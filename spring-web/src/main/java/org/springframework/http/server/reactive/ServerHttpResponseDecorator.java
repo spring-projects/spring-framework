@@ -131,11 +131,11 @@ public class ServerHttpResponseDecorator implements ServerHttpResponse {
 	 * @since 5.3.3
 	 */
 	public static <T> T getNativeResponse(ServerHttpResponse response) {
-		if (response instanceof AbstractServerHttpResponse) {
-			return ((AbstractServerHttpResponse) response).getNativeResponse();
+		if (response instanceof AbstractServerHttpResponse abstractServerHttpResponse) {
+			return abstractServerHttpResponse.getNativeResponse();
 		}
-		else if (response instanceof ServerHttpResponseDecorator) {
-			return getNativeResponse(((ServerHttpResponseDecorator) response).getDelegate());
+		else if (response instanceof ServerHttpResponseDecorator serverHttpResponseDecorator) {
+			return getNativeResponse(serverHttpResponseDecorator.getDelegate());
 		}
 		else {
 			throw new IllegalArgumentException(

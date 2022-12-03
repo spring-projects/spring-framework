@@ -1,9 +1,7 @@
 [[spring-core]]
 = Core Technologies
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This part of the reference documentation covers all the technologies that are
 absolutely integral to the Spring Framework.

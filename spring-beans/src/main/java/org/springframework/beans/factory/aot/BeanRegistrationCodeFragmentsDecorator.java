@@ -64,8 +64,7 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 	}
 
 	@Override
-	public CodeBlock generateSetBeanDefinitionPropertiesCode(
-			GenerationContext generationContext,
+	public CodeBlock generateSetBeanDefinitionPropertiesCode(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition,
 			Predicate<String> attributeFilter) {
 
@@ -74,8 +73,7 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 	}
 
 	@Override
-	public CodeBlock generateSetBeanInstanceSupplierCode(
-			GenerationContext generationContext,
+	public CodeBlock generateSetBeanInstanceSupplierCode(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode, CodeBlock instanceSupplierCode,
 			List<MethodReference> postProcessors) {
 
@@ -85,8 +83,8 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 
 	@Override
 	public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode,
-			Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
+			BeanRegistrationCode beanRegistrationCode, Executable constructorOrFactoryMethod,
+			boolean allowDirectSupplierShortcut) {
 
 		return this.delegate.generateInstanceSupplierCode(generationContext,
 				beanRegistrationCode, constructorOrFactoryMethod, allowDirectSupplierShortcut);

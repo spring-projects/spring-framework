@@ -1,14 +1,12 @@
 [[spring-web-reactive]]
 = Web on Reactive Stack
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This part of the documentation covers support for reactive-stack web applications built
 on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
 servers, such as Netty, Undertow, and Servlet containers. Individual chapters cover
-the <<webflux.adoc#webflux, Spring WebFlux>> framework,
+the <<webflux, Spring WebFlux>> framework,
 the reactive <<webflux-client, `WebClient`>>, support for <<webflux-test, testing>>,
 and <<webflux-reactive-libraries, reactive libraries>>. For Servlet-stack web applications,
 see <<web.adoc#spring-web, Web on Servlet Stack>>.
@@ -35,7 +33,7 @@ include::web/webflux-websocket.adoc[leveloffset=+1]
 
 [[webflux-test]]
 == Testing
-[.small]#<<web.adoc#testing, Same in Spring MVC>>#
+[.small]#<<web.adoc#webmvc.test, Same in Spring MVC>>#
 
 The `spring-test` module provides mock implementations of `ServerHttpRequest`,
 `ServerHttpResponse`, and `ServerWebExchange`.

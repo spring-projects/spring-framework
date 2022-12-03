@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.test.context.TestContextManager;
  * which allows the <em>Spring TestContext Framework</em> to be plugged into the
  * JUnit 4 execution chain by calling {@link TestContextManager#beforeTestExecution
  * beforeTestExecution()} on the supplied {@link TestContextManager}.
+ *
+ * <p><strong>NOTE:</strong> This class requires JUnit 4.9 or higher.
  *
  * @author Sam Brannen
  * @since 5.0

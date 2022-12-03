@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,20 +196,18 @@ abstract class BaseCodecConfigurer implements CodecConfigurer {
 
 		private void addCodec(Object codec, boolean applyDefaultConfig) {
 
-			if (codec instanceof Decoder) {
-				codec = new DecoderHttpMessageReader<>((Decoder<?>) codec);
+			if (codec instanceof Decoder<?> decoder) {
+				codec = new DecoderHttpMessageReader<>(decoder);
 			}
-			else if (codec instanceof Encoder) {
-				codec = new EncoderHttpMessageWriter<>((Encoder<?>) codec);
+			else if (codec instanceof Encoder<?> encoder) {
+				codec = new EncoderHttpMessageWriter<>(encoder);
 			}
 
-			if (codec instanceof HttpMessageReader) {
-				HttpMessageReader<?> reader = (HttpMessageReader<?>) codec;
+			if (codec instanceof HttpMessageReader<?> reader) {
 				boolean canReadToObject = reader.canRead(ResolvableType.forClass(Object.class), null);
 				(canReadToObject ? this.objectReaders : this.typedReaders).put(reader, applyDefaultConfig);
 			}
-			else if (codec instanceof HttpMessageWriter) {
-				HttpMessageWriter<?> writer = (HttpMessageWriter<?>) codec;
+			else if (codec instanceof HttpMessageWriter<?> writer) {
 				boolean canWriteObject = writer.canWrite(ResolvableType.forClass(Object.class), null);
 				(canWriteObject ? this.objectWriters : this.typedWriters).put(writer, applyDefaultConfig);
 			}

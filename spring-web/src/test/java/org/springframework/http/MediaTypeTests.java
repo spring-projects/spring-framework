@@ -291,7 +291,7 @@ public class MediaTypeTests {
 		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings("removal")
 		Comparator<MediaType> comp = MediaType.SPECIFICITY_COMPARATOR;
 
 		// equal
@@ -335,7 +335,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void sortBySpecificityRelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
@@ -366,7 +366,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void sortBySpecificityUnrelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");
@@ -398,7 +398,7 @@ public class MediaTypeTests {
 		MediaType allXml = new MediaType("application", "*+xml");
 		MediaType all = MediaType.ALL;
 
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings("removal")
 		Comparator<MediaType> comp = MediaType.QUALITY_VALUE_COMPARATOR;
 
 		// equal
@@ -442,7 +442,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void sortByQualityRelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audio = new MediaType("audio");
@@ -473,7 +473,7 @@ public class MediaTypeTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	public void sortByQualityUnrelated() {
 		MediaType audioBasic = new MediaType("audio", "basic");
 		MediaType audioWave = new MediaType("audio", "wave");

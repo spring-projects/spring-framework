@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.springframework.http.converter.protobuf.KotlinSerializationProtobufHt
 import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -74,13 +73,6 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 
 	public AllEncompassingFormHttpMessageConverter() {
-
-		try {
-			addPartConverter(new SourceHttpMessageConverter<>());
-		}
-		catch (Error err) {
-			// Ignore when no TransformerFactory implementation is available
-		}
 
 		if (jaxb2Present && !jackson2XmlPresent) {
 			addPartConverter(new Jaxb2RootElementHttpMessageConverter());

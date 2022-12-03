@@ -69,8 +69,6 @@ import org.springframework.util.TypeUtils;
  * Abstract base class for Jackson based and content type independent
  * {@link HttpMessageConverter} implementations.
  *
- * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
- *
  * @author Arjen Poutsma
  * @author Keith Donald
  * @author Rossen Stoyanchev

@@ -599,8 +599,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
-			if (ex instanceof BeanCreationException && beanName.equals(((BeanCreationException) ex).getBeanName())) {
-				throw (BeanCreationException) ex;
+			if (ex instanceof BeanCreationException bce && beanName.equals(bce.getBeanName())) {
+				throw bce;
 			}
 			else {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
@@ -862,9 +862,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				// declaration without instantiating the containing bean at all.
 				BeanDefinition factoryBeanDefinition = getBeanDefinition(factoryBeanName);
 				Class<?> factoryBeanClass;
-				if (factoryBeanDefinition instanceof AbstractBeanDefinition &&
-						((AbstractBeanDefinition) factoryBeanDefinition).hasBeanClass()) {
-					factoryBeanClass = ((AbstractBeanDefinition) factoryBeanDefinition).getBeanClass();
+				if (factoryBeanDefinition instanceof AbstractBeanDefinition abstractBeanDefinition &&
+						abstractBeanDefinition.hasBeanClass()) {
+					factoryBeanClass = abstractBeanDefinition.getBeanClass();
 				}
 				else {
 					RootBeanDefinition fbmbd = getMergedBeanDefinition(factoryBeanName, factoryBeanDefinition);
@@ -975,8 +975,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				return (FactoryBean<?>) bw.getWrappedInstance();
 			}
 			Object beanInstance = getSingleton(beanName, false);
-			if (beanInstance instanceof FactoryBean) {
-				return (FactoryBean<?>) beanInstance;
+			if (beanInstance instanceof FactoryBean<?> factoryBean) {
+				return factoryBean;
 			}
 			if (isSingletonCurrentlyInCreation(beanName) ||
 					(mbd.getFactoryBeanName() != null && isSingletonCurrentlyInCreation(mbd.getFactoryBeanName()))) {
@@ -1389,11 +1389,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 			pvs = newPvs;
 		}
-
-		boolean hasInstAwareBpps = hasInstantiationAwareBeanPostProcessors();
-		boolean needsDepCheck = (mbd.getDependencyCheck() != AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
-
-		if (hasInstAwareBpps) {
+		if (hasInstantiationAwareBeanPostProcessors()) {
 			if (pvs == null) {
 				pvs = mbd.getPropertyValues();
 			}
@@ -1405,6 +1401,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				pvs = pvsToUse;
 			}
 		}
+
+		boolean needsDepCheck = (mbd.getDependencyCheck() != AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
 		if (needsDepCheck) {
 			PropertyDescriptor[] filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
 			checkDependencies(beanName, mbd, filteredPds, pvs);
@@ -1677,8 +1675,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					}
 					deepCopy.add(pv);
 				}
-				else if (convertible && originalValue instanceof TypedStringValue &&
-						!((TypedStringValue) originalValue).isDynamic() &&
+				else if (convertible && originalValue instanceof TypedStringValue typedStringValue &&
+						!typedStringValue.isDynamic() &&
 						!(convertedValue instanceof Collection || ObjectUtils.isArray(convertedValue))) {
 					pv.setConvertedValue(convertedValue);
 					deepCopy.add(pv);
@@ -1709,8 +1707,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private Object convertForProperty(
 			@Nullable Object value, String propertyName, BeanWrapper bw, TypeConverter converter) {
 
-		if (converter instanceof BeanWrapperImpl) {
-			return ((BeanWrapperImpl) converter).convertForProperty(value, propertyName);
+		if (converter instanceof BeanWrapperImpl beanWrapper) {
+			return beanWrapper.convertForProperty(value, propertyName);
 		}
 		else {
 			PropertyDescriptor pd = bw.getPropertyDescriptor(propertyName);
@@ -1761,17 +1759,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	private void invokeAwareMethods(String beanName, Object bean) {
 		if (bean instanceof Aware) {
-			if (bean instanceof BeanNameAware) {
-				((BeanNameAware) bean).setBeanName(beanName);
+			if (bean instanceof BeanNameAware beanNameAware) {
+				beanNameAware.setBeanName(beanName);
 			}
-			if (bean instanceof BeanClassLoaderAware) {
+			if (bean instanceof BeanClassLoaderAware beanClassLoaderAware) {
 				ClassLoader bcl = getBeanClassLoader();
 				if (bcl != null) {
-					((BeanClassLoaderAware) bean).setBeanClassLoader(bcl);
+					beanClassLoaderAware.setBeanClassLoader(bcl);
 				}
 			}
-			if (bean instanceof BeanFactoryAware) {
-				((BeanFactoryAware) bean).setBeanFactory(AbstractAutowireCapableBeanFactory.this);
+			if (bean instanceof BeanFactoryAware beanFactoryAware) {
+				beanFactoryAware.setBeanFactory(AbstractAutowireCapableBeanFactory.this);
 			}
 		}
 	}

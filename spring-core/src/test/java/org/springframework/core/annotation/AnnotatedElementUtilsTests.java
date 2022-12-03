@@ -874,7 +874,7 @@ class AnnotatedElementUtilsTests {
 	void findAllMergedAnnotationsOnClassWithInterface() throws Exception {
 		Method method = TransactionalServiceImpl.class.getMethod("doIt");
 		Set<Transactional> allMergedAnnotations = findAllMergedAnnotations(method, Transactional.class);
-		assertThat(allMergedAnnotations.size()).isEqualTo(1);
+		assertThat(allMergedAnnotations).hasSize(1);
 	}
 
 	@Test  // SPR-16060

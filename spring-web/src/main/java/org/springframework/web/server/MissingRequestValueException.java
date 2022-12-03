@@ -42,7 +42,6 @@ public class MissingRequestValueException extends ServerWebInputException {
 		this.name = name;
 		this.type = type;
 		this.label = label;
-		getBody().setDetail(getReason());
 	}
 
 

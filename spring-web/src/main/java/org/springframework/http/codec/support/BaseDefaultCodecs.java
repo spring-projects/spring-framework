@@ -424,13 +424,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * if configured by the application, to the given codec , including any
 	 * codec it contains.
 	 */
-	@SuppressWarnings("rawtypes")
 	private void initCodec(@Nullable Object codec) {
-		if (codec instanceof DecoderHttpMessageReader) {
-			codec = ((DecoderHttpMessageReader) codec).getDecoder();
+		if (codec instanceof DecoderHttpMessageReader<?> decoderHttpMessageReader) {
+			codec = decoderHttpMessageReader.getDecoder();
 		}
-		else if (codec instanceof EncoderHttpMessageWriter) {
-			codec = ((EncoderHttpMessageWriter<?>) codec).getEncoder();
+		else if (codec instanceof EncoderHttpMessageWriter<?> encoderHttpMessageWriter) {
+			codec = encoderHttpMessageWriter.getEncoder();
 		}
 
 		if (codec == null) {
@@ -439,72 +438,74 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 		Integer size = this.maxInMemorySize;
 		if (size != null) {
-			if (codec instanceof AbstractDataBufferDecoder) {
-				((AbstractDataBufferDecoder<?>) codec).setMaxInMemorySize(size);
+			if (codec instanceof AbstractDataBufferDecoder<?> abstractDataBufferDecoder) {
+				abstractDataBufferDecoder.setMaxInMemorySize(size);
 			}
+			// Pattern variables in the following if-blocks cannot be named the same as instance fields
+			// due to lacking support in Checkstyle: https://github.com/checkstyle/checkstyle/issues/10969
 			if (protobufPresent) {
-				if (codec instanceof ProtobufDecoder) {
-					((ProtobufDecoder) codec).setMaxMessageSize(size);
+				if (codec instanceof ProtobufDecoder protobufDec) {
+					protobufDec.setMaxMessageSize(size);
 				}
 			}
 			if (kotlinSerializationCborPresent) {
-				if (codec instanceof KotlinSerializationCborDecoder) {
-					((KotlinSerializationCborDecoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationCborDecoder kotlinSerializationCborDec) {
+					kotlinSerializationCborDec.setMaxInMemorySize(size);
 				}
 			}
 			if (kotlinSerializationJsonPresent) {
-				if (codec instanceof KotlinSerializationJsonDecoder) {
-					((KotlinSerializationJsonDecoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationJsonDecoder kotlinSerializationJsonDec) {
+					kotlinSerializationJsonDec.setMaxInMemorySize(size);
 				}
 			}
 			if (kotlinSerializationProtobufPresent) {
-				if (codec instanceof KotlinSerializationProtobufDecoder) {
-					((KotlinSerializationProtobufDecoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationProtobufDecoder kotlinSerializationProtobufDec) {
+					kotlinSerializationProtobufDec.setMaxInMemorySize(size);
 				}
 			}
 			if (jackson2Present) {
-				if (codec instanceof AbstractJackson2Decoder) {
-					((AbstractJackson2Decoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof AbstractJackson2Decoder abstractJackson2Decoder) {
+					abstractJackson2Decoder.setMaxInMemorySize(size);
 				}
 			}
 			if (jaxb2Present) {
-				if (codec instanceof Jaxb2XmlDecoder) {
-					((Jaxb2XmlDecoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof Jaxb2XmlDecoder jaxb2XmlDecoder) {
+					jaxb2XmlDecoder.setMaxInMemorySize(size);
 				}
 			}
-			if (codec instanceof FormHttpMessageReader) {
-				((FormHttpMessageReader) codec).setMaxInMemorySize(size);
+			if (codec instanceof FormHttpMessageReader formHttpMessageReader) {
+				formHttpMessageReader.setMaxInMemorySize(size);
 			}
-			if (codec instanceof ServerSentEventHttpMessageReader) {
-				((ServerSentEventHttpMessageReader) codec).setMaxInMemorySize(size);
+			if (codec instanceof ServerSentEventHttpMessageReader serverSentEventHttpMessageReader) {
+				serverSentEventHttpMessageReader.setMaxInMemorySize(size);
 			}
-			if (codec instanceof DefaultPartHttpMessageReader) {
-				((DefaultPartHttpMessageReader) codec).setMaxInMemorySize(size);
+			if (codec instanceof DefaultPartHttpMessageReader defaultPartHttpMessageReader) {
+				defaultPartHttpMessageReader.setMaxInMemorySize(size);
 			}
-			if (codec instanceof PartEventHttpMessageReader) {
-				((PartEventHttpMessageReader) codec).setMaxInMemorySize(size);
+			if (codec instanceof PartEventHttpMessageReader partEventHttpMessageReader) {
+				partEventHttpMessageReader.setMaxInMemorySize(size);
 			}
 		}
 
 		Boolean enable = this.enableLoggingRequestDetails;
 		if (enable != null) {
-			if (codec instanceof FormHttpMessageReader) {
-				((FormHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof FormHttpMessageReader formHttpMessageReader) {
+				formHttpMessageReader.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof MultipartHttpMessageReader) {
-				((MultipartHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof MultipartHttpMessageReader multipartHttpMessageReader) {
+				multipartHttpMessageReader.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof DefaultPartHttpMessageReader) {
-				((DefaultPartHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof DefaultPartHttpMessageReader defaultPartHttpMessageReader) {
+				defaultPartHttpMessageReader.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof PartEventHttpMessageReader) {
-				((PartEventHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof PartEventHttpMessageReader partEventHttpMessageReader) {
+				partEventHttpMessageReader.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof FormHttpMessageWriter) {
-				((FormHttpMessageWriter) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof FormHttpMessageWriter formHttpMessageWriter) {
+				formHttpMessageWriter.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof MultipartHttpMessageWriter) {
-				((MultipartHttpMessageWriter) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof MultipartHttpMessageWriter multipartHttpMessageWriter) {
+				multipartHttpMessageWriter.setEnableLoggingRequestDetails(enable);
 			}
 		}
 
@@ -513,17 +514,17 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		}
 
 		// Recurse for nested codecs
-		if (codec instanceof MultipartHttpMessageReader) {
-			initCodec(((MultipartHttpMessageReader) codec).getPartReader());
+		if (codec instanceof MultipartHttpMessageReader multipartHttpMessageReader) {
+			initCodec(multipartHttpMessageReader.getPartReader());
 		}
-		else if (codec instanceof MultipartHttpMessageWriter) {
-			initCodec(((MultipartHttpMessageWriter) codec).getFormWriter());
+		else if (codec instanceof MultipartHttpMessageWriter multipartHttpMessageWriter) {
+			initCodec(multipartHttpMessageWriter.getFormWriter());
 		}
-		else if (codec instanceof ServerSentEventHttpMessageReader) {
-			initCodec(((ServerSentEventHttpMessageReader) codec).getDecoder());
+		else if (codec instanceof ServerSentEventHttpMessageReader serverSentEventHttpMessageReader) {
+			initCodec(serverSentEventHttpMessageReader.getDecoder());
 		}
-		else if (codec instanceof ServerSentEventHttpMessageWriter) {
-			initCodec(((ServerSentEventHttpMessageWriter) codec).getEncoder());
+		else if (codec instanceof ServerSentEventHttpMessageWriter serverSentEventHttpMessageWriter) {
+			initCodec(serverSentEventHttpMessageWriter.getEncoder());
 		}
 	}
 

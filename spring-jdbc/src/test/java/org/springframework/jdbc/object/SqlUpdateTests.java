@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,7 +224,7 @@ public class SqlUpdateTests {
 		int rowsAffected = pc.run("rod", generatedKeyHolder);
 
 		assertThat(rowsAffected).isEqualTo(1);
-		assertThat(generatedKeyHolder.getKeyList().size()).isEqualTo(1);
+		assertThat(generatedKeyHolder.getKeyList()).hasSize(1);
 		assertThat(generatedKeyHolder.getKey().intValue()).isEqualTo(11);
 		verify(preparedStatement).setString(1, "rod");
 		verify(resultSet).close();

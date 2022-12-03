@@ -238,10 +238,9 @@ class AotServicesTests {
 
 		@Override
 		public Enumeration<URL> getResources(String name) throws IOException {
-			return (!"META-INF/spring/aot.factories".equals(name))
-					? super.getResources(name)
-					: super.getResources("org/springframework/beans/factory/aot/"
-							+ this.factoriesName);
+			return (!"META-INF/spring/aot.factories".equals(name) ?
+					super.getResources(name) :
+					super.getResources("org/springframework/beans/factory/aot/" + this.factoriesName));
 		}
 
 	}

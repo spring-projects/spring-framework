@@ -159,8 +159,8 @@ public abstract class ServletRequestPathUtils {
 	 */
 	public static String getCachedPathValue(ServletRequest request) {
 		Object path = getCachedPath(request);
-		if (path instanceof PathContainer) {
-			String value = ((PathContainer) path).value();
+		if (path instanceof PathContainer pathContainer) {
+			String value = pathContainer.value();
 			path = UrlPathHelper.defaultInstance.removeSemicolonContent(value);
 		}
 		return (String) path;

@@ -1,9 +1,7 @@
 [[spring-data-tier]]
 = Data Access
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 This part of the reference documentation is concerned with data access and the
 interaction between the data access layer and the business or service layer.
@@ -3482,6 +3480,7 @@ configure a `DataSource` in your Spring configuration file and then dependency-i
 that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is created in
 the setter for the `DataSource`. This leads to DAOs that resemble the following:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -3506,6 +3505,7 @@ the setter for the `DataSource`. This leads to DAOs that resemble the following:
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
+--
 
 The following example shows the corresponding XML configuration:
 
@@ -3542,6 +3542,7 @@ support for dependency injection. In this case, you can annotate the class with 
 (which makes it a candidate for component-scanning) and annotate the `DataSource` setter
 method with `@Autowired`. The following example shows how to do so:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -3576,6 +3577,7 @@ method with `@Autowired`. The following example shows how to do so:
 <1> Annotate the class with `@Repository`.
 <2> Constructor injection of the `DataSource`.
 <3> Create a new `JdbcTemplate` with the `DataSource`.
+--
 
 
 The following example shows the corresponding XML configuration:
@@ -5486,8 +5488,7 @@ example shows such a method:
 .Java
 ----
 	public List<Actor> searchForActors(int age, String namePattern) {
-		List<Actor> actors = actorSearchMappingQuery.execute(age, namePattern);
-		return actors;
+		return actorSearchMappingQuery.execute(age, namePattern);
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -7080,6 +7081,7 @@ in your Spring configuration file and then dependency-inject
 that shared `ConnectionFactory` bean into your DAO classes. The `DatabaseClient` is created in
 the setter for the `ConnectionFactory`. This leads to DAOs that resemble the following:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -7104,12 +7106,14 @@ the setter for the `ConnectionFactory`. This leads to DAOs that resemble the fol
 		// R2DBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
+--
 
 An alternative to explicit configuration is to use component-scanning and annotation
 support for dependency injection. In this case, you can annotate the class with `@Component`
 (which makes it a candidate for component-scanning) and annotate the `ConnectionFactory` setter
 method with `@Autowired`. The following example shows how to do so:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -7144,6 +7148,7 @@ method with `@Autowired`. The following example shows how to do so:
 <1> Annotate the class with `@Component`.
 <2> Constructor injection of the `ConnectionFactory`.
 <3> Create a new `DatabaseClient` with the `ConnectionFactory`.
+--
 
 Regardless of which of the above template initialization styles you choose to use (or
 not), it is seldom necessary to create a new instance of a `DatabaseClient` class each
@@ -8868,9 +8873,10 @@ preamble of the XML configuration file. The following example shows how to do so
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:oxm="http://www.springframework.org/schema/oxm" <1>
-    xsi:schemaLocation="http://www.springframework.org/schema/beans
-      https://www.springframework.org/schema/beans/spring-beans.xsd
-      http://www.springframework.org/schema/oxm https://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/oxm
+			https://www.springframework.org/schema/oxm/spring-oxm.xsd"> <2>
 ----
 <1> Reference the `oxm` schema.
 <2> Specify the `oxm` schema location.

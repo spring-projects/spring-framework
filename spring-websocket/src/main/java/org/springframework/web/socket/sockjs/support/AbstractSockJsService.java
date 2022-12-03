@@ -58,7 +58,7 @@ import org.springframework.web.util.WebUtils;
  * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
  * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
  *
- * By default, only same origin requests are allowed. Use {@link #setAllowedOrigins}
+ * <p>By default, only same origin requests are allowed. Use {@link #setAllowedOrigins}
  * to specify a list of allowed origins (a list containing "*" will allow all origins).
  *
  * @author Rossen Stoyanchev
@@ -620,6 +620,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				<head>
 					<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+					<title>SockJS iframe</title>
 					<script>
 						document.domain = document.domain;
 						_sockjs_onload = function(){SockJS.bootstrap_iframe();};

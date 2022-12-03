@@ -20,6 +20,9 @@ Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Sl
 or ask a question with `spring` and `kotlin` as tags on
 https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you need support.
 
+
+
+
 [[kotlin-requirements]]
 == Requirements
 
@@ -36,6 +39,9 @@ NOTE: The https://github.com/FasterXML/jackson-module-kotlin[Jackson Kotlin modu
 for serializing or deserializing JSON data for Kotlin classes with Jackson, so make sure to add the
 `com.fasterxml.jackson.module:jackson-module-kotlin` dependency to your project if you have such need.
 It is automatically registered when found in the classpath.
+
+
+
 
 [[kotlin-extensions]]
 == Extensions
@@ -80,6 +86,9 @@ With Kotlin and the Spring Framework extensions, you can instead write the follo
 As in Java, `users` in Kotlin is strongly typed, but Kotlin's clever type inference allows
 for shorter syntax.
 
+
+
+
 [[kotlin-null-safety]]
 == Null-safety
 
@@ -115,6 +124,9 @@ NOTE: Generic type arguments, varargs, and array elements nullability are not su
 but should be in an upcoming release. See https://github.com/Kotlin/KEEP/issues/79[this discussion]
 for up-to-date information.
 
+
+
+
 [[kotlin-classes-interfaces]]
 == Classes and Interfaces
 
@@ -124,11 +136,15 @@ with default values.
 
 Kotlin parameter names are recognized through a dedicated `KotlinReflectionParameterNameDiscoverer`,
 which allows finding interface method parameter names without requiring the Java 8 `-parameters`
-compiler flag to be enabled during compilation.
+compiler flag to be enabled during compilation. (For completeness, we nevertheless recommend
+running the Kotlin compiler with its `-java-parameters` flag for standard Java parameter exposure.)
 
 You can declare configuration classes as
 https://kotlinlang.org/docs/reference/nested-classes.html[top level or nested but not inner],
 since the later requires a reference to the outer class.
+
+
+
 
 [[kotlin-annotations]]
 == Annotations
@@ -155,6 +171,9 @@ parameters, you may need to use
 https://kotlinlang.org/docs/reference/annotations.html#annotation-use-site-targets[annotation use-site targets],
 such as `@field:NotNull` or `@get:Size(min=5, max=15)`, as described in
 https://stackoverflow.com/a/35853200/1092077[this Stack Overflow response].
+
+
+
 
 [[kotlin-bean-definition-dsl]]
 == Bean Definition DSL
@@ -263,15 +282,19 @@ as the following example shows:
 	}
 ----
 
-
 NOTE: Spring Boot is based on JavaConfig and
 https://github.com/spring-projects/spring-boot/issues/8115[does not yet provide specific support for functional bean definition],
 but you can experimentally use functional bean definitions through Spring Boot's `ApplicationContextInitializer` support.
 See https://stackoverflow.com/questions/45935931/how-to-use-functional-bean-definition-kotlin-dsl-with-spring-boot-and-spring-w/46033685#46033685[this Stack Overflow answer]
 for more details and up-to-date information. See also the experimental Kofu DSL developed in https://github.com/spring-projects/spring-fu[Spring Fu incubator].
 
+
+
+
 [[kotlin-web]]
 == Web
+
+
 
 === Router DSL
 
@@ -314,6 +337,8 @@ when you need to register routes depending on dynamic data (for example, from a 
 
 See https://github.com/mixitconf/mixit/[MiXiT project] for a concrete example.
 
+
+
 === MockMvc DSL
 
 A Kotlin DSL is provided via `MockMvc` Kotlin extensions in order to provide a more
@@ -339,6 +364,8 @@ mockMvc.get("/person/{name}", "Lee") {
 }
 ----
 
+
+
 === Kotlin Script Templates
 
 Spring Framework provides a
@@ -357,9 +384,7 @@ dependencies {
 }
 ----
 
-Configuration is usually done with `ScriptTemplateConfigurer` and `ScriptTemplateViewResolver`
-beans.
-
+Configuration is usually done with `ScriptTemplateConfigurer` and `ScriptTemplateViewResolver` beans.
 
 `KotlinScriptConfiguration.kt`
 [source,kotlin,indent=0]
@@ -386,6 +411,8 @@ class KotlinScriptConfiguration {
 See the https://github.com/sdeleuze/kotlin-script-templating[kotlin-script-templating] example
 project for more details.
 
+
+
 === Kotlin multiplatform serialization
 
 As of Spring Framework 5.3, https://github.com/Kotlin/kotlinx.serialization[Kotlin multiplatform serialization] is
@@ -396,6 +423,9 @@ With Spring MVC and WebFlux, both Kotlin serialization and Jackson will be confi
 Kotlin serialization is designed to serialize only Kotlin classes annotated with `@Serializable`.
 With Spring Messaging (RSocket), make sure that neither Jackson, GSON or JSONB are in the classpath if you want automatic configuration,
 if Jackson is needed configure `KotlinSerializationJsonMessageConverter` manually.
+
+
+
 
 == Coroutines
 
@@ -415,6 +445,8 @@ Spring Framework provides support for Coroutines on the following scope:
 * Suspending function and `Flow` support in RSocket `@MessageMapping` annotated methods
 * Extensions for {docs-spring-framework}/kdoc-api/spring-messaging/org.springframework.messaging.rsocket/index.html[`RSocketRequester`]
 
+
+
 === Dependencies
 
 Coroutines support is enabled when `kotlinx-coroutines-core` and `kotlinx-coroutines-reactor`
@@ -431,6 +463,8 @@ dependencies {
 ----
 
 Version `1.4.0` and above are supported.
+
+
 
 === How Reactive translates to Coroutines?
 
@@ -457,6 +491,8 @@ https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coro
 
 Read this blog post about https://spring.io/blog/2019/04/12/going-reactive-with-spring-coroutines-and-kotlin-flow[Going Reactive with Spring, Coroutines and Kotlin Flow]
 for more details, including how to run code concurrently with Coroutines.
+
+
 
 === Controllers
 
@@ -554,6 +590,8 @@ class CoroutinesViewController(banner: Banner) {
 }
 ----
 
+
+
 === WebFlux.fn
 
 Here is an example of Coroutines router defined via the {docs-spring-framework}/kdoc-api/spring-webflux/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
@@ -586,6 +624,8 @@ class UserHandler(builder: WebClient.Builder) {
 				client.get().uri("...").awaitExchange().awaitBody<User>())
 }
 ----
+
+
 
 === Transactions
 
@@ -636,6 +676,8 @@ For Kotlin `Flow`, a  `Flow<T>.transactional` extension is provided.
 ----
 
 
+
+
 [[kotlin-spring-projects-in-kotlin]]
 == Spring Projects in Kotlin
 
@@ -683,6 +725,8 @@ NOTE: The Kotlin code samples in Spring Framework documentation do not explicitl
 `open` on the classes and their member functions. The samples are written for projects
 using the `kotlin-allopen` plugin, since this is the most commonly used setup.
 
+
+
 === Using Immutable Class Instances for Persistence
 
 In Kotlin, it is convenient and considered to be a best practice to declare read-only properties
@@ -726,6 +770,8 @@ NOTE: As of the Kay release train, Spring Data supports Kotlin immutable class i
 does not require the `kotlin-noarg` plugin if the module uses Spring Data object mappings
 (such as MongoDB, Redis, Cassandra, and others).
 
+
+
 === Injecting Dependencies
 
 Our recommendation is to try to favor constructor injection with `val` read-only (and
@@ -760,6 +806,8 @@ as the following example shows:
 		lateinit var solrClient: SolrClient
 	}
 ----
+
+
 
 === Injecting Configuration Properties
 
@@ -801,6 +849,7 @@ that uses the `${...}` syntax, with configuration beans, as the following exampl
 ----
 
 
+
 === Checked Exceptions
 
 Java and https://kotlinlang.org/docs/reference/exceptions.html[Kotlin exception handling]
@@ -812,6 +861,8 @@ an `UndeclaredThrowableException`.
 To get the original exception thrown like in Java, methods should be annotated with
 https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-throws/index.html[`@Throws`]
 to specify explicitly the checked exceptions thrown (for example `@Throws(IOException::class)`).
+
+
 
 === Annotation Array Attributes
 
@@ -857,6 +908,8 @@ use a shortcut annotation, such as `@GetMapping`, `@PostMapping`, and others.
 NOTE: If the `@RequestMapping` `method` attribute is not specified, all HTTP methods will
 be matched, not only the `GET` method.
 
+
+
 === Testing
 
 This section addresses testing with the combination of Kotlin and Spring Framework.
@@ -865,6 +918,7 @@ https://mockk.io/[Mockk] for mocking.
 
 NOTE: If you are using Spring Boot, see
 https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-kotlin-testing[this related documentation].
+
 
 ==== Constructor injection
 
@@ -886,6 +940,7 @@ class OrderServiceIntegrationTests(val orderService: OrderService,
 }
 ----
 ====
+
 
 ==== `PER_CLASS` Lifecycle
 
@@ -930,6 +985,7 @@ class IntegrationTests {
 }
 ----
 
+
 ==== Specification-like Tests
 
 You can create specification-like tests with JUnit 5 and Kotlin.
@@ -959,6 +1015,7 @@ class SpecificationLikeTests {
 }
 ----
 
+
 [[kotlin-webtestclient-issue]]
 ==== `WebTestClient` Type Inference Issue in Kotlin
 
@@ -968,16 +1025,23 @@ since it provides a workaround for the Kotlin issue with the Java API.
 
 See also the related https://jira.spring.io/browse/SPR-16057[SPR-16057] issue.
 
+
+
+
 [[kotlin-getting-started]]
 == Getting Started
 
 The easiest way to learn how to build a Spring application with Kotlin is to follow
 https://spring.io/guides/tutorials/spring-boot-kotlin/[the dedicated tutorial].
 
+
+
 === `start.spring.io`
 
 The easiest way to start a new Spring Framework project in Kotlin is to create a new Spring
 Boot 2 project on https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
+
+
 
 === Choosing the Web Flavor
 
@@ -990,6 +1054,9 @@ Kotlin DSL.
 
 For other use cases, especially if you are using blocking technologies such as JPA, Spring
 MVC and its annotation-based programming model is the recommended choice.
+
+
+
 
 [[kotlin-resources]]
 == Resources
@@ -1004,6 +1071,8 @@ Kotlin and the Spring Framework:
 * https://blog.jetbrains.com/kotlin/[Kotlin blog]
 * https://kotlin.link/[Awesome Kotlin]
 
+
+
 === Examples
 
 The following Github projects offer examples that you can learn from and possibly even extend:
@@ -1015,6 +1084,8 @@ The following Github projects offer examples that you can learn from and possibl
 * https://github.com/spring-petclinic/spring-petclinic-kotlin[spring-petclinic-kotlin]: Kotlin version of the Spring PetClinic Sample Application
 * https://github.com/sdeleuze/spring-kotlin-deepdive[spring-kotlin-deepdive]: A step-by-step migration guide for Boot 1.0 and Java to Boot 2.0 and Kotlin
 * https://github.com/spring-cloud/spring-cloud-gcp/tree/master/spring-cloud-gcp-kotlin-samples/spring-cloud-gcp-kotlin-app-sample[spring-cloud-gcp-kotlin-app-sample]: Spring Boot with Google Cloud Platform Integrations
+
+
 
 === Issues
 

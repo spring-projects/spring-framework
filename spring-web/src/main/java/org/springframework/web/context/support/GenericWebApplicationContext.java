@@ -208,8 +208,8 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	@Override
 	protected void initPropertySources() {
 		ConfigurableEnvironment env = getEnvironment();
-		if (env instanceof ConfigurableWebEnvironment) {
-			((ConfigurableWebEnvironment) env).initPropertySources(this.servletContext, null);
+		if (env instanceof ConfigurableWebEnvironment configurableWebEnv) {
+			configurableWebEnv.initPropertySources(this.servletContext, null);
 		}
 	}
 

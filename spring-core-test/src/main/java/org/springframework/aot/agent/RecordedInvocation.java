@@ -98,7 +98,7 @@ public final class RecordedInvocation {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getInstance() {
-		Assert.notNull(this.instance, "Cannot resolve 'this' for static invocations");
+		Assert.state(this.instance != null, "Cannot resolve 'this' for static invocations");
 		return (T) this.instance;
 	}
 
@@ -108,7 +108,7 @@ public final class RecordedInvocation {
 	 * @throws IllegalStateException in case of static invocations (there is no {@code this})
 	 */
 	public TypeReference getInstanceTypeReference() {
-		Assert.notNull(this.instance, "Cannot resolve 'this' for static invocations");
+		Assert.state(this.instance != null, "Cannot resolve 'this' for static invocations");
 		return TypeReference.of(this.instance.getClass());
 	}
 

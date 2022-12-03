@@ -17,6 +17,7 @@
 package org.apache.commons.logging;
 
 import java.io.Serializable;
+import java.util.function.Function;
 import java.util.logging.LogRecord;
 
 import org.apache.logging.log4j.Level;
@@ -32,45 +33,52 @@ import org.slf4j.spi.LocationAwareLogger;
  * Detects the presence of Log4j 2.x / SLF4J, falling back to {@code java.util.logging}.
  *
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 5.1
  */
 final class LogAdapter {
 
-	private static final String LOG4J_SPI = "org.apache.logging.log4j.spi.ExtendedLogger";
+	private static final boolean log4jSpiPresent = isPresent("org.apache.logging.log4j.spi.ExtendedLogger");
 
-	private static final String LOG4J_SLF4J_PROVIDER = "org.apache.logging.slf4j.SLF4JProvider";
+	private static final boolean log4jSlf4jProviderPresent = isPresent("org.apache.logging.slf4j.SLF4JProvider");
 
-	private static final String SLF4J_SPI = "org.slf4j.spi.LocationAwareLogger";
+	private static final boolean slf4jSpiPresent = isPresent("org.slf4j.spi.LocationAwareLogger");
 
-	private static final String SLF4J_API = "org.slf4j.Logger";
+	private static final boolean slf4jApiPresent = isPresent("org.slf4j.Logger");
 
 
-	private static final LogApi logApi;
+	private static final Function<String, Log> createLog;
 
 	static {
-		if (isPresent(LOG4J_SPI)) {
-			if (isPresent(LOG4J_SLF4J_PROVIDER) && isPresent(SLF4J_SPI)) {
+		if (log4jSpiPresent) {
+			if (log4jSlf4jProviderPresent && slf4jSpiPresent) {
 				// log4j-to-slf4j bridge -> we'll rather go with the SLF4J SPI;
 				// however, we still prefer Log4j over the plain SLF4J API since
 				// the latter does not have location awareness support.
-				logApi = LogApi.SLF4J_LAL;
+				createLog = Slf4jAdapter::createLocationAwareLog;
 			}
 			else {
 				// Use Log4j 2.x directly, including location awareness support
-				logApi = LogApi.LOG4J;
+				createLog = Log4jAdapter::createLog;
 			}
 		}
-		else if (isPresent(SLF4J_SPI)) {
+		else if (slf4jSpiPresent) {
 			// Full SLF4J SPI including location awareness support
-			logApi = LogApi.SLF4J_LAL;
+			createLog = Slf4jAdapter::createLocationAwareLog;
 		}
-		else if (isPresent(SLF4J_API)) {
+		else if (slf4jApiPresent) {
 			// Minimal SLF4J API without location awareness support
-			logApi = LogApi.SLF4J;
+			createLog = Slf4jAdapter::createLog;
 		}
 		else {
 			// java.util.logging as default
-			logApi = LogApi.JUL;
+			// Defensively use lazy-initializing adapter class here as well since the
+			// java.logging module is not present by default on JDK 9. We are requiring
+			// its presence if neither Log4j nor SLF4J is available; however, in the
+			// case of Log4j or SLF4J, we are trying to prevent early initialization
+			// of the JavaUtilLog adapter - e.g. by a JVM in debug mode - when eagerly
+			// trying to parse the bytecode for all the cases of this switch clause.
+			createLog = JavaUtilAdapter::createLog;
 		}
 	}
 
@@ -84,19 +92,7 @@ final class LogAdapter {
 	 * @param name the logger name
 	 */
 	public static Log createLog(String name) {
-		return switch (logApi) {
-			case LOG4J -> Log4jAdapter.createLog(name);
-			case SLF4J_LAL -> Slf4jAdapter.createLocationAwareLog(name);
-			case SLF4J -> Slf4jAdapter.createLog(name);
-			default ->
-					// Defensively use lazy-initializing adapter class here as well since the
-					// java.logging module is not present by default on JDK 9. We are requiring
-					// its presence if neither Log4j nor SLF4J is available; however, in the
-					// case of Log4j or SLF4J, we are trying to prevent early initialization
-					// of the JavaUtilLog adapter - e.g. by a JVM in debug mode - when eagerly
-					// trying to parse the bytecode for all the cases of this switch clause.
-					JavaUtilAdapter.createLog(name);
-		};
+		return createLog.apply(name);
 	}
 
 	private static boolean isPresent(String className) {
@@ -104,13 +100,11 @@ final class LogAdapter {
 			Class.forName(className, false, LogAdapter.class.getClassLoader());
 			return true;
 		}
-		catch (ClassNotFoundException ex) {
+		catch (Throwable ex) {
+			// Typically ClassNotFoundException or NoClassDefFoundError...
 			return false;
 		}
 	}
-
-
-	private enum LogApi {LOG4J, SLF4J_LAL, SLF4J, JUL}
 
 
 	private static class Log4jAdapter {

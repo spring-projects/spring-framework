@@ -41,7 +41,7 @@ import org.springframework.web.util.JavaScriptUtils;
 
 /**
  * An HTTP {@link TransportHandler} that uses a famous browser
- * {@code document.domain technique}. See <a href=
+ * {@code document.domain} technique. See <a href=
  * "https://stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do">
  * stackoverflow.com/questions/1481251/what-does-document-domain-document-domain-do</a>
  * for details.
@@ -61,10 +61,13 @@ public class HtmlFileTransportHandler extends AbstractHttpSendingTransportHandle
 	static {
 		StringBuilder sb = new StringBuilder("""
 				<!DOCTYPE html>
-				<html><head>
+				<html>
+				<head>
 					<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-				</head><body><h2>Don't panic!</h2>
+				</head>
+				<body>
+					<h2>Don't panic!</h2>
 					<script>
 						document.domain = document.domain;
 						var c = parent.%s;

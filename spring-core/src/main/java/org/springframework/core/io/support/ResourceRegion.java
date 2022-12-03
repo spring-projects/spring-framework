@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ public class ResourceRegion {
 	 */
 	public ResourceRegion(Resource resource, long position, long count) {
 		Assert.notNull(resource, "Resource must not be null");
-		Assert.isTrue(position >= 0, "'position' must be larger than or equal to 0");
-		Assert.isTrue(count >= 0, "'count' must be larger than or equal to 0");
+		Assert.isTrue(position >= 0, "'position' must be greater than or equal to 0");
+		Assert.isTrue(count >= 0, "'count' must be greater than or equal to 0");
 		this.resource = resource;
 		this.position = position;
 		this.count = count;

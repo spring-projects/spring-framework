@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ class BeanFactoryGenericsTests {
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("listOfArrays");
 
-		assertThat(gb.getListOfArrays().size()).isEqualTo(1);
+		assertThat(gb.getListOfArrays()).hasSize(1);
 		String[] array = gb.getListOfArrays().get(0);
 		assertThat(array).hasSize(2);
 		assertThat(array[0]).isEqualTo("value1");
@@ -338,7 +338,7 @@ class BeanFactoryGenericsTests {
 		assertThat(gb.getPlainMap()).hasSize(2);
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
 		assertThat(gb.getPlainMap().get("2")).isEqualTo("3");
-		assertThat(gb.getShortMap().size()).isEqualTo(2);
+		assertThat(gb.getShortMap()).hasSize(2);
 		assertThat(gb.getShortMap().get(Short.valueOf("4"))).isEqualTo(5);
 		assertThat(gb.getShortMap().get(Short.valueOf("6"))).isEqualTo(7);
 	}
@@ -361,7 +361,7 @@ class BeanFactoryGenericsTests {
 		assertThat(gb.getPlainMap()).hasSize(2);
 		assertThat(gb.getPlainMap().get("1")).isEqualTo("0");
 		assertThat(gb.getPlainMap().get("2")).isEqualTo("3");
-		assertThat(gb.getShortMap().size()).isEqualTo(2);
+		assertThat(gb.getShortMap()).hasSize(2);
 		assertThat(gb.getShortMap().get(Short.valueOf("1"))).isEqualTo(0);
 		assertThat(gb.getShortMap().get(Short.valueOf("2"))).isEqualTo(3);
 	}
@@ -589,7 +589,7 @@ class BeanFactoryGenericsTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		List<?> list = (List<?>) bf.getBean("list");
-		assertThat(list.size()).isEqualTo(1);
+		assertThat(list).hasSize(1);
 		assertThat(list.get(0)).isEqualTo(new URL("http://localhost:8080"));
 	}
 
@@ -599,7 +599,7 @@ class BeanFactoryGenericsTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		Set<?> set = (Set<?>) bf.getBean("set");
-		assertThat(set.size()).isEqualTo(1);
+		assertThat(set).hasSize(1);
 		assertThat(set.iterator().next()).isEqualTo(new URL("http://localhost:8080"));
 	}
 
@@ -643,7 +643,7 @@ class BeanFactoryGenericsTests {
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("genericBeanTests.xml", getClass()));
 		UrlSet us = (UrlSet) bf.getBean("setBean");
-		assertThat(us.size()).isEqualTo(1);
+		assertThat(us).hasSize(1);
 		assertThat(us.iterator().next()).isEqualTo(new URL("https://www.springframework.org"));
 	}
 
@@ -762,7 +762,7 @@ class BeanFactoryGenericsTests {
 		assertThat(bf.getType("mock")).isNull();
 		assertThat(bf.getType("mock")).isNull();
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
-		assertThat(beans).hasSize(0);
+		assertThat(beans).isEmpty();
 	}
 
 	@Test
@@ -828,8 +828,8 @@ class BeanFactoryGenericsTests {
 		assertThat(numberStoreNames).hasSize(2);
 		assertThat(numberStoreNames[0]).isEqualTo("doubleStore");
 		assertThat(numberStoreNames[1]).isEqualTo("floatStore");
-		assertThat(doubleStoreNames).hasSize(0);
-		assertThat(floatStoreNames).hasSize(0);
+		assertThat(doubleStoreNames).isEmpty();
+		assertThat(floatStoreNames).isEmpty();
 	}
 
 	@Test
@@ -879,17 +879,17 @@ class BeanFactoryGenericsTests {
 		for (NumberStore<?> instance : numberStoreProvider) {
 			resolved.add(instance);
 		}
-		assertThat(resolved.size()).isEqualTo(2);
+		assertThat(resolved).hasSize(2);
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store1"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store2"));
 
 		resolved = numberStoreProvider.stream().toList();
-		assertThat(resolved.size()).isEqualTo(2);
+		assertThat(resolved).hasSize(2);
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store1"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store2"));
 
 		resolved = numberStoreProvider.orderedStream().toList();
-		assertThat(resolved.size()).isEqualTo(2);
+		assertThat(resolved).hasSize(2);
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store2"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));
 
@@ -897,30 +897,30 @@ class BeanFactoryGenericsTests {
 		for (NumberStore<Double> instance : doubleStoreProvider) {
 			resolved.add(instance);
 		}
-		assertThat(resolved.size()).isEqualTo(1);
+		assertThat(resolved).hasSize(1);
 		assertThat(resolved.contains(bf.getBean("store1"))).isTrue();
 
 		resolved = doubleStoreProvider.stream().collect(Collectors.toList());
-		assertThat(resolved.size()).isEqualTo(1);
+		assertThat(resolved).hasSize(1);
 		assertThat(resolved.contains(bf.getBean("store1"))).isTrue();
 
 		resolved = doubleStoreProvider.orderedStream().collect(Collectors.toList());
-		assertThat(resolved.size()).isEqualTo(1);
+		assertThat(resolved).hasSize(1);
 		assertThat(resolved.contains(bf.getBean("store1"))).isTrue();
 
 		resolved = new ArrayList<>();
 		for (NumberStore<Float> instance : floatStoreProvider) {
 			resolved.add(instance);
 		}
-		assertThat(resolved.size()).isEqualTo(1);
+		assertThat(resolved).hasSize(1);
 		assertThat(resolved.contains(bf.getBean("store2"))).isTrue();
 
 		resolved = floatStoreProvider.stream().collect(Collectors.toList());
-		assertThat(resolved.size()).isEqualTo(1);
+		assertThat(resolved).hasSize(1);
 		assertThat(resolved.contains(bf.getBean("store2"))).isTrue();
 
 		resolved = floatStoreProvider.orderedStream().collect(Collectors.toList());
-		assertThat(resolved.size()).isEqualTo(1);
+		assertThat(resolved).hasSize(1);
 		assertThat(resolved.contains(bf.getBean("store2"))).isTrue();
 	}
 
@@ -939,7 +939,7 @@ class BeanFactoryGenericsTests {
 
 		ObjectProvider<NumberStore<?>> numberStoreProvider = bf.getBeanProvider(ResolvableType.forClass(NumberStore.class));
 		List<NumberStore<?>> resolved = numberStoreProvider.orderedStream().toList();
-		assertThat(resolved.size()).isEqualTo(2);
+		assertThat(resolved).hasSize(2);
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store2"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));
 	}
@@ -963,9 +963,9 @@ class BeanFactoryGenericsTests {
 	public static class CollectionDependentBean {
 
 		public CollectionDependentBean(NamedUrlList list, NamedUrlSet set, NamedUrlMap map) {
-			assertThat(list.size()).isEqualTo(1);
-			assertThat(set.size()).isEqualTo(1);
-			assertThat(map.size()).isEqualTo(1);
+			assertThat(list).hasSize(1);
+			assertThat(set).hasSize(1);
+			assertThat(map).hasSize(1);
 		}
 	}
 

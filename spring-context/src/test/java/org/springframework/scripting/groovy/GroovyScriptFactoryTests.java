@@ -463,7 +463,7 @@ public class GroovyScriptFactoryTests {
 	public void testAnonymousScriptDetected() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Map<?, Messenger> beans = ctx.getBeansOfType(Messenger.class);
-		assertThat(beans.size()).isEqualTo(4);
+		assertThat(beans).hasSize(4);
 		assertThat(ctx.getBean(MyBytecodeProcessor.class).processed.contains(
 				"org.springframework.scripting.groovy.GroovyMessenger2")).isTrue();
 	}

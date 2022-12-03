@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,14 +65,12 @@ public abstract class ConfigurationClassUtils {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassUtils.class);
 
-	private static final Set<String> candidateIndicators = new HashSet<>(8);
+	private static final Set<String> candidateIndicators = Set.of(
+			Component.class.getName(),
+			ComponentScan.class.getName(),
+			Import.class.getName(),
+			ImportResource.class.getName());
 
-	static {
-		candidateIndicators.add(Component.class.getName());
-		candidateIndicators.add(ComponentScan.class.getName());
-		candidateIndicators.add(Import.class.getName());
-		candidateIndicators.add(ImportResource.class.getName());
-	}
 
 	/**
 	 * Initialize a configuration class proxy for the specified class.

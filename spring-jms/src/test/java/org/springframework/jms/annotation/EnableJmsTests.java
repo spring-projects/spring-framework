@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 			EnableJmsDefaultContainerFactoryConfig.class, ComposedJmsListenersBean.class)) {
 			JmsListenerContainerTestFactory simpleFactory = context.getBean("jmsListenerContainerFactory",
 				JmsListenerContainerTestFactory.class);
-			assertThat(simpleFactory.getListenerContainers().size()).isEqualTo(2);
+			assertThat(simpleFactory.getListenerContainers()).hasSize(2);
 
 			MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
 				"first").getEndpoint();
@@ -193,10 +193,10 @@ class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 				EnableJmsDefaultContainerFactoryConfig.class, LazyBean.class);
 		JmsListenerContainerTestFactory defaultFactory =
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
-		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(0);
+		assertThat(defaultFactory.getListenerContainers()).isEmpty();
 
 		context.getBean(LazyBean.class);  // trigger lazy resolution
-		assertThat(defaultFactory.getListenerContainers().size()).isEqualTo(1);
+		assertThat(defaultFactory.getListenerContainers()).hasSize(1);
 		MessageListenerTestContainer container = defaultFactory.getListenerContainers().get(0);
 		assertThat(container.isStarted()).as("Should have been started " + container).isTrue();
 		context.close();  // close and stop the listeners

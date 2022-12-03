@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from an {@code Object} stream to a byte stream of JSON objects using Jackson 2.9.
+ * Encode from an {@code Object} stream to a byte stream of JSON objects using Jackson 2.x.
  * For non-streaming use cases, {@link Flux} elements are collected into a {@link List}
  * before serialization for performance reason.
  *

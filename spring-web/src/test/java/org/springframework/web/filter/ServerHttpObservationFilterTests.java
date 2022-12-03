@@ -97,7 +97,18 @@ class ServerHttpObservationFilterTests {
 		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
 				.getAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
 		assertThat(context.getError()).isEqualTo(customError);
-		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
+	}
+
+	@Test
+	void filterShouldSetDefaultErrorStatusForBubblingExceptions() {
+		assertThatThrownBy(() -> {
+			this.filter.doFilter(this.request, this.response, (request, response) -> {
+				throw new ServletException(new IllegalArgumentException("custom error"));
+			});
+		}).isInstanceOf(ServletException.class);
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR")
+				.hasLowCardinalityKeyValue("status", "500");
 	}
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {

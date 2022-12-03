@@ -35,6 +35,7 @@ public class SerializationHintsPredicates {
 	SerializationHintsPredicates() {
 	}
 
+
 	/**
 	 * Return a predicate that checks whether a {@link SerializationHints
 	 * serialization hint} is registered for the given type.
@@ -43,7 +44,7 @@ public class SerializationHintsPredicates {
 	 * @see java.lang.reflect.Proxy
 	 */
 	public Predicate<RuntimeHints> onType(Class<?> type) {
-		Assert.notNull(type, "'type' should not be null");
+		Assert.notNull(type, "'type' must not be null");
 		return onType(TypeReference.of(type));
 	}
 
@@ -55,7 +56,7 @@ public class SerializationHintsPredicates {
 	 * @see java.lang.reflect.Proxy
 	 */
 	public Predicate<RuntimeHints> onType(TypeReference typeReference) {
-		Assert.notNull(typeReference, "'typeReference' should not be null");
+		Assert.notNull(typeReference, "'typeReference' must not be null");
 		return hints -> hints.serialization().javaSerializationHints().anyMatch(
 				hint -> hint.getType().equals(typeReference));
 	}

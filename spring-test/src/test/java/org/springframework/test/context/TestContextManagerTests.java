@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.test.context;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -26,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * JUnit 4 based unit test for {@link TestContextManager}, which verifies proper
+ * JUnit Jupiter based unit test for {@link TestContextManager}, which verifies proper
  * <em>execution order</em> of registered {@link TestExecutionListener
  * TestExecutionListeners}.
  *
@@ -53,7 +52,7 @@ class TestContextManagerTests {
 	@Test
 	void listenerExecutionOrder() throws Exception {
 		// @formatter:off
-		assertThat(this.testContextManager.getTestExecutionListeners().size()).as("Registered TestExecutionListeners").isEqualTo(3);
+		assertThat(this.testContextManager.getTestExecutionListeners()).as("Registered TestExecutionListeners").hasSize(3);
 
 		this.testContextManager.beforeTestMethod(this, this.testMethod);
 		assertExecutionOrder("beforeTestMethod",
@@ -104,7 +103,7 @@ class TestContextManagerTests {
 	}
 
 	private static void assertExecutionOrder(String usageContext, String... expectedBeforeTestMethodCalls) {
-		assertThat(executionOrder).as("execution order (" + usageContext + ") ==>").isEqualTo(Arrays.asList(expectedBeforeTestMethodCalls));
+		assertThat(executionOrder).as("execution order (" + usageContext + ") ==>").containsExactly(expectedBeforeTestMethodCalls);
 	}
 
 

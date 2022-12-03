@@ -48,7 +48,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Base class providing support methods for Jackson 2.9 encoding and decoding.
+ * Base class providing support methods for Jackson 2.x encoding and decoding.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -255,7 +255,7 @@ public abstract class Jackson2CodecSupport {
 
 	@Nullable
 	protected MethodParameter getParameter(ResolvableType type) {
-		return (type.getSource() instanceof MethodParameter ? (MethodParameter) type.getSource() : null);
+		return (type.getSource() instanceof MethodParameter methodParameter ? methodParameter : null);
 	}
 
 	@Nullable

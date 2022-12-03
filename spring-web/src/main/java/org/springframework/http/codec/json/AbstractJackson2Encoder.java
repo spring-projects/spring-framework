@@ -59,7 +59,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 
 /**
- * Base class providing support methods for Jackson 2.9 encoding. For non-streaming use
+ * Base class providing support methods for Jackson 2.x encoding. For non-streaming use
  * cases, {@link Flux} elements are collected into a {@link List} before serialization for
  * performance reasons.
  *

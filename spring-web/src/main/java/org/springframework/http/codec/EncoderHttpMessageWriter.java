@@ -79,10 +79,10 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	}
 
 	private static void initLogger(Encoder<?> encoder) {
-		if (encoder instanceof AbstractEncoder &&
+		if (encoder instanceof AbstractEncoder<?> abstractEncoder &&
 				encoder.getClass().getName().startsWith("org.springframework.core.codec")) {
-			Log logger = HttpLogging.forLog(((AbstractEncoder<?>) encoder).getLogger());
-			((AbstractEncoder<?>) encoder).setLogger(logger);
+			Log logger = HttpLogging.forLog(abstractEncoder.getLogger());
+			abstractEncoder.setLogger(logger);
 		}
 	}
 
@@ -180,10 +180,10 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	}
 
 	private boolean isStreamingMediaType(@Nullable MediaType mediaType) {
-		if (mediaType == null || !(this.encoder instanceof HttpMessageEncoder)) {
+		if (mediaType == null || !(this.encoder instanceof HttpMessageEncoder<?> httpMessageEncoder)) {
 			return false;
 		}
-		for (MediaType streamingMediaType : ((HttpMessageEncoder<?>) this.encoder).getStreamingMediaTypes()) {
+		for (MediaType streamingMediaType : httpMessageEncoder.getStreamingMediaTypes()) {
 			if (mediaType.isCompatibleWith(streamingMediaType) && matchParameters(mediaType, streamingMediaType)) {
 				return true;
 			}
@@ -224,9 +224,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	protected Map<String, Object> getWriteHints(ResolvableType streamType, ResolvableType elementType,
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.encoder instanceof HttpMessageEncoder) {
-			HttpMessageEncoder<?> encoder = (HttpMessageEncoder<?>) this.encoder;
-			return encoder.getEncodeHints(streamType, elementType, mediaType, request, response);
+		if (this.encoder instanceof HttpMessageEncoder<?> httpMessageEncoder) {
+			return httpMessageEncoder.getEncodeHints(streamType, elementType, mediaType, request, response);
 		}
 		return Hints.none();
 	}

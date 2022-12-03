@@ -116,7 +116,7 @@ public class StandardWebSocketClientTests {
 
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
-		assertThat(session.getHandshakeHeaders().size()).isEqualTo(1);
+		assertThat(session.getHandshakeHeaders()).hasSize(1);
 		assertThat(session.getHandshakeHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
@@ -166,7 +166,7 @@ public class StandardWebSocketClientTests {
 
 		Map<String, List<String>> headers = new HashMap<>();
 		endpointConfig.getConfigurator().beforeRequest(headers);
-		assertThat(headers.size()).isEqualTo(1);
+		assertThat(headers).hasSize(1);
 	}
 
 	@Test

@@ -32,7 +32,7 @@ import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -137,7 +137,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
 		paramRequestPart = new SynthesizingMethodParameter(method, 0);
-		paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		paramRequestPart.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		paramNamedRequestPart = new SynthesizingMethodParameter(method, 1);
 		paramValidRequestPart = new SynthesizingMethodParameter(method, 2);
 		paramMultipartFile = new SynthesizingMethodParameter(method, 3);
@@ -145,20 +145,20 @@ public class RequestPartMethodArgumentResolverTests {
 		paramMultipartFileArray = new SynthesizingMethodParameter(method, 5);
 		paramInt = new SynthesizingMethodParameter(method, 6);
 		paramMultipartFileNotAnnot = new SynthesizingMethodParameter(method, 7);
-		paramMultipartFileNotAnnot.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		paramMultipartFileNotAnnot.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		paramPart = new SynthesizingMethodParameter(method, 8);
-		paramPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		paramPart.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		paramPartList = new SynthesizingMethodParameter(method, 9);
 		paramPartArray = new SynthesizingMethodParameter(method, 10);
 		paramRequestParamAnnot = new SynthesizingMethodParameter(method, 11);
 		optionalMultipartFile = new SynthesizingMethodParameter(method, 12);
-		optionalMultipartFile.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		optionalMultipartFile.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		optionalMultipartFileList = new SynthesizingMethodParameter(method, 13);
-		optionalMultipartFileList.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		optionalMultipartFileList.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		optionalPart = new SynthesizingMethodParameter(method, 14);
-		optionalPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		optionalPart.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		optionalPartList = new SynthesizingMethodParameter(method, 15);
-		optionalPartList.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		optionalPartList.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		optionalRequestPart = new SynthesizingMethodParameter(method, 16);
 	}
 
@@ -203,7 +203,7 @@ public class RequestPartMethodArgumentResolverTests {
 		assertThat(actual).isNotNull();
 		assertThat(actual instanceof MultipartFile[]).isTrue();
 		MultipartFile[] parts = (MultipartFile[]) actual;
-		assertThat(parts.length).isEqualTo(2);
+		assertThat(parts).hasSize(2);
 		assertThat(multipartFile1).isEqualTo(parts[0]);
 		assertThat(multipartFile2).isEqualTo(parts[1]);
 	}
@@ -269,7 +269,7 @@ public class RequestPartMethodArgumentResolverTests {
 		Object result = resolver.resolveArgument(paramPartArray, null, webRequest, null);
 		assertThat(result instanceof Part[]).isTrue();
 		Part[] parts = (Part[]) result;
-		assertThat(parts.length).isEqualTo(2);
+		assertThat(parts).hasSize(2);
 		assertThat(part1).isEqualTo(parts[0]);
 		assertThat(part2).isEqualTo(parts[1]);
 	}

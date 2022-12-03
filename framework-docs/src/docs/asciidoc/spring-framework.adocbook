@@ -1,5 +1,6 @@
 :noheader:
 = Spring Framework Documentation
+include::attributes.adoc[]
 
 include::overview.adoc[leveloffset=+1]
 include::core.adoc[leveloffset=+1]

@@ -129,17 +129,18 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	@Override
 	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		return (handler instanceof AsyncHandlerMethodReturnValueHandler &&
-				((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(returnValue, returnType));
+		return (handler instanceof AsyncHandlerMethodReturnValueHandler asyncHandler &&
+				asyncHandler.isAsyncReturnValue(returnValue, returnType));
 	}
 
 	@Override
 	@Nullable
 	public CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		if (handler instanceof AsyncHandlerMethodReturnValueHandler) {
-			return ((AsyncHandlerMethodReturnValueHandler) handler).toCompletableFuture(returnValue, returnType);
+		if (handler instanceof AsyncHandlerMethodReturnValueHandler asyncHandler) {
+			return asyncHandler.toCompletableFuture(returnValue, returnType);
 		}
 		return null;
 	}
+
 }

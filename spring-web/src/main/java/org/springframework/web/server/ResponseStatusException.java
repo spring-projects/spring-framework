@@ -23,8 +23,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.ErrorResponseException;
 
 /**
- * Subclass of {@link ErrorResponseException} that accepts a "reason" and maps
- * it to the "detail" property of {@link org.springframework.http.ProblemDetail}.
+ * Subclass of {@link ErrorResponseException} that accepts a "reason", and by
+ * default maps that to the {@link ErrorResponseException#setDetail(String) "detail"}
+ * of the {@code ProblemDetail}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -75,8 +76,7 @@ public class ResponseStatusException extends ErrorResponseException {
 	 * @param cause a nested exception (optional)
 	 */
 	public ResponseStatusException(HttpStatusCode status, @Nullable String reason, @Nullable Throwable cause) {
-		super(status, cause);
-		this.reason = reason;
+		this(status, reason, cause, null, null);
 	}
 
 	/**
@@ -93,6 +93,7 @@ public class ResponseStatusException extends ErrorResponseException {
 
 		super(status, ProblemDetail.forStatus(status), cause, messageDetailCode, messageDetailArguments);
 		this.reason = reason;
+		setDetail(reason);
 	}
 
 

@@ -195,7 +195,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 		Advised advised = (Advised) itb;
 		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
-		assertThat(advised.getAdvisors().length).isEqualTo(4);
+		assertThat(advised.getAdvisors()).hasSize(4);
 		ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor sia =
 				(ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertThat(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null)).isTrue();
@@ -231,7 +231,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 
 		Advised advised = (Advised) itb;
 		// Will be ExposeInvocationInterceptor, synthetic instantiation advisor, 2 method advisors
-		assertThat(advised.getAdvisors().length).isEqualTo(4);
+		assertThat(advised.getAdvisors()).hasSize(4);
 		ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor sia =
 				(ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor) advised.getAdvisors()[1];
 		assertThat(sia.getPointcut().getMethodMatcher().matches(TestBean.class.getMethod("getSpouse"), null)).isTrue();
@@ -366,7 +366,7 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 				new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
 		CannotBeUnlocked.class).isEmpty()).isTrue();
 		assertThat(AopUtils.findAdvisorsThatCanApply(getFixture().getAdvisors(
-		new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class).size()).isEqualTo(2);
+		new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(),"someBean")), NotLockable.class)).hasSize(2);
 	}
 
 	@Test

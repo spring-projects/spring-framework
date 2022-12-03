@@ -58,7 +58,6 @@ import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageC
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -880,13 +879,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		messageConverters.add(new StringHttpMessageConverter());
 		messageConverters.add(new ResourceHttpMessageConverter());
 		messageConverters.add(new ResourceRegionHttpMessageConverter());
-		try {
-			messageConverters.add(new SourceHttpMessageConverter<>());
-		}
-		catch (Throwable ex) {
-			// Ignore when no TransformerFactory implementation is available...
-		}
-
 		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
 		if (romePresent) {

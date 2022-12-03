@@ -63,7 +63,7 @@ public class WebUtilsTests {
 		MultiValueMap<String, String> variables;
 
 		variables = WebUtils.parseMatrixVariables(null);
-		assertThat(variables).hasSize(0);
+		assertThat(variables).isEmpty();
 
 		variables = WebUtils.parseMatrixVariables("year");
 		assertThat(variables).hasSize(1);

@@ -43,7 +43,7 @@ public class ModelAndViewContainerTests {
 	@Test
 	public void getModel() {
 		this.mavContainer.addAttribute("name", "value");
-		assertThat(this.mavContainer.getModel().size()).isEqualTo(1);
+		assertThat(this.mavContainer.getModel()).hasSize(1);
 		assertThat(this.mavContainer.getModel().get("name")).isEqualTo("value");
 	}
 
@@ -53,7 +53,7 @@ public class ModelAndViewContainerTests {
 		this.mavContainer.setRedirectModel(new ModelMap("name2", "value2"));
 		this.mavContainer.setRedirectModelScenario(true);
 
-		assertThat(this.mavContainer.getModel().size()).isEqualTo(1);
+		assertThat(this.mavContainer.getModel()).hasSize(1);
 		assertThat(this.mavContainer.getModel().get("name2")).isEqualTo("value2");
 	}
 
@@ -64,7 +64,7 @@ public class ModelAndViewContainerTests {
 		this.mavContainer.addAttribute("name", "value");
 		this.mavContainer.setRedirectModelScenario(true);
 
-		assertThat(this.mavContainer.getModel().size()).isEqualTo(1);
+		assertThat(this.mavContainer.getModel()).hasSize(1);
 		assertThat(this.mavContainer.getModel().get("name")).isEqualTo("value");
 	}
 
@@ -81,7 +81,7 @@ public class ModelAndViewContainerTests {
 		this.mavContainer.setRedirectModelScenario(true);
 		this.mavContainer.addAttribute("name", "value");
 
-		assertThat(this.mavContainer.getModel().size()).isEqualTo(1);
+		assertThat(this.mavContainer.getModel()).hasSize(1);
 		assertThat(this.mavContainer.getModel().get("name")).isEqualTo("value");
 	}
 

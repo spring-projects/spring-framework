@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.ClassUtils;
 
@@ -148,7 +148,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		lbf.registerBeanDefinition(MARK, person2);
 		MethodParameter param = new MethodParameter(QualifiedTestBean.class.getDeclaredConstructor(Person.class), 0);
 		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(param, false);
-		param.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		param.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		assertThat(param.getParameterName()).isEqualTo("tpb");
 		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isTrue();
 		assertThat(lbf.isAutowireCandidate(JUERGEN, qualifiedDescriptor)).isTrue();
@@ -174,9 +174,9 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 				new MethodParameter(QualifiedTestBean.class.getDeclaredMethod("autowireNonqualified", Person.class), 0);
 		DependencyDescriptor qualifiedDescriptor = new DependencyDescriptor(qualifiedParam, false);
 		DependencyDescriptor nonqualifiedDescriptor = new DependencyDescriptor(nonqualifiedParam, false);
-		qualifiedParam.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		qualifiedParam.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		assertThat(qualifiedParam.getParameterName()).isEqualTo("tpb");
-		nonqualifiedParam.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
+		nonqualifiedParam.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		assertThat(nonqualifiedParam.getParameterName()).isEqualTo("tpb");
 		assertThat(lbf.isAutowireCandidate(JUERGEN, null)).isTrue();
 		assertThat(lbf.isAutowireCandidate(JUERGEN, nonqualifiedDescriptor)).isTrue();

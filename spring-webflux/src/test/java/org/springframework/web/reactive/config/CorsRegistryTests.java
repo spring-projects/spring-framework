@@ -45,7 +45,7 @@ public class CorsRegistryTests {
 	public void multipleMappings() {
 		this.registry.addMapping("/foo");
 		this.registry.addMapping("/bar");
-		assertThat(this.registry.getCorsConfigurations().size()).isEqualTo(2);
+		assertThat(this.registry.getCorsConfigurations()).hasSize(2);
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class CorsRegistryTests {
 				.allowedMethods("DELETE").allowCredentials(false).allowedHeaders("header1", "header2")
 				.exposedHeaders("header3", "header4").maxAge(3600);
 		Map<String, CorsConfiguration> configs = this.registry.getCorsConfigurations();
-		assertThat(configs.size()).isEqualTo(1);
+		assertThat(configs).hasSize(1);
 		CorsConfiguration config = configs.get("/foo");
 		assertThat(config.getAllowedOrigins()).isEqualTo(Arrays.asList("https://domain2.com", "https://domain2.com"));
 		assertThat(config.getAllowedMethods()).isEqualTo(Collections.singletonList("DELETE"));
@@ -83,7 +83,7 @@ public class CorsRegistryTests {
 		this.registry.addMapping("/api/**").combine(otherConfig);
 
 		Map<String, CorsConfiguration> configs = this.registry.getCorsConfigurations();
-		assertThat(configs.size()).isEqualTo(1);
+		assertThat(configs).hasSize(1);
 		CorsConfiguration config = configs.get("/api/**");
 		assertThat(config.getAllowedOrigins()).isEqualTo(Collections.singletonList("http://localhost:3000"));
 		assertThat(config.getAllowedMethods()).isEqualTo(Collections.singletonList("*"));

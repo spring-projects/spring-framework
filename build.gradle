@@ -21,6 +21,13 @@ ext {
 configure(allprojects) { project ->
 	repositories {
 		mavenCentral()
+		maven {
+			url "https://repo.spring.io/milestone"
+			content {
+				// Netty 5 optional support
+				includeGroup 'io.projectreactor.netty'
+			}
+		}
 		maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		if (version.contains('-')) {
 			maven { url "https://repo.spring.io/milestone" }
@@ -71,7 +78,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "10.4"
+		toolVersion = "10.5.0"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
@@ -117,7 +124,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://fasterxml.github.io/jackson-core/javadoc/2.10/",
 			"https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
 			"https://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.10/",
-			//"https://hc.apache.org/httpcomponents-client-5.2.x/current/httpclient5/apidocs/",
+			"https://hc.apache.org/httpcomponents-client-5.2.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
 			// TODO Uncomment link to JUnit 5 docs once we have sorted out

@@ -410,8 +410,8 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 		@Override
 		public Object initializeBean(Object existingBean, String beanName) throws BeansException {
-			if (existingBean instanceof ApplicationContextAware) {
-				((ApplicationContextAware) existingBean).setApplicationContext(StubWebApplicationContext.this);
+			if (existingBean instanceof ApplicationContextAware applicationContextAware) {
+				applicationContextAware.setApplicationContext(StubWebApplicationContext.this);
 			}
 			return existingBean;
 		}

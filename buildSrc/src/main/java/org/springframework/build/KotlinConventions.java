@@ -38,6 +38,7 @@ public class KotlinConventions {
 		kotlinOptions.setApiVersion("1.7");
 		kotlinOptions.setLanguageVersion("1.7");
 		kotlinOptions.setJvmTarget("17");
+		kotlinOptions.setJavaParameters(true);
 		kotlinOptions.setAllWarningsAsErrors(true);
 		List<String> freeCompilerArgs = new ArrayList<>(compile.getKotlinOptions().getFreeCompilerArgs());
 		freeCompilerArgs.addAll(List.of("-Xsuppress-version-warnings", "-Xjsr305=strict", "-opt-in=kotlin.RequiresOptIn"));

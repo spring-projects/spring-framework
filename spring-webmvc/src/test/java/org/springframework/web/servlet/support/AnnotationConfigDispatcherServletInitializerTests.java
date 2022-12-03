@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 	public void register() throws ServletException {
 		initializer.onStartup(servletContext);
 
-		assertThat(servlets.size()).isEqualTo(1);
+		assertThat(servlets).hasSize(1);
 		assertThat(servlets.get(SERVLET_NAME)).isNotNull();
 
 		DispatcherServlet servlet = (DispatcherServlet) servlets.get(SERVLET_NAME);
@@ -96,7 +96,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 		boolean condition = wac.getBean("bean") instanceof MyBean;
 		assertThat(condition).isTrue();
 
-		assertThat(servletRegistrations.size()).isEqualTo(1);
+		assertThat(servletRegistrations).hasSize(1);
 		assertThat(servletRegistrations.get(SERVLET_NAME)).isNotNull();
 
 		MockServletRegistration servletRegistration = servletRegistrations.get(SERVLET_NAME);
@@ -106,7 +106,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 		assertThat(servletRegistration.getRunAsRole()).isEqualTo(ROLE_NAME);
 		assertThat(servletRegistration.isAsyncSupported()).isTrue();
 
-		assertThat(filterRegistrations.size()).isEqualTo(4);
+		assertThat(filterRegistrations).hasSize(4);
 		assertThat(filterRegistrations.get("hiddenHttpMethodFilter")).isNotNull();
 		assertThat(filterRegistrations.get("delegatingFilterProxy")).isNotNull();
 		assertThat(filterRegistrations.get("delegatingFilterProxy#0")).isNotNull();
@@ -179,7 +179,7 @@ public class AnnotationConfigDispatcherServletInitializerTests {
 
 		initializer.onStartup(servletContext);
 
-		assertThat(filterRegistrations.size()).isEqualTo(0);
+		assertThat(filterRegistrations).isEmpty();
 	}
 
 

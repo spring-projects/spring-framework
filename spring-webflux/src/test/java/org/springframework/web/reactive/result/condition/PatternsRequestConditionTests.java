@@ -168,7 +168,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void equallyMatchingPatternsAreBothPresent() {
 		PatternsRequestCondition c = createPatternsCondition("/a", "/b");
-		assertThat(c.getPatterns().size()).isEqualTo(2);
+		assertThat(c.getPatterns()).hasSize(2);
 		Iterator<PathPattern> itr = c.getPatterns().iterator();
 		assertThat(itr.next().getPatternString()).isEqualTo("/a");
 		assertThat(itr.next().getPatternString()).isEqualTo("/b");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class WebMvcStompEndpointRegistryTests {
 		this.endpointRegistry.addEndpoint("/stomp");
 
 		Map<String, SubProtocolHandler> protocolHandlers = webSocketHandler.getProtocolHandlerMap();
-		assertThat(protocolHandlers.size()).isEqualTo(3);
+		assertThat(protocolHandlers).hasSize(3);
 		assertThat(protocolHandlers.get("v10.stomp")).isNotNull();
 		assertThat(protocolHandlers.get("v11.stomp")).isNotNull();
 		assertThat(protocolHandlers.get("v12.stomp")).isNotNull();
@@ -72,7 +72,7 @@ public class WebMvcStompEndpointRegistryTests {
 	@Test
 	public void handlerMapping() {
 		SimpleUrlHandlerMapping hm = (SimpleUrlHandlerMapping) this.endpointRegistry.getHandlerMapping();
-		assertThat(hm.getUrlMap().size()).isEqualTo(0);
+		assertThat(hm.getUrlMap()).isEmpty();
 
 		UrlPathHelper pathHelper = new UrlPathHelper();
 		this.endpointRegistry.setUrlPathHelper(pathHelper);
@@ -80,10 +80,10 @@ public class WebMvcStompEndpointRegistryTests {
 		this.endpointRegistry.addEndpoint("/stompOverSockJS").withSockJS();
 
 		//SPR-12403
-		assertThat(this.webSocketHandler.getProtocolHandlers().size()).isEqualTo(1);
+		assertThat(this.webSocketHandler.getProtocolHandlers()).hasSize(1);
 
 		hm = (SimpleUrlHandlerMapping) this.endpointRegistry.getHandlerMapping();
-		assertThat(hm.getUrlMap().size()).isEqualTo(2);
+		assertThat(hm.getUrlMap()).hasSize(2);
 		assertThat(hm.getUrlMap().get("/stompOverWebSocket")).isNotNull();
 		assertThat(hm.getUrlMap().get("/stompOverSockJS/**")).isNotNull();
 		assertThat(hm.getUrlPathHelper()).isSameAs(pathHelper);

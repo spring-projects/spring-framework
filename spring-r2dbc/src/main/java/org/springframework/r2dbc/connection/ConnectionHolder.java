@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.ResourceHolderSupport;
 import org.springframework.util.Assert;
-
 
 /**
  * Resource holder wrapping a R2DBC {@link Connection}.
@@ -109,7 +108,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 * @see #released()
 	 */
 	public Connection getConnection() {
-		Assert.notNull(this.currentConnection, "Active Connection is required");
+		Assert.state(this.currentConnection != null, "Active Connection is required");
 		return this.currentConnection;
 	}
 

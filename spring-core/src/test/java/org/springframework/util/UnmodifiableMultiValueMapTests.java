@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class UnmodifiableMultiValueMapTests {
 		UnmodifiableMultiValueMap<String, String> map = new UnmodifiableMultiValueMap<>(mock);
 
 		given(mock.size()).willReturn(1);
-		assertThat(map.size()).isEqualTo(1);
+		assertThat(map).hasSize(1);
 
 		given(mock.isEmpty()).willReturn(false);
 		assertThat(map.isEmpty()).isFalse();
@@ -107,7 +107,7 @@ class UnmodifiableMultiValueMapTests {
 		Set<Map.Entry<String, List<String>>> set = new UnmodifiableMultiValueMap<>(mockMap).entrySet();
 
 		given(mockSet.size()).willReturn(1);
-		assertThat(set.size()).isEqualTo(1);
+		assertThat(set).hasSize(1);
 
 		given(mockSet.isEmpty()).willReturn(false);
 		assertThat(set.isEmpty()).isFalse();
@@ -149,7 +149,7 @@ class UnmodifiableMultiValueMapTests {
 		Collection<List<String>> values = new UnmodifiableMultiValueMap<>(mockMap).values();
 
 		given(mockValues.size()).willReturn(1);
-		assertThat(values.size()).isEqualTo(1);
+		assertThat(values).hasSize(1);
 
 		given(mockValues.isEmpty()).willReturn(false);
 		assertThat(values.isEmpty()).isFalse();

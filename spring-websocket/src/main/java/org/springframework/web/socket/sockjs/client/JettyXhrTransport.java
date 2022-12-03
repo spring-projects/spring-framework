@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jetty.client.HttpClient;
@@ -171,9 +172,9 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 	private static HttpHeaders toHttpHeaders(HttpFields httpFields) {
 		HttpHeaders responseHeaders = new HttpHeaders();
-		Enumeration<String> names = httpFields.getFieldNames();
-		while (names.hasMoreElements()) {
-			String name = names.nextElement();
+		Iterator<String> names = httpFields.getFieldNamesCollection().iterator();
+		while (names.hasNext()) {
+			String name = names.next();
 			Enumeration<String> values = httpFields.getValues(name);
 			while (values.hasMoreElements()) {
 				String value = values.nextElement();

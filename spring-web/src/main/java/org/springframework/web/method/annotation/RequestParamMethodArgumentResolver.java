@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,8 +234,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		Assert.state(name != null, "Unresolvable parameter name");
 
 		parameter = parameter.nestedIfOptional();
-		if (value instanceof Optional) {
-			value = ((Optional<?>) value).orElse(null);
+		if (value instanceof Optional<?> optional) {
+			value = optional.orElse(null);
 		}
 
 		if (value == null) {
@@ -245,8 +245,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			}
 			builder.queryParam(name);
 		}
-		else if (value instanceof Collection) {
-			for (Object element : (Collection<?>) value) {
+		else if (value instanceof Collection<?> elements) {
+			for (Object element : elements) {
 				element = formatUriValue(conversionService, TypeDescriptor.nested(parameter, 1), element);
 				builder.queryParam(name, element);
 			}
@@ -263,8 +263,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		if (value == null) {
 			return null;
 		}
-		else if (value instanceof String) {
-			return (String) value;
+		else if (value instanceof String string) {
+			return string;
 		}
 		else if (cs != null) {
 			return (String) cs.convert(value, sourceType, STRING_TYPE_DESCRIPTOR);

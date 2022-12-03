@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class PartEventHttpMessageWriterTests extends AbstractLeakCheckingTests {
 				.block(Duration.ofSeconds(5));
 
 		MultiValueMap<String, Part> requestParts = parse(this.response, hints);
-		assertThat(requestParts.size()).isEqualTo(2);
+		assertThat(requestParts).hasSize(2);
 
 		Part part = requestParts.getFirst("text part");
 		assertThat(part.name()).isEqualTo("text part");

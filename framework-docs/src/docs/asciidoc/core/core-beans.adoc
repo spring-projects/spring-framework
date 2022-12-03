@@ -107,16 +107,14 @@ configuration metadata is actually written. These days, many developers choose
 
 For information about using other forms of metadata with the Spring container, see:
 
-* <<beans-annotation-config,Annotation-based configuration>>: Spring 2.5 introduced
-  support for annotation-based configuration metadata.
-* <<beans-java, Java-based configuration>>: Starting with Spring 3.0, many features
-  provided by the Spring JavaConfig project became part of the core Spring Framework.
-  Thus, you can define beans external to your application classes by using Java rather
-  than XML files. To use these new features, see the
-  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/Configuration.html[`@Configuration`],
-  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/Bean.html[`@Bean`],
-  https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/Import.html[`@Import`],
-  and https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/DependsOn.html[`@DependsOn`] annotations.
+* <<beans-annotation-config,Annotation-based configuration>>: define beans using
+  annotation-based configuration metadata.
+* <<beans-java, Java-based configuration>>: define beans external to your application
+  classes by using Java rather than XML files. To use these features, see the
+  {api-spring-framework}/context/annotation/Configuration.html[`@Configuration`],
+  {api-spring-framework}/context/annotation/Bean.html[`@Bean`],
+  {api-spring-framework}/context/annotation/Import.html[`@Import`],
+  and {api-spring-framework}/context/annotation/DependsOn.html[`@DependsOn`] annotations.
 
 Spring configuration consists of at least one and typically more than one bean
 definition that the container must manage. XML-based configuration metadata configures these
@@ -124,14 +122,12 @@ beans as `<bean/>` elements inside a top-level `<beans/>` element. Java
 configuration typically uses `@Bean`-annotated methods within a `@Configuration` class.
 
 These bean definitions correspond to the actual objects that make up your application.
-Typically, you define service layer objects, data access objects (DAOs), presentation
-objects such as Struts `Action` instances, infrastructure objects such as Hibernate
-`SessionFactories`, JMS `Queues`, and so forth. Typically, one does not configure
-fine-grained domain objects in the container, because it is usually the responsibility
-of DAOs and business logic to create and load domain objects. However, you can use
-Spring's integration with AspectJ to configure objects that have been created outside
-the control of an IoC container. See <<aop-atconfigurable,Using AspectJ to
-dependency-inject domain objects with Spring>>.
+Typically, you define service layer objects, persistence layer objects such as
+repositories or data access objects (DAOs), presentation objects such as Web controllers,
+infrastructure objects such as a JPA `EntityManagerFactory`, JMS queues, and so forth.
+Typically, one does not configure fine-grained domain objects in the container, because
+it is usually the responsibility of repositories and business logic to create and load
+domain objects.
 
 The following example shows the basic structure of XML-based configuration metadata:
 
@@ -157,12 +153,11 @@ The following example shows the basic structure of XML-based configuration metad
 ----
 
 <1> The `id` attribute is a string that identifies the individual bean definition.
-
 <2> The `class` attribute defines the type of the bean and uses the fully qualified
-classname.
+class name.
 
-The value of the `id` attribute refers to collaborating objects. The XML for
-referring to collaborating objects is not shown in this example. See
+The value of the `id` attribute can be used to refer to collaborating objects. The XML
+for referring to collaborating objects is not shown in this example. See
 <<beans-dependencies,Dependencies>> for more information.
 
 
@@ -2839,7 +2834,7 @@ processed by the Spring `DispatcherServlet`, no special setup is necessary.
 `DispatcherServlet` already exposes all relevant state.
 
 If you use a Servlet web container, with requests processed outside of Spring's
-`DispatcherServlet` (for example, when using JSF or Struts), you need to register the
+`DispatcherServlet` (for example, when using JSF), you need to register the
 `org.springframework.web.context.request.RequestContextListener` `ServletRequestListener`.
 This can be done programmatically by using the `WebApplicationInitializer` interface.
 Alternatively, add the following declaration to your web application's `web.xml` file:
@@ -5205,6 +5200,7 @@ with specific arguments, narrowing the set of type matches so that a specific be
 chosen for each argument. In the simplest case, this can be a plain descriptive value, as
 shown in the following example:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5229,18 +5225,20 @@ shown in the following example:
 		// ...
 	}
 ----
+--
 
 You can also specify the `@Qualifier` annotation on individual constructor arguments or
 method parameters, as shown in the following example:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
 	public class MovieRecommender {
 
-		private MovieCatalog movieCatalog;
+		private final MovieCatalog movieCatalog;
 
-		private CustomerPreferenceDao customerPreferenceDao;
+		private final CustomerPreferenceDao customerPreferenceDao;
 
 		@Autowired
 		public void prepare(@Qualifier("main") MovieCatalog movieCatalog,
@@ -5271,9 +5269,11 @@ method parameters, as shown in the following example:
 		// ...
 	}
 ----
+--
 
 The following example shows corresponding bean definitions.
 
+--
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -5307,6 +5307,7 @@ The following example shows corresponding bean definitions.
 is qualified with the same value.
 <2> The bean with the `action` qualifier value is wired with the constructor argument that
 is qualified with the same value.
+--
 
 For a fallback match, the bean name is considered a default qualifier value. Thus, you
 can define the bean with an `id` of `main` instead of the nested qualifier element, leading
@@ -5384,6 +5385,7 @@ constructor or a multi-argument method.
 You can create your own custom qualifier annotations. To do so, define an annotation and
 provide the `@Qualifier` annotation within your definition, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5403,10 +5405,12 @@ provide the `@Qualifier` annotation within your definition, as the following exa
 	@Qualifier
 	annotation class Genre(val value: String)
 ----
+--
 
 Then you can provide the custom qualifier on autowired fields and parameters, as the
 following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5445,6 +5449,7 @@ following example shows:
 		// ...
 	}
 ----
+--
 
 Next, you can provide the information for the candidate bean definitions. You can add
 `<qualifier/>` tags as sub-elements of the `<bean/>` tag and then specify the `type` and
@@ -5453,6 +5458,7 @@ fully-qualified class name of the annotation. Alternately, as a convenience if n
 conflicting names exists, you can use the short class name. The following example
 demonstrates both approaches:
 
+--
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -5480,6 +5486,7 @@ demonstrates both approaches:
 
 	</beans>
 ----
+--
 
 In <<beans-classpath-scanning>>, you can see an annotation-based alternative to
 providing the qualifier metadata in XML. Specifically, see <<beans-scanning-qualifiers>>.
@@ -5490,6 +5497,7 @@ several different types of dependencies. For example, you may provide an offline
 catalog that can be searched when no Internet connection is available. First, define
 the simple annotation, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5497,7 +5505,6 @@ the simple annotation, as the following example shows:
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
 	public @interface Offline {
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -5508,10 +5515,12 @@ the simple annotation, as the following example shows:
 	@Qualifier
 	annotation class Offline
 ----
+--
 
 Then add the annotation to the field or property to be autowired, as shown in the
 following example:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5539,9 +5548,11 @@ class MovieRecommender {
 }
 ----
 <1> This line adds the `@Offline` annotation.
+--
 
 Now the bean definition only needs a qualifier `type`, as shown in the following example:
 
+--
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<bean class="example.SimpleMovieCatalog">
@@ -5550,6 +5561,7 @@ Now the bean definition only needs a qualifier `type`, as shown in the following
 	</bean>
 ----
 <1> This element specifies the qualifier.
+--
 
 
 You can also define custom qualifier annotations that accept named attributes in
@@ -5558,6 +5570,7 @@ then specified on a field or parameter to be autowired, a bean definition must m
 all such attribute values to be considered an autowire candidate. As an example,
 consider the following annotation definition:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5579,9 +5592,11 @@ consider the following annotation definition:
 	@Qualifier
 	annotation class MovieQualifier(val genre: String, val format: Format)
 ----
+--
 
 In this case `Format` is an enum, defined as follows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5596,10 +5611,12 @@ In this case `Format` is an enum, defined as follows:
 		VHS, DVD, BLURAY
 	}
 ----
+--
 
 The fields to be autowired are annotated with the custom qualifier and include values
 for both attributes: `genre` and `format`, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5648,6 +5665,7 @@ for both attributes: `genre` and `format`, as the following example shows:
 		// ...
 	}
 ----
+--
 
 Finally, the bean definitions should contain matching qualifier values. This example
 also demonstrates that you can use bean meta attributes instead of the
@@ -5656,6 +5674,7 @@ precedence, but the autowiring mechanism falls back on the values provided withi
 `<meta/>` tags if no such qualifier is present, as in the last two bean definitions in
 the following example:
 
+--
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -5699,6 +5718,7 @@ the following example:
 
 	</beans>
 ----
+--
 
 
 
@@ -5830,6 +5850,7 @@ endpoints. Spring supports this pattern for Spring-managed objects as well.
 the bean name to be injected. In other words, it follows by-name semantics,
 as demonstrated in the following example:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5855,6 +5876,7 @@ class SimpleMovieLister {
 }
 ----
 <1> This line injects a `@Resource`.
+--
 
 
 If no name is explicitly specified, the default name is derived from the field name or
@@ -5862,6 +5884,7 @@ setter method. In case of a field, it takes the field name. In case of a setter 
 it takes the bean property name. The following example is going to have the bean
 named `movieFinder` injected into its setter method:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5885,6 +5908,7 @@ named `movieFinder` injected into its setter method:
 
 	}
 ----
+--
 
 NOTE: The name provided with the annotation is resolved as a bean name by the
 `ApplicationContext` of which the `CommonAnnotationBeanPostProcessor` is aware.
@@ -5903,6 +5927,7 @@ Thus, in the following example, the `customerPreferenceDao` field first looks fo
 named "customerPreferenceDao" and then falls back to a primary type match for the type
 `CustomerPreferenceDao`:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5940,6 +5965,7 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 ----
 <1> The `context` field is injected based on the known resolvable dependency type:
 `ApplicationContext`.
+--
 
 [[beans-value-annotations]]
 === Using `@Value`
@@ -7515,7 +7541,7 @@ container. It includes the following topics:
 [[beans-java-basic-concepts]]
 === Basic Concepts: `@Bean` and `@Configuration`
 
-The central artifacts in Spring's new Java-configuration support are
+The central artifacts in Spring's Java configuration support are
 `@Configuration`-annotated classes and `@Bean`-annotated methods.
 
 The `@Bean` annotation is used to indicate that a method instantiates, configures, and
@@ -8099,7 +8125,7 @@ class AppConfig {
 By default, beans defined with Java configuration that have a public `close` or `shutdown`
 method are automatically enlisted with a destruction callback. If you have a public
 `close` or `shutdown` method and you do not wish for it to be called when the container
-shuts down, you can add `@Bean(destroyMethod="")` to your bean definition to disable the
+shuts down, you can add `@Bean(destroyMethod = "")` to your bean definition to disable the
 default `(inferred)` mode.
 
 You may want to do that by default for a resource that you acquire with JNDI, as its
@@ -8112,7 +8138,7 @@ The following example shows how to prevent an automatic destruction callback for
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Bean(destroyMethod="")
+	@Bean(destroyMethod = "")
 	public DataSource dataSource() throws NamingException {
 		return (DataSource) jndiTemplate.lookup("MyDS");
 	}
@@ -9456,7 +9482,7 @@ now looks like the following listing:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Bean(destroyMethod="")
+	@Bean(destroyMethod = "")
 	public DataSource dataSource() throws Exception {
 		Context ctx = new InitialContext();
 		return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
@@ -9495,6 +9521,7 @@ annotation lets you indicate that a component is eligible for registration
 when one or more specified profiles are active. Using our preceding example, we
 can rewrite the `dataSource` configuration as follows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -9529,7 +9556,9 @@ can rewrite the `dataSource` configuration as follows:
 		}
 	}
 ----
+--
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -9537,13 +9566,15 @@ can rewrite the `dataSource` configuration as follows:
 	@Profile("production")
 	public class JndiDataConfig {
 
-		@Bean(destroyMethod="")
+		@Bean(destroyMethod = "") // <1>
 		public DataSource dataSource() throws Exception {
 			Context ctx = new InitialContext();
 			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
 		}
 	}
 ----
+<1> `@Bean(destroyMethod = "")` disables default destroy method inference.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
@@ -9551,13 +9582,15 @@ can rewrite the `dataSource` configuration as follows:
 	@Profile("production")
 	class JndiDataConfig {
 
-		@Bean(destroyMethod = "")
+		@Bean(destroyMethod = "") // <1>
 		fun dataSource(): DataSource {
 			val ctx = InitialContext()
 			return ctx.lookup("java:comp/env/jdbc/datasource") as DataSource
 		}
 	}
 ----
+<1> `@Bean(destroyMethod = "")` disables default destroy method inference.
+--
 
 NOTE: As mentioned earlier, with `@Bean` methods, you typically choose to use programmatic
 JNDI lookups, by using either Spring's `JndiTemplate`/`JndiLocatorDelegate` helpers or the
@@ -9569,9 +9602,9 @@ profile expression. A profile expression allows for more complicated profile log
 expressed (for example, `production & us-east`). The following operators are supported in
 profile expressions:
 
-* `!`: A logical "`not`" of the profile
-* `&`: A logical "`and`" of the profiles
-* `|`: A logical "`or`" of the profiles
+* `!`: A logical `NOT` of the profile
+* `&`: A logical `AND` of the profiles
+* `|`: A logical `OR` of the profiles
 
 NOTE: You cannot mix the `&` and `|` operators without using parentheses. For example,
 `production & us-east | eu-central` is not a valid expression. It must be expressed as
@@ -9582,6 +9615,7 @@ of creating a custom composed annotation. The following example defines a custom
 `@Production` annotation that you can use as a drop-in replacement for
 `@Profile("production")`:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -9599,6 +9633,7 @@ of creating a custom composed annotation. The following example defines a custom
 	@Profile("production")
 	annotation class Production
 ----
+--
 
 TIP: If a `@Configuration` class is marked with `@Profile`, all of the `@Bean` methods and
 `@Import` annotations associated with that class are bypassed unless one or more of
@@ -9613,6 +9648,7 @@ active. For example, given `@Profile({"p1", "!p2"})`, registration will occur if
 of a configuration class (for example, for alternative variants of a particular bean), as
 the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -9664,6 +9700,7 @@ the following example shows:
 ----
 <1> The `standaloneDataSource` method is available only in the `development` profile.
 <2> The `jndiDataSource` method is available only in the `production` profile.
+--
 
 [NOTE]
 ====
@@ -9834,7 +9871,7 @@ activates multiple profiles:
 Declaratively, `spring.profiles.active` may accept a comma-separated list of profile names,
 as the following example shows:
 
-[literal,subs="verbatim,quotes"]
+[literal,indent=0,subs="verbatim,quotes"]
 ----
 	-Dspring.profiles.active="profile1,profile2"
 ----
@@ -10230,13 +10267,13 @@ handled in the JDK-standard way of resolving messages through `ResourceBundle` o
 purposes of the example, assume the contents of two of the above resource bundle files
 are as follows:
 
-[literal,subs="verbatim,quotes"]
+[source,properties,indent=0,subs="verbatim,quotes"]
 ----
 	# in format.properties
 	message=Alligators rock!
 ----
 
-[literal,subs="verbatim,quotes"]
+[source,properties,indent=0,subs="verbatim,quotes"]
 ----
 	# in exceptions.properties
 	argument.required=The {0} argument is required.

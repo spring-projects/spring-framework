@@ -189,7 +189,7 @@ public class JsonbHttpMessageConverterTests {
 
 		Type genericType = beansList.getGenericType();
 		List<MyBean> results = (List<MyBean>) converter.read(genericType, MyBeanListHolder.class, inputMessage);
-		assertThat(results.size()).isEqualTo(1);
+		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
 		assertThat(result.getNumber()).isEqualTo(42);
@@ -215,7 +215,7 @@ public class JsonbHttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), null, inputMessage);
-		assertThat(results.size()).isEqualTo(1);
+		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
 		assertThat(result.getNumber()).isEqualTo(42);
@@ -242,7 +242,7 @@ public class JsonbHttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), null, inputMessage);
-		assertThat(results.size()).isEqualTo(1);
+		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
 		assertThat(result.getNumber()).isEqualTo(42);

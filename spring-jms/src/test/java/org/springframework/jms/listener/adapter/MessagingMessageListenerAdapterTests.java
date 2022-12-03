@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ public class MessagingMessageListenerAdapterTests {
 		listener.setMessageConverter(messageConverter);
 		listener.onMessage(jmsMessage, session);
 		verify(messageConverter, times(1)).fromMessage(jmsMessage);
-		assertThat(sample.simples.size()).isEqualTo(1);
+		assertThat(sample.simples).hasSize(1);
 		assertThat(sample.simples.get(0).getPayload()).isEqualTo("FooBar");
 	}
 

@@ -12,6 +12,9 @@
 	<!-- JMH benchmarks -->
 	<suppress files="[\\/]src[\\/]jmh[\\/]java[\\/]org[\\/]springframework[\\/]" checks="JavadocVariable|JavadocStyle|InnerTypeLast"/>
 
+	<!-- Framework docs -->
+	<suppress files="org[\\/]springframework[\\/]docs[\\/].+" checks="IllegalImport" id="bannedJUnitJupiterImports" />
+
 	<!-- spring-aop -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]aopalliance[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
 

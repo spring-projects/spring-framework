@@ -89,7 +89,7 @@ class PropertySourceTests {
 		assertThat(propertySources.remove(PropertySource.named("ps1"))).isTrue();
 		assertThat(propertySources).hasSize(1);
 		assertThat(propertySources.remove(PropertySource.named("ps1"))).isTrue();
-		assertThat(propertySources).hasSize(0);
+		assertThat(propertySources).isEmpty();
 
 		PropertySource<?> ps2 = new MapPropertySource("ps2", map2);
 		propertySources.add(ps1);

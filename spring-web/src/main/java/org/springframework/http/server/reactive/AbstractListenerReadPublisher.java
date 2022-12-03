@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  *
  * <p>Specifically a base class for reading from the HTTP request body with
  * Servlet non-blocking I/O and Undertow XNIO as well as handling incoming
- * WebSocket messages with standard Java WebSocket (JSR-356), Jetty, and
+ * WebSocket messages with standard Jakarta WebSocket (JSR-356), Jetty, and
  * Undertow.
  *
  * @author Arjen Poutsma

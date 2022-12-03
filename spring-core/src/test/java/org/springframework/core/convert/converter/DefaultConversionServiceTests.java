@@ -452,7 +452,7 @@ class DefaultConversionServiceTests {
 	@Test
 	void convertObjectToArray() {
 		Object[] result = conversionService.convert(3L, Object[].class);
-		assertThat(result.length).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		assertThat(result[0]).isEqualTo(3L);
 	}
 
@@ -681,7 +681,7 @@ class DefaultConversionServiceTests {
 		Collection values = map.values();
 		List<Integer> bar = (List<Integer>) conversionService.convert(values,
 				TypeDescriptor.forObject(values), new TypeDescriptor(getClass().getField("genericList")));
-		assertThat(bar.size()).isEqualTo(3);
+		assertThat(bar).hasSize(3);
 		assertThat(bar.get(0)).isEqualTo(1);
 		assertThat(bar.get(1)).isEqualTo(2);
 		assertThat(bar.get(2)).isEqualTo(3);
@@ -745,7 +745,7 @@ class DefaultConversionServiceTests {
 	@Test
 	void convertStringToProperties() {
 		Properties result = conversionService.convert("a=b\nc=2\nd=", Properties.class);
-		assertThat(result.size()).isEqualTo(3);
+		assertThat(result).hasSize(3);
 		assertThat(result.getProperty("a")).isEqualTo("b");
 		assertThat(result.getProperty("c")).isEqualTo("2");
 		assertThat(result.getProperty("d")).isEqualTo("");

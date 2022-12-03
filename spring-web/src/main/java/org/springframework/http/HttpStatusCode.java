@@ -85,7 +85,8 @@ public sealed interface HttpStatusCode extends Serializable permits DefaultHttpS
 	 * positive number
 	 */
 	static HttpStatusCode valueOf(int code) {
-		Assert.isTrue(code >= 100 && code <= 999, () -> "Code '" + code + "' should be a three-digit positive integer");
+		Assert.isTrue(code >= 100 && code <= 999,
+				() -> "Status code '" + code + "' should be a three-digit positive integer");
 		HttpStatus status = HttpStatus.resolve(code);
 		if (status != null) {
 			return status;

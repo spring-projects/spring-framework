@@ -68,7 +68,7 @@ class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 
 		assertThat(response.getBody()).isNotNull();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(RESPONSE_SIZE);
-		assertThat(response.getBody().length).isEqualTo(RESPONSE_SIZE);
+		assertThat(response.getBody()).hasSize(RESPONSE_SIZE);
 	}
 
 

@@ -121,7 +121,7 @@ class GenericTypeResolverTests {
 		assertThat(map.toString()).isEqualTo("{T=class java.lang.Integer}");
 
 		map = GenericTypeResolver.getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
-		assertThat(map.size()).isEqualTo(2);
+		assertThat(map).hasSize(2);
 		Type t = null;
 		Type x = null;
 		for (Map.Entry<TypeVariable, Type> entry : map.entrySet()) {
@@ -168,7 +168,7 @@ class GenericTypeResolverTests {
 	void resolveIncompleteTypeVariables() {
 		Class<?>[] resolved = GenericTypeResolver.resolveTypeArguments(IdFixingRepository.class, Repository.class);
 		assertThat(resolved).isNotNull();
-		assertThat(resolved.length).isEqualTo(2);
+		assertThat(resolved).hasSize(2);
 		assertThat(resolved[0]).isEqualTo(Object.class);
 		assertThat(resolved[1]).isEqualTo(Long.class);
 	}

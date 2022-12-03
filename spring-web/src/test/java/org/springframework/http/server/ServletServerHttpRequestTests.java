@@ -155,7 +155,7 @@ public class ServletServerHttpRequestTests {
 	void getHeadersWithWildcardContentType() {
 		mockRequest.setContentType("*/*");
 		mockRequest.removeHeader("Content-Type");
-		assertThat(request.getHeaders()).as("Invalid content-type should not raise exception").hasSize(0);
+		assertThat(request.getHeaders()).as("Invalid content-type should not raise exception").isEmpty();
 	}
 
 	@Test

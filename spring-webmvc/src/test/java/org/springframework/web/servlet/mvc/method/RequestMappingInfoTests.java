@@ -59,7 +59,7 @@ class RequestMappingInfoTests {
 		// gh-22543
 		RequestMappingInfo info = infoBuilder.build();
 		assertThat(info.getPatternValues()).isEqualTo(Collections.singleton(""));
-		assertThat(info.getMethodsCondition().getMethods().size()).isEqualTo(0);
+		assertThat(info.getMethodsCondition().getMethods()).isEmpty();
 		assertThat(info.getParamsCondition()).isNotNull();
 		assertThat(info.getHeadersCondition()).isNotNull();
 		assertThat(info.getConsumesCondition().isEmpty()).isTrue();

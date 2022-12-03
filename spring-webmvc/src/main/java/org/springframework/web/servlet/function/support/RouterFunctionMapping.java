@@ -29,7 +29,6 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.ServerHttpObservationFilter;
@@ -189,12 +188,6 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(4);
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(new StringHttpMessageConverter());
-		try {
-			messageConverters.add(new SourceHttpMessageConverter<>());
-		}
-		catch (Error err) {
-			// Ignore when no TransformerFactory implementation is available
-		}
 		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
 		this.messageConverters = messageConverters;

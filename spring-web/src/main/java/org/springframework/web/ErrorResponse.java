@@ -268,6 +268,19 @@ public interface ErrorResponse {
 		 */
 		ErrorResponse build();
 
+		/**
+		 * Build the {@code ErrorResponse} instance and also resolve the "detail"
+		 * and "title" through the given {@link MessageSource}. Effectively a
+		 * shortcut for calling {@link #build()} and then
+		 * {@link ErrorResponse#updateAndGetBody(MessageSource, Locale)}.
+		 * @since 6.0.3
+		 */
+		default ErrorResponse build(@Nullable MessageSource messageSource, Locale locale) {
+			ErrorResponse response = build();
+			response.updateAndGetBody(messageSource, locale);
+			return response;
+		}
+
 	}
 
 }

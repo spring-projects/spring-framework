@@ -134,10 +134,12 @@ class BeanDefinitionMethodGenerator {
 					type.addJavadoc("Bean definitions for {@link $T}", topLevelClassName);
 					type.addModifiers(Modifier.PUBLIC);
 				});
+
 		List<String> names = target.simpleNames();
 		if (names.size() == 1) {
 			return generatedClass;
 		}
+
 		List<String> namesToProcess = names.subList(1, names.size());
 		ClassName currentTargetClassName = topLevelClassName;
 		GeneratedClass tmp = generatedClass;
@@ -148,8 +150,7 @@ class BeanDefinitionMethodGenerator {
 		return tmp;
 	}
 
-	private static GeneratedClass createInnerClass(GeneratedClass generatedClass,
-			String name, ClassName target) {
+	private static GeneratedClass createInnerClass(GeneratedClass generatedClass, String name, ClassName target) {
 		return generatedClass.getOrAdd(name, type -> {
 			type.addJavadoc("Bean definitions for {@link $T}", target);
 			type.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
@@ -167,16 +168,16 @@ class BeanDefinitionMethodGenerator {
 		return codeFragments;
 	}
 
-	private GeneratedMethod generateBeanDefinitionMethod(
-			GenerationContext generationContext, ClassName className,
-			GeneratedMethods generatedMethods, BeanRegistrationCodeFragments codeFragments,
-			Modifier modifier) {
+	private GeneratedMethod generateBeanDefinitionMethod(GenerationContext generationContext,
+			ClassName className, GeneratedMethods generatedMethods,
+			BeanRegistrationCodeFragments codeFragments, Modifier modifier) {
 
 		BeanRegistrationCodeGenerator codeGenerator = new BeanRegistrationCodeGenerator(
 				className, generatedMethods, this.registeredBean,
 				this.constructorOrFactoryMethod, codeFragments);
-		this.aotContributions.forEach(aotContribution -> aotContribution
-				.applyTo(generationContext, codeGenerator));
+
+		this.aotContributions.forEach(aotContribution -> aotContribution.applyTo(generationContext, codeGenerator));
+
 		return generatedMethods.add("getBeanDefinition", method -> {
 			method.addJavadoc("Get the $L definition for '$L'",
 					(!this.registeredBean.isInnerBean()) ? "bean" : "inner-bean",

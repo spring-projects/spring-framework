@@ -1,9 +1,7 @@
 [[languages]]
 = Language Support
-:toc: left
-:toclevels: 4
-:tabsize: 4
-:docinfo1:
+include::attributes.adoc[]
+include::page-layout.adoc[]
 
 include::languages/kotlin.adoc[leveloffset=+1]
 

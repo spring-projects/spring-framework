@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	private String extractSessionId(HttpHeaders headers) {
 		List<String> headerValues = headers.get("Set-Cookie");
 		assertThat(headerValues).isNotNull();
-		assertThat(headerValues.size()).isEqualTo(1);
+		assertThat(headerValues).hasSize(1);
 
 		for (String s : headerValues.get(0).split(";")){
 			if (s.startsWith("SESSION=")) {

@@ -8,12 +8,12 @@
 .Java
 ----
 	UriComponents uriComponents = UriComponentsBuilder
-			.fromUriString("https://example.com/hotels/{hotel}")  // <1>
-			.queryParam("q", "{q}")  // <2>
+			.fromUriString("https://example.com/hotels/{hotel}") // <1>
+			.queryParam("q", "{q}") // <2>
 			.encode() // <3>
 			.build(); // <4>
 
-	URI uri = uriComponents.expand("Westin", "123").toUri();  // <5>
+	URI uri = uriComponents.expand("Westin", "123").toUri(); // <5>
 ----
 <1> Static factory method with a URI template.
 <2> Add or replace URI components.
@@ -25,12 +25,12 @@
 .Kotlin
 ----
 	val uriComponents = UriComponentsBuilder
-			.fromUriString("https://example.com/hotels/{hotel}")  // <1>
-			.queryParam("q", "{q}")  // <2>
+			.fromUriString("https://example.com/hotels/{hotel}") // <1>
+			.queryParam("q", "{q}") // <2>
 			.encode() // <3>
 			.build() // <4>
 
-	val uri = uriComponents.expand("Westin", "123").toUri()  // <5>
+	val uri = uriComponents.expand("Westin", "123").toUri() // <5>
 ----
 <1> Static factory method with a URI template.
 <2> Add or replace URI components.

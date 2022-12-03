@@ -454,7 +454,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public RequestMatchResult match(HttpServletRequest request, String pattern) {
-		Assert.isNull(getPatternParser(), "This HandlerMapping requires a PathPattern");
+		Assert.state(getPatternParser() == null, "This HandlerMapping uses PathPatterns.");
 		RequestMappingInfo info = RequestMappingInfo.paths(pattern).options(this.config).build();
 		RequestMappingInfo match = info.getMatchingCondition(request);
 		return (match != null && match.getPatternsCondition() != null ?

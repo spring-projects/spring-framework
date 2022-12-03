@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class HeaderContentTypeResolverTests {
 		List<MediaType> mediaTypes = this.resolver.resolveMediaTypes(
 				MockServerWebExchange.from(MockServerHttpRequest.get("/").header("accept", header)));
 
-		assertThat(mediaTypes.size()).isEqualTo(4);
+		assertThat(mediaTypes).hasSize(4);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("text/html");
 		assertThat(mediaTypes.get(1).toString()).isEqualTo("text/x-c");
 		assertThat(mediaTypes.get(2).toString()).isEqualTo("text/x-dvi;q=0.8");

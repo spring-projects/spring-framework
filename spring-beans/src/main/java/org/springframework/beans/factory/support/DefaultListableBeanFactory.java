@@ -1342,11 +1342,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Class<?> type = descriptor.getDependencyType();
 			Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 			if (value != null) {
-				if (value instanceof String) {
-					String strVal = resolveEmbeddedValue((String) value);
+				if (value instanceof String strValue) {
+					String resolvedValue = resolveEmbeddedValue(strValue);
 					BeanDefinition bd = (beanName != null && containsBean(beanName) ?
 							getMergedBeanDefinition(beanName) : null);
-					value = evaluateBeanDefinitionString(strVal, bd);
+					value = evaluateBeanDefinitionString(resolvedValue, bd);
 				}
 				TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 				try {
@@ -2125,11 +2125,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return resolveStream(true);
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private Stream<Object> resolveStream(boolean ordered) {
 			DependencyDescriptor descriptorToUse = new StreamDependencyDescriptor(this.descriptor, ordered);
 			Object result = doResolveDependency(descriptorToUse, this.beanName, null, null);
-			return (result instanceof Stream ? (Stream<Object>) result : Stream.of(result));
+			return (result instanceof Stream stream ? stream : Stream.of(result));
 		}
 	}
 

@@ -66,7 +66,7 @@ class ChannelSendOperatorTests {
 		assertThat(signal).isNotNull();
 		assertThat(signal.isOnComplete()).as("Unexpected signal: " + signal).isTrue();
 
-		assertThat(this.writer.items.size()).isEqualTo(0);
+		assertThat(this.writer.items).isEmpty();
 		assertThat(this.writer.completed).isTrue();
 	}
 
@@ -78,7 +78,7 @@ class ChannelSendOperatorTests {
 		assertThat(signal).isNotNull();
 		assertThat(signal.isOnComplete()).as("Unexpected signal: " + signal).isTrue();
 
-		assertThat(this.writer.items.size()).isEqualTo(1);
+		assertThat(this.writer.items).hasSize(1);
 		assertThat(this.writer.items.get(0)).isEqualTo("one");
 		assertThat(this.writer.completed).isTrue();
 	}
@@ -93,7 +93,7 @@ class ChannelSendOperatorTests {
 		assertThat(signal).isNotNull();
 		assertThat(signal.isOnComplete()).as("Unexpected signal: " + signal).isTrue();
 
-		assertThat(this.writer.items.size()).isEqualTo(3);
+		assertThat(this.writer.items).hasSize(3);
 		assertThat(this.writer.items.get(0)).isEqualTo("one");
 		assertThat(this.writer.items.get(1)).isEqualTo("two");
 		assertThat(this.writer.items.get(2)).isEqualTo("three");
@@ -117,7 +117,7 @@ class ChannelSendOperatorTests {
 		assertThat(signal).isNotNull();
 		assertThat(signal.getThrowable()).as("Unexpected signal: " + signal).isSameAs(error);
 
-		assertThat(this.writer.items.size()).isEqualTo(3);
+		assertThat(this.writer.items).hasSize(3);
 		assertThat(this.writer.items.get(0)).isEqualTo("1");
 		assertThat(this.writer.items.get(1)).isEqualTo("2");
 		assertThat(this.writer.items.get(2)).isEqualTo("3");

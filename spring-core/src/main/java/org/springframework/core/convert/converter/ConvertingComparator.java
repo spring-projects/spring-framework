@@ -114,7 +114,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 
 		public ConversionServiceConverter(ConversionService conversionService, Class<? extends T> targetType) {
 			Assert.notNull(conversionService, "ConversionService must not be null");
-			Assert.notNull(targetType, "TargetType must not be null");
+			Assert.notNull(targetType, "'targetType' must not be null");
 			this.conversionService = conversionService;
 			this.targetType = targetType;
 		}

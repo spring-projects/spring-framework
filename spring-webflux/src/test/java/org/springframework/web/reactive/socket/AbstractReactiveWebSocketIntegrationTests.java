@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.socket.client.JettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNetty2WebSocketClient;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import org.springframework.web.reactive.socket.client.TomcatWebSocketClient;
@@ -70,7 +69,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.Tomcat
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer;
 
 /**
- * Base class for WebSocket integration tests. Subclasses must implement
+ * Base class for reactive WebSocket integration tests. Subclasses must implement
  * {@link #getWebConfigClass()} to return Spring config class with (server-side)
  * handler mappings to {@code WebSocketHandler}'s.
  *
@@ -78,7 +77,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.Undert
  * @author Sam Brannen
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
-abstract class AbstractWebSocketIntegrationTests {
+abstract class AbstractReactiveWebSocketIntegrationTests {
 
 	private static final File TMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
@@ -91,9 +90,10 @@ abstract class AbstractWebSocketIntegrationTests {
 
 	static Stream<Object[]> arguments() throws IOException {
 
+		@SuppressWarnings("removal")
 		WebSocketClient[] clients = new WebSocketClient[] {
 				new TomcatWebSocketClient(),
-				new JettyWebSocketClient(),
+				new org.springframework.web.reactive.socket.client.JettyWebSocketClient(),
 				new ReactorNettyWebSocketClient(),
 				new ReactorNetty2WebSocketClient(),
 				new UndertowWebSocketClient(Xnio.getInstance().createWorker(OptionMap.EMPTY))

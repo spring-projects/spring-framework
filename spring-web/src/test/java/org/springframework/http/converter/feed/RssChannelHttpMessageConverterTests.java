@@ -65,7 +65,7 @@ public class RssChannelHttpMessageConverterTests {
 		assertThat(result.getDescription()).isEqualTo("description");
 
 		List<?> items = result.getItems();
-		assertThat(items.size()).isEqualTo(2);
+		assertThat(items).hasSize(2);
 
 		Item item1 = (Item) items.get(0);
 		assertThat(item1.getTitle()).isEqualTo("title1");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		}
 		latch.await();
 
-		assertThat(results.size()).isEqualTo(10);
+		assertThat(results).hasSize(10);
 		results.forEach(r -> assertThat(r).isEqualTo(1)); // Only one method got invoked
 	}
 

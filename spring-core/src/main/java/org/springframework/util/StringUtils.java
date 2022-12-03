@@ -221,9 +221,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
-	 * @deprecated in favor of {@link String#strip()}
+	 * @deprecated since 6.0, in favor of {@link String#strip()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static String trimWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
@@ -277,9 +277,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
-	 * @deprecated in favor of {@link String#stripLeading()}
+	 * @deprecated since 6.0, in favor of {@link String#stripLeading()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static String trimLeadingWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
@@ -293,9 +293,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
-	 * @deprecated in favor of {@link String#stripTrailing()}
+	 * @deprecated since 6.0, in favor of {@link String#stripTrailing()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static String trimTrailingWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ public class ResourceHandlerRegistryTests {
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		PathResourceResolver resolver = (PathResourceResolver) resolvers.get(resolvers.size()-1);
 		Map<Resource, Charset> locationCharsets = resolver.getLocationCharsets();
-		assertThat(locationCharsets.size()).isEqualTo(1);
+		assertThat(locationCharsets).hasSize(1);
 		assertThat(locationCharsets.values().iterator().next()).isEqualTo(StandardCharsets.ISO_8859_1);
 	}
 

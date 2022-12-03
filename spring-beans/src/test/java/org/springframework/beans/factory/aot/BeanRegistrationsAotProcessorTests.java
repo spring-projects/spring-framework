@@ -62,9 +62,10 @@ class BeanRegistrationsAotProcessorTests {
 		beanFactory.registerAlias("test", "testAlias");
 		BeanRegistrationsAotContribution contribution = processor
 				.processAheadOfTime(beanFactory);
-		assertThat(contribution).extracting("aliases")
-				.asInstanceOf(InstanceOfAssertFactories.MAP).hasEntrySatisfying("test", value ->
-						assertThat(value).asList().singleElement().isEqualTo("testAlias"));
+		assertThat(contribution).extracting("registrations").asInstanceOf(InstanceOfAssertFactories.MAP)
+				.hasEntrySatisfying("test", registration ->
+						assertThat(registration).extracting("aliases").asInstanceOf(InstanceOfAssertFactories.ARRAY)
+								.singleElement().isEqualTo("testAlias"));
 	}
 
 }

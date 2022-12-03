@@ -708,7 +708,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param <T> the type of mime types that may be compared by this comparator
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static class SpecificityComparator<T extends MimeType> implements Comparator<T> {
 
 		@Override

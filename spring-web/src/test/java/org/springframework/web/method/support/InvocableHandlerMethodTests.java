@@ -61,8 +61,8 @@ public class InvocableHandlerMethodTests {
 
 		Object value = getInvocable(Integer.class, String.class).invokeForRequest(request, null);
 
-		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
-		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(0).getResolvedParameters()).hasSize(1);
+		assertThat(getStubResolver(1).getResolvedParameters()).hasSize(1);
 		assertThat(value).isEqualTo("99-value");
 		assertThat(getStubResolver(0).getResolvedParameters().get(0).getParameterName()).isEqualTo("intArg");
 		assertThat(getStubResolver(1).getResolvedParameters().get(0).getParameterName()).isEqualTo("stringArg");
@@ -75,8 +75,8 @@ public class InvocableHandlerMethodTests {
 
 		Object returnValue = getInvocable(Integer.class, String.class).invokeForRequest(request, null);
 
-		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
-		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(0).getResolvedParameters()).hasSize(1);
+		assertThat(getStubResolver(1).getResolvedParameters()).hasSize(1);
 		assertThat(returnValue).isEqualTo("null-null");
 	}
 

@@ -403,7 +403,7 @@ public class DefaultServerRequestTests {
 		Mono<MultiValueMap<String, String>> resultData = request.formData();
 		StepVerifier.create(resultData)
 				.consumeNextWith(formData -> {
-					assertThat(formData.size()).isEqualTo(2);
+					assertThat(formData).hasSize(2);
 					assertThat(formData.getFirst("foo")).isEqualTo("bar");
 					assertThat(formData.getFirst("baz")).isEqualTo("qux");
 				})
@@ -436,7 +436,7 @@ public class DefaultServerRequestTests {
 		Mono<MultiValueMap<String, Part>> resultData = request.multipartData();
 		StepVerifier.create(resultData)
 				.consumeNextWith(formData -> {
-					assertThat(formData.size()).isEqualTo(2);
+					assertThat(formData).hasSize(2);
 
 					Part part = formData.getFirst("foo");
 					boolean condition1 = part instanceof FormFieldPart;

@@ -21,7 +21,6 @@ import org.eclipse.jetty.client.HttpClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.JettyWebSocketTestServer;
-import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
 
@@ -42,9 +41,10 @@ class JettySockJsIntegrationTests extends AbstractSockJsIntegrationTests {
 		return new JettyWebSocketTestServer();
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	protected Transport createWebSocketTransport() {
-		return new WebSocketTransport(new JettyWebSocketClient());
+		return new WebSocketTransport(new org.springframework.web.socket.client.jetty.JettyWebSocketClient());
 	}
 
 	@Override

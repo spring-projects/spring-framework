@@ -55,7 +55,6 @@ import org.springframework.http.converter.smile.MappingJackson2SmileHttpMessageC
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
-import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -569,7 +568,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 			messageConverters.add(createConverterDefinition(ResourceHttpMessageConverter.class, source));
 			messageConverters.add(createConverterDefinition(ResourceRegionHttpMessageConverter.class, source));
-			messageConverters.add(createConverterDefinition(SourceHttpMessageConverter.class, source));
 			messageConverters.add(createConverterDefinition(AllEncompassingFormHttpMessageConverter.class, source));
 
 			if (romePresent) {

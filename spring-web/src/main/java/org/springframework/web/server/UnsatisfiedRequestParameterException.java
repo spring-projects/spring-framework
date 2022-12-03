@@ -40,7 +40,7 @@ public class UnsatisfiedRequestParameterException extends ServerWebInputExceptio
 		super(initReason(conditions, params), null, null, null, new Object[] {conditions});
 		this.conditions = conditions;
 		this.requestParams = params;
-		getBody().setDetail("Invalid request parameters.");
+		setDetail("Invalid request parameters.");
 	}
 
 	private static String initReason(List<String> conditions, MultiValueMap<String, String> queryParams) {

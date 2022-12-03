@@ -55,7 +55,8 @@ public abstract class MimeTypeUtils {
 	 * Comparator formally used by {@link #sortBySpecificity(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated(since = "6.0")
+	@SuppressWarnings("removal")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new MimeType.SpecificityComparator<>();
 
 	/**

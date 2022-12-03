@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ abstract class AbstractMockWebServerTests {
 	private MockResponse postRequest(RecordedRequest request, String expectedRequestContent,
 			String location, String contentType, byte[] responseBody) {
 
-		assertThat(request.getHeaders().values(CONTENT_LENGTH).size()).isEqualTo(1);
+		assertThat(request.getHeaders().values(CONTENT_LENGTH)).hasSize(1);
 		assertThat(Integer.parseInt(request.getHeader(CONTENT_LENGTH))).as("Invalid request content-length").isGreaterThan(0);
 		String requestContentType = request.getHeader(CONTENT_TYPE);
 		assertThat(requestContentType).as("No content-type").isNotNull();

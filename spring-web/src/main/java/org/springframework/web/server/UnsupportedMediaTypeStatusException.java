@@ -62,7 +62,7 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 		this.supportedMediaTypes = Collections.emptyList();
 		this.bodyType = null;
 		this.method = null;
-		getBody().setDetail("Could not parse Content-Type.");
+		setDetail("Could not parse Content-Type.");
 	}
 
 	/**

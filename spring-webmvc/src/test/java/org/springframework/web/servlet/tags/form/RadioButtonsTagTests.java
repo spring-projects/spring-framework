@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -310,7 +310,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 
 		int result = this.tag.doStartTag();
 		assertThat(result).isEqualTo(Tag.SKIP_BODY);
-		assertThat(editor.allProcessedValues.size()).isEqualTo(3);
+		assertThat(editor.allProcessedValues).hasSize(3);
 
 		String output = getOutput();
 
@@ -492,7 +492,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
 
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 		Node value1 = rootElement.selectSingleNode("//input[@value = 'VALUE_1']");
 		Node value2 = rootElement.selectSingleNode("//input[@value = 'VALUE_2']");
 		assertThat(rootElement.selectSingleNode("//label[@for = '" + value1.valueOf("@id") + "']").getText()).isEqualTo("TestEnum: VALUE_1");
@@ -517,7 +517,7 @@ public class RadioButtonsTagTests extends AbstractFormTagTests {
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
 
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 		Node value1 = rootElement.selectSingleNode("//input[@value = 'Value: VALUE_1']");
 		Node value2 = rootElement.selectSingleNode("//input[@value = 'Value: VALUE_2']");
 		assertThat(rootElement.selectSingleNode("//label[@for = '" + value1.valueOf("@id") + "']").getText()).isEqualTo("Label: VALUE_1");

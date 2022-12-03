@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.client.reactive;
 
 import java.util.AbstractSet;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -186,7 +185,6 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
 			}
-
 			@Override
 			public int size() {
 				return headers.size();
@@ -203,16 +201,16 @@ class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private final Enumeration<String> names = headers.getFieldNames();
+		private final Iterator<String> names = headers.getFieldNamesCollection().iterator();
 
 		@Override
 		public boolean hasNext() {
-			return this.names.hasMoreElements();
+			return this.names.hasNext();
 		}
 
 		@Override
 		public Entry<String, List<String>> next() {
-			return new HeaderEntry(this.names.nextElement());
+			return new HeaderEntry(this.names.next());
 		}
 	}
 

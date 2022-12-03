@@ -1357,12 +1357,12 @@ class CustomEditorTests {
 		bw.registerCustomEditor(Hashtable.class, new CustomMapEditor(Hashtable.class));
 
 		bw.setPropertyValue("vector", new String[] {"a", "b"});
-		assertThat(tb.getVector().size()).isEqualTo(2);
+		assertThat(tb.getVector()).hasSize(2);
 		assertThat(tb.getVector().get(0)).isEqualTo("a");
 		assertThat(tb.getVector().get(1)).isEqualTo("b");
 
 		bw.setPropertyValue("hashtable", Collections.singletonMap("foo", "bar"));
-		assertThat(tb.getHashtable().size()).isEqualTo(1);
+		assertThat(tb.getHashtable()).hasSize(1);
 		assertThat(tb.getHashtable().get("foo")).isEqualTo("bar");
 	}
 
@@ -1393,7 +1393,7 @@ class CustomEditorTests {
 			}
 		});
 		bw.setPropertyValue("array", new String[] {"a", "b"});
-		assertThat(tb.getArray().length).isEqualTo(2);
+		assertThat(tb.getArray()).hasSize(2);
 		assertThat(tb.getArray()[0].getName()).isEqualTo("a");
 		assertThat(tb.getArray()[1].getName()).isEqualTo("b");
 	}

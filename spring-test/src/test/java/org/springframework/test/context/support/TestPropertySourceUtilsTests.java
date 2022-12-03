@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,7 +215,7 @@ class TestPropertySourceUtilsTests {
 
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertThat(propertySources.size()).isEqualTo(0);
+		assertThat(propertySources).isEmpty();
 
 		String pair = "key = value";
 		ByteArrayResource resource = new ByteArrayResource(pair.getBytes(), "from inlined property: " + pair);
@@ -223,7 +223,7 @@ class TestPropertySourceUtilsTests {
 		given(resourceLoader.getResource(anyString())).willReturn(resource);
 
 		addPropertiesFilesToEnvironment(environment, resourceLoader, FOO_LOCATIONS);
-		assertThat(propertySources.size()).isEqualTo(1);
+		assertThat(propertySources).hasSize(1);
 		assertThat(environment.getProperty("key")).isEqualTo("value");
 	}
 
@@ -275,10 +275,10 @@ class TestPropertySourceUtilsTests {
 		ConfigurableEnvironment environment = new MockEnvironment();
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertThat(propertySources.size()).isEqualTo(0);
+		assertThat(propertySources).isEmpty();
 		addInlinedPropertiesToEnvironment(environment, asArray("  "));
-		assertThat(propertySources.size()).isEqualTo(1);
-		assertThat(((Map) propertySources.iterator().next().getSource()).size()).isEqualTo(0);
+		assertThat(propertySources).hasSize(1);
+		assertThat(((Map<?, ?>) propertySources.iterator().next().getSource())).isEmpty();
 	}
 
 	@Test

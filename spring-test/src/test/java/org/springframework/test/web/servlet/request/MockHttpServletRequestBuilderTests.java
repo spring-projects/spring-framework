@@ -345,7 +345,7 @@ class MockHttpServletRequestBuilderTests {
 		List<String> accept = Collections.list(request.getHeaders("Accept"));
 		List<MediaType> result = MediaType.parseMediaTypes(accept.get(0));
 
-		assertThat(accept.size()).isEqualTo(1);
+		assertThat(accept).hasSize(1);
 		assertThat(result.get(0).toString()).isEqualTo("text/html");
 		assertThat(result.get(1).toString()).isEqualTo("application/xml");
 	}
@@ -366,7 +366,7 @@ class MockHttpServletRequestBuilderTests {
 		List<String> contentTypes = Collections.list(request.getHeaders("Content-Type"));
 
 		assertThat(contentType).isEqualTo("text/html");
-		assertThat(contentTypes.size()).isEqualTo(1);
+		assertThat(contentTypes).hasSize(1);
 		assertThat(contentTypes.get(0)).isEqualTo("text/html");
 	}
 
@@ -379,7 +379,7 @@ class MockHttpServletRequestBuilderTests {
 		List<String> contentTypes = Collections.list(request.getHeaders("Content-Type"));
 
 		assertThat(contentType).isEqualTo("text/html");
-		assertThat(contentTypes.size()).isEqualTo(1);
+		assertThat(contentTypes).hasSize(1);
 		assertThat(contentTypes.get(0)).isEqualTo("text/html");
 	}
 
@@ -433,7 +433,7 @@ class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		List<String> headers = Collections.list(request.getHeaders("foo"));
 
-		assertThat(headers.size()).isEqualTo(2);
+		assertThat(headers).hasSize(2);
 		assertThat(headers.get(0)).isEqualTo("bar");
 		assertThat(headers.get(1)).isEqualTo("baz");
 	}
@@ -448,7 +448,7 @@ class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		List<String> headers = Collections.list(request.getHeaders("foo"));
 
-		assertThat(headers.size()).isEqualTo(2);
+		assertThat(headers).hasSize(2);
 		assertThat(headers.get(0)).isEqualTo("bar");
 		assertThat(headers.get(1)).isEqualTo("baz");
 		assertThat(request.getHeader("Content-Type")).isEqualTo(MediaType.APPLICATION_JSON.toString());
@@ -463,7 +463,7 @@ class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		Cookie[] cookies = request.getCookies();
 
-		assertThat(cookies.length).isEqualTo(2);
+		assertThat(cookies).hasSize(2);
 		assertThat(cookies[0].getName()).isEqualTo("foo");
 		assertThat(cookies[0].getValue()).isEqualTo("bar");
 		assertThat(cookies[1].getName()).isEqualTo("baz");

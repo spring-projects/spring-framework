@@ -26,6 +26,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -126,12 +127,12 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	 * back on the error's default message.
 	 * @since 6.0
 	 */
-	@SuppressWarnings("ConstantConditions")
 	public static List<String> errorsToStringList(
-			List<? extends ObjectError> errors, MessageSource source, Locale locale) {
+			List<? extends ObjectError> errors, @Nullable MessageSource source, Locale locale) {
 
-		return errorsToStringList(errors, error -> source.getMessage(
-				error.getCode(), error.getArguments(), error.getDefaultMessage(), locale));
+		return (source != null ?
+				errorsToStringList(errors, error -> source.getMessage(error, locale)) :
+				errorsToStringList(errors));
 	}
 
 	private static List<String> errorsToStringList(

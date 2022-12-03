@@ -214,7 +214,7 @@ public abstract class AbstractAopProxyTests {
 		Advised a1 = (Advised) p;
 		Advised a2 = (Advised) p2;
 		// Check we can manipulate state of p2
-		assertThat(a2.getAdvisors().length).isEqualTo(a1.getAdvisors().length);
+		assertThat(a2.getAdvisors()).hasSize(a1.getAdvisors().length);
 
 		// This should work as SerializablePerson is equal
 		assertThat(p2).as("Proxies should be equal, even after one was serialized").isEqualTo(p);
@@ -748,7 +748,7 @@ public abstract class AbstractAopProxyTests {
 			.withMessageContaining("frozen");
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertThat(proxied.getAge()).isEqualTo(target.getAge());
-		assertThat(((Advised) proxied).getAdvisors().length).isEqualTo(1);
+		assertThat(((Advised) proxied).getAdvisors()).hasSize(1);
 	}
 
 	/**
@@ -771,7 +771,7 @@ public abstract class AbstractAopProxyTests {
 			.withMessageContaining("frozen");
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertThat(proxied.getAge()).isEqualTo(target.getAge());
-		assertThat(advised.getAdvisors().length).isEqualTo(1);
+		assertThat(advised.getAdvisors()).hasSize(1);
 	}
 
 	@Test
@@ -790,13 +790,13 @@ public abstract class AbstractAopProxyTests {
 			.isThrownBy(() -> advised.removeAdvisor(0))
 			.withMessageContaining("frozen");
 		// Didn't get removed
-		assertThat(advised.getAdvisors().length).isEqualTo(1);
+		assertThat(advised.getAdvisors()).hasSize(1);
 		pc.setFrozen(false);
 		// Can now remove it
 		advised.removeAdvisor(0);
 		// Check it still works: proxy factory state shouldn't have been corrupted
 		assertThat(proxied.getAge()).isEqualTo(target.getAge());
-		assertThat(advised.getAdvisors().length).isEqualTo(0);
+		assertThat(advised.getAdvisors()).isEmpty();
 	}
 
 	@Test
@@ -1085,7 +1085,7 @@ public abstract class AbstractAopProxyTests {
 		it.setName(name2);
 		// NameReverter saved it back
 		assertThat(it.getName()).isEqualTo(name1);
-		assertThat(saver.names.size()).isEqualTo(2);
+		assertThat(saver.names).hasSize(2);
 		assertThat(saver.names.get(0)).isEqualTo(name2);
 		assertThat(saver.names.get(1)).isEqualTo(name1);
 	}
@@ -1173,7 +1173,7 @@ public abstract class AbstractAopProxyTests {
 		IOther proxyA = (IOther) createProxy(pfa);
 		IOther proxyB = (IOther) createProxy(pfb);
 
-		assertThat(pfb.getAdvisors().length).isEqualTo(pfa.getAdvisors().length);
+		assertThat(pfb.getAdvisors()).hasSize(pfa.getAdvisors().length);
 		assertThat(b).isEqualTo(a);
 		assertThat(i2).isEqualTo(i1);
 		assertThat(proxyB).isEqualTo(proxyA);

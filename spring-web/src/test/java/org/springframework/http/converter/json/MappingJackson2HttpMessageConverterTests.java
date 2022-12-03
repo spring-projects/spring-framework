@@ -268,7 +268,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		List<MyBean> results = (List<MyBean>) converter.read(List.class, inputMessage);
-		assertThat(results.size()).isEqualTo(1);
+		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
 		assertThat(result.getNumber()).isEqualTo(42);
@@ -299,7 +299,7 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), null, inputMessage);
-		assertThat(results.size()).isEqualTo(1);
+		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
 		assertThat(result.getNumber()).isEqualTo(42);
@@ -331,7 +331,7 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), null, inputMessage);
-		assertThat(results.size()).isEqualTo(1);
+		assertThat(results).hasSize(1);
 		MyBean result = results.get(0);
 		assertThat(result.getString()).isEqualTo("Foo");
 		assertThat(result.getNumber()).isEqualTo(42);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,11 +123,11 @@ public class ServerHttpRequestDecorator implements ServerHttpRequest {
 	 * @since 5.3.3
 	 */
 	public static <T> T getNativeRequest(ServerHttpRequest request) {
-		if (request instanceof AbstractServerHttpRequest) {
-			return ((AbstractServerHttpRequest) request).getNativeRequest();
+		if (request instanceof AbstractServerHttpRequest abstractServerHttpRequest) {
+			return abstractServerHttpRequest.getNativeRequest();
 		}
-		else if (request instanceof ServerHttpRequestDecorator) {
-			return getNativeRequest(((ServerHttpRequestDecorator) request).getDelegate());
+		else if (request instanceof ServerHttpRequestDecorator serverHttpRequestDecorator) {
+			return getNativeRequest(serverHttpRequestDecorator.getDelegate());
 		}
 		else {
 			throw new IllegalArgumentException(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,11 +74,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory clbf)) {
 			throw new IllegalArgumentException(
 					"DefaultLifecycleProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
 		}
-		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		this.beanFactory = clbf;
 	}
 
 	private ConfigurableListableBeanFactory getBeanFactory() {
@@ -143,7 +143,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		Map<Integer, LifecycleGroup> phases = new TreeMap<>();
 
 		lifecycleBeans.forEach((beanName, bean) -> {
-			if (!autoStartupOnly || (bean instanceof SmartLifecycle && ((SmartLifecycle) bean).isAutoStartup())) {
+			if (!autoStartupOnly || (bean instanceof SmartLifecycle smartLifecycle && smartLifecycle.isAutoStartup())) {
 				int phase = getPhase(bean);
 				phases.computeIfAbsent(
 						phase,
@@ -170,7 +170,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				doStart(lifecycleBeans, dependency, autoStartupOnly);
 			}
 			if (!bean.isRunning() &&
-					(!autoStartupOnly || !(bean instanceof SmartLifecycle) || ((SmartLifecycle) bean).isAutoStartup())) {
+					(!autoStartupOnly || !(bean instanceof SmartLifecycle smartLifecycle) || smartLifecycle.isAutoStartup())) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Starting bean '" + beanName + "' of type [" + bean.getClass().getName() + "]");
 				}
@@ -225,13 +225,13 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			try {
 				if (bean.isRunning()) {
-					if (bean instanceof SmartLifecycle) {
+					if (bean instanceof SmartLifecycle smartLifecycle) {
 						if (logger.isTraceEnabled()) {
 							logger.trace("Asking bean '" + beanName + "' of type [" +
 									bean.getClass().getName() + "] to stop");
 						}
 						countDownBeanNames.add(beanName);
-						((SmartLifecycle) bean).stop(() -> {
+						smartLifecycle.stop(() -> {
 							latch.countDown();
 							countDownBeanNames.remove(beanName);
 							if (logger.isDebugEnabled()) {
@@ -283,8 +283,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 					(!isFactoryBean || matchesBeanType(Lifecycle.class, beanNameToCheck, beanFactory))) ||
 					matchesBeanType(SmartLifecycle.class, beanNameToCheck, beanFactory)) {
 				Object bean = beanFactory.getBean(beanNameToCheck);
-				if (bean != this && bean instanceof Lifecycle) {
-					beans.put(beanNameToRegister, (Lifecycle) bean);
+				if (bean != this && bean instanceof Lifecycle lifecycle) {
+					beans.put(beanNameToRegister, lifecycle);
 				}
 			}
 		}
@@ -306,7 +306,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @see SmartLifecycle
 	 */
 	protected int getPhase(Lifecycle bean) {
-		return (bean instanceof Phased ? ((Phased) bean).getPhase() : 0);
+		return (bean instanceof Phased phased ? phased.getPhase() : 0);
 	}
 
 

@@ -230,7 +230,7 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		Cookie[] cookies = actualRequest.getCookies();
-		assertThat(cookies.length).isEqualTo(1);
+		assertThat(cookies).hasSize(1);
 		assertThat(cookies[0].getName()).isEqualTo("name");
 		assertThat(cookies[0].getValue()).isEqualTo("value");
 	}
@@ -242,7 +242,7 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		Cookie[] cookies = actualRequest.getCookies();
-		assertThat(cookies.length).isEqualTo(2);
+		assertThat(cookies).hasSize(2);
 		Cookie cookie = cookies[0];
 		assertThat(cookie.getName()).isEqualTo("name");
 		assertThat(cookie.getValue()).isEqualTo("value");
@@ -403,7 +403,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameterMap()).hasSize(1);
 		assertThat(actualRequest.getParameter("name")).isEqualTo("");
 	}
 
@@ -413,7 +413,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameterMap()).hasSize(1);
 		assertThat(actualRequest.getParameter("name")).isEqualTo("");
 	}
 
@@ -423,7 +423,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(actualRequest.getParameterMap().size()).isEqualTo(1);
+		assertThat(actualRequest.getParameterMap()).hasSize(1);
 		assertThat(actualRequest.getParameter("name")).isEqualTo(" ");
 	}
 
@@ -857,7 +857,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		Cookie[] cookies = mockMvc.perform(requestBuilder).andReturn().getRequest().getCookies();
 		assertThat(cookies).isNotNull();
-		assertThat(cookies.length).isEqualTo(1);
+		assertThat(cookies).hasSize(1);
 		Cookie cookie = cookies[0];
 		assertThat(cookie.getName()).isEqualTo(cookieName);
 		assertThat(cookie.getValue()).isEqualTo(cookieValue);

@@ -25,7 +25,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,6 +45,7 @@ import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.ClassHintUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -1018,10 +1018,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		private void registerProxyIfNecessary(RuntimeHints runtimeHints, DependencyDescriptor dependencyDescriptor) {
 			if (this.candidateResolver != null) {
-				Class<?> proxyType =
+				Class<?> proxyClass =
 						this.candidateResolver.getLazyResolutionProxyClass(dependencyDescriptor, null);
-				if (proxyType != null && Proxy.isProxyClass(proxyType)) {
-					runtimeHints.proxies().registerJdkProxy(proxyType.getInterfaces());
+				if (proxyClass != null) {
+					ClassHintUtils.registerProxyIfNecessary(proxyClass, runtimeHints);
 				}
 			}
 		}

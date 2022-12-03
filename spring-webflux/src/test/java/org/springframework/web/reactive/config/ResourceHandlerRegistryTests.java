@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ class ResourceHandlerRegistryTests {
 		this.registration.setMediaTypes(Collections.singletonMap("bar", mediaType));
 		ResourceWebHandler requestHandler = this.registration.getRequestHandler();
 
-		assertThat(requestHandler.getMediaTypes()).size().isEqualTo(1);
+		assertThat(requestHandler.getMediaTypes()).hasSize(1);
 		assertThat(requestHandler.getMediaTypes()).containsEntry("bar", mediaType);
 	}
 
@@ -161,7 +161,7 @@ class ResourceHandlerRegistryTests {
 		assertThat(resolvers.get(1)).isInstanceOf(PathResourceResolver.class);
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
-		assertThat(transformers).hasSize(0);
+		assertThat(transformers).isEmpty();
 	}
 
 	@Test

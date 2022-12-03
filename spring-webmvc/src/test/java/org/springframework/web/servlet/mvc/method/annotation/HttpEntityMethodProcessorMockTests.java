@@ -832,14 +832,14 @@ public class HttpEntityMethodProcessorMockTests {
 			assertResponseBody(body);
 		}
 		else {
-			assertThat(servletResponse.getContentAsByteArray().length).isEqualTo(0);
+			assertThat(servletResponse.getContentAsByteArray()).isEmpty();
 		}
 		if (etag != null) {
-			assertThat(servletResponse.getHeaderValues(HttpHeaders.ETAG).size()).isEqualTo(1);
+			assertThat(servletResponse.getHeaderValues(HttpHeaders.ETAG)).hasSize(1);
 			assertThat(servletResponse.getHeader(HttpHeaders.ETAG)).isEqualTo(etag);
 		}
 		if (lastModified != -1) {
-			assertThat(servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size()).isEqualTo(1);
+			assertThat(servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED)).hasSize(1);
 			assertThat((servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000)).isEqualTo((lastModified / 1000));
 		}
 	}

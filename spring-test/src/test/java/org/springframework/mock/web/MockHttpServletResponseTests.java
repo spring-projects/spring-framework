@@ -252,7 +252,7 @@ class MockHttpServletResponseTests {
 		response.addHeader(headerName, "value1");
 		Collection<String> responseHeaders = response.getHeaderNames();
 		assertThat(responseHeaders).isNotNull();
-		assertThat(responseHeaders.size()).isEqualTo(1);
+		assertThat(responseHeaders).hasSize(1);
 		assertThat(responseHeaders.iterator().next()).as("HTTP header casing not being preserved").isEqualTo(headerName);
 	}
 
@@ -280,7 +280,7 @@ class MockHttpServletResponseTests {
 		int size = response.getBufferSize();
 		response.getOutputStream().write(new byte[size]);
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo((size + 1));
+		assertThat(response.getContentAsByteArray()).hasSize((size + 1));
 	}
 
 	@Test
@@ -290,7 +290,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCommitted()).isFalse();
 		response.flushBuffer();
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
+		assertThat(response.getContentAsByteArray()).hasSize(1);
 	}
 
 	@Test
@@ -303,7 +303,7 @@ class MockHttpServletResponseTests {
 		Arrays.fill(data, 'p');
 		response.getWriter().write(data);
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo((size + 1));
+		assertThat(response.getContentAsByteArray()).hasSize((size + 1));
 	}
 
 	@Test
@@ -313,7 +313,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCommitted()).isFalse();
 		response.getOutputStream().flush();
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
+		assertThat(response.getContentAsByteArray()).hasSize(1);
 	}
 
 	@Test
@@ -323,7 +323,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCommitted()).isFalse();
 		response.getWriter().flush();
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
+		assertThat(response.getContentAsByteArray()).hasSize(1);
 	}
 
 	@Test // SPR-16683
@@ -333,7 +333,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCommitted()).isFalse();
 		response.getWriter().close();
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
+		assertThat(response.getContentAsByteArray()).hasSize(1);
 	}
 
 	@Test  // gh-23219

@@ -74,7 +74,7 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 	 * @throws AssertionError if any of the recorded invocations has no match in the provided hints
 	 */
 	public void match(RuntimeHints runtimeHints) {
-		Assert.notNull(runtimeHints, "RuntimeHints should not be null");
+		Assert.notNull(runtimeHints, "RuntimeHints must not be null");
 		configureRuntimeHints(runtimeHints);
 		List<RecordedInvocation> noMatchInvocations =
 				this.actual.recordedInvocations().filter(invocation -> !invocation.matches(runtimeHints)).toList();
@@ -84,7 +84,7 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 	}
 
 	public ListAssert<RecordedInvocation> notMatching(RuntimeHints runtimeHints) {
-		Assert.notNull(runtimeHints, "RuntimeHints should not be null");
+		Assert.notNull(runtimeHints, "RuntimeHints must not be null");
 		configureRuntimeHints(runtimeHints);
 		return ListAssert.assertThatStream(this.actual.recordedInvocations()
 				.filter(invocation -> !invocation.matches(runtimeHints)));

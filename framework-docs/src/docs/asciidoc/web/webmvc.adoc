@@ -1,18 +1,17 @@
 [[mvc]]
 :chapter: mvc
 = Spring Web MVC
-:doc-spring-security: {doc-root}/spring-security/reference
 
 Spring Web MVC is the original web framework built on the Servlet API and has been included
-in the Spring Framework from the very beginning. The formal name, "`Spring Web MVC,`"
+in the Spring Framework from the very beginning. The formal name, "Spring Web MVC,"
 comes from the name of its source module
 ({spring-framework-main-code}/spring-webmvc[`spring-webmvc`]),
-but it is more commonly known as "`Spring MVC`".
+but it is more commonly known as "Spring MVC".
 
 Parallel to Spring Web MVC, Spring Framework 5.0 introduced a reactive-stack web framework
-whose name, "`Spring WebFlux,`" is also based on its source module
+whose name, "Spring WebFlux," is also based on its source module
 ({spring-framework-main-code}/spring-webflux[`spring-webflux`]).
-This section covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next section>>
+This chapter covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next chapter>>
 covers Spring WebFlux.
 
 For baseline information and compatibility with Servlet container and Jakarta EE version
@@ -1142,9 +1141,10 @@ request with a simple request parameter.
 [.small]#<<web-reactive.adoc#webflux-multipart, WebFlux>>#
 
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
-for parsing multipart requests including file uploads. There is one implementation
-based on https://commons.apache.org/proper/commons-fileupload[Commons FileUpload] and
-another based on Servlet multipart request parsing.
+for parsing multipart requests including file uploads. There is a container-based
+`StandardServletMultipartResolver` implementation for Servlet multipart request parsing.
+Note that the outdated `CommonsMultipartResolver` based on Apache Commons FileUpload is
+not available anymore, as of Spring Framework 6.0 with its new Servlet 5.0+ baseline.
 
 To enable multipart handling, you need to declare a `MultipartResolver` bean in your
 `DispatcherServlet` Spring configuration with a name of `multipartResolver`.
@@ -1152,26 +1152,6 @@ The `DispatcherServlet` detects it and applies it to the incoming request. When 
 with a content type of `multipart/form-data` is received, the resolver parses the
 content wraps the current `HttpServletRequest` as a `MultipartHttpServletRequest` to
 provide access to resolved files in addition to exposing parts as request parameters.
-
-
-[[mvc-multipart-resolver-commons]]
-==== Apache Commons `FileUpload`
-
-To use Apache Commons `FileUpload`, you can configure a bean of type
-`CommonsMultipartResolver` with a name of `multipartResolver`. You also need to have
-the `commons-fileupload` jar as a dependency on your classpath.
-
-This resolver variant delegates to a local library within the application, providing
-maximum portability across Servlet containers. As an alternative, consider standard
-Servlet multipart resolution through the container's own parser as discussed below.
-
-[NOTE]
-====
-Commons FileUpload traditionally applies to POST requests only but accepts any
-`multipart/` content type. See the
-{api-spring-framework}/web/multipart/commons/CommonsMultipartResolver.html[`CommonsMultipartResolver`]
-javadoc for details and configuration options.
-====
 
 
 [[mvc-multipart-resolver-standard]]
@@ -1700,8 +1680,8 @@ register support for any other data type.
 See <<mvc-ann-typeconversion>> and <<mvc-ann-initbinder>>.
 
 You can explicitly name URI variables (for example, `@PathVariable("customId")`), but you can
-leave that detail out if the names are the same and your code is compiled with debugging
-information or with the `-parameters` compiler flag on Java 8.
+leave that detail out if the names are the same and your code is compiled with the `-parameters`
+compiler flag.
 
 The syntax `{varName:regex}` declares a URI variable with a regular expression that has
 syntax of `{varName:regex}`. For example, given URL `"/spring-web-3.0.5.jar"`, the following method
@@ -1938,6 +1918,7 @@ You can also use the same with request header conditions, as the following examp
 		// ...
 	}
 ----
+<1> Testing whether `myHeader` equals `myValue`.
 
 TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is better to use
 <<mvc-ann-requestmapping-consumes, consumes>> and <<mvc-ann-requestmapping-produces, produces>>
@@ -2661,19 +2642,21 @@ query parameters and form fields. The following example shows how to do so:
 .Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(@ModelAttribute Pet pet) {
+	public String processSubmit(@ModelAttribute Pet pet) { // <1>
 		// method logic...
 	}
 ----
+<1> Bind an instance of `Pet`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 @PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-fun processSubmit(@ModelAttribute pet: Pet): String {
+fun processSubmit(@ModelAttribute pet: Pet): String { // <1>
 	// method logic...
 }
 ----
+<1> Bind an instance of `Pet`.
 
 The `Pet` instance above is sourced in one of the following ways:
 
@@ -2701,18 +2684,21 @@ could load the `Account` from a data store:
 .Java
 ----
 	@PutMapping("/accounts/{account}")
-	public String save(@ModelAttribute("account") Account account) {
+	public String save(@ModelAttribute("account") Account account) { // <1>
 		// ...
 	}
 ----
+<1> Bind an instance of `Account` using an explicit attribute name.
+
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@PutMapping("/accounts/{account}")
-	fun save(@ModelAttribute("account") account: Account): String {
+	fun save(@ModelAttribute("account") account: Account): String { // <1>
 		// ...
 	}
 ----
+<1> Bind an instance of `Account` using an explicit attribute name.
 
 After the model attribute instance is obtained, data binding is applied. The
 `WebDataBinder` class matches Servlet request parameter names (query parameters and form
@@ -2826,6 +2812,7 @@ You can automatically apply validation after data binding by adding the
 		// ...
 	}
 ----
+<1> Validate the `Pet` instance.
 
 Note that using `@ModelAttribute` is optional (for example, to set its attributes).
 By default, any argument that is not a simple value type (as determined by
@@ -2945,6 +2932,7 @@ as the following example shows:
 		// ...
 	}
 ----
+<1> Using a `@SessionAttribute` annotation.
 
 For use cases that require adding or removing session attributes, consider injecting
 `org.springframework.web.context.request.WebRequest` or
@@ -3559,8 +3547,6 @@ to the model, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	import org.springframework.ui.set
-
 	@Controller
 	class UserController : AbstractController() {
 
@@ -4449,13 +4435,7 @@ as the following example shows:
 ----
 	@PostMapping
 	public Callable<String> processUpload(final MultipartFile file) {
-
-		return new Callable<String>() {
-			public String call() throws Exception {
-				// ...
-				return "someView";
-			}
-		};
+		return () -> "someView";
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -4792,7 +4772,7 @@ are written to the Reactor `Context` as key-value pairs, using the key assigned 
 For other asynchronous handling scenarios, you can use the Context Propagation library
 directly. For example:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes"]
 .Java
 ----
 	// Capture ThreadLocal values from the main thread ...
@@ -5073,10 +5053,10 @@ The https://spring.io/projects/spring-security[Spring Security] project provides
 for protecting web applications from malicious exploits. See the Spring Security
 reference documentation, including:
 
-* {doc-spring-security}/servlet/integrations/mvc.html[Spring MVC Security]
-* {doc-spring-security}/servlet/test/mockmvc/setup.html[Spring MVC Test Support]
-* {doc-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
-* {doc-spring-security}/features/exploits/headers.html[Security Response Headers]
+* {docs-spring-security}/servlet/integrations/mvc.html[Spring MVC Security]
+* {docs-spring-security}/servlet/test/mockmvc/setup.html[Spring MVC Test Support]
+* {docs-spring-security}/features/exploits/csrf.html#csrf-protection[CSRF protection]
+* {docs-spring-security}/features/exploits/headers.html[Security Response Headers]
 
 https://hdiv.org/[HDIV] is another web security framework that integrates with Spring MVC.
 
@@ -5164,6 +5144,7 @@ Controllers can add explicit support for HTTP caching. We recommended doing so, 
 against conditional request headers. A controller can add an `ETag` header and `Cache-Control`
 settings to a `ResponseEntity`, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5196,6 +5177,7 @@ settings to a `ResponseEntity`, as the following example shows:
 				.body(book)
 	}
 ----
+--
 
 The preceding example sends a 304 (NOT_MODIFIED) response with an empty body if the comparison
 to the conditional request headers indicates that the content has not changed. Otherwise, the
@@ -5204,6 +5186,7 @@ to the conditional request headers indicates that the content has not changed. O
 You can also make the check against conditional request headers in the controller,
 as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -5243,6 +5226,7 @@ as the following example shows:
 <1> Application-specific calculation.
 <2> The response has been set to 304 (NOT_MODIFIED) -- no further processing.
 <3> Continue with the request processing.
+--
 
 
 There are three variants for checking conditional requests against `eTag` values, `lastModified`
@@ -5914,7 +5898,6 @@ The MVC namespace provides dedicated elements. The following example works with 
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
-
 	<mvc:view-resolvers>
 		<mvc:content-negotiation>
 			<mvc:default-views>
@@ -5927,7 +5910,6 @@ The MVC namespace provides dedicated elements. The following example works with 
 	<mvc:freemarker-configurer>
 		<mvc:template-loader-path location="/freemarker"/>
 	</mvc:freemarker-configurer>
-
 ----
 
 In Java configuration, you can add the respective `Configurer` bean,

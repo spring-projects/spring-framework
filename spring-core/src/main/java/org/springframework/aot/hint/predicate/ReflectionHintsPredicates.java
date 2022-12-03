@@ -51,6 +51,7 @@ public class ReflectionHintsPredicates {
 	ReflectionHintsPredicates() {
 	}
 
+
 	/**
 	 * Return a predicate that checks whether a reflection hint is registered for the given type.
 	 * <p>The returned type exposes additional methods that refine the predicate behavior.
@@ -58,7 +59,7 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 */
 	public TypeHintPredicate onType(TypeReference typeReference) {
-		Assert.notNull(typeReference, "'typeReference' should not be null");
+		Assert.notNull(typeReference, "'typeReference' must not be null");
 		return new TypeHintPredicate(typeReference);
 	}
 
@@ -69,7 +70,7 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 */
 	public TypeHintPredicate onType(Class<?> type) {
-		Assert.notNull(type, "'type' should not be null");
+		Assert.notNull(type, "'type' must not be null");
 		return new TypeHintPredicate(TypeReference.of(type));
 	}
 
@@ -81,7 +82,7 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 */
 	public ConstructorHintPredicate onConstructor(Constructor<?> constructor) {
-		Assert.notNull(constructor, "'constructor' should not be null");
+		Assert.notNull(constructor, "'constructor' must not be null");
 		return new ConstructorHintPredicate(constructor);
 	}
 
@@ -93,7 +94,7 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 */
 	public MethodHintPredicate onMethod(Method method) {
-		Assert.notNull(method, "'method' should not be null");
+		Assert.notNull(method, "'method' must not be null");
 		return new MethodHintPredicate(method);
 	}
 
@@ -108,8 +109,8 @@ public class ReflectionHintsPredicates {
 	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
 	 */
 	public MethodHintPredicate onMethod(Class<?> type, String methodName) {
-		Assert.notNull(type, "'type' should not be null");
-		Assert.hasText(methodName, "'methodName' should not be empty");
+		Assert.notNull(type, "'type' must not be null");
+		Assert.hasText(methodName, "'methodName' must not be empty");
 		return new MethodHintPredicate(getMethod(type, methodName));
 	}
 
@@ -125,8 +126,8 @@ public class ReflectionHintsPredicates {
 	 * @throws IllegalArgumentException if the method cannot be found or if multiple methods are found with the same name.
 	 */
 	public MethodHintPredicate onMethod(String className, String methodName) throws ClassNotFoundException {
-		Assert.hasText(className, "'className' should not be empty");
-		Assert.hasText(methodName, "'methodName' should not be empty");
+		Assert.hasText(className, "'className' must not be empty");
+		Assert.hasText(methodName, "'methodName' must not be empty");
 		return onMethod(Class.forName(className), methodName);
 	}
 
@@ -155,8 +156,8 @@ public class ReflectionHintsPredicates {
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
 	 */
 	public FieldHintPredicate onField(Class<?> type, String fieldName) {
-		Assert.notNull(type, "'type' should not be null");
-		Assert.hasText(fieldName, "'fieldName' should not be empty");
+		Assert.notNull(type, "'type' must not be null");
+		Assert.hasText(fieldName, "'fieldName' must not be empty");
 		Field field = ReflectionUtils.findField(type, fieldName);
 		if (field == null) {
 			throw new IllegalArgumentException("No field named '%s' on class %s".formatted(fieldName, type.getName()));
@@ -176,8 +177,8 @@ public class ReflectionHintsPredicates {
 	 * @throws IllegalArgumentException if a field cannot be found with the given name.
 	 */
 	public FieldHintPredicate onField(String className, String fieldName) throws ClassNotFoundException {
-		Assert.hasText(className, "'className' should not be empty");
-		Assert.hasText(fieldName, "'fieldName' should not be empty");
+		Assert.hasText(className, "'className' must not be empty");
+		Assert.hasText(fieldName, "'fieldName' must not be empty");
 		return onField(Class.forName(className), fieldName);
 	}
 
@@ -189,7 +190,7 @@ public class ReflectionHintsPredicates {
 	 * @return the {@link RuntimeHints} predicate
 	 */
 	public FieldHintPredicate onField(Field field) {
-		Assert.notNull(field, "'field' should not be null");
+		Assert.notNull(field, "'field' must not be null");
 		return new FieldHintPredicate(field);
 	}
 
@@ -218,7 +219,7 @@ public class ReflectionHintsPredicates {
 		 * @return the refined {@link RuntimeHints} predicate
 		 */
 		public Predicate<RuntimeHints> withMemberCategory(MemberCategory memberCategory) {
-			Assert.notNull(memberCategory, "'memberCategory' should not be null");
+			Assert.notNull(memberCategory, "'memberCategory' must not be null");
 			return this.and(hints -> getTypeHint(hints).getMemberCategories().contains(memberCategory));
 		}
 
@@ -228,7 +229,7 @@ public class ReflectionHintsPredicates {
 		 * @return the refined {@link RuntimeHints} predicate
 		 */
 		public Predicate<RuntimeHints> withMemberCategories(MemberCategory... memberCategories) {
-			Assert.notEmpty(memberCategories, "'memberCategories' should not be empty");
+			Assert.notEmpty(memberCategories, "'memberCategories' must not be empty");
 			return this.and(hints -> getTypeHint(hints).getMemberCategories().containsAll(Arrays.asList(memberCategories)));
 		}
 
@@ -238,7 +239,7 @@ public class ReflectionHintsPredicates {
 		 * @return the refined {@link RuntimeHints} predicate
 		 */
 		public Predicate<RuntimeHints> withAnyMemberCategory(MemberCategory... memberCategories) {
-			Assert.notEmpty(memberCategories, "'memberCategories' should not be empty");
+			Assert.notEmpty(memberCategories, "'memberCategories' must not be empty");
 			return this.and(hints -> Arrays.stream(memberCategories)
 					.anyMatch(memberCategory -> getTypeHint(hints).getMemberCategories().contains(memberCategory)));
 		}

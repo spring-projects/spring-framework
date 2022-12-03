@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.web.server.adapter;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -73,9 +71,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
 			"org.springframework.web.server.DisconnectedClient";
 
-	 // Similar declaration exists in AbstractSockJsSession..
-	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS = new HashSet<>(
-			Arrays.asList("AbortedException", "ClientAbortException", "EOFException", "EofException"));
+	 // Similar declaration exists in AbstractSockJsSession.
+	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
+			Set.of("AbortedException", "ClientAbortException", "EOFException", "EofException");
 
 
 	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);

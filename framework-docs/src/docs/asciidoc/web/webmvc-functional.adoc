@@ -40,7 +40,7 @@ as the following example shows:
 	PersonRepository repository = ...
 	PersonHandler handler = new PersonHandler(repository);
 
-	RouterFunction<ServerResponse> route = route()
+	RouterFunction<ServerResponse> route = route() // <1>
 		.GET("/person/{id}", accept(APPLICATION_JSON), handler::getPerson)
 		.GET("/person", accept(APPLICATION_JSON), handler::listPeople)
 		.POST("/person", handler::createPerson)
@@ -64,6 +64,7 @@ as the following example shows:
 		}
 	}
 ----
+<1> Create router using `route()`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
@@ -289,6 +290,7 @@ allows you to send Strings, or other objects as JSON. For example:
 
 We can write a handler function as a lambda, as the following example shows:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -301,6 +303,7 @@ HandlerFunction<ServerResponse> helloWorld =
 val helloWorld: (ServerRequest) -> ServerResponse =
   { ServerResponse.ok().body("Hello World") }
 ----
+--
 
 That is convenient, but in an application we need multiple functions, and multiple inline
 lambda's can get messy.
@@ -308,6 +311,7 @@ Therefore, it is useful to group related handler functions together into a handl
 has a similar role as  `@Controller` in an annotation-based application.
 For example, the following class exposes a reactive `Person` repository:
 
+--
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
@@ -383,6 +387,7 @@ JSON.
 <3> `getPerson` is a handler function that returns a single person, identified by the `id` path
 variable. We retrieve that `Person` from the repository and create a JSON response, if it is
 found. If it is not found, we return a 404 Not Found response.
+--
 
 
 [[webmvc-fn-handler-validation]]
@@ -623,13 +628,14 @@ RouterFunction<ServerResponse> route = route()
 	import org.springframework.web.servlet.function.router
 
 	val route = router {
-		"/person".nest {
+		"/person".nest { // <1>
 			GET("/{id}", accept(APPLICATION_JSON), handler::getPerson)
 			GET(accept(APPLICATION_JSON), handler::listPeople)
 			POST(handler::createPerson)
 		}
 	}
 ----
+<1> Using `nest` DSL.
 
 Though path-based nesting is the most common, you can nest on any kind of predicate by using
 the `nest` method on the builder.

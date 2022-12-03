@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,18 +61,18 @@ public class ServletWebRequestTests {
 		servletRequest.addParameter("param2", "value2a");
 
 		assertThat(request.getParameter("param1")).isEqualTo("value1");
-		assertThat(request.getParameterValues("param1").length).isEqualTo(1);
+		assertThat(request.getParameterValues("param1")).hasSize(1);
 		assertThat(request.getParameterValues("param1")[0]).isEqualTo("value1");
 		assertThat(request.getParameter("param2")).isEqualTo("value2");
-		assertThat(request.getParameterValues("param2").length).isEqualTo(2);
+		assertThat(request.getParameterValues("param2")).hasSize(2);
 		assertThat(request.getParameterValues("param2")[0]).isEqualTo("value2");
 		assertThat(request.getParameterValues("param2")[1]).isEqualTo("value2a");
 
 		Map<String, String[]> paramMap = request.getParameterMap();
-		assertThat(paramMap.size()).isEqualTo(2);
-		assertThat(paramMap.get("param1").length).isEqualTo(1);
+		assertThat(paramMap).hasSize(2);
+		assertThat(paramMap.get("param1")).hasSize(1);
 		assertThat(paramMap.get("param1")[0]).isEqualTo("value1");
-		assertThat(paramMap.get("param2").length).isEqualTo(2);
+		assertThat(paramMap.get("param2")).hasSize(2);
 		assertThat(paramMap.get("param2")[0]).isEqualTo("value2");
 		assertThat(paramMap.get("param2")[1]).isEqualTo("value2a");
 	}

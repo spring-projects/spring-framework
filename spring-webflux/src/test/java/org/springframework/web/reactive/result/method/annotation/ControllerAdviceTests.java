@@ -107,7 +107,7 @@ public class ControllerAdviceTests {
 
 		Model model = handle(adapter, controller, "handle").getModel();
 
-		assertThat(model.asMap().size()).isEqualTo(2);
+		assertThat(model.asMap()).hasSize(2);
 		assertThat(model.asMap().get("attr1")).isEqualTo("lAttr1");
 		assertThat(model.asMap().get("attr2")).isEqualTo("gAttr2");
 	}

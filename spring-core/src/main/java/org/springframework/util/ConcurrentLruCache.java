@@ -29,7 +29,6 @@ import java.util.function.Function;
 
 import org.springframework.lang.Nullable;
 
-
 /**
  * Simple LRU (Least Recently Used) cache, bounded by a specified cache capacity.
  * <p>This is a simplified, opinionated implementation of a LRU cache for internal
@@ -81,7 +80,7 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	private ConcurrentLruCache(int capacity, Function<K, V> generator, int concurrencyLevel) {
-		Assert.isTrue(capacity > 0, "Capacity should be > 0");
+		Assert.isTrue(capacity > 0, "Capacity must be > 0");
 		this.capacity = capacity;
 		this.cache = new ConcurrentHashMap<>(16, 0.75f, concurrencyLevel);
 		this.generator = generator;
@@ -106,8 +105,8 @@ public final class ConcurrentLruCache<K, V> {
 	}
 
 	private void put(K key, V value) {
-		Assert.notNull(key, "key should not be null");
-		Assert.notNull(value, "value should not be null");
+		Assert.notNull(key, "key must not be null");
+		Assert.notNull(value, "value must not be null");
 		final CacheEntry<V> cacheEntry = new CacheEntry<>(value, CacheEntryState.ACTIVE);
 		final Node<K, V> node = new Node<>(key, cacheEntry);
 		final Node<K, V> prior = this.cache.putIfAbsent(node.key, node);

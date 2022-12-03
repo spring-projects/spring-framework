@@ -45,7 +45,8 @@ import org.springframework.web.socket.client.AbstractWebSocketClient;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programmatically
- * through the Jetty WebSocket API.
+ * through the Jetty WebSocket API. Only supported on Jetty 11, superseded by
+ * {@link org.springframework.web.socket.client.standard.StandardWebSocketClient}.
  *
  * <p>As of 4.1 this class implements {@link Lifecycle} rather than
  * {@link org.springframework.context.SmartLifecycle}. Use
@@ -55,7 +56,10 @@ import org.springframework.web.socket.client.AbstractWebSocketClient;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 4.0
+ * @deprecated as of 6.0.3, in favor of
+ * {@link org.springframework.web.socket.client.standard.StandardWebSocketClient}
  */
+@Deprecated(since = "6.0.3", forRemoval = true)
 public class JettyWebSocketClient extends AbstractWebSocketClient implements Lifecycle {
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
