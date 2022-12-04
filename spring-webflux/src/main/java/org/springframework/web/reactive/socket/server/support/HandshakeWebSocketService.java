@@ -164,8 +164,8 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	}
 
 	protected void doStart() {
-		if (getUpgradeStrategy() instanceof Lifecycle) {
-			((Lifecycle) getUpgradeStrategy()).start();
+		if (getUpgradeStrategy() instanceof Lifecycle lifecycle) {
+			lifecycle.start();
 		}
 	}
 
@@ -178,8 +178,8 @@ public class HandshakeWebSocketService implements WebSocketService, Lifecycle {
 	}
 
 	protected void doStop() {
-		if (getUpgradeStrategy() instanceof Lifecycle) {
-			((Lifecycle) getUpgradeStrategy()).stop();
+		if (getUpgradeStrategy() instanceof Lifecycle lifecycle) {
+			lifecycle.stop();
 		}
 	}
 

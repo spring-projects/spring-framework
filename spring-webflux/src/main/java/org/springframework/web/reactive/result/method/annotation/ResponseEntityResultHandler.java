@@ -137,8 +137,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 		return returnValueMono.flatMap(returnValue -> {
 			HttpEntity<?> httpEntity;
-			if (returnValue instanceof HttpEntity) {
-				httpEntity = (HttpEntity<?>) returnValue;
+			if (returnValue instanceof HttpEntity<?> he) {
+				httpEntity = he;
 			}
 			else if (returnValue instanceof ErrorResponse response) {
 				httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
@@ -146,8 +146,8 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			else if (returnValue instanceof ProblemDetail detail) {
 				httpEntity = ResponseEntity.of(detail).build();
 			}
-			else if (returnValue instanceof HttpHeaders) {
-				httpEntity = new ResponseEntity<>((HttpHeaders) returnValue, HttpStatus.OK);
+			else if (returnValue instanceof HttpHeaders headers) {
+				httpEntity = new ResponseEntity<>(headers, HttpStatus.OK);
 			}
 			else {
 				throw new IllegalArgumentException(

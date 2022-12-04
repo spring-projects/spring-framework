@@ -363,8 +363,8 @@ public abstract class BodyInserters {
 			M outputMessage, BodyInserter.Context context, Object body, ResolvableType bodyType, @Nullable ReactiveAdapter adapter) {
 
 		Publisher<?> publisher;
-		if (body instanceof Publisher) {
-			publisher = (Publisher<?>) body;
+		if (body instanceof Publisher<?> publisherBody) {
+			publisher = publisherBody;
 		}
 		else if (adapter != null) {
 			publisher = adapter.toPublisher(body);

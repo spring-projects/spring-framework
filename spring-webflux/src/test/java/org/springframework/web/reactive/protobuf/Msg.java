@@ -144,8 +144,8 @@ public  final class Msg extends
    */
   public String getFoo() {
     Object ref = foo_;
-    if (ref instanceof String) {
-      return (String) ref;
+    if (ref instanceof String stringRef) {
+      return stringRef;
     } else {
       com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
@@ -162,10 +162,9 @@ public  final class Msg extends
   public com.google.protobuf.ByteString
       getFooBytes() {
     Object ref = foo_;
-    if (ref instanceof String) {
+    if (ref instanceof String stringRef) {
       com.google.protobuf.ByteString b =
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (String) ref);
+          com.google.protobuf.ByteString.copyFromUtf8(stringRef);
       foo_ = b;
       return b;
     } else {
@@ -405,8 +404,8 @@ public  final class Msg extends
     }
 
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof Msg) {
-        return mergeFrom((Msg)other);
+      if (other instanceof Msg msg) {
+        return mergeFrom(msg);
       } else {
         super.mergeFrom(other);
         return this;
@@ -463,13 +462,13 @@ public  final class Msg extends
      */
     public String getFoo() {
       Object ref = foo_;
-      if (!(ref instanceof String)) {
+      if (!(ref instanceof String stringRef)) {
         String s = ((com.google.protobuf.ByteString) ref)
             .toStringUtf8();
         foo_ = s;
         return s;
       } else {
-        return (String) ref;
+        return stringRef;
       }
     }
     /**
@@ -478,10 +477,9 @@ public  final class Msg extends
     public com.google.protobuf.ByteString
         getFooBytes() {
       Object ref = foo_;
-      if (ref instanceof String) {
+      if (ref instanceof String stringRef) {
         com.google.protobuf.ByteString b =
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (String) ref);
+            com.google.protobuf.ByteString.copyFromUtf8(stringRef);
         foo_ = b;
         return b;
       } else {

@@ -795,11 +795,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
+			if (this.left instanceof ChangePathPatternParserVisitor.Target leftTarget) {
+				leftTarget.changeParser(parser);
 			}
-			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
+			if (this.right instanceof ChangePathPatternParserVisitor.Target rightTarget) {
+				rightTarget.changeParser(parser);
 			}
 		}
 
@@ -841,8 +841,8 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.delegate instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.delegate).changeParser(parser);
+			if (this.delegate instanceof ChangePathPatternParserVisitor.Target target) {
+				target.changeParser(parser);
 			}
 		}
 
@@ -909,11 +909,11 @@ public abstract class RequestPredicates {
 
 		@Override
 		public void changeParser(PathPatternParser parser) {
-			if (this.left instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.left).changeParser(parser);
+			if (this.left instanceof ChangePathPatternParserVisitor.Target leftTarget) {
+				leftTarget.changeParser(parser);
 			}
-			if (this.right instanceof ChangePathPatternParserVisitor.Target) {
-				((ChangePathPatternParserVisitor.Target) this.right).changeParser(parser);
+			if (this.right instanceof ChangePathPatternParserVisitor.Target rightTarget) {
+				rightTarget.changeParser(parser);
 			}
 		}
 

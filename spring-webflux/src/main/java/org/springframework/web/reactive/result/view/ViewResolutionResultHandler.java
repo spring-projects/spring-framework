@@ -223,7 +223,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 						if (view == null) {
 							view = getDefaultViewName(exchange);
 						}
-						viewsMono = (view instanceof String ? resolveViews((String) view, locale) :
+						viewsMono = (view instanceof String stringView? resolveViews(stringView, locale) :
 								Mono.just(Collections.singletonList((View) view)));
 					}
 					else if (Model.class.isAssignableFrom(clazz)) {

@@ -247,7 +247,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						}
 					}
 				}
-				value = (value instanceof List ? ((List<?>) value).toArray() : value);
+				value = (value instanceof List<?> valueList ? valueList.toArray() : value);
 				MethodParameter methodParam = new MethodParameter(ctor, i);
 				if (value == null && methodParam.isOptional()) {
 					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
