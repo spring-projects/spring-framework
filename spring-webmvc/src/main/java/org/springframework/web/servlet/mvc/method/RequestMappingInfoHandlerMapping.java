@@ -246,7 +246,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected HandlerMethod handleNoMatch(
 			Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
 
-		PartialMatchHelper helper = new PartialMatchHelper(infos, request);
+		PartialMatchHelper helper = PartialMatchHelper.from(infos, request);
 		if (helper.isEmpty()) {
 			return null;
 		}
@@ -293,16 +293,25 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	/**
 	 * Aggregate all partial matches and expose methods checking across them.
 	 */
-	private static class PartialMatchHelper {
+	private static final class PartialMatchHelper {
+
+		private static final PartialMatchHelper EMPTY_HELPER = new PartialMatchHelper(Collections.emptySet(), null);
 
 		private final List<PartialMatch> partialMatches = new ArrayList<>();
 
-		public PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
+		private PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
 			for (RequestMappingInfo info : infos) {
 				if (info.getActivePatternsCondition().getMatchingCondition(request) != null) {
 					this.partialMatches.add(new PartialMatch(info, request));
 				}
 			}
+		}
+
+		public static PartialMatchHelper from(Set<RequestMappingInfo> infos, HttpServletRequest request) {
+			if (CollectionUtils.isEmpty(infos)) {
+				return EMPTY_HELPER;
+			}
+			return new PartialMatchHelper(infos, request);
 		}
 
 		/**
