@@ -148,8 +148,8 @@ public class ResourceHandlerRegistry {
 	private ResourceWebHandler getRequestHandler(ResourceHandlerRegistration registration) {
 		ResourceWebHandler handler = registration.getRequestHandler();
 		for (ResourceTransformer transformer : handler.getResourceTransformers()) {
-			if (transformer instanceof ResourceTransformerSupport) {
-				((ResourceTransformerSupport) transformer).setResourceUrlProvider(this.resourceUrlProvider);
+			if (transformer instanceof ResourceTransformerSupport resourceTransformerSupport) {
+				resourceTransformerSupport.setResourceUrlProvider(this.resourceUrlProvider);
 			}
 		}
 		try {

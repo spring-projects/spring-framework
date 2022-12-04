@@ -126,8 +126,8 @@ public class BindStatus {
 					this.objectErrors = this.errors.getFieldErrors(this.expression);
 					this.value = this.errors.getFieldValue(this.expression);
 					this.valueType = this.errors.getFieldType(this.expression);
-					if (this.errors instanceof BindingResult) {
-						this.bindingResult = (BindingResult) this.errors;
+					if (this.errors instanceof BindingResult bindingResultError) {
+						this.bindingResult = bindingResultError;
 						this.actualValue = this.bindingResult.getRawFieldValue(this.expression);
 						this.editor = this.bindingResult.findEditor(this.expression, null);
 					}
@@ -162,8 +162,8 @@ public class BindStatus {
 			this.errorMessages = new String[0];
 		}
 
-		if (htmlEscape && this.value instanceof String) {
-			this.value = HtmlUtils.htmlEscape((String) this.value);
+		if (htmlEscape && this.value instanceof String valueString) {
+			this.value = HtmlUtils.htmlEscape(valueString);
 		}
 	}
 
@@ -238,8 +238,8 @@ public class BindStatus {
 	 * will get HTML-escaped.
 	 */
 	public String getDisplayValue() {
-		if (this.value instanceof String) {
-			return (String) this.value;
+		if (this.value instanceof String stringValue) {
+			return stringValue;
 		}
 		if (this.value != null) {
 			return (this.htmlEscape ?

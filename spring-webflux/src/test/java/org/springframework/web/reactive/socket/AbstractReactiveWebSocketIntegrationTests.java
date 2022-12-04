@@ -142,15 +142,15 @@ abstract class AbstractReactiveWebSocketIntegrationTests {
 		// Set dynamically chosen port
 		this.port = this.server.getPort();
 
-		if (this.client instanceof Lifecycle) {
-			((Lifecycle) this.client).start();
+		if (this.client instanceof Lifecycle lifecycle) {
+			lifecycle.start();
 		}
 	}
 
 	@AfterEach
 	void stopServer() {
-		if (this.client instanceof Lifecycle) {
-			((Lifecycle) this.client).stop();
+		if (this.client instanceof Lifecycle lifecycle) {
+			lifecycle.stop();
 		}
 		this.server.stop();
 	}

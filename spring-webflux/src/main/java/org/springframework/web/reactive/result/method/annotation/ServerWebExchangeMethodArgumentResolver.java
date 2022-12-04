@@ -124,8 +124,8 @@ public class ServerWebExchangeMethodArgumentResolver extends HandlerMethodArgume
 	@Nullable
 	private TimeZone getTimeZone(LocaleContext localeContext) {
 		TimeZone timeZone = null;
-		if (localeContext instanceof TimeZoneAwareLocaleContext) {
-			timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+		if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
+			timeZone = timeZoneAwareLocaleContext.getTimeZone();
 		}
 		return timeZone;
 	}

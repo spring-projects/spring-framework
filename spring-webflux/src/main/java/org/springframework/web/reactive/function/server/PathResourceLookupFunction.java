@@ -129,8 +129,8 @@ class PathResourceLookupFunction implements Function<ServerRequest, Mono<Resourc
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = StringUtils.cleanPath(this.location.getURL().toString());
 		}
-		else if (resource instanceof ClassPathResource) {
-			resourcePath = ((ClassPathResource) resource).getPath();
+		else if (resource instanceof ClassPathResource classPathResource) {
+			resourcePath = classPathResource.getPath();
 			locationPath = StringUtils.cleanPath(((ClassPathResource) this.location).getPath());
 		}
 		else {

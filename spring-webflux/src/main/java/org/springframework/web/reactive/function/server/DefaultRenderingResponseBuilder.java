@@ -107,7 +107,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 	@Override
 	public RenderingResponse.Builder modelAttribute(Object attribute) {
 		Assert.notNull(attribute, "Attribute must not be null");
-		if (attribute instanceof Collection && ((Collection<?>) attribute).isEmpty()) {
+		if (attribute instanceof Collection<?> attrCollection && attrCollection.isEmpty()) {
 			return this;
 		}
 		return modelAttribute(Conventions.getVariableName(attribute), attribute);
