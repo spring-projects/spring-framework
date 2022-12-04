@@ -50,7 +50,7 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		if (Flux.class.isAssignableFrom(elementType.toClass())) {
+		if (Part.class.isAssignableFrom(elementType.toClass())) {
 			if (mediaType == null) {
 				return true;
 			}
