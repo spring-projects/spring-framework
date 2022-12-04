@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -343,6 +344,17 @@ public class RequestMappingInfoHandlerMappingTests {
 				})
 				.verify();
 
+	}
+
+	@Test
+	public void handleNoMatchEmptyRequestMappingInfo() throws Exception {
+		ServerWebExchange exchange = MockServerWebExchange.from(post("/bar"));
+
+		HandlerMethod handlerMethod = this.handlerMapping.handleNoMatch(new HashSet<>(), exchange);
+		assertThat(handlerMethod).isNull();
+
+		handlerMethod = this.handlerMapping.handleNoMatch(null, exchange);
+		assertThat(handlerMethod).isNull();
 	}
 
 

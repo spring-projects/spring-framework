@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -395,6 +396,17 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(matrixVariables).isNotNull();
 		assertThat(matrixVariables.get("mvar")).isEqualTo(Collections.singletonList("a/b"));
 		assertThat(uriVariables.get("cars")).isEqualTo("cars");
+	}
+
+	@PathPatternsParameterizedTest
+	void handleNoMatchEmptyRequestMappingInfo(TestRequestMappingInfoHandlerMapping mapping) throws ServletException {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/cars;color=green");
+
+		HandlerMethod handlerMethod = mapping.handleNoMatch(new HashSet<>(), "/{cars}", request);
+		assertThat(handlerMethod).isNull();
+
+		handlerMethod = mapping.handleNoMatch(null, "/{cars}", request);
+		assertThat(handlerMethod).isNull();
 	}
 
 	private HandlerMethod getHandler(
