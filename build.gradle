@@ -10,7 +10,7 @@ plugins {
 	id 'com.github.ben-manes.versions' version '0.42.0'
 	id 'com.github.johnrengelman.shadow' version '7.1.2' apply false
 	id 'de.undercouch.download' version '5.1.0'
-	id 'me.champeau.jmh' version '0.6.6' apply false
+	id 'me.champeau.jmh' version '0.6.8' apply false
 }
 
 ext {
