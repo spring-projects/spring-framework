@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpRequestValuesTests {
+class HttpRequestValuesTests {
 
 	@Test
 	void defaultUri() {
@@ -49,6 +49,7 @@ public class HttpRequestValuesTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"POST", "PUT", "PATCH"})
+	@SuppressWarnings("unchecked")
 	void requestParamAsFormData(String httpMethod) {
 
 		HttpRequestValues requestValues = HttpRequestValues.builder().setHttpMethod(HttpMethod.valueOf(httpMethod))

@@ -21,7 +21,6 @@ import java.util.Optional;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,20 +51,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpServiceMethodTests {
+class HttpServiceMethodTests {
 
 	private static final ParameterizedTypeReference<String> BODY_TYPE = new ParameterizedTypeReference<>() {};
 
-
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private HttpServiceProxyFactory proxyFactory;
-
-
-	@BeforeEach
-	void setUp() throws Exception {
-		this.proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
-	}
+	private final HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
 
 
 	@Test

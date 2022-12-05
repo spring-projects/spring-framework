@@ -18,7 +18,6 @@ package org.springframework.web.service.invoker;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -36,18 +35,11 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class RequestBodyArgumentResolverTests {
+class RequestBodyArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private Service service;
-
-
-	@BeforeEach
-	void setUp() throws Exception {
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
-		this.service = proxyFactory.createClient(Service.class);
-	}
+	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
 
 
 	@Test
