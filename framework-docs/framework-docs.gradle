@@ -113,16 +113,19 @@ asciidoctor {
 	sources {
 		include '*.adoc'
 	}
-	outputDir "$buildDir/docs/ref-docs/html5"
-	outputOptions {
-		backends "spring-html"
-	}
-	logDocuments = true
 	resources {
 		from(sourceDir) {
 			include 'images/*.png'
 		}
 	}
+	outputDir "$buildDir/docs/ref-docs/html5"
+	outputOptions {
+		backends "spring-html"
+	}
+	forkOptions {
+		jvmArgs += ["--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"]
+	}
+	logDocuments = true
 }
 
 asciidoctor.mustRunAfter "check"
@@ -245,7 +248,6 @@ task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
 }
 
 distZip.mustRunAfter moduleProjects.check
-
 
 publishing {
 	publications {
