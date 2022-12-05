@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,10 +34,14 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,8 +73,7 @@ public class WebClientHttpServiceProxyTests {
 
 
 	@Test
-	void greeting() throws Exception {
-
+	void greeting() {
 		prepareResponse(response ->
 				response.setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
@@ -81,7 +85,6 @@ public class WebClientHttpServiceProxyTests {
 
 	@Test
 	void greetingWithRequestAttribute() {
-
 		Map<String, Object> attributes = new HashMap<>();
 
 		WebClient webClient = WebClient.builder()
@@ -115,6 +118,21 @@ public class WebClientHttpServiceProxyTests {
 		assertThat(this.server.takeRequest().getRequestUrl().uri()).isEqualTo(dynamicUri);
 	}
 
+	@Test
+	void formData() throws Exception {
+		prepareResponse(response -> response.setResponseCode(201));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("param1", "value 1");
+		map.add("param2", "value 2");
+
+		initHttpService().postForm(map);
+
+		RecordedRequest request = this.server.takeRequest();
+		assertThat(request.getHeaders().get("Content-Type")).isEqualTo("application/x-www-form-urlencoded;charset=UTF-8");
+		assertThat(request.getBody().readUtf8()).isEqualTo("param1=value+1&param2=value+2");
+	}
+
 	private TestHttpService initHttpService() {
 		WebClient webClient = WebClient.builder().baseUrl(this.server.url("/").toString()).build();
 		return initHttpService(webClient);
@@ -144,6 +162,9 @@ public class WebClientHttpServiceProxyTests {
 
 		@GetExchange("/greetings/{id}")
 		String getGreetingById(@Nullable URI uri, @PathVariable String id);
+
+		@PostExchange(contentType = "application/x-www-form-urlencoded")
+		void postForm(@RequestParam MultiValueMap<String, String> params);
 
 	}
 

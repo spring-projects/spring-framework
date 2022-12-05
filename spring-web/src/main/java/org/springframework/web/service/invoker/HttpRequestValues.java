@@ -17,14 +17,11 @@
 package org.springframework.web.service.invoker;
 
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
@@ -34,7 +31,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.http.codec.FormHttpMessageWriter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -201,8 +197,6 @@ public final class HttpRequestValues {
 	 * Builder for {@link HttpRequestValues}.
 	 */
 	public final static class Builder {
-
-		private static final Function<MultiValueMap<String, String>, byte[]> FORM_DATA_SERIALIZER = new FormDataSerializer();
 
 		@Nullable
 		private HttpMethod httpMethod;
@@ -403,7 +397,7 @@ public final class HttpRequestValues {
 
 				if (isFormData) {
 					Assert.isTrue(bodyValue == null && this.body == null, "Expected body or request params, not both");
-					bodyValue = FORM_DATA_SERIALIZER.apply(this.requestParams);
+					bodyValue = new LinkedMultiValueMap<>(this.requestParams);
 				}
 				else if (uri != null) {
 					uri = UriComponentsBuilder.fromUri(uri)
@@ -454,18 +448,6 @@ public final class HttpRequestValues {
 				i++;
 			}
 			return uriComponentsBuilder.build().toUriString();
-		}
-
-	}
-
-
-	private static class FormDataSerializer
-			extends FormHttpMessageWriter implements Function<MultiValueMap<String, String>, byte[]> {
-
-		@Override
-		public byte[] apply(MultiValueMap<String, String> requestParams) {
-			Charset charset = StandardCharsets.UTF_8;
-			return serializeForm(requestParams, charset).getBytes(charset);
 		}
 
 	}
