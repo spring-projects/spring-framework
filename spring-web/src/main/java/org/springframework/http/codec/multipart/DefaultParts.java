@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.3
  */
-abstract class DefaultParts {
+public abstract class DefaultParts {
 
 	/**
 	 * Create a new {@link FormFieldPart} with the given parameters.
