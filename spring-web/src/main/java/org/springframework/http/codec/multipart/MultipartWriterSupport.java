@@ -24,7 +24,6 @@ import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +33,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Support class for multipart HTTP message writers.
@@ -81,21 +79,6 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 
 	public List<MediaType> getWritableMediaTypes() {
 		return this.supportedMediaTypes;
-	}
-
-
-	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		if (MultiValueMap.class.isAssignableFrom(elementType.toClass())) {
-			if (mediaType == null) {
-				return true;
-			}
-			for (MediaType supportedMediaType : this.supportedMediaTypes) {
-				if (supportedMediaType.isCompatibleWith(mediaType)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	/**

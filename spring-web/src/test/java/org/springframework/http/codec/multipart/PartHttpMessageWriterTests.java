@@ -55,6 +55,7 @@ public class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_FORM_DATA)).isTrue();
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_MIXED)).isTrue();
 		assertThat(this.writer.canWrite(ResolvableType.forClass(Part.class), MediaType.MULTIPART_RELATED)).isTrue();
+		assertThat(this.writer.canWrite(ResolvableType.forClass(MultiValueMap.class), MediaType.MULTIPART_FORM_DATA)).isFalse();
 	}
 
 	@Test
