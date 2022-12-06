@@ -47,7 +47,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.type;
 /**
  * @author Sebastien Deleuze
  */
-class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class MultipartHttpHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
 	protected HttpHandler createHttpHandler() {

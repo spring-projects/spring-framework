@@ -59,7 +59,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 /**
  * @author Sebastien Deleuze
  */
-class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
+class MultipartRouterFunctionIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 	private final WebClient webClient = WebClient.create();
 

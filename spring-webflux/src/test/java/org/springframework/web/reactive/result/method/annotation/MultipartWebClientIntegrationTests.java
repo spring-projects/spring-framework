@@ -65,7 +65,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.Undert
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+class MultipartWebClientIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private WebClient webClient;
 
@@ -270,7 +270,7 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		@PostMapping("/requestBodyMap")
 		Mono<String> requestBodyMap(@RequestBody Mono<MultiValueMap<String, Part>> partsMono) {
-			return partsMono.map(MultipartIntegrationTests::partMapDescription);
+			return partsMono.map(MultipartWebClientIntegrationTests::partMapDescription);
 		}
 
 		@PostMapping("/requestBodyFlux")
@@ -345,11 +345,11 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 
 	private static Mono<String> partFluxDescription(Flux<? extends Part> partsFlux) {
-		return partsFlux.collectList().map(MultipartIntegrationTests::partListDescription);
+		return partsFlux.collectList().map(MultipartWebClientIntegrationTests::partListDescription);
 	}
 
 	private static String partListDescription(List<? extends Part> parts) {
-		return parts.stream().map(MultipartIntegrationTests::partDescription)
+		return parts.stream().map(MultipartWebClientIntegrationTests::partDescription)
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
