@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class UrlArgumentResolverTests {
+class UrlArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 

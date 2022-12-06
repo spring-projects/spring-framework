@@ -16,7 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.lang.Nullable;
@@ -27,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link PathVariableArgumentResolver}.
+ *
  * <p>For base class functionality, see {@link NamedValueArgumentResolverTests}.
  *
  * @author Olga Maciaszek-Sharma
@@ -36,17 +36,8 @@ class PathVariableArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private Service service;
+	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
 
-
-	@BeforeEach
-	void setUp() throws Exception {
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
-		this.service = proxyFactory.createClient(Service.class);
-	}
-
-
-	// Base class functionality should be tested in NamedValueArgumentResolverTests.
 
 	@Test
 	void pathVariable() {

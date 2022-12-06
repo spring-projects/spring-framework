@@ -34,8 +34,10 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -145,7 +147,16 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
 
-		MediaType contentType = request.getHeaders().getContentType();
+		MediaType contentType;
+		HttpHeaders headers = request.getHeaders();
+		try {
+			contentType = headers.getContentType();
+		}
+		catch (InvalidMediaTypeException ex) {
+			throw new UnsupportedMediaTypeStatusException(
+					"Can't parse Content-Type [" + headers.getFirst("Content-Type") + "]: " + ex.getMessage());
+		}
+
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 		Object[] hints = extractValidationHints(bodyParam);
 
