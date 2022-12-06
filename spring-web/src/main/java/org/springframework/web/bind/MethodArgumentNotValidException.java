@@ -17,8 +17,10 @@
 package org.springframework.web.bind;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.context.MessageSource;
@@ -97,19 +99,40 @@ public class MethodArgumentNotValidException extends BindException implements Er
 
 	@Override
 	public Object[] getDetailMessageArguments() {
-		return new Object[] {
-				errorsToStringList(getBindingResult().getGlobalErrors()),
-				errorsToStringList(getBindingResult().getFieldErrors())
-		};
+		return new Object[] {errorsToStringList(getGlobalErrors()), errorsToStringList(getFieldErrors())};
 	}
 
 	@Override
 	public Object[] getDetailMessageArguments(MessageSource messageSource, Locale locale) {
 		return new Object[] {
-				errorsToStringList(getBindingResult().getGlobalErrors(), messageSource, locale),
-				errorsToStringList(getBindingResult().getFieldErrors(), messageSource, locale)
+				errorsToStringList(getGlobalErrors(), messageSource, locale),
+				errorsToStringList(getFieldErrors(), messageSource, locale)
 		};
 	}
+
+	/**
+	 * Resolve global and field errors to messages with the given
+	 * {@link MessageSource} and {@link Locale}.
+	 * @return a Map with errors as key and resolves messages as value
+	 * @since 6.0.3
+	 */
+	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
+		Map<ObjectError, String> map = new LinkedHashMap<>();
+		addMessages(map, getGlobalErrors(), messageSource, locale);
+		addMessages(map, getFieldErrors(), messageSource, locale);
+		return map;
+	}
+
+	private static void addMessages(
+			Map<ObjectError, String> map, List<? extends ObjectError> errors,
+			MessageSource messageSource, Locale locale) {
+
+		List<String> messages = errorsToStringList(errors, messageSource, locale);
+		for (int i = 0; i < errors.size(); i++) {
+			map.put(errors.get(i), messages.get(i));
+		}
+	}
+
 
 	/**
 	 * Convert each given {@link ObjectError} to a String in single quotes, taking
