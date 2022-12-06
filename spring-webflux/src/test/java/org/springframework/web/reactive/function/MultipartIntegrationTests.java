@@ -240,7 +240,7 @@ class MultipartIntegrationTests extends AbstractRouterFunctionIntegrationTests {
 
 		public Mono<ServerResponse> transferTo(ServerRequest request) {
 			return request.body(BodyExtractors.toParts())
-					.filter(part -> part instanceof FilePart)
+					.filter(FilePart.class::isInstance)
 					.next()
 					.cast(FilePart.class)
 					.flatMap(part -> createTempFile()

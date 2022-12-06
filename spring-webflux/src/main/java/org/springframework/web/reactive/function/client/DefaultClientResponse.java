@@ -133,11 +133,11 @@ class DefaultClientResponse implements ClientResponse {
 	public <T> T body(BodyExtractor<T, ? super ClientHttpResponse> extractor) {
 		T result = extractor.extract(this.response, this.bodyExtractorContext);
 		String description = "Body from " + this.requestDescription + " [DefaultClientResponse]";
-		if (result instanceof Mono<?> monoResult) {
-			return (T) monoResult.checkpoint(description);
+		if (result instanceof Mono<?> mono) {
+			return (T) mono.checkpoint(description);
 		}
-		else if (result instanceof Flux<?> fluxResult) {
-			return (T) fluxResult.checkpoint(description);
+		else if (result instanceof Flux<?> flux) {
+			return (T) flux.checkpoint(description);
 		}
 		else {
 			return result;

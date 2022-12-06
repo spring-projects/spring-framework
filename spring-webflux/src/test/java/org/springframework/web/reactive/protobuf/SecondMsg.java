@@ -304,8 +304,8 @@ public  final class SecondMsg extends
     }
 
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof SecondMsg secondMsg) {
-        return mergeFrom(secondMsg);
+      if (other instanceof SecondMsg) {
+        return mergeFrom((SecondMsg)other);
       } else {
         super.mergeFrom(other);
         return this;

@@ -42,6 +42,7 @@ import org.springframework.web.testfixture.http.server.reactive.bootstrap.Abstra
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 
 /**
  * @author Sebastien Deleuze
@@ -95,9 +96,9 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 					.getMultipartData()
 					.doOnNext(parts -> {
 						assertThat(parts).hasSize(2);
-						assertThat(parts.containsKey("fooPart")).isTrue();
+						assertThat(parts).containsKey("fooPart");
 						assertFooPart(parts.getFirst("fooPart"));
-						assertThat(parts.containsKey("barPart")).isTrue();
+						assertThat(parts).containsKey("barPart");
 						assertBarPart(parts.getFirst("barPart"));
 					})
 					.then();
@@ -105,9 +106,9 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		private void assertFooPart(Part part) {
 			assertThat(part.name()).isEqualTo("fooPart");
-			boolean condition = part instanceof FilePart;
-			assertThat(condition).isTrue();
-			assertThat(((FilePart) part).filename()).isEqualTo("foo.txt");
+			assertThat(part)
+				.asInstanceOf(type(FilePart.class))
+				.extracting(FilePart::filename).isEqualTo("foo.txt");
 
 			StepVerifier.create(DataBufferUtils.join(part.content()))
 					.consumeNextWith(buffer -> {
@@ -121,9 +122,9 @@ class MultipartIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		private void assertBarPart(Part part) {
 			assertThat(part.name()).isEqualTo("barPart");
-			boolean condition = part instanceof FormFieldPart;
-			assertThat(condition).isTrue();
-			assertThat(((FormFieldPart) part).value()).isEqualTo("bar");
+			assertThat(part)
+				.asInstanceOf(type(FormFieldPart.class))
+				.extracting(FormFieldPart::value).isEqualTo("bar");
 		}
 	}
 
