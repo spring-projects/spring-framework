@@ -26,6 +26,7 @@ import java.util.function.Function;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
@@ -317,7 +318,9 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		else if (httpComponentsClientPresent) {
 			return new HttpComponentsClientHttpConnector();
 		}
-		throw new IllegalStateException("No suitable default ClientHttpConnector found");
+		else {
+			return new JdkClientHttpConnector();
+		}
 	}
 
 	private ExchangeStrategies initExchangeStrategies() {
