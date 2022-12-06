@@ -44,7 +44,7 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 
 	private final String requestURL;
 
-	private final HttpHeaders headers;
+	private final HttpHeaders requestHeaders;
 
 	private final ProblemDetail body;
 
@@ -59,7 +59,7 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 		super("No endpoint " + httpMethod + " " + requestURL + ".");
 		this.httpMethod = httpMethod;
 		this.requestURL = requestURL;
-		this.headers = headers;
+		this.requestHeaders = headers;
 		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), getMessage());
 	}
 
@@ -76,8 +76,23 @@ public class NoHandlerFoundException extends ServletException implements ErrorRe
 		return this.requestURL;
 	}
 
+	/**
+	 * Return headers to use for the response.
+	 * <p><strong>Note:</strong> As of 6.0 this method overlaps with
+	 * {@link ErrorResponse#getHeaders()} and therefore no longer returns request
+	 * headers. Use {@link #getRequestHeaders()} instead for request headers.
+	 */
+	@Override
 	public HttpHeaders getHeaders() {
-		return this.headers;
+		return ErrorResponse.super.getHeaders();
+	}
+
+	/**
+	 * Return the headers of the request.
+	 * @since 6.0.3
+	 */
+	public HttpHeaders getRequestHeaders() {
+		return this.requestHeaders;
 	}
 
 	@Override

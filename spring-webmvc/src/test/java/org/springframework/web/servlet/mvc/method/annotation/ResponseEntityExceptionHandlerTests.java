@@ -253,7 +253,13 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	public void noHandlerFoundException() {
-		testException(new NoHandlerFoundException("GET", "/resource", HttpHeaders.EMPTY));
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED); // gh-29626
+
+		ResponseEntity<Object> responseEntity =
+				testException(new NoHandlerFoundException("GET", "/resource", requestHeaders));
+
+		assertThat(responseEntity.getHeaders()).isEmpty();
 	}
 
 	@Test
