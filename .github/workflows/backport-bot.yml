@@ -3,7 +3,7 @@ name: Backport Bot
 on:
   issues:
     types: [labeled]
-  pull_requests:
+  pull_request:
     types: [labeled]
   push:
     branches:
