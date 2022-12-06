@@ -79,6 +79,7 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.core.type.classreading.MetadataReaderFactory
  * @see org.springframework.core.type.AnnotationMetadata
@@ -343,7 +344,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		if (filter instanceof AnnotationTypeFilter annotationTypeFilter) {
 			Class<? extends Annotation> annotationType = annotationTypeFilter.getAnnotationType();
 			return (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, annotationType) ||
-					annotationType.getName().startsWith("javax."));
+					annotationType.getName().startsWith("jakarta."));
 		}
 		if (filter instanceof AssignableTypeFilter assignableTypeFilter) {
 			Class<?> target = assignableTypeFilter.getTargetType();
