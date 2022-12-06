@@ -52,7 +52,7 @@ public class JsonPathRequestMatchers {
 	 * @param args arguments to parameterize the {@code JsonPath} expression with,
 	 * using formatting specifiers defined in {@link String#format(String, Object...)}
 	 */
-	protected JsonPathRequestMatchers(String expression, Object ... args) {
+	protected JsonPathRequestMatchers(String expression, Object... args) {
 		this.jsonPathHelper = new JsonPathExpectationsHelper(expression, args);
 	}
 

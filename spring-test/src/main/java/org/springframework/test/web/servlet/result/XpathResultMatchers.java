@@ -52,7 +52,7 @@ public class XpathResultMatchers {
 	 * @param args arguments to parameterize the XPath expression with using the
 	 * formatting specifiers defined in {@link String#format(String, Object...)}
 	 */
-	protected XpathResultMatchers(String expression, @Nullable Map<String, String> namespaces, Object ... args)
+	protected XpathResultMatchers(String expression, @Nullable Map<String, String> namespaces, Object... args)
 			throws XPathExpressionException {
 
 		this.xpathHelper = new XpathExpectationsHelper(expression, namespaces, args);
