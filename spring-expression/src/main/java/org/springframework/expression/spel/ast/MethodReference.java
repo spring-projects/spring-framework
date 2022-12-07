@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ public class MethodReference extends SpelNodeImpl {
 		// either there was no accessor or it no longer existed
 		executorToUse = findAccessorForMethod(argumentTypes, value, evaluationContext);
 		this.cachedExecutor = new CachedMethodExecutor(
-				executorToUse, (value instanceof Class ? (Class<?>) value : null), targetType, argumentTypes);
+				executorToUse, (value instanceof Class<?> clazz ? clazz : null), targetType, argumentTypes);
 		try {
 			return executorToUse.execute(evaluationContext, value, arguments);
 		}
@@ -216,7 +216,7 @@ public class MethodReference extends SpelNodeImpl {
 
 		String method = FormatHelper.formatMethodForMessage(this.name, argumentTypes);
 		String className = FormatHelper.formatClassNameForMessage(
-				targetObject instanceof Class ? ((Class<?>) targetObject) : targetObject.getClass());
+				targetObject instanceof Class<?> clazz ? clazz : targetObject.getClass());
 		if (accessException != null) {
 			throw new SpelEvaluationException(
 					getStartPosition(), accessException, SpelMessage.PROBLEM_LOCATING_METHOD, method, className);
@@ -233,8 +233,8 @@ public class MethodReference extends SpelNodeImpl {
 	private void throwSimpleExceptionIfPossible(Object value, AccessException ex) {
 		if (ex.getCause() instanceof InvocationTargetException) {
 			Throwable rootCause = ex.getCause().getCause();
-			if (rootCause instanceof RuntimeException) {
-				throw (RuntimeException) rootCause;
+			if (rootCause instanceof RuntimeException runtimeException) {
+				throw runtimeException;
 			}
 			throw new ExpressionInvocationTargetException(getStartPosition(),
 					"A problem occurred when trying to execute method '" + this.name +
@@ -244,8 +244,8 @@ public class MethodReference extends SpelNodeImpl {
 
 	private void updateExitTypeDescriptor() {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
-		if (executorToCheck != null && executorToCheck.get() instanceof ReflectiveMethodExecutor) {
-			Method method = ((ReflectiveMethodExecutor) executorToCheck.get()).getMethod();
+		if (executorToCheck != null && executorToCheck.get() instanceof ReflectiveMethodExecutor reflectiveMethodExecutor) {
+			Method method = reflectiveMethodExecutor.getMethod();
 			String descriptor = CodeFlow.toDescriptor(method.getReturnType());
 			if (this.nullSafe && CodeFlow.isPrimitive(descriptor)) {
 				this.originalPrimitiveExitTypeDescriptor = descriptor;

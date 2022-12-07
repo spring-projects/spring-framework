@@ -252,7 +252,7 @@ public final class SpelCompiler implements Opcodes {
 	 * {@code false} otherwise
 	 */
 	public static boolean compile(Expression expression) {
-		return (expression instanceof SpelExpression && ((SpelExpression) expression).compileExpression());
+		return (expression instanceof SpelExpression spelExpression && spelExpression.compileExpression());
 	}
 
 	/**
@@ -261,8 +261,8 @@ public final class SpelCompiler implements Opcodes {
 	 * @param expression the expression
 	 */
 	public static void revertToInterpreted(Expression expression) {
-		if (expression instanceof SpelExpression) {
-			((SpelExpression) expression).revertToInterpreted();
+		if (expression instanceof SpelExpression spelExpression) {
+			spelExpression.revertToInterpreted();
 		}
 	}
 

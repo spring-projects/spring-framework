@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		if (obj == null) {
 			return null;
 		}
-		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
+		return (obj instanceof Class<?> clazz ? clazz : obj.getClass());
 	}
 
 	@Override
@@ -207,8 +207,7 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	protected static void generateCodeForArguments(MethodVisitor mv, CodeFlow cf, Member member, SpelNodeImpl[] arguments) {
 		String[] paramDescriptors = null;
 		boolean isVarargs = false;
-		if (member instanceof Constructor) {
-			Constructor<?> ctor = (Constructor<?>) member;
+		if (member instanceof Constructor<?> ctor) {
 			paramDescriptors = CodeFlow.toDescriptors(ctor.getParameterTypes());
 			isVarargs = ctor.isVarArgs();
 		}
