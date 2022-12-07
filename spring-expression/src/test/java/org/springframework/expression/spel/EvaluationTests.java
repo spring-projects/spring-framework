@@ -365,6 +365,55 @@ class EvaluationTests extends AbstractExpressionTests {
 	}
 
 	@Nested
+	class StringLiterals {
+
+		@Test
+		void insideSingleQuotes() {
+			evaluate("'hello'", "hello", String.class);
+			evaluate("'hello world'", "hello world", String.class);
+		}
+
+		@Test
+		void insideDoubleQuotes() {
+			evaluate("\"hello\"", "hello", String.class);
+			evaluate("\"hello world\"", "hello world", String.class);
+		}
+
+		@Test
+		void singleQuotesInsideSingleQuotes() {
+			evaluate("'Tony''s Pizza'", "Tony's Pizza", String.class);
+			evaluate("'big ''''pizza'''' parlor'", "big ''pizza'' parlor", String.class);
+		}
+
+		@Test
+		void doubleQuotesInsideDoubleQuotes() {
+			evaluate("\"big \"\"pizza\"\" parlor\"", "big \"pizza\" parlor", String.class);
+			evaluate("\"big \"\"\"\"pizza\"\"\"\" parlor\"", "big \"\"pizza\"\" parlor", String.class);
+		}
+
+		@Test
+		void singleQuotesInsideDoubleQuotes() {
+			evaluate("\"Tony's Pizza\"", "Tony's Pizza", String.class);
+			evaluate("\"big ''pizza'' parlor\"", "big ''pizza'' parlor", String.class);
+		}
+
+		@Test
+		void doubleQuotesInsideSingleQuotes() {
+			evaluate("'big \"pizza\" parlor'", "big \"pizza\" parlor", String.class);
+			evaluate("'two double \"\" quotes'", "two double \"\" quotes", String.class);
+		}
+
+		@Test
+		void inCompoundExpressions() {
+			evaluate("'123''4' == '123''4'", true, Boolean.class);
+			evaluate("""
+				"123""4" == "123""4"\
+				""", true, Boolean.class);
+		}
+
+	}
+
+	@Nested
 	class RelationalOperatorTests {
 
 		@Test
