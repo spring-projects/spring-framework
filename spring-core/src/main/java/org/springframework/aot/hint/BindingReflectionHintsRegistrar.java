@@ -71,7 +71,7 @@ public class BindingReflectionHintsRegistrar {
 	}
 
 	private boolean shouldSkipMembers(Class<?> type) {
-		return type.getCanonicalName().startsWith("java.") || type.isArray();
+		return (type.getCanonicalName() != null && type.getCanonicalName().startsWith("java.")) || type.isArray();
 	}
 
 	private void registerReflectionHints(ReflectionHints hints, Set<Type> seen, Type type) {

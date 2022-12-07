@@ -222,6 +222,12 @@ public class BindingReflectionHintsRegistrarTests {
 	}
 
 	@Test
+	void registerTypeForSerializationWithAnonymousClass() {
+		Runnable anonymousRunnable = () -> { };
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), anonymousRunnable.getClass());
+	}
+
+	@Test
 	void registerTypeForJacksonAnnotations() {
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithJsonProperty.class);
 		assertThat(RuntimeHintsPredicates.reflection().onField(SampleClassWithJsonProperty.class, "privateField"))
