@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.ByteArrayDecoder;
@@ -62,6 +63,8 @@ import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
+import org.springframework.http.codec.multipart.PartEventHttpMessageWriter;
+import org.springframework.http.codec.multipart.PartHttpMessageWriter;
 import org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecoder;
 import org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
@@ -161,6 +164,15 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	private Encoder<?> kotlinSerializationProtobufEncoder;
 
 	@Nullable
+	private DefaultMultipartCodecs multipartCodecs;
+
+	@Nullable
+	private Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
+
+	@Nullable
+	private HttpMessageReader<?> multipartReader;
+
+	@Nullable
 	private Consumer<Object> codecConsumer;
 
 	@Nullable
@@ -224,6 +236,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		this.kotlinSerializationJsonEncoder = other.kotlinSerializationJsonEncoder;
 		this.kotlinSerializationProtobufDecoder = other.kotlinSerializationProtobufDecoder;
 		this.kotlinSerializationProtobufEncoder = other.kotlinSerializationProtobufEncoder;
+		this.multipartCodecs = other.multipartCodecs != null ?
+				new DefaultMultipartCodecs(other.multipartCodecs) : null;
+		this.multipartReader = other.multipartReader;
 		this.codecConsumer = other.codecConsumer;
 		this.maxInMemorySize = other.maxInMemorySize;
 		this.enableLoggingRequestDetails = other.enableLoggingRequestDetails;
@@ -352,6 +367,31 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	}
 
 	@Override
+	public CodecConfigurer.MultipartCodecs multipartCodecs() {
+		if (this.multipartCodecs == null) {
+			this.multipartCodecs = new DefaultMultipartCodecs();
+		}
+		return this.multipartCodecs;
+	}
+
+	@Override
+	public void multipartReader(HttpMessageReader<?> multipartReader) {
+		this.multipartReader = multipartReader;
+		initTypedReaders();
+	}
+
+	/**
+	 * Set a supplier for part writers to use when
+	 * {@link #multipartCodecs()} are not explicitly configured.
+	 * That's the same set of writers as for general except for the multipart
+	 * writer itself.
+	 */
+	void setPartWritersSupplier(Supplier<List<HttpMessageWriter<?>>> supplier) {
+		this.partWritersSupplier = supplier;
+		initTypedWriters();
+	}
+
+	@Override
 	@Nullable
 	public Boolean isEnableLoggingRequestDetails() {
 		return this.enableLoggingRequestDetails;
@@ -405,6 +445,15 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 					(KotlinSerializationProtobufDecoder) this.kotlinSerializationProtobufDecoder : new KotlinSerializationProtobufDecoder()));
 		}
 		addCodec(this.typedReaders, new FormHttpMessageReader());
+		if (this.multipartReader != null) {
+			addCodec(this.typedReaders, this.multipartReader);
+		}
+		else {
+			DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
+			addCodec(this.typedReaders, partReader);
+			addCodec(this.typedReaders, new MultipartHttpMessageReader(partReader));
+		}
+		addCodec(this.typedReaders, new PartEventHttpMessageReader());
 
 		// client vs server..
 		extendTypedReaders(this.typedReaders);
@@ -641,8 +690,24 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(writers, new ProtobufHttpMessageWriter(this.protobufEncoder != null ?
 					(ProtobufEncoder) this.protobufEncoder : new ProtobufEncoder()));
 		}
+		addCodec(writers, new MultipartHttpMessageWriter(this::getPartWriters, new FormHttpMessageWriter()));
+		addCodec(writers, new PartEventHttpMessageWriter());
+		addCodec(writers, new PartHttpMessageWriter());
 		return writers;
 	}
+
+	private List<HttpMessageWriter<?>> getPartWriters() {
+		if (this.multipartCodecs != null) {
+			return this.multipartCodecs.getWriters();
+		}
+		else if (this.partWritersSupplier != null) {
+			return this.partWritersSupplier.get();
+		}
+		else {
+			return Collections.emptyList();
+		}
+	}
+
 
 	/**
 	 * Hook for client or server specific typed writers.
@@ -765,5 +830,42 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		}
 		return this.kotlinSerializationJsonEncoder;
 	}
+
+
+	/**
+	 * Default implementation of {@link CodecConfigurer.MultipartCodecs}.
+	 */
+	protected class DefaultMultipartCodecs implements CodecConfigurer.MultipartCodecs {
+
+		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
+
+
+		DefaultMultipartCodecs() {
+		}
+
+		DefaultMultipartCodecs(DefaultMultipartCodecs other) {
+			this.writers.addAll(other.writers);
+		}
+
+
+		@Override
+		public CodecConfigurer.MultipartCodecs encoder(Encoder<?> encoder) {
+			writer(new EncoderHttpMessageWriter<>(encoder));
+			initTypedWriters();
+			return this;
+		}
+
+		@Override
+		public CodecConfigurer.MultipartCodecs writer(HttpMessageWriter<?> writer) {
+			this.writers.add(writer);
+			initTypedWriters();
+			return this;
+		}
+
+		List<HttpMessageWriter<?>> getWriters() {
+			return this.writers;
+		}
+	}
+
 
 }

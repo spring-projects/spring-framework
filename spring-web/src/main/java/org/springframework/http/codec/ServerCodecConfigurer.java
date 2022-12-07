@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,16 +81,6 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 	 * {@link CodecConfigurer.DefaultCodecs} extension with extra client-side options.
 	 */
 	interface ServerDefaultCodecs extends DefaultCodecs {
-
-		/**
-		 * Configure the {@code HttpMessageReader} to use for multipart requests.
-		 * <p>Note that {@link #maxInMemorySize(int)} and/or
-		 * {@link #enableLoggingRequestDetails(boolean)}, if configured, will be
-		 * applied to the given reader, if applicable.
-		 * @param reader the message reader to use for multipart requests.
-		 * @since 5.1.11
-		 */
-		void multipartReader(HttpMessageReader<?> reader);
 
 		/**
 		 * Configure the {@code Encoder} to use for Server-Sent Events.
