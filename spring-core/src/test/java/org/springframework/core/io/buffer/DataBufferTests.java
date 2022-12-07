@@ -318,6 +318,9 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		assertThat(result).isEqualTo((byte) 'b');
 		assertThat(inputStream.available()).isEqualTo(3);
 
+		assertThat(inputStream.markSupported()).isTrue();
+		inputStream.mark(2);
+
 		byte[] bytes = new byte[2];
 		int len = inputStream.read(bytes);
 		assertThat(len).isEqualTo(2);
@@ -332,6 +335,12 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 
 		assertThat(inputStream.read()).isEqualTo(-1);
 		assertThat(inputStream.read(bytes)).isEqualTo(-1);
+
+		inputStream.reset();
+		bytes = new byte[3];
+		len = inputStream.read(bytes);
+		assertThat(len).isEqualTo(3);
+		assertThat(bytes).containsExactly('c', 'd', 'e');
 
 		release(buffer);
 	}
