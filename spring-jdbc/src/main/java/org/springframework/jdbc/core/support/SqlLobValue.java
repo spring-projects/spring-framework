@@ -177,11 +177,11 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 			if (this.content instanceof byte[] || this.content == null) {
 				this.lobCreator.setBlobAsBytes(ps, paramIndex, (byte[]) this.content);
 			}
-			else if (this.content instanceof String) {
-				this.lobCreator.setBlobAsBytes(ps, paramIndex, ((String) this.content).getBytes());
+			else if (this.content instanceof String string) {
+				this.lobCreator.setBlobAsBytes(ps, paramIndex, string.getBytes());
 			}
-			else if (this.content instanceof InputStream) {
-				this.lobCreator.setBlobAsBinaryStream(ps, paramIndex, (InputStream) this.content, this.length);
+			else if (this.content instanceof InputStream inputStream) {
+				this.lobCreator.setBlobAsBinaryStream(ps, paramIndex, inputStream, this.length);
 			}
 			else {
 				throw new IllegalArgumentException(
@@ -192,11 +192,11 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 			if (this.content instanceof String || this.content == null) {
 				this.lobCreator.setClobAsString(ps, paramIndex, (String) this.content);
 			}
-			else if (this.content instanceof InputStream) {
-				this.lobCreator.setClobAsAsciiStream(ps, paramIndex, (InputStream) this.content, this.length);
+			else if (this.content instanceof InputStream inputStream) {
+				this.lobCreator.setClobAsAsciiStream(ps, paramIndex, inputStream, this.length);
 			}
-			else if (this.content instanceof Reader) {
-				this.lobCreator.setClobAsCharacterStream(ps, paramIndex, (Reader) this.content, this.length);
+			else if (this.content instanceof Reader reader) {
+				this.lobCreator.setClobAsCharacterStream(ps, paramIndex, reader, this.length);
 			}
 			else {
 				throw new IllegalArgumentException(

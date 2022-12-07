@@ -291,11 +291,11 @@ public abstract class NamedParameterUtils {
 			actualSql.append(originalSql, lastIndex, startIndex);
 			if (paramSource != null && paramSource.hasValue(paramName)) {
 				Object value = paramSource.getValue(paramName);
-				if (value instanceof SqlParameterValue) {
-					value = ((SqlParameterValue) value).getValue();
+				if (value instanceof SqlParameterValue sqlParameterValue) {
+					value = sqlParameterValue.getValue();
 				}
-				if (value instanceof Iterable) {
-					Iterator<?> entryIter = ((Iterable<?>) value).iterator();
+				if (value instanceof Iterable<?> iterable) {
+					Iterator<?> entryIter = iterable.iterator();
 					int k = 0;
 					while (entryIter.hasNext()) {
 						if (k > 0) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,8 +206,8 @@ public class PreparedStatementCreatorFactory {
 				Set<String> names = new HashSet<>();
 				for (int i = 0; i < parameters.size(); i++) {
 					Object param = parameters.get(i);
-					if (param instanceof SqlParameterValue) {
-						names.add(((SqlParameterValue) param).getName());
+					if (param instanceof SqlParameterValue sqlParameterValue) {
+						names.add(sqlParameterValue.getName());
 					}
 					else {
 						names.add("Parameter #" + i);
@@ -252,9 +252,9 @@ public class PreparedStatementCreatorFactory {
 				SqlParameter declaredParameter;
 				// SqlParameterValue overrides declared parameter meta-data, in particular for
 				// independence from the declared parameter position in case of named parameters.
-				if (in instanceof SqlParameterValue paramValue) {
-					in = paramValue.getValue();
-					declaredParameter = paramValue;
+				if (in instanceof SqlParameterValue sqlParameterValue) {
+					in = sqlParameterValue.getValue();
+					declaredParameter = sqlParameterValue;
 				}
 				else {
 					if (declaredParameters.size() <= i) {

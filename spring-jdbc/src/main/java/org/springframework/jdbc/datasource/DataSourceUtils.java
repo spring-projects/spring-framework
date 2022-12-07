@@ -438,8 +438,8 @@ public abstract class DataSourceUtils {
 	 */
 	public static Connection getTargetConnection(Connection con) {
 		Connection conToUse = con;
-		while (conToUse instanceof ConnectionProxy) {
-			conToUse = ((ConnectionProxy) conToUse).getTargetConnection();
+		while (conToUse instanceof ConnectionProxy connectionProxy) {
+			conToUse = connectionProxy.getTargetConnection();
 		}
 		return conToUse;
 	}
@@ -455,9 +455,9 @@ public abstract class DataSourceUtils {
 	private static int getConnectionSynchronizationOrder(DataSource dataSource) {
 		int order = CONNECTION_SYNCHRONIZATION_ORDER;
 		DataSource currDs = dataSource;
-		while (currDs instanceof DelegatingDataSource) {
+		while (currDs instanceof DelegatingDataSource delegatingDataSource) {
 			order--;
-			currDs = ((DelegatingDataSource) currDs).getTargetDataSource();
+			currDs = delegatingDataSource.getTargetDataSource();
 		}
 		return order;
 	}

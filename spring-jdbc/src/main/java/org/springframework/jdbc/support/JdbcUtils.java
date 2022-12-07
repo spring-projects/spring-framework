@@ -213,10 +213,10 @@ public abstract class JdbcUtils {
 			if (obj instanceof String) {
 				return obj;
 			}
-			else if (obj instanceof Number) {
+			else if (obj instanceof Number number) {
 				// Defensively convert any Number to an Integer (as needed by our
 				// ConversionService's IntegerToEnumConverterFactory) for use as index
-				return NumberUtils.convertNumberToTargetClass((Number) obj, Integer.class);
+				return NumberUtils.convertNumberToTargetClass(number, Integer.class);
 			}
 			else {
 				// e.g. on Postgres: getObject returns a PGObject but we need a String
@@ -405,8 +405,8 @@ public abstract class JdbcUtils {
 								"Could not access DatabaseMetaData method '" + metaDataMethodName + "'", ex);
 					}
 					catch (InvocationTargetException ex) {
-						if (ex.getTargetException() instanceof SQLException) {
-							throw (SQLException) ex.getTargetException();
+						if (ex.getTargetException() instanceof SQLException sqlException) {
+							throw sqlException;
 						}
 						throw new MetaDataAccessException(
 								"Invocation of DatabaseMetaData method '" + metaDataMethodName + "' failed", ex);
