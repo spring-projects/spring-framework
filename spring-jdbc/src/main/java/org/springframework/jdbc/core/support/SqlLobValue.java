@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,15 @@ import org.springframework.lang.Nullable;
 
 /**
  * Object to represent an SQL BLOB/CLOB value parameter. BLOBs can either be an
- * InputStream or a byte array. CLOBs can be in the form of a Reader, InputStream
+ * InputStream or a byte array. CLOBs can be in the form of a Reader, InputStream,
  * or String. Each CLOB/BLOB value will be stored together with its length.
- * The type is based on which constructor is used. Objects of this class are
- * immutable except for the LobCreator reference. Use them and discard them.
+ * The type is based on which constructor is used. Instances of this class are
+ * stateful and immutable: use them and discard them.
  *
- * <p>This class holds a reference to a LocCreator that must be closed after the
- * update has completed. This is done via a call to the closeLobCreator method.
- * All handling of the LobCreator is done by the framework classes that use it -
- * no need to set or close the LobCreator for end users of this class.
+ * <p>This class holds a reference to a {@link LobCreator} that must be closed after
+ * the update has completed. This is done via a call to the {@link #cleanup()} method.
+ * All handling of the {@code LobCreator} is done by the framework classes that use it -
+ * no need to set or close the {@code LobCreator} for end users of this class.
  *
  * <p>A usage example:
  *
@@ -72,8 +72,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	private final int length;
 
 	/**
-	 * This contains a reference to the LobCreator - so we can close it
-	 * once the update is done.
+	 * Reference to the LobCreator - so we can close it once the update is done.
 	 */
 	private final LobCreator lobCreator;
 
