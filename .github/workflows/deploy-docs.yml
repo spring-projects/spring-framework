@@ -1,0 +1,42 @@
+name: Deploy Docs
+run-name: ${{ format('{0} ({1})', github.workflow, github.event.inputs.build-refname || 'all') }}
+on:
+  workflow_dispatch:
+    inputs:
+      build-refname:
+        description: Enter git refname to build (e.g., 5.7.x).
+        required: false
+  push:
+    branches: docs-build
+env:
+  GRADLE_ENTERPRISE_SECRET_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
+permissions: read-all
+jobs:
+  build:
+    if: github.repository_owner == 'spring-projects'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 5
+    - name: Set Up Gradle
+      uses: spring-io/spring-gradle-build-action@v2
+      with:
+        java-version: '17'
+        distribution: temurin
+    - name: Set up refname build
+      if: github.event.inputs.build-refname
+      run: |
+        git fetch --depth 1 https://github.com/$GITHUB_REPOSITORY ${{ github.event.inputs.build-refname }}
+        echo BUILD_REFNAME=${{ github.event.inputs.build-refname }} >> $GITHUB_ENV
+        echo BUILD_VERSION=$(git cat-file --textconv FETCH_HEAD:gradle.properties | sed -n '/^version=/ { s/^version=//;p }') >> $GITHUB_ENV
+    - name: Run Antora
+      run: ./gradlew antora
+    - name: Publish Docs
+      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.5
+      with:
+        docs-username: ${{ secrets.DOCS_USERNAME }}
+        docs-host: ${{ secrets.DOCS_HOST }}
+        docs-ssh-key: ${{ secrets.DOCS_SSH_KEY }}
+        docs-ssh-host-key: ${{ secrets.DOCS_SSH_HOST_KEY }}

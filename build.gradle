@@ -1,0 +1,23 @@
+plugins {
+	id 'base'
+	id 'org.antora' version '1.0.0'
+}
+
+antora {
+    version = '3.2.0-alpha.2'
+	options = ['--clean', '--fetch', '--stacktrace']
+	environment = [
+		'ALGOLIA_API_KEY': '042f6aaab6ce998d2ea29e60167e1660',
+		'ALGOLIA_APP_ID': 'WB1FQYI187',
+		'ALGOLIA_INDEX_NAME': 'springframework'
+    ]
+	// NOTE remember to update the versions in lib/antora/templates/per-branch-antora-playbook.yml as well
+	dependencies = [
+			'@antora/atlas-extension': '1.0.0-alpha.1',
+			'@antora/collector-extension': '1.0.0-alpha.3',
+			'@asciidoctor/tabs': '1.0.0-beta.3',
+			'@opendevise/antora-release-line-extension': '1.0.0',
+			'@springio/antora-extensions': '1.3.0',
+			'@springio/asciidoctor-extensions': '1.0.0-alpha.9',
+	]
+}

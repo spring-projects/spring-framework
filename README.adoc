@@ -1,0 +1,140 @@
+= Spring Framework Docs Build
+
+You're currently viewing the Antora playbook branch.
+The playbook branch hosts the docs build that is used to build and publish the production docs site.
+
+The Spring Framework reference docs are built using https://antora.org[Antora].
+This README covers how to build the docs in a software branch as well as how to build the production docs site locally.
+
+== Overview
+
+To prepare your system for building the documentation, <<prerequisites,install the prerequisites>> and then <<build-main,create your workspace and build the main branch documentation>>.
+Once you've completed those steps, follow the instructions in <<build-branch,Build the 6.0.x branch documentation>> to learn how to build the documentation for a version branch you haven't previously checked out.
+
+To build the production site documentation on your computer, follow the instructions in <<prerequisites,Prerequisites>>, <<build-main,Build the main branch documentation>>, and then <<build-production,Build the production documentation site>>.
+
+.Branch checkout instead of worktrees
+[NOTE]
+====
+If you prefer to set up your workspace without worktrees, complete the steps in <<prerequisites,Prerequisites>> and clone the project repository onto your computer.
+Then follow the instructions in each section starting from the `sdk env || sdk env install` step once you've checked out the desired branch.
+====
+
+[#prerequisites]
+== Prerequisites (everyone)
+
+These instructions assume you already have basic tools on your system, including bash, zip, unzip, git, and curl.
+In addition to these basic tools, you need https://sdkman.io/install[SDKMAN!] installed so that the correct JDK is set for each branch.
+
+. Open your terminal and enter the following command:
++
+--
+ $ curl -s "https://get.sdkman.io" | bash
+
+This command downloads and installs SDKMAN!
+Once installation is complete, you should see a command displayed in your terminal that will initiate SDKMAN.
+--
+
+. Copy the command displayed in your terminal and run it.
+`$HOME` is the path unique to your computer (e.g., _home/my-jam/.sdkman/bin/sdkman-init.sh_).
+
+ $ source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+You'll use SDKMAN in the next sections to install and switch to the JDK required for each branch.
+Now you're ready to <<build-main,create your workspace>>.
+
+[#build-main]
+== Build the main branch documentation (writers)
+
+Your workspace will be the folder that contains the git worktrees of the project.
+
+. In your terminal, create a directory for the project and then change into that directory.
+
+ $ mkdir spring-framework
+ $ cd spring-framework
+
+. Clone the project repository and create the primary worktree for the main branch.
+Then change into the new _main_ folder.
+
+ $ git clone https://github.com/spring-projects/spring-framework main
+ $ cd main
+
+. Switch to the required JDK using SDKMAN by running the following command:
++
+--
+ $ sdk env || sdk env install
+
+SDKMAN will switch to the required JDK or install it if it isn't present.
+--
+
+. Generate the documentation with Antora using the following command:
++
+--
+ $ ./gradlew -PbuildSrc.skipTests=true :framework-docs:antora
+
+This command will build the documentation, including any generated attributes, for the main branch.
+--
+
+. Navigate to _$HOME/spring-framework/main/framework-docs/build/site/index.html_ to view the generated documentation.
+
+[#build-branch]
+== Build the 6.0.x branch documentation (writers)
+
+NOTE: The instructions in this section assume you've completed the steps in the <<build-main,previous section>>.
+
+After creating the worktree for the main branch, you can set up a worktree for any other branches you'll work on in the future.
+In this section, you'll create a worktree for the 6.0.x branch in your project workspace.
+
+. To add a worktree, you have to be in a worktree.
+In your terminal, change to the _main_ folder if you aren't already in it, e.g., _$HOME/spring-framework/main_.
+Set up a worktree for the 6.0.x branch and then change into the new directory by running the following commands:
+
+ $ git worktree add ../6.0.x 6.0.x --track
+ $ cd ../6.0.x
+
+. Switch to the required JDK or install it.
+
+ $ sdk env || sdk env install
+
+. Generate the documentation with the following command:
++
+--
+ $ ./gradlew -PbuildSrc.skipTests=true :framework-docs:antora
+
+This command will build the documentation, including any generated attributes, for the 6.0.x branch.
+--
+
+. Navigate to _$HOME/spring-framework/6.0.x/docs/build/site/index.html_ to view the generated documentation.
+
+[#build-production]
+== Build the production documentation site (docs manager)
+
+NOTE: The instructions in this section assume you've <<build-main,prepared your workspace and created the worktree for the main branch>>.
+
+To build the project's production site, you'll set up a worktree for the docs-build branch of the repository.
+
+. To add a worktree, you have to be in a worktree.
+In your terminal, change to the _main_ folder if you aren't already in it, e.g., _$HOME/spring-framework/main_.
+Run the following command to set up the worktree for the _docs-build_ branch.
+Then change into the new _docs-build_ directory.
+
+ $ git worktree add ../docs-build docs-build --track
+ $ cd ../docs-build
+
+. Switch to the required JDK or install it.
+
+ $ sdk env || sdk env install
+
+. Generate the documentation for the project's production site using the following command:
++
+--
+ $ ./gradlew antora
+
+This command will build all of the documentation included in the project's production site from the repository on GitHub.
+
+To build the documentation from the current clone, using any worktrees that are available, use the following command instead:
+
+ $ ./gradlew antora --playbook local-antora-playbook.yml
+--
+
+. Navigate to _$HOME/spring-framework/docs-site/build/site/index.html_ to view the generated documentation.

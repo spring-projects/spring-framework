@@ -1,0 +1,6 @@
+# Use sdkman to run "sdk env" to initialize with correct JDK version
+# Enable auto-env through the sdkman_auto_env config
+# See https://sdkman.io/usage#config
+# A summary is to add the following to ~/.sdkman/etc/config
+# sdkman_auto_env=true
+java=17.0.3-tem

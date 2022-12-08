@@ -1,0 +1,39 @@
+antora:
+  extensions:
+  - '@antora/collector-extension'
+  - '@antora/atlas-extension'
+  - '@opendevise/antora-release-line-extension'
+  - '@springio/antora-extensions/latest-version-extension'
+  - require: '@springio/antora-extensions/root-component-extension'
+    root_component_name: 'framework'
+site:
+  title: Spring Framework
+  url: https://docs.spring.io/spring-security/reference
+  robots: allow
+git:
+  ensure_git_suffix: false
+content:
+  sources:
+  - url: https://github.com/rwinch/spring-framework
+    branches: [6.0.x]
+    start_path: framework-docs
+asciidoc:
+  extensions:
+    - '@asciidoctor/tabs'
+    - '@springio/asciidoctor-extensions'
+    - '@springio/asciidoctor-extensions/include-code-extension'
+  attributes:
+    page-pagination: ''
+    hide-uri-scheme: '@'
+    include-java: 'example$docs-src/main/java/org/springframework/docs'
+urls:
+  latest_version_segment_strategy: redirect:to
+  latest_version_segment: ''
+  redirect_facility: httpd
+runtime:
+  log:
+    failure_level: warn
+ui:
+  bundle:
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.2.2/ui-bundle.zip
+    snapshot: true
