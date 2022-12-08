@@ -73,7 +73,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				// Optimization to avoid creating ClassReader for superclass.
 				Boolean superClassMatch = matchSuperClass(superClassName);
 				if (superClassMatch != null) {
-					if (superClassMatch.booleanValue()) {
+					if (superClassMatch) {
 						return true;
 					}
 				}
@@ -99,7 +99,7 @@ public abstract class AbstractTypeHierarchyTraversingFilter implements TypeFilte
 				// Optimization to avoid creating ClassReader for superclass
 				Boolean interfaceMatch = matchInterface(ifc);
 				if (interfaceMatch != null) {
-					if (interfaceMatch.booleanValue()) {
+					if (interfaceMatch) {
 						return true;
 					}
 				}

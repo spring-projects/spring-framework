@@ -268,6 +268,17 @@ public class ComponentScanAnnotationIntegrationTests {
 		assertThat(ctx.containsBean("fooServiceImpl")).isTrue();
 	}
 
+	@Test
+	public void testScannableBean() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ComponentScanWithScannable.class);
+		ctx.refresh();
+		assertThat(ctx.containsBean("unscannableController")).isFalse();
+		assertThat(ctx.containsBean("unscannableSerivce")).isFalse();
+		assertThat(ctx.containsBean("unscannableDao")).isFalse();
+		assertThat(ctx.containsBean("fooServiceImpl")).isTrue();
+	}
+
 
 	@Configuration
 	@ComponentScan
@@ -460,5 +471,12 @@ class ComponentScanWithMultipleAnnotationIncludeFilters2 {}
 		basePackages = "example.scannable",
 		basePackageClasses = example.scannable.PackageMarker.class)
 class ComponentScanWithBasePackagesAndValueAlias {}
+
+@ComponentScan(
+		value = "example.scannable")
+class ComponentScanWithScannable{
+
+}
+
 
 

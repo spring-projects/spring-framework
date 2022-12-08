@@ -52,4 +52,9 @@ public @interface Component {
 	 */
 	String value() default "";
 
+	/**
+	 * return true if this component can be scanned.
+	 */
+	boolean scannable() default true;
+
 }

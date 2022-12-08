@@ -46,7 +46,7 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 
 	private final Class<? extends Annotation> annotationType;
 
-	private final boolean considerMetaAnnotations;
+	protected final boolean considerMetaAnnotations;
 
 
 	/**

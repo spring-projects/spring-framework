@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -58,4 +59,6 @@ public @interface RestController {
 	@AliasFor(annotation = Controller.class)
 	String value() default "";
 
+	@AliasFor(annotation = Component.class, attribute = "scannable")
+	boolean scannable() default true;
 }

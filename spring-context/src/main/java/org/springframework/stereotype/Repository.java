@@ -69,4 +69,7 @@ public @interface Repository {
 	@AliasFor(annotation = Component.class)
 	String value() default "";
 
+	@AliasFor(annotation = Component.class, attribute = "scannable")
+	boolean scannable() default true;
+
 }

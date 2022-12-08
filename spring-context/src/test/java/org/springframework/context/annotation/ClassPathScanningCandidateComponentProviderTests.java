@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -56,6 +57,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.type.filter.AnnotationAttributesFilter;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
@@ -204,7 +206,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 	}
 
 	private void testCustomAnnotationTypeIncludeFilter(ClassPathScanningCandidateComponentProvider provider) {
-		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
+		provider.addIncludeFilter(new AnnotationAttributesFilter(Component.class, Map.of("scannable", true)));
 		testDefault(provider, false, false);
 	}
 
@@ -247,7 +249,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 	}
 
 	private void testCustomSupportedIncludeAndExcludeFilter(ClassPathScanningCandidateComponentProvider provider) {
-		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
+		provider.addIncludeFilter(new AnnotationAttributesFilter(Component.class, Map.of("scannable", true)));
 		provider.addExcludeFilter(new AnnotationTypeFilter(Service.class));
 		provider.addExcludeFilter(new AnnotationTypeFilter(Repository.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
@@ -346,7 +348,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 	@Test
 	void withMultipleMatchingFilters() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
-		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
+		provider.addIncludeFilter(new AnnotationAttributesFilter(Component.class, Map.of("scannable", true)));
 		provider.addIncludeFilter(new AssignableTypeFilter(FooServiceImpl.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
 		assertBeanTypes(candidates, NamedComponent.class, ServiceInvocationCounter.class, FooServiceImpl.class,
@@ -356,7 +358,7 @@ class ClassPathScanningCandidateComponentProviderTests {
 	@Test
 	void excludeTakesPrecedence() {
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
-		provider.addIncludeFilter(new AnnotationTypeFilter(Component.class));
+		provider.addIncludeFilter(new AnnotationAttributesFilter(Component.class, Map.of("scannable", true)));
 		provider.addIncludeFilter(new AssignableTypeFilter(FooServiceImpl.class));
 		provider.addExcludeFilter(new AssignableTypeFilter(FooService.class));
 		Set<BeanDefinition> candidates = provider.findCandidateComponents(TEST_BASE_PACKAGE);
