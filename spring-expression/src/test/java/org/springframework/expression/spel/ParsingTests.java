@@ -67,37 +67,31 @@ class ParsingTests {
 			parseCheck("#var1='value1'");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
 		void collectionProcessorsCountStringArray() {
 			parseCheck("new String[] {'abc','def','xyz'}.count()");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
 		void collectionProcessorsCountIntArray() {
 			parseCheck("new int[] {1,2,3}.count()");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
 		void collectionProcessorsMax() {
 			parseCheck("new int[] {1,2,3}.max()");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
 		void collectionProcessorsMin() {
 			parseCheck("new int[] {1,2,3}.min()");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
 		void collectionProcessorsAverage() {
 			parseCheck("new int[] {1,2,3}.average()");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
 		void collectionProcessorsSort() {
 			parseCheck("new int[] {3,2,1}.sort()");
@@ -444,32 +438,70 @@ class ParsingTests {
 
 		@Test
 		void methods() {
+			parseCheck("echo()");
 			parseCheck("echo(12)");
 			parseCheck("echo(name)");
+			parseCheck("echo('Jane')");
+			parseCheck("echo('Jane',32)");
+			parseCheck("echo('Jane', 32)", "echo('Jane',32)");
 			parseCheck("age.doubleItAndAdd(12)");
 		}
 
 		@Test
-		void constructors() {
-			parseCheck("new String('hello')");
+		void constructorWithNoArguments() {
+			parseCheck("new Foo()");
+			parseCheck("new example.Foo()");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
-		void arrayConstruction01() {
+		void constructorWithOneArgument() {
+			parseCheck("new String('hello')");
+			parseCheck("new String( 'hello' )", "new String('hello')");
+			parseCheck("new String(\"hello\" )", "new String('hello')");
+		}
+
+		@Test
+		void constructorWithMultipleArguments() {
+			parseCheck("new example.Person('Jane',32,true)");
+			parseCheck("new example.Person('Jane', 32, true)", "new example.Person('Jane',32,true)");
+			parseCheck("new example.Person('Jane', 2 * 16, true)", "new example.Person('Jane',(2 * 16),true)");
+		}
+
+		@Test
+		void arrayConstructionWithOneDimensionalReferenceType() {
 			parseCheck("new String[3]");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
-		void arrayConstruction02() {
-			parseCheck("new int[] {1, 2, 3, 4, 5}", "new int[] {1,2,3,4,5}");
+		void arrayConstructionWithOneDimensionalFullyQualifiedReferenceType() {
+			parseCheck("new java.lang.String[3]");
 		}
 
-		@Disabled("toStringAST() is broken for array construction")
 		@Test
-		void arrayConstruction03() {
-			parseCheck("new String[] {'abc','xyz'}", "new String[] {'abc','xyz'}");
+		void arrayConstructionWithOneDimensionalPrimitiveType() {
+			parseCheck("new int[3]");
+		}
+
+		@Test
+		void arrayConstructionWithMultiDimensionalReferenceType() {
+			parseCheck("new Float[3][4]");
+		}
+
+		@Test
+		void arrayConstructionWithMultiDimensionalPrimitiveType() {
+			parseCheck("new int[3][4]");
+		}
+
+		@Test
+		void arrayConstructionWithOneDimensionalReferenceTypeWithInitializer() {
+			parseCheck("new String[] {'abc','xyz'}");
+			parseCheck("new String[] {'abc', 'xyz'}", "new String[] {'abc','xyz'}");
+		}
+
+		@Test
+		void arrayConstructionWithOneDimensionalPrimitiveTypeWithInitializer() {
+			parseCheck("new int[] {1,2,3,4,5}");
+			parseCheck("new int[] {1, 2, 3, 4, 5}", "new int[] {1,2,3,4,5}");
 		}
 	}
 
