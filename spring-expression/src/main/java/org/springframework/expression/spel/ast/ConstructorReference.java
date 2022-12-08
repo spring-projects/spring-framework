@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.core.convert.TypeDescriptor;
@@ -46,10 +47,15 @@ import org.springframework.util.Assert;
  * Represents the invocation of a constructor. Either a constructor on a regular type or
  * construction of an array. When an array is constructed, an initializer can be specified.
  *
- * <p>Examples:<br>
- * new String('hello world')<br>
- * new int[]{1,2,3,4}<br>
- * new int[3] new int[3]{1,2,3}
+ * <h4>Examples</h4>
+ * <ul>
+ * <li><code>new example.Foo()</code></li>
+ * <li><code>new String('hello world')</code></li>
+ * <li><code>new int[] {1,2,3,4}</code></li>
+ * <li><code>new String[] {'abc','xyz'}</code></li>
+ * <li><code>new int[5]</code></li>
+ * <li><code>new int[3][4]</code></li>
+ * </ul>
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -68,7 +74,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	private final boolean isArrayConstructor;
 
 	@Nullable
-	private SpelNodeImpl[] dimensions;
+	private final SpelNodeImpl[] dimensions;
 
 	// TODO is this caching safe - passing the expression around will mean this executor is also being passed around
 	/** The cached executor that may be reused on subsequent evaluations. */
@@ -83,6 +89,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	public ConstructorReference(int startPos, int endPos, SpelNodeImpl... arguments) {
 		super(startPos, endPos, arguments);
 		this.isArrayConstructor = false;
+		this.dimensions = null;
 	}
 
 	/**
@@ -214,16 +221,33 @@ public class ConstructorReference extends SpelNodeImpl {
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder("new ");
-		int index = 0;
-		sb.append(getChild(index++).toStringAST());
-		sb.append('(');
-		for (int i = index; i < getChildCount(); i++) {
-			if (i > index) {
-				sb.append(',');
+		sb.append(getChild(0).toStringAST()); // constructor or array type
+
+		// Arrays
+		if (this.isArrayConstructor) {
+			if (hasInitializer()) {
+				// new int[] {1, 2, 3, 4, 5}, etc.
+				InlineList initializer = (InlineList) getChild(1);
+				sb.append("[] ").append(initializer.toStringAST());
 			}
-			sb.append(getChild(i).toStringAST());
+			else {
+				// new int[3], new java.lang.String[3][4], etc.
+				for (SpelNodeImpl dimension : this.dimensions) {
+					sb.append('[').append(dimension.toStringAST()).append(']');
+				}
+			}
 		}
-		sb.append(')');
+		// Constructors
+		else {
+			// new String('hello'), new org.example.Person('Jane', 32), etc.
+			StringJoiner sj = new StringJoiner(",", "(", ")");
+			int count = getChildCount();
+			for (int i = 1; i < count; i++) {
+				sj.add(getChild(i).toStringAST());
+			}
+			sb.append(sj.toString());
+		}
+
 		return sb.toString();
 	}
 
