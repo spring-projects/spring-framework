@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - '*.x'
+permissions:
+  contents: read
 jobs:
   build:
     permissions:
