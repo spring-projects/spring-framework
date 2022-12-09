@@ -25,7 +25,6 @@ import java.util.Map;
 import jakarta.websocket.ClientEndpointConfig;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.WebSocketContainer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -46,31 +45,21 @@ import static org.mockito.Mockito.verify;
  *
  * @author Rossen Stoyanchev
  */
-public class StandardWebSocketClientTests {
+class StandardWebSocketClientTests {
 
-	private StandardWebSocketClient wsClient;
+	private final WebSocketHandler wsHandler = new AbstractWebSocketHandler() {};
 
-	private WebSocketContainer wsContainer;
+	private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
-	private WebSocketHandler wsHandler;
+	private final WebSocketContainer wsContainer = mock(WebSocketContainer.class);
 
-	private WebSocketHttpHeaders headers;
-
-
-	@BeforeEach
-	public void setup() {
-		this.headers = new WebSocketHttpHeaders();
-		this.wsHandler = new AbstractWebSocketHandler() {
-		};
-		this.wsContainer = mock(WebSocketContainer.class);
-		this.wsClient = new StandardWebSocketClient(this.wsContainer);
-	}
+	private final StandardWebSocketClient wsClient = new StandardWebSocketClient(this.wsContainer);
 
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testGetLocalAddress() throws Exception {
-		URI uri = new URI("ws://localhost/abc");
+	void getLocalAddress() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getLocalAddress()).isNotNull();
@@ -79,8 +68,8 @@ public class StandardWebSocketClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testGetLocalAddressWss() throws Exception {
-		URI uri = new URI("wss://localhost/abc");
+	void getLocalAddressWss() throws Exception {
+		URI uri = URI.create("wss://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getLocalAddress()).isNotNull();
@@ -89,16 +78,16 @@ public class StandardWebSocketClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testGetLocalAddressNoScheme() throws Exception {
-		URI uri = new URI("localhost/abc");
+	void getLocalAddressNoScheme() {
+		URI uri = URI.create("localhost/abc");
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.wsClient.doHandshake(this.wsHandler, this.headers, uri));
 	}
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testGetRemoteAddress() throws Exception {
-		URI uri = new URI("wss://localhost/abc");
+	void getRemoteAddress() throws Exception {
+		URI uri = URI.create("wss://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getRemoteAddress()).isNotNull();
@@ -108,8 +97,8 @@ public class StandardWebSocketClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void handshakeHeaders() throws Exception {
-		URI uri = new URI("ws://localhost/abc");
+	void handshakeHeaders() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
 		this.headers.add("foo", "bar");
@@ -122,8 +111,8 @@ public class StandardWebSocketClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void clientEndpointConfig() throws Exception {
-		URI uri = new URI("ws://localhost/abc");
+	void clientEndpointConfig() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
 
@@ -138,10 +127,10 @@ public class StandardWebSocketClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void clientEndpointConfigWithUserProperties() throws Exception {
+	void clientEndpointConfigWithUserProperties() throws Exception {
 		Map<String,Object> userProperties = Collections.singletonMap("foo", "bar");
 
-		URI uri = new URI("ws://localhost/abc");
+		URI uri = URI.create("ws://localhost/abc");
 		this.wsClient.setUserProperties(userProperties);
 		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
@@ -154,8 +143,8 @@ public class StandardWebSocketClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void standardWebSocketClientConfiguratorInsertsHandshakeHeaders() throws Exception {
-		URI uri = new URI("ws://localhost/abc");
+	void standardWebSocketClientConfiguratorInsertsHandshakeHeaders() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		this.headers.add("foo", "bar");
 
 		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
@@ -171,8 +160,8 @@ public class StandardWebSocketClientTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void taskExecutor() throws Exception {
-		URI uri = new URI("ws://localhost/abc");
+	void taskExecutor() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		this.wsClient.setTaskExecutor(new SimpleAsyncTaskExecutor());
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 

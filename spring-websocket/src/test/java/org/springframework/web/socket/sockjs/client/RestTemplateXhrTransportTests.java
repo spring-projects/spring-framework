@@ -130,7 +130,7 @@ class RestTemplateXhrTransportTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	void connectFailure() throws Exception {
+	void connectFailure() {
 		final HttpServerErrorException expected = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
 		RestOperations restTemplate = mock(RestOperations.class);
 		given(restTemplate.execute((URI) any(), eq(HttpMethod.POST), any(), any())).willThrow(expected);
@@ -180,18 +180,18 @@ class RestTemplateXhrTransportTests {
 
 	@SuppressWarnings("deprecation")
 	private org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
-			ClientHttpResponse... responses) throws Exception {
+			ClientHttpResponse... responses) {
 		return connect(new TestRestTemplate(responses));
 	}
 
 	@SuppressWarnings("deprecation")
 	private org.springframework.util.concurrent.ListenableFuture<WebSocketSession> connect(
-			RestOperations restTemplate, ClientHttpResponse... responses) throws Exception {
+			RestOperations restTemplate, ClientHttpResponse... responses) {
 
 		RestTemplateXhrTransport transport = new RestTemplateXhrTransport(restTemplate);
 		transport.setTaskExecutor(new SyncTaskExecutor());
 
-		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
+		SockJsUrlInfo urlInfo = new SockJsUrlInfo(URI.create("https://example.com"));
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("h-foo", "h-bar");
 		TransportRequest request = new DefaultTransportRequest(urlInfo, headers, headers,

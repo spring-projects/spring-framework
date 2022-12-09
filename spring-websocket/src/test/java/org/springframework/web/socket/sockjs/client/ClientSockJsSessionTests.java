@@ -48,7 +48,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class ClientSockJsSessionTests {
+class ClientSockJsSessionTests {
 
 	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
@@ -60,8 +60,8 @@ public class ClientSockJsSessionTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
-		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
+	void setup() {
+		SockJsUrlInfo urlInfo = new SockJsUrlInfo(URI.create("https://example.com"));
 		Transport transport = mock(Transport.class);
 		TransportRequest request = new DefaultTransportRequest(urlInfo, null, null, transport, TransportType.XHR, CODEC);
 		this.handler = mock(WebSocketHandler.class);
@@ -71,7 +71,7 @@ public class ClientSockJsSessionTests {
 
 
 	@Test
-	public void handleFrameOpen() throws Exception {
+	void handleFrameOpen() throws Exception {
 		assertThat(this.session.isOpen()).isFalse();
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThat(this.session.isOpen()).isTrue();
@@ -82,7 +82,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void handleFrameOpenWhenStatusNotNew() throws Exception {
+	void handleFrameOpenWhenStatusNotNew() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThat(this.session.isOpen()).isTrue();
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
@@ -90,14 +90,14 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void handleFrameOpenWithWebSocketHandlerException() throws Exception {
+	void handleFrameOpenWithWebSocketHandlerException() throws Exception {
 		willThrow(new IllegalStateException("Fake error")).given(this.handler).afterConnectionEstablished(this.session);
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThat(this.session.isOpen()).isTrue();
 	}
 
 	@Test
-	public void handleFrameMessage() throws Exception {
+	void handleFrameMessage() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.handleFrame(SockJsFrame.messageFrame(CODEC, "foo", "bar").getContent());
 		verify(this.handler).afterConnectionEstablished(this.session);
@@ -107,7 +107,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void handleFrameMessageWhenNotOpen() throws Exception {
+	void handleFrameMessageWhenNotOpen() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.close();
 		reset(this.handler);
@@ -116,7 +116,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void handleFrameMessageWithBadData() throws Exception {
+	void handleFrameMessageWithBadData() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.handleFrame("a['bad data");
 		assertThat(this.session.isOpen()).isFalse();
@@ -126,7 +126,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void handleFrameMessageWithWebSocketHandlerException() throws Exception {
+	void handleFrameMessageWithWebSocketHandlerException() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		willThrow(new IllegalStateException("Fake error")).given(this.handler)
 				.handleMessage(this.session, new TextMessage("foo"));
@@ -141,7 +141,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void handleFrameClose() throws Exception {
+	void handleFrameClose() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.handleFrame(SockJsFrame.closeFrame(1007, "").getContent());
 		assertThat(this.session.isOpen()).isFalse();
@@ -151,7 +151,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void handleTransportError() throws Exception {
+	void handleTransportError() throws Exception {
 		final IllegalStateException ex = new IllegalStateException("Fake error");
 		this.session.handleTransportError(ex);
 		verify(this.handler).handleTransportError(this.session, ex);
@@ -159,7 +159,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void afterTransportClosed() throws Exception {
+	void afterTransportClosed() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.afterTransportClosed(CloseStatus.SERVER_ERROR);
 		assertThat(this.session.isOpen()).isFalse();
@@ -169,7 +169,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void close() throws Exception {
+	void close() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.close();
 		assertThat(this.session.isOpen()).isFalse();
@@ -179,14 +179,14 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void closeWithStatus() throws Exception {
+	void closeWithStatus() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.close(new CloseStatus(3000, "reason"));
 		assertThat(this.session.disconnectStatus).isEqualTo(new CloseStatus(3000, "reason"));
 	}
 
 	@Test
-	public void closeWithNullStatus() throws Exception {
+	void closeWithNullStatus() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.session.close(null))
@@ -194,7 +194,7 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void closeWithStatusOutOfRange() throws Exception {
+	void closeWithStatusOutOfRange() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.session.close(new CloseStatus(2999, "reason")))
@@ -202,13 +202,13 @@ public class ClientSockJsSessionTests {
 	}
 
 	@Test
-	public void timeoutTask() {
+	void timeoutTask() {
 		this.session.getTimeoutTask().run();
 		assertThat(this.session.disconnectStatus).isEqualTo(new CloseStatus(2007, "Transport timed out"));
 	}
 
 	@Test
-	public void send() throws Exception {
+	void send() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
 		this.session.sendMessage(new TextMessage("foo"));
 		assertThat(this.session.sentMessage).isEqualTo(new TextMessage("[\"foo\"]"));

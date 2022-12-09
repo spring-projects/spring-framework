@@ -59,7 +59,7 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol("foo");
-		URI url = new URI(getWsBaseUrl() + "/ws");
+		URI url = URI.create(getWsBaseUrl() + "/ws");
 		WebSocketSession session = this.webSocketClient.doHandshake(new TextWebSocketHandler(), headers, url).get();
 		assertThat(session.getAcceptedProtocol()).isEqualTo("foo");
 		session.close();

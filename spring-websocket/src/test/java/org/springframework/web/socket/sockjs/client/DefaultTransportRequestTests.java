@@ -45,10 +45,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class DefaultTransportRequestTests {
+class DefaultTransportRequestTests {
 
-	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
-
+	private final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
 	private CompletableFuture<WebSocketSession> connectFuture;
 
@@ -61,7 +60,7 @@ public class DefaultTransportRequestTests {
 
 	@SuppressWarnings("unchecked")
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() {
 		this.connectCallback = mock(BiConsumer.class);
 		this.connectFuture = new CompletableFuture<>();
 		this.connectFuture.whenComplete(this.connectCallback);
@@ -71,7 +70,7 @@ public class DefaultTransportRequestTests {
 
 
 	@Test
-	public void connect() throws Exception {
+	void connect() throws Exception {
 		DefaultTransportRequest request = createTransportRequest(this.webSocketTransport, TransportType.WEBSOCKET);
 		request.connect(null, this.connectFuture);
 		WebSocketSession session = mock(WebSocketSession.class);
@@ -80,7 +79,7 @@ public class DefaultTransportRequestTests {
 	}
 
 	@Test
-	public void fallbackAfterTransportError() throws Exception {
+	void fallbackAfterTransportError() {
 		DefaultTransportRequest request1 = createTransportRequest(this.webSocketTransport, TransportType.WEBSOCKET);
 		DefaultTransportRequest request2 = createTransportRequest(this.xhrTransport, TransportType.XHR_STREAMING);
 		request1.setFallbackRequest(request2);
@@ -100,7 +99,7 @@ public class DefaultTransportRequestTests {
 	}
 
 	@Test
-	public void fallbackAfterTimeout() throws Exception {
+	void fallbackAfterTimeout() {
 		TaskScheduler scheduler = mock(TaskScheduler.class);
 		Runnable sessionCleanupTask = mock(Runnable.class);
 		DefaultTransportRequest request1 = createTransportRequest(this.webSocketTransport, TransportType.WEBSOCKET);
@@ -123,8 +122,8 @@ public class DefaultTransportRequestTests {
 		verify(sessionCleanupTask).run();
 	}
 
-	protected DefaultTransportRequest createTransportRequest(Transport transport, TransportType type) throws Exception {
-		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
+	protected DefaultTransportRequest createTransportRequest(Transport transport, TransportType type) {
+		SockJsUrlInfo urlInfo = new SockJsUrlInfo(URI.create("https://example.com"));
 		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), new HttpHeaders(), transport, type, CODEC);
 	}
 
