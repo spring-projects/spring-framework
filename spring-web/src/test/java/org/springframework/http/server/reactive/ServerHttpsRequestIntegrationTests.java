@@ -86,7 +86,7 @@ class ServerHttpsRequestIntegrationTests {
 
 	@Test
 	void checkUri() throws Exception {
-		URI url = new URI("https://localhost:" + port + "/foo?param=bar");
+		URI url = URI.create("https://localhost:" + port + "/foo?param=bar");
 		RequestEntity<Void> request = RequestEntity.post(url).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

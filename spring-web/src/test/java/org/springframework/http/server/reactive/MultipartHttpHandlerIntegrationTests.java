@@ -61,7 +61,7 @@ class MultipartHttpHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 		RequestEntity<MultiValueMap<String, Object>> request = RequestEntity
-				.post(new URI("http://localhost:" + port + "/form-parts"))
+				.post(URI.create("http://localhost:" + port + "/form-parts"))
 				.contentType(MediaType.MULTIPART_FORM_DATA)
 				.body(generateBody());
 		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);

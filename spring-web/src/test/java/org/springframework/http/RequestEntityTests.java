@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,10 +40,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RequestEntityTests {
 
 	@Test
-	void normal() throws URISyntaxException {
+	void normal() {
 		String headerName = "My-Custom-Header";
 		String headerValue = "HeaderValue";
-		URI url = new URI("https://example.com");
+		URI url = URI.create("https://example.com");
 		Integer entity = 42;
 
 		RequestEntity<Object> requestEntity =
@@ -59,14 +58,14 @@ class RequestEntityTests {
 	}
 
 	@Test
-	void uriVariablesExpansion() throws URISyntaxException {
+	void uriVariablesExpansion() {
 		URI uri = UriComponentsBuilder.fromUriString("https://example.com/{foo}").buildAndExpand("bar").toUri();
 		RequestEntity.get(uri).accept(MediaType.TEXT_PLAIN).build();
 
 		String url = "https://www.{host}.com/{path}";
 		String host = "example";
 		String path = "foo/bar";
-		URI expected = new URI("https://www.example.com/foo/bar");
+		URI expected = URI.create("https://www.example.com/foo/bar");
 
 		uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(host, path).toUri();
 		RequestEntity<?> entity = RequestEntity.get(uri).build();
@@ -107,14 +106,14 @@ class RequestEntityTests {
 	}
 
 	@Test
-	void headers() throws URISyntaxException {
+	void headers() {
 		MediaType accept = MediaType.TEXT_PLAIN;
 		long ifModifiedSince = 12345L;
 		String ifNoneMatch = "\"foo\"";
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
-		RequestEntity<Void> responseEntity = RequestEntity.post(new URI("https://example.com")).
+		RequestEntity<Void> responseEntity = RequestEntity.post(URI.create("https://example.com")).
 				accept(accept).
 				acceptCharset(StandardCharsets.UTF_8).
 				ifModifiedSince(ifModifiedSince).
@@ -126,7 +125,7 @@ class RequestEntityTests {
 
 		assertThat(responseEntity).isNotNull();
 		assertThat(responseEntity.getMethod()).isEqualTo(HttpMethod.POST);
-		assertThat(responseEntity.getUrl()).isEqualTo(new URI("https://example.com"));
+		assertThat(responseEntity.getUrl()).isEqualTo(URI.create("https://example.com"));
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 
 		assertThat(responseHeaders.getFirst(HttpHeaders.ACCEPT)).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
@@ -140,8 +139,8 @@ class RequestEntityTests {
 	}
 
 	@Test
-	void methods() throws URISyntaxException {
-		URI url = new URI("https://example.com");
+	void methods() {
+		URI url = URI.create("https://example.com");
 
 		RequestEntity<?> entity = RequestEntity.get(url).build();
 		assertThat(entity.getMethod()).isEqualTo(HttpMethod.GET);
@@ -167,8 +166,8 @@ class RequestEntityTests {
 	}
 
 	@Test  // SPR-13154
-	void types() throws URISyntaxException {
-		URI url = new URI("https://example.com");
+	void types() {
+		URI url = URI.create("https://example.com");
 		List<String> body = Arrays.asList("foo", "bar");
 		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<String>>() {};
 

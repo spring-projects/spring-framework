@@ -53,7 +53,7 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 		RestTemplate restTemplate = new RestTemplate();
 
 		byte[] body = randomBytes();
-		RequestEntity<byte[]> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
+		RequestEntity<byte[]> request = RequestEntity.post(URI.create("http://localhost:" + port)).body(body);
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
 		assertThat(response.getBody()).isEqualTo(body);

@@ -17,7 +17,6 @@
 package org.springframework.web.server.session;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
@@ -85,7 +84,6 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	public void expiredSessionIsRecreated(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-
 		// First request: no session yet, new session created
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
@@ -123,7 +121,6 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	public void expiredSessionEnds(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-
 		// First request: no session yet, new session created
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
@@ -137,7 +134,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		store.setClock(Clock.offset(store.getClock(), Duration.ofMinutes(31)));
 
 		// Second request: session expires
-		URI uri = new URI("http://localhost:" + this.port + "/?expire");
+		URI uri = URI.create("http://localhost:" + this.port + "/?expire");
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
@@ -151,7 +148,6 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	public void changeSessionId(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-
 		// First request: no session yet, new session created
 		RequestEntity<Void> request = RequestEntity.get(createUri()).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
@@ -162,7 +158,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertThat(this.handler.getSessionRequestCount()).isEqualTo(1);
 
 		// Second request: session id changes
-		URI uri = new URI("http://localhost:" + this.port + "/?changeId");
+		URI uri = URI.create("http://localhost:" + this.port + "/?changeId");
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + oldId).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
@@ -186,7 +182,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertThat(id).isNotNull();
 
 		// Second request: invalidates session
-		URI uri = new URI("http://localhost:" + this.port + "/?invalidate");
+		URI uri = URI.create("http://localhost:" + this.port + "/?invalidate");
 		request = RequestEntity.get(uri).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
@@ -209,8 +205,8 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		return null;
 	}
 
-	private URI createUri() throws URISyntaxException {
-		return new URI("http://localhost:" + this.port + "/");
+	private URI createUri() {
+		return URI.create("http://localhost:" + this.port + "/");
 	}
 
 

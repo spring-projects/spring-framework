@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,8 +109,8 @@ public class HttpEntityTests {
 		headers.setContentType(MediaType.TEXT_PLAIN);
 		String body = "foo";
 		HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
-		RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, HttpMethod.GET, new URI("/"));
-		RequestEntity<String> requestEntity2 = new RequestEntity<>(body, headers, HttpMethod.GET, new URI("/"));
+		RequestEntity<String> requestEntity = new RequestEntity<>(body, headers, HttpMethod.GET, URI.create("/"));
+		RequestEntity<String> requestEntity2 = new RequestEntity<>(body, headers, HttpMethod.GET, URI.create("/"));
 
 		assertThat(requestEntity.getBody()).isEqualTo(body);
 		assertThat(requestEntity.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);

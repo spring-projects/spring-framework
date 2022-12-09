@@ -51,7 +51,7 @@ class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	void basicTest(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = new URI("http://localhost:" + port);
+		URI url = URI.create("http://localhost:" + port);
 		@SuppressWarnings("resource")
 		ResponseEntity<String> response = new RestTemplate().exchange(RequestEntity.get(url).build(), String.class);
 

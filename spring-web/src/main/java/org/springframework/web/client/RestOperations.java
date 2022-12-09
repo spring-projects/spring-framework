@@ -611,7 +611,7 @@ public interface RestOperations {
 	 * <pre class="code">
 	 * MyRequest body = ...
 	 * RequestEntity request = RequestEntity
-	 *     .post(new URI(&quot;https://example.com/foo&quot;))
+	 *     .post(URI.create(&quot;https://example.com/foo&quot;))
 	 *     .accept(MediaType.APPLICATION_JSON)
 	 *     .body(body);
 	 * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
@@ -631,7 +631,7 @@ public interface RestOperations {
 	 * <pre class="code">
 	 * MyRequest body = ...
 	 * RequestEntity request = RequestEntity
-	 *     .post(new URI(&quot;https://example.com/foo&quot;))
+	 *     .post(URI.create(&quot;https://example.com/foo&quot;))
 	 *     .accept(MediaType.APPLICATION_JSON)
 	 *     .body(body);
 	 * ParameterizedTypeReference&lt;List&lt;MyResponse&gt;&gt; myBean =

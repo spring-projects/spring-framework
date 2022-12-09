@@ -17,7 +17,6 @@
 package org.springframework.http;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -92,8 +91,8 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void createdLocation() throws URISyntaxException {
-		URI location = new URI("location");
+	void createdLocation() {
+		URI location = URI.create("location");
 		ResponseEntity<Void> responseEntity = ResponseEntity.created(location).build();
 
 		assertThat(responseEntity).isNotNull();
@@ -106,7 +105,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void acceptedNoBody() throws URISyntaxException {
+	void acceptedNoBody() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.accepted().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -115,7 +114,7 @@ class ResponseEntityTests {
 	}
 
 	@Test // SPR-14939
-	void acceptedNoBodyWithAlternativeBodyType() throws URISyntaxException {
+	void acceptedNoBodyWithAlternativeBodyType() {
 		ResponseEntity<String> responseEntity = ResponseEntity.accepted().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -124,7 +123,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void noContent() throws URISyntaxException {
+	void noContent() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.noContent().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -133,7 +132,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void badRequest() throws URISyntaxException {
+	void badRequest() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.badRequest().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -142,7 +141,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void notFound() throws URISyntaxException {
+	void notFound() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.notFound().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -151,7 +150,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void unprocessableEntity() throws URISyntaxException {
+	void unprocessableEntity() {
 		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
 
 		assertThat(responseEntity).isNotNull();
@@ -160,7 +159,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void internalServerError() throws URISyntaxException {
+	void internalServerError() {
 		ResponseEntity<String> responseEntity = ResponseEntity.internalServerError().body("error");
 
 		assertThat(responseEntity).isNotNull();
@@ -169,8 +168,8 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void headers() throws URISyntaxException {
-		URI location = new URI("location");
+	void headers() {
+		URI location = URI.create("location");
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
@@ -197,7 +196,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void Etagheader() throws URISyntaxException {
+	void Etagheader() {
 
 		ResponseEntity<Void> responseEntity = ResponseEntity.ok().eTag("\"foo\"").build();
 		assertThat(responseEntity.getHeaders().getETag()).isEqualTo("\"foo\"");

@@ -196,7 +196,7 @@ class RestTemplateTests {
 		mockSentRequest(GET, url);
 		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
-				.given(errorHandler).handleError(new URI(url), GET, response);
+				.given(errorHandler).handleError(URI.create(url), GET, response);
 
 		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
 				template.execute(url, GET, null, null));
@@ -318,7 +318,7 @@ class RestTemplateTests {
 		mockResponseStatus(HttpStatus.OK);
 		String helloWorld = "Hello World";
 		HttpHeaders responseHeaders = new HttpHeaders();
-		URI expected = new URI("https://example.com/hotels");
+		URI expected = URI.create("https://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 
@@ -336,7 +336,7 @@ class RestTemplateTests {
 
 		String helloWorld = "Hello World";
 		HttpHeaders responseHeaders = new HttpHeaders();
-		URI expected = new URI("https://example.com/hotels");
+		URI expected = URI.create("https://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 
@@ -357,7 +357,7 @@ class RestTemplateTests {
 		mockTextPlainHttpMessageConverter();
 		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		URI expected = new URI("https://example.com/hotels");
+		URI expected = URI.create("https://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 
@@ -762,7 +762,7 @@ class RestTemplateTests {
 	}
 
 	private void mockSentRequest(HttpMethod method, String uri, HttpHeaders requestHeaders) throws Exception {
-		given(requestFactory.createRequest(new URI(uri), method)).willReturn(request);
+		given(requestFactory.createRequest(URI.create(uri), method)).willReturn(request);
 		given(request.getHeaders()).willReturn(requestHeaders);
 	}
 

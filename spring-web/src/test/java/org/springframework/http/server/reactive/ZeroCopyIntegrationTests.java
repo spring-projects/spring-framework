@@ -59,7 +59,7 @@ class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		startServer(httpServer);
 
-		URI url = new URI("http://localhost:" + port);
+		URI url = URI.create("http://localhost:" + port);
 		RequestEntity<?> request = RequestEntity.get(url).build();
 		@SuppressWarnings("resource")
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);

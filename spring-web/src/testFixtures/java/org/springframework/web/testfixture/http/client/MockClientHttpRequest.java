@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -59,12 +58,7 @@ public class MockClientHttpRequest implements ClientHttpRequest {
 
 	public MockClientHttpRequest() {
 		this.httpMethod = HttpMethod.GET;
-		try {
-			this.uri = new URI("/");
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException(ex);
-		}
+		this.uri = URI.create("/");
 	}
 
 	public MockClientHttpRequest(HttpMethod httpMethod, String urlTemplate, Object... vars) {

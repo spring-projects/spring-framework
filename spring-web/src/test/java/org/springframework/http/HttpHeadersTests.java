@@ -153,7 +153,7 @@ public class HttpHeadersTests {
 
 	@Test
 	void location() throws URISyntaxException {
-		URI location = new URI("https://www.example.com/hotels");
+		URI location = URI.create("https://www.example.com/hotels");
 		headers.setLocation(location);
 		assertThat(headers.getLocation()).as("Invalid Location header").isEqualTo(location);
 		assertThat(headers.getFirst("Location")).as("Invalid Location header").isEqualTo("https://www.example.com/hotels");

@@ -53,7 +53,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
-		URI url = new URI("http://localhost:" + port + "/response-body-error");
+		URI url = URI.create("http://localhost:" + port + "/response-body-error");
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -67,7 +67,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
-		URI url = new URI("http://localhost:" + port + "/handling-error");
+		URI url = URI.create("http://localhost:" + port + "/handling-error");
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -81,7 +81,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
-		URI url = new URI("http://localhost:" + port + "//");
+		URI url = URI.create("http://localhost:" + port + "//");
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		// Jetty 10+ rejects empty path segments, see https://github.com/eclipse/jetty.project/issues/6302,

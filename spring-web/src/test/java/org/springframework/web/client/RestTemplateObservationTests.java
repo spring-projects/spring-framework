@@ -122,7 +122,7 @@ class RestTemplateObservationTests {
 		mockSentRequest(GET, url);
 		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
-				.given(errorHandler).handleError(new URI(url), GET, response);
+				.given(errorHandler).handleError(URI.create(url), GET, response);
 
 		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
 				template.execute(url, GET, null, null));
@@ -164,7 +164,7 @@ class RestTemplateObservationTests {
 	}
 
 	private void mockSentRequest(HttpMethod method, String uri, HttpHeaders requestHeaders) throws Exception {
-		given(requestFactory.createRequest(new URI(uri), method)).willReturn(request);
+		given(requestFactory.createRequest(URI.create(uri), method)).willReturn(request);
 		given(request.getHeaders()).willReturn(requestHeaders);
 		given(request.getMethod()).willReturn(method);
 		given(request.getURI()).willReturn(URI.create(uri));
