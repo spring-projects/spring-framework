@@ -235,8 +235,8 @@ public class ContentRequestMatchers {
 				for (int i = 0; i < values.size(); i++) {
 					Object expected = values.get(i);
 					Object actual = actualMap.get(name).get(i);
-					if (expected instanceof Resource) {
-						expected = StreamUtils.copyToByteArray(((Resource) expected).getInputStream());
+					if (expected instanceof Resource resource) {
+						expected = StreamUtils.copyToByteArray(resource.getInputStream());
 					}
 					if (expected instanceof byte[]) {
 						assertTrue("Multipart is not a file", actual instanceof byte[]);

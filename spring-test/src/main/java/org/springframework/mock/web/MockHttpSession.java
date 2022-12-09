@@ -167,11 +167,11 @@ public class MockHttpSession implements HttpSession {
 		if (value != null) {
 			Object oldValue = this.attributes.put(name, value);
 			if (value != oldValue) {
-				if (oldValue instanceof HttpSessionBindingListener) {
-					((HttpSessionBindingListener) oldValue).valueUnbound(new HttpSessionBindingEvent(this, name, oldValue));
+				if (oldValue instanceof HttpSessionBindingListener listener) {
+					listener.valueUnbound(new HttpSessionBindingEvent(this, name, oldValue));
 				}
-				if (value instanceof HttpSessionBindingListener) {
-					((HttpSessionBindingListener) value).valueBound(new HttpSessionBindingEvent(this, name, value));
+				if (value instanceof HttpSessionBindingListener listener) {
+					listener.valueBound(new HttpSessionBindingEvent(this, name, value));
 				}
 			}
 		}
@@ -185,8 +185,8 @@ public class MockHttpSession implements HttpSession {
 		assertIsValid();
 		Assert.notNull(name, "Attribute name must not be null");
 		Object value = this.attributes.remove(name);
-		if (value instanceof HttpSessionBindingListener) {
-			((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(this, name, value));
+		if (value instanceof HttpSessionBindingListener listener) {
+			listener.valueUnbound(new HttpSessionBindingEvent(this, name, value));
 		}
 	}
 
@@ -199,8 +199,8 @@ public class MockHttpSession implements HttpSession {
 			String name = entry.getKey();
 			Object value = entry.getValue();
 			it.remove();
-			if (value instanceof HttpSessionBindingListener) {
-				((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(this, name, value));
+			if (value instanceof HttpSessionBindingListener listener) {
+				listener.valueUnbound(new HttpSessionBindingEvent(this, name, value));
 			}
 		}
 	}
@@ -251,14 +251,14 @@ public class MockHttpSession implements HttpSession {
 			String name = entry.getKey();
 			Object value = entry.getValue();
 			it.remove();
-			if (value instanceof Serializable) {
-				state.put(name, (Serializable) value);
+			if (value instanceof Serializable serializable) {
+				state.put(name, serializable);
 			}
 			else {
 				// Not serializable... Servlet containers usually automatically
 				// unbind the attribute in this case.
-				if (value instanceof HttpSessionBindingListener) {
-					((HttpSessionBindingListener) value).valueUnbound(new HttpSessionBindingEvent(this, name, value));
+				if (value instanceof HttpSessionBindingListener listener) {
+					listener.valueUnbound(new HttpSessionBindingEvent(this, name, value));
 				}
 			}
 		}

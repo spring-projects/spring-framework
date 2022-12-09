@@ -165,8 +165,8 @@ public final class MockMvc {
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers
 	 */
 	public ResultActions perform(RequestBuilder requestBuilder) throws Exception {
-		if (this.defaultRequestBuilder != null && requestBuilder instanceof Mergeable) {
-			requestBuilder = (RequestBuilder) ((Mergeable) requestBuilder).merge(this.defaultRequestBuilder);
+		if (this.defaultRequestBuilder != null && requestBuilder instanceof Mergeable mergeable) {
+			requestBuilder = (RequestBuilder) mergeable.merge(this.defaultRequestBuilder);
 		}
 
 		MockHttpServletRequest request = requestBuilder.buildRequest(this.servletContext);
@@ -187,8 +187,8 @@ public final class MockMvc {
 			mockResponse.setDefaultCharacterEncoding(this.defaultResponseCharacterEncoding.name());
 		}
 
-		if (requestBuilder instanceof SmartRequestBuilder) {
-			request = ((SmartRequestBuilder) requestBuilder).postProcessRequest(request);
+		if (requestBuilder instanceof SmartRequestBuilder smartRequestBuilder) {
+			request = smartRequestBuilder.postProcessRequest(request);
 		}
 
 		MvcResult mvcResult = new DefaultMvcResult(request, mockResponse);
@@ -227,8 +227,8 @@ public final class MockMvc {
 	}
 
 	private MockHttpServletResponse unwrapResponseIfNecessary(ServletResponse servletResponse) {
-		while (servletResponse instanceof HttpServletResponseWrapper) {
-			servletResponse = ((HttpServletResponseWrapper) servletResponse).getResponse();
+		while (servletResponse instanceof HttpServletResponseWrapper wrapper) {
+			servletResponse = wrapper.getResponse();
 		}
 		Assert.isInstanceOf(MockHttpServletResponse.class, servletResponse);
 		return (MockHttpServletResponse) servletResponse;
