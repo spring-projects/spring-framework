@@ -30,9 +30,9 @@ import kotlin.reflect.typeOf
 import org.springframework.core.Ordered
 import org.springframework.core.ResolvableType
 import org.springframework.http.MediaType
-import org.springframework.http.MockHttpInputMessage
-import org.springframework.http.MockHttpOutputMessage
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.testfixture.http.MockHttpInputMessage
+import org.springframework.web.testfixture.http.MockHttpOutputMessage
 
 /**
  * Tests for the JSON conversion using kotlinx.serialization.

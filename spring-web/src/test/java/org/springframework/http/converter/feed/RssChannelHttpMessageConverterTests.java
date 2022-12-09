@@ -29,8 +29,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.http.MediaType;
-import org.springframework.http.MockHttpInputMessage;
-import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.web.testfixture.http.MockHttpInputMessage;
+import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;

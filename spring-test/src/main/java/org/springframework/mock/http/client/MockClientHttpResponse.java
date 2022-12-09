@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * Mock implementation of {@link ClientHttpResponse}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class MockClientHttpResponse extends MockHttpInputMessage implements ClientHttpResponse {
@@ -37,7 +38,17 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 
 
 	/**
-	 * Constructor with response body as a byte array.
+	 * Create a {@code MockClientHttpResponse} with an empty response body and
+	 * HTTP status code {@link HttpStatus#OK OK}.
+	 * @since 6.0.3
+	 */
+	public MockClientHttpResponse() {
+		this(new byte[0], HttpStatus.OK);
+	}
+
+	/**
+	 * Create a {@code MockClientHttpResponse} with response body as a byte array
+	 * and the supplied HTTP status code.
 	 */
 	public MockClientHttpResponse(byte[] body, HttpStatusCode statusCode) {
 		super(body);
@@ -46,8 +57,8 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 	}
 
 	/**
-	 * Variant of {@link #MockClientHttpResponse(byte[], HttpStatusCode)} with a
-	 * custom HTTP status code.
+	 * Create a {@code MockClientHttpResponse} with response body as a byte array
+	 * and a custom HTTP status code.
 	 * @since 5.3.17
 	 */
 	public MockClientHttpResponse(byte[] body, int statusCode) {
@@ -55,7 +66,8 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 	}
 
 	/**
-	 * Constructor with response body as InputStream.
+	 * Create a {@code MockClientHttpResponse} with response body as {@link InputStream}
+	 * and the supplied HTTP status code.
 	 */
 	public MockClientHttpResponse(InputStream body, HttpStatusCode statusCode) {
 		super(body);
@@ -64,8 +76,8 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 	}
 
 	/**
-	 * Variant of {@link #MockClientHttpResponse(InputStream, HttpStatusCode)} with a
-	 * custom HTTP status code.
+	 * Create a {@code MockClientHttpResponse} with response body as {@link InputStream}
+	 * and a custom HTTP status code.
 	 * @since 5.3.17
 	 */
 	public MockClientHttpResponse(InputStream body, int statusCode) {
@@ -86,12 +98,7 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 
 	@Override
 	public String getStatusText() {
-		if (this.statusCode instanceof HttpStatus status) {
-			return status.getReasonPhrase();
-		}
-		else {
-			return "";
-		}
+		return (this.statusCode instanceof HttpStatus status ? status.getReasonPhrase() : "");
 	}
 
 	@Override

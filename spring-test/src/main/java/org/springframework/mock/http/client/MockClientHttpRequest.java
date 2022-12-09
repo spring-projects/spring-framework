@@ -25,11 +25,13 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.util.Assert;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Mock implementation of {@link ClientHttpRequest}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @author Sam Brannen
  * @since 3.2
  */
@@ -46,15 +48,25 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 
 
 	/**
-	 * Default constructor.
+	 * Create a {@code MockClientHttpRequest} with {@link HttpMethod#GET GET} as
+	 * the HTTP request method and {@code "/"} as the {@link URI}.
 	 */
 	public MockClientHttpRequest() {
-		this.httpMethod = HttpMethod.GET;
-		this.uri = URI.create("/");
+		this(HttpMethod.GET, URI.create("/"));
 	}
 
 	/**
-	 * Create an instance with the given HttpMethod and URI.
+	 * Create a {@code MockClientHttpRequest} with the given {@link HttpMethod},
+	 * URI template, and URI template variable values.
+	 * @since 6.0.3
+	 */
+	public MockClientHttpRequest(HttpMethod httpMethod, String uriTemplate, Object... vars) {
+		this(httpMethod, UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(vars).encode().toUri());
+	}
+
+	/**
+	 * Create a {@code MockClientHttpRequest} with the given {@link HttpMethod}
+	 * and {@link URI}.
 	 */
 	public MockClientHttpRequest(HttpMethod httpMethod, URI uri) {
 		this.httpMethod = httpMethod;
@@ -62,6 +74,9 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	}
 
 
+	/**
+	 * Set the HTTP method of the request.
+	 */
 	public void setMethod(HttpMethod httpMethod) {
 		this.httpMethod = httpMethod;
 	}
@@ -71,6 +86,9 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 		return this.httpMethod;
 	}
 
+	/**
+	 * Set the URI of the request.
+	 */
 	public void setURI(URI uri) {
 		this.uri = uri;
 	}
@@ -80,10 +98,19 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 		return this.uri;
 	}
 
+	/**
+	 * Set the {@link ClientHttpResponse} to be used as the result of executing
+	 * the this request.
+	 * @see #execute()
+	 */
 	public void setResponse(ClientHttpResponse clientHttpResponse) {
 		this.clientHttpResponse = clientHttpResponse;
 	}
 
+	/**
+	 * Get the {@link #isExecuted() executed} flag.
+	 * @see #execute()
+	 */
 	public boolean isExecuted() {
 		return this.executed;
 	}

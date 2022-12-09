@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.http;
+package org.springframework.web.testfixture.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.util.Assert;
 
 /**
@@ -35,25 +37,31 @@ public class MockHttpInputMessage implements HttpInputMessage {
 	private final InputStream body;
 
 
-	public MockHttpInputMessage(byte[] contents) {
-		Assert.notNull(contents, "'contents' must not be null");
-		this.body = new ByteArrayInputStream(contents);
+	/**
+	 * Create a {@code MockHttpInputMessage} with the supplied body.
+	 */
+	public MockHttpInputMessage(byte[] body) {
+		Assert.notNull(body, "Byte array must not be null");
+		this.body = new ByteArrayInputStream(body);
 	}
 
+	/**
+	 * Create a {@code MockHttpInputMessage} with the supplied body.
+	 */
 	public MockHttpInputMessage(InputStream body) {
-		Assert.notNull(body, "'body' must not be null");
+		Assert.notNull(body, "InputStream must not be null");
 		this.body = body;
 	}
 
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return headers;
+		return this.headers;
 	}
 
 	@Override
 	public InputStream getBody() throws IOException {
-		return body;
+		return this.body;
 	}
 
 }

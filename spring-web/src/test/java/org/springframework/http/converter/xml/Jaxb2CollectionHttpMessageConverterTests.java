@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.testfixture.http.MockHttpInputMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

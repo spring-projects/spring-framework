@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.mock.http;
+package org.springframework.web.testfixture.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
