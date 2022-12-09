@@ -170,8 +170,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos,
 			ServerWebExchange exchange) throws Exception {
 
-		PartialMatchHelper helper = PartialMatchHelper.from(infos, exchange);
+		if (CollectionUtils.isEmpty(infos)) {
+			return null;
+		}
 
+		PartialMatchHelper helper = new PartialMatchHelper(infos, exchange);
 		if (helper.isEmpty()) {
 			return null;
 		}
@@ -222,24 +225,15 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	private static final class PartialMatchHelper {
 
-		private static final PartialMatchHelper EMPTY_HELPER = new PartialMatchHelper(Collections.emptySet(), null);
-
 		private final List<PartialMatch> partialMatches = new ArrayList<>();
 
 
-		private PartialMatchHelper(Set<RequestMappingInfo> infos, ServerWebExchange exchange) {
+		PartialMatchHelper(Set<RequestMappingInfo> infos, ServerWebExchange exchange) {
 			for (RequestMappingInfo info : infos) {
 				if (info.getPatternsCondition().getMatchingCondition(exchange) != null) {
 					this.partialMatches.add(new PartialMatch(info, exchange));
 				}
 			}
-		}
-
-		public static PartialMatchHelper from(Set<RequestMappingInfo> infos, ServerWebExchange exchange) {
-			if (CollectionUtils.isEmpty(infos)) {
-				return EMPTY_HELPER;
-			}
-			return new PartialMatchHelper(infos, exchange);
 		}
 
 		/**

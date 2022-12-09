@@ -398,14 +398,15 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 	}
 
-	@PathPatternsParameterizedTest
-	void handleNoMatchEmptyRequestMappingInfo(TestRequestMappingInfoHandlerMapping mapping) throws ServletException {
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/cars;color=green");
+	@PathPatternsParameterizedTest // gh-29611
+	void handleNoMatchWithoutPartialMatches(TestRequestMappingInfoHandlerMapping mapping) throws ServletException {
+		String path = "/non-existent";
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
 
-		HandlerMethod handlerMethod = mapping.handleNoMatch(new HashSet<>(), "/{cars}", request);
+		HandlerMethod handlerMethod = mapping.handleNoMatch(new HashSet<>(), path, request);
 		assertThat(handlerMethod).isNull();
 
-		handlerMethod = mapping.handleNoMatch(null, "/{cars}", request);
+		handlerMethod = mapping.handleNoMatch(null, path, request);
 		assertThat(handlerMethod).isNull();
 	}
 

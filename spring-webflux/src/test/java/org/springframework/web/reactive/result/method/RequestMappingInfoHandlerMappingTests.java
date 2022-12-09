@@ -346,9 +346,9 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	}
 
-	@Test
-	public void handleNoMatchEmptyRequestMappingInfo() throws Exception {
-		ServerWebExchange exchange = MockServerWebExchange.from(post("/bar"));
+	@Test // gh-29611
+	public void handleNoMatchWithoutPartialMatches() throws Exception {
+		ServerWebExchange exchange = MockServerWebExchange.from(post("/non-existent"));
 
 		HandlerMethod handlerMethod = this.handlerMapping.handleNoMatch(new HashSet<>(), exchange);
 		assertThat(handlerMethod).isNull();
