@@ -16,10 +16,20 @@
 package org.springframework.cglib.proxy;
 
 import java.lang.reflect.Method;
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.MethodWrapper;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 /**
  * @author Chris Nokleberg
@@ -61,20 +71,20 @@ class MixinEmitter extends ClassEmitter {
         Set unique = new HashSet();
         for (int i = 0; i < classes.length; i++) {
             Method[] methods = getMethods(classes[i]);
-            for (int j = 0; j < methods.length; j++) {
-                if (unique.add(MethodWrapper.create(methods[j]))) {
-                    MethodInfo method = ReflectUtils.getMethodInfo(methods[j]);
+            for (Method method : methods) {
+                if (unique.add(MethodWrapper.create(method))) {
+                    MethodInfo methodInfo = ReflectUtils.getMethodInfo(method);
                     int modifiers = Constants.ACC_PUBLIC;
-                    if ((method.getModifiers() & Constants.ACC_VARARGS) == Constants.ACC_VARARGS) {
+                    if ((methodInfo.getModifiers() & Constants.ACC_VARARGS) == Constants.ACC_VARARGS) {
                         modifiers |= Constants.ACC_VARARGS;
                     }
-                    e = EmitUtils.begin_method(this, method, modifiers);
+                    e = EmitUtils.begin_method(this, methodInfo, modifiers);
                     e.load_this();
                     e.getfield(FIELD_NAME);
                     e.aaload((route != null) ? route[i] : i);
-                    e.checkcast(method.getClassInfo().getType());
+                    e.checkcast(methodInfo.getClassInfo().getType());
                     e.load_args();
-                    e.invoke(method);
+                    e.invoke(methodInfo);
                     e.return_value();
                     e.end_method();
                 }

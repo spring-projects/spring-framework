@@ -19,8 +19,9 @@ import org.springframework.asm.ClassWriter;
 
 public class DefaultGeneratorStrategy implements GeneratorStrategy {
     public static final DefaultGeneratorStrategy INSTANCE = new DefaultGeneratorStrategy();
-    
-    public byte[] generate(ClassGenerator cg) throws Exception {
+
+    @Override
+	public byte[] generate(ClassGenerator cg) throws Exception {
         DebuggingClassWriter cw = getClassVisitor();
         transform(cg).generateClass(cw);
         return transform(cw.toByteArray());
@@ -36,7 +37,7 @@ public class DefaultGeneratorStrategy implements GeneratorStrategy {
 	throw new UnsupportedOperationException("You are calling " +
 		"getClassWriter, which no longer exists in this cglib version.");
     }
-    
+
     protected byte[] transform(byte[] b) throws Exception {
         return b;
     }

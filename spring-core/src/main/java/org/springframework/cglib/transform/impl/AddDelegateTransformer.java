@@ -65,11 +65,11 @@ public class AddDelegateTransformer extends ClassEmitterTransformer {
                       DELEGATE,
                       delegateType,
                       null);
-        for (int i = 0; i < delegateIf.length; i++) {
-            Method[] methods = delegateIf[i].getMethods();
-            for (int j = 0; j < methods.length; j++) {
-                if (Modifier.isAbstract(methods[j].getModifiers())) {
-                    addDelegate(methods[j]);
+        for (Class element : delegateIf) {
+            Method[] methods = element.getMethods();
+            for (Method method : methods) {
+                if (Modifier.isAbstract(method.getModifiers())) {
+                    addDelegate(method);
                 }
             }
         }

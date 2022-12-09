@@ -15,11 +15,20 @@
  */
 package org.springframework.cglib.reflect;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
-import org.springframework.cglib.core.*;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.KeyFactory;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.TypeUtils;
 
 /**
  * @author Chris Nokleberg
@@ -29,7 +38,7 @@ import org.springframework.asm.Type;
 abstract public class ConstructorDelegate {
     private static final ConstructorKey KEY_FACTORY =
       (ConstructorKey)KeyFactory.create(ConstructorKey.class, KeyFactory.CLASS_BY_NAME);
-    
+
     interface ConstructorKey {
         public Object newInstance(String declaring, String iface);
     }
@@ -70,15 +79,18 @@ abstract public class ConstructorDelegate {
             return (ConstructorDelegate)super.create(key);
         }
 
-        protected ClassLoader getDefaultClassLoader() {
+        @Override
+		protected ClassLoader getDefaultClassLoader() {
             return targetClass.getClassLoader();
         }
 
-        protected ProtectionDomain getProtectionDomain() {
+        @Override
+		protected ProtectionDomain getProtectionDomain() {
         	return ReflectUtils.getProtectionDomain(targetClass);
         }
 
-        public void generateClass(ClassVisitor v) {
+        @Override
+		public void generateClass(ClassVisitor v) {
             setNamePrefix(targetClass.getName());
 
             final Method newInstance = ReflectUtils.findNewInstance(iface);
@@ -113,11 +125,13 @@ abstract public class ConstructorDelegate {
             ce.end_class();
         }
 
-        protected Object firstInstance(Class type) {
+        @Override
+		protected Object firstInstance(Class type) {
             return ReflectUtils.newInstance(type);
         }
 
-        protected Object nextInstance(Object instance) {
+        @Override
+		protected Object nextInstance(Object instance) {
             return instance;
         }
     }

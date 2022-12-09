@@ -15,13 +15,17 @@
  */
 package org.springframework.cglib.reflect;
 
-import org.springframework.cglib.core.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 abstract public class FastClass
@@ -37,9 +41,9 @@ abstract public class FastClass
     }
 
     public static FastClass create(Class type) {
-    
+
         return create(type.getClassLoader(),type);
-        
+
     }
     public static FastClass create(ClassLoader loader, Class type) {
         Generator gen = new Generator();
@@ -52,7 +56,7 @@ abstract public class FastClass
     {
         private static final Source SOURCE = new Source(FastClass.class.getName());
         private Class type;
-        
+
         public Generator() {
             super(SOURCE);
         }
@@ -60,35 +64,40 @@ abstract public class FastClass
         public void setType(Class type) {
             this.type = type;
         }
-        
+
         public FastClass create() {
             setNamePrefix(type.getName());
             return (FastClass)super.create(type.getName());
         }
 
-        protected ClassLoader getDefaultClassLoader() {
+        @Override
+		protected ClassLoader getDefaultClassLoader() {
             return type.getClassLoader();
         }
 
-        protected ProtectionDomain getProtectionDomain() {
+        @Override
+		protected ProtectionDomain getProtectionDomain() {
         	return ReflectUtils.getProtectionDomain(type);
         }
 
-        public void generateClass(ClassVisitor v) throws Exception {
+        @Override
+		public void generateClass(ClassVisitor v) throws Exception {
             new FastClassEmitter(v, getClassName(), type);
         }
 
-        protected Object firstInstance(Class type) {
+        @Override
+		protected Object firstInstance(Class type) {
             return ReflectUtils.newInstance(type,
                                             new Class[]{ Class.class },
                                             new Object[]{ this.type });
         }
 
-        protected Object nextInstance(Object instance) {
+        @Override
+		protected Object nextInstance(Object instance) {
             return instance;
         }
     }
-    
+
     public Object invoke(String name, Class[] parameterTypes, Object obj, Object[] args) throws InvocationTargetException {
         return invoke(getIndex(name, parameterTypes), obj, args);
     }
@@ -100,7 +109,7 @@ abstract public class FastClass
     public Object newInstance(Class[] parameterTypes, Object[] args) throws InvocationTargetException {
         return newInstance(getIndex(parameterTypes), args);
     }
-    
+
     public FastMethod getMethod(Method method) {
         return new FastMethod(this, method);
     }
@@ -133,15 +142,18 @@ abstract public class FastClass
         return type;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return type.toString();
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return type.hashCode();
     }
 
-    public boolean equals(Object o) {
+    @Override
+	public boolean equals(Object o) {
         if (o == null || !(o instanceof FastClass)) {
             return false;
         }
@@ -199,8 +211,8 @@ abstract public class FastClass
 		StringBuilder sb = new StringBuilder();
         sb.append(name);
         sb.append('(');
-        for (int i = 0; i < parameterTypes.length; i++) {
-            sb.append(Type.getDescriptor(parameterTypes[i]));
+        for (Class parameterType : parameterTypes) {
+            sb.append(Type.getDescriptor(parameterType));
         }
         sb.append(')');
         return sb.toString();

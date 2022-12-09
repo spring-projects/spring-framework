@@ -57,7 +57,7 @@ class CallbackInfo
     private Class cls;
     private CallbackGenerator generator;
     private Type type;
-    
+
     private static final CallbackInfo[] CALLBACKS = {
         new CallbackInfo(NoOp.class, NoOpGenerator.INSTANCE),
         new CallbackInfo(MethodInterceptor.class, MethodInterceptorGenerator.INSTANCE),
@@ -84,8 +84,7 @@ class CallbackInfo
     private static Type determineType(Class callbackType, boolean checkAll) {
         Class cur = null;
         Type type = null;
-        for (int i = 0; i < CALLBACKS.length; i++) {
-            CallbackInfo info = CALLBACKS[i];
+        for (CallbackInfo info : CALLBACKS) {
             if (info.cls.isAssignableFrom(callbackType)) {
                 if (cur != null) {
                     throw new IllegalStateException("Callback implements both " + cur + " and " + info.cls);
@@ -104,8 +103,7 @@ class CallbackInfo
     }
 
     private static CallbackGenerator getGenerator(Type callbackType) {
-        for (int i = 0; i < CALLBACKS.length; i++) {
-            CallbackInfo info = CALLBACKS[i];
+        for (CallbackInfo info : CALLBACKS) {
             if (info.type.equals(callbackType)) {
                 return info.generator;
             }
@@ -113,5 +111,5 @@ class CallbackInfo
         throw new IllegalStateException("Unknown callback type " + callbackType);
     }
 }
-    
+
 

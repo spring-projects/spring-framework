@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.core;
 
+@FunctionalInterface
 public interface Predicate {
-    boolean evaluate(Object arg);
+	boolean evaluate(Object arg);
 }
-

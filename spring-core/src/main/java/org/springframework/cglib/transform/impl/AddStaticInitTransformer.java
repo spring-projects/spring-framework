@@ -16,9 +16,15 @@
 package org.springframework.cglib.transform.impl;
 
 import java.lang.reflect.Method;
-import org.springframework.cglib.core.*;
-import org.springframework.cglib.transform.*;
+
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.TypeUtils;
+import org.springframework.cglib.transform.ClassEmitterTransformer;
 
 /**
  * @author Juozas Baliuka, Chris Nokleberg
@@ -39,7 +45,8 @@ public class AddStaticInitTransformer extends ClassEmitterTransformer {
         }
     }
 
-    protected void init() {
+    @Override
+	protected void init() {
         if (!TypeUtils.isInterface(getAccess())) {
             CodeEmitter e = getStaticHook();
             EmitUtils.load_class_this(e);

@@ -48,8 +48,9 @@ public class DefaultNamingPolicy implements NamingPolicy {
             Integer.toHexString(STRESS_HASH_CODE ? 0 : key.hashCode());
         String attempt = base;
         int index = 2;
-        while (names.evaluate(attempt))
-            attempt = base + "_" + index++;
+        while (names.evaluate(attempt)) {
+			attempt = base + "_" + index++;
+		}
         return attempt;
     }
 

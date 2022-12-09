@@ -15,9 +15,18 @@
  */
 package org.springframework.cglib.proxy;
 
-import org.springframework.cglib.core.*;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.Block;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class InvocationHandlerGenerator
@@ -34,7 +43,8 @@ implements CallbackGenerator
     private static final Signature INVOKE =
       TypeUtils.parseSignature("Object invoke(Object, java.lang.reflect.Method, Object[])");
 
-    public void generate(ClassEmitter ce, Context context, List methods) {
+    @Override
+	public void generate(ClassEmitter ce, Context context, List methods) {
         for (Iterator it = methods.iterator(); it.hasNext();) {
             MethodInfo method = (MethodInfo)it.next();
             Signature impl = context.getImplSignature(method);
@@ -55,7 +65,8 @@ implements CallbackGenerator
         }
     }
 
-    public void generateStatic(CodeEmitter e, Context context, List methods) {
+    @Override
+	public void generateStatic(CodeEmitter e, Context context, List methods) {
         for (Iterator it = methods.iterator(); it.hasNext();) {
             MethodInfo method = (MethodInfo)it.next();
             EmitUtils.load_method(e, method);

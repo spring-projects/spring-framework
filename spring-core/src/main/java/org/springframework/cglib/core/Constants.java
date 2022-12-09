@@ -32,7 +32,7 @@ public interface Constants extends org.springframework.asm.Opcodes {
 
     public static final Signature SIG_STATIC =
       TypeUtils.parseSignature("void <clinit>()");
-    
+
     public static final Type TYPE_OBJECT_ARRAY = TypeUtils.parseType("Object[]");
     public static final Type TYPE_CLASS_ARRAY = TypeUtils.parseType("Class[]");
     public static final Type TYPE_STRING_ARRAY = TypeUtils.parseType("String[]");

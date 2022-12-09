@@ -22,12 +22,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.cglib.core.Constants;
-import org.springframework.cglib.core.Signature;
+
 import org.springframework.asm.ClassReader;
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.Signature;
 
 /**
  * Uses bytecode reflection to figure out the targets of all bridge methods that use invokespecial
@@ -80,7 +81,7 @@ class BridgeMethodResolver {
     private static class BridgedFinder extends ClassVisitor {
         private Map/*<Signature, Signature>*/ resolved;
         private Set/*<Signature>*/ eligibleMethods;
-        
+
         private Signature currentMethod = null;
 
         BridgedFinder(Set eligibleMethods, Map resolved) {
@@ -89,17 +90,20 @@ class BridgeMethodResolver {
             this.eligibleMethods = eligibleMethods;
         }
 
-        public void visit(int version, int access, String name,
+        @Override
+		public void visit(int version, int access, String name,
                 String signature, String superName, String[] interfaces) {
         }
 
-        public MethodVisitor visitMethod(int access, String name, String desc,
+        @Override
+		public MethodVisitor visitMethod(int access, String name, String desc,
                 String signature, String[] exceptions) {
             Signature sig = new Signature(name, desc);
             if (eligibleMethods.remove(sig)) {
                 currentMethod = sig;
                 return new MethodVisitor(Constants.ASM_API) {
-                    public void visitMethodInsn(
+                    @Override
+					public void visitMethodInsn(
                             int opcode, String owner, String name, String desc, boolean itf) {
                         if ((opcode == Opcodes.INVOKESPECIAL
                                         || (itf && opcode == Opcodes.INVOKEINTERFACE))

@@ -15,16 +15,17 @@
  */
 package org.springframework.cglib.transform;
 
+import org.springframework.asm.ClassVisitor;
 import org.springframework.cglib.core.ClassTransformer;
 import org.springframework.cglib.core.Constants;
-import org.springframework.asm.ClassVisitor;
 
 abstract public class AbstractClassTransformer extends ClassTransformer {
     protected AbstractClassTransformer() {
         super(Constants.ASM_API);
     }
 
-    public void setTarget(ClassVisitor target) {
+    @Override
+	public void setTarget(ClassVisitor target) {
         cv = target;
     }
 }

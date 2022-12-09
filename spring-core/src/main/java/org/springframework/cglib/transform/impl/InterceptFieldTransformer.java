@@ -15,10 +15,14 @@
  */
 package org.springframework.cglib.transform.impl;
 
-import org.springframework.cglib.transform.*;
-import org.springframework.cglib.core.*;
 import org.springframework.asm.Label;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.Local;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
+import org.springframework.cglib.transform.ClassEmitterTransformer;
 
 /**
  * @author Juozas Baliuka, Chris Nokleberg
@@ -35,15 +39,16 @@ public class InterceptFieldTransformer extends ClassEmitterTransformer {
       new Signature("getInterceptFieldCallback", CALLBACK, new Type[0]);
 
     private InterceptFieldFilter filter;
-    
+
     public InterceptFieldTransformer(InterceptFieldFilter filter) {
         this.filter = filter;
     }
-    
-    public void begin_class(int version, int access, String className, Type superType, Type[] interfaces, String sourceFile) {
+
+    @Override
+	public void begin_class(int version, int access, String className, Type superType, Type[] interfaces, String sourceFile) {
         if (!TypeUtils.isInterface(access)) {
             super.begin_class(version, access, className, superType, TypeUtils.add(interfaces, ENABLED), sourceFile);
-                    
+
             super.declare_field(Constants.ACC_PRIVATE | Constants.ACC_TRANSIENT,
                                 CALLBACK_FIELD,
                                 CALLBACK,
@@ -55,7 +60,7 @@ public class InterceptFieldTransformer extends ClassEmitterTransformer {
             e.getfield(CALLBACK_FIELD);
             e.return_value();
             e.end_method();
-                
+
             e = super.begin_method(Constants.ACC_PUBLIC, ENABLED_SET, null);
             e.load_this();
             e.load_arg(0);
@@ -67,7 +72,8 @@ public class InterceptFieldTransformer extends ClassEmitterTransformer {
         }
     }
 
-    public void declare_field(int access, String name, Type type, Object value) {
+    @Override
+	public void declare_field(int access, String name, Type type, Object value) {
         super.declare_field(access, name, type, value);
         if (!TypeUtils.isStatic(access)) {
             if (filter.acceptRead(getClassType(), name)) {
@@ -137,10 +143,12 @@ public class InterceptFieldTransformer extends ClassEmitterTransformer {
         e.return_value();
         e.end_method();
     }
-                
-    public CodeEmitter begin_method(int access, Signature sig, Type[] exceptions) {
+
+    @Override
+	public CodeEmitter begin_method(int access, Signature sig, Type[] exceptions) {
         return new CodeEmitter(super.begin_method(access, sig, exceptions)) {
-            public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+            @Override
+			public void visitFieldInsn(int opcode, String owner, String name, String desc) {
                 Type towner = TypeUtils.fromInternalName(owner);
                 switch (opcode) {
                 case Constants.GETFIELD:

@@ -36,6 +36,7 @@ public final class SpringNamingPolicy implements NamingPolicy {
 	private SpringNamingPolicy() {
 	}
 
+	@Override
 	public String getClassName(String prefix, String source, Object key, Predicate names) {
 		if (prefix == null) {
 			prefix = "org.springframework.cglib.empty.Object";

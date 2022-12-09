@@ -20,31 +20,34 @@ import org.springframework.asm.Type;
 
 abstract public class MethodInfo {
 
-    protected MethodInfo() {
-    }
+	protected MethodInfo() {
+	}
 
-    abstract public ClassInfo getClassInfo();
-    abstract public int getModifiers();
-    abstract public Signature getSignature();
-    abstract public Type[] getExceptionTypes();
+	abstract public ClassInfo getClassInfo();
+	abstract public int getModifiers();
+	abstract public Signature getSignature();
+	abstract public Type[] getExceptionTypes();
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null)
-            return false;
-        if (!(o instanceof MethodInfo))
-            return false;
-        return getSignature().equals(((MethodInfo)o).getSignature());
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
+		if (!(o instanceof MethodInfo other)) {
+			return false;
+		}
+		return getSignature().equals(other.getSignature());
+	}
 
-    @Override
-    public int hashCode() {
-        return getSignature().hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return getSignature().hashCode();
+	}
 
-    @Override
-    public String toString() {
-        // TODO: include modifiers, exceptions
-        return getSignature().toString();
-    }
+	@Override
+	public String toString() {
+		// TODO: include modifiers, exceptions
+		return getSignature().toString();
+	}
+
 }

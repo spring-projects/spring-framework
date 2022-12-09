@@ -16,8 +16,9 @@
 package org.springframework.cglib.proxy;
 
 import java.lang.reflect.Method;
-import org.springframework.cglib.core.ReflectUtils;
+
 import org.springframework.asm.ClassVisitor;
+import org.springframework.cglib.core.ReflectUtils;
 
 /**
  * @author Chris Nokleberg
@@ -29,11 +30,13 @@ class MixinBeanEmitter extends MixinEmitter {
         super(v, className, classes, null);
     }
 
-    protected Class[] getInterfaces(Class[] classes) {
+    @Override
+	protected Class[] getInterfaces(Class[] classes) {
         return null;
     }
 
-    protected Method[] getMethods(Class type) {
+    @Override
+	protected Method[] getMethods(Class type) {
         return ReflectUtils.getPropertyMethods(ReflectUtils.getBeanProperties(type), true, true);
     }
 }

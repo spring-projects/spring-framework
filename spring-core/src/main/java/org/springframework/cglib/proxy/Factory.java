@@ -32,14 +32,14 @@ public interface Factory {
      * If multiple callbacks are required an exception will be thrown.
      * @param callback the new interceptor to use
      * @return new instance of the same type
-     */     
+     */
     Object newInstance(Callback callback);
-    
+
     /**
      * Creates new instance of the same type, using the no-arg constructor.
      * @param callbacks the new callbacks(s) to use
      * @return new instance of the same type
-     */     
+     */
     Object newInstance(Callback[] callbacks);
 
     /**
@@ -75,6 +75,6 @@ public interface Factory {
     /**
      * Get the current set of callbacks for ths object.
      * @return a new array instance
-     */     
+     */
     Callback[] getCallbacks();
 }

@@ -15,9 +15,15 @@
  */
 package org.springframework.cglib.proxy;
 
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.Iterator;
+import java.util.List;
+
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class DispatcherGenerator implements CallbackGenerator {
@@ -41,7 +47,8 @@ class DispatcherGenerator implements CallbackGenerator {
         this.proxyRef = proxyRef;
     }
 
-    public void generate(ClassEmitter ce, Context context, List methods) {
+    @Override
+	public void generate(ClassEmitter ce, Context context, List methods) {
         for (Iterator it = methods.iterator(); it.hasNext();) {
             MethodInfo method = (MethodInfo)it.next();
             if (!TypeUtils.isProtected(method.getModifiers())) {
@@ -62,5 +69,6 @@ class DispatcherGenerator implements CallbackGenerator {
         }
     }
 
-    public void generateStatic(CodeEmitter e, Context context, List methods) { }
+    @Override
+	public void generateStatic(CodeEmitter e, Context context, List methods) { }
 }

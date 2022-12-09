@@ -30,7 +30,6 @@ import org.springframework.cglib.core.Constants;
 import org.springframework.cglib.core.EmitUtils;
 import org.springframework.cglib.core.Local;
 import org.springframework.cglib.core.MethodInfo;
-import org.springframework.cglib.core.ProcessArrayCallback;
 import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.cglib.core.Signature;
 import org.springframework.cglib.core.TypeUtils;
@@ -166,17 +165,14 @@ abstract public class MulticastDelegate implements Cloneable {
             e.load_this();
             e.super_getfield("targets", Constants.TYPE_OBJECT_ARRAY);
             final Local result2 = result;
-            EmitUtils.process_array(e, Constants.TYPE_OBJECT_ARRAY, new ProcessArrayCallback() {
-                @Override
-                public void processElement(Type type) {
-                    e.checkcast(Type.getType(iface));
-                    e.load_args();
-                    e.invoke(method);
-                    if (returns) {
-                        e.store_local(result2);
-                    }
-                }
-            });
+            EmitUtils.process_array(e, Constants.TYPE_OBJECT_ARRAY, type -> {
+			    e.checkcast(Type.getType(iface));
+			    e.load_args();
+			    e.invoke(method);
+			    if (returns) {
+			        e.store_local(result2);
+			    }
+			});
             if (returns) {
                 e.load_local(result);
             }

@@ -290,9 +290,9 @@ abstract public class ParallelSorter extends SorterTemplate {
             if (arrays.length == 0) {
                 throw new IllegalArgumentException("No arrays specified to sort");
             }
-            for (int i = 0; i < arrays.length; i++) {
-                if (!arrays[i].getClass().isArray()) {
-                    throw new IllegalArgumentException(arrays[i].getClass() + " is not an array");
+            for (Object array : arrays) {
+                if (!array.getClass().isArray()) {
+                    throw new IllegalArgumentException(array.getClass() + " is not an array");
                 }
             }
             new ParallelSorterEmitter(v, getClassName(), arrays);

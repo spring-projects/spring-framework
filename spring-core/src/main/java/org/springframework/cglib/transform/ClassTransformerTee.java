@@ -15,19 +15,20 @@
  */
 package org.springframework.cglib.transform;
 
+import org.springframework.asm.ClassVisitor;
 import org.springframework.cglib.core.ClassTransformer;
 import org.springframework.cglib.core.Constants;
-import org.springframework.asm.ClassVisitor;
 
 public class ClassTransformerTee extends ClassTransformer {
     private ClassVisitor branch;
-    
+
     public ClassTransformerTee(ClassVisitor branch) {
         super(Constants.ASM_API);
         this.branch = branch;
     }
-    
-    public void setTarget(ClassVisitor target) { 
+
+    @Override
+	public void setTarget(ClassVisitor target) {
         cv = new ClassVisitorTee(branch, target);
     }
 }

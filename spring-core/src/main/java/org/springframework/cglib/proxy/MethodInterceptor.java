@@ -35,7 +35,7 @@ extends Callback
      * @throws Throwable any exception may be thrown; if so, super method will not be invoked
      * @return any value compatible with the signature of the proxied method. Method returning void will ignore this value.
      * @see MethodProxy
-     */    
+     */
     public Object intercept(Object obj, java.lang.reflect.Method method, Object[] args,
                                MethodProxy proxy) throws Throwable;
 
