@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.awt.Color;
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -102,19 +101,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @see HandlerMethodAnnotationDetectionTests
  * @see ServletAnnotationControllerHandlerMethodTests
  */
-public class RequestMappingHandlerAdapterIntegrationTests {
+class RequestMappingHandlerAdapterIntegrationTests {
 
 	private final Object handler = new Handler();
 
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 	private RequestMappingHandlerAdapter handlerAdapter;
-
-	private MockHttpServletRequest request;
-
-	private MockHttpServletResponse response;
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setValidator(new StubValidator());
 
@@ -132,9 +129,6 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		handlerAdapter.setBeanFactory(context.getBeanFactory());
 		handlerAdapter.afterPropertiesSet();
 
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-
 		request.setMethod("POST");
 
 		// Expose request to the current thread (for SpEL expressions)
@@ -142,13 +136,13 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@AfterEach
-	public void teardown() {
+	void teardown() {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
 
 	@Test
-	public void handle() throws Exception {
+	void handle() throws Exception {
 		Class<?>[] parameterTypes = new Class<?>[] {int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, TestBean.class, TestBean.class,
@@ -226,11 +220,11 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertThat(model.get("sessionAttribute")).isSameAs(sessionAttribute);
 		assertThat(model.get("requestAttribute")).isSameAs(requestAttribute);
 
-		assertThat(model.get("url")).isEqualTo(new URI("http://localhost/contextPath/main/path"));
+		assertThat(model.get("url")).isEqualTo(URI.create("http://localhost/contextPath/main/path"));
 	}
 
 	@Test
-	public void handleInInterface() throws Exception {
+	void handleInInterface() throws Exception {
 		Class<?>[] parameterTypes = new Class<?>[] {int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, TestBean.class, TestBean.class,
@@ -307,11 +301,11 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertThat(model.get("sessionAttribute")).isSameAs(sessionAttribute);
 		assertThat(model.get("requestAttribute")).isSameAs(requestAttribute);
 
-		assertThat(model.get("url")).isEqualTo(new URI("http://localhost/contextPath/main/path"));
+		assertThat(model.get("url")).isEqualTo(URI.create("http://localhost/contextPath/main/path"));
 	}
 
 	@Test
-	public void handleRequestBody() throws Exception {
+	void handleRequestBody() throws Exception {
 		Class<?>[] parameterTypes = new Class<?>[] {byte[].class};
 
 		request.setMethod("POST");
@@ -328,7 +322,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@Test
-	public void handleAndValidateRequestBody() throws Exception {
+	void handleAndValidateRequestBody() throws Exception {
 		Class<?>[] parameterTypes = new Class<?>[] {TestBean.class, Errors.class};
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -344,7 +338,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@Test
-	public void handleHttpEntity() throws Exception {
+	void handleHttpEntity() throws Exception {
 		Class<?>[] parameterTypes = new Class<?>[] {HttpEntity.class};
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -364,7 +358,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	// SPR-13867
 	@Test
-	public void handleHttpEntityWithCacheControl() throws Exception {
+	void handleHttpEntityWithCacheControl() throws Exception {
 		Class<?>[] parameterTypes = new Class<?>[] {HttpEntity.class};
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.setContent("Hello Server".getBytes("UTF-8"));
@@ -379,7 +373,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@Test
-	public void handleRequestPart() throws Exception {
+	void handleRequestPart() throws Exception {
 		MockMultipartHttpServletRequest multipartRequest = new MockMultipartHttpServletRequest();
 		multipartRequest.addFile(new MockMultipartFile("requestPart", "", "text/plain", "content".getBytes("UTF-8")));
 
@@ -391,7 +385,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@Test
-	public void handleAndValidateRequestPart() throws Exception {
+	void handleAndValidateRequestPart() throws Exception {
 		MockMultipartHttpServletRequest multipartRequest = new MockMultipartHttpServletRequest();
 		multipartRequest.addFile(new MockMultipartFile("requestPart", "", "text/plain", "content".getBytes("UTF-8")));
 
@@ -403,7 +397,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	@Test
-	public void handleAndCompleteSession() throws Exception {
+	void handleAndCompleteSession() throws Exception {
 		HandlerMethod handlerMethod = handlerMethod("handleAndCompleteSession", SessionStatus.class);
 		handlerAdapter.handle(request, response, handlerMethod);
 
@@ -654,8 +648,8 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		}
 	}
 
-	@Target({ ElementType.PARAMETER, ElementType.ANNOTATION_TYPE })
+	@Target(ElementType.PARAMETER)
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
-	public @interface AuthenticationPrincipal {}
+	@interface AuthenticationPrincipal {}
+
 }

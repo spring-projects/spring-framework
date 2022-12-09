@@ -27,7 +27,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
@@ -170,7 +169,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
+class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
 
 	static Stream<Boolean> pathPatternsArguments() {
 		return Stream.of(true, false);
@@ -3654,14 +3653,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	static class ResponseEntityController {
 
 		@PostMapping("/foo")
-		public ResponseEntity<String> foo(HttpEntity<byte[]> requestEntity) throws Exception {
+		public ResponseEntity<String> foo(HttpEntity<byte[]> requestEntity) {
 			assertThat(requestEntity).isNotNull();
 			assertThat(requestEntity.getHeaders().getFirst("MyRequestHeader")).isEqualTo("MyValue");
 
-			String body = new String(requestEntity.getBody(), "UTF-8");
+			String body = new String(requestEntity.getBody(), StandardCharsets.UTF_8);
 			assertThat(body).isEqualTo("Hello World");
 
-			URI location = new URI("/foo");
+			URI location = URI.create("/foo");
 			return ResponseEntity.created(location).header("MyResponseHeader", "MyValue").body(body);
 		}
 
@@ -3868,9 +3867,9 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@RequestMapping(value = "/", method = RequestMethod.POST)
 		@ResponseStatus(HttpStatus.CREATED)
-		public HttpHeaders create() throws URISyntaxException {
+		public HttpHeaders create() {
 			HttpHeaders headers = new HttpHeaders();
-			headers.setLocation(new URI("/test/items/123"));
+			headers.setLocation(URI.create("/test/items/123"));
 			return headers;
 		}
 
