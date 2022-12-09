@@ -18,7 +18,6 @@ package org.springframework.mock.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
@@ -51,12 +50,7 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	 */
 	public MockClientHttpRequest() {
 		this.httpMethod = HttpMethod.GET;
-		try {
-			this.uri = new URI("/");
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException(ex);
-		}
+		this.uri = URI.create("/");
 	}
 
 	/**

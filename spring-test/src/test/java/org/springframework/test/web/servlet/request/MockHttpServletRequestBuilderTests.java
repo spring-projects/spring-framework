@@ -97,7 +97,7 @@ class MockHttpServletRequestBuilderTests {
 
 	@Test  // SPR-13435
 	void requestUriWithDoubleSlashes() throws URISyntaxException {
-		this.builder = new MockHttpServletRequestBuilder(GET, new URI("/test//currentlyValid/0"));
+		this.builder = new MockHttpServletRequestBuilder(GET, URI.create("/test//currentlyValid/0"));
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertThat(request.getRequestURI()).isEqualTo("/test//currentlyValid/0");

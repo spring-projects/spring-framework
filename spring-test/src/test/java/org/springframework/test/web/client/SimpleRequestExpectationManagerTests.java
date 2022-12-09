@@ -18,7 +18,6 @@ package org.springframework.test.web.client;
 
 import java.net.SocketException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
 
@@ -199,12 +198,7 @@ class SimpleRequestExpectationManagerTests {
 
 
 	private ClientHttpRequest createRequest(HttpMethod method, String url) {
-		try {
-			return new MockClientHttpRequest(method, new URI(url));
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException(ex);
-		}
+		return new MockClientHttpRequest(method, URI.create(url));
 	}
 
 }

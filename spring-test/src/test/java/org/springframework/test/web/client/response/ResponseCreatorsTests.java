@@ -71,7 +71,7 @@ class ResponseCreatorsTests {
 
 	@Test
 	void created() throws Exception {
-		URI location = new URI("/foo");
+		URI location = URI.create("/foo");
 		DefaultResponseCreator responseCreator = MockRestResponseCreators.withCreatedEntity(location);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 

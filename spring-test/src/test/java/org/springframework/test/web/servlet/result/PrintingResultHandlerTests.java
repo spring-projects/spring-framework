@@ -176,7 +176,7 @@ class PrintingResultHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
 		headers.setContentType(MediaType.TEXT_PLAIN);
-		headers.setLocation(new URI("/redirectFoo"));
+		headers.setLocation(URI.create("/redirectFoo"));
 		headers.put("Set-Cookie", cookieValues);
 
 		String heading = "MockHttpServletResponse";
