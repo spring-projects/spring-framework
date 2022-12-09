@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -334,9 +335,18 @@ public class RequestMappingInfoHandlerMappingTests {
 					assertThat(umtse.getResponseHeaders().getAcceptPatch()).containsExactly(mediaType);
 				})
 				.verify();
-
 	}
 
+	@Test // gh-29611
+	public void handleNoMatchWithoutPartialMatches() throws Exception {
+		ServerWebExchange exchange = MockServerWebExchange.from(post("/non-existent"));
+
+		HandlerMethod handlerMethod = this.handlerMapping.handleNoMatch(new HashSet<>(), exchange);
+		assertThat(handlerMethod).isNull();
+
+		handlerMethod = this.handlerMapping.handleNoMatch(null, exchange);
+		assertThat(handlerMethod).isNull();
+	}
 
 	@SuppressWarnings("unchecked")
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer) {

@@ -241,6 +241,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected HandlerMethod handleNoMatch(
 			Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
 
+		if (CollectionUtils.isEmpty(infos)) {
+			return null;
+		}
+
 		PartialMatchHelper helper = new PartialMatchHelper(infos, request);
 		if (helper.isEmpty()) {
 			return null;
@@ -291,7 +295,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		private final List<PartialMatch> partialMatches = new ArrayList<>();
 
-		public PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
+		PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
 			for (RequestMappingInfo info : infos) {
 				if (info.getActivePatternsCondition().getMatchingCondition(request) != null) {
 					this.partialMatches.add(new PartialMatch(info, request));
