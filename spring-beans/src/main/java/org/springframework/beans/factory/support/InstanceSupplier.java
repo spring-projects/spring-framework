@@ -75,7 +75,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 	default <V> InstanceSupplier<V> andThen(
 			ThrowingBiFunction<RegisteredBean, ? super T, ? extends V> after) {
 		Assert.notNull(after, "'after' function must not be null");
-		return new InstanceSupplier<V>() {
+		return new InstanceSupplier<>() {
 
 			@Override
 			public V get(RegisteredBean registeredBean) throws Exception {
@@ -119,7 +119,7 @@ public interface InstanceSupplier<T> extends ThrowingSupplier<T> {
 				&& instanceSupplier.getFactoryMethod() == factoryMethod) {
 			return instanceSupplier;
 		}
-		return new InstanceSupplier<T>() {
+		return new InstanceSupplier<>() {
 
 			@Override
 			public T get(RegisteredBean registeredBean) throws Exception {

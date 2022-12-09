@@ -56,8 +56,7 @@ public final class CompilerFiles implements UnaryOperator<TestCompiler> {
 		return testCompiler
 				.withSources(adapt(Kind.SOURCE, (path, inputStreamSource) ->
 						SourceFile.of(inputStreamSource)))
-				.withResources(adapt(Kind.RESOURCE, (path, inputStreamSource) ->
-						ResourceFile.of(path, inputStreamSource)))
+				.withResources(adapt(Kind.RESOURCE, ResourceFile::of))
 				.withClasses(adapt(Kind.CLASS, (path, inputStreamSource) ->
 						ClassFile.of(ClassFile.toClassName(path), inputStreamSource)));
 	}

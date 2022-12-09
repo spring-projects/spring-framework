@@ -155,7 +155,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	public BeanInstanceSupplier<T> withGenerator(
 			ThrowingBiFunction<RegisteredBean, AutowiredArguments, T> generator) {
 		Assert.notNull(generator, "'generator' must not be null");
-		return new BeanInstanceSupplier<T>(this.lookup, generator, this.shortcuts);
+		return new BeanInstanceSupplier<>(this.lookup, generator, this.shortcuts);
 	}
 
 	/**
@@ -196,7 +196,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	 * that uses the shortcuts
 	 */
 	public BeanInstanceSupplier<T> withShortcuts(String... beanNames) {
-		return new BeanInstanceSupplier<T>(this.lookup, this.generator, beanNames);
+		return new BeanInstanceSupplier<>(this.lookup, this.generator, beanNames);
 	}
 
 	@Override

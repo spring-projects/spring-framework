@@ -125,7 +125,7 @@ class DefaultWebClient implements WebClient {
 				handlerMap.entrySet().stream()
 						.map(entry -> new DefaultResponseSpec.StatusHandler(entry.getKey(), entry.getValue()))
 						.toList());
-	};
+	}
 
 
 	@Override

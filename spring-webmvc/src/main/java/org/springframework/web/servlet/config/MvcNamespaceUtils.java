@@ -232,8 +232,8 @@ public abstract class MvcNamespaceUtils {
 	}
 
 	/**
-	 * Registers an {@link FixedThemeResolver} under a well-known name
-	 * unless already registered.
+	 * Registers an {@link org.springframework.web.servlet.theme.FixedThemeResolver}
+	 * under a well-known name unless already registered.
 	 */
 	@SuppressWarnings("deprecation")
 	private static void registerThemeResolver(ParserContext context, @Nullable Object source) {

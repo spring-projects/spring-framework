@@ -117,8 +117,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 						return false;
 					}
 				}
-				else if (con instanceof JarURLConnection) {
-					JarURLConnection jarCon = (JarURLConnection) con;
+				else if (con instanceof JarURLConnection jarCon) {
 					JarEntry jarEntry = jarCon.getJarEntry();
 					if (jarEntry == null) {
 						return false;

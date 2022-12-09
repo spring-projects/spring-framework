@@ -370,8 +370,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private void addRequestParameter(MockHttpServletRequest request, NameValuePair param) {
-		if (param instanceof KeyDataPair) {
-			KeyDataPair pair = (KeyDataPair) param;
+		if (param instanceof KeyDataPair pair) {
 			File file = pair.getFile();
 			MockPart part;
 			if (file != null) {

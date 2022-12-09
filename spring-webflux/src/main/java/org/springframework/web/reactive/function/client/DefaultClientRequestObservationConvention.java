@@ -24,9 +24,8 @@ import io.micrometer.common.KeyValues;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.HighCardinalityKeyNames;
-import static org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.LowCardinalityKeyNames;
+import org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.HighCardinalityKeyNames;
+import org.springframework.web.reactive.function.client.ClientHttpObservationDocumentation.LowCardinalityKeyNames;
 
 /**
  * Default implementation for a {@link ClientRequestObservationConvention},
