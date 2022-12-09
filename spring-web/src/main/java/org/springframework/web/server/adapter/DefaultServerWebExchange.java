@@ -163,9 +163,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 		try {
 			MediaType contentType = request.getHeaders().getContentType();
-			if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
+			if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType) ||
+				MediaType.MULTIPART_MIXED.isCompatibleWith(contentType) ||
+				MediaType.MULTIPART_RELATED.isCompatibleWith(contentType)) {
 				return ((HttpMessageReader<MultiValueMap<String, Part>>) configurer.getReaders().stream()
-						.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
+						.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, contentType))
 						.findFirst()
 						.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
 						.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
