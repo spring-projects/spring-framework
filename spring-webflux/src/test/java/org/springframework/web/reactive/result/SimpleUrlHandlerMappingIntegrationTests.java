@@ -56,9 +56,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 
 	@Override
 	protected HttpHandler createHttpHandler() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
-		wac.refresh();
+		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext(WebConfig.class);
 
 		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac))
 				.exceptionHandler(new ResponseStatusExceptionHandler())
@@ -70,7 +68,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 	void requestToFooHandler(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = new URI("http://localhost:" + this.port + "/foo");
+		URI url = URI.create("http://localhost:" + this.port + "/foo");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		@SuppressWarnings("resource")
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
@@ -83,7 +81,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 	public void requestToBarHandler(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = new URI("http://localhost:" + this.port + "/bar");
+		URI url = URI.create("http://localhost:" + this.port + "/bar");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		@SuppressWarnings("resource")
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
@@ -96,7 +94,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 	void requestToHeaderSettingHandler(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = new URI("http://localhost:" + this.port + "/header");
+		URI url = URI.create("http://localhost:" + this.port + "/header");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		@SuppressWarnings("resource")
 		ResponseEntity<byte[]> response = new RestTemplate().exchange(request, byte[].class);
@@ -110,7 +108,7 @@ class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegra
 	void handlerNotFound(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI url = new URI("http://localhost:" + this.port + "/oops");
+		URI url = URI.create("http://localhost:" + this.port + "/oops");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		try {
 			new RestTemplate().exchange(request, byte[].class);
