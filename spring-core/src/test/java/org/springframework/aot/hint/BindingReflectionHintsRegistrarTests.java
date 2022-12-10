@@ -222,6 +222,13 @@ public class BindingReflectionHintsRegistrarTests {
 	}
 
 	@Test
+	void registerTypeForSerializationWithRecordWithProperty() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithProperty.class);
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleRecordWithProperty.class, "getNameProperty"))
+				.accepts(this.hints);
+	}
+
+	@Test
 	void registerTypeForSerializationWithAnonymousClass() {
 		Runnable anonymousRunnable = () -> { };
 		bindingRegistrar.registerReflectionHints(this.hints.reflection(), anonymousRunnable.getClass());
@@ -328,6 +335,13 @@ public class BindingReflectionHintsRegistrarTests {
 	}
 
 	record SampleRecord(String name) {}
+
+	record SampleRecordWithProperty(String name) {
+
+		public String getNameProperty() {
+			return "";
+		}
+	}
 
 	static class SampleClassWithJsonProperty {
 

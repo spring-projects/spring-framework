@@ -91,19 +91,17 @@ public class BindingReflectionHintsRegistrar {
 							registerRecordHints(hints, seen, recordComponent.getAccessor());
 						}
 					}
-					else {
-						typeHint.withMembers(
-								MemberCategory.DECLARED_FIELDS,
-								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-						for (Method method : clazz.getMethods()) {
-							String methodName = method.getName();
-							if (methodName.startsWith("set") && method.getParameterCount() == 1) {
-								registerPropertyHints(hints, seen, method, 0);
-							}
-							else if ((methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != Void.TYPE) ||
-									(methodName.startsWith("is") && method.getParameterCount() == 0 && method.getReturnType() == boolean.class)) {
-								registerPropertyHints(hints, seen, method, -1);
-							}
+					typeHint.withMembers(
+							MemberCategory.DECLARED_FIELDS,
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+					for (Method method : clazz.getMethods()) {
+						String methodName = method.getName();
+						if (methodName.startsWith("set") && method.getParameterCount() == 1) {
+							registerPropertyHints(hints, seen, method, 0);
+						}
+						else if ((methodName.startsWith("get") && method.getParameterCount() == 0 && method.getReturnType() != Void.TYPE) ||
+								(methodName.startsWith("is") && method.getParameterCount() == 0 && method.getReturnType() == boolean.class)) {
+							registerPropertyHints(hints, seen, method, -1);
 						}
 					}
 					if (jacksonAnnotationPresent) {
