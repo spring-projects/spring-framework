@@ -111,6 +111,8 @@ public class BindingReflectionHintsRegistrar {
 				if (KotlinDetector.isKotlinType(clazz)) {
 					KotlinDelegate.registerComponentHints(hints, clazz);
 					registerKotlinSerializationHints(hints, clazz);
+					// For Kotlin reflection
+					typeHint.withMembers(MemberCategory.INTROSPECT_DECLARED_METHODS);
 				}
 			});
 		}
@@ -192,7 +194,7 @@ public class BindingReflectionHintsRegistrar {
 			if (kClass.isData()) {
 				for (Method method : type.getMethods()) {
 					String methodName = method.getName();
-					if (methodName.startsWith("component") || methodName.equals("copy")) {
+					if (methodName.startsWith("component") || methodName.equals("copy") || methodName.equals("copy$default")) {
 						hints.registerMethod(method, ExecutableMode.INVOKE);
 					}
 				}
