@@ -184,8 +184,9 @@ public abstract class YamlProcessor {
 	protected Yaml createYaml() {
 		LoaderOptions loaderOptions = new LoaderOptions();
 		loaderOptions.setAllowDuplicateKeys(false);
-		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(),
-				new DumperOptions(), loaderOptions);
+		DumperOptions dumperOptions = new DumperOptions();
+		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(dumperOptions),
+				dumperOptions, loaderOptions);
 	}
 
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
