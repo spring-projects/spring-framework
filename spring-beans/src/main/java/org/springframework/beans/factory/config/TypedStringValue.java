@@ -143,7 +143,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	}
 
 	/**
-	 * Return whether this typed String value carries a target type .
+	 * Return whether this typed String value carries a target type.
 	 */
 	public boolean hasTargetType() {
 		return (this.targetType instanceof Class);

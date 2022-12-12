@@ -30,7 +30,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying a basic set of RESTful operations.
- * Implemented by {@link RestTemplate}. Not often used directly, but a useful
+ *
+ * <p>Implemented by {@link RestTemplate}. Not often used directly, but a useful
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
  * @author Arjen Poutsma
@@ -67,7 +68,7 @@ public interface RestOperations {
 	<T> T getForObject(String url, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
-	 * Retrieve a representation by doing a GET on the URL .
+	 * Retrieve a representation by doing a GET on the URL.
 	 * The response (if any) is converted and returned.
 	 * @param url the URL
 	 * @param responseType the type of the return value
@@ -78,7 +79,7 @@ public interface RestOperations {
 
 	/**
 	 * Retrieve an entity by doing a GET on the specified URL.
-	 * The response is converted and stored in an {@link ResponseEntity}.
+	 * The response is converted and stored in a {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param responseType the type of the return value
@@ -91,7 +92,7 @@ public interface RestOperations {
 
 	/**
 	 * Retrieve a representation by doing a GET on the URI template.
-	 * The response is converted and stored in an {@link ResponseEntity}.
+	 * The response is converted and stored in a {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given map.
 	 * @param url the URL
 	 * @param responseType the type of the return value
@@ -103,8 +104,8 @@ public interface RestOperations {
 			throws RestClientException;
 
 	/**
-	 * Retrieve a representation by doing a GET on the URL .
-	 * The response is converted and stored in an {@link ResponseEntity}.
+	 * Retrieve a representation by doing a GET on the URL.
+	 * The response is converted and stored in a {@link ResponseEntity}.
 	 * @param url the URL
 	 * @param responseType the type of the return value
 	 * @return the converted object

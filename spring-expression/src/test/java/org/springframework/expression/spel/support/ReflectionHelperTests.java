@@ -163,7 +163,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		checkMatch2(new Class<?>[] {Integer.class, String[].class}, new Class<?>[] {String.class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
 		// Passing (Integer, Sub, String[]) on call to (String, Super, String[]) is exact match
-		checkMatch2(new Class<?>[] {Integer.class, Sub.class, String[].class}, new Class<?>[] {String.class,Super .class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
+		checkMatch2(new Class<?>[] {Integer.class, Sub.class, String[].class}, new Class<?>[] {String.class, Super.class, String[].class}, tc, ArgumentsMatchKind.REQUIRES_CONVERSION);
 
 		// Passing (String) on call to (String[]) is exact match
 		checkMatch2(new Class<?>[] {String.class}, new Class<?>[] {String[].class}, tc, ArgumentsMatchKind.EXACT);
@@ -298,7 +298,7 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 		assertThat(rpa.read(ctx, t, "property3").getValue()).isEqualTo("doodoo");
 
 		// Access through is method
-		assertThat(rpa .read(ctx, t, "field3").getValue()).isEqualTo(0);
+		assertThat(rpa.read(ctx, t, "field3").getValue()).isEqualTo(0);
 		assertThat(rpa.read(ctx, t, "property4").getValue()).isEqualTo(false);
 		assertThat(rpa.canRead(ctx, t, "property4")).isTrue();
 

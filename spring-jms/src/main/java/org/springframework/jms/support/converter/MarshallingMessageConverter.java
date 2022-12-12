@@ -64,7 +64,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	/**
 	 * Construct a new {@code MarshallingMessageConverter} with no {@link Marshaller}
 	 * or {@link Unmarshaller} set. The marshaller must be set after construction by invoking
-	 * {@link #setMarshaller(Marshaller)} and {@link #setUnmarshaller(Unmarshaller)} .
+	 * {@link #setMarshaller(Marshaller)} and {@link #setUnmarshaller(Unmarshaller)}.
 	 */
 	public MarshallingMessageConverter() {
 	}

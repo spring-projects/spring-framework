@@ -94,7 +94,7 @@ public interface RSocketRequester extends Disposable {
 	 * {@code "flight.{code}"} in which case the supplied route variables are
 	 * formatted via {@code toString()} and expanded into the template.
 	 * If a formatted variable contains a "." it is replaced with the escape
-	 * sequence "%2E" to avoid treating it as separator by the responder .
+	 * sequence "%2E" to avoid treating it as separator by the responder.
 	 * <p>If the connection is set to use composite metadata, the route is
 	 * encoded as {@code "message/x.rsocket.routing.v0"}. Otherwise, the route
 	 * is encoded according to the mime type for the connection.
