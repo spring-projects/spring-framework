@@ -76,7 +76,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	}
 
 	@Nullable
-	public MessageSource getMessageSource() {
+	protected MessageSource getMessageSource() {
 		return this.messageSource;
 	}
 
