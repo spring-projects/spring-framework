@@ -166,8 +166,8 @@ public abstract class RepeatableContainers {
 
 		private static Object computeRepeatedAnnotationsMethod(Class<? extends Annotation> annotationType) {
 			AttributeMethods methods = AttributeMethods.forAnnotationType(annotationType);
-			if (methods.hasOnlyValueAttribute()) {
-				Method method = methods.get(0);
+			Method method = methods.get(MergedAnnotation.VALUE);
+			if (method != null) {
 				Class<?> returnType = method.getReturnType();
 				if (returnType.isArray()) {
 					Class<?> componentType = returnType.getComponentType();
