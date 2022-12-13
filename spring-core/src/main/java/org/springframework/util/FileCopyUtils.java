@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,12 +108,10 @@ public abstract class FileCopyUtils {
 		Assert.notNull(in, "No InputStream specified");
 		Assert.notNull(out, "No OutputStream specified");
 
-		try {
-			return StreamUtils.copy(in, out);
-		}
-		finally {
-			close(in);
-			close(out);
+		try (in; out) {
+			int count = (int) in.transferTo(out);
+			out.flush();
+			return count;
 		}
 	}
 

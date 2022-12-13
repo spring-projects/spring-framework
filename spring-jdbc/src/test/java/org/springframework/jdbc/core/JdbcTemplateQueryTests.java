@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
@@ -160,12 +159,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		Object o = this.template.queryForObject(sql, new RowMapper<Integer>() {
-			@Override
-			public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-				return rs.getInt(1);
-			}
-		});
+		Object o = this.template.queryForObject(sql, (RowMapper<Integer>) (rs, rowNum) -> rs.getInt(1));
 		assertThat(o instanceof Integer).as("Correct result type").isTrue();
 		verify(this.resultSet).close();
 		verify(this.statement).close();
@@ -244,7 +238,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		int i = this.template.queryForObject(sql, Integer.class).intValue();
+		int i = this.template.queryForObject(sql, Integer.class);
 		assertThat(i).as("Return of an int").isEqualTo(22);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
@@ -266,7 +260,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
-		long l = this.template.queryForObject(sql, Long.class).longValue();
+		long l = this.template.queryForObject(sql, Long.class);
 		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
@@ -401,7 +395,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getInt(1)).willReturn(22);
-		int i = this.template.queryForObject(sql, Integer.class, 3).intValue();
+		int i = this.template.queryForObject(sql, Integer.class, 3);
 		assertThat(i).as("Return of an int").isEqualTo(22);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();
@@ -413,7 +407,7 @@ public class JdbcTemplateQueryTests {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = ?";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
-		long l = this.template.queryForObject(sql, Long.class, 3).longValue();
+		long l = this.template.queryForObject(sql, Long.class, 3);
 		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(this.preparedStatement).setObject(1, 3);
 		verify(this.resultSet).close();

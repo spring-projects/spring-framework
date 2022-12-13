@@ -16,7 +16,7 @@
 
 package org.springframework.web;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import org.springframework.lang.Nullable;
 

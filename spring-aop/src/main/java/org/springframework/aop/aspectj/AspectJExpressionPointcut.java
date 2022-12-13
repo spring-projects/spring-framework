@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,21 +84,17 @@ import org.springframework.util.StringUtils;
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
-	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<>();
-
-	static {
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.ARGS);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.REFERENCE);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.THIS);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.TARGET);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.WITHIN);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ANNOTATION);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_WITHIN);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
-		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
-	}
-
+	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = Set.of(
+			PointcutPrimitive.EXECUTION,
+			PointcutPrimitive.ARGS,
+			PointcutPrimitive.REFERENCE,
+			PointcutPrimitive.THIS,
+			PointcutPrimitive.TARGET,
+			PointcutPrimitive.WITHIN,
+			PointcutPrimitive.AT_ANNOTATION,
+			PointcutPrimitive.AT_WITHIN,
+			PointcutPrimitive.AT_ARGS,
+			PointcutPrimitive.AT_TARGET);
 
 	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
@@ -378,7 +373,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to evaluate join point for arguments " + Arrays.asList(args) +
+				logger.debug("Failed to evaluate join point for arguments " + Arrays.toString(args) +
 						" - falling back to non-match", ex);
 			}
 			return false;
@@ -523,10 +518,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof AspectJExpressionPointcut)) {
+		if (!(other instanceof AspectJExpressionPointcut otherPc)) {
 			return false;
 		}
-		AspectJExpressionPointcut otherPc = (AspectJExpressionPointcut) other;
 		return ObjectUtils.nullSafeEquals(this.getExpression(), otherPc.getExpression()) &&
 				ObjectUtils.nullSafeEquals(this.pointcutDeclarationScope, otherPc.pointcutDeclarationScope) &&
 				ObjectUtils.nullSafeEquals(this.pointcutParameterNames, otherPc.pointcutParameterNames) &&
@@ -547,7 +541,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		StringBuilder sb = new StringBuilder("AspectJExpressionPointcut: (");
 		for (int i = 0; i < this.pointcutParameterTypes.length; i++) {
 			sb.append(this.pointcutParameterTypes[i].getName());
-			sb.append(" ");
+			sb.append(' ');
 			sb.append(this.pointcutParameterNames[i]);
 			if ((i+1) < this.pointcutParameterTypes.length) {
 				sb.append(", ");

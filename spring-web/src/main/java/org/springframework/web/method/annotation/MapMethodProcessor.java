@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 /**
  * Resolves {@link Map} method arguments and handles {@link Map} return values.
  *
- * <p>A Map return value can be interpreted in more than one ways depending
+ * <p>A Map return value can be interpreted in more than one way depending
  * on the presence of annotations like {@code @ModelAttribute} or
  * {@code @ResponseBody}. As of 5.2 this resolver returns false if the
  * parameter is annotated.
@@ -65,8 +65,8 @@ public class MapMethodProcessor implements HandlerMethodArgumentResolver, Handle
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
-		if (returnValue instanceof Map){
-			mavContainer.addAllAttributes((Map) returnValue);
+		if (returnValue instanceof Map map) {
+			mavContainer.addAllAttributes(map);
 		}
 		else if (returnValue != null) {
 			// should not happen

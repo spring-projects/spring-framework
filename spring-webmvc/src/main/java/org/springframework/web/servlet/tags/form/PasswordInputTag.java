@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 /**
  * The {@code <password>} tag renders an HTML 'input' tag with type 'password'
@@ -278,7 +278,7 @@ public class PasswordInputTag extends InputTag {
 	}
 
 	/**
-	 * The {@link PasswordInputTag} only writes it's value if the
+	 * The {@link PasswordInputTag} only writes its value if the
 	 * {@link #setShowPassword(boolean) 'showPassword'} property value is
 	 * {@link Boolean#TRUE true}.
 	 */

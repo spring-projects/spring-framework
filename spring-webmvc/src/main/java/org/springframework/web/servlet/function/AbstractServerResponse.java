@@ -18,17 +18,16 @@ package org.springframework.web.servlet.function;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.Set;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -44,16 +43,16 @@ import org.springframework.web.servlet.ModelAndView;
  */
 abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 
-	private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
-	final int statusCode;
+	private final HttpStatusCode statusCode;
 
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, Cookie> cookies;
 
 	protected AbstractServerResponse(
-			int statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies) {
+			HttpStatusCode statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies) {
 
 		this.statusCode = statusCode;
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
@@ -62,13 +61,14 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 	}
 
 	@Override
-	public final HttpStatus statusCode() {
-		return HttpStatus.valueOf(this.statusCode);
+	public final HttpStatusCode statusCode() {
+		return this.statusCode;
 	}
 
 	@Override
+	@Deprecated
 	public int rawStatusCode() {
-		return this.statusCode;
+		return this.statusCode.value();
 	}
 
 	@Override
@@ -90,7 +90,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 
 			long lastModified = headers().getLastModified();
 			ServletWebRequest servletWebRequest = new ServletWebRequest(request, response);
-			HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
+			HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
 			if (SAFE_METHODS.contains(httpMethod) &&
 					servletWebRequest.checkNotModified(headers().getETag(), lastModified)) {
 				return null;
@@ -105,7 +105,7 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 	}
 
 	private void writeStatusAndHeaders(HttpServletResponse response) {
-		response.setStatus(this.statusCode);
+		response.setStatus(this.statusCode.value());
 		writeHeaders(response);
 		writeCookies(response);
 	}

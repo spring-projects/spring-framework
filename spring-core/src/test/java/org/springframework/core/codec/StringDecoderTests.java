@@ -125,13 +125,28 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		);
 
 		testDecode(input, String.class, step -> step
-				.expectNext("")
+				.expectNext("").as("1st")
 				.expectNext("abc")
 				.expectNext("defghi")
-				.expectNext("")
+				.expectNext("").as("2nd")
 				.expectNext("jklmno")
 				.expectNext("pqr")
 				.expectNext("stuvwxyz")
+				.expectComplete()
+				.verify());
+	}
+
+	@Test
+	void decodeNewlinesAcrossBuffers()  {
+		Flux<DataBuffer> input = Flux.just(
+				stringBuffer("\r"),
+				stringBuffer("\n"),
+				stringBuffer("xyz")
+		);
+
+		testDecode(input, String.class, step -> step
+				.expectNext("")
+				.expectNext("xyz")
 				.expectComplete()
 				.verify());
 	}

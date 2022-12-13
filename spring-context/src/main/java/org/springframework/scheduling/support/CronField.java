@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.scheduling.support;
 
 import java.time.DateTimeException;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.ValueRange;
 import java.util.function.BiFunction;
@@ -48,7 +49,7 @@ abstract class CronField {
 	}
 
 	/**
-	 * Return a {@code CronField} enabled for 0 nano seconds.
+	 * Return a {@code CronField} enabled for 0 nanoseconds.
 	 */
 	public static CronField zeroNanos() {
 		return BitsCronField.zeroNanos();
@@ -69,7 +70,7 @@ abstract class CronField {
 	}
 
 	/**
-	 * Parse the given value into a hours {@code CronField}, the third entry of a cron expression.
+	 * Parse the given value into an hours {@code CronField}, the third entry of a cron expression.
 	 */
 	public static CronField parseHours(String value) {
 		return BitsCronField.parseHours(value);
@@ -157,28 +158,36 @@ abstract class CronField {
 		return this.type;
 	}
 
+	@SuppressWarnings("unchecked")
+	protected static <T extends Temporal & Comparable<? super T>> T cast(Temporal temporal) {
+		return (T) temporal;
+	}
+
 
 	/**
 	 * Represents the type of cron field, i.e. seconds, minutes, hours,
 	 * day-of-month, month, day-of-week.
 	 */
 	protected enum Type {
-		NANO(ChronoField.NANO_OF_SECOND),
-		SECOND(ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		MINUTE(ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		HOUR(ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		DAY_OF_MONTH(ChronoField.DAY_OF_MONTH, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		MONTH(ChronoField.MONTH_OF_YEAR, ChronoField.DAY_OF_MONTH, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
-		DAY_OF_WEEK(ChronoField.DAY_OF_WEEK, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND);
+		NANO(ChronoField.NANO_OF_SECOND, ChronoUnit.SECONDS),
+		SECOND(ChronoField.SECOND_OF_MINUTE, ChronoUnit.MINUTES, ChronoField.NANO_OF_SECOND),
+		MINUTE(ChronoField.MINUTE_OF_HOUR, ChronoUnit.HOURS, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
+		HOUR(ChronoField.HOUR_OF_DAY, ChronoUnit.DAYS, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
+		DAY_OF_MONTH(ChronoField.DAY_OF_MONTH, ChronoUnit.MONTHS, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
+		MONTH(ChronoField.MONTH_OF_YEAR, ChronoUnit.YEARS, ChronoField.DAY_OF_MONTH, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND),
+		DAY_OF_WEEK(ChronoField.DAY_OF_WEEK, ChronoUnit.WEEKS, ChronoField.HOUR_OF_DAY, ChronoField.MINUTE_OF_HOUR, ChronoField.SECOND_OF_MINUTE, ChronoField.NANO_OF_SECOND);
 
 
 		private final ChronoField field;
 
+		private final ChronoUnit higherOrder;
+
 		private final ChronoField[] lowerOrders;
 
 
-		Type(ChronoField field, ChronoField... lowerOrders) {
+		Type(ChronoField field, ChronoUnit higherOrder, ChronoField... lowerOrders) {
 			this.field = field;
+			this.higherOrder = higherOrder;
 			this.lowerOrders = lowerOrders;
 		}
 
@@ -192,7 +201,7 @@ abstract class CronField {
 		}
 
 		/**
-		 * Return the general range of this type. For instance, this methods
+		 * Return the general range of this type. For instance, this method
 		 * will return 0-31 for {@link #MONTH}.
 		 * @return the range of this field
 		 */
@@ -225,9 +234,7 @@ abstract class CronField {
 		 * Elapse the given temporal for the difference between the current
 		 * value of this field and the goal value. Typically, the returned
 		 * temporal will have the given goal as the current value for this type,
-		 * but this is not the case for {@link #DAY_OF_MONTH}. For instance,
-		 * if {@code goal} is 31, and {@code temporal} is April 16th,
-		 * this method returns May 1st, because April 31st does not exist.
+		 * but this is not the case for {@link #DAY_OF_MONTH}.
 		 * @param temporal the temporal to elapse
 		 * @param goal the goal value
 		 * @param <T> the type of temporal
@@ -236,11 +243,18 @@ abstract class CronField {
 		 */
 		public <T extends Temporal & Comparable<? super T>> T elapseUntil(T temporal, int goal) {
 			int current = get(temporal);
+			ValueRange range = temporal.range(this.field);
 			if (current < goal) {
-				return this.field.getBaseUnit().addTo(temporal, goal - current);
+				if (range.isValidIntValue(goal)) {
+					return cast(temporal.with(this.field, goal));
+				}
+				else {
+					// goal is invalid, eg. 29th Feb, so roll forward
+					long amount = range.getMaximum() - current + 1;
+					return this.field.getBaseUnit().addTo(temporal, amount);
+				}
 			}
 			else {
-				ValueRange range = temporal.range(this.field);
 				long amount = goal + range.getMaximum() - current + 1 - range.getMinimum();
 				return this.field.getBaseUnit().addTo(temporal, amount);
 			}
@@ -256,10 +270,9 @@ abstract class CronField {
 		 * @return the rolled forward temporal
 		 */
 		public <T extends Temporal & Comparable<? super T>> T rollForward(T temporal) {
-			int current = get(temporal);
-			ValueRange range = temporal.range(this.field);
-			long amount = range.getMaximum() - current + 1;
-			return this.field.getBaseUnit().addTo(temporal, amount);
+			T result = this.higherOrder.addTo(temporal, 1);
+			ValueRange range = result.range(this.field);
+			return this.field.adjustInto(result, range.getMinimum());
 		}
 
 		/**

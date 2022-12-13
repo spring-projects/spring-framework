@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.format.datetime.standard;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.time.format.ResolverStyle;
 import java.util.TimeZone;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -34,6 +33,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 4.0
  * @see #createDateTimeFormatter()
  * @see #createDateTimeFormatter(DateTimeFormatter)
@@ -139,14 +139,14 @@ public class DateTimeFormatterFactory {
 
 	@Nullable
 	private FormatStyle convertStyleCharacter(char c) {
-		switch (c) {
-			case 'S': return FormatStyle.SHORT;
-			case 'M': return FormatStyle.MEDIUM;
-			case 'L': return FormatStyle.LONG;
-			case 'F': return FormatStyle.FULL;
-			case '-': return null;
-			default: throw new IllegalArgumentException("Invalid style character '" + c + "'");
-		}
+		return switch (c) {
+			case 'S' -> FormatStyle.SHORT;
+			case 'M' -> FormatStyle.MEDIUM;
+			case 'L' -> FormatStyle.LONG;
+			case 'F' -> FormatStyle.FULL;
+			case '-' -> null;
+			default -> throw new IllegalArgumentException("Invalid style character '" + c + "'");
+		};
 	}
 
 	/**
@@ -180,26 +180,15 @@ public class DateTimeFormatterFactory {
 	public DateTimeFormatter createDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
 		DateTimeFormatter dateTimeFormatter = null;
 		if (StringUtils.hasLength(this.pattern)) {
-			// Using strict parsing to align with Joda-Time and standard DateFormat behavior:
-			// otherwise, an overflow like e.g. Feb 29 for a non-leap-year wouldn't get rejected.
-			// However, with strict parsing, a year digit needs to be specified as 'u'...
-			String patternToUse = StringUtils.replace(this.pattern, "yy", "uu");
-			dateTimeFormatter = DateTimeFormatter.ofPattern(patternToUse).withResolverStyle(ResolverStyle.STRICT);
+			dateTimeFormatter = DateTimeFormatterUtils.createStrictDateTimeFormatter(this.pattern);
 		}
 		else if (this.iso != null && this.iso != ISO.NONE) {
-			switch (this.iso) {
-				case DATE:
-					dateTimeFormatter = DateTimeFormatter.ISO_DATE;
-					break;
-				case TIME:
-					dateTimeFormatter = DateTimeFormatter.ISO_TIME;
-					break;
-				case DATE_TIME:
-					dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME;
-					break;
-				default:
-					throw new IllegalStateException("Unsupported ISO format: " + this.iso);
-			}
+			dateTimeFormatter = switch (this.iso) {
+				case DATE -> DateTimeFormatter.ISO_DATE;
+				case TIME -> DateTimeFormatter.ISO_TIME;
+				case DATE_TIME -> DateTimeFormatter.ISO_DATE_TIME;
+				default -> throw new IllegalStateException("Unsupported ISO format: " + this.iso);
+			};
 		}
 		else if (this.dateStyle != null && this.timeStyle != null) {
 			dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(this.dateStyle, this.timeStyle);

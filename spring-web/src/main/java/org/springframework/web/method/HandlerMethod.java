@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -70,6 +73,9 @@ public class HandlerMethod {
 	@Nullable
 	private final BeanFactory beanFactory;
 
+	@Nullable
+	private final MessageSource messageSource;
+
 	private final Class<?> beanType;
 
 	private final Method method;
@@ -79,7 +85,7 @@ public class HandlerMethod {
 	private final MethodParameter[] parameters;
 
 	@Nullable
-	private HttpStatus responseStatus;
+	private HttpStatusCode responseStatus;
 
 	@Nullable
 	private String responseStatusReason;
@@ -97,13 +103,24 @@ public class HandlerMethod {
 	 * Create an instance from a bean instance and a method.
 	 */
 	public HandlerMethod(Object bean, Method method) {
+		this(bean, method, null);
+	}
+
+	/**
+	 * Variant of {@link #HandlerMethod(Object, Method)} that
+	 * also accepts a {@link MessageSource} for use from subclasses.
+	 * @since 5.3.10
+	 */
+	protected HandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {
 		Assert.notNull(bean, "Bean is required");
 		Assert.notNull(method, "Method is required");
 		this.bean = bean;
 		this.beanFactory = null;
+		this.messageSource = messageSource;
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
@@ -118,9 +135,11 @@ public class HandlerMethod {
 		Assert.notNull(methodName, "Method name is required");
 		this.bean = bean;
 		this.beanFactory = null;
+		this.messageSource = null;
 		this.beanType = ClassUtils.getUserClass(bean);
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
@@ -132,11 +151,23 @@ public class HandlerMethod {
 	 * re-create the {@code HandlerMethod} with an initialized bean.
 	 */
 	public HandlerMethod(String beanName, BeanFactory beanFactory, Method method) {
+		this(beanName, beanFactory, null, method);
+	}
+
+	/**
+	 * Variant of {@link #HandlerMethod(String, BeanFactory, Method)} that
+	 * also accepts a {@link MessageSource}.
+	 */
+	public HandlerMethod(
+			String beanName, BeanFactory beanFactory,
+			@Nullable MessageSource messageSource, Method method) {
+
 		Assert.hasText(beanName, "Bean name is required");
 		Assert.notNull(beanFactory, "BeanFactory is required");
 		Assert.notNull(method, "Method is required");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
+		this.messageSource = messageSource;
 		Class<?> beanType = beanFactory.getType(beanName);
 		if (beanType == null) {
 			throw new IllegalStateException("Cannot resolve bean type for bean with name '" + beanName + "'");
@@ -144,6 +175,7 @@ public class HandlerMethod {
 		this.beanType = ClassUtils.getUserClass(beanType);
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
@@ -156,6 +188,7 @@ public class HandlerMethod {
 		Assert.notNull(handlerMethod, "HandlerMethod is required");
 		this.bean = handlerMethod.bean;
 		this.beanFactory = handlerMethod.beanFactory;
+		this.messageSource = handlerMethod.messageSource;
 		this.beanType = handlerMethod.beanType;
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
@@ -174,6 +207,7 @@ public class HandlerMethod {
 		Assert.notNull(handler, "Handler object is required");
 		this.bean = handler;
 		this.beanFactory = handlerMethod.beanFactory;
+		this.messageSource = handlerMethod.messageSource;
 		this.beanType = handlerMethod.beanType;
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
@@ -199,8 +233,13 @@ public class HandlerMethod {
 			annotation = AnnotatedElementUtils.findMergedAnnotation(getBeanType(), ResponseStatus.class);
 		}
 		if (annotation != null) {
+			String reason = annotation.reason();
+			String resolvedReason = (StringUtils.hasText(reason) && this.messageSource != null ?
+					this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale()) :
+					reason);
+
 			this.responseStatus = annotation.code();
-			this.responseStatusReason = annotation.reason();
+			this.responseStatusReason = resolvedReason;
 		}
 	}
 
@@ -238,7 +277,7 @@ public class HandlerMethod {
 
 	/**
 	 * If the bean method is a bridge method, this method returns the bridged
-	 * (user-defined) method. Otherwise it returns the same method as {@link #getMethod()}.
+	 * (user-defined) method. Otherwise, it returns the same method as {@link #getMethod()}.
 	 */
 	protected Method getBridgedMethod() {
 		return this.bridgedMethod;
@@ -257,7 +296,7 @@ public class HandlerMethod {
 	 * @see ResponseStatus#code()
 	 */
 	@Nullable
-	protected HttpStatus getResponseStatus() {
+	protected HttpStatusCode getResponseStatus() {
 		return this.responseStatus;
 	}
 
@@ -331,9 +370,8 @@ public class HandlerMethod {
 	 */
 	public HandlerMethod createWithResolvedBean() {
 		Object handler = this.bean;
-		if (this.bean instanceof String) {
+		if (this.bean instanceof String beanName) {
 			Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
-			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
 		return new HandlerMethod(this, handler);
@@ -389,10 +427,9 @@ public class HandlerMethod {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof HandlerMethod)) {
+		if (!(other instanceof HandlerMethod otherMethod)) {
 			return false;
 		}
-		HandlerMethod otherMethod = (HandlerMethod) other;
 		return (this.bean.equals(otherMethod.bean) && this.method.equals(otherMethod.method));
 	}
 
@@ -543,21 +580,21 @@ public class HandlerMethod {
 	private class ReturnValueMethodParameter extends HandlerMethodParameter {
 
 		@Nullable
-		private final Object returnValue;
+		private final Class<?> returnValueType;
 
 		public ReturnValueMethodParameter(@Nullable Object returnValue) {
 			super(-1);
-			this.returnValue = returnValue;
+			this.returnValueType = (returnValue != null ? returnValue.getClass() : null);
 		}
 
 		protected ReturnValueMethodParameter(ReturnValueMethodParameter original) {
 			super(original);
-			this.returnValue = original.returnValue;
+			this.returnValueType = original.returnValueType;
 		}
 
 		@Override
 		public Class<?> getParameterType() {
-			return (this.returnValue != null ? this.returnValue.getClass() : super.getParameterType());
+			return (this.returnValueType != null ? this.returnValueType : super.getParameterType());
 		}
 
 		@Override

@@ -46,10 +46,9 @@ public class ItemPet {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ItemPet)) {
+		if (!(other instanceof ItemPet otherPet)) {
 			return false;
 		}
-		ItemPet otherPet = (ItemPet) other;
 		return (this.name != null && this.name.equals(otherPet.getName()));
 	}
 

@@ -16,7 +16,7 @@
 
 package org.springframework.web.context;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.factory.Aware;
 

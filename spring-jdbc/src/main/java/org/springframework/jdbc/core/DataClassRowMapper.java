@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import java.sql.SQLException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -50,7 +52,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	private String[] constructorParameterNames;
 
 	@Nullable
-	private Class<?>[] constructorParameterTypes;
+	private TypeDescriptor[] constructorParameterTypes;
 
 
 	/**
@@ -75,9 +77,16 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		super.initialize(mappedClass);
 
 		this.mappedConstructor = BeanUtils.getResolvableConstructor(mappedClass);
-		if (this.mappedConstructor.getParameterCount() > 0) {
+		int paramCount = this.mappedConstructor.getParameterCount();
+		if (paramCount > 0) {
 			this.constructorParameterNames = BeanUtils.getParameterNames(this.mappedConstructor);
-			this.constructorParameterTypes = this.mappedConstructor.getParameterTypes();
+			for (String name : this.constructorParameterNames) {
+				suppressProperty(name);
+			}
+			this.constructorParameterTypes = new TypeDescriptor[paramCount];
+			for (int i = 0; i < paramCount; i++) {
+				this.constructorParameterTypes[i] = new TypeDescriptor(new MethodParameter(this.mappedConstructor, i));
+			}
 		}
 	}
 
@@ -89,9 +98,19 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		if (this.constructorParameterNames != null && this.constructorParameterTypes != null) {
 			args = new Object[this.constructorParameterNames.length];
 			for (int i = 0; i < args.length; i++) {
-				String name = underscoreName(this.constructorParameterNames[i]);
-				Class<?> type = this.constructorParameterTypes[i];
-				args[i] = tc.convertIfNecessary(getColumnValue(rs, rs.findColumn(name), type), type);
+				String name = this.constructorParameterNames[i];
+				int index;
+				try {
+					// Try direct name match first
+					index = rs.findColumn(lowerCaseName(name));
+				}
+				catch (SQLException ex) {
+					// Try underscored name match instead
+					index = rs.findColumn(underscoreName(name));
+				}
+				TypeDescriptor td = this.constructorParameterTypes[i];
+				Object value = getColumnValue(rs, index, td.getType());
+				args[i] = tc.convertIfNecessary(value, td.getType(), td);
 			}
 		}
 		else {

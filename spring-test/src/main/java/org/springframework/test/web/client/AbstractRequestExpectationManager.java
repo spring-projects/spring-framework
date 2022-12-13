@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * expectations at the end.
  *
  * <p>Subclasses are responsible for validating each request by matching it to
- * to expectations following the order of declaration or not.
+ * expectations following the order of declaration or not.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -88,14 +88,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 				afterExpectationsDeclared();
 			}
 			try {
-				// Try this first for backwards compatibility
-				ClientHttpResponse response = validateRequestInternal(request);
-				if (response != null) {
-					return response;
-				}
-				else {
-					expectation = matchRequest(request);
-				}
+				expectation = matchRequest(request);
 			}
 			catch (Throwable ex) {
 				this.requestFailures.put(request, ex);
@@ -113,19 +106,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	 * the expectations declaration phase is over.
 	 */
 	protected void afterExpectationsDeclared() {
-	}
-
-	/**
-	 * Subclasses must implement the actual validation of the request
-	 * matching to declared expectations.
-	 * @deprecated as of 5.0.3, subclasses should implement {@link #matchRequest(ClientHttpRequest)}
-	 * instead and return only the matched expectation, leaving the call to create the response
-	 * as a separate step (to be invoked by this class).
-	 */
-	@Deprecated
-	@Nullable
-	protected ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
-		return null;
 	}
 
 	/**
@@ -193,7 +173,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		if (!this.requests.isEmpty()) {
 			sb.append(":\n");
 			for (ClientHttpRequest request : this.requests) {
-				sb.append(request.toString()).append("\n");
+				sb.append(request.toString()).append('\n');
 			}
 		}
 		else {
@@ -203,7 +183,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	}
 
 	/**
-	 * Return an {@code AssertionError} that a sub-class can raise for an
+	 * Return an {@code AssertionError} that a subclass can raise for an
 	 * unexpected request.
 	 */
 	protected AssertionError createUnexpectedRequestError(ClientHttpRequest request) {
@@ -247,7 +227,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 					return expectation;
 				}
 				catch (AssertionError error) {
-					// We're looking to find a match or return null..
+					// We're looking to find a match or return null.
 				}
 			}
 			return null;
@@ -256,7 +236,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		/**
 		 * Invoke this for an expectation that has been matched.
 		 * <p>The count of the given expectation is incremented, then it is
-		 * either stored if remainingCount > 0 or removed otherwise.
+		 * either stored if remainingCount &gt; 0 or removed otherwise.
 		 */
 		public void update(RequestExpectation expectation) {
 			expectation.incrementAndValidate();
@@ -270,15 +250,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 			else {
 				this.expectations.remove(expectation);
 			}
-		}
-
-		/**
-		 * Add expectations to this group.
-		 * @deprecated as of 5.0.3, if favor of {@link #addAllExpectations}
-		 */
-		@Deprecated
-		public void updateAll(Collection<RequestExpectation> expectations) {
-			expectations.forEach(this::updateInternal);
 		}
 
 		/**

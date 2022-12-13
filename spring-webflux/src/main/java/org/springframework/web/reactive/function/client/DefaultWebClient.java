@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,9 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,7 +44,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
@@ -49,6 +54,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -68,8 +74,9 @@ class DefaultWebClient implements WebClient {
 	private static final String URI_TEMPLATE_ATTRIBUTE = WebClient.class.getName() + ".uriTemplate";
 
 	private static final Mono<ClientResponse> NO_HTTP_CLIENT_RESPONSE_ERROR = Mono.error(
-			new IllegalStateException("The underlying HTTP client completed without emitting a response."));
+			() -> new IllegalStateException("The underlying HTTP client completed without emitting a response."));
 
+	private static final DefaultClientRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultClientRequestObservationConvention();
 
 	private final ExchangeFunction exchangeFunction;
 
@@ -84,19 +91,40 @@ class DefaultWebClient implements WebClient {
 	@Nullable
 	private final Consumer<RequestHeadersSpec<?>> defaultRequest;
 
+	private final List<DefaultResponseSpec.StatusHandler> defaultStatusHandlers;
+
+	private final ObservationRegistry observationRegistry;
+
+	private final ClientRequestObservationConvention observationConvention;
+
 	private final DefaultWebClientBuilder builder;
 
 
 	DefaultWebClient(ExchangeFunction exchangeFunction, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
-			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest, DefaultWebClientBuilder builder) {
+			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
+			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlerMap,
+			ObservationRegistry observationRegistry, ClientRequestObservationConvention observationConvention,
+			DefaultWebClientBuilder builder) {
 
 		this.exchangeFunction = exchangeFunction;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
+		this.observationRegistry = observationRegistry;
+		this.observationConvention = observationConvention;
 		this.defaultRequest = defaultRequest;
+		this.defaultStatusHandlers = initStatusHandlers(statusHandlerMap);
 		this.builder = builder;
+	}
+
+	private static List<DefaultResponseSpec.StatusHandler> initStatusHandlers(
+			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> handlerMap) {
+
+		return (CollectionUtils.isEmpty(handlerMap) ? Collections.emptyList() :
+				handlerMap.entrySet().stream()
+						.map(entry -> new DefaultResponseSpec.StatusHandler(entry.getKey(), entry.getValue()))
+						.toList());
 	}
 
 
@@ -365,26 +393,26 @@ class DefaultWebClient implements WebClient {
 
 		@Override
 		public ResponseSpec retrieve() {
-			return new DefaultResponseSpec(exchange(), this::createRequest);
+			return new DefaultResponseSpec(
+					exchange(), this::createRequest, DefaultWebClient.this.defaultStatusHandlers);
 		}
 
 		private HttpRequest createRequest() {
 			return new HttpRequest() {
 				private final URI uri = initUri();
+
 				private final HttpHeaders headers = initHeaders();
 
 				@Override
 				public HttpMethod getMethod() {
 					return httpMethod;
 				}
-				@Override
-				public String getMethodValue() {
-					return httpMethod.name();
-				}
+
 				@Override
 				public URI getURI() {
 					return this.uri;
 				}
+
 				@Override
 				public HttpHeaders getHeaders() {
 					return this.headers;
@@ -424,17 +452,33 @@ class DefaultWebClient implements WebClient {
 		@Override
 		@SuppressWarnings("deprecation")
 		public Mono<ClientResponse> exchange() {
-			ClientRequest request = (this.inserter != null ?
-					initRequestBuilder().body(this.inserter).build() :
-					initRequestBuilder().build());
-			return Mono.defer(() -> {
+			ClientRequestObservationContext observationContext = new ClientRequestObservationContext();
+			ClientRequest.Builder requestBuilder = this.inserter != null ?
+					initRequestBuilder().body(this.inserter) :
+					initRequestBuilder();
+			return Mono.deferContextual(contextView -> {
+				Observation observation = ClientHttpObservationDocumentation.HTTP_REACTIVE_CLIENT_EXCHANGES.observation(observationConvention,
+						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
+				observationContext.setCarrier(requestBuilder);
+				observation
+						.parentObservation(contextView.getOrDefault(ObservationThreadLocalAccessor.KEY, null))
+						.start();
+				ClientRequest request = requestBuilder.build();
+				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
+				observationContext.setRequest(request);
 				Mono<ClientResponse> responseMono = exchangeFunction.exchange(request)
 						.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
 						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
 				if (this.contextModifier != null) {
 					responseMono = responseMono.contextWrite(this.contextModifier);
 				}
-				return responseMono;
+				return responseMono.doOnNext(observationContext::setResponse)
+						.doOnError(observationContext::setError)
+						.doOnCancel(() -> {
+							observationContext.setAborted(true);
+							observation.stop();
+						})
+						.doOnTerminate(observation::stop);
 			});
 		}
 
@@ -490,7 +534,7 @@ class DefaultWebClient implements WebClient {
 
 	private static class DefaultResponseSpec implements ResponseSpec {
 
-		private static final IntPredicate STATUS_CODE_ERROR = (value -> value >= 400);
+		private static final Predicate<HttpStatusCode> STATUS_CODE_ERROR = HttpStatusCode::isError;
 
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
 				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
@@ -501,37 +545,41 @@ class DefaultWebClient implements WebClient {
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
+		private final int defaultStatusHandlerCount;
 
-		DefaultResponseSpec(Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier) {
+
+		DefaultResponseSpec(
+				Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier,
+				List<StatusHandler> defaultStatusHandlers) {
+
 			this.responseMono = responseMono;
 			this.requestSupplier = requestSupplier;
+			this.statusHandlers.addAll(defaultStatusHandlers);
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
+			this.defaultStatusHandlerCount = this.statusHandlers.size();
 		}
 
 
 		@Override
-		public ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
+		public ResponseSpec onStatus(Predicate<HttpStatusCode> statusCodePredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
-			return onRawStatus(toIntPredicate(statusPredicate), exceptionFunction);
-		}
-
-		private static IntPredicate toIntPredicate(Predicate<HttpStatus> predicate) {
-			return value -> {
-				HttpStatus status = HttpStatus.resolve(value);
-				return (status != null && predicate.test(status));
-			};
+			Assert.notNull(statusCodePredicate, "StatusCodePredicate must not be null");
+			Assert.notNull(exceptionFunction, "Function must not be null");
+			int index = this.statusHandlers.size() - this.defaultStatusHandlerCount;  // Default handlers always last
+			this.statusHandlers.add(index, new StatusHandler(statusCodePredicate, exceptionFunction));
+			return this;
 		}
 
 		@Override
 		public ResponseSpec onRawStatus(IntPredicate statusCodePredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
-			Assert.notNull(statusCodePredicate, "IntPredicate must not be null");
-			Assert.notNull(exceptionFunction, "Function must not be null");
-			int index = this.statusHandlers.size() - 1;  // Default handler always last
-			this.statusHandlers.add(index, new StatusHandler(statusCodePredicate, exceptionFunction));
-			return this;
+			return onStatus(toStatusCodePredicate(statusCodePredicate), exceptionFunction);
+		}
+
+		private static Predicate<HttpStatusCode> toStatusCodePredicate(IntPredicate predicate) {
+			return value -> predicate.test(value.value());
 		}
 
 		@Override
@@ -612,7 +660,9 @@ class DefaultWebClient implements WebClient {
 		public Mono<ResponseEntity<Void>> toBodilessEntity() {
 			return this.responseMono.flatMap(response ->
 					WebClientUtils.mapToEntity(response, handleBodyMono(response, Mono.<Void>empty()))
-							.flatMap(entity -> response.releaseBody().thenReturn(entity))
+							.flatMap(entity -> response.releaseBody()
+									.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response))
+									.thenReturn(entity))
 			);
 		}
 
@@ -628,11 +678,11 @@ class DefaultWebClient implements WebClient {
 			return (result != null ? result.flux().switchIfEmpty(body) : body);
 		}
 
-		private  <T> Mono<? extends ResponseEntity<Flux<T>>> handlerEntityFlux(ClientResponse response, Flux<T> body) {
+		private <T> Mono<? extends ResponseEntity<Flux<T>>> handlerEntityFlux(ClientResponse response, Flux<T> body) {
 			ResponseEntity<Flux<T>> entity = new ResponseEntity<>(
 					body.onErrorResume(WebClientUtils.WRAP_EXCEPTION_PREDICATE, exceptionWrappingFunction(response)),
 					response.headers().asHttpHeaders(),
-					response.rawStatusCode());
+					response.statusCode());
 
 			Mono<ResponseEntity<Flux<T>>> result = applyStatusHandlers(response);
 			return (result != null ? result.defaultIfEmpty(entity) : Mono.just(entity));
@@ -644,7 +694,7 @@ class DefaultWebClient implements WebClient {
 
 		@Nullable
 		private <T> Mono<T> applyStatusHandlers(ClientResponse response) {
-			int statusCode = response.rawStatusCode();
+			HttpStatusCode statusCode = response.statusCode();
 			for (StatusHandler handler : this.statusHandlers) {
 				if (handler.test(statusCode)) {
 					Mono<? extends Throwable> exMono;
@@ -664,28 +714,40 @@ class DefaultWebClient implements WebClient {
 			return null;
 		}
 
-		private <T> Mono<T> insertCheckpoint(Mono<T> result, int statusCode, HttpRequest request) {
-			String httpMethod = request.getMethodValue();
+		private <T> Mono<T> insertCheckpoint(Mono<T> result, HttpStatusCode statusCode, HttpRequest request) {
+			HttpMethod method = request.getMethod();
+			URI uri = getUriToLog(request);
+			return result.checkpoint(statusCode + " from " + method + " " + uri + " [DefaultWebClient]");
+		}
+
+		private static URI getUriToLog(HttpRequest request) {
 			URI uri = request.getURI();
-			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
-			return result.checkpoint(description);
+			if (StringUtils.hasText(uri.getQuery())) {
+				try {
+					uri = new URI(uri.getScheme(), uri.getHost(), uri.getPath(), null);
+				}
+				catch (URISyntaxException ex) {
+					// ignore
+				}
+			}
+			return uri;
 		}
 
 
 		private static class StatusHandler {
 
-			private final IntPredicate predicate;
+			private final Predicate<HttpStatusCode> predicate;
 
 			private final Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction;
 
-			public StatusHandler(IntPredicate predicate,
+			public StatusHandler(Predicate<HttpStatusCode> predicate,
 					Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 
 				this.predicate = predicate;
 				this.exceptionFunction = exceptionFunction;
 			}
 
-			public boolean test(int status) {
+			public boolean test(HttpStatusCode status) {
 				return this.predicate.test(status);
 			}
 

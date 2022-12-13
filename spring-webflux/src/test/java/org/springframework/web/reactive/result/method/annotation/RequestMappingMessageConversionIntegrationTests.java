@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -72,7 +71,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML;
 public class RequestMappingMessageConversionIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	private static final ParameterizedTypeReference<List<Person>> PERSON_LIST =
-			new ParameterizedTypeReference<List<Person>>() {};
+			new ParameterizedTypeReference<>() {};
 
 	private static final MediaType JSON = MediaType.APPLICATION_JSON;
 
@@ -168,7 +167,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(responseEntity.getBody()).isNull();
 
 		// As we're on the same connection, the 2nd request proves server response handling
-		// did complete after the 1st request..
+		// did complete after the 1st request.
 		responseEntity = performGet("/person-response/mono-empty", JSON, Person.class);
 		assertThat(responseEntity.getHeaders().getContentLength()).isEqualTo(0);
 		assertThat(responseEntity.getBody()).isNull();
@@ -263,7 +262,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.hasBody()).isTrue();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(951);
-		assertThat(response.getBody().length).isEqualTo(951);
+		assertThat(response.getBody()).hasSize(951);
 		assertThat(response.getHeaders().getContentType()).isEqualTo(new MediaType("image", "png"));
 	}
 
@@ -359,7 +358,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -370,7 +369,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> response = performPost("/person-create/publisher", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -381,7 +380,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				"/person-create/mono", JSON, new Person("Robert"), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(1);
 	}
 
 	@ParameterizedHttpServerTest
@@ -392,7 +391,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				"/person-create/single", JSON, new Person("Robert"), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(1);
 	}
 
 	@ParameterizedHttpServerTest
@@ -403,7 +402,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -414,7 +413,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> response = performPost("/person-create/flux", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -425,7 +424,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -436,7 +435,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> response = performPost("/person-create/observable", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -447,7 +446,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -458,7 +457,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> response = performPost("/person-create/flowable", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest // gh-23791
@@ -488,7 +487,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		public Publisher<ByteBuffer> getPublisher() {
 			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 			return encoder.encode(Mono.just(new Person("Robert")), DefaultDataBufferFactory.sharedInstance,
-					ResolvableType.forClass(Person.class), JSON, Collections.emptyMap()).map(DataBuffer::asByteBuffer);
+					ResolvableType.forClass(Person.class), JSON, Collections.emptyMap()).map(DataBuffer::toByteBuffer);
 		}
 
 		@GetMapping("/flux")

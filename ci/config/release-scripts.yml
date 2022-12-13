@@ -1,9 +1,10 @@
 logging:
   level:
     io.spring.concourse: DEBUG
-distribute:
-  optional-deployments:
-    - '.*\.zip'
 spring:
   main:
     banner-mode: off
+sonatype:
+  exclude:
+    - 'build-info\.json'
+    - '.*\.zip'

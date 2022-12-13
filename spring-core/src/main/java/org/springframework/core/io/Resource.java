@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Determine whether this resource represents a file in a file system.
-	 * A value of {@code true} strongly suggests (but does not guarantee)
+	 * <p>A value of {@code true} strongly suggests (but does not guarantee)
 	 * that a {@link #getFile()} call will succeed.
 	 * <p>This is conservatively {@code false} by default.
 	 * @since 5.0
@@ -99,14 +99,14 @@ public interface Resource extends InputStreamSource {
 	/**
 	 * Return a URL handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URL,
-	 * i.e. if the resource is not available as descriptor
+	 * i.e. if the resource is not available as a descriptor
 	 */
 	URL getURL() throws IOException;
 
 	/**
 	 * Return a URI handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URI,
-	 * i.e. if the resource is not available as descriptor
+	 * i.e. if the resource is not available as a descriptor
 	 * @since 2.5
 	 */
 	URI getURI() throws IOException;
@@ -158,10 +158,11 @@ public interface Resource extends InputStreamSource {
 	Resource createRelative(String relativePath) throws IOException;
 
 	/**
-	 * Determine a filename for this resource, i.e. typically the last
-	 * part of the path: for example, "myfile.txt".
+	 * Determine the filename for this resource &mdash; typically the last
+	 * part of the path &mdash; for example, {@code "myfile.txt"}.
 	 * <p>Returns {@code null} if this type of resource does not
 	 * have a filename.
+	 * <p>Implementations are encouraged to return the filename unencoded.
 	 */
 	@Nullable
 	String getFilename();

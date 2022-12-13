@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.beans.factory.aspectj;
 
 /**
- * Marker interface for domain object that need DI through aspects.
+ * Marker interface for domain objects that need DI through aspects.
  *
  * @author Ramnivas Laddad
  * @since 2.5
  */
 public interface ConfigurableObject {
-
 }

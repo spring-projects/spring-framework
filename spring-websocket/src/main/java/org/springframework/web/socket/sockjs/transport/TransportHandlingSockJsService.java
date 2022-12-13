@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,8 +31,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import org.springframework.context.Lifecycle;
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -234,7 +237,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		TransportType transportType = TransportType.fromValue(transport);
 		if (transportType == null) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Unknown transport type for " + request.getURI());
+				logger.warn(LogFormatUtils.formatValue("Unknown transport type for " + request.getURI(), -1, true));
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -243,7 +246,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		TransportHandler transportHandler = this.handlers.get(transportType);
 		if (transportHandler == null) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("No TransportHandler for " + request.getURI());
+				logger.warn(LogFormatUtils.formatValue("No TransportHandler for " + request.getURI(), -1, true));
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -315,9 +318,9 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 			transportHandler.handleRequest(request, response, handler, session);
 
-			if (isNewSession && (response instanceof ServletServerHttpResponse)) {
-				int status = ((ServletServerHttpResponse) response).getServletResponse().getStatus();
-				if (HttpStatus.valueOf(status).is4xxClientError()) {
+			if (isNewSession && response instanceof ServletServerHttpResponse servletResponse) {
+				int status = servletResponse.getServletResponse().getStatus();
+				if (HttpStatusCode.valueOf(status).is4xxClientError()) {
 					this.sessions.remove(sessionId);
 				}
 			}
@@ -378,6 +381,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (this.sessionCleanupTask != null) {
 				return;
 			}
+			Duration disconnectDelay = Duration.ofMillis(getDisconnectDelay());
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(() -> {
 				List<String> removedIds = new ArrayList<>();
 				for (SockJsSession session : this.sessions.values()) {
@@ -396,7 +400,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				if (logger.isDebugEnabled() && !removedIds.isEmpty()) {
 					logger.debug("Closed " + removedIds.size() + " sessions: " + removedIds);
 				}
-			}, getDisconnectDelay());
+			}, disconnectDelay);
 		}
 	}
 

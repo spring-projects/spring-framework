@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.testfixture.servlet;
 
-import javax.servlet.http.HttpServletMapping;
-import javax.servlet.http.MappingMatch;
+import jakarta.servlet.http.HttpServletMapping;
+import jakarta.servlet.http.MappingMatch;
 
 import org.springframework.lang.Nullable;
 
@@ -72,9 +73,9 @@ public class MockHttpServletMapping implements HttpServletMapping {
 
 	@Override
 	public String toString() {
-		return "MockHttpServletMapping [matchValue=\"" + matchValue + "\", " +
-				"pattern=\"" + pattern + "\", servletName=\"" + servletName + "\", " +
-				"mappingMatch=" + mappingMatch + "]";
+		return "MockHttpServletMapping [matchValue=\"" + this.matchValue + "\", " +
+				"pattern=\"" + this.pattern + "\", servletName=\"" + this.servletName + "\", " +
+				"mappingMatch=" + this.mappingMatch + "]";
 	}
 
 }

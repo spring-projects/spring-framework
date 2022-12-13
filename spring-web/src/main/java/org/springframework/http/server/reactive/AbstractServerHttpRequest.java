@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -158,15 +158,8 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return queryParams;
 	}
 
-	@SuppressWarnings("deprecation")
 	private String decodeQueryParam(String value) {
-		try {
-			return URLDecoder.decode(value, "UTF-8");
-		}
-		catch (UnsupportedEncodingException ex) {
-			// Should never happen but we got a platform default fallback anyway.
-			return URLDecoder.decode(value);
-		}
+		return URLDecoder.decode(value, StandardCharsets.UTF_8);
 	}
 
 	@Override
@@ -182,7 +175,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * an {@link HttpCookie} map. The return value is turned into an immutable
 	 * map and cached.
 	 * <p>Note that this method is invoked lazily on access to
-	 * {@link #getCookies()}. Sub-classes should synchronize cookie
+	 * {@link #getCookies()}. Subclasses should synchronize cookie
 	 * initialization if the underlying "native" request does not provide
 	 * thread-safe access to cookie data.
 	 */
@@ -218,9 +211,18 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 */
 	String getLogPrefix() {
 		if (this.logPrefix == null) {
-			this.logPrefix = "[" + getId() + "] ";
+			this.logPrefix = "[" + initLogPrefix() + "] ";
 		}
 		return this.logPrefix;
+	}
+
+	/**
+	 * Subclasses can override this to provide the prefix to use for log messages.
+	 * <p>By default, this is {@link #getId()}.
+	 * @since 5.3.15
+	 */
+	protected String initLogPrefix() {
+		return getId();
 	}
 
 }

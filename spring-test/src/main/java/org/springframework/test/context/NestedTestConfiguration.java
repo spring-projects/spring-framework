@@ -34,7 +34,7 @@ import org.springframework.lang.Nullable;
  * enclosing class hierarchies (i.e., for <em>inner</em> test classes).
  *
  * <p>If {@code @NestedTestConfiguration} is not <em>present</em> or
- * <em>meta-present</em> on a test class, in its super type hierarchy, or in its
+ * <em>meta-present</em> on a test class, in its supertype hierarchy, or in its
  * enclosing class hierarchy, the default <em>enclosing configuration inheritance
  * mode</em> will be used. A {@code @NestedTestConfiguration} declaration on an
  * enclosing class for a nested interface will be ignored when searching for the

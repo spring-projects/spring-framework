@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class DefaultServerWebExchangeCheckNotModifiedTests {
 
 		assertThat(exchange.checkNotModified(currentDate)).isTrue();
 		assertThat(exchange.getResponse().getStatusCode().value()).isEqualTo(304);
-		assertThat(exchange.getResponse().getHeaders().get("Last-Modified").size()).isEqualTo(1);
+		assertThat(exchange.getResponse().getHeaders().get("Last-Modified")).hasSize(1);
 		assertThat(exchange.getResponse().getHeaders().getFirst("Last-Modified")).isEqualTo(CURRENT_TIME);
 	}
 
@@ -306,5 +306,19 @@ class DefaultServerWebExchangeCheckNotModifiedTests {
 		assertThat(exchange.getResponse().getStatusCode().value()).isEqualTo(412);
 		assertThat(exchange.getResponse().getHeaders().getLastModified()).isEqualTo(-1);
 	}
+
+	@Test
+	void checkNotModifiedTimestampConditionalWithSafeMethod() throws Exception {
+		String eTag = "\"Foo\"";
+		Instant oneMinuteAgo = currentDate.minusSeconds(60);
+		MockServerHttpRequest request = MockServerHttpRequest.get("/")
+				.ifUnmodifiedSince(currentDate.toEpochMilli()).build();
+		MockServerWebExchange exchange = MockServerWebExchange.from(request);
+		assertThat(exchange.checkNotModified(eTag, oneMinuteAgo)).isFalse();
+		assertThat(exchange.getResponse().getStatusCode()).isNull();
+		assertThat(exchange.getResponse().getHeaders().getLastModified()).isEqualTo(oneMinuteAgo.toEpochMilli());
+		assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo(eTag);
+	}
+
 
 }

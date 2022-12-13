@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.FilterRegistration;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletRegistration;
-
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletRegistration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -181,7 +180,7 @@ class MockServletContextTests {
 		void getServletRegistrations() {
 			Map<String, ? extends ServletRegistration> servletRegistrations = servletContext.getServletRegistrations();
 			assertThat(servletRegistrations).isNotNull();
-			assertThat(servletRegistrations.size()).isEqualTo(0);
+			assertThat(servletRegistrations).isEmpty();
 		}
 
 		/**
@@ -199,7 +198,7 @@ class MockServletContextTests {
 		void getFilterRegistrations() {
 			Map<String, ? extends FilterRegistration> filterRegistrations = servletContext.getFilterRegistrations();
 			assertThat(filterRegistrations).isNotNull();
-			assertThat(filterRegistrations.size()).isEqualTo(0);
+			assertThat(filterRegistrations).isEmpty();
 		}
 
 	}

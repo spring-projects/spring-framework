@@ -145,14 +145,14 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	private void addRollbackRuleAttributesTo(List<RollbackRuleAttribute> rollbackRules, String rollbackForValue) {
 		String[] exceptionTypeNames = StringUtils.commaDelimitedListToStringArray(rollbackForValue);
 		for (String typeName : exceptionTypeNames) {
-			rollbackRules.add(new RollbackRuleAttribute(StringUtils.trimWhitespace(typeName)));
+			rollbackRules.add(new RollbackRuleAttribute(typeName.strip()));
 		}
 	}
 
 	private void addNoRollbackRuleAttributesTo(List<RollbackRuleAttribute> rollbackRules, String noRollbackForValue) {
 		String[] exceptionTypeNames = StringUtils.commaDelimitedListToStringArray(noRollbackForValue);
 		for (String typeName : exceptionTypeNames) {
-			rollbackRules.add(new NoRollbackRuleAttribute(StringUtils.trimWhitespace(typeName)));
+			rollbackRules.add(new NoRollbackRuleAttribute(typeName.strip()));
 		}
 	}
 

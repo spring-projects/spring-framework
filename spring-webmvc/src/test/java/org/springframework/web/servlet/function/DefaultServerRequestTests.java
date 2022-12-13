@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.Part;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.Part;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -284,7 +283,7 @@ class DefaultServerRequestTests {
 				Collections.singletonList(new MappingJackson2HttpMessageConverter()));
 
 		List<String> result = request.body(new ParameterizedTypeReference<List<String>>() {});
-		assertThat(result.size()).isEqualTo(2);
+		assertThat(result).hasSize(2);
 		assertThat(result.get(0)).isEqualTo("foo");
 		assertThat(result.get(1)).isEqualTo("bar");
 	}
@@ -318,12 +317,7 @@ class DefaultServerRequestTests {
 	@Test
 	void principal() {
 		MockHttpServletRequest servletRequest = PathPatternsTestUtils.initRequest("GET", "/", true);
-		Principal principal = new Principal() {
-			@Override
-			public String getName() {
-				return "foo";
-			}
-		};
+		Principal principal = () -> "foo";
 		servletRequest.setUserPrincipal(principal);
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest,

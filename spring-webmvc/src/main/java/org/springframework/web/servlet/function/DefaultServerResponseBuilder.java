@@ -26,15 +26,15 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -49,7 +49,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
-	private final int statusCode;
+	private final HttpStatusCode statusCode;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -58,19 +58,14 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	public DefaultServerResponseBuilder(ServerResponse other) {
 		Assert.notNull(other, "ServerResponse must not be null");
-		this.statusCode = (other instanceof AbstractServerResponse ?
-				((AbstractServerResponse) other).statusCode : other.statusCode().value());
+		this.statusCode = other.statusCode();
 		this.headers.addAll(other.headers());
 		this.cookies.addAll(other.cookies());
 	}
 
-	public DefaultServerResponseBuilder(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
-		this.statusCode = status.value();
-	}
-
-	public DefaultServerResponseBuilder(int statusCode) {
-		this.statusCode = statusCode;
+	public DefaultServerResponseBuilder(HttpStatusCode status) {
+		Assert.notNull(status, "HttpStatusCode must not be null");
+		this.statusCode = status;
 	}
 
 	@Override
@@ -221,7 +216,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction;
 
-		public WriterFunctionResponse(int statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
+		public WriterFunctionResponse(HttpStatusCode statusCode, HttpHeaders headers, MultiValueMap<String, Cookie> cookies,
 				BiFunction<HttpServletRequest, HttpServletResponse, ModelAndView> writeFunction) {
 
 			super(statusCode, headers, cookies);

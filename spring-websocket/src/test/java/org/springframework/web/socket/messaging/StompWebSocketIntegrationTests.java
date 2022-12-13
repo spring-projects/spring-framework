@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
 
-		try (WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get()) {
+		try (WebSocketSession session = execute(new TestClientWebSocketHandler(0, message), "/ws").get()) {
 			assertThat(session).isNotNull();
 			SimpleController controller = this.wac.getBean(SimpleController.class);
 			assertThat(controller.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
@@ -98,7 +98,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 		}
@@ -114,7 +114,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 
@@ -133,7 +133,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
@@ -153,7 +153,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
@@ -175,7 +175,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();

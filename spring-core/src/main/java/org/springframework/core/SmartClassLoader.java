@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
  * Spring's CGLIB proxy factory for making a caching decision.
  *
  * <p>If a ClassLoader does <i>not</i> implement this interface,
- * then all of the classes obtained from it should be considered
+ * then all the classes obtained from it should be considered
  * as not reloadable (i.e. cacheable).
  *
  * @author Juergen Hoeller
@@ -45,6 +45,28 @@ public interface SmartClassLoader {
 	 */
 	default boolean isClassReloadable(Class<?> clazz) {
 		return false;
+	}
+
+	/**
+	 * Return the original ClassLoader for this SmartClassLoader, or potentially
+	 * the present loader itself if it is self-sufficient.
+	 * <p>The default implementation returns the local ClassLoader reference as-is.
+	 * In case of a reloadable or other selectively overriding ClassLoader which
+	 * commonly deals with unaffected classes from a base application class loader,
+	 * this should get implemented to return the original ClassLoader that the
+	 * present loader got derived from (e.g. through {@code return getParent();}).
+	 * <p>This gets specifically used in Spring's AOP framework to determine the
+	 * class loader for a specific proxy in case the target class has not been
+	 * defined in the present class loader. In case of a reloadable class loader,
+	 * we prefer the base application class loader for proxying general classes
+	 * not defined in the reloadable class loader itself.
+	 * @return the original ClassLoader (the same reference by default)
+	 * @since 5.3.5
+	 * @see ClassLoader#getParent()
+	 * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator
+	 */
+	default ClassLoader getOriginalClassLoader() {
+		return (ClassLoader) this;
 	}
 
 	/**
@@ -69,7 +91,6 @@ public interface SmartClassLoader {
 	 * not being possible (thrown by the default implementation in this interface)
 	 * @since 5.3.4
 	 * @see ClassLoader#defineClass(String, byte[], int, int, ProtectionDomain)
-	 * @see java.lang.invoke.MethodHandles.Lookup#defineClass(byte[])
 	 */
 	default Class<?> publicDefineClass(String name, byte[] b, @Nullable ProtectionDomain protectionDomain) {
 		throw new UnsupportedOperationException();

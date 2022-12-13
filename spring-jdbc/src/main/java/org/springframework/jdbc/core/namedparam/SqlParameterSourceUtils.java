@@ -106,9 +106,9 @@ public abstract class SqlParameterSourceUtils {
 	}
 
 	/**
-	 * Create a Map of case insensitive parameter names together with the original name.
+	 * Create a Map of case-insensitive parameter names together with the original name.
 	 * @param parameterSource the source of parameter names
-	 * @return the Map that can be used for case insensitive matching of parameter names
+	 * @return the Map that can be used for case-insensitive matching of parameter names
 	 */
 	public static Map<String, String> extractCaseInsensitiveParameterNames(SqlParameterSource parameterSource) {
 		Map<String, String> caseInsensitiveParameterNames = new HashMap<>();

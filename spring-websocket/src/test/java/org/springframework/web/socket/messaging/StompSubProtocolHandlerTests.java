@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class StompSubProtocolHandlerTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.protocolHandler = new StompSubProtocolHandler();
 		this.channel = Mockito.mock(MessageChannel.class);
 		this.messageCaptor = ArgumentCaptor.forClass(Message.class);
@@ -101,34 +101,39 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void handleMessageToClientWithConnectedFrame() {
-
+	void handleMessageToClientWithConnectedFrame() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
-		assertThat(textMessage.getPayload()).isEqualTo(("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000"));
+		assertThat(textMessage.getPayload()).isEqualTo("""
+				CONNECTED
+				user-name:joe
+
+				\u0000""");
 	}
 
 	@Test
-	public void handleMessageToClientWithDestinationUserNameProvider() {
-
+	void handleMessageToClientWithDestinationUserNameProvider() {
 		this.session.setPrincipal(new UniqueUser("joe"));
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
-		assertThat(textMessage.getPayload()).isEqualTo(("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000"));
+		assertThat(textMessage.getPayload()).isEqualTo("""
+				CONNECTED
+				user-name:joe
+
+				\u0000""");
 	}
 
 	@Test
-	public void handleMessageToClientWithSimpConnectAck() {
-
+	void handleMessageToClientWithSimpConnectAck() {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
 		accessor.setHeartbeat(10000, 10000);
 		accessor.setAcceptVersion("1.0,1.1,1.2");
@@ -140,15 +145,19 @@ public class StompSubProtocolHandlerTests {
 		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
-		assertThat(actual.getPayload()).isEqualTo(("CONNECTED\n" + "version:1.2\n" + "heart-beat:15000,15000\n" +
-				"user-name:joe\n" + "\n" + "\u0000"));
+		assertThat(actual.getPayload()).isEqualTo("""
+				CONNECTED
+				version:1.2
+				heart-beat:15000,15000
+				user-name:joe
+
+				\u0000""");
 	}
 
 	@Test
-	public void handleMessageToClientWithSimpConnectAckDefaultHeartBeat() {
-
+	void handleMessageToClientWithSimpConnectAckDefaultHeartBeat() {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
 		accessor.setHeartbeat(10000, 10000);
 		accessor.setAcceptVersion("1.0");
@@ -159,15 +168,19 @@ public class StompSubProtocolHandlerTests {
 		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
-		assertThat(actual.getPayload()).isEqualTo(("CONNECTED\n" + "version:1.0\n" + "heart-beat:0,0\n" +
-				"user-name:joe\n" + "\n" + "\u0000"));
+		assertThat(actual.getPayload()).isEqualTo("""
+				CONNECTED
+				version:1.0
+				heart-beat:0,0
+				user-name:joe
+
+				\u0000""");
 	}
 
 	@Test
-	public void handleMessageToClientWithSimpDisconnectAck() {
-
+	void handleMessageToClientWithSimpDisconnectAck() {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 
@@ -176,15 +189,18 @@ public class StompSubProtocolHandlerTests {
 		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
-		assertThat(actual.getPayload()).isEqualTo(("ERROR\n" + "message:Session closed.\n" + "content-length:0\n" +
-				"\n\u0000"));
+		assertThat(actual.getPayload()).isEqualTo("""
+				ERROR
+				message:Session closed.
+				content-length:0
+
+				\u0000""");
 	}
 
 	@Test
-	public void handleMessageToClientWithSimpDisconnectAckAndReceipt() {
-
+	void handleMessageToClientWithSimpDisconnectAckAndReceipt() {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.DISCONNECT);
 		accessor.setReceipt("message-123");
 		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
@@ -194,28 +210,30 @@ public class StompSubProtocolHandlerTests {
 		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
-		assertThat(actual.getPayload()).isEqualTo(("RECEIPT\n" + "receipt-id:message-123\n" + "\n\u0000"));
+		assertThat(actual.getPayload()).isEqualTo("""
+				RECEIPT
+				receipt-id:message-123
+
+				\u0000""");
 	}
 
 	@Test
-	public void handleMessageToClientWithSimpHeartbeat() {
-
+	void handleMessageToClientWithSimpHeartbeat() {
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
 		accessor.setSessionId("s1");
 		accessor.setUser(new TestPrincipal("joe"));
 		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
 		assertThat(actual.getPayload()).isEqualTo("\n");
 	}
 
 	@Test
-	public void handleMessageToClientWithHeartbeatSuppressingSockJsHeartbeat() throws IOException {
-
+	void handleMessageToClientWithHeartbeatSuppressingSockJsHeartbeat() throws IOException {
 		SockJsSession sockJsSession = Mockito.mock(SockJsSession.class);
 		given(sockJsSession.getId()).willReturn("s1");
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
@@ -243,8 +261,7 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void handleMessageToClientWithUserDestination() {
-
+	void handleMessageToClientWithUserDestination() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
 		headers.setMessageId("mess0");
 		headers.setSubscriptionId("sub0");
@@ -253,7 +270,7 @@ public class StompSubProtocolHandlerTests {
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
 		assertThat(((String) textMessage.getPayload()).contains("destination:/user/queue/foo\n")).isTrue();
 		assertThat(((String) textMessage.getPayload()).contains(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION)).isFalse();
@@ -262,8 +279,7 @@ public class StompSubProtocolHandlerTests {
 	// SPR-12475
 
 	@Test
-	public void handleMessageToClientWithBinaryWebSocketMessage() {
-
+	void handleMessageToClientWithBinaryWebSocketMessage() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
 		headers.setMessageId("mess0");
 		headers.setSubscriptionId("sub0");
@@ -276,7 +292,7 @@ public class StompSubProtocolHandlerTests {
 		Message<byte[]> message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		WebSocketMessage<?> webSocketMessage = this.session.getSentMessages().get(0);
 		assertThat(webSocketMessage instanceof BinaryMessage).isTrue();
 
@@ -286,14 +302,13 @@ public class StompSubProtocolHandlerTests {
 		message = MessageBuilder.createMessage(payload, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.session.getSentMessages()).hasSize(2);
 		webSocketMessage = this.session.getSentMessages().get(1);
 		assertThat(webSocketMessage instanceof TextMessage).isTrue();
 	}
 
 	@Test
-	public void handleMessageFromClient() {
-
+	void handleMessageFromClient() {
 		TextMessage textMessage = StompTextMessageBuilder.create(StompCommand.STOMP).headers(
 				"login:guest", "passcode:guest", "accept-version:1.1,1.0", "heart-beat:10000,10000").build();
 
@@ -317,11 +332,11 @@ public class StompSubProtocolHandlerTests {
 		assertThat(stompAccessor.getPasscode()).isEqualTo("guest");
 		assertThat(stompAccessor.getHeartbeat()).isEqualTo(new long[] {10000, 10000});
 		assertThat(stompAccessor.getAcceptVersion()).isEqualTo(new HashSet<>(Arrays.asList("1.1","1.0")));
-		assertThat(this.session.getSentMessages().size()).isEqualTo(0);
+		assertThat(this.session.getSentMessages()).isEmpty();
 	}
 
 	@Test
-	public void handleMessageFromClientWithImmutableMessageInterceptor() {
+	void handleMessageFromClientWithImmutableMessageInterceptor() {
 		AtomicReference<Boolean> mutable = new AtomicReference<>();
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
 		channel.addInterceptor(new ChannelInterceptor() {
@@ -343,7 +358,7 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void handleMessageFromClientWithoutImmutableMessageInterceptor() {
+	void handleMessageFromClientWithoutImmutableMessageInterceptor() {
 		AtomicReference<Boolean> mutable = new AtomicReference<>();
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
 		channel.addInterceptor(new ChannelInterceptor() {
@@ -364,7 +379,7 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test // SPR-14690
-	public void handleMessageFromClientWithTokenAuthentication() {
+	void handleMessageFromClientWithTokenAuthentication() {
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
 		channel.addInterceptor(new AuthenticationInterceptor("__pete__@gmail.com"));
 		channel.addInterceptor(new ImmutableMessageChannelInterceptor());
@@ -378,7 +393,7 @@ public class StompSubProtocolHandlerTests {
 		TextMessage wsMessage = StompTextMessageBuilder.create(StompCommand.CONNECT).build();
 		handler.handleMessageFromClient(this.session, wsMessage, channel);
 
-		assertThat(messageHandler.getMessages().size()).isEqualTo(1);
+		assertThat(messageHandler.getMessages()).hasSize(1);
 		Message<?> message = messageHandler.getMessages().get(0);
 		Principal user = SimpMessageHeaderAccessor.getUser(message.getHeaders());
 		assertThat(user).isNotNull();
@@ -390,27 +405,28 @@ public class StompSubProtocolHandlerTests {
 
 		assertThat(this.session.getSentMessages()).hasSize(1);
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
-		assertThat(textMessage.getPayload())
-				.isEqualTo("CONNECTED\n" + "user-name:__pete__@gmail.com\n" + "\n" + "\u0000");
+		assertThat(textMessage.getPayload()).isEqualTo("""
+				CONNECTED
+				user-name:__pete__@gmail.com
+
+				\u0000""");
 	}
 
 	@Test
-	public void handleMessageFromClientWithInvalidStompCommand() {
-
+	void handleMessageFromClientWithInvalidStompCommand() {
 		TextMessage textMessage = new TextMessage("FOO\n\n\0");
 
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
 
 		verifyNoInteractions(this.channel);
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
 		assertThat(actual.getPayload().startsWith("ERROR")).isTrue();
 	}
 
 	@Test
-	public void eventPublication() {
-
+	void eventPublication() {
 		TestPublisher publisher = new TestPublisher();
 
 		this.protocolHandler.setApplicationEventPublisher(publisher);
@@ -446,8 +462,7 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void eventPublicationWithExceptions() {
-
+	void eventPublicationWithExceptions() {
 		ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
 
 		this.protocolHandler.setApplicationEventPublisher(publisher);
@@ -468,9 +483,13 @@ public class StompSubProtocolHandlerTests {
 		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
 
-		assertThat(this.session.getSentMessages().size()).isEqualTo(1);
+		assertThat(this.session.getSentMessages()).hasSize(1);
 		textMessage = (TextMessage) this.session.getSentMessages().get(0);
-		assertThat(textMessage.getPayload()).isEqualTo(("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000"));
+		assertThat(textMessage.getPayload()).isEqualTo("""
+				CONNECTED
+				user-name:joe
+
+				\u0000""");
 
 		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, this.channel);
 
@@ -484,8 +503,7 @@ public class StompSubProtocolHandlerTests {
 	}
 
 	@Test
-	public void webSocketScope() {
-
+	void webSocketScope() {
 		Runnable runnable = Mockito.mock(Runnable.class);
 		SimpAttributes simpAttributes = new SimpAttributes(this.session.getId(), this.session.getAttributes());
 		simpAttributes.setAttribute("name", "value");
@@ -576,4 +594,5 @@ public class StompSubProtocolHandlerTests {
 			return message;
 		}
 	}
+
 }

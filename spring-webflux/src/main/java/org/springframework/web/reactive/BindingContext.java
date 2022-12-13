@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,11 @@ package org.springframework.web.reactive;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.TreeMap;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.codec.multipart.Part;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
@@ -127,21 +124,9 @@ public class BindingContext {
 
 		@Override
 		public Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
-			Map<String, String> vars = exchange.getAttributeOrDefault(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap());
-			MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
-			Mono<MultiValueMap<String, String>> formData = exchange.getFormData();
-			Mono<MultiValueMap<String, Part>> multipartData = exchange.getMultipartData();
-
-			return Mono.zip(Mono.just(vars), Mono.just(queryParams), formData, multipartData)
-					.map(tuple -> {
-						Map<String, Object> result = new TreeMap<>();
-						tuple.getT1().forEach(result::put);
-						tuple.getT2().forEach((key, values) -> addBindValue(result, key, values));
-						tuple.getT3().forEach((key, values) -> addBindValue(result, key, values));
-						tuple.getT4().forEach((key, values) -> addBindValue(result, key, values));
-						return result;
-					});
+			return super.getValuesToBind(exchange).doOnNext(map ->
+					map.putAll(exchange.<Map<String, String>>getAttributeOrDefault(
+							HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap())));
 		}
 	}
 

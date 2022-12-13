@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.reactive.server;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.hamcrest.Matcher;
@@ -28,7 +30,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Assertions on cookies of the response.
+ *
  * @author Rossen Stoyanchev
+ * @since 5.3
  */
 public class CookieAssertions {
 
@@ -185,7 +189,7 @@ public class CookieAssertions {
 	public WebTestClient.ResponseSpec httpOnly(String name, boolean expected) {
 		boolean isHttpOnly = getCookie(name).isHttpOnly();
 		this.exchangeResult.assertWithDiagnostics(() -> {
-			String message = getMessage(name) + " secure";
+			String message = getMessage(name) + " httpOnly";
 			AssertionErrors.assertEquals(message, expected, isHttpOnly);
 		});
 		return this.responseSpec;
@@ -197,7 +201,7 @@ public class CookieAssertions {
 	public WebTestClient.ResponseSpec sameSite(String name, String expected) {
 		String sameSite = getCookie(name).getSameSite();
 		this.exchangeResult.assertWithDiagnostics(() -> {
-			String message = getMessage(name) + " secure";
+			String message = getMessage(name) + " sameSite";
 			AssertionErrors.assertEquals(message, expected, sameSite);
 		});
 		return this.responseSpec;
@@ -207,10 +211,10 @@ public class CookieAssertions {
 	private ResponseCookie getCookie(String name) {
 		ResponseCookie cookie = this.exchangeResult.getResponseCookies().getFirst(name);
 		if (cookie == null) {
-			String message = "No cookie with name '" + name + "'";
-			this.exchangeResult.assertWithDiagnostics(() -> AssertionErrors.fail(message));
+			this.exchangeResult.assertWithDiagnostics(() ->
+					AssertionErrors.fail("No cookie with name '" + name + "'"));
 		}
-		return cookie;
+		return Objects.requireNonNull(cookie);
 	}
 
 	private String getMessage(String cookie) {

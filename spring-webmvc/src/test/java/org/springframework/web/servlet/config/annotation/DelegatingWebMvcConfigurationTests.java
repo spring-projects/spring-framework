@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,8 +112,8 @@ public class DelegatingWebMvcConfigurationTests {
 		assertThat(initializer.getConversionService()).isSameAs(conversionService.getValue());
 		boolean condition = initializer.getValidator() instanceof LocalValidatorFactoryBean;
 		assertThat(condition).isTrue();
-		assertThat(resolvers.getValue().size()).isEqualTo(0);
-		assertThat(handlers.getValue().size()).isEqualTo(0);
+		assertThat(resolvers.getValue()).isEmpty();
+		assertThat(handlers.getValue()).isEmpty();
 		assertThat(adapter.getMessageConverters()).isEqualTo(converters.getValue());
 		assertThat(asyncConfigurer).isNotNull();
 	}
@@ -174,7 +174,7 @@ public class DelegatingWebMvcConfigurationTests {
 		verify(webMvcConfigurer).configureContentNegotiation(contentNegotiationConfigurer.capture());
 		verify(webMvcConfigurer).configureHandlerExceptionResolvers(exceptionResolvers.capture());
 
-		assertThat(exceptionResolvers.getValue().size()).isEqualTo(3);
+		assertThat(exceptionResolvers.getValue()).hasSize(3);
 		boolean condition2 = exceptionResolvers.getValue().get(0) instanceof ExceptionHandlerExceptionResolver;
 		assertThat(condition2).isTrue();
 		boolean condition1 = exceptionResolvers.getValue().get(1) instanceof ResponseStatusExceptionResolver;
@@ -245,9 +245,9 @@ public class DelegatingWebMvcConfigurationTests {
 				webMvcConfig.mvcResourceUrlProvider());
 
 		assertThat(annotationsMapping).isNotNull();
-		assertThat(annotationsMapping.useRegisteredSuffixPatternMatch()).isEqualTo(true);
-		assertThat(annotationsMapping.useSuffixPatternMatch()).isEqualTo(true);
-		assertThat(annotationsMapping.useTrailingSlashMatch()).isEqualTo(false);
+		assertThat(annotationsMapping.useRegisteredSuffixPatternMatch()).isTrue();
+		assertThat(annotationsMapping.useSuffixPatternMatch()).isTrue();
+		assertThat(annotationsMapping.useTrailingSlashMatch()).isFalse();
 		configAssertion.accept(annotationsMapping.getUrlPathHelper(), annotationsMapping.getPathMatcher());
 
 		SimpleUrlHandlerMapping mapping = (SimpleUrlHandlerMapping) webMvcConfig.viewControllerHandlerMapping(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public class PropertiesEditorTests {
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(null);
 		Properties p = (Properties) pe.getValue();
-		assertThat(p.size()).isEqualTo(0);
+		assertThat(p).isEmpty();
 	}
 
 	@Test
@@ -163,7 +163,7 @@ public class PropertiesEditorTests {
 		boolean condition = value instanceof Properties;
 		assertThat(condition).isTrue();
 		Properties props = (Properties) value;
-		assertThat(props.size()).isEqualTo(3);
+		assertThat(props).hasSize(3);
 		assertThat(props.getProperty("one")).isEqualTo("1");
 		assertThat(props.getProperty("two")).isEqualTo("2");
 		assertThat(props.getProperty("three")).isEqualTo("3");

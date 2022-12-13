@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Rossen Stoyanchev
  * @author Eko Kurniawan Khannedy
  */
+@SuppressWarnings("deprecation")
 public class InterceptorRegistryTests {
 
 	private InterceptorRegistry registry;
@@ -104,7 +105,7 @@ public class InterceptorRegistryTests {
 		this.registry.addWebRequestInterceptor(this.webInterceptor1);
 		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
 
-		assertThat(interceptors.size()).isEqualTo(1);
+		assertThat(interceptors).hasSize(1);
 		verifyWebInterceptor(interceptors.get(0), this.webInterceptor1);
 	}
 
@@ -114,7 +115,7 @@ public class InterceptorRegistryTests {
 		this.registry.addWebRequestInterceptor(this.webInterceptor2);
 		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
 
-		assertThat(interceptors.size()).isEqualTo(2);
+		assertThat(interceptors).hasSize(2);
 		verifyWebInterceptor(interceptors.get(0), this.webInterceptor1);
 		verifyWebInterceptor(interceptors.get(1), this.webInterceptor2);
 	}
@@ -134,11 +135,11 @@ public class InterceptorRegistryTests {
 		this.registry.addWebRequestInterceptor(this.webInterceptor2).addPathPatterns("/path2");
 
 		List<HandlerInterceptor> interceptors = getInterceptorsForPath("/path1");
-		assertThat(interceptors.size()).isEqualTo(1);
+		assertThat(interceptors).hasSize(1);
 		verifyWebInterceptor(interceptors.get(0), this.webInterceptor1);
 
 		interceptors = getInterceptorsForPath("/path2");
-		assertThat(interceptors.size()).isEqualTo(1);
+		assertThat(interceptors).hasSize(1);
 		verifyWebInterceptor(interceptors.get(0), this.webInterceptor2);
 	}
 
@@ -158,7 +159,7 @@ public class InterceptorRegistryTests {
 		this.registry.addInterceptor(this.interceptor2).order(Ordered.HIGHEST_PRECEDENCE);
 
 		List<Object> interceptors = this.registry.getInterceptors();
-		assertThat(interceptors.size()).isEqualTo(2);
+		assertThat(interceptors).hasSize(2);
 
 		assertThat(interceptors.get(0)).isSameAs(this.interceptor2);
 		assertThat(interceptors.get(1)).isSameAs(this.interceptor1);
@@ -170,20 +171,18 @@ public class InterceptorRegistryTests {
 		this.registry.addInterceptor(this.interceptor2).order(0);
 
 		List<Object> interceptors = this.registry.getInterceptors();
-		assertThat(interceptors.size()).isEqualTo(2);
+		assertThat(interceptors).hasSize(2);
 
 		assertThat(interceptors.get(0)).isSameAs(this.interceptor1);
 		assertThat(interceptors.get(1)).isSameAs(this.interceptor2);
 	}
 
 
-	@SuppressWarnings("deprecation")
 	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
 		PathMatcher pathMatcher = new AntPathMatcher();
 		List<HandlerInterceptor> result = new ArrayList<>();
 		for (Object interceptor : this.registry.getInterceptors()) {
-			if (interceptor instanceof MappedInterceptor) {
-				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
+			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
 				if (mappedInterceptor.matches(lookupPath, pathMatcher)) {
 					result.add(mappedInterceptor.getInterceptor());
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,10 +64,10 @@ import org.springframework.util.StringUtils;
  * underneath the {@code /resources/} path, including {@code /resources/image.png}
  * and {@code /resources/css/spring.css}</li>
  * <li><code>/resources/{&#42;path}</code> &mdash; matches all files
- * underneath the {@code /resources/} path and captures their relative path in
- * a variable named "path"; {@code /resources/image.png} will match with
- * "path" &rarr; "/image.png", and {@code /resources/css/spring.css} will match
- * with "path" &rarr; "/css/spring.css"</li>
+ * underneath the {@code /resources/}, as well as {@code /resources}, and captures
+ * their relative path in a variable named "path"; {@code /resources/image.png}
+ * will match with "path" &rarr; "/image.png", and {@code /resources/css/spring.css}
+ * will match with "path" &rarr; "/css/spring.css"</li>
  * <li><code>/resources/{filename:\\w+}.dat</code> will match {@code /resources/spring.dat}
  * and assign the value {@code "spring"} to the {@code filename} variable</li>
  * </ul>
@@ -113,7 +113,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	/** If this pattern has no trailing slash, allow candidates to include one and still match successfully. */
 	private final boolean matchOptionalTrailingSeparator;
 
-	/** Will this match candidates in a case sensitive way? (case sensitivity  at parse time). */
+	/** Will this match candidates in a case-sensitive way? (case sensitivity  at parse time). */
 	private final boolean caseSensitive;
 
 	/** First path element in the parsed chain of path elements for this pattern. */
@@ -150,6 +150,7 @@ public class PathPattern implements Comparable<PathPattern> {
 	private boolean catchAll = false;
 
 
+	@SuppressWarnings("deprecation")
 	PathPattern(String patternText, PathPatternParser parser, @Nullable PathElement head) {
 		this.patternString = patternText;
 		this.parser = parser;
@@ -336,18 +337,18 @@ public class PathPattern implements Comparable<PathPattern> {
 		PathContainer resultPath = null;
 		if (multipleAdjacentSeparators) {
 			// Need to rebuild the path without the duplicate adjacent separators
-			StringBuilder buf = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 			int i = startIndex;
 			while (i < endIndex) {
 				Element e = pathElements.get(i++);
-				buf.append(e.value());
+				sb.append(e.value());
 				if (e instanceof Separator) {
 					while (i < endIndex && (pathElements.get(i) instanceof Separator)) {
 						i++;
 					}
 				}
 			}
-			resultPath = PathContainer.parsePath(buf.toString(), this.pathOptions);
+			resultPath = PathContainer.parsePath(sb.toString(), this.pathOptions);
 		}
 		else if (startIndex >= endIndex) {
 			resultPath = PathContainer.parsePath("");
@@ -430,10 +431,9 @@ public class PathPattern implements Comparable<PathPattern> {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (!(other instanceof PathPattern)) {
+		if (!(other instanceof PathPattern otherPattern)) {
 			return false;
 		}
-		PathPattern otherPattern = (PathPattern) other;
 		return (this.patternString.equals(otherPattern.getPatternString()) &&
 				getSeparator() == otherPattern.getSeparator() &&
 				this.caseSensitive == otherPattern.caseSensitive);
@@ -491,13 +491,13 @@ public class PathPattern implements Comparable<PathPattern> {
 	 * @return the string form of the pattern
 	 */
 	String computePatternString() {
-		StringBuilder buf = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		PathElement pe = this.head;
 		while (pe != null) {
-			buf.append(pe.getChars());
+			sb.append(pe.getChars());
 			pe = pe.next;
 		}
-		return buf.toString();
+		return sb.toString();
 	}
 
 	@Nullable
@@ -726,10 +726,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		 */
 		String pathElementValue(int pathIndex) {
 			Element element = (pathIndex < this.pathLength) ? this.pathElements.get(pathIndex) : null;
-			if (element instanceof PathContainer.PathSegment) {
-				return ((PathContainer.PathSegment)element).valueToMatch();
-			}
-			return "";
+			return (element instanceof PathContainer.PathSegment pathSegment ? pathSegment.valueToMatch() : "");
 		}
 	}
 

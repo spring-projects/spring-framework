@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -45,7 +46,7 @@ import org.springframework.web.util.UriUtils;
  * values from the model or with URI variables from the current request.
  *
  * <p>By default {@link HttpStatus#SEE_OTHER} is used but alternate status codes
- * may be via constructor or setters arguments.
+ * may be supplied via constructor or setters arguments.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -53,10 +54,10 @@ import org.springframework.web.util.UriUtils;
  */
 public class RedirectView extends AbstractUrlBasedView {
 
-	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)}");
+	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
-	private HttpStatus statusCode = HttpStatus.SEE_OTHER;
+	private HttpStatusCode statusCode = HttpStatus.SEE_OTHER;
 
 	private boolean contextRelative = true;
 
@@ -74,7 +75,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Create a new {@code RedirectView} with the given redirect URL.
-	 * Status code {@link HttpStatus#SEE_OTHER} is used by default.
+	 * <p>Status code {@link HttpStatus#SEE_OTHER} is used by default.
 	 */
 	public RedirectView(String redirectUrl) {
 		super(redirectUrl);
@@ -85,7 +86,7 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * redirect status code such as {@link HttpStatus#TEMPORARY_REDIRECT} or
 	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
-	public RedirectView(String redirectUrl, HttpStatus statusCode) {
+	public RedirectView(String redirectUrl, HttpStatusCode statusCode) {
 		super(redirectUrl);
 		setStatusCode(statusCode);
 	}
@@ -96,22 +97,22 @@ public class RedirectView extends AbstractUrlBasedView {
 	 * {@link HttpStatus#TEMPORARY_REDIRECT} or
 	 * {@link HttpStatus#PERMANENT_REDIRECT}.
 	 */
-	public void setStatusCode(HttpStatus statusCode) {
-		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code");
+	public void setStatusCode(HttpStatusCode statusCode) {
+		Assert.isTrue(statusCode.is3xxRedirection(), () -> "Not a redirect status code: " + statusCode);
 		this.statusCode = statusCode;
 	}
 
 	/**
 	 * Get the redirect status code to use.
 	 */
-	public HttpStatus getStatusCode() {
+	public HttpStatusCode getStatusCode() {
 		return this.statusCode;
 	}
 
 	/**
-	 * Whether to interpret a given redirect URLs that starts with a slash ("/")
-	 * as relative to the current context path ({@code true}, the default) or to
-	 * the web server root ({@code false}).
+	 * Whether to interpret a given redirect URL that starts with a slash ("/")
+	 * as relative to the current context path ({@code true}, the default) or
+	 * relative to the web server root ({@code false}).
 	 */
 	public void setContextRelative(boolean contextRelative) {
 		this.contextRelative = contextRelative;
@@ -141,7 +142,7 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Configure one or more hosts associated with the application.
-	 * All other hosts will be considered external hosts.
+	 * <p>All other hosts will be considered external hosts.
 	 * <p>In effect this provides a way turn off encoding for URLs that
 	 * have a host and that host is not listed as a known host.
 	 * <p>If not set (the default) all redirect URLs are encoded.
@@ -158,13 +159,6 @@ public class RedirectView extends AbstractUrlBasedView {
 	public String[] getHosts() {
 		return this.hosts;
 	}
-
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
-	}
-
 
 	@Override
 	public boolean isRedirectView() {
@@ -296,12 +290,12 @@ public class RedirectView extends AbstractUrlBasedView {
 
 	/**
 	 * Whether the given targetUrl has a host that is a "foreign" system in which
-	 * case {@link javax.servlet.http.HttpServletResponse#encodeRedirectURL} will not be applied.
-	 * This method returns {@code true} if the {@link #setHosts(String[])}
+	 * case {@link jakarta.servlet.http.HttpServletResponse#encodeRedirectURL} will not be applied.
+	 * <p>This method returns {@code true} if the {@link #setHosts(String[])}
 	 * property is configured and the target URL has a host that does not match.
 	 * @param targetUrl the target redirect URL
-	 * @return {@code true} the target URL has a remote host, {@code false} if it
-	 * the URL does not have a host or the "host" property is not configured.
+	 * @return {@code true} if the target URL has a remote host, {@code false} if
+	 * the URL does not have a host or the "host" property is not configured
 	 */
 	protected boolean isRemoteHost(String targetUrl) {
 		if (ObjectUtils.isEmpty(this.hosts)) {

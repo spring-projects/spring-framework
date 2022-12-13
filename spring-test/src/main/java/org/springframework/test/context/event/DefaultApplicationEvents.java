@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,8 @@ class DefaultApplicationEvents implements ApplicationEvents {
 	}
 
 	private Object unwrapPayloadEvent(Object source) {
-		return (PayloadApplicationEvent.class.isInstance(source) ?
-				((PayloadApplicationEvent<?>) source).getPayload() : source);
+		return ((source instanceof PayloadApplicationEvent<?> payloadApplicationEvent) ?
+				payloadApplicationEvent.getPayload() : source);
 	}
 
 }

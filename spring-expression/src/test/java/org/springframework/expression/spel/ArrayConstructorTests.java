@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,54 +18,47 @@ package org.springframework.expression.spel;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
+import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Test construction of arrays.
  *
  * @author Andy Clement
+ * @author Sam Brannen
+ * @author Juergen Hoeller
  */
-public class ArrayConstructorTests extends AbstractExpressionTests {
+class ArrayConstructorTests extends AbstractExpressionTests {
 
 	@Test
-	public void simpleArrayWithInitializer() {
-		evaluateArrayBuildingExpression("new int[]{1,2,3}", "[1,2,3]");
-		evaluateArrayBuildingExpression("new int[]{}", "[]");
-		evaluate("new int[]{}.length", "0", Integer.class);
-	}
-
-	@Test
-	public void conversion() {
+	void conversion() {
 		evaluate("new String[]{1,2,3}[0]", "1", String.class);
 		evaluate("new int[]{'123'}[0]", 123, Integer.class);
 	}
 
 	@Test
-	public void multidimensionalArrays() {
-		evaluateAndCheckError("new int[][]{{1,2},{3,4}}", SpelMessage.MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED);
-		evaluateAndCheckError("new int[3][]", SpelMessage.MISSING_ARRAY_DIMENSION);
-		evaluateAndCheckError("new int[]", SpelMessage.MISSING_ARRAY_DIMENSION);
-		evaluateAndCheckError("new String[]", SpelMessage.MISSING_ARRAY_DIMENSION);
-		evaluateAndCheckError("new int[][1]", SpelMessage.MISSING_ARRAY_DIMENSION);
+	void primitiveTypeArrayConstructors() {
+		evaluateArrayBuildingExpression("new int[]{}", "{}");
+		evaluateArrayBuildingExpression("new int[]{1,2,3,4}", "{1, 2, 3, 4}");
+		evaluateArrayBuildingExpression("new boolean[]{true,false,true}", "{true, false, true}");
+		evaluateArrayBuildingExpression("new char[]{'a','b','c'}", "{'a', 'b', 'c'}");
+		evaluateArrayBuildingExpression("new long[]{1,2,3,4,5}", "{1, 2, 3, 4, 5}");
+		evaluateArrayBuildingExpression("new short[]{2,3,4,5,6}", "{2, 3, 4, 5, 6}");
+		evaluateArrayBuildingExpression("new double[]{1d,2d,3d,4d}", "{1.0, 2.0, 3.0, 4.0}");
+		evaluateArrayBuildingExpression("new float[]{1f,2f,3f,4f}", "{1.0, 2.0, 3.0, 4.0}");
+		evaluateArrayBuildingExpression("new byte[]{1,2,3,4}", "{1, 2, 3, 4}");
+
+		evaluate("new int[]{}.length", "0", Integer.class);
 	}
 
 	@Test
-	public void primitiveTypeArrayConstructors() {
-		evaluateArrayBuildingExpression("new int[]{1,2,3,4}", "[1,2,3,4]");
-		evaluateArrayBuildingExpression("new boolean[]{true,false,true}", "[true,false,true]");
-		evaluateArrayBuildingExpression("new char[]{'a','b','c'}", "[a,b,c]");
-		evaluateArrayBuildingExpression("new long[]{1,2,3,4,5}", "[1,2,3,4,5]");
-		evaluateArrayBuildingExpression("new short[]{2,3,4,5,6}", "[2,3,4,5,6]");
-		evaluateArrayBuildingExpression("new double[]{1d,2d,3d,4d}", "[1.0,2.0,3.0,4.0]");
-		evaluateArrayBuildingExpression("new float[]{1f,2f,3f,4f}", "[1.0,2.0,3.0,4.0]");
-		evaluateArrayBuildingExpression("new byte[]{1,2,3,4}", "[1,2,3,4]");
-	}
-
-	@Test
-	public void primitiveTypeArrayConstructorsElements() {
+	void primitiveTypeArrayConstructorsElements() {
 		evaluate("new int[]{1,2,3,4}[0]", 1, Integer.class);
 		evaluate("new boolean[]{true,false,true}[0]", true, Boolean.class);
 		evaluate("new char[]{'a','b','c'}[0]", 'a', Character.class);
@@ -78,129 +71,68 @@ public class ArrayConstructorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void errorCases() {
+	void errorCases() {
+		evaluateAndCheckError("new int[]", SpelMessage.MISSING_ARRAY_DIMENSION);
+		evaluateAndCheckError("new String[]", SpelMessage.MISSING_ARRAY_DIMENSION);
+		evaluateAndCheckError("new int[3][]", SpelMessage.MISSING_ARRAY_DIMENSION);
+		evaluateAndCheckError("new int[][1]", SpelMessage.MISSING_ARRAY_DIMENSION);
+
 		evaluateAndCheckError("new char[7]{'a','c','d','e'}", SpelMessage.INITIALIZER_LENGTH_INCORRECT);
 		evaluateAndCheckError("new char[3]{'a','c','d','e'}", SpelMessage.INITIALIZER_LENGTH_INCORRECT);
+
+		evaluateAndCheckError("new int[][]{{1,2},{3,4}}", SpelMessage.MULTIDIM_ARRAY_INITIALIZER_NOT_SUPPORTED);
+
 		evaluateAndCheckError("new char[2]{'hello','world'}", SpelMessage.TYPE_CONVERSION_ERROR);
+		// Could conceivably be a SpelMessage.INCORRECT_ELEMENT_TYPE_FOR_ARRAY, but it appears
+		// that SpelMessage.INCORRECT_ELEMENT_TYPE_FOR_ARRAY is not actually (no longer?) used
+		// in the code base.
+		evaluateAndCheckError("new Integer[3]{'3','ghi','5'}", SpelMessage.TYPE_CONVERSION_ERROR);
+
 		evaluateAndCheckError("new String('a','c','d')", SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM);
+		// Root cause: java.lang.OutOfMemoryError: Requested array size exceeds VM limit
+		evaluateAndCheckError("new java.util.ArrayList(T(java.lang.Integer).MAX_VALUE)", SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM);
+
+		int threshold = 256 * 1024; // ConstructorReference.MAX_ARRAY_ELEMENTS
+		evaluateAndCheckError("new int[T(java.lang.Integer).MAX_VALUE]", SpelMessage.MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED, 0, threshold);
+		evaluateAndCheckError("new int[1024 * 1024][1024 * 1024]", SpelMessage.MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED, 0, threshold);
 	}
 
 	@Test
-	public void typeArrayConstructors() {
+	void typeArrayConstructors() {
 		evaluate("new String[]{'a','b','c','d'}[1]", "b", String.class);
 		evaluateAndCheckError("new String[]{'a','b','c','d'}.size()", SpelMessage.METHOD_NOT_FOUND, 30, "size()",
-			"java.lang.String[]");
+				"java.lang.String[]");
 		evaluate("new String[]{'a','b','c','d'}.length", 4, Integer.class);
 	}
 
 	@Test
-	public void basicArray() {
+	void basicArray() {
 		evaluate("new String[3]", "java.lang.String[3]{null,null,null}", String[].class);
 	}
 
 	@Test
-	public void multiDimensionalArray() {
+	void multiDimensionalArrays() {
 		evaluate("new String[2][2]", "[Ljava.lang.String;[2]{[2]{null,null},[2]{null,null}}", String[][].class);
 		evaluate("new String[3][2][1]",
-			"[[Ljava.lang.String;[3]{[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}}}",
-			String[][][].class);
+				"[[Ljava.lang.String;[3]{[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}},[2]{[1]{null},[1]{null}}}",
+				String[][][].class);
 	}
 
 	@Test
-	public void constructorInvocation03() {
-		evaluateAndCheckError("new String[]", SpelMessage.MISSING_ARRAY_DIMENSION);
+	void noArrayConstruction() {
+		EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() ->
+				parser.parseExpression("new int[2]").getValue(context));
 	}
 
-	public void constructorInvocation04() {
-		evaluateAndCheckError("new Integer[3]{'3','ghi','5'}", SpelMessage.INCORRECT_ELEMENT_TYPE_FOR_ARRAY, 4);
-	}
 
-	private String evaluateArrayBuildingExpression(String expression, String expectedToString) {
+	private void evaluateArrayBuildingExpression(String expression, String expectedToString) {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression e = parser.parseExpression(expression);
-		Object o = e.getValue();
-		assertThat(o).isNotNull();
-		assertThat(o.getClass().isArray()).isTrue();
-		StringBuilder s = new StringBuilder();
-		s.append('[');
-		if (o instanceof int[]) {
-			int[] array = (int[]) o;
-			for (int i = 0; i < array.length; i++) {
-				if (i > 0) {
-					s.append(',');
-				}
-				s.append(array[i]);
-			}
-		}
-		else if (o instanceof boolean[]) {
-			boolean[] array = (boolean[]) o;
-			for (int i = 0; i < array.length; i++) {
-				if (i > 0) {
-					s.append(',');
-				}
-				s.append(array[i]);
-			}
-		}
-		else if (o instanceof char[]) {
-			char[] array = (char[]) o;
-			for (int i = 0; i < array.length; i++) {
-				if (i > 0) {
-					s.append(',');
-				}
-				s.append(array[i]);
-			}
-		}
-		else if (o instanceof long[]) {
-			long[] array = (long[]) o;
-			for (int i = 0; i < array.length; i++) {
-				if (i > 0) {
-					s.append(',');
-				}
-				s.append(array[i]);
-			}
-		}
-		else if (o instanceof short[]) {
-			short[] array = (short[]) o;
-			for (int i = 0; i < array.length; i++) {
-				if (i > 0) {
-					s.append(',');
-				}
-				s.append(array[i]);
-			}
-		}
-		else if (o instanceof double[]) {
-			double[] array = (double[]) o;
-			for (int i = 0; i < array.length; i++) {
-				if (i > 0) {
-					s.append(',');
-				}
-				s.append(array[i]);
-			}
-		}
-		else if (o instanceof float[]) {
-			float[] array = (float[]) o;
-			for (int i = 0; i < array.length; i++) {
-				if (i > 0) {
-					s.append(',');
-				}
-				s.append(array[i]);
-			}
-		}
-		else if (o instanceof byte[]) {
-			byte[] array = (byte[]) o;
-			for (int i = 0; i < array.length; i++) {
-				if (i > 0) {
-					s.append(',');
-				}
-				s.append(array[i]);
-			}
-		}
-		else {
-			throw new IllegalStateException("Not supported " + o.getClass());
-		}
-		s.append(']');
-		assertThat(s.toString()).isEqualTo(expectedToString);
-		return s.toString();
+		Object array = e.getValue();
+		assertThat(array).isNotNull();
+		assertThat(array.getClass().isArray()).isTrue();
+		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo(expectedToString);
 	}
 
 }

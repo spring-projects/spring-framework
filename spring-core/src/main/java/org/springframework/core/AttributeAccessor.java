@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,15 +59,15 @@ public interface AttributeAccessor {
 	 * in this {@code AttributeAccessor}, the existing value will be returned
 	 * without applying the supplied compute function.
 	 * <p>The default implementation of this method is not thread safe but can
-	 * overridden by concrete implementations of this interface.
+	 * be overridden by concrete implementations of this interface.
 	 * @param <T> the type of the attribute value
 	 * @param name the unique attribute key
 	 * @param computeFunction a function that computes a new value for the attribute
 	 * name; the function must not return a {@code null} value
 	 * @return the existing value or newly computed value for the named attribute
+	 * @since 5.3.3
 	 * @see #getAttribute(String)
 	 * @see #setAttribute(String, Object)
-	 * @since 5.3.3
 	 */
 	@SuppressWarnings("unchecked")
 	default <T> T computeAttribute(String name, Function<String, T> computeFunction) {

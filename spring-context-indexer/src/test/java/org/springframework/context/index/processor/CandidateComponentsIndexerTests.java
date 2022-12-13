@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javax.annotation.ManagedBean;
-import javax.inject.Named;
-import javax.persistence.Converter;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-import javax.transaction.Transactional;
-
+import jakarta.annotation.ManagedBean;
+import jakarta.inject.Named;
+import jakarta.persistence.Converter;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -83,13 +82,13 @@ class CandidateComponentsIndexerTests {
 	@Test
 	void noCandidate() {
 		CandidateComponentsMetadata metadata = compile(SampleNone.class);
-		assertThat(metadata.getItems()).hasSize(0);
+		assertThat(metadata.getItems()).isEmpty();
 	}
 
 	@Test
 	void noAnnotation() {
 		CandidateComponentsMetadata metadata = compile(CandidateComponentsIndexerTests.class);
-		assertThat(metadata.getItems()).hasSize(0);
+		assertThat(metadata.getItems()).isEmpty();
 	}
 
 	@Test
@@ -215,7 +214,7 @@ class CandidateComponentsIndexerTests {
 	@Test
 	void embeddedNonStaticCandidateAreIgnored() {
 		CandidateComponentsMetadata metadata = compile(SampleNonStaticEmbedded.class);
-		assertThat(metadata.getItems()).hasSize(0);
+		assertThat(metadata.getItems()).isEmpty();
 	}
 
 	private void testComponent(Class<?>... classes) {

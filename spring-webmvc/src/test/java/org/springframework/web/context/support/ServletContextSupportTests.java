@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,7 +159,7 @@ public class ServletContextSupportTests {
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
-		assertThat(foundPaths.size()).isEqualTo(2);
+		assertThat(foundPaths).hasSize(2);
 		assertThat(foundPaths.contains("/WEB-INF/context1.xml")).isTrue();
 		assertThat(foundPaths.contains("/WEB-INF/context2.xml")).isTrue();
 	}
@@ -192,7 +192,7 @@ public class ServletContextSupportTests {
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
-		assertThat(foundPaths.size()).isEqualTo(2);
+		assertThat(foundPaths).hasSize(2);
 		assertThat(foundPaths.contains("/WEB-INF/mydir1/context1.xml")).isTrue();
 		assertThat(foundPaths.contains("/WEB-INF/mydir2/context2.xml")).isTrue();
 	}
@@ -232,7 +232,7 @@ public class ServletContextSupportTests {
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
-		assertThat(foundPaths.size()).isEqualTo(3);
+		assertThat(foundPaths).hasSize(3);
 		assertThat(foundPaths.contains("/WEB-INF/mydir1/context1.xml")).isTrue();
 		assertThat(foundPaths.contains("/WEB-INF/mydir2/context2.xml")).isTrue();
 		assertThat(foundPaths.contains("/WEB-INF/mydir2/mydir3/context3.xml")).isTrue();
@@ -261,7 +261,7 @@ public class ServletContextSupportTests {
 		for (Resource resource : found) {
 			foundPaths.add(((ServletContextResource) resource).getPath());
 		}
-		assertThat(foundPaths.size()).isEqualTo(2);
+		assertThat(foundPaths).hasSize(2);
 		assertThat(foundPaths.contains("/WEB-INF/context1.xml")).isTrue();
 		assertThat(foundPaths.contains("/WEB-INF/context2.xml")).isTrue();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ class AroundAdviceBindingTestAspect {
 
 	public int oneObjectArg(ProceedingJoinPoint pjp, Object bean) throws Throwable {
 		this.collaborator.oneObjectArg(bean);
-		return ((Integer) pjp.proceed()).intValue();
+		return (Integer) pjp.proceed();
 	}
 
 	public void oneIntAndOneObject(ProceedingJoinPoint pjp, int x , Object o) throws Throwable {
@@ -119,7 +119,7 @@ class AroundAdviceBindingTestAspect {
 
 	public int justJoinPoint(ProceedingJoinPoint pjp) throws Throwable {
 		this.collaborator.justJoinPoint(pjp.getSignature().getName());
-		return ((Integer) pjp.proceed()).intValue();
+		return (Integer) pjp.proceed();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodProxy;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -131,7 +131,7 @@ public class ResolvableMethod {
 
 	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
-	private static final ParameterNameDiscoverer nameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
+	private static final ParameterNameDiscoverer nameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	// Matches ValueConstants.DEFAULT_NONE (spring-web and spring-messaging)
 	private static final String DEFAULT_VALUE_NONE = "\n\t\t\n\t\t\n\uE000\uE001\uE002\n\t\t\t\t\n";
@@ -660,6 +660,7 @@ public class ResolvableMethod {
 			enhancer.setSuperclass(type);
 			enhancer.setInterfaces(new Class<?>[] {Supplier.class});
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+			enhancer.setAttemptLoad(true);
 			enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
 
 			Class<?> proxyClass = enhancer.createClass();

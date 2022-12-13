@@ -17,6 +17,7 @@
 package org.springframework.core
 
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,7 @@ import reactor.test.StepVerifier
 import java.time.Duration
 import kotlin.reflect.KClass
 
+@OptIn(DelicateCoroutinesApi::class)
 class KotlinReactiveAdapterRegistryTests {
 
 	private val registry = ReactiveAdapterRegistry.getSharedInstance()

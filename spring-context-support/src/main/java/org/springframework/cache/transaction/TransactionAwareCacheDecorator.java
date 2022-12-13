@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 /**
  * Cache decorator which synchronizes its {@link #put}, {@link #evict} and
  * {@link #clear} operations with Spring-managed transactions (through Spring's
- * {@link TransactionSynchronizationManager}, performing the actual cache
+ * {@link TransactionSynchronizationManager}), performing the actual cache
  * put/evict/clear operation only in the after-commit phase of a successful
  * transaction. If no transaction is active, {@link #put}, {@link #evict} and
  * {@link #clear} operations will be performed immediately, as usual.

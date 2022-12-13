@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.enterprise.concurrent.ManagedExecutors;
-import javax.enterprise.concurrent.ManagedTask;
+import jakarta.enterprise.concurrent.ManagedExecutors;
+import jakarta.enterprise.concurrent.ManagedTask;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.TaskDecorator;
@@ -41,11 +41,11 @@ import org.springframework.util.concurrent.ListenableFuture;
  * Also detects an extended {@code java.util.concurrent.ExecutorService}, adapting
  * the {@link org.springframework.core.task.AsyncTaskExecutor} interface accordingly.
  *
- * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedExecutorService}
- * in order to expose {@link javax.enterprise.concurrent.ManagedTask} adapters for it,
+ * <p>Autodetects a JSR-236 {@link jakarta.enterprise.concurrent.ManagedExecutorService}
+ * in order to expose {@link jakarta.enterprise.concurrent.ManagedTask} adapters for it,
  * exposing a long-running hint based on {@link SchedulingAwareRunnable} and an identity
  * name based on the given Runnable/Callable's {@code toString()}. For JSR-236 style
- * lookup in a Java EE 7 environment, consider using {@link DefaultManagedTaskExecutor}.
+ * lookup in a Jakarta EE environment, consider using {@link DefaultManagedTaskExecutor}.
  *
  * <p>Note that there is a pre-built {@link ThreadPoolTaskExecutor} that allows
  * for defining a {@link java.util.concurrent.ThreadPoolExecutor} in bean style,
@@ -62,6 +62,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @see DefaultManagedTaskExecutor
  * @see ThreadPoolTaskExecutor
  */
+@SuppressWarnings("deprecation")
 public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
 	@Nullable
@@ -70,7 +71,7 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	static {
 		try {
 			managedExecutorServiceClass = ClassUtils.forName(
-					"javax.enterprise.concurrent.ManagedExecutorService",
+					"jakarta.enterprise.concurrent.ManagedExecutorService",
 					ConcurrentTaskScheduler.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
@@ -95,8 +96,8 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 
 	/**
 	 * Create a new ConcurrentTaskExecutor, using the given {@link java.util.concurrent.Executor}.
-	 * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedExecutorService}
-	 * in order to expose {@link javax.enterprise.concurrent.ManagedTask} adapters for it.
+	 * <p>Autodetects a JSR-236 {@link jakarta.enterprise.concurrent.ManagedExecutorService}
+	 * in order to expose {@link jakarta.enterprise.concurrent.ManagedTask} adapters for it.
 	 * @param executor the {@link java.util.concurrent.Executor} to delegate to
 	 */
 	public ConcurrentTaskExecutor(@Nullable Executor executor) {
@@ -107,8 +108,8 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 
 	/**
 	 * Specify the {@link java.util.concurrent.Executor} to delegate to.
-	 * <p>Autodetects a JSR-236 {@link javax.enterprise.concurrent.ManagedExecutorService}
-	 * in order to expose {@link javax.enterprise.concurrent.ManagedTask} adapters for it.
+	 * <p>Autodetects a JSR-236 {@link jakarta.enterprise.concurrent.ManagedExecutorService}
+	 * in order to expose {@link jakarta.enterprise.concurrent.ManagedTask} adapters for it.
 	 */
 	public final void setConcurrentExecutor(@Nullable Executor executor) {
 		this.concurrentExecutor = (executor != null ? executor : Executors.newSingleThreadExecutor());
@@ -147,6 +148,7 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 		this.adaptedExecutor.execute(task);
 	}
 
+	@Deprecated
 	@Override
 	public void execute(Runnable task, long startTimeout) {
 		this.adaptedExecutor.execute(task, startTimeout);

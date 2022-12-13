@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package org.springframework.r2dbc.core
 
-import kotlinx.coroutines.reactive.awaitSingleOrNull
+import io.r2dbc.spi.Parameters
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 
 /**
  * Coroutines variant of [DatabaseClient.GenericExecuteSpec.then].
  *
  * @author Sebastien Deleuze
  */
+@Suppress("DEPRECATION")
 suspend fun DatabaseClient.GenericExecuteSpec.await() {
 	then().awaitSingleOrNull()
 }
@@ -34,7 +36,7 @@ suspend fun DatabaseClient.GenericExecuteSpec.await() {
  * @author Ibanga Enoobong Ime
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(index: Int, value: T?) = bind(index, Parameter.fromOrEmpty(value, T::class.java))
+inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(index: Int, value: T?) = bind(index, if (value != null) Parameters.`in`(value) else Parameters.`in`(T::class.java))
 
 /**
  * Extension for [DatabaseClient.GenericExecuteSpec.bind] providing a variant leveraging reified type parameters
@@ -43,4 +45,4 @@ inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(index: Int, 
  * @author Ibanga Enoobong Ime
  */
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(name: String, value: T?) = bind(name, Parameter.fromOrEmpty(value, T::class.java))
+inline fun <reified T : Any> DatabaseClient.GenericExecuteSpec.bind(name: String, value: T?) = bind(name, if (value != null) Parameters.`in`(value) else Parameters.`in`(T::class.java))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.server.adapter;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -34,6 +34,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
@@ -56,11 +57,12 @@ import org.springframework.web.server.session.WebSessionManager;
  * Default implementation of {@link ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class DefaultServerWebExchange implements ServerWebExchange {
 
-	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	private static final ResolvableType FORM_DATA_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
@@ -248,44 +250,142 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@Override
-	public boolean checkNotModified(@Nullable String etag, Instant lastModified) {
-		HttpStatus status = getResponse().getStatusCode();
+	public boolean checkNotModified(@Nullable String eTag, Instant lastModified) {
+		HttpStatusCode status = getResponse().getStatusCode();
 		if (this.notModified || (status != null && !HttpStatus.OK.equals(status))) {
 			return this.notModified;
 		}
-
 		// Evaluate conditions in order of precedence.
-		// See https://tools.ietf.org/html/rfc7232#section-6
-
-		if (validateIfUnmodifiedSince(lastModified)) {
-			if (this.notModified) {
-				getResponse().setStatusCode(HttpStatus.PRECONDITION_FAILED);
-			}
+		// See https://datatracker.ietf.org/doc/html/rfc9110#section-13.2.2
+		// 1) If-Match
+		if (validateIfMatch(eTag)) {
+			updateResponseStateChanging(eTag, lastModified);
 			return this.notModified;
 		}
-
-		boolean validated = validateIfNoneMatch(etag);
-		if (!validated) {
+		// 2) If-Unmodified-Since
+		else if (validateIfUnmodifiedSince(lastModified)) {
+			updateResponseStateChanging(eTag, lastModified);
+			return this.notModified;
+		}
+		// 3) If-None-Match
+		if (!validateIfNoneMatch(eTag)) {
+			// 4) If-Modified-Since
 			validateIfModifiedSince(lastModified);
 		}
+		updateResponseIdempotent(eTag, lastModified);
+		return this.notModified;
+	}
 
-		// Update response
+	private boolean validateIfMatch(@Nullable String eTag) {
+		try {
+			if (SAFE_METHODS.contains(getRequest().getMethod())) {
+				return false;
+			}
+			if (CollectionUtils.isEmpty(getRequestHeaders().get(HttpHeaders.IF_MATCH))) {
+				return false;
+			}
+			this.notModified = matchRequestedETags(getRequestHeaders().getIfMatch(), eTag, false);
+		}
+		catch (IllegalArgumentException ex) {
+			return false;
+		}
+		return true;
+	}
 
-		boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
+	private boolean matchRequestedETags(List<String> requestedETags, @Nullable String eTag, boolean weakCompare) {
+		eTag = padEtagIfNecessary(eTag);
+		for (String clientEtag : requestedETags) {
+			// only consider "lost updates" checks for unsafe HTTP methods
+			if ("*".equals(clientEtag) && StringUtils.hasLength(eTag)
+					&& !SAFE_METHODS.contains(getRequest().getMethod())) {
+				return false;
+			}
+			// Compare weak/strong ETags as per https://datatracker.ietf.org/doc/html/rfc9110#section-8.8.3
+			if (weakCompare) {
+				if (eTagWeakMatch(eTag, clientEtag)) {
+					return false;
+				}
+			}
+			else {
+				if (eTagStrongMatch(eTag, clientEtag)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Nullable
+	private String padEtagIfNecessary(@Nullable String etag) {
+		if (!StringUtils.hasLength(etag)) {
+			return etag;
+		}
+		if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
+			return etag;
+		}
+		return "\"" + etag + "\"";
+	}
+
+	private boolean eTagStrongMatch(@Nullable String first, @Nullable String second) {
+		if (!StringUtils.hasLength(first) || first.startsWith("W/")) {
+			return false;
+		}
+		return first.equals(second);
+	}
+
+	private boolean eTagWeakMatch(@Nullable String first, @Nullable String second) {
+		if (!StringUtils.hasLength(first) || !StringUtils.hasLength(second)) {
+			return false;
+		}
+		if (first.startsWith("W/")) {
+			first = first.substring(2);
+		}
+		if (second.startsWith("W/")) {
+			second = second.substring(2);
+		}
+		return first.equals(second);
+	}
+
+	private void updateResponseStateChanging(@Nullable String eTag, Instant lastModified) {
 		if (this.notModified) {
-			getResponse().setStatusCode(isHttpGetOrHead ?
+			getResponse().setStatusCode(HttpStatus.PRECONDITION_FAILED);
+		}
+		else {
+			addCachingResponseHeaders(eTag, lastModified);
+		}
+	}
+
+	private boolean validateIfNoneMatch(@Nullable String eTag) {
+		try {
+			if (CollectionUtils.isEmpty(getRequestHeaders().get(HttpHeaders.IF_NONE_MATCH))) {
+				return false;
+			}
+			this.notModified = !matchRequestedETags(getRequestHeaders().getIfNoneMatch(), eTag, true);
+		}
+		catch (IllegalArgumentException ex) {
+			return false;
+		}
+		return true;
+	}
+
+	private void updateResponseIdempotent(@Nullable String eTag, Instant lastModified) {
+		boolean isSafeMethod = SAFE_METHODS.contains(getRequest().getMethod());
+		if (this.notModified) {
+			getResponse().setStatusCode(isSafeMethod ?
 					HttpStatus.NOT_MODIFIED : HttpStatus.PRECONDITION_FAILED);
 		}
-		if (isHttpGetOrHead) {
+		addCachingResponseHeaders(eTag, lastModified);
+	}
+
+	private void addCachingResponseHeaders(@Nullable String eTag, Instant lastModified) {
+		if (SAFE_METHODS.contains(getRequest().getMethod())) {
 			if (lastModified.isAfter(Instant.EPOCH) && getResponseHeaders().getLastModified() == -1) {
 				getResponseHeaders().setLastModified(lastModified.toEpochMilli());
 			}
-			if (StringUtils.hasLength(etag) && getResponseHeaders().getETag() == null) {
-				getResponseHeaders().setETag(padEtagIfNecessary(etag));
+			if (StringUtils.hasLength(eTag) && getResponseHeaders().getETag() == null) {
+				getResponseHeaders().setETag(padEtagIfNecessary(eTag));
 			}
 		}
-
-		return this.notModified;
 	}
 
 	private boolean validateIfUnmodifiedSince(Instant lastModified) {
@@ -296,67 +396,20 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		if (ifUnmodifiedSince == -1) {
 			return false;
 		}
-		// We will perform this validation...
 		Instant sinceInstant = Instant.ofEpochMilli(ifUnmodifiedSince);
 		this.notModified = sinceInstant.isBefore(lastModified.truncatedTo(ChronoUnit.SECONDS));
 		return true;
 	}
 
-	private boolean validateIfNoneMatch(@Nullable String etag) {
-		if (!StringUtils.hasLength(etag)) {
-			return false;
-		}
-		List<String> ifNoneMatch;
-		try {
-			ifNoneMatch = getRequestHeaders().getIfNoneMatch();
-		}
-		catch (IllegalArgumentException ex) {
-			return false;
-		}
-		if (ifNoneMatch.isEmpty()) {
-			return false;
-		}
-		// We will perform this validation...
-		etag = padEtagIfNecessary(etag);
-		if (etag.startsWith("W/")) {
-			etag = etag.substring(2);
-		}
-		for (String clientEtag : ifNoneMatch) {
-			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			if (StringUtils.hasLength(clientEtag)) {
-				if (clientEtag.startsWith("W/")) {
-					clientEtag = clientEtag.substring(2);
-				}
-				if (clientEtag.equals(etag)) {
-					this.notModified = true;
-					break;
-				}
-			}
-		}
-		return true;
-	}
-
-	private String padEtagIfNecessary(String etag) {
-		if (!StringUtils.hasLength(etag)) {
-			return etag;
-		}
-		if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
-			return etag;
-		}
-		return "\"" + etag + "\"";
-	}
-
-	private boolean validateIfModifiedSince(Instant lastModified) {
+	private void validateIfModifiedSince(Instant lastModified) {
 		if (lastModified.isBefore(Instant.EPOCH)) {
-			return false;
+			return;
 		}
 		long ifModifiedSince = getRequestHeaders().getIfModifiedSince();
-		if (ifModifiedSince == -1) {
-			return false;
+		if (ifModifiedSince != -1) {
+			// We will perform this validation...
+			this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
 		}
-		// We will perform this validation...
-		this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
-		return true;
 	}
 
 	@Override

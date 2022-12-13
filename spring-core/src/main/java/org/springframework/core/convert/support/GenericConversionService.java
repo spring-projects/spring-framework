@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@Override
 	public void addConverter(Converter<?, ?> converter) {
 		ResolvableType[] typeInfo = getRequiredTypeInfo(converter.getClass(), Converter.class);
-		if (typeInfo == null && converter instanceof DecoratingProxy) {
-			typeInfo = getRequiredTypeInfo(((DecoratingProxy) converter).getDecoratedClass(), Converter.class);
+		if (typeInfo == null && converter instanceof DecoratingProxy decoratingProxy) {
+			typeInfo = getRequiredTypeInfo(decoratingProxy.getDecoratedClass(), Converter.class);
 		}
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
@@ -110,8 +110,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	@Override
 	public void addConverterFactory(ConverterFactory<?, ?> factory) {
 		ResolvableType[] typeInfo = getRequiredTypeInfo(factory.getClass(), ConverterFactory.class);
-		if (typeInfo == null && factory instanceof DecoratingProxy) {
-			typeInfo = getRequiredTypeInfo(((DecoratingProxy) factory).getDecoratedClass(), ConverterFactory.class);
+		if (typeInfo == null && factory instanceof DecoratingProxy decoratingProxy) {
+			typeInfo = getRequiredTypeInfo(decoratingProxy.getDecoratedClass(), ConverterFactory.class);
 		}
 		if (typeInfo == null) {
 			throw new IllegalArgumentException("Unable to determine source type <S> and target type <T> for your " +
@@ -240,7 +240,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	/**
-	 * Hook method to lookup the converter for a given sourceType/targetType pair.
+	 * Hook method to look up the converter for a given sourceType/targetType pair.
 	 * First queries this ConversionService's converter cache.
 	 * On a cache miss, then performs an exhaustive search for a matching converter.
 	 * If no converter matches, returns the default converter.
@@ -373,8 +373,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 					!this.targetType.hasUnresolvableGenerics()) {
 				return false;
 			}
-			return !(this.converter instanceof ConditionalConverter) ||
-					((ConditionalConverter) this.converter).matches(sourceType, targetType);
+			return !(this.converter instanceof ConditionalConverter conditionalConverter) ||
+					conditionalConverter.matches(sourceType, targetType);
 		}
 
 		@Override
@@ -416,13 +416,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			boolean matches = true;
-			if (this.converterFactory instanceof ConditionalConverter) {
-				matches = ((ConditionalConverter) this.converterFactory).matches(sourceType, targetType);
+			if (this.converterFactory instanceof ConditionalConverter conditionalConverter) {
+				matches = conditionalConverter.matches(sourceType, targetType);
 			}
 			if (matches) {
 				Converter<?, ?> converter = this.converterFactory.getConverter(targetType.getType());
-				if (converter instanceof ConditionalConverter) {
-					matches = ((ConditionalConverter) converter).matches(sourceType, targetType);
+				if (converter instanceof ConditionalConverter conditionalConverter) {
+					matches = conditionalConverter.matches(sourceType, targetType);
 				}
 			}
 			return matches;
@@ -463,10 +463,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof ConverterCacheKey)) {
+			if (!(other instanceof ConverterCacheKey otherKey)) {
 				return false;
 			}
-			ConverterCacheKey otherKey = (ConverterCacheKey) other;
 			return (this.sourceType.equals(otherKey.sourceType)) &&
 					this.targetType.equals(otherKey.targetType);
 		}
@@ -660,8 +659,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 		@Nullable
 		public GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			for (GenericConverter converter : this.converters) {
-				if (!(converter instanceof ConditionalGenericConverter) ||
-						((ConditionalGenericConverter) converter).matches(sourceType, targetType)) {
+				if (!(converter instanceof ConditionalGenericConverter genericConverter) ||
+						genericConverter.matches(sourceType, targetType)) {
 					return converter;
 				}
 			}

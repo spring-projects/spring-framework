@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,8 +160,8 @@ public class ControllerAdviceBean implements Ordered {
 		if (this.order == null) {
 			String beanName = null;
 			Object resolvedBean = null;
-			if (this.beanFactory != null && this.beanOrName instanceof String) {
-				beanName = (String) this.beanOrName;
+			if (this.beanFactory != null && this.beanOrName instanceof String stringBeanName) {
+				beanName = stringBeanName;
 				String targetBeanName = ScopedProxyUtils.getTargetBeanName(beanName);
 				boolean isScopedProxy = this.beanFactory.containsBean(targetBeanName);
 				// Avoid eager @ControllerAdvice bean resolution for scoped proxies,
@@ -176,16 +176,15 @@ public class ControllerAdviceBean implements Ordered {
 				resolvedBean = resolveBean();
 			}
 
-			if (resolvedBean instanceof Ordered) {
-				this.order = ((Ordered) resolvedBean).getOrder();
+			if (resolvedBean instanceof Ordered ordered) {
+				this.order = ordered.getOrder();
 			}
 			else {
-				if (beanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
-					ConfigurableBeanFactory cbf = (ConfigurableBeanFactory) this.beanFactory;
+				if (beanName != null && this.beanFactory instanceof ConfigurableBeanFactory cbf) {
 					try {
 						BeanDefinition bd = cbf.getMergedBeanDefinition(beanName);
-						if (bd instanceof RootBeanDefinition) {
-							Method factoryMethod = ((RootBeanDefinition) bd).getResolvedFactoryMethod();
+						if (bd instanceof RootBeanDefinition rbd) {
+							Method factoryMethod = rbd.getResolvedFactoryMethod();
 							if (factoryMethod != null) {
 								this.order = OrderUtils.getOrder(factoryMethod);
 							}
@@ -261,10 +260,9 @@ public class ControllerAdviceBean implements Ordered {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ControllerAdviceBean)) {
+		if (!(other instanceof ControllerAdviceBean otherAdvice)) {
 			return false;
 		}
-		ControllerAdviceBean otherAdvice = (ControllerAdviceBean) other;
 		return (this.beanOrName.equals(otherAdvice.beanOrName) && this.beanFactory == otherAdvice.beanFactory);
 	}
 
@@ -291,9 +289,9 @@ public class ControllerAdviceBean implements Ordered {
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext context) {
 		ListableBeanFactory beanFactory = context;
-		if (context instanceof ConfigurableApplicationContext) {
+		if (context instanceof ConfigurableApplicationContext cac) {
 			// Use internal BeanFactory for potential downcast to ConfigurableBeanFactory above
-			beanFactory = ((ConfigurableApplicationContext) context).getBeanFactory();
+			beanFactory = cac.getBeanFactory();
 		}
 		List<ControllerAdviceBean> adviceBeans = new ArrayList<>();
 		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Object.class)) {

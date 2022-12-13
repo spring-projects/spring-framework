@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ package org.springframework.jms.listener;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -52,11 +51,11 @@ public class DefaultMessageListenerContainerTests {
 		DefaultMessageListenerContainer container = createContainer(createFailingContainerFactory());
 		container.setBackOff(backOff);
 		container.start();
-		assertThat(container.isRunning()).isEqualTo(true);
+		assertThat(container.isRunning()).isTrue();
 
 		container.refreshConnectionUntilSuccessful();
 
-		assertThat(container.isRunning()).isEqualTo(false);
+		assertThat(container.isRunning()).isFalse();
 		verify(backOff).start();
 		verify(execution).nextBackOff();
 	}
@@ -73,7 +72,7 @@ public class DefaultMessageListenerContainerTests {
 		container.start();
 		container.refreshConnectionUntilSuccessful();
 
-		assertThat(container.isRunning()).isEqualTo(false);
+		assertThat(container.isRunning()).isFalse();
 		verify(backOff).start();
 		verify(execution, times(2)).nextBackOff();
 	}
@@ -90,7 +89,7 @@ public class DefaultMessageListenerContainerTests {
 		container.start();
 		container.refreshConnectionUntilSuccessful();
 
-		assertThat(container.isRunning()).isEqualTo(true);
+		assertThat(container.isRunning()).isTrue();
 		verify(backOff).start();
 		verify(execution, times(1)).nextBackOff();  // only on attempt as the second one lead to a recovery
 	}

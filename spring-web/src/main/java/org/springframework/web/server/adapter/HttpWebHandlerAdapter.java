@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.web.server.adapter;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,8 +29,10 @@ import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -69,9 +71,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
 			"org.springframework.web.server.DisconnectedClient";
 
-	 // Similar declaration exists in AbstractSockJsSession..
-	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS = new HashSet<>(
-			Arrays.asList("AbortedException", "ClientAbortException", "EOFException", "EofException"));
+	 // Similar declaration exists in AbstractSockJsSession.
+	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
+			Set.of("AbortedException", "ClientAbortException", "EOFException", "EofException");
 
 
 	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
@@ -228,7 +230,16 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		if (this.forwardedHeaderTransformer != null) {
-			request = this.forwardedHeaderTransformer.apply(request);
+			try {
+				request = this.forwardedHeaderTransformer.apply(request);
+			}
+			catch (Throwable ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to apply forwarded headers to " + formatRequest(request), ex);
+				}
+				response.setStatusCode(HttpStatus.BAD_REQUEST);
+				return response.setComplete();
+			}
 		}
 		ServerWebExchange exchange = createExchange(request, response);
 
@@ -239,6 +250,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		return getDelegate().handle(exchange)
 				.doOnSuccess(aVoid -> logResponse(exchange))
 				.onErrorResume(ex -> handleUnresolvedError(exchange, ex))
+				.then(cleanupMultipart(exchange))
 				.then(Mono.defer(response::setComplete));
 	}
 
@@ -261,7 +273,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	private void logResponse(ServerWebExchange exchange) {
 		LogFormatUtils.traceDebug(logger, traceOn -> {
-			HttpStatus status = exchange.getResponse().getStatusCode();
+			HttpStatusCode status = exchange.getResponse().getStatusCode();
 			return exchange.getLogPrefix() + "Completed " + (status != null ? status : "200 OK") +
 					(traceOn ? ", headers=" + formatHeaders(exchange.getResponse().getHeaders()) : "");
 		});
@@ -312,5 +324,24 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 		}
 		return DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName());
 	}
+
+	private Mono<Void> cleanupMultipart(ServerWebExchange exchange) {
+		return exchange.getMultipartData()
+				.onErrorResume(t -> Mono.empty()) // ignore errors reading multipart data
+				.flatMapIterable(Map::values)
+				.flatMapIterable(Function.identity())
+				.flatMap(this::deletePart)
+				.then();
+	}
+
+	private Mono<Void> deletePart(Part part) {
+		return part.delete().onErrorResume(ex -> {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Failed to perform cleanup of multipart items", ex);
+					}
+					return Mono.empty();
+				});
+	}
+
 
 }

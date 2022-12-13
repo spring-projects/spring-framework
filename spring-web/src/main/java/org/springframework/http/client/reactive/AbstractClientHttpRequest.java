@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -81,12 +80,22 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 			return this.readOnlyHeaders;
 		}
 		else if (State.COMMITTED.equals(this.state.get())) {
-			this.readOnlyHeaders = HttpHeaders.readOnlyHttpHeaders(this.headers);
+			this.readOnlyHeaders = initReadOnlyHeaders();
 			return this.readOnlyHeaders;
 		}
 		else {
 			return this.headers;
 		}
+	}
+
+	/**
+	 * Initialize the read-only headers after the request is committed.
+	 * <p>By default, this method simply applies a read-only wrapper.
+	 * Subclasses can do the same for headers from the native request.
+	 * @since 5.3.15
+	 */
+	protected HttpHeaders initReadOnlyHeaders() {
+		return HttpHeaders.readOnlyHttpHeaders(this.headers);
 	}
 
 	@Override
@@ -139,7 +148,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		}
 
 		List<? extends Publisher<Void>> actions = this.commitActions.stream()
-				.map(Supplier::get).collect(Collectors.toList());
+				.map(Supplier::get).toList();
 
 		return Flux.concat(actions).then();
 	}

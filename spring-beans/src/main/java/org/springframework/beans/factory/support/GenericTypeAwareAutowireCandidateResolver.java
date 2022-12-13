@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Basic {@link AutowireCandidateResolver} that performs a full generic type
  * match with the candidate's type if the dependency is declared as a generic type
- * (e.g. Repository&lt;Customer&gt;).
+ * (e.g. {@code Repository<Customer>}).
  *
  * <p>This is the base class for
  * {@link org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver},
@@ -102,6 +102,22 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 					}
 				}
 			}
+			else {
+				// Pre-existing target type: In case of a generic FactoryBean type,
+				// unwrap nested generic type when matching a non-FactoryBean type.
+				Class<?> resolvedClass = targetType.resolve();
+				if (resolvedClass != null && FactoryBean.class.isAssignableFrom(resolvedClass)) {
+					Class<?> typeToBeMatched = dependencyType.resolve();
+					if (typeToBeMatched != null && !FactoryBean.class.isAssignableFrom(typeToBeMatched)) {
+						targetType = targetType.getGeneric();
+						if (descriptor.fallbackMatchAllowed()) {
+							// Matching the Class-based type determination for FactoryBean
+							// objects in the lazy-determination getType code path below.
+							targetType = ResolvableType.forClass(targetType.resolve());
+						}
+					}
+				}
+			}
 		}
 
 		if (targetType == null) {
@@ -142,8 +158,7 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	@Nullable
 	protected RootBeanDefinition getResolvedDecoratedDefinition(RootBeanDefinition rbd) {
 		BeanDefinitionHolder decDef = rbd.getDecoratedDefinition();
-		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory) {
-			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) this.beanFactory;
+		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
 			if (clbf.containsBeanDefinition(decDef.getBeanName())) {
 				BeanDefinition dbd = clbf.getMergedBeanDefinition(decDef.getBeanName());
 				if (dbd instanceof RootBeanDefinition) {

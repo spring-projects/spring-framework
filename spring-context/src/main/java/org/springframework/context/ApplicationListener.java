@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ import java.util.function.Consumer;
  * @param <E> the specific {@code ApplicationEvent} subclass to listen to
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.event.ApplicationEventMulticaster
+ * @see org.springframework.context.event.SmartApplicationListener
+ * @see org.springframework.context.event.GenericApplicationListener
  * @see org.springframework.context.event.EventListener
  */
 @FunctionalInterface

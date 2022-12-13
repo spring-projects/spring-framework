@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,15 +41,17 @@ import org.springframework.util.comparator.NullSafeComparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Tests for {@link ConcurrentReferenceHashMap}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 class ConcurrentReferenceHashMapTests {
 
-	private static final Comparator<? super String> NULL_SAFE_STRING_SORT = new NullSafeComparator<String>(
+	private static final Comparator<? super String> NULL_SAFE_STRING_SORT = new NullSafeComparator<>(
 			new ComparableComparator<String>(), true);
 
 	private TestWeakConcurrentCache<Integer, String> map = new TestWeakConcurrentCache<>();
@@ -124,7 +126,7 @@ class ConcurrentReferenceHashMapTests {
 	@Test
 	void shouldPutAndGet() {
 		// NOTE we are using mock references so we don't need to worry about GC
-		assertThat(this.map).hasSize(0);
+		assertThat(this.map).isEmpty();
 		this.map.put(123, "123");
 		assertThat(this.map.get(123)).isEqualTo("123");
 		assertThat(this.map).hasSize(1);
@@ -325,7 +327,7 @@ class ConcurrentReferenceHashMapTests {
 
 	@Test
 	void shouldGetSize() {
-		assertThat(this.map).hasSize(0);
+		assertThat(this.map).isEmpty();
 		this.map.put(123, "123");
 		this.map.put(123, null);
 		this.map.put(456, "456");
@@ -398,7 +400,7 @@ class ConcurrentReferenceHashMapTests {
 		this.map.put(456, null);
 		this.map.put(null, "789");
 		this.map.clear();
-		assertThat(this.map).hasSize(0);
+		assertThat(this.map).isEmpty();
 		assertThat(this.map.containsKey(123)).isFalse();
 		assertThat(this.map.containsKey(456)).isFalse();
 		assertThat(this.map.containsKey(null)).isFalse();
@@ -466,6 +468,7 @@ class ConcurrentReferenceHashMapTests {
 		iterator.next();
 		iterator.next();
 		iterator.remove();
+		assertThatIllegalStateException().isThrownBy(iterator::remove);
 		iterator.next();
 		assertThat(iterator.hasNext()).isFalse();
 		assertThat(this.map).hasSize(2);
@@ -484,6 +487,26 @@ class ConcurrentReferenceHashMapTests {
 		assertThat(iterator.hasNext()).isFalse();
 		assertThat(this.map).hasSize(3);
 		assertThat(this.map.get(2)).isEqualTo("2b");
+	}
+
+	@Test
+	void containsViaEntrySet() {
+		this.map.put(1, "1");
+		this.map.put(2, "2");
+		this.map.put(3, "3");
+		Set<Map.Entry<Integer, String>> entrySet = this.map.entrySet();
+		Set<Map.Entry<Integer, String>> copy = new HashMap<>(this.map).entrySet();
+		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isTrue());
+		this.map.put(1, "A");
+		this.map.put(2, "B");
+		this.map.put(3, "C");
+		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isFalse());
+		this.map.put(1, "1");
+		this.map.put(2, "2");
+		this.map.put(3, "3");
+		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isTrue());
+		entrySet.clear();
+		copy.forEach(entry -> assertThat(entrySet.contains(entry)).isFalse());
 	}
 
 	@Test

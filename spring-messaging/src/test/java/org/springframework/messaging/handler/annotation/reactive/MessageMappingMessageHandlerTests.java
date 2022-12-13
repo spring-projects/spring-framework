@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.handler.annotation.reactive;
 
 import java.time.Duration;
@@ -150,7 +151,7 @@ public class MessageMappingMessageHandlerTests {
 	}
 
 	private Message<?> message(String destination, String... content) {
-		Flux<DataBuffer> payload = Flux.fromIterable(Arrays.asList(content)).map(parts -> toDataBuffer(parts));
+		Flux<DataBuffer> payload = Flux.fromIterable(Arrays.asList(content)).map(this::toDataBuffer);
 		MessageHeaderAccessor headers = new MessageHeaderAccessor();
 		headers.setLeaveMutable(true);
 		headers.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER,

@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.web;
 
-import javax.servlet.http.HttpServletMapping;
-import javax.servlet.http.MappingMatch;
+import jakarta.servlet.http.HttpServletMapping;
+import jakarta.servlet.http.MappingMatch;
 
 import org.springframework.lang.Nullable;
 
 /**
  * Mock implementation of {@link HttpServletMapping}.
+ *
+ * <p>Currently not exposed in {@link MockHttpServletRequest} as a setter to
+ * avoid issues for Maven builds in applications with a Servlet 3.1 runtime
+ * requirement.
  *
  * @author Rossen Stoyanchev
  * @since 5.3.4
@@ -72,9 +77,9 @@ public class MockHttpServletMapping implements HttpServletMapping {
 
 	@Override
 	public String toString() {
-		return "MockHttpServletMapping [matchValue=\"" + matchValue + "\", " +
-				"pattern=\"" + pattern + "\", servletName=\"" + servletName + "\", " +
-				"mappingMatch=" + mappingMatch + "]";
+		return "MockHttpServletMapping [matchValue=\"" + this.matchValue + "\", " +
+				"pattern=\"" + this.pattern + "\", servletName=\"" + this.servletName + "\", " +
+				"mappingMatch=" + this.mappingMatch + "]";
 	}
 
 }

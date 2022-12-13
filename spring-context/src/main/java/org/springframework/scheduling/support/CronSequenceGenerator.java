@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
  * @see CronTrigger
  * @deprecated as of 5.3, in favor of {@link CronExpression}
  */
-@Deprecated
+@Deprecated(since = "5.3", forRemoval = true)
 public class CronSequenceGenerator {
 
 	private final String expression;
@@ -84,7 +84,7 @@ public class CronSequenceGenerator {
 	 * @see java.util.TimeZone#getDefault()
 	 * @deprecated as of 5.3, in favor of {@link CronExpression#parse(String)}
 	 */
-	@Deprecated
+	@Deprecated(since = "5.3", forRemoval = true)
 	public CronSequenceGenerator(String expression) {
 		this(expression, TimeZone.getDefault());
 	}
@@ -298,7 +298,7 @@ public class CronSequenceGenerator {
 	}
 
 	/**
-	 * Replace the values in the comma-separated list (case insensitive)
+	 * Replace the values in the comma-separated list (case-insensitive)
 	 * with their index in the list.
 	 * @return a new String with the values from the list replaced
 	 */
@@ -438,10 +438,9 @@ public class CronSequenceGenerator {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof CronSequenceGenerator)) {
+		if (!(other instanceof CronSequenceGenerator otherCron)) {
 			return false;
 		}
-		CronSequenceGenerator otherCron = (CronSequenceGenerator) other;
 		return (this.months.equals(otherCron.months) && this.daysOfMonth.equals(otherCron.daysOfMonth) &&
 				this.daysOfWeek.equals(otherCron.daysOfWeek) && this.hours.equals(otherCron.hours) &&
 				this.minutes.equals(otherCron.minutes) && this.seconds.equals(otherCron.seconds));

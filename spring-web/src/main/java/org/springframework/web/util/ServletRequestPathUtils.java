@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletMapping;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.MappingMatch;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletMapping;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.MappingMatch;
 
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.RequestPath;
@@ -53,11 +54,10 @@ public abstract class ServletRequestPathUtils {
 	 * {@link RequestPath} and save it in the request attribute
 	 * {@link #PATH_ATTRIBUTE} for subsequent use with
 	 * {@link org.springframework.web.util.pattern.PathPattern parsed patterns}.
-	 * The returned {@code RequestPath} will have both the contextPath and any
+	 * <p>The returned {@code RequestPath} will have both the contextPath and any
 	 * servletPath prefix omitted from the {@link RequestPath#pathWithinApplication()
 	 * pathWithinApplication} it exposes.
-	 *
-	 * <p>This method is typically called by the {@code DispatcherServlet} to
+	 * <p>This method is typically called by the {@code DispatcherServlet} to determine
 	 * if any {@code HandlerMapping} indicates that it uses parsed patterns.
 	 * After that the pre-parsed and cached {@code RequestPath} can be accessed
 	 * through {@link #getParsedRequestPath(ServletRequest)}.
@@ -74,7 +74,7 @@ public abstract class ServletRequestPathUtils {
 	 */
 	public static RequestPath getParsedRequestPath(ServletRequest request) {
 		RequestPath path = (RequestPath) request.getAttribute(PATH_ATTRIBUTE);
-		Assert.notNull(path, "Expected parsed RequestPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
+		Assert.notNull(path, () -> "Expected parsed RequestPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
 		return path;
 	}
 
@@ -159,8 +159,8 @@ public abstract class ServletRequestPathUtils {
 	 */
 	public static String getCachedPathValue(ServletRequest request) {
 		Object path = getCachedPath(request);
-		if (path instanceof PathContainer) {
-			String value = ((PathContainer) path).value();
+		if (path instanceof PathContainer pathContainer) {
+			String value = pathContainer.value();
 			path = UrlPathHelper.defaultInstance.removeSemicolonContent(value);
 		}
 		return (String) path;
@@ -249,12 +249,15 @@ public abstract class ServletRequestPathUtils {
 			if (requestUri == null) {
 				requestUri = request.getRequestURI();
 			}
-			if (UrlPathHelper.servlet4Present) {
-				String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
-				if (StringUtils.hasText(servletPathPrefix)) {
-					return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
+
+			String servletPathPrefix = Servlet4Delegate.getServletPathPrefix(request);
+			if (StringUtils.hasText(servletPathPrefix)) {
+				if (servletPathPrefix.endsWith("/")) {
+					servletPathPrefix = servletPathPrefix.substring(0, servletPathPrefix.length() - 1);
 				}
+				return new ServletRequestPath(requestUri, request.getContextPath(), servletPathPrefix);
 			}
+
 			return RequestPath.parse(requestUri, request.getContextPath());
 		}
 	}
@@ -272,8 +275,7 @@ public abstract class ServletRequestPathUtils {
 			if (mapping == null) {
 				mapping = request.getHttpServletMapping();
 			}
-			MappingMatch match = mapping.getMappingMatch();
-			if (!ObjectUtils.nullSafeEquals(match, MappingMatch.PATH)) {
+			if (!ObjectUtils.nullSafeEquals(mapping.getMappingMatch(), MappingMatch.PATH)) {
 				return null;
 			}
 			String servletPath = (String) request.getAttribute(WebUtils.INCLUDE_SERVLET_PATH_ATTRIBUTE);

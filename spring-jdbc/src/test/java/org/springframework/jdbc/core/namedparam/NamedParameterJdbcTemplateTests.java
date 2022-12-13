@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,7 +283,7 @@ public class NamedParameterJdbcTemplateTests {
 			customers.add(cust);
 		});
 
-		assertThat(customers.size()).isEqualTo(1);
+		assertThat(customers).hasSize(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
@@ -308,7 +308,7 @@ public class NamedParameterJdbcTemplateTests {
 			customers.add(cust);
 		});
 
-		assertThat(customers.size()).isEqualTo(1);
+		assertThat(customers).hasSize(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);
@@ -333,7 +333,7 @@ public class NamedParameterJdbcTemplateTests {
 					return cust;
 				});
 
-		assertThat(customers.size()).isEqualTo(1);
+		assertThat(customers).hasSize(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NAMED_PARAMETERS_PARSED);
@@ -358,7 +358,7 @@ public class NamedParameterJdbcTemplateTests {
 					return cust;
 				});
 
-		assertThat(customers.size()).isEqualTo(1);
+		assertThat(customers).hasSize(1);
 		assertThat(customers.get(0).getId() == 1).as("Customer id was assigned correctly").isTrue();
 		assertThat(customers.get(0).getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
 		verify(connection).prepareStatement(SELECT_NO_PARAMETERS);

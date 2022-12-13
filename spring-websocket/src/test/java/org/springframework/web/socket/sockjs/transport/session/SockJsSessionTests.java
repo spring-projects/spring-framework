@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.jupiter.api.Test;
@@ -44,8 +44,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
-
+class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 
 	@Override
 	protected TestSockJsSession initSockJsSession() {
@@ -54,7 +53,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 
 	@Test
-	public void getTimeSinceLastActive() throws Exception {
+	void getTimeSinceLastActive() throws Exception {
 		Thread.sleep(1);
 
 		long time1 = this.session.getTimeSinceLastActive();
@@ -77,7 +76,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void delegateConnectionEstablished() throws Exception {
+	void delegateConnectionEstablished() throws Exception {
 		assertNew();
 		this.session.delegateConnectionEstablished();
 		assertOpen();
@@ -85,15 +84,14 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void delegateError() throws Exception {
+	void delegateError() throws Exception {
 		Exception ex = new Exception();
 		this.session.delegateError(ex);
 		verify(this.webSocketHandler).handleTransportError(this.session, ex);
 	}
 
 	@Test
-	public void delegateMessages() throws Exception {
-
+	void delegateMessages() throws Exception {
 		String msg1 = "message 1";
 		String msg2 = "message 2";
 
@@ -105,8 +103,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void delegateMessagesWithError() throws Exception {
-
+	void delegateMessagesWithError() throws Exception {
 		TestSockJsSession session = new TestSockJsSession("1", this.sockJsConfig,
 				new ExceptionWebSocketHandlerDecorator(this.webSocketHandler), Collections.emptyMap());
 
@@ -127,8 +124,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test // gh-23828
-	public void delegateMessagesEmptyAfterConnectionClosed() throws Exception {
-
+	void delegateMessagesEmptyAfterConnectionClosed() throws Exception {
 		TestSockJsSession session = new TestSockJsSession("1", this.sockJsConfig,
 				new ExceptionWebSocketHandlerDecorator(this.webSocketHandler), Collections.emptyMap());
 
@@ -144,7 +140,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void delegateConnectionClosed() throws Exception {
+	void delegateConnectionClosed() throws Exception {
 		this.session.delegateConnectionEstablished();
 		this.session.delegateConnectionClosed(CloseStatus.GOING_AWAY);
 
@@ -154,7 +150,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void closeWhenNotOpen() throws Exception {
+	void closeWhenNotOpen() throws Exception {
 		assertNew();
 
 		this.session.close();
@@ -172,7 +168,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void closeWhenNotActive() throws Exception {
+	void closeWhenNotActive() throws Exception {
 		this.session.delegateConnectionEstablished();
 		assertOpen();
 
@@ -183,14 +179,14 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void close() throws Exception {
+	void close() throws Exception {
 		this.session.delegateConnectionEstablished();
 		assertOpen();
 
 		this.session.setActive(true);
 		this.session.close();
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.closeFrameGoAway());
 
 		assertThat(this.session.getNumberOfLastActiveTimeUpdates()).isEqualTo(1);
@@ -202,7 +198,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void closeWithWriteFrameExceptions() throws Exception {
+	void closeWithWriteFrameExceptions() throws Exception {
 		this.session.setExceptionOnWrite(new IOException());
 
 		this.session.delegateConnectionEstablished();
@@ -214,7 +210,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void closeWithWebSocketHandlerExceptions() throws Exception {
+	void closeWithWebSocketHandlerExceptions() throws Exception {
 		willThrow(new Exception()).given(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.NORMAL);
 
 		this.session.delegateConnectionEstablished();
@@ -226,7 +222,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void tryCloseWithWebSocketHandlerExceptions() throws Exception {
+	void tryCloseWithWebSocketHandlerExceptions() throws Exception {
 		this.session.delegateConnectionEstablished();
 		this.session.setActive(true);
 		this.session.tryCloseWithSockJsTransportError(new Exception(), CloseStatus.BAD_DATA);
@@ -236,15 +232,15 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void writeFrame() {
+	void writeFrame() {
 		this.session.writeFrame(SockJsFrame.openFrame());
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.openFrame());
 	}
 
 	@Test
-	public void writeFrameIoException() throws Exception {
+	void writeFrameIoException() throws Exception {
 		this.session.setExceptionOnWrite(new IOException());
 		this.session.delegateConnectionEstablished();
 
@@ -255,19 +251,19 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void sendHeartbeat() {
+	void sendHeartbeat() {
 		this.session.setActive(true);
 		this.session.sendHeartbeat();
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.heartbeatFrame());
 
-		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 	}
 
 	@Test
-	public void scheduleHeartbeatNotActive() {
+	void scheduleHeartbeatNotActive() {
 		this.session.setActive(false);
 		this.session.scheduleHeartbeat();
 
@@ -275,7 +271,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void sendHeartbeatWhenDisabled() {
+	void sendHeartbeatWhenDisabled() {
 		this.session.disableHeartbeat();
 		this.session.setActive(true);
 		this.session.sendHeartbeat();
@@ -284,14 +280,14 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void scheduleAndCancelHeartbeat() {
+	void scheduleAndCancelHeartbeat() {
 		ScheduledFuture<?> task = mock(ScheduledFuture.class);
-		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 
 		this.session.setActive(true);
 		this.session.scheduleHeartbeat();
 
-		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 
 		given(task.isCancelled()).willReturn(false);

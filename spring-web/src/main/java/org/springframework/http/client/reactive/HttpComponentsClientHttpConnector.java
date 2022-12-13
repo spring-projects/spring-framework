@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.http.client.reactive;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.function.BiFunction;
@@ -48,7 +50,7 @@ import org.springframework.util.Assert;
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
-public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
+public class HttpComponentsClientHttpConnector implements ClientHttpConnector, Closeable {
 
 	private final CloseableHttpAsyncClient client;
 
@@ -126,6 +128,10 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 		});
 	}
 
+	@Override
+	public void close() throws IOException {
+		this.client.close();
+	}
 
 	private static class MonoFutureCallbackAdapter
 			implements FutureCallback<Message<HttpResponse, Publisher<ByteBuffer>>> {
@@ -152,11 +158,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 		@Override
 		public void failed(Exception ex) {
-			Throwable t = ex;
-			if (t instanceof HttpStreamResetException) {
-				HttpStreamResetException httpStreamResetException = (HttpStreamResetException) ex;
-				t = httpStreamResetException.getCause();
-			}
+			Throwable t = (ex instanceof HttpStreamResetException hsre ? hsre.getCause() : ex);
 			this.sink.error(t);
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.util.unit;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -25,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Tests for {@link DataSize}.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class DataSizeTests {
 
@@ -128,9 +131,17 @@ class DataSizeTests {
 		assertThat(DataSize.parse("-1", DataUnit.KILOBYTES)).isEqualTo(DataSize.ofKilobytes(-1));
 	}
 
-	@Test
-	void parseWithBytes() {
-		assertThat(DataSize.parse("1024B")).isEqualTo(DataSize.ofKilobytes(1));
+	@ParameterizedTest(name = "[{index}] text = ''{0}''")
+	@ValueSource(strings = {
+		"1024B",
+		"1024 B",
+		"1024B   ",
+		"   1024B",
+		" 1024B ",
+		"\t1024   B\t"
+	})
+	void parseWithBytes(CharSequence text) {
+		assertThat(DataSize.parse(text)).isEqualTo(DataSize.ofKilobytes(1));
 	}
 
 	@Test
@@ -210,9 +221,12 @@ class DataSizeTests {
 
 	@Test
 	void parseWithUnsupportedUnit() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				DataSize.parse("3WB"))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> DataSize.parse("3WB"))
 			.withMessage("'3WB' is not a valid data size");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> DataSize.parse("3 WB"))
+			.withMessage("'3 WB' is not a valid data size");
 	}
 
 }

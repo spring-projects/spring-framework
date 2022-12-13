@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ public final class CloseStatus {
 	 * @param reason the reason
 	 */
 	public CloseStatus(int code, @Nullable String reason) {
-		Assert.isTrue((code >= 1000 && code < 5000), "Invalid status code");
+		Assert.isTrue((code >= 1000 && code < 5000), () -> "Invalid status code: " + code);
 		this.code = code;
 		this.reason = reason;
 	}
@@ -239,10 +239,9 @@ public final class CloseStatus {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof CloseStatus)) {
+		if (!(other instanceof CloseStatus otherStatus)) {
 			return false;
 		}
-		CloseStatus otherStatus = (CloseStatus) other;
 		return (this.code == otherStatus.code &&
 				ObjectUtils.nullSafeEquals(this.reason, otherStatus.reason));
 	}

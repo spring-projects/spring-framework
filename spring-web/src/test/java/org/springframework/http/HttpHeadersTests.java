@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.GregorianCalendar;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -129,7 +129,7 @@ public class HttpHeadersTests {
 
 	@Test
 	void allow() {
-		EnumSet<HttpMethod> methods = EnumSet.of(HttpMethod.GET, HttpMethod.POST);
+		Set<HttpMethod> methods = new LinkedHashSet<>(Arrays.asList(HttpMethod.GET, HttpMethod.POST));
 		headers.setAllow(methods);
 		assertThat(headers.getAllow()).as("Invalid Allow header").isEqualTo(methods);
 		assertThat(headers.getFirst("Allow")).as("Invalid Allow header").isEqualTo("GET,POST");
@@ -153,7 +153,7 @@ public class HttpHeadersTests {
 
 	@Test
 	void location() throws URISyntaxException {
-		URI location = new URI("https://www.example.com/hotels");
+		URI location = URI.create("https://www.example.com/hotels");
 		headers.setLocation(location);
 		assertThat(headers.getLocation()).as("Invalid Location header").isEqualTo(location);
 		assertThat(headers.getFirst("Location")).as("Invalid Location header").isEqualTo("https://www.example.com/hotels");
@@ -588,7 +588,7 @@ public class HttpHeadersTests {
 
 		// isEmpty() and size()
 		assertThat(keySet.isEmpty()).isFalse();
-		assertThat(keySet.size()).isEqualTo(2);
+		assertThat(keySet).hasSize(2);
 
 		// contains()
 		assertThat(keySet.contains("Alpha")).as("Alpha should be present").isTrue();
@@ -610,18 +610,18 @@ public class HttpHeadersTests {
 
 		// remove()
 		assertThat(keySet.remove("Alpha")).isTrue();
-		assertThat(keySet.size()).isEqualTo(1);
-		assertThat(headers.size()).isEqualTo(1);
+		assertThat(keySet).hasSize(1);
+		assertThat(headers).hasSize(1);
 		assertThat(keySet.remove("Alpha")).isFalse();
-		assertThat(keySet.size()).isEqualTo(1);
-		assertThat(headers.size()).isEqualTo(1);
+		assertThat(keySet).hasSize(1);
+		assertThat(headers).hasSize(1);
 
 		// clear()
 		keySet.clear();
 		assertThat(keySet.isEmpty()).isTrue();
-		assertThat(keySet.size()).isEqualTo(0);
+		assertThat(keySet).isEmpty();
 		assertThat(headers.isEmpty()).isTrue();
-		assertThat(headers.size()).isEqualTo(0);
+		assertThat(headers).isEmpty();
 
 		// Unsupported operations
 		assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -653,7 +653,7 @@ public class HttpHeadersTests {
 
 		assertThat(removed).isTrue();
 		assertThat(headers.keySet().remove("Alpha")).isFalse();
-		assertThat(headers.size()).isEqualTo(1);
+		assertThat(headers).hasSize(1);
 		assertThat(headers.containsKey("Alpha")).as("Alpha should have been removed").isFalse();
 		assertThat(headers.containsKey("Bravo")).as("Bravo should be present").isTrue();
 		assertThat(headers.keySet()).containsOnly("Bravo");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public abstract class ResourceUtils {
 			return true;
 		}
 		try {
-			new URL(resourceLocation);
+			toURL(resourceLocation);
 			return true;
 		}
 		catch (MalformedURLException ex) {
@@ -141,7 +141,7 @@ public abstract class ResourceUtils {
 		}
 		try {
 			// try URL
-			return new URL(resourceLocation);
+			return toURL(resourceLocation);
 		}
 		catch (MalformedURLException ex) {
 			// no URL -> treat as file path
@@ -181,7 +181,7 @@ public abstract class ResourceUtils {
 		}
 		try {
 			// try URL
-			return getFile(new URL(resourceLocation));
+			return getFile(toURL(resourceLocation));
 		}
 		catch (MalformedURLException ex) {
 			// no URL -> treat as file path
@@ -311,7 +311,7 @@ public abstract class ResourceUtils {
 		if (separatorIndex != -1) {
 			String jarFile = urlFile.substring(0, separatorIndex);
 			try {
-				return new URL(jarFile);
+				return toURL(jarFile);
 			}
 			catch (MalformedURLException ex) {
 				// Probably no protocol in original jar URL, like "jar:C:/mypath/myjar.jar".
@@ -319,7 +319,7 @@ public abstract class ResourceUtils {
 				if (!jarFile.startsWith("/")) {
 					jarFile = "/" + jarFile;
 				}
-				return new URL(FILE_URL_PREFIX + jarFile);
+				return toURL(FILE_URL_PREFIX + jarFile);
 			}
 		}
 		else {
@@ -346,11 +346,11 @@ public abstract class ResourceUtils {
 			// Tomcat's "war:file:...mywar.war*/WEB-INF/lib/myjar.jar!/myentry.txt"
 			String warFile = urlFile.substring(0, endIndex);
 			if (URL_PROTOCOL_WAR.equals(jarUrl.getProtocol())) {
-				return new URL(warFile);
+				return toURL(warFile);
 			}
 			int startIndex = warFile.indexOf(WAR_URL_PREFIX);
 			if (startIndex != -1) {
-				return new URL(warFile.substring(startIndex + WAR_URL_PREFIX.length()));
+				return toURL(warFile.substring(startIndex + WAR_URL_PREFIX.length()));
 			}
 		}
 
@@ -379,6 +379,51 @@ public abstract class ResourceUtils {
 	 */
 	public static URI toURI(String location) throws URISyntaxException {
 		return new URI(StringUtils.replace(location, " ", "%20"));
+	}
+
+	/**
+	 * Create a URL instance for the given location String,
+	 * going through URI construction and then URL conversion.
+	 * @param location the location String to convert into a URL instance
+	 * @return the URL instance
+	 * @throws MalformedURLException if the location wasn't a valid URL
+	 * @since 6.0
+	 */
+	public static URL toURL(String location) throws MalformedURLException {
+		// Equivalent without java.net.URL constructor - for building on JDK 20+
+		/*
+		try {
+			return toURI(StringUtils.cleanPath(location)).toURL();
+		}
+		catch (URISyntaxException | IllegalArgumentException ex) {
+			MalformedURLException exToThrow = new MalformedURLException(ex.getMessage());
+			exToThrow.initCause(ex);
+			throw exToThrow;
+		}
+		*/
+
+		return new URL(location);
+	}
+
+	/**
+	 * Create a URL instance for the given root URL and relative path,
+	 * going through URI construction and then URL conversion.
+	 * @param root the root URL to start from
+	 * @param relativePath the relative path to apply
+	 * @return the relative URL instance
+	 * @throws MalformedURLException if the end result is not a valid URL
+	 * @since 6.0
+	 */
+	public static URL toRelativeURL(URL root, String relativePath) throws MalformedURLException {
+		// # can appear in filenames, java.net.URL should not treat it as a fragment
+		relativePath = StringUtils.replace(relativePath, "#", "%23");
+
+		// Equivalent without java.net.URL constructor - for building on JDK 20+
+		/*
+		return toURL(StringUtils.applyRelativePath(root.toString(), relativePath));
+		*/
+
+		return new URL(root, relativePath);
 	}
 
 	/**

@@ -36,7 +36,7 @@ public interface IntroductionAwareMethodMatcher extends MethodMatcher {
 	 * @param targetClass the target class
 	 * @param hasIntroductions {@code true} if the object on whose behalf we are
 	 * asking is the subject on one or more introductions; {@code false} otherwise
-	 * @return whether or not this method matches statically
+	 * @return whether this method matches statically
 	 */
 	boolean matches(Method method, Class<?> targetClass, boolean hasIntroductions);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.expression.spel.support;
+
+import java.util.function.Supplier;
 
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConversionService;
@@ -37,7 +39,7 @@ import org.springframework.util.Assert;
  */
 public class StandardTypeConverter implements TypeConverter {
 
-	private final ConversionService conversionService;
+	private final Supplier<ConversionService> conversionService;
 
 
 	/**
@@ -45,7 +47,7 @@ public class StandardTypeConverter implements TypeConverter {
 	 * @see DefaultConversionService#getSharedInstance()
 	 */
 	public StandardTypeConverter() {
-		this.conversionService = DefaultConversionService.getSharedInstance();
+		this.conversionService = DefaultConversionService::getSharedInstance;
 	}
 
 	/**
@@ -54,20 +56,30 @@ public class StandardTypeConverter implements TypeConverter {
 	 */
 	public StandardTypeConverter(ConversionService conversionService) {
 		Assert.notNull(conversionService, "ConversionService must not be null");
+		this.conversionService = () -> conversionService;
+	}
+
+	/**
+	 * Create a StandardTypeConverter for the given ConversionService.
+	 * @param conversionService a Supplier for the ConversionService to delegate to
+	 * @since 5.3.11
+	 */
+	public StandardTypeConverter(Supplier<ConversionService> conversionService) {
+		Assert.notNull(conversionService, "Supplier must not be null");
 		this.conversionService = conversionService;
 	}
 
 
 	@Override
 	public boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return this.conversionService.canConvert(sourceType, targetType);
+		return this.conversionService.get().canConvert(sourceType, targetType);
 	}
 
 	@Override
 	@Nullable
 	public Object convertValue(@Nullable Object value, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		try {
-			return this.conversionService.convert(value, sourceType, targetType);
+			return this.conversionService.get().convert(value, sourceType, targetType);
 		}
 		catch (ConversionException ex) {
 			throw new SpelEvaluationException(ex, SpelMessage.TYPE_CONVERSION_ERROR,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,11 +67,13 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = -4688694393146734764L;
 
-
+	@SuppressWarnings("serial")
 	private final ResultSet resultSet;
 
+	@SuppressWarnings("serial")
 	private final SqlRowSetMetaData rowSetMetaData;
 
+	@SuppressWarnings("serial")
 	private final Map<String, Integer> columnLabelMap;
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -205,8 +206,8 @@ public class PreparedStatementCreatorFactory {
 				Set<String> names = new HashSet<>();
 				for (int i = 0; i < parameters.size(); i++) {
 					Object param = parameters.get(i);
-					if (param instanceof SqlParameterValue) {
-						names.add(((SqlParameterValue) param).getName());
+					if (param instanceof SqlParameterValue sqlParameterValue) {
+						names.add(sqlParameterValue.getName());
 					}
 					else {
 						names.add("Parameter #" + i);
@@ -228,7 +229,7 @@ public class PreparedStatementCreatorFactory {
 					ps = con.prepareStatement(this.actualSql, generatedKeysColumnNames);
 				}
 				else {
-					ps = con.prepareStatement(this.actualSql, PreparedStatement.RETURN_GENERATED_KEYS);
+					ps = con.prepareStatement(this.actualSql, Statement.RETURN_GENERATED_KEYS);
 				}
 			}
 			else if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
@@ -251,10 +252,9 @@ public class PreparedStatementCreatorFactory {
 				SqlParameter declaredParameter;
 				// SqlParameterValue overrides declared parameter meta-data, in particular for
 				// independence from the declared parameter position in case of named parameters.
-				if (in instanceof SqlParameterValue) {
-					SqlParameterValue paramValue = (SqlParameterValue) in;
-					in = paramValue.getValue();
-					declaredParameter = paramValue;
+				if (in instanceof SqlParameterValue sqlParameterValue) {
+					in = sqlParameterValue.getValue();
+					declaredParameter = sqlParameterValue;
 				}
 				else {
 					if (declaredParameters.size() <= i) {
@@ -265,11 +265,9 @@ public class PreparedStatementCreatorFactory {
 					}
 					declaredParameter = declaredParameters.get(i);
 				}
-				if (in instanceof Iterable && declaredParameter.getSqlType() != Types.ARRAY) {
-					Iterable<?> entries = (Iterable<?>) in;
+				if (in instanceof Iterable<?> entries && declaredParameter.getSqlType() != Types.ARRAY) {
 					for (Object entry : entries) {
-						if (entry instanceof Object[]) {
-							Object[] valueArray = (Object[]) entry;
+						if (entry instanceof Object[] valueArray) {
 							for (Object argValue : valueArray) {
 								StatementCreatorUtils.setParameterValue(ps, sqlColIndx++, declaredParameter, argValue);
 							}

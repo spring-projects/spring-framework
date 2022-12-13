@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -53,8 +55,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.util.StringUtils;
 
 /**
  * Abstract base class for HandlerMethod-based message handling. Provides most of
@@ -319,9 +320,12 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	private String formatMappings(Class<?> userType, Map<Method, T> methods) {
-		String formattedType = Arrays.stream(ClassUtils.getPackageName(userType).split("\\."))
-				.map(p -> p.substring(0, 1))
-				.collect(Collectors.joining(".", "", "." + userType.getSimpleName()));
+		String packageName = ClassUtils.getPackageName(userType);
+		String formattedType = (StringUtils.hasText(packageName) ?
+				Arrays.stream(packageName.split("\\."))
+						.map(packageSegment -> packageSegment.substring(0, 1))
+						.collect(Collectors.joining(".", "", "." + userType.getSimpleName())) :
+				userType.getSimpleName());
 		Function<Method, String> methodFormatter = method -> Arrays.stream(method.getParameterTypes())
 				.map(Class::getSimpleName)
 				.collect(Collectors.joining(",", "(", ")"));
@@ -336,7 +340,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	/**
 	 * Provide the mapping for a handler method.
 	 * @param method the method to provide a mapping for
-	 * @param handlerType the handler type, possibly a sub-type of the method's declaring class
+	 * @param handlerType the handler type, possibly a subtype of the method's declaring class
 	 * @return the mapping, or {@code null} if the method is not mapped
 	 */
 	@Nullable
@@ -474,8 +478,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		if (CollectionUtils.isEmpty(this.destinationPrefixes)) {
 			return destination;
 		}
-		for (int i = 0; i < this.destinationPrefixes.size(); i++) {
-			String prefix = this.destinationPrefixes.get(i);
+		for (String prefix : this.destinationPrefixes) {
 			if (destination.startsWith(prefix)) {
 				return destination.substring(prefix.length());
 			}
@@ -568,9 +571,9 @@ public abstract class AbstractMethodMessageHandler<T>
 				return;
 			}
 			if (returnValue != null && this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
-				ListenableFuture<?> future = this.returnValueHandlers.toListenableFuture(returnValue, returnType);
+				CompletableFuture<?> future = this.returnValueHandlers.toCompletableFuture(returnValue, returnType);
 				if (future != null) {
-					future.addCallback(new ReturnValueListenableFutureCallback(invocable, message));
+					future.whenComplete(new ReturnValueListenableFutureCallback(invocable, message));
 				}
 			}
 			else {
@@ -701,7 +704,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 
-	private class ReturnValueListenableFutureCallback implements ListenableFutureCallback<Object> {
+	private class ReturnValueListenableFutureCallback implements BiConsumer<Object, Throwable> {
 
 		private final InvocableHandlerMethod handlerMethod;
 
@@ -713,19 +716,19 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 
 		@Override
-		public void onSuccess(@Nullable Object result) {
-			try {
-				MethodParameter returnType = this.handlerMethod.getAsyncReturnValueType(result);
-				returnValueHandlers.handleReturnValue(result, returnType, this.message);
+		public void accept(@Nullable Object result, @Nullable Throwable ex) {
+			if (result != null) {
+				try {
+					MethodParameter returnType = this.handlerMethod.getAsyncReturnValueType(result);
+					returnValueHandlers.handleReturnValue(result, returnType, this.message);
+				}
+				catch (Throwable throwable) {
+					handleFailure(throwable);
+				}
 			}
-			catch (Throwable ex) {
+			else if (ex != null) {
 				handleFailure(ex);
 			}
-		}
-
-		@Override
-		public void onFailure(Throwable ex) {
-			handleFailure(ex);
 		}
 
 		private void handleFailure(Throwable ex) {

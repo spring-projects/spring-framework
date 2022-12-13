@@ -16,7 +16,7 @@
 
 package org.springframework.web.testfixture.xml;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Sebastien Deleuze
@@ -57,8 +57,7 @@ public class Pojo {
 		if (this == o) {
 			return true;
 		}
-		if (o instanceof Pojo) {
-			Pojo other = (Pojo) o;
+		if (o instanceof Pojo other) {
 			return this.foo.equals(other.foo) && this.bar.equals(other.bar);
 		}
 		return false;

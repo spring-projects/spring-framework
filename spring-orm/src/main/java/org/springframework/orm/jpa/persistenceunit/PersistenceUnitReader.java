@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.SharedCacheMode;
-import javax.persistence.ValidationMode;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import jakarta.persistence.SharedCacheMode;
+import jakarta.persistence.ValidationMode;
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -312,7 +312,7 @@ final class PersistenceUnitReader {
 					// relative to the persistence unit root, according to the JPA spec
 					URL rootUrl = unitInfo.getPersistenceUnitRootUrl();
 					if (rootUrl != null) {
-						unitInfo.addJarFileUrl(new URL(rootUrl, value));
+						unitInfo.addJarFileUrl(ResourceUtils.toRelativeURL(rootUrl, value));
 					}
 					else {
 						logger.warn("Cannot resolve jar-file entry [" + value + "] in persistence unit '" +
@@ -363,7 +363,7 @@ final class PersistenceUnitReader {
 		if (persistenceUnitRoot.endsWith("/")) {
 			persistenceUnitRoot = persistenceUnitRoot.substring(0, persistenceUnitRoot.length() - 1);
 		}
-		return new URL(persistenceUnitRoot);
+		return ResourceUtils.toURL(persistenceUnitRoot);
 	}
 
 }

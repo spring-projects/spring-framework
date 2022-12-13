@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.handler.invocation;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.util.concurrent.ListenableFuture;
 
@@ -24,7 +26,9 @@ import org.springframework.util.concurrent.ListenableFuture;
  *
  * @author Sebastien Deleuze
  * @since 4.2
+ * @deprecated as of 6.0, in favor of {@link CompletableFutureReturnValueHandler}
  */
+@Deprecated(since = "6.0")
 public class ListenableFutureReturnValueHandler extends AbstractAsyncReturnValueHandler {
 
 	@Override
@@ -38,4 +42,8 @@ public class ListenableFutureReturnValueHandler extends AbstractAsyncReturnValue
 		return (ListenableFuture<?>) returnValue;
 	}
 
+	@Override
+	public CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
+		return ((ListenableFuture<?>) returnValue).completable();
+	}
 }

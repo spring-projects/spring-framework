@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.AntPathMatcher;
@@ -87,7 +87,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and whether to match
 	 * trailing slashes.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @since 5.2.4
@@ -105,7 +105,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and flags for matching
 	 * with suffixes and trailing slashes.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @deprecated as of 5.2.4. See class-level note in
@@ -123,7 +123,7 @@ public class PatternsRequestCondition extends AbstractRequestCondition<PatternsR
 	 * Variant of {@link #PatternsRequestCondition(String...)} with a
 	 * {@link UrlPathHelper} and a {@link PathMatcher}, and flags for matching
 	 * with suffixes and trailing slashes, along with specific extensions.
-	 * <p>As of 5.3 the the path is obtained through the static method
+	 * <p>As of 5.3 the path is obtained through the static method
 	 * {@link UrlPathHelper#getResolvedLookupPath} and a {@code UrlPathHelper}
 	 * does not need to be passed in.
 	 * @deprecated as of 5.2.4. See class-level note in

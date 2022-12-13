@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
  */
 public final class Property {
 
-	private static Map<Property, Annotation[]> annotationCache = new ConcurrentReferenceHashMap<>();
+	private static final Map<Property, Annotation[]> annotationCache = new ConcurrentReferenceHashMap<>();
 
 	private final Class<?> objectType;
 
@@ -263,10 +263,9 @@ public final class Property {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof Property)) {
+		if (!(other instanceof Property otherProperty)) {
 			return false;
 		}
-		Property otherProperty = (Property) other;
 		return (ObjectUtils.nullSafeEquals(this.objectType, otherProperty.objectType) &&
 				ObjectUtils.nullSafeEquals(this.name, otherProperty.name) &&
 				ObjectUtils.nullSafeEquals(this.readMethod, otherProperty.readMethod) &&

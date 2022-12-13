@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Collection;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -34,50 +36,54 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public class GenericParameterMatchingTests {
+class GenericParameterMatchingTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private CounterAspect counterAspect;
 
 	private GenericInterface<String> testBean;
 
 
+	@BeforeEach
 	@SuppressWarnings("unchecked")
-	@org.junit.jupiter.api.BeforeEach
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
 
 		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
-		counterAspect.reset();
-
 		testBean = (GenericInterface<String>) ctx.getBean("testBean");
+	}
+
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
 	}
 
 
 	@Test
-	public void testGenericInterfaceGenericArgExecution() {
+	void testGenericInterfaceGenericArgExecution() {
 		testBean.save("");
 		assertThat(counterAspect.genericInterfaceGenericArgExecutionCount).isEqualTo(1);
 	}
 
 	@Test
-	public void testGenericInterfaceGenericCollectionArgExecution() {
+	void testGenericInterfaceGenericCollectionArgExecution() {
 		testBean.saveAll(null);
 		assertThat(counterAspect.genericInterfaceGenericCollectionArgExecutionCount).isEqualTo(1);
 	}
 
 	@Test
-	public void testGenericInterfaceSubtypeGenericCollectionArgExecution() {
+	void testGenericInterfaceSubtypeGenericCollectionArgExecution() {
 		testBean.saveAll(null);
 		assertThat(counterAspect.genericInterfaceSubtypeGenericCollectionArgExecutionCount).isEqualTo(1);
 	}
 
 
-	static interface GenericInterface<T> {
+	interface GenericInterface<T> {
 
-		public void save(T bean);
+		void save(T bean);
 
-		public void saveAll(Collection<T> beans);
+		void saveAll(Collection<T> beans);
 	}
 
 

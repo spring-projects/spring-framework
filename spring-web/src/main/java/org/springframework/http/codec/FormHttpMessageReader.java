@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -130,7 +129,7 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 
 		return DataBufferUtils.join(message.getBody(), this.maxInMemorySize)
 				.map(buffer -> {
-					CharBuffer charBuffer = charset.decode(buffer.asByteBuffer());
+					CharBuffer charBuffer = charset.decode(buffer.toByteBuffer());
 					String body = charBuffer.toString();
 					DataBufferUtils.release(buffer);
 					MultiValueMap<String, String> formData = parseFormData(charset, body);
@@ -158,21 +157,16 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 	private MultiValueMap<String, String> parseFormData(Charset charset, String body) {
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(pairs.length);
-		try {
-			for (String pair : pairs) {
-				int idx = pair.indexOf('=');
-				if (idx == -1) {
-					result.add(URLDecoder.decode(pair, charset.name()), null);
-				}
-				else {
-					String name = URLDecoder.decode(pair.substring(0, idx),  charset.name());
-					String value = URLDecoder.decode(pair.substring(idx + 1), charset.name());
-					result.add(name, value);
-				}
+		for (String pair : pairs) {
+			int idx = pair.indexOf('=');
+			if (idx == -1) {
+				result.add(URLDecoder.decode(pair, charset), null);
 			}
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException(ex);
+			else {
+				String name = URLDecoder.decode(pair.substring(0, idx),  charset);
+				String value = URLDecoder.decode(pair.substring(idx + 1), charset);
+				result.add(name, value);
+			}
 		}
 		return result;
 	}

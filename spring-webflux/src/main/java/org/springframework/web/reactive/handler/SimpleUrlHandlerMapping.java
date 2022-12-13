@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 	}
 
 	/**
-	 * Allow Map access to the URL path mappings, with the option to add or
+	 * Allow {@code Map} access to the URL path mappings, with the option to add or
 	 * override specific entries.
 	 * <p>Useful for specifying entries directly, for example via "urlMap[myKey]".
 	 * This is particularly useful for adding or overriding entries in child
@@ -153,14 +153,21 @@ public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 					url = "/" + url;
 				}
 				// Remove whitespace from handler bean name.
-				if (handler instanceof String) {
-					handler = ((String) handler).trim();
+				if (handler instanceof String handlerName) {
+					handler = handlerName.trim();
 				}
 				registerHandler(url, handler);
 			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("Patterns " + getHandlerMap().keySet() + " in " + formatMappingName());
-			}
+			logMappings();
+		}
+	}
+
+	private void logMappings() {
+		if (mappingsLogger.isDebugEnabled()) {
+			mappingsLogger.debug(formatMappingName() + " " + getHandlerMap());
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Patterns " + getHandlerMap().keySet() + " in " + formatMappingName());
 		}
 	}
 

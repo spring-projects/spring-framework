@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.concurrent.Callable;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.context.MessageSource;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -43,7 +45,6 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
-import org.springframework.web.util.NestedServletException;
 
 /**
  * Extends {@link InvocableHandlerMethod} with the ability to handle return
@@ -74,6 +75,16 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 */
 	public ServletInvocableHandlerMethod(Object handler, Method method) {
 		super(handler, method);
+	}
+
+	/**
+	 * Variant of {@link #ServletInvocableHandlerMethod(Object, Method)} that
+	 * also accepts a {@link MessageSource}, e.g. to resolve
+	 * {@code @ResponseStatus} messages with.
+	 * @since 5.3.10
+	 */
+	public ServletInvocableHandlerMethod(Object handler, Method method, @Nullable MessageSource messageSource) {
+		super(handler, method, messageSource);
 	}
 
 	/**
@@ -136,7 +147,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * Set the response status according to the {@link ResponseStatus} annotation.
 	 */
 	private void setResponseStatus(ServletWebRequest webRequest) throws IOException {
-		HttpStatus status = getResponseStatus();
+		HttpStatusCode status = getResponseStatus();
 		if (status == null) {
 			return;
 		}
@@ -184,7 +195,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	/**
 	 * Create a nested ServletInvocableHandlerMethod subclass that returns the
-	 * the given value (or raises an Exception if the value is one) rather than
+	 * given value (or raises an Exception if the value is one) rather than
 	 * actually invoking the controller method. This is useful when processing
 	 * async return values (e.g. Callable, DeferredResult, ListenableFuture).
 	 */
@@ -209,7 +220,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 					throw (Exception) result;
 				}
 				else if (result instanceof Throwable) {
-					throw new NestedServletException("Async processing failed", (Throwable) result);
+					throw new ServletException("Async processing failed: " + result, (Throwable) result);
 				}
 				return result;
 			}, CALLABLE_METHOD);

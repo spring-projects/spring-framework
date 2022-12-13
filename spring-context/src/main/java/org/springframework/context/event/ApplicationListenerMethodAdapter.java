@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletionStage;
 
 import org.apache.commons.logging.Log;
@@ -49,7 +50,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link GenericApplicationListener} adapter that delegates the processing of
@@ -90,6 +90,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	private final int order;
 
 	@Nullable
+	private volatile String listenerId;
+
+	@Nullable
 	private ApplicationContext applicationContext;
 
 	@Nullable
@@ -113,6 +116,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);
 		this.order = resolveOrder(this.targetMethod);
+		String id = (ann != null ? ann.id() : "");
+		this.listenerId = (!id.isEmpty() ? id : null);
 	}
 
 	private static List<ResolvableType> resolveDeclaredEventTypes(Method method, @Nullable EventListener ann) {
@@ -186,6 +191,32 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return this.order;
 	}
 
+	@Override
+	public String getListenerId() {
+		String id = this.listenerId;
+		if (id == null) {
+			id = getDefaultListenerId();
+			this.listenerId = id;
+		}
+		return id;
+	}
+
+	/**
+	 * Determine the default id for the target listener, to be applied in case of
+	 * no {@link EventListener#id() annotation-specified id value}.
+	 * <p>The default implementation builds a method name with parameter types.
+	 * @since 5.3.5
+	 * @see #getListenerId()
+	 */
+	protected String getDefaultListenerId() {
+		Method method = getTargetMethod();
+		StringJoiner sj = new StringJoiner(",", "(", ")");
+		for (Class<?> paramType : method.getParameterTypes()) {
+			sj.add(paramType.getName());
+		}
+		return ClassUtils.getQualifiedMethodName(method) + sj.toString();
+	}
+
 
 	/**
 	 * Process the specified {@link ApplicationEvent}, checking if the condition
@@ -221,8 +252,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 		Class<?> declaredEventClass = declaredEventType.toClass();
 		if (!ApplicationEvent.class.isAssignableFrom(declaredEventClass) &&
-				event instanceof PayloadApplicationEvent) {
-			Object payload = ((PayloadApplicationEvent<?>) event).getPayload();
+				event instanceof PayloadApplicationEvent<?> payloadEvent) {
+			Object payload = payloadEvent.getPayload();
 			if (declaredEventClass.isInstance(payload)) {
 				return new Object[] {payload};
 			}
@@ -230,14 +261,15 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return new Object[] {event};
 	}
 
+	@SuppressWarnings({ "deprecation", "unchecked" })
 	protected void handleResult(Object result) {
 		if (reactiveStreamsPresent && new ReactiveResultHandler().subscribeToPublisher(result)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Adapted to reactive result: " + result);
 			}
 		}
-		else if (result instanceof CompletionStage) {
-			((CompletionStage<?>) result).whenComplete((event, ex) -> {
+		else if (result instanceof CompletionStage<?> completionStage) {
+			completionStage.whenComplete((event, ex) -> {
 				if (ex != null) {
 					handleAsyncError(ex);
 				}
@@ -246,8 +278,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 				}
 			});
 		}
-		else if (result instanceof ListenableFuture) {
-			((ListenableFuture<?>) result).addCallback(this::publishEvents, this::handleAsyncError);
+		else if (result instanceof org.springframework.util.concurrent.ListenableFuture<?> listenableFuture) {
+			listenableFuture.addCallback(this::publishEvents, this::handleAsyncError);
 		}
 		else {
 			publishEvents(result);
@@ -261,8 +293,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 				publishEvent(event);
 			}
 		}
-		else if (result instanceof Collection<?>) {
-			Collection<?> events = (Collection<?>) result;
+		else if (result instanceof Collection<?> events) {
 			for (Object event : events) {
 				publishEvent(event);
 			}
@@ -321,8 +352,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		catch (InvocationTargetException ex) {
 			// Throw underlying exception
 			Throwable targetException = ex.getTargetException();
-			if (targetException instanceof RuntimeException) {
-				throw (RuntimeException) targetException;
+			if (targetException instanceof RuntimeException runtimeException) {
+				throw runtimeException;
 			}
 			else {
 				String msg = getInvocationErrorMessage(bean, "Failed to invoke event listener method", args);
@@ -364,7 +395,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * @param message error message to append the HandlerMethod details to
 	 */
 	protected String getDetailedErrorMessage(Object bean, String message) {
-		StringBuilder sb = new StringBuilder(message).append("\n");
+		StringBuilder sb = new StringBuilder(message).append('\n');
 		sb.append("HandlerMethod details: \n");
 		sb.append("Bean [").append(bean.getClass().getName()).append("]\n");
 		sb.append("Method [").append(this.method.toGenericString()).append("]\n");
@@ -394,7 +425,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(bean, message));
 		sb.append("Resolved arguments: \n");
 		for (int i = 0; i < resolvedArgs.length; i++) {
-			sb.append("[").append(i).append("] ");
+			sb.append('[').append(i).append("] ");
 			if (resolvedArgs[i] == null) {
 				sb.append("[null] \n");
 			}
@@ -409,8 +440,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	@Nullable
 	private ResolvableType getResolvableType(ApplicationEvent event) {
 		ResolvableType payloadType = null;
-		if (event instanceof PayloadApplicationEvent) {
-			PayloadApplicationEvent<?> payloadEvent = (PayloadApplicationEvent<?>) event;
+		if (event instanceof PayloadApplicationEvent<?> payloadEvent) {
 			ResolvableType eventType = payloadEvent.getResolvableType();
 			if (eventType != null) {
 				payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();

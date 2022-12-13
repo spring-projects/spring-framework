@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
@@ -37,16 +38,17 @@ import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -56,6 +58,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -69,6 +72,7 @@ import org.springframework.web.util.UriBuilder;
  * {@code ServerRequest} implementation based on a {@link HttpServletRequest}.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 5.2
  */
 class DefaultServerRequest implements ServerRequest {
@@ -81,8 +85,6 @@ class DefaultServerRequest implements ServerRequest {
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
-	private final List<MediaType> allSupportedMediaTypes;
-
 	private final MultiValueMap<String, String> params;
 
 	private final Map<String, Object> attributes;
@@ -93,8 +95,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	public DefaultServerRequest(HttpServletRequest servletRequest, List<HttpMessageConverter<?>> messageConverters) {
 		this.serverHttpRequest = new ServletServerHttpRequest(servletRequest);
-		this.messageConverters = Collections.unmodifiableList(new ArrayList<>(messageConverters));
-		this.allSupportedMediaTypes = allSupportedMediaTypes(messageConverters);
+		this.messageConverters = List.copyOf(messageConverters);
 
 		this.headers = new DefaultRequestHeaders(this.serverHttpRequest.getHeaders());
 		this.params = CollectionUtils.toMultiValueMap(new ServletParametersMap(servletRequest));
@@ -107,15 +108,13 @@ class DefaultServerRequest implements ServerRequest {
 				ServletRequestPathUtils.parseAndCache(servletRequest));
 	}
 
-	private static List<MediaType> allSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
-		return messageConverters.stream()
-				.flatMap(converter -> converter.getSupportedMediaTypes().stream())
-				.sorted(MediaType.SPECIFICITY_COMPARATOR)
-				.collect(Collectors.toList());
+	@Override
+	public HttpMethod method() {
+		return HttpMethod.valueOf(servletRequest().getMethod());
 	}
 
-
 	@Override
+	@Deprecated
 	public String methodName() {
 		return servletRequest().getMethod();
 	}
@@ -180,14 +179,12 @@ class DefaultServerRequest implements ServerRequest {
 	}
 
 	static Class<?> bodyClass(Type type) {
-		if (type instanceof Class) {
-			return (Class<?>) type;
+		if (type instanceof Class<?> clazz) {
+			return clazz;
 		}
-		if (type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) type;
-			if (parameterizedType.getRawType() instanceof Class) {
-				return (Class<?>) parameterizedType.getRawType();
-			}
+		if (type instanceof ParameterizedType parameterizedType &&
+				parameterizedType.getRawType() instanceof Class<?> rawType) {
+			return rawType;
 		}
 		return Object.class;
 	}
@@ -197,11 +194,9 @@ class DefaultServerRequest implements ServerRequest {
 		MediaType contentType = this.headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-			if (messageConverter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter<T> genericMessageConverter =
-						(GenericHttpMessageConverter<T>) messageConverter;
+			if (messageConverter instanceof GenericHttpMessageConverter<?> genericMessageConverter) {
 				if (genericMessageConverter.canRead(bodyType, bodyClass, contentType)) {
-					return genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
+					return (T) genericMessageConverter.read(bodyType, bodyClass, this.serverHttpRequest);
 				}
 			}
 			if (messageConverter.canRead(bodyClass, contentType)) {
@@ -211,7 +206,16 @@ class DefaultServerRequest implements ServerRequest {
 				return theConverter.read(clazz, this.serverHttpRequest);
 			}
 		}
-		throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);
+		throw new HttpMediaTypeNotSupportedException(contentType, getSupportedMediaTypes(bodyClass), method());
+	}
+
+	private List<MediaType> getSupportedMediaTypes(Class<?> bodyClass) {
+		List<MediaType> result = new ArrayList<>(this.messageConverters.size());
+		for (HttpMessageConverter<?> converter : this.messageConverters) {
+			result.addAll(converter.getSupportedMediaTypes(bodyClass));
+		}
+		MimeTypeUtils.sortBySpecificity(result);
+		return result;
 	}
 
 	@Override
@@ -504,12 +508,6 @@ class DefaultServerRequest implements ServerRequest {
 		}
 
 		@Override
-		@Deprecated
-		public void setStatus(int sc, String sm) {
-			this.status = sc;
-		}
-
-		@Override
 		public int getStatus() {
 			return this.status;
 		}
@@ -546,18 +544,6 @@ class DefaultServerRequest implements ServerRequest {
 
 		@Override
 		public String encodeRedirectURL(String url) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		@Deprecated
-		public String encodeUrl(String url) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		@Deprecated
-		public String encodeRedirectUrl(String url) {
 			throw new UnsupportedOperationException();
 		}
 

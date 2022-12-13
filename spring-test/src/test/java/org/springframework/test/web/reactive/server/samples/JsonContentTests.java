@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.containsString;
-
-
 
 /**
  * Samples of tests using {@link WebTestClient} with serialized JSON content.
@@ -42,47 +41,87 @@ import static org.hamcrest.Matchers.containsString;
  * @author Sam Brannen
  * @since 5.0
  */
-public class JsonContentTests {
+class JsonContentTests {
 
 	private final WebTestClient client = WebTestClient.bindToController(new PersonController()).build();
 
 
 	@Test
-	public void jsonContent() {
+	void jsonContentWithDefaultLenientMode() {
 		this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
-				.expectBody().json("[{\"name\":\"Jane\"},{\"name\":\"Jason\"},{\"name\":\"John\"}]");
+				.expectBody().json("""
+						[
+							{"firstName":"Jane"},
+							{"firstName":"Jason"},
+							{"firstName":"John"}
+						]
+						""");
 	}
 
 	@Test
-	public void jsonPathIsEqualTo() {
+	void jsonContentWithStrictMode() {
+		this.client.get().uri("/persons")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody().json("""
+						[
+							{"firstName":"Jane", "lastName":"Williams"},
+							{"firstName":"Jason","lastName":"Johnson"},
+							{"firstName":"John", "lastName":"Smith"}
+						]
+						""",
+						true);
+	}
+
+	@Test
+	void jsonContentWithStrictModeAndMissingAttributes() {
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> this.client.get().uri("/persons")
+				.accept(MediaType.APPLICATION_JSON)
+				.exchange()
+				.expectBody().json("""
+						[
+							{"firstName":"Jane"},
+							{"firstName":"Jason"},
+							{"firstName":"John"}
+						]
+						""",
+						true)
+		);
+	}
+
+	@Test
+	void jsonPathIsEqualTo() {
 		this.client.get().uri("/persons")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
-				.jsonPath("$[0].name").isEqualTo("Jane")
-				.jsonPath("$[1].name").isEqualTo("Jason")
-				.jsonPath("$[2].name").isEqualTo("John");
+				.jsonPath("$[0].firstName").isEqualTo("Jane")
+				.jsonPath("$[1].firstName").isEqualTo("Jason")
+				.jsonPath("$[2].firstName").isEqualTo("John");
 	}
 
 	@Test
-	public void jsonPathMatches() {
-		this.client.get().uri("/persons/John")
+	void jsonPathMatches() {
+		this.client.get().uri("/persons/John/Smith")
 				.accept(MediaType.APPLICATION_JSON)
 				.exchange()
 				.expectStatus().isOk()
 				.expectBody()
-				.jsonPath("$.name").value(containsString("oh"));
+				.jsonPath("$.firstName").value(containsString("oh"));
 	}
 
 	@Test
-	public void postJsonContent() {
+	void postJsonContent() {
 		this.client.post().uri("/persons")
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue("{\"name\":\"John\"}")
+				.bodyValue("""
+						{"firstName":"John", "lastName":"Smith"}
+						""")
 				.exchange()
 				.expectStatus().isCreated()
 				.expectBody().isEmpty();
@@ -95,17 +134,38 @@ public class JsonContentTests {
 
 		@GetMapping
 		Flux<Person> getPersons() {
-			return Flux.just(new Person("Jane"), new Person("Jason"), new Person("John"));
+			return Flux.just(new Person("Jane", "Williams"), new Person("Jason", "Johnson"), new Person("John", "Smith"));
 		}
 
-		@GetMapping("/{name}")
-		Person getPerson(@PathVariable String name) {
-			return new Person(name);
+		@GetMapping("/{firstName}/{lastName}")
+		Person getPerson(@PathVariable String firstName, @PathVariable String lastName) {
+			return new Person(firstName, lastName);
 		}
 
 		@PostMapping
 		ResponseEntity<String> savePerson(@RequestBody Person person) {
-			return ResponseEntity.created(URI.create("/persons/" + person.getName())).build();
+			return ResponseEntity.created(URI.create(String.format("/persons/%s/%s", person.getFirstName(), person.getLastName()))).build();
+		}
+	}
+
+	static class Person {
+		private String firstName;
+		private String lastName;
+
+		public Person() {
+		}
+
+		public Person(String firstName, String lastName) {
+			this.firstName = firstName;
+			this.lastName = lastName;
+		}
+
+		public String getFirstName() {
+			return this.firstName;
+		}
+
+		public String getLastName() {
+			return this.lastName;
 		}
 	}
 

@@ -53,7 +53,7 @@ abstract class WebClientUtils {
 				new ResponseEntity<>(
 						body != VALUE_NONE ? (T) body : null,
 						response.headers().asHttpHeaders(),
-						response.rawStatusCode()));
+						response.statusCode()));
 	}
 
 	/**
@@ -61,7 +61,7 @@ abstract class WebClientUtils {
 	 */
 	public static <T> Mono<ResponseEntity<List<T>>> mapToEntityList(ClientResponse response, Publisher<T> body) {
 		return Flux.from(body).collectList().map(list ->
-				new ResponseEntity<>(list, response.headers().asHttpHeaders(), response.rawStatusCode()));
+				new ResponseEntity<>(list, response.headers().asHttpHeaders(), response.statusCode()));
 	}
 
 }

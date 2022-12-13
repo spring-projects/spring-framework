@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,16 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.ParameterMode;
-import javax.persistence.Query;
-import javax.persistence.StoredProcedureQuery;
-import javax.persistence.TransactionRequiredException;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.Query;
+import jakarta.persistence.StoredProcedureQuery;
+import jakarta.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,8 +43,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
- * Delegate for creating a shareable JPA {@link javax.persistence.EntityManager}
- * reference for a given {@link javax.persistence.EntityManagerFactory}.
+ * Delegate for creating a shareable JPA {@link jakarta.persistence.EntityManager}
+ * reference for a given {@link jakarta.persistence.EntityManagerFactory}.
  *
  * <p>A shared EntityManager will behave just like an EntityManager fetched from
  * an application server's JNDI environment, as defined by the JPA specification.
@@ -54,17 +52,17 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * otherwise it will fall back to a newly created EntityManager per operation.
  *
  * <p>For a behavioral definition of such a shared transactional EntityManager,
- * see {@link javax.persistence.PersistenceContextType#TRANSACTION} and its
+ * see {@link jakarta.persistence.PersistenceContextType#TRANSACTION} and its
  * discussion in the JPA spec document. This is also the default being used
- * for the annotation-based {@link javax.persistence.PersistenceContext#type()}.
+ * for the annotation-based {@link jakarta.persistence.PersistenceContext#type()}.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Oliver Gierke
  * @author Mark Paluch
  * @since 2.0
- * @see javax.persistence.PersistenceContext
- * @see javax.persistence.PersistenceContextType#TRANSACTION
+ * @see jakarta.persistence.PersistenceContext
+ * @see jakarta.persistence.PersistenceContextType#TRANSACTION
  * @see org.springframework.orm.jpa.JpaTransactionManager
  * @see ExtendedEntityManagerCreator
  */
@@ -74,25 +72,22 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Map<Class<?>, Class<?>[]> cachedQueryInterfaces = new ConcurrentReferenceHashMap<>(4);
 
-	private static final Set<String> transactionRequiringMethods = new HashSet<>(8);
+	private static final Set<String> transactionRequiringMethods = Set.of(
+			"joinTransaction",
+			"flush",
+			"persist",
+			"merge",
+			"remove",
+			"refresh");
 
-	private static final Set<String> queryTerminatingMethods = new HashSet<>(8);
-
-	static {
-		transactionRequiringMethods.add("joinTransaction");
-		transactionRequiringMethods.add("flush");
-		transactionRequiringMethods.add("persist");
-		transactionRequiringMethods.add("merge");
-		transactionRequiringMethods.add("remove");
-		transactionRequiringMethods.add("refresh");
-
-		queryTerminatingMethods.add("execute");  // JPA 2.1 StoredProcedureQuery
-		queryTerminatingMethods.add("executeUpdate");
-		queryTerminatingMethods.add("getSingleResult");
-		queryTerminatingMethods.add("getResultStream");
-		queryTerminatingMethods.add("getResultList");
-		queryTerminatingMethods.add("list");  // Hibernate Query.list() method
-	}
+	private static final Set<String> queryTerminatingMethods = Set.of(
+			"execute",  // JPA 2.1 StoredProcedureQuery
+			"executeUpdate",
+			"getSingleResult",
+			"getResultStream",
+			"getResultList",
+			"list"  // Hibernate Query.list() method
+		);
 
 
 	/**
@@ -267,13 +262,14 @@ public abstract class SharedEntityManagerCreator {
 					this.targetFactory, this.properties, this.synchronizedWithTransaction);
 
 			switch (method.getName()) {
-				case "getTargetEntityManager":
+				case "getTargetEntityManager" -> {
 					// Handle EntityManagerProxy interface.
 					if (target == null) {
 						throw new IllegalStateException("No transactional EntityManager available");
 					}
 					return target;
-				case "unwrap":
+				}
+				case "unwrap" -> {
 					Class<?> targetClass = (Class<?>) args[0];
 					if (targetClass == null) {
 						return (target != null ? target : proxy);
@@ -282,8 +278,8 @@ public abstract class SharedEntityManagerCreator {
 					if (target == null) {
 						throw new IllegalStateException("No transactional EntityManager available");
 					}
-					// Still perform unwrap call on target EntityManager.
-					break;
+				}
+				// Still perform unwrap call on target EntityManager.
 			}
 
 			if (transactionRequiringMethods.contains(method.getName())) {
@@ -309,8 +305,7 @@ public abstract class SharedEntityManagerCreator {
 			// Invoke method on current EntityManager.
 			try {
 				Object result = method.invoke(target, args);
-				if (result instanceof Query) {
-					Query query = (Query) result;
+				if (result instanceof Query query) {
 					if (isNewEm) {
 						Class<?>[] ifcs = cachedQueryInterfaces.computeIfAbsent(query.getClass(), key ->
 								ClassUtils.getAllInterfacesForClass(key, this.proxyClassLoader));
@@ -420,8 +415,7 @@ public abstract class SharedEntityManagerCreator {
 				if (queryTerminatingMethods.contains(method.getName())) {
 					// Actual execution of the query: close the EntityManager right
 					// afterwards, since that was the only reason we kept it open.
-					if (this.outputParameters != null && this.target instanceof StoredProcedureQuery) {
-						StoredProcedureQuery storedProc = (StoredProcedureQuery) this.target;
+					if (this.outputParameters != null && this.target instanceof StoredProcedureQuery storedProc) {
 						for (Map.Entry<Object, Object> entry : this.outputParameters.entrySet()) {
 							try {
 								Object key = entry.getKey();

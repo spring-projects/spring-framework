@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -30,8 +32,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Ramnivas Laddad
  * @author Chris Beams
+ * @author Sam Brannen
  */
-public class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
+class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
+
+	private ClassPathXmlApplicationContext ctx;
 
 	private TestInterface testBean;
 
@@ -42,10 +47,9 @@ public class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 	private Counter counter;
 
 
-	@org.junit.jupiter.api.BeforeEach
-	public void setup() {
-		ClassPathXmlApplicationContext ctx =
-				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
+	@BeforeEach
+	void setup() {
+		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		testBean = (TestInterface) ctx.getBean("testBean");
 		testAnnotatedClassBean = (TestInterface) ctx.getBean("testAnnotatedClassBean");
 		testAnnotatedMethodBean = (TestInterface) ctx.getBean("testAnnotatedMethodBean");
@@ -53,85 +57,89 @@ public class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 		counter.reset();
 	}
 
+	@AfterEach
+	void tearDown() {
+		this.ctx.close();
+	}
+
 
 	@Test
-	public void thisAsClassDoesNotMatch() {
+	void thisAsClassDoesNotMatch() {
 		testBean.doIt();
 		assertThat(counter.thisAsClassCounter).isEqualTo(0);
 	}
 
 	@Test
-	public void thisAsInterfaceMatch() {
+	void thisAsInterfaceMatch() {
 		testBean.doIt();
 		assertThat(counter.thisAsInterfaceCounter).isEqualTo(1);
 	}
 
 	@Test
-	public void targetAsClassDoesMatch() {
+	void targetAsClassDoesMatch() {
 		testBean.doIt();
 		assertThat(counter.targetAsClassCounter).isEqualTo(1);
 	}
 
 	@Test
-	public void targetAsInterfaceMatch() {
+	void targetAsInterfaceMatch() {
 		testBean.doIt();
 		assertThat(counter.targetAsInterfaceCounter).isEqualTo(1);
 	}
 
 	@Test
-	public void thisAsClassAndTargetAsClassCounterNotMatch() {
+	void thisAsClassAndTargetAsClassCounterNotMatch() {
 		testBean.doIt();
 		assertThat(counter.thisAsClassAndTargetAsClassCounter).isEqualTo(0);
 	}
 
 	@Test
-	public void thisAsInterfaceAndTargetAsInterfaceCounterMatch() {
+	void thisAsInterfaceAndTargetAsInterfaceCounterMatch() {
 		testBean.doIt();
 		assertThat(counter.thisAsInterfaceAndTargetAsInterfaceCounter).isEqualTo(1);
 	}
 
 	@Test
-	public void thisAsInterfaceAndTargetAsClassCounterMatch() {
+	void thisAsInterfaceAndTargetAsClassCounterMatch() {
 		testBean.doIt();
 		assertThat(counter.thisAsInterfaceAndTargetAsInterfaceCounter).isEqualTo(1);
 	}
 
 
 	@Test
-	public void atTargetClassAnnotationMatch() {
+	void atTargetClassAnnotationMatch() {
 		testAnnotatedClassBean.doIt();
 		assertThat(counter.atTargetClassAnnotationCounter).isEqualTo(1);
 	}
 
 	@Test
-	public void atAnnotationMethodAnnotationMatch() {
+	void atAnnotationMethodAnnotationMatch() {
 		testAnnotatedMethodBean.doIt();
 		assertThat(counter.atAnnotationMethodAnnotationCounter).isEqualTo(1);
 	}
 
-	public static interface TestInterface {
+	interface TestInterface {
 		public void doIt();
 	}
 
-	public static class TestImpl implements TestInterface {
+	static class TestImpl implements TestInterface {
 		@Override
 		public void doIt() {
 		}
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface TestAnnotation {
-
+	@interface TestAnnotation {
 	}
 
 	@TestAnnotation
-	public static class AnnotatedClassTestImpl implements TestInterface {
+	static class AnnotatedClassTestImpl implements TestInterface {
 		@Override
 		public void doIt() {
 		}
 	}
 
-	public static class AnnotatedMethodTestImpl implements TestInterface {
+	static class AnnotatedMethodTestImpl implements TestInterface {
 		@Override
 		@TestAnnotation
 		public void doIt() {
@@ -139,7 +147,7 @@ public class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 	}
 
 	@Aspect
-	public static class Counter {
+	static class Counter {
 		int thisAsClassCounter;
 		int thisAsInterfaceCounter;
 		int targetAsClassCounter;
@@ -211,4 +219,5 @@ public class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 		}
 
 	}
+
 }

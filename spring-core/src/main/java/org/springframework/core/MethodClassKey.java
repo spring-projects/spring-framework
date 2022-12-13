@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,9 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof MethodClassKey)) {
+		if (!(other instanceof MethodClassKey otherKey)) {
 			return false;
 		}
-		MethodClassKey otherKey = (MethodClassKey) other;
 		return (this.method.equals(otherKey.method) &&
 				ObjectUtils.nullSafeEquals(this.targetClass, otherKey.targetClass));
 	}

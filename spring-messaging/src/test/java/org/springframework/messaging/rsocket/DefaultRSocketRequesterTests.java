@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,14 @@ import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.rsocket.Payload;
-import io.rsocket.RSocket;
 import io.rsocket.metadata.WellKnownMimeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.lang.Nullable;
 import org.springframework.messaging.rsocket.RSocketRequester.RequestSpec;
 import org.springframework.messaging.rsocket.RSocketRequester.RetrieveSpec;
 import org.springframework.util.MimeType;
@@ -122,7 +119,7 @@ public class DefaultRSocketRequesterTests {
 		assertThat(payloads).isNotNull();
 
 		if (Arrays.equals(new String[] {""}, expectedValues)) {
-			assertThat(payloads.size()).isEqualTo(1);
+			assertThat(payloads).hasSize(1);
 			assertThat(payloads.get(0).getMetadataUtf8()).isEqualTo("toA");
 			assertThat(payloads.get(0).getDataUtf8()).isEqualTo("");
 		}
@@ -244,75 +241,6 @@ public class DefaultRSocketRequesterTests {
 	private Payload toPayload(String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
 		return PayloadUtils.createPayload(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
-	}
-
-
-	private static class TestRSocket implements RSocket {
-
-		private Mono<Payload> payloadMonoToReturn = Mono.empty();
-		private Flux<Payload> payloadFluxToReturn = Flux.empty();
-
-		@Nullable private volatile String savedMethodName;
-		@Nullable private volatile Payload savedPayload;
-		@Nullable private volatile Flux<Payload> savedPayloadFlux;
-
-		void setPayloadMonoToReturn(Mono<Payload> payloadMonoToReturn) {
-			this.payloadMonoToReturn = payloadMonoToReturn;
-		}
-
-		void setPayloadFluxToReturn(Flux<Payload> payloadFluxToReturn) {
-			this.payloadFluxToReturn = payloadFluxToReturn;
-		}
-
-		@Nullable
-		String getSavedMethodName() {
-			return this.savedMethodName;
-		}
-
-		@Nullable
-		Payload getSavedPayload() {
-			return this.savedPayload;
-		}
-
-		@Nullable
-		Flux<Payload> getSavedPayloadFlux() {
-			return this.savedPayloadFlux;
-		}
-
-		public void reset() {
-			this.savedMethodName = null;
-			this.savedPayload = null;
-			this.savedPayloadFlux = null;
-		}
-
-
-		@Override
-		public Mono<Void> fireAndForget(Payload payload) {
-			this.savedMethodName = "fireAndForget";
-			this.savedPayload = payload;
-			return Mono.empty();
-		}
-
-		@Override
-		public Mono<Payload> requestResponse(Payload payload) {
-			this.savedMethodName = "requestResponse";
-			this.savedPayload = payload;
-			return this.payloadMonoToReturn;
-		}
-
-		@Override
-		public Flux<Payload> requestStream(Payload payload) {
-			this.savedMethodName = "requestStream";
-			this.savedPayload = payload;
-			return this.payloadFluxToReturn;
-		}
-
-		@Override
-		public Flux<Payload> requestChannel(Publisher<Payload> publisher) {
-			this.savedMethodName = "requestChannel";
-			this.savedPayloadFlux = Flux.from(publisher);
-			return this.payloadFluxToReturn;
-		}
 	}
 
 }

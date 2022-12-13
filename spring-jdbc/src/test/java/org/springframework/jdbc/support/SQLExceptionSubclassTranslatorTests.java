@@ -90,7 +90,7 @@ public class SQLExceptionSubclassTranslatorTests {
 		assertThat(rdaex2.getCause()).isEqualTo(recoverableEx);
 
 		// Test classic error code translation. We should move there next if the exception we pass in is not one
-		// of the new sub-classes.
+		// of the new subclasses.
 		SQLException sexEct = new SQLException("", "", 1);
 		BadSqlGrammarException bsgEct = (BadSqlGrammarException) sext.translate("task", "SQL-ECT", sexEct);
 		assertThat(bsgEct.getSql()).isEqualTo("SQL-ECT");

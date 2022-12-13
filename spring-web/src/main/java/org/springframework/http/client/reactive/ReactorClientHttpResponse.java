@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
+import reactor.netty.ChannelOperationsId;
 import reactor.netty.Connection;
 import reactor.netty.NettyInbound;
 import reactor.netty.http.client.HttpClientResponse;
@@ -34,12 +35,13 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
@@ -64,8 +66,6 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	// 0 - not subscribed, 1 - subscribed, 2 - cancelled via connector (before subscribe)
 	private final AtomicInteger state = new AtomicInteger();
 
-	private final String logPrefix;
-
 
 	/**
 	 * Constructor that matches the inputs from
@@ -78,7 +78,6 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		this.inbound = connection.inbound();
 		this.bufferFactory = new NettyDataBufferFactory(connection.outbound().alloc());
-		this.logPrefix = (logger.isDebugEnabled() ? "[" + connection.channel().id().asShortText() + "] " : "");
 	}
 
 	/**
@@ -92,9 +91,20 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 		this.headers = HttpHeaders.readOnlyHttpHeaders(adapter);
 		this.inbound = inbound;
 		this.bufferFactory = new NettyDataBufferFactory(alloc);
-		this.logPrefix = "";
 	}
 
+
+	@Override
+	public String getId() {
+		String id = null;
+		if (this.response instanceof ChannelOperationsId operationsId) {
+			id = (logger.isDebugEnabled() ? operationsId.asLongText() : operationsId.asShortText());
+		}
+		if (id == null && this.response instanceof Connection connection) {
+			id = connection.channel().id().asShortText();
+		}
+		return (id != null ? id : ObjectUtils.getIdentityHexString(this));
+	}
 
 	@Override
 	public Flux<DataBuffer> getBody() {
@@ -120,13 +130,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(getRawStatusCode());
-	}
-
-	@Override
-	public int getRawStatusCode() {
-		return this.response.status().code();
+	public HttpStatusCode getStatusCode() {
+		return HttpStatusCode.valueOf(this.response.status().code());
 	}
 
 	@Override
@@ -148,8 +153,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String getSameSite(Cookie cookie) {
-		if (cookie instanceof DefaultCookie) {
-			DefaultCookie defaultCookie = (DefaultCookie) cookie;
+		if (cookie instanceof DefaultCookie defaultCookie) {
 			if (defaultCookie.sameSite() != null) {
 				return defaultCookie.sameSite().name();
 			}
@@ -167,14 +171,14 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	void releaseAfterCancel(HttpMethod method) {
 		if (mayHaveBody(method) && this.state.compareAndSet(0, 2)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(this.logPrefix + "Releasing body, not yet subscribed.");
+				logger.debug("[" + getId() + "]" + "Releasing body, not yet subscribed.");
 			}
 			this.inbound.receive().doOnNext(byteBuf -> {}).subscribe(byteBuf -> {}, ex -> {});
 		}
 	}
 
 	private boolean mayHaveBody(HttpMethod method) {
-		int code = this.getRawStatusCode();
+		int code = getStatusCode().value();
 		return !((code >= 100 && code < 200) || code == 204 || code == 205 ||
 				method.equals(HttpMethod.HEAD) || getHeaders().getContentLength() == 0);
 	}
@@ -183,7 +187,7 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
 				"request=[" + this.response.method().name() + " " + this.response.uri() + "]," +
-				"status=" + getRawStatusCode() + '}';
+				"status=" + getStatusCode() + '}';
 	}
 
 }

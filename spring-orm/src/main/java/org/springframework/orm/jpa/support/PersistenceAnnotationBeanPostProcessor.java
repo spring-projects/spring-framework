@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,26 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.PersistenceProperty;
-import javax.persistence.PersistenceUnit;
-import javax.persistence.SynchronizationType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
+import jakarta.persistence.PersistenceProperty;
+import jakarta.persistence.PersistenceUnit;
+import jakarta.persistence.SynchronizationType;
 
+import org.springframework.aot.generate.GeneratedClass;
+import org.springframework.aot.generate.GeneratedMethod;
+import org.springframework.aot.generate.GeneratedMethods;
+import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
@@ -45,17 +52,24 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
+import org.springframework.beans.factory.annotation.InjectionMetadata.InjectedElement;
+import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
+import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
+import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.javapoet.CodeBlock;
+import org.springframework.javapoet.MethodSpec;
 import org.springframework.jndi.JndiLocatorDelegate;
 import org.springframework.jndi.JndiTemplate;
 import org.springframework.lang.Nullable;
@@ -66,15 +80,16 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * BeanPostProcessor that processes {@link javax.persistence.PersistenceUnit}
- * and {@link javax.persistence.PersistenceContext} annotations, for injection of
- * the corresponding JPA resources {@link javax.persistence.EntityManagerFactory}
- * and {@link javax.persistence.EntityManager}. Any such annotated fields or methods
+ * BeanPostProcessor that processes {@link jakarta.persistence.PersistenceUnit}
+ * and {@link jakarta.persistence.PersistenceContext} annotations, for injection of
+ * the corresponding JPA resources {@link jakarta.persistence.EntityManagerFactory}
+ * and {@link jakarta.persistence.EntityManager}. Any such annotated fields or methods
  * in any Spring-managed object will automatically be injected.
  *
  * <p>This post-processor will inject sub-interfaces of {@code EntityManagerFactory}
@@ -88,7 +103,7 @@ import org.springframework.util.StringUtils;
  * with the "unitName" attribute, or no attribute at all (for the default unit).
  * If those annotations are present with the "name" attribute at the class level,
  * they will simply be ignored, since those only serve as deployment hint
- * (as per the Java EE specification).
+ * (as per the Jakarta EE specification).
  *
  * <p>This post-processor can either obtain EntityManagerFactory beans defined
  * in the Spring application context (the default), or obtain EntityManagerFactory
@@ -106,9 +121,9 @@ import org.springframework.util.StringUtils;
  *
  * In the JNDI case, specify the corresponding JNDI names in this post-processor's
  * {@link #setPersistenceUnits "persistenceUnits" map}, typically with matching
- * {@code persistence-unit-ref} entries in the Java EE deployment descriptor.
+ * {@code persistence-unit-ref} entries in the Jakarta EE deployment descriptor.
  * By default, those names are considered as resource references (according to the
- * Java EE resource-ref convention), located underneath the "java:comp/env/" namespace.
+ * Jakarta EE resource-ref convention), located underneath the "java:comp/env/" namespace.
  * For example:
  *
  * <pre class="code">
@@ -123,18 +138,18 @@ import org.springframework.util.StringUtils;
  *
  * In this case, the specified persistence units will always be resolved in JNDI
  * rather than as Spring-defined beans. The entire persistence unit deployment,
- * including the weaving of persistent classes, is then up to the Java EE server.
+ * including the weaving of persistent classes, is then up to the Jakarta EE server.
  * Persistence contexts (i.e. EntityManager references) will be built based on
  * those server-provided EntityManagerFactory references, using Spring's own
  * transaction synchronization facilities for transactional EntityManager handling
  * (typically with Spring's {@code @Transactional} annotation for demarcation
  * and {@link org.springframework.transaction.jta.JtaTransactionManager} as backend).
  *
- * <p>If you prefer the Java EE server's own EntityManager handling, specify entries
+ * <p>If you prefer the Jakarta EE server's own EntityManager handling, specify entries
  * in this post-processor's {@link #setPersistenceContexts "persistenceContexts" map}
  * (or {@link #setExtendedPersistenceContexts "extendedPersistenceContexts" map},
  * typically with matching {@code persistence-context-ref} entries in the
- * Java EE deployment descriptor. For example:
+ * Jakarta EE deployment descriptor. For example:
  *
  * <pre class="code">
  * &lt;bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"&gt;
@@ -164,14 +179,16 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
+ * @author Phillip Webb
  * @since 2.0
- * @see javax.persistence.PersistenceUnit
- * @see javax.persistence.PersistenceContext
+ * @see jakarta.persistence.PersistenceUnit
+ * @see jakarta.persistence.PersistenceContext
  */
 @SuppressWarnings("serial")
-public class PersistenceAnnotationBeanPostProcessor
-		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
+public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwareBeanPostProcessor,
+		DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor, BeanRegistrationAotProcessor,
+		PriorityOrdered, BeanFactoryAware, Serializable {
 
 	@Nullable
 	private Object jndiEnvironment;
@@ -216,7 +233,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Set whether the lookup occurs in a Java EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a Jakarta EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. PersistenceAnnotationBeanPostProcessor's default is "true".
 	 * @see org.springframework.jndi.JndiLocatorSupport#setResourceRef
@@ -230,12 +247,12 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * as a Map from persistence unit name to persistence unit JNDI name
 	 * (which needs to resolve to an EntityManagerFactory instance).
 	 * <p>JNDI names specified here should refer to {@code persistence-unit-ref}
-	 * entries in the Java EE deployment descriptor, matching the target persistence unit.
+	 * entries in the Jakarta EE deployment descriptor, matching the target persistence unit.
 	 * <p>In case of no unit name specified in the annotation, the specified value
 	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
 	 * will be taken (by default, the value mapped to the empty String),
 	 * or simply the single persistence unit if there is only one.
-	 * <p>This is mainly intended for use in a Java EE environment, with all lookup
+	 * <p>This is mainly intended for use in a Jakarta EE environment, with all lookup
 	 * driven by the standard JPA annotations, and all EntityManagerFactory
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
 	 * definitions are necessary in such a scenario.
@@ -244,7 +261,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * EntityManagers built on top of the EntityManagerFactory defined here.
 	 * Note that those will be Spring-managed EntityManagers, which implement
 	 * transaction synchronization based on Spring's facilities.
-	 * If you prefer the Java EE server's own EntityManager handling,
+	 * If you prefer the Jakarta EE server's own EntityManager handling,
 	 * specify corresponding "persistenceContexts"/"extendedPersistenceContexts".
 	 */
 	public void setPersistenceUnits(Map<String, String> persistenceUnits) {
@@ -256,17 +273,17 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * as a Map from persistence unit name to persistence context JNDI name
 	 * (which needs to resolve to an EntityManager instance).
 	 * <p>JNDI names specified here should refer to {@code persistence-context-ref}
-	 * entries in the Java EE deployment descriptors, matching the target persistence unit
+	 * entries in the Jakarta EE deployment descriptors, matching the target persistence unit
 	 * and being set up with persistence context type {@code Transaction}.
 	 * <p>In case of no unit name specified in the annotation, the specified value
 	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
 	 * will be taken (by default, the value mapped to the empty String),
 	 * or simply the single persistence unit if there is only one.
-	 * <p>This is mainly intended for use in a Java EE environment, with all
+	 * <p>This is mainly intended for use in a Jakarta EE environment, with all
 	 * lookup driven by the standard JPA annotations, and all EntityManager
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
 	 * definitions are necessary in such a scenario, and all EntityManager
-	 * handling is done by the Java EE server itself.
+	 * handling is done by the Jakarta EE server itself.
 	 */
 	public void setPersistenceContexts(Map<String, String> persistenceContexts) {
 		this.persistenceContexts = persistenceContexts;
@@ -277,17 +294,17 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * as a Map from persistence unit name to persistence context JNDI name
 	 * (which needs to resolve to an EntityManager instance).
 	 * <p>JNDI names specified here should refer to {@code persistence-context-ref}
-	 * entries in the Java EE deployment descriptors, matching the target persistence unit
+	 * entries in the Jakarta EE deployment descriptors, matching the target persistence unit
 	 * and being set up with persistence context type {@code Extended}.
 	 * <p>In case of no unit name specified in the annotation, the specified value
 	 * for the {@link #setDefaultPersistenceUnitName default persistence unit}
 	 * will be taken (by default, the value mapped to the empty String),
 	 * or simply the single persistence unit if there is only one.
-	 * <p>This is mainly intended for use in a Java EE environment, with all
+	 * <p>This is mainly intended for use in a Jakarta EE environment, with all
 	 * lookup driven by the standard JPA annotations, and all EntityManager
 	 * references obtained from JNDI. No separate EntityManagerFactory bean
 	 * definitions are necessary in such a scenario, and all EntityManager
-	 * handling is done by the Java EE server itself.
+	 * handling is done by the Jakarta EE server itself.
 	 */
 	public void setExtendedPersistenceContexts(Map<String, String> extendedPersistenceContexts) {
 		this.extendedPersistenceContexts = extendedPersistenceContexts;
@@ -324,16 +341,34 @@ public class PersistenceAnnotationBeanPostProcessor
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ListableBeanFactory) {
-			this.beanFactory = (ListableBeanFactory) beanFactory;
+		if (beanFactory instanceof ListableBeanFactory lbf) {
+			this.beanFactory = lbf;
 		}
 	}
 
 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		findInjectionMetadata(beanDefinition, beanType, beanName);
+	}
+
+	@Override
+	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		Class<?> beanClass = registeredBean.getBeanClass();
+		String beanName = registeredBean.getBeanName();
+		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
+		InjectionMetadata metadata = findInjectionMetadata(beanDefinition, beanClass, beanName);
+		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
+		if (!CollectionUtils.isEmpty(injectedElements)) {
+			return new AotContribution(beanClass, injectedElements);
+		}
+		return null;
+	}
+
+	private InjectionMetadata findInjectionMetadata(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		InjectionMetadata metadata = findPersistenceMetadata(beanName, beanType, null);
 		metadata.checkConfigMembers(beanDefinition);
+		return metadata;
 	}
 
 	@Override
@@ -353,14 +388,6 @@ public class PersistenceAnnotationBeanPostProcessor
 		return pvs;
 	}
 
-	@Deprecated
-	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
-		return postProcessProperties(pvs, bean, beanName);
-	}
-
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		EntityManager emToClose = this.extendedEntityManagersToClose.remove(bean);
@@ -373,7 +400,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 
-	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz, @Nullable PropertyValues pvs) {
+	private InjectionMetadata findPersistenceMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
 		// Quick check on the concurrent map first, with minimal locking.
@@ -393,7 +420,7 @@ public class PersistenceAnnotationBeanPostProcessor
 		return metadata;
 	}
 
-	private InjectionMetadata buildPersistenceMetadata(final Class<?> clazz) {
+	private InjectionMetadata buildPersistenceMetadata(Class<?> clazz) {
 		if (!AnnotationUtils.isCandidateClass(clazz, Arrays.asList(PersistenceContext.class, PersistenceUnit.class))) {
 			return InjectionMetadata.EMPTY;
 		}
@@ -543,8 +570,8 @@ public class PersistenceAnnotationBeanPostProcessor
 		Assert.state(this.beanFactory != null, "ListableBeanFactory required for EntityManagerFactory bean lookup");
 
 		EntityManagerFactory emf = EntityManagerFactoryUtils.findEntityManagerFactory(this.beanFactory, unitName);
-		if (requestingBeanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
-			((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
+		if (requestingBeanName != null && this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+			cbf.registerDependentBean(unitName, requestingBeanName);
 		}
 		return emf;
 	}
@@ -559,9 +586,8 @@ public class PersistenceAnnotationBeanPostProcessor
 
 		Assert.state(this.beanFactory != null, "ListableBeanFactory required for EntityManagerFactory bean lookup");
 
-		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
 			// Fancy variant with dependency registration
-			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) this.beanFactory;
 			NamedBeanHolder<EntityManagerFactory> emfHolder = clbf.resolveNamedBean(EntityManagerFactory.class);
 			if (requestingBeanName != null) {
 				clbf.registerDependentBean(emfHolder.getBeanName(), requestingBeanName);
@@ -596,11 +622,11 @@ public class PersistenceAnnotationBeanPostProcessor
 
 		public <T> T lookup(String jndiName, Class<T> requiredType) throws Exception {
 			JndiLocatorDelegate locator = new JndiLocatorDelegate();
-			if (jndiEnvironment instanceof JndiTemplate) {
-				locator.setJndiTemplate((JndiTemplate) jndiEnvironment);
+			if (jndiEnvironment instanceof JndiTemplate jndiTemplate) {
+				locator.setJndiTemplate(jndiTemplate);
 			}
-			else if (jndiEnvironment instanceof Properties) {
-				locator.setJndiEnvironment((Properties) jndiEnvironment);
+			else if (jndiEnvironment instanceof Properties properties) {
+				locator.setJndiEnvironment(properties);
 			}
 			else if (jndiEnvironment != null) {
 				throw new IllegalStateException("Illegal 'jndiEnvironment' type: " + jndiEnvironment.getClass());
@@ -696,8 +722,7 @@ public class PersistenceAnnotationBeanPostProcessor
 					emf = findEntityManagerFactory(this.unitName, requestingBeanName);
 				}
 				// Inject a shared transactional EntityManager proxy.
-				if (emf instanceof EntityManagerFactoryInfo &&
-						((EntityManagerFactoryInfo) emf).getEntityManagerInterface() != null) {
+				if (emf instanceof EntityManagerFactoryInfo emfInfo && emfInfo.getEntityManagerInterface() != null) {
 					// Create EntityManager based on the info's vendor-specific type
 					// (which might be more specific than the field's type).
 					em = SharedEntityManagerCreator.createSharedEntityManager(
@@ -727,11 +752,108 @@ public class PersistenceAnnotationBeanPostProcessor
 				em = ExtendedEntityManagerCreator.createContainerManagedEntityManager(
 						emf, this.properties, this.synchronizedWithTransaction);
 			}
-			if (em instanceof EntityManagerProxy && beanFactory != null && requestingBeanName != null &&
+			if (em instanceof EntityManagerProxy emp && beanFactory != null && requestingBeanName != null &&
 					beanFactory.containsBean(requestingBeanName) && !beanFactory.isPrototype(requestingBeanName)) {
-				extendedEntityManagersToClose.put(target, ((EntityManagerProxy) em).getTargetEntityManager());
+				extendedEntityManagersToClose.put(target, emp.getTargetEntityManager());
 			}
 			return em;
+		}
+	}
+
+
+	private static class AotContribution implements BeanRegistrationAotContribution {
+
+		private static final String REGISTERED_BEAN_PARAMETER = "registeredBean";
+
+		private static final String INSTANCE_PARAMETER = "instance";
+
+		private final Class<?> target;
+
+		private final Collection<InjectedElement> injectedElements;
+
+		AotContribution(Class<?> target, Collection<InjectedElement> injectedElements) {
+			this.target = target;
+			this.injectedElements = injectedElements;
+		}
+
+		@Override
+		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
+			GeneratedClass generatedClass = generationContext.getGeneratedClasses()
+					.addForFeatureComponent("PersistenceInjection", this.target, type -> {
+						type.addJavadoc("Persistence injection for {@link $T}.", this.target);
+						type.addModifiers(javax.lang.model.element.Modifier.PUBLIC);
+					});
+			GeneratedMethod generatedMethod = generatedClass.getMethods().add("apply", method -> {
+				method.addJavadoc("Apply the persistence injection.");
+				method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+						javax.lang.model.element.Modifier.STATIC);
+				method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+				method.addParameter(this.target, INSTANCE_PARAMETER);
+				method.returns(this.target);
+				method.addCode(generateMethodCode(generationContext.getRuntimeHints(), generatedClass));
+			});
+			beanRegistrationCode.addInstancePostProcessor(generatedMethod.toMethodReference());
+		}
+
+		private CodeBlock generateMethodCode(RuntimeHints hints, GeneratedClass generatedClass) {
+			CodeBlock.Builder code = CodeBlock.builder();
+			InjectionCodeGenerator injectionCodeGenerator =
+					new InjectionCodeGenerator(generatedClass.getName(), hints);
+			for (InjectedElement injectedElement : this.injectedElements) {
+				CodeBlock resourceToInject = generateResourceToInjectCode(generatedClass.getMethods(),
+						(PersistenceElement) injectedElement);
+				code.add(injectionCodeGenerator.generateInjectionCode(
+						injectedElement.getMember(), INSTANCE_PARAMETER,
+						resourceToInject));
+			}
+			code.addStatement("return $L", INSTANCE_PARAMETER);
+			return code.build();
+		}
+
+		private CodeBlock generateResourceToInjectCode(
+				GeneratedMethods generatedMethods, PersistenceElement injectedElement) {
+
+			String unitName = injectedElement.unitName;
+			boolean requireEntityManager = (injectedElement.type != null);
+			if (!requireEntityManager) {
+				return CodeBlock.of(
+						"$T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
+						EntityManagerFactoryUtils.class, ListableBeanFactory.class,
+						REGISTERED_BEAN_PARAMETER, unitName);
+			}
+			String[] methodNameParts = {"get", unitName, "EntityManager"};
+			GeneratedMethod generatedMethod = generatedMethods.add(methodNameParts, method ->
+					generateGetEntityManagerMethod(method, injectedElement));
+			return CodeBlock.of("$L($L)", generatedMethod.getName(), REGISTERED_BEAN_PARAMETER);
+		}
+
+		private void generateGetEntityManagerMethod(MethodSpec.Builder method, PersistenceElement injectedElement) {
+			String unitName = injectedElement.unitName;
+			Properties properties = injectedElement.properties;
+			method.addJavadoc("Get the '$L' {@link $T}",
+					(StringUtils.hasLength(unitName)) ? unitName : "default",
+					EntityManager.class);
+			method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,
+					javax.lang.model.element.Modifier.STATIC);
+			method.returns(EntityManager.class);
+			method.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);
+			method.addStatement(
+					"$T entityManagerFactory = $T.findEntityManagerFactory(($T) $L.getBeanFactory(), $S)",
+					EntityManagerFactory.class, EntityManagerFactoryUtils.class,
+					ListableBeanFactory.class, REGISTERED_BEAN_PARAMETER, unitName);
+			boolean hasProperties = !CollectionUtils.isEmpty(properties);
+			if (hasProperties) {
+				method.addStatement("$T properties = new Properties()",
+						Properties.class);
+				for (String propertyName : new TreeSet<>(properties.stringPropertyNames())) {
+					method.addStatement("properties.put($S, $S)", propertyName, properties.getProperty(propertyName));
+				}
+			}
+			method.addStatement(
+					"return $T.createSharedEntityManager(entityManagerFactory, $L, $L)",
+					SharedEntityManagerCreator.class,
+					(hasProperties) ? "properties" : null,
+					injectedElement.synchronizedWithTransaction);
 		}
 	}
 

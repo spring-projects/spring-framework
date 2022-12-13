@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,16 +66,6 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	 */
 	public WebSocketHttpHeaders(HttpHeaders headers) {
 		this.headers = headers;
-	}
-
-	/**
-	 * Returns {@code WebSocketHttpHeaders} object that can only be read, not written to.
-	 * @deprecated as of 5.1.16, in favor of calling {@link #WebSocketHttpHeaders(HttpHeaders)}
-	 * with a read-only wrapper from {@link HttpHeaders#readOnlyHttpHeaders(HttpHeaders)}
-	 */
-	@Deprecated
-	public static WebSocketHttpHeaders readOnlyWebSocketHttpHeaders(WebSocketHttpHeaders headers) {
-		return new WebSocketHttpHeaders(HttpHeaders.readOnlyHttpHeaders(headers));
 	}
 
 
@@ -311,10 +301,9 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof WebSocketHttpHeaders)) {
+		if (!(other instanceof WebSocketHttpHeaders otherHeaders)) {
 			return false;
 		}
-		WebSocketHttpHeaders otherHeaders = (WebSocketHttpHeaders) other;
 		return this.headers.equals(otherHeaders.headers);
 	}
 

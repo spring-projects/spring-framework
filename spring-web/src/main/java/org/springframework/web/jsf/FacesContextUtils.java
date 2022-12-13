@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.jsf;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -55,16 +55,16 @@ public abstract class FacesContextUtils {
 		if (attr == null) {
 			return null;
 		}
-		if (attr instanceof RuntimeException) {
-			throw (RuntimeException) attr;
+		if (attr instanceof RuntimeException runtimeException) {
+			throw runtimeException;
 		}
-		if (attr instanceof Error) {
-			throw (Error) attr;
+		if (attr instanceof Error error) {
+			throw error;
 		}
-		if (!(attr instanceof WebApplicationContext)) {
+		if (!(attr instanceof WebApplicationContext wac)) {
 			throw new IllegalStateException("Root context attribute is not of type WebApplicationContext: " + attr);
 		}
-		return (WebApplicationContext) attr;
+		return wac;
 	}
 
 	/**

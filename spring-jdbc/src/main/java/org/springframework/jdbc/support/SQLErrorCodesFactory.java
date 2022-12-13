@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,14 +68,20 @@ public class SQLErrorCodesFactory {
 
 	/**
 	 * Keep track of a single instance so we can return it to classes that request it.
+	 * Lazily initialized in order to avoid making {@code SQLErrorCodesFactory} constructor
+	 * reachable on native images when not needed.
 	 */
-	private static final SQLErrorCodesFactory instance = new SQLErrorCodesFactory();
+	@Nullable
+	private static SQLErrorCodesFactory instance;
 
 
 	/**
 	 * Return the singleton instance.
 	 */
 	public static SQLErrorCodesFactory getInstance() {
+		if (instance == null) {
+			instance = new SQLErrorCodesFactory();
+		}
 		return instance;
 	}
 
@@ -101,6 +107,7 @@ public class SQLErrorCodesFactory {
 	 * @see #loadResource(String)
 	 */
 	protected SQLErrorCodesFactory() {
+
 		Map<String, SQLErrorCodes> errorCodes;
 
 		try {

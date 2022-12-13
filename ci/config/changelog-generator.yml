@@ -4,7 +4,7 @@ changelog:
     - title: ":star: New Features"
       labels:
         - "type: enhancement"
-    - title: ":beetle: Bug Fixes"
+    - title: ":lady_beetle: Bug Fixes"
       labels:
         - "type: bug"
         - "type: regression"
@@ -15,3 +15,6 @@ changelog:
       sort: "title"
       labels:
         - "type: dependency-upgrade"
+  contributors:
+    exclude:
+      names: ["bclozel", "jhoeller", "poutsma", "rstoyanchev", "sbrannen", "sdeleuze", "snicoll"]

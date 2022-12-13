@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,8 +268,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the single mapped object (may be {@code null} if the given
 	 * {@link RowMapper} returned {@code} null)
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
 	@Nullable
@@ -287,8 +286,7 @@ public interface NamedParameterJdbcOperations {
 	 * @return the single mapped object (may be {@code null} if the given
 	 * {@link RowMapper} returned {@code} null)
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
+	 * if the query does not return exactly one row
 	 * @throws DataAccessException if the query fails
 	 */
 	@Nullable
@@ -305,10 +303,12 @@ public interface NamedParameterJdbcOperations {
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
+	 * if the query does not return exactly one row
+	 * @throws org.springframework.jdbc.IncorrectResultSetColumnCountException
+	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
+	 * @see org.springframework.jdbc.core.SingleColumnRowMapper
 	 */
 	@Nullable
 	<T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
@@ -325,8 +325,9 @@ public interface NamedParameterJdbcOperations {
 	 * @param requiredType the type that the result object is expected to match
 	 * @return the result object of the required type, or {@code null} in case of SQL NULL
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
-	 * if the query does not return exactly one row, or does not return exactly
-	 * one column in that row
+	 * if the query does not return exactly one row
+	 * @throws org.springframework.jdbc.IncorrectResultSetColumnCountException
+	 * if the query does not return a row containing a single column
 	 * @throws DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForObject(String, Class)
 	 */

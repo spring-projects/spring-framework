@@ -20,9 +20,8 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.NotNull;
-
 import org.springframework.core.metrics.StartupStep;
+import org.springframework.lang.NonNull;
 
 /**
  * {@link StartupStep} implementation for the Java Flight Recorder.
@@ -115,7 +114,7 @@ class FlightRecorderStartupStep implements StartupStep {
 			add(key, value.get());
 		}
 
-		@NotNull
+		@NonNull
 		@Override
 		public Iterator<Tag> iterator() {
 			return new TagsIterator();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,17 +132,17 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private static final int STEP_REFERENCE_PCUT_BINDING = 7;
 	private static final int STEP_FINISHED = 8;
 
-	private static final Set<String> singleValuedAnnotationPcds = new HashSet<>();
+	private static final Set<String> singleValuedAnnotationPcds = Set.of(
+			"@this",
+			"@target",
+			"@within",
+			"@withincode",
+			"@annotation");
+
 	private static final Set<String> nonReferencePointcutTokens = new HashSet<>();
 
 
 	static {
-		singleValuedAnnotationPcds.add("@this");
-		singleValuedAnnotationPcds.add("@target");
-		singleValuedAnnotationPcds.add("@within");
-		singleValuedAnnotationPcds.add("@withincode");
-		singleValuedAnnotationPcds.add("@annotation");
-
 		Set<PointcutPrimitive> pointcutPrimitives = PointcutParser.getAllSupportedPointcutPrimitives();
 		for (PointcutPrimitive primitive : pointcutPrimitives) {
 			nonReferencePointcutTokens.add(primitive.getName());
@@ -158,7 +158,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 	/** The pointcut expression associated with the advice, as a simple String. */
 	@Nullable
-	private String pointcutExpression;
+	private final String pointcutExpression;
 
 	private boolean raiseExceptions;
 
@@ -486,7 +486,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 		String[] tokens = StringUtils.tokenizeToStringArray(argsSpec, ",");
 		for (int i = 0; i < tokens.length; i++) {
-			tokens[i] = StringUtils.trimWhitespace(tokens[i]);
+			tokens[i] = tokens[i].strip();
 			String varName = maybeExtractVariableName(tokens[i]);
 			if (varName != null) {
 				varNames.add(varName);
@@ -625,7 +625,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			StringBuilder sb = new StringBuilder();
 			if (bodyStart >= 0 && bodyStart != (currentToken.length() - 1)) {
 				sb.append(currentToken.substring(bodyStart + 1));
-				sb.append(" ");
+				sb.append(' ');
 			}
 			numTokensConsumed++;
 			int currentIndex = startIndex + numTokensConsumed;
@@ -645,7 +645,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 					toAppend = toAppend.substring(1);
 				}
 				sb.append(toAppend);
-				sb.append(" ");
+				sb.append(' ');
 				currentIndex++;
 				numTokensConsumed++;
 			}
@@ -759,10 +759,10 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 */
 	private static class PointcutBody {
 
-		private int numTokensConsumed;
+		private final int numTokensConsumed;
 
 		@Nullable
-		private String text;
+		private final String text;
 
 		public PointcutBody(int tokens, @Nullable String text) {
 			this.numTokensConsumed = tokens;

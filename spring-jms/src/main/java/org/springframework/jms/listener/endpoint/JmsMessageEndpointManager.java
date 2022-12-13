@@ -16,8 +16,8 @@
 
 package org.springframework.jms.listener.endpoint;
 
-import javax.jms.MessageListener;
-import javax.resource.ResourceException;
+import jakarta.jms.MessageListener;
+import jakarta.resource.ResourceException;
 
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.jca.endpoint.GenericMessageEndpointManager;
@@ -37,15 +37,15 @@ import org.springframework.lang.Nullable;
  * object for activating the endpoint.
  *
  * <p><b>NOTE:</b> This JCA-based endpoint manager supports standard JMS
- * {@link javax.jms.MessageListener} endpoints only. It does <i>not</i> support
+ * {@link jakarta.jms.MessageListener} endpoints only. It does <i>not</i> support
  * Spring's {@link org.springframework.jms.listener.SessionAwareMessageListener}
  * variant, simply because the JCA endpoint management contract does not allow
- * for obtaining the current JMS {@link javax.jms.Session}.
+ * for obtaining the current JMS {@link jakarta.jms.Session}.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 2.5
- * @see javax.jms.MessageListener
+ * @see jakarta.jms.MessageListener
  * @see #setActivationSpecConfig
  * @see JmsActivationSpecConfig
  * @see JmsActivationSpecFactory
@@ -86,7 +86,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * invocations, enlisting the endpoint resource in each such transaction.
 	 * <p>The passed-in object may be a transaction manager which implements
 	 * Spring's {@link org.springframework.transaction.jta.TransactionFactory}
-	 * interface, or a plain {@link javax.transaction.TransactionManager}.
+	 * interface, or a plain {@link jakarta.transaction.TransactionManager}.
 	 * <p>If no transaction manager is specified, the endpoint invocation
 	 * will simply not be wrapped in an XA transaction. Consult your
 	 * resource provider's ActivationSpec documentation for the local
@@ -104,7 +104,7 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	 * {@link #setActivationSpecConfig JmsActivationSpecConfig} objects.
 	 * <p>This factory is dependent on the concrete JMS provider, e.g. on ActiveMQ.
 	 * The default implementation simply guesses the ActivationSpec class name
-	 * from the provider's class name (e.g. "ActiveMQResourceAdapter" ->
+	 * from the provider's class name (e.g. "ActiveMQResourceAdapter" &rarr;
 	 * "ActiveMQActivationSpec" in the same package), and populates the
 	 * ActivationSpec properties as suggested by the JCA 1.5 specification
 	 * (plus a couple of autodetected vendor-specific properties).

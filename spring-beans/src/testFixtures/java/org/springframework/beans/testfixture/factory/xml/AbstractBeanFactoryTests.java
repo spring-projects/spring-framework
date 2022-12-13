@@ -261,11 +261,9 @@ public abstract class AbstractBeanFactoryTests {
 	@Test
 	public void aliasing() {
 		BeanFactory bf = getBeanFactory();
-		if (!(bf instanceof ConfigurableBeanFactory)) {
+		if (!(bf instanceof ConfigurableBeanFactory cbf)) {
 			return;
 		}
-		ConfigurableBeanFactory cbf = (ConfigurableBeanFactory) bf;
-
 		String alias = "rods alias";
 
 		assertThatExceptionOfType(NoSuchBeanDefinitionException.class).isThrownBy(() ->

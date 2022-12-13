@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.lang.Nullable;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.test.util.ExceptionCollector;
 import org.springframework.test.util.JsonExpectationsHelper;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.util.Assert;
@@ -63,6 +64,8 @@ import org.springframework.web.util.UriBuilderFactory;
  * Default implementation of {@link WebTestClient}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
+ * @author Michał Rowicki
  * @since 5.0
  */
 class DefaultWebTestClient implements WebTestClient {
@@ -79,6 +82,8 @@ class DefaultWebTestClient implements WebTestClient {
 	@Nullable
 	private final MultiValueMap<String, String> defaultCookies;
 
+	private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
+
 	private final Duration responseTimeout;
 
 	private final DefaultWebTestClientBuilder builder;
@@ -89,6 +94,7 @@ class DefaultWebTestClient implements WebTestClient {
 	DefaultWebTestClient(ClientHttpConnector connector,
 			Function<ClientHttpConnector, ExchangeFunction> exchangeFactory, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders headers, @Nullable MultiValueMap<String, String> cookies,
+			Consumer<EntityExchangeResult<?>> entityResultConsumer,
 			@Nullable Duration responseTimeout, DefaultWebTestClientBuilder clientBuilder) {
 
 		this.wiretapConnector = new WiretapConnector(connector);
@@ -96,6 +102,7 @@ class DefaultWebTestClient implements WebTestClient {
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = headers;
 		this.defaultCookies = cookies;
+		this.entityResultConsumer = entityResultConsumer;
 		this.responseTimeout = (responseTimeout != null ? responseTimeout : Duration.ofSeconds(5));
 		this.builder = clientBuilder;
 	}
@@ -357,7 +364,8 @@ class DefaultWebTestClient implements WebTestClient {
 			ExchangeResult result = wiretapConnector.getExchangeResult(
 					this.requestId, this.uriTemplate, getResponseTimeout());
 
-			return new DefaultResponseSpec(result, response, getResponseTimeout());
+			return new DefaultResponseSpec(result, response,
+					DefaultWebTestClient.this.entityResultConsumer, getResponseTimeout());
 		}
 
 		private ClientRequest.Builder initRequestBuilder() {
@@ -408,12 +416,19 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private final ClientResponse response;
 
+		private final Consumer<EntityExchangeResult<?>> entityResultConsumer;
+
 		private final Duration timeout;
 
 
-		DefaultResponseSpec(ExchangeResult exchangeResult, ClientResponse response, Duration timeout) {
+		DefaultResponseSpec(
+				ExchangeResult exchangeResult, ClientResponse response,
+				Consumer<EntityExchangeResult<?>> entityResultConsumer,
+				Duration timeout) {
+
 			this.exchangeResult = exchangeResult;
 			this.response = response;
+			this.entityResultConsumer = entityResultConsumer;
 			this.timeout = timeout;
 		}
 
@@ -435,14 +450,14 @@ class DefaultWebTestClient implements WebTestClient {
 		@Override
 		public <B> BodySpec<B, ?> expectBody(Class<B> bodyType) {
 			B body = this.response.bodyToMono(bodyType).block(this.timeout);
-			EntityExchangeResult<B> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
+			EntityExchangeResult<B> entityResult = initEntityExchangeResult(body);
 			return new DefaultBodySpec<>(entityResult);
 		}
 
 		@Override
 		public <B> BodySpec<B, ?> expectBody(ParameterizedTypeReference<B> bodyType) {
 			B body = this.response.bodyToMono(bodyType).block(this.timeout);
-			EntityExchangeResult<B> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
+			EntityExchangeResult<B> entityResult = initEntityExchangeResult(body);
 			return new DefaultBodySpec<>(entityResult);
 		}
 
@@ -459,7 +474,7 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private <E> ListBodySpec<E> getListBodySpec(Flux<E> flux) {
 			List<E> body = flux.collectList().block(this.timeout);
-			EntityExchangeResult<List<E>> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
+			EntityExchangeResult<List<E>> entityResult = initEntityExchangeResult(body);
 			return new DefaultListBodySpec<>(entityResult);
 		}
 
@@ -467,8 +482,14 @@ class DefaultWebTestClient implements WebTestClient {
 		public BodyContentSpec expectBody() {
 			ByteArrayResource resource = this.response.bodyToMono(ByteArrayResource.class).block(this.timeout);
 			byte[] body = (resource != null ? resource.getByteArray() : null);
-			EntityExchangeResult<byte[]> entityResult = new EntityExchangeResult<>(this.exchangeResult, body);
+			EntityExchangeResult<byte[]> entityResult = initEntityExchangeResult(body);
 			return new DefaultBodyContentSpec(entityResult);
+		}
+
+		private  <B> EntityExchangeResult<B> initEntityExchangeResult(@Nullable B body) {
+			EntityExchangeResult<B> result = new EntityExchangeResult<>(this.exchangeResult, body);
+			result.assertWithDiagnostics(() -> this.entityResultConsumer.accept(result));
+			return result;
 		}
 
 		@Override
@@ -488,6 +509,30 @@ class DefaultWebTestClient implements WebTestClient {
 		public <T> FluxExchangeResult<T> returnResult(ParameterizedTypeReference<T> elementTypeRef) {
 			Flux<T> body = this.response.bodyToFlux(elementTypeRef);
 			return new FluxExchangeResult<>(this.exchangeResult, body);
+		}
+
+		@Override
+		public ResponseSpec expectAll(ResponseSpecConsumer... consumers) {
+			ExceptionCollector exceptionCollector = new ExceptionCollector();
+			for (ResponseSpecConsumer consumer : consumers) {
+				exceptionCollector.execute(() -> consumer.accept(this));
+			}
+			try {
+				exceptionCollector.assertEmpty();
+			}
+			catch (RuntimeException ex) {
+				throw ex;
+			}
+			catch (Exception ex) {
+				// In theory, a ResponseSpecConsumer should never throw an Exception
+				// that is not a RuntimeException, but since ExceptionCollector may
+				// throw a checked Exception, we handle this to appease the compiler
+				// and in case someone uses a "sneaky throws" technique.
+				AssertionError assertionError = new AssertionError(ex.getMessage());
+				assertionError.initCause(ex);
+				throw assertionError;
+			}
+			return this;
 		}
 	}
 
@@ -614,10 +659,10 @@ class DefaultWebTestClient implements WebTestClient {
 		}
 
 		@Override
-		public BodyContentSpec json(String json) {
+		public BodyContentSpec json(String json, boolean strict) {
 			this.result.assertWithDiagnostics(() -> {
 				try {
-					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString());
+					new JsonExpectationsHelper().assertJsonEqual(json, getBodyAsString(), strict);
 				}
 				catch (Exception ex) {
 					throw new AssertionError("JSON parsing error", ex);
