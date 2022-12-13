@@ -53,8 +53,8 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * for global exception handling in an application. Subclasses can override
  * individual methods that handle a specific exception, override
  * {@link #handleExceptionInternal} to override common handling of all exceptions,
- * or {@link #createResponseEntity} to intercept the final step of creating the
- * {@link ResponseEntity} from the selected HTTP status code, headers, and body.
+ * or override {@link #createResponseEntity} to intercept the final step of creating
+ * the {@link ResponseEntity} from the selected HTTP status code, headers, and body.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
