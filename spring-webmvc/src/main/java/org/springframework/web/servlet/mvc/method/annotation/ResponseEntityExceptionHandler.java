@@ -96,6 +96,10 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		this.messageSource = messageSource;
 	}
 
+	/**
+	 * Get the {@link MessageSource} that this exception handler uses.
+	 * @since 6.0.3
+	 */
 	@Nullable
 	protected MessageSource getMessageSource() {
 		return this.messageSource;
