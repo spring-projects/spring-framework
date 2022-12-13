@@ -67,6 +67,15 @@ class RepeatableContainersTests {
 				StandardRepeatablesTestCase.class, StandardContainer.class);
 			assertThat(values).containsExactly("a", "b");
 		}
+
+		@Test
+		void standardRepeatablesWithContainerWithMultipleAttributes() {
+			Object[] values = findRepeatedAnnotationValues(RepeatableContainers.standardRepeatables(),
+				StandardRepeatablesWithContainerWithMultipleAttributesTestCase.class,
+				StandardContainerWithMultipleAttributes.class);
+			assertThat(values).containsExactly("a", "b");
+		}
+
 	}
 
 	@Nested
@@ -245,6 +254,26 @@ class RepeatableContainersTests {
 	@StandardRepeatable("a")
 	@StandardRepeatable("b")
 	static class StandardRepeatablesTestCase {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface StandardContainerWithMultipleAttributes {
+
+		StandardRepeatableWithContainerWithMultipleAttributes[] value();
+
+		String name() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Repeatable(StandardContainerWithMultipleAttributes.class)
+	@interface StandardRepeatableWithContainerWithMultipleAttributes {
+
+		String value() default "";
+	}
+
+	@StandardRepeatableWithContainerWithMultipleAttributes("a")
+	@StandardRepeatableWithContainerWithMultipleAttributes("b")
+	static class StandardRepeatablesWithContainerWithMultipleAttributesTestCase {
 	}
 
 	@ExplicitContainer({ @ExplicitRepeatable("a"), @ExplicitRepeatable("b") })

@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -77,6 +78,7 @@ import static org.springframework.core.annotation.AnnotationUtilsTests.asArray;
  * @see AnnotationUtilsTests
  * @see MultipleComposedAnnotationsOnSingleAnnotatedElementTests
  * @see ComposedRepeatableAnnotationsTests
+ * @see NestedRepeatableAnnotationsTests
  */
 class AnnotatedElementUtilsTests {
 
@@ -908,6 +910,31 @@ class AnnotatedElementUtilsTests {
 		assertThat(annotation.value()).containsExactly("FromValueAttributeMeta");
 	}
 
+	/**
+	 * @since 5.3.25
+	 */
+	@Test // gh-29685
+	void getMergedRepeatableAnnotationsWithContainerWithMultipleAttributes() {
+		Set<StandardRepeatableWithContainerWithMultipleAttributes> repeatableAnnotations =
+				AnnotatedElementUtils.getMergedRepeatableAnnotations(
+						StandardRepeatablesWithContainerWithMultipleAttributesTestCase.class,
+						StandardRepeatableWithContainerWithMultipleAttributes.class);
+		assertThat(repeatableAnnotations).map(StandardRepeatableWithContainerWithMultipleAttributes::value)
+				.containsExactly("a", "b");
+	}
+
+	/**
+	 * @since 5.3.25
+	 */
+	@Test // gh-29685
+	void findMergedRepeatableAnnotationsWithContainerWithMultipleAttributes() {
+		Set<StandardRepeatableWithContainerWithMultipleAttributes> repeatableAnnotations =
+				AnnotatedElementUtils.findMergedRepeatableAnnotations(
+						StandardRepeatablesWithContainerWithMultipleAttributesTestCase.class,
+						StandardRepeatableWithContainerWithMultipleAttributes.class);
+		assertThat(repeatableAnnotations).map(StandardRepeatableWithContainerWithMultipleAttributes::value)
+				.containsExactly("a", "b");
+	}
 
 	// -------------------------------------------------------------------------
 
@@ -1565,6 +1592,26 @@ class AnnotatedElementUtilsTests {
 
 	@ValueAttributeMetaMeta
 	static class ValueAttributeMetaMetaClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface StandardContainerWithMultipleAttributes {
+
+		StandardRepeatableWithContainerWithMultipleAttributes[] value();
+
+		String name() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Repeatable(StandardContainerWithMultipleAttributes.class)
+	@interface StandardRepeatableWithContainerWithMultipleAttributes {
+
+		String value() default "";
+	}
+
+	@StandardRepeatableWithContainerWithMultipleAttributes("a")
+	@StandardRepeatableWithContainerWithMultipleAttributes("b")
+	static class StandardRepeatablesWithContainerWithMultipleAttributesTestCase {
 	}
 
 }
