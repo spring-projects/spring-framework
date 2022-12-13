@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -51,6 +52,10 @@ public class SimpleBeanInfoFactory implements BeanInfoFactory, Ordered {
 				PropertyDescriptorUtils.determineBasicProperties(beanClass);
 
 		return new SimpleBeanInfo() {
+			@Override
+			public BeanDescriptor getBeanDescriptor() {
+				return new BeanDescriptor(beanClass);
+			}
 			@Override
 			public PropertyDescriptor[] getPropertyDescriptors() {
 				return pds.toArray(PropertyDescriptorUtils.EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
