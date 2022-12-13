@@ -7,10 +7,8 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 default-autowire="byType"
 >
 
-	<bean id="firstBeanAwareTest" class="com.ysj.bean.FirstBeanAwareTest">
+	<bean id="abfpp" class="com.ysj.beanfactory.ABfpp">
 	</bean>
-	<bean id="firstBeanA" class="com.ysj.bean.FirstBeanA">
-	</bean>
-	<bean id="firstBeanB" class="com.ysj.bean.FirstBeanB">
+	<bean id="cbrfpp" name="myCbrfpp" class="com.ysj.beanfactory.CBfrpp">
 	</bean>
 </beans>

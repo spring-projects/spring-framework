@@ -1297,10 +1297,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected RootBeanDefinition getMergedLocalBeanDefinition(String beanName) throws BeansException {
 		// Quick check on the concurrent map first, with minimal locking.
+		// Spring会先从mergedBeanDefinitions中获取, 从而可以联想到, 在对一个BeanDifinition进行合并完成后
+		//  Spring都会将合并后的BeanDifinition放入到这个Map中, 如果在缓存中没有拿到, 则先
+		//  调用getBeanDefinition方法从beanDefintionsMap中获取原始的BeanDefinition
+		//
 		RootBeanDefinition mbd = this.mergedBeanDefinitions.get(beanName);
 		if (mbd != null && !mbd.stale) {
 			return mbd;
 		}
+		//调用getBeanDefinition方法从beanDefintionsMap中获取原始的BeanDefinition
 		return getMergedBeanDefinition(beanName, getBeanDefinition(beanName));
 	}
 
@@ -1337,30 +1342,42 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			RootBeanDefinition previous = null;
 
 			// Check with full lock now in order to enforce the same merged instance.
+			//todo  containingBd这个到底是个啥？
 			if (containingBd == null) {
 				mbd = this.mergedBeanDefinitions.get(beanName);
 			}
 
+			//如果mbd为null  或者stale为true
+			//stale 翻译过来为不新鲜的 官方注释：Determines if the definition needs to be re-merged.  需要被重新合并的
+			//在clearMergedBeanDefinition 和   clearMetadataCache方法中被设置为true
 			if (mbd == null || mbd.stale) {
 				previous = mbd;
+				//判断是否有父bd
 				if (bd.getParentName() == null) {
 					// Use copy of given root bean definition.
+					//转换成 RootBeanDefinition
+					//如果已经是RootBeanDefinition，则直接clone一个
 					if (bd instanceof RootBeanDefinition) {
 						mbd = ((RootBeanDefinition) bd).cloneBeanDefinition();
 					}
 					else {
+						//否则，则根据传进来的BeanDefinition 生成一个，进行赋值set操作
 						mbd = new RootBeanDefinition(bd);
 					}
 				}
 				else {
 					// Child bean definition: needs to be merged with parent.
+					//子bean定义：需要与父bean合并
 					BeanDefinition pbd;
 					try {
+						//根据bd的parentName 获取到 真实的beanName
 						String parentBeanName = transformedBeanName(bd.getParentName());
 						if (!beanName.equals(parentBeanName)) {
+							//递归
 							pbd = getMergedBeanDefinition(parentBeanName);
 						}
 						else {
+							//todo why
 							BeanFactory parent = getParentBeanFactory();
 							if (parent instanceof ConfigurableBeanFactory) {
 								pbd = ((ConfigurableBeanFactory) parent).getMergedBeanDefinition(parentBeanName);
@@ -1382,6 +1399,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 
 				// Set default singleton scope, if not configured before.
+				//public static final String SCOPE_DEFAULT = ""; scope默认是空字符串 所以这里判断它的长度
 				if (!StringUtils.hasLength(mbd.getScope())) {
 					mbd.setScope(SCOPE_SINGLETON);
 				}
