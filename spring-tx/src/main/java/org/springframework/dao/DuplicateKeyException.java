@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ package org.springframework.dao;
  * results in violation of a primary key or unique constraint.
  * Note that this is not necessarily a purely relational concept;
  * unique primary keys are required by most database types.
+ *
+ * <p>Consider handling the general {@link DataIntegrityViolationException}
+ * instead, semantically including a wider range of constraint violations.
  *
  * @author Thomas Risberg
  */

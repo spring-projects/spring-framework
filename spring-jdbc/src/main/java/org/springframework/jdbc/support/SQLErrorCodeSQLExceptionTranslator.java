@@ -177,6 +177,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Override
 	@Nullable
 	protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {

@@ -19,8 +19,13 @@ package org.springframework.dao;
 /**
  * Exception thrown when an attempt to insert or update data
  * results in violation of an integrity constraint. Note that this
- * is not purely a relational concept; unique primary keys are
- * required by most database types.
+ * is not purely a relational concept; integrity constraints such
+ * as unique primary keys are required by most database types.
+ *
+ * <p>Serves as a superclass for more specific exceptions, e.g.
+ * {@link DuplicateKeyException}. However, it is generally
+ * recommended to handle {@code DataIntegrityViolationException}
+ * itself instead of relying on specific exception subclasses.
  *
  * @author Rod Johnson
  */

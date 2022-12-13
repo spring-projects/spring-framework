@@ -19,10 +19,12 @@ package org.springframework.jdbc.support;
 import java.sql.SQLException;
 import java.util.Set;
 
-import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -77,7 +79,7 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 			"S1"   // DB2: communication failure
 		);
 
-	private static final Set<String> CONCURRENCY_FAILURE_CODES = Set.of(
+	private static final Set<String> PESSIMISTIC_LOCKING_FAILURE_CODES = Set.of(
 			"40",  // Transaction rollback
 			"61"   // Oracle: deadlock
 		);
@@ -97,6 +99,9 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 				return new BadSqlGrammarException(task, (sql != null ? sql : ""), ex);
 			}
 			else if (DATA_INTEGRITY_VIOLATION_CODES.contains(classCode)) {
+				if ("23505".equals(sqlState)) {
+					return new DuplicateKeyException(buildMessage(task, sql, ex), ex);
+				}
 				return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
 			}
 			else if (DATA_ACCESS_RESOURCE_FAILURE_CODES.contains(classCode)) {
@@ -105,8 +110,11 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 			else if (TRANSIENT_DATA_ACCESS_RESOURCE_CODES.contains(classCode)) {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
 			}
-			else if (CONCURRENCY_FAILURE_CODES.contains(classCode)) {
-				return new ConcurrencyFailureException(buildMessage(task, sql, ex), ex);
+			else if (PESSIMISTIC_LOCKING_FAILURE_CODES.contains(classCode)) {
+				if ("40001".equals(sqlState)) {
+					return new CannotAcquireLockException(buildMessage(task, sql, ex), ex);
+				}
+				return new PessimisticLockingFailureException(buildMessage(task, sql, ex), ex);
 			}
 		}
 

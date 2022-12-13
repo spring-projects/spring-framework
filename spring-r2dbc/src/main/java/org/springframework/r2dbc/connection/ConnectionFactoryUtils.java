@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,13 @@ import io.r2dbc.spi.Wrapped;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
-import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.lang.Nullable;
@@ -215,17 +217,23 @@ public abstract class ConnectionFactoryUtils {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcRollbackException) {
-				return new ConcurrencyFailureException(buildMessage(task, sql, ex), ex);
+				if ("40001".equals(ex.getSqlState())) {
+					return new CannotAcquireLockException(buildMessage(task, sql, ex), ex);
+				}
+				return new PessimisticLockingFailureException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcTimeoutException) {
 				return new QueryTimeoutException(buildMessage(task, sql, ex), ex);
 			}
 		}
-		if (ex instanceof R2dbcNonTransientException) {
+		else if (ex instanceof R2dbcNonTransientException) {
 			if (ex instanceof R2dbcNonTransientResourceException) {
 				return new DataAccessResourceFailureException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcDataIntegrityViolationException) {
+				if ("23505".equals(ex.getSqlState())) {
+					return new DuplicateKeyException(buildMessage(task, sql, ex), ex);
+				}
 				return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcPermissionDeniedException) {
