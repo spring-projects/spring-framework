@@ -78,15 +78,15 @@ public interface ServerCodecConfigurer extends CodecConfigurer {
 
 
 	/**
-	 * {@link CodecConfigurer.DefaultCodecs} extension with extra client-side options.
+	 * {@link CodecConfigurer.DefaultCodecs} extension with extra server-side options.
 	 */
 	interface ServerDefaultCodecs extends DefaultCodecs {
 
 		/**
 		 * Configure the {@code Encoder} to use for Server-Sent Events.
-		 * <p>By default if this is not set, and Jackson is available, the
-		 * {@link #jackson2JsonEncoder} override is used instead. Use this method
-		 * to customize the SSE encoder.
+		 * <p>By default if this is not set, and Jackson is available,
+		 * the {@link #jackson2JsonEncoder} override is used instead.
+		 * Use this method to customize the SSE encoder.
 		 */
 		void serverSentEventEncoder(Encoder<?> encoder);
 	}

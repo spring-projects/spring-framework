@@ -119,7 +119,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	@Nullable
 	public Integer getRawStatusCode() {
-		return this.statusCode != null ? this.statusCode.value() : null;
+		return (this.statusCode != null ? this.statusCode.value() : null);
 	}
 
 	@Override
