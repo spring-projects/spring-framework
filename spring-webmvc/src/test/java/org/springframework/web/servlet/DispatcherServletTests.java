@@ -875,6 +875,14 @@ public class DispatcherServletTests {
 		assertThat(getServletContext().getAttribute("otherInitialized")).isEqualTo("true");
 	}
 
+	@Test
+	public void webDavMethod() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "PROPFIND", "/body.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("body");
+	}
+
 
 	public static class ControllerFromParent implements Controller {
 

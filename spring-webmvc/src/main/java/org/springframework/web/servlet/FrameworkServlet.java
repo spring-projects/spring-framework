@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -166,6 +167,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * multiple values in a single init-param String value.
 	 */
 	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
+
+	/**
+	 * HTTP methods supported by {@link jakarta.servlet.http.HttpServlet}.
+	 */
+	private static final Set<String> HTTP_SERVLET_METHODS = Set.of("DELETE", "HEAD", "GET", "OPTIONS", "POST", "PUT",
+			"TRACE");
 
 
 	/** ServletContext attribute to find the WebApplicationContext in. */
@@ -866,18 +873,18 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/**
-	 * Override the parent class implementation in order to intercept PATCH requests.
+	 * Override the parent class implementation in order to intercept requests
+	 * using PATCH or non-standard HTTP methods (WebDAV).
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
-		if (HttpMethod.PATCH.equals(httpMethod)) {
-			processRequest(request, response);
+		if (HTTP_SERVLET_METHODS.contains(request.getMethod())) {
+			super.service(request, response);
 		}
 		else {
-			super.service(request, response);
+			processRequest(request, response);
 		}
 	}
 
