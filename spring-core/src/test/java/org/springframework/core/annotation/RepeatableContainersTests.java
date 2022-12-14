@@ -25,6 +25,9 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.annotation.AnnotatedElementUtilsTests.StandardContainerWithMultipleAttributes;
+import org.springframework.core.annotation.AnnotatedElementUtilsTests.StandardRepeatablesWithContainerWithMultipleAttributesTestCase;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -254,26 +257,6 @@ class RepeatableContainersTests {
 	@StandardRepeatable("a")
 	@StandardRepeatable("b")
 	static class StandardRepeatablesTestCase {
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface StandardContainerWithMultipleAttributes {
-
-		StandardRepeatableWithContainerWithMultipleAttributes[] value();
-
-		String name() default "";
-	}
-
-	@Retention(RetentionPolicy.RUNTIME)
-	@Repeatable(StandardContainerWithMultipleAttributes.class)
-	@interface StandardRepeatableWithContainerWithMultipleAttributes {
-
-		String value() default "";
-	}
-
-	@StandardRepeatableWithContainerWithMultipleAttributes("a")
-	@StandardRepeatableWithContainerWithMultipleAttributes("b")
-	static class StandardRepeatablesWithContainerWithMultipleAttributesTestCase {
 	}
 
 	@ExplicitContainer({ @ExplicitRepeatable("a"), @ExplicitRepeatable("b") })
