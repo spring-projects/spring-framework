@@ -53,10 +53,12 @@ public abstract class RepeatableContainers {
 
 
 	/**
-	 * Add an additional explicit relationship between a contained and
+	 * Add an additional explicit relationship between a container and
 	 * repeatable annotation.
-	 * @param container the container type
-	 * @param repeatable the contained repeatable type
+	 * <p>WARNING: the arguments supplied to this method are in the reverse order
+	 * of those supplied to {@link #of(Class, Class)}.
+	 * @param container the container annotation type
+	 * @param repeatable the repeatable annotation type
 	 * @return a new {@link RepeatableContainers} instance
 	 */
 	public RepeatableContainers and(Class<? extends Annotation> container,
@@ -103,7 +105,9 @@ public abstract class RepeatableContainers {
 	/**
 	 * Create a {@link RepeatableContainers} instance that uses predefined
 	 * repeatable and container types.
-	 * @param repeatable the contained repeatable annotation type
+	 * <p>WARNING: the arguments supplied to this method are in the reverse order
+	 * of those supplied to {@link #and(Class, Class)}.
+	 * @param repeatable the repeatable annotation type
 	 * @param container the container annotation type or {@code null}. If specified,
 	 * this annotation must declare a {@code value} attribute returning an array
 	 * of repeatable annotations. If not specified, the container will be
@@ -122,7 +126,7 @@ public abstract class RepeatableContainers {
 	}
 
 	/**
-	 * Create a {@link RepeatableContainers} instance that does not expand any
+	 * Create a {@link RepeatableContainers} instance that does not support any
 	 * repeatable annotations.
 	 * @return a {@link RepeatableContainers} instance
 	 */
@@ -208,10 +212,9 @@ public abstract class RepeatableContainers {
 				}
 				Class<?> returnType = valueMethod.getReturnType();
 				if (!returnType.isArray() || returnType.getComponentType() != repeatable) {
-					throw new AnnotationConfigurationException("Container type [" +
-							container.getName() +
-							"] must declare a 'value' attribute for an array of type [" +
-							repeatable.getName() + "]");
+					throw new AnnotationConfigurationException(
+							"Container type [%s] must declare a 'value' attribute for an array of type [%s]"
+								.formatted(container.getName(), repeatable.getName()));
 				}
 			}
 			catch (AnnotationConfigurationException ex) {
@@ -219,9 +222,8 @@ public abstract class RepeatableContainers {
 			}
 			catch (Throwable ex) {
 				throw new AnnotationConfigurationException(
-						"Invalid declaration of container type [" + container.getName() +
-								"] for repeatable annotation [" + repeatable.getName() + "]",
-						ex);
+						"Invalid declaration of container type [%s] for repeatable annotation [%s]"
+							.formatted(container.getName(), repeatable.getName()), ex);
 			}
 			this.repeatable = repeatable;
 			this.container = container;
