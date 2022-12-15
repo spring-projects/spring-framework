@@ -1175,7 +1175,7 @@ A `HandlerAdapter` may expose its exception handling mechanism as a
 `DispatchExceptionHandler` set on the `HandlerResult` it returns. When that's set,
 `DispatcherHandler` will also apply it to the handling of the result.
 
-A `HandlerAdapter` may also choose to implement `DispatchExceptionHandler`. Inn that case
+A `HandlerAdapter` may also choose to implement `DispatchExceptionHandler`. In that case
 `DispatcherHandler` will apply it to exceptions that arise before a handler is mapped,
 e.g. during handler mapping, or earlier, e.g. in a `WebFilter`.
 
