@@ -1,6 +1,6 @@
 [[webflux-fn]]
 = Functional Endpoints
-[.small]#<<web.adoc#webmvc-fn, Web MVC>>#
+[.small]#<<web.adoc#webmvc-fn, See equivalent in the Servlet stack>>#
 
 Spring WebFlux includes WebFlux.fn, a lightweight functional programming model in which functions
 are used to route and handle requests and contracts are designed for immutability.
@@ -12,7 +12,7 @@ the same <<web-reactive.adoc#webflux-reactive-spring-web>> foundation.
 
 [[webflux-fn-overview]]
 == Overview
-[.small]#<<web.adoc#webmvc-fn-overview, Web MVC>>#
+[.small]#<<web.adoc#webmvc-fn-overview, See equivalent in the Servlet stack>>#
 
 In WebFlux.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a delayed `ServerResponse` (i.e. `Mono<ServerResponse>`).
@@ -113,7 +113,7 @@ Most applications can run through the WebFlux Java configuration, see <<webflux-
 
 [[webflux-fn-handler-functions]]
 == HandlerFunction
-[.small]#<<web.adoc#webmvc-fn-handler-functions, Web MVC>>#
+[.small]#<<web.adoc#webmvc-fn-handler-functions, See equivalent in the Servlet stack>>#
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
 access to the HTTP request and response.
@@ -486,7 +486,7 @@ See <<core.adoc#validation-beanvalidation, Spring Validation>>.
 
 [[webflux-fn-router-functions]]
 == `RouterFunction`
-[.small]#<<web.adoc#webmvc-fn-router-functions, Web MVC>>#
+[.small]#<<web.adoc#webmvc-fn-router-functions, See equivalent in the Servlet stack>>#
 
 Router functions are used to route the requests to the corresponding `HandlerFunction`.
 Typically, you do not write router functions yourself, but rather use a method on the
@@ -687,7 +687,7 @@ We can further improve by using the `nest` method together with `accept`:
 
 [[webflux-fn-running]]
 == Running a Server
-[.small]#<<web.adoc#webmvc-fn-running, Web MVC>>#
+[.small]#<<web.adoc#webmvc-fn-running, See equivalent in the Servlet stack>>#
 
 How do you run a router function in an HTTP server? A simple option is to convert a router
 function to an `HttpHandler` by using one of the following:
@@ -793,7 +793,7 @@ The following example shows a WebFlux Java configuration (see
 
 [[webflux-fn-handler-filter-function]]
 == Filtering Handler Functions
-[.small]#<<web.adoc#webmvc-fn-handler-filter-function, Web MVC>>#
+[.small]#<<web.adoc#webmvc-fn-handler-filter-function, See equivalent in the Servlet stack>>#
 
 You can filter handler functions by using the `before`, `after`, or `filter` methods on the routing
 function builder.
