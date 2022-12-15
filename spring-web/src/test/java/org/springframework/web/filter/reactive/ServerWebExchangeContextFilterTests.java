@@ -63,7 +63,7 @@ class ServerWebExchangeContextFilterTests {
 
 		public Mono<String> service() {
 			return Mono.just("result").contextWrite(context -> {
-				ServerWebExchangeContextFilter.get(context).ifPresent(exchangeRef::set);
+				ServerWebExchangeContextFilter.getExchange(context).ifPresent(exchangeRef::set);
 				return context;
 			});
 		}
