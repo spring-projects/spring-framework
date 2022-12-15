@@ -129,7 +129,7 @@ Typically, you need an application server's JTA capability only if your applicat
 to handle transactions across multiple resources, which is not a requirement for many
 applications. Many high-end applications use a single, highly scalable database (such as
 Oracle RAC) instead. Stand-alone transaction managers (such as
-https://www.atomikos.com/[Atomikos Transactions] and https://jotm.ow2.org/[JOTM])
+https://www.atomikos.com/[Atomikos Transactions])
 are other options. Of course, you may need other application server capabilities, such as
 Java Message Service (JMS) and Jakarta EE Connector Architecture (JCA).
 
