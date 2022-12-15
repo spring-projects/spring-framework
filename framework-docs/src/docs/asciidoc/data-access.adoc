@@ -6850,7 +6850,7 @@ Without specifying further mapping details, queries return tabular results
 as `Map` whose keys are case-insensitive column names that map to their column value.
 
 You can take control over result mapping by supplying a `Function<Row, T>` that gets
-called for each `Row` so it can can return arbitrary values (singular values,
+called for each `Row` so it can return arbitrary values (singular values,
 collections and maps, and objects).
 
 The following example extracts the `name` column and emits its value:
@@ -7212,7 +7212,7 @@ responsibility of the administrator who sets up the `ConnectionFactory`. You
 most likely fill both roles as you develop and test code, but you do not
 necessarily have to know how the production data source is configured.
 
-When you use Spring's R2DBC layer, you can can configure your own with a
+When you use Spring's R2DBC layer, you can configure your own with a
 connection pool implementation provided by a third party. A popular
 implementation is R2DBC Pool (`r2dbc-pool`). Implementations in the Spring
 distribution are meant only for testing purposes and do not provide pooling.
