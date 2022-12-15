@@ -4366,7 +4366,6 @@ capital letters of the class and the method name (for example, the `getThing` me
 
 [[mvc-ann-async]]
 == Asynchronous Requests
-[.small]#<<mvc-ann-async-vs-webflux, Compared to WebFlux>>#
 
 Spring MVC has an extensive integration with Servlet asynchronous request
 <<mvc-ann-async-processing,processing>>:
@@ -4379,11 +4378,10 @@ return value.
 * Controllers can use reactive clients and return
 <<mvc-ann-async-reactive-types, reactive types>> for response handling.
 
-
+For an overview of how this differs from Spring WebFlux, see the <<mvc-ann-async-vs-webflux>> section below.
 
 [[mvc-ann-async-deferredresult]]
 === `DeferredResult`
-[.small]#<<mvc-ann-async-vs-webflux, Compared to WebFlux>>#
 
 Once the asynchronous request processing feature is <<mvc-ann-async-configuration, enabled>>
 in the Servlet container, controller methods can wrap any supported controller method
@@ -4425,7 +4423,6 @@ example, in response to an external event (JMS message), a scheduled task, or ot
 
 [[mvc-ann-async-callable]]
 === `Callable`
-[.small]#<<mvc-ann-async-vs-webflux, Compared to WebFlux>>#
 
 A controller can wrap any supported return value with `java.util.concurrent.Callable`,
 as the following example shows:
@@ -4455,7 +4452,6 @@ The return value can then be obtained by running the given task through the
 
 [[mvc-ann-async-processing]]
 === Processing
-[.small]#<<mvc-ann-async-vs-webflux, Compared to WebFlux>>#
 
 Here is a very concise overview of Servlet asynchronous request processing:
 
@@ -4533,7 +4529,7 @@ methods for timeout and completion callbacks.
 
 
 [[mvc-ann-async-vs-webflux]]
-==== Compared to WebFlux
+==== Async Spring MVC compared to WebFlux
 
 The Servlet API was originally built for making a single pass through the Filter-Servlet
 chain. Asynchronous request processing lets applications exit the Filter-Servlet chain
@@ -4560,6 +4556,8 @@ types in controller method arguments (for example, `@RequestBody`, `@RequestPart
 nor does it have any explicit support for asynchronous and reactive types as model attributes.
 Spring WebFlux does support all that.
 
+Finally, from a configuration perspective the asynchronous request processing feature must be
+<<mvc-ann-async-configuration, enabled at the Servlet container level>>.
 
 
 [[mvc-ann-async-http-streaming]]
@@ -4809,7 +4807,6 @@ that have a built-in heartbeat mechanism.
 
 [[mvc-ann-async-configuration]]
 === Configuration
-[.small]#<<mvc-ann-async-vs-webflux, Compared to WebFlux>>#
 
 The asynchronous request processing feature must be enabled at the Servlet container level.
 The MVC configuration also exposes several options for asynchronous requests.
