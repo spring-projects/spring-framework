@@ -979,9 +979,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			this.shutdownHook = new Thread(SHUTDOWN_HOOK_THREAD_NAME) {
 				@Override
 				public void run() {
-					synchronized (startupShutdownMonitor) {
-						doClose();
-					}
+					// This call is thread safe.
+					doClose();
 				}
 			};
 			Runtime.getRuntime().addShutdownHook(this.shutdownHook);
