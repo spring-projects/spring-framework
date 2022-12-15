@@ -37,7 +37,7 @@ import java.util.Map;
  * <pre class="code">
  * ConfigurableEnvironment environment = new StandardEnvironment();
  * MutablePropertySources propertySources = environment.getPropertySources();
- * Map&lt;String, String&gt; myMap = new HashMap&lt;&gt;();
+ * Map&lt;String, Object&gt; myMap = new HashMap&lt;&gt;();
  * myMap.put("xyz", "myValue");
  * propertySources.addFirst(new MapPropertySource("MY_MAP", myMap));
  * </pre>
