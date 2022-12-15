@@ -248,20 +248,22 @@ current thread (and rely on callbacks instead) means that you do not need extra 
 there are no blocking calls to absorb.
 
 
+==== Invoking a Blocking API
 
-.Invoking a Blocking API
 What if you do need to use a blocking library? Both Reactor and RxJava provide the
 `publishOn` operator to continue processing on a different thread. That means there is an
 easy escape hatch. Keep in mind, however, that blocking APIs are not a good fit for
 this concurrency model.
 
-.Mutable State
+==== Mutable State
+
 In Reactor and RxJava, you declare logic through operators. At runtime, a reactive
 pipeline is formed where data is processed sequentially, in distinct stages. A key benefit
 of this is that it frees applications from having to protect mutable state because
 application code within that pipeline is never invoked concurrently.
 
-.Threading Model
+==== Threading Model
+
 What threads should you expect to see on a server running with Spring WebFlux?
 
 * On a "`vanilla`" Spring WebFlux server (for example, no data access nor other optional
@@ -285,7 +287,8 @@ specific thread pool `Scheduler` strategy.
 * Data access libraries and other third party dependencies can also create and use threads
 of their own.
 
-.Configuring
+==== Configuring
+
 The Spring Framework does not provide support for starting and stopping
 <<webflux-server-choice, servers>>. To configure the threading model for a server,
 you need to use server-specific configuration APIs, or, if you use Spring Boot,
