@@ -110,7 +110,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 				}
 			}
 			else if (systemId.endsWith(DTD_SUFFIX) || systemId.endsWith(XSD_SUFFIX)) {
-				source = resolveEntityFallbackForSchemas(publicId, systemId);
+				source = resolveSchemaEntity(publicId, systemId);
 			}
 		}
 
@@ -134,7 +134,7 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 	 * that the parser open a regular URI connection to the system identifier.
 	 */
 	@Nullable
-	protected InputSource resolveEntityFallbackForSchemas(@Nullable String publicId, String systemId) {
+	protected InputSource resolveSchemaEntity(@Nullable String publicId, String systemId) {
 		InputSource source;
 		// External dtd/xsd lookup via https even for canonical http declaration
 		String url = systemId;

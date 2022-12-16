@@ -123,7 +123,7 @@ class ResourceEntityResolverTests {
 
 		@Nullable
 		@Override
-		protected InputSource resolveEntityFallbackForSchemas(String publicId, String systemId) {
+		protected InputSource resolveSchemaEntity(String publicId, String systemId) {
 			if (shouldThrow) throw new IllegalStateException("FallingBackEntityResolver that throws");
 			return this.returnValue;
 		}
