@@ -17,6 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.Collection;
@@ -161,9 +162,8 @@ public abstract class YamlProcessor {
 	 * @see #createYaml()
 	 */
 	protected void process(MatchCallback callback) {
-		Yaml yaml = createYaml();
 		for (Resource resource : this.resources) {
-			boolean found = process(callback, yaml, resource);
+			boolean found = process(callback, resource);
 			if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND && found) {
 				return;
 			}
@@ -180,7 +180,10 @@ public abstract class YamlProcessor {
 	 * YAML documents. If an unsupported type is encountered, an
 	 * {@link IllegalStateException} will be thrown when the node is processed.
 	 * @see LoaderOptions#setAllowDuplicateKeys(boolean)
+	 * @deprecated no need to use this method. {@linkplain #loadAllDocuments} should be used. It
+	 * may become private
 	 */
+	@Deprecated
 	protected Yaml createYaml() {
 		LoaderOptions loaderOptions = new LoaderOptions();
 		loaderOptions.setAllowDuplicateKeys(false);
@@ -189,25 +192,34 @@ public abstract class YamlProcessor {
 				dumperOptions, loaderOptions);
 	}
 
-	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
+	/**
+	 * Parse all the YAML documents in the provided resource.
+	 * @param input - the YAML input
+	 * @return lazy loaded parsed data
+	 */
+	protected Iterable<Object> loadAllDocuments(InputStream input) {
+		Yaml yaml = createYaml();
+		Reader reader = new UnicodeReader(input);
+		return yaml.loadAll(reader);
+	}
+
+	private boolean process(MatchCallback callback, Resource resource) {
 		int count = 0;
 		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loading from YAML: " + resource);
 			}
-			try (Reader reader = new UnicodeReader(resource.getInputStream())) {
-				for (Object object : yaml.loadAll(reader)) {
-					if (object != null && process(asMap(object), callback)) {
-						count++;
-						if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
-							break;
-						}
+			for (Object object : loadAllDocuments(resource.getInputStream())) {
+				if (object != null && process(asMap(object), callback)) {
+					count++;
+					if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
+						break;
 					}
 				}
-				if (logger.isDebugEnabled()) {
-					logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
-							" from YAML resource: " + resource);
-				}
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
+						" from YAML resource: " + resource);
 			}
 		}
 		catch (IOException ex) {
