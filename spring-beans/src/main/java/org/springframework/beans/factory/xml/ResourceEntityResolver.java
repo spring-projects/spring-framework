@@ -118,13 +118,20 @@ public class ResourceEntityResolver extends DelegatingEntityResolver {
 	}
 
 	/**
-	 * A fallback method for {@link #resolveEntity(String, String)} used when a "schema" entity (DTD or XSD) couldn't
-	 * be resolved as a local resource. The default behavior is to perform a remote resolution over https.
-	 * Override this method if this behavior is not desirable.
-	 * @param publicId the public identifier of the external entity being referenced, or null if none was supplied.
-	 * @param systemId the system identifier of the external entity being referenced.
-	 * @return an InputSource object describing the new input source, or null to request that the
-	 * parser open a regular URI connection to the system identifier.
+	 * A fallback method for {@link #resolveEntity(String, String)} that is used when a
+	 * "schema" entity (DTD or XSD) cannot be resolved as a local resource. The default
+	 * behavior is to perform a remote resolution over HTTPS.
+	 * <p>Subclasses can override this method to change the default behavior.
+	 * <ul>
+	 * <li>Return {@code null} to fall back to the parser's
+	 * {@linkplain org.xml.sax.EntityResolver#resolveEntity(String, String) default behavior}.</li>
+	 * <li>Throw an exception to prevent remote resolution of the XSD or DTD.</li>
+	 * </ul>
+	 * @param publicId the public identifier of the external entity being referenced,
+	 * or null if none was supplied
+	 * @param systemId the system identifier of the external entity being referenced
+	 * @return an InputSource object describing the new input source, or null to request
+	 * that the parser open a regular URI connection to the system identifier.
 	 */
 	@Nullable
 	protected InputSource resolveEntityFallbackForSchemas(@Nullable String publicId, String systemId) {
