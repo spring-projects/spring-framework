@@ -373,7 +373,19 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 					txObject.getConnectionHolder().clear();
 				}
 				return Mono.empty();
-			}));
+			})).onErrorResume(e -> {
+				logger.debug("Resource cleanup failed for [" + con + "] after transaction", e);
+				try {
+					if (txObject.hasConnectionHolder() && txObject.isNewConnectionHolder()) {
+						logger.debug("Releasing R2DBC Connection [" + con + "] after transaction");
+						return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory());
+					}
+				}
+				finally {
+					txObject.getConnectionHolder().clear();
+				}
+				return Mono.empty();
+			});
 		});
 	}
 

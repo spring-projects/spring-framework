@@ -23,6 +23,7 @@ import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.IsolationLevel;
 import io.r2dbc.spi.R2dbcBadGrammarException;
+import io.r2dbc.spi.R2dbcTimeoutException;
 import io.r2dbc.spi.Statement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.r2dbc.BadSqlGrammarException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.TransactionDefinition;
@@ -324,6 +326,31 @@ class R2dbcTransactionManagerUnitTests {
 		verify(connectionMock).rollbackTransaction();
 		verify(connectionMock).close();
 		verifyNoMoreInteractions(connectionMock);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void testConnectionReleasedWhenRollbackFails() {
+		when(connectionMock.rollbackTransaction()).thenReturn(Mono.defer(() -> Mono.error(new R2dbcBadGrammarException("Rollback should fail"))), Mono.empty());
+
+		TransactionalOperator operator = TransactionalOperator.create(tm);
+
+		when(connectionMock.isAutoCommit()).thenReturn(true);
+		when(connectionMock.setAutoCommit(true)).thenReturn(Mono.defer(() -> Mono.error(new R2dbcTimeoutException("SET AUTOCOMMIT = 1 timed out"))));
+		when(connectionMock.setTransactionIsolationLevel(any())).thenReturn(Mono.empty());
+		when(connectionMock.setAutoCommit(false)).thenReturn(Mono.empty());
+
+		operator.execute(reactiveTransaction -> ConnectionFactoryUtils.getConnection(connectionFactoryMock)
+						.doOnNext(connection -> {
+							throw new IllegalStateException("Intentional error to trigger rollback");
+						}).then()).as(StepVerifier::create)
+				.verifyError(BadSqlGrammarException.class);
+
+		verify(connectionMock).isAutoCommit();
+		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
+		verify(connectionMock, never()).commitTransaction();
+		verify(connectionMock).rollbackTransaction();
+		verify(connectionMock).close();
 	}
 
 	@Test
