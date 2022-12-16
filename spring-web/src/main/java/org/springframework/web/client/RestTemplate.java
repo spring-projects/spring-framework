@@ -908,7 +908,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				logger.debug("Response " + statusCode);
 			}
 			catch (IOException ex) {
-				// ignore
+				logger.debug("Failed to get response status code", ex);
 			}
 		}
 		if (hasError) {
