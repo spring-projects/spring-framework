@@ -16,88 +16,68 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.io.IOException;
-
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
+ * Unit tests for ResourceEntityResolver.
+ *
  * @author Simon Baslé
+ * @author Sam Brannen
+ * @since 6.0.4
  */
 class ResourceEntityResolverTests {
 
-	@Test
-	void resolveEntityCallsFallbackWithNullOnDtd() throws IOException, SAXException {
-		ResourceEntityResolver resolver = new FallingBackEntityResolver(false, null);
+	@ParameterizedTest
+	@ValueSource(strings = { "https://example.org/schema/", "https://example.org/schema.xml" })
+	void resolveEntityDoesNotCallFallbackIfNotSchema(String systemId) throws Exception {
+		ConfigurableFallbackEntityResolver resolver = new ConfigurableFallbackEntityResolver(true);
 
-		assertThat(resolver.resolveEntity("testPublicId", "https://example.org/exampleschema.dtd"))
-				.isNull();
+		assertThat(resolver.resolveEntity("testPublicId", systemId)).isNull();
+		assertThat(resolver.fallbackInvoked).isFalse();
 	}
 
-	@Test
-	void resolveEntityCallsFallbackWithNullOnXsd() throws IOException, SAXException {
-		ResourceEntityResolver resolver = new FallingBackEntityResolver(false, null);
+	@ParameterizedTest
+	@ValueSource(strings = { "https://example.org/schema.dtd", "https://example.org/schema.xsd" })
+	void resolveEntityCallsFallbackThatReturnsNull(String systemId) throws Exception {
+		ConfigurableFallbackEntityResolver resolver = new ConfigurableFallbackEntityResolver(null);
 
-		assertThat(resolver.resolveEntity("testPublicId", "https://example.org/exampleschema.xsd"))
-				.isNull();
+		assertThat(resolver.resolveEntity("testPublicId", systemId)).isNull();
+		assertThat(resolver.fallbackInvoked).isTrue();
 	}
 
-	@Test
-	void resolveEntityCallsFallbackWithThrowOnDtd() {
-		ResourceEntityResolver resolver = new FallingBackEntityResolver(true, null);
+	@ParameterizedTest
+	@ValueSource(strings = { "https://example.org/schema.dtd", "https://example.org/schema.xsd" })
+	void resolveEntityCallsFallbackThatThrowsException(String systemId) {
+		ConfigurableFallbackEntityResolver resolver = new ConfigurableFallbackEntityResolver(true);
 
-		assertThatIllegalStateException().isThrownBy(
-						() -> resolver.resolveEntity("testPublicId", "https://example.org/exampleschema.dtd"))
-				.withMessage("FallingBackEntityResolver that throws");
+		assertThatExceptionOfType(ResolutionRejectedException.class)
+				.isThrownBy(() -> resolver.resolveEntity("testPublicId", systemId));
+		assertThat(resolver.fallbackInvoked).isTrue();
 	}
 
-	@Test
-	void resolveEntityCallsFallbackWithThrowOnXsd() {
-		ResourceEntityResolver resolver = new FallingBackEntityResolver(true, null);
-
-		assertThatIllegalStateException().isThrownBy(
-						() -> resolver.resolveEntity("testPublicId", "https://example.org/exampleschema.xsd"))
-				.withMessage("FallingBackEntityResolver that throws");
-	}
-
-	@Test
-	void resolveEntityCallsFallbackWithInputSourceOnDtd() throws IOException, SAXException {
+	@ParameterizedTest
+	@ValueSource(strings = { "https://example.org/schema.dtd", "https://example.org/schema.xsd" })
+	void resolveEntityCallsFallbackThatReturnsInputSource(String systemId) throws Exception {
 		InputSource expected = Mockito.mock(InputSource.class);
-		ResourceEntityResolver resolver = new FallingBackEntityResolver(false, expected);
+		ConfigurableFallbackEntityResolver resolver = new ConfigurableFallbackEntityResolver(expected);
 
-		assertThat(resolver.resolveEntity("testPublicId", "https://example.org/exampleschema.dtd"))
-				.isNotNull()
-				.isSameAs(expected);
+		assertThat(resolver.resolveEntity("testPublicId", systemId)).isSameAs(expected);
+		assertThat(resolver.fallbackInvoked).isTrue();
 	}
 
-	@Test
-	void resolveEntityCallsFallbackWithInputSourceOnXsd() throws IOException, SAXException {
-		InputSource expected = Mockito.mock(InputSource.class);
-		ResourceEntityResolver resolver = new FallingBackEntityResolver(false, expected);
-
-		assertThat(resolver.resolveEntity("testPublicId", "https://example.org/exampleschema.xsd"))
-				.isNotNull()
-				.isSameAs(expected);
-	}
-
-	@Test
-	void resolveEntityDoesntCallFallbackIfNotSchema() throws IOException, SAXException {
-		ResourceEntityResolver resolver = new FallingBackEntityResolver(true, null);
-
-		assertThat(resolver.resolveEntity("testPublicId", "https://example.org/example.xml"))
-				.isNull();
-	}
 
 	private static final class NoOpResourceLoader implements ResourceLoader {
+
 		@Override
 		public Resource getResource(String location) {
 			return null;
@@ -109,23 +89,40 @@ class ResourceEntityResolverTests {
 		}
 	}
 
-	private static class FallingBackEntityResolver extends ResourceEntityResolver {
+	private static class ConfigurableFallbackEntityResolver extends ResourceEntityResolver {
 
 		private final boolean shouldThrow;
+
 		@Nullable
 		private final InputSource returnValue;
 
-		private FallingBackEntityResolver(boolean shouldThrow, @Nullable InputSource returnValue) {
+		boolean fallbackInvoked = false;
+
+
+		private ConfigurableFallbackEntityResolver(boolean shouldThrow) {
 			super(new NoOpResourceLoader());
 			this.shouldThrow = shouldThrow;
+			this.returnValue = null;
+		}
+
+		private ConfigurableFallbackEntityResolver(@Nullable InputSource returnValue) {
+			super(new NoOpResourceLoader());
+			this.shouldThrow = false;
 			this.returnValue = returnValue;
 		}
+
 
 		@Nullable
 		@Override
 		protected InputSource resolveSchemaEntity(String publicId, String systemId) {
-			if (shouldThrow) throw new IllegalStateException("FallingBackEntityResolver that throws");
+			this.fallbackInvoked = true;
+			if (this.shouldThrow) {
+				throw new ResolutionRejectedException();
+			}
 			return this.returnValue;
 		}
 	}
+
+	static class ResolutionRejectedException extends RuntimeException {}
+
 }
