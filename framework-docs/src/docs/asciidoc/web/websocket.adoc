@@ -1,6 +1,6 @@
 [[websocket]]
 = WebSockets
-[.small]#<<web-reactive.adoc#webflux-websocket, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket, See equivalent in the Reactive stack>>#
 
 This part of the reference documentation covers support for Servlet stack, WebSocket
 messaging that includes raw WebSocket interactions, WebSocket emulation through SockJS, and
@@ -13,7 +13,7 @@ include::websocket-intro.adoc[leveloffset=+1]
 
 [[websocket-server]]
 == WebSocket API
-[.small]#<<web-reactive.adoc#webflux-websocket-server, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server, See equivalent in the Reactive stack>>#
 
 The Spring Framework provides a WebSocket API that you can use to write client- and
 server-side applications that handle WebSocket messages.
@@ -22,7 +22,7 @@ server-side applications that handle WebSocket messages.
 
 [[websocket-server-handler]]
 === `WebSocketHandler`
-[.small]#<<web-reactive.adoc#webflux-websocket-server-handler, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server-handler, See equivalent in the Reactive stack>>#
 
 Creating a WebSocket server is as simple as implementing `WebSocketHandler` or, more
 likely, extending either `TextWebSocketHandler` or `BinaryWebSocketHandler`. The following
@@ -108,7 +108,7 @@ sending. One option is to wrap the `WebSocketSession` with
 
 [[websocket-server-handshake]]
 === WebSocket Handshake
-[.small]#<<web-reactive.adoc#webflux-websocket-server-handshake, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server-handshake, See equivalent in the Reactive stack>>#
 
 The easiest way to customize the initial HTTP WebSocket handshake request is through
 a `HandshakeInterceptor`, which exposes methods for "`before`" and "`after`" the handshake.
@@ -242,7 +242,7 @@ Java initialization API. The following example shows how to do so:
 
 [[websocket-server-runtime-configuration]]
 === Server Configuration
-[.small]#<<web-reactive.adoc#webflux-websocket-server-config, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server-config, See equivalent in the Reactive stack>>#
 
 Each underlying WebSocket engine exposes configuration properties that control
 runtime characteristics, such as the size of message buffer sizes, idle timeout,
@@ -365,7 +365,7 @@ The following example shows the XML configuration equivalent of the preceding ex
 
 [[websocket-server-allowed-origins]]
 === Allowed Origins
-[.small]#<<web-reactive.adoc#webflux-websocket-server-cors, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-websocket-server-cors, See equivalent in the Reactive stack>>#
 
 As of Spring Framework 4.1.5, the default behavior for WebSocket and SockJS is to accept
 only same-origin requests. It is also possible to allow all or a specified list of origins.

@@ -1,6 +1,6 @@
 [[webmvc.test]]
 = Testing
-[.small]#<<web-reactive.adoc#webflux-test, Same in Spring WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-test, See equivalent in the Reactive stack>>#
 
 This section summarizes the options available in `spring-test` for Spring MVC applications.
 

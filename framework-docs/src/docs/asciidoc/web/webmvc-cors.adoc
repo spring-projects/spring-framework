@@ -1,6 +1,6 @@
 [[mvc-cors]]
 = CORS
-[.small]#<<web-reactive.adoc#webflux-cors, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-cors, See equivalent in the Reactive stack>>#
 
 Spring MVC lets you handle CORS (Cross-Origin Resource Sharing). This section
 describes how to do so.
@@ -10,7 +10,7 @@ describes how to do so.
 
 [[mvc-cors-intro]]
 == Introduction
-[.small]#<<web-reactive.adoc#webflux-cors-intro, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-cors-intro, See equivalent in the Reactive stack>>#
 
 For security reasons, browsers prohibit AJAX calls to resources outside the current origin.
 For example, you could have your bank account in one tab and evil.com in another. Scripts
@@ -27,7 +27,7 @@ powerful workarounds based on IFRAME or JSONP.
 
 [[mvc-cors-processing]]
 == Processing
-[.small]#<<web-reactive.adoc#webflux-cors-processing, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-cors-processing, See equivalent in the Reactive stack>>#
 
 The CORS specification distinguishes between preflight, simple, and actual requests.
 To learn how CORS works, you can read
@@ -77,7 +77,7 @@ To learn more from the source or make advanced customizations, check the code be
 
 [[mvc-cors-controller]]
 == `@CrossOrigin`
-[.small]#<<web-reactive.adoc#webflux-cors-controller, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-cors-controller, See equivalent in the Reactive stack>>#
 
 The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods,
@@ -226,7 +226,7 @@ as the following example shows:
 
 [[mvc-cors-global]]
 == Global Configuration
-[.small]#<<web-reactive.adoc#webflux-cors-global, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-cors-global, See equivalent in the Reactive stack>>#
 
 In addition to fine-grained, controller method level configuration, you probably want to
 define some global CORS configuration, too. You can set URL-based `CorsConfiguration`
@@ -252,7 +252,7 @@ the `allowOriginPatterns` property may be used to match to a dynamic set of orig
 
 [[mvc-cors-global-java]]
 === Java Configuration
-[.small]#<<web-reactive.adoc#webflux-cors-global, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-cors-global, See equivalent in the Reactive stack>>#
 
 To enable CORS in the MVC Java config, you can use the `CorsRegistry` callback,
 as the following example shows:
@@ -329,7 +329,7 @@ as the following example shows:
 
 [[mvc-cors-filter]]
 == CORS Filter
-[.small]#<<webflux-cors.adoc#webflux-cors-webfilter, WebFlux>>#
+[.small]#<<webflux-cors.adoc#webflux-cors-webfilter, See equivalent in the Reactive stack>>#
 
 You can apply CORS support through the built-in
 {api-spring-framework}/web/filter/CorsFilter.html[`CorsFilter`].

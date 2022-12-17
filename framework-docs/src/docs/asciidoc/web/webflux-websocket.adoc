@@ -1,6 +1,6 @@
 [[webflux-websocket]]
 = WebSockets
-[.small]#<<web.adoc#websocket, Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket, See equivalent in the Servlet stack>>#
 
 This part of the reference documentation covers support for reactive-stack WebSocket
 messaging.
@@ -12,7 +12,7 @@ include::websocket-intro.adoc[leveloffset=+1]
 
 [[webflux-websocket-server]]
 == WebSocket API
-[.small]#<<web.adoc#websocket-server, Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server, See equivalent in the Servlet stack>>#
 
 The Spring Framework provides a WebSocket API that you can use to write client- and
 server-side applications that handle WebSocket messages.
@@ -21,7 +21,7 @@ server-side applications that handle WebSocket messages.
 
 [[webflux-websocket-server-handler]]
 === Server
-[.small]#<<web.adoc#websocket-server-handler, Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server-handler, See equivalent in the Servlet stack>>#
 
 To create a WebSocket server, you can first create a `WebSocketHandler`.
 The following example shows how to do so:
@@ -339,7 +339,7 @@ subsequently use `DataBufferUtils.release(dataBuffer)` when the buffers are cons
 
 [[webflux-websocket-server-handshake]]
 === Handshake
-[.small]#<<web.adoc#websocket-server-handshake, Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server-handshake, See equivalent in the Servlet stack>>#
 
 `WebSocketHandlerAdapter` delegates to a `WebSocketService`. By default, that is an instance
 of `HandshakeWebSocketService`, which performs basic checks on the WebSocket request and
@@ -354,7 +354,7 @@ into the attributes of the `WebSocketSession`.
 
 [[webflux-websocket-server-config]]
 === Server Configuration
-[.small]#<<web.adoc#websocket-server-runtime-configuration, Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server-runtime-configuration, See equivalent in the Servlet stack>>#
 
 The `RequestUpgradeStrategy` for each server exposes configuration specific to the
 underlying WebSocket server engine. When using the WebFlux Java config you can customize
@@ -408,7 +408,7 @@ only Tomcat and Jetty expose such options.
 
 [[webflux-websocket-server-cors]]
 === CORS
-[.small]#<<web.adoc#websocket-server-allowed-origins, Same as in the Servlet stack>>#
+[.small]#<<web.adoc#websocket-server-allowed-origins, See equivalent in the Servlet stack>>#
 
 The easiest way to configure CORS and restrict access to a WebSocket endpoint is to
 have your `WebSocketHandler` implement `CorsConfigurationSource` and return a
