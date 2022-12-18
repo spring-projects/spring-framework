@@ -1069,7 +1069,7 @@ The following listing shows the `Component` class:
 		private String name;
 		private List<Component> components = new ArrayList<Component> ();
 
-		// mmm, there is no setter method for the 'components'
+		// there is no setter method for the 'components'
 		public void addComponent(Component component) {
 			this.components.add(component);
 		}
@@ -1099,7 +1099,7 @@ The following listing shows the `Component` class:
 		var name: String? = null
 		private val components = ArrayList<Component>()
 
-		// mmm, there is no setter method for the 'components'
+		// there is no setter method for the 'components'
 		fun addComponent(component: Component) {
 			this.components.add(component)
 		}

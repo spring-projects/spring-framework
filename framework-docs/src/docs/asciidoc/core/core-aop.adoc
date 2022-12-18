@@ -4149,7 +4149,7 @@ The following example specifies a `ReflectiveLoadTimeWeaver`:
 	}
 ----
 
-If you use XML-based configuration, you can specify the fully qualified classname
+If you use XML-based configuration, you can specify the fully qualified class name
 as the value of the `weaver-class` attribute on the `<context:load-time-weaver/>`
 element. Again, the following example specifies a `ReflectiveLoadTimeWeaver`:
 

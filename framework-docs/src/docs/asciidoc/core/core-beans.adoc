@@ -605,7 +605,7 @@ creating a namespace), yet they refer to the same bean.
 
 .Java-configuration
 ****
-If you use Javaconfiguration, the `@Bean` annotation can be used to provide aliases.
+If you use Java Configuration, the `@Bean` annotation can be used to provide aliases.
 See <<beans-java-bean-annotation>> for details.
 ****
 
@@ -3981,7 +3981,7 @@ dependency type. The following table summarizes the most important `Aware` inter
 | <<aop-aj-ltw>>
 
 | `MessageSourceAware`
-| Configured strategy for resolving messages (with support for parametrization and
+| Configured strategy for resolving messages (with support for parameterization and
   internationalization).
 | <<context-introduction>>
 
@@ -5020,7 +5020,7 @@ through Java 8's `java.util.Optional`, as the following example shows:
 
 As of Spring Framework 5.0, you can also use a `@Nullable` annotation (of any kind
 in any package -- for example, `javax.annotation.Nullable` from JSR-305) or just leverage
-Kotlin builtin null-safety support:
+Kotlin built-in null-safety support:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -6324,7 +6324,7 @@ the `@RestController` annotation from Spring MVC is composed of `@Controller` an
 In addition, composed annotations can optionally redeclare attributes from
 meta-annotations to allow customization. This can be particularly useful when you
 want to only expose a subset of the meta-annotation's attributes. For example, Spring's
-`@SessionScope` annotation hardcodes the scope name to `session` but still allows
+`@SessionScope` annotation hard codes the scope name to `session` but still allows
 customization of the `proxyMode`. The following listing shows the definition of the
 `SessionScope` annotation:
 

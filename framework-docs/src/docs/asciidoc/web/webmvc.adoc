@@ -978,7 +978,7 @@ The following table describes the properties `CookieLocaleResolver`:
 | Property | Default | Description
 
 | `cookieName`
-| classname + LOCALE
+| class name + LOCALE
 | The name of the cookie
 
 | `cookieMaxAge`

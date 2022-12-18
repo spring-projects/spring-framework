@@ -4188,7 +4188,7 @@ To configure a `DriverManagerDataSource`:
 
 . Obtain a connection with `DriverManagerDataSource` as you typically obtain a JDBC
   connection.
-. Specify the fully qualified classname of the JDBC driver so that the `DriverManager`
+. Specify the fully qualified class name of the JDBC driver so that the `DriverManager`
   can load the driver class.
 . Provide a URL that varies between JDBC drivers. (See the documentation for your driver
   for the correct value.)
@@ -4346,7 +4346,7 @@ javadoc for more details.
 ==== Using `DataSourceTransactionManager`
 
 The `DataSourceTransactionManager` class is a `PlatformTransactionManager`
-implementation for single JDBC datasources. It binds a JDBC connection from the
+implementation for single JDBC data sources. It binds a JDBC connection from the
 specified data source to the currently executing thread, potentially allowing for one
 thread connection per data source.
 
@@ -6966,7 +6966,7 @@ Consider the following query:
 SELECT id, name, state FROM table WHERE (name, age) IN (('John', 35), ('Ann', 50))
 ----
 
-The preceding query can be parametrized and run as follows:
+The preceding query can be parameterized and run as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -7286,7 +7286,7 @@ javadoc for more details.
 ==== Using `R2dbcTransactionManager`
 
 The `R2dbcTransactionManager` class is a `ReactiveTransactionManager` implementation for
-single R2DBC datasources. It binds an R2DBC connection from the specified connection factory
+single R2DBC data sources. It binds an R2DBC connection from the specified connection factory
 to the subscriber `Context`, potentially allowing for one subscriber connection for each
 connection factory.
 

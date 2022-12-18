@@ -23,7 +23,7 @@ Spring's pointcut model enables pointcut reuse independent of advice types. You 
 target different advice with the same pointcut.
 
 The `org.springframework.aop.Pointcut` interface is the central interface, used to
-target advices to particular classes and methods. The complete interface follows:
+target advice to particular classes and methods. The complete interface follows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -843,7 +843,7 @@ created by the implementation of the `getObject()` method in the `ProxyFactoryBe
 method creates an AOP proxy that wraps a target object.
 
 One of the most important benefits of using a `ProxyFactoryBean` or another IoC-aware
-class to create AOP proxies is that advices and pointcuts can also be
+class to create AOP proxies is that advice and pointcuts can also be
 managed by IoC. This is a powerful feature, enabling certain approaches that are hard to
 achieve with other AOP frameworks. For example, an advice may itself reference
 application objects (besides the target, which should be available in any AOP
@@ -901,7 +901,7 @@ to be applied. You can find an example of using this feature in <<aop-global-adv
 * singleton: Whether or not the factory should return a single object, no matter how
   often the `getObject()` method is called. Several `FactoryBean` implementations offer
   such a method. The default value is `true`. If you want to use stateful advice - for
-  example, for stateful mixins - use prototype advices along with a singleton value of
+  example, for stateful mixins - use prototype advice along with a singleton value of
   `false`.
 
 
@@ -965,7 +965,7 @@ Consider a simple example of `ProxyFactoryBean` in action. This example involves
   the example.
 * An `Advisor` and an `Interceptor` used to provide advice.
 * An AOP proxy bean definition to specify the target object (the `personTarget` bean),
-  the interfaces to proxy, and the advices to apply.
+  the interfaces to proxy, and the advice to apply.
 
 The following listing shows the example:
 
@@ -1239,7 +1239,7 @@ The first step is to construct an object of type
 object, as in the preceding example, or specify the interfaces to be proxied in an alternate
 constructor.
 
-You can add advices (with interceptors as a specialized kind of advice), advisors, or both
+You can add advice (with interceptors as a specialized kind of advice), advisors, or both
 and manipulate them for the life of the `ProxyFactory`. If you add an
 `IntroductionInterceptionAroundAdvisor`, you can cause the proxy to implement additional
 interfaces.
@@ -1468,7 +1468,7 @@ Using this mechanism involves:
 
 * Specifying a `DefaultAdvisorAutoProxyCreator` bean definition.
 * Specifying any number of advisors in the same or related contexts. Note that these
-  must be advisors, not interceptors or other advices. This is necessary,
+  must be advisors, not interceptors or other advice. This is necessary,
   because there must be a pointcut to evaluate, to check the eligibility of each advice
   to candidate bean definitions.
 
@@ -1731,7 +1731,7 @@ of target source, as the following example shows:
 
 NOTE: `ThreadLocal` instances come with serious issues (potentially resulting in memory leaks) when
 incorrectly using them in multi-threaded and multi-classloader environments. You
-should always consider wrapping a threadlocal in some other class and never directly use
+should always consider wrapping a `ThreadLocal` in some other class and never directly use
 the `ThreadLocal` itself (except in the wrapper class). Also, you should
 always remember to correctly set and unset (where the latter simply involves a call to
 `ThreadLocal.set(null)`) the resource local to the thread. Unsetting should be done in
