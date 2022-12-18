@@ -2680,7 +2680,7 @@ following:
 
 
 
-[[aop-schema-instatiation-models]]
+[[aop-schema-instantiation-models]]
 === Aspect Instantiation Models
 
 The only supported instantiation model for schema-defined aspects is the singleton

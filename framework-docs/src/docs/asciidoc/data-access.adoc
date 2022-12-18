@@ -8636,7 +8636,7 @@ given `javax.xml.transform.Result`. The result is a tagging interface that basic
 represents an XML output abstraction. Concrete implementations wrap various XML
 representations, as the following table indicates:
 
-[[oxm-marshller-tbl]]
+[[oxm-marshaller-tbl]]
 |===
 | Result implementation| Wraps XML representation
 
@@ -8679,7 +8679,7 @@ This interface also has one method, which reads from the given
 with `Result`, `Source` is a tagging interface that has three concrete implementations. Each
 wraps a different XML representation, as the following table indicates:
 
-[[oxm-unmarshller-tbl]]
+[[oxm-unmarshaller-tbl]]
 |===
 | Source implementation| Wraps XML representation
 
