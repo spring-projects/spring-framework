@@ -179,7 +179,7 @@ is quite simple, as the following listing shows:
 ----
 	public interface Trigger {
 
-		Date nextExecutionTime(TriggerContext triggerContext);
+		Instant nextExecution(TriggerContext triggerContext);
 	}
 ----
 
@@ -192,11 +192,11 @@ default). The following listing shows the available methods for `Trigger` implem
 ----
 	public interface TriggerContext {
 
-		Date lastScheduledExecutionTime();
+		Instant lastScheduledExecution();
 
-		Date lastActualExecutionTime();
+		Instant lastActualExecution();
 
-		Date lastCompletionTime();
+		Instant lastCompletion();
 	}
 ----
 
