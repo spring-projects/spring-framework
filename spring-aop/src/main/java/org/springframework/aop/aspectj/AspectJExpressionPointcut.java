@@ -200,8 +200,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 */
 	@Nullable
 	private ClassLoader determinePointcutClassLoader() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+			return cbf.getBeanClassLoader();
 		}
 		if (this.pointcutDeclarationScope != null) {
 			return this.pointcutDeclarationScope.getClassLoader();
@@ -335,10 +335,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		try {
 			MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
 			targetObject = mi.getThis();
-			if (!(mi instanceof ProxyMethodInvocation)) {
+			if (!(mi instanceof ProxyMethodInvocation _pmi)) {
 				throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 			}
-			pmi = (ProxyMethodInvocation) mi;
+			pmi = _pmi;
 			thisObject = pmi.getProxy();
 		}
 		catch (IllegalStateException ex) {
@@ -404,8 +404,8 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	private RuntimeTestWalker getRuntimeTestWalker(ShadowMatch shadowMatch) {
-		if (shadowMatch instanceof DefensiveShadowMatch) {
-			return new RuntimeTestWalker(((DefensiveShadowMatch) shadowMatch).primary);
+		if (shadowMatch instanceof DefensiveShadowMatch defensiveShadowMatch) {
+			return new RuntimeTestWalker(defensiveShadowMatch.primary);
 		}
 		return new RuntimeTestWalker(shadowMatch);
 	}

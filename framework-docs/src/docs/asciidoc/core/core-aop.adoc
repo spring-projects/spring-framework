@@ -2680,7 +2680,7 @@ following:
 
 
 
-[[aop-schema-instatiation-models]]
+[[aop-schema-instantiation-models]]
 === Aspect Instantiation Models
 
 The only supported instantiation model for schema-defined aspects is the singleton
@@ -2920,8 +2920,7 @@ AspectJ. You also need to use AspectJ if you wish to advise join points other th
 simple method executions (for example, field get or set join points and so on).
 
 When you use AspectJ, you have the choice of the AspectJ language syntax (also known as
-the "`code style`") or the @AspectJ annotation style. Clearly, if you do not use Java
-5+, the choice has been made for you: Use the code style. If aspects play a large
+the "`code style`") or the @AspectJ annotation style. If aspects play a large
 role in your design, and you are able to use the https://www.eclipse.org/ajdt/[AspectJ
 Development Tools (AJDT)] plugin for Eclipse, the AspectJ language syntax is the
 preferred option. It is cleaner and simpler because the language was purposefully
@@ -4150,7 +4149,7 @@ The following example specifies a `ReflectiveLoadTimeWeaver`:
 	}
 ----
 
-If you use XML-based configuration, you can specify the fully qualified classname
+If you use XML-based configuration, you can specify the fully qualified class name
 as the value of the `weaver-class` attribute on the `<context:load-time-weaver/>`
 element. Again, the following example specifies a `ReflectiveLoadTimeWeaver`:
 

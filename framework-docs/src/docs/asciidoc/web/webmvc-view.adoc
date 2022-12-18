@@ -1,6 +1,6 @@
 [[mvc-view]]
 = View Technologies
-[.small]#<<web-reactive.adoc#webflux-view, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view, See equivalent in the Reactive stack>>#
 
 The use of view technologies in Spring MVC is pluggable. Whether you decide to use
 Thymeleaf, Groovy Markup Templates, JSPs, or other technologies is primarily a matter of
@@ -14,7 +14,7 @@ the templates are editable by external sources, since this can have security imp
 
 [[mvc-view-thymeleaf]]
 == Thymeleaf
-[.small]#<<web-reactive.adoc#webflux-view-thymeleaf, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-thymeleaf, See equivalent in the Reactive stack>>#
 
 Thymeleaf is a modern server-side Java template engine that emphasizes natural HTML
 templates that can be previewed in a browser by double-clicking, which is very helpful
@@ -34,7 +34,7 @@ See https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more deta
 
 [[mvc-view-freemarker]]
 == FreeMarker
-[.small]#<<web-reactive.adoc#webflux-view-freemarker, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-freemarker, See equivalent in the Reactive stack>>#
 
 https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
 kind of text output from HTML to email and others. The Spring Framework has built-in
@@ -44,7 +44,7 @@ integration for using Spring MVC with FreeMarker templates.
 
 [[mvc-view-freemarker-contextconfig]]
 === View Configuration
-[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig, See equivalent in the Reactive stack>>#
 
 The following example shows how to configure FreeMarker as a view technology:
 
@@ -125,7 +125,7 @@ returns a view name of `welcome`, the resolver looks for the
 
 [[mvc-views-freemarker]]
 === FreeMarker Configuration
-[.small]#<<web-reactive.adoc#webflux-views-freemarker, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-views-freemarker, See equivalent in the Reactive stack>>#
 
 You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
 `Configuration` object (which is managed by Spring) by setting the appropriate bean
@@ -164,7 +164,7 @@ with additional convenience macros for generating form input elements themselves
 
 [[mvc-view-bind-macros]]
 ==== The Bind Macros
-[.small]#<<web-reactive.adoc#webflux-view-bind-macros, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-bind-macros, See equivalent in the Reactive stack>>#
 
 A standard set of macros are maintained within the `spring-webmvc.jar` file for
 FreeMarker, so they are always available to a suitably configured application.
@@ -288,7 +288,7 @@ as the value for the `fieldType` parameter.
 
 The parameters to any of the above macros have consistent meanings:
 
-* `path`: The name of the field to bind to (ie "command.name")
+* `path`: The name of the field to bind to (for example, "command.name")
 * `options`: A `Map` of all the available values that can be selected from in the input
   field. The keys to the map represent the values that are POSTed back from the form
   and bound to the command object. Map objects stored against the keys are the labels
@@ -576,7 +576,7 @@ syntax. The following example shows a sample template for an HTML page:
 
 [[mvc-view-script]]
 == Script Views
-[.small]#<<web-reactive.adoc#webflux-view-script, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script, See equivalent in the Reactive stack>>#
 
 The Spring Framework has a built-in integration for using Spring MVC with any
 templating library that can run on top of the
@@ -602,7 +602,7 @@ TIP: The basic rule for integrating any other script engine is that it must impl
 
 [[mvc-view-script-dependencies]]
 === Requirements
-[.small]#<<web-reactive.adoc#webflux-view-script-dependencies, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script-dependencies, See equivalent in the Reactive stack>>#
 
 You need to have the script engine on your classpath, the details of which vary by script engine:
 
@@ -622,7 +622,7 @@ through https://www.webjars.org/[WebJars].
 
 [[mvc-view-script-integrate]]
 === Script Templates
-[.small]#<<web-reactive.adoc#webflux-view-script, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-script, See equivalent in the Reactive stack>>#
 
 You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
@@ -1965,7 +1965,7 @@ an external definition (by name) or as a `View` instance from the handler method
 
 [[mvc-view-jackson]]
 == Jackson
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, See equivalent in the Reactive stack>>#
 
 Spring offers support for the Jackson JSON library.
 
@@ -1973,7 +1973,7 @@ Spring offers support for the Jackson JSON library.
 
 [[mvc-view-json-mapping]]
 === Jackson-based JSON MVC Views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, See equivalent in the Reactive stack>>#
 
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
@@ -1992,7 +1992,7 @@ serializers and deserializers for specific types.
 
 [[mvc-view-xml-mapping]]
 === Jackson-based XML Views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, See equivalent in the Reactive stack>>#
 
 `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`

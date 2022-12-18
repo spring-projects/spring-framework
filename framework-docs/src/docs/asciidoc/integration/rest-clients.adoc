@@ -215,7 +215,7 @@ converters to use explicitly.
 
 [[rest-message-conversion]]
 ==== Message Conversion
-[.small]#<<web-reactive.adoc#webflux-codecs, WebFlux>>#
+[.small]#<<web-reactive.adoc#webflux-codecs, See equivalent in the Reactive stack>>#
 
 The `spring-web` module contains the `HttpMessageConverter` contract for reading and
 writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
@@ -417,7 +417,7 @@ method parameters:
 | Dynamically set the HTTP method for the request, overriding the annotation's `method` attribute
 
 | `@RequestHeader`
-| Add a request header or mutliple headers. The argument may be a `Map<String, ?>` or
+| Add a request header or multiple headers. The argument may be a `Map<String, ?>` or
   `MultiValueMap<String, ?>` with multiple headers, a `Collection<?>` of values, or an
   individual value. Type conversion is supported for non-String values.
 
@@ -432,7 +432,7 @@ method parameters:
   through the configured `ReactiveAdapterRegistry`.
 
 | `@RequestParam`
-| Add a request parameter or mutliple parameters. The argument may be a `Map<String, ?>`
+| Add a request parameter or multiple parameters. The argument may be a `Map<String, ?>`
   or `MultiValueMap<String, ?>` with multiple parameters, a `Collection<?>` of values, or
   an individual value. Type conversion is supported for non-String values.
 
@@ -446,7 +446,7 @@ method parameters:
   a Spring `Part`, or Reactive Streams `Publisher` of any of the above.
 
 | `@CookieValue`
-| Add a cookie or mutliple cookies. The argument may be a `Map<String, ?>` or
+| Add a cookie or multiple cookies. The argument may be a `Map<String, ?>` or
   `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
   individual value. Type conversion is supported for non-String values.
 

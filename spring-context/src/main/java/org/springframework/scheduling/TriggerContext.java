@@ -33,9 +33,9 @@ public interface TriggerContext {
 
 	/**
 	 * Return the clock to use for trigger calculation.
+	 * <p>Defaults to {@link Clock#systemDefaultZone()}.
 	 * @since 5.3
 	 * @see TaskScheduler#getClock()
-	 * @see Clock#systemDefaultZone()
 	 */
 	default Clock getClock() {
 		return Clock.systemDefaultZone();
@@ -44,6 +44,7 @@ public interface TriggerContext {
 	/**
 	 * Return the last <i>scheduled</i> execution time of the task,
 	 * or {@code null} if not scheduled before.
+	 * <p>The default implementation delegates to {@link #lastScheduledExecution()}.
 	 * @deprecated as of 6.0, in favor on {@link #lastScheduledExecution()}
 	 */
 	@Nullable
@@ -64,10 +65,11 @@ public interface TriggerContext {
 	/**
 	 * Return the last <i>actual</i> execution time of the task,
 	 * or {@code null} if not scheduled before.
+	 * <p>The default implementation delegates to {@link #lastActualExecution()}.
 	 * @deprecated as of 6.0, in favor on {@link #lastActualExecution()}
 	 */
-	@Deprecated(since = "6.0")
 	@Nullable
+	@Deprecated(since = "6.0")
 	default Date lastActualExecutionTime() {
 		Instant instant = lastActualExecution();
 		return instant != null ? Date.from(instant) : null;
@@ -83,6 +85,7 @@ public interface TriggerContext {
 	/**
 	 * Return the last completion time of the task,
 	 * or {@code null} if not scheduled before.
+	 * <p>The default implementation delegates to {@link #lastCompletion()}.
 	 * @deprecated as of 6.0, in favor on {@link #lastCompletion()}
 	 */
 	@Deprecated(since = "6.0")

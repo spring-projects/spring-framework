@@ -140,9 +140,9 @@ Since caches are essentially key-value stores, each invocation of a cached metho
 needs to be translated into a suitable key for cache access. The caching abstraction
 uses a simple `KeyGenerator` based on the following algorithm:
 
-* If no params are given, return `SimpleKey.EMPTY`.
-* If only one param is given, return that instance.
-* If more than one param is given, return a `SimpleKey` that contains all parameters.
+* If no parameters are given, return `SimpleKey.EMPTY`.
+* If only one parameter is given, return that instance.
+* If more than one parameter is given, return a `SimpleKey` that contains all parameters.
 
 This approach works well for most use-cases, as long as parameters have natural keys
 and implement valid `hashCode()` and `equals()` methods. If that is not the case,

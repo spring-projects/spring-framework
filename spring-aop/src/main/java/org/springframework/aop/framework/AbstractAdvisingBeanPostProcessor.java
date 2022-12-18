@@ -74,8 +74,9 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 			// Use original ClassLoader if bean class not locally loaded in overriding class loader
 			ClassLoader classLoader = getProxyClassLoader();
-			if (classLoader instanceof SmartClassLoader && classLoader != beanClass.getClassLoader()) {
-				classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+			if (classLoader instanceof SmartClassLoader smartClassLoader &&
+					classLoader != beanClass.getClassLoader()) {
+				classLoader = smartClassLoader.getOriginalClassLoader();
 			}
 			return proxyFactory.getProxyClass(classLoader);
 		}
@@ -113,8 +114,9 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 			// Use original ClassLoader if bean class not locally loaded in overriding class loader
 			ClassLoader classLoader = getProxyClassLoader();
-			if (classLoader instanceof SmartClassLoader && classLoader != bean.getClass().getClassLoader()) {
-				classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+			if (classLoader instanceof SmartClassLoader smartClassLoader &&
+					classLoader != bean.getClass().getClassLoader()) {
+				classLoader = smartClassLoader.getOriginalClassLoader();
 			}
 			return proxyFactory.getProxy(classLoader);
 		}

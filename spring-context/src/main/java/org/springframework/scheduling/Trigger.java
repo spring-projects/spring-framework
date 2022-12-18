@@ -34,6 +34,7 @@ public interface Trigger {
 
 	/**
 	 * Determine the next execution time according to the given trigger context.
+	 * <p>The default implementation delegates to {@link #nextExecution(TriggerContext)}.
 	 * @param triggerContext context object encapsulating last execution times
 	 * and last completion time
 	 * @return the next execution time as defined by the trigger,

@@ -9,7 +9,7 @@ implementations behind the common interfaces abstracts away the differences betw
 SE 5, Java SE 6, and Jakarta EE environments.
 
 Spring also features integration classes to support scheduling with the `Timer`
-(part of the JDK since 1.3) and the Quartz Scheduler ( https://www.quartz-scheduler.org/[]).
+(part of the JDK since 1.3) and the https://www.quartz-scheduler.org/[Quartz Scheduler].
 You can set up both of those schedulers by using a `FactoryBean` with optional references to
 `Timer` or `Trigger` instances, respectively. Furthermore, a convenience class for both
 the Quartz Scheduler and the `Timer` is available that lets you invoke a method of
@@ -171,7 +171,7 @@ much more flexible.
 The `Trigger` interface is essentially inspired by JSR-236 which, as of Spring 3.0,
 was not yet officially implemented. The basic idea of the `Trigger` is that execution
 times may be determined based on past execution outcomes or even arbitrary conditions.
-If these determinations do take into account the outcome of the preceding execution,
+If these determinations take into account the outcome of the preceding execution,
 that information is available within a `TriggerContext`. The `Trigger` interface itself
 is quite simple, as the following listing shows:
 
@@ -179,7 +179,7 @@ is quite simple, as the following listing shows:
 ----
 	public interface Trigger {
 
-		Date nextExecutionTime(TriggerContext triggerContext);
+		Instant nextExecution(TriggerContext triggerContext);
 	}
 ----
 
@@ -192,11 +192,11 @@ default). The following listing shows the available methods for `Trigger` implem
 ----
 	public interface TriggerContext {
 
-		Date lastScheduledExecutionTime();
+		Instant lastScheduledExecution();
 
-		Date lastActualExecutionTime();
+		Instant lastActualExecution();
 
-		Date lastCompletionTime();
+		Instant lastCompletion();
 	}
 ----
 
@@ -208,7 +208,7 @@ Spring provides two implementations of the `Trigger` interface. The most interes
 is the `CronTrigger`. It enables the scheduling of tasks based on
 <<scheduling-cron-expression,cron expressions>>.
 For example, the following task is scheduled to run 15 minutes past each hour but only
-during the 9-to-5 "`business hours`" on weekdays:
+during the 9-to-5 "business hours" on weekdays:
 
 [source,java,indent=0]
 [subs="verbatim"]
@@ -782,9 +782,9 @@ You can use these macros instead of the six-digit value, thus: `@Scheduled(cron 
 == Using the Quartz Scheduler
 
 Quartz uses `Trigger`, `Job`, and `JobDetail` objects to realize scheduling of all kinds
-of jobs. For the basic concepts behind Quartz, see
-https://www.quartz-scheduler.org/[]. For convenience purposes, Spring offers a couple of
-classes that simplify using Quartz within Spring-based applications.
+of jobs. For the basic concepts behind Quartz, see the
+https://www.quartz-scheduler.org/[Quartz Web site]. For convenience purposes, Spring
+offers a couple of classes that simplify using Quartz within Spring-based applications.
 
 
 [[scheduling-quartz-jobdetail]]
@@ -882,12 +882,13 @@ that merely invoke a method. You need only create the actual business object and
 wire up the detail object.
 
 By default, Quartz Jobs are stateless, resulting in the possibility of jobs interfering
-with each other. If you specify two triggers for the same `JobDetail`, it is
-possible that, before the first job has finished, the second one starts. If
-`JobDetail` classes implement the `Stateful` interface, this does not happen. The second
-job does not start before the first one has finished. To make jobs resulting from the
-`MethodInvokingJobDetailFactoryBean` be non-concurrent, set the `concurrent` flag to
-`false`, as the following example shows:
+with each other. If you specify two triggers for the same `JobDetail`, it is possible
+that the second one starts before the first job has finished. If `JobDetail` classes
+implement the `Stateful` interface, this does not happen: the second job does not start
+before the first one has finished.
+
+To make jobs resulting from the `MethodInvokingJobDetailFactoryBean` be non-concurrent,
+set the `concurrent` flag to `false`, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----

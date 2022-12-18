@@ -84,7 +84,7 @@ In the absence of that, they need to come up with their own conventions.
 == When to Use WebSockets
 
 WebSockets can make a web page be dynamic and interactive. However, in many cases,
-a combination of Ajax and HTTP streaming or long polling can provide a simple and
+a combination of AJAX and HTTP streaming or long polling can provide a simple and
 effective solution.
 
 For example, news, mail, and social feeds need to update dynamically, but it may be

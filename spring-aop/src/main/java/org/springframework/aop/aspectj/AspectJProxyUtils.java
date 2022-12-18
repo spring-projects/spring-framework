@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,8 @@ public abstract class AspectJProxyUtils {
 	private static boolean isAspectJAdvice(Advisor advisor) {
 		return (advisor instanceof InstantiationModelAwarePointcutAdvisor ||
 				advisor.getAdvice() instanceof AbstractAspectJAdvice ||
-				(advisor instanceof PointcutAdvisor &&
-						((PointcutAdvisor) advisor).getPointcut() instanceof AspectJExpressionPointcut));
+				(advisor instanceof PointcutAdvisor pointcutAdvisor &&
+						pointcutAdvisor.getPointcut() instanceof AspectJExpressionPointcut));
 	}
 
 	static boolean isVariableName(@Nullable String name) {

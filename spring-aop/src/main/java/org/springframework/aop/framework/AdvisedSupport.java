@@ -258,8 +258,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	@Override
 	public void addAdvisor(int pos, Advisor advisor) throws AopConfigException {
-		if (advisor instanceof IntroductionAdvisor) {
-			validateIntroductionAdvisor((IntroductionAdvisor) advisor);
+		if (advisor instanceof IntroductionAdvisor introductionAdvisor) {
+			validateIntroductionAdvisor(introductionAdvisor);
 		}
 		addAdvisorInternal(pos, advisor);
 	}
@@ -287,9 +287,9 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		}
 
 		Advisor advisor = this.advisors.remove(index);
-		if (advisor instanceof IntroductionAdvisor ia) {
+		if (advisor instanceof IntroductionAdvisor introductionAdvisor) {
 			// We need to remove introduction interfaces.
-			for (Class<?> ifc : ia.getInterfaces()) {
+			for (Class<?> ifc : introductionAdvisor.getInterfaces()) {
 				removeInterface(ifc);
 			}
 		}
@@ -387,10 +387,10 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	@Override
 	public void addAdvice(int pos, Advice advice) throws AopConfigException {
 		Assert.notNull(advice, "Advice must not be null");
-		if (advice instanceof IntroductionInfo) {
+		if (advice instanceof IntroductionInfo introductionInfo) {
 			// We don't need an IntroductionAdvisor for this kind of introduction:
 			// It's fully self-describing.
-			addAdvisor(pos, new DefaultIntroductionAdvisor(advice, (IntroductionInfo) advice));
+			addAdvisor(pos, new DefaultIntroductionAdvisor(advice, introductionInfo));
 		}
 		else if (advice instanceof DynamicIntroductionAdvice) {
 			// We need an IntroductionAdvisor for this kind of introduction.
@@ -506,8 +506,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		this.advisorChainFactory = other.advisorChainFactory;
 		this.interfaces = new ArrayList<>(other.interfaces);
 		for (Advisor advisor : advisors) {
-			if (advisor instanceof IntroductionAdvisor) {
-				validateIntroductionAdvisor((IntroductionAdvisor) advisor);
+			if (advisor instanceof IntroductionAdvisor introductionAdvisor) {
+				validateIntroductionAdvisor(introductionAdvisor);
 			}
 			Assert.notNull(advisor, "Advisor must not be null");
 			this.advisors.add(advisor);
@@ -580,8 +580,8 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		@Override
 		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof MethodCacheKey &&
-					this.method == ((MethodCacheKey) other).method));
+			return (this == other || (other instanceof MethodCacheKey methodCacheKey &&
+					this.method == methodCacheKey.method));
 		}
 
 		@Override

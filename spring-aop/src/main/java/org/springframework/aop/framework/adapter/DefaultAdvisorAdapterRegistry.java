@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 
 	@Override
 	public Advisor wrap(Object adviceObject) throws UnknownAdviceTypeException {
-		if (adviceObject instanceof Advisor) {
-			return (Advisor) adviceObject;
+		if (adviceObject instanceof Advisor advisor) {
+			return advisor;
 		}
 		if (!(adviceObject instanceof Advice advice)) {
 			throw new UnknownAdviceTypeException(adviceObject);
@@ -78,8 +78,8 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 	public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
 		List<MethodInterceptor> interceptors = new ArrayList<>(3);
 		Advice advice = advisor.getAdvice();
-		if (advice instanceof MethodInterceptor) {
-			interceptors.add((MethodInterceptor) advice);
+		if (advice instanceof MethodInterceptor methodInterceptor) {
+			interceptors.add(methodInterceptor);
 		}
 		for (AdvisorAdapter adapter : this.adapters) {
 			if (adapter.supportsAdvice(advice)) {

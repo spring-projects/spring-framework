@@ -1196,7 +1196,7 @@ response individually, and instead wait for the combined result:
 
 The above is merely one example. There are lots of other patterns and operators for putting
 together a reactive pipeline that makes many remote calls, potentially some nested,
-inter-dependent, without ever blocking until the end.
+interdependent, without ever blocking until the end.
 
 [NOTE]
 ====

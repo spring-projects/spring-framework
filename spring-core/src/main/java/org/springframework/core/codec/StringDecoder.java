@@ -45,7 +45,7 @@ import org.springframework.util.MimeTypeUtils;
  * Decode from a data buffer stream to a {@code String} stream, either splitting
  * or aggregating incoming data chunks to realign along newlines delimiters
  * and produce a stream of strings. This is useful for streaming but is also
- * necessary to ensure that that multibyte characters can be decoded correctly,
+ * necessary to ensure that multi-byte characters can be decoded correctly,
  * avoiding split-character issues. The default delimiters used by default are
  * {@code \n} and {@code \r\n} but that can be customized.
  *

@@ -961,7 +961,7 @@ leads to a number of additional challenges:
 * Testing can become slow, since each test would need to ensure that the database is in
   the correct state.
 * Since our database needs to be in a specific state, we cannot run tests in parallel.
-* Performing assertions on such items as auto-generated ids, timestamps, and others can
+* Performing assertions on such items as auto-generated IDs, timestamps, and others can
   be difficult.
 
 These challenges do not mean that we should abandon end-to-end integration testing

@@ -129,7 +129,7 @@ Typically, you need an application server's JTA capability only if your applicat
 to handle transactions across multiple resources, which is not a requirement for many
 applications. Many high-end applications use a single, highly scalable database (such as
 Oracle RAC) instead. Stand-alone transaction managers (such as
-https://www.atomikos.com/[Atomikos Transactions] and https://jotm.ow2.org/[JOTM])
+https://www.atomikos.com/[Atomikos Transactions])
 are other options. Of course, you may need other application server capabilities, such as
 Java Message Service (JMS) and Jakarta EE Connector Architecture (JCA).
 
@@ -1090,8 +1090,8 @@ application-specific `Exception` type by supplying an _exception pattern_ via th
 ----
 	<tx:advice id="txAdvice" transaction-manager="txManager">
 		<tx:attributes>
-		<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
-		<tx:method name="*"/>
+			<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
+			<tx:method name="*"/>
 		</tx:attributes>
 	</tx:advice>
 ----
@@ -1105,8 +1105,8 @@ unhandled `InstrumentNotFoundException`:
 ----
 	<tx:advice id="txAdvice">
 		<tx:attributes>
-		<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
-		<tx:method name="*"/>
+			<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
+			<tx:method name="*"/>
 		</tx:attributes>
 	</tx:advice>
 ----
@@ -1121,7 +1121,7 @@ attendant transaction:
 ----
 	<tx:advice id="txAdvice">
 		<tx:attributes>
-		<tx:method name="*" rollback-for="Throwable" no-rollback-for="InstrumentNotFoundException"/>
+			<tx:method name="*" rollback-for="Throwable" no-rollback-for="InstrumentNotFoundException"/>
 		</tx:attributes>
 	</tx:advice>
 ----
@@ -4188,7 +4188,7 @@ To configure a `DriverManagerDataSource`:
 
 . Obtain a connection with `DriverManagerDataSource` as you typically obtain a JDBC
   connection.
-. Specify the fully qualified classname of the JDBC driver so that the `DriverManager`
+. Specify the fully qualified class name of the JDBC driver so that the `DriverManager`
   can load the driver class.
 . Provide a URL that varies between JDBC drivers. (See the documentation for your driver
   for the correct value.)
@@ -4346,7 +4346,7 @@ javadoc for more details.
 ==== Using `DataSourceTransactionManager`
 
 The `DataSourceTransactionManager` class is a `PlatformTransactionManager`
-implementation for single JDBC datasources. It binds a JDBC connection from the
+implementation for single JDBC data sources. It binds a JDBC connection from the
 specified data source to the currently executing thread, potentially allowing for one
 thread connection per data source.
 
@@ -6825,7 +6825,7 @@ The following query uses a bind variable:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val first = client.sql("SELECT id, name FROM person WHERE WHERE first_name = :fn")
+	val first = client.sql("SELECT id, name FROM person WHERE first_name = :fn")
 	        .bind("fn", "Joe")
 	        .fetch().awaitSingle()
 ----
@@ -6850,7 +6850,7 @@ Without specifying further mapping details, queries return tabular results
 as `Map` whose keys are case-insensitive column names that map to their column value.
 
 You can take control over result mapping by supplying a `Function<Row, T>` that gets
-called for each `Row` so it can can return arbitrary values (singular values,
+called for each `Row` so it can return arbitrary values (singular values,
 collections and maps, and objects).
 
 The following example extracts the `name` column and emits its value:
@@ -6966,7 +6966,7 @@ Consider the following query:
 SELECT id, name, state FROM table WHERE (name, age) IN (('John', 35), ('Ann', 50))
 ----
 
-The preceding query can be parametrized and run as follows:
+The preceding query can be parameterized and run as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -7212,7 +7212,7 @@ responsibility of the administrator who sets up the `ConnectionFactory`. You
 most likely fill both roles as you develop and test code, but you do not
 necessarily have to know how the production data source is configured.
 
-When you use Spring's R2DBC layer, you can can configure your own with a
+When you use Spring's R2DBC layer, you can configure your own with a
 connection pool implementation provided by a third party. A popular
 implementation is R2DBC Pool (`r2dbc-pool`). Implementations in the Spring
 distribution are meant only for testing purposes and do not provide pooling.
@@ -7286,7 +7286,7 @@ javadoc for more details.
 ==== Using `R2dbcTransactionManager`
 
 The `R2dbcTransactionManager` class is a `ReactiveTransactionManager` implementation for
-single R2DBC datasources. It binds an R2DBC connection from the specified connection factory
+single R2DBC data sources. It binds an R2DBC connection from the specified connection factory
 to the subscriber `Context`, potentially allowing for one subscriber connection for each
 connection factory.
 
@@ -8636,7 +8636,7 @@ given `javax.xml.transform.Result`. The result is a tagging interface that basic
 represents an XML output abstraction. Concrete implementations wrap various XML
 representations, as the following table indicates:
 
-[[oxm-marshller-tbl]]
+[[oxm-marshaller-tbl]]
 |===
 | Result implementation| Wraps XML representation
 
@@ -8679,7 +8679,7 @@ This interface also has one method, which reads from the given
 with `Result`, `Source` is a tagging interface that has three concrete implementations. Each
 wraps a different XML representation, as the following table indicates:
 
-[[oxm-unmarshller-tbl]]
+[[oxm-unmarshaller-tbl]]
 |===
 | Source implementation| Wraps XML representation
 

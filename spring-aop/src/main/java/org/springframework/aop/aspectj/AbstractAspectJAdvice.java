@@ -655,10 +655,10 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	@Nullable
 	protected JoinPointMatch getJoinPointMatch() {
 		MethodInvocation mi = ExposeInvocationInterceptor.currentInvocation();
-		if (!(mi instanceof ProxyMethodInvocation)) {
+		if (!(mi instanceof ProxyMethodInvocation pmi)) {
 			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 		}
-		return getJoinPointMatch((ProxyMethodInvocation) mi);
+		return getJoinPointMatch(pmi);
 	}
 
 	// Note: We can't use JoinPointMatch.getClass().getName() as the key, since
