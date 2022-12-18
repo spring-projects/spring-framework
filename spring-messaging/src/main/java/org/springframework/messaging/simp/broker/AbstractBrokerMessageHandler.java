@@ -130,7 +130,7 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Return destination prefixes prefixes to use to filter messages to forward
+	 * Return destination prefixes to use to filter messages to forward
 	 * to the broker. Messages that have a destination and where the destination
 	 * doesn't match are ignored.
 	 * <p>By default this is not set.

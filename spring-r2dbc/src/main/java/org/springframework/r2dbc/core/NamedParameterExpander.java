@@ -74,7 +74,7 @@ class NamedParameterExpander {
 	 * placeholders to be used for a select list. Select lists should be limited
 	 * to 100 or fewer elements. A larger number of elements is not guaranteed to be
 	 * supported by the database and is strictly vendor-dependent.
-	 * @param sql sql the original SQL statement
+	 * @param sql the original SQL statement
 	 * @param bindMarkersFactory the bind marker factory
 	 * @param paramSource the source for named parameters
 	 * @return the expanded sql that accepts bind parameters and allows for execution
