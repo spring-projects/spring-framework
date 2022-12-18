@@ -6825,7 +6825,7 @@ The following query uses a bind variable:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val first = client.sql("SELECT id, name FROM person WHERE WHERE first_name = :fn")
+	val first = client.sql("SELECT id, name FROM person WHERE first_name = :fn")
 	        .bind("fn", "Joe")
 	        .fetch().awaitSingle()
 ----
