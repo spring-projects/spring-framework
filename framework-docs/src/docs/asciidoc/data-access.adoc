@@ -1090,8 +1090,8 @@ application-specific `Exception` type by supplying an _exception pattern_ via th
 ----
 	<tx:advice id="txAdvice" transaction-manager="txManager">
 		<tx:attributes>
-		<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
-		<tx:method name="*"/>
+			<tx:method name="get*" read-only="true" rollback-for="NoProductInStockException"/>
+			<tx:method name="*"/>
 		</tx:attributes>
 	</tx:advice>
 ----
@@ -1105,8 +1105,8 @@ unhandled `InstrumentNotFoundException`:
 ----
 	<tx:advice id="txAdvice">
 		<tx:attributes>
-		<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
-		<tx:method name="*"/>
+			<tx:method name="updateStock" no-rollback-for="InstrumentNotFoundException"/>
+			<tx:method name="*"/>
 		</tx:attributes>
 	</tx:advice>
 ----
@@ -1121,7 +1121,7 @@ attendant transaction:
 ----
 	<tx:advice id="txAdvice">
 		<tx:attributes>
-		<tx:method name="*" rollback-for="Throwable" no-rollback-for="InstrumentNotFoundException"/>
+			<tx:method name="*" rollback-for="Throwable" no-rollback-for="InstrumentNotFoundException"/>
 		</tx:attributes>
 	</tx:advice>
 ----

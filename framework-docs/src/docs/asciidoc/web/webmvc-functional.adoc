@@ -238,22 +238,22 @@ allows you to send Strings, or other objects as JSON. For example:
 .Java
 ----
 	public RouterFunction<ServerResponse> sse() {
-        return route(GET("/sse"), request -> ServerResponse.sse(sseBuilder -> {
-                	// Save the sseBuilder object somewhere..
-                }));
+		return route(GET("/sse"), request -> ServerResponse.sse(sseBuilder -> {
+					// Save the sseBuilder object somewhere..
+				}));
 	}
 
 	// In some other thread, sending a String
 	sseBuilder.send("Hello world");
 
 	// Or an object, which will be transformed into JSON
-    Person person = ...
+	Person person = ...
 	sseBuilder.send(person);
 
-    // Customize the event by using the other methods
-    sseBuilder.id("42")
-            .event("sse event")
-            .data(person);
+	// Customize the event by using the other methods
+	sseBuilder.id("42")
+			.event("sse event")
+			.data(person);
 
 	// and done at some point
 	sseBuilder.complete();
@@ -261,23 +261,23 @@ allows you to send Strings, or other objects as JSON. For example:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-    fun sse(): RouterFunction<ServerResponse> = router {
-        GET("/sse") { request -> ServerResponse.sse { sseBuilder ->
-            // Save the sseBuilder object somewhere..
-        }
-    }
+	fun sse(): RouterFunction<ServerResponse> = router {
+		GET("/sse") { request -> ServerResponse.sse { sseBuilder ->
+			// Save the sseBuilder object somewhere..
+		}
+	}
 
 	// In some other thread, sending a String
 	sseBuilder.send("Hello world")
 
 	// Or an object, which will be transformed into JSON
-    val person = ...
+	val person = ...
 	sseBuilder.send(person)
 
-    // Customize the event by using the other methods
-    sseBuilder.id("42")
-            .event("sse event")
-            .data(person)
+	// Customize the event by using the other methods
+	sseBuilder.id("42")
+			.event("sse event")
+			.data(person)
 
 	// and done at some point
 	sseBuilder.complete()
