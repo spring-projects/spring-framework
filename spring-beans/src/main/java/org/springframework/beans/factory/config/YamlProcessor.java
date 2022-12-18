@@ -187,6 +187,9 @@ public abstract class YamlProcessor {
 	protected Yaml createYaml() {
 		LoaderOptions loaderOptions = new LoaderOptions();
 		loaderOptions.setAllowDuplicateKeys(false);
+		loaderOptions.setNestingDepthLimit(10);
+		loaderOptions.setAllowRecursiveKeys(false);
+		loaderOptions.setMaxAliasesForCollections(20);
 		DumperOptions dumperOptions = new DumperOptions();
 		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(dumperOptions),
 				dumperOptions, loaderOptions);
