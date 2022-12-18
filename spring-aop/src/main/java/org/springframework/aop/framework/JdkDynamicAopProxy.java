@@ -262,15 +262,15 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		}
 
 		JdkDynamicAopProxy otherProxy;
-		if (other instanceof JdkDynamicAopProxy) {
-			otherProxy = (JdkDynamicAopProxy) other;
+		if (other instanceof JdkDynamicAopProxy jdkDynamicAopProxy) {
+			otherProxy = jdkDynamicAopProxy;
 		}
 		else if (Proxy.isProxyClass(other.getClass())) {
 			InvocationHandler ih = Proxy.getInvocationHandler(other);
-			if (!(ih instanceof JdkDynamicAopProxy)) {
+			if (!(ih instanceof JdkDynamicAopProxy jdkDynamicAopProxy)) {
 				return false;
 			}
-			otherProxy = (JdkDynamicAopProxy) ih;
+			otherProxy = jdkDynamicAopProxy;
 		}
 		else {
 			// Not a valid comparison...

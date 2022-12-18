@@ -274,8 +274,8 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 			this.declaredPointcut = declaredPointcut;
 			this.preInstantiationPointcut = preInstantiationPointcut;
-			if (aspectInstanceFactory instanceof LazySingletonAspectInstanceFactoryDecorator) {
-				this.aspectInstanceFactory = (LazySingletonAspectInstanceFactoryDecorator) aspectInstanceFactory;
+			if (aspectInstanceFactory instanceof LazySingletonAspectInstanceFactoryDecorator lazyFactory) {
+				this.aspectInstanceFactory = lazyFactory;
 			}
 		}
 
