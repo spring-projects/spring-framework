@@ -104,7 +104,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		return this.inputStream;
 	}
 	
-	protected ServletInputStream retrieveServletInputStream() {
+	protected ServletInputStream retrieveServletInputStream() throws IOException {
 		return new ContentCachingInputStream(this, getRequest().getInputStream());
 	}
 
