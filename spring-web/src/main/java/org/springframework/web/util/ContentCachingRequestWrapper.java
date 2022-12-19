@@ -97,14 +97,14 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		if (this.inputStream == null) {
 			synchronized (cachedContent) {
 				if (this.inputStream == null) {
-					this.inputStream = retrieveServletInputStream();
+					this.inputStream = buildInputStream();
 				}
 			}
 		}
 		return this.inputStream;
 	}
 	
-	protected ServletInputStream retrieveServletInputStream() throws IOException {
+	protected ServletInputStream buildInputStream() throws IOException {
 		return new ContentCachingInputStream(this, getRequest().getInputStream());
 	}
 
@@ -234,12 +234,12 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		public int read() throws IOException {
 			int ch = this.is.read();
 			if (ch != -1 && !this.overflow) {
-				if (request.contentCacheLimit != null && request.cachedContent.size() == request.contentCacheLimit) {
+				if (this.request.contentCacheLimit != null && this.request.cachedContent.size() == this.request.contentCacheLimit) {
 					this.overflow = true;
-					request.handleContentOverflow(request.contentCacheLimit);
+					this.request.handleContentOverflow(this.request.contentCacheLimit);
 				}
 				else {
-					request.cachedContent.write(ch);
+					this.request.cachedContent.write(ch);
 				}
 			}
 			return ch;
@@ -254,14 +254,14 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 		private void writeToCache(final byte[] b, final int off, int count) {
 			if (!this.overflow && count > 0) {
-				if (request.contentCacheLimit != null &&
-						count + request.cachedContent.size() > request.contentCacheLimit) {
+				if (this.request.contentCacheLimit != null &&
+						count + this.request.cachedContent.size() > this.request.contentCacheLimit) {
 					this.overflow = true;
-					request.cachedContent.write(b, off, request.contentCacheLimit - request.cachedContent.size());
-					request.handleContentOverflow(request.contentCacheLimit);
+					this.request.cachedContent.write(b, off, this.request.contentCacheLimit - this.request.cachedContent.size());
+					this.request.handleContentOverflow(this.request.contentCacheLimit);
 					return;
 				}
-				request.cachedContent.write(b, off, count);
+				this.request.cachedContent.write(b, off, count);
 			}
 		}
 
