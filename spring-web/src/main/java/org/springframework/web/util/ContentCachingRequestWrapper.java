@@ -55,16 +55,16 @@ import org.springframework.lang.Nullable;
  */
 public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
-	private final ByteArrayOutputStream cachedContent;
+	protected final ByteArrayOutputStream cachedContent;
 
 	@Nullable
-	private final Integer contentCacheLimit;
+	protected final Integer contentCacheLimit;
 
 	@Nullable
-	private ServletInputStream inputStream;
+	protected ServletInputStream inputStream;
 
 	@Nullable
-	private BufferedReader reader;
+	protected BufferedReader reader;
 
 
 	/**
@@ -95,7 +95,11 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
 		if (this.inputStream == null) {
-			this.inputStream = new ContentCachingInputStream(getRequest().getInputStream());
+			synchronized (cachedContent) {
+				if (this.inputStream == null) {
+					this.inputStream = new ContentCachingInputStream(this, getRequest().getInputStream());
+				}
+			}
 		}
 		return this.inputStream;
 	}
@@ -147,13 +151,13 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	}
 
 
-	private boolean isFormPost() {
+	protected boolean isFormPost() {
 		String contentType = getContentType();
 		return (contentType != null && contentType.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE) &&
 				HttpMethod.POST.matches(getMethod()));
 	}
 
-	private void writeRequestParametersToCachedContent() {
+	protected void writeRequestParametersToCachedContent() {
 		try {
 			if (this.cachedContent.size() == 0) {
 				String requestEncoding = getCharacterEncoding();
@@ -206,30 +210,32 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	 * @since 4.3.6
 	 * @see #ContentCachingRequestWrapper(HttpServletRequest, int)
 	 */
-	protected void handleContentOverflow(int contentCacheLimit) {
-	}
+	protected void handleContentOverflow(int contentCacheLimit) {}
 
 
-	private class ContentCachingInputStream extends ServletInputStream {
+	public static class ContentCachingInputStream extends ServletInputStream {
 
-		private final ServletInputStream is;
+		protected final ServletInputStream is;
+		
+		protected ContentCachingRequestWrapper request;
+		
+		protected boolean overflow = false;
 
-		private boolean overflow = false;
-
-		public ContentCachingInputStream(ServletInputStream is) {
+		public ContentCachingInputStream(ContentCachingRequestWrapper request, ServletInputStream is) {
 			this.is = is;
+			this.request = request;
 		}
 
 		@Override
 		public int read() throws IOException {
 			int ch = this.is.read();
 			if (ch != -1 && !this.overflow) {
-				if (contentCacheLimit != null && cachedContent.size() == contentCacheLimit) {
+				if (request.contentCacheLimit != null && request.cachedContent.size() == request.contentCacheLimit) {
 					this.overflow = true;
-					handleContentOverflow(contentCacheLimit);
+					request.handleContentOverflow(request.contentCacheLimit);
 				}
 				else {
-					cachedContent.write(ch);
+					request.cachedContent.write(ch);
 				}
 			}
 			return ch;
@@ -244,14 +250,14 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 		private void writeToCache(final byte[] b, final int off, int count) {
 			if (!this.overflow && count > 0) {
-				if (contentCacheLimit != null &&
-						count + cachedContent.size() > contentCacheLimit) {
+				if (request.contentCacheLimit != null &&
+						count + request.cachedContent.size() > request.contentCacheLimit) {
 					this.overflow = true;
-					cachedContent.write(b, off, contentCacheLimit - cachedContent.size());
-					handleContentOverflow(contentCacheLimit);
+					request.cachedContent.write(b, off, request.contentCacheLimit - request.cachedContent.size());
+					request.handleContentOverflow(request.contentCacheLimit);
 					return;
 				}
-				cachedContent.write(b, off, count);
+				request.cachedContent.write(b, off, count);
 			}
 		}
 
