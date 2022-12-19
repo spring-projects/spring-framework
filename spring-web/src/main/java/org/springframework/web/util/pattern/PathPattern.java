@@ -304,7 +304,7 @@ public class PathPattern implements Comparable<PathPattern> {
 		// Find first path element that is not a separator or a literal (i.e. the first pattern based element)
 		PathElement elem = this.head;
 		while (elem != null) {
-			if (elem.getWildcardCount() != 0 || elem.getCaptureCount() != 0) {
+			if (!elem.isLiteral()) {
 				break;
 			}
 			elem = elem.next;

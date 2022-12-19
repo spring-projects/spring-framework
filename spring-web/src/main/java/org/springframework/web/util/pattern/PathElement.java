@@ -25,6 +25,7 @@ import org.springframework.web.util.pattern.PathPattern.MatchingContext;
  * Common supertype for the Ast nodes created to represent a path pattern.
  *
  * @author Andy Clement
+ * @author Brian Clozel
  * @since 5.0
  */
 abstract class PathElement {
@@ -97,6 +98,14 @@ abstract class PathElement {
 	 */
 	public int getScore() {
 		return 0;
+	}
+
+	/**
+	 * Return whether this PathElement can be strictly {@link String#compareTo(String) compared}
+	 * against another element for matching.
+	 */
+	public boolean isLiteral() {
+		return false;
 	}
 
 	/**

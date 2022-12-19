@@ -118,6 +118,10 @@ class LiteralPathElement extends PathElement {
 		return this.text;
 	}
 
+	@Override
+	public boolean isLiteral() {
+		return true;
+	}
 
 	@Override
 	public String toString() {

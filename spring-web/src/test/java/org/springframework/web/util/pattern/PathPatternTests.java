@@ -686,6 +686,7 @@ public class PathPatternTests {
 		checkExtractPathWithinPattern("/docs/commit.html", "/docs/commit.html", "");
 		checkExtractPathWithinPattern("/docs/*", "/docs/cvs/commit", "cvs/commit");
 		checkExtractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit.html", "commit.html");
+		checkExtractPathWithinPattern("/docs/cvs/file.*.html", "/docs/cvs/file.sha.html", "file.sha.html");
 		checkExtractPathWithinPattern("/docs/**", "/docs/cvs/commit", "cvs/commit");
 		checkExtractPathWithinPattern("/doo/{*foobar}", "/doo/customer.html", "customer.html");
 		checkExtractPathWithinPattern("/doo/{*foobar}", "/doo/daa/customer.html", "daa/customer.html");

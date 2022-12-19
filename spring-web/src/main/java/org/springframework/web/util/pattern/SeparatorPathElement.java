@@ -67,6 +67,10 @@ class SeparatorPathElement extends PathElement {
 		return new char[] {this.separator};
 	}
 
+	@Override
+	public boolean isLiteral() {
+		return true;
+	}
 
 	@Override
 	public String toString() {
