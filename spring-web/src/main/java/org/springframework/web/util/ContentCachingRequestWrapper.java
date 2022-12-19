@@ -97,14 +97,14 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		if (this.inputStream == null) {
 			synchronized (cachedContent) {
 				if (this.inputStream == null) {
-					this.inputStream = buildInputStream();
+					this.inputStream = retrieveServletInputStream();
 				}
 			}
 		}
 		return this.inputStream;
 	}
 	
-	protected ServletInputStream buildInputStream() {
+	protected ServletInputStream retrieveServletInputStream() {
 		return new ContentCachingInputStream(this, getRequest().getInputStream());
 	}
 
