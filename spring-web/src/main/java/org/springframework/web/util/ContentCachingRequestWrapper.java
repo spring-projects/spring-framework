@@ -221,7 +221,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 		protected final ServletInputStream is;
 
-		protected ContentCachingRequestWrapper request;
+		protected final ContentCachingRequestWrapper request;
 
 		protected boolean overflow = false;
 
