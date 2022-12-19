@@ -95,7 +95,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
 		if (this.inputStream == null) {
-			synchronized (cachedContent) {
+			synchronized (this.cachedContent) {
 				if (this.inputStream == null) {
 					this.inputStream = buildInputStream();
 				}
@@ -103,7 +103,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		}
 		return this.inputStream;
 	}
-	
+
 	protected ServletInputStream buildInputStream() throws IOException {
 		return new ContentCachingInputStream(this, getRequest().getInputStream());
 	}
@@ -220,9 +220,9 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	public static class ContentCachingInputStream extends ServletInputStream {
 
 		protected final ServletInputStream is;
-		
+
 		protected ContentCachingRequestWrapper request;
-		
+
 		protected boolean overflow = false;
 
 		public ContentCachingInputStream(ContentCachingRequestWrapper request, ServletInputStream is) {
