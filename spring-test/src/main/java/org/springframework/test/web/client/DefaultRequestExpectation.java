@@ -34,6 +34,9 @@ import org.springframework.util.Assert;
  */
 public class DefaultRequestExpectation implements RequestExpectation {
 
+	@Nullable
+	private final ResponseCreator implicitResponseCreator;
+
 	private final RequestCount requestCount;
 
 	private final List<RequestMatcher> requestMatchers = new ArrayList<>(1);
@@ -48,10 +51,24 @@ public class DefaultRequestExpectation implements RequestExpectation {
 	 * @param expectedCount the expected request expectedCount
 	 */
 	public DefaultRequestExpectation(ExpectedCount expectedCount, RequestMatcher requestMatcher) {
+		this(expectedCount, requestMatcher, null);
+	}
+
+	/**
+	 * Create a new request expectation that should be called a number of times
+	 * as indicated by {@code RequestCount}, with support for {@link #andPerformRequest()}
+	 * thanks to a provided ResponseCreator.
+	 * @param expectedCount the expected request expectedCount
+	 * @param implicitResponseCreator the {@link ResponseCreator} to set up when
+	 * {@link #andPerformRequest()} is called, or null if the later shouldn't be supported
+	 */
+	public DefaultRequestExpectation(ExpectedCount expectedCount, RequestMatcher requestMatcher,
+			@Nullable ResponseCreator implicitResponseCreator) {
 		Assert.notNull(expectedCount, "ExpectedCount is required");
 		Assert.notNull(requestMatcher, "RequestMatcher is required");
 		this.requestCount = new RequestCount(expectedCount);
 		this.requestMatchers.add(requestMatcher);
+		this.implicitResponseCreator = implicitResponseCreator;
 	}
 
 
@@ -73,6 +90,15 @@ public class DefaultRequestExpectation implements RequestExpectation {
 		Assert.notNull(requestMatcher, "RequestMatcher is required");
 		this.requestMatchers.add(requestMatcher);
 		return this;
+	}
+
+	@Override
+	public void andPerformRequest() {
+		if (this.implicitResponseCreator == null) {
+			throw new UnsupportedOperationException("andPerformRequest is only supported "
+					+ "if an implicit ResponseCreator is provided at construction, which was not the case");
+		}
+		this.responseCreator = this.implicitResponseCreator;
 	}
 
 	@Override

@@ -19,6 +19,7 @@ package org.springframework.test.web.client;
 import java.io.IOException;
 
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestFactory;
 
 /**
  * {@code RequestExpectationManager} that matches requests to expectations
@@ -31,6 +32,12 @@ public class UnorderedRequestExpectationManager extends AbstractRequestExpectati
 
 	private final RequestExpectationGroup remainingExpectations = new RequestExpectationGroup();
 
+	public UnorderedRequestExpectationManager(ClientHttpRequestFactory actualRequestFactory) {
+		super(actualRequestFactory);
+	}
+
+	public UnorderedRequestExpectationManager() {
+	}
 
 	@Override
 	protected void afterExpectationsDeclared() {

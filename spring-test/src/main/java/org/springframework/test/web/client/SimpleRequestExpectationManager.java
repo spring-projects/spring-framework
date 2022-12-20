@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -44,6 +45,12 @@ public class SimpleRequestExpectationManager extends AbstractRequestExpectationM
 	/** Track expectations that have a remaining count. */
 	private final RequestExpectationGroup repeatExpectations = new RequestExpectationGroup();
 
+	public SimpleRequestExpectationManager(ClientHttpRequestFactory actualRequestFactory) {
+		super(actualRequestFactory);
+	}
+
+	public SimpleRequestExpectationManager() {
+	}
 
 	@Override
 	protected void afterExpectationsDeclared() {

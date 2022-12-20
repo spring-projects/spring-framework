@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.client;
 
+import java.io.IOException;
 import java.net.SocketException;
 import java.net.URI;
 
@@ -23,8 +24,13 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -194,6 +200,38 @@ class SimpleRequestExpectationManagerTests {
 				this.manager.validateRequest(createRequest(GET, "/foo")));
 		this.manager.validateRequest(createRequest(POST, "/handle-error"));
 		this.manager.verify();
+	}
+
+
+	@Test
+	void rejectAndPerformRequestWhenNoImplicitResponseCreator() {
+		ResponseActions responseActions = this.manager.expectRequest(once(), requestTo("/bar"))
+				.andExpect(method(GET));
+
+		//attempt to perform the "original" request, but the factory hasn't been captured
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(responseActions::andPerformRequest)
+				.withMessage("andPerformRequest is only supported if an implicit ResponseCreator is provided at construction, which was not the case");
+	}
+
+	@Test
+	void delegatingToImplicitResponseCreator() throws IOException {
+		final MockClientHttpResponse expectedMockResponse = new MockClientHttpResponse(new byte[0], 404);
+		ClientHttpRequestFactory originalFactory = (uri, httpMethod) -> {
+			MockClientHttpRequest originalMockRequest = new MockClientHttpRequest(httpMethod, uri);
+			originalMockRequest.setResponse(expectedMockResponse);
+			return originalMockRequest;
+		};
+		SimpleRequestExpectationManager managerWithOriginalFactory = new SimpleRequestExpectationManager(originalFactory);
+
+		ResponseActions responseActions = managerWithOriginalFactory.expectRequest(once(), requestTo("/bar"))
+				.andExpect(method(GET));
+
+		//set up the implicit ResponseCreator which perform the "original" request
+		assertThatCode(responseActions::andPerformRequest).doesNotThrowAnyException();
+
+		//verify validation actually triggers the "original response" creator
+		ClientHttpResponse response = managerWithOriginalFactory.validateRequest(createRequest(GET, "/bar"));
+		assertThat(response).as("created response").isSameAs(expectedMockResponse);
 	}
 
 

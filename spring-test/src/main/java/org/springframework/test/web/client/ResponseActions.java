@@ -37,4 +37,21 @@ public interface ResponseActions {
 	 */
 	void andRespond(ResponseCreator responseCreator);
 
+	/**
+	 * Attempt to {@link #andRespond(ResponseCreator) activate} an implicit {@link ResponseCreator}
+	 * which "performs the request" in a predefined way (typically, execute the original request
+	 * rather than a mock one).
+	 * <p>This may not be supported by all implementations and needs
+	 * specific support / setup. Vanilla {@link RequestExpectationManager}
+	 * creates {@link DefaultRequestExpectation expectations} which do
+	 * support this by calling the original {@link org.springframework.http.client.ClientHttpRequestFactory}
+	 * and executing the request.
+	 * @throws UnsupportedOperationException if the implementation doesn't define/support
+	 * an implicit ResponseCreator
+	 */
+	default void andPerformRequest() {
+		throw new UnsupportedOperationException("andPerformRequest is not supported, "
+				+ "implementation doesn't define an implicit ResponseCreator mechanism");
+	}
+
 }
