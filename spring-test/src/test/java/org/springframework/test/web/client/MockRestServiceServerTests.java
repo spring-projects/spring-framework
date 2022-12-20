@@ -17,13 +17,22 @@
 package org.springframework.test.web.client;
 
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer.MockRestServiceServerBuilder;
+import org.springframework.test.web.client.response.ExecutingResponseCreator;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
@@ -86,6 +95,43 @@ class MockRestServiceServerTests {
 		this.restTemplate.getForObject("/bar", Void.class);
 		this.restTemplate.getForObject("/foo", Void.class);
 		server.verify();
+	}
+
+	@Test
+	void executingResponseCreator() {
+		RestTemplate restTemplateWithMockEcho = createEchoRestTemplate();
+
+		final ExecutingResponseCreator withActualCall = new ExecutingResponseCreator(restTemplateWithMockEcho.getRequestFactory());
+		MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplateWithMockEcho).build();
+		server.expect(requestTo("/profile")).andRespond(withSuccess());
+		server.expect(requestTo("/quoteOfTheDay")).andRespond(withActualCall);
+
+		var response1 = restTemplateWithMockEcho.getForEntity("/profile", String.class);
+		var response2 = restTemplateWithMockEcho.getForEntity("/quoteOfTheDay", String.class);
+		server.verify();
+
+		assertThat(response1.getStatusCode().value())
+				.as("response1 status").isEqualTo(200);
+		assertThat(response1.getBody())
+				.as("response1 body").isNullOrEmpty();
+		assertThat(response2.getStatusCode().value())
+				.as("response2 status").isEqualTo(300);
+		assertThat(response2.getBody())
+				.as("response2 body").isEqualTo("echo from /quoteOfTheDay");
+	}
+
+	private static RestTemplate createEchoRestTemplate() {
+		final ClientHttpRequestFactory echoRequestFactory = (uri, httpMethod) -> {
+			final MockClientHttpRequest req = new MockClientHttpRequest(httpMethod, uri);
+			String body = "echo from " + uri.getPath();
+			final ClientHttpResponse resp = new MockClientHttpResponse(body.getBytes(StandardCharsets.UTF_8),
+					// Instead of 200, we use a less-common status code on purpose
+					HttpStatus.MULTIPLE_CHOICES);
+			resp.getHeaders().setContentType(MediaType.TEXT_PLAIN);
+			req.setResponse(resp);
+			return req;
+		};
+		return new RestTemplate(echoRequestFactory);
 	}
 
 	@Test

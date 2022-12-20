@@ -33,8 +33,15 @@ import org.springframework.test.web.client.ResponseCreator;
  * <p><strong>Eclipse users:</strong> consider adding this class as a Java editor
  * favorite. To navigate, open the Preferences and type "favorites".
  *
+ * <p>See also {@link ExecutingResponseCreator} for a {@code ResponseCreator} that is
+ * capable of performing an actual request. That case is not offered as a factory method
+ * here because of the early setup that is likely needed (capturing a request factory
+ * which wouldn't be available anymore when the factory methods are typically invoked,
+ * e.g. replaced in a {@code RestTemplate} by the {@code MockRestServiceServer}).
+ *
  * @author Rossen Stoyanchev
  * @since 3.2
+ * @see ExecutingResponseCreator
  */
 public abstract class MockRestResponseCreators {
 
