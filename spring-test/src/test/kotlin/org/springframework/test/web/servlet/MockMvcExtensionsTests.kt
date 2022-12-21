@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.hamcrest.CoreMatchers
 import org.junit.jupiter.api.Test
@@ -25,6 +26,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_ATOM_XML
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_XML
+import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
@@ -181,6 +183,22 @@ class MockMvcExtensionsTests {
 				attribute("foo", "foo")
 			}
 		}
+	}
+
+	@Test
+	fun `andExpectAll reports multiple assertion errors`() {
+		assertThatCode {
+			mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee") {
+				accept = APPLICATION_JSON
+			}.andExpectAll {
+				status { is4xxClientError() }
+				content { contentType(TEXT_PLAIN) }
+				jsonPath("$.name") { value("Lee") }
+			}
+		}
+				.hasMessage("Multiple Exceptions (2):\n" +
+						"Range for response status value 200 expected:<CLIENT_ERROR> but was:<SUCCESSFUL>\n" +
+						"Content type expected:<text/plain> but was:<application/json>")
 	}
 
 
