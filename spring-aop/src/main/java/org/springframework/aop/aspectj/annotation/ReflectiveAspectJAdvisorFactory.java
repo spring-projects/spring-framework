@@ -47,6 +47,7 @@ import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.OrderUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConvertingComparator;
 import org.springframework.lang.Nullable;
@@ -91,7 +92,15 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 					return (ann != null ? ann.getAnnotation() : null);
 				});
 		Comparator<Method> methodNameComparator = new ConvertingComparator<>(Method::getName);
-		adviceMethodComparator = adviceKindComparator.thenComparing(methodNameComparator);
+		Comparator<Method> methodOrderComparator = new ConvertingComparator<>(method -> {
+			final Integer order = OrderUtils.getOrder(method);
+			if (order == null) {
+				return Integer.MAX_VALUE;
+			}
+			return order;
+		});
+
+		adviceMethodComparator = adviceKindComparator.thenComparing(methodOrderComparator).thenComparing(methodNameComparator);
 	}
 
 

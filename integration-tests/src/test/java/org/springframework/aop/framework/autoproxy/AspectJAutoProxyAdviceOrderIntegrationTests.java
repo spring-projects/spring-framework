@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.core.annotation.Order;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -62,11 +63,11 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		void afterAdviceIsInvokedLast(@Autowired Echo echo, @Autowired AfterAdviceFirstAspect aspect) throws Exception {
 			assertThat(aspect.invocations).isEmpty();
 			assertThat(echo.echo(42)).isEqualTo(42);
-			assertThat(aspect.invocations).containsExactly("around - start", "before", "after returning", "after", "around - end");
+			assertThat(aspect.invocations).containsExactly("around - start", "before-1", "before", "after returning", "after", "around - end");
 
 			aspect.invocations.clear();
 			assertThatException().isThrownBy(() -> echo.echo(new Exception()));
-			assertThat(aspect.invocations).containsExactly("around - start", "before", "after throwing", "after", "around - end");
+			assertThat(aspect.invocations).containsExactly("around - start", "before-1", "before", "after throwing", "after", "around - end");
 		}
 	}
 
@@ -168,8 +169,15 @@ class AspectJAutoProxyAdviceOrderIntegrationTests {
 		}
 
 		@Before("echo()")
+		@Order(0)
 		void before() {
 			invocations.add("before");
+		}
+
+		@Before("echo()")
+		@Order(-1)
+		void before1() {
+			invocations.add("before-1");
 		}
 
 		@Around("echo()")
