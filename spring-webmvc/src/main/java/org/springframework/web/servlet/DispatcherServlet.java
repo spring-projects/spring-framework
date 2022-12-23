@@ -116,9 +116,9 @@ import org.springframework.web.util.WebUtils;
  * {@link org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator}.
  *
  * <li>The dispatcher's strategy for resolving multipart requests is determined by a
- * {@link org.springframework.web.multipart.MultipartResolver} implementation. An
- * implementation for Servlet 3 is included. The MultipartResolver bean name is
- * "multipartResolver"; default is none.
+ * {@link org.springframework.web.multipart.MultipartResolver} implementation.
+ * An implementation for standard Servlet multipart processing is included.
+ * The MultipartResolver bean name is "multipartResolver"; default is none.
  *
  * <li>Its locale resolution strategy is determined by a {@link LocaleResolver}.
  * Out-of-the-box implementations work via HTTP accept header, cookie, or session.
@@ -318,8 +318,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	private LocaleResolver localeResolver;
 
 	/** ThemeResolver used by this servlet. */
-	@Nullable
 	@Deprecated
+	@Nullable
 	private ThemeResolver themeResolver;
 
 	/** List of HandlerMappings used by this servlet. */
@@ -808,8 +808,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @return the ThemeSource, if any
 	 * @see #getWebApplicationContext()
 	 */
-	@Nullable
 	@Deprecated
+	@Nullable
 	public final org.springframework.ui.context.ThemeSource getThemeSource() {
 		return (getWebApplicationContext() instanceof org.springframework.ui.context.ThemeSource ?
 				(org.springframework.ui.context.ThemeSource) getWebApplicationContext() : null);

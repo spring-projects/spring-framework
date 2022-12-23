@@ -51,7 +51,7 @@ import static org.mockito.Mockito.verify;
  */
 public class SQLErrorCodeSQLExceptionTranslatorTests {
 
-	private static SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
+	private static final SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
 	static {
 		ERROR_CODES.setBadSqlGrammarCodes("1", "2");
 		ERROR_CODES.setInvalidResultSetAccessCodes("3", "4");
@@ -64,6 +64,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void errorCodeTranslation() {
 		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);

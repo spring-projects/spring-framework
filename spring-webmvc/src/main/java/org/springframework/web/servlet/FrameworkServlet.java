@@ -171,8 +171,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * HTTP methods supported by {@link jakarta.servlet.http.HttpServlet}.
 	 */
-	private static final Set<String> HTTP_SERVLET_METHODS = Set.of("DELETE", "HEAD", "GET", "OPTIONS", "POST", "PUT",
-			"TRACE");
+	private static final Set<String> HTTP_SERVLET_METHODS =
+			Set.of("DELETE", "HEAD", "GET", "OPTIONS", "POST", "PUT", "TRACE");
 
 
 	/** ServletContext attribute to find the WebApplicationContext in. */
@@ -866,7 +866,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	public void destroy() {
 		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
 		// Only call close() on WebApplicationContext if locally managed...
-		if (!this.webApplicationContextInjected && this.webApplicationContext instanceof ConfigurableApplicationContext cac) {
+		if (!this.webApplicationContextInjected &&
+				this.webApplicationContext instanceof ConfigurableApplicationContext cac) {
 			cac.close();
 		}
 	}
@@ -1131,8 +1132,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			logger.debug("Exiting from \"" + dispatchType + "\" dispatch, status " + status + headers);
 		}
 		else {
-			HttpStatusCode httpStatus = HttpStatusCode.valueOf(status);
-			logger.debug("Completed " + httpStatus + headers);
+			logger.debug("Completed " + HttpStatusCode.valueOf(status) + headers);
 		}
 	}
 
