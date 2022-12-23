@@ -62,6 +62,21 @@ public class SQLStateSQLExceptionTranslatorTests {
 	}
 
 	@Test
+	public void translateDuplicateKeyOracle() {
+		doTest("23000", 1, DuplicateKeyException.class);
+	}
+
+	@Test
+	public void translateDuplicateKeyMySQL() {
+		doTest("23000", 1062, DuplicateKeyException.class);
+	}
+
+	@Test
+	public void translateDuplicateKeyMSSQL() {
+		doTest("23000", 2627, DuplicateKeyException.class);
+	}
+
+	@Test
 	public void translateDataAccessResourceFailure() {
 		doTest("53", DataAccessResourceFailureException.class);
 	}
@@ -105,8 +120,12 @@ public class SQLStateSQLExceptionTranslatorTests {
 
 
 	private void doTest(@Nullable String sqlState, @Nullable Class<?> dataAccessExceptionType) {
+		doTest(sqlState, 0, dataAccessExceptionType);
+	}
+
+	private void doTest(@Nullable String sqlState, int errorCode, @Nullable Class<?> dataAccessExceptionType) {
 		SQLExceptionTranslator translator = new SQLStateSQLExceptionTranslator();
-		SQLException ex = new SQLException("reason", sqlState);
+		SQLException ex = new SQLException("reason", sqlState, errorCode);
 		DataAccessException dax = translator.translate("task", "SQL", ex);
 
 		if (dataAccessExceptionType == null) {

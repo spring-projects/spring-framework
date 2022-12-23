@@ -231,7 +231,7 @@ public abstract class ConnectionFactoryUtils {
 				return new DataAccessResourceFailureException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcDataIntegrityViolationException) {
-				if ("23505".equals(ex.getSqlState())) {
+				if (indicatesDuplicateKey(ex.getSqlState(), ex.getErrorCode())) {
 					return new DuplicateKeyException(buildMessage(task, sql, ex), ex);
 				}
 				return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
@@ -244,6 +244,19 @@ public abstract class ConnectionFactoryUtils {
 			}
 		}
 		return new UncategorizedR2dbcException(buildMessage(task, sql, ex), sql, ex);
+	}
+
+	/**
+	 * Check whether the given SQL state (and the associated error code in case
+	 * of a generic SQL state value) indicate a duplicate key exception. See
+	 * {@code org.springframework.jdbc.support.SQLStateSQLExceptionTranslator#indicatesDuplicateKey}.
+	 * @param sqlState the SQL state value
+	 * @param errorCode the error code value
+	 */
+	static boolean indicatesDuplicateKey(@Nullable String sqlState, int errorCode) {
+		return ("23505".equals(sqlState) ||
+				("23000".equals(sqlState) &&
+						(errorCode == 1 || errorCode == 1062 || errorCode == 2627)));
 	}
 
 	/**

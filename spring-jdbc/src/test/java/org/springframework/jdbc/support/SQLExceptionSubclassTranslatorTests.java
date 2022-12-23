@@ -57,6 +57,9 @@ public class SQLExceptionSubclassTranslatorTests {
 		doTest(new SQLFeatureNotSupportedException("", "", 0), InvalidDataAccessApiUsageException.class);
 		doTest(new SQLIntegrityConstraintViolationException("", "", 0), DataIntegrityViolationException.class);
 		doTest(new SQLIntegrityConstraintViolationException("", "23505", 0), DuplicateKeyException.class);
+		doTest(new SQLIntegrityConstraintViolationException("", "23000", 1), DuplicateKeyException.class);
+		doTest(new SQLIntegrityConstraintViolationException("", "23000", 1062), DuplicateKeyException.class);
+		doTest(new SQLIntegrityConstraintViolationException("", "23505", 2627), DuplicateKeyException.class);
 		doTest(new SQLInvalidAuthorizationSpecException("", "", 0), PermissionDeniedDataAccessException.class);
 		doTest(new SQLNonTransientConnectionException("", "", 0), DataAccessResourceFailureException.class);
 		doTest(new SQLRecoverableException("", "", 0), RecoverableDataAccessException.class);
