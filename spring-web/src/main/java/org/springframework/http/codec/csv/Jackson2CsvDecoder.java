@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDataBufferDecoder;
-import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
@@ -25,7 +24,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * Decoder for CSV files.
  */
-public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> implements Decoder<T> {
+public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
     /**
      * Element type for parsing a whole row as a {@link String}.
      */
