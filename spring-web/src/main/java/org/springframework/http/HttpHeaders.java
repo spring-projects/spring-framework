@@ -433,6 +433,18 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Construct a new {@code HttpHeaders} from single value header.
+	 * <p>This constructor is using a case-insensitive map structure.
+	 * @param singleKey the header name
+	 * @param singleValue the header value
+	 * @since 6.0
+	 */
+	public HttpHeaders(String singleKey, String singleValue) {
+		this();
+		this.headers.put(singleKey, new ArrayList<>(List.of(singleValue)));
+	}
+
+	/**
 	 * Construct a new {@code HttpHeaders} instance backed by an existing map.
 	 * <p>This constructor is available as an optimization for adapting to existing
 	 * headers map structures, primarily for internal use within the framework.

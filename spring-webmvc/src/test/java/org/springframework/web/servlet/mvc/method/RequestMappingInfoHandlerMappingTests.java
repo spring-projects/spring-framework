@@ -531,9 +531,7 @@ class RequestMappingInfoHandlerMappingTests {
 
 		@RequestMapping(value = "/something", method = RequestMethod.OPTIONS)
 		public HttpHeaders fooOptions() {
-			HttpHeaders headers = new HttpHeaders();
-			headers.add("Allow", "PUT,POST");
-			return headers;
+			return new HttpHeaders("Allow", "PUT,POST");
 		}
 
 		@RequestMapping(value = "/qux", method = RequestMethod.GET, produces = "application/xml")

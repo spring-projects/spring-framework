@@ -192,8 +192,7 @@ class RestTemplateXhrTransportTests {
 		transport.setTaskExecutor(new SyncTaskExecutor());
 
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(URI.create("https://example.com"));
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("h-foo", "h-bar");
+		HttpHeaders headers = new HttpHeaders("h-foo", "h-bar");
 		TransportRequest request = new DefaultTransportRequest(urlInfo, headers, headers,
 				transport, TransportType.XHR, CODEC);
 

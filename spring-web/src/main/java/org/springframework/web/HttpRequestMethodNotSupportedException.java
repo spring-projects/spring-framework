@@ -149,9 +149,9 @@ public class HttpRequestMethodNotSupportedException extends ServletException imp
 		if (ObjectUtils.isEmpty(this.supportedMethods)) {
 			return HttpHeaders.EMPTY;
 		}
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ALLOW, StringUtils.arrayToDelimitedString(this.supportedMethods, ", "));
-		return headers;
+		return new HttpHeaders(
+				HttpHeaders.ALLOW, StringUtils.arrayToDelimitedString(this.supportedMethods, ", ")
+		);
 	}
 
 	@Override

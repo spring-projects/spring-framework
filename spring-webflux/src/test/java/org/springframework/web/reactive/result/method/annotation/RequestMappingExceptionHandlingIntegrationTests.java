@@ -103,8 +103,7 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	void exceptionFromMethodWithProducesCondition(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Accept", "text/plain, application/problem+json");
+		HttpHeaders headers = new HttpHeaders("Accept", "text/plain, application/problem+json");
 		assertThatExceptionOfType(HttpStatusCodeException.class)
 				.isThrownBy(() -> performGet("/SPR-16318", headers, String.class))
 				.satisfies(ex -> {

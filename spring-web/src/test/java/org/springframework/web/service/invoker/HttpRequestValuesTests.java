@@ -113,9 +113,7 @@ class HttpRequestValuesTests {
 
 	@Test
 	void requestPart() {
-		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.add("foo", "bar");
-		HttpEntity<String> entity = new HttpEntity<>("body", entityHeaders);
+		HttpEntity<String> entity = new HttpEntity<>("body", new HttpHeaders("foo", "bar"));
 
 		HttpRequestValues requestValues = HttpRequestValues.builder()
 				.addRequestPart("form field", "form value")

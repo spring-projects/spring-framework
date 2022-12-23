@@ -690,8 +690,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 		else if (HttpHeaders.CONTENT_LANGUAGE.equalsIgnoreCase(name)) {
 			String contentLanguages = value.toString();
-			HttpHeaders headers = new HttpHeaders();
-			headers.add(HttpHeaders.CONTENT_LANGUAGE, contentLanguages);
+			HttpHeaders headers = new HttpHeaders(HttpHeaders.CONTENT_LANGUAGE, contentLanguages);
 			Locale language = headers.getContentLanguage();
 			setLocale(language != null ? language : Locale.getDefault());
 			// Since setLocale() sets the Content-Language header to the given

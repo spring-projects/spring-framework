@@ -698,8 +698,7 @@ class RestTemplateTests {
 		mockSentRequest(POST, "https://example.com", requestHeaders);
 		mockResponseStatus(HttpStatus.OK);
 
-		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.add("MyHeader", "MyEntityValue");
+		HttpHeaders entityHeaders = new HttpHeaders("MyHeader", "MyEntityValue");
 		HttpEntity<Void> entity = new HttpEntity<>(null, entityHeaders);
 		template.exchange("https://example.com", POST, entity, Void.class);
 		assertThat(requestHeaders.get("MyHeader")).contains("MyEntityValue", "MyInterceptorValue");
@@ -721,9 +720,8 @@ class RestTemplateTests {
 		mockSentRequest(POST, "https://example.com", requestHeaders);
 		mockResponseStatus(HttpStatus.OK);
 
-		HttpHeaders entityHeaders = new HttpHeaders();
+		HttpHeaders entityHeaders = new HttpHeaders("MyHeader", "MyEntityValue");
 		entityHeaders.setContentType(contentType);
-		entityHeaders.add("MyHeader", "MyEntityValue");
 		HttpEntity<String> entity = new HttpEntity<>("Hello World", entityHeaders);
 		template.exchange("https://example.com", POST, entity, Void.class);
 		assertThat(requestHeaders.get("MyHeader")).contains("MyEntityValue", "MyInterceptorValue");

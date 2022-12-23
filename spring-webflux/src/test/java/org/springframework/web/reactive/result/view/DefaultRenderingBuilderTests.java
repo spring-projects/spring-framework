@@ -101,8 +101,7 @@ public class DefaultRenderingBuilderTests {
 
 	@Test
 	public void httpHeaders() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("foo", "bar");
+		HttpHeaders headers = new HttpHeaders("foo", "bar");
 		Rendering rendering = Rendering.view("foo").headers(headers).build();
 
 		assertThat(rendering.headers()).isEqualTo(headers);

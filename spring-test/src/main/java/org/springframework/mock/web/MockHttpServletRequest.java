@@ -1057,8 +1057,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		else if (HttpHeaders.ACCEPT_LANGUAGE.equalsIgnoreCase(name) &&
 				!this.headers.containsKey(HttpHeaders.ACCEPT_LANGUAGE)) {
 			try {
-				HttpHeaders headers = new HttpHeaders();
-				headers.add(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
+				HttpHeaders headers = new HttpHeaders(HttpHeaders.ACCEPT_LANGUAGE, value.toString());
 				List<Locale> locales = headers.getAcceptLanguageAsLocales();
 				this.locales.clear();
 				this.locales.addAll(locales);

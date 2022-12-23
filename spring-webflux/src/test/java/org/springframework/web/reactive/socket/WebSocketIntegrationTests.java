@@ -130,8 +130,7 @@ class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTest
 	void customHeader(WebSocketClient client, HttpServer server, Class<?> serverConfigClass) throws Exception {
 		startServer(client, server, serverConfigClass);
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("my-header", "my-value");
+		HttpHeaders headers = new HttpHeaders("my-header", "my-value");
 		AtomicReference<Object> headerRef = new AtomicReference<>();
 
 		this.client.execute(getUrl("/custom-header"), headers,

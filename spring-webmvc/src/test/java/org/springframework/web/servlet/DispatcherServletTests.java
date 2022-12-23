@@ -600,8 +600,7 @@ public class DispatcherServletTests {
 
 	@Test
 	public void noHandlerFoundExceptionMessage() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("foo", "bar");
+		HttpHeaders headers = new HttpHeaders("foo", "bar");
 		NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/foo", headers);
 		assertThat(!ex.getMessage().contains("bar")).isTrue();
 		assertThat(!ex.toString().contains("bar")).isTrue();

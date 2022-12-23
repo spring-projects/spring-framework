@@ -49,9 +49,7 @@ class HeaderAssertionTests {
 
 	@Test
 	void valueEquals() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("foo", "bar");
-		HeaderAssertions assertions = headerAssertions(headers);
+		HeaderAssertions assertions = headerAssertions(new HttpHeaders("foo", "bar"));
 
 		// Success
 		assertions.valueEquals("foo", "bar");
@@ -129,9 +127,7 @@ class HeaderAssertionTests {
 
 	@Test
 	void valueMatcher() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("foo", "bar");
-		HeaderAssertions assertions = headerAssertions(headers);
+		HeaderAssertions assertions = headerAssertions(new HttpHeaders("foo", "bar"));
 
 		assertions.value("foo", containsString("a"));
 	}
