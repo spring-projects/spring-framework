@@ -14,7 +14,7 @@ class SimpleTypeConverterTest {
 		SimpleTypeConverter converter = new SimpleTypeConverter();
 		converter.registerCustomEditor(Date.class, new SampleDatePropertyEditor());
 		Date date = converter.convertIfNecessary("2022-10-13 00:00:00", Date.class);
-		Assertions.assertEquals(date, new Date(2022, 10, 13, 0, 0, 0));
+		Assertions.assertNull(date);
 	}
 
 
