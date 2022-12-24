@@ -95,6 +95,18 @@ public class ConnectionFactoryUtilsUnitTests {
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException("reason", "23505"));
 		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+
+		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
+				new R2dbcDataIntegrityViolationException("reason", "23000", 1));
+		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+
+		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
+				new R2dbcDataIntegrityViolationException("reason", "23000", 1062));
+		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+
+		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
+				new R2dbcDataIntegrityViolationException("reason", "23000", 2627));
+		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
 	}
 
 	@Test
