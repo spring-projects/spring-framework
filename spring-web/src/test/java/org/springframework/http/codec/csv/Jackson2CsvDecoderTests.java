@@ -61,7 +61,7 @@ class Jackson2CsvDecoderTests {
 		var decoder = decoder(schema);
 		decoder.setMaxInMemorySize(16);
 
-		var buffers = dataBuffer("""
+		var buffers = encodeUtf8("""
 				value1;value2
 				value3;value4
 				""");
@@ -84,7 +84,7 @@ class Jackson2CsvDecoderTests {
 	/**
 	 * Encode the CSV as UTF-8 and use {@code \n} as line separators.
 	 */
-	private Flux<DataBuffer> dataBuffer(String csv) {
+	private Flux<DataBuffer> encodeUtf8(String csv) {
 		var encoded = csv.replaceAll("\\R", "\n").getBytes(UTF_8);
 		return Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(encoded));
 	}
