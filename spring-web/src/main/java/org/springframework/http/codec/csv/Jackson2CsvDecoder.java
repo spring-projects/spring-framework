@@ -106,6 +106,7 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
      * Number of rows to lookahead for skipping of rows. Defaults to 16.
      */
     public void setLookAhead(int lookahead) {
+		Assert.isTrue(lookahead > 0, "lookahead must be positive");
         this.lookahead = lookahead;
     }
 
