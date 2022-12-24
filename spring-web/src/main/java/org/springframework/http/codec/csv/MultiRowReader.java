@@ -43,7 +43,7 @@ final class MultiRowReader extends Reader {
 	 */
 	void addRow(String row) {
 		Assert.notNull(row, "row must not be null");
-		Assert.isTrue(!closed, "reader must not be closed.");
+		Assert.isTrue(!closed, "reader must not be closed");
 
 		if (row.isEmpty()) {
 			// Ignore empty (last) line that cause trouble because read() may not return 0.
