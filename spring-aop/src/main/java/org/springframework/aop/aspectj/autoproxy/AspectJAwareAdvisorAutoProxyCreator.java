@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.aopalliance.aop.Advice;
-import org.aspectj.util.PartialOrder;
 import org.aspectj.util.PartialOrder.PartialComparable;
 
 import org.springframework.aop.Advisor;
@@ -67,22 +66,9 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 	 */
 	@Override
 	protected List<Advisor> sortAdvisors(List<Advisor> advisors) {
-		List<PartiallyComparableAdvisorHolder> partiallyComparableAdvisors = new ArrayList<>(advisors.size());
-		for (Advisor advisor : advisors) {
-			partiallyComparableAdvisors.add(
-					new PartiallyComparableAdvisorHolder(advisor, DEFAULT_PRECEDENCE_COMPARATOR));
-		}
-		List<PartiallyComparableAdvisorHolder> sorted = PartialOrder.sort(partiallyComparableAdvisors);
-		if (sorted != null) {
-			List<Advisor> result = new ArrayList<>(advisors.size());
-			for (PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
-				result.add(pcAdvisor.getAdvisor());
-			}
-			return result;
-		}
-		else {
-			return super.sortAdvisors(advisors);
-		}
+		List<Advisor> sorted = new ArrayList<>(advisors);
+		sorted.sort(DEFAULT_PRECEDENCE_COMPARATOR);
+		return sorted;
 	}
 
 	/**
