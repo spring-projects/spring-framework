@@ -25,19 +25,17 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	/**
-	 * Default charset. Defaults to UTF-8.
-	 */
-	private Charset defaultCharset = UTF_8;
-
-	/**
 	 * CSV mapper.
 	 */
 	private final CsvMapper mapper;
-
 	/**
 	 * CSV schema.
 	 */
 	private final CsvSchema schema;
+	/**
+	 * Default charset. Defaults to UTF-8.
+	 */
+	private Charset defaultCharset = UTF_8;
 
 	/**
 	 * Constructor.

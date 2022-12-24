@@ -29,12 +29,22 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 * Element type for parsing a whole row as a {@link String}.
 	 */
 	private static final ResolvableType STRING_TYPE = ResolvableType.forType(String.class);
-
+	/**
+	 * CSV mapper.
+	 */
+	private final CsvMapper mapper;
+	/**
+	 * CSV schema.
+	 */
+	private final CsvSchema schema;
+	/**
+	 * {@link String} decoder for parsing a whole row as a {@link String}.
+	 */
+	private final StringDecoder stringDecoder;
 	/**
 	 * Default charset. Defaults to UTF-8.
 	 */
 	private Charset defaultCharset = UTF_8;
-
 	/**
 	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
 	 * For a CSV with a header the lookahead has at least to be 3:
@@ -46,21 +56,6 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 * The maximum number of comment and empty lines have to be considered additionally.
 	 */
 	private int lookahead = 16;
-
-	/**
-	 * CSV mapper.
-	 */
-	private final CsvMapper mapper;
-
-	/**
-	 * CSV schema.
-	 */
-	private final CsvSchema schema;
-
-	/**
-	 * {@link String} decoder for parsing a whole row as a {@link String}.
-	 */
-	private final StringDecoder stringDecoder;
 
 	/**
 	 * Constructor.
