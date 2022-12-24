@@ -14,7 +14,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test for {@link Jackson2CsvReactiveParser}.
  */
 class Jackson2CsvReactiveParserTest {
-    /**
+	/**
+	 * Type for rows: {@code Map<String, String>}.
+	 */
+	private static final TypeReference<Map<String, String>> CSV_RECORD_TYPE = new TypeReference<>() {};
+
+	/**
      * Test for {@link Jackson2CsvReactiveParser#parse(String)}.
      */
     @Test
@@ -58,18 +63,20 @@ class Jackson2CsvReactiveParserTest {
                 Map.of("header1", "value3", "header2", "value4"));
     }
 
-    //
-    // Helper.
-    //
-
+	/**
+	 * Create a parser for the schema.
+	 */
     private Jackson2CsvReactiveParser<Map<String, String>> parser(CsvSchema.Builder schema, int lookahead) {
         var csvMapper = CsvMapper.builder().build();
         var objectReader = csvMapper
-                .readerFor(new TypeReference<Map<String, String>>() {})
+                .readerFor(CSV_RECORD_TYPE)
                 .with(schema.build());
         return new Jackson2CsvReactiveParser<>(objectReader, lookahead);
     }
 
+	/**
+	 * Create rows.
+	 */
     private Flux<String> rows(String... rows) {
         return Flux.just(rows).map(row -> row + "\n");
     }

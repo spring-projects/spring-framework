@@ -22,12 +22,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test for {@link Jackson2CsvEncoder}.
  */
 class Jackson2CsvEncoderTest {
+	/**
+	 * Type for rows: {@code Map<String, String>}.
+	 */
     private static final ResolvableType CSV_RECORD_TYPE =
             ResolvableType.forClassWithGenerics(Map.class, String.class, String.class);
+
+	/**
+	 * MIME type for CSV encoded as UTF-8.
+	 */
     private static final MimeType MIME_TYPE_CSV_UTF_8 =
             MimeType.valueOf("text/csv;charset=UTF-8");
-
-	private final DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 
 	/**
      * Test for {@link Jackson2CsvEncoder#encode(Publisher, DataBufferFactory, ResolvableType, MimeType, Map)}.
@@ -40,11 +45,12 @@ class Jackson2CsvEncoderTest {
                 .setLineSeparator('\n')
 				.setUseHeader(true)
                 .addColumn("header1")
-                .addColumn("header2")
-                .build();
+                .addColumn("header2");
         var encoder = encoder(schema);
 
 		var rows = Flux.just(Map.of("header1", "value1", "header2", "value2"));
+		var bufferFactory = DefaultDataBufferFactory.sharedInstance;
+
 		var csv = encoder.encode(rows, bufferFactory, CSV_RECORD_TYPE, MIME_TYPE_CSV_UTF_8, Map.of());
 
         assertThat(join(csv).block().asInputStream()).hasBinaryContent(encodeUtf8("""
@@ -56,9 +62,9 @@ class Jackson2CsvEncoderTest {
 	/**
 	 * Create an encoder for the schema.
 	 */
-    private Jackson2CsvEncoder<Map<String, String>> encoder(CsvSchema schema) {
+    private Jackson2CsvEncoder<Map<String, String>> encoder(CsvSchema.Builder schema) {
         var csvMapper = CsvMapper.builder().build();
-        return new Jackson2CsvEncoder<>(csvMapper, schema);
+        return new Jackson2CsvEncoder<>(csvMapper, schema.build());
     }
 
 	/**

@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Test for {@link MultiRowReader}.
  */
 class MultiRowReaderTest {
-    MultiRowReader reader = new MultiRowReader();
+    private final MultiRowReader reader = new MultiRowReader();
 
     /**
      * Test for {@link MultiRowReader#size()} and

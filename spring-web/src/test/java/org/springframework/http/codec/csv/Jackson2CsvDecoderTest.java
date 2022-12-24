@@ -20,8 +20,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test for {@link Jackson2CsvDecoder}.
  */
 class Jackson2CsvDecoderTest {
+	/**
+	 * Type for rows: {@code Map<String, String>}.
+	 */
     private static final ResolvableType CSV_RECORD_TYPE =
             ResolvableType.forClassWithGenerics(Map.class, String.class, String.class);
+
+	/**
+	 * MIME type for CSV encoded as UTF-8.
+	 */
     private static final MimeType MIME_TYPE_CSV_UTF_8 =
             MimeType.valueOf("text/csv;charset=UTF-8");
 
@@ -34,8 +41,7 @@ class Jackson2CsvDecoderTest {
                 .setColumnSeparator(';')
                 .setLineSeparator('\n')
                 .addColumn("header1")
-                .addColumn("header2")
-                .build();
+                .addColumn("header2");
         var decoder = decoder(schema);
         decoder.setMaxInMemorySize(16);
 
@@ -54,17 +60,16 @@ class Jackson2CsvDecoderTest {
 	/**
 	 * Create a decoder for the schema.
 	 */
-    private Jackson2CsvDecoder<Map<String, String>> decoder(CsvSchema schema) {
+    private Jackson2CsvDecoder<Map<String, String>> decoder(CsvSchema.Builder schema) {
         var csvMapper = CsvMapper.builder().build();
-        return new Jackson2CsvDecoder<>(csvMapper, schema);
+        return new Jackson2CsvDecoder<>(csvMapper, schema.build());
     }
 
 	/**
 	 * Encode the CSV as UTF-8 and use {@code \n} as line separators.
 	 */
     private Flux<DataBuffer> dataBuffer(String csv) {
-        var factory = DefaultDataBufferFactory.sharedInstance;
-        var buffer = factory.wrap(csv.replaceAll("\\R", "\n").getBytes(UTF_8));
-        return Flux.just(buffer);
+		var encoded = csv.replaceAll("\\R", "\n").getBytes(UTF_8);
+		return Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(encoded));
     }
 }
