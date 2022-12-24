@@ -118,7 +118,10 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 		Assert.notNull(input, "input must not be null");
 		Assert.notNull(elementType, "elementType must not be null");
 
-        var parser = parser(elementType);
+		var parser = new Jackson2CsvReactiveParser<T>(
+				mapper.readerFor(mapper.constructType(elementType.getType())).with(schema),
+				lookahead);
+
         return splitRows(input, mimeType, hints)
                 .flatMap(parser::parse)
                 .concatWith(Flux.defer(parser::parseRemaining));
@@ -131,14 +134,5 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
         var textMimeType = new MimeType(TEXT_PLAIN,
                 mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : defaultCharset);
         return stringDecoder.decode(input, STRING_TYPE, textMimeType, hints);
-    }
-
-    /**
-     * Create a parser for the element type.
-     */
-    private Jackson2CsvReactiveParser<T> parser(ResolvableType elementType) {
-        return new Jackson2CsvReactiveParser<>(
-                mapper.readerFor(mapper.constructType(elementType.getType())).with(schema),
-                lookahead);
     }
 }

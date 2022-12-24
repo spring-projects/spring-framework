@@ -50,6 +50,21 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 		this.schema = schema;
 	}
 
+	/**
+	 * Default charset. Defaults to UTF-8.
+	 */
+	public Charset getDefaultCharset() {
+		return defaultCharset;
+	}
+
+	/**
+	 * Default charset. Defaults to UTF-8.
+	 */
+	public void setDefaultCharset(Charset defaultCharset) {
+		Assert.notNull(defaultCharset, "defaultCharset must not be null");
+		this.defaultCharset = defaultCharset;
+	}
+
 	@Override
 	public Flux<DataBuffer> encode(
 			Publisher<? extends T> inputStream, DataBufferFactory bufferFactory, ResolvableType elementType,
@@ -60,6 +75,7 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 
 		var objectWriter = mapper.writerFor(mapper.constructType(elementType.getType())).with(schema);
 		var charset = mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : defaultCharset;
+
 		return Flux.from(inputStream)
 				.flatMap(row -> writeCsv(row, objectWriter))
 				.map(charset::encode)
