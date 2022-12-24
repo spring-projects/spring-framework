@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test for {@link Jackson2CsvEncoder}.
  */
-class Jackson2CsvEncoderTest {
+class Jackson2CsvEncoderTests {
 	/**
 	 * Type for rows: {@code Map<String, String>}.
 	 */

@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Test for {@link MultiRowReader}.
  */
-class MultiRowReaderTest {
+class MultiRowReaderTests {
     private final MultiRowReader reader = new MultiRowReader();
 
     /**

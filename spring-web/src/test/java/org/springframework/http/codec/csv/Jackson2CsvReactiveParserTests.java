@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test for {@link Jackson2CsvReactiveParser}.
  */
-class Jackson2CsvReactiveParserTest {
+class Jackson2CsvReactiveParserTests {
 	/**
 	 * Type for rows: {@code Map<String, String>}.
 	 */
