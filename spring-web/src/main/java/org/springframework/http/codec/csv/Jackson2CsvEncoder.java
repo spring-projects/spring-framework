@@ -8,6 +8,7 @@ import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -17,7 +18,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -44,14 +44,20 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	 */
 	public Jackson2CsvEncoder(CsvMapper mapper, CsvSchema schema) {
 		super(MimeType.valueOf("text/csv"));
-		this.mapper = checkNotNull(mapper, "Precondition violated: mapper != null.");
-		this.schema = checkNotNull(schema, "Precondition violated: schema != null.");
+		Assert.notNull(mapper, "mapper must not be null");
+		Assert.notNull(schema, "schema must not be null");
+		this.mapper = mapper;
+		this.schema = schema;
 	}
 
 	@Override
 	public Flux<DataBuffer> encode(
 			Publisher<? extends T> inputStream, DataBufferFactory bufferFactory, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+		Assert.notNull(inputStream, "inputStream must not be null");
+		Assert.notNull(bufferFactory, "bufferFactory must not be null");
+		Assert.notNull(elementType, "elementType must not be null");
+
 		var objectWriter = mapper.writerFor(mapper.constructType(elementType.getType())).with(schema);
 		var charset = mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : defaultCharset;
 		return Flux.from(inputStream)

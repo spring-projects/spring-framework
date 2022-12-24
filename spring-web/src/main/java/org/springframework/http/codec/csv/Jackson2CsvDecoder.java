@@ -9,6 +9,7 @@ import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -18,7 +19,6 @@ import reactor.core.publisher.Flux;
 
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -67,8 +67,10 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
      */
     public Jackson2CsvDecoder(CsvMapper mapper, CsvSchema schema) {
         super(MimeType.valueOf("text/csv"));
-        this.mapper = checkNotNull(mapper, "Precondition violated: mapper != null.");
-        this.schema = checkNotNull(schema, "Precondition violated: schema != null.");
+		Assert.notNull(mapper, "mapper must not be null");
+		Assert.notNull(schema, "schema must not be null");
+		this.mapper = mapper;
+		this.schema = schema;
         this.stringDecoder = StringDecoder.textPlainOnly(List.of(new String(schema.getLineSeparator())), false);
     }
 
@@ -89,7 +91,8 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
      * Default charset. Defaults to UTF-8.
      */
     public void setDefaultCharset(Charset defaultCharset) {
-        this.defaultCharset = checkNotNull(defaultCharset, "Precondition violated: defaultCharset != null.");
+        Assert.notNull(defaultCharset, "defaultCharset must not be null");
+        this.defaultCharset = defaultCharset;
     }
 
     /**
@@ -112,8 +115,8 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
             ResolvableType elementType,
             @Nullable MimeType mimeType,
             @Nullable Map<String, Object> hints) {
-        checkNotNull(input, "Precondition violated: input != null.");
-        checkNotNull(elementType, "Precondition violated: elementType != null.");
+		Assert.notNull(input, "input must not be null");
+		Assert.notNull(elementType, "elementType must not be null");
 
         var parser = parser(elementType);
         return splitRows(input, mimeType, hints)

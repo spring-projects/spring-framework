@@ -3,13 +3,12 @@ package org.springframework.http.codec.csv;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.springframework.util.Assert;
+
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Reactive CSV parser. NOT thread-safe.
@@ -44,8 +43,8 @@ final class Jackson2CsvReactiveParser<T> {
      *         Lookahead.
      */
     Jackson2CsvReactiveParser(ObjectReader objectReader, int lookahead) {
-        checkNotNull(objectReader, "Precondition violated: objectReader != null.");
-        checkArgument(lookahead > 0, "Precondition violated: lookahead > 0.");
+		Assert.notNull(objectReader, "objectReader must not be null");
+		Assert.isTrue(lookahead > 0, "lookahead must be positive");
 
         this.objectReader = objectReader;
         this.lookahead = lookahead;
@@ -56,7 +55,7 @@ final class Jackson2CsvReactiveParser<T> {
      * Parse a single CSV row.
      */
     Mono<T> parse(String row) {
-        checkNotNull(row, "Precondition violated: row != null.");
+		Assert.notNull(row, "row must not be null");
 
         // Accumulate enough lookahead so that the parser below won't run out of rows.
         reader.addRow(row);
