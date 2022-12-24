@@ -25,97 +25,97 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * Decoder for CSV files.
  */
 public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
-    /**
-     * Element type for parsing a whole row as a {@link String}.
-     */
-    private static final ResolvableType STRING_TYPE = ResolvableType.forType(String.class);
+	/**
+	 * Element type for parsing a whole row as a {@link String}.
+	 */
+	private static final ResolvableType STRING_TYPE = ResolvableType.forType(String.class);
 
-    /**
-     * Default charset. Defaults to UTF-8.
-     */
-    private Charset defaultCharset = UTF_8;
+	/**
+	 * Default charset. Defaults to UTF-8.
+	 */
+	private Charset defaultCharset = UTF_8;
 
-    /**
-     * Number of rows to lookahead for skipping of rows. Defaults to 16.
-     * For a CSV with a header the lookahead has at least to be 3:
-     * <ul>
-     *     <li>Header</li>
-     *     <li>First data row</li>
-     *     <li>Read ahead</li>
-     * </ul>
-     * The maximum number of comment and empty lines have to be considered additionally.
-     */
-    private int lookahead = 16;
+	/**
+	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
+	 * For a CSV with a header the lookahead has at least to be 3:
+	 * <ul>
+	 *     <li>Header</li>
+	 *     <li>First data row</li>
+	 *     <li>Read ahead</li>
+	 * </ul>
+	 * The maximum number of comment and empty lines have to be considered additionally.
+	 */
+	private int lookahead = 16;
 
-    /**
-     * CSV mapper.
-     */
-    private final CsvMapper mapper;
+	/**
+	 * CSV mapper.
+	 */
+	private final CsvMapper mapper;
 
-    /**
-     * CSV schema.
-     */
-    private final CsvSchema schema;
+	/**
+	 * CSV schema.
+	 */
+	private final CsvSchema schema;
 
-    /**
-     * {@link String} decoder for parsing a whole row as a {@link String}.
-     */
-    private final StringDecoder stringDecoder;
+	/**
+	 * {@link String} decoder for parsing a whole row as a {@link String}.
+	 */
+	private final StringDecoder stringDecoder;
 
-    /**
-     * Constructor.
-     */
-    public Jackson2CsvDecoder(CsvMapper mapper, CsvSchema schema) {
-        super(MimeType.valueOf("text/csv"));
+	/**
+	 * Constructor.
+	 */
+	public Jackson2CsvDecoder(CsvMapper mapper, CsvSchema schema) {
+		super(MimeType.valueOf("text/csv"));
 		Assert.notNull(mapper, "mapper must not be null");
 		Assert.notNull(schema, "schema must not be null");
 		this.mapper = mapper;
 		this.schema = schema;
-        this.stringDecoder = StringDecoder.textPlainOnly(List.of(new String(schema.getLineSeparator())), false);
-    }
+		this.stringDecoder = StringDecoder.textPlainOnly(List.of(new String(schema.getLineSeparator())), false);
+	}
 
-    @Override
-    public void setMaxInMemorySize(int byteCount) {
-        super.setMaxInMemorySize(byteCount);
-        stringDecoder.setMaxInMemorySize(byteCount);
-    }
+	@Override
+	public void setMaxInMemorySize(int byteCount) {
+		super.setMaxInMemorySize(byteCount);
+		stringDecoder.setMaxInMemorySize(byteCount);
+	}
 
-    /**
-     * Default charset. Defaults to UTF-8.
-     */
-    public Charset getDefaultCharset() {
-        return defaultCharset;
-    }
+	/**
+	 * Default charset. Defaults to UTF-8.
+	 */
+	public Charset getDefaultCharset() {
+		return defaultCharset;
+	}
 
-    /**
-     * Default charset. Defaults to UTF-8.
-     */
-    public void setDefaultCharset(Charset defaultCharset) {
-        Assert.notNull(defaultCharset, "defaultCharset must not be null");
-        this.defaultCharset = defaultCharset;
-    }
+	/**
+	 * Default charset. Defaults to UTF-8.
+	 */
+	public void setDefaultCharset(Charset defaultCharset) {
+		Assert.notNull(defaultCharset, "defaultCharset must not be null");
+		this.defaultCharset = defaultCharset;
+	}
 
-    /**
-     * Number of rows to lookahead for skipping of rows. Defaults to 16.
-     */
-    public int getLookAhead() {
-        return lookahead;
-    }
+	/**
+	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
+	 */
+	public int getLookAhead() {
+		return lookahead;
+	}
 
-    /**
-     * Number of rows to lookahead for skipping of rows. Defaults to 16.
-     */
-    public void setLookAhead(int lookahead) {
+	/**
+	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
+	 */
+	public void setLookAhead(int lookahead) {
 		Assert.isTrue(lookahead > 0, "lookahead must be positive");
-        this.lookahead = lookahead;
-    }
+		this.lookahead = lookahead;
+	}
 
-    @Override
-    public Flux<T> decode(
-            Publisher<DataBuffer> input,
-            ResolvableType elementType,
-            @Nullable MimeType mimeType,
-            @Nullable Map<String, Object> hints) {
+	@Override
+	public Flux<T> decode(
+			Publisher<DataBuffer> input,
+			ResolvableType elementType,
+			@Nullable MimeType mimeType,
+			@Nullable Map<String, Object> hints) {
 		Assert.notNull(input, "input must not be null");
 		Assert.notNull(elementType, "elementType must not be null");
 
@@ -123,17 +123,17 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 				mapper.readerFor(mapper.constructType(elementType.getType())).with(schema),
 				lookahead);
 
-        return splitRows(input, mimeType, hints)
-                .flatMap(parser::parse)
-                .concatWith(Flux.defer(parser::parseRemaining));
-    }
+		return splitRows(input, mimeType, hints)
+				.flatMap(parser::parse)
+				.concatWith(Flux.defer(parser::parseRemaining));
+	}
 
-    /**
-     * Split input into rows.
-     */
-    private Flux<String> splitRows(Publisher<DataBuffer> input, MimeType mimeType, Map<String, Object> hints) {
-        var textMimeType = new MimeType(TEXT_PLAIN,
-                mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : defaultCharset);
-        return stringDecoder.decode(input, STRING_TYPE, textMimeType, hints);
-    }
+	/**
+	 * Split input into rows.
+	 */
+	private Flux<String> splitRows(Publisher<DataBuffer> input, MimeType mimeType, Map<String, Object> hints) {
+		var textMimeType = new MimeType(TEXT_PLAIN,
+				mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : defaultCharset);
+		return stringDecoder.decode(input, STRING_TYPE, textMimeType, hints);
+	}
 }
