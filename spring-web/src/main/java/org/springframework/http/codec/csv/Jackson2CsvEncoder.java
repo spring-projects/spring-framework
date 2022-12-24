@@ -67,7 +67,7 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	}
 
 	/**
-	 * Writer a row.
+	 * Write a row.
 	 */
 	private Mono<String> writeCsv(T row, ObjectWriter objectWriter) {
 		try {
