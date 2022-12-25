@@ -18,7 +18,6 @@ package org.springframework.core.codec;
 
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +40,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Decode from a data buffer stream to a {@code CharBuffer} stream, either splitting
  * or aggregating incoming data chunks to realign along newlines delimiters
@@ -57,17 +58,15 @@ import reactor.core.publisher.Mono;
  * @since 5.0
  */
 public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffer> {
-
 	/**
-	 * The default charset to use, i.e. "UTF-8".
+	 * The default charset "UTF-8".
 	 */
-	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+	public static final Charset DEFAULT_CHARSET = UTF_8;
 
 	/**
 	 * The default delimiter strings to use, i.e. {@code \r\n} and {@code \n}.
 	 */
 	public static final List<String> DEFAULT_DELIMITERS = List.of("\r\n", "\n");
-
 
 	private final List<String> delimiters;
 
@@ -83,7 +82,6 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 		this.delimiters = new ArrayList<>(delimiters);
 		this.stripDelimiter = stripDelimiter;
 	}
-
 
 	/**
 	 * Set the default character set to fall back on if the MimeType does not specify any.
@@ -105,7 +103,6 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	public Charset getDefaultCharset() {
 		return this.defaultCharset;
 	}
-
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
@@ -227,7 +224,8 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	 * 		input strings
 	 */
 	public static CharBufferDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
-		return new CharBufferDecoder(delimiters, stripDelimiter, new MimeType("text", "plain", DEFAULT_CHARSET));
+		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
+		return new CharBufferDecoder(delimiters, stripDelimiter, textPlain);
 	}
 
 	/**
@@ -247,8 +245,7 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	 * 		input strings
 	 */
 	public static CharBufferDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
-		return new CharBufferDecoder(delimiters, stripDelimiter,
-				new MimeType("text", "plain", DEFAULT_CHARSET), MimeTypeUtils.ALL);
+		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
+		return new CharBufferDecoder(delimiters, stripDelimiter, textPlain, MimeTypeUtils.ALL);
 	}
-
 }

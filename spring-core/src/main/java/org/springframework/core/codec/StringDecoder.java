@@ -47,9 +47,8 @@ import reactor.core.publisher.Flux;
  * @since 5.0
  */
 public final class StringDecoder extends AbstractDataBufferDecoder<String> {
-
 	/**
-	 * The default charset to use, i.e. "UTF-8".
+	 * The default charset "UTF-8".
 	 */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
@@ -59,7 +58,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	public static final List<String> DEFAULT_DELIMITERS = List.of("\r\n", "\n");
 
 	private static final ResolvableType CHAR_BUFFER_TYPE = ResolvableType.forClass(CharBuffer.class);
-
 
 	private final CharBufferDecoder charBufferDecoder;
 
@@ -94,7 +92,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	public Charset getDefaultCharset() {
 		return this.charBufferDecoder.getDefaultCharset();
 	}
-
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
@@ -134,7 +131,8 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * 		input strings
 	 */
 	public static StringDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
-		return new StringDecoder(delimiters, stripDelimiter, new MimeType("text", "plain", DEFAULT_CHARSET));
+		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
+		return new StringDecoder(delimiters, stripDelimiter, textPlain);
 	}
 
 	/**
@@ -154,8 +152,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * 		input strings
 	 */
 	public static StringDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
-		return new StringDecoder(delimiters, stripDelimiter,
-				new MimeType("text", "plain", DEFAULT_CHARSET), MimeTypeUtils.ALL);
+		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
+		return new StringDecoder(delimiters, stripDelimiter, textPlain, MimeTypeUtils.ALL);
 	}
-
 }
