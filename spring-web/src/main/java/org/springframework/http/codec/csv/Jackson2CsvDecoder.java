@@ -39,6 +39,16 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Decoder for CSV files.
+ * <p>
+ * Uses a lookahead to circumvent the fact that the Jackson CSV parser has no streaming API.
+ * For a CSV with a header the lookahead has at least to be 3:
+ * <ul>
+ *     <li>Header</li>
+ *     <li>First data row</li>
+ *     <li>Read ahead</li>
+ * </ul>
+ * The maximum number of consecutive comment and empty lines have to be considered additionally.
+ *
  */
 public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	/**
@@ -67,13 +77,6 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	private Charset defaultCharset = DEFAULT_CHARSET;
 	/**
 	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
-	 * For a CSV with a header the lookahead has at least to be 3:
-	 * <ul>
-	 *     <li>Header</li>
-	 *     <li>First data row</li>
-	 *     <li>Read ahead</li>
-	 * </ul>
-	 * The maximum number of comment and empty lines have to be considered additionally.
 	 */
 	private int lookahead = 16;
 
