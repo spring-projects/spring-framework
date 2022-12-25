@@ -42,6 +42,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  */
 public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	/**
+	 * The default charset "UTF-8".
+	 */
+	public static final Charset DEFAULT_CHARSET = UTF_8;
+	/**
 	 * Element type for parsing a whole row as a {@link String}.
 	 */
 	private static final ResolvableType STRING_TYPE = ResolvableType.forType(String.class);
@@ -58,9 +62,9 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 */
 	private final StringDecoder stringDecoder;
 	/**
-	 * Default charset. Defaults to UTF-8.
+	 * Default charset. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
-	private Charset defaultCharset = UTF_8;
+	private Charset defaultCharset = DEFAULT_CHARSET;
 	/**
 	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
 	 * For a CSV with a header the lookahead has at least to be 3:
