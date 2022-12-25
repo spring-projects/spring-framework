@@ -72,7 +72,7 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 */
 	private final StringDecoder stringDecoder;
 	/**
-	 * Default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
+	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	private Charset defaultCharset = DEFAULT_CHARSET;
 	/**
@@ -99,14 +99,14 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	}
 
 	/**
-	 * Default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
+	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	public Charset getDefaultCharset() {
 		return defaultCharset;
 	}
 
 	/**
-	 * Default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
+	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	public void setDefaultCharset(Charset defaultCharset) {
 		Assert.notNull(defaultCharset, "defaultCharset must not be null");
