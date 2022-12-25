@@ -16,6 +16,7 @@
 
 package org.springframework.core.codec;
 
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,19 +39,19 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link StringDecoder}.
+ * Unit tests for {@link CharBufferDecoder}.
  *
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Mark Paluch
  */
-class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
+class CharBufferDecoderTests extends AbstractDecoderTests<CharBufferDecoder> {
 
-	private static final ResolvableType TYPE = ResolvableType.forClass(String.class);
+	private static final ResolvableType TYPE = ResolvableType.forClass(CharBuffer.class);
 
 
-	StringDecoderTests() {
-		super(StringDecoder.allMimeTypes());
+	CharBufferDecoderTests() {
+		super(CharBufferDecoder.allMimeTypes());
 	}
 
 
@@ -68,9 +69,9 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 	@Override
 	@Test
 	public void decode() {
-		String u = "ü";
-		String e = "é";
-		String o = "ø";
+		CharBuffer u = charBuffer("ü");
+		CharBuffer e = charBuffer("é");
+		CharBuffer o = charBuffer("ø");
 		String s = String.format("%s\n%s\n%s", u, e, o);
 		Flux<DataBuffer> input = buffers(s, 1, UTF_8);
 
@@ -86,9 +87,9 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 
 	@Test
 	void decodeMultibyteCharacterUtf16() {
-		String u = "ü";
-		String e = "é";
-		String o = "ø";
+		CharBuffer u = charBuffer("ü");
+		CharBuffer e = charBuffer("é");
+		CharBuffer o = charBuffer("ø");
 		String s = String.format("%s\n%s\n%s", u, e, o);
 		Flux<DataBuffer> source = buffers(s, 2, UTF_16BE);
 		MimeType mimeType = MimeTypeUtils.parseMimeType("text/plain;charset=utf-16be");
@@ -118,14 +119,14 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 				"vw",
 				"xyz");
 
-		testDecode(input, String.class, step -> step
-				.expectNext("").as("1st")
-				.expectNext("abc")
-				.expectNext("defghi")
-				.expectNext("").as("2nd")
-				.expectNext("jklmno")
-				.expectNext("pqr")
-				.expectNext("stuvwxyz")
+		testDecode(input, CharBuffer.class, step -> step
+				.expectNext(charBuffer("")).as("1st")
+				.expectNext(charBuffer("abc"))
+				.expectNext(charBuffer("defghi"))
+				.expectNext(charBuffer("")).as("2nd")
+				.expectNext(charBuffer("jklmno"))
+				.expectNext(charBuffer("pqr"))
+				.expectNext(charBuffer("stuvwxyz"))
 				.expectComplete()
 				.verify());
 	}
@@ -137,9 +138,9 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 				"\n",
 				"xyz");
 
-		testDecode(input, String.class, step -> step
-				.expectNext("")
-				.expectNext("xyz")
+		testDecode(input, CharBuffer.class, step -> step
+				.expectNext(charBuffer(""))
+				.expectNext(charBuffer("xyz"))
 				.expectComplete()
 				.verify());
 	}
@@ -152,9 +153,9 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 
 		this.decoder.setMaxInMemorySize(5);
 
-		testDecode(input, String.class, step -> step
-				.expectNext("abc")
-				.expectNext("defg")
+		testDecode(input, CharBuffer.class, step -> step
+				.expectNext(charBuffer("abc"))
+				.expectNext(charBuffer("defg"))
 				.verifyError(DataBufferLimitException.class));
 	}
 
@@ -165,11 +166,11 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 
 		this.decoder.setMaxInMemorySize(5);
 
-		testDecode(input, String.class, step -> step
-				.expectNext("TOO MUCH DATA")
-				.expectNext("another line")
-				.expectNext("")
-				.expectNext("and another")
+		testDecode(input, CharBuffer.class, step -> step
+				.expectNext(charBuffer("TOO MUCH DATA"))
+				.expectNext(charBuffer("another line"))
+				.expectNext(charBuffer(""))
+				.expectNext(charBuffer("and another"))
 				.expectComplete()
 				.verify());
 	}
@@ -186,7 +187,7 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 
 	@Test
 	void decodeNewLineIncludeDelimiters() {
-		this.decoder = StringDecoder.allMimeTypes(StringDecoder.DEFAULT_DELIMITERS, false);
+		this.decoder = CharBufferDecoder.allMimeTypes(CharBufferDecoder.DEFAULT_DELIMITERS, false);
 
 		Flux<DataBuffer> input = buffers(
 				"\r\nabc\n",
@@ -198,14 +199,14 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 				"vw",
 				"xyz");
 
-		testDecode(input, String.class, step -> step
-				.expectNext("\r\n")
-				.expectNext("abc\n")
-				.expectNext("defghi\r\n")
-				.expectNext("\n")
-				.expectNext("jklmno\n")
-				.expectNext("pqr\n")
-				.expectNext("stuvwxyz")
+		testDecode(input, CharBuffer.class, step -> step
+				.expectNext(charBuffer("\r\n"))
+				.expectNext(charBuffer("abc\n"))
+				.expectNext(charBuffer("defghi\r\n"))
+				.expectNext(charBuffer("\n"))
+				.expectNext(charBuffer("jklmno\n"))
+				.expectNext(charBuffer("pqr\n"))
+				.expectNext(charBuffer("stuvwxyz"))
 				.expectComplete()
 				.verify());
 	}
@@ -223,10 +224,10 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 	void decodeEmptyDataBuffer() {
 		Flux<DataBuffer> input = buffers("");
 
-		Flux<String> output = this.decoder.decode(input, TYPE, null, Collections.emptyMap());
+		Flux<CharBuffer> output = this.decoder.decode(input, TYPE, null, Collections.emptyMap());
 
 		StepVerifier.create(output)
-				.expectNext("")
+				.expectNext(charBuffer(""))
 				.expectComplete().verify();
 	}
 
@@ -238,8 +239,8 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 				"bar",
 				"baz");
 
-		testDecodeToMonoAll(input, String.class, step -> step
-				.expectNext("foobarbaz")
+		testDecodeToMonoAll(input, CharBuffer.class, step -> step
+				.expectNext(charBuffer("foobarbaz"))
 				.expectComplete()
 				.verify());
 	}
@@ -265,6 +266,13 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(value.length);
 		buffer.write(value);
 		return buffer;
+	}
+
+	private CharBuffer charBuffer(String value) {
+		return CharBuffer
+				.allocate(value.length())
+				.put(value)
+				.flip();
 	}
 
 }
