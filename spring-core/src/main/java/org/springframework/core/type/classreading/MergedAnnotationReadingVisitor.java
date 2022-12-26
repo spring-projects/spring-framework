@@ -92,8 +92,10 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@Override
 	public void visitEnd() {
+		Map<String, Object> compactedAttributes
+				= this.attributes.size() == 0 ? Map.of() : this.attributes;
 		MergedAnnotation<A> annotation = MergedAnnotation.of(
-				this.classLoader, this.source, this.annotationType, this.attributes);
+				this.classLoader, this.source, this.annotationType, compactedAttributes);
 		this.consumer.accept(annotation);
 	}
 
