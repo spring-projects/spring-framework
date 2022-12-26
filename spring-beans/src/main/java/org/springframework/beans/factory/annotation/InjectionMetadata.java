@@ -107,15 +107,20 @@ public class InjectionMetadata {
 	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-		Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
-		for (InjectedElement element : this.injectedElements) {
-			Member member = element.getMember();
-			if (!beanDefinition.isExternallyManagedConfigMember(member)) {
-				beanDefinition.registerExternallyManagedConfigMember(member);
-				checkedElements.add(element);
-			}
+		if (this.injectedElements.isEmpty()) {
+			this.checkedElements = Collections.emptySet();
 		}
-		this.checkedElements = checkedElements;
+		else {
+			Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size()*4/3 + 1);
+			for (InjectedElement element : this.injectedElements) {
+				Member member = element.getMember();
+				if (!beanDefinition.isExternallyManagedConfigMember(member)) {
+					beanDefinition.registerExternallyManagedConfigMember(member);
+					checkedElements.add(element);
+				}
+			}
+			this.checkedElements = checkedElements;
+		}
 	}
 
 	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {

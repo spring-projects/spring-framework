@@ -19,6 +19,7 @@ package org.springframework.core.type.classreading;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,8 +93,10 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@Override
 	public void visitEnd() {
+		Map<String, Object> compactedAttributes
+				= this.attributes.size() == 0 ? Collections.emptyMap() : this.attributes;
 		MergedAnnotation<A> annotation = MergedAnnotation.of(
-				this.classLoader, this.source, this.annotationType, this.attributes);
+				this.classLoader, this.source, this.annotationType, compactedAttributes);
 		this.consumer.accept(annotation);
 	}
 
