@@ -16,20 +16,19 @@
 
 package org.springframework.core.codec;
 
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-
+import org.reactivestreams.Publisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Decode from a data buffer stream to a {@code String} stream, either splitting
@@ -47,6 +46,7 @@ import reactor.core.publisher.Flux;
  * @since 5.0
  */
 public final class StringDecoder extends AbstractDataBufferDecoder<String> {
+
 	/**
 	 * The default charset "UTF-8".
 	 */
@@ -76,8 +76,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	 * Set the default character set to fall back on if the MimeType does not specify any.
 	 * <p>By default this is {@code UTF-8}.
 	 *
-	 * @param defaultCharset
-	 * 		the charset to fall back on
+	 * @param defaultCharset the charset to fall back on
 	 * @since 5.2.9
 	 */
 	public void setDefaultCharset(Charset defaultCharset) {
@@ -100,7 +99,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	@Override
 	public Flux<String> decode(Publisher<DataBuffer> input, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+							   @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return this.charBufferDecoder.decode(input, CHAR_BUFFER_TYPE, mimeType, hints)
 				.map(CharBuffer::toString);
@@ -108,7 +107,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	@Override
 	public String decode(DataBuffer dataBuffer, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+						 @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return this.charBufferDecoder.decode(dataBuffer, CHAR_BUFFER_TYPE, mimeType, hints)
 				.toString();
@@ -124,11 +123,9 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	/**
 	 * Create a {@code StringDecoder} for {@code "text/plain"}.
 	 *
-	 * @param delimiters
-	 * 		delimiter strings to use to split the input stream
-	 * @param stripDelimiter
-	 * 		whether to remove delimiters from the resulting
-	 * 		input strings
+	 * @param delimiters     delimiter strings to use to split the input stream
+	 * @param stripDelimiter whether to remove delimiters from the resulting
+	 *                       input strings
 	 */
 	public static StringDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
 		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
@@ -145,14 +142,13 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	/**
 	 * Create a {@code StringDecoder} that supports all MIME types.
 	 *
-	 * @param delimiters
-	 * 		delimiter strings to use to split the input stream
-	 * @param stripDelimiter
-	 * 		whether to remove delimiters from the resulting
-	 * 		input strings
+	 * @param delimiters     delimiter strings to use to split the input stream
+	 * @param stripDelimiter whether to remove delimiters from the resulting
+	 *                       input strings
 	 */
 	public static StringDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
 		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
 		return new StringDecoder(delimiters, stripDelimiter, textPlain, MimeTypeUtils.ALL);
 	}
+
 }

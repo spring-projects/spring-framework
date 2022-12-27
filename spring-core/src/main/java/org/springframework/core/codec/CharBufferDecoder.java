@@ -16,16 +16,7 @@
 
 package org.springframework.core.codec;
 
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
+import org.reactivestreams.Publisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -35,10 +26,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -58,6 +53,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @since 5.0
  */
 public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffer> {
+
 	/**
 	 * The default charset "UTF-8".
 	 */
@@ -87,8 +83,7 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	 * Set the default character set to fall back on if the MimeType does not specify any.
 	 * <p>By default this is {@code UTF-8}.
 	 *
-	 * @param defaultCharset
-	 * 		the charset to fall back on
+	 * @param defaultCharset the charset to fall back on
 	 * @since 5.2.9
 	 */
 	public void setDefaultCharset(Charset defaultCharset) {
@@ -111,7 +106,7 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 
 	@Override
 	public Flux<CharBuffer> decode(Publisher<DataBuffer> input, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+								   @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		byte[][] delimiterBytes = getDelimiterBytes(mimeType);
 
@@ -187,7 +182,7 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 
 	@Override
 	public CharBuffer decode(DataBuffer dataBuffer, ResolvableType elementType,
-			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+							 @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Charset charset = getCharset(mimeType);
 		CharBuffer charBuffer = charset.decode(dataBuffer.toByteBuffer());
@@ -217,11 +212,9 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	/**
 	 * Create a {@code CharBufferDecoder} for {@code "text/plain"}.
 	 *
-	 * @param delimiters
-	 * 		delimiter strings to use to split the input stream
-	 * @param stripDelimiter
-	 * 		whether to remove delimiters from the resulting
-	 * 		input strings
+	 * @param delimiters     delimiter strings to use to split the input stream
+	 * @param stripDelimiter whether to remove delimiters from the resulting
+	 *                       input strings
 	 */
 	public static CharBufferDecoder textPlainOnly(List<String> delimiters, boolean stripDelimiter) {
 		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
@@ -238,14 +231,13 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	/**
 	 * Create a {@code CharBufferDecoder} that supports all MIME types.
 	 *
-	 * @param delimiters
-	 * 		delimiter strings to use to split the input stream
-	 * @param stripDelimiter
-	 * 		whether to remove delimiters from the resulting
-	 * 		input strings
+	 * @param delimiters     delimiter strings to use to split the input stream
+	 * @param stripDelimiter whether to remove delimiters from the resulting
+	 *                       input strings
 	 */
 	public static CharBufferDecoder allMimeTypes(List<String> delimiters, boolean stripDelimiter) {
 		var textPlain = new MimeType("text", "plain", DEFAULT_CHARSET);
 		return new CharBufferDecoder(delimiters, stripDelimiter, textPlain, MimeTypeUtils.ALL);
 	}
+
 }
