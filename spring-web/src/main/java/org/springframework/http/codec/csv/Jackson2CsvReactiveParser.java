@@ -16,20 +16,20 @@
 
 package org.springframework.http.codec.csv;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-import org.springframework.util.Assert;
-
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
+import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Reactive CSV parser. NOT thread-safe.
  */
 final class Jackson2CsvReactiveParser<T> {
+
 	/**
 	 * CSV object reader.
 	 */
@@ -53,10 +53,8 @@ final class Jackson2CsvReactiveParser<T> {
 	/**
 	 * Constructor.
 	 *
-	 * @param objectReader
-	 * 		CSV object mapper.
-	 * @param lookahead
-	 * 		Lookahead.
+	 * @param objectReader CSV object mapper.
+	 * @param lookahead    Lookahead.
 	 */
 	Jackson2CsvReactiveParser(ObjectReader objectReader, int lookahead) {
 		Assert.notNull(objectReader, "objectReader must not be null");
@@ -113,4 +111,5 @@ final class Jackson2CsvReactiveParser<T> {
 			return Flux.error(e);
 		}
 	}
+
 }

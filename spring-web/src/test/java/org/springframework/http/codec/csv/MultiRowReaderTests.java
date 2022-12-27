@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Test for {@link MultiRowReader}.
  */
 class MultiRowReaderTests {
+
 	private final MultiRowReader reader = new MultiRowReader();
 
 	/**
@@ -136,4 +137,5 @@ class MultiRowReaderTests {
 		assertThatThrownBy(() -> reader.read(new char[1], 0, 0))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
+
 }

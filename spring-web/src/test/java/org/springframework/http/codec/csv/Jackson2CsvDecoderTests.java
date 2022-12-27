@@ -16,18 +16,17 @@
 
 package org.springframework.http.codec.csv;
 
-import java.util.Map;
-
-import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.util.MimeType;
-
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.util.MimeType;
 import reactor.core.publisher.Flux;
+
+import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test for {@link Jackson2CsvDecoder}.
  */
 class Jackson2CsvDecoderTests {
+
 	/**
 	 * Type for rows: {@code Map<String, String>}.
 	 */
@@ -88,4 +88,5 @@ class Jackson2CsvDecoderTests {
 		var encoded = csv.replaceAll("\\R", "\n").getBytes(UTF_8);
 		return Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(encoded));
 	}
+
 }

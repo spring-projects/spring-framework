@@ -16,10 +16,9 @@
 
 package org.springframework.http.codec.csv;
 
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.reactivestreams.Publisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
@@ -27,15 +26,14 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
-import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
 
 /**
  * Decoder for CSV files.
@@ -48,33 +46,39 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *     <li>Read ahead</li>
  * </ul>
  * The maximum number of consecutive comment and empty lines have to be considered additionally.
- *
  */
 public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
+
 	/**
 	 * The default charset "UTF-8".
 	 */
 	public static final Charset DEFAULT_CHARSET = UTF_8;
+
 	/**
 	 * Element type for parsing a whole row as a {@link String}.
 	 */
 	private static final ResolvableType STRING_TYPE = ResolvableType.forType(String.class);
+
 	/**
 	 * CSV mapper.
 	 */
 	private final CsvMapper mapper;
+
 	/**
 	 * CSV schema.
 	 */
 	private final CsvSchema schema;
+
 	/**
 	 * {@link String} decoder for parsing a whole row as a {@link String}.
 	 */
 	private final StringDecoder stringDecoder;
+
 	/**
 	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	private Charset defaultCharset = DEFAULT_CHARSET;
+
 	/**
 	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
 	 */
@@ -154,4 +158,5 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 				mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : defaultCharset);
 		return stringDecoder.decode(input, STRING_TYPE, textMimeType, hints);
 	}
+
 }

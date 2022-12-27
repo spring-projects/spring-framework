@@ -16,13 +16,13 @@
 
 package org.springframework.http.codec.csv;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,10 +30,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test for {@link Jackson2CsvReactiveParser}.
  */
 class Jackson2CsvReactiveParserTests {
+
 	/**
 	 * Type for rows: {@code Map<String, String>}.
 	 */
-	private static final TypeReference<Map<String, String>> CSV_RECORD_TYPE = new TypeReference<>() {};
+	private static final TypeReference<Map<String, String>> CSV_RECORD_TYPE = new TypeReference<>() {
+	};
 
 	/**
 	 * Test for {@link Jackson2CsvReactiveParser#parse(String)}.
@@ -96,4 +98,5 @@ class Jackson2CsvReactiveParserTests {
 	private Flux<String> rows(String... rows) {
 		return Flux.just(rows).map(row -> row + "\n");
 	}
+
 }

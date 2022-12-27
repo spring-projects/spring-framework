@@ -16,9 +16,10 @@
 
 package org.springframework.http.codec.csv;
 
-import java.nio.charset.Charset;
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.reactivestreams.Publisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -26,13 +27,11 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.Charset;
+import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -40,14 +39,17 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * Encoder for CSV files.
  */
 public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
+
 	/**
 	 * CSV mapper.
 	 */
 	private final CsvMapper mapper;
+
 	/**
 	 * CSV schema.
 	 */
 	private final CsvSchema schema;
+
 	/**
 	 * Default charset. Defaults to UTF-8.
 	 */
@@ -106,4 +108,5 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 			return Mono.error(e);
 		}
 	}
+
 }

@@ -16,10 +16,10 @@
 
 package org.springframework.http.codec.csv;
 
+import org.springframework.util.Assert;
+
 import java.io.Reader;
 import java.util.LinkedList;
-
-import org.springframework.util.Assert;
 
 import static java.lang.Math.min;
 
@@ -27,6 +27,7 @@ import static java.lang.Math.min;
  * A reader that reads multiple row at a time. NOT thread-safe.
  */
 final class MultiRowReader extends Reader {
+
 	/**
 	 * The row.
 	 */
@@ -76,15 +77,11 @@ final class MultiRowReader extends Reader {
 	/**
 	 * Read the (one and only) row.
 	 *
-	 * @param destination
-	 * 		Destination buffer.
-	 * @param offset
-	 * 		Offset at which to start storing characters.
-	 * @param length
-	 * 		Maximum number of characters to read.
+	 * @param destination Destination buffer.
+	 * @param offset      Offset at which to start storing characters.
+	 * @param length      Maximum number of characters to read.
 	 * @return Number of characters read.
-	 * @throws IllegalArgumentException
-	 * 		If this reader runs out of rows but has not been closed yet.
+	 * @throws IllegalArgumentException If this reader runs out of rows but has not been closed yet.
 	 */
 	@Override
 	public int read(char[] destination, int offset, int length) {
@@ -92,7 +89,7 @@ final class MultiRowReader extends Reader {
 
 		if (rows.isEmpty()) {
 			Assert.isTrue(closed, "reader must be closed. " +
-								  "Increment the lookahead if the reader runs out of rows.");
+					"Increment the lookahead if the reader runs out of rows.");
 			return -1;
 		}
 
@@ -115,7 +112,7 @@ final class MultiRowReader extends Reader {
 		rows.removeFirst();
 		if (rows.isEmpty()) {
 			Assert.isTrue(closed, "reader must be closed. " +
-								  "Increment the lookahead if the reader runs out of rows.");
+					"Increment the lookahead if the reader runs out of rows.");
 			return;
 		}
 
@@ -130,4 +127,5 @@ final class MultiRowReader extends Reader {
 	public void close() {
 		closed = true;
 	}
+
 }
