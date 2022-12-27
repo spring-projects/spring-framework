@@ -42,8 +42,8 @@ import java.util.Map;
  * @author Brian Clozel
  * @author Arjen Poutsma
  * @author Mark Paluch
- * @see CharSequenceEncoder
  * @since 5.0
+ * @see CharSequenceEncoder
  */
 public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 

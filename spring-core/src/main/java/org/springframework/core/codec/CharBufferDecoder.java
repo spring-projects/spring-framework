@@ -50,7 +50,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author Arjen Poutsma
  * @author Mark Paluch
  * @see CharSequenceEncoder
- * @since 5.0
  */
 public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffer> {
 
