@@ -16,19 +16,20 @@
 
 package org.springframework.core.codec;
 
-import org.reactivestreams.Publisher;
-import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.lang.Nullable;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
-import reactor.core.publisher.Flux;
-
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+
+import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * Decode from a data buffer stream to a {@code String} stream, either splitting
@@ -99,7 +100,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	@Override
 	public Flux<String> decode(Publisher<DataBuffer> input, ResolvableType elementType,
-							   @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return this.charBufferDecoder.decode(input, CHAR_BUFFER_TYPE, mimeType, hints)
 				.map(CharBuffer::toString);
@@ -107,7 +108,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	@Override
 	public String decode(DataBuffer dataBuffer, ResolvableType elementType,
-						 @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return this.charBufferDecoder.decode(dataBuffer, CHAR_BUFFER_TYPE, mimeType, hints)
 				.toString();

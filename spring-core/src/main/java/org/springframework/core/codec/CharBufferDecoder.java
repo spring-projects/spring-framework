@@ -16,7 +16,20 @@
 
 package org.springframework.core.codec;
 
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -26,16 +39,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.charset.StandardCharsets.*;
 
 /**
  * Decode from a data buffer stream to a {@code CharBuffer} stream, either splitting
@@ -105,7 +109,7 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 
 	@Override
 	public Flux<CharBuffer> decode(Publisher<DataBuffer> input, ResolvableType elementType,
-								   @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		byte[][] delimiterBytes = getDelimiterBytes(mimeType);
 
@@ -160,7 +164,8 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 						split.writePosition(split.writePosition() - delimiterLength);
 					}
 					result.add(split);
-				} else {
+				}
+				else {
 					chunks.add(split);
 					DataBuffer joined = buffer.factory().join(chunks);
 					if (this.stripDelimiter) {
@@ -172,7 +177,8 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 			}
 			while (buffer.readableByteCount() > 0);
 			return (result != null ? result : Collections.emptyList());
-		} finally {
+		}
+		finally {
 			if (release) {
 				DataBufferUtils.release(buffer);
 			}
@@ -181,7 +187,7 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 
 	@Override
 	public CharBuffer decode(DataBuffer dataBuffer, ResolvableType elementType,
-							 @Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Charset charset = getCharset(mimeType);
 		CharBuffer charBuffer = charset.decode(dataBuffer.toByteBuffer());
@@ -196,7 +202,8 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	private Charset getCharset(@Nullable MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {
 			return mimeType.getCharset();
-		} else {
+		}
+		else {
 			return getDefaultCharset();
 		}
 	}
