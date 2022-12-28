@@ -18,6 +18,7 @@ package org.springframework.core.codec;
 
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +40,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import static java.nio.charset.StandardCharsets.*;
 
 /**
  * Decode from a data buffer stream to a {@code CharBuffer} stream, either splitting
@@ -60,7 +60,7 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	/**
 	 * The default charset "UTF-8".
 	 */
-	public static final Charset DEFAULT_CHARSET = UTF_8;
+	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	/**
 	 * The default delimiter strings to use, i.e. {@code \r\n} and {@code \n}.
