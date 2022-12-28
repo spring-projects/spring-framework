@@ -16,15 +16,13 @@
 
 package org.springframework.http.codec.csv;
 
-import org.springframework.util.Assert;
-
 import java.io.Reader;
 import java.util.LinkedList;
 
-import static java.lang.Math.min;
+import org.springframework.util.Assert;
 
 /**
- * A reader that reads multiple row at a time. NOT thread-safe.
+ * A reader that reads multiple row at a time. Not thread-safe.
  */
 final class MultiRowReader extends Reader {
 
@@ -93,7 +91,7 @@ final class MultiRowReader extends Reader {
 			return -1;
 		}
 
-		var count = min(rowRemaining, length);
+		var count = Math.min(rowRemaining, length);
 		rows.get(0).getChars(rowOffset, rowOffset + count, destination, offset);
 		rowOffset += count;
 		rowRemaining -= count;
@@ -117,7 +115,7 @@ final class MultiRowReader extends Reader {
 		}
 
 		rowOffset = 0;
-		rowRemaining = rows.get(0).length();
+		rowRemaining = rows.getFirst().length();
 	}
 
 	/**

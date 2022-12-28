@@ -16,9 +16,15 @@
 
 package org.springframework.http.codec.csv;
 
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
@@ -26,11 +32,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-import reactor.core.publisher.Flux;
-
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
@@ -45,7 +46,7 @@ import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
  *     <li>First data row</li>
  *     <li>Read ahead</li>
  * </ul>
- * The maximum number of consecutive comment and empty lines have to be considered additionally.
+ * The maximum number of consecutive comment and empty lines in the CSV have to be considered additionally.
  */
 public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 
@@ -70,7 +71,7 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	private final CsvSchema schema;
 
 	/**
-	 * {@link String} decoder for parsing a whole row as a {@link String}.
+	 * Decoder for parsing a whole row as a {@link String}.
 	 */
 	private final StringDecoder stringDecoder;
 
@@ -84,9 +85,6 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 */
 	private int lookahead = 16;
 
-	/**
-	 * Constructor.
-	 */
 	public Jackson2CsvDecoder(CsvMapper mapper, CsvSchema schema) {
 		super(MimeType.valueOf("text/csv"));
 		Assert.notNull(mapper, "mapper must not be null");

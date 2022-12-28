@@ -16,14 +16,15 @@
 
 package org.springframework.http.codec.csv;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
-import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import org.springframework.util.Assert;
 
 /**
  * Reactive CSV parser. NOT thread-safe.
@@ -86,7 +87,8 @@ final class Jackson2CsvReactiveParser<T> {
 					Mono.just(parser.next()) :
 					Mono.empty();
 
-		} catch (IOException | RuntimeException e) {
+		}
+		catch (IOException | RuntimeException e) {
 			// Shouldn't happen because the web client should handle all IO related errors upfront.
 			return Mono.error(e);
 		}
@@ -106,7 +108,8 @@ final class Jackson2CsvReactiveParser<T> {
 			parser.forEachRemaining(rows::add);
 			return Flux.fromIterable(rows);
 
-		} catch (IOException | RuntimeException e) {
+		}
+		catch (IOException | RuntimeException e) {
 			// Shouldn't happen because the web client should handle all IO related errors upfront.
 			return Flux.error(e);
 		}

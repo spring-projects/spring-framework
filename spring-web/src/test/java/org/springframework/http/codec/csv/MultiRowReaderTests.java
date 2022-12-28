@@ -21,17 +21,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Test for {@link MultiRowReader}.
- */
 class MultiRowReaderTests {
 
 	private final MultiRowReader reader = new MultiRowReader();
 
-	/**
-	 * Test for {@link MultiRowReader#size()} and
-	 * implicitly for {@link MultiRowReader#addRow(String)}.
-	 */
 	@Test
 	void size() {
 		assertThat(reader.size()).isZero();
@@ -45,9 +38,6 @@ class MultiRowReaderTests {
 		assertThat(reader.size()).isEqualTo(2);
 	}
 
-	/**
-	 * Test for {@link MultiRowReader#addRow(String)}.
-	 */
 	@Test
 	void add_empty() {
 		reader.addRow("");
@@ -55,9 +45,6 @@ class MultiRowReaderTests {
 		assertThat(reader.size()).isZero();
 	}
 
-	/**
-	 * Test for {@link MultiRowReader#addRow(String)}.
-	 */
 	@Test
 	void add_first() {
 		reader.addRow("ab");
@@ -68,10 +55,6 @@ class MultiRowReaderTests {
 		assertThat(destination1).containsExactly('a');
 	}
 
-	/**
-	 * Test for {@link MultiRowReader#addRow(String)}.
-	 * Test that adding a second row does not interrupt a prior read.
-	 */
 	@Test
 	void add_second() {
 		reader.addRow("ab");
@@ -83,6 +66,7 @@ class MultiRowReaderTests {
 
 		reader.addRow("cd");
 
+		// Test that adding the second row did not interrupt the read of the first row.
 		var destination2 = new char[1];
 		var count2 = reader.read(destination2, 0, 1);
 		assertThat(count2).isEqualTo(1);
@@ -94,20 +78,13 @@ class MultiRowReaderTests {
 		assertThat(destination3).containsExactly('c');
 	}
 
-	/**
-	 * Test for {@link MultiRowReader#read(char[], int, int)}.
-	 * Test that an exception is thrown if the buffer is depleted unplanned.
-	 */
 	@Test
 	void read_empty() {
+	    // Test that an exception is thrown if the buffer is depleted unplanned.
 		assertThatThrownBy(() -> reader.read(new char[1], 0, 1))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 
-	/**
-	 * Test for {@link MultiRowReader#read(char[], int, int)} and
-	 * implicitly for {@link MultiRowReader#close()}.
-	 */
 	@Test
 	void read_end() {
 		reader.close();
@@ -115,10 +92,6 @@ class MultiRowReaderTests {
 		assertThat(reader.read(new char[1], 0, 1)).isEqualTo(-1);
 	}
 
-	/**
-	 * Test for {@link MultiRowReader#read(char[], int, int)} and
-	 * implicitly for {@link MultiRowReader#addRow(String)}.
-	 */
 	@Test
 	void read() {
 		reader.addRow("abc");

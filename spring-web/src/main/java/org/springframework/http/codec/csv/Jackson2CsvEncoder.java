@@ -16,10 +16,16 @@
 
 package org.springframework.http.codec.csv;
 
+import java.nio.charset.Charset;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -27,11 +33,6 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.nio.charset.Charset;
-import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -39,6 +40,11 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * Encoder for CSV files.
  */
 public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
+
+	/**
+	 * The default charset "UTF-8".
+	 */
+	public static final Charset DEFAULT_CHARSET = UTF_8;
 
 	/**
 	 * CSV mapper.
@@ -51,13 +57,10 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	private final CsvSchema schema;
 
 	/**
-	 * Default charset. Defaults to UTF-8.
+	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	private Charset defaultCharset = UTF_8;
 
-	/**
-	 * Constructor.
-	 */
 	public Jackson2CsvEncoder(CsvMapper mapper, CsvSchema schema) {
 		super(MimeType.valueOf("text/csv"));
 		Assert.notNull(mapper, "mapper must not be null");
@@ -67,14 +70,14 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	}
 
 	/**
-	 * Default charset. Defaults to UTF-8.
+	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	public Charset getDefaultCharset() {
 		return defaultCharset;
 	}
 
 	/**
-	 * Default charset. Defaults to UTF-8.
+	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	public void setDefaultCharset(Charset defaultCharset) {
 		Assert.notNull(defaultCharset, "defaultCharset must not be null");
@@ -104,7 +107,8 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	private Mono<String> writeCsv(T row, ObjectWriter objectWriter) {
 		try {
 			return Mono.just(objectWriter.writeValueAsString(row));
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return Mono.error(e);
 		}
 	}

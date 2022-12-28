@@ -16,19 +16,16 @@
 
 package org.springframework.http.codec.csv;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test for {@link Jackson2CsvReactiveParser}.
- */
 class Jackson2CsvReactiveParserTests {
 
 	/**
@@ -37,9 +34,6 @@ class Jackson2CsvReactiveParserTests {
 	private static final TypeReference<Map<String, String>> CSV_RECORD_TYPE = new TypeReference<>() {
 	};
 
-	/**
-	 * Test for {@link Jackson2CsvReactiveParser#parse(String)}.
-	 */
 	@Test
 	void parse_withHeader() {
 		var parser = parser(CsvSchema.builder()
@@ -59,9 +53,6 @@ class Jackson2CsvReactiveParserTests {
 				Map.of("header1", "value3", "header2", "value4"));
 	}
 
-	/**
-	 * Test for {@link Jackson2CsvReactiveParser#parse(String)}.
-	 */
 	@Test
 	void parse_withoutHeader() {
 		var parser = parser(CsvSchema.builder()
