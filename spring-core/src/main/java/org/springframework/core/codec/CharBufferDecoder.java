@@ -85,7 +85,6 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	/**
 	 * Set the default character set to fall back on if the MimeType does not specify any.
 	 * <p>By default this is {@code UTF-8}.
-	 *
 	 * @param defaultCharset the charset to fall back on
 	 * @since 5.2.9
 	 */
@@ -217,7 +216,6 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 
 	/**
 	 * Create a {@code CharBufferDecoder} for {@code "text/plain"}.
-	 *
 	 * @param delimiters     delimiter strings to use to split the input stream
 	 * @param stripDelimiter whether to remove delimiters from the resulting
 	 *                       input strings
@@ -236,7 +234,6 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 
 	/**
 	 * Create a {@code CharBufferDecoder} that supports all MIME types.
-	 *
 	 * @param delimiters     delimiter strings to use to split the input stream
 	 * @param stripDelimiter whether to remove delimiters from the resulting
 	 *                       input strings

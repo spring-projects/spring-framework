@@ -76,7 +76,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	/**
 	 * Set the default character set to fall back on if the MimeType does not specify any.
 	 * <p>By default this is {@code UTF-8}.
-	 *
 	 * @param defaultCharset the charset to fall back on
 	 * @since 5.2.9
 	 */
@@ -86,7 +85,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	/**
 	 * Return the configured {@link #setDefaultCharset(Charset) defaultCharset}.
-	 *
 	 * @since 5.2.9
 	 */
 	public Charset getDefaultCharset() {
@@ -123,7 +121,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} for {@code "text/plain"}.
-	 *
 	 * @param delimiters     delimiter strings to use to split the input stream
 	 * @param stripDelimiter whether to remove delimiters from the resulting
 	 *                       input strings
@@ -142,7 +139,6 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} that supports all MIME types.
-	 *
 	 * @param delimiters     delimiter strings to use to split the input stream
 	 * @param stripDelimiter whether to remove delimiters from the resulting
 	 *                       input strings
