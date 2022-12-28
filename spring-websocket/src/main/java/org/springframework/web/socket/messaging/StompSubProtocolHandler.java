@@ -427,7 +427,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@Override
 	@SuppressWarnings("unchecked")
 	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
-		if (!(message.getPayload() instanceof byte[])) {
+		if (!(message.getPayload() instanceof byte[] payload)) {
 			if (logger.isErrorEnabled()) {
 				logger.error("Expected byte[] payload. Ignoring " + message + ".");
 			}
@@ -464,7 +464,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			}
 		}
 
-		byte[] payload = (byte[]) message.getPayload();
 		if (StompCommand.ERROR.equals(command) && getErrorHandler() != null) {
 			Message<byte[]> errorMessage = getErrorHandler().handleErrorMessageToClient((Message<byte[]>) message);
 			if (errorMessage != null) {

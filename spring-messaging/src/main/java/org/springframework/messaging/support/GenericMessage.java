@@ -93,10 +93,9 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof GenericMessage)) {
+		if (!(other instanceof GenericMessage<?> otherMsg)) {
 			return false;
 		}
-		GenericMessage<?> otherMsg = (GenericMessage<?>) other;
 		// Using nullSafeEquals for proper array equals comparisons
 		return (ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers));
 	}

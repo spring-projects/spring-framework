@@ -378,10 +378,9 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
 		HandlerMethod handlerMethod;
-		if (handler instanceof String) {
+		if (handler instanceof String beanName) {
 			ApplicationContext context = getApplicationContext();
 			Assert.state(context != null, "ApplicationContext is required for resolving handler bean names");
-			String beanName = (String) handler;
 			handlerMethod = new HandlerMethod(beanName, context.getAutowireCapableBeanFactory(), method);
 		}
 		else {

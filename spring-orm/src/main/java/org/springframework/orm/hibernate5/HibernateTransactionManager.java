@@ -362,11 +362,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (this.entityInterceptor instanceof Interceptor) {
 			return (Interceptor) this.entityInterceptor;
 		}
-		else if (this.entityInterceptor instanceof String) {
+		else if (this.entityInterceptor instanceof String beanName) {
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
 			}
-			String beanName = (String) this.entityInterceptor;
 			return this.beanFactory.getBean(beanName, Interceptor.class);
 		}
 		else {

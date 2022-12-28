@@ -274,7 +274,7 @@ public class MethodReference extends SpelNodeImpl {
 	public boolean isCompilable() {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
 		if (executorToCheck == null || executorToCheck.hasProxyTarget() ||
-				!(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
+				!(executorToCheck.get() instanceof ReflectiveMethodExecutor executor)) {
 			return false;
 		}
 
@@ -284,26 +284,20 @@ public class MethodReference extends SpelNodeImpl {
 			}
 		}
 
-		ReflectiveMethodExecutor executor = (ReflectiveMethodExecutor) executorToCheck.get();
 		if (executor.didArgumentConversionOccur()) {
 			return false;
 		}
 		Class<?> clazz = executor.getMethod().getDeclaringClass();
-		if (!Modifier.isPublic(clazz.getModifiers()) && executor.getPublicDeclaringClass() == null) {
-			return false;
-		}
-
-		return true;
+		return Modifier.isPublic(clazz.getModifiers()) || executor.getPublicDeclaringClass() != null;
 	}
 
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		CachedMethodExecutor executorToCheck = this.cachedExecutor;
-		if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor)) {
+		if (executorToCheck == null || !(executorToCheck.get() instanceof ReflectiveMethodExecutor methodExecutor)) {
 			throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
 		}
 
-		ReflectiveMethodExecutor methodExecutor = (ReflectiveMethodExecutor) executorToCheck.get();
 		Method method = methodExecutor.getMethod();
 		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
 		String descriptor = cf.lastDescriptor();

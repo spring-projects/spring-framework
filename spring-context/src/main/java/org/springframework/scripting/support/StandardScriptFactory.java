@@ -160,8 +160,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 			}
 		}
 
-		if (script instanceof Class) {
-			Class<?> scriptClass = (Class<?>) script;
+		if (script instanceof Class<?> scriptClass) {
 			try {
 				return ReflectionUtils.accessibleConstructor(scriptClass).newInstance();
 			}
