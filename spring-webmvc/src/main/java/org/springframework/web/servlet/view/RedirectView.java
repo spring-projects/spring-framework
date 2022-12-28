@@ -537,8 +537,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			}
 			return true;
 		}
-		if (value instanceof Collection) {
-			Collection<?> coll = (Collection<?>) value;
+		if (value instanceof Collection<?> coll) {
 			if (coll.isEmpty()) {
 				return false;
 			}

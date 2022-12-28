@@ -191,8 +191,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource, BeanC
 	 * @param theme the Theme to (re-)initialize
 	 */
 	protected void initParent(Theme theme) {
-		if (theme.getMessageSource() instanceof HierarchicalMessageSource) {
-			HierarchicalMessageSource messageSource = (HierarchicalMessageSource) theme.getMessageSource();
+		if (theme.getMessageSource() instanceof HierarchicalMessageSource messageSource) {
 			if (getParentThemeSource() != null && messageSource.getParentMessageSource() == null) {
 				Theme parentTheme = getParentThemeSource().getTheme(theme.getName());
 				if (parentTheme != null) {

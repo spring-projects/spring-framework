@@ -52,11 +52,12 @@ public class ToStringVisitorTests {
 		routerFunction.accept(visitor);
 		String result = visitor.toString();
 
-		String expected = "/foo => {\n" +
-				" /bar => {\n" +
-				"  (GET && /baz) -> \n" +
-				" }\n" +
-				"}";
+		String expected = """
+				/foo => {
+					/bar => {
+						(GET && /baz) ->\s
+					}
+				}""".replace('\t', ' ');
 		assertThat(result).isEqualTo(expected);
 	}
 

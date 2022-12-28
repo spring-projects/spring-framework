@@ -381,8 +381,7 @@ class ReactiveTypeHandler {
 
 		@Override
 		protected void send(Object element) throws IOException {
-			if (element instanceof ServerSentEvent) {
-				ServerSentEvent<?> event = (ServerSentEvent<?>) element;
+			if (element instanceof ServerSentEvent<?> event) {
 				((SseEmitter) getEmitter()).send(adapt(event));
 			}
 			else {

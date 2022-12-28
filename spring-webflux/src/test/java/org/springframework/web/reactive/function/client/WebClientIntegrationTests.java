@@ -726,8 +726,8 @@ class WebClientIntegrationTests {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try {
 				request.getBody().copyTo(bos);
-				String actual = bos.toString("UTF-8");
-				String expected = new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
+				String actual = bos.toString(StandardCharsets.UTF_8);
+				String expected = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
 				assertThat(actual).isEqualTo(expected);
 			}
 			catch (IOException ex) {

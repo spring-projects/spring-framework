@@ -173,14 +173,18 @@ class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 
 		StepVerifier.create(outputMessage.getBody())
 				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\n" +
-						"data:  \"foo\" : \"foofoo\",\n" +
-						"data:  \"bar\" : \"barbar\"\n" + "data:}"))
+				.consumeNextWith(stringConsumer("""
+						{
+						data:  "foo" : "foofoo",
+						data:  "bar" : "barbar"
+						data:}"""))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.consumeNextWith(stringConsumer("data:"))
-				.consumeNextWith(stringConsumer("{\n" +
-						"data:  \"foo\" : \"foofoofoo\",\n" +
-						"data:  \"bar\" : \"barbarbar\"\n" + "data:}"))
+				.consumeNextWith(stringConsumer("""
+						{
+						data:  "foo" : "foofoofoo",
+						data:  "bar" : "barbarbar"
+						data:}"""))
 				.consumeNextWith(stringConsumer("\n\n"))
 				.expectComplete()
 				.verify();

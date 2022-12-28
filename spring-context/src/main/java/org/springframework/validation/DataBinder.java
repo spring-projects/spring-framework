@@ -852,8 +852,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 					if (pv.getValue() instanceof String) {
 						empty = !StringUtils.hasText((String) pv.getValue());
 					}
-					else if (pv.getValue() instanceof String[]) {
-						String[] values = (String[]) pv.getValue();
+					else if (pv.getValue() instanceof String[] values) {
 						empty = (values.length == 0 || !StringUtils.hasText(values[0]));
 					}
 				}

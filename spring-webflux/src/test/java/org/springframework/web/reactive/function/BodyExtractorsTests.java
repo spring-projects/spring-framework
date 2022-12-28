@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -336,23 +336,25 @@ public class BodyExtractorsTests {
 	public void toParts() {
 		BodyExtractor<Flux<Part>, ServerHttpRequest> extractor = BodyExtractors.toParts();
 
-		String bodyContents = "-----------------------------9051914041544843365972754266\r\n" +
-				"Content-Disposition: form-data; name=\"text\"\r\n" +
-				"\r\n" +
-				"text default\r\n" +
-				"-----------------------------9051914041544843365972754266\r\n" +
-				"Content-Disposition: form-data; name=\"file1\"; filename=\"a.txt\"\r\n" +
-				"Content-Type: text/plain\r\n" +
-				"\r\n" +
-				"Content of a.txt.\r\n" +
-				"\r\n" +
-				"-----------------------------9051914041544843365972754266\r\n" +
-				"Content-Disposition: form-data; name=\"file2\"; filename=\"a.html\"\r\n" +
-				"Content-Type: text/html\r\n" +
-				"\r\n" +
-				"<!DOCTYPE html><title>Content of a.html.</title>\r\n" +
-				"\r\n" +
-				"-----------------------------9051914041544843365972754266--\r\n";
+		String bodyContents = """
+				-----------------------------9051914041544843365972754266\r
+				Content-Disposition: form-data; name="text"\r
+				\r
+				text default\r
+				-----------------------------9051914041544843365972754266\r
+				Content-Disposition: form-data; name="file1"; filename="a.txt"\r
+				Content-Type: text/plain\r
+				\r
+				Content of a.txt.\r
+				\r
+				-----------------------------9051914041544843365972754266\r
+				Content-Disposition: form-data; name="file2"; filename="a.html"\r
+				Content-Type: text/html\r
+				\r
+				<!DOCTYPE html><title>Content of a.html.</title>\r
+				\r
+				-----------------------------9051914041544843365972754266--\r
+				""";
 
 		byte[] bytes = bodyContents.getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));

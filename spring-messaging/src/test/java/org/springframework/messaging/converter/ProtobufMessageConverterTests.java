@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,13 +62,13 @@ public class ProtobufMessageConverterTests {
 		this.message = MessageBuilder.withPayload(this.testMsg.toByteArray())
 				.setHeader(CONTENT_TYPE, ProtobufMessageConverter.PROTOBUF).build();
 		this.messageWithoutContentType = MessageBuilder.withPayload(this.testMsg.toByteArray()).build();
-		this.messageJson = MessageBuilder.withPayload(
-					"{\n" +
-					"  \"foo\": \"Foo\",\n" +
-					"  \"blah\": {\n" +
-					"    \"blah\": 123\n" +
-					"  }\n" +
-						"}")
+		this.messageJson = MessageBuilder.withPayload("""
+					{
+						"foo": "Foo",
+						"blah": {
+							"blah": 123
+						}
+					}""".replace("\t", "  "))
 				.setHeader(CONTENT_TYPE, APPLICATION_JSON)
 				.build();
 	}

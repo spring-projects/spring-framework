@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,13 +80,17 @@ public class CssLinkResourceTransformerTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/main.css"));
 		Resource css = getResource("main.css");
-		String expected = "\n" +
-				"@import url(\"/static/bar-11e16cf79faee7ac698c805cf28248d2.css?#iefix\");\n" +
-				"@import url('/static/bar-11e16cf79faee7ac698c805cf28248d2.css#bla-normal');\n" +
-				"@import url(/static/bar-11e16cf79faee7ac698c805cf28248d2.css);\n\n" +
-				"@import \"/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css\";\n" +
-				"@import '/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
-				"body { background: url(\"/static/images/image-f448cd1d5dba82b774f3202c878230b3.png?#iefix\") }\n";
+		String expected = """
+
+				@import url("/static/bar-11e16cf79faee7ac698c805cf28248d2.css?#iefix");
+				@import url('/static/bar-11e16cf79faee7ac698c805cf28248d2.css#bla-normal');
+				@import url(/static/bar-11e16cf79faee7ac698c805cf28248d2.css);
+
+				@import "/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css";
+				@import '/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css';
+
+				body { background: url("/static/images/image-f448cd1d5dba82b774f3202c878230b3.png?#iefix") }
+				""";
 
 		StepVerifier.create(this.transformerChain.transform(exchange, css)
 				.cast(TransformedResource.class))
@@ -118,9 +122,10 @@ public class CssLinkResourceTransformerTests {
 		ResourceTransformerChain chain = new DefaultResourceTransformerChain(mockChain, transformers);
 
 		Resource resource = getResource("external.css");
-		String expected = "@import url(\"https://example.org/fonts/css\");\n" +
-				"body { background: url(\"file:///home/spring/image.png\") }\n" +
-				"figure { background: url(\"//example.org/style.css\")}";
+		String expected = """
+				@import url("https://example.org/fonts/css");
+				body { background: url("file:///home/spring/image.png") }
+				figure { background: url("//example.org/style.css")}""";
 
 		StepVerifier.create(chain.transform(exchange, resource)
 				.cast(TransformedResource.class))
@@ -167,10 +172,10 @@ public class CssLinkResourceTransformerTests {
 	public void transformEmptyUrlFunction() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(get("/static/empty_url_function.css"));
 		Resource css = getResource("empty_url_function.css");
-		String expected =
-				".fooStyle {\n" +
-				"\tbackground: transparent url() no-repeat left top;\n" +
-				"}";
+		String expected = """
+						.fooStyle {
+						\tbackground: transparent url() no-repeat left top;
+						}""";
 
 		StepVerifier.create(this.transformerChain.transform(exchange, css)
 				.cast(TransformedResource.class))

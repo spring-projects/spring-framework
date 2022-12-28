@@ -159,8 +159,12 @@ public class ServerSentEventHttpMessageReaderTests extends AbstractLeakCheckingT
 	public void readPojo() {
 		MockServerHttpRequest request = MockServerHttpRequest.post("/")
 				.body(Mono.just(stringBuffer(
-						"data:{\"foo\": \"foofoo\", \"bar\": \"barbar\"}\n\n" +
-								"data:{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}\n\n")));
+						"""
+								data:{"foo": "foofoo", "bar": "barbar"}
+
+								data:{"foo": "foofoofoo", "bar": "barbarbar"}
+
+								""")));
 
 		Flux<Pojo> data = reader.read(ResolvableType.forClass(Pojo.class), request,
 				Collections.emptyMap()).cast(Pojo.class);

@@ -276,12 +276,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			SockJsSession session = this.sessions.get(sessionId);
 			boolean isNewSession = false;
 			if (session == null) {
-				if (transportHandler instanceof SockJsSessionFactory) {
+				if (transportHandler instanceof SockJsSessionFactory sessionFactory) {
 					Map<String, Object> attributes = new HashMap<>();
 					if (!chain.applyBeforeHandshake(request, response, attributes)) {
 						return;
 					}
-					SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
 					session = createSockJsSession(sessionId, sessionFactory, handler, attributes);
 					isNewSession = true;
 				}

@@ -587,12 +587,11 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey) throws MBeanExportException {
 		try {
-			if (mapValue instanceof String) {
+			if (mapValue instanceof String beanName) {
 				// Bean name pointing to a potentially lazy-init bean in the factory.
 				if (this.beanFactory == null) {
 					throw new MBeanExportException("Cannot resolve bean names if not running in a BeanFactory");
 				}
-				String beanName = (String) mapValue;
 				if (isBeanDefinitionLazyInit(this.beanFactory, beanName)) {
 					ObjectName objectName = registerLazyInit(beanName, beanKey);
 					replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);

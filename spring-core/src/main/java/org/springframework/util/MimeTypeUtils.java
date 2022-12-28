@@ -314,18 +314,14 @@ public abstract class MimeTypeUtils {
 		int i = 0;
 		while (i < mimeTypes.length()) {
 			switch (mimeTypes.charAt(i)) {
-				case '"':
-					inQuotes = !inQuotes;
-					break;
-				case ',':
+				case '"' -> inQuotes = !inQuotes;
+				case ',' -> {
 					if (!inQuotes) {
 						tokens.add(mimeTypes.substring(startIndex, i));
 						startIndex = i + 1;
 					}
-					break;
-				case '\\':
-					i++;
-					break;
+				}
+				case '\\' -> i++;
 			}
 			i++;
 		}

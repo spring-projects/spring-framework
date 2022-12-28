@@ -412,15 +412,17 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void multipartData() {
-		String data = "--12345\r\n" +
-				"Content-Disposition: form-data; name=\"foo\"\r\n" +
-				"\r\n" +
-				"bar\r\n" +
-				"--12345\r\n" +
-				"Content-Disposition: form-data; name=\"baz\"\r\n" +
-				"\r\n" +
-				"qux\r\n" +
-				"--12345--\r\n";
+		String data = """
+				--12345\r
+				Content-Disposition: form-data; name="foo"\r
+				\r
+				bar\r
+				--12345\r
+				Content-Disposition: form-data; name="baz"\r
+				\r
+				qux\r
+				--12345--\r
+				""";
 		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);

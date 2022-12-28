@@ -84,11 +84,13 @@ public class StandardMultipartHttpServletRequestTests {
 		new FormHttpMessageConverter().write(map, null, output);
 
 		assertThat(output.getBodyAsString(StandardCharsets.UTF_8)).contains(
-				"Content-Disposition: form-data; name=\"file\"; filename=\"myFile.txt\"\r\n" +
-						"Content-Type: text/plain\r\n" +
-						"Content-Length: 6\r\n" +
-						"\r\n" +
-						"myBody\r\n");
+				"""
+						Content-Disposition: form-data; name="file"; filename="myFile.txt"\r
+						Content-Type: text/plain\r
+						Content-Length: 6\r
+						\r
+						myBody\r
+						""");
 	}
 
 

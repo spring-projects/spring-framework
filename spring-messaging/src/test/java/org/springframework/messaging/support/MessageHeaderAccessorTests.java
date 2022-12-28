@@ -319,9 +319,7 @@ public class MessageHeaderAccessorTests {
 		})).isEqualTo(expected);
 
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 80; i++) {
-			sb.append('a');
-		}
+		sb.append("a".repeat(80));
 		final String payload = sb.toString() + " > 80";
 
 		String actual = accessor.getShortLogMessage(payload);
@@ -355,10 +353,8 @@ public class MessageHeaderAccessorTests {
 		})).isEqualTo(expected);
 
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 80; i++) {
-			sb.append('a');
-		}
-		final String payload = sb.toString() + " > 80";
+		sb.append("a".repeat(80));
+		final String payload = sb + " > 80";
 
 		String actual = accessor.getDetailedLogMessage(payload);
 		assertThat(actual).isEqualTo("headers={contentType=text/plain} payload=" + sb + " > 80");
