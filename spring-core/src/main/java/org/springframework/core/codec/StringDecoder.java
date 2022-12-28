@@ -61,7 +61,9 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 
 	private static final ResolvableType CHAR_BUFFER_TYPE = ResolvableType.forClass(CharBuffer.class);
 
+
 	private final CharBufferDecoder charBufferDecoder;
+
 
 	private StringDecoder(List<String> delimiters, boolean stripDelimiter, MimeType... mimeTypes) {
 		super(mimeTypes);
