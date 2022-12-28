@@ -60,6 +60,7 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 */
 	private static final ResolvableType STRING_TYPE = ResolvableType.forType(String.class);
 
+
 	/**
 	 * CSV mapper.
 	 */
@@ -84,6 +85,7 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
 	 */
 	private int lookahead = 16;
+
 
 	public Jackson2CsvDecoder(CsvMapper mapper, CsvSchema schema) {
 		super(MimeType.valueOf("text/csv"));

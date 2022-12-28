@@ -46,6 +46,7 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	 */
 	public static final Charset DEFAULT_CHARSET = UTF_8;
 
+
 	/**
 	 * CSV mapper.
 	 */
@@ -60,6 +61,7 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	private Charset defaultCharset = UTF_8;
+
 
 	public Jackson2CsvEncoder(CsvMapper mapper, CsvSchema schema) {
 		super(MimeType.valueOf("text/csv"));
