@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -1296,7 +1297,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				return new NamedBeanHolder<>(candidateName, (T) beanInstance);
 			}
 			if (!nonUniqueAsNull) {
-				throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
+				throw new NoUniqueBeanDefinitionException(requiredType, new HashSet<>(candidates.keySet()));
 			}
 		}
 

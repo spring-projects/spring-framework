@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -215,7 +216,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 */
 	@Nullable
 	public Object resolveNotUnique(ResolvableType type, Map<String, Object> matchingBeans) throws BeansException {
-		throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
+		throw new NoUniqueBeanDefinitionException(type, new HashSet<>( matchingBeans.keySet() ));
 	}
 
 	/**
