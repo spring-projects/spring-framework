@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.constructor.ConstructorException;
+import org.yaml.snakeyaml.composer.ComposerException;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.scanner.ScannerException;
 
@@ -156,9 +156,9 @@ class YamlProcessorTests {
 	void customTypeNotSupportedByDefault() throws Exception {
 		URL url = new URL("https://localhost:9000/");
 		setYaml("value: !!java.net.URL [\"" + url + "\"]");
-		assertThatExceptionOfType(ConstructorException.class)
+		assertThatExceptionOfType(ComposerException.class)
 				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
-				.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
+				.withMessageContaining("Global tag is not allowed: tag:yaml.org,2002:java.net.URL");
 	}
 
 	@Test
@@ -180,9 +180,9 @@ class YamlProcessorTests {
 
 		setYaml("value: !!java.net.URL [\"https://localhost:9000/\"]");
 
-		assertThatExceptionOfType(ConstructorException.class)
+		assertThatExceptionOfType(ComposerException.class)
 				.isThrownBy(() -> this.processor.process((properties, map) -> {}))
-				.withMessageContaining("Unsupported type encountered in YAML document: java.net.URL");
+				.withMessageContaining("Global tag is not allowed: tag:yaml.org,2002:java.net.URL");
 	}
 
 	private void setYaml(String yaml) {
