@@ -16,10 +16,14 @@
 
 package org.springframework.http.converter.json;
 
+import kotlinx.serialization.KSerializer;
+import kotlinx.serialization.SerializersKt;
 import kotlinx.serialization.json.Json;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.KotlinSerializationStringHttpMessageConverter;
+
+import java.lang.reflect.Type;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter}
@@ -52,5 +56,10 @@ public class KotlinSerializationJsonHttpMessageConverter extends KotlinSerializa
 	 */
 	public KotlinSerializationJsonHttpMessageConverter(Json json) {
 		super(json, MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+	}
+
+	@Override
+	protected KSerializer<Object> serializerInternal(Type type) throws IllegalArgumentException {
+		return SerializersKt.serializerOrNull(type);
 	}
 }

@@ -152,7 +152,7 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 		KSerializer<Object> serializer = serializerCache.get(type);
 		if (serializer == null) {
 			try {
-				serializer = SerializersKt.serializerOrNull(type);
+				serializer = serializerInternal(type);
 			}
 			catch (IllegalArgumentException ignored) {
 			}
@@ -165,6 +165,12 @@ public abstract class AbstractKotlinSerializationHttpMessageConverter<T extends 
 		}
 		return serializer;
 	}
+
+	/**
+	 * An abstract method that returns a KSerializer over the given type.
+	 */
+	@Nullable
+	protected abstract KSerializer<Object> serializerInternal(Type type) throws IllegalArgumentException;
 
 	private boolean hasPolymorphism(SerialDescriptor descriptor, Set<String> alreadyProcessed) {
 		alreadyProcessed.add(descriptor.getSerialName());

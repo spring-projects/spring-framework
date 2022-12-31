@@ -17,11 +17,13 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 import kotlinx.serialization.BinaryFormat;
 import kotlinx.serialization.KSerializer;
 import kotlinx.serialization.SerializationException;
 
+import kotlinx.serialization.SerializersKt;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -75,5 +77,10 @@ public abstract class KotlinSerializationBinaryHttpMessageConverter<T extends Bi
 		catch (SerializationException ex) {
 			throw new HttpMessageNotWritableException("Could not write " + format + ": " + ex.getMessage(), ex);
 		}
+	}
+
+	@Override
+	protected KSerializer<Object> serializerInternal(Type type) throws IllegalArgumentException {
+		return SerializersKt.serializerOrNull(type);
 	}
 }
