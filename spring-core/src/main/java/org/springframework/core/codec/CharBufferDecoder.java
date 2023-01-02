@@ -88,7 +88,6 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 	 * Set the default character set to fall back on if the MimeType does not specify any.
 	 * <p>By default this is {@code UTF-8}.
 	 * @param defaultCharset the charset to fall back on
-	 * @since 5.2.9
 	 */
 	public void setDefaultCharset(Charset defaultCharset) {
 		this.defaultCharset = defaultCharset;
@@ -96,8 +95,6 @@ public final class CharBufferDecoder extends AbstractDataBufferDecoder<CharBuffe
 
 	/**
 	 * Return the configured {@link #setDefaultCharset(Charset) defaultCharset}.
-	 *
-	 * @since 5.2.9
 	 */
 	public Charset getDefaultCharset() {
 		return this.defaultCharset;
