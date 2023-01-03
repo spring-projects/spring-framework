@@ -147,6 +147,7 @@ class MockMvcResultMatchersDsl internal constructor (private val actions: Result
 	}
 
 	/**
+	 * @since 6.0.4
 	 * @see ResultActions.andExpectAll
 	 */
 	fun matchAll(vararg matchers: ResultMatcher) {

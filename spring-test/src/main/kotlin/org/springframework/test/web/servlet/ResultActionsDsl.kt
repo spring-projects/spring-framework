@@ -22,6 +22,7 @@ class ResultActionsDsl internal constructor (private val actions: ResultActions,
 
 	/**
 	 * Provide access to [MockMvcResultMatchersDsl] Kotlin DSL.
+	 * @since 6.0.4
 	 * @see MockMvcResultMatchersDsl.matchAll
 	 */
 	fun andExpectAll(dsl: MockMvcResultMatchersDsl.() -> Unit): ResultActionsDsl {

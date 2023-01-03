@@ -100,6 +100,24 @@ class MockMvcExtensionsTests {
 	}
 
 	@Test
+	fun `request with two custom matchers and matchAll`() {
+		var matcher1Invoked = false
+		var matcher2Invoked = false
+		val matcher1 = ResultMatcher { matcher1Invoked = true; throw AssertionError("expected") }
+		val matcher2 = ResultMatcher { matcher2Invoked = true }
+		assertThatExceptionOfType(AssertionError::class.java).isThrownBy {
+			mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee")
+					.andExpect {
+						matchAll(matcher1, matcher2)
+					}
+		}
+				.withMessage("expected")
+
+		assertThat(matcher1Invoked).describedAs("matcher1").isTrue()
+		assertThat(matcher2Invoked).describedAs("matcher2").isTrue()
+	}
+
+	@Test
 	fun get() {
 		mockMvc.get("/person/{name}", "Lee") {
 				secure = true
