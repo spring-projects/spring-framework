@@ -242,12 +242,11 @@ public final class MockRestServiceServer {
 
 		@Override
 		public MockRestServiceServer build() {
-			ClientHttpRequestFactory originalFactory = this.restTemplate.getRequestFactory();
 			if (this.ignoreExpectOrder) {
-				return build(new UnorderedRequestExpectationManager(originalFactory));
+				return build(new UnorderedRequestExpectationManager());
 			}
 			else {
-				return build(new SimpleRequestExpectationManager(originalFactory));
+				return build(new SimpleRequestExpectationManager());
 			}
 		}
 

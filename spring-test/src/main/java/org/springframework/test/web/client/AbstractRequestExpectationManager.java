@@ -32,12 +32,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
 
 /**
  * Base class for {@code RequestExpectationManager} implementations responsible
@@ -53,25 +50,12 @@ import org.springframework.util.StreamUtils;
  */
 public abstract class AbstractRequestExpectationManager implements RequestExpectationManager {
 
-	private final List<RequestExpectation> expectations;
+	private final List<RequestExpectation> expectations = new ArrayList<>();
 
-	private final List<ClientHttpRequest> requests;
+	private final List<ClientHttpRequest> requests = new ArrayList<>();
 
-	private final Map<ClientHttpRequest, Throwable> requestFailures;
+	private final Map<ClientHttpRequest, Throwable> requestFailures = new LinkedHashMap<>();
 
-	@Nullable
-	private final ClientHttpRequestFactory originalRequestFactory;
-
-	protected AbstractRequestExpectationManager(@Nullable ClientHttpRequestFactory originalRequestFactory) {
-		this.expectations = new ArrayList<>();
-		this.requests = new ArrayList<>();
-		this.requestFailures = new LinkedHashMap<>();
-		this.originalRequestFactory = originalRequestFactory;
-	}
-
-	protected AbstractRequestExpectationManager() {
-		this(null);
-	}
 
 	/**
 	 * Return a read-only list of the expectations.
@@ -87,39 +71,11 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		return Collections.unmodifiableList(this.requests);
 	}
 
-	/**
-	 * Return the original {@link ClientHttpRequestFactory} if it was provided at construction
-	 * time.
-	 * <p>By default, this is used to create instances of {@link DefaultRequestExpectation}
-	 * that use said request factory to {@link RequestExpectation#andPerformRequest()
-	 * perform an original request}.
-	 * @return the original {@code ClientHttpRequestFactory} or null if not captured
-	 */
-	@Nullable
-	protected ClientHttpRequestFactory getOriginalRequestFactory() {
-		return this.originalRequestFactory;
-	}
 
 	@Override
 	public ResponseActions expectRequest(ExpectedCount count, RequestMatcher matcher) {
 		Assert.state(this.requests.isEmpty(), "Cannot add more expectations after actual requests are made");
-
-		ResponseCreator implicitResponseCreator = null;
-		if (this.originalRequestFactory != null) {
-			implicitResponseCreator = r -> {
-				if (r instanceof MockClientHttpRequest mockRequest) {
-					ClientHttpRequest newRequest = this.originalRequestFactory.createRequest(mockRequest.getURI(), mockRequest.getMethod());
-					newRequest.getHeaders().putAll(mockRequest.getHeaders());
-					StreamUtils.copy(mockRequest.getBodyAsBytes(), newRequest.getBody());
-
-					return newRequest.execute();
-				}
-				else {
-					return null;
-				}
-			};
-		}
-		RequestExpectation expectation = new DefaultRequestExpectation(count, matcher, implicitResponseCreator);
+		RequestExpectation expectation = new DefaultRequestExpectation(count, matcher);
 		this.expectations.add(expectation);
 		return expectation;
 	}
