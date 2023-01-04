@@ -24,8 +24,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.test.web.client.ResponseCreator;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Static factory methods for obtaining a {@link ResponseCreator} instance.
@@ -212,6 +214,19 @@ public abstract class MockRestResponseCreators {
 		return request -> {
 			throw ex;
 		};
+	}
+
+	/**
+	 * {@code ResponseCreator} which delegates to the {@link ClientHttpRequestFactory} of a
+	 * {@link RestTemplate} to perform the request and use the response.
+	 * <p>The input request is asserted to be a {@code MockClientHttpRequest} and the URI,
+	 * method, headers and body are copied.
+	 * @param restTemplate the {@link RestTemplate} to use to perform the request
+	 * @since 6.0.4
+	 * @see ExecutingResponseCreator
+	 */
+	public static ResponseCreator byExecutingRequestUsing(RestTemplate restTemplate) {
+		return new ExecutingResponseCreator(restTemplate.getRequestFactory());
 	}
 
 }
