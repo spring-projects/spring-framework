@@ -25,15 +25,22 @@ import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * A {@code ResponseCreator} which delegates to a {@link ClientHttpRequestFactory}
  * to perform the request and return the associated response.
  * <p>Note that the input request is asserted to be a {@code MockClientHttpRequest} and
  * the URI, method, headers and body are copied.
- * <p>The {@link MockRestResponseCreators#byExecutingRequestUsing(RestTemplate)} method
- * can be used as a pseudo-DSL for creating an instance of this class.
+ * <p>The factory can typically be obtained from a {@code RestTemplate} but in case this
+ * is used with e.g. {@code MockRestServiceServer}, make sure to capture the factory early
+ * before binding the mock server to the RestTemplate (as it replaces the factory):
+ * <pre><code>
+ * ResponseCreator withActualResponse = new ExecutingResponseCreator(restTemplate);
+ * MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
+ * //...
+ * server.expect(requestTo("/foo")).andRespond(withSuccess());
+ * server.expect(requestTo("/bar")).andRespond(withActualResponse);
+ * </code></pre>
  *
  * @since 6.0.4
  */
@@ -44,11 +51,7 @@ public class ExecutingResponseCreator implements ResponseCreator {
 
 	/**
 	 * Create a {@code ExecutingResponseCreator} from a {@code ClientHttpRequestFactory}.
-	 * <p>See also {@link MockRestResponseCreators#byExecutingRequestUsing(RestTemplate)}
-	 * for a factory method alternative to this constructor which accepts a
-	 * {@code RestTemplate} instead.
 	 * @param requestFactory the request factory to delegate to
-	 * @see MockRestResponseCreators#byExecutingRequestUsing(RestTemplate)
 	 */
 	public ExecutingResponseCreator(ClientHttpRequestFactory requestFactory) {
 		this.requestFactory = requestFactory;

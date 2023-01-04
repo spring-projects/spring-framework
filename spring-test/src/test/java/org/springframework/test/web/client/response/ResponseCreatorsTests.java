@@ -16,32 +16,21 @@
 
 package org.springframework.test.web.client.response;
 
-import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpResponse;
-import org.springframework.test.web.client.ResponseActions;
 import org.springframework.test.web.client.ResponseCreator;
-import org.springframework.test.web.client.SimpleRequestExpectationManager;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.test.web.client.ExpectedCount.once;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 
 /**
  * Tests for the {@link MockRestResponseCreators} static factory methods.
@@ -238,25 +227,6 @@ class ResponseCreatorsTests {
 		ResponseCreator responseCreator = MockRestResponseCreators.withException(new SocketTimeoutException());
 		assertThatExceptionOfType(SocketTimeoutException.class)
 				.isThrownBy(() -> responseCreator.createResponse(null));
-	}
-
-	@Test
-	void byExecutingRequestUsing() throws IOException {
-		final MockClientHttpResponse expectedMockResponse = new MockClientHttpResponse(new byte[0], 404);
-		ClientHttpRequestFactory mockFactory = (uri, httpMethod) -> {
-			MockClientHttpRequest originalMockRequest = new MockClientHttpRequest(httpMethod, uri);
-			originalMockRequest.setResponse(expectedMockResponse);
-			return originalMockRequest;
-		};
-		final RestTemplate mockTemplate = Mockito.mock(RestTemplate.class);
-		Mockito.when(mockTemplate.getRequestFactory()).thenReturn(mockFactory);
-		ResponseCreator responseCreator = MockRestResponseCreators.byExecutingRequestUsing(mockTemplate);
-
-		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(
-				null);
-
-		assertThat(response).isSameAs(expectedMockResponse);
-		Mockito.verify(mockTemplate).getRequestFactory();
 	}
 
 }
