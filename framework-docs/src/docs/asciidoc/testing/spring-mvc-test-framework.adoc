@@ -445,6 +445,17 @@ all failures will be tracked and reported.
 		content().contentType("application/json;charset=UTF-8"));
 ----
 
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	import org.springframework.test.web.servlet.get
+
+	mockMvc.get("/accounts/1").andExpectAll {
+		status { isOk() }
+		content { contentType(APPLICATION_JSON) }
+	}
+----
+
 `MockMvcResultMatchers.*` provides a number of expectations, some of which are further
 nested with more detailed expectations.
 
