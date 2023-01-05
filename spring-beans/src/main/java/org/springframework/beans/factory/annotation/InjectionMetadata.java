@@ -111,7 +111,7 @@ public class InjectionMetadata {
 			this.checkedElements = Set.of();
 		}
 		else {
-			Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
+			Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size()*4/3);
 			for (InjectedElement element : this.injectedElements) {
 				Member member = element.getMember();
 				if (!beanDefinition.isExternallyManagedConfigMember(member)) {
