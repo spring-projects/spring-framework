@@ -138,6 +138,18 @@ public class MessageConverterTests {
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(MimeTypeUtils.TEXT_PLAIN);
 	}
 
+	@Test
+	public void toMessageDefaultContentType() {
+		DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
+		resolver.setDefaultMimeType(MimeTypeUtils.TEXT_PLAIN);
+		TestMessageConverter converter = new TestMessageConverter();
+		converter.setContentTypeResolver(resolver);
+		converter.setStrictContentTypeMatch(true);
+
+		Message<?> message = converter.toMessage("ABC", null);
+		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE)).isEqualTo(MimeTypeUtils.TEXT_PLAIN);
+	}
+
 
 	private static class TestMessageConverter extends AbstractMessageConverter {
 

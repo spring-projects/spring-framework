@@ -251,7 +251,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 
 	@Nullable
 	protected MimeType getMimeType(@Nullable MessageHeaders headers) {
-		return (headers != null && this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
+		return (this.contentTypeResolver != null ? this.contentTypeResolver.resolve(headers) : null);
 	}
 
 	/**

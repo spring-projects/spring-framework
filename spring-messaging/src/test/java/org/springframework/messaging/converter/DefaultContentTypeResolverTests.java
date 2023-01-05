@@ -97,4 +97,12 @@ public class DefaultContentTypeResolverTests {
 		assertThat(this.resolver.resolve(headers)).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
+	@Test
+	public void resolveDefaultMimeTypeWithNoHeader() {
+		this.resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
+		MessageHeaders headers = null;
+
+		assertThat(this.resolver.resolve(headers)).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
+	}
+
 }
