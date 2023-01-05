@@ -37,6 +37,11 @@ import org.springframework.mock.http.client.MockClientHttpResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
+/**
+ * Tests for the {@link ExecutingResponseCreator} implementation.
+ *
+ * @author Simon Baslé
+ */
 class ExecutingResponseCreatorTests {
 
 	@Test

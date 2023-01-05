@@ -42,6 +42,7 @@ import org.springframework.util.StreamUtils;
  * server.expect(requestTo("/bar")).andRespond(withActualResponse);
  * </code></pre>
  *
+ * @author Simon Baslé
  * @since 6.0.4
  */
 public class ExecutingResponseCreator implements ResponseCreator {
