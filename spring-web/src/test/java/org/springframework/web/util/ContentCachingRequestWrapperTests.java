@@ -48,13 +48,15 @@ public class ContentCachingRequestWrapperTests {
 
 	@Test
 	void cachedContent() throws Exception {
+		byte[] contentPayload = "Hello World".getBytes(CHARSET);
 		this.request.setMethod(GET);
 		this.request.setCharacterEncoding(CHARSET);
-		this.request.setContent("Hello World".getBytes(CHARSET));
+		this.request.setContent(contentPayload);
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request);
 		byte[] response = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
 		assertThat(wrapper.getContentAsByteArray()).isEqualTo(response);
+		assertThat(wrapper.getContentAsByteArray()).isEqualTo(contentPayload);
 	}
 
 	@Test
@@ -117,4 +119,40 @@ public class ContentCachingRequestWrapperTests {
 		assertThat(wrapper.getContentAsByteArray()).isEqualTo(response);
 	}
 
+	/**
+	 * When content limiting, if the content length is known and is lower than the content limit, the internal
+	 * buffer should allocate that size. This exaggerates this scenario by using a very large content limit that
+	 * would cause an OOM Error likely otherwise.
+	 */
+	@Test
+	void cachedContentWithLimitKnownLengthAvoidOverAllocation() throws Exception {
+		byte[] contentPayload = "Hello World".getBytes(CHARSET);
+		this.request.setMethod(POST);
+		this.request.setCharacterEncoding(CHARSET);
+		this.request.setContent(contentPayload);
+
+		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request, Integer.MAX_VALUE);
+
+		byte[] contents = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
+		assertThat(contents).isEqualTo(contentPayload);
+		assertThat(wrapper.getContentAsByteArray()).isEqualTo(contentPayload);
+	}
+
+	/**
+	 * When content limiting, if the content length is unknown, rather than allocating the content limit upfront
+	 * (which may be quite a bit larger than the actual request), a smaller initial buffer should be used that is
+	 * allowed to grow as needed up to the limit.  This exaggerates this scenario by using a very large content limit
+	 * that would cause an OOM Error likely otherwise.
+	 */
+	@Test
+	void cachedContentWithLimitUnknownLengthAvoidOverAllocation() throws Exception {
+		this.request.setMethod(POST);
+		this.request.setCharacterEncoding(CHARSET);
+
+		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request, Integer.MAX_VALUE);
+
+		byte[] contents = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
+		assertThat(contents).isEmpty();
+		assertThat(wrapper.getContentAsByteArray()).isEmpty();
+	}
 }
