@@ -56,6 +56,8 @@ import org.springframework.lang.Nullable;
  */
 public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
+	private static final int DEFAULT_BUFFER_SIZE = 1024;
+
 	private final ByteArrayOutputStream cachedContent;
 
 	@Nullable
@@ -75,7 +77,8 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	public ContentCachingRequestWrapper(HttpServletRequest request) {
 		super(request);
 		int contentLength = request.getContentLength();
-		this.cachedContent = new ByteArrayOutputStream(contentLength >= 0 ? contentLength : 1024);
+		this.cachedContent = new ByteArrayOutputStream(contentLength >= 0 ?
+				contentLength : DEFAULT_BUFFER_SIZE);
 		this.contentCacheLimit = null;
 	}
 
@@ -88,7 +91,9 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	 */
 	public ContentCachingRequestWrapper(HttpServletRequest request, int contentCacheLimit) {
 		super(request);
-		this.cachedContent = new ByteArrayOutputStream(contentCacheLimit);
+		int contentLength = request.getContentLength();
+		int initialBufferSize = contentLength >= 0 ? contentLength : DEFAULT_BUFFER_SIZE;
+		this.cachedContent = new ByteArrayOutputStream(Math.min(initialBufferSize, contentCacheLimit));
 		this.contentCacheLimit = contentCacheLimit;
 	}
 
