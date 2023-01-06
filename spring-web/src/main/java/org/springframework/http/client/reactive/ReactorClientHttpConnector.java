@@ -49,7 +49,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	/**
 	 * Default constructor. Initializes {@link HttpClient} via:
 	 * <pre class="code">
-	 * HttpClient.create().compress()
+	 * HttpClient.create().compress(true)
 	 * </pre>
 	 */
 	public ReactorClientHttpConnector() {
