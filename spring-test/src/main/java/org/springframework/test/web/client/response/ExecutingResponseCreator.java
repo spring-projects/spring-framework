@@ -29,6 +29,8 @@ import org.springframework.util.StreamUtils;
 /**
  * A {@code ResponseCreator} which delegates to a {@link ClientHttpRequestFactory}
  * to perform the request and return the associated response.
+ * This is notably useful when testing code that calls multiple remote services, some
+ * of which need to be actually called rather than further mocked.
  * <p>Note that the input request is asserted to be a {@code MockClientHttpRequest} and
  * the URI, method, headers and body are copied.
  * <p>The factory can typically be obtained from a {@code RestTemplate} but in case this

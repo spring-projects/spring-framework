@@ -117,6 +117,56 @@ logic but without running a server. The following example shows how to do so:
 	// Test code that uses the above RestTemplate ...
 ----
 
+In the more specific cases where total isolation isn't desired and some integration testing
+of one or more calls is needed, a specific `ResponseCreator` can be set up in advance and
+used to perform actual requests and assert the response.
+The following example shows how to set up and use the `ExecutingResponseCreator` to do so:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	RestTemplate restTemplate = new RestTemplate();
+
+	// Make sure to capture the request factory of the RestTemplate before binding
+	ExecutingResponseCreator withActualResponse = new ExecutingResponseCreator(restTemplate.getRequestFactory());
+
+	MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+	mockServer.expect(requestTo("/greeting")).andRespond(withActualResponse);
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val restTemplate = RestTemplate()
+
+	// Make sure to capture the request factory of the RestTemplate before binding
+	val withActualResponse = new ExecutingResponseCreator(restTemplate.getRequestFactory())
+
+	val mockServer = MockRestServiceServer.bindTo(restTemplate).build()
+	mockServer.expect(requestTo("/profile")).andRespond(withSuccess())
+	mockServer.expect(requestTo("/quoteOfTheDay")).andRespond(withActualResponse)
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify()
+----
+
+In the preceding example, we create the `ExecutingResponseCreator` using the
+`ClientHttpRequestFactory` from the `RestTemplate` _before_ `MockRestServiceServer` replaces
+it with the custom one.
+Then we define expectations with two kinds of response:
+
+ * a stub `200` response for the `/profile` endpoint (no actual request will be executed)
+ * an "executing response" for the `/quoteOfTheDay` endpoint
+
+In the second case, the request is executed by the `ClientHttpRequestFactory` that was
+captured earlier. This generates a response that could e.g. come from an actual remote server,
+depending on how the `RestTemplate` was originally configured, and MockMVC can be further
+used to assert the content of the response.
+
 [[spring-mvc-test-client-static-imports]]
 == Static Imports
 
