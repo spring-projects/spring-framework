@@ -28,6 +28,10 @@ import org.springframework.util.Assert;
 
 /**
  * Reactive CSV parser. NOT thread-safe.
+ *
+ * @author Markus Heiden
+ *
+ * @param <T> Row type.
  */
 final class Jackson2CsvReactiveParser<T> {
 
@@ -54,8 +58,8 @@ final class Jackson2CsvReactiveParser<T> {
 	/**
 	 * Constructor.
 	 *
-	 * @param objectReader CSV object mapper.
-	 * @param lookahead    Lookahead.
+	 * @param objectReader csv object reader.
+	 * @param lookahead    lookahead.
 	 */
 	Jackson2CsvReactiveParser(ObjectReader objectReader, int lookahead) {
 		Assert.notNull(objectReader, "objectReader must not be null");
@@ -73,18 +77,18 @@ final class Jackson2CsvReactiveParser<T> {
 		Assert.notNull(row, "row must not be null");
 
 		// Accumulate enough lookahead so that the parser below won't run out of rows.
-		reader.addRow(row);
-		if (reader.size() <= lookahead) {
+		this.reader.addRow(row);
+		if (this.reader.size() <= this.lookahead) {
 			return Mono.empty();
 		}
 
 		try {
-			if (parser == null) {
-				parser = objectReader.readValues(reader);
+			if (this.parser == null) {
+				this.parser = this.objectReader.readValues(this.reader);
 			}
 
-			return parser.hasNext() ?
-					Mono.just(parser.next()) :
+			return this.parser.hasNext() ?
+					Mono.just(this.parser.next()) :
 					Mono.empty();
 
 		}
@@ -98,14 +102,14 @@ final class Jackson2CsvReactiveParser<T> {
 	 * Parse the remaining rows in the reader without lookahead.
 	 */
 	Flux<T> parseRemaining() {
-		reader.close();
+		this.reader.close();
 		try {
-			if (parser == null) {
-				parser = objectReader.readValues(reader);
+			if (this.parser == null) {
+				this.parser = this.objectReader.readValues(this.reader);
 			}
 
-			var rows = new ArrayList<T>(reader.size());
-			parser.forEachRemaining(rows::add);
+			var rows = new ArrayList<T>(this.reader.size());
+			this.parser.forEachRemaining(rows::add);
 			return Flux.fromIterable(rows);
 
 		}

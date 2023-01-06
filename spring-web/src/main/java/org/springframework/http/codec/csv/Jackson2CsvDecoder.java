@@ -47,6 +47,10 @@ import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
  *     <li>Read ahead</li>
  * </ul>
  * The maximum number of consecutive comment and empty lines in the CSV have to be considered additionally.
+ *
+ * @author Markus Heiden
+ *
+ * @param <T> Row type.
  */
 public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 
@@ -99,14 +103,14 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	@Override
 	public void setMaxInMemorySize(int byteCount) {
 		super.setMaxInMemorySize(byteCount);
-		stringDecoder.setMaxInMemorySize(byteCount);
+		this.stringDecoder.setMaxInMemorySize(byteCount);
 	}
 
 	/**
 	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	public Charset getDefaultCharset() {
-		return defaultCharset;
+		return this.defaultCharset;
 	}
 
 	/**
@@ -121,7 +125,7 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 * Number of rows to lookahead for skipping of rows. Defaults to 16.
 	 */
 	public int getLookAhead() {
-		return lookahead;
+		return this.lookahead;
 	}
 
 	/**
@@ -142,8 +146,8 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 		Assert.notNull(elementType, "elementType must not be null");
 
 		var parser = new Jackson2CsvReactiveParser<T>(
-				mapper.readerFor(mapper.constructType(elementType.getType())).with(schema),
-				lookahead);
+				this.mapper.readerFor(this.mapper.constructType(elementType.getType())).with(this.schema),
+				this.lookahead);
 
 		return splitRows(input, mimeType, hints)
 				.flatMap(parser::parse)
@@ -155,8 +159,8 @@ public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 	 */
 	private Flux<String> splitRows(Publisher<DataBuffer> input, MimeType mimeType, Map<String, Object> hints) {
 		var textMimeType = new MimeType(TEXT_PLAIN,
-				mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : defaultCharset);
-		return stringDecoder.decode(input, STRING_TYPE, textMimeType, hints);
+				mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : this.defaultCharset);
+		return this.stringDecoder.decode(input, STRING_TYPE, textMimeType, hints);
 	}
 
 }

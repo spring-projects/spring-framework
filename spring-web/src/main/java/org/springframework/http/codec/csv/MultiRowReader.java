@@ -23,6 +23,8 @@ import org.springframework.util.Assert;
 
 /**
  * A reader that reads multiple row at a time. Not thread-safe.
+ *
+ * @author Markus Heiden
  */
 final class MultiRowReader extends Reader {
 
@@ -58,7 +60,7 @@ final class MultiRowReader extends Reader {
 	 */
 	void addRow(String row) {
 		Assert.notNull(row, "row must not be null");
-		Assert.isTrue(!closed, "reader must not be closed");
+		Assert.isTrue(!this.closed, "reader must not be closed");
 
 		if (row.isEmpty()) {
 			// Ignore empty (last) line that cause trouble because read() may not return 0.
@@ -66,8 +68,8 @@ final class MultiRowReader extends Reader {
 		}
 
 		if (rows.isEmpty()) {
-			rowOffset = 0;
-			rowRemaining = row.length();
+			this.rowOffset = 0;
+			this.rowRemaining = row.length();
 		}
 		this.rows.addLast(row);
 	}
@@ -75,9 +77,9 @@ final class MultiRowReader extends Reader {
 	/**
 	 * Read the (one and only) row.
 	 *
-	 * @param destination Destination buffer.
-	 * @param offset      Offset at which to start storing characters.
-	 * @param length      Maximum number of characters to read.
+	 * @param destination destination buffer.
+	 * @param offset      offset at which to start storing characters.
+	 * @param length      maximum number of characters to read.
 	 * @return Number of characters read.
 	 * @throws IllegalArgumentException If this reader runs out of rows but has not been closed yet.
 	 */
@@ -85,16 +87,16 @@ final class MultiRowReader extends Reader {
 	public int read(char[] destination, int offset, int length) {
 		Assert.isTrue(length > 0, "length must be positive");
 
-		if (rows.isEmpty()) {
-			Assert.isTrue(closed, "reader must be closed. " +
+		if (this.rows.isEmpty()) {
+			Assert.isTrue(this.closed, "reader must be closed. " +
 					"Increment the lookahead if the reader runs out of rows.");
 			return -1;
 		}
 
-		var count = Math.min(rowRemaining, length);
-		rows.get(0).getChars(rowOffset, rowOffset + count, destination, offset);
-		rowOffset += count;
-		rowRemaining -= count;
+		var count = Math.min(this.rowRemaining, length);
+		this.rows.get(0).getChars(this.rowOffset, this.rowOffset + count, destination, offset);
+		this.rowOffset += count;
+		this.rowRemaining -= count;
 		nextRow();
 		return count;
 	}
@@ -103,19 +105,19 @@ final class MultiRowReader extends Reader {
 	 * Advance to the next row if the current one has been read fully.
 	 */
 	private void nextRow() {
-		if (rowRemaining > 0) {
+		if (this.rowRemaining > 0) {
 			return;
 		}
 
-		rows.removeFirst();
-		if (rows.isEmpty()) {
-			Assert.isTrue(closed, "reader must be closed. " +
+		this.rows.removeFirst();
+		if (this.rows.isEmpty()) {
+			Assert.isTrue(this.closed, "reader must be closed. " +
 					"Increment the lookahead if the reader runs out of rows.");
 			return;
 		}
 
-		rowOffset = 0;
-		rowRemaining = rows.getFirst().length();
+		this.rowOffset = 0;
+		this.rowRemaining = rows.getFirst().length();
 	}
 
 	/**
@@ -123,7 +125,7 @@ final class MultiRowReader extends Reader {
 	 */
 	@Override
 	public void close() {
-		closed = true;
+		this.closed = true;
 	}
 
 }

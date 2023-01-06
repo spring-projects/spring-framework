@@ -38,6 +38,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Encoder for CSV files.
+ *
+ * @author Markus Heiden
+ *
+ * @param <T> Row type.
  */
 public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 
@@ -75,7 +79,7 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 	 * The default charset. Used if the MIME type contains none. Defaults to {@link #DEFAULT_CHARSET}.
 	 */
 	public Charset getDefaultCharset() {
-		return defaultCharset;
+		return this.defaultCharset;
 	}
 
 	/**
@@ -94,8 +98,8 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 		Assert.notNull(bufferFactory, "bufferFactory must not be null");
 		Assert.notNull(elementType, "elementType must not be null");
 
-		var objectWriter = mapper.writerFor(mapper.constructType(elementType.getType())).with(schema);
-		var charset = mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : defaultCharset;
+		var objectWriter = this.mapper.writerFor(this.mapper.constructType(elementType.getType())).with(this.schema);
+		var charset = mimeType != null && mimeType.getCharset() != null ? mimeType.getCharset() : this.defaultCharset;
 
 		return Flux.from(inputStream)
 				.flatMap(row -> writeCsv(row, objectWriter))
@@ -110,8 +114,8 @@ public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 		try {
 			return Mono.just(objectWriter.writeValueAsString(row));
 		}
-		catch (Exception e) {
-			return Mono.error(e);
+		catch (Exception ex) {
+			return Mono.error(ex);
 		}
 	}
 
