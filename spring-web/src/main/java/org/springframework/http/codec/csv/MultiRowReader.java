@@ -52,7 +52,7 @@ final class MultiRowReader extends Reader {
 	 * Number of rows.
 	 */
 	public int size() {
-		return rows.size();
+		return this.rows.size();
 	}
 
 	/**
@@ -67,7 +67,7 @@ final class MultiRowReader extends Reader {
 			return;
 		}
 
-		if (rows.isEmpty()) {
+		if (this.rows.isEmpty()) {
 			this.rowOffset = 0;
 			this.rowRemaining = row.length();
 		}
@@ -76,12 +76,11 @@ final class MultiRowReader extends Reader {
 
 	/**
 	 * Read the (one and only) row.
-	 *
 	 * @param destination destination buffer.
 	 * @param offset      offset at which to start storing characters.
 	 * @param length      maximum number of characters to read.
-	 * @return Number of characters read.
-	 * @throws IllegalArgumentException If this reader runs out of rows but has not been closed yet.
+	 * @return number of characters read.
+	 * @throws IllegalArgumentException if this reader runs out of rows but has not been closed yet.
 	 */
 	@Override
 	public int read(char[] destination, int offset, int length) {
@@ -117,7 +116,7 @@ final class MultiRowReader extends Reader {
 		}
 
 		this.rowOffset = 0;
-		this.rowRemaining = rows.getFirst().length();
+		this.rowRemaining = this.rows.getFirst().length();
 	}
 
 	/**

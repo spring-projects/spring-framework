@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  *
  * @author Markus Heiden
  *
- * @param <T> Row type.
+ * @param <T> row type.
  */
 final class Jackson2CsvReactiveParser<T> {
 
@@ -92,9 +92,9 @@ final class Jackson2CsvReactiveParser<T> {
 					Mono.empty();
 
 		}
-		catch (IOException | RuntimeException e) {
+		catch (IOException | RuntimeException ex) {
 			// Shouldn't happen because the web client should handle all IO related errors upfront.
-			return Mono.error(e);
+			return Mono.error(ex);
 		}
 	}
 
@@ -113,9 +113,9 @@ final class Jackson2CsvReactiveParser<T> {
 			return Flux.fromIterable(rows);
 
 		}
-		catch (IOException | RuntimeException e) {
+		catch (IOException | RuntimeException ex) {
 			// Shouldn't happen because the web client should handle all IO related errors upfront.
-			return Flux.error(e);
+			return Flux.error(ex);
 		}
 	}
 

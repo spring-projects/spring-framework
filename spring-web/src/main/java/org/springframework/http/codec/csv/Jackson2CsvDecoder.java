@@ -50,7 +50,7 @@ import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN;
  *
  * @author Markus Heiden
  *
- * @param <T> Row type.
+ * @param <T> row type.
  */
 public final class Jackson2CsvDecoder<T> extends AbstractDataBufferDecoder<T> {
 

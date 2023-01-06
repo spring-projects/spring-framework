@@ -41,7 +41,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * @author Markus Heiden
  *
- * @param <T> Row type.
+ * @param <T> row type.
  */
 public final class Jackson2CsvEncoder<T> extends AbstractEncoder<T> {
 
