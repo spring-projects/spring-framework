@@ -17,17 +17,13 @@
 package org.springframework.test.web.client.response;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.client.AbstractClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
@@ -36,6 +32,7 @@ import org.springframework.mock.http.client.MockClientHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for the {@link ExecutingResponseCreator} implementation.
@@ -46,50 +43,29 @@ class ExecutingResponseCreatorTests {
 
 	@Test
 	void ensureRequestNotNull() {
-		final ExecutingResponseCreator responseCreator = new ExecutingResponseCreator((uri, method) -> null);
+		ExecutingResponseCreator responseCreator = new ExecutingResponseCreator((uri, method) -> null);
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> responseCreator.createResponse(null))
-				.withMessage("Request should be an instance of MockClientHttpRequest");
+				.withMessage("Expected a MockClientHttpRequest");
 	}
 
 	@Test
 	void ensureRequestIsMock() {
 		final ExecutingResponseCreator responseCreator = new ExecutingResponseCreator((uri, method) -> null);
-		ClientHttpRequest notAMockRequest = new AbstractClientHttpRequest() {
-			@Override
-			protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
-				return null;
-			}
-
-			@Override
-			protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
-				return null;
-			}
-
-			@Override
-			public HttpMethod getMethod() {
-				return null;
-			}
-
-			@Override
-			public URI getURI() {
-				return null;
-			}
-		};
+		ClientHttpRequest notAMockRequest = mock(ClientHttpRequest.class);
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> responseCreator.createResponse(notAMockRequest))
-				.withMessage("Request should be an instance of MockClientHttpRequest");
+				.withMessage("Expected a MockClientHttpRequest");
 	}
 
 	@Test
 	void requestIsCopied() throws IOException {
-		MockClientHttpRequest originalRequest = new MockClientHttpRequest(HttpMethod.POST,
-				"https://example.org");
-		String body = "original body";
+		MockClientHttpRequest originalRequest = new MockClientHttpRequest(HttpMethod.POST, "https://example.org");
 		originalRequest.getHeaders().add("X-example", "original");
-		originalRequest.getBody().write(body.getBytes(StandardCharsets.UTF_8));
+		originalRequest.getBody().write("original body".getBytes(StandardCharsets.UTF_8));
+
 		MockClientHttpResponse originalResponse = new MockClientHttpResponse(new byte[0], 500);
 		List<MockClientHttpRequest> factoryRequests = new ArrayList<>();
 		ClientHttpRequestFactory originalFactory = (uri, httpMethod) -> {
@@ -99,8 +75,8 @@ class ExecutingResponseCreatorTests {
 			return request;
 		};
 
-		final ExecutingResponseCreator responseCreator = new ExecutingResponseCreator(originalFactory);
-		final ClientHttpResponse response = responseCreator.createResponse(originalRequest);
+		ExecutingResponseCreator responseCreator = new ExecutingResponseCreator(originalFactory);
+		ClientHttpResponse response = responseCreator.createResponse(originalRequest);
 
 		assertThat(response).as("response").isSameAs(originalResponse);
 		assertThat(originalRequest.isExecuted()).as("originalRequest.isExecuted").isFalse();
@@ -109,16 +85,11 @@ class ExecutingResponseCreatorTests {
 				.hasSize(1)
 				.first()
 				.isNotSameAs(originalRequest)
-				.satisfies(copiedRequest -> {
-					assertThat(copiedRequest)
-							.as("copied request")
-							.isNotSameAs(originalRequest);
-					assertThat(copiedRequest.isExecuted())
-							.as("copiedRequest.isExecuted").isTrue();
-					assertThat(copiedRequest.getBody())
-							.as("copiedRequest.body").isNotSameAs(originalRequest.getBody());
-					assertThat(copiedRequest.getHeaders())
-							.as("copiedRequest.headers").isNotSameAs(originalRequest.getHeaders());
+				.satisfies(request -> {
+					assertThat(request).isNotSameAs(originalRequest);
+					assertThat(request.isExecuted()).isTrue();
+					assertThat(request.getBody()).isNotSameAs(originalRequest.getBody());
+					assertThat(request.getHeaders()).isNotSameAs(originalRequest.getHeaders());
 				});
 	}
 }

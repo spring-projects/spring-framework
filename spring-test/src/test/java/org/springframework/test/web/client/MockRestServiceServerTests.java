@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,39 +99,34 @@ class MockRestServiceServerTests {
 
 	@Test
 	void executingResponseCreator() {
-		RestTemplate restTemplateWithMockEcho = createEchoRestTemplate();
+		RestTemplate restTemplate = createEchoRestTemplate();
+		ExecutingResponseCreator withActualCall = new ExecutingResponseCreator(restTemplate.getRequestFactory());
 
-		final ExecutingResponseCreator withActualCall = new ExecutingResponseCreator(restTemplateWithMockEcho.getRequestFactory());
-		MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplateWithMockEcho).build();
+		MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
 		server.expect(requestTo("/profile")).andRespond(withSuccess());
 		server.expect(requestTo("/quoteOfTheDay")).andRespond(withActualCall);
 
-		var response1 = restTemplateWithMockEcho.getForEntity("/profile", String.class);
-		var response2 = restTemplateWithMockEcho.getForEntity("/quoteOfTheDay", String.class);
+		var response1 = restTemplate.getForEntity("/profile", String.class);
+		var response2 = restTemplate.getForEntity("/quoteOfTheDay", String.class);
 		server.verify();
 
-		assertThat(response1.getStatusCode().value())
-				.as("response1 status").isEqualTo(200);
-		assertThat(response1.getBody())
-				.as("response1 body").isNullOrEmpty();
-		assertThat(response2.getStatusCode().value())
-				.as("response2 status").isEqualTo(300);
-		assertThat(response2.getBody())
-				.as("response2 body").isEqualTo("echo from /quoteOfTheDay");
+		assertThat(response1.getStatusCode().value()).isEqualTo(200);
+		assertThat(response1.getBody()).isNullOrEmpty();
+		assertThat(response2.getStatusCode().value()).isEqualTo(300);
+		assertThat(response2.getBody()).isEqualTo("echo from /quoteOfTheDay");
 	}
 
 	private static RestTemplate createEchoRestTemplate() {
-		final ClientHttpRequestFactory echoRequestFactory = (uri, httpMethod) -> {
-			final MockClientHttpRequest req = new MockClientHttpRequest(httpMethod, uri);
-			String body = "echo from " + uri.getPath();
-			final ClientHttpResponse resp = new MockClientHttpResponse(body.getBytes(StandardCharsets.UTF_8),
-					// Instead of 200, we use a less-common status code on purpose
-					HttpStatus.MULTIPLE_CHOICES);
-			resp.getHeaders().setContentType(MediaType.TEXT_PLAIN);
-			req.setResponse(resp);
-			return req;
+		ClientHttpRequestFactory requestFactory = (uri, httpMethod) -> {
+			MockClientHttpRequest request = new MockClientHttpRequest(httpMethod, uri);
+			ClientHttpResponse response = new MockClientHttpResponse(
+					("echo from " + uri.getPath()).getBytes(StandardCharsets.UTF_8),
+					HttpStatus.MULTIPLE_CHOICES); // use a different status on purpose
+			response.getHeaders().setContentType(MediaType.TEXT_PLAIN);
+			request.setResponse(response);
+			return request;
 		};
-		return new RestTemplate(echoRequestFactory);
+		return new RestTemplate(requestFactory);
 	}
 
 	@Test

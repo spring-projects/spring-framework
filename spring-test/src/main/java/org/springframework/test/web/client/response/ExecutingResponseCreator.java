@@ -27,15 +27,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 
 /**
- * A {@code ResponseCreator} which delegates to a {@link ClientHttpRequestFactory}
- * to perform the request and return the associated response.
- * This is notably useful when testing code that calls multiple remote services, some
- * of which need to be actually called rather than further mocked.
- * <p>Note that the input request is asserted to be a {@code MockClientHttpRequest} and
- * the URI, method, headers and body are copied.
- * <p>The factory can typically be obtained from a {@code RestTemplate} but in case this
- * is used with e.g. {@code MockRestServiceServer}, make sure to capture the factory early
- * before binding the mock server to the RestTemplate (as it replaces the factory):
+ * {@code ResponseCreator} that obtains the response by executing the request
+ * through a {@link ClientHttpRequestFactory}. This is useful in scenarios with
+ * multiple remote services where some need to be called rather than mocked.
+ * <p>The {@code ClientHttpRequestFactory} is typically obtained from the
+ * {@code RestTemplate} before it is passed to {@code MockRestServiceServer},
+ * in effect using the original factory rather than the test factory:
  * <pre><code>
  * ResponseCreator withActualResponse = new ExecutingResponseCreator(restTemplate);
  * MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
@@ -53,7 +50,7 @@ public class ExecutingResponseCreator implements ResponseCreator {
 
 
 	/**
-	 * Create a {@code ExecutingResponseCreator} from a {@code ClientHttpRequestFactory}.
+	 * Create an instance with the given {@code ClientHttpRequestFactory}.
 	 * @param requestFactory the request factory to delegate to
 	 */
 	public ExecutingResponseCreator(ClientHttpRequestFactory requestFactory) {
@@ -63,7 +60,7 @@ public class ExecutingResponseCreator implements ResponseCreator {
 
 	@Override
 	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
-		Assert.state(request instanceof MockClientHttpRequest, "Request should be an instance of MockClientHttpRequest");
+		Assert.state(request instanceof MockClientHttpRequest, "Expected a MockClientHttpRequest");
 		MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 		ClientHttpRequest newRequest = this.requestFactory.createRequest(mockRequest.getURI(), mockRequest.getMethod());
 		newRequest.getHeaders().putAll(mockRequest.getHeaders());
