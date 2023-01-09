@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Sebastien Deleuze
  * @author Kazuki Shimizu
  * @author Sam Brannen
+ * @author Luis Juarez
  * @since 3.0
  * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">
  *     HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
@@ -399,6 +400,16 @@ public class MediaType extends MimeType implements Serializable {
 	public static final String TEXT_HTML_VALUE = "text/html";
 
 	/**
+	 * Public constant media type for {@code text/css}.
+	 */
+	public static final MediaType TEXT_CSS;
+
+	/**
+	 * A String equivalent of {@link MediaType#TEXT_CSS}.
+	 */
+	public static final String TEXT_CSS_VALUE = "text/css";
+
+	/**
 	 * Public constant media type for {@code text/markdown}.
 	 * @since 4.3
 	 */
@@ -462,6 +473,7 @@ public class MediaType extends MimeType implements Serializable {
 		MULTIPART_RELATED = new MediaType("multipart", "related");
 		TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
 		TEXT_HTML = new MediaType("text", "html");
+		TEXT_CSS = new MediaType("text", "css");
 		TEXT_MARKDOWN = new MediaType("text", "markdown");
 		TEXT_PLAIN = new MediaType("text", "plain");
 		TEXT_XML = new MediaType("text", "xml");
