@@ -108,10 +108,10 @@ public class InjectionMetadata {
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		if (this.injectedElements.isEmpty()) {
-			this.checkedElements = Set.of();
+			this.checkedElements = Collections.emptySet();
 		}
 		else {
-			Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size()*4/3);
+			Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size()*4/3 + 1);
 			for (InjectedElement element : this.injectedElements) {
 				Member member = element.getMember();
 				if (!beanDefinition.isExternallyManagedConfigMember(member)) {
