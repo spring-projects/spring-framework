@@ -715,7 +715,7 @@ public abstract class BeanUtils {
 	 * @see BeanWrapper
 	 */
 	public static void copyProperties(Object source, Object target) throws BeansException {
-		copyProperties(source, target, null, (String[]) null);
+		copyProperties(source, target, null, null, (String[]) null);
 	}
 
 	/**
@@ -736,7 +736,28 @@ public abstract class BeanUtils {
 	 * @see BeanWrapper
 	 */
 	public static void copyProperties(Object source, Object target, Class<?> editable) throws BeansException {
-		copyProperties(source, target, editable, (String[]) null);
+		copyProperties(source, target, editable, null, (String[]) null);
+	}
+
+	/**
+	 * Copy the property values of the given source bean into the given target bean,
+	 * ignoring null value.
+	 * <p>Note: The source and target classes do not have to match or even be derived
+	 * from each other, as long as the properties match. Any bean properties that the
+	 * source bean exposes but the target bean does not will silently be ignored.
+	 * <p>This is just a convenience method. For more complex transfer needs,
+	 * consider using a full {@link BeanWrapper}.
+	 * <p>As of Spring Framework 5.3, this method honors generic type information
+	 * when matching properties in the source and target objects. See the
+	 * documentation for {@link #copyProperties(Object, Object)} for details.
+	 * @param source the source bean
+	 * @param target the target bean
+	 * @param ignoreNull if true, ignore the property with null value
+	 * @throws BeansException if the copying failed
+	 * @see BeanWrapper
+	 */
+	public static void copyProperties(Object source, Object target, boolean ignoreNull) throws BeansException {
+		copyProperties(source, target, null, ignoreNull, (String[]) null);
 	}
 
 	/**
@@ -757,7 +778,7 @@ public abstract class BeanUtils {
 	 * @see BeanWrapper
 	 */
 	public static void copyProperties(Object source, Object target, String... ignoreProperties) throws BeansException {
-		copyProperties(source, target, null, ignoreProperties);
+		copyProperties(source, target, null, null, ignoreProperties);
 	}
 
 	/**
@@ -771,12 +792,13 @@ public abstract class BeanUtils {
 	 * @param source the source bean
 	 * @param target the target bean
 	 * @param editable the class (or interface) to restrict property setting to
+	 * @param ignoreNull if true, ignore the property with null value
 	 * @param ignoreProperties array of property names to ignore
 	 * @throws BeansException if the copying failed
 	 * @see BeanWrapper
 	 */
 	private static void copyProperties(Object source, Object target, @Nullable Class<?> editable,
-			@Nullable String... ignoreProperties) throws BeansException {
+		@Nullable Boolean ignoreNull, @Nullable String... ignoreProperties) throws BeansException {
 
 		Assert.notNull(source, "Source must not be null");
 		Assert.notNull(target, "Target must not be null");
@@ -814,10 +836,13 @@ public abstract class BeanUtils {
 									readMethod.setAccessible(true);
 								}
 								Object value = readMethod.invoke(source);
-								if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
-									writeMethod.setAccessible(true);
+
+								if (ignoreNull == null || Boolean.FALSE.equals(ignoreNull) || value != null) {
+									if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers())) {
+										writeMethod.setAccessible(true);
+									}
+									writeMethod.invoke(target, value);
 								}
-								writeMethod.invoke(target, value);
 							}
 							catch (Throwable ex) {
 								throw new FatalBeanException(

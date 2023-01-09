@@ -358,6 +358,24 @@ class BeanUtilsTests {
 	}
 
 	@Test
+	void copyPropertiesWithIgnoreNull() throws Exception {
+		TestBean tb = new TestBean();
+		assertThat(tb.getName() == null).as("Name empty").isTrue();
+		tb.setAge(32);
+		tb.setTouchy("bla");
+		TestBean tb2 = new TestBean();
+		tb2.setName("rod");
+
+		// "name" should not be copied while ignoreNull is true
+		BeanUtils.copyProperties(tb, tb2, true);
+		assertThat(tb2.getName()).as("Name not copied").isEqualTo("rod");
+
+		// "name" should be copied while ignoreNull is false
+		BeanUtils.copyProperties(tb, tb2, false);
+		assertThat(tb2.getName()).as("Name copied").isNull();
+	}
+
+	@Test
 	void copyPropertiesWithIgnore() throws Exception {
 		TestBean tb = new TestBean();
 		assertThat(tb.getName() == null).as("Name empty").isTrue();
