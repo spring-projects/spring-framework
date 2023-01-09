@@ -1773,19 +1773,19 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	@Override
-	public boolean equals(@Nullable Object other) {
-		if (this == other) {
+	public boolean equals(@Nullable Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(other instanceof HttpHeaders)) {
+		if (!(obj instanceof HttpHeaders other)) {
 			return false;
 		}
-		return unwrap(this).equals(unwrap((HttpHeaders) other));
+		return unwrap(this).equals(unwrap(other));
 	}
 
 	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
-		while (headers.headers instanceof HttpHeaders) {
-			headers = (HttpHeaders) headers.headers;
+		while (headers.headers instanceof HttpHeaders httpHeaders) {
+			headers = httpHeaders;
 		}
 		return headers.headers;
 	}
@@ -1810,8 +1810,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.3
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(MultiValueMap<String, String> headers) {
-		return (headers instanceof HttpHeaders ?
-				readOnlyHttpHeaders((HttpHeaders) headers) : new ReadOnlyHttpHeaders(headers));
+		return (headers instanceof HttpHeaders httpHeaders ? readOnlyHttpHeaders(httpHeaders) :
+				new ReadOnlyHttpHeaders(headers));
 	}
 
 	/**
