@@ -29,7 +29,7 @@ configure(allprojects) { project ->
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.7"
 			mavenBom "io.netty:netty-bom:4.1.86.Final"
-			mavenBom "io.projectreactor:reactor-bom:2020.0.25"
+			mavenBom "io.projectreactor:reactor-bom:2020.0.27"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR13"
 			mavenBom "io.rsocket:rsocket-bom:1.1.3"
 			mavenBom "org.eclipse.jetty:jetty-bom:9.4.50.v20221201"
@@ -191,14 +191,14 @@ configure(allprojects) { project ->
 			dependency "org.junit.support:testng-engine:1.0.4"
 			dependency "org.hamcrest:hamcrest:2.2"
 			dependency "org.awaitility:awaitility:3.1.6"
-			dependency "org.assertj:assertj-core:3.23.1"
+			dependency "org.assertj:assertj-core:3.24.1"
 			dependencySet(group: 'org.xmlunit', version: '2.9.0') {
 				entry 'xmlunit-assertj'
 				entry('xmlunit-matchers') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
 			}
-			dependencySet(group: 'org.mockito', version: '4.9.0') {
+			dependencySet(group: 'org.mockito', version: '4.9.0') {  // spring-beans tests fail with 4.10+
 				entry('mockito-core') {
 					exclude group: "org.hamcrest", name: "hamcrest-core"
 				}
@@ -206,7 +206,7 @@ configure(allprojects) { project ->
 			}
 			dependency "io.mockk:mockk:1.12.1"
 
-			dependency("net.sourceforge.htmlunit:htmlunit:2.67.0") {
+			dependency("net.sourceforge.htmlunit:htmlunit:2.69.0") {
 				exclude group: "commons-logging", name: "commons-logging"
 			}
 			dependency("org.seleniumhq.selenium:htmlunit-driver:2.67.0") {
@@ -340,7 +340,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	checkstyle {
-		toolVersion = "10.5.0"
+		toolVersion = "10.6.0"
 		configDirectory.set(rootProject.file("src/checkstyle"))
 	}
 
