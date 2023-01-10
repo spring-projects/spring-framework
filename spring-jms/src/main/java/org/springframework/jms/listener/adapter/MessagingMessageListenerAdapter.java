@@ -73,7 +73,8 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	public String getSubscriptionName() {
 		if (this.handlerMethod != null) {
 			return this.handlerMethod.getBeanType().getName() + "#" + this.handlerMethod.getMethod().getName();
-		} else {
+		}
+		else {
 			return this.getClass().getName();
 		}
 	}
