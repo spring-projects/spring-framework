@@ -117,6 +117,55 @@ logic but without running a server. The following example shows how to do so:
 	// Test code that uses the above RestTemplate ...
 ----
 
+In some cases it may be necessary to perform an actual call to a remote service instead
+of mocking the response. The following example shows how to do that through
+`ExecutingResponseCreator`:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	RestTemplate restTemplate = new RestTemplate();
+
+	// Create ExecutingResponseCreator with the original request factory
+	ExecutingResponseCreator withActualResponse = new ExecutingResponseCreator(restTemplate.getRequestFactory());
+
+	MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+	mockServer.expect(requestTo("/profile")).andRespond(withSuccess());
+	mockServer.expect(requestTo("/quoteOfTheDay")).andRespond(withActualResponse);
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify();
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val restTemplate = RestTemplate()
+
+	// Create ExecutingResponseCreator with the original request factory
+	val withActualResponse = new ExecutingResponseCreator(restTemplate.getRequestFactory())
+
+	val mockServer = MockRestServiceServer.bindTo(restTemplate).build()
+	mockServer.expect(requestTo("/profile")).andRespond(withSuccess())
+	mockServer.expect(requestTo("/quoteOfTheDay")).andRespond(withActualResponse)
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify()
+----
+
+In the preceding example, we create the `ExecutingResponseCreator` using the
+`ClientHttpRequestFactory` from the `RestTemplate` _before_ `MockRestServiceServer` replaces
+it with a different one that mocks responses.
+Then we define expectations with two kinds of responses:
+
+ * a stub `200` response for the `/profile` endpoint (no actual request will be executed)
+ * a response obtained through a call to the `/quoteOfTheDay` endpoint
+
+In the second case, the request is executed through the `ClientHttpRequestFactory` that was
+captured earlier. This generates a response that could e.g. come from an actual remote server,
+depending on how the `RestTemplate` was originally configured.
+
 [[spring-mvc-test-client-static-imports]]
 == Static Imports
 

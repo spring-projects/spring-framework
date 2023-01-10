@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,7 +242,7 @@ public class UrlPathHelper {
 	public String getLookupPathForRequest(HttpServletRequest request) {
 		String pathWithinApp = getPathWithinApplication(request);
 		// Always use full path within current servlet context?
-		if (this.alwaysUseFullPath || skipServletPathDetermination(request)) {
+		if (this.alwaysUseFullPath || ignoreServletPath(request)) {
 			return pathWithinApp;
 		}
 		// Else, use path within current servlet mapping if applicable
@@ -256,16 +256,13 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Check whether servlet path determination can be skipped for the given request.
-	 * @param request current HTTP request
-	 * @return {@code true} if the request mapping has not been achieved using a path
-	 * or if the servlet has been mapped to root; {@code false} otherwise
+	 * Whether we can ignore the servletPath and pathInfo for mapping purposes,
+	 * which is the case when we can establish that the Servlet is not mapped
+	 * by servletPath prefix.
 	 */
-	private boolean skipServletPathDetermination(HttpServletRequest request) {
+	private boolean ignoreServletPath(HttpServletRequest request) {
 		HttpServletMapping mapping = (HttpServletMapping) request.getAttribute(RequestDispatcher.INCLUDE_MAPPING);
-		if (mapping == null) {
-			mapping = request.getHttpServletMapping();
-		}
+		mapping = (mapping == null ? request.getHttpServletMapping() : mapping);
 		MappingMatch match = mapping.getMappingMatch();
 		return (match != null && (!match.equals(MappingMatch.PATH) || mapping.getPattern().equals("/*")));
 	}

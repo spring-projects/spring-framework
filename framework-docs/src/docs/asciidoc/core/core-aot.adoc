@@ -72,7 +72,7 @@ These are:
 * `SmartInstantiationAwareBeanPostProcessor` implementations determine a more precise bean type if necessary.
 This makes sure to create any proxy that will be required at runtime.
 
-One this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiation but allows the AOT engine to inspect the beans that will be created at runtime.
+Once this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiation but allows the AOT engine to inspect the beans that will be created at runtime.
 
 [[core.aot.bean-factory-initialization-contributions]]
 == Bean Factory Initialization AOT Contributions
