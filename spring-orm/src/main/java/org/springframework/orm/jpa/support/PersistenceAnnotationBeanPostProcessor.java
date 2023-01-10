@@ -181,6 +181,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Christoph Strobl
  * @since 2.0
  * @see jakarta.persistence.PersistenceUnit
  * @see jakarta.persistence.PersistenceContext
@@ -360,7 +361,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		InjectionMetadata metadata = findInjectionMetadata(beanDefinition, beanClass, beanName);
 		Collection<InjectedElement> injectedElements = metadata.getInjectedElements();
 		if (!CollectionUtils.isEmpty(injectedElements)) {
-			return new AotContribution(beanClass, injectedElements);
+			return new AotContribution(registeredBean, beanClass, injectedElements);
 		}
 		return null;
 	}
@@ -767,11 +768,14 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 
 		private static final String INSTANCE_PARAMETER = "instance";
 
+		private final RegisteredBean targetBean;
+
 		private final Class<?> target;
 
 		private final Collection<InjectedElement> injectedElements;
 
-		AotContribution(Class<?> target, Collection<InjectedElement> injectedElements) {
+		AotContribution(RegisteredBean targetBean, Class<?> target, Collection<InjectedElement> injectedElements) {
+			this.targetBean = targetBean;
 			this.target = target;
 			this.injectedElements = injectedElements;
 		}
@@ -802,6 +806,12 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 			for (InjectedElement injectedElement : this.injectedElements) {
 				CodeBlock resourceToInject = generateResourceToInjectCode(generatedClass.getMethods(),
 						(PersistenceElement) injectedElement);
+				if(injectedElement.getMember() instanceof Method setter) {
+					PropertyDescriptor property = BeanUtils.findPropertyForMethod(setter);
+					if(property != null && this.targetBean.getMergedBeanDefinition().getPropertyValues().contains(property.getName())) {
+						continue;
+					}
+				}
 				code.add(injectionCodeGenerator.generateInjectionCode(
 						injectedElement.getMember(), INSTANCE_PARAMETER,
 						resourceToInject));

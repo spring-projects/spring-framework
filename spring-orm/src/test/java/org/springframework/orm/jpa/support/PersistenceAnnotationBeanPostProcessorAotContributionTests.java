@@ -36,6 +36,7 @@ import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -52,6 +53,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Christoph Strobl
  */
 @CompileWithForkedClassLoader
 class PersistenceAnnotationBeanPostProcessorAotContributionTests {
@@ -157,6 +159,23 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 					.containsEntry("jpa.test2", "value2");
 			assertThat(this.generationContext.getRuntimeHints().reflection().typeHints())
 					.isEmpty();
+		});
+	}
+
+	@Test
+	void processAheadOfTimeWhenPersistenceUnitAlreadySet() {
+		String beanName = "testBean";
+		EntityManagerFactory mockEMF = mock(EntityManagerFactory.class);
+		this.beanFactory.registerBeanDefinition(beanName, BeanDefinitionBuilder
+				.rootBeanDefinition(DefaultPersistenceUnitMethod.class)
+				.addPropertyValue("emf", mockEMF).getBeanDefinition());
+		RegisteredBean registeredBean = RegisteredBean.of(this.beanFactory, beanName);
+		testCompile(registeredBean, (actual, compiled) -> {
+			this.beanFactory.registerSingleton("entityManagerFactory", mock(EntityManagerFactory.class));
+			DefaultPersistenceUnitMethod instance = new DefaultPersistenceUnitMethod();
+			instance.setEmf(mockEMF);
+			actual.accept(registeredBean, instance); // does not change to different one
+			assertThat(instance).extracting("emf").isSameAs(mockEMF);
 		});
 	}
 
