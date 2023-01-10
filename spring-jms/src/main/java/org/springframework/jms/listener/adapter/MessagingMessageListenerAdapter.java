@@ -71,8 +71,8 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 
 	@Override
 	public String getSubscriptionName() {
-		if (handlerMethod != null) {
-			return handlerMethod.getBeanType().getName() + "#" + handlerMethod.getMethod().getName();
+		if (this.handlerMethod != null) {
+			return this.handlerMethod.getBeanType().getName() + "#" + this.handlerMethod.getMethod().getName();
 		} else {
 			return this.getClass().getName();
 		}
