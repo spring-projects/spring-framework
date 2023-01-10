@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class InjectionMetadata {
 			this.checkedElements = Collections.emptySet();
 		}
 		else {
-			Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size()*4/3 + 1);
+			Set<InjectedElement> checkedElements = new LinkedHashSet<>((this.injectedElements.size() * 4 / 3) + 1);
 			for (InjectedElement element : this.injectedElements) {
 				Member member = element.getMember();
 				if (!beanDefinition.isExternallyManagedConfigMember(member)) {
