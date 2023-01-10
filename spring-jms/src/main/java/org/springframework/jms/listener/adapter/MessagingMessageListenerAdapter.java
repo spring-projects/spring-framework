@@ -20,6 +20,7 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Session;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.jms.listener.SubscriptionNameProvider;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.lang.Nullable;
@@ -48,7 +49,8 @@ import org.springframework.util.Assert;
  * @see JmsHeaderMapper
  * @see InvocableHandlerMethod
  */
-public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageListener {
+public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageListener
+		implements SubscriptionNameProvider {
 
 	@Nullable
 	private InvocableHandlerMethod handlerMethod;
@@ -65,6 +67,16 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	private InvocableHandlerMethod getHandlerMethod() {
 		Assert.state(this.handlerMethod != null, "No HandlerMethod set");
 		return this.handlerMethod;
+	}
+
+	@Override
+	public String getSubscriptionName() {
+		if (this.handlerMethod != null) {
+			return this.handlerMethod.getBeanType().getName() + "#" + this.handlerMethod.getMethod().getName();
+		}
+		else {
+			return this.getClass().getName();
+		}
 	}
 
 
