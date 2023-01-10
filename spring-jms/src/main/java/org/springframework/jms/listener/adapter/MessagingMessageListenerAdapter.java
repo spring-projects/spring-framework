@@ -20,6 +20,7 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Session;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.jms.listener.SubscriptionNameProvider;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.lang.Nullable;
