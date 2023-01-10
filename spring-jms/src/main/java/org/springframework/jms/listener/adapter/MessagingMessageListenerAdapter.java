@@ -48,7 +48,8 @@ import org.springframework.util.Assert;
  * @see JmsHeaderMapper
  * @see InvocableHandlerMethod
  */
-public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageListener {
+public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageListener
+		implements SubscriptionNameProvider {
 
 	@Nullable
 	private InvocableHandlerMethod handlerMethod;
@@ -65,6 +66,15 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	private InvocableHandlerMethod getHandlerMethod() {
 		Assert.state(this.handlerMethod != null, "No HandlerMethod set");
 		return this.handlerMethod;
+	}
+
+	@Override
+	public String getSubscriptionName() {
+		if (handlerMethod != null) {
+			return handlerMethod.getBeanType().getName() + "#" + handlerMethod.getMethod().getName();
+		} else {
+			return this.getClass().getName();
+		}
 	}
 
 
