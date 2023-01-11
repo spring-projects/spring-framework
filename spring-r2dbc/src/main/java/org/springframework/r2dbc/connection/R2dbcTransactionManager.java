@@ -200,7 +200,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				Mono<Connection> newCon = Mono.from(obtainConnectionFactory().create());
 				connectionMono = newCon.doOnNext(connection -> {
 					if (logger.isDebugEnabled()) {
-						logger.debug("Acquired Connection [" + newCon + "] for R2DBC transaction");
+						logger.debug("Acquired Connection [" + connection + "] for R2DBC transaction");
 					}
 					txObject.setConnectionHolder(new ConnectionHolder(connection), true);
 				});
