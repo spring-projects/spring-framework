@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ class TestConventions {
 	}
 
 	private void configureTestConventions(Project project) {
-		project.getPlugins().apply(TestRetryPlugin.class);
 		project.getTasks().withType(Test.class,
 				(test) -> project.getPlugins().withType(TestRetryPlugin.class, (testRetryPlugin) -> {
 					TestRetryTaskExtension testRetry = test.getExtensions().getByType(TestRetryTaskExtension.class);

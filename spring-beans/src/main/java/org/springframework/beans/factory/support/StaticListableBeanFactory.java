@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -365,8 +365,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		for (Map.Entry<String, Object> entry : this.beans.entrySet()) {
 			String beanName = entry.getKey();
 			Object beanInstance = entry.getValue();
-			if (beanInstance instanceof FactoryBean && !isFactoryType) {
-				FactoryBean<?> factoryBean = (FactoryBean<?>) beanInstance;
+			if (beanInstance instanceof FactoryBean<?> factoryBean && !isFactoryType) {
 				Class<?> objectType = factoryBean.getObjectType();
 				if ((includeNonSingletons || factoryBean.isSingleton()) &&
 						objectType != null && (type == null || type.isAssignableFrom(objectType))) {
@@ -409,9 +408,8 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			String beanName = entry.getKey();
 			Object beanInstance = entry.getValue();
 			// Is bean a FactoryBean?
-			if (beanInstance instanceof FactoryBean && !isFactoryType) {
+			if (beanInstance instanceof FactoryBean<?> factory && !isFactoryType) {
 				// Match object created by FactoryBean.
-				FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
 				Class<?> objectType = factory.getObjectType();
 				if ((includeNonSingletons || factory.isSingleton()) &&
 						objectType != null && (type == null || type.isAssignableFrom(objectType))) {

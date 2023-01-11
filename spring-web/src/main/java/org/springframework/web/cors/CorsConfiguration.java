@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,18 +263,14 @@ public class CorsConfiguration {
 		boolean withinPortRange = false;
 		for (int current = 0; current < rawValue.length(); current++) {
 			switch (rawValue.charAt(current)) {
-				case '[':
-					withinPortRange = true;
-					break;
-				case ']':
-					withinPortRange = false;
-					break;
-				case ',':
+				case '[' -> withinPortRange = true;
+				case ']' -> withinPortRange = false;
+				case ',' -> {
 					if (!withinPortRange) {
 						valueConsumer.accept(rawValue.substring(start, current).trim());
 						start = current + 1;
 					}
-					break;
+				}
 			}
 		}
 		if (start < rawValue.length()) {

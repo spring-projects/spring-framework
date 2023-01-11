@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -617,8 +617,7 @@ public class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
-		if (message.getHeaders() instanceof MutableMessageHeaders) {
-			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) message.getHeaders();
+		if (message.getHeaders() instanceof MutableMessageHeaders mutableHeaders) {
 			MessageHeaderAccessor accessor = mutableHeaders.getAccessor();
 			return (accessor.isMutable() ? accessor : accessor.createAccessor(message));
 		}

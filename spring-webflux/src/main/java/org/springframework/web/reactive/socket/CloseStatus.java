@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,34 +201,22 @@ public final class CloseStatus {
 	 */
 	public static CloseStatus create(int code, @Nullable String reason) {
 		if (!StringUtils.hasText(reason)) {
-			switch (code) {
-				case 1000:
-					return NORMAL;
-				case 1001:
-					return GOING_AWAY;
-				case 1002:
-					return PROTOCOL_ERROR;
-				case 1003:
-					return NOT_ACCEPTABLE;
-				case 1005:
-					return NO_STATUS_CODE;
-				case 1006:
-					return NO_CLOSE_FRAME;
-				case 1007:
-					return BAD_DATA;
-				case 1008:
-					return POLICY_VIOLATION;
-				case 1009:
-					return TOO_BIG_TO_PROCESS;
-				case 1010:
-					return REQUIRED_EXTENSION;
-				case 1011:
-					return SERVER_ERROR;
-				case 1012:
-					return SERVICE_RESTARTED;
-				case 1013:
-					return SERVICE_OVERLOAD;
-			}
+			return switch (code) {
+				case 1000 -> NORMAL;
+				case 1001 -> GOING_AWAY;
+				case 1002 -> PROTOCOL_ERROR;
+				case 1003 -> NOT_ACCEPTABLE;
+				case 1005 -> NO_STATUS_CODE;
+				case 1006 -> NO_CLOSE_FRAME;
+				case 1007 -> BAD_DATA;
+				case 1008 -> POLICY_VIOLATION;
+				case 1009 -> TOO_BIG_TO_PROCESS;
+				case 1010 -> REQUIRED_EXTENSION;
+				case 1011 -> SERVER_ERROR;
+				case 1012 -> SERVICE_RESTARTED;
+				case 1013 -> SERVICE_OVERLOAD;
+				default -> new CloseStatus(code, reason);
+			};
 		}
 		return new CloseStatus(code, reason);
 	}

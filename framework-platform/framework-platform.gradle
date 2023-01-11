@@ -8,18 +8,18 @@ javaPlatform {
 
 dependencies {
 	api(platform("com.fasterxml.jackson:jackson-bom:2.14.1"))
-	api(platform("io.micrometer:micrometer-bom:1.10.2"))
+	api(platform("io.micrometer:micrometer-bom:1.10.3"))
 	api(platform("io.netty:netty-bom:4.1.86.Final"))
 	api(platform("io.netty:netty5-bom:5.0.0.Alpha5"))
-	api(platform("io.projectreactor:reactor-bom:2022.0.1"))
+	api(platform("io.projectreactor:reactor-bom:2022.0.2"))
 	api(platform("io.rsocket:rsocket-bom:1.1.3"))
 	api(platform("org.apache.groovy:groovy-bom:4.0.6"))
 	api(platform("org.apache.logging.log4j:log4j-bom:2.19.0"))
 	api(platform("org.eclipse.jetty:jetty-bom:11.0.13"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4"))
 	api(platform("org.jetbrains.kotlinx:kotlinx-serialization-bom:1.4.0"))
-	api(platform("org.junit:junit-bom:5.9.1"))
-	api(platform("org.mockito:mockito-bom:4.9.0"))
+	api(platform("org.junit:junit-bom:5.9.2"))
+	api(platform("org.mockito:mockito-bom:4.9.0"))  // spring-beans tests fail with 4.10+
 
 	constraints {
 		api("com.fasterxml:aalto-xml:1.3.1")
@@ -87,7 +87,7 @@ dependencies {
 		api("jaxen:jaxen:1.2.0")
 		api("junit:junit:4.13.2")
 		api("net.sf.jopt-simple:jopt-simple:5.0.4")
-		api("net.sourceforge.htmlunit:htmlunit:2.67.0")
+		api("net.sourceforge.htmlunit:htmlunit:2.69.0")
 		api("org.apache-extras.beanshell:bsh:2.0b6")
 		api("org.apache.activemq:activemq-broker:5.16.2")
 		api("org.apache.activemq:activemq-kahadb-store:5.16.2")
@@ -106,7 +106,7 @@ dependencies {
 		api("org.aspectj:aspectjrt:1.9.9.1")
 		api("org.aspectj:aspectjtools:1.9.9.1")
 		api("org.aspectj:aspectjweaver:1.9.9.1")
-		api("org.assertj:assertj-core:3.23.1")
+		api("org.assertj:assertj-core:3.24.1")
 		api("org.awaitility:awaitility:3.1.6")
 		api("org.bouncycastle:bcpkix-jdk18on:1.71")
 		api("org.codehaus.jettison:jettison:1.3.8")

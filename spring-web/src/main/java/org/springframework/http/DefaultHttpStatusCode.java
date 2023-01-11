@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,16 +90,12 @@ final class DefaultHttpStatusCode
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof HttpStatusCode other) {
-			return this.value == other.value();
-		}
-		else {
-			return false;
-		}
+		return (obj instanceof HttpStatusCode other && this.value == other.value());
 	}
 
 	@Override
 	public String toString() {
 		return Integer.toString(this.value);
 	}
+
 }

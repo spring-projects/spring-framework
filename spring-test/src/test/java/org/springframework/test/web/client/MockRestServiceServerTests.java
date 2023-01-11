@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,22 @@
 package org.springframework.test.web.client;
 
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer.MockRestServiceServerBuilder;
+import org.springframework.test.web.client.response.ExecutingResponseCreator;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
@@ -86,6 +95,38 @@ class MockRestServiceServerTests {
 		this.restTemplate.getForObject("/bar", Void.class);
 		this.restTemplate.getForObject("/foo", Void.class);
 		server.verify();
+	}
+
+	@Test
+	void executingResponseCreator() {
+		RestTemplate restTemplate = createEchoRestTemplate();
+		ExecutingResponseCreator withActualCall = new ExecutingResponseCreator(restTemplate.getRequestFactory());
+
+		MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
+		server.expect(requestTo("/profile")).andRespond(withSuccess());
+		server.expect(requestTo("/quoteOfTheDay")).andRespond(withActualCall);
+
+		var response1 = restTemplate.getForEntity("/profile", String.class);
+		var response2 = restTemplate.getForEntity("/quoteOfTheDay", String.class);
+		server.verify();
+
+		assertThat(response1.getStatusCode().value()).isEqualTo(200);
+		assertThat(response1.getBody()).isNullOrEmpty();
+		assertThat(response2.getStatusCode().value()).isEqualTo(300);
+		assertThat(response2.getBody()).isEqualTo("echo from /quoteOfTheDay");
+	}
+
+	private static RestTemplate createEchoRestTemplate() {
+		ClientHttpRequestFactory requestFactory = (uri, httpMethod) -> {
+			MockClientHttpRequest request = new MockClientHttpRequest(httpMethod, uri);
+			ClientHttpResponse response = new MockClientHttpResponse(
+					("echo from " + uri.getPath()).getBytes(StandardCharsets.UTF_8),
+					HttpStatus.MULTIPLE_CHOICES); // use a different status on purpose
+			response.getHeaders().setContentType(MediaType.TEXT_PLAIN);
+			request.setResponse(response);
+			return request;
+		};
+		return new RestTemplate(requestFactory);
 	}
 
 	@Test

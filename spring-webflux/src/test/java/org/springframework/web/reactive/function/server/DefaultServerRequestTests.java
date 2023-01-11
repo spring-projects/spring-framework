@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
@@ -412,15 +413,17 @@ public class DefaultServerRequestTests {
 
 	@Test
 	public void multipartData() {
-		String data = "--12345\r\n" +
-				"Content-Disposition: form-data; name=\"foo\"\r\n" +
-				"\r\n" +
-				"bar\r\n" +
-				"--12345\r\n" +
-				"Content-Disposition: form-data; name=\"baz\"\r\n" +
-				"\r\n" +
-				"qux\r\n" +
-				"--12345--\r\n";
+		String data = """
+				--12345
+				Content-Disposition: form-data; name="foo"
+
+				bar
+				--12345
+				Content-Disposition: form-data; name="baz"
+
+				qux
+				--12345--
+				""".replace("\n", "\r\n");
 		byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
 		DefaultDataBuffer dataBuffer = DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(bytes));
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
@@ -437,18 +440,10 @@ public class DefaultServerRequestTests {
 		StepVerifier.create(resultData)
 				.consumeNextWith(formData -> {
 					assertThat(formData).hasSize(2);
-
-					Part part = formData.getFirst("foo");
-					boolean condition1 = part instanceof FormFieldPart;
-					assertThat(condition1).isTrue();
-					FormFieldPart formFieldPart = (FormFieldPart) part;
-					assertThat(formFieldPart.value()).isEqualTo("bar");
-
-					part = formData.getFirst("baz");
-					boolean condition = part instanceof FormFieldPart;
-					assertThat(condition).isTrue();
-					formFieldPart = (FormFieldPart) part;
-					assertThat(formFieldPart.value()).isEqualTo("qux");
+					assertThat(formData.getFirst("foo")).asInstanceOf(type(FormFieldPart.class))
+							.extracting(FormFieldPart::value).isEqualTo("bar");
+					assertThat(formData.getFirst("baz")).asInstanceOf(type(FormFieldPart.class))
+							.extracting(FormFieldPart::value).isEqualTo("qux");
 				})
 				.verifyComplete();
 	}
@@ -738,7 +733,6 @@ public class DefaultServerRequestTests {
 		@ParameterizedTest(name = "[{index}] {0}")
 		@ValueSource(strings = {"GET", "HEAD"})
 		@interface SafeHttpMethodsTest {
-
 		}
 
 	}

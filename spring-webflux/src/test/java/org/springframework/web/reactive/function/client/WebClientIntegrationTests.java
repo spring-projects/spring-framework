@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -726,8 +726,8 @@ class WebClientIntegrationTests {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try {
 				request.getBody().copyTo(bos);
-				String actual = bos.toString("UTF-8");
-				String expected = new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
+				String actual = bos.toString(StandardCharsets.UTF_8);
+				String expected = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
 				assertThat(actual).isEqualTo(expected);
 			}
 			catch (IOException ex) {
