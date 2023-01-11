@@ -35,10 +35,10 @@ import static org.springframework.web.servlet.function.RouterFunctions.route;
 /**
  * @author Arjen Poutsma
  */
-public class ToStringVisitorTests {
+class ToStringVisitorTests {
 
 	@Test
-	public void nested() {
+	void nested() {
 		HandlerFunction<ServerResponse> handler = new SimpleHandlerFunction();
 		RouterFunction<ServerResponse> routerFunction = route()
 				.path("/foo", builder ->
@@ -62,7 +62,7 @@ public class ToStringVisitorTests {
 	}
 
 	@Test
-	public void predicates() {
+	void predicates() {
 		testPredicate(methods(HttpMethod.GET), "GET");
 		testPredicate(methods(HttpMethod.GET, HttpMethod.POST), "[GET, POST]");
 
@@ -95,9 +95,7 @@ public class ToStringVisitorTests {
 	private void testPredicate(RequestPredicate predicate, String expected) {
 		ToStringVisitor visitor = new ToStringVisitor();
 		predicate.accept(visitor);
-		String result = visitor.toString();
-
-		assertThat(result).isEqualTo(expected);
+		assertThat(visitor).asString().isEqualTo(expected);
 	}
 
 

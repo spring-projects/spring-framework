@@ -153,26 +153,25 @@ class BasicJsonWriter {
 	private static String escape(CharSequence input) {
 		StringBuilder builder = new StringBuilder();
 		input.chars().forEach(c -> builder.append(
-						switch (c) {
-							case '"' -> "\\\"";
-							case '\\' -> "\\\\";
-							case '/' -> "\\/";
-							case '\b' -> "\\b";
-							case '\f' -> "\\f";
-							case '\n' -> "\\n";
-							case '\r' -> "\\r";
-							case '\t' -> "\\t";
-							default -> {
-								if (c <= 0x1F) {
-									yield String.format("\\u%04x", c);
-								}
-								else {
-									yield (char) c;
-								}
-							}
-						}
-				)
-		);
+			switch (c) {
+				case '"' -> "\\\"";
+				case '\\' -> "\\\\";
+				case '/' -> "\\/";
+				case '\b' -> "\\b";
+				case '\f' -> "\\f";
+				case '\n' -> "\\n";
+				case '\r' -> "\\r";
+				case '\t' -> "\\t";
+				default -> {
+					if (c <= 0x1F) {
+						yield String.format("\\u%04x", c);
+					}
+					else {
+						yield (char) c;
+					}
+				}
+			}
+		));
 		return builder.toString();
 	}
 
