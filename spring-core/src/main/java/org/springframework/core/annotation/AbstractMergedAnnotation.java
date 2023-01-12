@@ -188,11 +188,22 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 		return filterAttributes(this::hasNonDefaultValue);
 	}
 
+	/**
+	 *
+	 * @param adaptations the adaptions
+	 * @return value
+	 */
 	@Override
 	public AnnotationAttributes asAnnotationAttributes(Adapt... adaptations) {
 		return asMap(mergedAnnotation -> new AnnotationAttributes(mergedAnnotation.getType()), adaptations);
 	}
 
+	/**
+	 *
+	 * @param condition the condition
+	 * @return value
+	 * @throws NoSuchElementException
+	 */
 	@Override
 	public Optional<A> synthesize(Predicate<? super MergedAnnotation<A>> condition)
 			throws NoSuchElementException {
@@ -200,6 +211,10 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 		return (condition.test(this) ? Optional.of(synthesize()) : Optional.empty());
 	}
 
+	/**
+	 *
+	 * @return the attribute value synthesized
+	 */
 	@Override
 	public A synthesize() {
 		if (!isPresent()) {
@@ -213,6 +228,13 @@ abstract class AbstractMergedAnnotation<A extends Annotation> implements MergedA
 		return synthesized;
 	}
 
+	/**
+	 *
+	 * @param attributeName the attribute name
+	 * @param type the type to return
+	 * @return the attribute value
+	 * @param <T>
+	 */
 	private <T> T getRequiredAttributeValue(String attributeName, Class<T> type) {
 		T value = getAttributeValue(attributeName, type);
 		if (value == null) {
