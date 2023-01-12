@@ -28,15 +28,17 @@ import org.springframework.stereotype.Component;
 @ImportRuntimeHints(SpellCheckService.SpellCheckServiceRuntimeHints.class)
 public class SpellCheckService {
 
-	public void loadDictionary(Locale locale) {
-		ClassPathResource resource = new ClassPathResource("dicts/" + locale.getLanguage() + ".txt");
+	public void loadDictionary(final Locale locale) {
+		ClassPathResource resource = new ClassPathResource(
+				"dicts/" + locale.getLanguage() + ".txt");
 		//...
 	}
 
 	static class SpellCheckServiceRuntimeHints implements RuntimeHintsRegistrar {
 
 		@Override
-		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+		public void registerHints(
+				final RuntimeHints hints, final ClassLoader classLoader) {
 			hints.resources().registerPattern("dicts/*");
 		}
 	}
