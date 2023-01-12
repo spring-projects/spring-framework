@@ -264,7 +264,7 @@ class ScriptFactoryPostProcessorTests {
 
 	private static void pauseToLetRefreshDelayKickIn(int secondsToPause) {
 		try {
-			Thread.sleep(secondsToPause * 1000);
+			Thread.sleep(secondsToPause * 1000L);
 		}
 		catch (InterruptedException ignored) {
 		}

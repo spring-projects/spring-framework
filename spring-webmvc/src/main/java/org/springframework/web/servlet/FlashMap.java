@@ -113,7 +113,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 * @param timeToLive the number of seconds before expiration
 	 */
 	public void startExpirationPeriod(int timeToLive) {
-		this.expirationTime = System.currentTimeMillis() + timeToLive * 1000;
+		this.expirationTime = System.currentTimeMillis() + timeToLive * 1000L;
 	}
 
 	/**

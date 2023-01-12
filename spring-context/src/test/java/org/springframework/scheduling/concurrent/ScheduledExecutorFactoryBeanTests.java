@@ -218,7 +218,7 @@ class ScheduledExecutorFactoryBeanTests {
 
 	private static void pauseToLetTaskStart(int seconds) {
 		try {
-			Thread.sleep(seconds * 1000);
+			Thread.sleep(seconds * 1000L);
 		}
 		catch (InterruptedException ignored) {
 		}
