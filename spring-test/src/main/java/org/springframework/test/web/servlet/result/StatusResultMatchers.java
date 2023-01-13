@@ -148,7 +148,7 @@ public class StatusResultMatchers {
 	 * @see #isEarlyHints()
 	 * @deprecated in favor of {@link #isEarlyHints()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public ResultMatcher isCheckpoint() {
 		return isEarlyHints();
 	}
