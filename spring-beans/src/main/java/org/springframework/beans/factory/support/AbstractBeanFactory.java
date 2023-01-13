@@ -1011,6 +1011,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+	 * Return whether this factory holds a SmartInstantiationAwareBeanPostProcessor
+	 * that will get applied to singleton beans on creation.
+	 * @see #addBeanPostProcessor
+	 * @see org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor
+	 */
+	protected boolean hasSmartInstantiationAwareBeanPostProcessors() {
+		return !getBeanPostProcessorCache().smartInstantiationAware.isEmpty();
+	}
+
+	/**
 	 * Return whether this factory holds a DestructionAwareBeanPostProcessor
 	 * that will get applied to singleton beans on shutdown.
 	 * @see #addBeanPostProcessor
