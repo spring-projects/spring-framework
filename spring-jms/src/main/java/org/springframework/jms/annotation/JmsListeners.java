@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * Container annotation that aggregates several {@link JmsListener} annotations.
  *
  * <p>Can be used natively, declaring several nested {@link JmsListener} annotations.
- * Can also be used in conjunction with Java 8's support for repeatable annotations,
+ * Can also be used in conjunction with Java's support for repeatable annotations,
  * where {@link JmsListener} can simply be declared several times on the same method,
  * implicitly generating this container annotation.
  *

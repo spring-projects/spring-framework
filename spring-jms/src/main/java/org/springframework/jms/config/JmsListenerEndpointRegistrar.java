@@ -170,8 +170,8 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	/**
 	 * Register a new {@link JmsListenerEndpoint} alongside the
 	 * {@link JmsListenerContainerFactory} to use to create the underlying container.
-	 * <p>The {@code factory} may be {@code null} if the default factory has to be
-	 * used for that endpoint.
+	 * <p>The {@code factory} may be {@code null} if the default factory should be
+	 * used for the supplied endpoint.
 	 */
 	public void registerEndpoint(JmsListenerEndpoint endpoint, @Nullable JmsListenerContainerFactory<?> factory) {
 		Assert.notNull(endpoint, "Endpoint must not be null");

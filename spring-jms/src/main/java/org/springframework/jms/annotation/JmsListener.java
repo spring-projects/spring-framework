@@ -33,9 +33,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * assumed to be available with a bean name of {@code jmsListenerContainerFactory}
  * unless an explicit default has been provided through configuration.
  *
- * <p><b>Consider setting up a custom
+ * <p><b>Consider registering a custom
  * {@link org.springframework.jms.config.DefaultJmsListenerContainerFactory} bean.</b>
- * For production purposes, you'll typically fine-tune timeouts and recovery settings.
+ * For production purposes, you'll typically fine tune timeouts and recovery settings.
  * Most importantly, the default 'AUTO_ACKNOWLEDGE' mode does not provide reliability
  * guarantees, so make sure to use transacted sessions in case of reliability needs.
  *
