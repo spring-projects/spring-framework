@@ -156,7 +156,10 @@ public abstract class RouterFunctions {
 	 * @see #resourceLookupFunction(String, Resource)
 	 */
 	public static RouterFunction<ServerResponse> resources(String pattern, Resource location) {
-		return resources(resourceLookupFunction(pattern, location));
+		return resources(resourceLookupFunction(pattern, location), ResourceCacheLookupStrategy.noCaching());
+	}
+	public static RouterFunction<ServerResponse> resources(String pattern, Resource location, ResourceCacheLookupStrategy lookupStrategy) {
+		return resources(resourceLookupFunction(pattern, location), lookupStrategy);
 	}
 
 	/**
@@ -186,7 +189,10 @@ public abstract class RouterFunctions {
 	 * @return a router function that routes to resources
 	 */
 	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
-		return new ResourcesRouterFunction(lookupFunction);
+		return new ResourcesRouterFunction(lookupFunction, ResourceCacheLookupStrategy.noCaching());
+	}
+	public static RouterFunction<ServerResponse> resources(Function<ServerRequest, Mono<Resource>> lookupFunction, ResourceCacheLookupStrategy lookupStrategy) {
+		return new ResourcesRouterFunction(lookupFunction, lookupStrategy);
 	}
 
 	/**
@@ -652,6 +658,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 */
 		Builder resources(String pattern, Resource location);
+		Builder resources(String pattern, Resource location, ResourceCacheLookupStrategy resourceCacheLookupStrategy);
 
 		/**
 		 * Route to resources using the provided lookup function. If the lookup function provides a
@@ -661,6 +668,7 @@ public abstract class RouterFunctions {
 		 * @return this builder
 		 */
 		Builder resources(Function<ServerRequest, Mono<Resource>> lookupFunction);
+		Builder resources(Function<ServerRequest, Mono<Resource>> lookupFunction, ResourceCacheLookupStrategy resourceCacheLookupStrategy);
 
 		/**
 		 * Route to the supplied router function if the given request predicate applies. This method
@@ -1142,14 +1150,22 @@ public abstract class RouterFunctions {
 
 		private final Function<ServerRequest, Mono<Resource>> lookupFunction;
 
+		private final ResourceCacheLookupStrategy lookupStrategy;
+
 		public ResourcesRouterFunction(Function<ServerRequest, Mono<Resource>> lookupFunction) {
+			this(lookupFunction, ResourceCacheLookupStrategy.noCaching());
+		}
+
+		public ResourcesRouterFunction(Function<ServerRequest, Mono<Resource>> lookupFunction, ResourceCacheLookupStrategy lookupStrategy) {
 			Assert.notNull(lookupFunction, "Function must not be null");
+			Assert.notNull(lookupStrategy, "Strategy must not be null");
 			this.lookupFunction = lookupFunction;
+			this.lookupStrategy = lookupStrategy;
 		}
 
 		@Override
 		public Mono<HandlerFunction<ServerResponse>> route(ServerRequest request) {
-			return this.lookupFunction.apply(request).map(ResourceHandlerFunction::new);
+			return this.lookupFunction.apply(request).map(resource -> new ResourceHandlerFunction(resource, this.lookupStrategy));
 		}
 
 		@Override
