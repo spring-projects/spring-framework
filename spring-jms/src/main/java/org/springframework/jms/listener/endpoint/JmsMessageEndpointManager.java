@@ -180,8 +180,8 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 
 	@Override
 	public void setupMessageListener(Object messageListener) {
-		if (messageListener instanceof MessageListener) {
-			setMessageListener((MessageListener) messageListener);
+		if (messageListener instanceof MessageListener msgListener) {
+			setMessageListener(msgListener);
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported message listener '" +
@@ -203,8 +203,8 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	@Override
 	@Nullable
 	public DestinationResolver getDestinationResolver() {
-		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory) {
-			return ((StandardJmsActivationSpecFactory) this.activationSpecFactory).getDestinationResolver();
+		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory standardFactory) {
+			return standardFactory.getDestinationResolver();
 		}
 		return null;
 	}

@@ -188,9 +188,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	public void initialize() {
 		// Set sessionTransacted=true in case of a non-JTA transaction manager.
 		if (!this.sessionTransactedCalled &&
-				this.transactionManager instanceof ResourceTransactionManager &&
-				!TransactionSynchronizationUtils.sameResourceFactory(
-						(ResourceTransactionManager) this.transactionManager, obtainConnectionFactory())) {
+				this.transactionManager instanceof ResourceTransactionManager rtm &&
+				!TransactionSynchronizationUtils.sameResourceFactory(rtm, obtainConnectionFactory())) {
 			super.setSessionTransacted(true);
 		}
 
@@ -340,8 +339,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 					handleListenerException(ex);
 					// Rethrow JMSException to indicate an infrastructure problem
 					// that may have to trigger recovery...
-					if (ex instanceof JMSException) {
-						throw (JMSException) ex;
+					if (ex instanceof JMSException jmsException) {
+						throw jmsException;
 					}
 				}
 				finally {

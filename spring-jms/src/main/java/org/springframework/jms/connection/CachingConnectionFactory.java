@@ -255,7 +255,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		if (session != null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Found cached JMS Session for mode " + mode + ": " +
-						(session instanceof SessionProxy ? ((SessionProxy) session).getTargetSession() : session));
+						(session instanceof SessionProxy sessionProxy ? sessionProxy.getTargetSession() : session));
 			}
 		}
 		else {
@@ -455,15 +455,15 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				}
 			}
 			else {
-				if (dest instanceof Topic) {
+				if (dest instanceof Topic topic) {
 					if (noLocal == null) {
 						consumer = (durable ?
-								this.target.createSharedDurableConsumer((Topic) dest, subscription, selector) :
-								this.target.createSharedConsumer((Topic) dest, subscription, selector));
+								this.target.createSharedDurableConsumer(topic, subscription, selector) :
+								this.target.createSharedConsumer(topic, subscription, selector));
 					}
 					else {
 						consumer = (durable ?
-								this.target.createDurableSubscriber((Topic) dest, subscription, selector, noLocal) :
+								this.target.createDurableSubscriber(topic, subscription, selector, noLocal) :
 								this.target.createConsumer(dest, selector, noLocal));
 					}
 				}
@@ -559,11 +559,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object other) {
+		public boolean equals(@Nullable Object obj) {
 			// Effectively checking object equality as well as toString equality.
 			// On WebSphere MQ, Destination objects do not implement equals...
-			return (this == other || (other instanceof DestinationCacheKey &&
-					destinationEquals((DestinationCacheKey) other)));
+			return (this == obj || (obj instanceof DestinationCacheKey otherKey &&
+					destinationEquals(otherKey)));
 		}
 
 		@Override

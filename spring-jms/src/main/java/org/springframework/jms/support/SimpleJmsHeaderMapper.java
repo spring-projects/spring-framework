@@ -65,9 +65,9 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 			if (jmsCorrelationId instanceof Number) {
 				jmsCorrelationId = jmsCorrelationId.toString();
 			}
-			if (jmsCorrelationId instanceof String) {
+			if (jmsCorrelationId instanceof String correlationId) {
 				try {
-					jmsMessage.setJMSCorrelationID((String) jmsCorrelationId);
+					jmsMessage.setJMSCorrelationID(correlationId);
 				}
 				catch (Exception ex) {
 					logger.debug("Failed to set JMSCorrelationID - skipping", ex);

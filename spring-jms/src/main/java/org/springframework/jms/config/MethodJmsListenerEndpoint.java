@@ -136,8 +136,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	 */
 	@Override
 	public void setBeanFactory(@Nullable BeanFactory beanFactory) {
-		if (this.embeddedValueResolver == null && beanFactory instanceof ConfigurableBeanFactory) {
-			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
+		if (this.embeddedValueResolver == null && beanFactory instanceof ConfigurableBeanFactory cbf) {
+			this.embeddedValueResolver = new EmbeddedValueResolver(cbf);
 		}
 	}
 

@@ -163,40 +163,40 @@ public class TransactionAwareConnectionFactoryProxy
 	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		ConnectionFactory target = getTargetConnectionFactory();
-		if (!(target instanceof QueueConnectionFactory)) {
+		if (!(target instanceof QueueConnectionFactory queueFactory)) {
 			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
 		}
-		QueueConnection targetConnection = ((QueueConnectionFactory) target).createQueueConnection();
+		QueueConnection targetConnection = queueFactory.createQueueConnection();
 		return (QueueConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
 	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		ConnectionFactory target = getTargetConnectionFactory();
-		if (!(target instanceof QueueConnectionFactory)) {
+		if (!(target instanceof QueueConnectionFactory queueFactory)) {
 			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
 		}
-		QueueConnection targetConnection = ((QueueConnectionFactory) target).createQueueConnection(username, password);
+		QueueConnection targetConnection = queueFactory.createQueueConnection(username, password);
 		return (QueueConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
 	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		ConnectionFactory target = getTargetConnectionFactory();
-		if (!(target instanceof TopicConnectionFactory)) {
+		if (!(target instanceof TopicConnectionFactory topicFactory)) {
 			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
 		}
-		TopicConnection targetConnection = ((TopicConnectionFactory) target).createTopicConnection();
+		TopicConnection targetConnection = topicFactory.createTopicConnection();
 		return (TopicConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
 	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		ConnectionFactory target = getTargetConnectionFactory();
-		if (!(target instanceof TopicConnectionFactory)) {
+		if (!(target instanceof TopicConnectionFactory topicFactory)) {
 			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
 		}
-		TopicConnection targetConnection = ((TopicConnectionFactory) target).createTopicConnection(username, password);
+		TopicConnection targetConnection = topicFactory.createTopicConnection(username, password);
 		return (TopicConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 

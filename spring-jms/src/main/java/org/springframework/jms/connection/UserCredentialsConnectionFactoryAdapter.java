@@ -283,14 +283,14 @@ public class UserCredentialsConnectionFactoryAdapter
 			@Nullable String username, @Nullable String password) throws JMSException {
 
 		ConnectionFactory target = obtainTargetConnectionFactory();
-		if (!(target instanceof TopicConnectionFactory queueFactory)) {
+		if (!(target instanceof TopicConnectionFactory topicFactory)) {
 			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");
 		}
 		if (StringUtils.hasLength(username)) {
-			return queueFactory.createTopicConnection(username, password);
+			return topicFactory.createTopicConnection(username, password);
 		}
 		else {
-			return queueFactory.createTopicConnection();
+			return topicFactory.createTopicConnection();
 		}
 	}
 

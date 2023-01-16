@@ -71,8 +71,8 @@ public abstract class JmsException extends NestedRuntimeException {
 	@Nullable
 	public String getErrorCode() {
 		Throwable cause = getCause();
-		if (cause instanceof JMSException) {
-			return ((JMSException) cause).getErrorCode();
+		if (cause instanceof JMSException jmsException) {
+			return jmsException.getErrorCode();
 		}
 		return null;
 	}
@@ -87,8 +87,8 @@ public abstract class JmsException extends NestedRuntimeException {
 	public String getMessage() {
 		String message = super.getMessage();
 		Throwable cause = getCause();
-		if (cause instanceof JMSException) {
-			Exception linkedEx = ((JMSException) cause).getLinkedException();
+		if (cause instanceof JMSException jmsException) {
+			Exception linkedEx = jmsException.getLinkedException();
 			if (linkedEx != null) {
 				String linkedMessage = linkedEx.getMessage();
 				String causeMessage = cause.getMessage();

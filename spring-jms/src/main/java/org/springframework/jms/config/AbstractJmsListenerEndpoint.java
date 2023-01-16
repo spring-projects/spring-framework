@@ -134,8 +134,8 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 
 	@Override
 	public void setupListenerContainer(MessageListenerContainer listenerContainer) {
-		if (listenerContainer instanceof AbstractMessageListenerContainer) {
-			setupJmsListenerContainer((AbstractMessageListenerContainer) listenerContainer);
+		if (listenerContainer instanceof AbstractMessageListenerContainer abstractContainer) {
+			setupJmsListenerContainer(abstractContainer);
 		}
 		else {
 			new JcaEndpointConfigurer().configureEndpoint(listenerContainer);
@@ -194,8 +194,8 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	private class JcaEndpointConfigurer {
 
 		public void configureEndpoint(Object listenerContainer) {
-			if (listenerContainer instanceof JmsMessageEndpointManager) {
-				setupJcaMessageContainer((JmsMessageEndpointManager) listenerContainer);
+			if (listenerContainer instanceof JmsMessageEndpointManager endpointManager) {
+				setupJcaMessageContainer(endpointManager);
 			}
 			else {
 				throw new IllegalArgumentException("Could not configure endpoint with the specified container '" +

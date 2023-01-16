@@ -68,7 +68,7 @@ public abstract class ConnectionFactoryUtils {
 		if (con == null) {
 			return;
 		}
-		if (started && cf instanceof SmartConnectionFactory && ((SmartConnectionFactory) cf).shouldStop(con)) {
+		if (started && cf instanceof SmartConnectionFactory smartFactory && smartFactory.shouldStop(con)) {
 			try {
 				con.stop();
 			}
@@ -94,8 +94,8 @@ public abstract class ConnectionFactoryUtils {
 	 */
 	public static Session getTargetSession(Session session) {
 		Session sessionToUse = session;
-		while (sessionToUse instanceof SessionProxy) {
-			sessionToUse = ((SessionProxy) sessionToUse).getTargetSession();
+		while (sessionToUse instanceof SessionProxy sessionProxy) {
+			sessionToUse = sessionProxy.getTargetSession();
 		}
 		return sessionToUse;
 	}

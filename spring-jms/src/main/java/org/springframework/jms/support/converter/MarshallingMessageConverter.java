@@ -81,7 +81,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 */
 	public MarshallingMessageConverter(Marshaller marshaller) {
 		Assert.notNull(marshaller, "Marshaller must not be null");
-		if (!(marshaller instanceof Unmarshaller)) {
+		if (!(marshaller instanceof Unmarshaller _unmarshaller)) {
 			throw new IllegalArgumentException(
 					"Marshaller [" + marshaller + "] does not implement the Unmarshaller " +
 					"interface. Please set an Unmarshaller explicitly by using the " +
@@ -89,7 +89,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 		}
 		else {
 			this.marshaller = marshaller;
-			this.unmarshaller = (Unmarshaller) marshaller;
+			this.unmarshaller = _unmarshaller;
 		}
 	}
 

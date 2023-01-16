@@ -269,41 +269,41 @@ public abstract class JmsUtils {
 	public static JmsException convertJmsAccessException(JMSException ex) {
 		Assert.notNull(ex, "JMSException must not be null");
 
-		if (ex instanceof jakarta.jms.IllegalStateException) {
-			return new org.springframework.jms.IllegalStateException((jakarta.jms.IllegalStateException) ex);
+		if (ex instanceof jakarta.jms.IllegalStateException jakartaISE) {
+			return new org.springframework.jms.IllegalStateException(jakartaISE);
 		}
-		if (ex instanceof jakarta.jms.InvalidClientIDException) {
-			return new InvalidClientIDException((jakarta.jms.InvalidClientIDException) ex);
+		if (ex instanceof jakarta.jms.InvalidClientIDException jakartaICIDE) {
+			return new InvalidClientIDException(jakartaICIDE);
 		}
-		if (ex instanceof jakarta.jms.InvalidDestinationException) {
-			return new InvalidDestinationException((jakarta.jms.InvalidDestinationException) ex);
+		if (ex instanceof jakarta.jms.InvalidDestinationException jakartaIDE) {
+			return new InvalidDestinationException(jakartaIDE);
 		}
-		if (ex instanceof jakarta.jms.InvalidSelectorException) {
-			return new InvalidSelectorException((jakarta.jms.InvalidSelectorException) ex);
+		if (ex instanceof jakarta.jms.InvalidSelectorException jakartaISE) {
+			return new InvalidSelectorException(jakartaISE);
 		}
-		if (ex instanceof jakarta.jms.JMSSecurityException) {
-			return new JmsSecurityException((jakarta.jms.JMSSecurityException) ex);
+		if (ex instanceof jakarta.jms.JMSSecurityException jakartaJMSSE) {
+			return new JmsSecurityException(jakartaJMSSE);
 		}
-		if (ex instanceof jakarta.jms.MessageEOFException) {
-			return new MessageEOFException((jakarta.jms.MessageEOFException) ex);
+		if (ex instanceof jakarta.jms.MessageEOFException jakartaMEOFE) {
+			return new MessageEOFException(jakartaMEOFE);
 		}
-		if (ex instanceof jakarta.jms.MessageFormatException) {
-			return new MessageFormatException((jakarta.jms.MessageFormatException) ex);
+		if (ex instanceof jakarta.jms.MessageFormatException jakartaMFE) {
+			return new MessageFormatException(jakartaMFE);
 		}
-		if (ex instanceof jakarta.jms.MessageNotReadableException) {
-			return new MessageNotReadableException((jakarta.jms.MessageNotReadableException) ex);
+		if (ex instanceof jakarta.jms.MessageNotReadableException jakartaMNRE) {
+			return new MessageNotReadableException(jakartaMNRE);
 		}
-		if (ex instanceof jakarta.jms.MessageNotWriteableException) {
-			return new MessageNotWriteableException((jakarta.jms.MessageNotWriteableException) ex);
+		if (ex instanceof jakarta.jms.MessageNotWriteableException jakartaMNWE) {
+			return new MessageNotWriteableException(jakartaMNWE);
 		}
-		if (ex instanceof jakarta.jms.ResourceAllocationException) {
-			return new ResourceAllocationException((jakarta.jms.ResourceAllocationException) ex);
+		if (ex instanceof jakarta.jms.ResourceAllocationException jakartaRAE) {
+			return new ResourceAllocationException(jakartaRAE);
 		}
-		if (ex instanceof jakarta.jms.TransactionInProgressException) {
-			return new TransactionInProgressException((jakarta.jms.TransactionInProgressException) ex);
+		if (ex instanceof jakarta.jms.TransactionInProgressException jakartaTIPE) {
+			return new TransactionInProgressException(jakartaTIPE);
 		}
-		if (ex instanceof jakarta.jms.TransactionRolledBackException) {
-			return new TransactionRolledBackException((jakarta.jms.TransactionRolledBackException) ex);
+		if (ex instanceof jakarta.jms.TransactionRolledBackException jakartaTRBE) {
+			return new TransactionRolledBackException(jakartaTRBE);
 		}
 
 		// fallback

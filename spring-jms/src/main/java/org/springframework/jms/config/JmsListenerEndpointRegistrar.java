@@ -124,8 +124,8 @@ public class JmsListenerEndpointRegistrar implements BeanFactoryAware, Initializ
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.mutex = ((ConfigurableBeanFactory) beanFactory).getSingletonMutex();
+		if (beanFactory instanceof ConfigurableBeanFactory cbf) {
+			this.mutex = cbf.getSingletonMutex();
 		}
 	}
 

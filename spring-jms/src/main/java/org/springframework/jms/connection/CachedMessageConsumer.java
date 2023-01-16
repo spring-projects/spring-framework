@@ -52,18 +52,18 @@ class CachedMessageConsumer implements MessageConsumer, QueueReceiver, TopicSubs
 	@Override
 	@Nullable
 	public Queue getQueue() throws JMSException {
-		return (this.target instanceof QueueReceiver ? ((QueueReceiver) this.target).getQueue() : null);
+		return (this.target instanceof QueueReceiver receiver ? receiver.getQueue() : null);
 	}
 
 	@Override
 	@Nullable
 	public Topic getTopic() throws JMSException {
-		return (this.target instanceof TopicSubscriber ? ((TopicSubscriber) this.target).getTopic() : null);
+		return (this.target instanceof TopicSubscriber subscriber ? subscriber.getTopic() : null);
 	}
 
 	@Override
 	public boolean getNoLocal() throws JMSException {
-		return (this.target instanceof TopicSubscriber && ((TopicSubscriber) this.target).getNoLocal());
+		return (this.target instanceof TopicSubscriber subscriber && subscriber.getNoLocal());
 	}
 
 	@Override
