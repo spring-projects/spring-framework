@@ -115,10 +115,19 @@ class StatusResultMatchersDsl internal constructor (private val actions: ResultA
 	}
 
 	/**
-	 * @see StatusResultMatchers.isCheckpoint
+	 * @see isEarlyHints
 	 */
+	@Deprecated("use isEarlyHints() instead", replaceWith= ReplaceWith("isEarlyHints()"))
 	fun isCheckpoint() {
+		@Suppress("DEPRECATION")
 		actions.andExpect(matchers.isCheckpoint())
+	}
+
+	/**
+	 * @see StatusResultMatchers.isEarlyHints
+	 */
+	fun isEarlyHints() {
+		actions.andExpect(matchers.isEarlyHints())
 	}
 
 	/**
