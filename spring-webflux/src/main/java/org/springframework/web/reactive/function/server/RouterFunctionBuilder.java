@@ -242,8 +242,18 @@ class RouterFunctionBuilder implements RouterFunctions.Builder {
 	}
 
 	@Override
+	public RouterFunctions.Builder resources(String pattern, Resource location, ResourceCacheLookupStrategy resourceCacheLookupStrategy) {
+		return add(RouterFunctions.resources(pattern,location,resourceCacheLookupStrategy));
+	}
+
+	@Override
 	public RouterFunctions.Builder resources(Function<ServerRequest, Mono<Resource>> lookupFunction) {
 		return add(RouterFunctions.resources(lookupFunction));
+	}
+
+	@Override
+	public RouterFunctions.Builder resources(Function<ServerRequest, Mono<Resource>> lookupFunction, ResourceCacheLookupStrategy resourceCacheLookupStrategy) {
+		return add(RouterFunctions.resources(lookupFunction,resourceCacheLookupStrategy));
 	}
 
 	@Override

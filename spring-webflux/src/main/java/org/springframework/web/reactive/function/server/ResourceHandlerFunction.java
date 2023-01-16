@@ -27,6 +27,7 @@ import java.util.Set;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -45,10 +46,18 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
 
 	private final Resource resource;
+	private final CacheControl cacheControl;
 
 
 	public ResourceHandlerFunction(Resource resource) {
 		this.resource = resource;
+		this.cacheControl = CacheControl.empty();
+	}
+
+
+	public ResourceHandlerFunction(Resource resource, ResourceCacheLookupStrategy strategy) {
+		this.resource = resource;
+		this.cacheControl = strategy.lookupCacheControl(resource);
 	}
 
 
@@ -56,12 +65,16 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 	public Mono<ServerResponse> handle(ServerRequest request) {
 		HttpMethod method = request.method();
 		if (HttpMethod.GET.equals(method)) {
-			return EntityResponse.fromObject(this.resource).build()
+			return EntityResponse.fromObject(this.resource)
+					.cacheControl(this.cacheControl)
+					.build()
 					.map(response -> response);
 		}
 		else if (HttpMethod.HEAD.equals(method)) {
 			Resource headResource = new HeadMethodResource(this.resource);
-			return EntityResponse.fromObject(headResource).build()
+			return EntityResponse.fromObject(headResource)
+					.cacheControl(this.cacheControl)
+					.build()
 					.map(response -> response);
 		}
 		else if (HttpMethod.OPTIONS.equals(method)) {
