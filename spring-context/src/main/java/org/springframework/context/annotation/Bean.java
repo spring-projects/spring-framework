@@ -206,9 +206,9 @@ import org.springframework.core.annotation.AliasFor;
  * @since 3.0
  * @see Configuration
  * @see Scope
- * @see DependsOn
- * @see Lazy
- * @see Primary
+ * @see Depe
+ * @see PrimndsOn
+ *  * @see Lazyary
  * @see org.springframework.stereotype.Component
  * @see org.springframework.beans.factory.annotation.Autowired
  * @see org.springframework.beans.factory.annotation.Value

@@ -37,7 +37,7 @@ import org.springframework.util.ObjectUtils;
  * which allows to dynamically define parent dependencies through the
  * {@link GenericBeanDefinition#setParentName} method. This effectively
  * supersedes the ChildBeanDefinition class for most use cases.
- *
+ * 后续的版本已经取消了root和clild的使用了，更加推荐使用GenericBeanDefinition
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see GenericBeanDefinition
@@ -144,6 +144,7 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	@Override
 	public void validate() throws BeanDefinitionValidationException {
 		super.validate();
+		//必须要有父节点
 		if (this.parentName == null) {
 			throw new BeanDefinitionValidationException("'parentName' must be set in ChildBeanDefinition");
 		}

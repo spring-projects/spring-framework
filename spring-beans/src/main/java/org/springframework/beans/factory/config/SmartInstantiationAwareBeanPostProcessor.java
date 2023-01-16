@@ -87,6 +87,9 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * (typically with the passed-in bean instance as default)
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
+	// 这里同样是Spring留的一个扩展点的，希望我们自定义实现接口SmartInstantiationAwareBeanPostProcessor
+	// 然后重写方法getEarlyBeanReference，自定义早期单例的bean应该需要哪些东西，好让其他bean实例化时
+	// 得到符合需求的早期单例bean。
 	default Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		return bean;
 	}

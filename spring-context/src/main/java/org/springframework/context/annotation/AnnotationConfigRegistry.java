@@ -23,6 +23,7 @@ package org.springframework.context.annotation;
  * @author Juergen Hoeller
  * @since 4.1
  */
+// 标准注解接口
 public interface AnnotationConfigRegistry {
 
 	/**

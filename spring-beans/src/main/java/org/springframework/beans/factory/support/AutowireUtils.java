@@ -108,10 +108,14 @@ abstract class AutowireUtils {
 	 * @return whether the setter method is defined by an interface
 	 */
 	public static boolean isSetterDefinedInInterface(PropertyDescriptor pd, Set<Class<?>> interfaces) {
+		//获取属性对应的setter方法
 		Method setter = pd.getWriteMethod();
 		if (setter != null) {
+			//获取属性对应的类
 			Class<?> targetClass = setter.getDeclaringClass();
 			for (Class<?> ifc : interfaces) {
+				//判读对应的类，是否实现了感知方法
+				//并且在这些感知接口中中，是否存在同样的setter方法
 				if (ifc.isAssignableFrom(targetClass) && ClassUtils.hasMethod(ifc, setter)) {
 					return true;
 				}

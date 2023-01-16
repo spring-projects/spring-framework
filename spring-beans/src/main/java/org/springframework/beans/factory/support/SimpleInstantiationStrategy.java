@@ -88,6 +88,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		}
 		else {
 			// Must generate CGLIB subclass.
+			// bean标签中配置了属性lookup-method或者replace-method
 			return instantiateWithMethodInjection(bd, beanName, owner);
 		}
 	}
@@ -98,6 +99,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	 * the Method Injection specified in the given RootBeanDefinition.
 	 * Instantiation should use a no-arg constructor.
 	 */
+	// Subclasses can override this method 子类实现该方法
 	protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
 		throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
 	}

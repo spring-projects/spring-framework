@@ -41,6 +41,7 @@ public interface InitializingBean {
 	 * @throws Exception in the event of misconfiguration (such as failure to set an
 	 * essential property) or if initialization fails for any other reason
 	 */
+	// 该方法允许bean的实例在设置完成所有的属性后，进行整体的性能的验证，并且对bean进行一些配置和最终的初始化
 	void afterPropertiesSet() throws Exception;
 
 }
