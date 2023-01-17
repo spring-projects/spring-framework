@@ -49,6 +49,7 @@ import org.springframework.util.ObjectUtils;
  * @see PropertyOverrideConfigurer
  * @see PropertyPlaceholderConfigurer
  */
+// 占位符的解析
 public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 		implements BeanFactoryPostProcessor, PriorityOrdered {
 
