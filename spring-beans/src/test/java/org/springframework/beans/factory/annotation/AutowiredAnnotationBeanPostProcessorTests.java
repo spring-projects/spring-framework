@@ -1928,8 +1928,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("annotatedBean", bd);
 
 		RootBeanDefinition rbd = new RootBeanDefinition();
-		rbd.setBeanClassName(Mockito.class.getName());
-		rbd.setFactoryMethodName("mock");
+		rbd.setBeanClassName(getClass().getName());
+		rbd.setFactoryMethodName("createMockitoMock");
 		// TypedStringValue used to be equivalent to an XML-defined argument String
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Repository.class.getName()));
 		bf.registerBeanDefinition("repo", rbd);
@@ -1950,6 +1950,15 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertThat(bean.stringRepositoryMap.size()).isSameAs(1);
 		assertThat(bean.repositoryMap.get("repo")).isSameAs(repo);
 		assertThat(bean.stringRepositoryMap.get("repo")).isSameAs(repo);
+	}
+
+	/**
+	 * Mimics and delegates to {@link Mockito#mock(Class)} -- created here to avoid factory
+	 * method resolution issues caused by the introduction of {@code Mockito.mock(T...)}
+	 * in Mockito 4.10.
+	 */
+	public static <T> T createMockitoMock(Class<T> classToMock) {
+		return Mockito.mock(classToMock);
 	}
 
 	@Test
