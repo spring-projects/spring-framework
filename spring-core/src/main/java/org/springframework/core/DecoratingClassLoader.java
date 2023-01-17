@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +47,14 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 	/**
 	 * Create a new DecoratingClassLoader with no parent ClassLoader.
 	 */
-	public DecoratingClassLoader() {
+	protected DecoratingClassLoader() {
 	}
 
 	/**
 	 * Create a new DecoratingClassLoader using the given parent ClassLoader
 	 * for delegation.
 	 */
-	public DecoratingClassLoader(@Nullable ClassLoader parent) {
+	protected DecoratingClassLoader(@Nullable ClassLoader parent) {
 		super(parent);
 	}
 
