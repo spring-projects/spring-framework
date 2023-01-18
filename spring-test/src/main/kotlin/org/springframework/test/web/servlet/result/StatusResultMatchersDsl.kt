@@ -125,6 +125,7 @@ class StatusResultMatchersDsl internal constructor (private val actions: ResultA
 
 	/**
 	 * @see StatusResultMatchers.isEarlyHints
+	 * @since 6.0.5
 	 */
 	fun isEarlyHints() {
 		actions.andExpect(matchers.isEarlyHints())
