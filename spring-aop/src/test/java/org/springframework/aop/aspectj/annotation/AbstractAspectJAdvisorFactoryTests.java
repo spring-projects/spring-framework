@@ -483,6 +483,19 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 	@Test
+	void nonAbstractParentAspect() throws Exception {
+		IncrementingAspect aspect = new IncrementingAspect();
+
+		// Precondition:
+		assertThat(Modifier.isAbstract(aspect.getClass().getSuperclass().getModifiers())).isFalse();
+
+		List<Advisor> advisors = getAdvisorFactory().getAdvisors(aspectInstanceFactory(aspect, "incrementingAspect"));
+
+		ITestBean proxy = createProxy(new TestBean("Jane", 42), ITestBean.class, advisors);
+		assertThat(proxy.getAge()).isEqualTo(86); // (42 + 1) * 2
+	}
+
+	@Test
 	void failureWithoutExplicitDeclarePrecedence() {
 		TestBean target = new TestBean();
 		MetadataAwareAspectInstanceFactory aspectInstanceFactory = aspectInstanceFactory(
@@ -746,6 +759,26 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 			return obj;
 		}
 	}
+
+
+	@Aspect
+	class DoublingAspect {
+
+		@Around("execution(* getAge())")
+		public Object doubleAge(ProceedingJoinPoint pjp) throws Throwable {
+			return ((int) pjp.proceed()) * 2;
+		}
+	}
+
+	@Aspect
+	class IncrementingAspect extends DoublingAspect {
+
+		@Around("execution(* getAge())")
+		public int incrementAge(ProceedingJoinPoint pjp) throws Throwable {
+			return ((int) pjp.proceed()) + 1;
+		}
+	}
+
 
 
 	@Aspect
