@@ -39,6 +39,15 @@ import org.springframework.lang.Nullable;
  * @see DefaultParameterNameDiscoverer
  */
 public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDiscoverer {
+	private boolean includeContinuationParameter;
+
+	public KotlinReflectionParameterNameDiscoverer() {
+		this(false);
+	}
+
+	public KotlinReflectionParameterNameDiscoverer(boolean includeContinuationParameter) {
+		this.includeContinuationParameter = includeContinuationParameter;
+	}
 
 	@Override
 	@Nullable
@@ -49,7 +58,7 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 
 		try {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(method);
-			return (function != null ? getParameterNames(function.getParameters()) : null);
+			return (function != null ? getParameterNames(function.getParameters(), includeContinuationParameter && function.isSuspend()) : null);
 		}
 		catch (UnsupportedOperationException ex) {
 			return null;
@@ -65,7 +74,7 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 
 		try {
 			KFunction<?> function = ReflectJvmMapping.getKotlinFunction(ctor);
-			return (function != null ? getParameterNames(function.getParameters()) : null);
+			return (function != null ? getParameterNames(function.getParameters(), false) : null);
 		}
 		catch (UnsupportedOperationException ex) {
 			return null;
@@ -73,13 +82,13 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 	}
 
 	@Nullable
-	private String[] getParameterNames(List<KParameter> parameters) {
+	private String[] getParameterNames(List<KParameter> parameters, boolean addContinuationName) {
 		List<KParameter> filteredParameters = parameters
 				.stream()
 				// Extension receivers of extension methods must be included as they appear as normal method parameters in Java
 				.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()) || KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()))
 				.toList();
-		String[] parameterNames = new String[filteredParameters.size()];
+		String[] parameterNames = new String[filteredParameters.size() + (addContinuationName ? 1 : 0)];
 		for (int i = 0; i < filteredParameters.size(); i++) {
 			KParameter parameter = filteredParameters.get(i);
 			// extension receivers are not explicitly named, but require a name for Java interoperability
@@ -90,7 +99,9 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 			}
 			parameterNames[i] = name;
 		}
+		if (addContinuationName) {
+			parameterNames[filteredParameters.size()] = "continuation";
+		}
 		return parameterNames;
 	}
-
 }

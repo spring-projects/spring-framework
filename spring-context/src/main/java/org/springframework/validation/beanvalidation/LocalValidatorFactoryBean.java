@@ -120,7 +120,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	public LocalValidatorFactoryBean() {
 		if (KotlinDetector.isKotlinReflectPresent()) {
-			this.parameterNameDiscoverer = new KotlinReflectionParameterNameDiscoverer();
+			this.parameterNameDiscoverer = new KotlinReflectionParameterNameDiscoverer(true);
 		}
 	}
 
