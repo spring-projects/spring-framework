@@ -103,12 +103,12 @@ public class Indexer extends SpelNodeImpl {
 	private PropertyAccessor cachedWriteAccessor;
 
 
-	/**
-	 * Create an {@code Indexer} with the given start position, end position, and
-	 * index expression.
-	 */
-	public Indexer(int startPos, int endPos, SpelNodeImpl indexExpression) {
-		super(startPos, endPos, indexExpression);
+	private final boolean nullSafe;
+
+
+	public Indexer(boolean nullSafe, int startPos, int endPos, SpelNodeImpl expr) {
+		super(startPos, endPos, expr);
+		this.nullSafe = nullSafe;
 	}
 
 
@@ -161,6 +161,9 @@ public class Indexer extends SpelNodeImpl {
 
 		// Raise a proper exception in case of a null target
 		if (target == null) {
+			if (this.nullSafe) {
+				return ValueRef.NullValueRef.INSTANCE;
+			}
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 

@@ -376,6 +376,20 @@ class IndexingTests {
 		assertThat(expression.getValue(this, String.class)).isEqualTo("apple");
 	}
 
+	@Test
+	void nullSafeIndex() {
+		ContextWithNullCollections testContext = new ContextWithNullCollections();
+		StandardEvaluationContext context = new StandardEvaluationContext(testContext);
+		Expression expr = new SpelExpressionParser().parseRaw("nullList?.[4]");
+		assertThat(expr.getValue(context)).isNull();
+
+		expr = new SpelExpressionParser().parseRaw("nullArray?.[4]");
+		assertThat(expr.getValue(context)).isNull();
+
+		expr = new SpelExpressionParser().parseRaw("nullMap:?.[4]");
+		assertThat(expr.getValue(context)).isNull();
+	}
+
 
 	@Target({ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -434,6 +448,13 @@ class IndexingTests {
 			return new Class<?>[] {Map.class};
 		}
 
+	}
+
+
+	static class ContextWithNullCollections {
+		public List nullList = null;
+		public String[] nullArray = null;
+		public Map nullMap = null;
 	}
 
 }
