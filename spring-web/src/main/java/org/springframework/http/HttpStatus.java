@@ -51,8 +51,9 @@ public enum HttpStatus implements HttpStatusCode {
 	 */
 	PROCESSING(102, Series.INFORMATIONAL, "Processing"),
 	/**
-	 * {code 103 Early Hints}.
+	 * {@code 103 Early Hints}.
 	 * @see <a href="https://tools.ietf.org/html/rfc8297">An HTTP Status Code for Indicating Hints</a>
+	 * @since 6.0.5
 	 */
 	EARLY_HINTS(103, Series.INFORMATIONAL, "Early Hints"),
 	/**
@@ -61,7 +62,7 @@ public enum HttpStatus implements HttpStatusCode {
 	 * resumable POST/PUT HTTP requests in HTTP/1.0</a>
 	 * @deprecated in favor of {@link #EARLY_HINTS} which will be returned from {@code HttpStatus.valueOf(103)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0.5")
 	CHECKPOINT(103, Series.INFORMATIONAL, "Checkpoint"),
 
 	// 2xx Success
