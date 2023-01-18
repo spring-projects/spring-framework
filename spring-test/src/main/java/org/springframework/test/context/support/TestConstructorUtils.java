@@ -16,8 +16,11 @@
 
 package org.springframework.test.context.support;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.SpringProperties;
@@ -26,6 +29,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestConstructor.AutowireMode;
 import org.springframework.test.context.TestContextAnnotationUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * Utility methods for working with {@link TestConstructor @TestConstructor}.
@@ -33,6 +37,7 @@ import org.springframework.test.context.TestContextAnnotationUtils;
  * <p>Primarily intended for use within the framework.
  *
  * @author Sam Brannen
+ * @author Florian Lehmann
  * @since 5.2
  * @see TestConstructor
  */
@@ -99,6 +104,7 @@ public abstract class TestConstructorUtils {
 	 *
 	 * <ol>
 	 * <li>The constructor is annotated with {@link Autowired @Autowired}.</li>
+	 * <li>The constructor is annotated with {@link jakarta.inject.Inject} or {@code javax.inject.Inject}.</li>
 	 * <li>{@link TestConstructor @TestConstructor} is <em>present</em> or
 	 * <em>meta-present</em> on the test class with
 	 * {@link TestConstructor#autowireMode() autowireMode} set to
@@ -119,8 +125,8 @@ public abstract class TestConstructorUtils {
 	public static boolean isAutowirableConstructor(Constructor<?> constructor, Class<?> testClass,
 			@Nullable PropertyProvider fallbackPropertyProvider) {
 
-		// Is the constructor annotated with @Autowired?
-		if (AnnotatedElementUtils.hasAnnotation(constructor, Autowired.class)) {
+		// Is the constructor annotated with @Autowired/@Inject?
+		if (isAnnotatedWithAutowiredOrInject(constructor)) {
 			return true;
 		}
 
@@ -144,6 +150,32 @@ public abstract class TestConstructorUtils {
 		}
 
 		return (autowireMode == AutowireMode.ALL);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static boolean isAnnotatedWithAutowiredOrInject(Constructor<?> constructor) {
+		Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>();
+
+		autowiredAnnotationTypes.add(Autowired.class);
+
+		try {
+			autowiredAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("jakarta.inject.Inject", TestConstructorUtils.class.getClassLoader()));
+		}
+		catch (ClassNotFoundException ex) {
+			// jakarta.inject API not available - simply skip.
+		}
+
+		try {
+			autowiredAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("javax.inject.Inject", TestConstructorUtils.class.getClassLoader()));
+		}
+		catch (ClassNotFoundException ex) {
+			// javax.inject API not available - simply skip.
+		}
+
+		return autowiredAnnotationTypes.stream()
+				.anyMatch(autowiredAnnotationType -> AnnotatedElementUtils.hasAnnotation(constructor, autowiredAnnotationType));
 	}
 
 }
