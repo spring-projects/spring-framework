@@ -91,9 +91,12 @@ public class Indexer extends SpelNodeImpl {
 	@Nullable
 	private IndexedType indexedType;
 
+	private final boolean nullSafe;
 
-	public Indexer(int startPos, int endPos, SpelNodeImpl expr) {
+
+	public Indexer(boolean nullSafe, int startPos, int endPos, SpelNodeImpl expr) {
 		super(startPos, endPos, expr);
+		this.nullSafe = nullSafe;
 	}
 
 
@@ -142,6 +145,9 @@ public class Indexer extends SpelNodeImpl {
 
 		// Raise a proper exception in case of a null target
 		if (target == null) {
+			if (this.nullSafe) {
+				return ValueRef.NullValueRef.INSTANCE;
+			}
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 		// At this point, we need a TypeDescriptor for a non-null target object

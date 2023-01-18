@@ -375,7 +375,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	@Nullable
 	private SpelNodeImpl eatNonDottedNode() {
 		if (peekToken(TokenKind.LSQUARE)) {
-			if (maybeEatIndexer()) {
+			if (maybeEatIndexer(false)) {
 				return pop();
 			}
 		}
@@ -395,7 +395,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		Token t = takeToken();  // it was a '.' or a '?.'
 		boolean nullSafeNavigation = (t.kind == TokenKind.SAFE_NAVI);
 		if (maybeEatMethodOrProperty(nullSafeNavigation) || maybeEatFunctionOrVar() ||
-				maybeEatProjection(nullSafeNavigation) || maybeEatSelection(nullSafeNavigation)) {
+				maybeEatProjection(nullSafeNavigation) || maybeEatSelection(nullSafeNavigation) ||
+				maybeEatIndexer(nullSafeNavigation)) {
 			return pop();
 		}
 		if (peekToken() == null) {
@@ -513,7 +514,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		else if (maybeEatBeanReference()) {
 			return pop();
 		}
-		else if (maybeEatProjection(false) || maybeEatSelection(false) || maybeEatIndexer()) {
+		else if (maybeEatProjection(false) || maybeEatSelection(false) ||
+				maybeEatIndexer(false)) {
 			return pop();
 		}
 		else if (maybeEatInlineListOrMap()) {
@@ -678,7 +680,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return true;
 	}
 
-	private boolean maybeEatIndexer() {
+	private boolean maybeEatIndexer(boolean nullSafeNavigation) {
 		Token t = peekToken();
 		if (!peekToken(TokenKind.LSQUARE, true)) {
 			return false;
@@ -687,7 +689,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		SpelNodeImpl expr = eatExpression();
 		Assert.state(expr != null, "No node");
 		eatToken(TokenKind.RSQUARE);
-		this.constructedNodes.push(new Indexer(t.startPos, t.endPos, expr));
+		this.constructedNodes.push(new Indexer(nullSafeNavigation, t.startPos, t.endPos, expr));
 		return true;
 	}
 

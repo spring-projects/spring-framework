@@ -156,6 +156,16 @@ class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	void SPR16929() {
+		C testContext = new C();
+		testContext.ls = null;
+		StandardEvaluationContext context = new StandardEvaluationContext(testContext);
+		context.addPropertyAccessor(new MapAccessor());
+		Expression expr = new SpelExpressionParser().parseRaw("ls?.[4]");
+		assertThat(expr.getValue(context)).isNull();
+	}
+
+	@Test
 	void SPR5847() {
 		StandardEvaluationContext context = new StandardEvaluationContext(new TestProperties());
 		String name = null;
