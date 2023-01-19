@@ -40,9 +40,9 @@ import static org.mockito.Mockito.verify;
  */
 public class DefaultLobHandlerTests {
 
-	private ResultSet rs = mock(ResultSet.class);
+	private ResultSet rs = mock();
 
-	private PreparedStatement ps = mock(PreparedStatement.class);
+	private PreparedStatement ps = mock();
 
 	private LobHandler lobHandler = new DefaultLobHandler();
 

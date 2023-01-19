@@ -57,7 +57,7 @@ public class WebSessionMethodArgumentResolverTests {
 	public void resolverArgument() {
 
 		BindingContext context = new BindingContext();
-		WebSession session = mock(WebSession.class);
+		WebSession session = mock();
 		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
 		ServerWebExchange exchange = MockServerWebExchange.builder(request).session(session).build();
 

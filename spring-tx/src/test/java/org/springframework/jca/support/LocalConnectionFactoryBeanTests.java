@@ -55,7 +55,7 @@ public class LocalConnectionFactoryBeanTests {
 	@Test
 	public void testCreatesVanillaConnectionFactoryIfNoConnectionManagerHasBeenConfigured() throws Exception {
 		final Object CONNECTION_FACTORY = new Object();
-		ManagedConnectionFactory managedConnectionFactory = mock(ManagedConnectionFactory.class);
+		ManagedConnectionFactory managedConnectionFactory = mock();
 		given(managedConnectionFactory.createConnectionFactory()).willReturn(CONNECTION_FACTORY);
 		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
 		factory.setManagedConnectionFactory(managedConnectionFactory);
@@ -65,8 +65,8 @@ public class LocalConnectionFactoryBeanTests {
 
 	@Test
 	public void testCreatesManagedConnectionFactoryIfAConnectionManagerHasBeenConfigured() throws Exception {
-		ManagedConnectionFactory managedConnectionFactory = mock(ManagedConnectionFactory.class);
-		ConnectionManager connectionManager = mock(ConnectionManager.class);
+		ManagedConnectionFactory managedConnectionFactory = mock();
+		ConnectionManager connectionManager = mock();
 		LocalConnectionFactoryBean factory = new LocalConnectionFactoryBean();
 		factory.setManagedConnectionFactory(managedConnectionFactory);
 		factory.setConnectionManager(connectionManager);

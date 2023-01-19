@@ -407,7 +407,7 @@ class MergedContextConfigurationTests {
 	 */
 	@Test
 	void equalsWithSameContextCustomizers() {
-		Set<ContextCustomizer> customizers = Collections.singleton(mock(ContextCustomizer.class));
+		Set<ContextCustomizer> customizers = Collections.singleton(mock());
 		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
 			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers, loader, null, null);
 		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
@@ -420,8 +420,8 @@ class MergedContextConfigurationTests {
 	 */
 	@Test
 	void equalsWithDifferentContextCustomizers() {
-		Set<ContextCustomizer> customizers1 = Collections.singleton(mock(ContextCustomizer.class));
-		Set<ContextCustomizer> customizers2 = Collections.singleton(mock(ContextCustomizer.class));
+		Set<ContextCustomizer> customizers1 = Collections.singleton(mock());
+		Set<ContextCustomizer> customizers2 = Collections.singleton(mock());
 
 		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
 			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers1, loader, null, null);

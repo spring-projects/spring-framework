@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 class BindingsUnitTests {
 
 	BindMarkersFactory markersFactory = BindMarkersFactory.indexed("$", 1);
-	BindTarget bindTarget = mock(BindTarget.class);
+	BindTarget bindTarget = mock();
 
 	@Test
 	void shouldCreateBindings() {

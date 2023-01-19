@@ -63,7 +63,7 @@ public class WebAsyncManagerTimeoutTests {
 		this.servletResponse = new MockHttpServletResponse();
 		this.asyncWebRequest = new StandardServletAsyncWebRequest(servletRequest, servletResponse);
 
-		AsyncTaskExecutor executor = mock(AsyncTaskExecutor.class);
+		AsyncTaskExecutor executor = mock();
 
 		this.asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 		this.asyncManager.setTaskExecutor(executor);
@@ -75,7 +75,7 @@ public class WebAsyncManagerTimeoutTests {
 	public void startCallableProcessingTimeoutAndComplete() throws Exception {
 		StubCallable callable = new StubCallable();
 
-		CallableProcessingInterceptor interceptor = mock(CallableProcessingInterceptor.class);
+		CallableProcessingInterceptor interceptor = mock();
 		given(interceptor.handleTimeout(this.asyncWebRequest, callable)).willReturn(RESULT_NONE);
 
 		this.asyncManager.registerCallableInterceptor("interceptor", interceptor);
@@ -112,7 +112,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		StubCallable callable = new StubCallable();
 
-		CallableProcessingInterceptor interceptor = mock(CallableProcessingInterceptor.class);
+		CallableProcessingInterceptor interceptor = mock();
 		given(interceptor.handleTimeout(this.asyncWebRequest, callable)).willReturn(22);
 
 		this.asyncManager.registerCallableInterceptor("timeoutInterceptor", interceptor);
@@ -133,7 +133,7 @@ public class WebAsyncManagerTimeoutTests {
 		StubCallable callable = new StubCallable();
 		Exception exception = new Exception();
 
-		CallableProcessingInterceptor interceptor = mock(CallableProcessingInterceptor.class);
+		CallableProcessingInterceptor interceptor = mock();
 		given(interceptor.handleTimeout(this.asyncWebRequest, callable)).willThrow(exception);
 
 		this.asyncManager.registerCallableInterceptor("timeoutInterceptor", interceptor);
@@ -153,9 +153,9 @@ public class WebAsyncManagerTimeoutTests {
 	public void startCallableProcessingTimeoutAndCheckThreadInterrupted() throws Exception {
 
 		StubCallable callable = new StubCallable();
-		Future future = mock(Future.class);
+		Future future = mock();
 
-		AsyncTaskExecutor executor = mock(AsyncTaskExecutor.class);
+		AsyncTaskExecutor executor = mock();
 		given(executor.submit(any(Runnable.class))).willReturn(future);
 
 		this.asyncManager.setTaskExecutor(executor);
@@ -174,7 +174,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 
-		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
+		DeferredResultProcessingInterceptor interceptor = mock();
 		given(interceptor.handleTimeout(this.asyncWebRequest, deferredResult)).willReturn(true);
 
 		this.asyncManager.registerDeferredResultInterceptor("interceptor", interceptor);

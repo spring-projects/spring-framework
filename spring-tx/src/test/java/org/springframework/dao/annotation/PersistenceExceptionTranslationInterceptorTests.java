@@ -74,7 +74,7 @@ public class PersistenceExceptionTranslationInterceptorTests extends Persistence
 		interceptor.setAlwaysTranslate(true);
 
 		RuntimeException exception = new RuntimeException();
-		MethodInvocation invocation = mock(MethodInvocation.class);
+		MethodInvocation invocation = mock();
 		given(invocation.proceed()).willThrow(exception);
 
 		assertThatThrownBy(() -> interceptor.invoke(invocation)).isSameAs(exception);

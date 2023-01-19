@@ -61,20 +61,19 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  */
 class DefaultClientResponseTests {
 
-	private ClientHttpResponse mockResponse;
+	private ClientHttpResponse mockResponse = mock();
 
 	private final HttpHeaders httpHeaders = new HttpHeaders();
 
-	private ExchangeStrategies mockExchangeStrategies;
+	private ExchangeStrategies mockExchangeStrategies = mock();
 
 	private DefaultClientResponse defaultClientResponse;
 
 
 	@BeforeEach
-	void createMocks() {
-		mockResponse = mock(ClientHttpResponse.class);
+	void configureMocks() {
 		given(mockResponse.getHeaders()).willReturn(this.httpHeaders);
-		mockExchangeStrategies = mock(ExchangeStrategies.class);
+
 		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies, "", "", () -> null);
 	}
 

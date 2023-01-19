@@ -35,8 +35,8 @@ public class UserCredentialsDataSourceAdapterTests {
 
 	@Test
 	public void testStaticCredentials() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
-		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock();
+		Connection connection = mock();
 		given(dataSource.getConnection("user", "pw")).willReturn(connection);
 
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
@@ -48,8 +48,8 @@ public class UserCredentialsDataSourceAdapterTests {
 
 	@Test
 	public void testNoCredentials() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
-		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock();
+		Connection connection = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();
 		adapter.setTargetDataSource(dataSource);
@@ -58,8 +58,8 @@ public class UserCredentialsDataSourceAdapterTests {
 
 	@Test
 	public void testThreadBoundCredentials() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
-		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock();
+		Connection connection = mock();
 		given(dataSource.getConnection("user", "pw")).willReturn(connection);
 
 		UserCredentialsDataSourceAdapter adapter = new UserCredentialsDataSourceAdapter();

@@ -160,7 +160,7 @@ class GeneratedClassesTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void writeToInvokeTypeSpecCustomizer() throws IOException {
-		Consumer<TypeSpec.Builder> typeSpecCustomizer = mock(Consumer.class);
+		Consumer<TypeSpec.Builder> typeSpecCustomizer = mock();
 		this.generatedClasses.addForFeatureComponent("one", TestComponent.class, typeSpecCustomizer);
 		verifyNoInteractions(typeSpecCustomizer);
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();

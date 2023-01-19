@@ -44,20 +44,17 @@ import static org.mockito.Mockito.mock;
  */
 public class MessageMethodArgumentResolverTests {
 
-	private MessageConverter converter;
+	private MessageConverter converter = mock();
 
-	private MessageMethodArgumentResolver resolver;
+	private MessageMethodArgumentResolver resolver = new MessageMethodArgumentResolver(this.converter);
 
 	private Method method;
 
 
 	@BeforeEach
 	public void setup() throws Exception {
-		this.method = MessageMethodArgumentResolverTests.class.getDeclaredMethod("handle",
+		this.method = getClass().getDeclaredMethod("handle",
 				Message.class, Message.class, Message.class, Message.class, ErrorMessage.class, Message.class);
-
-		this.converter = mock(MessageConverter.class);
-		this.resolver = new MessageMethodArgumentResolver(this.converter);
 	}
 
 

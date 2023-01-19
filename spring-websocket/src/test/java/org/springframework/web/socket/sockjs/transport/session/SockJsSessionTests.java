@@ -281,7 +281,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 
 	@Test
 	void scheduleAndCancelHeartbeat() {
-		ScheduledFuture<?> task = mock(ScheduledFuture.class);
+		ScheduledFuture<?> task = mock();
 		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 
 		this.session.setActive(true);

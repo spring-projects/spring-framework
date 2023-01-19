@@ -42,7 +42,7 @@ public class ExtractingResponseErrorHandlerTests {
 
 	private ExtractingResponseErrorHandler errorHandler;
 
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+	private final ClientHttpResponse response = mock();
 
 
 	@BeforeEach

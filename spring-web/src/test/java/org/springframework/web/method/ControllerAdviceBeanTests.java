@@ -74,7 +74,7 @@ public class ControllerAdviceBeanTests {
 	@Test
 	public void equalsHashCodeAndToStringForBeanName() {
 		String beanName = "myBean";
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 		given(beanFactory.containsBean(beanName)).willReturn(true);
 
 		ControllerAdviceBean bean1 = new ControllerAdviceBean(beanName, beanFactory);
@@ -232,7 +232,7 @@ public class ControllerAdviceBeanTests {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void assertOrder(Class beanType, int expectedOrder) {
 		String beanName = "myBean";
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 		given(beanFactory.containsBean(beanName)).willReturn(true);
 		given(beanFactory.getType(beanName)).willReturn(beanType);
 		given(beanFactory.getBean(beanName)).willReturn(BeanUtils.instantiateClass(beanType));

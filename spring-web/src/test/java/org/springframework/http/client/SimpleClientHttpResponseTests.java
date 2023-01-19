@@ -41,7 +41,7 @@ import static org.mockito.Mockito.verify;
  */
 public class SimpleClientHttpResponseTests {
 
-	private final HttpURLConnection connection = mock(HttpURLConnection.class);
+	private final HttpURLConnection connection = mock();
 
 	private final SimpleClientHttpResponse response = new SimpleClientHttpResponse(this.connection);
 
@@ -97,7 +97,7 @@ public class SimpleClientHttpResponseTests {
 
 	@Test  // SPR-16773
 	public void shouldNotDrainWhenErrorStreamClosed() throws Exception {
-		InputStream is = mock(InputStream.class);
+		InputStream is = mock();
 		given(this.connection.getErrorStream()).willReturn(is);
 		willDoNothing().given(is).close();
 		given(is.transferTo(any())).willCallRealMethod();

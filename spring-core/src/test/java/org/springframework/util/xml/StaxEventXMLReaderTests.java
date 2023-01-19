@@ -48,7 +48,7 @@ class StaxEventXMLReaderTests extends AbstractStaxXMLReaderTests {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(CONTENT));
 		eventReader.nextTag();  // skip to root
 		StaxEventXMLReader xmlReader = new StaxEventXMLReader(eventReader);
-		ContentHandler contentHandler = mock(ContentHandler.class);
+		ContentHandler contentHandler = mock();
 		xmlReader.setContentHandler(contentHandler);
 		xmlReader.parse(new InputSource());
 		verify(contentHandler).startDocument();

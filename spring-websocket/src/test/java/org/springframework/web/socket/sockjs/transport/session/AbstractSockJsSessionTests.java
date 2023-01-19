@@ -31,9 +31,9 @@ import static org.mockito.Mockito.mock;
  */
 abstract class AbstractSockJsSessionTests<S extends AbstractSockJsSession> {
 
-	protected WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
+	protected WebSocketHandler webSocketHandler = mock();
 
-	protected TaskScheduler taskScheduler = mock(TaskScheduler.class);
+	protected TaskScheduler taskScheduler = mock();
 
 	protected StubSockJsServiceConfig sockJsConfig = new StubSockJsServiceConfig();
 

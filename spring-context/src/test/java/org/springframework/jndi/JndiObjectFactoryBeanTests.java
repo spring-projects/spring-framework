@@ -372,7 +372,7 @@ public class JndiObjectFactoryBeanTests {
 	public void testLookupWithExposeAccessContext() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		TestBean tb = new TestBean();
-		final Context mockCtx = mock(Context.class);
+		final Context mockCtx = mock();
 		given(mockCtx.lookup("foo")).willReturn(tb);
 		jof.setJndiTemplate(new JndiTemplate() {
 			@Override

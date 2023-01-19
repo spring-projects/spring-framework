@@ -93,7 +93,7 @@ class DefaultClientRequestBuilderTests {
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
-		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		ExchangeStrategies strategies = mock();
 		given(strategies.messageWriters()).willReturn(messageWriters);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(POST, "/");
@@ -142,7 +142,7 @@ class DefaultClientRequestBuilderTests {
 				.build();
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
-		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		ExchangeStrategies strategies = mock();
 
 		result.writeTo(request, strategies).block();
 
@@ -168,7 +168,7 @@ class DefaultClientRequestBuilderTests {
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
-		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		ExchangeStrategies strategies = mock();
 		given(strategies.messageWriters()).willReturn(messageWriters);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
@@ -187,7 +187,7 @@ class DefaultClientRequestBuilderTests {
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
-		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		ExchangeStrategies strategies = mock();
 		given(strategies.messageWriters()).willReturn(messageWriters);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");
@@ -207,7 +207,7 @@ class DefaultClientRequestBuilderTests {
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(CharSequenceEncoder.allMimeTypes()));
 
-		ExchangeStrategies strategies = mock(ExchangeStrategies.class);
+		ExchangeStrategies strategies = mock();
 		given(strategies.messageWriters()).willReturn(messageWriters);
 
 		MockClientHttpRequest request = new MockClientHttpRequest(GET, "/");

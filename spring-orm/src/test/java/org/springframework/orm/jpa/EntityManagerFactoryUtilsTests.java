@@ -56,7 +56,7 @@ public class EntityManagerFactoryUtilsTests {
 		// test null assertion
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				EntityManagerFactoryUtils.doGetTransactionalEntityManager(null, null));
-		EntityManagerFactory factory = mock(EntityManagerFactory.class);
+		EntityManagerFactory factory = mock();
 
 		// no tx active
 		assertThat(EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory, null)).isNull();
@@ -66,8 +66,8 @@ public class EntityManagerFactoryUtilsTests {
 	@Test
 	public void testDoGetEntityManagerWithTx() throws Exception {
 		try {
-			EntityManagerFactory factory = mock(EntityManagerFactory.class);
-			EntityManager manager = mock(EntityManager.class);
+			EntityManagerFactory factory = mock();
+			EntityManager manager = mock();
 
 			TransactionSynchronizationManager.initSynchronization();
 			given(factory.createEntityManager()).willReturn(manager);

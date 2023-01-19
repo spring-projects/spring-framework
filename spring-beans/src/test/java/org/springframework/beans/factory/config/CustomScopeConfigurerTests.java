@@ -50,7 +50,7 @@ public class CustomScopeConfigurerTests {
 
 	@Test
 	public void testSunnyDayWithBonaFideScopeInstance() {
-		Scope scope = mock(Scope.class);
+		Scope scope = mock();
 		factory.registerScope(FOO_SCOPE, scope);
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, scope);

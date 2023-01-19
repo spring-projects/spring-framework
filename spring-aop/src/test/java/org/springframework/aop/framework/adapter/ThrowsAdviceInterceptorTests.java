@@ -50,7 +50,7 @@ public class ThrowsAdviceInterceptorTests {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		Object ret = new Object();
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.proceed()).willReturn(ret);
 		assertThat(ti.invoke(mi)).isEqualTo(ret);
 		assertThat(th.getCalls()).isEqualTo(0);
@@ -62,7 +62,7 @@ public class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		assertThat(ti.getHandlerMethodCount()).isEqualTo(2);
 		Exception ex = new Exception();
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.proceed()).willThrow(ex);
 		assertThatException().isThrownBy(() -> ti.invoke(mi)).isSameAs(ex);
 		assertThat(th.getCalls()).isEqualTo(0);
@@ -73,7 +73,7 @@ public class ThrowsAdviceInterceptorTests {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		FileNotFoundException ex = new FileNotFoundException();
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(Object.class.getMethod("hashCode"));
 		given(mi.getThis()).willReturn(new Object());
 		given(mi.proceed()).willThrow(ex);
@@ -90,7 +90,7 @@ public class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
 		ConnectException ex = new ConnectException("");
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.proceed()).willThrow(ex);
 		assertThatExceptionOfType(ConnectException.class).isThrownBy(() ->
 				ti.invoke(mi))
@@ -115,7 +115,7 @@ public class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
 		ConnectException ex = new ConnectException("");
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.proceed()).willThrow(ex);
 		assertThatExceptionOfType(Throwable.class).isThrownBy(() ->
 				ti.invoke(mi))

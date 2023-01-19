@@ -36,7 +36,7 @@ public class GenericApplicationListenerAdapterTests extends AbstractApplicationE
 
 	@Test
 	public void supportsEventTypeWithSmartApplicationListener() {
-		SmartApplicationListener smartListener = mock(SmartApplicationListener.class);
+		SmartApplicationListener smartListener = mock();
 		GenericApplicationListenerAdapter listener = new GenericApplicationListenerAdapter(smartListener);
 		ResolvableType type = ResolvableType.forClass(ApplicationEvent.class);
 		listener.supportsEventType(type);
@@ -45,7 +45,7 @@ public class GenericApplicationListenerAdapterTests extends AbstractApplicationE
 
 	@Test
 	public void supportsSourceTypeWithSmartApplicationListener() {
-		SmartApplicationListener smartListener = mock(SmartApplicationListener.class);
+		SmartApplicationListener smartListener = mock();
 		GenericApplicationListenerAdapter listener = new GenericApplicationListenerAdapter(smartListener);
 		listener.supportsSourceType(Object.class);
 		verify(smartListener, times(1)).supportsSourceType(Object.class);

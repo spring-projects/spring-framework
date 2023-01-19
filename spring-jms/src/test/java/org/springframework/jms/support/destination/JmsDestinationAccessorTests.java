@@ -31,7 +31,7 @@ public class JmsDestinationAccessorTests {
 
 	@Test
 	public void testChokesIfDestinationResolverIsetToNullExplicitly() throws Exception {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 
 		JmsDestinationAccessor accessor = new StubJmsDestinationAccessor();
 		accessor.setConnectionFactory(connectionFactory);

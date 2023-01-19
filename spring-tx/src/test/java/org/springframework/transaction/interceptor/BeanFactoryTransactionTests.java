@@ -142,7 +142,7 @@ public class BeanFactoryTransactionTests {
 
 	private void doTestGetsAreNotTransactional(final ITestBean testBean) {
 		// Install facade
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = mock();
 		PlatformTransactionManagerFacade.delegate = ptm;
 
 		assertThat(testBean.getAge() == 666).as("Age should not be " + testBean.getAge()).isTrue();
@@ -151,7 +151,7 @@ public class BeanFactoryTransactionTests {
 		verifyNoInteractions(ptm);
 
 		// Install facade expecting a call
-		final TransactionStatus ts = mock(TransactionStatus.class);
+		final TransactionStatus ts = mock();
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
 			@Override

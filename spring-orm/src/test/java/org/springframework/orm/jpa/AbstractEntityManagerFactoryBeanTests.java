@@ -40,8 +40,8 @@ public abstract class AbstractEntityManagerFactoryBeanTests {
 	protected static EntityManagerFactory mockEmf;
 
 	@BeforeEach
-	public void setUp() throws Exception {
-		mockEmf = mock(EntityManagerFactory.class);
+	public void setUp() {
+		mockEmf = mock();
 	}
 
 	@AfterEach

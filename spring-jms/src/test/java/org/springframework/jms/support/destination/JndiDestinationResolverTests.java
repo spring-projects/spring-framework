@@ -43,7 +43,7 @@ public class JndiDestinationResolverTests {
 	@Test
 	public void testHitsCacheSecondTimeThrough() throws Exception {
 
-		Session session = mock(Session.class);
+		Session session = mock();
 
 		JndiDestinationResolver resolver = new OneTimeLookupJndiDestinationResolver();
 		Destination destination = resolver.resolveDestinationName(session, DESTINATION_NAME, true);
@@ -54,7 +54,7 @@ public class JndiDestinationResolverTests {
 	@Test
 	public void testDoesNotUseCacheIfCachingIsTurnedOff() throws Exception {
 
-		Session session = mock(Session.class);
+		Session session = mock();
 
 		CountingCannedJndiDestinationResolver resolver
 				= new CountingCannedJndiDestinationResolver();
@@ -72,9 +72,9 @@ public class JndiDestinationResolverTests {
 
 	@Test
 	public void testDelegatesToFallbackIfNotResolvedInJndi() throws Exception {
-		Session session = mock(Session.class);
+		Session session = mock();
 
-		DestinationResolver dynamicResolver = mock(DestinationResolver.class);
+		DestinationResolver dynamicResolver = mock();
 		given(dynamicResolver.resolveDestinationName(session, DESTINATION_NAME,
 				true)).willReturn(DESTINATION);
 
@@ -94,8 +94,8 @@ public class JndiDestinationResolverTests {
 
 	@Test
 	public void testDoesNotDelegateToFallbackIfNotResolvedInJndi() throws Exception {
-		final Session session = mock(Session.class);
-		DestinationResolver dynamicResolver = mock(DestinationResolver.class);
+		final Session session = mock();
+		DestinationResolver dynamicResolver = mock();
 
 		final JndiDestinationResolver resolver = new JndiDestinationResolver() {
 			@Override

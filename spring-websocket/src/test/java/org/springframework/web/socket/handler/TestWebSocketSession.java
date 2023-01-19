@@ -69,6 +69,10 @@ public class TestWebSocketSession implements WebSocketSession {
 		this.id = id;
 	}
 
+	public TestWebSocketSession(boolean open) {
+		this.open = open;
+	}
+
 	@Override
 	public String getId() {
 		return this.id;

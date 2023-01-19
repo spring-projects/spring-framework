@@ -120,7 +120,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@Test
 	public void configureMessageConverters() {
-		HttpMessageConverter<?> customConverter = mock(HttpMessageConverter.class);
+		HttpMessageConverter<?> customConverter = mock();
 		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override
@@ -206,8 +206,8 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	public void configurePathMatcher() {
-		PathMatcher pathMatcher = mock(PathMatcher.class);
-		UrlPathHelper pathHelper = mock(UrlPathHelper.class);
+		PathMatcher pathMatcher = mock();
+		UrlPathHelper pathHelper = mock();
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override
@@ -275,8 +275,8 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	public void configurePathPatternParser() {
 		PathPatternParser patternParser = new PathPatternParser();
-		PathMatcher pathMatcher = mock(PathMatcher.class);
-		UrlPathHelper pathHelper = mock(UrlPathHelper.class);
+		PathMatcher pathMatcher = mock();
+		UrlPathHelper pathHelper = mock();
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override

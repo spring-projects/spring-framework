@@ -46,7 +46,7 @@ import static org.mockito.Mockito.mock;
  */
 public class InvocableHandlerMethodTests {
 
-	private final Message<?> message = mock(Message.class);
+	private final Message<?> message = mock();
 
 	private final List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 

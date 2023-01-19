@@ -131,7 +131,7 @@ public class CookieAssertionTests {
 		ExchangeResult result = new ExchangeResult(
 				request, response, Mono.empty(), Mono.empty(), Duration.ZERO, null, null);
 
-		return new CookieAssertions(result, mock(WebTestClient.ResponseSpec.class));
+		return new CookieAssertions(result, mock());
 	}
 
 }

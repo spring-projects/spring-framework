@@ -51,7 +51,7 @@ class ReflectiveRuntimeHintsRegistrarTests {
 
 	@Test
 	void shouldIgnoreNonAnnotatedType() {
-		RuntimeHints mock = mock(RuntimeHints.class);
+		RuntimeHints mock = mock();
 		this.registrar.registerRuntimeHints(mock, String.class);
 		verifyNoInteractions(mock);
 	}

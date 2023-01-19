@@ -36,7 +36,7 @@ class ConnectionFactoryInitializerUnitTests {
 
 	AtomicBoolean called = new AtomicBoolean();
 
-	DatabasePopulator populator = mock(DatabasePopulator.class);
+	DatabasePopulator populator = mock();
 
 	MockConnection connection = MockConnection.builder().build();
 

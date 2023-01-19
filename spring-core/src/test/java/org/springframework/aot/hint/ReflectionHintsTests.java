@@ -57,7 +57,7 @@ class ReflectionHintsTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void registerTypeIfPresentIgnoresMissingClass() {
-		Consumer<TypeHint.Builder> hintBuilder = mock(Consumer.class);
+		Consumer<TypeHint.Builder> hintBuilder = mock();
 		this.reflectionHints.registerTypeIfPresent(null, "com.example.DoesNotExist", hintBuilder);
 		assertThat(this.reflectionHints.typeHints()).isEmpty();
 		verifyNoInteractions(hintBuilder);

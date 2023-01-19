@@ -169,7 +169,7 @@ abstract class AbstractDatabasePopulatorTests extends AbstractDatabaseInitializa
 	void usesBoundConnectionIfAvailable() throws SQLException {
 		TransactionSynchronizationManager.initSynchronization();
 		Connection connection = DataSourceUtils.getConnection(db);
-		DatabasePopulator populator = mock(DatabasePopulator.class);
+		DatabasePopulator populator = mock();
 		DatabasePopulatorUtils.execute(populator, db);
 		verify(populator).populate(connection);
 	}

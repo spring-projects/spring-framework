@@ -41,13 +41,13 @@ import static org.mockito.Mockito.verify;
  */
 class DataFieldMaxValueIncrementerTests {
 
-	private final DataSource dataSource = mock(DataSource.class);
+	private final DataSource dataSource = mock();
 
-	private final Connection connection = mock(Connection.class);
+	private final Connection connection = mock();
 
-	private final Statement statement = mock(Statement.class);
+	private final Statement statement = mock();
 
-	private final ResultSet resultSet = mock(ResultSet.class);
+	private final ResultSet resultSet = mock();
 
 
 	@Test

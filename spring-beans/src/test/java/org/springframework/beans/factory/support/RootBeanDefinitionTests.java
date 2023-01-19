@@ -36,7 +36,7 @@ class RootBeanDefinitionTests {
 
 	@Test
 	void setInstanceSetResolvedFactoryMethod() {
-		InstanceSupplier<?> instanceSupplier = mock(InstanceSupplier.class);
+		InstanceSupplier<?> instanceSupplier = mock();
 		Method method = ReflectionUtils.findMethod(String.class, "toString");
 		given(instanceSupplier.getFactoryMethod()).willReturn(method);
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
@@ -47,7 +47,7 @@ class RootBeanDefinitionTests {
 
 	@Test
 	void setInstanceDoesNotOverrideResolvedFactoryMethodWithNull() {
-		InstanceSupplier<?> instanceSupplier = mock(InstanceSupplier.class);
+		InstanceSupplier<?> instanceSupplier = mock();
 		given(instanceSupplier.getFactoryMethod()).willReturn(null);
 		Method method = ReflectionUtils.findMethod(String.class, "toString");
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);

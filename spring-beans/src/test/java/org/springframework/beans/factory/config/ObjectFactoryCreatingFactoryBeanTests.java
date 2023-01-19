@@ -109,7 +109,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		final String targetBeanName = "singleton";
 		final String expectedSingleton = "Alicia Keys";
 
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 		given(beanFactory.getBean(targetBeanName)).willReturn(expectedSingleton);
 
 		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();

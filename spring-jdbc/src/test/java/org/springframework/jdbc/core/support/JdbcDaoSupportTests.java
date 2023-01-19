@@ -36,7 +36,7 @@ public class JdbcDaoSupportTests {
 
 	@Test
 	public void testJdbcDaoSupportWithDataSource() throws Exception {
-		DataSource ds = mock(DataSource.class);
+		DataSource ds = mock();
 		final List<String> test = new ArrayList<>();
 		JdbcDaoSupport dao = new JdbcDaoSupport() {
 			@Override

@@ -115,7 +115,7 @@ class AutowiredMethodArgumentsResolverTests {
 
 	@Test
 	void resolveRequiredWithMultipleDependenciesReturnsValue() {
-		Environment environment = mock(Environment.class);
+		Environment environment = mock();
 		this.beanFactory.registerSingleton("test", "testValue");
 		this.beanFactory.registerSingleton("environment", environment);
 		RegisteredBean registeredBean = registerTestBean(this.beanFactory);

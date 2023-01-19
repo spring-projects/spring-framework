@@ -151,7 +151,7 @@ class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		@Bean
 		PersistenceExceptionTranslator peTranslator() {
-			return mock(PersistenceExceptionTranslator.class);
+			return mock();
 		}
 
 		@Bean

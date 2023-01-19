@@ -183,7 +183,7 @@ class CacheErrorHandlerTests {
 		@Bean
 		@Override
 		public CacheErrorHandler errorHandler() {
-			return mock(CacheErrorHandler.class);
+			return mock();
 		}
 
 		@Bean
@@ -201,7 +201,7 @@ class CacheErrorHandlerTests {
 
 		@Bean
 		public Cache mockCache() {
-			Cache cache = mock(Cache.class);
+			Cache cache = mock();
 			given(cache.getName()).willReturn("test");
 			return cache;
 		}

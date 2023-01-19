@@ -49,10 +49,10 @@ class LruContextCacheTests {
 	private static final MergedContextConfiguration bazConfig = config(Baz.class);
 
 
-	private final ConfigurableApplicationContext abcContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext fooContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext barContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext bazContext = mock(ConfigurableApplicationContext.class);
+	private final ConfigurableApplicationContext abcContext = mock();
+	private final ConfigurableApplicationContext fooContext = mock();
+	private final ConfigurableApplicationContext barContext = mock();
+	private final ConfigurableApplicationContext bazContext = mock();
 
 
 	@Test

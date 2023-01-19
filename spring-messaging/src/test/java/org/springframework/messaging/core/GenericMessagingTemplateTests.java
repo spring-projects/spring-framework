@@ -72,7 +72,7 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendWithTimeout() {
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		final AtomicReference<Message<?>> sent = new AtomicReference<>();
 		willAnswer(invocation -> {
 			sent.set(invocation.getArgument(0));
@@ -91,7 +91,7 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendWithTimeoutMutable() {
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		final AtomicReference<Message<?>> sent = new AtomicReference<>();
 		willAnswer(invocation -> {
 			sent.set(invocation.getArgument(0));
@@ -129,7 +129,7 @@ public class GenericMessagingTemplateTests {
 		this.template.setSendTimeout(30_000L);
 		this.template.setThrowExceptionOnLateReply(true);
 
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		MessageHandler handler = createLateReplier(latch, failure);
 		willAnswer(invocation -> {
 			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));
@@ -155,7 +155,7 @@ public class GenericMessagingTemplateTests {
 		this.template.setReceiveTimeout(10_000);
 		this.template.setThrowExceptionOnLateReply(true);
 
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		MessageHandler handler = createLateReplier(latch, failure);
 		willAnswer(invocation -> {
 			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));
@@ -187,7 +187,7 @@ public class GenericMessagingTemplateTests {
 		this.template.setSendTimeoutHeader("sto");
 		this.template.setReceiveTimeoutHeader("rto");
 
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		MessageHandler handler = createLateReplier(latch, failure);
 		willAnswer(invocation -> {
 			this.executor.execute(() -> handler.handleMessage(invocation.getArgument(0)));

@@ -132,7 +132,7 @@ public class DelegatingWebFluxConfigurationTests {
 
 	@Test
 	void webSocketService() {
-		WebSocketService service = mock(WebSocketService.class);
+		WebSocketService service = mock();
 		given(webFluxConfigurer.getWebSocketService()).willReturn(service);
 
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));

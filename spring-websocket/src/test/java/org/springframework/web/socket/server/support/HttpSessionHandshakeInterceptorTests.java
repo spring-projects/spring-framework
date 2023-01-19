@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 public class HttpSessionHandshakeInterceptorTests extends AbstractHttpRequestTests {
 
 	private final Map<String, Object> attributes = new HashMap<>();
-	private final WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+	private final WebSocketHandler wsHandler = mock();
 
 
 	@Test

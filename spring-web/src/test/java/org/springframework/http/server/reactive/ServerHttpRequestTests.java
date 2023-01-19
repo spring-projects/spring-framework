@@ -100,7 +100,7 @@ public class ServerHttpRequestTests {
 
 	@Test
 	public void mutateSslInfo() throws Exception {
-		SslInfo sslInfo = mock(SslInfo.class);
+		SslInfo sslInfo = mock();
 		ServerHttpRequest request = createRequest("/").mutate().sslInfo(sslInfo).build();
 		assertThat(request.getSslInfo()).isSameAs(sslInfo);
 	}

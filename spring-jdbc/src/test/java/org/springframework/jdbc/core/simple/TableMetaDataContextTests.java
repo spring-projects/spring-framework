@@ -44,22 +44,19 @@ import static org.mockito.Mockito.verify;
  *
  * @author Thomas Risberg
  */
-public class TableMetaDataContextTests  {
+public class TableMetaDataContextTests {
 
-	private Connection connection;
+	private DataSource dataSource = mock();
 
-	private DataSource dataSource;
+	private Connection connection = mock();
 
-	private DatabaseMetaData databaseMetaData;
+	private DatabaseMetaData databaseMetaData = mock();
 
 	private TableMetaDataContext context = new TableMetaDataContext();
 
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		connection = mock(Connection.class);
-		dataSource = mock(DataSource.class);
-		databaseMetaData = mock(DatabaseMetaData.class);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 		given(dataSource.getConnection()).willReturn(connection);
 	}
@@ -70,13 +67,13 @@ public class TableMetaDataContextTests  {
 		final String TABLE = "customers";
 		final String USER = "me";
 
-		ResultSet metaDataResultSet = mock(ResultSet.class);
+		ResultSet metaDataResultSet = mock();
 		given(metaDataResultSet.next()).willReturn(true, false);
 		given(metaDataResultSet.getString("TABLE_SCHEM")).willReturn(USER);
 		given(metaDataResultSet.getString("TABLE_NAME")).willReturn(TABLE);
 		given(metaDataResultSet.getString("TABLE_TYPE")).willReturn("TABLE");
 
-		ResultSet columnsResultSet = mock(ResultSet.class);
+		ResultSet columnsResultSet = mock();
 		given(columnsResultSet.next()).willReturn(
 				true, true, true, true, false);
 		given(columnsResultSet.getString("COLUMN_NAME")).willReturn(
@@ -126,13 +123,13 @@ public class TableMetaDataContextTests  {
 		final String TABLE = "customers";
 		final String USER = "me";
 
-		ResultSet metaDataResultSet = mock(ResultSet.class);
+		ResultSet metaDataResultSet = mock();
 		given(metaDataResultSet.next()).willReturn(true, false);
 		given(metaDataResultSet.getString("TABLE_SCHEM")).willReturn(USER);
 		given(metaDataResultSet.getString("TABLE_NAME")).willReturn(TABLE);
 		given(metaDataResultSet.getString("TABLE_TYPE")).willReturn("TABLE");
 
-		ResultSet columnsResultSet = mock(ResultSet.class);
+		ResultSet columnsResultSet = mock();
 		given(columnsResultSet.next()).willReturn(true, false);
 		given(columnsResultSet.getString("COLUMN_NAME")).willReturn("id");
 		given(columnsResultSet.getInt("DATA_TYPE")).willReturn(Types.INTEGER);

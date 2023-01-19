@@ -99,7 +99,7 @@ public class NamedParameterUtilsUnitTests {
 		namedParams.addValue("a", Arrays.asList(new Object[] { "Walter", "Heisenberg" },
 				new Object[] { "Walt Jr.", "Flynn" }));
 
-		BindTarget bindTarget = mock(BindTarget.class);
+		BindTarget bindTarget = mock();
 
 		PreparedOperation<?> operation = NamedParameterUtils.substituteNamedParameters(
 				"xxx :a", BIND_MARKERS, namedParams);

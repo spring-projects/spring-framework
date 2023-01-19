@@ -38,7 +38,7 @@ class DataSourceUtilsTests {
 
 	@Test
 	void testConnectionNotAcquiredExceptionIsPropagated() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		when(dataSource.getConnection()).thenReturn(null);
 		assertThatThrownBy(() -> DataSourceUtils.getConnection(dataSource))
 				.isInstanceOf(CannotGetJdbcConnectionException.class)
@@ -48,7 +48,7 @@ class DataSourceUtilsTests {
 
 	@Test
 	void testConnectionSQLExceptionIsPropagated() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		when(dataSource.getConnection()).thenThrow(new SQLException("my dummy exception"));
 		assertThatThrownBy(() -> DataSourceUtils.getConnection(dataSource))
 				.isInstanceOf(CannotGetJdbcConnectionException.class)

@@ -42,7 +42,7 @@ class AfterThrowingAdviceBindingTests {
 
 	private AfterThrowingAdviceBindingTestAspect afterThrowingAdviceAspect;
 
-	private AfterThrowingAdviceBindingCollaborator mockCollaborator;
+	private AfterThrowingAdviceBindingCollaborator mockCollaborator = mock();
 
 
 	@BeforeEach
@@ -52,7 +52,6 @@ class AfterThrowingAdviceBindingTests {
 		testBean = (ITestBean) ctx.getBean("testBean");
 		afterThrowingAdviceAspect = (AfterThrowingAdviceBindingTestAspect) ctx.getBean("testAspect");
 
-		mockCollaborator = mock(AfterThrowingAdviceBindingCollaborator.class);
 		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
 	}
 

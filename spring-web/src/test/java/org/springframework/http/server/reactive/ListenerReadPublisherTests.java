@@ -105,7 +105,7 @@ public class ListenerReadPublisherTests {
 		@Override
 		protected DataBuffer read() {
 			this.readCalls++;
-			return mock(DataBuffer.class);
+			return mock();
 		}
 
 		@Override

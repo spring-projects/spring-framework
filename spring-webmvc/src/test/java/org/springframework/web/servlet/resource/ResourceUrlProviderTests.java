@@ -176,7 +176,7 @@ public class ResourceUrlProviderTests {
 	@Test // SPR-16296
 	void getForLookupPathShouldNotFailIfPathContainsDoubleSlashes() {
 		// given
-		ResourceResolver mockResourceResolver = mock(ResourceResolver.class);
+		ResourceResolver mockResourceResolver = mock();
 		given(mockResourceResolver.resolveUrlPath(any(), any(), any())).willReturn("some-path");
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();

@@ -634,7 +634,7 @@ public class ForwardedHeaderFilterTests {
 				}
 			};
 			MockHttpServletResponse response = new MockHttpServletResponse();
-			FilterChain filterChain = new MockFilterChain(mock(HttpServlet.class), filter, redirectFilter);
+			FilterChain filterChain = new MockFilterChain(mock(), filter, redirectFilter);
 			filterChain.doFilter(request, response);
 			return response.getRedirectedUrl();
 		}

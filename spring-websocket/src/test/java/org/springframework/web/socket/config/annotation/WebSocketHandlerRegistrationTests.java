@@ -46,7 +46,7 @@ public class WebSocketHandlerRegistrationTests {
 
 	private TestWebSocketHandlerRegistration registration = new TestWebSocketHandlerRegistration();
 
-	private TaskScheduler taskScheduler = mock(TaskScheduler.class);
+	private TaskScheduler taskScheduler = mock();
 
 
 	@Test

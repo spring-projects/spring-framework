@@ -114,7 +114,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	@Test
 	public void defaultCacheNameWithDefaults() {
 		Method method = ReflectionUtils.findMethod(Object.class, "toString");
-		CacheDefaults mock = mock(CacheDefaults.class);
+		CacheDefaults mock = mock();
 		given(mock.cacheName()).willReturn("");
 		assertThat(source.determineCacheName(method, mock, "")).isEqualTo("java.lang.Object.toString()");
 	}

@@ -81,10 +81,10 @@ public class ControllerTests {
 	private void doTestServletForwardingController(ServletForwardingController sfc, boolean include)
 			throws Exception {
 
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		ServletContext context = mock(ServletContext.class);
-		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		HttpServletRequest request = mock();
+		HttpServletResponse response = mock();
+		ServletContext context = mock();
+		RequestDispatcher dispatcher = mock();
 
 		given(request.getMethod()).willReturn("GET");
 		given(context.getNamedDispatcher("action")).willReturn(dispatcher);

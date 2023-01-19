@@ -53,7 +53,7 @@ class MergedAnnotationsCollectionTests {
 
 	@Test
 	void createWhenAnnotationIsNotDirectlyPresentThrowsException() {
-		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
+		MergedAnnotation<?> annotation = mock();
 		given(annotation.isDirectlyPresent()).willReturn(false);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				MergedAnnotationsCollection.of(Collections.singleton(annotation)))
@@ -62,7 +62,7 @@ class MergedAnnotationsCollectionTests {
 
 	@Test
 	void createWhenAnnotationAggregateIndexIsNotZeroThrowsException() {
-		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
+		MergedAnnotation<?> annotation = mock();
 		given(annotation.isDirectlyPresent()).willReturn(true);
 		given(annotation.getAggregateIndex()).willReturn(1);
 		assertThatIllegalArgumentException().isThrownBy(() ->

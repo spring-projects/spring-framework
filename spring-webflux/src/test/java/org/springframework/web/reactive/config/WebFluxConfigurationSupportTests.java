@@ -333,7 +333,7 @@ public class WebFluxConfigurationSupportTests {
 
 		@GetMapping("/{id}")
 		public Principal getUser() {
-			return mock(Principal.class);
+			return mock();
 		}
 	}
 

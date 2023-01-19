@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
@@ -40,16 +39,9 @@ import static org.mockito.Mockito.mock;
  */
 public class ResultSetWrappingRowSetTests {
 
-	private ResultSet resultSet;
+	private ResultSet resultSet = mock();
 
-	private ResultSetWrappingSqlRowSet rowSet;
-
-
-	@BeforeEach
-	public void setup() throws Exception {
-		resultSet = mock(ResultSet.class);
-		rowSet = new ResultSetWrappingSqlRowSet(resultSet);
-	}
+	private ResultSetWrappingSqlRowSet rowSet = new ResultSetWrappingSqlRowSet(resultSet);
 
 
 	@Test

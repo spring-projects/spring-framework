@@ -47,7 +47,7 @@ public class FailFastProblemReporterTests {
 		Problem problem = new Problem("VGER", new Location(new DescriptiveResource("here")),
 				null, new IllegalArgumentException());
 
-		Log log = mock(Log.class);
+		Log log = mock();
 
 		FailFastProblemReporter reporter = new FailFastProblemReporter();
 		reporter.setLogger(log);

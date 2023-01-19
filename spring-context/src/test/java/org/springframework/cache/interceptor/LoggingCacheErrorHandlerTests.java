@@ -42,7 +42,7 @@ class LoggingCacheErrorHandlerTests {
 
 	private static final String KEY = "enigma";
 
-	private final Log logger = mock(Log.class);
+	private final Log logger = mock();
 
 	private LoggingCacheErrorHandler handler = new LoggingCacheErrorHandler(this.logger, false);
 

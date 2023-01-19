@@ -79,7 +79,7 @@ class TestTransport implements Transport {
 	@Override
 	public CompletableFuture<WebSocketSession> connectAsync(TransportRequest request, WebSocketHandler handler) {
 		this.request = request;
-		this.future = mock(CompletableFuture.class);
+		this.future = mock();
 		return this.future;
 	}
 

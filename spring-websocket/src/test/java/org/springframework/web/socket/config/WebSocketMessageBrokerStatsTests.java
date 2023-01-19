@@ -60,7 +60,7 @@ class WebSocketMessageBrokerStatsTests {
 
 	@Test
 	void inboundAndOutboundChannelsWithMockedTaskExecutor() {
-		TaskExecutor executor = mock(TaskExecutor.class);
+		TaskExecutor executor = mock();
 
 		stats.setInboundChannelExecutor(executor);
 		stats.setOutboundChannelExecutor(executor);
@@ -82,7 +82,7 @@ class WebSocketMessageBrokerStatsTests {
 
 	@Test
 	void sockJsTaskSchedulerWithMockedTaskScheduler() {
-		TaskScheduler scheduler = mock(TaskScheduler.class);
+		TaskScheduler scheduler = mock();
 
 		stats.setSockJsTaskScheduler(scheduler);
 

@@ -68,7 +68,7 @@ class QuartzSupportTests {
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
 
-		final Scheduler scheduler = mock(Scheduler.class);
+		final Scheduler scheduler = mock();
 		SchedulerContext schedulerContext = new SchedulerContext();
 		given(scheduler.getContext()).willReturn(schedulerContext);
 

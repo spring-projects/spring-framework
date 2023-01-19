@@ -213,7 +213,7 @@ class BshScriptFactoryTests {
 
 	@Test
 	void scriptThatCompilesButIsJustPlainBad() throws IOException {
-		ScriptSource script = mock(ScriptSource.class);
+		ScriptSource script = mock();
 		final String badScript = "String getMessage() { throw new IllegalArgumentException(); }";
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.isModified()).willReturn(true);

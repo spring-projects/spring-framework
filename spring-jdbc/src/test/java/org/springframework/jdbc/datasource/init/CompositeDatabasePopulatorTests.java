@@ -36,11 +36,11 @@ import static org.mockito.Mockito.verify;
  */
 class CompositeDatabasePopulatorTests {
 
-	private final Connection mockedConnection = mock(Connection.class);
+	private final Connection mockedConnection = mock();
 
-	private final DatabasePopulator mockedDatabasePopulator1 = mock(DatabasePopulator.class);
+	private final DatabasePopulator mockedDatabasePopulator1 = mock();
 
-	private final DatabasePopulator mockedDatabasePopulator2 = mock(DatabasePopulator.class);
+	private final DatabasePopulator mockedDatabasePopulator2 = mock();
 
 
 	@Test

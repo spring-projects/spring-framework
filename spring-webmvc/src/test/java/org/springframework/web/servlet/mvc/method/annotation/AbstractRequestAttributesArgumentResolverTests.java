@@ -121,7 +121,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 	public void resolveOptional() throws Exception {
 		WebDataBinder dataBinder = new WebRequestDataBinder(null);
 		dataBinder.setConversionService(new DefaultConversionService());
-		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory factory = mock();
 		given(factory.createBinder(this.webRequest, null, "foo")).willReturn(dataBinder);
 
 		MethodParameter param = initMethodParameter(3);

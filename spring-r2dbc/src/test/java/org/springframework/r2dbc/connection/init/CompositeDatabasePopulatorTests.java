@@ -39,11 +39,11 @@ import static org.mockito.BDDMockito.when;
  */
 class CompositeDatabasePopulatorTests {
 
-	Connection mockedConnection = mock(Connection.class);
+	Connection mockedConnection = mock();
 
-	DatabasePopulator mockedDatabasePopulator1 = mock(DatabasePopulator.class);
+	DatabasePopulator mockedDatabasePopulator1 = mock();
 
-	DatabasePopulator mockedDatabasePopulator2 = mock(DatabasePopulator.class);
+	DatabasePopulator mockedDatabasePopulator2 = mock();
 
 
 	@BeforeEach

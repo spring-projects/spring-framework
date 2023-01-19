@@ -34,7 +34,7 @@ public class TestableCacheResolver implements CacheResolver {
 	public <K, V> Cache<K, V> resolveCache(CacheInvocationContext<? extends Annotation> cacheInvocationContext) {
 		String cacheName = cacheInvocationContext.getCacheName();
 		@SuppressWarnings("unchecked")
-		Cache<K, V> mock = mock(Cache.class);
+		Cache<K, V> mock = mock();
 		given(mock.getName()).willReturn(cacheName);
 		return mock;
 	}

@@ -19,10 +19,8 @@ package org.springframework.test.context.jdbc;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationConfigurationException;
-import org.springframework.core.io.Resource;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.jdbc.SqlConfig.TransactionMode;
 
@@ -42,7 +40,7 @@ class SqlScriptsTestExecutionListenerTests {
 
 	private final SqlScriptsTestExecutionListener listener = new SqlScriptsTestExecutionListener();
 
-	private final TestContext testContext = mock(TestContext.class);
+	private final TestContext testContext = mock();
 
 
 	@Test
@@ -78,9 +76,9 @@ class SqlScriptsTestExecutionListenerTests {
 
 	@Test
 	void isolatedTxModeDeclaredWithoutTxMgr() throws Exception {
-		ApplicationContext ctx = mock(ApplicationContext.class);
-		given(ctx.getResource(anyString())).willReturn(mock(Resource.class));
-		given(ctx.getAutowireCapableBeanFactory()).willReturn(mock(AutowireCapableBeanFactory.class));
+		ApplicationContext ctx = mock();
+		given(ctx.getResource(anyString())).willReturn(mock());
+		given(ctx.getAutowireCapableBeanFactory()).willReturn(mock());
 
 		Class<?> clazz = IsolatedWithoutTxMgr.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
@@ -92,9 +90,9 @@ class SqlScriptsTestExecutionListenerTests {
 
 	@Test
 	void missingDataSourceAndTxMgr() throws Exception {
-		ApplicationContext ctx = mock(ApplicationContext.class);
-		given(ctx.getResource(anyString())).willReturn(mock(Resource.class));
-		given(ctx.getAutowireCapableBeanFactory()).willReturn(mock(AutowireCapableBeanFactory.class));
+		ApplicationContext ctx = mock();
+		given(ctx.getResource(anyString())).willReturn(mock());
+		given(ctx.getAutowireCapableBeanFactory()).willReturn(mock());
 
 		Class<?> clazz = MissingDataSourceAndTxMgr.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);

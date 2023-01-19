@@ -77,11 +77,11 @@ public class SimpMessageHeaderAccessorTests {
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
 		accessor.setUserChangeCallback(userCallback);
 
-		Principal user1 = mock(Principal.class);
+		Principal user1 = mock();
 		accessor.setUser(user1);
 		assertThat(userCallback.getUser()).isEqualTo(user1);
 
-		Principal user2 = mock(Principal.class);
+		Principal user2 = mock();
 		accessor.setUser(user2);
 		assertThat(userCallback.getUser()).isEqualTo(user2);
 	}

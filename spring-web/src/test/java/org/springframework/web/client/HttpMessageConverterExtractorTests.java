@@ -53,11 +53,11 @@ import static org.mockito.Mockito.mock;
 class HttpMessageConverterExtractorTests {
 
 	@SuppressWarnings("unchecked")
-	private final HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+	private final HttpMessageConverter<String> converter = mock();
 	private final HttpMessageConverterExtractor<?> extractor = new HttpMessageConverterExtractor<>(String.class, asList(converter));
 	private final MediaType contentType = MediaType.TEXT_PLAIN;
 	private final HttpHeaders responseHeaders = new HttpHeaders();
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+	private final ClientHttpResponse response = mock();
 
 
 	@Test
@@ -156,7 +156,7 @@ class HttpMessageConverterExtractorTests {
 		ParameterizedTypeReference<List<String>> reference = new ParameterizedTypeReference<>() {};
 		Type type = reference.getType();
 
-		GenericHttpMessageConverter<String> converter = mock(GenericHttpMessageConverter.class);
+		GenericHttpMessageConverter<String> converter = mock();
 		HttpMessageConverterExtractor<?> extractor = new HttpMessageConverterExtractor<List<String>>(type, asList(converter));
 
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);

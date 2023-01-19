@@ -46,9 +46,9 @@ class UserDestinationMessageHandlerTests {
 
 	private static final String SESSION_ID = "123";
 
-	private final SimpUserRegistry registry = mock(SimpUserRegistry.class);
+	private final SimpUserRegistry registry = mock();
 
-	private final SubscribableChannel brokerChannel = mock(SubscribableChannel.class);
+	private final SubscribableChannel brokerChannel = mock();
 
 	private final UserDestinationMessageHandler handler = new UserDestinationMessageHandler(new StubMessageChannel(), this.brokerChannel, new DefaultUserDestinationResolver(this.registry));
 

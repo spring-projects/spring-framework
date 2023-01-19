@@ -118,7 +118,7 @@ public class ControllerAdviceTests {
 		RequestMappingHandlerAdapter adapter = createAdapter(context);
 		TestController controller = context.getBean(TestController.class);
 
-		Validator validator = mock(Validator.class);
+		Validator validator = mock();
 		controller.setValidator(validator);
 
 		BindingContext bindingContext = handle(adapter, controller, "handle").getBindingContext();

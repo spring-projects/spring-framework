@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -45,6 +43,7 @@ import org.springframework.web.servlet.ModelAndView;
 import static java.nio.charset.StandardCharsets.UTF_16;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link PrintingResultHandler}.
@@ -128,7 +127,7 @@ class PrintingResultHandlerTests {
 		String palindrome = "ablE was I ere I saw Elba";
 		byte[] bytes = palindrome.getBytes(UTF_16);
 		this.request.setContent(bytes);
-		this.request.setSession(Mockito.mock(HttpSession.class));
+		this.request.setSession(mock());
 
 		this.handler.handle(this.mvcResult);
 

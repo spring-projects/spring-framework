@@ -61,13 +61,13 @@ public class CacheResolverAdapterTests extends AbstractJCacheTests {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected CacheResolver getCacheResolver(CacheInvocationContext<? extends Annotation> context, String cacheName) {
-		CacheResolver cacheResolver = mock(CacheResolver.class);
+		CacheResolver cacheResolver = mock();
 		javax.cache.Cache cache;
 		if (cacheName == null) {
 			cache = null;
 		}
 		else {
-			cache = mock(javax.cache.Cache.class);
+			cache = mock();
 			given(cache.getName()).willReturn(cacheName);
 		}
 		given(cacheResolver.resolveCache(context)).willReturn(cache);

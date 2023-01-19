@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
 class AotMergedContextConfigurationTests {
 
 	private final CacheAwareContextLoaderDelegate delegate =
-			new DefaultCacheAwareContextLoaderDelegate(mock(ContextCache.class));
+			new DefaultCacheAwareContextLoaderDelegate(mock());
 
 	private final ContextLoader contextLoader = new DelegatingSmartContextLoader();
 

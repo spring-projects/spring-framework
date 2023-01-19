@@ -105,7 +105,7 @@ class DefaultResponseCreatorTests {
 	@Test
 	void setBodyFromResource() throws IOException {
 		byte[] resourceContent = {7, 14, 21, 28, 35};
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		given(resource.getInputStream()).willReturn(new ByteArrayInputStream(resourceContent));
 
 		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK).body(resource));

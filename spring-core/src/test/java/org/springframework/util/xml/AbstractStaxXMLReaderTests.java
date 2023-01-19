@@ -170,7 +170,7 @@ abstract class AbstractStaxXMLReaderTests {
 
 
 	private LexicalHandler mockLexicalHandler() throws Exception {
-		LexicalHandler lexicalHandler = mock(LexicalHandler.class);
+		LexicalHandler lexicalHandler = mock();
 		willAnswer(new CopyCharsAnswer()).given(lexicalHandler).comment(any(char[].class), anyInt(), anyInt());
 		return lexicalHandler;
 	}
@@ -180,7 +180,7 @@ abstract class AbstractStaxXMLReaderTests {
 	}
 
 	protected final ContentHandler mockContentHandler() throws Exception {
-		ContentHandler contentHandler = mock(ContentHandler.class);
+		ContentHandler contentHandler = mock();
 		willAnswer(new CopyCharsAnswer()).given(contentHandler).characters(any(char[].class), anyInt(), anyInt());
 		willAnswer(new CopyCharsAnswer()).given(contentHandler).ignorableWhitespace(any(char[].class), anyInt(), anyInt());
 		willAnswer(invocation -> {

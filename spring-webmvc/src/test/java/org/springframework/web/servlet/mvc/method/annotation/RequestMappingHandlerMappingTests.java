@@ -363,7 +363,7 @@ public class RequestMappingHandlerMappingTests {
 
 		@GetMapping("/{id}")
 		public Principal getUser() {
-			return mock(Principal.class);
+			return mock();
 		}
 	}
 

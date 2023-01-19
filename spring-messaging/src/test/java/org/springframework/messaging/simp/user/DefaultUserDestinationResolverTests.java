@@ -34,16 +34,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for
- * {@link org.springframework.messaging.simp.user.DefaultUserDestinationResolver}.
+ * Unit tests for {@link DefaultUserDestinationResolver}.
  *
  * @author Rossen Stoyanchev
  */
 public class DefaultUserDestinationResolverTests {
 
-	private DefaultUserDestinationResolver resolver;
+	private SimpUserRegistry registry = mock();
 
-	private SimpUserRegistry registry;
+	private DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(this.registry);
 
 
 	@BeforeEach
@@ -51,10 +50,7 @@ public class DefaultUserDestinationResolverTests {
 		TestSimpUser simpUser = new TestSimpUser("joe");
 		simpUser.addSessions(new TestSimpSession("123"));
 
-		this.registry = mock(SimpUserRegistry.class);
 		given(this.registry.getUser("joe")).willReturn(simpUser);
-
-		this.resolver = new DefaultUserDestinationResolver(this.registry);
 	}
 
 	@Test

@@ -80,7 +80,7 @@ public class ServletContextResourceTests {
 
 	@Test
 	void missingResourceShouldHaveExpectedProperties() {
-		MockServletContext context = mock(MockServletContext.class);
+		MockServletContext context = mock();
 		given(context.getRealPath(eq("/org/springframework/web/context/support/missing.txt")))
 				.willReturn(this.servletContext.getRealPath("org/springframework/web/context/support/") + "missing.txt");
 		Resource missing = new ServletContextResource(context, "org/springframework/web/context/support/missing.txt");

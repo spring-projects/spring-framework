@@ -184,7 +184,7 @@ public class SimpleBrokerMessageHandlerTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void startAndStopWithHeartbeatValue() {
-		ScheduledFuture future = mock(ScheduledFuture.class);
+		ScheduledFuture future = mock();
 		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMillis(15000)))).willReturn(future);
 
 		this.messageHandler.setTaskScheduler(this.taskScheduler);

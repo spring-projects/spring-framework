@@ -32,9 +32,9 @@ import static org.mockito.BDDMockito.mock;
  */
 class ResourceDatabasePopulatorUnitTests {
 
-	private static final Resource script1 = mock(Resource.class);
-	private static final Resource script2 = mock(Resource.class);
-	private static final Resource script3 = mock(Resource.class);
+	private static final Resource script1 = mock();
+	private static final Resource script2 = mock();
+	private static final Resource script3 = mock();
 
 
 	@Test

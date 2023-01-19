@@ -425,7 +425,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.MULTI_ARGS)
 	void resolveArgumentsWithMultiArgsConstructor(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
-		Environment environment = mock(Environment.class);
+		Environment environment = mock();
 		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
 				resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
@@ -442,7 +442,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.MIXED_ARGS)
 	void resolveArgumentsWithMixedArgsConstructorWithUserValue(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
-		Environment environment = mock(Environment.class);
+		Environment environment = mock();
 		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
 				resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
@@ -463,7 +463,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.MIXED_ARGS)
 	void resolveArgumentsWithMixedArgsConstructorWithUserBeanReference(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
-		Environment environment = mock(Environment.class);
+		Environment environment = mock();
 		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
 				resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);

@@ -110,13 +110,11 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 	@Test
 	void getBeanDefinitionMethodGeneratorAddsContributionsFromProcessors() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		BeanRegistrationAotContribution beanContribution = mock(
-				BeanRegistrationAotContribution.class);
+		BeanRegistrationAotContribution beanContribution = mock();
 		BeanRegistrationAotProcessor processorBean = registeredBean -> beanContribution;
 		beanFactory.registerSingleton("processorBean", processorBean);
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
-		BeanRegistrationAotContribution loaderContribution = mock(
-				BeanRegistrationAotContribution.class);
+		BeanRegistrationAotContribution loaderContribution = mock();
 		BeanRegistrationAotProcessor loaderProcessor = registeredBean -> loaderContribution;
 		springFactoriesLoader.addInstance(BeanRegistrationAotProcessor.class,
 				loaderProcessor);

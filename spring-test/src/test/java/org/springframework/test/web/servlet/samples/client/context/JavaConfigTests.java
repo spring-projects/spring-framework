@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.samples.client.context;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +41,7 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * {@link MockMvcWebTestClient} equivalent of the MockMvc
@@ -88,7 +88,7 @@ class JavaConfigTests {
 
 		@Bean
 		PersonDao personDao() {
-			return Mockito.mock(PersonDao.class);
+			return mock();
 		}
 	}
 

@@ -35,7 +35,7 @@ public class SimpleClientHttpRequestFactoryTests {
 
 	@Test // SPR-13225
 	public void headerWithNullValue() {
-		HttpURLConnection urlConnection = mock(HttpURLConnection.class);
+		HttpURLConnection urlConnection = mock();
 		given(urlConnection.getRequestMethod()).willReturn("GET");
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", null);

@@ -304,10 +304,10 @@ class ResourceWebHandlerTests {
 
 		// Use mock ResourceResolver: i.e. we're only testing upfront validations...
 
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		given(resource.getFilename()).willThrow(new AssertionError("Resource should not be resolved"));
 		given(resource.getInputStream()).willThrow(new AssertionError("Resource should not be resolved"));
-		ResourceResolver resolver = mock(ResourceResolver.class);
+		ResourceResolver resolver = mock();
 		given(resolver.resolveResource(any(), any(), any(), any())).willReturn(Mono.just(resource));
 
 		ResourceWebHandler handler = new ResourceWebHandler();

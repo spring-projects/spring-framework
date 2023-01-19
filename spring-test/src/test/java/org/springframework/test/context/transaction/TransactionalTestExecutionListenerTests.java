@@ -49,7 +49,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRED;
  */
 class TransactionalTestExecutionListenerTests {
 
-	private final PlatformTransactionManager tm = mock(PlatformTransactionManager.class);
+	private final PlatformTransactionManager tm = mock();
 
 	private final TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
 		@Override
@@ -58,7 +58,7 @@ class TransactionalTestExecutionListenerTests {
 		}
 	};
 
-	private final TestContext testContext = mock(TestContext.class);
+	private final TestContext testContext = mock();
 
 
 	@AfterEach

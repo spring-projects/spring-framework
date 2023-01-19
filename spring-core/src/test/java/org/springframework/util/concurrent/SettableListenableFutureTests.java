@@ -361,7 +361,7 @@ class SettableListenableFutureTests {
 	@Test
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void cancelDoesNotNotifyCallbacksOnSet() {
-		ListenableFutureCallback callback = mock(ListenableFutureCallback.class);
+		ListenableFutureCallback callback = mock();
 		settableListenableFuture.addCallback(callback);
 		settableListenableFuture.cancel(true);
 
@@ -378,7 +378,7 @@ class SettableListenableFutureTests {
 	@Test
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void cancelDoesNotNotifyCallbacksOnSetException() {
-		ListenableFutureCallback callback = mock(ListenableFutureCallback.class);
+		ListenableFutureCallback callback = mock();
 		settableListenableFuture.addCallback(callback);
 		settableListenableFuture.cancel(true);
 

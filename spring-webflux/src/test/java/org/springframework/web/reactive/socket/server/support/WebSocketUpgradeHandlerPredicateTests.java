@@ -40,7 +40,7 @@ public class WebSocketUpgradeHandlerPredicateTests {
 
 	private final WebSocketUpgradeHandlerPredicate predicate = new WebSocketUpgradeHandlerPredicate();
 
-	private final WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
+	private final WebSocketHandler webSocketHandler = mock();
 
 	ServerWebExchange httpGetExchange =
 			MockServerWebExchange.from(MockServerHttpRequest.get("/path"));

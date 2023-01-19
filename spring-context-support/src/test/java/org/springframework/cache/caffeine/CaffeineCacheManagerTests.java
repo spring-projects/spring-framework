@@ -156,7 +156,7 @@ public class CaffeineCacheManagerTests {
 		Cache cache1 = cm.getCache("c1");
 
 		@SuppressWarnings("unchecked")
-		CacheLoader<Object, Object> loader = mock(CacheLoader.class);
+		CacheLoader<Object, Object> loader = mock();
 
 		cm.setCacheLoader(loader);
 		Cache cache1x = cm.getCache("c1");

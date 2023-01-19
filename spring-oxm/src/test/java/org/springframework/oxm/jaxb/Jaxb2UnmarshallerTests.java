@@ -83,7 +83,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 		unmarshaller.setClassesToBeBound(BinaryObject.class);
 		unmarshaller.setMtomEnabled(true);
 		unmarshaller.afterPropertiesSet();
-		MimeContainer mimeContainer = mock(MimeContainer.class);
+		MimeContainer mimeContainer = mock();
 
 		Resource logo = new ClassPathResource("spring-ws.png", getClass());
 		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));

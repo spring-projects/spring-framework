@@ -54,7 +54,7 @@ public class ChannelInterceptorTests {
 
 	@Test
 	public void preSendInterceptorReturningModifiedMessage() {
-		Message<?> expected = mock(Message.class);
+		Message<?> expected = mock();
 		PreSendInterceptor interceptor = new PreSendInterceptor();
 		interceptor.setMessageToReturn(expected);
 		this.channel.addInterceptor(interceptor);

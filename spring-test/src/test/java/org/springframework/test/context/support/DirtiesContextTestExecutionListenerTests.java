@@ -59,7 +59,7 @@ class DirtiesContextTestExecutionListenerTests {
 
 	private final TestExecutionListener beforeListener = new DirtiesContextBeforeModesTestExecutionListener();
 	private final TestExecutionListener afterListener = new DirtiesContextTestExecutionListener();
-	private final TestContext testContext = mock(TestContext.class);
+	private final TestContext testContext = mock();
 
 
 	@Nested

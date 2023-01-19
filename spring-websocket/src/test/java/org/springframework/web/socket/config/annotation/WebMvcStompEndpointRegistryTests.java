@@ -48,12 +48,12 @@ public class WebMvcStompEndpointRegistryTests {
 
 	@BeforeEach
 	public void setup() {
-		SubscribableChannel inChannel = mock(SubscribableChannel.class);
-		SubscribableChannel outChannel = mock(SubscribableChannel.class);
+		SubscribableChannel inChannel = mock();
+		SubscribableChannel outChannel = mock();
 		this.webSocketHandler = new SubProtocolWebSocketHandler(inChannel, outChannel);
 
 		WebSocketTransportRegistration transport = new WebSocketTransportRegistration();
-		TaskScheduler scheduler = mock(TaskScheduler.class);
+		TaskScheduler scheduler = mock();
 		this.endpointRegistry = new WebMvcStompEndpointRegistry(this.webSocketHandler, transport, scheduler);
 	}
 
@@ -91,7 +91,7 @@ public class WebMvcStompEndpointRegistryTests {
 
 	@Test
 	public void errorHandler() throws Exception {
-		StompSubProtocolErrorHandler errorHandler = mock(StompSubProtocolErrorHandler.class);
+		StompSubProtocolErrorHandler errorHandler = mock();
 		this.endpointRegistry.setErrorHandler(errorHandler);
 		this.endpointRegistry.addEndpoint("/stompOverWebSocket");
 

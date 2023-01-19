@@ -33,9 +33,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  */
 public class CompositeLogTests {
 
-	private final Log logger1 = mock(Log.class);
+	private final Log logger1 = mock();
 
-	private final Log logger2 = mock(Log.class);
+	private final Log logger2 = mock();
 
 	private final CompositeLog compositeLog = new CompositeLog(Arrays.asList(logger1, logger2));
 

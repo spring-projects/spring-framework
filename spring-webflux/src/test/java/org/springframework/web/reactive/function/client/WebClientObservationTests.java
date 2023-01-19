@@ -49,7 +49,7 @@ class WebClientObservationTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private final ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+	private final ExchangeFunction exchangeFunction = mock();
 
 	private final ArgumentCaptor<ClientRequest> request = ArgumentCaptor.forClass(ClientRequest.class);
 
@@ -57,7 +57,7 @@ class WebClientObservationTests {
 
 	@BeforeEach
 	void setup() {
-		ClientResponse mockResponse = mock(ClientResponse.class);
+		ClientResponse mockResponse = mock();
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
 		given(this.exchangeFunction.exchange(this.request.capture())).willReturn(Mono.just(mockResponse));
@@ -95,7 +95,7 @@ class WebClientObservationTests {
 
 	@Test
 	void recordsObservationForErrorExchange() {
-		ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+		ExchangeFunction exchangeFunction = mock();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.error(new IllegalStateException()));
 		WebClient client = WebClient.builder().observationRegistry(observationRegistry).exchangeFunction(exchangeFunction).build();
 		StepVerifier.create(client.get().uri("/path").retrieve().bodyToMono(Void.class))

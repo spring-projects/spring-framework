@@ -87,7 +87,7 @@ public class ModelInitializerTests {
 
 	@Test
 	public void initBinderMethod() {
-		Validator validator = mock(Validator.class);
+		Validator validator = mock();
 
 		TestController controller = new TestController();
 		controller.setValidator(validator);

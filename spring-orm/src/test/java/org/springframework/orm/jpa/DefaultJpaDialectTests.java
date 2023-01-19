@@ -49,8 +49,8 @@ public class DefaultJpaDialectTests {
 	@Test
 	public void testDefaultBeginTransaction() throws Exception {
 		TransactionDefinition definition = new DefaultTransactionDefinition();
-		EntityManager entityManager = mock(EntityManager.class);
-		EntityTransaction entityTx = mock(EntityTransaction.class);
+		EntityManager entityManager = mock();
+		EntityTransaction entityTx = mock();
 
 		given(entityManager.getTransaction()).willReturn(entityTx);
 

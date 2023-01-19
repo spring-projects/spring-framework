@@ -35,7 +35,7 @@ class JmsGatewaySupportTests {
 
 	@Test
 	void testJmsGatewaySupportWithConnectionFactory() throws Exception {
-		ConnectionFactory mockConnectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory mockConnectionFactory = mock();
 		final List<String> test = new ArrayList<>(1);
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
 			@Override

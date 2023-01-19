@@ -103,8 +103,8 @@ class SingleConnectionFactoryUnitTests {
 
 	@Test
 	void releaseConnectionShouldNotCloseConnection() {
-		Connection connectionMock = mock(Connection.class);
-		ConnectionFactoryMetadata metadata = mock(ConnectionFactoryMetadata.class);
+		Connection connectionMock = mock();
+		ConnectionFactoryMetadata metadata = mock();
 
 		SingleConnectionFactory factory = new SingleConnectionFactory(connectionMock, metadata, true);
 
@@ -119,9 +119,9 @@ class SingleConnectionFactoryUnitTests {
 
 	@Test
 	void releaseConnectionShouldCloseUnrelatedConnection() {
-		Connection connectionMock = mock(Connection.class);
-		Connection otherConnection = mock(Connection.class);
-		ConnectionFactoryMetadata metadata = mock(ConnectionFactoryMetadata.class);
+		Connection connectionMock = mock();
+		Connection otherConnection = mock();
+		ConnectionFactoryMetadata metadata = mock();
 		when(otherConnection.close()).thenReturn(Mono.empty());
 
 		SingleConnectionFactory factory = new SingleConnectionFactory(connectionMock, metadata, false);

@@ -29,14 +29,13 @@ import static org.mockito.Mockito.mock;
  */
 class JmsTemplateTransactedTests extends JmsTemplateTests {
 
-	private Session localSession;
+	private Session localSession = mock();
 
 
 	@Override
 	@BeforeEach
 	void setupMocks() throws Exception {
 		super.setupMocks();
-		this.localSession = mock(Session.class);
 		given(this.connection.createSession(false, Session.AUTO_ACKNOWLEDGE)).willReturn(this.localSession);
 	}
 

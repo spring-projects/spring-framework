@@ -50,7 +50,7 @@ class AfterReturningAdviceBindingTests {
 
 	private TestBean testBeanTarget;
 
-	private AfterReturningAdviceBindingCollaborator mockCollaborator;
+	private AfterReturningAdviceBindingCollaborator mockCollaborator = mock();
 
 
 	@BeforeEach
@@ -59,7 +59,6 @@ class AfterReturningAdviceBindingTests {
 
 		afterAdviceAspect = (AfterReturningAdviceBindingTestAspect) ctx.getBean("testAspect");
 
-		mockCollaborator = mock(AfterReturningAdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");

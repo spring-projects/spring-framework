@@ -140,8 +140,8 @@ class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test  // SPR-11919
 	void handleInfoGetWildflyNPE() throws IOException {
-		HttpServletResponse mockResponse = mock(HttpServletResponse.class);
-		ServletOutputStream ous = mock(ServletOutputStream.class);
+		HttpServletResponse mockResponse = mock();
+		ServletOutputStream ous = mock();
 		given(mockResponse.getHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).willThrow(NullPointerException.class);
 		given(mockResponse.getOutputStream()).willReturn(ous);
 		this.response = new ServletServerHttpResponse(mockResponse);

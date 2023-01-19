@@ -100,7 +100,7 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void getSessionScopedAttributeDoesNotForceCreationOfSession() {
-		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletRequest request = mock();
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		Object value = attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION);
@@ -122,7 +122,7 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void removeSessionScopedAttributeDoesNotForceCreationOfSession() {
-		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletRequest request = mock();
 
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.removeAttribute(KEY, RequestAttributes.SCOPE_SESSION);
@@ -131,8 +131,8 @@ public class ServletRequestAttributesTests {
 
 	@Test
 	public void updateAccessedAttributes() {
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpSession session = mock(HttpSession.class);
+		HttpServletRequest request = mock();
+		HttpSession session = mock();
 		given(request.getSession(anyBoolean())).willReturn(session);
 		given(session.getAttribute(KEY)).willReturn(VALUE);
 
@@ -176,8 +176,8 @@ public class ServletRequestAttributesTests {
 	}
 
 	private void doSkipImmutableValue(Object immutableValue) {
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpSession session = mock(HttpSession.class);
+		HttpServletRequest request = mock();
+		HttpSession session = mock();
 		given(request.getSession(anyBoolean())).willReturn(session);
 		given(session.getAttribute(KEY)).willReturn(immutableValue);
 

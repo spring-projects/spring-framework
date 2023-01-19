@@ -147,7 +147,7 @@ public class HttpRangeTests {
 
 	@Test
 	public void toResourceRegionInputStreamResource() {
-		InputStreamResource resource = mock(InputStreamResource.class);
+		InputStreamResource resource = mock();
 		HttpRange range = HttpRange.createByteRange(0, 9);
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				range.toResourceRegion(resource));
@@ -155,7 +155,7 @@ public class HttpRangeTests {
 
 	@Test
 	public void toResourceRegionIllegalLength() {
-		ByteArrayResource resource = mock(ByteArrayResource.class);
+		ByteArrayResource resource = mock();
 		given(resource.contentLength()).willReturn(-1L);
 		HttpRange range = HttpRange.createByteRange(0, 9);
 		assertThatIllegalArgumentException().isThrownBy(() -> range.toResourceRegion(resource));
@@ -163,7 +163,7 @@ public class HttpRangeTests {
 
 	@Test
 	public void toResourceRegionExceptionLength() throws IOException {
-		InputStreamResource resource = mock(InputStreamResource.class);
+		InputStreamResource resource = mock();
 		given(resource.contentLength()).willThrow(IOException.class);
 		HttpRange range = HttpRange.createByteRange(0, 9);
 		assertThatIllegalArgumentException().isThrownBy(() -> range.toResourceRegion(resource));

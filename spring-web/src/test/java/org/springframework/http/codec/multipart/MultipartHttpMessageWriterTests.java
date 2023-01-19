@@ -103,7 +103,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 				this.bufferFactory.wrap("Bb".getBytes(StandardCharsets.UTF_8)),
 				this.bufferFactory.wrap("Cc".getBytes(StandardCharsets.UTF_8))
 		);
-		FilePart mockPart = mock(FilePart.class);
+		FilePart mockPart = mock();
 		HttpHeaders partHeaders = new HttpHeaders();
 		partHeaders.setContentType(MediaType.TEXT_PLAIN);
 		partHeaders.setContentDispositionFormData("foo", "file.txt");

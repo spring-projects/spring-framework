@@ -16,12 +16,12 @@
 
 package org.springframework.web.reactive.result.view.script;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,29 +38,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  */
 @Disabled("JRuby not compatible with JDK 9 yet")
-public class JRubyScriptTemplateTests {
+class JRubyScriptTemplateTests {
 
 	@Test
-	public void renderTemplate() throws Exception {
-		Map<String, Object> model = new HashMap<>();
-		model.put("title", "Layout example");
-		model.put("body", "This is the body");
+	void renderTemplate() throws Exception {
+		Map<String, Object> model = Map.of(
+			"title", "Layout example",
+			"body", "This is the body"
+		);
 		String url = "org/springframework/web/reactive/result/view/script/jruby/template.erb";
 		MockServerHttpResponse response = renderViewWithModel(url, model);
-		assertThat(response.getBodyAsString().block()).isEqualTo("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>");
+		assertThat(response.getBodyAsString().block())
+			.isEqualTo("<html><head><title>Layout example</title></head><body><p>This is the body</p></body></html>");
 	}
 
-	private MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model) throws Exception {
+
+	private static MockServerHttpResponse renderViewWithModel(String viewUrl, Map<String, Object> model) throws Exception {
 		ScriptTemplateView view = createViewWithUrl(viewUrl);
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		view.renderInternal(model, MediaType.TEXT_HTML, exchange).block();
 		return exchange.getResponse();
 	}
 
-	private ScriptTemplateView createViewWithUrl(String viewUrl) throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ScriptTemplatingConfiguration.class);
-		ctx.refresh();
+	private static ScriptTemplateView createViewWithUrl(String viewUrl) throws Exception {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(ScriptTemplatingConfiguration.class);
 
 		ScriptTemplateView view = new ScriptTemplateView();
 		view.setApplicationContext(ctx);
@@ -74,7 +75,7 @@ public class JRubyScriptTemplateTests {
 	static class ScriptTemplatingConfiguration {
 
 		@Bean
-		public ScriptTemplateConfigurer jRubyConfigurer() {
+		ScriptTemplateConfigurer jRubyConfigurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
 			configurer.setScripts("org/springframework/web/reactive/result/view/script/jruby/render.rb");
 			configurer.setEngineName("jruby");

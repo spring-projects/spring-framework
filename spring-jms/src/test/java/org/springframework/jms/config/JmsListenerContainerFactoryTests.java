@@ -54,7 +54,7 @@ public class JmsListenerContainerFactoryTests {
 
 	private final MessageConverter messageConverter = new SimpleMessageConverter();
 
-	private final TransactionManager transactionManager = mock(TransactionManager.class);
+	private final TransactionManager transactionManager = mock();
 
 
 	@Test

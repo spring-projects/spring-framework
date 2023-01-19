@@ -104,7 +104,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	}
 
 	protected RequestDataValueProcessor getMockRequestDataValueProcessor() {
-		RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
+		RequestDataValueProcessor mockProcessor = mock();
 		HttpServletRequest request = (HttpServletRequest) getPageContext().getRequest();
 		WebApplicationContext wac = RequestContextUtils.findWebApplicationContext(request);
 		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);

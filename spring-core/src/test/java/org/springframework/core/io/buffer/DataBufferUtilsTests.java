@@ -101,7 +101,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void readByteChannelError(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
-		ReadableByteChannel channel = mock(ReadableByteChannel.class);
+		ReadableByteChannel channel = mock();
 		given(channel.read(any()))
 				.willAnswer(invocation -> {
 					ByteBuffer buffer = invocation.getArgument(0);
@@ -166,7 +166,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void readAsynchronousFileChannelError(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
-		AsynchronousFileChannel channel = mock(AsynchronousFileChannel.class);
+		AsynchronousFileChannel channel = mock();
 		willAnswer(invocation -> {
 			ByteBuffer byteBuffer = invocation.getArgument(0);
 			byteBuffer.put("foo".getBytes(StandardCharsets.UTF_8));
@@ -360,7 +360,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer bar = stringBuffer("bar");
 		Flux<DataBuffer> flux = Flux.just(foo, bar);
 
-		WritableByteChannel channel = mock(WritableByteChannel.class);
+		WritableByteChannel channel = mock();
 		given(channel.write(any()))
 				.willAnswer(invocation -> {
 					ByteBuffer buffer = invocation.getArgument(0);
@@ -470,7 +470,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer bar = stringBuffer("bar");
 		Flux<DataBuffer> flux = Flux.just(foo, bar);
 
-		AsynchronousFileChannel channel = mock(AsynchronousFileChannel.class);
+		AsynchronousFileChannel channel = mock();
 		willAnswer(invocation -> {
 			ByteBuffer buffer = invocation.getArgument(0);
 			long pos = invocation.getArgument(1);
@@ -777,7 +777,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	void SPR16070(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
-		ReadableByteChannel channel = mock(ReadableByteChannel.class);
+		ReadableByteChannel channel = mock();
 		given(channel.read(any()))
 				.willAnswer(putByte('a'))
 				.willAnswer(putByte('b'))

@@ -118,7 +118,7 @@ class AttributeMethodsTests {
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	void isValidWhenDoesNotHaveTypeNotPresentExceptionReturnsTrue() {
-		ClassValue annotation = mock(ClassValue.class);
+		ClassValue annotation = mock();
 		given(annotation.value()).willReturn((Class) InputStream.class);
 		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		assertThat(attributes.isValid(annotation)).isTrue();

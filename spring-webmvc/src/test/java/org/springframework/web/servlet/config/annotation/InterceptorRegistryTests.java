@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
@@ -42,6 +41,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture with a {@link InterceptorRegistry}, two {@link HandlerInterceptor}s and two
@@ -122,7 +122,7 @@ public class InterceptorRegistryTests {
 
 	@Test
 	public void addInterceptorsWithCustomPathMatcher() {
-		PathMatcher pathMatcher = Mockito.mock(PathMatcher.class);
+		PathMatcher pathMatcher = mock();
 		this.registry.addInterceptor(interceptor1).addPathPatterns("/path1/**").pathMatcher(pathMatcher);
 
 		MappedInterceptor mappedInterceptor = (MappedInterceptor) this.registry.getInterceptors().get(0);

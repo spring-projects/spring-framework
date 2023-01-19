@@ -193,7 +193,7 @@ class PathResourceTests {
 
 	@Test
 	void getFileUnsupported() throws IOException {
-		Path path = mock(Path.class);
+		Path path = mock();
 		given(path.normalize()).willReturn(path);
 		given(path.toFile()).willThrow(new UnsupportedOperationException());
 		PathResource resource = new PathResource(path);

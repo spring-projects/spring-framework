@@ -94,8 +94,8 @@ class ListenableFutureTaskTests {
 		final String s = "Hello World";
 		Callable<String> callable = () -> s;
 
-		SuccessCallback<String> successCallback = mock(SuccessCallback.class);
-		FailureCallback failureCallback = mock(FailureCallback.class);
+		SuccessCallback<String> successCallback = mock();
+		FailureCallback failureCallback = mock();
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
 		task.addCallback(successCallback, failureCallback);
 		task.run();
@@ -115,20 +115,22 @@ class ListenableFutureTaskTests {
 			throw ex;
 		};
 
-		SuccessCallback<String> successCallback = mock(SuccessCallback.class);
-		FailureCallback failureCallback = mock(FailureCallback.class);
+		SuccessCallback<String> successCallback = mock();
+		FailureCallback failureCallback = mock();
 		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
 		task.addCallback(successCallback, failureCallback);
 		task.run();
 		verify(failureCallback).onFailure(ex);
 		verifyNoInteractions(successCallback);
 
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				task::get)
-			.satisfies(e -> assertThat(e.getCause().getMessage()).isEqualTo(s));
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				task.completable()::get)
-			.satisfies(e -> assertThat(e.getCause().getMessage()).isEqualTo(s));
+		assertThatExceptionOfType(ExecutionException.class)
+				.isThrownBy(task::get)
+				.havingCause()
+				.withMessage(s);
+		assertThatExceptionOfType(ExecutionException.class)
+				.isThrownBy(task.completable()::get)
+				.havingCause()
+				.withMessage(s);
 	}
 
 }

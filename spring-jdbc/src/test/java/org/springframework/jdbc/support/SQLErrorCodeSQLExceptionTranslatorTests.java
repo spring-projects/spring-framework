@@ -189,16 +189,16 @@ public class SQLErrorCodeSQLExceptionTranslatorTests {
 		SQLException connectionException = new SQLException();
 		SQLException duplicateKeyException = new SQLException("test", "", 1);
 
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willThrow(connectionException);
 
 		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(dataSource);
 		assertThat(sext.translate("test", null, duplicateKeyException)).isNull();
 
-		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		DatabaseMetaData databaseMetaData = mock();
 		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 
 		Mockito.reset(dataSource);

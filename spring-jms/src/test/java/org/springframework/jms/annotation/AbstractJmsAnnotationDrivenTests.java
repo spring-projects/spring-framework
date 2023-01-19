@@ -19,7 +19,6 @@ package org.springframework.jms.annotation;
 import java.lang.reflect.Method;
 
 import jakarta.jms.JMSException;
-import jakarta.jms.Session;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -172,7 +171,7 @@ abstract class AbstractJmsAnnotationDrivenTests {
 		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
 		endpoint.setupListenerContainer(container);
 		MessagingMessageListenerAdapter listener = (MessagingMessageListenerAdapter) container.getMessageListener();
-		listener.onMessage(new StubTextMessage("failValidation"), mock(Session.class));
+		listener.onMessage(new StubTextMessage("failValidation"), mock());
 	}
 
 	/**

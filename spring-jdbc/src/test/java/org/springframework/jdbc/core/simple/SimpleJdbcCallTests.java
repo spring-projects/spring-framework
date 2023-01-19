@@ -50,13 +50,13 @@ import static org.mockito.Mockito.verify;
  */
 class SimpleJdbcCallTests {
 
-	private final Connection connection = mock(Connection.class);
+	private final Connection connection = mock();
 
-	private final DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+	private final DatabaseMetaData databaseMetaData = mock();
 
-	private final DataSource dataSource = mock(DataSource.class);
+	private final DataSource dataSource = mock();
 
-	private final CallableStatement callableStatement = mock(CallableStatement.class);
+	private final CallableStatement callableStatement = mock();
 
 
 	@BeforeEach
@@ -233,8 +233,8 @@ class SimpleJdbcCallTests {
 	 */
 	@Test  // gh-26486
 	void exceptionThrownWhileRetrievingColumnNamesFromMetadata() throws Exception {
-		ResultSet proceduresResultSet = mock(ResultSet.class);
-		ResultSet procedureColumnsResultSet = mock(ResultSet.class);
+		ResultSet proceduresResultSet = mock();
+		ResultSet procedureColumnsResultSet = mock();
 
 		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
 		given(databaseMetaData.getUserName()).willReturn("ME");
@@ -301,8 +301,8 @@ class SimpleJdbcCallTests {
 	}
 
 	private void initializeAddInvoiceWithMetaData(boolean isFunction) throws SQLException {
-		ResultSet proceduresResultSet = mock(ResultSet.class);
-		ResultSet procedureColumnsResultSet = mock(ResultSet.class);
+		ResultSet proceduresResultSet = mock();
+		ResultSet procedureColumnsResultSet = mock();
 		given(databaseMetaData.getDatabaseProductName()).willReturn("Oracle");
 		given(databaseMetaData.getUserName()).willReturn("ME");
 		given(databaseMetaData.storesUpperCaseIdentifiers()).willReturn(true);

@@ -46,7 +46,7 @@ public class DefaultResponseErrorHandlerTests {
 
 	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();
 
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+	private final ClientHttpResponse response = mock();
 
 
 	@Test

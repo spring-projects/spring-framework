@@ -53,7 +53,7 @@ class ExecutingResponseCreatorTests {
 	@Test
 	void ensureRequestIsMock() {
 		final ExecutingResponseCreator responseCreator = new ExecutingResponseCreator((uri, method) -> null);
-		ClientHttpRequest notAMockRequest = mock(ClientHttpRequest.class);
+		ClientHttpRequest notAMockRequest = mock();
 
 		assertThatIllegalStateException()
 				.isThrownBy(() -> responseCreator.createResponse(notAMockRequest))

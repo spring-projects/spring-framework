@@ -30,6 +30,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link RelativeRedirectFilter}.
@@ -41,7 +42,7 @@ public class RelativeRedirectFilterTests {
 
 	private RelativeRedirectFilter filter = new RelativeRedirectFilter();
 
-	private HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+	private HttpServletResponse response = mock();
 
 
 	@Test

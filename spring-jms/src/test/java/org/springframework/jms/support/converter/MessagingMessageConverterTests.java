@@ -45,14 +45,14 @@ public class MessagingMessageConverterTests {
 	@Test
 	public void onlyHandlesMessage() throws JMSException {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.converter.toMessage(new Object(), mock(Session.class)));
+				this.converter.toMessage(new Object(), mock()));
 	}
 
 	@Test
 	public void simpleObject() throws Exception {
-		Session session = mock(Session.class);
-		Serializable payload = mock(Serializable.class);
-		ObjectMessage jmsMessage = mock(ObjectMessage.class);
+		Session session = mock();
+		Serializable payload = mock();
+		ObjectMessage jmsMessage = mock();
 		given(session.createObjectMessage(payload)).willReturn(jmsMessage);
 
 		this.converter.toMessage(MessageBuilder.withPayload(payload).build(), session);

@@ -63,8 +63,8 @@ public class JndiJtaTransactionManagerTests {
 	private void doTestJtaTransactionManagerWithDefaultJndiLookups(String tmName, boolean tmFound, boolean defaultUt)
 			throws Exception {
 
-		UserTransaction ut = mock(UserTransaction.class);
-		TransactionManager tm = mock(TransactionManager.class);
+		UserTransaction ut = mock();
+		TransactionManager tm = mock();
 		if (defaultUt) {
 			given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 		}
@@ -128,10 +128,10 @@ public class JndiJtaTransactionManagerTests {
 
 	@Test
 	public void jtaTransactionManagerWithCustomJndiLookups() throws Exception {
-		UserTransaction ut = mock(UserTransaction.class);
+		UserTransaction ut = mock();
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
-		TransactionManager tm = mock(TransactionManager.class);
+		TransactionManager tm = mock();
 
 		JtaTransactionManager ptm = new JtaTransactionManager();
 		ptm.setUserTransactionName("jndi-ut");
@@ -167,10 +167,10 @@ public class JndiJtaTransactionManagerTests {
 
 	@Test
 	public void jtaTransactionManagerWithNotCacheUserTransaction() throws Exception {
-		UserTransaction ut = mock(UserTransaction.class);
+		UserTransaction ut = mock();
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
-		UserTransaction ut2 = mock(UserTransaction.class);
+		UserTransaction ut2 = mock();
 		given(ut2.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
 		JtaTransactionManager ptm = new JtaTransactionManager();

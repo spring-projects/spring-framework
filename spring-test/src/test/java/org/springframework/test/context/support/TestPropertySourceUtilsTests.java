@@ -191,7 +191,7 @@ class TestPropertySourceUtilsTests {
 	@Test
 	void addPropertiesFilesToEnvironmentWithNullEnvironment() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(ResourceLoader.class), FOO_LOCATIONS))
+			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(), FOO_LOCATIONS))
 			.withMessageContaining("'environment' must not be null");
 	}
 
@@ -205,7 +205,7 @@ class TestPropertySourceUtilsTests {
 	@Test
 	void addPropertiesFilesToEnvironmentWithEnvironmentAndNullLocations() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> addPropertiesFilesToEnvironment(new MockEnvironment(), mock(ResourceLoader.class), (String[]) null))
+			.isThrownBy(() -> addPropertiesFilesToEnvironment(new MockEnvironment(), mock(), (String[]) null))
 			.withMessageContaining("'locations' must not be null");
 	}
 
@@ -219,7 +219,7 @@ class TestPropertySourceUtilsTests {
 
 		String pair = "key = value";
 		ByteArrayResource resource = new ByteArrayResource(pair.getBytes(), "from inlined property: " + pair);
-		ResourceLoader resourceLoader = mock(ResourceLoader.class);
+		ResourceLoader resourceLoader = mock();
 		given(resourceLoader.getResource(anyString())).willReturn(resource);
 
 		addPropertiesFilesToEnvironment(environment, resourceLoader, FOO_LOCATIONS);

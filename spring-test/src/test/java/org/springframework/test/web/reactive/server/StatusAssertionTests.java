@@ -175,7 +175,7 @@ class StatusAssertionTests {
 		ExchangeResult result = new ExchangeResult(
 				request, response, Mono.empty(), Mono.empty(), Duration.ZERO, null, null);
 
-		return new StatusAssertions(result, mock(WebTestClient.ResponseSpec.class));
+		return new StatusAssertions(result, mock());
 	}
 
 }

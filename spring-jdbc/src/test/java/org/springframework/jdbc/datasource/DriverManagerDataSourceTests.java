@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
  */
 public class DriverManagerDataSourceTests {
 
-	private Connection connection = mock(Connection.class);
+	private Connection connection = mock();
 
 	@Test
 	public void testStandardUsage() throws Exception {

@@ -122,7 +122,7 @@ public class FrameworkExtensionTests {
 		public RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder,
 				WebApplicationContext context) {
 			return request -> {
-				request.setUserPrincipal(mock(Principal.class));
+				request.setUserPrincipal(mock());
 				return request;
 			};
 		}

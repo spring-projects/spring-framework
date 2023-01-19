@@ -322,7 +322,7 @@ public class SendToMethodReturnValueHandlerTests {
 	public void testHeadersToSend() throws Exception {
 		Message<?> message = createMessage("sess1", "sub1", "/app", "/dest", null);
 
-		SimpMessageSendingOperations messagingTemplate = mock(SimpMessageSendingOperations.class);
+		SimpMessageSendingOperations messagingTemplate = mock();
 		SendToMethodReturnValueHandler handler = new SendToMethodReturnValueHandler(messagingTemplate, false);
 
 		handler.handleReturnValue(PAYLOAD, this.noAnnotationsReturnType, message);

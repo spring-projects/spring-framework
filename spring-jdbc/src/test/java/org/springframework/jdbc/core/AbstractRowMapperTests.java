@@ -120,15 +120,16 @@ public abstract class AbstractRowMapperTests {
 
 	protected static class Mock {
 
-		private Connection connection;
+		private Connection connection = mock();
 
-		private ResultSetMetaData resultSetMetaData;
+		private ResultSetMetaData resultSetMetaData = mock();
 
-		private ResultSet resultSet;
+		private ResultSet resultSet = mock();
 
-		private Statement statement;
+		private Statement statement = mock();
 
 		private JdbcTemplate jdbcTemplate;
+
 
 		public Mock() throws Exception {
 			this(MockType.ONE);
@@ -136,11 +137,6 @@ public abstract class AbstractRowMapperTests {
 
 		@SuppressWarnings("unchecked")
 		public Mock(MockType type) throws Exception {
-			connection = mock(Connection.class);
-			statement = mock(Statement.class);
-			resultSet = mock(ResultSet.class);
-			resultSetMetaData = mock(ResultSetMetaData.class);
-
 			given(connection.createStatement()).willReturn(statement);
 			given(statement.executeQuery(anyString())).willReturn(resultSet);
 			given(resultSet.getMetaData()).willReturn(resultSetMetaData);

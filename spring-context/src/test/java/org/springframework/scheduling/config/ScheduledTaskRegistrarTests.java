@@ -50,28 +50,28 @@ class ScheduledTaskRegistrarTests {
 
 	@Test
 	void getTriggerTasks() {
-		TriggerTask mockTriggerTask = mock(TriggerTask.class);
+		TriggerTask mockTriggerTask = mock();
 		this.taskRegistrar.setTriggerTasksList(Collections.singletonList(mockTriggerTask));
 		assertThat(this.taskRegistrar.getTriggerTaskList()).containsExactly(mockTriggerTask);
 	}
 
 	@Test
 	void getCronTasks() {
-		CronTask mockCronTask = mock(CronTask.class);
+		CronTask mockCronTask = mock();
 		this.taskRegistrar.setCronTasksList(Collections.singletonList(mockCronTask));
 		assertThat(this.taskRegistrar.getCronTaskList()).containsExactly(mockCronTask);
 	}
 
 	@Test
 	void getFixedRateTasks() {
-		IntervalTask mockFixedRateTask = mock(IntervalTask.class);
+		IntervalTask mockFixedRateTask = mock();
 		this.taskRegistrar.setFixedRateTasksList(Collections.singletonList(mockFixedRateTask));
 		assertThat(this.taskRegistrar.getFixedRateTaskList()).containsExactly(mockFixedRateTask);
 	}
 
 	@Test
 	void getFixedDelayTasks() {
-		IntervalTask mockFixedDelayTask = mock(IntervalTask.class);
+		IntervalTask mockFixedDelayTask = mock();
 		this.taskRegistrar.setFixedDelayTasksList(Collections.singletonList(mockFixedDelayTask));
 		assertThat(this.taskRegistrar.getFixedDelayTaskList()).containsExactly(mockFixedDelayTask);
 	}

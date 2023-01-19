@@ -57,9 +57,9 @@ import static org.mockito.BDDMockito.when;
  */
 class R2dbcTransactionManagerUnitTests {
 
-	ConnectionFactory connectionFactoryMock = mock(ConnectionFactory.class);
+	ConnectionFactory connectionFactoryMock = mock();
 
-	Connection connectionMock = mock(Connection.class);
+	Connection connectionMock = mock();
 
 	private R2dbcTransactionManager tm;
 
@@ -226,7 +226,7 @@ class R2dbcTransactionManagerUnitTests {
 	void appliesReadOnly() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 		when(connectionMock.setTransactionIsolationLevel(any())).thenReturn(Mono.empty());
-		Statement statement = mock(Statement.class);
+		Statement statement = mock();
 		when(connectionMock.createStatement(anyString())).thenReturn(statement);
 		when(statement.execute()).thenReturn(Mono.empty());
 		tm.setEnforceReadOnly(true);

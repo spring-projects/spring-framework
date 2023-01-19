@@ -34,9 +34,9 @@ public class JtaTransactionManagerSerializationTests {
 
 	@Test
 	public void serializable() throws Exception {
-		UserTransaction ut1 = mock(UserTransaction.class);
-		UserTransaction ut2 = mock(UserTransaction.class);
-		TransactionManager tm = mock(TransactionManager.class);
+		UserTransaction ut1 = mock();
+		UserTransaction ut2 = mock();
+		TransactionManager tm = mock();
 
 		JtaTransactionManager jtam = new JtaTransactionManager();
 		jtam.setUserTransaction(ut1);

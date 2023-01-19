@@ -18,7 +18,6 @@ package org.springframework.aop.config;
 
 import java.lang.reflect.Method;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -36,14 +35,9 @@ import static org.mockito.Mockito.verify;
 public class MethodLocatingFactoryBeanTests {
 
 	private static final String BEAN_NAME = "string";
-	private MethodLocatingFactoryBean factory;
-	private BeanFactory beanFactory;
+	private MethodLocatingFactoryBean factory = new MethodLocatingFactoryBean();
+	private BeanFactory beanFactory = mock();
 
-	@BeforeEach
-	public void setUp() {
-		factory = new MethodLocatingFactoryBean();
-		beanFactory = mock(BeanFactory.class);
-	}
 
 	@Test
 	public void testIsSingleton() {

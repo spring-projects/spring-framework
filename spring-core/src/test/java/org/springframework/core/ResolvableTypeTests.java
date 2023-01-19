@@ -869,7 +869,7 @@ class ResolvableTypeTests {
 
 	@Test
 	void resolveTypeWithCustomVariableResolver() throws Exception {
-		VariableResolver variableResolver = mock(VariableResolver.class);
+		VariableResolver variableResolver = mock();
 		given(variableResolver.getSource()).willReturn(this);
 		ResolvableType longType = ResolvableType.forClass(Long.class);
 		given(variableResolver.resolveVariable(any())).willReturn(longType);

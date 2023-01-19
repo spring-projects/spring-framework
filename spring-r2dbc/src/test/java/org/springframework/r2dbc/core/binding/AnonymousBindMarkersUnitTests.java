@@ -42,7 +42,7 @@ class AnonymousBindMarkersUnitTests {
 
 	@Test
 	public void shouldBindByIndex() {
-		BindTarget bindTarget = mock(BindTarget.class);
+		BindTarget bindTarget = mock();
 
 		BindMarkers bindMarkers = BindMarkersFactory.anonymous("?").create();
 

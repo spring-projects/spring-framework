@@ -47,8 +47,8 @@ public class SingleColumnRowMapperTests {
 
 		SingleColumnRowMapper<LocalDateTime> rowMapper = SingleColumnRowMapper.newInstance(LocalDateTime.class);
 
-		ResultSet resultSet = mock(ResultSet.class);
-		ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+		ResultSet resultSet = mock();
+		ResultSetMetaData metaData = mock();
 		given(metaData.getColumnCount()).willReturn(1);
 		given(resultSet.getMetaData()).willReturn(metaData);
 		given(resultSet.getObject(1, LocalDateTime.class))
@@ -70,8 +70,8 @@ public class SingleColumnRowMapperTests {
 		SingleColumnRowMapper<MyLocalDateTime> rowMapper =
 				SingleColumnRowMapper.newInstance(MyLocalDateTime.class, myConversionService);
 
-		ResultSet resultSet = mock(ResultSet.class);
-		ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+		ResultSet resultSet = mock();
+		ResultSetMetaData metaData = mock();
 		given(metaData.getColumnCount()).willReturn(1);
 		given(resultSet.getMetaData()).willReturn(metaData);
 		given(resultSet.getObject(1, MyLocalDateTime.class))
@@ -89,8 +89,8 @@ public class SingleColumnRowMapperTests {
 		SingleColumnRowMapper<LocalDateTime> rowMapper =
 				SingleColumnRowMapper.newInstance(LocalDateTime.class, null);
 
-		ResultSet resultSet = mock(ResultSet.class);
-		ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+		ResultSet resultSet = mock();
+		ResultSetMetaData metaData = mock();
 		given(metaData.getColumnCount()).willReturn(1);
 		given(resultSet.getMetaData()).willReturn(metaData);
 		given(resultSet.getObject(1, LocalDateTime.class))

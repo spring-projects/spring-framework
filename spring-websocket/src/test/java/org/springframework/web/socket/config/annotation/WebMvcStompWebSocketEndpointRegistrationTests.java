@@ -21,8 +21,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
@@ -41,17 +39,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- * Test fixture for
- * {@link org.springframework.web.socket.config.annotation.WebMvcStompWebSocketEndpointRegistration}.
+ * Tests for {@link WebMvcStompWebSocketEndpointRegistration}.
  *
  * @author Rossen Stoyanchev
  */
 class WebMvcStompWebSocketEndpointRegistrationTests {
 
-	private final SubProtocolWebSocketHandler handler =
-			new SubProtocolWebSocketHandler(mock(MessageChannel.class), mock(SubscribableChannel.class));
+	private final SubProtocolWebSocketHandler handler = new SubProtocolWebSocketHandler(mock(), mock());
 
-	private final TaskScheduler scheduler = mock(TaskScheduler.class);
+	private final TaskScheduler scheduler = mock();
 
 
 	@Test

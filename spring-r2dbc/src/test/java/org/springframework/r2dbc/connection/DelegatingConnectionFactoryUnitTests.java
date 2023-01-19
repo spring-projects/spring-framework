@@ -32,9 +32,9 @@ import static org.mockito.BDDMockito.when;
  */
 class DelegatingConnectionFactoryUnitTests {
 
-	ConnectionFactory delegate = mock(ConnectionFactory.class);
+	ConnectionFactory delegate = mock();
 
-	Connection connectionMock = mock(Connection.class);
+	Connection connectionMock = mock();
 
 	DelegatingConnectionFactory connectionFactory = new ExampleConnectionFactory(delegate);
 

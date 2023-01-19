@@ -150,7 +150,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		String destination = "/dest";
 		Message<?> inputMessage = createInputMessage(sessionId, subscriptionId, destination, null);
 
-		MessageSendingOperations messagingTemplate = mock(MessageSendingOperations.class);
+		MessageSendingOperations messagingTemplate = mock();
 		SubscriptionMethodReturnValueHandler handler = new SubscriptionMethodReturnValueHandler(messagingTemplate);
 
 		handler.handleReturnValue(PAYLOAD, this.subscribeEventReturnType, inputMessage);

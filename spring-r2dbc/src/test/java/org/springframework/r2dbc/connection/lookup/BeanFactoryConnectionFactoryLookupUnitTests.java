@@ -62,7 +62,7 @@ public class BeanFactoryConnectionFactoryLookupUnitTests {
 
 	@Test
 	public void shouldLookupWhereBeanFactoryYieldsNonConnectionFactoryType() {
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 
 		when(beanFactory.getBean(CONNECTION_FACTORY_BEAN_NAME,
 				ConnectionFactory.class)).thenThrow(

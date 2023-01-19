@@ -42,7 +42,7 @@ class BeforeAdviceBindingTests {
 
 	private ClassPathXmlApplicationContext ctx;
 
-	private AdviceBindingCollaborator mockCollaborator;
+	private AdviceBindingCollaborator mockCollaborator = mock();
 
 	private ITestBean testBeanProxy;
 
@@ -61,7 +61,6 @@ class BeforeAdviceBindingTests {
 
 		AdviceBindingTestAspect beforeAdviceAspect = (AdviceBindingTestAspect) ctx.getBean("testAspect");
 
-		mockCollaborator = mock(AdviceBindingCollaborator.class);
 		beforeAdviceAspect.setCollaborator(mockCollaborator);
 	}
 

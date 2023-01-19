@@ -38,9 +38,9 @@ public class ReactorResourceFactoryTests {
 
 	private final ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 
-	private final ConnectionProvider connectionProvider = mock(ConnectionProvider.class);
+	private final ConnectionProvider connectionProvider = mock();
 
-	private final LoopResources loopResources = mock(LoopResources.class);
+	private final LoopResources loopResources = mock();
 
 
 	@Test

@@ -100,7 +100,7 @@ public class JmsListenerEndpointTests {
 
 	@Test
 	public void setupMessageContainerUnsupportedContainer() {
-		MessageListenerContainer container = mock(MessageListenerContainer.class);
+		MessageListenerContainer container = mock();
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
 		endpoint.setMessageListener(new MessageListenerAdapter());
 

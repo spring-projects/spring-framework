@@ -51,7 +51,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 
 	private final SampleEvents sampleEvents = spy(new SampleEvents());
 
-	private final ApplicationContext context = mock(ApplicationContext.class);
+	private final ApplicationContext context = mock();
 
 
 	@Test

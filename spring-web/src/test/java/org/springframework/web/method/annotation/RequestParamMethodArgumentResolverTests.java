@@ -437,7 +437,7 @@ public class RequestParamMethodArgumentResolverTests {
 		WebDataBinder binder = new WebRequestDataBinder(null);
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(webRequest, null, "stringNotAnnot")).willReturn(binder);
 
 		request.addParameter("stringNotAnnot", "");
@@ -452,7 +452,7 @@ public class RequestParamMethodArgumentResolverTests {
 		WebDataBinder binder = new WebRequestDataBinder(null);
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(webRequest, null, "name")).willReturn(binder);
 
 		request.addParameter("name", "");

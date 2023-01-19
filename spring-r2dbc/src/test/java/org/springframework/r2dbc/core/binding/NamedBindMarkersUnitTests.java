@@ -89,7 +89,7 @@ class NamedBindMarkersUnitTests {
 
 	@Test
 	void bindValueShouldBindByName() {
-		BindTarget bindTarget = mock(BindTarget.class);
+		BindTarget bindTarget = mock();
 
 		BindMarkers bindMarkers = BindMarkersFactory.named("@", "p", 32).create();
 
@@ -102,7 +102,7 @@ class NamedBindMarkersUnitTests {
 
 	@Test
 	void bindNullShouldBindByName() {
-		BindTarget bindTarget = mock(BindTarget.class);
+		BindTarget bindTarget = mock();
 
 		BindMarkers bindMarkers = BindMarkersFactory.named("@", "p", 32).create();
 

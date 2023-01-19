@@ -89,13 +89,13 @@ class XhrTransportTests {
 		HttpHeaders handshakeHeaders = new HttpHeaders();
 		handshakeHeaders.setOrigin("foo");
 
-		TransportRequest request = mock(TransportRequest.class);
+		TransportRequest request = mock();
 		given(request.getSockJsUrlInfo()).willReturn(new SockJsUrlInfo(URI.create("https://example.com")));
 		given(request.getHandshakeHeaders()).willReturn(handshakeHeaders);
 		given(request.getHttpRequestHeaders()).willReturn(new HttpHeaders());
 
 		TestXhrTransport transport = new TestXhrTransport();
-		WebSocketHandler handler = mock(WebSocketHandler.class);
+		WebSocketHandler handler = mock();
 		transport.connect(request, handler);
 
 		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);

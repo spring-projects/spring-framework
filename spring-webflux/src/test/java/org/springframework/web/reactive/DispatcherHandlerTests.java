@@ -77,8 +77,8 @@ public class DispatcherHandlerTests {
 
 	@Test
 	void preFlightRequest() {
-		WebHandler webHandler = mock(WebHandler.class);
-		HandlerMapping handlerMapping = mock(HandlerMapping.class);
+		WebHandler webHandler = mock();
+		HandlerMapping handlerMapping = mock();
 		given((handlerMapping).getHandler(any())).willReturn(Mono.just(webHandler));
 
 		StaticApplicationContext context = new StaticApplicationContext();

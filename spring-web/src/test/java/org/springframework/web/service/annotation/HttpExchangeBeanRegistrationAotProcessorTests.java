@@ -24,7 +24,6 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
-import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -61,7 +60,7 @@ class HttpExchangeBeanRegistrationAotProcessorTests {
 	private void process(Class<?> beanClass) {
 		BeanRegistrationAotContribution contribution = createContribution(beanClass);
 		if (contribution != null) {
-			contribution.applyTo(this.generationContext, mock(BeanRegistrationCode.class));
+			contribution.applyTo(this.generationContext, mock());
 		}
 	}
 

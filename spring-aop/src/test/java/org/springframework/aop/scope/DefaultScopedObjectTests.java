@@ -59,7 +59,7 @@ public class DefaultScopedObjectTests {
 	}
 
 	private static void testBadTargetBeanName(final String badTargetBeanName) {
-		ConfigurableBeanFactory factory = mock(ConfigurableBeanFactory.class);
+		ConfigurableBeanFactory factory = mock();
 		new DefaultScopedObject(factory, badTargetBeanName);
 	}
 

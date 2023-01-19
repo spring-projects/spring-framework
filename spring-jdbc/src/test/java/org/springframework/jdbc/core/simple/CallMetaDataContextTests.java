@@ -47,21 +47,18 @@ import static org.mockito.Mockito.verify;
  */
 public class CallMetaDataContextTests {
 
-	private DataSource dataSource;
+	private DataSource dataSource = mock();
 
-	private Connection connection;
+	private Connection connection = mock();
 
-	private DatabaseMetaData databaseMetaData;
+	private DatabaseMetaData databaseMetaData = mock();
 
 	private CallMetaDataContext context = new CallMetaDataContext();
 
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		connection = mock(Connection.class);
-		databaseMetaData = mock(DatabaseMetaData.class);
 		given(connection.getMetaData()).willReturn(databaseMetaData);
-		dataSource = mock(DataSource.class);
 		given(dataSource.getConnection()).willReturn(connection);
 	}
 

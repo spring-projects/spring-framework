@@ -204,7 +204,7 @@ class JmsListenerAnnotationBeanPostProcessorTests {
 
 		@Bean
 		public PlatformTransactionManager transactionManager() {
-			return mock(PlatformTransactionManager.class);
+			return mock();
 		}
 	}
 

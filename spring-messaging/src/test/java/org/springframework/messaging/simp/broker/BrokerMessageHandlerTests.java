@@ -26,8 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.GenericMessage;
@@ -165,8 +163,7 @@ public class BrokerMessageHandlerTests {
 
 
 		TestBrokerMessageHandler(String... destinationPrefixes) {
-			super(mock(SubscribableChannel.class), mock(MessageChannel.class),
-					mock(SubscribableChannel.class), Arrays.asList(destinationPrefixes));
+			super(mock(), mock(), mock(), Arrays.asList(destinationPrefixes));
 
 			setApplicationEventPublisher(this);
 		}

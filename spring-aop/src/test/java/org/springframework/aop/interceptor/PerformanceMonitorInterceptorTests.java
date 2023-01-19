@@ -50,10 +50,10 @@ public class PerformanceMonitorInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsPerformanceMetricsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
 
-		Log log = mock(Log.class);
+		Log log = mock();
 
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
 		interceptor.invokeUnderTrace(mi, log);
@@ -63,11 +63,11 @@ public class PerformanceMonitorInterceptorTests {
 
 	@Test
 	public void testExceptionPathStillLogsPerformanceMetricsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
 		given(mi.proceed()).willThrow(new IllegalArgumentException());
-		Log log = mock(Log.class);
+		Log log = mock();
 
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
 		assertThatIllegalArgumentException().isThrownBy(() ->

@@ -53,7 +53,7 @@ public class InternalResourceViewTests {
 
 	private static final String url = "forward-to";
 
-	private final HttpServletRequest request = mock(HttpServletRequest.class);
+	private final HttpServletRequest request = mock();
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 

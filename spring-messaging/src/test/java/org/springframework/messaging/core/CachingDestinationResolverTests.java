@@ -36,7 +36,7 @@ public class CachingDestinationResolverTests {
 	@Test
 	public void cachedDestination() {
 		@SuppressWarnings("unchecked")
-		DestinationResolver<String> resolver = mock(DestinationResolver.class);
+		DestinationResolver<String> resolver = mock();
 		CachingDestinationResolverProxy<String> resolverProxy = new CachingDestinationResolverProxy<>(resolver);
 
 		given(resolver.resolveDestination("abcd")).willReturn("dcba");

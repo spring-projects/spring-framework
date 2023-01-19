@@ -95,7 +95,7 @@ class DefaultClientRequestObservationConventionTests {
 	@Test
 	void addsKeyValueForNonResolvableStatus() throws Exception {
 		ClientRequestObservationContext context = new ClientRequestObservationContext(this.request);
-		ClientHttpResponse response = mock(ClientHttpResponse.class);
+		ClientHttpResponse response = mock();
 		context.setResponse(response);
 		given(response.getStatusCode()).willThrow(new IOException("test error"));
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("status", "IO_ERROR"));

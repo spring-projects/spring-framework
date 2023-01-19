@@ -39,10 +39,9 @@ public class DebugInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
+		MethodInvocation methodInvocation = mock();
 
-		MethodInvocation methodInvocation = mock(MethodInvocation.class);
-
-		Log log = mock(Log.class);
+		Log log = mock();
 		given(log.isTraceEnabled()).willReturn(true);
 
 		DebugInterceptor interceptor = new StubDebugInterceptor(log);
@@ -54,13 +53,12 @@ public class DebugInterceptorTests {
 
 	@Test
 	public void testExceptionPathStillLogsCorrectly() throws Throwable {
-
-		MethodInvocation methodInvocation = mock(MethodInvocation.class);
+		MethodInvocation methodInvocation = mock();
 
 		IllegalArgumentException exception = new IllegalArgumentException();
 		given(methodInvocation.proceed()).willThrow(exception);
 
-		Log log = mock(Log.class);
+		Log log = mock();
 		given(log.isTraceEnabled()).willReturn(true);
 
 		DebugInterceptor interceptor = new StubDebugInterceptor(log);

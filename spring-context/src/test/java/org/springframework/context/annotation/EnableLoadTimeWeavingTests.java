@@ -84,7 +84,7 @@ class EnableLoadTimeWeavingTests {
 
 		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
-			return mock(LoadTimeWeaver.class);
+			return mock();
 		}
 	}
 
@@ -94,7 +94,7 @@ class EnableLoadTimeWeavingTests {
 
 		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
-			return mock(LoadTimeWeaver.class);
+			return mock();
 		}
 	}
 
@@ -104,7 +104,7 @@ class EnableLoadTimeWeavingTests {
 
 		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
-			return mock(LoadTimeWeaver.class);
+			return mock();
 		}
 	}
 

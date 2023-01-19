@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
  */
 class IntrospectingClientHttpResponseTests {
 
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+	private final ClientHttpResponse response = mock();
 
 	private final IntrospectingClientHttpResponse wrappedResponse = new IntrospectingClientHttpResponse(response);
 

@@ -47,7 +47,7 @@ class EventPublicationInterceptorTests {
 
 	@BeforeEach
 	void setup() {
-		ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
+		ApplicationEventPublisher publisher = mock();
 		this.interceptor.setApplicationEventPublisher(publisher);
 	}
 

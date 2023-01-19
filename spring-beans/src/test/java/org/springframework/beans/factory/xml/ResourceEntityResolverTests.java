@@ -18,7 +18,6 @@ package org.springframework.beans.factory.xml;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 import org.xml.sax.InputSource;
 
 import org.springframework.core.io.Resource;
@@ -27,6 +26,7 @@ import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for ResourceEntityResolver.
@@ -68,7 +68,7 @@ class ResourceEntityResolverTests {
 	@ParameterizedTest
 	@ValueSource(strings = { "https://example.org/schema.dtd", "https://example.org/schema.xsd" })
 	void resolveEntityCallsFallbackThatReturnsInputSource(String systemId) throws Exception {
-		InputSource expected = Mockito.mock(InputSource.class);
+		InputSource expected = mock();
 		ConfigurableFallbackEntityResolver resolver = new ConfigurableFallbackEntityResolver(expected);
 
 		assertThat(resolver.resolveEntity("testPublicId", systemId)).isSameAs(expected);

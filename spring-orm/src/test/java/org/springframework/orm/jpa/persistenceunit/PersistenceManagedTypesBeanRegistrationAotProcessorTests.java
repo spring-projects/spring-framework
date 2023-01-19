@@ -142,7 +142,7 @@ class PersistenceManagedTypesBeanRegistrationAotProcessorTests {
 
 		@Bean
 		public DataSource mockDataSource() {
-			return mock(DataSource.class);
+			return mock();
 		}
 
 		@Bean

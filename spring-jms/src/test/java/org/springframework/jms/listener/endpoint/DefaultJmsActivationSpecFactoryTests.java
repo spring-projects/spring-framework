@@ -61,7 +61,7 @@ public class DefaultJmsActivationSpecFactoryTests {
 	public void webSphereResourceAdapterSetup() throws Exception {
 		Destination destination = new StubQueue();
 
-		DestinationResolver destinationResolver = mock(DestinationResolver.class);
+		DestinationResolver destinationResolver = mock();
 		given(destinationResolver.resolveDestinationName(null, "destinationname", false)).willReturn(destination);
 
 		DefaultJmsActivationSpecFactory activationSpecFactory = new DefaultJmsActivationSpecFactory();

@@ -161,7 +161,7 @@ public class RedirectViewTests {
 		wac.setServletContext(new MockServletContext());
 		wac.refresh();
 
-		RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
+		RequestDataValueProcessor mockProcessor = mock();
 		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
 
 		RedirectView rv = new RedirectView();
@@ -186,7 +186,7 @@ public class RedirectViewTests {
 		contextLoader.initWebApplicationContext(servletContext);
 
 		try {
-			RequestDataValueProcessor mockProcessor = mock(RequestDataValueProcessor.class);
+			RequestDataValueProcessor mockProcessor = mock();
 			wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
 
 			RedirectView rv = new RedirectView();

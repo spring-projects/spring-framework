@@ -41,9 +41,9 @@ import static org.mockito.Mockito.verify;
  */
 class DatabaseStartupValidatorTests {
 
-	private final DataSource dataSource = mock(DataSource.class);
+	private final DataSource dataSource = mock();
 
-	private final Connection connection = mock(Connection.class);
+	private final Connection connection = mock();
 
 	private final DatabaseStartupValidator validator = new DatabaseStartupValidator();
 
@@ -103,7 +103,7 @@ class DatabaseStartupValidatorTests {
 	@SuppressWarnings("deprecation")
 	void useValidationQueryInsteadOfIsValid() throws Exception {
 		String validationQuery = "SELECT NOW() FROM DUAL";
-		Statement statement = mock(Statement.class);
+		Statement statement = mock();
 		given(connection.createStatement()).willReturn(statement);
 		given(statement.execute(validationQuery)).willReturn(true);
 
@@ -120,7 +120,7 @@ class DatabaseStartupValidatorTests {
 	@SuppressWarnings("deprecation")
 	void shouldExecuteValidationTwiceOnError() throws Exception {
 		String validationQuery = "SELECT NOW() FROM DUAL";
-		Statement statement = mock(Statement.class);
+		Statement statement = mock();
 		given(connection.createStatement()).willReturn(statement);
 		given(statement.execute(validationQuery))
 				.willThrow(new SQLException("Test"))

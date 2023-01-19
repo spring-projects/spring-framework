@@ -44,6 +44,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
 /**
  * {@link MockMvcWebTestClient} equivalent of the MockMvc
@@ -97,7 +98,7 @@ public class AsyncControllerJavaConfigTests {
 
 		@Bean
 		public CallableProcessingInterceptor callableInterceptor() {
-			return Mockito.mock(CallableProcessingInterceptor.class);
+			return mock();
 		}
 
 		@Bean

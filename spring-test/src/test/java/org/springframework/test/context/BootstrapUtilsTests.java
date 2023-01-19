@@ -56,7 +56,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  */
 class BootstrapUtilsTests {
 
-	private final CacheAwareContextLoaderDelegate delegate = mock(CacheAwareContextLoaderDelegate.class);
+	private final CacheAwareContextLoaderDelegate delegate = mock();
 
 	@Test
 	void resolveTestContextBootstrapperWithEmptyBootstrapWithAnnotation() {

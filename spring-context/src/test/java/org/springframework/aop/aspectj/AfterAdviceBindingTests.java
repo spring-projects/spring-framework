@@ -42,7 +42,7 @@ class AfterAdviceBindingTests {
 
 	private ClassPathXmlApplicationContext ctx;
 
-	private AdviceBindingCollaborator mockCollaborator;
+	private AdviceBindingCollaborator mockCollaborator = mock();
 
 	private ITestBean testBeanProxy;
 
@@ -60,7 +60,6 @@ class AfterAdviceBindingTests {
 		// we need the real target too, not just the proxy...
 		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
 
-		mockCollaborator = mock(AdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 	}
 

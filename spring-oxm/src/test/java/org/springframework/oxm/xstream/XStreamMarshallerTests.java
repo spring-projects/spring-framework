@@ -155,7 +155,7 @@ class XStreamMarshallerTests {
 
 	@Test
 	void marshalSaxResult() throws Exception {
-		ContentHandler contentHandler = mock(ContentHandler.class);
+		ContentHandler contentHandler = mock();
 		SAXResult result = new SAXResult(contentHandler);
 		marshaller.marshal(flight, result);
 		InOrder ordered = inOrder(contentHandler);

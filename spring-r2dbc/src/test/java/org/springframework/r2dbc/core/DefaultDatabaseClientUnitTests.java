@@ -76,7 +76,7 @@ class DefaultDatabaseClientUnitTests {
 	@BeforeEach
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void before() {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 
 		when(connectionFactory.create()).thenReturn((Publisher) Mono.just(connection));
 		when(connection.close()).thenReturn(Mono.empty());
@@ -88,7 +88,7 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void connectionFactoryIsExposed() {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		DatabaseClient databaseClient = DatabaseClient.builder()
 				.connectionFactory(connectionFactory)
 				.bindMarkers(BindMarkersFactory.anonymous("?")).build();
@@ -224,7 +224,7 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void rowsUpdatedShouldEmitSingleValue() {
-		Result result = mock(Result.class);
+		Result result = mock();
 		when(result.getRowsUpdated()).thenReturn(Mono.empty(), Mono.just(2L), Flux.just(1L, 2L, 3L));
 		mockStatementFor("DROP TABLE tab;", result);
 
@@ -399,7 +399,7 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	private Statement mockStatementFor(@Nullable String sql, @Nullable Result result) {
-		Statement statement = mock(Statement.class);
+		Statement statement = mock();
 		when(connection.createStatement(sql == null ? anyString() : eq(sql))).thenReturn(statement);
 		when(statement.returnGeneratedValues(anyString())).thenReturn(statement);
 		when(statement.returnGeneratedValues()).thenReturn(statement);

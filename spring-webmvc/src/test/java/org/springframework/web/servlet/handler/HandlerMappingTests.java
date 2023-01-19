@@ -48,11 +48,10 @@ class HandlerMappingTests {
 
 	@PathPatternsParameterizedTest
 	void orderedInterceptors(Function<String, MockHttpServletRequest> requestFactory, TestHandlerMapping mapping) throws Exception {
-
 		MappedInterceptor i1 = new MappedInterceptor(new String[] {"/**"}, mock(HandlerInterceptor.class));
-		HandlerInterceptor i2 = mock(HandlerInterceptor.class);
+		HandlerInterceptor i2 = mock();
 		MappedInterceptor i3 = new MappedInterceptor(new String[] {"/**"}, mock(HandlerInterceptor.class));
-		HandlerInterceptor i4 = mock(HandlerInterceptor.class);
+		HandlerInterceptor i4 = mock();
 
 		mapping.setInterceptors(i1, i2, i3, i4);
 		mapping.setApplicationContext(new StaticWebApplicationContext());

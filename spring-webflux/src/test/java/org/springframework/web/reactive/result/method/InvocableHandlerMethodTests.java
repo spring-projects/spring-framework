@@ -231,7 +231,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	private <T> HandlerMethodArgumentResolver stubResolver(Mono<Object> stubValue) {
-		HandlerMethodArgumentResolver resolver = mock(HandlerMethodArgumentResolver.class);
+		HandlerMethodArgumentResolver resolver = mock();
 		given(resolver.supportsParameter(any())).willReturn(true);
 		given(resolver.resolveArgument(any(), any(), any())).willReturn(stubValue);
 		return resolver;

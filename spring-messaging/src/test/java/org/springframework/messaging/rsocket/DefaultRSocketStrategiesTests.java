@@ -110,7 +110,7 @@ class DefaultRSocketStrategiesTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void applyMetadataExtractors() {
-		Consumer<MetadataExtractorRegistry> consumer = mock(Consumer.class);
+		Consumer<MetadataExtractorRegistry> consumer = mock();
 		RSocketStrategies.builder().metadataExtractorRegistry(consumer).build();
 		verify(consumer, times(1)).accept(any());
 	}

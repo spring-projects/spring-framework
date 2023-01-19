@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,22 +32,17 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("deprecation")
 class FutureAdapterTests {
 
-	private FutureAdapter<String, Integer> adapter;
-
-	private Future<Integer> adaptee;
-
-
-	@BeforeEach
 	@SuppressWarnings("unchecked")
-	void setUp() {
-		adaptee = mock(Future.class);
-		adapter = new FutureAdapter<>(adaptee) {
-			@Override
-			protected String adapt(Integer adapteeResult) throws ExecutionException {
-				return adapteeResult.toString();
-			}
-		};
-	}
+	private Future<Integer> adaptee = mock();
+
+	private FutureAdapter<String, Integer> adapter = new FutureAdapter<>(adaptee) {
+		@Override
+		protected String adapt(Integer adapteeResult) throws ExecutionException {
+			return adapteeResult.toString();
+		}
+	};
+
+
 
 	@Test
 	void cancel() {

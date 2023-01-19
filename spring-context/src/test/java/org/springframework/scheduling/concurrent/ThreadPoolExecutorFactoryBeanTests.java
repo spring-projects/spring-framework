@@ -97,7 +97,7 @@ class ThreadPoolExecutorFactoryBeanTests {
 				int corePoolSize, int maxPoolSize, int keepAliveSeconds, BlockingQueue<Runnable> queue,
 				ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
-			return mock(ThreadPoolExecutor.class);
+			return mock();
 		}
 	}
 

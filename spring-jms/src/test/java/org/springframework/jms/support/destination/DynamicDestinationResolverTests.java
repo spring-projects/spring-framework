@@ -43,7 +43,7 @@ public class DynamicDestinationResolverTests {
 	@Test
 	public void resolveWithPubSubTopicSession() throws Exception {
 		Topic expectedDestination = new StubTopic();
-		TopicSession session = mock(TopicSession.class);
+		TopicSession session = mock();
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination);
 		testResolveDestination(session, expectedDestination, true);
 	}
@@ -51,7 +51,7 @@ public class DynamicDestinationResolverTests {
 	@Test
 	public void resolveWithPubSubVanillaSession() throws Exception {
 		Topic expectedDestination = new StubTopic();
-		Session session = mock(Session.class);
+		Session session = mock();
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination);
 		testResolveDestination(session, expectedDestination, true);
 	}
@@ -59,7 +59,7 @@ public class DynamicDestinationResolverTests {
 	@Test
 	public void resolveWithPointToPointQueueSession() throws Exception {
 		Queue expectedDestination = new StubQueue();
-		Session session = mock(QueueSession.class);
+		QueueSession session = mock();
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);
 		testResolveDestination(session, expectedDestination, false);
 	}
@@ -67,7 +67,7 @@ public class DynamicDestinationResolverTests {
 	@Test
 	public void resolveWithPointToPointVanillaSession() throws Exception {
 		Queue expectedDestination = new StubQueue();
-		Session session = mock(Session.class);
+		Session session = mock();
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);
 		testResolveDestination(session, expectedDestination, false);
 	}

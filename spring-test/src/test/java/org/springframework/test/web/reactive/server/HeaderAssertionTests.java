@@ -242,7 +242,7 @@ class HeaderAssertionTests {
 		ExchangeResult result = new ExchangeResult(
 				request, response, Mono.empty(), Mono.empty(), Duration.ZERO, null, null);
 
-		return new HeaderAssertions(result, mock(WebTestClient.ResponseSpec.class));
+		return new HeaderAssertions(result, mock());
 	}
 
 }

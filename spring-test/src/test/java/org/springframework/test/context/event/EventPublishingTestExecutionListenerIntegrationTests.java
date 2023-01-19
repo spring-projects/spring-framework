@@ -232,7 +232,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 		@Bean
 		public TestExecutionListener listener() {
-			return mock(TestExecutionListener.class);
+			return mock();
 		}
 
 		/**

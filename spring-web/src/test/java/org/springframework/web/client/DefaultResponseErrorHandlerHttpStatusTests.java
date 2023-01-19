@@ -59,7 +59,7 @@ class DefaultResponseErrorHandlerHttpStatusTests {
 
 	private final DefaultResponseErrorHandler handler = new DefaultResponseErrorHandler();
 
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+	private final ClientHttpResponse response = mock();
 
 
 	@ParameterizedTest(name = "[{index}] error: [{0}]")

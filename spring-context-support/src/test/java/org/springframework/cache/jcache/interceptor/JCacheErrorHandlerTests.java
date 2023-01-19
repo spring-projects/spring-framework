@@ -154,7 +154,7 @@ public class JCacheErrorHandlerTests {
 		@Bean
 		@Override
 		public CacheErrorHandler errorHandler() {
-			return mock(CacheErrorHandler.class);
+			return mock();
 		}
 
 		@Bean
@@ -164,14 +164,14 @@ public class JCacheErrorHandlerTests {
 
 		@Bean
 		public Cache mockCache() {
-			Cache cache = mock(Cache.class);
+			Cache cache = mock();
 			given(cache.getName()).willReturn("test");
 			return cache;
 		}
 
 		@Bean
 		public Cache mockErrorCache() {
-			Cache cache = mock(Cache.class);
+			Cache cache = mock();
 			given(cache.getName()).willReturn("error");
 			return cache;
 		}

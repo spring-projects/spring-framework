@@ -155,7 +155,7 @@ public class ResponseBodyEmitterTests {
 
 	@Test
 	public void onTimeoutBeforeHandlerInitialized() throws Exception  {
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 		this.emitter.onTimeout(runnable);
 		this.emitter.initialize(this.handler);
 
@@ -176,7 +176,7 @@ public class ResponseBodyEmitterTests {
 		verify(this.handler).onTimeout(captor.capture());
 		verify(this.handler).onCompletion(any());
 
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 		this.emitter.onTimeout(runnable);
 
 		assertThat(captor.getValue()).isNotNull();
@@ -186,7 +186,7 @@ public class ResponseBodyEmitterTests {
 
 	@Test
 	public void onCompletionBeforeHandlerInitialized() throws Exception  {
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 		this.emitter.onCompletion(runnable);
 		this.emitter.initialize(this.handler);
 
@@ -207,7 +207,7 @@ public class ResponseBodyEmitterTests {
 		verify(this.handler).onTimeout(any());
 		verify(this.handler).onCompletion(captor.capture());
 
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 		this.emitter.onCompletion(runnable);
 
 		assertThat(captor.getValue()).isNotNull();

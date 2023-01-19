@@ -100,7 +100,7 @@ class StreamUtilsTests {
 
 	@Test
 	void nonClosingInputStream() throws Exception {
-		InputStream source = mock(InputStream.class);
+		InputStream source = mock();
 		InputStream nonClosing = StreamUtils.nonClosing(source);
 		nonClosing.read();
 		nonClosing.read(bytes);
@@ -115,7 +115,7 @@ class StreamUtilsTests {
 
 	@Test
 	void nonClosingOutputStream() throws Exception {
-		OutputStream source = mock(OutputStream.class);
+		OutputStream source = mock();
 		OutputStream nonClosing = StreamUtils.nonClosing(source);
 		nonClosing.write(1);
 		nonClosing.write(bytes);

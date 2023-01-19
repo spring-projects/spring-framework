@@ -175,14 +175,14 @@ class AotServicesTests {
 		AotServices<TestService> loaded = AotServices.factoriesAndBeans(loader, beanFactory).load(TestService.class);
 		assertThat(loaded.getSource(loaded.asList().get(0))).isEqualTo(Source.SPRING_FACTORIES_LOADER);
 		assertThat(loaded.getSource(loaded.asList().get(1))).isEqualTo(Source.BEAN_FACTORY);
-		TestService missing = mock(TestService.class);
+		TestService missing = mock();
 		assertThatIllegalStateException().isThrownBy(()->loaded.getSource(missing));
 	}
 
 	@Test
 	void getSourceWhenMissingThrowsException() {
 		AotServices<TestService> loaded = AotServices.factories().load(TestService.class);
-		TestService missing = mock(TestService.class);
+		TestService missing = mock();
 		assertThatIllegalStateException().isThrownBy(()->loaded.getSource(missing));
 	}
 

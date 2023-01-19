@@ -41,10 +41,10 @@ public class SharedEntityManagerFactoryTests {
 	public void testValidUsage() {
 		Object o = new Object();
 
-		EntityManager mockEm = mock(EntityManager.class);
+		EntityManager mockEm = mock();
 		given(mockEm.isOpen()).willReturn(true);
 
-		EntityManagerFactory mockEmf = mock(EntityManagerFactory.class);
+		EntityManagerFactory mockEmf = mock();
 		given(mockEmf.createEntityManager()).willReturn(mockEm);
 
 		SharedEntityManagerBean proxyFactoryBean = new SharedEntityManagerBean();

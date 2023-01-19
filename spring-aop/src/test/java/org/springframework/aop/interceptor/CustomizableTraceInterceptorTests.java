@@ -94,12 +94,11 @@ public class CustomizableTraceInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
-
-		MethodInvocation methodInvocation = mock(MethodInvocation.class);
+		MethodInvocation methodInvocation = mock();
 		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(methodInvocation.getThis()).willReturn(this);
 
-		Log log = mock(Log.class);
+		Log log = mock();
 		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
@@ -110,15 +109,14 @@ public class CustomizableTraceInterceptorTests {
 
 	@Test
 	public void testExceptionPathLogsCorrectly() throws Throwable {
-
-		MethodInvocation methodInvocation = mock(MethodInvocation.class);
+		MethodInvocation methodInvocation = mock();
 
 		IllegalArgumentException exception = new IllegalArgumentException();
 		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(methodInvocation.getThis()).willReturn(this);
 		given(methodInvocation.proceed()).willThrow(exception);
 
-		Log log = mock(Log.class);
+		Log log = mock();
 		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
@@ -131,15 +129,14 @@ public class CustomizableTraceInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectlyWithPrettyMuchAllPlaceholdersMatching() throws Throwable {
-
-		MethodInvocation methodInvocation = mock(MethodInvocation.class);
+		MethodInvocation methodInvocation = mock();
 
 		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
 		given(methodInvocation.getThis()).willReturn(this);
 		given(methodInvocation.getArguments()).willReturn(new Object[]{"$ One \\$", 2L});
 		given(methodInvocation.proceed()).willReturn("Hello!");
 
-		Log log = mock(Log.class);
+		Log log = mock();
 		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
