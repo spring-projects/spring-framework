@@ -20,7 +20,6 @@ import java.util.Map;
 
 import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -41,7 +40,6 @@ import static org.mockito.Mockito.mock;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
-@Disabled("JRuby not compatible with JDK 9 yet")
 class JRubyScriptTemplateTests {
 
 	private WebApplicationContext webAppContext = mock();

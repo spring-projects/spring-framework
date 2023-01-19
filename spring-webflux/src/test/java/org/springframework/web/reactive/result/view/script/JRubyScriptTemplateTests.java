@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.view.script;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -37,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-@Disabled("JRuby not compatible with JDK 9 yet")
 class JRubyScriptTemplateTests {
 
 	@Test
