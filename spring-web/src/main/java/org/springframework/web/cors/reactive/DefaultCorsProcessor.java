@@ -193,7 +193,6 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * {@link CorsConfiguration#checkOrigin(String)}.
 	 */
 	@Nullable
-
 	protected List<String> checkHeaders(CorsConfiguration config, List<String> requestHeaders) {
 		return config.checkHeaders(requestHeaders);
 	}
