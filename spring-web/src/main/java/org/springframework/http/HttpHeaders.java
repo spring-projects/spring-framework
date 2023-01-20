@@ -1537,8 +1537,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return all values of a given header name,
-	 * even if this header is set multiple times.
+	 * Return all values of a given header name, even if this header is set
+	 * multiple times.
+	 * <p>This method supports double-quoted values, as described in
+	 * <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-5.5-8">RFC
+	 * 9110, section 5.5</a>.
 	 * @param headerName the header name
 	 * @return all associated values
 	 * @since 4.3
@@ -1549,12 +1552,59 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			List<String> result = new ArrayList<>();
 			for (String value : values) {
 				if (value != null) {
-					Collections.addAll(result, StringUtils.tokenizeToStringArray(value, ","));
+					result.addAll(tokenizeQuoted(value));
 				}
 			}
 			return result;
 		}
 		return Collections.emptyList();
+	}
+
+	private static List<String> tokenizeQuoted(String str) {
+		List<String> tokens = new ArrayList<>();
+		boolean quoted = false;
+		boolean trim = true;
+		StringBuilder builder = new StringBuilder(str.length());
+		for (int i = 0; i < str.length(); ++i) {
+			char ch = str.charAt(i);
+			if (ch == '"') {
+				if (builder.isEmpty()) {
+					quoted = true;
+				}
+				else if (quoted) {
+					quoted = false;
+					trim = false;
+				}
+				else {
+					builder.append(ch);
+				}
+			}
+			else if (ch == '\\' && quoted && i < str.length() - 1) {
+				builder.append(str.charAt(++i));
+			}
+			else if (ch == ',' && !quoted) {
+				addToken(builder, tokens, trim);
+				builder.setLength(0);
+				trim = false;
+			}
+			else if (quoted || (!builder.isEmpty() && trim) || !Character.isWhitespace(ch)) {
+				builder.append(ch);
+			}
+		}
+		if (!builder.isEmpty()) {
+			addToken(builder, tokens, trim);
+		}
+		return tokens;
+	}
+
+	private static void addToken(StringBuilder builder, List<String> tokens, boolean trim) {
+		String token = builder.toString();
+		if (trim) {
+			token = token.trim();
+		}
+		if (!token.isEmpty()) {
+			tokens.add(token);
+		}
 	}
 
 	/**
