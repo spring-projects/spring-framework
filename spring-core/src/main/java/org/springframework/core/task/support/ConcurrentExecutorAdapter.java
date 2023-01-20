@@ -34,7 +34,10 @@ import org.springframework.util.Assert;
  * @since 2.5
  * @see java.util.concurrent.Executor
  * @see org.springframework.core.task.TaskExecutor
+ * @deprecated {@code ConcurrentExecutorAdapter} is obsolete and will be removed
+ * in Spring Framework 6.1
  */
+@Deprecated(since = "6.0.5", forRemoval = true)
 public class ConcurrentExecutorAdapter implements Executor {
 
 	private final TaskExecutor taskExecutor;
