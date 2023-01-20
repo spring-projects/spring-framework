@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * {@link Runnable Runnables} based on different kinds of triggers.
  *
  * <p>This interface is separate from {@link SchedulingTaskExecutor} since it
- * usually represents for a different kind of backend, i.e. a thread pool with
+ * usually represents a different kind of backend, i.e. a thread pool with
  * different characteristics and capabilities. Implementations may implement
  * both interfaces if they can handle both kinds of execution characteristics.
  *
