@@ -63,8 +63,8 @@ import org.springframework.web.context.ContextLoader;
  * ContextLoader and/or "contextClass" init-param for FrameworkServlet must be set to
  * the fully-qualified name of this class.
  *
- * <p>As of Spring 3.1, this class may also be directly instantiated and injected into
- * Spring's {@code DispatcherServlet} or {@code ContextLoaderListener} when using the
+ * <p>This class may also be directly instantiated and injected into Spring's
+ * {@code DispatcherServlet} or {@code ContextLoaderListener} when using the
  * {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}
  * code-based alternative to {@code web.xml}. See its Javadoc for details and usage examples.
  *

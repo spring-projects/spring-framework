@@ -70,10 +70,10 @@ import org.springframework.util.StringUtils;
  * load or obtain and hook up a shared parent context to the root application context.
  * See the {@link #loadParentContext(ServletContext)} method for more information.
  *
- * <p>As of Spring 3.1, {@code ContextLoader} supports injecting the root web
- * application context via the {@link #ContextLoader(WebApplicationContext)}
- * constructor, allowing for programmatic configuration in Servlet initializers.
- * See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
+ * <p>{@code ContextLoader} supports injecting the root web application context
+ * via the {@link #ContextLoader(WebApplicationContext)} constructor, allowing for
+ * programmatic configuration in Servlet initializers. See
+ * {@link org.springframework.web.WebApplicationInitializer} for usage examples.
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu

@@ -136,13 +136,15 @@ To configure the rules that the `TaskExecutor` uses, we expose simple bean prope
 [[scheduling-task-scheduler]]
 == The Spring `TaskScheduler` Abstraction
 
-In addition to the `TaskExecutor` abstraction, Spring 3.0 introduced a `TaskScheduler`
-with a variety of methods for scheduling tasks to run at some point in the future.
-The following listing shows the `TaskScheduler` interface definition:
+In addition to the `TaskExecutor` abstraction, Spring has a `TaskScheduler` SPI with a
+variety of methods for scheduling tasks to run at some point in the future. The following
+listing shows the `TaskScheduler` interface definition:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TaskScheduler {
+
+		Clock getClock();
 
 		ScheduledFuture schedule(Runnable task, Trigger trigger);
 
@@ -168,12 +170,11 @@ much more flexible.
 [[scheduling-trigger-interface]]
 === `Trigger` Interface
 
-The `Trigger` interface is essentially inspired by JSR-236 which, as of Spring 3.0,
-was not yet officially implemented. The basic idea of the `Trigger` is that execution
-times may be determined based on past execution outcomes or even arbitrary conditions.
-If these determinations take into account the outcome of the preceding execution,
-that information is available within a `TriggerContext`. The `Trigger` interface itself
-is quite simple, as the following listing shows:
+The `Trigger` interface is essentially inspired by JSR-236. The basic idea of the
+`Trigger` is that execution times may be determined based on past execution outcomes or
+even arbitrary conditions. If these determinations take into account the outcome of the
+preceding execution, that information is available within a `TriggerContext`. The
+`Trigger` interface itself is quite simple, as the following listing shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -191,6 +192,8 @@ default). The following listing shows the available methods for `Trigger` implem
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	public interface TriggerContext {
+
+		Clock getClock();
 
 		Instant lastScheduledExecution();
 

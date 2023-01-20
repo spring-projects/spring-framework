@@ -42,8 +42,8 @@ import org.springframework.util.CollectionUtils;
  * Helper bean for registering tasks with a {@link TaskScheduler}, typically using cron
  * expressions.
  *
- * <p>As of Spring 3.1, {@code ScheduledTaskRegistrar} has a more prominent user-facing
- * role when used in conjunction with the {@link
+ * <p>{@code ScheduledTaskRegistrar} has a more prominent user-facing role when used in
+ * conjunction with the {@link
  * org.springframework.scheduling.annotation.EnableAsync @EnableAsync} annotation and its
  * {@link org.springframework.scheduling.annotation.SchedulingConfigurer
  * SchedulingConfigurer} callback interface.

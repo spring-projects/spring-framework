@@ -28,8 +28,8 @@ import org.springframework.web.context.ServletContextAware;
  * Exposes that ServletContext init parameter when used as bean reference,
  * effectively making it available as named Spring bean instance.
  *
- * <p><b>NOTE:</b> As of Spring 3.0, you may also use the "contextParameters" default
- * bean which is of type Map, and dereference it using an "#{contextParameters.myKey}"
+ * <p><b>NOTE:</b> You may also use the "contextParameters" default bean, which
+ * is of type Map, and dereference it using a "#{contextParameters.myKey}"
  * expression to access a specific parameter by name.
  *
  * @author Juergen Hoeller

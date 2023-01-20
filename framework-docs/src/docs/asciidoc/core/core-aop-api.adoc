@@ -1100,12 +1100,15 @@ subclass is used to implement the Decorator pattern, weaving in the advice.
 CGLIB proxying should generally be transparent to users. However, there are some issues
 to consider:
 
-* `Final` methods cannot be advised, as they cannot be overridden.
-* There is no need to add CGLIB to your classpath. As of Spring 3.2, CGLIB is repackaged
-  and included in the spring-core JAR. In other words, CGLIB-based AOP works "`out of
-  the box`", as do JDK dynamic proxies.
+* `final` classes cannot be proxied, because they cannot be extended.
+* `final` methods cannot be advised, because they cannot be overridden.
+* `private` methods cannot be advised, because they cannot be overridden.
 
-There is little performance difference between CGLIB proxying and dynamic proxies.
+NOTE: There is no need to add CGLIB to your classpath. CGLIB is repackaged and included
+in the `spring-core` JAR. In other words, CGLIB-based AOP works "out of the box", as do
+JDK dynamic proxies.
+
+There is little performance difference between CGLIB proxies and dynamic proxies.
 Performance should not be a decisive consideration in this case.
 
 
