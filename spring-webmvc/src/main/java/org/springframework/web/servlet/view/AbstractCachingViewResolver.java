@@ -133,7 +133,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * Note that this flag only applies if the general {@link #setCache "cache"}
 	 * flag is kept at its default of "true" as well.
 	 * <p>Of specific interest is the ability for some AbstractUrlBasedView
-	 * implementations (FreeMarker, Tiles) to check if an underlying resource
+	 * implementations (e.g., FreeMarker) to check if an underlying resource
 	 * exists via {@link AbstractUrlBasedView#checkResource(Locale)}.
 	 * With this flag set to "false", an underlying resource that re-appears
 	 * is noticed and used. With the flag set to "true", one check is made only.
