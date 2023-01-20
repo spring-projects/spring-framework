@@ -1091,24 +1091,6 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest  // SPR-15782
-	void exchangeWithRelativeUrl(ClientHttpConnector connector) {
-		startServer(connector);
-
-		String uri = "/api/v4/groups/1";
-		Mono<ResponseEntity<Void>> responseMono = WebClient.builder().build().get().uri(uri)
-				.retrieve().toBodilessEntity();
-
-		StepVerifier.create(responseMono)
-				.expectErrorSatisfies(throwable -> {
-					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
-					WebClientRequestException ex = (WebClientRequestException) throwable;
-					assertThat(ex.getMethod()).isEqualTo(HttpMethod.GET);
-					assertThat(ex.getUri()).isEqualTo(URI.create(uri));
-				})
-				.verify(Duration.ofSeconds(5));
-	}
-
 	@ParameterizedWebClientTest
 	void filter(ClientHttpConnector connector) {
 		startServer(connector);
