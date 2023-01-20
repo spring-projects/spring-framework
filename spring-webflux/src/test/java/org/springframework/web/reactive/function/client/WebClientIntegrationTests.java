@@ -34,7 +34,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,6 +49,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
@@ -1281,12 +1281,13 @@ class WebClientIntegrationTests {
 	private <T> Mono<T> doMalformedChunkedResponseTest(
 			ClientHttpConnector connector, Function<ResponseSpec, Mono<T>> handler) {
 
-		AtomicInteger port = new AtomicInteger();
+		Sinks.One<Integer> portSink = Sinks.one();
 
 		Thread serverThread = new Thread(() -> {
 			// No way to simulate a malformed chunked response through MockWebServer.
 			try (ServerSocket serverSocket = new ServerSocket(0)) {
-				port.set(serverSocket.getLocalPort());
+				Sinks.EmitResult result = portSink.tryEmitValue(serverSocket.getLocalPort());
+				assertThat(result).isEqualTo(Sinks.EmitResult.OK);
 				Socket socket = serverSocket.accept();
 				InputStream is = socket.getInputStream();
 
@@ -1310,12 +1311,13 @@ class WebClientIntegrationTests {
 
 		serverThread.start();
 
-		WebClient client = WebClient.builder()
-				.clientConnector(connector)
-				.baseUrl("http://localhost:" + port)
-				.build();
-
-		return handler.apply(client.post().retrieve());
+		return portSink.asMono().flatMap(port -> {
+			WebClient client = WebClient.builder()
+					.clientConnector(connector)
+					.baseUrl("http://localhost:" + port)
+					.build();
+			return handler.apply(client.post().retrieve());
+		});
 	}
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {
