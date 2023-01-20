@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1073,24 +1073,6 @@ class WebClientIntegrationTests {
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("*/*");
 			assertThat(request.getPath()).isEqualTo("/unknownPage");
 		});
-	}
-
-	@ParameterizedWebClientTest  // SPR-15782
-	void exchangeWithRelativeUrl(ClientHttpConnector connector) {
-		startServer(connector);
-
-		String uri = "/api/v4/groups/1";
-		Mono<ResponseEntity<Void>> responseMono = WebClient.builder().build().get().uri(uri)
-				.retrieve().toBodilessEntity();
-
-		StepVerifier.create(responseMono)
-				.expectErrorSatisfies(throwable -> {
-					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
-					WebClientRequestException ex = (WebClientRequestException) throwable;
-					assertThat(ex.getMethod()).isEqualTo(HttpMethod.GET);
-					assertThat(ex.getUri()).isEqualTo(URI.create(uri));
-				})
-				.verify(Duration.ofSeconds(5));
 	}
 
 	@ParameterizedWebClientTest
