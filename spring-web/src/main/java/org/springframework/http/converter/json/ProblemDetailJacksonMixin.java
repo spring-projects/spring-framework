@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.springframework.http.ProblemDetail;
+import org.springframework.lang.Nullable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -46,7 +47,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 public interface ProblemDetailJacksonMixin {
 
 	@JsonAnySetter
-	void setProperty(String name, Object value);
+	void setProperty(String name, @Nullable Object value);
 
 	@JsonAnyGetter
 	Map<String, Object> getProperties();

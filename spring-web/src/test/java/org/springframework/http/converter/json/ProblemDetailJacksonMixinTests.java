@@ -52,13 +52,15 @@ public class ProblemDetailJacksonMixinTests {
 	void writeCustomProperty() throws Exception {
 		ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Missing header");
 		problemDetail.setProperty("host", "abc.org");
+		problemDetail.setProperty("user", null);
 
 		testWrite(problemDetail,
 				"{\"type\":\"about:blank\"," +
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
 						"\"detail\":\"Missing header\"," +
-						"\"host\":\"abc.org\"}");
+						"\"host\":\"abc.org\"," +
+						"\"user\":null}");
 	}
 
 	@Test
@@ -68,13 +70,15 @@ public class ProblemDetailJacksonMixinTests {
 						"\"title\":\"Bad Request\"," +
 						"\"status\":400," +
 						"\"detail\":\"Missing header\"," +
-						"\"host\":\"abc.org\"}", ProblemDetail.class);
+						"\"host\":\"abc.org\"," +
+						"\"user\":null}", ProblemDetail.class);
 
 		assertThat(problemDetail.getType()).isEqualTo(URI.create("about:blank"));
 		assertThat(problemDetail.getTitle()).isEqualTo("Bad Request");
 		assertThat(problemDetail.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 		assertThat(problemDetail.getDetail()).isEqualTo("Missing header");
 		assertThat(problemDetail.getProperties()).containsEntry("host", "abc.org");
+		assertThat(problemDetail.getProperties()).containsEntry("user", null);
 	}
 
 

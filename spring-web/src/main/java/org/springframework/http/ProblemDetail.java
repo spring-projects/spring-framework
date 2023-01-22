@@ -209,7 +209,7 @@ public class ProblemDetail {
 	 * @param value the property value
 	 * @see org.springframework.http.converter.json.ProblemDetailJacksonMixin
 	 */
-	public void setProperty(String name, Object value) {
+	public void setProperty(String name, @Nullable Object value) {
 		this.properties = (this.properties != null ? this.properties : new LinkedHashMap<>());
 		this.properties.put(name, value);
 	}
