@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
+
 /**
  * Annotation to declare a method on an RSocket service interface as an RSocket
  * endpoint. The endpoint route is determined through the annotation attribute,
@@ -65,6 +67,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Reflective(RSocketExchangeReflectiveProcessor.class)
 public @interface RSocketExchange {
 
 	/**
