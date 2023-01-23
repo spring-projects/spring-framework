@@ -386,6 +386,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
+	public static final String BEARER = "Bearer ";
+
+	public static final String BASIC = "Basic ";
 
 	/**
 	 * An empty {@code HttpHeaders} instance (immutable).
@@ -819,7 +822,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setBasicAuth(String encodedCredentials) {
 		Assert.hasText(encodedCredentials, "'encodedCredentials' must not be null or blank");
-		set(AUTHORIZATION, "Basic " + encodedCredentials);
+		set(AUTHORIZATION, BASIC + encodedCredentials);
 	}
 
 	/**
@@ -830,7 +833,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see <a href="https://tools.ietf.org/html/rfc6750">RFC 6750</a>
 	 */
 	public void setBearerAuth(String token) {
-		set(AUTHORIZATION, "Bearer " + token);
+		set(AUTHORIZATION, BEARER + token);
 	}
 
 	/**
