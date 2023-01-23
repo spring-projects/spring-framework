@@ -34,6 +34,7 @@ dependencies {
 	testImplementation("org.skyscreamer:jsonassert")
 	testImplementation("org.xmlunit:xmlunit-assertj")
 	testImplementation("org.xmlunit:xmlunit-matchers")
+	testImplementation(project(":spring-core-test"))
 	testRuntimeOnly("com.sun.activation:jakarta.activation")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
