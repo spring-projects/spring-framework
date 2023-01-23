@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.Optional
 import java.util.function.Supplier
 
 /**
- * Allow to create easily a WebMvc.fn [RouterFunction] with a [Reactive router Kotlin DSL][RouterFunctionDsl].
+ * Allow to create easily a WebMvc.fn [RouterFunction] with a [router Kotlin DSL][RouterFunctionDsl].
  *
  * Example:
  *
@@ -54,7 +54,7 @@ import java.util.function.Supplier
 fun router(routes: (RouterFunctionDsl.() -> Unit)) = RouterFunctionDsl(routes).build()
 
 /**
- * Provide a WebMvc.fn [RouterFunction] Reactive Kotlin DSL created by [`router { }`][router] in order to be able to write idiomatic Kotlin code.
+ * Provide a WebMvc.fn [RouterFunction] Kotlin DSL created by [`router { }`][router] in order to be able to write idiomatic Kotlin code.
  *
  * @author Sebastien Deleuze
  * @since 5.2
