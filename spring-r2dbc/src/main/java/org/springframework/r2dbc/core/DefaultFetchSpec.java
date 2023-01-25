@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
  * Default {@link FetchSpec} implementation.
  *
  * @author Mark Paluch
+ * @author Simon Baslé
  * @since 5.3
  * @param <T> the row result type
  */
@@ -37,24 +38,21 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 
 	private final ConnectionAccessor connectionAccessor;
 
-	private final String sql;
-
-	private final Function<Connection, Flux<Result>> resultFunction;
+	private final ResultFunction resultFunction;
 
 	private final Function<Connection, Mono<Long>> updatedRowsFunction;
 
 	private final Function<Result, Publisher<T>> resultAdapter;
 
 
-	DefaultFetchSpec(ConnectionAccessor connectionAccessor, String sql,
-			Function<Connection, Flux<Result>> resultFunction,
+	DefaultFetchSpec(ConnectionAccessor connectionAccessor,
+			ResultFunction resultFunction,
 			Function<Connection, Mono<Long>> updatedRowsFunction,
 			Function<Result, Publisher<T>> resultAdapter) {
 
-		this.sql = sql;
 		this.connectionAccessor = connectionAccessor;
 		this.resultFunction = resultFunction;
-		this.updatedRowsFunction = updatedRowsFunction;
+		this.updatedRowsFunction = new DelegateConnectionFunction<>(resultFunction, updatedRowsFunction);
 		this.resultAdapter = resultAdapter;
 	}
 
@@ -68,7 +66,7 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 					}
 					if (list.size() > 1) {
 						return Mono.error(new IncorrectResultSizeDataAccessException(
-								String.format("Query [%s] returned non unique result.", this.sql),
+								String.format("Query [%s] returned non unique result.", this.resultFunction.getSql()),
 								1));
 					}
 					return Mono.just(list.get(0));
@@ -82,7 +80,7 @@ class DefaultFetchSpec<T> implements FetchSpec<T> {
 
 	@Override
 	public Flux<T> all() {
-		return this.connectionAccessor.inConnectionMany(new ConnectionFunction<>(this.sql,
+		return this.connectionAccessor.inConnectionMany(new DelegateConnectionFunction<>(this.resultFunction,
 				connection -> this.resultFunction.apply(connection)
 						.flatMap(this.resultAdapter)));
 	}

@@ -20,19 +20,37 @@ import java.util.function.Function;
 
 import io.r2dbc.spi.Connection;
 
+import org.springframework.lang.Nullable;
 
 /**
- * Union type combining {@link Function} and {@link SqlProvider} to expose the SQL that is
- * related to the underlying action. The SqlProvider can support lazy / generate once semantics,
- * in which case {@link #getSql()} can be {@code null} until the {@code #apply(Connection)}
- * method is invoked.
+ * A {@link ConnectionFunction} that delegates to a {@code SqlProvider} and a plain
+ * {@code Function}.
  *
- * @author Mark Paluch
  * @author Simon Baslé
- * @since 5.3
+ * @since 5.3.26
  * @param <R> the type of the result of the function.
  */
-sealed interface ConnectionFunction<R> extends Function<Connection, R>, SqlProvider
-		permits DelegateConnectionFunction, ResultFunction {
-}
+final class DelegateConnectionFunction<R> implements ConnectionFunction<R> {
 
+	private final SqlProvider sql;
+
+	private final Function<Connection, R> function;
+
+
+	DelegateConnectionFunction(SqlProvider sql, Function<Connection, R> function) {
+		this.sql = sql;
+		this.function = function;
+	}
+
+
+	@Override
+	public R apply(Connection t) {
+		return this.function.apply(t);
+	}
+
+	@Nullable
+	@Override
+	public String getSql() {
+		return this.sql.getSql();
+	}
+}
