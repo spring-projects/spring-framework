@@ -75,6 +75,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 	 * for further processing of the concurrently produced result.
 	 * <p>If this value is not set, the default timeout of the underlying
 	 * implementation is used.
+	 * A value of 0 or less indicates that the asynchronous operation will never time out.
 	 * @param timeout the timeout value in milliseconds
 	 */
 	public void setAsyncRequestTimeout(long timeout) {
