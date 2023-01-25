@@ -131,18 +131,18 @@ Instrumentation is using the `org.springframework.http.client.observation.Client
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
-|`outcome` _(required)_|Outcome of the HTTP client exchange.
-|`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
 |`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided.
+|`client.name` _(required)_|Client name derived from the request URI host.
+|`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
+|`outcome` _(required)_|Outcome of the HTTP client exchange.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |===
 
 .High cardinality Keys
 [cols="a,a"]
 |===
 |Name | Description
-|`client.name` _(required)_|Client name derived from the request URI host.
 |`http.url` _(required)_|HTTP request URI.
 |===
 
@@ -157,18 +157,18 @@ Instrumentation is using the `org.springframework.web.reactive.function.client.C
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
-|`outcome` _(required)_|Outcome of the HTTP client exchange.
-|`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
 |`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided.
+|`client.name` _(required)_|Client name derived from the request URI host.
+|`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
+|`outcome` _(required)_|Outcome of the HTTP client exchange.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |===
 
 .High cardinality Keys
 [cols="a,a"]
 |===
 |Name | Description
-|`client.name` _(required)_|Client name derived from the request URI host.
 |`http.url` _(required)_|HTTP request URI.
 |===
 
