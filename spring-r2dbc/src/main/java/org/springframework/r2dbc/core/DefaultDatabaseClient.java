@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Paluch
  * @author Mingyuan Wu
  * @author Bogdan Ilchyshyn
+ * @author Simon Baslé
  * @since 5.3
  */
 class DefaultDatabaseClient implements DatabaseClient {
@@ -322,9 +323,8 @@ class DefaultDatabaseClient implements DatabaseClient {
 			return fetch().rowsUpdated().then();
 		}
 
-		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, BiFunction<Row, RowMetadata, T> mappingFunction) {
-			String sql = getRequiredSql(sqlSupplier);
-			Function<Connection, Statement> statementFunction = connection -> {
+		private ResultFunction getResultFunction(Supplier<String> sqlSupplier) {
+			BiFunction<Connection, String, Statement> statementFunction = (connection, sql) -> {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing SQL statement [" + sql + "]");
 				}
@@ -370,16 +370,16 @@ class DefaultDatabaseClient implements DatabaseClient {
 				return statement;
 			};
 
-			Function<Connection, Flux<Result>> resultFunction = connection -> {
-				Statement statement = statementFunction.apply(connection);
-				return Flux.from(this.filterFunction.filter(statement, DefaultDatabaseClient.this.executeFunction))
-				.cast(Result.class).checkpoint("SQL \"" + sql + "\" [DatabaseClient]");
-			};
+			return new ResultFunction(sqlSupplier, statementFunction, this.filterFunction, DefaultDatabaseClient.this.executeFunction);
+		}
+
+		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, BiFunction<Row, RowMetadata, T> mappingFunction) {
+			ResultFunction resultHandler = getResultFunction(sqlSupplier);
 
 			return new DefaultFetchSpec<>(
-					DefaultDatabaseClient.this, sql,
-					new ConnectionFunction<>(sql, resultFunction),
-					new ConnectionFunction<>(sql, connection -> sumRowsUpdated(resultFunction, connection)),
+					DefaultDatabaseClient.this,
+					resultHandler,
+					connection -> sumRowsUpdated(resultHandler, connection),
 					mappingFunction);
 		}
 
