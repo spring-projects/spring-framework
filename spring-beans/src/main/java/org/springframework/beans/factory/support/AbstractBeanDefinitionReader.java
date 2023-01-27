@@ -86,16 +86,16 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 		this.registry = registry;
 
 		// Determine ResourceLoader to use.
-		if (this.registry instanceof ResourceLoader) {
-			this.resourceLoader = (ResourceLoader) this.registry;
+		if (this.registry instanceof ResourceLoader _resourceLoader) {
+			this.resourceLoader = _resourceLoader;
 		}
 		else {
 			this.resourceLoader = new PathMatchingResourcePatternResolver();
 		}
 
 		// Inherit Environment if possible
-		if (this.registry instanceof EnvironmentCapable) {
-			this.environment = ((EnvironmentCapable) this.registry).getEnvironment();
+		if (this.registry instanceof EnvironmentCapable environmentCapable) {
+			this.environment = environmentCapable.getEnvironment();
 		}
 		else {
 			this.environment = new StandardEnvironment();
@@ -213,10 +213,10 @@ public abstract class AbstractBeanDefinitionReader implements BeanDefinitionRead
 					"Cannot load bean definitions from location [" + location + "]: no ResourceLoader available");
 		}
 
-		if (resourceLoader instanceof ResourcePatternResolver) {
+		if (resourceLoader instanceof ResourcePatternResolver resourcePatternResolver) {
 			// Resource pattern matching available.
 			try {
-				Resource[] resources = ((ResourcePatternResolver) resourceLoader).getResources(location);
+				Resource[] resources = resourcePatternResolver.getResources(location);
 				int count = loadBeanDefinitions(resources);
 				if (actualResources != null) {
 					Collections.addAll(actualResources, resources);

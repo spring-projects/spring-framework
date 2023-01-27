@@ -766,8 +766,8 @@ class ConstructorResolver {
 										"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
 					}
 					Object sourceHolder = valueHolder.getSource();
-					if (sourceHolder instanceof ConstructorArgumentValues.ValueHolder) {
-						Object sourceValue = ((ConstructorArgumentValues.ValueHolder) sourceHolder).getValue();
+					if (sourceHolder instanceof ConstructorArgumentValues.ValueHolder constructorValueHolder) {
+						Object sourceValue = constructorValueHolder.getValue();
 						args.resolveNecessary = true;
 						args.preparedArguments[paramIndex] = sourceValue;
 					}
@@ -834,8 +834,8 @@ class ConstructorResolver {
 			else if (argValue instanceof BeanMetadataElement) {
 				argValue = valueResolver.resolveValueIfNecessary("constructor argument", argValue);
 			}
-			else if (argValue instanceof String) {
-				argValue = this.beanFactory.evaluateBeanDefinitionString((String) argValue, mbd);
+			else if (argValue instanceof String text) {
+				argValue = this.beanFactory.evaluateBeanDefinitionString(text, mbd);
 			}
 			Class<?> paramType = paramTypes[argIndex];
 			try {

@@ -1619,8 +1619,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		MutablePropertyValues mpvs = null;
 		List<PropertyValue> original;
 
-		if (pvs instanceof MutablePropertyValues) {
-			mpvs = (MutablePropertyValues) pvs;
+		if (pvs instanceof MutablePropertyValues _mpvs) {
+			mpvs = _mpvs;
 			if (mpvs.isConverted()) {
 				// Shortcut: use the pre-converted values as-is.
 				try {

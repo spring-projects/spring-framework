@@ -86,8 +86,8 @@ public class MethodInvokingBean extends ArgumentConvertingMethodInvoker
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		if (beanFactory instanceof ConfigurableBeanFactory cbf) {
+			this.beanFactory = cbf;
 		}
 	}
 
@@ -123,11 +123,11 @@ public class MethodInvokingBean extends ArgumentConvertingMethodInvoker
 			return invoke();
 		}
 		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof Exception) {
-				throw (Exception) ex.getTargetException();
+			if (ex.getTargetException() instanceof Exception exception) {
+				throw exception;
 			}
-			if (ex.getTargetException() instanceof Error) {
-				throw (Error) ex.getTargetException();
+			if (ex.getTargetException() instanceof Error error) {
+				throw error;
 			}
 			throw ex;
 		}

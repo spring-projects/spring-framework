@@ -120,8 +120,8 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 		if (handlerOrClassName == null) {
 			return null;
 		}
-		else if (handlerOrClassName instanceof NamespaceHandler) {
-			return (NamespaceHandler) handlerOrClassName;
+		else if (handlerOrClassName instanceof NamespaceHandler namespaceHandler) {
+			return namespaceHandler;
 		}
 		else {
 			String className = (String) handlerOrClassName;

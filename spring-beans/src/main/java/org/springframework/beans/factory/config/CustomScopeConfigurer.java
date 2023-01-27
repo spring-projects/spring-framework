@@ -98,15 +98,15 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.scopes != null) {
 			this.scopes.forEach((scopeKey, value) -> {
-				if (value instanceof Scope) {
-					beanFactory.registerScope(scopeKey, (Scope) value);
+				if (value instanceof Scope scope) {
+					beanFactory.registerScope(scopeKey, scope);
 				}
 				else if (value instanceof Class<?> scopeClass) {
 					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}
-				else if (value instanceof String) {
-					Class<?> scopeClass = ClassUtils.resolveClassName((String) value, this.beanClassLoader);
+				else if (value instanceof String scopeClassName) {
+					Class<?> scopeClass = ClassUtils.resolveClassName(scopeClassName, this.beanClassLoader);
 					Assert.isAssignable(Scope.class, scopeClass, "Invalid scope class");
 					beanFactory.registerScope(scopeKey, (Scope) BeanUtils.instantiateClass(scopeClass));
 				}

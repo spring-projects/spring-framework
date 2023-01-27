@@ -279,7 +279,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 				actualValue = bd.getAttribute(attributeName);
 			}
 			if (actualValue == null && attributeName.equals(AutowireCandidateQualifier.VALUE_KEY) &&
-					expectedValue instanceof String && bdHolder.matchesName((String) expectedValue)) {
+					expectedValue instanceof String name && bdHolder.matchesName(name)) {
 				// Fall back on bean name (or alias) match
 				continue;
 			}

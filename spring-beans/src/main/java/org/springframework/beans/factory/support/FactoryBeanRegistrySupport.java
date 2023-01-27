@@ -188,11 +188,11 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeansException if the given bean cannot be exposed as a FactoryBean
 	 */
 	protected FactoryBean<?> getFactoryBean(String beanName, Object beanInstance) throws BeansException {
-		if (!(beanInstance instanceof FactoryBean)) {
+		if (!(beanInstance instanceof FactoryBean<?> factoryBean)) {
 			throw new BeanCreationException(beanName,
 					"Bean instance of type [" + beanInstance.getClass() + "] is not a FactoryBean");
 		}
-		return (FactoryBean<?>) beanInstance;
+		return factoryBean;
 	}
 
 	/**

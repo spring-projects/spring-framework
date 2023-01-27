@@ -75,11 +75,11 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 		if (parent == null) {
 			return this;
 		}
-		if (!(parent instanceof Properties)) {
+		if (!(parent instanceof Properties properties)) {
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
 		Properties merged = new ManagedProperties();
-		merged.putAll((Properties) parent);
+		merged.putAll(properties);
 		merged.putAll(this);
 		return merged;
 	}

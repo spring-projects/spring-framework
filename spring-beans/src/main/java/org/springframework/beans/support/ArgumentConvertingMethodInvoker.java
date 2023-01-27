@@ -98,11 +98,11 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 */
 	public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		TypeConverter converter = getTypeConverter();
-		if (!(converter instanceof PropertyEditorRegistry)) {
+		if (!(converter instanceof PropertyEditorRegistry registry)) {
 			throw new IllegalStateException(
 					"TypeConverter does not implement PropertyEditorRegistry interface: " + converter);
 		}
-		((PropertyEditorRegistry) converter).registerCustomEditor(requiredType, propertyEditor);
+		registry.registerCustomEditor(requiredType, propertyEditor);
 	}
 
 

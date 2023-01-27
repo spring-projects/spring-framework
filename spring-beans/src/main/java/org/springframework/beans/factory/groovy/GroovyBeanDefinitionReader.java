@@ -318,8 +318,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			if (!ObjectUtils.isEmpty(args)) {
 				int index = args.length;
 				Object lastArg = args[index - 1];
-				if (lastArg instanceof Closure<?>) {
-					callable = (Closure<?>) lastArg;
+				if (lastArg instanceof Closure<?> closure) {
+					callable = closure;
 					index--;
 				}
 				constructorArgs = resolveConstructorArguments(args, 0, index);

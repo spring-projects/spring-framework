@@ -206,8 +206,8 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 		BeanWrapper target = this.targetBeanWrapper;
 		if (target != null) {
 			if (logger.isWarnEnabled() && this.targetBeanName != null &&
-					this.beanFactory instanceof ConfigurableBeanFactory &&
-					((ConfigurableBeanFactory) this.beanFactory).isCurrentlyInCreation(this.targetBeanName)) {
+					this.beanFactory instanceof ConfigurableBeanFactory cbf &&
+					cbf.isCurrentlyInCreation(this.targetBeanName)) {
 				logger.warn("Target bean '" + this.targetBeanName + "' is still in creation due to a circular " +
 						"reference - obtained value for property '" + this.propertyPath + "' may be outdated!");
 			}

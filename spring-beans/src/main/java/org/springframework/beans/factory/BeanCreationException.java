@@ -204,8 +204,7 @@ public class BeanCreationException extends FatalBeanException {
 		}
 		if (this.relatedCauses != null) {
 			for (Throwable relatedCause : this.relatedCauses) {
-				if (relatedCause instanceof NestedRuntimeException &&
-						((NestedRuntimeException) relatedCause).contains(exClass)) {
+				if (relatedCause instanceof NestedRuntimeException nested && nested.contains(exClass)) {
 					return true;
 				}
 			}

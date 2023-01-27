@@ -433,10 +433,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	@Override
-	public void setInstanceSupplier(@Nullable Supplier<?> instanceSupplier) {
-		super.setInstanceSupplier(instanceSupplier);
-		Method factoryMethod = (instanceSupplier instanceof InstanceSupplier<?> ?
-				((InstanceSupplier<?>) instanceSupplier).getFactoryMethod() : null);
+	public void setInstanceSupplier(@Nullable Supplier<?> supplier) {
+		super.setInstanceSupplier(supplier);
+		Method factoryMethod = (supplier instanceof InstanceSupplier<?> instanceSupplier ?
+				instanceSupplier.getFactoryMethod() : null);
 		if (factoryMethod != null) {
 			setResolvedFactoryMethod(factoryMethod);
 		}

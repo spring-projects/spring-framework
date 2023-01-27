@@ -73,14 +73,14 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 		PropertyValues propertyValues = beanDefinitionHolder.getBeanDefinition().getPropertyValues();
 		for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
 			Object value = propertyValue.getValue();
-			if (value instanceof BeanDefinitionHolder) {
-				innerBeans.add(((BeanDefinitionHolder) value).getBeanDefinition());
+			if (value instanceof BeanDefinitionHolder beanDefHolder) {
+				innerBeans.add(beanDefHolder.getBeanDefinition());
 			}
-			else if (value instanceof BeanDefinition) {
-				innerBeans.add((BeanDefinition) value);
+			else if (value instanceof BeanDefinition beanDef) {
+				innerBeans.add(beanDef);
 			}
-			else if (value instanceof BeanReference) {
-				references.add((BeanReference) value);
+			else if (value instanceof BeanReference beanRef) {
+				references.add(beanRef);
 			}
 		}
 		this.innerBeanDefinitions = innerBeans.toArray(new BeanDefinition[0]);

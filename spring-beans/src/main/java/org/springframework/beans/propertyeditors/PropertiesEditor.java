@@ -68,9 +68,9 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	 */
 	@Override
 	public void setValue(Object value) {
-		if (!(value instanceof Properties) && value instanceof Map) {
+		if (!(value instanceof Properties) && value instanceof Map<?, ?> map) {
 			Properties props = new Properties();
-			props.putAll((Map<?, ?>) value);
+			props.putAll(map);
 			super.setValue(props);
 		}
 		else {

@@ -250,11 +250,11 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		if (!(beanFactory instanceof ListableBeanFactory)) {
+		if (!(beanFactory instanceof ListableBeanFactory lbf)) {
 			throw new FatalBeanException(
 					"ServiceLocatorFactoryBean needs to run in a BeanFactory that is a ListableBeanFactory");
 		}
-		this.beanFactory = (ListableBeanFactory) beanFactory;
+		this.beanFactory = lbf;
 	}
 
 	@Override

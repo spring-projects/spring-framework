@@ -154,8 +154,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			enhancer.setSuperclass(beanDefinition.getBeanClass());
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setAttemptLoad(true);
-			if (this.owner instanceof ConfigurableBeanFactory) {
-				ClassLoader cl = ((ConfigurableBeanFactory) this.owner).getBeanClassLoader();
+			if (this.owner instanceof ConfigurableBeanFactory cbf) {
+				ClassLoader cl = cbf.getBeanClassLoader();
 				enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(cl));
 			}
 			enhancer.setCallbackFilter(new MethodOverrideCallbackFilter(beanDefinition));

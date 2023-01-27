@@ -76,11 +76,11 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory clbf)) {
 			throw new IllegalArgumentException(
 				"Bean configurer aspect needs to run in a ConfigurableListableBeanFactory: " + beanFactory);
 		}
-		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		this.beanFactory = clbf;
 		if (this.beanWiringInfoResolver == null) {
 			this.beanWiringInfoResolver = createDefaultBeanWiringInfoResolver();
 		}
@@ -158,8 +158,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 		}
 		catch (BeanCreationException ex) {
 			Throwable rootCause = ex.getMostSpecificCause();
-			if (rootCause instanceof BeanCurrentlyInCreationException) {
-				BeanCreationException bce = (BeanCreationException) rootCause;
+			if (rootCause instanceof BeanCurrentlyInCreationException bce) {
 				String bceBeanName = bce.getBeanName();
 				if (bceBeanName != null && beanFactory.isCurrentlyInCreation(bceBeanName)) {
 					if (logger.isDebugEnabled()) {

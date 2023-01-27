@@ -1540,8 +1540,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				if (evaluated instanceof Class<?> clazz) {
 					return clazz;
 				}
-				else if (evaluated instanceof String str) {
-					className = str;
+				else if (evaluated instanceof String name) {
+					className = name;
 					freshResolve = true;
 				}
 				else {

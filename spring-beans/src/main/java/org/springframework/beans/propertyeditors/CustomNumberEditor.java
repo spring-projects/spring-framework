@@ -121,8 +121,8 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 */
 	@Override
 	public void setValue(@Nullable Object value) {
-		if (value instanceof Number) {
-			super.setValue(NumberUtils.convertNumberToTargetClass((Number) value, this.numberClass));
+		if (value instanceof Number num) {
+			super.setValue(NumberUtils.convertNumberToTargetClass(num, this.numberClass));
 		}
 		else {
 			super.setValue(value);

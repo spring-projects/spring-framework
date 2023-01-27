@@ -83,8 +83,8 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		ResolvableType targetType = null;
 		boolean cacheType = false;
 		RootBeanDefinition rbd = null;
-		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
-			rbd = (RootBeanDefinition) bdHolder.getBeanDefinition();
+		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition rootBeanDef) {
+			rbd = rootBeanDef;
 		}
 		if (rbd != null) {
 			targetType = rbd.targetType;
@@ -161,8 +161,8 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
 			if (clbf.containsBeanDefinition(decDef.getBeanName())) {
 				BeanDefinition dbd = clbf.getMergedBeanDefinition(decDef.getBeanName());
-				if (dbd instanceof RootBeanDefinition) {
-					return (RootBeanDefinition) dbd;
+				if (dbd instanceof RootBeanDefinition rootBeanDef) {
+					return rootBeanDef;
 				}
 			}
 		}

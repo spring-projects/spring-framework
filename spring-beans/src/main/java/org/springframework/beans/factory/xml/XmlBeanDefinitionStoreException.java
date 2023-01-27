@@ -52,8 +52,8 @@ public class XmlBeanDefinitionStoreException extends BeanDefinitionStoreExceptio
 	 */
 	public int getLineNumber() {
 		Throwable cause = getCause();
-		if (cause instanceof SAXParseException) {
-			return ((SAXParseException) cause).getLineNumber();
+		if (cause instanceof SAXParseException parseEx) {
+			return parseEx.getLineNumber();
 		}
 		return -1;
 	}

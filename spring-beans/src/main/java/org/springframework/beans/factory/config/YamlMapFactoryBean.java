@@ -129,10 +129,9 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 	private void merge(Map<String, Object> output, Map<String, Object> map) {
 		map.forEach((key, value) -> {
 			Object existing = output.get(key);
-			if (value instanceof Map && existing instanceof Map) {
-				// Inner cast required by Eclipse IDE.
-				Map<String, Object> result = new LinkedHashMap<>((Map<String, Object>) existing);
-				merge(result, (Map) value);
+			if (value instanceof Map valueMap && existing instanceof Map existingMap) {
+				Map<String, Object> result = new LinkedHashMap<>(existingMap);
+				merge(result, valueMap);
 				output.put(key, result);
 			}
 			else {
