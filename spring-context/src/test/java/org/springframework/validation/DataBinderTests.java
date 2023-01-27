@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,17 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Sam Brannen
  */
 class DataBinderTests {
+
+	Validator spouseValidator = Validator.of(TestBean.class)
+			.apply((tb, errors) -> {
+				if (tb == null || "XXX".equals(tb.getName())) {
+					errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");
+					return;
+				}
+				if (tb.getAge() < 32) {
+					errors.rejectValue("age", "TOO_YOUNG", "simply too young");
+				}
+			});
 
 	@Test
 	void bindingNoErrors() throws BindException {
@@ -1144,7 +1155,6 @@ class DataBinderTests {
 		errors.setNestedPath("spouse");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
 		assertThat(errors.getFieldValue("age")).isEqualTo("argh");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
@@ -1195,7 +1205,6 @@ class DataBinderTests {
 
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
@@ -1267,7 +1276,6 @@ class DataBinderTests {
 
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
@@ -1332,7 +1340,6 @@ class DataBinderTests {
 		testValidator.validate(tb, errors);
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 		errors.setNestedPath("");
 
@@ -1348,7 +1355,6 @@ class DataBinderTests {
 		TestBean tb = new TestBean();
 		tb.setName("XXX");
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb, errors);
 
 		assertThat(errors.hasGlobalErrors()).isTrue();
@@ -2159,28 +2165,6 @@ class DataBinderTests {
 			}
 		}
 	}
-
-
-	private static class SpouseValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return TestBean.class.isAssignableFrom(clazz);
-		}
-
-		@Override
-		public void validate(@Nullable Object obj, Errors errors) {
-			TestBean tb = (TestBean) obj;
-			if (tb == null || "XXX".equals(tb.getName())) {
-				errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");
-				return;
-			}
-			if (tb.getAge() < 32) {
-				errors.rejectValue("age", "TOO_YOUNG", "simply too young");
-			}
-		}
-	}
-
 
 	@SuppressWarnings("unused")
 	private static class GrowingList<E> extends AbstractList<E> {
