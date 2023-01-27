@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,9 @@ import jakarta.validation.executable.ExecutableValidator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.BridgeMethodResolver;
@@ -115,6 +118,10 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Set<ConstraintViolation<Object>> result;
 
 		Object target = invocation.getThis();
+		if (target == null && invocation instanceof ProxyMethodInvocation methodInvocation) {
+			// Allow validation for AOP proxy without a target
+			target = methodInvocation.getProxy();
+		}
 		Assert.state(target != null, "Target must not be null");
 
 		try {
@@ -165,7 +172,8 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	/**
 	 * Determine the validation groups to validate against for the given method invocation.
 	 * <p>Default are the validation groups as specified in the {@link Validated} annotation
-	 * on the containing target class of the method.
+	 * on the method, or on the containing target class of the method, or for an AOP proxy
+	 * without a target (with all behavior in advisors), also check on proxied interfaces.
 	 * @param invocation the current MethodInvocation
 	 * @return the applicable validation groups as a Class array
 	 */
@@ -173,8 +181,20 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Validated validatedAnn = AnnotationUtils.findAnnotation(invocation.getMethod(), Validated.class);
 		if (validatedAnn == null) {
 			Object target = invocation.getThis();
-			Assert.state(target != null, "Target must not be null");
-			validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
+			if (target != null) {
+				validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
+			}
+			else if (invocation instanceof ProxyMethodInvocation methodInvocation) {
+				Object proxy = methodInvocation.getProxy();
+				if (AopUtils.isAopProxy(proxy)) {
+					for (Class<?> type : AopProxyUtils.proxiedUserInterfaces(proxy)) {
+						validatedAnn = AnnotationUtils.findAnnotation(type, Validated.class);
+						if (validatedAnn != null) {
+							break;
+						}
+					}
+				}
+			}
 		}
 		return (validatedAnn != null ? validatedAnn.value() : new Class<?>[0]);
 	}
