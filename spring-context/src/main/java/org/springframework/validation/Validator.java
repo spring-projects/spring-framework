@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 
 package org.springframework.validation;
+
+import java.util.function.BiConsumer;
+
+import org.springframework.util.Assert;
 
 /**
  * A validator for application-specific objects.
@@ -59,6 +63,7 @@ package org.springframework.validation;
  * application.
  *
  * @author Rod Johnson
+ * @author Toshiaki Maki
  * @see SmartValidator
  * @see Errors
  * @see ValidationUtils
@@ -92,4 +97,38 @@ public interface Validator {
 	 */
 	void validate(Object target, Errors errors);
 
+	/**
+	 * Takes the {@link BiConsumer} containing the validation logic for the specific type
+	 * <code>&lt;T&gt;</code> and returns the {@link Validator} instance.<br>
+	 * This validator implements the <i>typical</i> {@link #supports(Class)} method
+	 * for the given <code>&lt;T&gt;</code>.<br>
+	 *
+	 * By using this method, a {@link Validator}  can be implemented as follows:
+	 *
+	 * <pre class="code">Validator passwordEqualsValidator = Validator.of(PasswordResetForm.class, (form, errors) -> {
+	 *       if (!Objects.equals(form.getPassword(), form.getConfirmPassword())) {
+	 *         errors.rejectValue("confirmPassword",
+	 *             "PasswordEqualsValidator.passwordResetForm.password",
+	 *             "password and confirm password must be same.");
+	 *       }
+	 *     });</pre>
+	 * @param targetClass  the class of the object that is to be validated
+	 * @param delegate the validation logic to delegate for the specific type <code>&lt;T&gt;</code>
+	 * @param <T> the type of the object that is to be validated
+	 * @return the {@link Validator} instance
+	 */
+	static <T> Validator of(Class<T> targetClass, BiConsumer<T, Errors> delegate) {
+		Assert.notNull(targetClass, "'targetClass' must not be null.");
+		return new Validator() {
+			@Override
+			public boolean supports(Class<?> clazz) {
+				return targetClass.isAssignableFrom(clazz);
+			}
+
+			@Override
+			public void validate(Object target, Errors errors) {
+				delegate.accept(targetClass.cast(target), errors);
+			}
+		};
+	}
 }
