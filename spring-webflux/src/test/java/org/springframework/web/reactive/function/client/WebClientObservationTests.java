@@ -114,6 +114,25 @@ class WebClientObservationTests {
 				.hasLowCardinalityKeyValue("status", "CLIENT_ERROR");
 	}
 
+	@Test
+	void setsCurrentObservationInReactorContext() {
+		ExchangeFilterFunction assertionFilter = new ExchangeFilterFunction() {
+			@Override
+			public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction chain) {
+				return chain.exchange(request).contextWrite(context -> {
+					Observation currentObservation = context.get(ObservationThreadLocalAccessor.KEY);
+					assertThat(currentObservation).isNotNull();
+					assertThat(currentObservation.getContext()).isInstanceOf(ClientRequestObservationContext.class);
+					return context;
+				});
+			}
+		};
+		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
+				.retrieve().bodyToMono(Void.class)
+				.block(Duration.ofSeconds(10));
+			verifyAndGetRequest();
+	}
+
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
 		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
 				.hasObservationWithNameEqualTo("http.client.requests").that();
