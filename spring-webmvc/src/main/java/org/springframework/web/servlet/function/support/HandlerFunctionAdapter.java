@@ -73,14 +73,13 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 	 * should time out. In Servlet 3, the timeout begins after the main request
 	 * processing thread has exited and ends when the request is dispatched again
 	 * for further processing of the concurrently produced result.
-	 * <p>If this value is not set or negative value is passed, the default timeout of 
-	 * the underlying implementation is used.
+	 * <p>If this value is not set, the default timeout of the underlying
+	 * implementation is used.
+	 * A value of 0 or less indicates that the asynchronous operation will never time out.
 	 * @param timeout the timeout value in milliseconds
 	 */
 	public void setAsyncRequestTimeout(long timeout) {
-		if(timeout >= 0) {
-			this.asyncRequestTimeout = timeout;
-		}
+		this.asyncRequestTimeout = timeout;
 	}
 
 	@Override
