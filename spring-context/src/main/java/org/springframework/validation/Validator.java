@@ -114,11 +114,10 @@ public interface Validator {
 	 *             "password and confirm password must be same.");
 	 *       }
 	 *     });</pre>
-	 *
 	 * @param targetClass  the class of the object that is to be validated
-	 * @return The {@link Function} that takes the {@link BiConsumer} containing the validation logic and
-	 * returns the {@link Validator} instance
 	 * @param <T> the type of the object that is to be validated
+	 * @return the {@link Function} that takes the {@link BiConsumer} containing the validation logic and
+	 * returns the {@link Validator} instance
 	 */
 	static <T> Function<BiConsumer<T, Errors>, Validator> of(Class<T> targetClass) {
 		Assert.notNull(targetClass, "'targetClass' must not be null.");
