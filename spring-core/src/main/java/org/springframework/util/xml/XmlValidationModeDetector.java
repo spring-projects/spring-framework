@@ -108,6 +108,7 @@ public class XmlValidationModeDetector {
 					break;
 				}
 			}
+			//只要包含DOCTYPE的字符，就定义XML的校验格式为DTD,否则就是XSD
 			return (isDtdValidated ? VALIDATION_DTD : VALIDATION_XSD);
 		}
 		catch (CharConversionException ex) {

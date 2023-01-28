@@ -203,6 +203,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
+		// 注册component类型注解的的过滤器
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
@@ -415,21 +416,28 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			// 包下的classpath*:包/**/*.class
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			// 加载packageSearchPath路径下的所有资源
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
+			// 遍历所有resource
 			for (Resource resource : resources) {
 				if (traceEnabled) {
 					logger.trace("Scanning " + resource);
 				}
 				if (resource.isReadable()) {
 					try {
+						// 将resource封装到metadataReader中，MetadataReader为资源resource元数据的访问组件
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+						// 判断当前的Resource是否符合候选条件
 						if (isCandidateComponent(metadataReader)) {
+							// metadataReader封装到ScannedGenericBeanDefinition类型的BeanDefinition中
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setSource(resource);
+							// 判断当前的BeanDefinition是否符合候选条件
 							if (isCandidateComponent(sbd)) {
 								if (debugEnabled) {
 									logger.debug("Identified candidate component class: " + resource);
@@ -491,6 +499,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 				return false;
 			}
 		}
+		// 通过注解过滤器来判断（注解过滤器，只留下了@Component注解下的类）
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, getMetadataReaderFactory())) {
 				return isConditionMatch(metadataReader);
@@ -523,6 +532,10 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
 		AnnotationMetadata metadata = beanDefinition.getMetadata();
+		// 1 isIndependent 当前bean是独立的，不依赖其他类
+		// 2.1 isConcrete 即不是接口也不是抽象类
+		//  或者
+		// 2.2 isAbstract 是抽象类 但是指定了要寻找的方法 hasAnnotatedMethods
 		return (metadata.isIndependent() && (metadata.isConcrete() ||
 				(metadata.isAbstract() && metadata.hasAnnotatedMethods(Lookup.class.getName()))));
 	}

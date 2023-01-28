@@ -201,6 +201,7 @@ public abstract class BeanUtils {
 						argsWithDefaultValues[i] = args[i];
 					}
 				}
+				// 通过放射来创建一个bean的实例
 				return ctor.newInstance(argsWithDefaultValues);
 			}
 		}

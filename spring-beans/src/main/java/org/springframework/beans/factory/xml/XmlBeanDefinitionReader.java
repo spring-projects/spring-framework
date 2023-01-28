@@ -389,7 +389,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			throws BeanDefinitionStoreException {
 
 		try {
+			//1 根据输入流和resource，创建xml对应的document
 			Document doc = doLoadDocument(inputSource, resource);
+			//2 解析并注册到bean中
 			int count = registerBeanDefinitions(doc, resource);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loaded " + count + " bean definitions from " + resource);
@@ -436,6 +438,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
+	 * 获取xml文件的校验类型
 	 * Determine the validation mode for the specified {@link Resource}.
 	 * If no explicit validation mode has been configured, then the validation
 	 * mode gets {@link #detectValidationMode detected} from the given resource.
@@ -444,10 +447,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see #detectValidationMode
 	 */
 	protected int getValidationModeForResource(Resource resource) {
+		//默认获取的校验类型
 		int validationModeToUse = getValidationMode();
 		if (validationModeToUse != VALIDATION_AUTO) {
 			return validationModeToUse;
 		}
+		//2自动检测校验模式
 		int detectedMode = detectValidationMode(resource);
 		if (detectedMode != VALIDATION_AUTO) {
 			return detectedMode;
@@ -486,6 +491,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 
 		try {
+			//根据输入流判断类型
 			return this.validationModeDetector.detectValidationMode(inputStream);
 		}
 		catch (IOException ex) {
@@ -508,9 +514,13 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
+		//通过反射创建对象
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
+		//获取Spring容器中已经注册的Bean数量
 		int countBefore = getRegistry().getBeanDefinitionCount();
+		//解析出来bean放到容器中
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
+		//获取本次注入的数量
 		return getRegistry().getBeanDefinitionCount() - countBefore;
 	}
 

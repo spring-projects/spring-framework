@@ -45,7 +45,7 @@ import org.springframework.util.Assert;
  * bean definitions programmatically is the {@link GenericBeanDefinition} class.
  * GenericBeanDefinition has the advantage that it allows to dynamically define
  * parent dependencies, not 'hard-coding' the role as a root bean definition.
- *
+ * 后续的版本已经取消了root和clild的使用了，更加推荐使用GenericBeanDefinition
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see GenericBeanDefinition
@@ -264,6 +264,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	@Override
 	public void setParentName(@Nullable String parentName) {
+		//不允许有父节点
 		if (parentName != null) {
 			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");
 		}

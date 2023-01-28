@@ -223,6 +223,7 @@ public abstract class AopUtils {
 	 */
 	public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
 		Assert.notNull(pc, "Pointcut must not be null");
+		// 类级别的匹配，如果不匹配，就直接返回false
 		if (!pc.getClassFilter().matches(targetClass)) {
 			return false;
 		}
@@ -240,14 +241,20 @@ public abstract class AopUtils {
 
 		Set<Class<?>> classes = new LinkedHashSet<>();
 		if (!Proxy.isProxyClass(targetClass)) {
+			// 将目标类，也就是当前要匹配的bean，给放入到classes集合中
 			classes.add(ClassUtils.getUserClass(targetClass));
 		}
+		// 将目标的实现类的接口也放入到classes集合中
 		classes.addAll(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
-
+		// 遍历处理目标类和目标类的接口
 		for (Class<?> clazz : classes) {
+			// 获取目标类中的方法
 			Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
+			// 遍历处理目标类和目标接口的方法
 			for (Method method : methods) {
+				// 目标类中只要有一个方法被匹配到，那么就直接返回true，说白了就是这个类需要设置为代理
 				if (introductionAwareMethodMatcher != null ?
+						// 目标类方法与切点表达式匹配。
 						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions) :
 						methodMatcher.matches(method, targetClass)) {
 					return true;
@@ -281,11 +288,14 @@ public abstract class AopUtils {
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
+		// 引介增强，那么就对类实现匹配
 		if (advisor instanceof IntroductionAdvisor) {
 			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
 		}
+		// 普通增强，即PointcutAdvisors实现类，那么就对方法级别进行匹配
 		else if (advisor instanceof PointcutAdvisor) {
 			PointcutAdvisor pca = (PointcutAdvisor) advisor;
+			// 使用切点Pointcut与当前bean进行方法级别的匹配
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);
 		}
 		else {
@@ -307,17 +317,24 @@ public abstract class AopUtils {
 			return candidateAdvisors;
 		}
 		List<Advisor> eligibleAdvisors = new ArrayList<>();
+		// 对于IntroductionAdvisor引介增强的处理，	控制粒度为类级别，一般不常用。
+		// 目前我们的增强类型为PointcutAdvisor，所以不会走这条路
 		for (Advisor candidate : candidateAdvisors) {
+			// 一般我们使用@Pointcut注解方式定义的切点，Advisor会通过InstantiationModelAwarePointcutAdvisorImpl来进行构建
+			// 并且InstantiationModelAwarePointcutAdvisorImpl并没有实现IntroductionAdvisor接口，实现的而是PointcutAdvisor接口
+			// 所以使用@Pointcut注解定义切点的这种方式的话，是不会走这里的逻辑的
 			if (candidate instanceof IntroductionAdvisor && canApply(candidate, clazz)) {
 				eligibleAdvisors.add(candidate);
 			}
 		}
 		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
 		for (Advisor candidate : candidateAdvisors) {
+			// 上面已经处理的引介增强了，那么这里就不需要再次重复处理了
 			if (candidate instanceof IntroductionAdvisor) {
 				// already processed
 				continue;
 			}
+			// 处理普通增强，找到与当前bean相匹配的的增强
 			if (canApply(candidate, clazz, hasIntroductions)) {
 				eligibleAdvisors.add(candidate);
 			}

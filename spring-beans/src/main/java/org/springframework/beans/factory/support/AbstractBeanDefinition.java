@@ -366,14 +366,21 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	public void applyDefaults(BeanDefinitionDefaults defaults) {
 		Boolean lazyInit = defaults.getLazyInit();
+		// 是否懒加载
 		if (lazyInit != null) {
 			setLazyInit(lazyInit);
 		}
+		// 自动装配模式为Autowire_no
 		setAutowireMode(defaults.getAutowireMode());
+		// 设置是否依赖检查
 		setDependencyCheck(defaults.getDependencyCheck());
+		// 设置初始方法的名称
 		setInitMethodName(defaults.getInitMethodName());
+		// 是否是默认的初始方法
 		setEnforceInitMethod(false);
+		// 设置销毁方法
 		setDestroyMethodName(defaults.getDestroyMethodName());
+		// 是否指定默认的销毁方法
 		setEnforceDestroyMethod(false);
 	}
 
@@ -607,19 +614,25 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #AUTOWIRE_BY_TYPE
 	 */
 	public int getResolvedAutowireMode() {
+		// 如果设置了AUTOWIRE_AUTODETECT  就由spring自动探测装配模式
 		if (this.autowireMode == AUTOWIRE_AUTODETECT) {
 			// Work out whether to apply setter autowiring or constructor autowiring.
 			// If it has a no-arg constructor it's deemed to be setter autowiring,
 			// otherwise we'll try constructor autowiring.
+			// 获取bean的构造方法
 			Constructor<?>[] constructors = getBeanClass().getConstructors();
 			for (Constructor<?> constructor : constructors) {
+				// 如果构造的参数为0（有无参构造函数），就通过类型自动装配，
 				if (constructor.getParameterCount() == 0) {
 					return AUTOWIRE_BY_TYPE;
 				}
 			}
+			// 如果bean的所有构造方法都有参数，就通过构造函数来自动装配
 			return AUTOWIRE_CONSTRUCTOR;
 		}
 		else {
+			// 默认的装配模式：AUTOWIRE_NO 也就是不自动装配，
+			// 也就是spring在xml中，默认是关闭自动装配的功能的
 			return this.autowireMode;
 		}
 	}
@@ -1143,6 +1156,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		}
 		else if (count == 1) {
 			// Mark override as not overloaded, to avoid the overhead of arg type checking.
+			// 如果相同的名称只有一个 ，就将overload属性设置为false
+			// 标识当前方法在bean中只有一个，就是没有重载的方法，不需要耗费性能去寻找了
 			mo.setOverloaded(false);
 		}
 	}

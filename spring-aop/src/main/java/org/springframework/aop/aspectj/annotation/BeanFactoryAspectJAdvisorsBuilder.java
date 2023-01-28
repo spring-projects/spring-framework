@@ -89,9 +89,11 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 				if (aspectNames == null) {
 					List<Advisor> advisors = new ArrayList<>();
 					aspectNames = new ArrayList<>();
+					// 获取IOC容器中所有的bean
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
 					for (String beanName : beanNames) {
+						// 过滤掉没资格的bean
 						if (!isEligibleBean(beanName)) {
 							continue;
 						}
@@ -101,19 +103,25 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						if (beanType == null) {
 							continue;
 						}
+						// 判断这个bean的是否是切面类，说白了就是这个bean有没注解@Aspect
+						// AnnotationUtils.findAnnotation(clazz, Aspect.class)
 						if (this.advisorFactory.isAspect(beanType)) {
 							aspectNames.add(beanName);
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
+								// 为切面类中的增强方法构建Advisor
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
+								// 如果是单例，就将构建好的增强ClassAdvisor放入缓存，以便下一次直接从缓存获取
 								if (this.beanFactory.isSingleton(beanName)) {
 									this.advisorsCache.put(beanName, classAdvisors);
 								}
 								else {
+									// 如果不是单例，那么直接缓存factory，以便下一次创建
 									this.aspectFactoryCache.put(beanName, factory);
 								}
+								// 添加构建好的增强
 								advisors.addAll(classAdvisors);
 							}
 							else {
@@ -129,6 +137,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 							}
 						}
 					}
+					// 处理设置好的增强数据
 					this.aspectBeanNames = aspectNames;
 					return advisors;
 				}
@@ -140,11 +149,13 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 		}
 		List<Advisor> advisors = new ArrayList<>();
 		for (String aspectName : aspectNames) {
+			// 尝试缓存取
 			List<Advisor> cachedAdvisors = this.advisorsCache.get(aspectName);
 			if (cachedAdvisors != null) {
 				advisors.addAll(cachedAdvisors);
 			}
 			else {
+				// factory缓存方法
 				MetadataAwareAspectInstanceFactory factory = this.aspectFactoryCache.get(aspectName);
 				advisors.addAll(this.advisorFactory.getAdvisors(factory));
 			}

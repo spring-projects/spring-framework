@@ -104,6 +104,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		if (config.getAdvisors().length == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
 			throw new AopConfigException("No advisors and no TargetSource specified");
 		}
+		// 增强相关配置
 		this.advised = config;
 	}
 
@@ -120,6 +121,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		}
 		Class<?>[] proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised, true);
 		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
+		// 创建jdk动态代理
+		// classLoader 目标类的类加载器，后边加载生成的字节码会用到
+		// proxiedInterfaces 代理的接口，后面生成的字节码会用到
+		// InvocationHandler 传的是this,也就是当前的jdkDynamicAopProxy对象
+		// 其实代理对象是使用反射创建出来
 		return Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
 	}
 

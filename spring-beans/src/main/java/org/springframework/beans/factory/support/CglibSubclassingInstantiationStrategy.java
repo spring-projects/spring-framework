@@ -113,6 +113,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * @return new instance of the dynamically generated subclass
 		 */
 		public Object instantiate(@Nullable Constructor<?> ctor, Object... args) {
+			// 生成被代理对象的子类
 			Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
 			Object instance;
 			if (ctor == null) {
@@ -131,6 +132,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			// SPR-10785: set callbacks directly on the instance instead of in the
 			// enhanced class (via the Enhancer) in order to avoid memory leaks.
 			Factory factory = (Factory) instance;
+			// 对实例化的bean进行方法增强，也就是覆盖方法
+			// 即对lookup-method和replace-method指定需要覆盖的方法，添加了方法拦截器
 			factory.setCallbacks(new Callback[] {NoOp.INSTANCE,
 					new LookupOverrideMethodInterceptor(this.beanDefinition, this.owner),
 					new ReplaceOverrideMethodInterceptor(this.beanDefinition, this.owner)});

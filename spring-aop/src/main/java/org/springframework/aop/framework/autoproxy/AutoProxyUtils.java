@@ -70,6 +70,7 @@ public abstract class AutoProxyUtils {
 
 		if (beanName != null && beanFactory.containsBeanDefinition(beanName)) {
 			BeanDefinition bd = beanFactory.getBeanDefinition(beanName);
+			//preserveTargetClass属性是否为true
 			return Boolean.TRUE.equals(bd.getAttribute(PRESERVE_TARGET_CLASS_ATTRIBUTE));
 		}
 		return false;

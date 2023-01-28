@@ -30,6 +30,9 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
  * @since 3.0.1
  * @see org.springframework.context.annotation.ConfigurationClassPostProcessor
  */
+    // 该接口其实会被调用2次。
+	// 会调用2次。先执行postProcessBeanDefinitionRegistry
+	// 后执行BeanFactoryPostProcessor.postProcessBeanFactory
 public interface BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProcessor {
 
 	/**
