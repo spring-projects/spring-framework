@@ -89,6 +89,7 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 
 		/**
 		 * Client name derived from the request URI host.
+		 * @since 6.0.5
 		 */
 		CLIENT_NAME {
 			@Override
