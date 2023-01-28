@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Rod Johnson
  * @author Oliver Gierke
  * @author Mark Paluch
+ * @author Sam Brannen
  * @since 2.0
  * @see javax.persistence.PersistenceContext
  * @see javax.persistence.PersistenceContextType#TRANSACTION
@@ -74,9 +75,9 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Map<Class<?>, Class<?>[]> cachedQueryInterfaces = new ConcurrentReferenceHashMap<>(4);
 
-	private static final Set<String> transactionRequiringMethods = new HashSet<>(8);
+	private static final Set<String> transactionRequiringMethods = new HashSet<>(6);
 
-	private static final Set<String> queryTerminatingMethods = new HashSet<>(8);
+	private static final Set<String> queryTerminatingMethods = new HashSet<>(9);
 
 	static {
 		transactionRequiringMethods.add("joinTransaction");
@@ -86,12 +87,15 @@ public abstract class SharedEntityManagerCreator {
 		transactionRequiringMethods.add("remove");
 		transactionRequiringMethods.add("refresh");
 
-		queryTerminatingMethods.add("execute");  // JPA 2.1 StoredProcedureQuery
-		queryTerminatingMethods.add("executeUpdate");
-		queryTerminatingMethods.add("getSingleResult");
-		queryTerminatingMethods.add("getResultStream");
-		queryTerminatingMethods.add("getResultList");
-		queryTerminatingMethods.add("list");  // Hibernate Query.list() method
+		queryTerminatingMethods.add("execute");  // javax.persistence.StoredProcedureQuery.execute()
+		queryTerminatingMethods.add("executeUpdate");  // javax.persistence.Query.executeUpdate()
+		queryTerminatingMethods.add("getSingleResult");  // javax.persistence.Query.getSingleResult()
+		queryTerminatingMethods.add("getResultStream");  // javax.persistence.Query.getResultStream()
+		queryTerminatingMethods.add("getResultList");  // javax.persistence.Query.getResultList()
+		queryTerminatingMethods.add("list");  // org.hibernate.query.Query.list()
+		queryTerminatingMethods.add("stream");  // org.hibernate.query.Query.stream()
+		queryTerminatingMethods.add("uniqueResult");  // org.hibernate.query.Query.uniqueResult()
+		queryTerminatingMethods.add("uniqueResultOptional");  // org.hibernate.query.Query.uniqueResultOptional()
 	}
 
 
