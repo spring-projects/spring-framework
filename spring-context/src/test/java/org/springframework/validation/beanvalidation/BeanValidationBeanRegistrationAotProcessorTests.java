@@ -131,12 +131,14 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 
 	private static class MethodParameterLevelConstraint {
 
+		@SuppressWarnings("unused")
 		public String hello(@Exists String name) {
 			return "Hello " + name;
 		}
 
 	}
 
+	@SuppressWarnings("unused")
 	private static class ConstructorParameterLevelConstraint {
 
 		private final String name;
@@ -151,6 +153,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 
 	}
 
+	@SuppressWarnings("unused")
 	private static class PropertyLevelConstraint {
 
 		@Exists

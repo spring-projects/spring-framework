@@ -196,7 +196,7 @@ public class MethodValidationTests {
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method;
 			try {
-				method = ClassUtils.getMethod(MyValidBean.class, invocation.getMethod().getName(), null);
+				method = ClassUtils.getMethod(MyValidBean.class, invocation.getMethod().getName(), (Class<?>[]) null);
 			}
 			catch (IllegalStateException ex) {
 				method = BridgeMethodResolver.findBridgedMethod(
