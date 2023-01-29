@@ -155,7 +155,7 @@ class ConditionEvaluator {
 		}
 
 		@Nullable
-		private ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
+		private static ConfigurableListableBeanFactory deduceBeanFactory(@Nullable BeanDefinitionRegistry source) {
 			if (source instanceof ConfigurableListableBeanFactory configurableListableBeanFactory) {
 				return configurableListableBeanFactory;
 			}
@@ -165,22 +165,22 @@ class ConditionEvaluator {
 			return null;
 		}
 
-		private Environment deduceEnvironment(@Nullable BeanDefinitionRegistry source) {
+		private static Environment deduceEnvironment(@Nullable BeanDefinitionRegistry source) {
 			if (source instanceof EnvironmentCapable environmentCapable) {
 				return environmentCapable.getEnvironment();
 			}
 			return new StandardEnvironment();
 		}
 
-		private ResourceLoader deduceResourceLoader(@Nullable BeanDefinitionRegistry source) {
-			if (source instanceof ResourceLoader resourceLoaderSource) {
-				return resourceLoaderSource;
+		private static ResourceLoader deduceResourceLoader(@Nullable BeanDefinitionRegistry source) {
+			if (source instanceof ResourceLoader resourceLoader) {
+				return resourceLoader;
 			}
 			return new DefaultResourceLoader();
 		}
 
 		@Nullable
-		private ClassLoader deduceClassLoader(@Nullable ResourceLoader resourceLoader,
+		private static ClassLoader deduceClassLoader(@Nullable ResourceLoader resourceLoader,
 				@Nullable ConfigurableListableBeanFactory beanFactory) {
 
 			if (resourceLoader != null) {

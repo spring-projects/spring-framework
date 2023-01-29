@@ -60,7 +60,6 @@ public class NoOpCacheManager implements CacheManager {
 				this.cacheNames.add(name);
 			}
 		}
-
 		return this.caches.get(name);
 	}
 

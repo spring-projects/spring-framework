@@ -56,8 +56,8 @@ final class BeanMethod extends ConfigurationMethod {
 
 	@Override
 	public boolean equals(@Nullable Object obj) {
-		return ((this == obj) || ((obj instanceof BeanMethod beanMethod) &&
-				this.metadata.equals((beanMethod).metadata)));
+		return (this == obj ||
+				(obj instanceof BeanMethod that && this.metadata.equals(that.metadata)));
 	}
 
 	@Override
@@ -73,8 +73,8 @@ final class BeanMethod extends ConfigurationMethod {
 	private class NonOverridableMethodError extends Problem {
 
 		NonOverridableMethodError() {
-			super(String.format("@Bean method '%s' must not be private or final; change the method's modifiers to continue",
-					getMetadata().getMethodName()), getResourceLocation());
+			super("@Bean method '%s' must not be private or final; change the method's modifiers to continue."
+					.formatted(getMetadata().getMethodName()), getResourceLocation());
 		}
 	}
 
