@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
@@ -252,6 +256,15 @@ public class BindingReflectionHintsRegistrarTests {
 				.accepts(this.hints);
 	}
 
+	@Test
+	void registerTypeForJacksonCustomStrategy() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithJacksonCustomStrategy.class);
+		assertThat(RuntimeHintsPredicates.reflection().onType(PropertyNamingStrategies.UpperSnakeCaseStrategy.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+				.accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleRecordWithJacksonCustomStrategy.Builder.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+				.accepts(this.hints);
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -355,5 +368,29 @@ public class BindingReflectionHintsRegistrarTests {
 	}
 
 	static class SampleClassWithInheritedJsonProperty extends SampleClassWithJsonProperty {}
+
+	@JsonNaming(PropertyNamingStrategies.UpperSnakeCaseStrategy.class)
+	@JsonDeserialize(builder = SampleRecordWithJacksonCustomStrategy.Builder.class)
+	record SampleRecordWithJacksonCustomStrategy(String name) {
+
+		@JsonPOJOBuilder(withPrefix = "")
+		public static class Builder {
+			private String name;
+
+			public static Builder newInstance() {
+				return new Builder();
+			}
+
+			public Builder id(String name) {
+				this.name = name;
+				return this;
+			}
+
+			public SampleRecordWithJacksonCustomStrategy build() {
+				return new SampleRecordWithJacksonCustomStrategy(name);
+			}
+		}
+
+	}
 
 }

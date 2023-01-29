@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import org.springframework.jms.config.JmsListenerEndpointRegistrar;
  * used to define the default {@link org.springframework.jms.config.JmsListenerContainerFactory
  * JmsListenerContainerFactory} to use or for registering JMS endpoints
  * in a <em>programmatic</em> fashion as opposed to the <em>declarative</em>
- * approach of using the @{@link JmsListener} annotation.
+ * approach of using the {@link JmsListener @JmsListener} annotation.
  *
- * <p>See @{@link EnableJms} for detailed usage examples.
+ * <p>See {@link EnableJms @EnableJms} for detailed usage examples.
  *
  * @author Stephane Nicoll
  * @since 4.1

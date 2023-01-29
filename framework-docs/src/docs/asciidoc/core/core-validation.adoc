@@ -2,7 +2,7 @@
 = Validation, Data Binding, and Type Conversion
 
 There are pros and cons for considering validation as business logic, and Spring offers
-a design for validation (and data binding) that does not exclude either one of them.
+a design for validation and data binding that does not exclude either one of them.
 Specifically, validation should not be tied to the web tier and should be easy to localize,
 and it should be possible to plug in any available validator. Considering these concerns,
 Spring provides a `Validator` contract that is both basic and eminently usable
@@ -15,18 +15,18 @@ provides the aptly named `DataBinder` to do exactly that. The `Validator` and th
 limited to the web layer.
 
 The `BeanWrapper` is a fundamental concept in the Spring Framework and is used in a lot
-of places. However, you probably do not need to use the `BeanWrapper`
-directly. Because this is reference documentation, however, we felt that some explanation
-might be in order. We explain the `BeanWrapper` in this chapter, since, if you are
-going to use it at all, you are most likely do so when trying to bind data to objects.
+of places. However, you probably do not need to use the `BeanWrapper` directly. Because
+this is reference documentation, however, we feel that some explanation might be in
+order. We explain the `BeanWrapper` in this chapter, since, if you are going to use it at
+all, you are most likely do so when trying to bind data to objects.
 
 Spring's `DataBinder` and the lower-level `BeanWrapper` both use `PropertyEditorSupport`
 implementations to parse and format property values. The `PropertyEditor` and
 `PropertyEditorSupport` types are part of the JavaBeans specification and are also
-explained in this chapter. Spring 3 introduced a `core.convert` package that provides a
-general type conversion facility, as well as a higher-level "`format`" package for
-formatting UI field values. You can use these packages as simpler alternatives to
-`PropertyEditorSupport` implementations. They are also discussed in this chapter.
+explained in this chapter. Spring's `core.convert` package provides a general type
+conversion facility, as well as a higher-level `format` package for formatting UI field
+values. You can use these packages as simpler alternatives to `PropertyEditorSupport`
+implementations. They are also discussed in this chapter.
 
 Spring supports Java Bean Validation through setup infrastructure and an adaptor to
 Spring's own `Validator` contract. Applications can enable Bean Validation once globally,
@@ -861,12 +861,12 @@ as needed.
 [[core-convert]]
 == Spring Type Conversion
 
-Spring 3 introduced a `core.convert` package that provides a general type conversion
-system. The system defines an SPI to implement type conversion logic and an API
-to perform type conversions at runtime. Within a Spring container, you can use this system
-as an alternative to `PropertyEditor` implementations to convert externalized bean property value
-strings to the required property types. You can also use the public API anywhere in your
-application where type conversion is needed.
+The `core.convert` package provides a general type conversion system. The system defines
+an SPI to implement type conversion logic and an API to perform type conversions at
+runtime. Within a Spring container, you can use this system as an alternative to
+`PropertyEditor` implementations to convert externalized bean property value strings to
+the required property types. You can also use the public API anywhere in your application
+where type conversion is needed.
 
 
 
@@ -1205,8 +1205,9 @@ web or desktop application. In such environments, you typically convert from `St
 to support the client postback process, as well as back to `String` to support the
 view rendering process. In addition, you often need to localize `String` values. The more
 general `core.convert` `Converter` SPI does not address such formatting requirements
-directly. To directly address them, Spring 3 introduced a convenient `Formatter` SPI that
-provides a simple and robust alternative to `PropertyEditor` implementations for client environments.
+directly. To directly address them, Spring provides a convenient `Formatter` SPI that
+provides a simple and robust alternative to `PropertyEditor` implementations for client
+environments.
 
 In general, you can use the `Converter` SPI when you need to implement general-purpose type
 conversion logic -- for example, for converting between a `java.util.Date` and a `Long`.
@@ -1956,9 +1957,9 @@ javadoc for more information on these options.
 [[validation-binder]]
 === Configuring a `DataBinder`
 
-Since Spring 3, you can configure a `DataBinder` instance with a `Validator`. Once
-configured, you can invoke the `Validator` by calling `binder.validate()`. Any validation
-`Errors` are automatically added to the binder's `BindingResult`.
+You can configure a `DataBinder` instance with a `Validator`. Once configured, you can
+invoke the `Validator` by calling `binder.validate()`. Any validation `Errors` are
+automatically added to the binder's `BindingResult`.
 
 The following example shows how to use a `DataBinder` programmatically to invoke validation
 logic after binding to a target object:

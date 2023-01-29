@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,11 +212,11 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	}
 
 	private T invokeBeanSupplier(Executable executable, ThrowingSupplier<T> beanSupplier) {
-		if (!(executable instanceof Method)) {
+		if (!(executable instanceof Method method)) {
 			return beanSupplier.get();
 		}
 		try {
-			SimpleInstantiationStrategy.setCurrentlyInvokedFactoryMethod((Method) executable);
+			SimpleInstantiationStrategy.setCurrentlyInvokedFactoryMethod(method);
 			return beanSupplier.get();
 		}
 		finally {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
- * Unit tests for
- * {@link org.springframework.web.socket.sockjs.client.AbstractClientSockJsSession}.
+ * Unit tests for {@link AbstractClientSockJsSession}.
  *
  * @author Rossen Stoyanchev
  */
@@ -52,20 +51,18 @@ class ClientSockJsSessionTests {
 
 	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
+	private WebSocketHandler handler = mock();
+
+	private CompletableFuture<WebSocketSession> connectFuture = new CompletableFuture<>();
+
 	private TestClientSockJsSession session;
-
-	private WebSocketHandler handler;
-
-	private CompletableFuture<WebSocketSession> connectFuture;
 
 
 	@BeforeEach
 	void setup() {
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(URI.create("https://example.com"));
-		Transport transport = mock(Transport.class);
+		Transport transport = mock();
 		TransportRequest request = new DefaultTransportRequest(urlInfo, null, null, transport, TransportType.XHR, CODEC);
-		this.handler = mock(WebSocketHandler.class);
-		this.connectFuture = new CompletableFuture<>();
 		this.session = new TestClientSockJsSession(request, this.handler, this.connectFuture);
 	}
 
@@ -188,16 +185,16 @@ class ClientSockJsSessionTests {
 	@Test
 	void closeWithNullStatus() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.session.close(null))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> this.session.close(null))
 			.withMessageContaining("Invalid close status");
 	}
 
 	@Test
 	void closeWithStatusOutOfRange() throws Exception {
 		this.session.handleFrame(SockJsFrame.openFrame().getContent());
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.session.close(new CloseStatus(2999, "reason")))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> this.session.close(new CloseStatus(2999, "reason")))
 			.withMessageContaining("Invalid close status");
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,8 +140,8 @@ class SockJsServiceTests extends AbstractHttpRequestTests {
 
 	@Test  // SPR-11919
 	void handleInfoGetWildflyNPE() throws IOException {
-		HttpServletResponse mockResponse = mock(HttpServletResponse.class);
-		ServletOutputStream ous = mock(ServletOutputStream.class);
+		HttpServletResponse mockResponse = mock();
+		ServletOutputStream ous = mock();
 		given(mockResponse.getHeaders(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).willThrow(NullPointerException.class);
 		given(mockResponse.getOutputStream()).willReturn(ous);
 		this.response = new ServletServerHttpResponse(mockResponse);

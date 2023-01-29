@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void simpleApplicationEventMulticasterWithTaskExecutor() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -153,7 +153,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void simpleApplicationEventMulticasterWithException() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -169,7 +169,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void simpleApplicationEventMulticasterWithErrorHandler() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -246,8 +246,8 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	@Test
 	public void testEventPublicationInterceptor() throws Throwable {
-		MethodInvocation invocation = mock(MethodInvocation.class);
-		ApplicationContext ctx = mock(ApplicationContext.class);
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
 
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventClass(MyEvent.class);

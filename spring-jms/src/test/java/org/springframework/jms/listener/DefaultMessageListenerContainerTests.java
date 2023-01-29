@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ public class DefaultMessageListenerContainerTests {
 
 	@Test
 	public void applyBackOff() {
-		BackOff backOff = mock(BackOff.class);
-		BackOffExecution execution = mock(BackOffExecution.class);
+		BackOff backOff = mock();
+		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(BackOffExecution.STOP);
 		given(backOff.start()).willReturn(execution);
 
@@ -62,8 +62,8 @@ public class DefaultMessageListenerContainerTests {
 
 	@Test
 	public void applyBackOffRetry() {
-		BackOff backOff = mock(BackOff.class);
-		BackOffExecution execution = mock(BackOffExecution.class);
+		BackOff backOff = mock();
+		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(50L, BackOffExecution.STOP);
 		given(backOff.start()).willReturn(execution);
 
@@ -79,8 +79,8 @@ public class DefaultMessageListenerContainerTests {
 
 	@Test
 	public void recoverResetBackOff() {
-		BackOff backOff = mock(BackOff.class);
-		BackOffExecution execution = mock(BackOffExecution.class);
+		BackOff backOff = mock();
+		BackOffExecution execution = mock();
 		given(execution.nextBackOff()).willReturn(50L, 50L, 50L);  // 3 attempts max
 		given(backOff.start()).willReturn(execution);
 
@@ -125,7 +125,7 @@ public class DefaultMessageListenerContainerTests {
 
 	private ConnectionFactory createFailingContainerFactory() {
 		try {
-			ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+			ConnectionFactory connectionFactory = mock();
 			given(connectionFactory.createConnection()).will(invocation -> {
 				throw new JMSException("Test exception");
 			});
@@ -138,7 +138,7 @@ public class DefaultMessageListenerContainerTests {
 
 	private ConnectionFactory createRecoverableContainerFactory(final int failingAttempts) {
 		try {
-			ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+			ConnectionFactory connectionFactory = mock();
 			given(connectionFactory.createConnection()).will(new Answer<Object>() {
 				int currentAttempts = 0;
 				@Override
@@ -161,8 +161,8 @@ public class DefaultMessageListenerContainerTests {
 
 	private ConnectionFactory createSuccessfulConnectionFactory() {
 		try {
-			ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
-			given(connectionFactory.createConnection()).willReturn(mock(Connection.class));
+			ConnectionFactory connectionFactory = mock();
+			given(connectionFactory.createConnection()).willReturn(mock());
 			return connectionFactory;
 		}
 		catch (JMSException ex) {

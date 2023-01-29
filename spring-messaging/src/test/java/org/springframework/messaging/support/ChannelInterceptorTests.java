@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class ChannelInterceptorTests {
 
 	@Test
 	public void preSendInterceptorReturningModifiedMessage() {
-		Message<?> expected = mock(Message.class);
+		Message<?> expected = mock();
 		PreSendInterceptor interceptor = new PreSendInterceptor();
 		interceptor.setMessageToReturn(expected);
 		this.channel.addInterceptor(interceptor);

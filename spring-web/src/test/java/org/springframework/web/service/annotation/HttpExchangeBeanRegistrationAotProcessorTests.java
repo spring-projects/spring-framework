@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
-import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -61,7 +60,7 @@ class HttpExchangeBeanRegistrationAotProcessorTests {
 	private void process(Class<?> beanClass) {
 		BeanRegistrationAotContribution contribution = createContribution(beanClass);
 		if (contribution != null) {
-			contribution.applyTo(this.generationContext, mock(BeanRegistrationCode.class));
+			contribution.applyTo(this.generationContext, mock());
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,8 +235,8 @@ public class SQLErrorCodesFactoryTests {
 
 	@Test
 	public void testDataSourceWithNullMetadata() throws Exception {
-		Connection connection = mock(Connection.class);
-		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock();
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
@@ -253,7 +253,7 @@ public class SQLErrorCodesFactoryTests {
 	public void testGetFromDataSourceWithSQLException() throws Exception {
 		SQLException expectedSQLException = new SQLException();
 
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willThrow(expectedSQLException);
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
@@ -264,13 +264,13 @@ public class SQLErrorCodesFactoryTests {
 	}
 
 	private SQLErrorCodes getErrorCodesFromDataSource(String productName, SQLErrorCodesFactory factory) throws Exception {
-		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		DatabaseMetaData databaseMetaData = mock();
 		given(databaseMetaData.getDatabaseProductName()).willReturn(productName);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 
 		SQLErrorCodesFactory secf = (factory != null ? factory : SQLErrorCodesFactory.getInstance());

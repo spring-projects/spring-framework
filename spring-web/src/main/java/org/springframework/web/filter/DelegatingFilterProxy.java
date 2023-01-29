@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * be delegated to that bean in the Spring context, which is required to implement
  * the standard Servlet Filter interface.
  *
- * <p>This approach is particularly useful for Filter implementation with complex
+ * <p>This approach is particularly useful for Filter implementations with complex
  * setup needs, allowing to apply the full Spring bean definition machinery to
  * Filter instances. Alternatively, consider standard Filter setup in combination
  * with looking up service beans from the Spring root application context.
@@ -51,12 +51,13 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * will by default <i>not</i> be delegated to the target bean, relying on the
  * Spring application context to manage the lifecycle of that bean. Specifying
  * the "targetFilterLifecycle" filter init-param as "true" will enforce invocation
- * of the {@code Filter.init} and {@code Filter.destroy} lifecycle methods
- * on the target bean, letting the servlet container manage the filter lifecycle.
+ * of the {@link Filter#init(jakarta.servlet.FilterConfig)} and
+ * {@link Filter#destroy()} lifecycle methods on the target bean, letting the
+ * Servlet container manage the filter lifecycle.
  *
- * <p>As of Spring 3.1, {@code DelegatingFilterProxy} has been updated to optionally
- * accept constructor parameters when using a Servlet container's instance-based filter
- * registration methods, usually in conjunction with Spring's
+ * <p>{@code DelegatingFilterProxy} can optionally accept constructor parameters
+ * when using a Servlet container's instance-based filter registration methods,
+ * usually in conjunction with Spring's
  * {@link org.springframework.web.WebApplicationInitializer} SPI. These constructors allow
  * for providing the delegate Filter bean directly, or providing the application context
  * and bean name to fetch, avoiding the need to look up the application context from the

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ abstract class AbstractStaxXMLReaderTests {
 
 
 	private LexicalHandler mockLexicalHandler() throws Exception {
-		LexicalHandler lexicalHandler = mock(LexicalHandler.class);
+		LexicalHandler lexicalHandler = mock();
 		willAnswer(new CopyCharsAnswer()).given(lexicalHandler).comment(any(char[].class), anyInt(), anyInt());
 		return lexicalHandler;
 	}
@@ -180,7 +180,7 @@ abstract class AbstractStaxXMLReaderTests {
 	}
 
 	protected final ContentHandler mockContentHandler() throws Exception {
-		ContentHandler contentHandler = mock(ContentHandler.class);
+		ContentHandler contentHandler = mock();
 		willAnswer(new CopyCharsAnswer()).given(contentHandler).characters(any(char[].class), anyInt(), anyInt());
 		willAnswer(new CopyCharsAnswer()).given(contentHandler).ignorableWhitespace(any(char[].class), anyInt(), anyInt());
 		willAnswer(invocation -> {

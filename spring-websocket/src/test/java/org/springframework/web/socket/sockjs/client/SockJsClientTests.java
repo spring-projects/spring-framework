@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,18 +49,17 @@ class SockJsClientTests {
 
 	private static final String URL = "https://example.com";
 
-	private static final WebSocketHandler handler = mock(WebSocketHandler.class);
+	private static final WebSocketHandler handler = mock();
 
 
-	private final InfoReceiver infoReceiver = mock(InfoReceiver.class);
+	private final InfoReceiver infoReceiver = mock();
 
 	private final TestTransport webSocketTransport = new TestTransport("WebSocketTestTransport");
 
 	private final XhrTestTransport xhrTransport = new XhrTestTransport("XhrTestTransport");
 
 	@SuppressWarnings({ "deprecation", "unchecked" })
-	private org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession> connectCallback =
-		mock(org.springframework.util.concurrent.ListenableFutureCallback.class);
+	private org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession> connectCallback = mock();
 
 	private SockJsClient sockJsClient = new SockJsClient(List.of(this.webSocketTransport, this.xhrTransport));
 
@@ -76,7 +75,7 @@ class SockJsClientTests {
 		setupInfoRequest(true);
 		this.sockJsClient.doHandshake(handler, URL).addCallback(this.connectCallback);
 		assertThat(this.webSocketTransport.invoked()).isTrue();
-		WebSocketSession session = mock(WebSocketSession.class);
+		WebSocketSession session = mock();
 		this.webSocketTransport.getConnectCallback().accept(session, null);
 		verify(this.connectCallback).onSuccess(session);
 		verifyNoMoreInteractions(this.connectCallback);

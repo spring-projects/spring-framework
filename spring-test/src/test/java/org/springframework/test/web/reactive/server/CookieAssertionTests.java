@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class CookieAssertionTests {
 		ExchangeResult result = new ExchangeResult(
 				request, response, Mono.empty(), Mono.empty(), Duration.ZERO, null, null);
 
-		return new CookieAssertions(result, mock(WebTestClient.ResponseSpec.class));
+		return new CookieAssertions(result, mock());
 	}
 
 }

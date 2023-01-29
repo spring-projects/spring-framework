@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,19 +94,19 @@ public class SimpleMessageListenerContainerTests {
 
 	@Test
 	public void testContextRefreshedEventDoesNotStartTheConnectionIfAutoStartIsSetToFalse() throws Exception {
-		MessageConsumer messageConsumer = mock(MessageConsumer.class);
-		Session session = mock(Session.class);
+		MessageConsumer messageConsumer = mock();
+		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
 		// and then the MessageConsumer gets created...
 		given(session.createConsumer(QUEUE_DESTINATION, null)).willReturn(messageConsumer);  // no MessageSelector...
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		// session gets created in order to register MessageListener...
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		this.container.setConnectionFactory(connectionFactory);
@@ -125,20 +125,20 @@ public class SimpleMessageListenerContainerTests {
 
 	@Test
 	public void testContextRefreshedEventStartsTheConnectionByDefault() throws Exception {
-		MessageConsumer messageConsumer = mock(MessageConsumer.class);
-		Session session = mock(Session.class);
+		MessageConsumer messageConsumer = mock();
+		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
 		// and then the MessageConsumer gets created...
 		given(session.createConsumer(QUEUE_DESTINATION, null)).willReturn(messageConsumer);  // no MessageSelector...
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		// session gets created in order to register MessageListener...
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 		// and the connection is start()ed after the listener is registered...
 
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		this.container.setConnectionFactory(connectionFactory);
@@ -159,7 +159,7 @@ public class SimpleMessageListenerContainerTests {
 	public void testCorrectSessionExposedForSessionAwareMessageListenerInvocation() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
-		final Session session = mock(Session.class);
+		final Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
 		// and then the MessageConsumer gets created...
@@ -168,13 +168,13 @@ public class SimpleMessageListenerContainerTests {
 		given(session.getTransacted()).willReturn(false);
 		given(session.getAcknowledgeMode()).willReturn(Session.AUTO_ACKNOWLEDGE);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		// session gets created in order to register MessageListener...
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 		// and the connection is start()ed after the listener is registered...
 
-		final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		final ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		final Set<String> failure = new HashSet<>(1);
@@ -194,7 +194,7 @@ public class SimpleMessageListenerContainerTests {
 		this.container.afterPropertiesSet();
 		this.container.start();
 
-		final Message message = mock(Message.class);
+		final Message message = mock();
 		messageConsumer.sendMessage(message);
 
 		if (!failure.isEmpty()) {
@@ -209,17 +209,17 @@ public class SimpleMessageListenerContainerTests {
 	public void testTaskExecutorCorrectlyInvokedWhenSpecified() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
-		final Session session = mock(Session.class);
+		final Session session = mock();
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
 		given(session.createConsumer(QUEUE_DESTINATION, null)).willReturn(messageConsumer);  // no MessageSelector...
 		given(session.getTransacted()).willReturn(false);
 		given(session.getAcknowledgeMode()).willReturn(Session.AUTO_ACKNOWLEDGE);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 
-		final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		final ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		final TestMessageListener listener = new TestMessageListener();
@@ -236,7 +236,7 @@ public class SimpleMessageListenerContainerTests {
 		this.container.afterPropertiesSet();
 		this.container.start();
 
-		final Message message = mock(Message.class);
+		final Message message = mock();
 		messageConsumer.sendMessage(message);
 
 		assertThat(listener.executorInvoked).isTrue();
@@ -250,7 +250,7 @@ public class SimpleMessageListenerContainerTests {
 	public void testRegisteredExceptionListenerIsInvokedOnException() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
-		Session session = mock(Session.class);
+		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
 		// and then the MessageConsumer gets created...
@@ -258,13 +258,13 @@ public class SimpleMessageListenerContainerTests {
 		// an exception is thrown, so the rollback logic is being applied here...
 		given(session.getTransacted()).willReturn(false);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		// session gets created in order to register MessageListener...
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 		// and the connection is start()ed after the listener is registered...
 
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		final JMSException theException = new JMSException(EXCEPTION_MESSAGE);
@@ -275,14 +275,14 @@ public class SimpleMessageListenerContainerTests {
 			throw theException;
 		});
 
-		ExceptionListener exceptionListener = mock(ExceptionListener.class);
+		ExceptionListener exceptionListener = mock();
 
 		this.container.setExceptionListener(exceptionListener);
 		this.container.afterPropertiesSet();
 		this.container.start();
 
 		// manually trigger an Exception with the above bad MessageListener...
-		final Message message = mock(Message.class);
+		final Message message = mock();
 
 		// a Throwable from a MessageListener MUST simply be swallowed...
 		messageConsumer.sendMessage(message);
@@ -297,7 +297,7 @@ public class SimpleMessageListenerContainerTests {
 	public void testRegisteredErrorHandlerIsInvokedOnException() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
-		Session session = mock(Session.class);
+		Session session = mock();
 
 		// Queue gets created in order to create MessageConsumer for that Destination...
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
@@ -306,12 +306,12 @@ public class SimpleMessageListenerContainerTests {
 		// an exception is thrown, so the rollback logic is being applied here...
 		given(session.getTransacted()).willReturn(false);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		// session gets created in order to register MessageListener...
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		final IllegalStateException theException = new IllegalStateException("intentional test failure");
@@ -322,13 +322,13 @@ public class SimpleMessageListenerContainerTests {
 			throw theException;
 		});
 
-		ErrorHandler errorHandler = mock(ErrorHandler.class);
+		ErrorHandler errorHandler = mock();
 		this.container.setErrorHandler(errorHandler);
 		this.container.afterPropertiesSet();
 		this.container.start();
 
 		// manually trigger an Exception with the above bad MessageListener...
-		Message message = mock(Message.class);
+		Message message = mock();
 
 		// a Throwable from a MessageListener MUST simply be swallowed...
 		messageConsumer.sendMessage(message);
@@ -342,7 +342,7 @@ public class SimpleMessageListenerContainerTests {
 	public void testNoRollbackOccursIfSessionIsNotTransactedAndThatExceptionsDo_NOT_Propagate() throws Exception {
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
-		Session session = mock(Session.class);
+		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
 		// and then the MessageConsumer gets created...
@@ -350,13 +350,13 @@ public class SimpleMessageListenerContainerTests {
 		// an exception is thrown, so the rollback logic is being applied here...
 		given(session.getTransacted()).willReturn(false);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		// session gets created in order to register MessageListener...
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 		// and the connection is start()ed after the listener is registered...
 
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		this.container.setConnectionFactory(connectionFactory);
@@ -368,7 +368,7 @@ public class SimpleMessageListenerContainerTests {
 		this.container.start();
 
 		// manually trigger an Exception with the above bad MessageListener...
-		final Message message = mock(Message.class);
+		final Message message = mock();
 
 		// a Throwable from a MessageListener MUST simply be swallowed...
 		messageConsumer.sendMessage(message);
@@ -383,7 +383,7 @@ public class SimpleMessageListenerContainerTests {
 
 		final SimpleMessageConsumer messageConsumer = new SimpleMessageConsumer();
 
-		Session session = mock(Session.class);
+		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
 		// and then the MessageConsumer gets created...
@@ -391,13 +391,13 @@ public class SimpleMessageListenerContainerTests {
 		// an exception is thrown, so the rollback logic is being applied here...
 		given(session.getTransacted()).willReturn(true);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		// session gets created in order to register MessageListener...
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 		// and the connection is start()ed after the listener is registered...
 
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		this.container.setConnectionFactory(connectionFactory);
@@ -409,7 +409,7 @@ public class SimpleMessageListenerContainerTests {
 		this.container.start();
 
 		// manually trigger an Exception with the above bad MessageListener...
-		final Message message = mock(Message.class);
+		final Message message = mock();
 
 		// a Throwable from a MessageListener MUST simply be swallowed...
 		messageConsumer.sendMessage(message);
@@ -422,20 +422,20 @@ public class SimpleMessageListenerContainerTests {
 
 	@Test
 	public void testDestroyClosesConsumersSessionsAndConnectionInThatOrder() throws Exception {
-		MessageConsumer messageConsumer = mock(MessageConsumer.class);
-		Session session = mock(Session.class);
+		MessageConsumer messageConsumer = mock();
+		Session session = mock();
 		// Queue gets created in order to create MessageConsumer for that Destination...
 		given(session.createQueue(DESTINATION_NAME)).willReturn(QUEUE_DESTINATION);
 		// and then the MessageConsumer gets created...
 		given(session.createConsumer(QUEUE_DESTINATION, null)).willReturn(messageConsumer);  // no MessageSelector...
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		// session gets created in order to register MessageListener...
 		given(connection.createSession(this.container.isSessionTransacted(),
 				this.container.getSessionAcknowledgeMode())).willReturn(session);
 		// and the connection is start()ed after the listener is registered...
 
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		given(connectionFactory.createConnection()).willReturn(connection);
 
 		this.container.setConnectionFactory(connectionFactory);

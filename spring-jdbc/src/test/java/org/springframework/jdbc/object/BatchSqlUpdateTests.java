@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,14 +54,14 @@ public class BatchSqlUpdateTests {
 		final int[] ids = new int[] { 100, 200 };
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		Connection connection = mock(Connection.class);
-		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock();
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
-		PreparedStatement preparedStatement = mock(PreparedStatement.class);
+		PreparedStatement preparedStatement = mock();
 		given(preparedStatement.getConnection()).willReturn(connection);
 		given(preparedStatement.executeBatch()).willReturn(rowsAffected);
 
-		DatabaseMetaData mockDatabaseMetaData = mock(DatabaseMetaData.class);
+		DatabaseMetaData mockDatabaseMetaData = mock();
 		given(mockDatabaseMetaData.supportsBatchUpdates()).willReturn(true);
 		given(connection.prepareStatement(sql)).willReturn(preparedStatement);
 		given(connection.getMetaData()).willReturn(mockDatabaseMetaData);

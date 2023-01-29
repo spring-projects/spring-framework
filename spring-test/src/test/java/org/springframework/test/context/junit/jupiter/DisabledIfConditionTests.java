@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,10 +111,10 @@ class DisabledIfConditionTests {
 	private ExtensionContext buildExtensionContext(String methodName) {
 		Class<?> testClass = SpringTestCase.class;
 		Method method = ReflectionUtils.findMethod(getClass(), methodName);
-		Store store = mock(Store.class);
+		Store store = mock();
 		given(store.getOrComputeIfAbsent(any(), any(), any())).willReturn(new TestContextManager(testClass));
 
-		ExtensionContext extensionContext = mock(ExtensionContext.class);
+		ExtensionContext extensionContext = mock();
 		given(extensionContext.getTestClass()).willReturn(Optional.of(testClass));
 		given(extensionContext.getElement()).willReturn(Optional.of(method));
 		given(extensionContext.getStore(any())).willReturn(store);

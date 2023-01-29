@@ -281,8 +281,8 @@ public class InjectionMetadata {
 						this.skip = true;
 						return true;
 					}
-					else if (pvs instanceof MutablePropertyValues) {
-						((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
+					else if (pvs instanceof MutablePropertyValues mpvs) {
+						mpvs.registerProcessedProperty(this.pd.getName());
 					}
 				}
 				this.skip = false;
@@ -299,8 +299,8 @@ public class InjectionMetadata {
 				return;
 			}
 			synchronized (pvs) {
-				if (Boolean.FALSE.equals(this.skip) && this.pd != null && pvs instanceof MutablePropertyValues) {
-					((MutablePropertyValues) pvs).clearProcessedProperty(this.pd.getName());
+				if (Boolean.FALSE.equals(this.skip) && this.pd != null && pvs instanceof MutablePropertyValues mpvs) {
+					mpvs.clearProcessedProperty(this.pd.getName());
 				}
 			}
 		}

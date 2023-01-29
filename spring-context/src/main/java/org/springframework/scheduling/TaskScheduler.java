@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.lang.Nullable;
  * {@link Runnable Runnables} based on different kinds of triggers.
  *
  * <p>This interface is separate from {@link SchedulingTaskExecutor} since it
- * usually represents for a different kind of backend, i.e. a thread pool with
+ * usually represents a different kind of backend, i.e. a thread pool with
  * different characteristics and capabilities. Implementations may implement
  * both interfaces if they can handle both kinds of execution characteristics.
  *

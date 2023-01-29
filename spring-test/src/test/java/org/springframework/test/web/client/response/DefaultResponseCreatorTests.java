@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class DefaultResponseCreatorTests {
 	@Test
 	void setBodyFromResource() throws IOException {
 		byte[] resourceContent = {7, 14, 21, 28, 35};
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		given(resource.getInputStream()).willReturn(new ByteArrayInputStream(resourceContent));
 
 		ClientHttpResponse response = createResponse(new DefaultResponseCreator(HttpStatus.OK).body(resource));

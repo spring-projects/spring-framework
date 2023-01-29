@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
@@ -343,6 +346,18 @@ public class MappingJackson2HttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(results, baseList.getType(), MediaType.APPLICATION_JSON, outputMessage);
 		JSONAssert.assertEquals(body, outputMessage.getBodyAsString(StandardCharsets.UTF_8), true);
+	}
+
+	// gh-24498
+	@Test
+	public void writeOptional() throws IOException {
+		ParameterizedTypeReference<Optional<MyParent>> optionalParent = new ParameterizedTypeReference<>() {};
+		Optional<MyParent> result = Optional.of(new Impl1());
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		converter.write(result, optionalParent.getType(), MediaType.APPLICATION_JSON, outputMessage);
+
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8))
+				.contains("@type");
 	}
 
 	@Test
@@ -771,6 +786,18 @@ public class MappingJackson2HttpMessageConverterTests {
 		public String toString() {
 			return this == VAL1 ? "Value1" : "Value2";
 		}
+	}
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+	@JsonSubTypes(value = {@JsonSubTypes.Type(value = Impl1.class),
+			@JsonSubTypes.Type(value = Impl2.class)})
+	public static interface MyParent {
+	}
+
+	public static class Impl1 implements MyParent {
+	}
+
+	public static class Impl2 implements MyParent {
 	}
 
 	private static class MappingJackson2HttpMessageConverterWithCustomization extends MappingJackson2HttpMessageConverter {

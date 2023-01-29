@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.mock;
  */
 class ClientResponseWrapperTests {
 
-	private ClientResponse mockResponse = mock(ClientResponse.class);
+	private ClientResponse mockResponse = mock();
 
 	private ClientResponseWrapper wrapper = new ClientResponseWrapper(mockResponse);
 
@@ -62,7 +62,7 @@ class ClientResponseWrapperTests {
 
 	@Test
 	void headers() {
-		ClientResponse.Headers headers = mock(ClientResponse.Headers.class);
+		ClientResponse.Headers headers = mock();
 		given(mockResponse.headers()).willReturn(headers);
 
 		assertThat(wrapper.headers()).isSameAs(headers);
@@ -71,7 +71,7 @@ class ClientResponseWrapperTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void cookies() {
-		MultiValueMap<String, ResponseCookie> cookies = mock(MultiValueMap.class);
+		MultiValueMap<String, ResponseCookie> cookies = mock();
 		given(mockResponse.cookies()).willReturn(cookies);
 
 		assertThat(wrapper.cookies()).isSameAs(cookies);

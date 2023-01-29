@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ public class ReactorResourceFactoryTests {
 
 	private final ReactorResourceFactory resourceFactory = new ReactorResourceFactory();
 
-	private final ConnectionProvider connectionProvider = mock(ConnectionProvider.class);
+	private final ConnectionProvider connectionProvider = mock();
 
-	private final LoopResources loopResources = mock(LoopResources.class);
+	private final LoopResources loopResources = mock();
 
 
 	@Test

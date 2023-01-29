@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,6 +307,17 @@ public class ProducesRequestConditionTests {
 
 		result = condition2.compareTo(condition1, request);
 		assertThat(result > 0).as("Should have used MediaType.equals(Object) to break the match").isTrue();
+	}
+
+	@Test
+	public void compareEmptyInvalidAccept() {
+		HttpServletRequest request = createRequest("foo");
+
+		ProducesRequestCondition condition1 = new ProducesRequestCondition();
+		ProducesRequestCondition condition2 = new ProducesRequestCondition();
+
+		int result = condition1.compareTo(condition2, request);
+		assertThat(result).isEqualTo(0);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,7 +281,7 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 
 	@Test
 	void scheduleAndCancelHeartbeat() {
-		ScheduledFuture<?> task = mock(ScheduledFuture.class);
+		ScheduledFuture<?> task = mock();
 		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 
 		this.session.setActive(true);

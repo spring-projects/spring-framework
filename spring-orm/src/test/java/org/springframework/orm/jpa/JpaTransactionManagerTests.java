@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,26 +53,19 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class JpaTransactionManagerTests {
 
-	private EntityManagerFactory factory;
+	private EntityManagerFactory factory = mock();
 
-	private EntityManager manager;
+	private EntityManager manager = mock();
 
-	private EntityTransaction tx;
+	private EntityTransaction tx = mock();
 
-	private JpaTransactionManager tm;
+	private JpaTransactionManager tm = new JpaTransactionManager(factory);
 
-	private TransactionTemplate tt;
+	private TransactionTemplate tt = new TransactionTemplate(tm);
 
 
 	@BeforeEach
 	public void setup() {
-		factory = mock(EntityManagerFactory.class);
-		manager = mock(EntityManager.class);
-		tx = mock(EntityTransaction.class);
-
-		tm = new JpaTransactionManager(factory);
-		tt = new TransactionTemplate(tm);
-
 		given(factory.createEntityManager()).willReturn(manager);
 		given(manager.getTransaction()).willReturn(tx);
 		given(manager.isOpen()).willReturn(true);
@@ -448,8 +441,8 @@ public class JpaTransactionManagerTests {
 	public void testTransactionWithRequiresNewInAfterCompletion() {
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-		EntityManager manager2 = mock(EntityManager.class);
-		EntityTransaction tx2 = mock(EntityTransaction.class);
+		EntityManager manager2 = mock();
+		EntityTransaction tx2 = mock();
 
 		given(manager.getTransaction()).willReturn(tx);
 		given(factory.createEntityManager()).willReturn(manager, manager2);

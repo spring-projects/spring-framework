@@ -222,13 +222,13 @@ abstract class AutowireUtils {
 					Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
 					for (Type typeArg : actualTypeArguments) {
 						if (typeArg.equals(genericReturnType)) {
-							if (arg instanceof Class) {
-								return (Class<?>) arg;
+							if (arg instanceof Class<?> clazz) {
+								return clazz;
 							}
 							else {
 								String className = null;
-								if (arg instanceof String) {
-									className = (String) arg;
+								if (arg instanceof String name) {
+									className = name;
 								}
 								else if (arg instanceof TypedStringValue typedValue) {
 									String targetTypeName = typedValue.getTargetTypeName();

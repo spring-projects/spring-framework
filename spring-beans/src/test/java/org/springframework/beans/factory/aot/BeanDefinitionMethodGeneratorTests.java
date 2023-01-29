@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.javapoet.MethodSpec;
 import org.springframework.javapoet.ParameterizedTypeName;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests for {@link BeanDefinitionMethodGenerator} and
@@ -65,6 +66,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  */
 class BeanDefinitionMethodGeneratorTests {
 
@@ -489,6 +491,14 @@ class BeanDefinitionMethodGeneratorTests {
 		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
 				.rootBeanDefinition(Boolean.class).setFactoryMethod("parseBoolean").addConstructorArgValue("true").getBeanDefinition();
 		testBeanDefinitionMethodInCurrentFile(Boolean.class, beanDefinition);
+	}
+
+	@Test
+	void throwExceptionWithInstanceSupplier() {
+		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(TestBean.class, TestBean::new));
+		assertThatIllegalArgumentException().isThrownBy(() -> new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList()));
 	}
 
 	private void testBeanDefinitionMethodInCurrentFile(Class<?> targetType, RootBeanDefinition beanDefinition) {

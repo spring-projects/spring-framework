@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,11 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
+	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(LowCardinalityKeyNames.CLIENT_NAME, KeyValue.NONE_VALUE);
+
 	private static final KeyValue EXCEPTION_NONE = KeyValue.of(LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
 
 	private static final KeyValue HTTP_URL_NONE = KeyValue.of(HighCardinalityKeyNames.HTTP_URL, KeyValue.NONE_VALUE);
-
-	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(HighCardinalityKeyNames.CLIENT_NAME, KeyValue.NONE_VALUE);
 
 
 	private final String name;
@@ -87,7 +87,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(ClientRequestObservationContext context) {
-		return KeyValues.of(uri(context), method(context), status(context), exception(context), outcome(context));
+		return KeyValues.of(uri(context), method(context), status(context), clientName(context), exception(context), outcome(context));
 	}
 
 	protected KeyValue uri(ClientRequestObservationContext context) {
@@ -119,6 +119,13 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 		}
 	}
 
+	protected KeyValue clientName(ClientRequestObservationContext context) {
+		if (context.getCarrier() != null && context.getCarrier().getURI().getHost() != null) {
+			return KeyValue.of(LowCardinalityKeyNames.CLIENT_NAME, context.getCarrier().getURI().getHost());
+		}
+		return CLIENT_NAME_NONE;
+	}
+
 	protected KeyValue exception(ClientRequestObservationContext context) {
 		Throwable error = context.getError();
 		if (error != null) {
@@ -129,7 +136,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 		return EXCEPTION_NONE;
 	}
 
-	protected static KeyValue outcome(ClientRequestObservationContext context) {
+	protected KeyValue outcome(ClientRequestObservationContext context) {
 		if (context.getResponse() != null) {
 			try {
 				return HttpOutcome.forStatus(context.getResponse().getStatusCode());
@@ -143,7 +150,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public KeyValues getHighCardinalityKeyValues(ClientRequestObservationContext context) {
-		return KeyValues.of(requestUri(context), clientName(context));
+		return KeyValues.of(requestUri(context));
 	}
 
 	protected KeyValue requestUri(ClientRequestObservationContext context) {
@@ -153,12 +160,6 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 		return HTTP_URL_NONE;
 	}
 
-	protected KeyValue clientName(ClientRequestObservationContext context) {
-		if (context.getCarrier() != null && context.getCarrier().getURI().getHost() != null) {
-			return KeyValue.of(HighCardinalityKeyNames.CLIENT_NAME, context.getCarrier().getURI().getHost());
-		}
-		return CLIENT_NAME_NONE;
-	}
 
 	static class HttpOutcome {
 

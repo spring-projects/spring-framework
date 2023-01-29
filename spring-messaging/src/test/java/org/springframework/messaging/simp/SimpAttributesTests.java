@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class SimpAttributesTests {
 
 	@Test
 	public void registerDestructionCallback() {
-		Runnable callback = mock(Runnable.class);
+		Runnable callback = mock();
 		this.simpAttributes.registerDestructionCallback("name1", callback);
 
 		assertThat(this.simpAttributes.getAttribute(
@@ -70,15 +70,15 @@ public class SimpAttributesTests {
 	@Test
 	public void registerDestructionCallbackAfterSessionCompleted() {
 		this.simpAttributes.sessionCompleted();
-		assertThatIllegalStateException().isThrownBy(() ->
-				this.simpAttributes.registerDestructionCallback("name1", mock(Runnable.class)))
-			.withMessageContaining("already completed");
+		assertThatIllegalStateException()
+				.isThrownBy(() -> this.simpAttributes.registerDestructionCallback("name1", mock()))
+				.withMessageContaining("already completed");
 	}
 
 	@Test
 	public void removeDestructionCallback() {
-		Runnable callback1 = mock(Runnable.class);
-		Runnable callback2 = mock(Runnable.class);
+		Runnable callback1 = mock();
+		Runnable callback2 = mock();
 		this.simpAttributes.registerDestructionCallback("name1", callback1);
 		this.simpAttributes.registerDestructionCallback("name2", callback2);
 
@@ -100,8 +100,8 @@ public class SimpAttributesTests {
 
 	@Test
 	public void sessionCompleted() {
-		Runnable callback1 = mock(Runnable.class);
-		Runnable callback2 = mock(Runnable.class);
+		Runnable callback1 = mock();
+		Runnable callback2 = mock();
 		this.simpAttributes.registerDestructionCallback("name1", callback1);
 		this.simpAttributes.registerDestructionCallback("name2", callback2);
 
@@ -113,7 +113,7 @@ public class SimpAttributesTests {
 
 	@Test
 	public void sessionCompletedIsIdempotent() {
-		Runnable callback1 = mock(Runnable.class);
+		Runnable callback1 = mock();
 		this.simpAttributes.registerDestructionCallback("name1", callback1);
 
 		this.simpAttributes.sessionCompleted();

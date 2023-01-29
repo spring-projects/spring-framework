@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,9 +65,9 @@ public class SimpleJmsHeaderMapper extends AbstractHeaderMapper<Message> impleme
 			if (jmsCorrelationId instanceof Number) {
 				jmsCorrelationId = jmsCorrelationId.toString();
 			}
-			if (jmsCorrelationId instanceof String) {
+			if (jmsCorrelationId instanceof String correlationId) {
 				try {
-					jmsMessage.setJMSCorrelationID((String) jmsCorrelationId);
+					jmsMessage.setJMSCorrelationID(correlationId);
 				}
 				catch (Exception ex) {
 					logger.debug("Failed to set JMSCorrelationID - skipping", ex);

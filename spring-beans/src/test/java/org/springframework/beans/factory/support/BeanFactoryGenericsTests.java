@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -659,14 +659,29 @@ class BeanFactoryGenericsTests {
 	 */
 	@Test
 	void parameterizedStaticFactoryMethod() {
-		RootBeanDefinition rbd = new RootBeanDefinition(Mockito.class);
-		rbd.setFactoryMethodName("mock");
+		RootBeanDefinition rbd = new RootBeanDefinition(getClass());
+		rbd.setFactoryMethodName("createMockitoMock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
 
+		assertRunnableMockFactory(rbd);
+	}
+
+	@Test
+	void parameterizedStaticFactoryMethodWithWrappedClassName() {
+		RootBeanDefinition rbd = new RootBeanDefinition();
+		rbd.setBeanClassName(getClass().getName());
+		rbd.setFactoryMethodName("createMockitoMock");
+		// TypedStringValue is used as an equivalent to an XML-defined argument String
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Runnable.class.getName()));
+
+		assertRunnableMockFactory(rbd);
+	}
+
+	private void assertRunnableMockFactory(RootBeanDefinition rbd) {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("mock", rbd);
 
-		assertThat(bf.getType("mock")).isEqualTo(Runnable.class);
+		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
 		assertThat(bf.getType("mock")).isEqualTo(Runnable.class);
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertThat(beans).hasSize(1);
@@ -715,25 +730,6 @@ class BeanFactoryGenericsTests {
 		rbd.setFactoryBeanName("mocksControl");
 		rbd.setFactoryMethodName("createMock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class.getName());
-		bf.registerBeanDefinition("mock", rbd);
-
-		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
-		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
-		assertThat(bf.getType("mock")).isEqualTo(Runnable.class);
-		assertThat(bf.getType("mock")).isEqualTo(Runnable.class);
-		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
-		assertThat(beans).hasSize(1);
-	}
-
-	@Test
-	void parameterizedInstanceFactoryMethodWithWrappedClassName() {
-		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-
-		RootBeanDefinition rbd = new RootBeanDefinition();
-		rbd.setBeanClassName(Mockito.class.getName());
-		rbd.setFactoryMethodName("mock");
-		// TypedStringValue used to be equivalent to an XML-defined argument String
-		rbd.getConstructorArgumentValues().addGenericArgumentValue(new TypedStringValue(Runnable.class.getName()));
 		bf.registerBeanDefinition("mock", rbd);
 
 		assertThat(bf.isTypeMatch("mock", Runnable.class)).isTrue();
@@ -942,6 +938,16 @@ class BeanFactoryGenericsTests {
 		assertThat(resolved).hasSize(2);
 		assertThat(resolved.get(0)).isSameAs(bf.getBean("store2"));
 		assertThat(resolved.get(1)).isSameAs(bf.getBean("store1"));
+	}
+
+
+	/**
+	 * Mimics and delegates to {@link Mockito#mock(Class)} -- created here to avoid factory
+	 * method resolution issues caused by the introduction of {@code Mockito.mock(T...)}
+	 * in Mockito 4.10.
+	 */
+	public static <T> T createMockitoMock(Class<T> classToMock) {
+		return Mockito.mock(classToMock);
 	}
 
 

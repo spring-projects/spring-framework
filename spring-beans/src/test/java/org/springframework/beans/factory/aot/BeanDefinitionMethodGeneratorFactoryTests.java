@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,13 +110,11 @@ class BeanDefinitionMethodGeneratorFactoryTests {
 	@Test
 	void getBeanDefinitionMethodGeneratorAddsContributionsFromProcessors() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-		BeanRegistrationAotContribution beanContribution = mock(
-				BeanRegistrationAotContribution.class);
+		BeanRegistrationAotContribution beanContribution = mock();
 		BeanRegistrationAotProcessor processorBean = registeredBean -> beanContribution;
 		beanFactory.registerSingleton("processorBean", processorBean);
 		MockSpringFactoriesLoader springFactoriesLoader = new MockSpringFactoriesLoader();
-		BeanRegistrationAotContribution loaderContribution = mock(
-				BeanRegistrationAotContribution.class);
+		BeanRegistrationAotContribution loaderContribution = mock();
 		BeanRegistrationAotProcessor loaderProcessor = registeredBean -> loaderContribution;
 		springFactoriesLoader.addInstance(BeanRegistrationAotProcessor.class,
 				loaderProcessor);

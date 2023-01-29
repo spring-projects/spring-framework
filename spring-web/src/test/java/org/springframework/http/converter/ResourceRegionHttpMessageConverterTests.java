@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
-import org.mockito.Mockito;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
@@ -38,6 +37,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test cases for {@link ResourceRegionHttpMessageConverter} class.
@@ -186,7 +186,7 @@ public class ResourceRegionHttpMessageConverterTests {
 	@Test // SPR-15041
 	public void applicationOctetStreamDefaultContentType() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		ClassPathResource body = Mockito.mock(ClassPathResource.class);
+		ClassPathResource body = mock();
 		BDDMockito.given(body.getFilename()).willReturn("spring.dat");
 		BDDMockito.given(body.contentLength()).willReturn(12L);
 		BDDMockito.given(body.getInputStream()).willReturn(new ByteArrayInputStream("Spring Framework".getBytes()));

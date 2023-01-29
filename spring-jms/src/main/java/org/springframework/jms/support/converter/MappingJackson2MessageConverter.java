@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -348,11 +348,11 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * Convenience method to dispatch to converters for individual message types.
 	 */
 	private Object convertToObject(Message message, JavaType targetJavaType) throws JMSException, IOException {
-		if (message instanceof TextMessage) {
-			return convertFromTextMessage((TextMessage) message, targetJavaType);
+		if (message instanceof TextMessage textMessage) {
+			return convertFromTextMessage(textMessage, targetJavaType);
 		}
-		else if (message instanceof BytesMessage) {
-			return convertFromBytesMessage((BytesMessage) message, targetJavaType);
+		else if (message instanceof BytesMessage bytesMessage) {
+			return convertFromBytesMessage(bytesMessage, targetJavaType);
 		}
 		else {
 			return convertFromMessage(message, targetJavaType);
@@ -474,11 +474,11 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 			}
 			return extractViewClass(annotation, conversionHint);
 		}
-		else if (conversionHint instanceof JsonView) {
-			return extractViewClass((JsonView) conversionHint, conversionHint);
+		else if (conversionHint instanceof JsonView jsonView) {
+			return extractViewClass(jsonView, conversionHint);
 		}
-		else if (conversionHint instanceof Class) {
-			return (Class<?>) conversionHint;
+		else if (conversionHint instanceof Class<?> clazz) {
+			return clazz;
 		}
 		else {
 			return null;

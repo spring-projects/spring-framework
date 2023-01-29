@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,9 +145,9 @@ import org.springframework.web.util.WebUtils;
  * with mappings, handlers, etc. Only the root application context as loaded by
  * {@link org.springframework.web.context.ContextLoaderListener}, if any, will be shared.
  *
- * <p>As of Spring 3.1, {@code DispatcherServlet} may now be injected with a web
- * application context, rather than creating its own internally. This is useful in Servlet
- * 3.0+ environments, which support programmatic registration of servlet instances.
+ * <p>{@code DispatcherServlet} may be injected with a web application context,
+ * rather than creating its own internally. This is useful in Servlet 3.0+
+ * environments, which support programmatic registration of servlet instances.
  * See the {@link #DispatcherServlet(WebApplicationContext)} javadoc for details.
  *
  * @author Rod Johnson

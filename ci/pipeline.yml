@@ -125,14 +125,6 @@ resources:
     access_token: ((github-ci-status-token))
     branch: ((branch))
     context: build
-- name: repo-status-jdk18-build
-  type: github-status-resource
-  icon: eye-check-outline
-  source:
-    repository: ((github-repo-name))
-    access_token: ((github-ci-status-token))
-    branch: ((branch))
-    context: jdk18-build
 - name: repo-status-jdk19-build
   type: github-status-resource
   icon: eye-check-outline
@@ -237,34 +229,6 @@ jobs:
           "zip.type": "schema"
     get_params:
       threads: 8
-- name: jdk18-build
-  serial: true
-  public: true
-  plan:
-    - get: ci-image
-    - get: git-repo
-    - get: every-morning
-      trigger: true
-    - put: repo-status-jdk18-build
-      params: { state: "pending", commit: "git-repo" }
-    - do:
-        - task: check-project
-          image: ci-image
-          file: git-repo/ci/tasks/check-project.yml
-          privileged: true
-          timeout: ((task-timeout))
-          params:
-            TEST_TOOLCHAIN: 18
-            <<: *build-project-task-params
-      on_failure:
-        do:
-          - put: repo-status-jdk18-build
-            params: { state: "failure", commit: "git-repo" }
-          - put: slack-alert
-            params:
-              <<: *slack-fail-params
-    - put: repo-status-jdk18-build
-      params: { state: "success", commit: "git-repo" }
 - name: jdk19-build
   serial: true
   public: true
@@ -471,7 +435,7 @@ jobs:
 
 groups:
 - name: "builds"
-  jobs: ["build", "jdk18-build", "jdk19-build"]
+  jobs: ["build", "jdk19-build"]
 - name: "releases"
   jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone", "promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"

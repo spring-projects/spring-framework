@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,9 +116,9 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 		doRegisterEditor(registry, Class.class, new ClassEditor(classLoader));
 		doRegisterEditor(registry, Class[].class, new ClassArrayEditor(classLoader));
 
-		if (this.resourceLoader instanceof ResourcePatternResolver) {
+		if (this.resourceLoader instanceof ResourcePatternResolver resourcePatternResolver) {
 			doRegisterEditor(registry, Resource[].class,
-					new ResourceArrayPropertyEditor((ResourcePatternResolver) this.resourceLoader, this.propertyResolver));
+					new ResourceArrayPropertyEditor(resourcePatternResolver, this.propertyResolver));
 		}
 	}
 
@@ -127,8 +127,8 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 	 * otherwise register as a custom editor.
 	 */
 	private void doRegisterEditor(PropertyEditorRegistry registry, Class<?> requiredType, PropertyEditor editor) {
-		if (registry instanceof PropertyEditorRegistrySupport) {
-			((PropertyEditorRegistrySupport) registry).overrideDefaultEditor(requiredType, editor);
+		if (registry instanceof PropertyEditorRegistrySupport registrySupport) {
+			registrySupport.overrideDefaultEditor(requiredType, editor);
 		}
 		else {
 			registry.registerCustomEditor(requiredType, editor);

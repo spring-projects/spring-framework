@@ -31,12 +31,6 @@ dependencies {
 	asciidoctorExtensions "io.spring.asciidoctor.backends:spring-asciidoctor-backends:0.0.4"
 }
 
-repositories {
-	maven {
-		url "https://repo.spring.io/release"
-	}
-}
-
 /**
  * Produce Javadoc for all Spring Framework modules in "build/docs/javadoc"
  */

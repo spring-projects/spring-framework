@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1265,17 +1265,17 @@ public abstract class ClassUtils {
 	/**
 	 * Given a method, which may come from an interface, and a target class used
 	 * in the current reflective invocation, find the corresponding target method
-	 * if there is one. E.g. the method may be {@code IFoo.bar()} and the
-	 * target class may be {@code DefaultFoo}. In this case, the method may be
+	 * if there is one &mdash; for example, the method may be {@code IFoo.bar()},
+	 * and the target class may be {@code DefaultFoo}. In this case, the method may be
 	 * {@code DefaultFoo.bar()}. This enables attributes on that method to be found.
 	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.aop.support.AopUtils#getMostSpecificMethod},
 	 * this method does <i>not</i> resolve bridge methods automatically.
 	 * Call {@link org.springframework.core.BridgeMethodResolver#findBridgedMethod}
-	 * if bridge method resolution is desirable (e.g. for obtaining metadata from
-	 * the original method definition).
-	 * <p><b>NOTE:</b> Since Spring 3.1.1, if Java security settings disallow reflective
-	 * access (e.g. calls to {@code Class#getDeclaredMethods} etc, this implementation
-	 * will fall back to returning the originally provided method.
+	 * if bridge method resolution is desirable &mdash; for example, to obtain
+	 * metadata from the original method definition.
+	 * <p><b>NOTE:</b> If Java security settings disallow reflective access &mdash;
+	 * for example, calls to {@code Class#getDeclaredMethods}, etc. &mdash; this
+	 * implementation will fall back to returning the originally provided method.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation
 	 * (may be {@code null} or may not even implement the method)

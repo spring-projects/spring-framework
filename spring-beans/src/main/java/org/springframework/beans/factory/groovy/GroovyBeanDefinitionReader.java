@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,8 +318,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			if (!ObjectUtils.isEmpty(args)) {
 				int index = args.length;
 				Object lastArg = args[index - 1];
-				if (lastArg instanceof Closure<?>) {
-					callable = (Closure<?>) lastArg;
+				if (lastArg instanceof Closure<?> closure) {
+					callable = closure;
 					index--;
 				}
 				constructorArgs = resolveConstructorArguments(args, 0, index);

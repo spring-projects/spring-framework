@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,6 +254,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	@Override
 	public int compareTo(ProducesRequestCondition other, HttpServletRequest request) {
+		if (this.expressions.isEmpty() && other.expressions.isEmpty()) {
+			return 0;
+		}
 		try {
 			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(request);
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {

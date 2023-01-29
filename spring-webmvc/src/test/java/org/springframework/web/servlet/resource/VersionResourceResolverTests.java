@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package org.springframework.web.servlet.resource;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -42,30 +40,21 @@ import static org.mockito.Mockito.verify;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-public class VersionResourceResolverTests {
+class VersionResourceResolverTests {
 
-	private List<Resource> locations;
+	private List<Resource> locations = List.of(
+			new ClassPathResource("test/", getClass()),
+			new ClassPathResource("testalternatepath/", getClass()));
 
-	private VersionResourceResolver resolver;
+	private VersionResourceResolver resolver = new VersionResourceResolver();
 
-	private ResourceResolverChain chain;
+	private ResourceResolverChain chain = mock();
 
-	private VersionStrategy versionStrategy;
+	private VersionStrategy versionStrategy = mock();
 
-
-	@BeforeEach
-	public void setup() {
-		this.locations = new ArrayList<>();
-		this.locations.add(new ClassPathResource("test/", getClass()));
-		this.locations.add(new ClassPathResource("testalternatepath/", getClass()));
-
-		this.resolver = new VersionResourceResolver();
-		this.chain = mock(ResourceResolverChain.class);
-		this.versionStrategy = mock(VersionStrategy.class);
-	}
 
 	@Test
-	public void resolveResourceExisting() throws Exception {
+	void resolveResourceExisting() throws Exception {
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(expected);
@@ -78,7 +67,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceNoVersionStrategy() throws Exception {
+	void resolveResourceNoVersionStrategy() throws Exception {
 		String file = "missing.css";
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(null);
 
@@ -89,7 +78,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceNoVersionInPath() throws Exception {
+	void resolveResourceNoVersionInPath() throws Exception {
 		String file = "bar.css";
 		given(this.chain.resolveResource(null, file, this.locations)).willReturn(null);
 		given(this.versionStrategy.extractVersion(file)).willReturn("");
@@ -102,7 +91,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceNoResourceAfterVersionRemoved() throws Exception {
+	void resolveResourceNoResourceAfterVersionRemoved() throws Exception {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -118,7 +107,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceVersionDoesNotMatch() throws Exception {
+	void resolveResourceVersionDoesNotMatch() throws Exception {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -136,7 +125,7 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void resolveResourceSuccess() throws Exception {
+	void resolveResourceSuccess() throws Exception {
 		String versionFile = "bar-version.css";
 		String version = "version";
 		String file = "bar.css";
@@ -158,10 +147,10 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test
-	public void getStrategyForPath() throws Exception {
+	void getStrategyForPath() throws Exception {
 		Map<String, VersionStrategy> strategies = new HashMap<>();
-		VersionStrategy jsStrategy = mock(VersionStrategy.class);
-		VersionStrategy catchAllStrategy = mock(VersionStrategy.class);
+		VersionStrategy jsStrategy = mock();
+		VersionStrategy catchAllStrategy = mock();
 		strategies.put("/**", catchAllStrategy);
 		strategies.put("/**/*.js", jsStrategy);
 		this.resolver.setStrategyMap(strategies);
@@ -174,8 +163,7 @@ public class VersionResourceResolverTests {
 
 	// SPR-13883
 	@Test
-	public void shouldConfigureFixedPrefixAutomatically() throws Exception {
-
+	void shouldConfigureFixedPrefixAutomatically() throws Exception {
 		this.resolver.addFixedVersionStrategy("fixedversion", "/js/**", "/css/**", "/fixedversion/css/**");
 
 		assertThat(this.resolver.getStrategyMap()).hasSize(4);
@@ -186,11 +174,10 @@ public class VersionResourceResolverTests {
 	}
 
 	@Test // SPR-15372
-	public void resolveUrlPathNoVersionStrategy() throws Exception {
+	void resolveUrlPathNoVersionStrategy() throws Exception {
 		given(this.chain.resolveUrlPath("/foo.css", this.locations)).willReturn("/foo.css");
 		String resolved = this.resolver.resolveUrlPathInternal("/foo.css", this.locations, this.chain);
 		assertThat(resolved).isEqualTo("/foo.css");
 	}
-
 
 }

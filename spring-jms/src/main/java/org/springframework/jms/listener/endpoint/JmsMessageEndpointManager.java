@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,8 +180,8 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 
 	@Override
 	public void setupMessageListener(Object messageListener) {
-		if (messageListener instanceof MessageListener) {
-			setMessageListener((MessageListener) messageListener);
+		if (messageListener instanceof MessageListener msgListener) {
+			setMessageListener(msgListener);
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported message listener '" +
@@ -203,8 +203,8 @@ public class JmsMessageEndpointManager extends GenericMessageEndpointManager
 	@Override
 	@Nullable
 	public DestinationResolver getDestinationResolver() {
-		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory) {
-			return ((StandardJmsActivationSpecFactory) this.activationSpecFactory).getDestinationResolver();
+		if (this.activationSpecFactory instanceof StandardJmsActivationSpecFactory standardFactory) {
+			return standardFactory.getDestinationResolver();
 		}
 		return null;
 	}

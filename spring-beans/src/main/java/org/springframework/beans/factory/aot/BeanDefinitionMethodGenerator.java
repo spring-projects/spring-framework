@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.MethodParameter;
 import org.springframework.javapoet.ClassName;
 import org.springframework.lang.Nullable;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 6.0
  * @see BeanDefinitionMethodGeneratorFactory
  */
@@ -68,12 +70,17 @@ class BeanDefinitionMethodGenerator {
 	 * @param registeredBean the registered bean
 	 * @param currentPropertyName the current property name
 	 * @param aotContributions the AOT contributions
+	 * @throws IllegalArgumentException if the bean definition defines an instance supplier since this can't be supported for code generation
 	 */
 	BeanDefinitionMethodGenerator(
 			BeanDefinitionMethodGeneratorFactory methodGeneratorFactory,
 			RegisteredBean registeredBean, @Nullable String currentPropertyName,
 			List<BeanRegistrationAotContribution> aotContributions) {
 
+		RootBeanDefinition mbd = registeredBean.getMergedBeanDefinition();
+		if (mbd.getInstanceSupplier() != null) {
+			throw new IllegalArgumentException("Code generation is not supported for bean definitions declaring an instance supplier callback : " + mbd);
+		}
 		this.methodGeneratorFactory = methodGeneratorFactory;
 		this.registeredBean = registeredBean;
 		this.constructorOrFactoryMethod = registeredBean.resolveConstructorOrFactoryMethod();

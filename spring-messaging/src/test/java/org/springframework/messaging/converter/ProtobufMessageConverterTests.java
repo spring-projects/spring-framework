@@ -18,7 +18,6 @@ package org.springframework.messaging.converter;
 
 import java.util.Map;
 
-import com.google.protobuf.ExtensionRegistry;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -108,7 +107,7 @@ class ProtobufMessageConverterTests {
 	void jsonWithGoogleProtobuf() throws Exception {
 		ProtobufMessageConverter converter = new ProtobufMessageConverter(
 				new ProtobufMessageConverter.ProtobufJavaUtilSupport(null, null),
-				mock(ExtensionRegistry.class));
+				mock());
 
 		//convertTo
 		Message<?> message = converter.toMessage(testMsg, new MessageHeaders(Map.of(CONTENT_TYPE, APPLICATION_JSON)));

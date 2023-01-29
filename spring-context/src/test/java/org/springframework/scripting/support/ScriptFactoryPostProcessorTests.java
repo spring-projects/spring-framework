@@ -19,7 +19,6 @@ package org.springframework.scripting.support;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -88,7 +87,7 @@ class ScriptFactoryPostProcessorTests {
 	@Test
 	void testThrowsExceptionIfGivenNonAbstractBeanFactoryImplementation() {
 		assertThatIllegalStateException().isThrownBy(() ->
-				new ScriptFactoryPostProcessor().setBeanFactory(mock(BeanFactory.class)));
+				new ScriptFactoryPostProcessor().setBeanFactory(mock()));
 	}
 
 	@Test

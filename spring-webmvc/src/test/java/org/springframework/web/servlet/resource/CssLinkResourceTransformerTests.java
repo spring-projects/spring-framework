@@ -23,7 +23,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -33,6 +32,9 @@ import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link CssLinkResourceTransformer}.
@@ -111,7 +113,7 @@ class CssLinkResourceTransformerTests {
 		this.request = new MockHttpServletRequest("GET", "/static/external.css");
 
 		List<ResourceTransformer> transformers = Collections.singletonList(new CssLinkResourceTransformer());
-		ResourceResolverChain mockChain = Mockito.mock(DefaultResourceResolverChain.class);
+		ResourceResolverChain mockChain = mock();
 		ResourceTransformerChain chain = new DefaultResourceTransformerChain(mockChain, transformers);
 
 		Resource resource = getResource("external.css");
@@ -125,9 +127,9 @@ class CssLinkResourceTransformerTests {
 		assertThat(result).isEqualToNormalizingNewlines(expected);
 
 		List<Resource> locations = List.of(resource);
-		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("https://example.org/fonts/css", locations);
-		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("file:///home/spring/image.png", locations);
-		Mockito.verify(mockChain, Mockito.never()).resolveUrlPath("//example.org/style.css", locations);
+		verify(mockChain, never()).resolveUrlPath("https://example.org/fonts/css", locations);
+		verify(mockChain, never()).resolveUrlPath("file:///home/spring/image.png", locations);
+		verify(mockChain, never()).resolveUrlPath("//example.org/style.css", locations);
 	}
 
 	@Test

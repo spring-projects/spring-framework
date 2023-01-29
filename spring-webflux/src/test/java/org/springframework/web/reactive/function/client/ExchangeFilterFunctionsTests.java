@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class ExchangeFilterFunctionsTests {
 	@Test
 	public void andThen() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
-		ClientResponse response = mock(ClientResponse.class);
+		ClientResponse response = mock();
 		ExchangeFunction exchange = r -> Mono.just(response);
 
 		boolean[] filtersInvoked = new boolean[2];
@@ -82,7 +82,7 @@ public class ExchangeFilterFunctionsTests {
 	@Test
 	public void apply() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
-		ClientResponse response = mock(ClientResponse.class);
+		ClientResponse response = mock();
 		ExchangeFunction exchange = r -> Mono.just(response);
 
 		boolean[] filterInvoked = new boolean[1];
@@ -101,7 +101,7 @@ public class ExchangeFilterFunctionsTests {
 	@Test
 	public void basicAuthenticationUsernamePassword() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
-		ClientResponse response = mock(ClientResponse.class);
+		ClientResponse response = mock();
 
 		ExchangeFunction exchange = r -> {
 			assertThat(r.headers().containsKey(HttpHeaders.AUTHORIZATION)).isTrue();
@@ -118,7 +118,7 @@ public class ExchangeFilterFunctionsTests {
 	@Test
 	public void basicAuthenticationInvalidCharacters() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
-		ExchangeFunction exchange = r -> Mono.just(mock(ClientResponse.class));
+		ExchangeFunction exchange = r -> Mono.just(mock());
 
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				ExchangeFilterFunctions.basicAuthentication("foo", "\ud83d\udca9").filter(request, exchange));
@@ -131,7 +131,7 @@ public class ExchangeFilterFunctionsTests {
 				.attributes(org.springframework.web.reactive.function.client.ExchangeFilterFunctions
 						.Credentials.basicAuthenticationCredentials("foo", "bar"))
 				.build();
-		ClientResponse response = mock(ClientResponse.class);
+		ClientResponse response = mock();
 
 		ExchangeFunction exchange = r -> {
 			assertThat(r.headers().containsKey(HttpHeaders.AUTHORIZATION)).isTrue();
@@ -149,7 +149,7 @@ public class ExchangeFilterFunctionsTests {
 	@SuppressWarnings("deprecation")
 	public void basicAuthenticationAbsentAttributes() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
-		ClientResponse response = mock(ClientResponse.class);
+		ClientResponse response = mock();
 
 		ExchangeFunction exchange = r -> {
 			assertThat(r.headers().containsKey(HttpHeaders.AUTHORIZATION)).isFalse();
@@ -165,7 +165,7 @@ public class ExchangeFilterFunctionsTests {
 	@Test
 	public void statusHandlerMatch() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
-		ClientResponse response = mock(ClientResponse.class);
+		ClientResponse response = mock();
 		given(response.statusCode()).willReturn(HttpStatus.NOT_FOUND);
 
 		ExchangeFunction exchange = r -> Mono.just(response);
@@ -183,7 +183,7 @@ public class ExchangeFilterFunctionsTests {
 	@Test
 	public void statusHandlerNoMatch() {
 		ClientRequest request = ClientRequest.create(HttpMethod.GET, DEFAULT_URL).build();
-		ClientResponse response = mock(ClientResponse.class);
+		ClientResponse response = mock();
 		given(response.statusCode()).willReturn(HttpStatus.NOT_FOUND);
 
 		Mono<ClientResponse> result = ExchangeFilterFunctions

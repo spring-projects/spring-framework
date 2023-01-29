@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,16 +58,16 @@ class RestTemplateObservationTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private final ClientHttpRequestFactory requestFactory = mock(ClientHttpRequestFactory.class);
+	private final ClientHttpRequestFactory requestFactory = mock();
 
-	private final ClientHttpRequest request = mock(ClientHttpRequest.class);
+	private final ClientHttpRequest request = mock();
 
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+	private final ClientHttpResponse response = mock();
 
-	private final ResponseErrorHandler errorHandler = mock(ResponseErrorHandler.class);
+	private final ResponseErrorHandler errorHandler = mock();
 
 	@SuppressWarnings("unchecked")
-	private final HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+	private final HttpMessageConverter<String> converter = mock();
 
 	private final RestTemplate template = new RestTemplate(List.of(converter));
 

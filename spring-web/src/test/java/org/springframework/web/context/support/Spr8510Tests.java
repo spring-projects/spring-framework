@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * Tests the interaction between a WebApplicationContext and ContextLoaderListener with
  * regard to config location precedence, overriding and defaulting in programmatic
- * configuration use cases, e.g. with Spring 3.1's WebApplicationInitializer.
+ * configuration use cases, e.g. with WebApplicationInitializer.
  *
  * @author Chris Beams
  * @since 3.1

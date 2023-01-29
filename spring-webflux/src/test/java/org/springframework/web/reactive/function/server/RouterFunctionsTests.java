@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ class RouterFunctionsTests {
 
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.test(request)).willReturn(true);
 
 		RouterFunction<ServerResponse>
@@ -77,7 +77,7 @@ class RouterFunctionsTests {
 
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.test(request)).willReturn(false);
 
 		RouterFunction<ServerResponse> result = RouterFunctions.route(requestPredicate, handlerFunction);
@@ -96,7 +96,7 @@ class RouterFunctionsTests {
 
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.nest(request)).willReturn(Optional.of(request));
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
@@ -116,7 +116,7 @@ class RouterFunctionsTests {
 
 		MockServerHttpRequest mockRequest = MockServerHttpRequest.get("https://example.com").build();
 		ServerRequest request = new DefaultServerRequest(MockServerWebExchange.from(mockRequest), Collections.emptyList());
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.nest(request)).willReturn(Optional.empty());
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
