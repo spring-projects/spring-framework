@@ -70,6 +70,7 @@ public enum ClientHttpObservationDocumentation implements ObservationDocumentati
 
 		/**
 		 * URI template used for HTTP request, or {@value KeyValue#NONE_VALUE} if none was provided.
+		 * Only the path part of the URI is considered.
 		 */
 		URI {
 			@Override

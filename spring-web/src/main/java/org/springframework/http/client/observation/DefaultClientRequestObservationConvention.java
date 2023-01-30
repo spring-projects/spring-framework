@@ -17,6 +17,7 @@
 package org.springframework.http.client.observation;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
@@ -38,6 +39,8 @@ import org.springframework.util.StringUtils;
 public class DefaultClientRequestObservationConvention implements ClientRequestObservationConvention {
 
 	private static final String DEFAULT_NAME = "http.client.requests";
+
+	private static final Pattern PATTERN_BEFORE_PATH = Pattern.compile("^https?://[^/]+/");
 
 	private static final KeyValue URI_NONE = KeyValue.of(LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
 
@@ -92,9 +95,14 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	protected KeyValue uri(ClientRequestObservationContext context) {
 		if (context.getUriTemplate() != null) {
-			return KeyValue.of(LowCardinalityKeyNames.URI, context.getUriTemplate());
+			return KeyValue.of(LowCardinalityKeyNames.URI, extractPath(context.getUriTemplate()));
 		}
 		return URI_NONE;
+	}
+
+	private static String extractPath(String uriTemplate) {
+		String path = PATTERN_BEFORE_PATH.matcher(uriTemplate).replaceFirst("");
+		return (path.startsWith("/") ? path : "/" + path);
 	}
 
 	protected KeyValue method(ClientRequestObservationContext context) {

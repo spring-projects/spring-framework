@@ -88,7 +88,7 @@ class RestTemplateObservationTests {
 		template.execute("https://example.com/hotels/{hotel}/bookings/{booking}", GET,
 				null, null, "42", "21");
 
-		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "https://example.com/hotels/{hotel}/bookings/{booking}");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/hotels/{hotel}/bookings/{booking}");
 	}
 
 	@Test
@@ -101,7 +101,7 @@ class RestTemplateObservationTests {
 		template.execute("https://example.com/hotels/{hotel}/bookings/{booking}", GET,
 				null, null, vars);
 
-		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "https://example.com/hotels/{hotel}/bookings/{booking}");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/hotels/{hotel}/bookings/{booking}");
 	}
 
 

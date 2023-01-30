@@ -74,6 +74,18 @@ class DefaultClientRequestObservationConventionTests {
 	}
 
 	@Test
+	void addsKeyValuesForRequestWithUriTemplateWithHost() {
+		ClientRequestObservationContext context = createContext(
+				new MockClientHttpRequest(HttpMethod.GET, "https://example.org/resource/{id}", 42), new MockClientHttpResponse());
+		context.setUriTemplate("https://example.org/resource/{id}");
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("exception", "none"), KeyValue.of("method", "GET"), KeyValue.of("uri", "/resource/{id}"),
+						KeyValue.of("status", "200"), KeyValue.of("client.name", "example.org"), KeyValue.of("outcome", "SUCCESS"));
+		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("http.url", "https://example.org/resource/42"));
+	}
+
+
+	@Test
 	void addsKeyValuesForRequestWithoutUriTemplate() {
 		ClientRequestObservationContext context = createContext(
 				new MockClientHttpRequest(HttpMethod.GET, "/resource/42"), new MockClientHttpResponse());

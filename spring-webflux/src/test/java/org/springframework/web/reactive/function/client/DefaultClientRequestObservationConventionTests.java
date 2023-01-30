@@ -114,6 +114,14 @@ class DefaultClientRequestObservationConventionTests {
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("uri", "/"));
 	}
 
+	@Test
+	void shouldOnlyConsiderPathForUriKeyValue() {
+		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://example.org/resource/42")));
+		context.setUriTemplate("https://example.org/resource/{id}");
+		context.setRequest(context.getCarrier().build());
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("uri", "/resource/{id}"));
+	}
+
 	private ClientRequestObservationContext createContext(ClientRequest.Builder request) {
 		ClientRequestObservationContext context = new ClientRequestObservationContext();
 		context.setCarrier(request);
