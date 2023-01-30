@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				contentType = request.getHeaders().getContentType();
 			}
 			catch (InvalidMediaTypeException ex) {
-				throw new UnsupportedMediaTypeStatusException(ex.getMessage());
+				throw new UnsupportedMediaTypeStatusException(ex.getMessage(), new ArrayList<>(mediaTypes));
 			}
 			throw new UnsupportedMediaTypeStatusException(
 					contentType, new ArrayList<>(mediaTypes), exchange.getRequest().getMethod());

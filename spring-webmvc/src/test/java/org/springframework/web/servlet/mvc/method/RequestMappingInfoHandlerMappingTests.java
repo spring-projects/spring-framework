@@ -176,6 +176,15 @@ class RequestMappingInfoHandlerMappingTests {
 		testHttpMediaTypeNotSupportedException(mapping, "/person/1.json");
 	}
 
+	@PathPatternsParameterizedTest // gh-28062
+	void getHandlerMethodTypeNotSupportedWithParseError(TestRequestMappingInfoHandlerMapping mapping) {
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/person/1");
+		request.setContentType("This string");
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class)
+				.isThrownBy(() -> mapping.getHandler(request))
+				.satisfies(ex -> assertThat(ex.getSupportedMediaTypes()).containsExactly(MediaType.APPLICATION_XML));
+	}
+
 	@PathPatternsParameterizedTest
 	void getHandlerHttpOptions(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
 		testHttpOptions(mapping, "/foo", "GET,HEAD,OPTIONS", null);

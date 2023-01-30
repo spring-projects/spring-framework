@@ -57,9 +57,17 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	 * Constructor for when the specified Content-Type is invalid.
 	 */
 	public UnsupportedMediaTypeStatusException(@Nullable String reason) {
+		this(reason, Collections.emptyList());
+	}
+
+	/**
+	 * Constructor for when the specified Content-Type is invalid.
+	 * @since 6.0.5
+	 */
+	public UnsupportedMediaTypeStatusException(@Nullable String reason, List<MediaType> supportedTypes) {
 		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason, null, PARSE_ERROR_DETAIL_CODE, null);
 		this.contentType = null;
-		this.supportedMediaTypes = Collections.emptyList();
+		this.supportedMediaTypes = Collections.unmodifiableList(supportedTypes);
 		this.bodyType = null;
 		this.method = null;
 		setDetail("Could not parse Content-Type.");
