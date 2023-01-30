@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,9 +185,9 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			String etag = entityHeaders.getETag();
 			Instant lastModified = Instant.ofEpochMilli(entityHeaders.getLastModified());
 			HttpMethod httpMethod = exchange.getRequest().getMethod();
-			return (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) ?
-					exchange.getResponse().setComplete()
-					: writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange);
+			return ((SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) ?
+					exchange.getResponse().setComplete() :
+					writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange));
 		});
 	}
 
