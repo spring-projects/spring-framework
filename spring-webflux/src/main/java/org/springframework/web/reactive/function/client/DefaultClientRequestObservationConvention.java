@@ -38,6 +38,8 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	private static final String DEFAULT_NAME = "http.client.requests";
 
+	private static final String ROOT_PATH = "/";
+
 	private static final KeyValue URI_NONE = KeyValue.of(LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
 
 	private static final KeyValue METHOD_NONE = KeyValue.of(LowCardinalityKeyNames.METHOD, KeyValue.NONE_VALUE);
@@ -93,6 +95,10 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 	protected KeyValue uri(ClientRequestObservationContext context) {
 		if (context.getUriTemplate() != null) {
 			return KeyValue.of(LowCardinalityKeyNames.URI, context.getUriTemplate());
+		}
+		ClientRequest request = context.getRequest();
+		if (request != null && ROOT_PATH.equals(request.url().getPath())) {
+			return KeyValue.of(LowCardinalityKeyNames.URI, ROOT_PATH);
 		}
 		return URI_NONE;
 	}

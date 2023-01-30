@@ -107,6 +107,13 @@ class DefaultClientRequestObservationConventionTests {
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("client.name", "localhost"));
 	}
 
+	@Test
+	void shouldAddRootUriEvenIfTemplateMissing() {
+		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://example.org/")));
+		context.setRequest(context.getCarrier().build());
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("uri", "/"));
+	}
+
 	private ClientRequestObservationContext createContext(ClientRequest.Builder request) {
 		ClientRequestObservationContext context = new ClientRequestObservationContext();
 		context.setCarrier(request);
