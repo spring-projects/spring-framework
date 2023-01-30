@@ -43,6 +43,10 @@ import org.springframework.util.Assert;
  * are provided as additional arguments so that these can be injected as
  * method arguments if necessary.
  *
+ * <p>As of Spring Framework 6.0.5, {@code MessagingMessageListenerAdapter} implements
+ * {@link SubscriptionNameProvider} in order to provide a meaningful default
+ * subscription name. See {@link #getSubscriptionName()} for details.
+ *
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 4.1
@@ -68,16 +72,6 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	private InvocableHandlerMethod getHandlerMethod() {
 		Assert.state(this.handlerMethod != null, "No HandlerMethod set");
 		return this.handlerMethod;
-	}
-
-	@Override
-	public String getSubscriptionName() {
-		if (this.handlerMethod != null) {
-			return this.handlerMethod.getBeanType().getName() + "#" + this.handlerMethod.getMethod().getName();
-		}
-		else {
-			return this.getClass().getName();
-		}
 	}
 
 
@@ -143,6 +137,30 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 		return messageBuilder
 				.setHeader(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType)
 				.build();
+	}
+
+	/**
+	 * Generate a subscription name for this {@code MessageListener} adapter based
+	 * on the following rules.
+	 * <ul>
+	 * <li>If the {@link #setHandlerMethod(InvocableHandlerMethod) handlerMethod}
+	 * has been set, the generated subscription name takes the form of
+	 * {@code handlerMethod.getBeanType().getName() + "." + handlerMethod.getMethod().getName()}.</li>
+	 * <li>Otherwise, the generated subscription name is the result of invoking
+	 * {@code getClass().getName()}, which aligns with the default behavior of
+	 * {@link org.springframework.jms.listener.AbstractMessageListenerContainer}.</li>
+	 * </ul>
+	 * @since 6.0.5
+	 * @see SubscriptionNameProvider#getSubscriptionName()
+	 */
+	@Override
+	public String getSubscriptionName() {
+		if (this.handlerMethod != null) {
+			return this.handlerMethod.getBeanType().getName() + "." + this.handlerMethod.getMethod().getName();
+		}
+		else {
+			return getClass().getName();
+		}
 	}
 
 }

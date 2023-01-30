@@ -79,6 +79,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * <em>composed annotations</em> with attribute overrides.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.1
  * @see EnableJms
  * @see JmsListenerAnnotationBeanPostProcessor
@@ -113,6 +114,12 @@ public @interface JmsListener {
 
 	/**
 	 * The name for the durable subscription, if any.
+	 * <p>As of Spring Framework 6.0.5, if an explicit subscription name is not
+	 * specified, a default subscription name will be generated based on the fully
+	 * qualified name of the annotated listener method &mdash; for example,
+	 * {@code "org.example.jms.ProductListener.processRequest"} for a
+	 * {@code processRequest(...)} listener method in the
+	 * {@code org.example.jms.ProductListener} class.
 	 */
 	String subscription() default "";
 
