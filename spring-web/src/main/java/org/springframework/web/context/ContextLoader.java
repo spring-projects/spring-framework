@@ -133,22 +133,6 @@ public class ContextLoader {
 	private static final String DEFAULT_STRATEGIES_PATH = "ContextLoader.properties";
 
 
-	private static final Properties defaultStrategies;
-
-	static {
-		// Load default strategy implementations from properties file.
-		// This is currently strictly internal and not meant to be customized
-		// by application developers.
-		try {
-			ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, ContextLoader.class);
-			defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
-		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Could not load 'ContextLoader.properties': " + ex.getMessage());
-		}
-	}
-
-
 	/**
 	 * Map from (thread context) ClassLoader to corresponding 'current' WebApplicationContext.
 	 */
@@ -162,6 +146,8 @@ public class ContextLoader {
 	@Nullable
 	private static volatile WebApplicationContext currentContext;
 
+	@Nullable
+	private static Properties defaultStrategies;
 
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
@@ -357,6 +343,18 @@ public class ContextLoader {
 			}
 		}
 		else {
+			if (defaultStrategies == null) {
+				// Load default strategy implementations from properties file.
+				// This is currently strictly internal and not meant to be customized
+				// by application developers.
+				try {
+					ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, ContextLoader.class);
+					defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
+				}
+				catch (IOException ex) {
+					throw new IllegalStateException("Could not load 'ContextLoader.properties': " + ex.getMessage());
+				}
+			}
 			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
 			try {
 				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
