@@ -159,11 +159,9 @@ class DefaultDatabaseClient implements DatabaseClient {
 	/**
 	 * Release the {@link Connection}.
 	 * @param connection to close.
-	 * @return a {@link Publisher} that completes successfully when the connection is
-	 * closed
+	 * @return a {@link Publisher} that completes successfully when the connection is closed
 	 */
 	private Publisher<Void> closeConnection(Connection connection) {
-
 		return ConnectionFactoryUtils.currentConnectionFactory(
 				obtainConnectionFactory()).then().onErrorResume(Exception.class,
 						e -> Mono.from(connection.close()));
@@ -189,24 +187,22 @@ class DefaultDatabaseClient implements DatabaseClient {
 				new CloseSuppressingInvocationHandler(con));
 	}
 
-	private static Mono<Integer> sumRowsUpdated(
-			Function<Connection, Flux<Result>> resultFunction, Connection it) {
+	private static Mono<Integer> sumRowsUpdated(Function<Connection, Flux<Result>> resultFunction, Connection it) {
 		return resultFunction.apply(it)
 				.flatMap(Result::getRowsUpdated)
 				.collect(Collectors.summingInt(Integer::intValue));
 	}
 
 	/**
-	 * Determine SQL from potential provider object.
-	 * @param sqlProvider object that's potentially a SqlProvider
+	 * Get SQL from a potential provider object.
+	 * @param object an object that is potentially an SqlProvider
 	 * @return the SQL string, or {@code null}
 	 * @see SqlProvider
 	 */
 	@Nullable
-	private static String getSql(Object sqlProvider) {
-
-		if (sqlProvider instanceof SqlProvider) {
-			return ((SqlProvider) sqlProvider).getSql();
+	private static String getSql(Object object) {
+		if (object instanceof SqlProvider) {
+			return ((SqlProvider) object).getSql();
 		}
 		else {
 			return null;
@@ -215,7 +211,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 
 	/**
-	 * Base class for {@link DatabaseClient.GenericExecuteSpec} implementations.
+	 * Default {@link DatabaseClient.GenericExecuteSpec} implementation.
 	 */
 	class DefaultGenericExecuteSpec implements GenericExecuteSpec {
 
@@ -505,12 +501,11 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		private static final long serialVersionUID = -8994138383301201380L;
 
-		final Connection connection;
+		final transient Connection connection;
 
-		final Function<Connection, Publisher<Void>> closeFunction;
+		final transient Function<Connection, Publisher<Void>> closeFunction;
 
-		ConnectionCloseHolder(Connection connection,
-				Function<Connection, Publisher<Void>> closeFunction) {
+		ConnectionCloseHolder(Connection connection, Function<Connection, Publisher<Void>> closeFunction) {
 			this.connection = connection;
 			this.closeFunction = closeFunction;
 		}

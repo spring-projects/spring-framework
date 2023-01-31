@@ -395,6 +395,7 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 	}
 
 
+	@SuppressWarnings("try")
 	public static class ActiveResource implements AutoCloseable {
 
 		public ActiveResource getResource() {

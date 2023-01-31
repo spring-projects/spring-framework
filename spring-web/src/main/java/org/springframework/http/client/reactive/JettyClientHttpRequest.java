@@ -96,8 +96,7 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 					.as(chunks -> ReactiveRequest.Content.fromPublisher(chunks, getContentType()));
 			this.builder.content(content);
 			sink.success();
-		})
-				.then(doCommit());
+		}).then(doCommit());
 	}
 
 	@Override
