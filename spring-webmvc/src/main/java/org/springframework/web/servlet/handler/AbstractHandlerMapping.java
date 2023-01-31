@@ -60,7 +60,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping}
- * implementations. Supports ordering, a default handler, handler interceptors,
+ * implementations. Supports ordering, a default handler, and handler interceptors,
  * including handler interceptors mapped by path patterns.
  *
  * <p>Note: This base class does <i>not</i> support exposure of the
@@ -280,8 +280,8 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	/**
 	 * Return all configured interceptors adapted to {@link HandlerInterceptor}.
 	 * @return the array of configured interceptors, or {@code null} if none
-	 * are configured; this method also returns {@code null} also if called too
-	 * early, or more specifically before.
+	 * are configured; this method also returns {@code null} if called too early,
+	 * or more specifically before
 	 * {@link org.springframework.context.ApplicationContextAware#setApplicationContext}.
 	 */
 	@Nullable
