@@ -38,7 +38,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  * except that these tests have a different scope and do not use mocks.
  *
  * @author Sam Brannen
- * @since 6.0.5
+ * @since 5.3.26
  * @see MessagingMessageListenerAdapterTests
  */
 class MessagingMessageListenerAdapterIntegrationTests {

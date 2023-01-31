@@ -114,7 +114,7 @@ public @interface JmsListener {
 
 	/**
 	 * The name for the durable subscription, if any.
-	 * <p>As of Spring Framework 6.0.5, if an explicit subscription name is not
+	 * <p>As of Spring Framework 5.3.26, if an explicit subscription name is not
 	 * specified, a default subscription name will be generated based on the fully
 	 * qualified name of the annotated listener method &mdash; for example,
 	 * {@code "org.example.jms.ProductListener.processRequest"} for a

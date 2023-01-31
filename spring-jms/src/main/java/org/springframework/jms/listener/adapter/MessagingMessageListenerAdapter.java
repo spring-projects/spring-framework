@@ -43,7 +43,7 @@ import org.springframework.util.Assert;
  * are provided as additional arguments so that these can be injected as
  * method arguments if necessary.
  *
- * <p>As of Spring Framework 6.0.5, {@code MessagingMessageListenerAdapter} implements
+ * <p>As of Spring Framework 5.3.26, {@code MessagingMessageListenerAdapter} implements
  * {@link SubscriptionNameProvider} in order to provide a meaningful default
  * subscription name. See {@link #getSubscriptionName()} for details.
  *
@@ -150,7 +150,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	 * {@code getClass().getName()}, which aligns with the default behavior of
 	 * {@link org.springframework.jms.listener.AbstractMessageListenerContainer}.</li>
 	 * </ul>
-	 * @since 6.0.5
+	 * @since 5.3.26
 	 * @see SubscriptionNameProvider#getSubscriptionName()
 	 */
 	@Override
