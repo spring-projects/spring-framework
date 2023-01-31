@@ -49,6 +49,7 @@ public class DateFormatter implements Formatter<Date> {
 
 	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
+	// We use an EnumMap instead of Map.of(...) since the former provides better performance.
 	private static final Map<ISO, String> ISO_PATTERNS;
 
 	static {
