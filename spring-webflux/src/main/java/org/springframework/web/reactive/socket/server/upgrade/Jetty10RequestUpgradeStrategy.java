@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,20 @@
 package org.springframework.web.reactive.socket.server.upgrade;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.function.Supplier;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import reactor.core.publisher.Mono;
 
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -119,40 +115,14 @@ public class Jetty10RequestUpgradeStrategy implements RequestUpgradeStrategy {
 	private static Object createJettyWebSocketCreator(
 			Jetty10WebSocketHandlerAdapter adapter, @Nullable String protocol) {
 
-		ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
-		factory.addInterface(webSocketCreatorClass);
-		factory.addAdvice(new WebSocketCreatorInterceptor(adapter, protocol));
-		return factory.getProxy();
-	}
-
-
-	/**
-	 * Proxy for a JettyWebSocketCreator to supply the WebSocket handler and set the sub-protocol.
-	 */
-	private static class WebSocketCreatorInterceptor implements MethodInterceptor {
-
-		private final Jetty10WebSocketHandlerAdapter adapter;
-
-		@Nullable
-		private final String protocol;
-
-
-		public WebSocketCreatorInterceptor(
-				Jetty10WebSocketHandlerAdapter adapter, @Nullable String protocol) {
-
-			this.adapter = adapter;
-			this.protocol = protocol;
-		}
-
-		@Nullable
-		@Override
-		public Object invoke(@NonNull MethodInvocation invocation) {
-			if (this.protocol != null) {
-				ReflectionUtils.invokeMethod(
-						setAcceptedSubProtocol, invocation.getArguments()[1], this.protocol);
-			}
-			return this.adapter;
-		}
+		return Proxy.newProxyInstance(
+				webSocketCreatorClass.getClassLoader(), new Class<?>[] {webSocketCreatorClass},
+				(proxy, method, args) -> {
+					if (protocol != null) {
+						ReflectionUtils.invokeMethod(setAcceptedSubProtocol, args[1], protocol);
+					}
+					return adapter;
+				});
 	}
 
 }
