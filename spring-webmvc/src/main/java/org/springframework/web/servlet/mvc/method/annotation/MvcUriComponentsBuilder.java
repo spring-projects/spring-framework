@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,17 +27,15 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
+import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
@@ -93,6 +93,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class MvcUriComponentsBuilder {
@@ -700,7 +701,7 @@ public class MvcUriComponentsBuilder {
 
 
 	private static class ControllerMethodInvocationInterceptor
-			implements org.springframework.cglib.proxy.MethodInterceptor, MethodInterceptor, MethodInvocationInfo {
+			implements MethodInterceptor, InvocationHandler, MethodInvocationInfo {
 
 		private final Class<?> controllerType;
 
@@ -741,8 +742,8 @@ public class MvcUriComponentsBuilder {
 
 		@Override
 		@Nullable
-		public Object invoke(org.aopalliance.intercept.MethodInvocation inv) throws Throwable {
-			return intercept(inv.getThis(), inv.getMethod(), inv.getArguments(), null);
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			return intercept(proxy, method, args, null);
 		}
 
 		@Override
@@ -767,19 +768,17 @@ public class MvcUriComponentsBuilder {
 		private static <T> T initProxy(
 				Class<?> controllerType, @Nullable ControllerMethodInvocationInterceptor interceptor) {
 
-			interceptor = interceptor != null ?
-					interceptor : new ControllerMethodInvocationInterceptor(controllerType);
+			interceptor = (interceptor != null ?
+					interceptor : new ControllerMethodInvocationInterceptor(controllerType));
 
 			if (controllerType == Object.class) {
 				return (T) interceptor;
 			}
 
 			else if (controllerType.isInterface()) {
-				ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
-				factory.addInterface(controllerType);
-				factory.addInterface(MethodInvocationInfo.class);
-				factory.addAdvice(interceptor);
-				return (T) factory.getProxy();
+				return (T) Proxy.newProxyInstance(controllerType.getClassLoader(),
+						new Class<?>[] {controllerType, MethodInvocationInfo.class},
+						interceptor);
 			}
 
 			else {
@@ -787,7 +786,7 @@ public class MvcUriComponentsBuilder {
 				enhancer.setSuperclass(controllerType);
 				enhancer.setInterfaces(new Class<?>[] {MethodInvocationInfo.class});
 				enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-				enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
+				enhancer.setCallbackType(MethodInterceptor.class);
 
 				Class<?> proxyClass = enhancer.createClass();
 				Object proxy = null;
