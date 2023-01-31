@@ -244,8 +244,8 @@ class DefaultDatabaseClient implements DatabaseClient {
 			this.filterFunction = filterFunction;
 		}
 
-		@Override
 		@SuppressWarnings("deprecation")
+		@Override
 		public DefaultGenericExecuteSpec bind(int index, Object value) {
 			assertNotPreparedOperation();
 			Assert.notNull(value, () -> String.format(
@@ -275,8 +275,8 @@ class DefaultDatabaseClient implements DatabaseClient {
 			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
 		}
 
-		@Override
 		@SuppressWarnings("deprecation")
+		@Override
 		public DefaultGenericExecuteSpec bind(String name, Object value) {
 			assertNotPreparedOperation();
 
@@ -522,8 +522,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		final transient Function<Connection, Publisher<Void>> closeFunction;
 
-		ConnectionCloseHolder(Connection connection,
-				Function<Connection, Publisher<Void>> closeFunction) {
+		ConnectionCloseHolder(Connection connection, Function<Connection, Publisher<Void>> closeFunction) {
 			this.connection = connection;
 			this.closeFunction = closeFunction;
 		}

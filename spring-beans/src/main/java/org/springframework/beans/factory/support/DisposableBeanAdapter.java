@@ -221,12 +221,15 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				((AutoCloseable) this.bean).close();
 			}
 			catch (Throwable ex) {
-				String msg = "Invocation of close method failed on bean with name '" + this.beanName + "'";
-				if (logger.isDebugEnabled()) {
-					logger.warn(msg, ex);
-				}
-				else {
-					logger.warn(msg + ": " + ex);
+				if (logger.isWarnEnabled()) {
+					String msg = "Invocation of close method failed on bean with name '" + this.beanName + "'";
+					if (logger.isDebugEnabled()) {
+						// Log at warn level like below but add the exception stacktrace only with debug level
+						logger.warn(msg, ex);
+					}
+					else {
+						logger.warn(msg + ": " + ex);
+					}
 				}
 			}
 		}
@@ -286,18 +289,23 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			destroyMethod.invoke(this.bean, args);
 		}
 		catch (InvocationTargetException ex) {
-			String msg = "Custom destroy method '" + destroyMethod.getName() + "' on bean with name '" +
-					this.beanName + "' threw an exception";
-			if (logger.isDebugEnabled()) {
-				logger.warn(msg, ex.getTargetException());
-			}
-			else {
-				logger.warn(msg + ": " + ex.getTargetException());
+			if (logger.isWarnEnabled()) {
+				String msg = "Custom destroy method '" + destroyMethod.getName() + "' on bean with name '" +
+						this.beanName + "' threw an exception";
+				if (logger.isDebugEnabled()) {
+					// Log at warn level like below but add the exception stacktrace only with debug level
+					logger.warn(msg, ex.getTargetException());
+				}
+				else {
+					logger.warn(msg + ": " + ex.getTargetException());
+				}
 			}
 		}
 		catch (Throwable ex) {
-			logger.warn("Failed to invoke custom destroy method '" + destroyMethod.getName() +
-					"' on bean with name '" + this.beanName + "'", ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to invoke custom destroy method '" + destroyMethod.getName() +
+						"' on bean with name '" + this.beanName + "'", ex);
+			}
 		}
 	}
 
@@ -328,8 +336,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param beanDefinition the corresponding bean definition
 	 */
 	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
-		return (bean instanceof DisposableBean
-				|| inferDestroyMethodsIfNecessary(bean.getClass(), beanDefinition) != null);
+		return (bean instanceof DisposableBean ||
+				inferDestroyMethodsIfNecessary(bean.getClass(), beanDefinition) != null);
 	}
 
 
