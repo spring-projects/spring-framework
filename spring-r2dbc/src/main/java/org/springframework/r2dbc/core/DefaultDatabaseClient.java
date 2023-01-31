@@ -166,7 +166,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 	 * closed
 	 */
 	private Publisher<Void> closeConnection(Connection connection) {
-
 		return ConnectionFactoryUtils.currentConnectionFactory(
 				obtainConnectionFactory()).then().onErrorResume(Exception.class,
 						e -> Mono.from(connection.close()));
@@ -192,8 +191,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 				new CloseSuppressingInvocationHandler(con));
 	}
 
-	private static Mono<Long> sumRowsUpdated(
-			Function<Connection, Flux<Result>> resultFunction, Connection it) {
+	private static Mono<Long> sumRowsUpdated(Function<Connection, Flux<Result>> resultFunction, Connection it) {
 		return resultFunction.apply(it)
 				.flatMap(Result::getRowsUpdated)
 				.cast(Number.class)

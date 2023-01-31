@@ -284,6 +284,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private static final String DEFAULT_STRATEGIES_PREFIX = "org.springframework.web.servlet";
 
+
 	/** Additional logger to use when no mapped handler is found for a request. */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
 

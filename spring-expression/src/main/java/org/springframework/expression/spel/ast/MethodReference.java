@@ -263,7 +263,7 @@ public class MethodReference extends SpelNodeImpl {
 		for (int i = 0; i < getChildCount(); i++) {
 			sj.add(getChild(i).toStringAST());
 		}
-		return this.name + sj.toString();
+		return this.name + sj;
 	}
 
 	/**
@@ -283,12 +283,12 @@ public class MethodReference extends SpelNodeImpl {
 				return false;
 			}
 		}
-
 		if (executor.didArgumentConversionOccur()) {
 			return false;
 		}
+
 		Class<?> clazz = executor.getMethod().getDeclaringClass();
-		return Modifier.isPublic(clazz.getModifiers()) || executor.getPublicDeclaringClass() != null;
+		return (Modifier.isPublic(clazz.getModifiers()) || executor.getPublicDeclaringClass() != null);
 	}
 
 	@Override
