@@ -339,8 +339,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		catch (Throwable ex) {
-			logger.warn("Failed to invoke custom destroy method '" + this.destroyMethodName +
-					"' on bean with name '" + this.beanName + "'", ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to invoke custom destroy method '" + this.destroyMethodName +
+						"' on bean with name '" + this.beanName + "'", ex);
+			}
 		}
 	}
 
