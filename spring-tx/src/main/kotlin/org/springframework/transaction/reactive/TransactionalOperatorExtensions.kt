@@ -16,14 +16,17 @@
 
 package org.springframework.transaction.reactive
 
-import java.util.Optional
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactor.asFlux
 import kotlinx.coroutines.reactor.mono
 import org.springframework.transaction.ReactiveTransaction
+import java.util.*
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * Coroutines variant of [TransactionalOperator.transactional] as a [Flow] extension.
@@ -31,8 +34,8 @@ import org.springframework.transaction.ReactiveTransaction
  * @author Sebastien Deleuze
  * @since 5.2
  */
-fun <T : Any> Flow<T>.transactional(operator: TransactionalOperator): Flow<T> =
-		operator.transactional(asFlux()).asFlow()
+fun <T : Any> Flow<T>.transactional(operator: TransactionalOperator, context: CoroutineContext = EmptyCoroutineContext): Flow<T> =
+		operator.transactional(asFlux(context)).asFlow()
 
 /**
 * Coroutines variant of [TransactionalOperator.execute] with a suspending lambda
@@ -42,6 +45,8 @@ fun <T : Any> Flow<T>.transactional(operator: TransactionalOperator): Flow<T> =
 * @author Mark Paluch
 * @since 5.2
 */
-suspend fun <T> TransactionalOperator.executeAndAwait(f: suspend (ReactiveTransaction) -> T): T =
-		execute { status -> mono(Dispatchers.Unconfined) { f(status) } }.map { value -> Optional.ofNullable(value) }
+suspend fun <T> TransactionalOperator.executeAndAwait(f: suspend (ReactiveTransaction) -> T): T {
+	val context = currentCoroutineContext().minusKey(Job.Key)
+	return execute { status -> mono(context) { f(status) } }.map { value -> Optional.ofNullable(value) }
 				.defaultIfEmpty(Optional.empty()).awaitLast().orElse(null)
+}
