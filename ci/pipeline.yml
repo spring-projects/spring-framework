@@ -23,11 +23,6 @@ anchors:
   docker-resource-source: &docker-resource-source
     username: ((docker-hub-username))
     password: ((docker-hub-password))
-    tag: ((milestone))
-  registry-mirror-vars: &registry-mirror-vars
-    registry-mirror-host: ((registry-mirror-host))
-    registry-mirror-username: ((registry-mirror-username))
-    registry-mirror-password: ((registry-mirror-password))
   slack-fail-params: &slack-fail-params
     text: >
       :concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>
@@ -48,31 +43,37 @@ resource_types:
 - name: registry-image
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: concourse/registry-image-resource
     tag: 1.5.0
 - name: artifactory-resource
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: springio/artifactory-resource
     tag: 0.0.17
 - name: github-release
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: concourse/github-release-resource
     tag: 1.5.5
 - name: github-status-resource
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: dpb587/github-status-resource
     tag: master
 - name: pull-request
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: teliaoss/github-pr-resource
     tag: v0.23.0
 - name: slack-notification
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: cfcommunity/slack-notification-resource
     tag: latest
 resources:
@@ -94,6 +95,7 @@ resources:
   source:
     <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-ci
+    tag: ((milestone))
 - name: every-morning
   type: time
   icon: alarm
@@ -168,7 +170,7 @@ jobs:
         image: ci-image
       vars:
         ci-image-name: ci-image
-        <<: *registry-mirror-vars
+        <<: *docker-resource-source
     - put: ci-image
       params:
         image: ci-image/image.tar
