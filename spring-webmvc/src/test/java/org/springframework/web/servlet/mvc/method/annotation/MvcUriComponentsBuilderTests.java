@@ -234,10 +234,17 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameNotMapped() {
-		UriComponents uriComponents = fromMethodName(UnmappedController.class, "unmappedMethod").build();
+	public void fromMethodNameInUnmappedController() {
+		UriComponents uriComponents = fromMethodName(UnmappedController.class, "requestMappingMethod").build();
 
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/");
+	}
+
+	@Test // gh-29897
+	public void fromMethodNameInUnmappedControllerMethod() {
+		UriComponents uriComponents = fromMethodName(UnmappedControllerMethod.class, "getMethod").build();
+
+		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/path");
 	}
 
 	@Test
@@ -535,7 +542,16 @@ public class MvcUriComponentsBuilderTests {
 	private class UnmappedController {
 
 		@RequestMapping
-		public void unmappedMethod() {
+		public void requestMappingMethod() {
+		}
+	}
+
+
+	@RequestMapping("/path")
+	private class UnmappedControllerMethod {
+
+		@GetMapping
+		public void getMethod() {
 		}
 	}
 
