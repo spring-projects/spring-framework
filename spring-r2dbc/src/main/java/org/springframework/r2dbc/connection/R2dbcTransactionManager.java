@@ -370,7 +370,8 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 						}
 						return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory());
 					}
-				} finally {
+				}
+				finally {
 					txObject.getConnectionHolder().clear();
 				}
 				return Mono.empty();
