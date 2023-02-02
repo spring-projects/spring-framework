@@ -125,6 +125,9 @@ Unlike their server counterparts, the instrumentation is implemented directly in
 [[integration.observability.http-client.resttemplate]]
 === RestTemplate
 
+Applications must configure an `ObservationRegistry` on `RestTemplate` instances to enable the instrumentation; without that, observations are "no-ops".
+Spring Boot will auto-configure `RestTemplateBuilder` beans with the observation registry already set.
+
 Instrumentation is using the `org.springframework.http.client.observation.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
 
 .Low cardinality Keys
@@ -150,6 +153,9 @@ Instrumentation is using the `org.springframework.http.client.observation.Client
 
 [[integration.observability.http-client.webclient]]
 === WebClient
+
+Applications must configure an `ObservationRegistry` on the `WebClient` builder to enable the instrumentation; without that, observations are "no-ops".
+Spring Boot will auto-configure `WebClient.Builder` beans with the observation registry already set.
 
 Instrumentation is using the `org.springframework.web.reactive.function.client.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
 
