@@ -380,11 +380,12 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	}
 
 	private Mono<Void> safeCleanupStep(String stepDescription, Mono<Void> stepMono) {
-		if (!this.logger.isDebugEnabled()) {
+		if (!logger.isDebugEnabled()) {
 			return stepMono.onErrorComplete();
-		} else {
+		}
+		else {
 			return stepMono.doOnError(e ->
-							this.logger.debug(String.format("Error ignored during %s: %s", stepDescription, e)))
+							logger.debug(String.format("Error ignored during %s: %s", stepDescription, e)))
 					.onErrorComplete();
 		}
 	}
