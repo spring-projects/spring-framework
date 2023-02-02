@@ -35,8 +35,8 @@ public class UserController {
 	}
 
 	// @fold:on
+	@SuppressWarnings("serial")
 	static class MissingUserException extends RuntimeException {
-
 	}
 	// @fold:off
 
