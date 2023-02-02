@@ -331,6 +331,7 @@ jobs:
       params:
         RELEASE_TYPE: M
         <<: *github-task-params
+        <<: *docker-resource-source
     - put: github-pre-release
       params:
         <<: *changelog-task-params
@@ -369,6 +370,7 @@ jobs:
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RC
+        <<: *docker-resource-source
         <<: *artifactory-task-params
     - task: generate-changelog
       file: git-repo/ci/tasks/generate-changelog.yml
@@ -413,6 +415,7 @@ jobs:
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RELEASE
+        <<: *docker-resource-source
         <<: *artifactory-task-params
         <<: *sonatype-task-params
 - name: create-github-release
@@ -430,6 +433,7 @@ jobs:
       file: git-repo/ci/tasks/generate-changelog.yml
       params:
         RELEASE_TYPE: RELEASE
+        <<: *docker-resource-source
         <<: *github-task-params
     - put: github-release
       params:
