@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.reflection;
 
 /**
  * Tests for {@link HttpExchangeReflectiveProcessor}.
@@ -37,26 +37,27 @@ class HttpExchangeReflectiveProcessorTests {
 
 	private final RuntimeHints hints = new RuntimeHints();
 
+
 	@Test
 	void registerReflectiveHintsForMethodWithReturnValue() throws NoSuchMethodException {
 		Method method = SampleService.class.getDeclaredMethod("get");
 		processor.registerReflectionHints(hints.reflection(), method);
-		assertThat(RuntimeHintsPredicates.reflection().onType(SampleService.class)).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleService.class, "get")).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onType(Response.class)).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Response.class, "getMessage")).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Response.class, "setMessage")).accepts(hints);
+		assertThat(reflection().onType(SampleService.class)).accepts(hints);
+		assertThat(reflection().onMethod(SampleService.class, "get")).accepts(hints);
+		assertThat(reflection().onType(Response.class)).accepts(hints);
+		assertThat(reflection().onMethod(Response.class, "getMessage")).accepts(hints);
+		assertThat(reflection().onMethod(Response.class, "setMessage")).accepts(hints);
 	}
 
 	@Test
 	void registerReflectiveHintsForMethodWithRequestBodyParameter() throws NoSuchMethodException {
 		Method method = SampleService.class.getDeclaredMethod("post", Request.class);
 		processor.registerReflectionHints(hints.reflection(), method);
-		assertThat(RuntimeHintsPredicates.reflection().onType(SampleService.class)).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleService.class, "post")).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onType(Request.class)).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Request.class, "getMessage")).accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Request.class, "setMessage")).accepts(hints);
+		assertThat(reflection().onType(SampleService.class)).accepts(hints);
+		assertThat(reflection().onMethod(SampleService.class, "post")).accepts(hints);
+		assertThat(reflection().onType(Request.class)).accepts(hints);
+		assertThat(reflection().onMethod(Request.class, "getMessage")).accepts(hints);
+		assertThat(reflection().onMethod(Request.class, "setMessage")).accepts(hints);
 	}
 
 

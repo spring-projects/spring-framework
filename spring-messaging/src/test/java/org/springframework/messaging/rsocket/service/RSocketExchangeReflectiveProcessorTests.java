@@ -21,24 +21,26 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.util.MimeType;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.reflection;
 
 /**
  * Tests for {@link RSocketExchangeReflectiveProcessor}.
  *
  * @author Sebastien Deleuze
  * @author Olga Maciaszek-Sharma
+ * @since 6.0.5
  */
 class RSocketExchangeReflectiveProcessorTests {
 
 	private final RSocketExchangeReflectiveProcessor processor = new RSocketExchangeReflectiveProcessor();
 
 	private final RuntimeHints hints = new RuntimeHints();
+
 
 	@Test
 	void shouldRegisterReflectionHintsForMethod() throws NoSuchMethodException {
@@ -47,35 +49,22 @@ class RSocketExchangeReflectiveProcessorTests {
 
 		processor.registerReflectionHints(hints.reflection(), method);
 
-		assertThat(RuntimeHintsPredicates.reflection().onType(SampleService.class))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleService.class, "get"))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onType(Response.class))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Response.class, "getMessage"))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Response.class, "setMessage"))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onType(Request.class))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Request.class, "getMessage"))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Request.class, "setMessage"))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onType(Variable.class))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Variable.class, "getValue"))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Variable.class, "setValue"))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onType(Metadata.class))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Metadata.class, "getValue"))
-				.accepts(hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(Metadata.class, "setValue"))
-				.accepts(hints);
+		assertThat(reflection().onType(SampleService.class)).accepts(hints);
+		assertThat(reflection().onMethod(SampleService.class, "get")).accepts(hints);
+		assertThat(reflection().onType(Response.class)).accepts(hints);
+		assertThat(reflection().onMethod(Response.class, "getMessage")).accepts(hints);
+		assertThat(reflection().onMethod(Response.class, "setMessage")).accepts(hints);
+		assertThat(reflection().onType(Request.class)).accepts(hints);
+		assertThat(reflection().onMethod(Request.class, "getMessage")).accepts(hints);
+		assertThat(reflection().onMethod(Request.class, "setMessage")).accepts(hints);
+		assertThat(reflection().onType(Variable.class)).accepts(hints);
+		assertThat(reflection().onMethod(Variable.class, "getValue")).accepts(hints);
+		assertThat(reflection().onMethod(Variable.class, "setValue")).accepts(hints);
+		assertThat(reflection().onType(Metadata.class)).accepts(hints);
+		assertThat(reflection().onMethod(Metadata.class, "getValue")).accepts(hints);
+		assertThat(reflection().onMethod(Metadata.class, "setValue")).accepts(hints);
 	}
+
 
 	interface SampleService {
 
@@ -148,4 +137,5 @@ class RSocketExchangeReflectiveProcessorTests {
 			this.value = value;
 		}
 	}
+
 }

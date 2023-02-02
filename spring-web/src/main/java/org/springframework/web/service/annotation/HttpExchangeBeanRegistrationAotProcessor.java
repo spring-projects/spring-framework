@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,28 +27,33 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.Search;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import static org.springframework.core.annotation.MergedAnnotations.SearchStrategy.TYPE_HIERARCHY;
+
 /**
  * AOT {@code BeanRegistrationAotProcessor} that detects the presence of
- * {@link HttpExchange @HttpExchange} on methods and creates
- * the required proxy hints.
+ * {@link HttpExchange @HttpExchange} on methods and creates the required proxy
+ * hints.
  *
  * @author Sebastien Deleuze
  * @since 6.0
  */
 class HttpExchangeBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
+	@Nullable
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		List<Class<?>> exchangeInterfaces = new ArrayList<>();
+		Search search = MergedAnnotations.search(TYPE_HIERARCHY);
 		for (Class<?> interfaceClass : ClassUtils.getAllInterfacesForClass(beanClass)) {
 			ReflectionUtils.doWithMethods(interfaceClass, method -> {
 				if (!exchangeInterfaces.contains(interfaceClass) &&
-						MergedAnnotations.from(method, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
-								.get(HttpExchange.class).isPresent()) {
+						search.from(method).isPresent(HttpExchange.class)) {
 					exchangeInterfaces.add(interfaceClass);
 				}
 			});
@@ -58,6 +63,7 @@ class HttpExchangeBeanRegistrationAotProcessor implements BeanRegistrationAotPro
 		}
 		return null;
 	}
+
 
 	private static class HttpExchangeBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
 
@@ -74,5 +80,7 @@ class HttpExchangeBeanRegistrationAotProcessor implements BeanRegistrationAotPro
 				proxyHints.registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(httpExchangeInterface));
 			}
 		}
+
 	}
+
 }

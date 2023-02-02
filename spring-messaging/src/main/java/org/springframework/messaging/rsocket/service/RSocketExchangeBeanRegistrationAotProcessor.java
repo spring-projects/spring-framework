@@ -27,31 +27,35 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.Search;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
+import static org.springframework.core.annotation.MergedAnnotations.SearchStrategy.TYPE_HIERARCHY;
+
 /**
  * An AOT {@link BeanRegistrationAotProcessor} that detects the presence of
- * {@link RSocketExchange @RSocketExchange} on methods and creates
- * the required proxy hints.
- * Based on {@code HttpExchangeBeanRegistrationAotProcessor}
+ * {@link RSocketExchange @RSocketExchange} on methods and creates the required
+ * proxy hints.
  *
  * @author Sebastien Deleuze
  * @author Olga Maciaszek-Sharma
- * @since 6.0
+ * @since 6.0.5
  * @see org.springframework.web.service.annotation.HttpExchangeBeanRegistrationAotProcessor
  */
 class RSocketExchangeBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
+	@Nullable
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		Set<Class<?>> exchangeInterfaces = new HashSet<>();
+		Search search = MergedAnnotations.search(TYPE_HIERARCHY);
 		for (Class<?> interfaceClass : ClassUtils.getAllInterfacesForClass(beanClass)) {
 			ReflectionUtils.doWithMethods(interfaceClass, method -> {
 				if (!exchangeInterfaces.contains(interfaceClass) &&
-						MergedAnnotations.from(method, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)
-								.get(RSocketExchange.class).isPresent()) {
+						search.from(method).isPresent(RSocketExchange.class)) {
 					exchangeInterfaces.add(interfaceClass);
 				}
 			});
@@ -62,6 +66,7 @@ class RSocketExchangeBeanRegistrationAotProcessor implements BeanRegistrationAot
 		return null;
 	}
 
+
 	private static class RSocketExchangeBeanRegistrationContribution implements BeanRegistrationAotContribution {
 
 		private final Set<Class<?>> rSocketExchangeInterfaces;
@@ -71,14 +76,13 @@ class RSocketExchangeBeanRegistrationAotProcessor implements BeanRegistrationAot
 		}
 
 		@Override
-		public void applyTo(GenerationContext generationContext,
-				BeanRegistrationCode beanRegistrationCode) {
+		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			ProxyHints proxyHints = generationContext.getRuntimeHints().proxies();
-			for (Class<?> httpExchangeInterface : this.rSocketExchangeInterfaces) {
-				proxyHints.registerJdkProxy(AopProxyUtils
-						.completeJdkProxyInterfaces(httpExchangeInterface));
+			for (Class<?> rSocketExchangeInterface : this.rSocketExchangeInterfaces) {
+				proxyHints.registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(rSocketExchangeInterface));
 			}
 		}
 
 	}
+
 }

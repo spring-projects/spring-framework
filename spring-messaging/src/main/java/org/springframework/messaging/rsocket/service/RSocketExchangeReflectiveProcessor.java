@@ -29,18 +29,18 @@ import org.springframework.core.MethodParameter;
 /**
  * A {@link ReflectiveProcessor} implementation for {@link RSocketExchange @RSocketExchange}
  * annotated methods. In addition to registering reflection hints for invoking
- * the annotated method, this implementation handles reflection-based
- * binding for return types and parameters.
- * Based on {@code HttpExchangeReflectiveProcessor}.
+ * the annotated method, this implementation handles reflection-based binding for
+ * return types and parameters.
  *
  * @author Sebastien Deleuze
  * @author Olga Maciaszek-Sharma
- * @since 6.0
+ * @since 6.0.5
  * @see org.springframework.web.service.annotation.HttpExchangeReflectiveProcessor
  */
-public class RSocketExchangeReflectiveProcessor implements ReflectiveProcessor {
+class RSocketExchangeReflectiveProcessor implements ReflectiveProcessor {
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
+
 
 	@Override
 	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
@@ -61,8 +61,8 @@ public class RSocketExchangeReflectiveProcessor implements ReflectiveProcessor {
 
 	protected void registerReturnTypeHints(ReflectionHints hints, MethodParameter returnTypeParameter) {
 		if (!void.class.equals(returnTypeParameter.getParameterType())) {
-			this.bindingRegistrar.registerReflectionHints(hints, returnTypeParameter
-					.getGenericParameterType());
+			this.bindingRegistrar.registerReflectionHints(hints, returnTypeParameter.getGenericParameterType());
 		}
 	}
+
 }
