@@ -103,7 +103,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROBLEM_JSON,
 			MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_PROBLEM_XML
 	);
-	private final Set<MediaType> problemMediaTypes = new HashSet<>(problemMediaTypesByNormalType.values());
+	private final Set<MediaType> problemMediaTypes = new HashSet<>(this.problemMediaTypesByNormalType.values());
 
 	private final Set<String> safeExtensions = new HashSet<>();
 
@@ -263,7 +263,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 						.map(mediaType -> this.problemMediaTypesByNormalType.get(mediaType.toString()))
 						.filter(Objects::nonNull)
 						.collect(Collectors.toList());
-			} else {
+			}
+			else {
 				acceptableTypes.removeAll(this.problemMediaTypes);
 				producibleTypes.removeAll(this.problemMediaTypes);
 			}
