@@ -67,6 +67,12 @@ HTTP server exchanges observations are created with the name `"http.server.reque
 Applications need to configure the `org.springframework.web.filter.ServerHttpObservationFilter` Servlet filter in their application.
 It is using the `org.springframework.http.server.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
+This will only record an observation as an error if the `Exception` has not been handled by the web Framework and has bubbled up to the Servlet filter.
+Typically, all exceptions handled by Spring MVC's `@ExceptionHandler` and <<web.adoc#mvc-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
+You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
+
+include::code:UserController[]
+
 By default, the following `KeyValues` are created:
 
 .Low cardinality Keys
@@ -93,6 +99,12 @@ By default, the following `KeyValues` are created:
 
 Applications need to configure the `org.springframework.web.filter.reactive.ServerHttpObservationFilter` reactive `WebFilter` in their application.
 It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
+
+This will only record an observation as an error if the `Exception` has not been handled by the web Framework and has bubbled up to the `WebFilter`.
+Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and <<web.adoc#webflux-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
+You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
+
+include::code:UserController[]
 
 By default, the following `KeyValues` are created:
 

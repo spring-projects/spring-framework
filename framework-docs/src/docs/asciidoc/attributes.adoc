@@ -1,4 +1,5 @@
 :chomp:                         default headers packages
+:fold:                          all
 :docs-site:                     https://docs.spring.io
 // Spring Framework
 :docs-spring-framework:         {docs-site}/spring-framework/docs/{spring-version}
