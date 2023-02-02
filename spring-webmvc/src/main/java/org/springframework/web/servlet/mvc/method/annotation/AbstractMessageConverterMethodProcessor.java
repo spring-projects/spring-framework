@@ -19,13 +19,15 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,6 +75,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @author Juergen Hoeller
+ * @author Ralf Ueberfuhr
  * @since 3.1
  */
 public abstract class AbstractMessageConverterMethodProcessor extends AbstractMessageConverterMethodArgumentResolver
@@ -96,8 +99,11 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
-	private final List<MediaType> problemMediaTypes =
-			Arrays.asList(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_PROBLEM_XML);
+	private final Map<String, MediaType> problemMediaTypesByNormalType = Map.of(
+			MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_PROBLEM_JSON,
+			MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_PROBLEM_XML
+	);
+	private final Set<MediaType> problemMediaTypes = new HashSet<>(problemMediaTypesByNormalType.values());
 
 	private final Set<String> safeExtensions = new HashSet<>();
 
@@ -240,13 +246,30 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 						"No converter found for return value of type: " + valueType);
 			}
 
+			// For ProblemDetail, fall back on RFC 7807 format
+			if(ProblemDetail.class.isAssignableFrom(valueType)) {
+				acceptableTypes = acceptableTypes.stream()
+						.map(
+								mediaType -> this.problemMediaTypes.stream()
+										.noneMatch(problemType -> problemType.isCompatibleWith(mediaType))
+										?
+										this.problemMediaTypesByNormalType.get(mediaType.toString())
+										:
+										mediaType
+						)
+						.filter(Objects::nonNull)
+						.collect(Collectors.toList());
+				producibleTypes = producibleTypes.stream()
+						.map(mediaType -> this.problemMediaTypesByNormalType.get(mediaType.toString()))
+						.filter(Objects::nonNull)
+						.collect(Collectors.toList());
+			} else {
+				acceptableTypes.removeAll(this.problemMediaTypes);
+				producibleTypes.removeAll(this.problemMediaTypes);
+			}
+
 			List<MediaType> compatibleMediaTypes = new ArrayList<>();
 			determineCompatibleMediaTypes(acceptableTypes, producibleTypes, compatibleMediaTypes);
-
-			// For ProblemDetail, fall back on RFC 7807 format
-			if (compatibleMediaTypes.isEmpty() && ProblemDetail.class.isAssignableFrom(valueType)) {
-				determineCompatibleMediaTypes(this.problemMediaTypes, producibleTypes, compatibleMediaTypes);
-			}
 
 			if (compatibleMediaTypes.isEmpty()) {
 				if (logger.isDebugEnabled()) {

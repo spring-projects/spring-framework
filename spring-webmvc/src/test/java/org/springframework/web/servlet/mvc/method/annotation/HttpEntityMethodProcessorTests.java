@@ -21,27 +21,36 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -206,6 +215,157 @@ public class HttpEntityMethodProcessorTests {
 		assertThat(servletResponse.getContentAsString()).isEqualTo("Foo");
 	}
 
+	@Nested
+	class ContentNegotiationTests {
+		private static class ContentNegotiationCase {
+			private final List<String> givenAccept;
+			private final String expectedContentType;
+
+			public ContentNegotiationCase(List<String> givenAccept, String expectedContentType) {
+				this.givenAccept = givenAccept;
+				this.expectedContentType = expectedContentType;
+			}
+
+			public List<String> getGivenAccept() {
+				return givenAccept;
+			}
+
+			public String getExpectedContentType() {
+				return expectedContentType;
+			}
+
+			@Override
+			public String toString() {
+				return givenAccept + "->" + expectedContentType;
+			}
+		}
+
+		private static Stream<ContentNegotiationCase> handleContentNegotiationForProblem() {
+			var result = Stream.of(
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_JSON_VALUE),
+							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_PROBLEM_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE),
+							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of("*/*"),
+							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of("application/*+json"),
+							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of(MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE),
+							MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+			);
+			// if ProblemDetail is supported by the XML message converter, add further test cases
+			if (new Jaxb2RootElementHttpMessageConverter()
+					.canWrite(ProblemDetail.class, MediaType.APPLICATION_XML)) {
+				result = Stream.concat(result, Stream.of(
+						new ContentNegotiationCase(
+								List.of(MediaType.APPLICATION_XML_VALUE),
+								MediaType.APPLICATION_PROBLEM_XML_VALUE),
+						new ContentNegotiationCase(
+								List.of(MediaType.APPLICATION_PROBLEM_XML_VALUE, MediaType.APPLICATION_XML_VALUE),
+								MediaType.APPLICATION_PROBLEM_XML_VALUE),
+						new ContentNegotiationCase(
+								List.of("application/*+xml"),
+								MediaType.APPLICATION_PROBLEM_XML_VALUE)
+				));
+			}
+			return result;
+		}
+
+		@ParameterizedTest // gh-29588
+		@MethodSource
+		public void handleContentNegotiationForProblem(ContentNegotiationCase contentNegotiationCase) throws Exception {
+			List<HttpMessageConverter<?>> converters = new ArrayList<>();
+			converters.add(new MappingJackson2HttpMessageConverter());
+			converters.add(new Jaxb2RootElementHttpMessageConverter());
+
+			Method method = JacksonController.class.getDeclaredMethod("handleException");
+			MethodParameter returnType = new MethodParameter(method, -1);
+
+			servletRequest.addHeader(
+					"Accept",
+					contentNegotiationCase.getGivenAccept()
+							.stream()
+							.collect(Collectors.joining(","))
+			);
+
+			HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+			processor.writeWithMessageConverters(
+					ProblemDetail.forStatus(400),
+					returnType,
+					webRequest);
+
+			assertThat(servletResponse.getHeader("Content-Type"))
+					.isEqualTo(contentNegotiationCase.getExpectedContentType());
+		}
+
+		private static Stream<ContentNegotiationCase> handleContentNegotiationForProblemAcceptedButNoProblem() {
+			return Stream.of(
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_JSON_VALUE),
+							MediaType.APPLICATION_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_PROBLEM_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE),
+							MediaType.APPLICATION_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of("*/*"),
+							MediaType.APPLICATION_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_PROBLEM_JSON_VALUE, "*/*"),
+							MediaType.APPLICATION_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of("application/*+json"),
+							MediaType.APPLICATION_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_XML_VALUE),
+							MediaType.APPLICATION_XML_VALUE),
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_PROBLEM_XML_VALUE, MediaType.APPLICATION_XML_VALUE),
+							MediaType.APPLICATION_XML_VALUE),
+					new ContentNegotiationCase(
+							List.of("application/*+xml"),
+							MediaType.APPLICATION_XML_VALUE),
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE),
+							MediaType.APPLICATION_XML_VALUE)
+			);
+		}
+
+		@ParameterizedTest // gh-29588
+		@MethodSource
+		public void handleContentNegotiationForProblemAcceptedButNoProblem(ContentNegotiationCase contentNegotiationCase) throws Exception {
+			List<HttpMessageConverter<?>> converters = new ArrayList<>();
+			converters.add(new MappingJackson2HttpMessageConverter());
+			converters.add(new Jaxb2RootElementHttpMessageConverter());
+
+			Method method = HttpEntityMethodProcessorTests.this.getClass().getDeclaredMethod("handle");
+			MethodParameter returnType = new MethodParameter(method, -1);
+
+			servletRequest.addHeader(
+					"Accept",
+					contentNegotiationCase.getGivenAccept()
+							.stream()
+							.collect(Collectors.joining(","))
+			);
+
+			HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+			processor.writeWithMessageConverters(
+					new Foo("foo"),
+					returnType,
+					webRequest);
+
+			assertThat(servletResponse.getStatus())
+					.isEqualTo(200);
+			assertThat(servletResponse.getHeader("Content-Type"))
+					.isEqualTo(contentNegotiationCase.getExpectedContentType());
+		}
+
+	}
+
 	@Test  // SPR-13423
 	public void handleReturnValueWithETagAndETagFilter() throws Exception {
 		String eTagValue = "\"deadb33f8badf00d\"";
@@ -354,6 +514,7 @@ public class HttpEntityMethodProcessorTests {
 
 
 	@JsonTypeName("foo")
+	@XmlRootElement
 	private static class Foo extends ParentClass {
 
 		public Foo() {
@@ -387,6 +548,13 @@ public class HttpEntityMethodProcessorTests {
 			list.add(new Bar("bar"));
 			return new HttpEntity<>(list);
 		}
+
+		@ExceptionHandler
+		public ResponseEntity<Object> handleException() {
+			return ResponseEntity.internalServerError()
+					.body(ProblemDetail.forStatus(500));
+		}
+
 	}
 
 }
