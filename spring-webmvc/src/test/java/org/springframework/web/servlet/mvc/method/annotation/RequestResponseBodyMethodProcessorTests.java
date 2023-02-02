@@ -403,7 +403,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	@Test
 	void problemDetailWhenJsonRequested() throws Exception {
 		this.servletRequest.addHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
-		testProblemDetailMediaType(MediaType.APPLICATION_JSON_VALUE);
+		testProblemDetailMediaType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
 	}
 
 	@Test

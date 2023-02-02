@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -248,25 +249,21 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 			// For ProblemDetail, fall back on RFC 7807 format
 			if(ProblemDetail.class.isAssignableFrom(valueType)) {
-				acceptableTypes = acceptableTypes.stream()
-						.map(
-								mediaType -> this.problemMediaTypes.stream()
-										.noneMatch(problemType -> problemType.isCompatibleWith(mediaType))
-										?
-										this.problemMediaTypesByNormalType.get(mediaType.toString())
-										:
-										mediaType
-						)
-						.filter(Objects::nonNull)
-						.collect(Collectors.toList());
-				producibleTypes = producibleTypes.stream()
-						.map(mediaType -> this.problemMediaTypesByNormalType.get(mediaType.toString()))
-						.filter(Objects::nonNull)
-						.collect(Collectors.toList());
+				acceptableTypes = this.replaceNonProblemCompliantMediaTypes(acceptableTypes);
+				if(acceptableTypes.isEmpty()) {
+					acceptableTypes = List.of(MediaType.APPLICATION_PROBLEM_JSON);
+				}
+				producibleTypes = this.replaceNonProblemCompliantMediaTypes(producibleTypes);
 			}
 			else {
-				acceptableTypes.removeAll(this.problemMediaTypes);
-				producibleTypes.removeAll(this.problemMediaTypes);
+				var statusCode = outputMessage.getServletResponse().getStatus();
+				var status = HttpStatus.resolve(statusCode);
+				// For error status code, leave RFC 7807 media types, if requested
+				// otherwise, remove them
+				if(null == status || !status.isError()) {
+					acceptableTypes.removeAll(this.problemMediaTypes);
+					producibleTypes.removeAll(this.problemMediaTypes);
+				}
 			}
 
 			List<MediaType> compatibleMediaTypes = new ArrayList<>();
@@ -345,6 +342,20 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 			throw new HttpMediaTypeNotAcceptableException(getSupportedMediaTypes(body.getClass()));
 		}
+	}
+
+	private List<MediaType> replaceNonProblemCompliantMediaTypes(Collection<MediaType> types) {
+		return types.stream()
+				.map(
+						mediaType -> this.problemMediaTypes.stream()
+								.noneMatch(problemType -> problemType.isCompatibleWith(mediaType))
+								?
+								this.problemMediaTypesByNormalType.get(mediaType.toString())
+								:
+								mediaType
+				)
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 	}
 
 	/**

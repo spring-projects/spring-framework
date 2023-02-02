@@ -246,10 +246,16 @@ public class HttpEntityMethodProcessorTests {
 							List.of(MediaType.APPLICATION_JSON_VALUE),
 							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
 					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_PROBLEM_JSON_VALUE),
+							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
+					new ContentNegotiationCase(
 							List.of(MediaType.APPLICATION_PROBLEM_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE),
 							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
 					new ContentNegotiationCase(
 							List.of("*/*"),
+							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
+					new ContentNegotiationCase(
+							List.of(MediaType.APPLICATION_PDF_VALUE),
 							MediaType.APPLICATION_PROBLEM_JSON_VALUE),
 					new ContentNegotiationCase(
 							List.of("application/*+json"),
