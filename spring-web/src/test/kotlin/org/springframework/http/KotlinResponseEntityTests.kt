@@ -16,7 +16,7 @@
 
 package org.springframework.http
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 /**
@@ -30,17 +30,17 @@ class KotlinResponseEntityTests {
 	fun ofNullable() {
 		val entity = 42
 		val responseEntity = ResponseEntity.ofNullable(entity)
-		Assertions.assertThat(responseEntity).isNotNull()
-		Assertions.assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
-		Assertions.assertThat(responseEntity.body as Int).isEqualTo(entity)
+		assertThat(responseEntity).isNotNull()
+		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(responseEntity.body as Int).isEqualTo(entity)
 	}
 
 	@Test
 	fun ofNullNullable() {
 		val responseEntity = ResponseEntity.ofNullable<Int>(null)
-		Assertions.assertThat(responseEntity).isNotNull()
-		Assertions.assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
-		Assertions.assertThat(responseEntity.body).isNull()
+		assertThat(responseEntity).isNotNull()
+		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+		assertThat(responseEntity.body).isNull()
 	}
 
 }
