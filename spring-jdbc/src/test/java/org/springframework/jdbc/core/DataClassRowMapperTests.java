@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @since 5.3
  */
-public class DataClassRowMapperTests extends AbstractRowMapperTests {
+class DataClassRowMapperTests extends AbstractRowMapperTests {
 
 	@Test
-	public void testStaticQueryWithDataClass() throws Exception {
+	void staticQueryWithDataClass() throws Exception {
 		Mock mock = new Mock();
 		List<ConstructorPerson> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
@@ -48,7 +48,7 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 	}
 
 	@Test
-	public void testStaticQueryWithDataClassAndGenerics() throws Exception {
+	void staticQueryWithDataClassAndGenerics() throws Exception {
 		Mock mock = new Mock();
 		List<ConstructorPersonWithGenerics> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
@@ -57,14 +57,14 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 		ConstructorPersonWithGenerics person = result.get(0);
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
-		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
 		assertThat(person.balance()).isEqualTo(Collections.singletonList(new BigDecimal("1234.56")));
 
 		mock.verifyClosed();
 	}
 
 	@Test
-	public void testStaticQueryWithDataClassAndSetters() throws Exception {
+	void staticQueryWithDataClassAndSetters() throws Exception {
 		Mock mock = new Mock(MockType.FOUR);
 		List<ConstructorPersonWithSetters> result = mock.getJdbcTemplate().query(
 				"select name, age, birthdate, balance from people",
@@ -73,14 +73,14 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 		ConstructorPersonWithSetters person = result.get(0);
 		assertThat(person.name()).isEqualTo("BUBBA");
 		assertThat(person.age()).isEqualTo(22L);
-		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
 		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
 
 		mock.verifyClosed();
 	}
 
 	@Test
-	public void testStaticQueryWithDataRecord() throws Exception {
+	void staticQueryWithDataRecord() throws Exception {
 		Mock mock = new Mock();
 		List<RecordPerson> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
@@ -94,7 +94,7 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 	protected void verifyPerson(RecordPerson person) {
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
-		assertThat(person.birth_date()).usingComparator(Date::compareTo).isEqualTo(new java.util.Date(1221222L));
+		assertThat(person.birth_date()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
 		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
 		verifyPersonViaBeanWrapper(person);
 	}
