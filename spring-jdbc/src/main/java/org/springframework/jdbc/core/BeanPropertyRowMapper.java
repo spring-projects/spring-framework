@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,28 +48,35 @@ import org.springframework.util.StringUtils;
 /**
  * {@link RowMapper} implementation that converts a row into a new instance
  * of the specified mapped target class. The mapped target class must be a
- * top-level class and it must have a default or no-arg constructor.
+ * top-level class or {@code static} nested class, and it must have a default or
+ * no-arg constructor.
  *
- * <p>Column values are mapped based on matching the column name as obtained from result set
- * meta-data to public setters for the corresponding properties. The names are matched either
- * directly or by transforming a name separating the parts with underscores to the same name
- * using "camel" case.
+ * <p>Column values are mapped based on matching the column name (as obtained from
+ * result set meta-data) to public setters in the target class for the corresponding
+ * properties. The names are matched either directly or by transforming a name
+ * separating the parts with underscores to the same name using "camel" case.
  *
- * <p>Mapping is provided for fields in the target class for many common types, e.g.:
- * String, boolean, Boolean, byte, Byte, short, Short, int, Integer, long, Long,
- * float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
+ * <p>Mapping is provided for fields in the target class for many common types &mdash;
+ * for example: String, boolean, Boolean, byte, Byte, short, Short, int, Integer,
+ * long, Long, float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,
- * try using column aliases in the SQL statement like "select fname as first_name from customer".
+ * try using column aliases in the SQL statement like
+ * {@code "select fname as first_name from customer"}, where {@code first_name}
+ * can be mapped to a {@code setFirstName(String)} method in the target class.
  *
- * <p>For 'null' values read from the database, we will attempt to call the setter, but in the case of
- * Java primitives, this causes a TypeMismatchException. This class can be configured (using the
- * primitivesDefaultedForNullValue property) to trap this exception and use the primitives default value.
- * Be aware that if you use the values from the generated bean to update the database the primitive value
- * will have been set to the primitive's default value instead of null.
+ * <p>For {@code NULL} values read from the database, an attempt will be made to
+ * call the corresponding setter method with {@code null}, but in the case of
+ * Java primitives, this will result in a {@link TypeMismatchException}. This class
+ * can be configured (via the {@link #setPrimitivesDefaultedForNullValue(boolean)
+ * primitivesDefaultedForNullValue} property) to catch this exception and use the
+ * primitive's default value. Be aware that if you use the values from the mapped
+ * bean to update the database, the primitive value in the database will be
+ * changed from {@code NULL} to the primitive's default value.
  *
- * <p>Please note that this class is designed to provide convenience rather than high performance.
- * For best performance, consider using a custom {@link RowMapper} implementation.
+ * <p>Please note that this class is designed to provide convenience rather than
+ * high performance. For best performance, consider using a custom {@code RowMapper}
+ * implementation.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
