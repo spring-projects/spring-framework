@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,9 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
  * @author Sam Brannen
  */
 class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
+
+	private static final String SELECT_NULL_AS_AGE = "select null as age from people";
+
 
 	@Test
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -115,7 +118,17 @@ class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 		Mock mock = new Mock(MockType.TWO);
 		assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() ->
-				mock.getJdbcTemplate().query("select name, null as age, birth_date, balance from people", mapper));
+				mock.getJdbcTemplate().query(SELECT_NULL_AS_AGE, mapper));
+	}
+
+	@Test
+	void mappingNullValueWithPrimitivesDefaultedForNullValue() throws Exception {
+		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
+		mapper.setPrimitivesDefaultedForNullValue(true);
+		Mock mock = new Mock(MockType.TWO);
+		Person person = mock.getJdbcTemplate().queryForObject(SELECT_NULL_AS_AGE, mapper);
+		assertThat(person).extracting(Person::getAge).isEqualTo(42L);
+		mock.verifyClosed();
 	}
 
 	@Test
