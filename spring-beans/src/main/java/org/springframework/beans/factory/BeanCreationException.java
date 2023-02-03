@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,8 +204,7 @@ public class BeanCreationException extends FatalBeanException {
 		}
 		if (this.relatedCauses != null) {
 			for (Throwable relatedCause : this.relatedCauses) {
-				if (relatedCause instanceof NestedRuntimeException &&
-						((NestedRuntimeException) relatedCause).contains(exClass)) {
+				if (relatedCause instanceof NestedRuntimeException nested && nested.contains(exClass)) {
 					return true;
 				}
 			}

@@ -40,7 +40,6 @@ public class UrlArgumentResolver implements HttpServiceArgumentResolver {
 
 		if (argument != null) {
 			requestValues.setUri((URI) argument);
-			return true;
 		}
 
 		return true;

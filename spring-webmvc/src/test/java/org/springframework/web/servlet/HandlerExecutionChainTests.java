@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -30,47 +29,28 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 /**
- * A test fixture with HandlerExecutionChain and mock handler interceptors.
+ * Tests for {@link HandlerExecutionChain} with mock handler interceptors.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
-public class HandlerExecutionChainTests {
+class HandlerExecutionChainTests {
 
-	private HandlerExecutionChain chain;
+	private Object handler = new Object();
 
-	private Object handler;
+	private AsyncHandlerInterceptor interceptor1 = mock();
+	private AsyncHandlerInterceptor interceptor2 = mock();
+	private AsyncHandlerInterceptor interceptor3 = mock();
 
-	private MockHttpServletRequest request;
+	private HandlerExecutionChain chain = new HandlerExecutionChain(handler, interceptor1, interceptor2, interceptor3);
 
-	private MockHttpServletResponse response;
+	private MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private AsyncHandlerInterceptor interceptor1;
-
-	private AsyncHandlerInterceptor interceptor2;
-
-	private AsyncHandlerInterceptor interceptor3;
-
-
-	@BeforeEach
-	public void setup() {
-		this.request = new MockHttpServletRequest();
-		this.response= new MockHttpServletResponse() ;
-
-		this.handler = new Object();
-		this.chain = new HandlerExecutionChain(this.handler);
-
-		this.interceptor1 = mock(AsyncHandlerInterceptor.class);
-		this.interceptor2 = mock(AsyncHandlerInterceptor.class);
-		this.interceptor3 = mock(AsyncHandlerInterceptor.class);
-
-		this.chain.addInterceptor(this.interceptor1);
-		this.chain.addInterceptor(this.interceptor2);
-		this.chain.addInterceptor(this.interceptor3);
-	}
+	private MockHttpServletResponse response = new MockHttpServletResponse() ;
 
 
 	@Test
-	public void successScenario() throws Exception {
+	void successScenario() throws Exception {
 		ModelAndView mav = new ModelAndView();
 
 		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
@@ -91,7 +71,7 @@ public class HandlerExecutionChainTests {
 	}
 
 	@Test
-	public void successAsyncScenario() throws Exception {
+	void successAsyncScenario() throws Exception {
 		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
 		given(this.interceptor2.preHandle(this.request, this.response, this.handler)).willReturn(true);
 		given(this.interceptor3.preHandle(this.request, this.response, this.handler)).willReturn(true);
@@ -106,7 +86,7 @@ public class HandlerExecutionChainTests {
 	}
 
 	@Test
-	public void earlyExitInPreHandle() throws Exception {
+	void earlyExitInPreHandle() throws Exception {
 		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
 		given(this.interceptor2.preHandle(this.request, this.response, this.handler)).willReturn(false);
 
@@ -116,13 +96,13 @@ public class HandlerExecutionChainTests {
 	}
 
 	@Test
-	public void exceptionBeforePreHandle() throws Exception {
+	void exceptionBeforePreHandle() throws Exception {
 		this.chain.triggerAfterCompletion(this.request, this.response, null);
 		verifyNoInteractions(this.interceptor1, this.interceptor2, this.interceptor3);
 	}
 
 	@Test
-	public void exceptionDuringPreHandle() throws Exception {
+	void exceptionDuringPreHandle() throws Exception {
 		Exception ex = new Exception("");
 
 		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);
@@ -141,7 +121,7 @@ public class HandlerExecutionChainTests {
 	}
 
 	@Test
-	public void exceptionAfterPreHandle() throws Exception {
+	void exceptionAfterPreHandle() throws Exception {
 		Exception ex = new Exception("");
 
 		given(this.interceptor1.preHandle(this.request, this.response, this.handler)).willReturn(true);

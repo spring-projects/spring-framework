@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  * @since 6.0
  * @see BeanDefinitionPropertyValueCodeGeneratorTests
  */
@@ -436,6 +437,12 @@ class BeanDefinitionPropertyValueCodeGeneratorTests {
 				assertThat(compiler.getSourceFile())
 						.contains("new LinkedHashSet(List.of(");
 			});
+		}
+
+		@Test
+		void generateWhenSetOfClass() {
+			Set<Class<?>> set = Set.of(String.class, Integer.class, Long.class);
+			compile(set, (instance, compiler) -> assertThat(instance).isEqualTo(set));
 		}
 
 	}

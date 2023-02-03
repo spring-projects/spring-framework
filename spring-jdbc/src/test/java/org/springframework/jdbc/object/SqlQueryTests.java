@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,18 +85,18 @@ public class SqlQueryTests  {
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
 	private static final int[] COLUMN_TYPES = new int[] {Types.INTEGER, Types.VARCHAR};
 
-	private Connection connection;
-	private DataSource dataSource;
-	private PreparedStatement preparedStatement;
-	private ResultSet resultSet;
+
+	private Connection connection = mock();
+
+	private DataSource dataSource = mock();
+
+	private PreparedStatement preparedStatement = mock();
+
+	private ResultSet resultSet = mock();
 
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		this.connection = mock(Connection.class);
-		this.dataSource = mock(DataSource.class);
-		this.preparedStatement = mock(PreparedStatement.class);
-		this.resultSet = mock(ResultSet.class);
 		given(this.dataSource.getConnection()).willReturn(this.connection);
 		given(this.connection.prepareStatement(anyString())).willReturn(this.preparedStatement);
 		given(preparedStatement.executeQuery()).willReturn(resultSet);
@@ -273,8 +273,8 @@ public class SqlQueryTests  {
 	@Test
 	public void testFindCustomerMixed() throws SQLException {
 		reset(connection);
-		PreparedStatement preparedStatement2 = mock(PreparedStatement.class);
-		ResultSet resultSet2 = mock(ResultSet.class);
+		PreparedStatement preparedStatement2 = mock();
+		ResultSet resultSet2 = mock();
 		given(preparedStatement2.executeQuery()).willReturn(resultSet2);
 		given(resultSet.next()).willReturn(true, false);
 		given(resultSet.getInt("id")).willReturn(1);

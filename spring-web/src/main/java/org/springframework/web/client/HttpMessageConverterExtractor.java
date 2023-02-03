@@ -71,13 +71,13 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		this(responseType, messageConverters, LogFactory.getLog(HttpMessageConverterExtractor.class));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters, Log logger) {
 		Assert.notNull(responseType, "'responseType' must not be null");
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		Assert.noNullElements(messageConverters, "'messageConverters' must not contain null elements");
 		this.responseType = responseType;
-		this.responseClass = (responseType instanceof Class ? (Class<T>) responseType : null);
+		this.responseClass = (responseType instanceof Class clazz ? clazz : null);
 		this.messageConverters = messageConverters;
 		this.logger = logger;
 	}
@@ -94,9 +94,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 		try {
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter) {
-					GenericHttpMessageConverter<?> genericMessageConverter =
-							(GenericHttpMessageConverter<?>) messageConverter;
+				if (messageConverter instanceof GenericHttpMessageConverter genericMessageConverter) {
 					if (genericMessageConverter.canRead(this.responseType, null, contentType)) {
 						if (logger.isDebugEnabled()) {
 							ResolvableType resolvableType = ResolvableType.forType(this.responseType);

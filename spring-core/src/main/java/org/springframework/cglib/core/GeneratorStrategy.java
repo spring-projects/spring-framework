@@ -40,5 +40,6 @@ public interface GeneratorStrategy {
      * correctly implement <code>equals</code> and <code>hashCode</code>
      * to avoid generating too many classes.
      */
-    boolean equals(Object o);
+    @Override
+	boolean equals(Object o);
 }

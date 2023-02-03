@@ -79,7 +79,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	private static final Map<String, Object> DEFAULT_HINTS = Hints.from(Hints.SUPPRESS_LOGGING_HINT, true);
 
 
-	private final List<HttpMessageWriter<?>> partWriters;
+	private final Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
 
 	@Nullable
 	private final HttpMessageWriter<MultiValueMap<String, String>> formWriter;
@@ -112,8 +112,23 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	public MultipartHttpMessageWriter(List<HttpMessageWriter<?>> partWriters,
 			@Nullable  HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
 
+		this(() -> partWriters, formWriter);
+	}
+
+	/**
+	 * Constructor with a supplier for an explicit list of writers for
+	 * serializing parts and a writer for plain form data to fall back when
+	 * no media type is specified and the actual map consists of String
+	 * values only.
+	 * @param partWritersSupplier the supplier for writers for serializing parts
+	 * @param formWriter the fallback writer for form data, {@code null} by default
+	 * @since 6.0.3
+	 */
+	public MultipartHttpMessageWriter(Supplier<List<HttpMessageWriter<?>>> partWritersSupplier,
+			@Nullable  HttpMessageWriter<MultiValueMap<String, String>> formWriter) {
+
 		super(initMediaTypes(formWriter));
-		this.partWriters = partWriters;
+		this.partWritersSupplier = partWritersSupplier;
 		this.formWriter = formWriter;
 	}
 
@@ -131,7 +146,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	 * @since 5.0.7
 	 */
 	public List<HttpMessageWriter<?>> getPartWriters() {
-		return Collections.unmodifiableList(this.partWriters);
+		return Collections.unmodifiableList(this.partWritersSupplier.get());
 	}
 
 
@@ -145,6 +160,20 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 	}
 
 
+	@Override
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
+		if (MultiValueMap.class.isAssignableFrom(elementType.toClass())) {
+			if (mediaType == null) {
+				return true;
+			}
+			for (MediaType supportedMediaType : getWritableMediaTypes()) {
+				if (supportedMediaType.isCompatibleWith(mediaType)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public Mono<Void> write(Publisher<? extends MultiValueMap<String, ?>> inputStream,
@@ -250,8 +279,8 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 
 		MediaType contentType = headers.getContentType();
 
-		final ResolvableType finalBodyType = resolvableType;
-		Optional<HttpMessageWriter<?>> writer = this.partWriters.stream()
+		ResolvableType finalBodyType = resolvableType;
+		Optional<HttpMessageWriter<?>> writer = this.partWritersSupplier.get().stream()
 				.filter(partWriter -> partWriter.canWrite(finalBodyType, contentType))
 				.findFirst();
 

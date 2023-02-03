@@ -98,18 +98,19 @@ public class SockJsServiceRegistration {
 	/**
 	 * Transports with no native cross-domain communication (e.g. "eventsource",
 	 * "htmlfile") must get a simple page from the "foreign" domain in an invisible
-	 * iframe so that code in the iframe can run from  a domain local to the SockJS
-	 * server. Since the iframe needs to load the SockJS javascript client library,
-	 * this property allows specifying where to load it from.
+	 * {@code iframe} so that code in the {@code iframe} can run from a domain
+	 * local to the SockJS server. Since the {@code iframe} needs to load the
+	 * SockJS JavaScript client library, this property allows specifying where to
+	 * load it from.
 	 * <p>By default this is set to point to
-	 * "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js". However it can
-	 * also be set to point to a URL served by the application.
+	 * <a href="https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js">"https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"</a>.
+	 * However, it can also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
-	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
-	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then
+	 * must be relative to the {@code iframe} URL. For example assuming a SockJS endpoint
+	 * mapped to "/sockjs", and resulting {@code iframe} URL "/sockjs/iframe.html", then
 	 * the relative URL must start with "../../" to traverse up to the location
 	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
-	 * traversal may be needed.
+	 * traversals may be needed.
 	 */
 	public SockJsServiceRegistration setClientLibraryUrl(String clientLibraryUrl) {
 		this.clientLibraryUrl = clientLibraryUrl;

@@ -63,7 +63,7 @@ public class EnableSchedulingTests {
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withFixedRateTask() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfig.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size()).isEqualTo(2);
+		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(2);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
@@ -73,7 +73,7 @@ public class EnableSchedulingTests {
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withSubclass() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfigSubclass.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size()).isEqualTo(2);
+		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(2);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
@@ -83,7 +83,7 @@ public class EnableSchedulingTests {
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withExplicitScheduler() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(ExplicitSchedulerConfig.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size()).isEqualTo(1);
+		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(1);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
@@ -102,7 +102,7 @@ public class EnableSchedulingTests {
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withExplicitScheduledTaskRegistrar() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(ExplicitScheduledTaskRegistrarConfig.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size()).isEqualTo(1);
+		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(1);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);

@@ -399,19 +399,19 @@ public class PropertyResourceConfigurerTests {
 		assertThat(tb1.getName()).isEqualTo("namemyvarmyvar${");
 		assertThat(tb2.getName()).isEqualTo("myvarname98");
 		assertThat(tb1.getSpouse()).isEqualTo(tb2);
-		assertThat(tb1.getSomeMap().size()).isEqualTo(1);
+		assertThat(tb1.getSomeMap()).hasSize(1);
 		assertThat(tb1.getSomeMap().get("myKey")).isEqualTo("myValue");
-		assertThat(tb2.getStringArray().length).isEqualTo(2);
+		assertThat(tb2.getStringArray()).hasSize(2);
 		assertThat(tb2.getStringArray()[0]).isEqualTo(System.getProperty("os.name"));
 		assertThat(tb2.getStringArray()[1]).isEqualTo("98");
-		assertThat(tb2.getFriends().size()).isEqualTo(2);
+		assertThat(tb2.getFriends()).hasSize(2);
 		assertThat(tb2.getFriends().iterator().next()).isEqualTo("na98me");
 		assertThat(tb2.getFriends().toArray()[1]).isEqualTo(tb2);
-		assertThat(tb2.getSomeSet().size()).isEqualTo(3);
+		assertThat(tb2.getSomeSet()).hasSize(3);
 		assertThat(tb2.getSomeSet().contains("na98me")).isTrue();
 		assertThat(tb2.getSomeSet().contains(tb2)).isTrue();
 		assertThat(tb2.getSomeSet().contains(98)).isTrue();
-		assertThat(tb2.getSomeMap().size()).isEqualTo(6);
+		assertThat(tb2.getSomeMap()).hasSize(6);
 		assertThat(tb2.getSomeMap().get("key98")).isEqualTo("98");
 		assertThat(tb2.getSomeMap().get("key98ref")).isEqualTo(tb2);
 		assertThat(tb2.getSomeMap().get("key1")).isEqualTo(tb2);
@@ -577,7 +577,7 @@ public class PropertyResourceConfigurerTests {
 
 		TestBean tb = (TestBean) factory.getBean("tb");
 		assertThat(tb).isNotNull();
-		assertThat(factory.getAliases("tb").length).isEqualTo(0);
+		assertThat(factory.getAliases("tb")).isEmpty();
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 
 
 	/**
-	 * Look up the aspect bean from the {@link BeanFactory} and returns it.
+	 * Look up the aspect bean from the {@link BeanFactory} and return it.
 	 * @see #setAspectBeanName
 	 */
 	@Override
@@ -71,8 +71,8 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 	@Override
 	@Nullable
 	public ClassLoader getAspectClassLoader() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
+		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+			return cbf.getBeanClassLoader();
 		}
 		else {
 			return ClassUtils.getDefaultClassLoader();

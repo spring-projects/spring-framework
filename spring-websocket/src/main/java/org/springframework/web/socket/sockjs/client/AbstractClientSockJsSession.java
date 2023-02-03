@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,19 +229,14 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	public void handleFrame(String payload) {
 		SockJsFrame frame = new SockJsFrame(payload);
 		switch (frame.getType()) {
-			case OPEN:
-				handleOpenFrame();
-				break;
-			case HEARTBEAT:
+			case OPEN -> handleOpenFrame();
+			case HEARTBEAT -> {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Received heartbeat in " + this);
 				}
-				break;
-			case MESSAGE:
-				handleMessageFrame(frame);
-				break;
-			case CLOSE:
-				handleCloseFrame(frame);
+			}
+			case MESSAGE -> handleMessageFrame(frame);
+			case CLOSE -> handleCloseFrame(frame);
 		}
 	}
 

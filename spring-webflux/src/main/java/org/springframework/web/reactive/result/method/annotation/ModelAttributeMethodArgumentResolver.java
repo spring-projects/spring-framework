@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,7 +247,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						}
 					}
 				}
-				value = (value instanceof List ? ((List<?>) value).toArray() : value);
+				value = (value instanceof List<?> list ? list.toArray() : value);
 				MethodParameter methodParam = new MethodParameter(ctor, i);
 				if (value == null && methodParam.isOptional()) {
 					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,11 @@
 package org.springframework.web.reactive.function.client;
 
 import java.time.Duration;
+import java.util.Collections;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationHandler;
+import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +32,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpStatus;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.when;
@@ -44,7 +49,7 @@ class WebClientObservationTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private final ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+	private final ExchangeFunction exchangeFunction = mock();
 
 	private final ArgumentCaptor<ClientRequest> request = ArgumentCaptor.forClass(ClientRequest.class);
 
@@ -52,27 +57,45 @@ class WebClientObservationTests {
 
 	@BeforeEach
 	void setup() {
-		ClientResponse mockResponse = mock(ClientResponse.class);
+		ClientResponse mockResponse = mock();
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
 		given(this.exchangeFunction.exchange(this.request.capture())).willReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction).observationRegistry(this.observationRegistry);
+		this.observationRegistry.observationConfig().observationHandler(new HeaderInjectingHandler());
 	}
-
 
 	@Test
 	void recordsObservationForSuccessfulExchange() {
 		this.builder.build().get().uri("/resource/{id}", 42)
 				.retrieve().bodyToMono(Void.class).block(Duration.ofSeconds(10));
-		verifyAndGetRequest();
+
+		ClientRequest clientRequest = verifyAndGetRequest();
 
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
 				.hasLowCardinalityKeyValue("uri", "/resource/{id}");
+		assertThat(clientRequest.headers()).containsEntry("foo", Collections.singletonList("bar"));
+	}
+
+	@Test
+	void recordsObservationForSuccessfulExchangeWithParentObservationInReactorContext() {
+		Observation parent = Observation.start("parent", observationRegistry);
+		try {
+			this.builder.build().get().uri("/resource/{id}", 42)
+					.retrieve().bodyToMono(Void.class).contextWrite(context -> context.put(ObservationThreadLocalAccessor.KEY, parent)).block(Duration.ofSeconds(10));
+			verifyAndGetRequest();
+
+			assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
+					.hasParentObservationEqualTo(parent);
+		}
+		finally {
+			parent.stop();
+		}
 	}
 
 	@Test
 	void recordsObservationForErrorExchange() {
-		ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+		ExchangeFunction exchangeFunction = mock();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.error(new IllegalStateException()));
 		WebClient client = WebClient.builder().observationRegistry(observationRegistry).exchangeFunction(exchangeFunction).build();
 		StepVerifier.create(client.get().uri("/path").retrieve().bodyToMono(Void.class))
@@ -91,6 +114,25 @@ class WebClientObservationTests {
 				.hasLowCardinalityKeyValue("status", "CLIENT_ERROR");
 	}
 
+	@Test
+	void setsCurrentObservationInReactorContext() {
+		ExchangeFilterFunction assertionFilter = new ExchangeFilterFunction() {
+			@Override
+			public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction chain) {
+				return chain.exchange(request).contextWrite(context -> {
+					Observation currentObservation = context.get(ObservationThreadLocalAccessor.KEY);
+					assertThat(currentObservation).isNotNull();
+					assertThat(currentObservation.getContext()).isInstanceOf(ClientRequestObservationContext.class);
+					return context;
+				});
+			}
+		};
+		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
+				.retrieve().bodyToMono(Void.class)
+				.block(Duration.ofSeconds(10));
+			verifyAndGetRequest();
+	}
+
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
 		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
 				.hasObservationWithNameEqualTo("http.client.requests").that();
@@ -100,6 +142,19 @@ class WebClientObservationTests {
 		verify(exchangeFunction).exchange(request.getValue());
 		verifyNoMoreInteractions(exchangeFunction);
 		return request.getValue();
+	}
+
+	static class HeaderInjectingHandler implements ObservationHandler<ClientRequestObservationContext> {
+
+		@Override
+		public void onStart(ClientRequestObservationContext context) {
+			context.getSetter().set(context.getCarrier(), "foo", "bar");
+		}
+
+		@Override
+		public boolean supportsContext(Observation.Context context) {
+			return context instanceof ClientRequestObservationContext;
+		}
 	}
 
 }

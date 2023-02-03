@@ -21,14 +21,15 @@ import java.util.Set;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.observation.reactive.DefaultServerRequestObservationConvention;
-import org.springframework.http.observation.reactive.ServerHttpObservationDocumentation;
-import org.springframework.http.observation.reactive.ServerRequestObservationContext;
-import org.springframework.http.observation.reactive.ServerRequestObservationConvention;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention;
+import org.springframework.http.server.reactive.observation.ServerHttpObservationDocumentation;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationConvention;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -95,13 +96,14 @@ public class ServerHttpObservationFilter implements WebFilter {
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange);
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(),
+				exchange.getResponse(), exchange.getAttributes());
 		exchange.getAttributes().put(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		return chain.filter(exchange).transformDeferred(call -> filter(exchange, observationContext, call));
 	}
 
 	private Publisher<Void> filter(ServerWebExchange exchange, ServerRequestObservationContext observationContext, Mono<Void> call) {
-		Observation observation = ServerHttpObservationDocumentation.HTTP_REQUESTS.observation(this.observationConvention,
+		Observation observation = ServerHttpObservationDocumentation.HTTP_REACTIVE_SERVER_REQUESTS.observation(this.observationConvention,
 				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry);
 		observation.start();
 		return call.doOnEach(signal -> {
@@ -117,7 +119,8 @@ public class ServerHttpObservationFilter implements WebFilter {
 				.doOnCancel(() -> {
 					observationContext.setConnectionAborted(true);
 					observation.stop();
-				});
+				})
+				.contextWrite(context -> context.put(ObservationThreadLocalAccessor.KEY, observation));
 	}
 
 	private void onTerminalSignal(Observation observation, ServerWebExchange exchange) {

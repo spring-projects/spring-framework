@@ -53,8 +53,8 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * for global exception handling in an application. Subclasses can override
  * individual methods that handle a specific exception, override
  * {@link #handleExceptionInternal} to override common handling of all exceptions,
- * or {@link #createResponseEntity} to intercept the final step of creating the
- * {@link ResponseEntity} from the selected HTTP status code, headers, and body.
+ * or override {@link #createResponseEntity} to intercept the final step of creating
+ * the {@link ResponseEntity} from the selected HTTP status code, headers, and body.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -75,9 +75,18 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		this.messageSource = messageSource;
 	}
 
+	/**
+	 * Get the {@link MessageSource} that this exception handler uses.
+	 * @since 6.0.3
+	 */
+	@Nullable
+	protected MessageSource getMessageSource() {
+		return this.messageSource;
+	}
+
 
 	/**
-	 * Handle all exceptions raised within Spring MVC handling of the request .
+	 * Handle all exceptions raised within Spring MVC handling of the request.
 	 * @param ex the exception to handle
 	 * @param exchange the current request-response
 	 */
@@ -293,6 +302,38 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	}
 
 	/**
+	 * Convenience method to create a {@link ProblemDetail} for any exception
+	 * that doesn't implement {@link ErrorResponse}, also performing a
+	 * {@link MessageSource} lookup for the "detail" field.
+	 * @param ex the exception being handled
+	 * @param status the status to associate with the exception
+	 * @param defaultDetail default value for the "detail" field
+	 * @param detailMessageCode the code to use to look up the "detail" field
+	 * through a {@code MessageSource}, falling back on
+	 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)}
+	 * @param detailMessageArguments the arguments to go with the detailMessageCode
+	 * @return the created {@code ProblemDetail} instance
+	 */
+	protected ProblemDetail createProblemDetail(
+			Exception ex, HttpStatusCode status, String defaultDetail, @Nullable String detailMessageCode,
+			@Nullable Object[] detailMessageArguments, ServerWebExchange exchange) {
+
+		ErrorResponse.Builder builder = ErrorResponse.builder(ex, status, defaultDetail);
+		if (detailMessageCode != null) {
+			builder.detailMessageCode(detailMessageCode);
+		}
+		if (detailMessageArguments != null) {
+			builder.detailMessageArguments(detailMessageArguments);
+		}
+		return builder.build().updateAndGetBody(this.messageSource, getLocale(exchange));
+	}
+
+	private static Locale getLocale(ServerWebExchange exchange) {
+		Locale locale = exchange.getLocaleContext().getLocale();
+		return (locale != null ? locale : Locale.getDefault());
+	}
+
+	/**
 	 * Internal handler method that all others in this class delegate to, for
 	 * common handling, and for the creation of a {@link ResponseEntity}.
 	 * <p>The default implementation does the following:
@@ -311,7 +352,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @return a {@code Mono} with the {@code ResponseEntity} for the response
 	 */
 	protected Mono<ResponseEntity<Object>> handleExceptionInternal(
-			Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode status,
+			Exception ex, @Nullable Object body, @Nullable HttpHeaders headers, HttpStatusCode status,
 			ServerWebExchange exchange) {
 
 		if (exchange.getResponse().isCommitted()) {
@@ -319,23 +360,10 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		}
 
 		if (body == null && ex instanceof ErrorResponse errorResponse) {
-			body = resolveDetailViaMessageSource(errorResponse, exchange.getLocaleContext().getLocale());
+			body = errorResponse.updateAndGetBody(this.messageSource, getLocale(exchange));
 		}
 
 		return createResponseEntity(body, headers, status, exchange);
-	}
-
-	private ProblemDetail resolveDetailViaMessageSource(ErrorResponse response, @Nullable Locale locale) {
-		ProblemDetail body = response.getBody();
-		if (this.messageSource != null) {
-			locale = (locale != null ? locale : Locale.getDefault());
-			Object[] arguments = response.getDetailMessageArguments(this.messageSource, locale);
-			String detail = this.messageSource.getMessage(response.getDetailMessageCode(), arguments, null, locale);
-			if (detail != null) {
-				body.setDetail(detail);
-			}
-		}
-		return body;
 	}
 
 	/**
@@ -351,7 +379,8 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	 * @since 6.0
 	 */
 	protected Mono<ResponseEntity<Object>> createResponseEntity(
-			@Nullable Object body, HttpHeaders headers, HttpStatusCode status, ServerWebExchange exchange) {
+			@Nullable Object body, @Nullable HttpHeaders headers, HttpStatusCode status,
+			ServerWebExchange exchange) {
 
 		return Mono.just(new ResponseEntity<>(body, headers, status));
 	}

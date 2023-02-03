@@ -291,7 +291,7 @@ class MergedSqlConfig {
 	}
 
 	private static boolean isEmptyString(@Nullable Object value) {
-		return (value instanceof String && ((String) value).isEmpty());
+		return (value instanceof String str && str.isEmpty());
 	}
 
 	private static boolean isEmptyArray(@Nullable Object value) {

@@ -67,8 +67,8 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * @since 5.2.4
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	@Nullable
 	@Deprecated(since = "6.0")
+	@Nullable
 	default Integer getRawStatusCode() {
 		HttpStatusCode httpStatus = getStatusCode();
 		return (httpStatus != null ? httpStatus.value() : null);

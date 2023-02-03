@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,9 +216,9 @@ public class EmbeddedDatabaseFactory {
 	protected void shutdownDatabase() {
 		if (this.dataSource != null) {
 			if (logger.isInfoEnabled()) {
-				if (this.dataSource instanceof SimpleDriverDataSource) {
+				if (this.dataSource instanceof SimpleDriverDataSource simpleDriverDataSource) {
 					logger.info(String.format("Shutting down embedded database: url='%s'",
-						((SimpleDriverDataSource) this.dataSource).getUrl()));
+							simpleDriverDataSource.getUrl()));
 				}
 				else {
 					logger.info(String.format("Shutting down embedded database '%s'", this.databaseName));

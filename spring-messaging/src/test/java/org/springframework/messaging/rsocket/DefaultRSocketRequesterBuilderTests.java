@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ import static org.mockito.Mockito.verify;
  */
 public class DefaultRSocketRequesterBuilderTests {
 
-	private ClientTransport transport;
+	private ClientTransport transport = mock();
 
 	private final MockConnection connection = new MockConnection();
 
@@ -75,7 +75,6 @@ public class DefaultRSocketRequesterBuilderTests {
 
 	@BeforeEach
 	public void setup() {
-		this.transport = mock(ClientTransport.class);
 		given(this.transport.connect()).willReturn(Mono.just(this.connection));
 		given(this.transport.maxFrameLength()).willReturn(16777215);
 	}
@@ -84,7 +83,7 @@ public class DefaultRSocketRequesterBuilderTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void rsocketConnectorConfigurer() {
-		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock(Consumer.class);
+		Consumer<RSocketStrategies.Builder> strategiesConfigurer = mock();
 		RSocketRequester.builder()
 				.rsocketConnector(this.connectorConfigurer)
 				.rsocketStrategies(strategiesConfigurer)

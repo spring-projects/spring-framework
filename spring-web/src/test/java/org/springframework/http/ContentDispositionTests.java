@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,22 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.http.ContentDisposition.parse;
 
 /**
- * Unit tests for {@link ContentDisposition}
+ * Unit tests for {@link ContentDisposition}.
+ *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
 class ContentDispositionTests {
 
-	private static DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+	private static final DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
 
-	@Test
 	@SuppressWarnings("deprecation")
-	void parse() {
+	@Test
+	void parseFilenameQuoted() {
 		assertThat(parse("form-data; name=\"foo\"; filename=\"foo.txt\"; size=123"))
 				.isEqualTo(ContentDisposition.formData()
 						.name("foo")
@@ -72,7 +74,7 @@ class ContentDispositionTests {
 						.build());
 	}
 
-	@Test // gh-24112
+	@Test  // gh-24112
 	void parseEncodedFilenameWithPaddedCharset() {
 		assertThat(parse("attachment; filename*= UTF-8''some-file.zip"))
 				.isEqualTo(ContentDisposition.attachment()
@@ -80,7 +82,7 @@ class ContentDispositionTests {
 						.build());
 	}
 
-	@Test // gh-26463
+	@Test  // gh-26463
 	void parseBase64EncodedFilename() {
 		String input = "attachment; filename=\"=?UTF-8?B?5pel5pys6KqeLmNzdg==?=\"";
 		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
@@ -95,7 +97,7 @@ class ContentDispositionTests {
 		assertThat(parse(input).getFilename()).isEqualTo("Spring框架为基于Java的现代企业应用程序提供了全面的编程和配置模型.txt");
 	}
 
-	@Test // gh-26463
+	@Test  // gh-26463
 	void parseBase64EncodedShiftJISFilename() {
 		String input = "attachment; filename=\"=?SHIFT_JIS?B?k/qWe4zqLmNzdg==?=\"";
 		assertThat(parse(input).getFilename()).isEqualTo("日本語.csv");
@@ -168,8 +170,8 @@ class ContentDispositionTests {
 	}
 
 
-	@Test
 	@SuppressWarnings("deprecation")
+	@Test
 	void parseWithExtraSemicolons() {
 		assertThat(parse("form-data; name=\"foo\";; ; filename=\"foo.txt\"; size=123"))
 				.isEqualTo(ContentDisposition.formData()
@@ -179,8 +181,8 @@ class ContentDispositionTests {
 						.build());
 	}
 
-	@Test
 	@SuppressWarnings("deprecation")
+	@Test
 	void parseDates() {
 		ZonedDateTime creationTime = ZonedDateTime.parse("Mon, 12 Feb 2007 10:15:30 -0500", formatter);
 		ZonedDateTime modificationTime = ZonedDateTime.parse("Tue, 13 Feb 2007 10:15:30 -0500", formatter);
@@ -198,8 +200,8 @@ class ContentDispositionTests {
 						.build());
 	}
 
-	@Test
 	@SuppressWarnings("deprecation")
+	@Test
 	void parseIgnoresInvalidDates() {
 		ZonedDateTime readTime = ZonedDateTime.parse("Wed, 14 Feb 2007 10:15:30 -0500", formatter);
 
@@ -228,13 +230,8 @@ class ContentDispositionTests {
 		assertThatIllegalArgumentException().isThrownBy(() -> parse("foo;bar"));
 	}
 
-	private static ContentDisposition parse(String input) {
-		return ContentDisposition.parse(input);
-	}
-
-
-	@Test
 	@SuppressWarnings("deprecation")
+	@Test
 	void format() {
 		assertThat(
 				ContentDisposition.formData()
@@ -252,7 +249,9 @@ class ContentDispositionTests {
 						.name("name")
 						.filename("中文.txt", StandardCharsets.UTF_8)
 						.build().toString())
-				.isEqualTo("form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt");
+				.isEqualTo("form-data; name=\"name\"; " +
+						"filename=\"=?UTF-8?Q?=E4=B8=AD=E6=96=87.txt?=\"; " +
+						"filename*=UTF-8''%E4%B8%AD%E6%96%87.txt");
 	}
 
 	@Test
@@ -266,14 +265,11 @@ class ContentDispositionTests {
 				.isEqualTo("form-data; name=\"name\"; filename=\"test.txt\"");
 	}
 
-	@Test // gh-24220
+	@Test  // gh-24220
 	void formatWithFilenameWithQuotes() {
-
 		BiConsumer<String, String> tester = (input, output) -> {
-
 			assertThat(ContentDisposition.formData().filename(input).build().toString())
 					.isEqualTo("form-data; filename=\"" + output + "\"");
-
 			assertThat(ContentDisposition.formData().filename(input, StandardCharsets.US_ASCII).build().toString())
 					.isEqualTo("form-data; filename=\"" + output + "\"");
 		};

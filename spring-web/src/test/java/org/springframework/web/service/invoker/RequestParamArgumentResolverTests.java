@@ -16,13 +16,14 @@
 
 package org.springframework.web.service.invoker;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.PostExchange;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -36,30 +37,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class RequestParamArgumentResolverTests {
+class RequestParamArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private Service service;
+	private final Service service = HttpServiceProxyFactory.builder(this.client).build().createClient(Service.class);
 
-
-	@BeforeEach
-	void setUp() throws Exception {
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
-		this.service = proxyFactory.createClient(Service.class);
-	}
-
-
-	// Base class functionality should be tested in NamedValueArgumentResolverTests.
-	// Form data vs query params tested in HttpRequestValuesTests.
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void requestParam() {
 		this.service.postForm("value 1", "value 2");
 
 		Object body = this.client.getRequestValues().getBodyValue();
-		assertThat(body).isNotNull().isInstanceOf(byte[].class);
-		assertThat(new String((byte[]) body, UTF_8)).isEqualTo("param1=value+1&param2=value+2");
+		assertThat(body).isNotNull().isInstanceOf(MultiValueMap.class);
+		assertThat((MultiValueMap<String, String>) body).hasSize(2)
+				.containsEntry("param1", List.of("value 1"))
+				.containsEntry("param2", List.of("value 2"));
 	}
 
 

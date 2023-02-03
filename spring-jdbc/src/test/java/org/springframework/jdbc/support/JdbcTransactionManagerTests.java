@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,19 +75,16 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
  */
 public class JdbcTransactionManagerTests {
 
-	private DataSource ds;
+	private DataSource ds = mock();
 
-	private Connection con;
+	private Connection con = mock();
 
-	private JdbcTransactionManager tm;
+	private JdbcTransactionManager tm = new JdbcTransactionManager(ds);
 
 
 	@BeforeEach
 	public void setup() throws Exception {
-		ds = mock(DataSource.class);
-		con = mock(Connection.class);
 		given(ds.getConnection()).willReturn(con);
-		tm = new JdbcTransactionManager(ds);
 	}
 
 	@AfterEach
@@ -491,8 +488,8 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testParticipatingTransactionWithDifferentConnectionObtainedFromSynch() throws Exception {
-		DataSource ds2 = mock(DataSource.class);
-		final Connection con2 = mock(Connection.class);
+		DataSource ds2 = mock();
+		final Connection con2 = mock();
 		given(ds2.getConnection()).willReturn(con2);
 
 		assertThat(!TransactionSynchronizationManager.hasResource(ds)).as("Hasn't thread connection").isTrue();
@@ -615,8 +612,8 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testPropagationRequiresNewWithExistingTransactionAndUnrelatedDataSource() throws Exception {
-		Connection con2 = mock(Connection.class);
-		final DataSource ds2 = mock(DataSource.class);
+		Connection con2 = mock();
+		final DataSource ds2 = mock();
 		given(ds2.getConnection()).willReturn(con2);
 
 		final TransactionTemplate tt = new TransactionTemplate(tm);
@@ -664,7 +661,7 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testPropagationRequiresNewWithExistingTransactionAndUnrelatedFailingDataSource() throws Exception {
-		final DataSource ds2 = mock(DataSource.class);
+		final DataSource ds2 = mock();
 		SQLException failure = new SQLException();
 		given(ds2.getConnection()).willThrow(failure);
 
@@ -800,8 +797,8 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testPropagationSupportsAndRequiresNewWithEarlyAccess() throws Exception {
-		final Connection con1 = mock(Connection.class);
-		final Connection con2 = mock(Connection.class);
+		final Connection con1 = mock();
+		final Connection con2 = mock();
 		given(ds.getConnection()).willReturn(con1, con2);
 
 		final
@@ -874,7 +871,7 @@ public class JdbcTransactionManagerTests {
 		tm.setEnforceReadOnly(true);
 
 		given(con.getAutoCommit()).willReturn(true);
-		Statement stmt = mock(Statement.class);
+		Statement stmt = mock();
 		given(con.createStatement()).willReturn(stmt);
 
 		TransactionTemplate tt = new TransactionTemplate(tm);
@@ -906,7 +903,7 @@ public class JdbcTransactionManagerTests {
 	@ValueSource(ints = {1, 10})
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void transactionWithTimeout(int timeout) throws Exception {
-		PreparedStatement ps = mock(PreparedStatement.class);
+		PreparedStatement ps = mock();
 		given(con.getAutoCommit()).willReturn(true);
 		given(con.prepareStatement("some SQL statement")).willReturn(ps);
 
@@ -1334,8 +1331,8 @@ public class JdbcTransactionManagerTests {
 	}
 
 	private void doTestExistingTransactionWithPropagationNested(final int count) throws Exception {
-		DatabaseMetaData md = mock(DatabaseMetaData.class);
-		Savepoint sp = mock(Savepoint.class);
+		DatabaseMetaData md = mock();
+		Savepoint sp = mock();
 
 		given(md.supportsSavepoints()).willReturn(true);
 		given(con.getMetaData()).willReturn(md);
@@ -1377,8 +1374,8 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testExistingTransactionWithPropagationNestedAndRollback() throws Exception {
-		DatabaseMetaData md = mock(DatabaseMetaData.class);
-		Savepoint sp = mock(Savepoint.class);
+		DatabaseMetaData md = mock();
+		Savepoint sp = mock();
 
 		given(md.supportsSavepoints()).willReturn(true);
 		given(con.getMetaData()).willReturn(md);
@@ -1418,8 +1415,8 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testExistingTransactionWithPropagationNestedAndRequiredRollback() throws Exception {
-		DatabaseMetaData md = mock(DatabaseMetaData.class);
-		Savepoint sp = mock(Savepoint.class);
+		DatabaseMetaData md = mock();
+		Savepoint sp = mock();
 
 		given(md.supportsSavepoints()).willReturn(true);
 		given(con.getMetaData()).willReturn(md);
@@ -1470,8 +1467,8 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testExistingTransactionWithPropagationNestedAndRequiredRollbackOnly() throws Exception {
-		DatabaseMetaData md = mock(DatabaseMetaData.class);
-		Savepoint sp = mock(Savepoint.class);
+		DatabaseMetaData md = mock();
+		Savepoint sp = mock();
 
 		given(md.supportsSavepoints()).willReturn(true);
 		given(con.getMetaData()).willReturn(md);
@@ -1522,8 +1519,8 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testExistingTransactionWithManualSavepoint() throws Exception {
-		DatabaseMetaData md = mock(DatabaseMetaData.class);
-		Savepoint sp = mock(Savepoint.class);
+		DatabaseMetaData md = mock();
+		Savepoint sp = mock();
 
 		given(md.supportsSavepoints()).willReturn(true);
 		given(con.getMetaData()).willReturn(md);
@@ -1553,8 +1550,8 @@ public class JdbcTransactionManagerTests {
 
 	@Test
 	public void testExistingTransactionWithManualSavepointAndRollback() throws Exception {
-		DatabaseMetaData md = mock(DatabaseMetaData.class);
-		Savepoint sp = mock(Savepoint.class);
+		DatabaseMetaData md = mock();
+		Savepoint sp = mock();
 
 		given(md.supportsSavepoints()).willReturn(true);
 		given(con.getMetaData()).willReturn(md);

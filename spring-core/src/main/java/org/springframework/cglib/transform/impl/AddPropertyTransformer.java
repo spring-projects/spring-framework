@@ -15,10 +15,12 @@
  */
 package org.springframework.cglib.transform.impl;
 
-import org.springframework.cglib.transform.*;
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.Map;
+
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.TypeUtils;
+import org.springframework.cglib.transform.ClassEmitterTransformer;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class AddPropertyTransformer extends ClassEmitterTransformer {
@@ -39,7 +41,8 @@ public class AddPropertyTransformer extends ClassEmitterTransformer {
         this.types = types;
     }
 
-    public void end_class() {
+    @Override
+	public void end_class() {
         if (!TypeUtils.isAbstract(getAccess())) {
             EmitUtils.add_properties(this, names, types);
         }

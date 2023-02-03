@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,21 +181,21 @@ public class JmsNamespaceHandlerTests {
 		assertThat(testBean2.getName()).isNull();
 		assertThat(testBean3.message).isNull();
 
-		TextMessage message1 = mock(TextMessage.class);
+		TextMessage message1 = mock();
 		given(message1.getText()).willReturn("Test1");
 
 		MessageListener listener1 = getListener("listener1");
 		listener1.onMessage(message1);
 		assertThat(testBean1.getName()).isEqualTo("Test1");
 
-		TextMessage message2 = mock(TextMessage.class);
+		TextMessage message2 = mock();
 		given(message2.getText()).willReturn("Test2");
 
 		MessageListener listener2 = getListener("listener2");
 		listener2.onMessage(message2);
 		assertThat(testBean2.getName()).isEqualTo("Test2");
 
-		TextMessage message3 = mock(TextMessage.class);
+		TextMessage message3 = mock();
 
 		MessageListener listener3 = getListener(DefaultMessageListenerContainer.class.getName() + "#0");
 		listener3.onMessage(message3);

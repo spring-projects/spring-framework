@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -357,8 +356,9 @@ public class FreeMarkerMacroTests {
 	}
 
 	private void storeTemplateInTempDir(String macro) throws IOException {
-		Files.write(this.templateLoaderPath.resolve("tmp.ftl"),
-				("<#import \"spring.ftl\" as spring />\n" + macro).getBytes(UTF_8));
+		Files.writeString(this.templateLoaderPath.resolve("tmp.ftl"),
+				"<#import \"spring.ftl\" as spring />\n" + macro
+		);
 	}
 
 	private List<String> getOutput() {

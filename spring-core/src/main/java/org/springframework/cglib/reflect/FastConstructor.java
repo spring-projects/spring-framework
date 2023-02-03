@@ -25,11 +25,13 @@ public class FastConstructor extends FastMember
         super(fc, constructor, fc.getIndex(constructor.getParameterTypes()));
     }
 
-    public Class[] getParameterTypes() {
+    @Override
+	public Class[] getParameterTypes() {
         return ((Constructor)member).getParameterTypes();
     }
 
-    public Class[] getExceptionTypes() {
+    @Override
+	public Class[] getExceptionTypes() {
         return ((Constructor)member).getExceptionTypes();
     }
 

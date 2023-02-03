@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -193,9 +192,11 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 		if (context instanceof WebApplicationContext wac) {
 			ServletContext servletContext = wac.getServletContext();
-			Assert.state(servletContext instanceof MockServletContext, () -> String.format(
-						"The WebApplicationContext for test context %s must be configured with a MockServletContext.",
-						testContext));
+			if (!(servletContext instanceof MockServletContext mockServletContext)) {
+				throw new IllegalStateException(
+						"The WebApplicationContext for test context %s must be configured with a MockServletContext."
+							.formatted(testContext));
+			}
 
 			if (logger.isTraceEnabled()) {
 				logger.trace("Setting up MockHttpServletRequest, MockHttpServletResponse, ServletWebRequest, " +
@@ -206,7 +207,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 						"and RequestContextHolder for test class " + testContext.getTestClass().getName());
 			}
 
-			MockServletContext mockServletContext = (MockServletContext) servletContext;
 			MockHttpServletRequest request = new MockHttpServletRequest(mockServletContext);
 			request.setAttribute(CREATED_BY_THE_TESTCONTEXT_FRAMEWORK, Boolean.TRUE);
 			MockHttpServletResponse response = new MockHttpServletResponse();

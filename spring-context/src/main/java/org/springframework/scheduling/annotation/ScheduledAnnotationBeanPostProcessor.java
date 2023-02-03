@@ -159,7 +159,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @since 5.1
 	 */
 	public ScheduledAnnotationBeanPostProcessor(ScheduledTaskRegistrar registrar) {
-		Assert.notNull(registrar, "ScheduledTaskRegistrar is required");
+		Assert.notNull(registrar, "ScheduledTaskRegistrar must not be null");
 		this.registrar = registrar;
 	}
 

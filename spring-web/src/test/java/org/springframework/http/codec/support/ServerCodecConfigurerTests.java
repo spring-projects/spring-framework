@@ -64,7 +64,9 @@ import org.springframework.http.codec.json.KotlinSerializationJsonDecoder;
 import org.springframework.http.codec.json.KotlinSerializationJsonEncoder;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
+import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
+import org.springframework.http.codec.multipart.PartEventHttpMessageWriter;
 import org.springframework.http.codec.multipart.PartHttpMessageWriter;
 import org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecoder;
 import org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder;
@@ -92,7 +94,7 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultReaders() {
 		List<HttpMessageReader<?>> readers = this.configurer.getReaders();
-		assertThat(readers.size()).isEqualTo(19);
+		assertThat(readers).hasSize(19);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteArrayDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(ByteBufferDecoder.class);
 		assertThat(getNextDecoder(readers).getClass()).isEqualTo(DataBufferDecoder.class);
@@ -117,7 +119,7 @@ public class ServerCodecConfigurerTests {
 	@Test
 	public void defaultWriters() {
 		List<HttpMessageWriter<?>> writers = this.configurer.getWriters();
-		assertThat(writers.size()).isEqualTo(17);
+		assertThat(writers).hasSize(19);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteArrayEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(ByteBufferEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(DataBufferEncoder.class);
@@ -126,6 +128,8 @@ public class ServerCodecConfigurerTests {
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ResourceHttpMessageWriter.class);
 		assertStringEncoder(getNextEncoder(writers), true);
 		assertThat(writers.get(index.getAndIncrement()).getClass()).isEqualTo(ProtobufHttpMessageWriter.class);
+		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(MultipartHttpMessageWriter.class);
+		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(PartEventHttpMessageWriter.class);
 		assertThat(writers.get(this.index.getAndIncrement()).getClass()).isEqualTo(PartHttpMessageWriter.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationCborEncoder.class);
 		assertThat(getNextEncoder(writers).getClass()).isEqualTo(KotlinSerializationJsonEncoder.class);

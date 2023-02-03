@@ -15,21 +15,31 @@
  */
 package org.springframework.cglib.proxy;
 
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.asm.Label;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class LazyLoaderGenerator implements CallbackGenerator {
     public static final LazyLoaderGenerator INSTANCE = new LazyLoaderGenerator();
 
-    private static final Signature LOAD_OBJECT = 
+    private static final Signature LOAD_OBJECT =
       TypeUtils.parseSignature("Object loadObject()");
     private static final Type LAZY_LOADER =
       TypeUtils.parseType("org.springframework.cglib.proxy.LazyLoader");
 
-    public void generate(ClassEmitter ce, Context context, List methods) {
+    @Override
+	public void generate(ClassEmitter ce, Context context, List methods) {
         Set indexes = new HashSet();
         for (Iterator it = methods.iterator(); it.hasNext();) {
             MethodInfo method = (MethodInfo)it.next();
@@ -75,7 +85,7 @@ class LazyLoaderGenerator implements CallbackGenerator {
             e.mark(end);
             e.return_value();
             e.end_method();
-            
+
         }
     }
 
@@ -85,5 +95,6 @@ class LazyLoaderGenerator implements CallbackGenerator {
                              Constants.TYPES_EMPTY);
     }
 
-    public void generateStatic(CodeEmitter e, Context context, List methods) { }
+    @Override
+	public void generateStatic(CodeEmitter e, Context context, List methods) { }
 }

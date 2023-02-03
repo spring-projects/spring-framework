@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,8 +149,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	/**
 	 * As of version 6.0, setting this property has no effect.
-	 *
-	 * <p/>To change the socket read timeout, use {@link SocketConfig.Builder#setSoTimeout(Timeout)},
+	 * <p>To change the socket read timeout, use {@link SocketConfig.Builder#setSoTimeout(Timeout)},
 	 * supply the resulting {@link SocketConfig} to
 	 * {@link org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder#setDefaultSocketConfig(SocketConfig)},
 	 * use the resulting connection manager for
@@ -202,8 +201,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
 			// Use request configuration given by the user, when available
 			RequestConfig config = null;
-			if (httpRequest instanceof Configurable) {
-				config = ((Configurable) httpRequest).getConfig();
+			if (httpRequest instanceof Configurable configurable) {
+				config = configurable.getConfig();
 			}
 			if (config == null) {
 				config = createRequestConfig(client);
@@ -249,6 +248,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @return the merged request config
 	 * @since 4.2
 	 */
+	@SuppressWarnings("deprecation")  // setConnectTimeout
 	protected RequestConfig mergeRequestConfig(RequestConfig clientConfig) {
 		if (this.connectTimeout == -1 && this.connectionRequestTimeout == -1) {  // nothing to merge
 			return clientConfig;
@@ -328,8 +328,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	@Override
 	public void destroy() throws Exception {
 		HttpClient httpClient = getHttpClient();
-		if (httpClient instanceof Closeable) {
-			((Closeable) httpClient).close();
+		if (httpClient instanceof Closeable closeable) {
+			closeable.close();
 		}
 	}
 

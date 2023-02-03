@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 import org.springframework.transaction.support.DefaultTransactionDefinition
 
 class TransactionalOperatorExtensionsTests {
@@ -30,10 +29,11 @@ class TransactionalOperatorExtensionsTests {
 	private val tm = ReactiveTestTransactionManager(false, true)
 
 	@Test
+	@Suppress("UNUSED_VARIABLE")
 	fun commitWithSuspendingFunction() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		runBlocking {
-			operator.executeAndAwait {
+			val returnValue: Boolean = operator.executeAndAwait {
 				delay(1)
 				true
 			}
@@ -43,10 +43,11 @@ class TransactionalOperatorExtensionsTests {
 	}
 
 	@Test
+	@Suppress("UNUSED_VARIABLE")
 	fun commitWithEmptySuspendingFunction() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		runBlocking {
-			operator.executeAndAwait {
+			val returnValue: Boolean? = operator.executeAndAwait {
 				delay(1)
 				null
 			}
@@ -69,7 +70,6 @@ class TransactionalOperatorExtensionsTests {
 				assertThat(tm.rollback).isTrue()
 				return@runBlocking
 			}
-			fail("")
 		}
 	}
 

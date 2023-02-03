@@ -38,7 +38,7 @@ import static org.mockito.Mockito.withSettings;
 /**
  * @author Stephane Nicoll
  */
-public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -47,19 +47,20 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 
 	@Override
 	@Test
-	public void httpMethods() throws Exception {
+	void httpMethods() throws Exception {
 		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
 	}
 
 	@Test
-	public void assertCustomConfig() throws Exception {
+	@SuppressWarnings("deprecation")
+	void assertCustomConfig() throws Exception {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpComponentsClientHttpRequestFactory hrf = new HttpComponentsClientHttpRequestFactory(httpClient);
 		hrf.setConnectTimeout(1234);
 		hrf.setConnectionRequestTimeout(4321);
 
-		URI uri = new URI(baseUrl + "/status/ok");
+		URI uri = URI.create(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest) hrf.createRequest(uri, HttpMethod.GET);
 
 		Object config = request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
@@ -71,7 +72,9 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 	}
 
 	@Test
-	public void defaultSettingsOfHttpClientMergedOnExecutorCustomization() throws Exception {
+	@SuppressWarnings("deprecation")
+	void defaultSettingsOfHttpClientMergedOnExecutorCustomization() throws Exception {
+		@SuppressWarnings("deprecation")
 		RequestConfig defaultConfig = RequestConfig.custom().setConnectTimeout(1234, MILLISECONDS).build();
 		CloseableHttpClient client = mock(CloseableHttpClient.class,
 				withSettings().extraInterfaces(Configurable.class));
@@ -90,7 +93,8 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 	}
 
 	@Test
-	public void localSettingsOverrideClientDefaultSettings() throws Exception {
+	@SuppressWarnings("deprecation")
+	void localSettingsOverrideClientDefaultSettings() throws Exception {
 		RequestConfig defaultConfig = RequestConfig.custom()
 				.setConnectTimeout(1234, MILLISECONDS)
 				.setConnectionRequestTimeout(6789, MILLISECONDS)
@@ -109,11 +113,12 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 	}
 
 	@Test
-	public void mergeBasedOnCurrentHttpClient() throws Exception {
+	@SuppressWarnings("deprecation")
+	void mergeBasedOnCurrentHttpClient() throws Exception {
 		RequestConfig defaultConfig = RequestConfig.custom()
 				.setConnectionRequestTimeout(1234, MILLISECONDS)
 				.build();
-		final CloseableHttpClient client = mock(CloseableHttpClient.class,
+		CloseableHttpClient client = mock(CloseableHttpClient.class,
 				withSettings().extraInterfaces(Configurable.class));
 		Configurable configurable = (Configurable) client;
 		given(configurable.getConfig()).willReturn(defaultConfig);
@@ -141,7 +146,7 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 	}
 
 	private RequestConfig retrieveRequestConfig(HttpComponentsClientHttpRequestFactory factory) throws Exception {
-		URI uri = new URI(baseUrl + "/status/ok");
+		URI uri = URI.create(baseUrl + "/status/ok");
 		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
 				factory.createRequest(uri, HttpMethod.GET);
 		return (RequestConfig) request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);

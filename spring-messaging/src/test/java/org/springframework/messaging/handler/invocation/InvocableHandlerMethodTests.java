@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
  */
 public class InvocableHandlerMethodTests {
 
-	private final Message<?> message = mock(Message.class);
+	private final Message<?> message = mock();
 
 	private final HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
@@ -51,8 +51,8 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invoke(new Handler(), method);
 
-		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
-		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(0).getResolvedParameters()).hasSize(1);
+		assertThat(getStubResolver(1).getResolvedParameters()).hasSize(1);
 		assertThat(value).isEqualTo("99-value");
 		assertThat(getStubResolver(0).getResolvedParameters().get(0).getParameterName()).isEqualTo("intArg");
 		assertThat(getStubResolver(1).getResolvedParameters().get(0).getParameterName()).isEqualTo("stringArg");
@@ -65,8 +65,8 @@ public class InvocableHandlerMethodTests {
 		Method method = ResolvableMethod.on(Handler.class).mockCall(c -> c.handle(0, "")).method();
 		Object value = invoke(new Handler(), method);
 
-		assertThat(getStubResolver(0).getResolvedParameters().size()).isEqualTo(1);
-		assertThat(getStubResolver(1).getResolvedParameters().size()).isEqualTo(1);
+		assertThat(getStubResolver(0).getResolvedParameters()).hasSize(1);
+		assertThat(getStubResolver(1).getResolvedParameters()).hasSize(1);
 		assertThat(value).isEqualTo("null-null");
 	}
 

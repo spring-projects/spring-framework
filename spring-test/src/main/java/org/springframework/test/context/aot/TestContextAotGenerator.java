@@ -16,7 +16,10 @@
 
 package org.springframework.test.context.aot;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -30,12 +33,19 @@ import org.springframework.aot.generate.GeneratedClasses;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.annotation.ReflectiveRuntimeHintsRegistrar;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.log.LogMessage;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.context.BootstrapUtils;
@@ -117,22 +127,61 @@ public class TestContextAotGenerator {
 		try {
 			resetAotFactories();
 
+			Set<Class<? extends RuntimeHintsRegistrar>> coreRuntimeHintsRegistrarClasses = new LinkedHashSet<>();
+			ReflectiveRuntimeHintsRegistrar reflectiveRuntimeHintsRegistrar = new ReflectiveRuntimeHintsRegistrar();
+
 			MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
 			ClassLoader classLoader = getClass().getClassLoader();
 			testClasses.forEach(testClass -> {
 				MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 				mergedConfigMappings.add(mergedConfig, testClass);
-				this.testRuntimeHintsRegistrars.forEach(registrar ->
-						registrar.registerHints(this.runtimeHints, testClass, classLoader));
+				collectRuntimeHintsRegistrarClasses(testClass, coreRuntimeHintsRegistrarClasses);
+				reflectiveRuntimeHintsRegistrar.registerRuntimeHints(this.runtimeHints, testClass);
+				this.testRuntimeHintsRegistrars.forEach(registrar -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Processing RuntimeHints contribution from class [%s]"
+								.formatted(registrar.getClass().getCanonicalName()));
+					}
+					registrar.registerHints(this.runtimeHints, testClass, classLoader);
+				});
 			});
-			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 
+			coreRuntimeHintsRegistrarClasses.stream()
+					.map(BeanUtils::instantiateClass)
+					.forEach(registrar -> {
+						if (logger.isTraceEnabled()) {
+							logger.trace("Processing RuntimeHints contribution from class [%s]"
+									.formatted(registrar.getClass().getCanonicalName()));
+						}
+						registrar.registerHints(this.runtimeHints, classLoader);
+					});
+
+			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 			generateAotTestContextInitializerMappings(initializerClassMappings);
 			generateAotTestAttributeMappings();
 		}
 		finally {
 			resetAotFactories();
 		}
+	}
+
+	/**
+	 * Collect all {@link RuntimeHintsRegistrar} classes declared via
+	 * {@link ImportRuntimeHints @ImportRuntimeHints} on the supplied test class
+	 * and add them to the supplied {@link Set}.
+	 * @param testClass the test class on which to search for {@code @ImportRuntimeHints}
+	 * @param coreRuntimeHintsRegistrarClasses the set of registrar classes
+	 */
+	private void collectRuntimeHintsRegistrarClasses(
+			Class<?> testClass, Set<Class<? extends RuntimeHintsRegistrar>> coreRuntimeHintsRegistrarClasses) {
+
+		MergedAnnotations.from(testClass, SearchStrategy.TYPE_HIERARCHY)
+				.stream(ImportRuntimeHints.class)
+				.filter(MergedAnnotation::isPresent)
+				.map(MergedAnnotation::synthesize)
+				.map(ImportRuntimeHints::value)
+				.flatMap(Arrays::stream)
+				.forEach(coreRuntimeHintsRegistrarClasses::add);
 	}
 
 	private void resetAotFactories() {
@@ -205,7 +254,7 @@ public class TestContextAotGenerator {
 
 		Class<?> testClass = mergedConfig.getTestClass();
 		ContextLoader contextLoader = mergedConfig.getContextLoader();
-		Assert.notNull(contextLoader, """
+		Assert.notNull(contextLoader, () -> """
 				Cannot load an ApplicationContext with a NULL 'contextLoader'. \
 				Consider annotating test class [%s] with @ContextConfiguration or \
 				@ContextHierarchy.""".formatted(testClass.getName()));

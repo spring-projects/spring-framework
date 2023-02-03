@@ -13,14 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.reflect;
 
-import java.lang.reflect.*;
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Label;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.Block;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.CollectionUtils;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.DuplicatesPredicate;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.MethodInfoTransformer;
+import org.springframework.cglib.core.ObjectSwitchCallback;
+import org.springframework.cglib.core.ProcessSwitchCallback;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
+import org.springframework.cglib.core.VisibilityPredicate;
 
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 class FastClassEmitter extends ClassEmitter {
@@ -49,7 +70,7 @@ class FastClassEmitter extends ClassEmitter {
     private static final Type INVOCATION_TARGET_EXCEPTION =
       TypeUtils.parseType("java.lang.reflect.InvocationTargetException");
     private static final Type[] INVOCATION_TARGET_EXCEPTION_ARRAY = { INVOCATION_TARGET_EXCEPTION };
-    
+
     public FastClassEmitter(ClassVisitor v, String className, Class type) {
         super(v);
 
@@ -70,13 +91,13 @@ class FastClassEmitter extends ClassEmitter {
         CollectionUtils.filter(methods, new DuplicatesPredicate());
         List constructors = new ArrayList(Arrays.asList(type.getDeclaredConstructors()));
         CollectionUtils.filter(constructors, vp);
-        
+
         // getIndex(String)
         emitIndexBySignature(methods);
 
         // getIndex(String, Class[])
         emitIndexByClassArray(methods);
-        
+
         // getIndex(Class[])
         e = begin_method(Constants.ACC_PUBLIC, CONSTRUCTOR_GET_INDEX, null);
         e.load_args();
@@ -112,11 +133,7 @@ class FastClassEmitter extends ClassEmitter {
     // TODO: support constructor indices ("<init>")
     private void emitIndexBySignature(List methods) {
         CodeEmitter e = begin_method(Constants.ACC_PUBLIC, SIGNATURE_GET_INDEX, null);
-        List signatures = CollectionUtils.transform(methods, new Transformer() {
-            public Object transform(Object obj) {
-                return ReflectUtils.getSignature((Method)obj).toString();
-            }
-        });
+        List signatures = CollectionUtils.transform(methods, obj -> ReflectUtils.getSignature((Method)obj).toString());
         e.load_arg(0);
         e.invoke_virtual(Constants.TYPE_OBJECT, TO_STRING);
         signatureSwitchHelper(e, signatures);
@@ -128,12 +145,10 @@ class FastClassEmitter extends ClassEmitter {
         CodeEmitter e = begin_method(Constants.ACC_PUBLIC, METHOD_GET_INDEX, null);
         if (methods.size() > TOO_MANY_METHODS) {
             // hack for big classes
-            List signatures = CollectionUtils.transform(methods, new Transformer() {
-                public Object transform(Object obj) {
-                    String s = ReflectUtils.getSignature((Method)obj).toString();
-                    return s.substring(0, s.lastIndexOf(')') + 1);
-                }
-            });
+            List signatures = CollectionUtils.transform(methods, obj -> {
+			    String s = ReflectUtils.getSignature((Method)obj).toString();
+			    return s.substring(0, s.lastIndexOf(')') + 1);
+			});
             e.load_args();
             e.invoke_static(FAST_CLASS, GET_SIGNATURE_WITHOUT_RETURN_TYPE);
             signatureSwitchHelper(e, signatures);
@@ -147,12 +162,14 @@ class FastClassEmitter extends ClassEmitter {
 
     private void signatureSwitchHelper(final CodeEmitter e, final List signatures) {
         ObjectSwitchCallback callback = new ObjectSwitchCallback() {
-            public void processCase(Object key, Label end) {
+            @Override
+			public void processCase(Object key, Label end) {
                 // TODO: remove linear indexOf
                 e.push(signatures.indexOf(key));
                 e.return_value();
             }
-            public void processDefault() {
+            @Override
+			public void processDefault() {
                 e.push(-1);
                 e.return_value();
             }
@@ -164,11 +181,12 @@ class FastClassEmitter extends ClassEmitter {
     }
 
     private static void invokeSwitchHelper(final CodeEmitter e, List members, final int arg, final Type base) {
-        final List info = CollectionUtils.transform(members, MethodInfoTransformer.getInstance());        
+        final List info = CollectionUtils.transform(members, MethodInfoTransformer.getInstance());
         final Label illegalArg = e.make_label();
         Block block = e.begin_block();
         e.process_switch(getIntRange(info.size()), new ProcessSwitchCallback() {
-            public void processCase(int key, Label end) {
+            @Override
+			public void processCase(int key, Label end) {
                 MethodInfo method = (MethodInfo)info.get(key);
                 Type[] types = method.getSignature().getArgumentTypes();
                 for (int i = 0; i < types.length; i++) {
@@ -184,7 +202,8 @@ class FastClassEmitter extends ClassEmitter {
                 }
                 e.return_value();
             }
-            public void processDefault() {
+            @Override
+			public void processDefault() {
                 e.goTo(illegalArg);
             }
         });
@@ -205,18 +224,20 @@ class FastClassEmitter extends ClassEmitter {
                 indexes.put(it.next(), index++);
             }
         }
-            
-        public void processCase(Object key, Label end) {
+
+        @Override
+		public void processCase(Object key, Label end) {
             e.push(((Integer)indexes.get(key)));
             e.return_value();
         }
-        
-        public void processDefault() {
+
+        @Override
+		public void processDefault() {
             e.push(-1);
             e.return_value();
         }
     }
-    
+
     private static int[] getIntRange(int length) {
         int[] range = new int[length];
         for (int i = 0; i < length; i++) {

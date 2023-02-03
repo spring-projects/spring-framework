@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,13 @@ import static org.mockito.BDDMockito.when;
  */
 class TransactionAwareConnectionFactoryProxyUnitTests {
 
-	ConnectionFactory connectionFactoryMock = mock(ConnectionFactory.class);
+	ConnectionFactory connectionFactoryMock = mock();
 
-	Connection connectionMock1 = mock(Connection.class);
+	Connection connectionMock1 = mock();
 
-	Connection connectionMock2 = mock(Connection.class);
+	Connection connectionMock2 = mock();
 
-	Connection connectionMock3 = mock(Connection.class);
+	Connection connectionMock3 = mock();
 
 	R2dbcTransactionManager tm;
 

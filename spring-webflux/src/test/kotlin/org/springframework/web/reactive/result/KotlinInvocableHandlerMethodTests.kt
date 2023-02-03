@@ -34,6 +34,7 @@ import org.springframework.web.reactive.result.method.annotation.ContinuationHan
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.lang.reflect.Method
+import java.time.Duration
 import kotlin.reflect.jvm.javaMethod
 
 class KotlinInvocableHandlerMethodTests {
@@ -89,11 +90,9 @@ class KotlinInvocableHandlerMethodTests {
 		val response = this.exchange.response
 		this.resolvers.add(stubResolver(response))
 		val method = CoroutinesController::response.javaMethod!!
-		val result = invoke(CoroutinesController(), method)
+		val result = invokeForResult(CoroutinesController(), method, response)
 
-		StepVerifier.create(result)
-				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).verifyComplete() }
-				.verifyComplete()
+		assertThat(result).`as`("Expected no result (i.e. fully handled)").isNull()
 		assertThat(this.exchange.response.headers.getFirst("foo")).isEqualTo("bar")
 	}
 
@@ -103,6 +102,10 @@ class KotlinInvocableHandlerMethodTests {
 		val method = PrivateCoroutinesController::singleArg.javaMethod!!
 		val result = invoke(PrivateCoroutinesController(), method,"foo")
 		assertHandlerResultValue(result, "success:foo")
+	}
+
+	private fun invokeForResult(handler: Any, method: Method, vararg providedArgs: Any): HandlerResult? {
+		return invoke(handler, method, *providedArgs).block(Duration.ofSeconds(5))
 	}
 
 	private fun invoke(handler: Any, method: Method, vararg providedArgs: Any?): Mono<HandlerResult> {

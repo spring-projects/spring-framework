@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 		unmarshaller.setClassesToBeBound(BinaryObject.class);
 		unmarshaller.setMtomEnabled(true);
 		unmarshaller.afterPropertiesSet();
-		MimeContainer mimeContainer = mock(MimeContainer.class);
+		MimeContainer mimeContainer = mock();
 
 		Resource logo = new ClassPathResource("spring-ws.png", getClass());
 		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@ public abstract class AbstractExpressionTests {
 			assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
 			if (!ObjectUtils.isEmpty(otherProperties)) {
 				// first one is expected position of the error within the string
-				int pos = ((Integer) otherProperties[0]).intValue();
+				int pos = (Integer) otherProperties[0];
 				assertThat(ex.getPosition()).as("position").isEqualTo(pos);
 				if (otherProperties.length > 1) {
 					// Check inserts match
@@ -207,7 +207,7 @@ public abstract class AbstractExpressionTests {
 			assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
 			if (otherProperties != null && otherProperties.length != 0) {
 				// first one is expected position of the error within the string
-				int pos = ((Integer) otherProperties[0]).intValue();
+				int pos = (Integer) otherProperties[0];
 				assertThat(pos).as("reported position").isEqualTo(pos);
 				if (otherProperties.length > 1) {
 					// Check inserts match

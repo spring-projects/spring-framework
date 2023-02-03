@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,9 +66,8 @@ public class LazyInitTargetSourceCreator extends AbstractBeanFactoryBasedTargetS
 	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName) {
 
-		if (getBeanFactory() instanceof ConfigurableListableBeanFactory) {
-			BeanDefinition definition =
-					((ConfigurableListableBeanFactory) getBeanFactory()).getBeanDefinition(beanName);
+		if (getBeanFactory() instanceof ConfigurableListableBeanFactory clbf) {
+			BeanDefinition definition = clbf.getBeanDefinition(beanName);
 			if (definition.isLazyInit()) {
 				return new LazyInitTargetSource();
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,7 +255,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		if (session != null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Found cached JMS Session for mode " + mode + ": " +
-						(session instanceof SessionProxy ? ((SessionProxy) session).getTargetSession() : session));
+						(session instanceof SessionProxy sessionProxy ? sessionProxy.getTargetSession() : session));
 			}
 		}
 		else {
@@ -365,45 +365,54 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				}
 				else if (isCacheConsumers()) {
 					// let raw JMS invocation throw an exception if Destination (i.e. args[0]) is null
-					if ((methodName.equals("createConsumer") || methodName.equals("createReceiver") ||
-							methodName.equals("createSubscriber"))) {
-						Destination dest = (Destination) args[0];
-						if (dest != null && !(dest instanceof TemporaryQueue || dest instanceof TemporaryTopic)) {
-							return getCachedConsumer(dest,
-									(args.length > 1 ? (String) args[1] : null),
-									(args.length > 2 && (Boolean) args[2]),
-									null,
-									false);
+					switch (methodName) {
+						case "createConsumer", "createReceiver", "createSubscriber" -> {
+							Destination dest = (Destination) args[0];
+							if (dest != null && !(dest instanceof TemporaryQueue || dest instanceof TemporaryTopic)) {
+								return getCachedConsumer(
+										dest,
+										(args.length > 1 ? (String) args[1] : null),
+										(args.length > 2 && (Boolean) args[2]),
+										null,
+										false
+								);
+							}
 						}
-					}
-					else if (methodName.equals("createDurableConsumer") || methodName.equals("createDurableSubscriber")) {
-						Destination dest = (Destination) args[0];
-						if (dest != null) {
-							return getCachedConsumer(dest,
-									(args.length > 2 ? (String) args[2] : null),
-									(args.length > 3 && (Boolean) args[3]),
-									(String) args[1],
-									true);
+						case "createDurableConsumer", "createDurableSubscriber" -> {
+							Destination dest = (Destination) args[0];
+							if (dest != null) {
+								return getCachedConsumer(
+										dest,
+										(args.length > 2 ? (String) args[2] : null),
+										(args.length > 3 && (Boolean) args[3]),
+										(String) args[1],
+										true
+								);
+							}
 						}
-					}
-					else if (methodName.equals("createSharedConsumer")) {
-						Destination dest = (Destination) args[0];
-						if (dest != null) {
-							return getCachedConsumer(dest,
-									(args.length > 2 ? (String) args[2] : null),
-									null,
-									(String) args[1],
-									false);
+						case "createSharedConsumer" -> {
+							Destination dest = (Destination) args[0];
+							if (dest != null) {
+								return getCachedConsumer(
+										dest,
+										(args.length > 2 ? (String) args[2] : null),
+										null,
+										(String) args[1],
+										false
+								);
+							}
 						}
-					}
-					else if (methodName.equals("createSharedDurableConsumer")) {
-						Destination dest = (Destination) args[0];
-						if (dest != null) {
-							return getCachedConsumer(dest,
-									(args.length > 2 ? (String) args[2] : null),
-									null,
-									(String) args[1],
-									true);
+						case "createSharedDurableConsumer" -> {
+							Destination dest = (Destination) args[0];
+							if (dest != null) {
+								return getCachedConsumer(
+										dest,
+										(args.length > 2 ? (String) args[2] : null),
+										null,
+										(String) args[1],
+										true
+								);
+							}
 						}
 					}
 				}
@@ -446,15 +455,15 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 				}
 			}
 			else {
-				if (dest instanceof Topic) {
+				if (dest instanceof Topic topic) {
 					if (noLocal == null) {
 						consumer = (durable ?
-								this.target.createSharedDurableConsumer((Topic) dest, subscription, selector) :
-								this.target.createSharedConsumer((Topic) dest, subscription, selector));
+								this.target.createSharedDurableConsumer(topic, subscription, selector) :
+								this.target.createSharedConsumer(topic, subscription, selector));
 					}
 					else {
 						consumer = (durable ?
-								this.target.createDurableSubscriber((Topic) dest, subscription, selector, noLocal) :
+								this.target.createDurableSubscriber(topic, subscription, selector, noLocal) :
 								this.target.createConsumer(dest, selector, noLocal));
 					}
 				}
@@ -550,11 +559,11 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object other) {
+		public boolean equals(@Nullable Object obj) {
 			// Effectively checking object equality as well as toString equality.
 			// On WebSphere MQ, Destination objects do not implement equals...
-			return (this == other || (other instanceof DestinationCacheKey &&
-					destinationEquals((DestinationCacheKey) other)));
+			return (this == obj || (obj instanceof DestinationCacheKey otherKey &&
+					destinationEquals(otherKey)));
 		}
 
 		@Override

@@ -258,6 +258,24 @@ public interface CodecConfigurer {
 		 * @since 5.1
 		 */
 		void enableLoggingRequestDetails(boolean enable);
+
+		/**
+		 * Configure encoders or writers for use with
+		 * {@link org.springframework.http.codec.multipart.MultipartHttpMessageWriter
+		 * MultipartHttpMessageWriter}.
+		 * @since 6.0.3
+		 */
+		MultipartCodecs multipartCodecs();
+
+		/**
+		 * Configure the {@code HttpMessageReader} to use for multipart requests.
+		 * <p>Note that {@link #maxInMemorySize(int)} and/or
+		 * {@link #enableLoggingRequestDetails(boolean)}, if configured, will be
+		 * applied to the given reader, if applicable.
+		 * @param reader the message reader to use for multipart requests.
+		 * @since 6.0.3
+		 */
+		void multipartReader(HttpMessageReader<?> reader);
 	}
 
 
@@ -387,6 +405,29 @@ public interface CodecConfigurer {
 		 */
 		@Nullable
 		Boolean isEnableLoggingRequestDetails();
+	}
+
+
+	/**
+	 * Registry and container for multipart HTTP message writers.
+	 * @since 6.0.3
+	 */
+	interface MultipartCodecs {
+
+		/**
+		 * Add a Part {@code Encoder}, internally wrapped with
+		 * {@link EncoderHttpMessageWriter}.
+		 * @param encoder the encoder to add
+		 */
+		MultipartCodecs encoder(Encoder<?> encoder);
+
+		/**
+		 * Add a Part {@link HttpMessageWriter}. For writers of type
+		 * {@link EncoderHttpMessageWriter} consider using the shortcut
+		 * {@link #encoder(Encoder)} instead.
+		 * @param writer the writer to add
+		 */
+		MultipartCodecs writer(HttpMessageWriter<?> writer);
 	}
 
 }

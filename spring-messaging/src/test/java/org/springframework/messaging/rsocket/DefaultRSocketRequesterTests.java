@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class DefaultRSocketRequesterTests {
 		assertThat(payloads).isNotNull();
 
 		if (Arrays.equals(new String[] {""}, expectedValues)) {
-			assertThat(payloads.size()).isEqualTo(1);
+			assertThat(payloads).hasSize(1);
 			assertThat(payloads.get(0).getMetadataUtf8()).isEqualTo("toA");
 			assertThat(payloads.get(0).getDataUtf8()).isEqualTo("");
 		}

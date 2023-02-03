@@ -77,8 +77,9 @@ final class DataBufferInputStream extends InputStream {
 	}
 
 	@Override
-	public void mark(int mark) {
-		this.mark = mark;
+	public void mark(int readLimit) {
+		Assert.isTrue(readLimit > 0, "readLimit must be greater than 0");
+		this.mark = this.dataBuffer.readPosition();
 	}
 
 	@Override

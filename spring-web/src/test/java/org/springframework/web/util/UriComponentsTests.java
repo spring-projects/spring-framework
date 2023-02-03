@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -76,30 +75,30 @@ class UriComponentsTests {
 	}
 
 	@Test
-	void toUriEncoded() throws URISyntaxException {
+	void toUriEncoded() {
 		UriComponents uri = UriComponentsBuilder.fromUriString("https://example.com/hotel list/Z\u00fcrich").build();
-		assertThat(uri.encode().toUri()).isEqualTo(new URI("https://example.com/hotel%20list/Z%C3%BCrich"));
+		assertThat(uri.encode().toUri()).isEqualTo(URI.create("https://example.com/hotel%20list/Z%C3%BCrich"));
 	}
 
 	@Test
-	void toUriNotEncoded() throws URISyntaxException {
+	void toUriNotEncoded() {
 		UriComponents uri = UriComponentsBuilder.fromUriString("https://example.com/hotel list/Z\u00fcrich").build();
-		assertThat(uri.toUri()).isEqualTo(new URI("https://example.com/hotel%20list/Z\u00fcrich"));
+		assertThat(uri.toUri()).isEqualTo(URI.create("https://example.com/hotel%20list/Z\u00fcrich"));
 	}
 
 	@Test
-	void toUriAlreadyEncoded() throws URISyntaxException {
+	void toUriAlreadyEncoded() {
 		UriComponents uri = UriComponentsBuilder.fromUriString("https://example.com/hotel%20list/Z%C3%BCrich").build(true);
-		assertThat(uri.encode().toUri()).isEqualTo(new URI("https://example.com/hotel%20list/Z%C3%BCrich"));
+		assertThat(uri.encode().toUri()).isEqualTo(URI.create("https://example.com/hotel%20list/Z%C3%BCrich"));
 	}
 
 	@Test
-	void toUriWithIpv6HostAlreadyEncoded() throws URISyntaxException {
+	void toUriWithIpv6HostAlreadyEncoded() {
 		UriComponents uri = UriComponentsBuilder.fromUriString(
 				"http://[1abc:2abc:3abc::5ABC:6abc]:8080/hotel%20list/Z%C3%BCrich").build(true);
 
 		assertThat(uri.encode().toUri()).isEqualTo(
-				new URI("http://[1abc:2abc:3abc::5ABC:6abc]:8080/hotel%20list/Z%C3%BCrich"));
+				URI.create("http://[1abc:2abc:3abc::5ABC:6abc]:8080/hotel%20list/Z%C3%BCrich"));
 	}
 
 	@Test

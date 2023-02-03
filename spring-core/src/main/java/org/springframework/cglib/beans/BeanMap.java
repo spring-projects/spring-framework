@@ -54,7 +54,7 @@ abstract public class BeanMap implements Map {
      * @see BeanMap.Generator#setRequire
      */
     public static final int REQUIRE_SETTER = 2;
-    
+
     /**
      * Helper method to create a new <code>BeanMap</code>.  For finer
      * control over the generated instance, use a new instance of
@@ -77,11 +77,11 @@ abstract public class BeanMap implements Map {
         interface BeanMapKey {
             public Object newInstance(Class type, int require);
         }
-        
+
         private Object bean;
         private Class beanClass;
         private int require;
-        
+
         public Generator() {
             super(SOURCE);
         }
@@ -121,11 +121,13 @@ abstract public class BeanMap implements Map {
             this.require = require;
         }
 
-        protected ClassLoader getDefaultClassLoader() {
+        @Override
+		protected ClassLoader getDefaultClassLoader() {
             return beanClass.getClassLoader();
         }
 
-        protected ProtectionDomain getProtectionDomain() {
+        @Override
+		protected ProtectionDomain getProtectionDomain() {
         	return ReflectUtils.getProtectionDomain(beanClass);
         }
 
@@ -134,21 +136,25 @@ abstract public class BeanMap implements Map {
          * generated class will be reused if possible.
          */
         public BeanMap create() {
-            if (beanClass == null)
-                throw new IllegalArgumentException("Class of bean unknown");
+            if (beanClass == null) {
+				throw new IllegalArgumentException("Class of bean unknown");
+			}
             setNamePrefix(beanClass.getName());
             return (BeanMap)super.create(KEY_FACTORY.newInstance(beanClass, require));
         }
 
-        public void generateClass(ClassVisitor v) throws Exception {
+        @Override
+		public void generateClass(ClassVisitor v) throws Exception {
             new BeanMapEmitter(v, getClassName(), beanClass, require);
         }
 
-        protected Object firstInstance(Class type) {
+        @Override
+		protected Object firstInstance(Class type) {
             return ((BeanMap)ReflectUtils.newInstance(type)).newInstance(bean);
         }
 
-        protected Object nextInstance(Object instance) {
+        @Override
+		protected Object nextInstance(Object instance) {
             return ((BeanMap)instance).newInstance(bean);
         }
     }
@@ -177,11 +183,13 @@ abstract public class BeanMap implements Map {
         setBean(bean);
     }
 
-    public Object get(Object key) {
+    @Override
+	public Object get(Object key) {
         return get(bean, key);
     }
 
-    public Object put(Object key, Object value) {
+    @Override
+	public Object put(Object key, Object value) {
         return put(bean, key, value);
     }
 
@@ -223,52 +231,58 @@ abstract public class BeanMap implements Map {
         return bean;
     }
 
-    public void clear() {
+    @Override
+	public void clear() {
         throw new UnsupportedOperationException();
     }
 
-    public boolean containsKey(Object key) {
+    @Override
+	public boolean containsKey(Object key) {
         return keySet().contains(key);
     }
 
-    public boolean containsValue(Object value) {
+    @Override
+	public boolean containsValue(Object value) {
         for (Iterator it = keySet().iterator(); it.hasNext();) {
             Object v = get(it.next());
-            if (((value == null) && (v == null)) || (value != null && value.equals(v)))
-                return true;
+            if (((value == null) && (v == null)) || (value != null && value.equals(v))) {
+				return true;
+			}
         }
         return false;
     }
 
-    public int size() {
+    @Override
+	public int size() {
         return keySet().size();
     }
 
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
         return size() == 0;
     }
 
-    public Object remove(Object key) {
+    @Override
+	public Object remove(Object key) {
         throw new UnsupportedOperationException();
     }
 
-    public void putAll(Map t) {
-        for (Iterator it = t.keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
+    @Override
+	public void putAll(Map t) {
+        for (Object key : t.keySet()) {
             put(key, t.get(key));
         }
     }
 
-    public boolean equals(Object o) {
-        if (o == null || !(o instanceof Map)) {
+    @Override
+	public boolean equals(Object o) {
+        if (o == null || !(o instanceof Map other)) {
             return false;
         }
-        Map other = (Map)o;
         if (size() != other.size()) {
             return false;
         }
-        for (Iterator it = keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
+        for (Object key : keySet()) {
             if (!other.containsKey(key)) {
                 return false;
             }
@@ -281,10 +295,10 @@ abstract public class BeanMap implements Map {
         return true;
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         int code = 0;
-        for (Iterator it = keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
+        for (Object key : keySet()) {
             Object value = get(key);
             code += ((key == null) ? 0 : key.hashCode()) ^
                 ((value == null) ? 0 : value.hashCode());
@@ -293,16 +307,17 @@ abstract public class BeanMap implements Map {
     }
 
     // TODO: optimize
-    public Set entrySet() {
+    @Override
+	public Set entrySet() {
         HashMap copy = new HashMap();
-        for (Iterator it = keySet().iterator(); it.hasNext();) {
-            Object key = it.next();
+        for (Object key : keySet()) {
             copy.put(key, get(key));
         }
         return Collections.unmodifiableMap(copy).entrySet();
     }
 
-    public Collection values() {
+    @Override
+	public Collection values() {
         Set keys = keySet();
         List values = new ArrayList(keys.size());
         for (Iterator it = keys.iterator(); it.hasNext();) {
@@ -314,7 +329,8 @@ abstract public class BeanMap implements Map {
     /*
      * @see java.util.AbstractMap#toString
      */
-    public String toString()
+    @Override
+	public String toString()
     {
         StringBuilder sb = new StringBuilder();
         sb.append('{');

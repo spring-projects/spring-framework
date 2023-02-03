@@ -28,7 +28,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
-
 /**
  * Implementation of the {@code DataBuffer} interface that wraps a Netty 5
  * {@link Buffer}. Typically constructed with {@link Netty5DataBufferFactory}.
@@ -37,8 +36,7 @@ import org.springframework.util.ObjectUtils;
  * @author Arjen Poutsma
  * @since 6.0
  */
-public final class Netty5DataBuffer implements CloseableDataBuffer,
-		TouchableDataBuffer {
+public final class Netty5DataBuffer implements CloseableDataBuffer, TouchableDataBuffer {
 
 	private final Buffer buffer;
 
@@ -51,7 +49,7 @@ public final class Netty5DataBuffer implements CloseableDataBuffer,
 	 */
 	Netty5DataBuffer(Buffer buffer, Netty5DataBufferFactory dataBufferFactory) {
 		Assert.notNull(buffer, "Buffer must not be null");
-		Assert.notNull(dataBufferFactory, "NettyDataBufferFactory must not be null");
+		Assert.notNull(dataBufferFactory, "Netty5DataBufferFactory must not be null");
 		this.buffer = buffer;
 		this.dataBufferFactory = dataBufferFactory;
 	}
@@ -150,7 +148,7 @@ public final class Netty5DataBuffer implements CloseableDataBuffer,
 
 	@Override
 	public DataBuffer ensureWritable(int capacity) {
-		Assert.isTrue(capacity >= 0, "Capacity must be larger than 0");
+		Assert.isTrue(capacity >= 0, "Capacity must be >= 0");
 		this.buffer.ensureWritable(capacity);
 		return this;
 	}
@@ -328,6 +326,7 @@ public final class Netty5DataBuffer implements CloseableDataBuffer,
 	}
 
 
+	@Override
 	public boolean equals(@Nullable Object other) {
 		return (this == other || (other instanceof Netty5DataBuffer dataBuffer &&
 				this.buffer.equals(dataBuffer.buffer)));

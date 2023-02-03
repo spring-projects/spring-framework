@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -336,10 +336,10 @@ class ResourceHttpRequestHandlerTests {
 	void testInvalidPath() throws Exception {
 		// Use mock ResourceResolver: i.e. we're only testing upfront validations...
 
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		given(resource.getFilename()).willThrow(new AssertionError("Resource should not be resolved"));
 		given(resource.getInputStream()).willThrow(new AssertionError("Resource should not be resolved"));
-		ResourceResolver resolver = mock(ResourceResolver.class);
+		ResourceResolver resolver = mock();
 		given(resolver.resolveResource(any(), any(), any(), any())).willReturn(resource);
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();

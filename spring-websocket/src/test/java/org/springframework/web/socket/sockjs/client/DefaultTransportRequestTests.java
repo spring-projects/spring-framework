@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,42 +45,37 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class DefaultTransportRequestTests {
+class DefaultTransportRequestTests {
 
-	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
+	private final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
-
-	private CompletableFuture<WebSocketSession> connectFuture;
-
-	private BiConsumer<WebSocketSession, Throwable> connectCallback;
-
-	private TestTransport webSocketTransport;
-
-	private TestTransport xhrTransport;
-
+	private CompletableFuture<WebSocketSession> connectFuture = new CompletableFuture<>();
 
 	@SuppressWarnings("unchecked")
+	private BiConsumer<WebSocketSession, Throwable> connectCallback = mock();
+
+	private TestTransport webSocketTransport = new TestTransport("WebSocketTestTransport");
+
+	private TestTransport xhrTransport = new TestTransport("XhrTestTransport");
+
+
 	@BeforeEach
-	public void setup() throws Exception {
-		this.connectCallback = mock(BiConsumer.class);
-		this.connectFuture = new CompletableFuture<>();
+	void setup() {
 		this.connectFuture.whenComplete(this.connectCallback);
-		this.webSocketTransport = new TestTransport("WebSocketTestTransport");
-		this.xhrTransport = new TestTransport("XhrTestTransport");
 	}
 
 
 	@Test
-	public void connect() throws Exception {
+	void connect() throws Exception {
 		DefaultTransportRequest request = createTransportRequest(this.webSocketTransport, TransportType.WEBSOCKET);
 		request.connect(null, this.connectFuture);
-		WebSocketSession session = mock(WebSocketSession.class);
+		WebSocketSession session = mock();
 		this.webSocketTransport.getConnectCallback().accept(session, null);
 		assertThat(this.connectFuture.get()).isSameAs(session);
 	}
 
 	@Test
-	public void fallbackAfterTransportError() throws Exception {
+	void fallbackAfterTransportError() {
 		DefaultTransportRequest request1 = createTransportRequest(this.webSocketTransport, TransportType.WEBSOCKET);
 		DefaultTransportRequest request2 = createTransportRequest(this.xhrTransport, TransportType.XHR_STREAMING);
 		request1.setFallbackRequest(request2);
@@ -94,15 +89,15 @@ public class DefaultTransportRequestTests {
 		// Transport error => no more fallback
 		this.xhrTransport.getConnectCallback().accept(null, new IOException("Fake exception 2"));
 		assertThat(this.connectFuture.isDone()).isTrue();
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				this.connectFuture::get)
+		assertThatExceptionOfType(ExecutionException.class)
+			.isThrownBy(this.connectFuture::get)
 			.withMessageContaining("Fake exception 2");
 	}
 
 	@Test
-	public void fallbackAfterTimeout() throws Exception {
-		TaskScheduler scheduler = mock(TaskScheduler.class);
-		Runnable sessionCleanupTask = mock(Runnable.class);
+	void fallbackAfterTimeout() {
+		TaskScheduler scheduler = mock();
+		Runnable sessionCleanupTask = mock();
 		DefaultTransportRequest request1 = createTransportRequest(this.webSocketTransport, TransportType.WEBSOCKET);
 		DefaultTransportRequest request2 = createTransportRequest(this.xhrTransport, TransportType.XHR_STREAMING);
 		request1.setFallbackRequest(request2);
@@ -123,8 +118,8 @@ public class DefaultTransportRequestTests {
 		verify(sessionCleanupTask).run();
 	}
 
-	protected DefaultTransportRequest createTransportRequest(Transport transport, TransportType type) throws Exception {
-		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("https://example.com"));
+	protected DefaultTransportRequest createTransportRequest(Transport transport, TransportType type) {
+		SockJsUrlInfo urlInfo = new SockJsUrlInfo(URI.create("https://example.com"));
 		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), new HttpHeaders(), transport, type, CODEC);
 	}
 

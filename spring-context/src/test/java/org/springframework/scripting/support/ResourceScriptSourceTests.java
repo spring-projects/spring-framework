@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class ResourceScriptSourceTests {
 
 	@Test
 	public void doesNotPropagateFatalExceptionOnResourceThatCannotBeResolvedToAFile() throws Exception {
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		given(resource.lastModified()).willThrow(new IOException());
 
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
@@ -46,14 +46,14 @@ public class ResourceScriptSourceTests {
 
 	@Test
 	public void beginsInModifiedState() throws Exception {
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
 		assertThat(scriptSource.isModified()).isTrue();
 	}
 
 	@Test
 	public void lastModifiedWorksWithResourceThatDoesNotSupportFileBasedReading() throws Exception {
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		// underlying File is asked for so that the last modified time can be checked...
 		// And then mock the file changing; i.e. the File says it has been modified
 		given(resource.lastModified()).willReturn(100L, 100L, 200L);

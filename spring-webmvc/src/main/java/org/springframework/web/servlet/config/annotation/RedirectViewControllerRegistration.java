@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class RedirectViewControllerRegistration {
 	 * will select {@code HttpStatus.MOVED_TEMPORARILY (302)} by default.
 	 */
 	public RedirectViewControllerRegistration setStatusCode(HttpStatusCode statusCode) {
-		Assert.isTrue(statusCode.is3xxRedirection(), "Not a redirect status code");
+		Assert.isTrue(statusCode.is3xxRedirection(), () -> "Not a redirect status code: " + statusCode);
 		this.redirectView.setStatusCode(statusCode);
 		return this;
 	}

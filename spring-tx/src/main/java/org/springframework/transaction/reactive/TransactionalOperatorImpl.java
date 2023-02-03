@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 	 */
 	TransactionalOperatorImpl(ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition) {
 		Assert.notNull(transactionManager, "ReactiveTransactionManager must not be null");
-		Assert.notNull(transactionManager, "TransactionDefinition must not be null");
+		Assert.notNull(transactionDefinition, "TransactionDefinition must not be null");
 		this.transactionManager = transactionManager;
 		this.transactionDefinition = transactionDefinition;
 	}

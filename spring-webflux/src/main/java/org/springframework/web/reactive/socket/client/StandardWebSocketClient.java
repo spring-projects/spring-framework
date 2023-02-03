@@ -43,7 +43,7 @@ import org.springframework.web.reactive.socket.adapter.StandardWebSocketHandlerA
 import org.springframework.web.reactive.socket.adapter.StandardWebSocketSession;
 
 /**
- * {@link WebSocketClient} implementation for use with the Java WebSocket API.
+ * {@link WebSocketClient} implementation for use with the Jakarta WebSocket API.
  *
  * @author Violeta Georgieva
  * @author Rossen Stoyanchev

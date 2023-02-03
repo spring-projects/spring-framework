@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,8 +154,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			enhancer.setSuperclass(beanDefinition.getBeanClass());
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setAttemptLoad(true);
-			if (this.owner instanceof ConfigurableBeanFactory) {
-				ClassLoader cl = ((ConfigurableBeanFactory) this.owner).getBeanClassLoader();
+			if (this.owner instanceof ConfigurableBeanFactory cbf) {
+				ClassLoader cl = cbf.getBeanClassLoader();
 				enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(cl));
 			}
 			enhancer.setCallbackFilter(new MethodOverrideCallbackFilter(beanDefinition));

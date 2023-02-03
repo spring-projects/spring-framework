@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,13 @@ import org.springframework.stereotype.Controller;
 
 /**
  * {@link ReflectiveProcessor} implementation for {@link Controller} and
- * controller-specific annotated methods. On top of registering reflection
+ * controller-specific annotated methods. In addition to registering reflection
  * hints for invoking the annotated method, this implementation handles:
+ *
  * <ul>
- *     <li>Return types annotated with {@link ResponseBody}.</li>
- *     <li>Parameters annotated with {@link RequestBody}.</li>
- *     <li>{@link HttpEntity} return type and parameters.</li>
+ *     <li>Return types annotated with {@link ResponseBody}</li>
+ *     <li>Parameters annotated with {@link RequestBody}</li>
+ *     <li>{@link HttpEntity} return types and parameters</li>
  * </ul>
  *
  * @author Stephane Nicoll
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Controller;
 class ControllerMappingReflectiveProcessor implements ReflectiveProcessor {
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
+
 
 	@Override
 	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {
@@ -77,7 +79,8 @@ class ControllerMappingReflectiveProcessor implements ReflectiveProcessor {
 
 	protected void registerParameterTypeHints(ReflectionHints hints, MethodParameter methodParameter) {
 		if (methodParameter.hasParameterAnnotation(RequestBody.class) ||
-				methodParameter.hasParameterAnnotation(ModelAttribute.class)) {
+				methodParameter.hasParameterAnnotation(ModelAttribute.class) ||
+				methodParameter.hasParameterAnnotation(RequestPart.class)) {
 			this.bindingRegistrar.registerReflectionHints(hints, methodParameter.getGenericParameterType());
 		}
 		else if (HttpEntity.class.isAssignableFrom(methodParameter.getParameterType())) {
@@ -98,8 +101,8 @@ class ControllerMappingReflectiveProcessor implements ReflectiveProcessor {
 	@Nullable
 	private Type getHttpEntityType(MethodParameter parameter) {
 		MethodParameter nestedParameter = parameter.nested();
-		return (nestedParameter.getNestedParameterType() == nestedParameter.getParameterType()
-				? null : nestedParameter.getNestedParameterType());
+		return (nestedParameter.getNestedParameterType() == nestedParameter.getParameterType() ?
+				null : nestedParameter.getNestedParameterType());
 	}
 
 }

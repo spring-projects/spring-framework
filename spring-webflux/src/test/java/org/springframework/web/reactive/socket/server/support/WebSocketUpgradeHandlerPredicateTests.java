@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class WebSocketUpgradeHandlerPredicateTests {
 
 	private final WebSocketUpgradeHandlerPredicate predicate = new WebSocketUpgradeHandlerPredicate();
 
-	private final WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
+	private final WebSocketHandler webSocketHandler = mock();
 
 	ServerWebExchange httpGetExchange =
 			MockServerWebExchange.from(MockServerHttpRequest.get("/path"));

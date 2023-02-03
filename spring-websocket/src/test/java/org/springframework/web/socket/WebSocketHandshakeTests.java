@@ -59,7 +59,7 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol("foo");
-		URI url = new URI(getWsBaseUrl() + "/ws");
+		URI url = URI.create(getWsBaseUrl() + "/ws");
 		WebSocketSession session = this.webSocketClient.doHandshake(new TextWebSocketHandler(), headers, url).get();
 		assertThat(session.getAcceptedProtocol()).isEqualTo("foo");
 		session.close();
@@ -80,7 +80,7 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 
 		serverHandler.await();
 		assertThat(serverHandler.getTransportError()).isNull();
-		assertThat(serverHandler.getReceivedMessages().size()).isEqualTo(1);
+		assertThat(serverHandler.getReceivedMessages()).hasSize(1);
 		assertThat(serverHandler.getReceivedMessages().get(0).getClass()).isEqualTo(PongMessage.class);
 	}
 

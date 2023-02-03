@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,20 @@ public class UnsupportedMediaTypeStatusException extends ResponseStatusException
 	 * Constructor for when the specified Content-Type is invalid.
 	 */
 	public UnsupportedMediaTypeStatusException(@Nullable String reason) {
+		this(reason, Collections.emptyList());
+	}
+
+	/**
+	 * Constructor for when the specified Content-Type is invalid.
+	 * @since 6.0.5
+	 */
+	public UnsupportedMediaTypeStatusException(@Nullable String reason, List<MediaType> supportedTypes) {
 		super(HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason, null, PARSE_ERROR_DETAIL_CODE, null);
 		this.contentType = null;
-		this.supportedMediaTypes = Collections.emptyList();
+		this.supportedMediaTypes = Collections.unmodifiableList(supportedTypes);
 		this.bodyType = null;
 		this.method = null;
-		getBody().setDetail("Could not parse Content-Type.");
+		setDetail("Could not parse Content-Type.");
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ public abstract class AbstractEntityManagerFactoryBeanTests {
 	protected static EntityManagerFactory mockEmf;
 
 	@BeforeEach
-	public void setUp() throws Exception {
-		mockEmf = mock(EntityManagerFactory.class);
+	public void setUp() {
+		mockEmf = mock();
 	}
 
 	@AfterEach

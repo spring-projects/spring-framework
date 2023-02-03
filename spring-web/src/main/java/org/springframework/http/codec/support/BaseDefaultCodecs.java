@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.springframework.core.codec.AbstractDataBufferDecoder;
 import org.springframework.core.codec.ByteArrayDecoder;
@@ -62,6 +63,8 @@ import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageReader;
 import org.springframework.http.codec.multipart.MultipartHttpMessageWriter;
 import org.springframework.http.codec.multipart.PartEventHttpMessageReader;
+import org.springframework.http.codec.multipart.PartEventHttpMessageWriter;
+import org.springframework.http.codec.multipart.PartHttpMessageWriter;
 import org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecoder;
 import org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder;
 import org.springframework.http.codec.protobuf.ProtobufDecoder;
@@ -161,6 +164,15 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	private Encoder<?> kotlinSerializationProtobufEncoder;
 
 	@Nullable
+	private DefaultMultipartCodecs multipartCodecs;
+
+	@Nullable
+	private Supplier<List<HttpMessageWriter<?>>> partWritersSupplier;
+
+	@Nullable
+	private HttpMessageReader<?> multipartReader;
+
+	@Nullable
 	private Consumer<Object> codecConsumer;
 
 	@Nullable
@@ -224,6 +236,9 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		this.kotlinSerializationJsonEncoder = other.kotlinSerializationJsonEncoder;
 		this.kotlinSerializationProtobufDecoder = other.kotlinSerializationProtobufDecoder;
 		this.kotlinSerializationProtobufEncoder = other.kotlinSerializationProtobufEncoder;
+		this.multipartCodecs = other.multipartCodecs != null ?
+				new DefaultMultipartCodecs(other.multipartCodecs) : null;
+		this.multipartReader = other.multipartReader;
 		this.codecConsumer = other.codecConsumer;
 		this.maxInMemorySize = other.maxInMemorySize;
 		this.enableLoggingRequestDetails = other.enableLoggingRequestDetails;
@@ -352,6 +367,31 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	}
 
 	@Override
+	public CodecConfigurer.MultipartCodecs multipartCodecs() {
+		if (this.multipartCodecs == null) {
+			this.multipartCodecs = new DefaultMultipartCodecs();
+		}
+		return this.multipartCodecs;
+	}
+
+	@Override
+	public void multipartReader(HttpMessageReader<?> multipartReader) {
+		this.multipartReader = multipartReader;
+		initTypedReaders();
+	}
+
+	/**
+	 * Set a supplier for part writers to use when
+	 * {@link #multipartCodecs()} are not explicitly configured.
+	 * That's the same set of writers as for general except for the multipart
+	 * writer itself.
+	 */
+	void setPartWritersSupplier(Supplier<List<HttpMessageWriter<?>>> supplier) {
+		this.partWritersSupplier = supplier;
+		initTypedWriters();
+	}
+
+	@Override
 	@Nullable
 	public Boolean isEnableLoggingRequestDetails() {
 		return this.enableLoggingRequestDetails;
@@ -405,6 +445,15 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 					(KotlinSerializationProtobufDecoder) this.kotlinSerializationProtobufDecoder : new KotlinSerializationProtobufDecoder()));
 		}
 		addCodec(this.typedReaders, new FormHttpMessageReader());
+		if (this.multipartReader != null) {
+			addCodec(this.typedReaders, this.multipartReader);
+		}
+		else {
+			DefaultPartHttpMessageReader partReader = new DefaultPartHttpMessageReader();
+			addCodec(this.typedReaders, partReader);
+			addCodec(this.typedReaders, new MultipartHttpMessageReader(partReader));
+		}
+		addCodec(this.typedReaders, new PartEventHttpMessageReader());
 
 		// client vs server..
 		extendTypedReaders(this.typedReaders);
@@ -424,13 +473,12 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 	 * if configured by the application, to the given codec , including any
 	 * codec it contains.
 	 */
-	@SuppressWarnings("rawtypes")
 	private void initCodec(@Nullable Object codec) {
-		if (codec instanceof DecoderHttpMessageReader) {
-			codec = ((DecoderHttpMessageReader) codec).getDecoder();
+		if (codec instanceof DecoderHttpMessageReader<?> decoderHttpMessageReader) {
+			codec = decoderHttpMessageReader.getDecoder();
 		}
-		else if (codec instanceof EncoderHttpMessageWriter) {
-			codec = ((EncoderHttpMessageWriter<?>) codec).getEncoder();
+		else if (codec instanceof EncoderHttpMessageWriter<?> encoderHttpMessageWriter) {
+			codec = encoderHttpMessageWriter.getEncoder();
 		}
 
 		if (codec == null) {
@@ -439,72 +487,74 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 
 		Integer size = this.maxInMemorySize;
 		if (size != null) {
-			if (codec instanceof AbstractDataBufferDecoder) {
-				((AbstractDataBufferDecoder<?>) codec).setMaxInMemorySize(size);
+			if (codec instanceof AbstractDataBufferDecoder<?> abstractDataBufferDecoder) {
+				abstractDataBufferDecoder.setMaxInMemorySize(size);
 			}
+			// Pattern variables in the following if-blocks cannot be named the same as instance fields
+			// due to lacking support in Checkstyle: https://github.com/checkstyle/checkstyle/issues/10969
 			if (protobufPresent) {
-				if (codec instanceof ProtobufDecoder) {
-					((ProtobufDecoder) codec).setMaxMessageSize(size);
+				if (codec instanceof ProtobufDecoder protobufDec) {
+					protobufDec.setMaxMessageSize(size);
 				}
 			}
 			if (kotlinSerializationCborPresent) {
-				if (codec instanceof KotlinSerializationCborDecoder) {
-					((KotlinSerializationCborDecoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationCborDecoder kotlinSerializationCborDec) {
+					kotlinSerializationCborDec.setMaxInMemorySize(size);
 				}
 			}
 			if (kotlinSerializationJsonPresent) {
-				if (codec instanceof KotlinSerializationJsonDecoder) {
-					((KotlinSerializationJsonDecoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationJsonDecoder kotlinSerializationJsonDec) {
+					kotlinSerializationJsonDec.setMaxInMemorySize(size);
 				}
 			}
 			if (kotlinSerializationProtobufPresent) {
-				if (codec instanceof KotlinSerializationProtobufDecoder) {
-					((KotlinSerializationProtobufDecoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof KotlinSerializationProtobufDecoder kotlinSerializationProtobufDec) {
+					kotlinSerializationProtobufDec.setMaxInMemorySize(size);
 				}
 			}
 			if (jackson2Present) {
-				if (codec instanceof AbstractJackson2Decoder) {
-					((AbstractJackson2Decoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof AbstractJackson2Decoder abstractJackson2Decoder) {
+					abstractJackson2Decoder.setMaxInMemorySize(size);
 				}
 			}
 			if (jaxb2Present) {
-				if (codec instanceof Jaxb2XmlDecoder) {
-					((Jaxb2XmlDecoder) codec).setMaxInMemorySize(size);
+				if (codec instanceof Jaxb2XmlDecoder jaxb2XmlDecoder) {
+					jaxb2XmlDecoder.setMaxInMemorySize(size);
 				}
 			}
-			if (codec instanceof FormHttpMessageReader) {
-				((FormHttpMessageReader) codec).setMaxInMemorySize(size);
+			if (codec instanceof FormHttpMessageReader formHttpMessageReader) {
+				formHttpMessageReader.setMaxInMemorySize(size);
 			}
-			if (codec instanceof ServerSentEventHttpMessageReader) {
-				((ServerSentEventHttpMessageReader) codec).setMaxInMemorySize(size);
+			if (codec instanceof ServerSentEventHttpMessageReader serverSentEventHttpMessageReader) {
+				serverSentEventHttpMessageReader.setMaxInMemorySize(size);
 			}
-			if (codec instanceof DefaultPartHttpMessageReader) {
-				((DefaultPartHttpMessageReader) codec).setMaxInMemorySize(size);
+			if (codec instanceof DefaultPartHttpMessageReader defaultPartHttpMessageReader) {
+				defaultPartHttpMessageReader.setMaxInMemorySize(size);
 			}
-			if (codec instanceof PartEventHttpMessageReader) {
-				((PartEventHttpMessageReader) codec).setMaxInMemorySize(size);
+			if (codec instanceof PartEventHttpMessageReader partEventHttpMessageReader) {
+				partEventHttpMessageReader.setMaxInMemorySize(size);
 			}
 		}
 
 		Boolean enable = this.enableLoggingRequestDetails;
 		if (enable != null) {
-			if (codec instanceof FormHttpMessageReader) {
-				((FormHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof FormHttpMessageReader formHttpMessageReader) {
+				formHttpMessageReader.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof MultipartHttpMessageReader) {
-				((MultipartHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof MultipartHttpMessageReader multipartHttpMessageReader) {
+				multipartHttpMessageReader.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof DefaultPartHttpMessageReader) {
-				((DefaultPartHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof DefaultPartHttpMessageReader defaultPartHttpMessageReader) {
+				defaultPartHttpMessageReader.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof PartEventHttpMessageReader) {
-				((PartEventHttpMessageReader) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof PartEventHttpMessageReader partEventHttpMessageReader) {
+				partEventHttpMessageReader.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof FormHttpMessageWriter) {
-				((FormHttpMessageWriter) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof FormHttpMessageWriter formHttpMessageWriter) {
+				formHttpMessageWriter.setEnableLoggingRequestDetails(enable);
 			}
-			if (codec instanceof MultipartHttpMessageWriter) {
-				((MultipartHttpMessageWriter) codec).setEnableLoggingRequestDetails(enable);
+			if (codec instanceof MultipartHttpMessageWriter multipartHttpMessageWriter) {
+				multipartHttpMessageWriter.setEnableLoggingRequestDetails(enable);
 			}
 		}
 
@@ -513,17 +563,17 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		}
 
 		// Recurse for nested codecs
-		if (codec instanceof MultipartHttpMessageReader) {
-			initCodec(((MultipartHttpMessageReader) codec).getPartReader());
+		if (codec instanceof MultipartHttpMessageReader multipartHttpMessageReader) {
+			initCodec(multipartHttpMessageReader.getPartReader());
 		}
-		else if (codec instanceof MultipartHttpMessageWriter) {
-			initCodec(((MultipartHttpMessageWriter) codec).getFormWriter());
+		else if (codec instanceof MultipartHttpMessageWriter multipartHttpMessageWriter) {
+			initCodec(multipartHttpMessageWriter.getFormWriter());
 		}
-		else if (codec instanceof ServerSentEventHttpMessageReader) {
-			initCodec(((ServerSentEventHttpMessageReader) codec).getDecoder());
+		else if (codec instanceof ServerSentEventHttpMessageReader serverSentEventHttpMessageReader) {
+			initCodec(serverSentEventHttpMessageReader.getDecoder());
 		}
-		else if (codec instanceof ServerSentEventHttpMessageWriter) {
-			initCodec(((ServerSentEventHttpMessageWriter) codec).getEncoder());
+		else if (codec instanceof ServerSentEventHttpMessageWriter serverSentEventHttpMessageWriter) {
+			initCodec(serverSentEventHttpMessageWriter.getEncoder());
 		}
 	}
 
@@ -640,8 +690,24 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 			addCodec(writers, new ProtobufHttpMessageWriter(this.protobufEncoder != null ?
 					(ProtobufEncoder) this.protobufEncoder : new ProtobufEncoder()));
 		}
+		addCodec(writers, new MultipartHttpMessageWriter(this::getPartWriters, new FormHttpMessageWriter()));
+		addCodec(writers, new PartEventHttpMessageWriter());
+		addCodec(writers, new PartHttpMessageWriter());
 		return writers;
 	}
+
+	private List<HttpMessageWriter<?>> getPartWriters() {
+		if (this.multipartCodecs != null) {
+			return this.multipartCodecs.getWriters();
+		}
+		else if (this.partWritersSupplier != null) {
+			return this.partWritersSupplier.get();
+		}
+		else {
+			return Collections.emptyList();
+		}
+	}
+
 
 	/**
 	 * Hook for client or server specific typed writers.
@@ -764,5 +830,42 @@ class BaseDefaultCodecs implements CodecConfigurer.DefaultCodecs, CodecConfigure
 		}
 		return this.kotlinSerializationJsonEncoder;
 	}
+
+
+	/**
+	 * Default implementation of {@link CodecConfigurer.MultipartCodecs}.
+	 */
+	protected class DefaultMultipartCodecs implements CodecConfigurer.MultipartCodecs {
+
+		private final List<HttpMessageWriter<?>> writers = new ArrayList<>();
+
+
+		DefaultMultipartCodecs() {
+		}
+
+		DefaultMultipartCodecs(DefaultMultipartCodecs other) {
+			this.writers.addAll(other.writers);
+		}
+
+
+		@Override
+		public CodecConfigurer.MultipartCodecs encoder(Encoder<?> encoder) {
+			writer(new EncoderHttpMessageWriter<>(encoder));
+			initTypedWriters();
+			return this;
+		}
+
+		@Override
+		public CodecConfigurer.MultipartCodecs writer(HttpMessageWriter<?> writer) {
+			this.writers.add(writer);
+			initTypedWriters();
+			return this;
+		}
+
+		List<HttpMessageWriter<?>> getWriters() {
+			return this.writers;
+		}
+	}
+
 
 }

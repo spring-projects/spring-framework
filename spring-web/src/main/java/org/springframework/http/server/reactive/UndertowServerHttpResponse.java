@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 5.0
  */
 class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse implements ZeroCopyHttpOutputMessage {
@@ -63,12 +64,12 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 			HttpServerExchange exchange, DataBufferFactory bufferFactory, UndertowServerHttpRequest request) {
 
 		super(bufferFactory, createHeaders(exchange));
-		Assert.notNull(exchange, "HttpServerExchange must not be null");
 		this.exchange = exchange;
 		this.request = request;
 	}
 
 	private static HttpHeaders createHeaders(HttpServerExchange exchange) {
+		Assert.notNull(exchange, "HttpServerExchange must not be null");
 		UndertowHeadersAdapter headersMap = new UndertowHeadersAdapter(exchange.getResponseHeaders());
 		return new HttpHeaders(headersMap);
 	}
@@ -105,7 +106,6 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 	protected void applyHeaders() {
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void applyCookies() {
 		for (String name : getCookies().keySet()) {
@@ -123,8 +123,7 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				cookie.setSameSiteMode(httpCookie.getSameSite());
-				// getResponseCookies() is deprecated in Undertow 2.2
-				this.exchange.getResponseCookies().putIfAbsent(name, cookie);
+				this.exchange.setResponseCookie(cookie);
 			}
 		}
 	}
@@ -135,14 +134,10 @@ class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse impl
 				Mono.create(sink -> {
 					try {
 						FileChannel source = FileChannel.open(file, StandardOpenOption.READ);
-
-						TransferBodyListener listener = new TransferBodyListener(source, position,
-								count, sink);
+						TransferBodyListener listener = new TransferBodyListener(source, position, count, sink);
 						sink.onDispose(listener::closeSource);
-
 						StreamSinkChannel destination = this.exchange.getResponseChannel();
 						destination.getWriteSetter().set(listener::transfer);
-
 						listener.transfer(destination);
 					}
 					catch (IOException ex) {

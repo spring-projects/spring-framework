@@ -63,7 +63,9 @@ public class CookieValueArgumentResolver extends AbstractNamedValueArgumentResol
 	}
 
 	@Override
-	protected void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues) {
+	protected void addRequestValue(
+			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
+
 		requestValues.addCookie(name, (String) value);
 	}
 

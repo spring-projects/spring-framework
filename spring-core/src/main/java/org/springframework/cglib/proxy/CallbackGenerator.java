@@ -16,7 +16,11 @@
 package org.springframework.cglib.proxy;
 
 import java.util.List;
-import org.springframework.cglib.core.*;
+
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.Signature;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 interface CallbackGenerator

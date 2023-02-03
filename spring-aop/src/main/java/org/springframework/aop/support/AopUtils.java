@@ -107,8 +107,8 @@ public abstract class AopUtils {
 	public static Class<?> getTargetClass(Object candidate) {
 		Assert.notNull(candidate, "Candidate object must not be null");
 		Class<?> result = null;
-		if (candidate instanceof TargetClassAware) {
-			result = ((TargetClassAware) candidate).getTargetClass();
+		if (candidate instanceof TargetClassAware targetClassAware) {
+			result = targetClassAware.getTargetClass();
 		}
 		if (result == null) {
 			result = (isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
@@ -234,8 +234,8 @@ public abstract class AopUtils {
 		}
 
 		IntroductionAwareMethodMatcher introductionAwareMethodMatcher = null;
-		if (methodMatcher instanceof IntroductionAwareMethodMatcher) {
-			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
+		if (methodMatcher instanceof IntroductionAwareMethodMatcher iamm) {
+			introductionAwareMethodMatcher = iamm;
 		}
 
 		Set<Class<?>> classes = new LinkedHashSet<>();
@@ -281,8 +281,8 @@ public abstract class AopUtils {
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
-		if (advisor instanceof IntroductionAdvisor) {
-			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
+		if (advisor instanceof IntroductionAdvisor ia) {
+			return ia.getClassFilter().matches(targetClass);
 		}
 		else if (advisor instanceof PointcutAdvisor pca) {
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);

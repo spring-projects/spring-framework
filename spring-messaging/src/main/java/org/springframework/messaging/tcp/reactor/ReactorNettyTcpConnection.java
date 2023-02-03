@@ -80,4 +80,9 @@ public class ReactorNettyTcpConnection<P> implements TcpConnection<P> {
 		this.completionSink.tryEmitEmpty();
 	}
 
+	@Override
+	public String toString() {
+		return "ReactorNettyTcpConnection[inbound=" + this.inbound + "]";
+	}
+
 }

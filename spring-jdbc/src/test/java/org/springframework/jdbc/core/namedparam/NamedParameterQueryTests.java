@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,27 +48,21 @@ import static org.mockito.Mockito.verify;
  */
 public class NamedParameterQueryTests {
 
-	private DataSource dataSource;
+	private Connection connection = mock();
 
-	private Connection connection;
+	private DataSource dataSource = mock();
 
-	private PreparedStatement preparedStatement;
+	private PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet;
+	private ResultSet resultSet = mock();
 
-	private ResultSetMetaData resultSetMetaData;
+	private ResultSetMetaData resultSetMetaData = mock();
 
-	private NamedParameterJdbcTemplate template;
+	private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(dataSource);
 
 
 	@BeforeEach
 	public void setup() throws Exception {
-		connection = mock(Connection.class);
-		dataSource = mock(DataSource.class);
-		preparedStatement = mock(PreparedStatement.class);
-		resultSet = mock(ResultSet.class);
-		resultSetMetaData = mock(ResultSetMetaData.class);
-		template = new NamedParameterJdbcTemplate(dataSource);
 		given(dataSource.getConnection()).willReturn(connection);
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
 		given(resultSetMetaData.getColumnLabel(1)).willReturn("age");
@@ -265,7 +259,7 @@ public class NamedParameterQueryTests {
 
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("id", 3);
-		int i = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", params, Integer.class).intValue();
+		int i = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", params, Integer.class);
 
 		assertThat(i).as("Return of an int").isEqualTo(22);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
@@ -279,7 +273,7 @@ public class NamedParameterQueryTests {
 		given(resultSet.getLong(1)).willReturn(87L);
 
 		BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(new ParameterBean(3));
-		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", params, Long.class).longValue();
+		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID = :id", params, Long.class);
 
 		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID = ?");
@@ -293,7 +287,7 @@ public class NamedParameterQueryTests {
 		given(resultSet.getLong(1)).willReturn(87L);
 
 		BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(new ParameterCollectionBean(3, 5));
-		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID IN (:ids)", params, Long.class).longValue();
+		long l = template.queryForObject("SELECT AGE FROM CUSTMR WHERE ID IN (:ids)", params, Long.class);
 
 		assertThat(l).as("Return of a long").isEqualTo(87);
 		verify(connection).prepareStatement("SELECT AGE FROM CUSTMR WHERE ID IN (?, ?)");

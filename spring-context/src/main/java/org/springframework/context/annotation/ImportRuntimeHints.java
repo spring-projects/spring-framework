@@ -29,7 +29,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
  * should be processed.
  *
  * <p>Unlike declaring {@link RuntimeHintsRegistrar} using
- * {@code spring/aot.factories}, this annotation allows for more flexible
+ * {@code META-INF/spring/aot.factories}, this annotation allows for more flexible
  * registration where it is only processed if the annotated component or bean
  * method is actually registered in the bean factory. To illustrate this
  * behavior, consider the following example:
@@ -47,21 +47,26 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
  *
  * }</pre>
  *
- * If the configuration class above is processed, {@code MyHints} will be
- * contributed only if {@code MyCondition} matches. If it does not, and
- * therefore {@code MyService} is not defined as a bean, the hints will
+ * <p>If the configuration class above is processed, {@code MyHints} will be
+ * contributed only if {@code MyCondition} matches. If the condition does not
+ * match, {@code MyService} will not be defined as a bean and the hints will
  * not be processed either.
  *
- * <p>If several components refer to the same {@link RuntimeHintsRegistrar}
- * implementation, it is invoked only once for a given bean factory
- * processing.
+ * <p>{@code @ImportRuntimeHints} can also be applied to any test class that uses
+ * the <em>Spring TestContext Framework</em> to load an {@code ApplicationContext}.
+ *
+ * <p>If several components or test classes refer to the same {@link RuntimeHintsRegistrar}
+ * implementation, the registrar will only be invoked once for the given bean factory
+ * processing or test suite.
  *
  * @author Brian Clozel
  * @author Stephane Nicoll
  * @since 6.0
  * @see org.springframework.aot.hint.RuntimeHints
+ * @see org.springframework.aot.hint.annotation.Reflective
+ * @see org.springframework.aot.hint.annotation.RegisterReflectionForBinding
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ImportRuntimeHints {

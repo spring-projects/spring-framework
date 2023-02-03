@@ -15,11 +15,18 @@
  */
 package org.springframework.cglib.proxy;
 
-import java.lang.reflect.*;
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
 
 /**
  * Generates new interfaces at runtime.
@@ -71,8 +78,7 @@ public class InterfaceMaker extends AbstractClassGenerator
      */
     public void add(Class clazz) {
         Method[] methods = clazz.getMethods();
-        for (int i = 0; i < methods.length; i++) {
-            Method m = methods[i];
+        for (Method m : methods) {
             if (!m.getDeclaringClass().getName().equals("java.lang.Object")) {
                 add(m);
             }
@@ -87,19 +93,23 @@ public class InterfaceMaker extends AbstractClassGenerator
         return (Class)super.create(this);
     }
 
-    protected ClassLoader getDefaultClassLoader() {
+    @Override
+	protected ClassLoader getDefaultClassLoader() {
         return null;
     }
-    
-    protected Object firstInstance(Class type) {
+
+    @Override
+	protected Object firstInstance(Class type) {
         return type;
     }
 
-    protected Object nextInstance(Object instance) {
+    @Override
+	protected Object nextInstance(Object instance) {
         throw new IllegalStateException("InterfaceMaker does not cache");
     }
 
-    public void generateClass(ClassVisitor v) throws Exception {
+    @Override
+	public void generateClass(ClassVisitor v) throws Exception {
         ClassEmitter ce = new ClassEmitter(v);
         ce.begin_class(Constants.V1_8,
                        Constants.ACC_PUBLIC | Constants.ACC_INTERFACE | Constants.ACC_ABSTRACT,

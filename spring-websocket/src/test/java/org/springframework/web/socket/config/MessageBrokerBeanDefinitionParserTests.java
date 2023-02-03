@@ -399,12 +399,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 		SimpAnnotationMethodMessageHandler handler = this.appContext.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		List<HandlerMethodArgumentResolver> customResolvers = handler.getCustomArgumentResolvers();
-		assertThat(customResolvers.size()).isEqualTo(2);
+		assertThat(customResolvers).hasSize(2);
 		assertThat(handler.getArgumentResolvers().contains(customResolvers.get(0))).isTrue();
 		assertThat(handler.getArgumentResolvers().contains(customResolvers.get(1))).isTrue();
 
 		List<HandlerMethodReturnValueHandler> customHandlers = handler.getCustomReturnValueHandlers();
-		assertThat(customHandlers.size()).isEqualTo(2);
+		assertThat(customHandlers).hasSize(2);
 		assertThat(handler.getReturnValueHandlers().contains(customHandlers.get(0))).isTrue();
 		assertThat(handler.getReturnValueHandlers().contains(customHandlers.get(1))).isTrue();
 	}
@@ -416,7 +416,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
 		assertThat(compositeConverter).isNotNull();
 
-		assertThat(compositeConverter.getConverters().size()).isEqualTo(4);
+		assertThat(compositeConverter.getConverters()).hasSize(4);
 		assertThat(compositeConverter.getConverters().iterator().next().getClass()).isEqualTo(StringMessageConverter.class);
 	}
 
@@ -427,7 +427,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		CompositeMessageConverter compositeConverter = this.appContext.getBean(CompositeMessageConverter.class);
 		assertThat(compositeConverter).isNotNull();
 
-		assertThat(compositeConverter.getConverters().size()).isEqualTo(1);
+		assertThat(compositeConverter.getConverters()).hasSize(1);
 		assertThat(compositeConverter.getConverters().iterator().next().getClass()).isEqualTo(StringMessageConverter.class);
 	}
 
@@ -442,7 +442,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 			assertThat(channel.hasSubscription(subscriber)).isTrue();
 		}
 		List<ChannelInterceptor> interceptors = channel.getInterceptors();
-		assertThat(interceptors.size()).isEqualTo(interceptorCount);
+		assertThat(interceptors).hasSize(interceptorCount);
 		assertThat(interceptors.get(interceptors.size() - 1).getClass()).isEqualTo(ImmutableMessageChannelInterceptor.class);
 	}
 

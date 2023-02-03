@@ -49,18 +49,22 @@ abstract public class FastMember
         return member.getModifiers();
     }
 
+    @Override
     public String toString() {
         return member.toString();
     }
 
+    @Override
     public int hashCode() {
         return member.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
-        if (o == null || !(o instanceof FastMember)) {
+        if (o == null || !(o instanceof FastMember other)) {
             return false;
         }
-        return member.equals(((FastMember)o).member);
+        return member.equals(other.member);
     }
+
 }

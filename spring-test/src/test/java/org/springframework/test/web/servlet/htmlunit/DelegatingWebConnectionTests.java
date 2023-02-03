@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -51,7 +52,7 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
  * @since 4.2
  */
 @ExtendWith(MockitoExtension.class)
-public class DelegatingWebConnectionTests {
+class DelegatingWebConnectionTests {
 
 	private DelegatingWebConnection webConnection;
 
@@ -77,9 +78,9 @@ public class DelegatingWebConnectionTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		request = new WebRequest(new URL("http://localhost/"));
-		WebResponseData data = new WebResponseData("".getBytes("UTF-8"), 200, "", Collections.emptyList());
+		WebResponseData data = new WebResponseData("".getBytes(UTF_8), 200, "", Collections.emptyList());
 		expectedResponse = new WebResponse(data, request, 100L);
 		webConnection = new DelegatingWebConnection(defaultConnection,
 				new DelegateWebConnection(matcher1, connection1), new DelegateWebConnection(matcher2, connection2));
@@ -87,7 +88,7 @@ public class DelegatingWebConnectionTests {
 
 
 	@Test
-	public void getResponseDefault() throws Exception {
+	void getResponseDefault() throws Exception {
 		given(defaultConnection.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
 
@@ -99,7 +100,7 @@ public class DelegatingWebConnectionTests {
 	}
 
 	@Test
-	public void getResponseAllMatches() throws Exception {
+	void getResponseAllMatches() throws Exception {
 		given(matcher1.matches(request)).willReturn(true);
 		given(connection1.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
@@ -111,7 +112,7 @@ public class DelegatingWebConnectionTests {
 	}
 
 	@Test
-	public void getResponseSecondMatches() throws Exception {
+	void getResponseSecondMatches() throws Exception {
 		given(matcher2.matches(request)).willReturn(true);
 		given(connection2.getResponse(request)).willReturn(expectedResponse);
 		WebResponse response = webConnection.getResponse(request);
@@ -125,7 +126,7 @@ public class DelegatingWebConnectionTests {
 
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
-	public void verifyExampleInClassLevelJavadoc() throws Exception {
+	void verifyExampleInClassLevelJavadoc() throws Exception {
 		WebClient webClient = new WebClient();
 
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup().build();

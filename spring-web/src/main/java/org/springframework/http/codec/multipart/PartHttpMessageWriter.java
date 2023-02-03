@@ -48,6 +48,21 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 		super(MultipartHttpMessageReader.MIME_TYPES);
 	}
 
+	@Override
+	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
+		if (Part.class.isAssignableFrom(elementType.toClass())) {
+			if (mediaType == null) {
+				return true;
+			}
+			for (MediaType supportedMediaType : getWritableMediaTypes()) {
+				if (supportedMediaType.isCompatibleWith(mediaType)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 
 	@Override
 	public Mono<Void> write(Publisher<? extends Part> parts,
@@ -81,7 +96,7 @@ public class PartHttpMessageWriter extends MultipartWriterSupport implements Htt
 		String name = part.name();
 		if (!headers.containsKey(HttpHeaders.CONTENT_DISPOSITION)) {
 			headers.setContentDispositionFormData(name,
-					(part instanceof FilePart ? ((FilePart) part).filename() : null));
+					(part instanceof FilePart filePart ? filePart.filename() : null));
 		}
 
 		return Flux.concat(

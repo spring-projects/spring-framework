@@ -17,7 +17,6 @@
 package org.springframework.web.util;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,7 +77,7 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test
-	void plain() throws URISyntaxException {
+	void plain() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
 		UriComponents result = builder.scheme("https").host("example.com")
 				.path("foo").queryParam("bar").fragment("baz").build();
@@ -89,12 +88,12 @@ class UriComponentsBuilderTests {
 		assertThat(result.getQuery()).isEqualTo("bar");
 		assertThat(result.getFragment()).isEqualTo("baz");
 
-		URI expected = new URI("https://example.com/foo?bar#baz");
+		URI expected = URI.create("https://example.com/foo?bar#baz");
 		assertThat(result.toUri()).as("Invalid result URI").isEqualTo(expected);
 	}
 
 	@Test
-	void multipleFromSameBuilder() throws URISyntaxException {
+	void multipleFromSameBuilder() {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance()
 				.scheme("https").host("example.com").pathSegment("foo");
 		UriComponents result1 = builder.build();
@@ -104,7 +103,7 @@ class UriComponentsBuilderTests {
 		assertThat(result1.getScheme()).isEqualTo("https");
 		assertThat(result1.getHost()).isEqualTo("example.com");
 		assertThat(result1.getPath()).isEqualTo("/foo");
-		URI expected = new URI("https://example.com/foo");
+		URI expected = URI.create("https://example.com/foo");
 		assertThat(result1.toUri()).as("Invalid result URI").isEqualTo(expected);
 
 		assertThat(result2.getScheme()).isEqualTo("https");
@@ -112,12 +111,12 @@ class UriComponentsBuilderTests {
 		assertThat(result2.getPath()).isEqualTo("/foo/foo2");
 		assertThat(result2.getQuery()).isEqualTo("bar");
 		assertThat(result2.getFragment()).isEqualTo("baz");
-		expected = new URI("https://example.com/foo/foo2?bar#baz");
+		expected = URI.create("https://example.com/foo/foo2?bar#baz");
 		assertThat(result2.toUri()).as("Invalid result URI").isEqualTo(expected);
 	}
 
 	@Test
-	void fromPath() throws URISyntaxException {
+	void fromPath() {
 		UriComponents result = UriComponentsBuilder.fromPath("foo").queryParam("bar").fragment("baz").build();
 
 		assertThat(result.getPath()).isEqualTo("foo");
@@ -125,19 +124,19 @@ class UriComponentsBuilderTests {
 		assertThat(result.getFragment()).isEqualTo("baz");
 		assertThat(result.toUriString()).as("Invalid result URI String").isEqualTo("foo?bar#baz");
 
-		URI expected = new URI("foo?bar#baz");
+		URI expected = URI.create("foo?bar#baz");
 		assertThat(result.toUri()).as("Invalid result URI").isEqualTo(expected);
 
 		result = UriComponentsBuilder.fromPath("/foo").build();
 		assertThat(result.getPath()).isEqualTo("/foo");
 
-		expected = new URI("/foo");
+		expected = URI.create("/foo");
 		assertThat(result.toUri()).as("Invalid result URI").isEqualTo(expected);
 	}
 
 	@Test
-	void fromHierarchicalUri() throws URISyntaxException {
-		URI uri = new URI("https://example.com/foo?bar#baz");
+	void fromHierarchicalUri() {
+		URI uri = URI.create("https://example.com/foo?bar#baz");
 		UriComponents result = UriComponentsBuilder.fromUri(uri).build();
 
 		assertThat(result.getScheme()).isEqualTo("https");
@@ -149,8 +148,8 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test
-	void fromOpaqueUri() throws URISyntaxException {
-		URI uri = new URI("mailto:foo@bar.com#baz");
+	void fromOpaqueUri() {
+		URI uri = URI.create("mailto:foo@bar.com#baz");
 		UriComponents result = UriComponentsBuilder.fromUri(uri).build();
 
 		assertThat(result.getScheme()).isEqualTo("mailto");
@@ -160,8 +159,8 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-9317
-	void fromUriEncodedQuery() throws URISyntaxException {
-		URI uri = new URI("https://www.example.org/?param=aGVsbG9Xb3JsZA%3D%3D");
+	void fromUriEncodedQuery() {
+		URI uri = URI.create("https://www.example.org/?param=aGVsbG9Xb3JsZA%3D%3D");
 		String fromUri = UriComponentsBuilder.fromUri(uri).build().getQueryParams().get("param").get(0);
 		String fromUriString = UriComponentsBuilder.fromUriString(uri.toString())
 				.build().getQueryParams().get("param").get(0);
@@ -967,8 +966,8 @@ class UriComponentsBuilderTests {
 	}
 
 	@Test  // gh-24444
-	void opaqueUriDoesNotResetOnNullInput() throws URISyntaxException {
-		URI uri = new URI("urn:ietf:wg:oauth:2.0:oob");
+	void opaqueUriDoesNotResetOnNullInput() {
+		URI uri = URI.create("urn:ietf:wg:oauth:2.0:oob");
 		UriComponents result = UriComponentsBuilder.fromUri(uri)
 				.host(null)
 				.port(-1)

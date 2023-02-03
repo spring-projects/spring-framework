@@ -36,6 +36,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.MethodNotAllowedException;
@@ -59,7 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ResponseEntityExceptionHandlerTests {
 
-	private final ResponseEntityExceptionHandler exceptionHandler = new GlobalExceptionHandler();
+	private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
 
@@ -131,8 +132,11 @@ public class ResponseEntityExceptionHandlerTests {
 
 		StaticMessageSource messageSource = new StaticMessageSource();
 		messageSource.addMessage(
-				"problemDetail." + UnsupportedMediaTypeStatusException.class.getName(), locale,
+				ErrorResponse.getDefaultDetailMessageCode(UnsupportedMediaTypeStatusException.class, null), locale,
 				"Content-Type {0} not supported. Supported: {1}");
+		messageSource.addMessage(
+				ErrorResponse.getDefaultTitleMessageCode(UnsupportedMediaTypeStatusException.class), locale,
+				"Media type is not valid or not supported");
 
 		this.exceptionHandler.setMessageSource(messageSource);
 
@@ -147,6 +151,31 @@ public class ResponseEntityExceptionHandlerTests {
 		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
 		assertThat(body.getDetail()).isEqualTo(
 				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+		assertThat(body.getTitle()).isEqualTo(
+				"Media type is not valid or not supported");
+	}
+
+	@Test
+	void customExceptionToProblemDetailViaMessageSource() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage(
+				"problemDetail." + IllegalStateException.class.getName(), locale,
+				"Invalid state: {0}");
+
+		this.exceptionHandler.setMessageSource(messageSource);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+				.acceptLanguageAsLocales(locale).build());
+
+		ResponseEntity<?> responseEntity =
+				this.exceptionHandler.handleException(new IllegalStateException("test"), exchange).block();
+
+		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
+		assertThat(body.getDetail()).isEqualTo("Invalid state: A");
 	}
 
 
@@ -246,6 +275,12 @@ public class ResponseEntityExceptionHandlerTests {
 				ServerWebExchange exchange) {
 
 			return handleAndSetTypeToExceptionName(ex, headers, status, exchange);
+		}
+
+		public Mono<ResponseEntity<Object>> handleException(IllegalStateException ex, ServerWebExchange exchange) {
+			HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+			ProblemDetail body = createProblemDetail(ex, status, ex.getMessage(), null, new Object[] {"A"}, exchange);
+			return handleExceptionInternal(ex, body, null, status, exchange);
 		}
 	}
 

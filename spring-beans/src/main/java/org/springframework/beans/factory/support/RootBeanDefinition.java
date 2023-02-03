@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,10 +433,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	@Override
-	public void setInstanceSupplier(@Nullable Supplier<?> instanceSupplier) {
-		super.setInstanceSupplier(instanceSupplier);
-		Method factoryMethod = (instanceSupplier instanceof InstanceSupplier<?> ?
-				((InstanceSupplier<?>) instanceSupplier).getFactoryMethod() : null);
+	public void setInstanceSupplier(@Nullable Supplier<?> supplier) {
+		super.setInstanceSupplier(supplier);
+		Method factoryMethod = (supplier instanceof InstanceSupplier<?> instanceSupplier ?
+				instanceSupplier.getFactoryMethod() : null);
 		if (factoryMethod != null) {
 			setResolvedFactoryMethod(factoryMethod);
 		}

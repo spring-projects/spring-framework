@@ -136,7 +136,7 @@ class DynamicJavaFileManagerTests {
 	void listWithoutClassKindDoesNotReturnClasses() throws IOException {
 		Iterable<JavaFileObject> listed = this.fileManager.list(
 				this.location, "com.example", EnumSet.of(Kind.SOURCE), true);
-		assertThat(listed).hasSize(0);
+		assertThat(listed).isEmpty();
 	}
 
 	@Test

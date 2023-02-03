@@ -94,6 +94,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 		throw new UnsupportedOperationException("getBody not supported");
 	}
 
+	@SuppressWarnings("deprecation")  // execute(ClassicHttpRequest, HttpContext)
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
 		HttpComponentsClientHttpRequest.addHeaders(this.httpRequest, headers);

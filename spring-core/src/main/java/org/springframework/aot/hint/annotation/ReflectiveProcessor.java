@@ -24,8 +24,12 @@ import org.springframework.aot.hint.ReflectionHints;
  * Process an {@link AnnotatedElement} and register the necessary reflection
  * hints for it.
  *
+ * <p>{@code ReflectiveProcessor} implementations are registered via
+ * {@link Reflective#processors() @Reflective(processors = ...)}.
+ *
  * @author Stephane Nicoll
  * @since 6.0
+ * @see Reflective @Reflective
  */
 public interface ReflectiveProcessor {
 

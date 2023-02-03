@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void simpleApplicationEventMulticasterWithTaskExecutor() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -153,7 +153,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void simpleApplicationEventMulticasterWithException() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -169,7 +169,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void simpleApplicationEventMulticasterWithErrorHandler() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -191,7 +191,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
-		assertThat(listener1.seenEvents.size()).isEqualTo(2);
+		assertThat(listener1.seenEvents).hasSize(2);
 	}
 
 	@Test
@@ -205,7 +205,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
-		assertThat(listener1.seenEvents.size()).isEqualTo(2);
+		assertThat(listener1.seenEvents).hasSize(2);
 	}
 
 	@Test
@@ -222,7 +222,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
-		assertThat(listener1.seenEvents.size()).isEqualTo(2);
+		assertThat(listener1.seenEvents).hasSize(2);
 	}
 
 	@Test
@@ -241,13 +241,13 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
-		assertThat(listener1.seenEvents.size()).isEqualTo(2);
+		assertThat(listener1.seenEvents).hasSize(2);
 	}
 
 	@Test
 	public void testEventPublicationInterceptor() throws Throwable {
-		MethodInvocation invocation = mock(MethodInvocation.class);
-		ApplicationContext ctx = mock(ApplicationContext.class);
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
 
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventClass(MyEvent.class);
@@ -298,7 +298,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		assertThat(listener1.seenEvents.contains(event4)).isTrue();
 
 		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
-		assertThat(multicaster.retrieverCache.size()).isEqualTo(2);
+		assertThat(multicaster.retrieverCache).hasSize(2);
 
 		context.close();
 	}
@@ -320,7 +320,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		assertThat(listener.seenPayloads.contains("event4")).isTrue();
 
 		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
-		assertThat(multicaster.retrieverCache.size()).isEqualTo(2);
+		assertThat(multicaster.retrieverCache).hasSize(2);
 
 		context.close();
 	}
@@ -384,7 +384,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		MyNonSingletonListener.seenEvents.clear();
 
 		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
-		assertThat(multicaster.retrieverCache.size()).isEqualTo(3);
+		assertThat(multicaster.retrieverCache).hasSize(3);
 
 		context.close();
 	}

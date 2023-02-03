@@ -149,7 +149,16 @@ class ConfigurationClassPostProcessorAotContributionTests {
 					.singleElement()
 					.satisfies(resourceHint -> assertThat(resourceHint.getIncludes())
 							.map(ResourcePatternHint::getPattern)
-							.containsOnly("org/springframework/context/testfixture/context/annotation/ImportConfiguration.class"));
+							.containsExactlyInAnyOrder(
+									"/",
+									"org",
+									"org/springframework",
+									"org/springframework/context",
+									"org/springframework/context/testfixture",
+									"org/springframework/context/testfixture/context",
+									"org/springframework/context/testfixture/context/annotation",
+									"org/springframework/context/testfixture/context/annotation/ImportConfiguration.class"
+							));
 		}
 
 		@SuppressWarnings("unchecked")

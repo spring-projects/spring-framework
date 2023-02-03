@@ -38,11 +38,11 @@ public class ContextLoadException extends Exception {
 
 	/**
 	 * Create a new {@code ContextLoadException} for the supplied
-	 * {@link ApplicationContext} and {@link Exception}.
+	 * {@link ApplicationContext} and {@link Throwable}.
 	 * @param applicationContext the application context that failed to load
 	 * @param cause the exception caught while attempting to load that context
 	 */
-	public ContextLoadException(ApplicationContext applicationContext, Exception cause) {
+	public ContextLoadException(ApplicationContext applicationContext, Throwable cause) {
 		super(cause);
 		this.applicationContext = applicationContext;
 	}

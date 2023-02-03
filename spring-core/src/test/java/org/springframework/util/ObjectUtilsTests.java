@@ -151,14 +151,14 @@ class ObjectUtilsTests {
 	void toObjectArrayWithNull() {
 		Object[] objects = ObjectUtils.toObjectArray(null);
 		assertThat(objects).isNotNull();
-		assertThat(objects.length).isEqualTo(0);
+		assertThat(objects).isEmpty();
 	}
 
 	@Test
 	void toObjectArrayWithEmptyPrimitiveArray() {
 		Object[] objects = ObjectUtils.toObjectArray(new byte[] {});
 		assertThat(objects).isNotNull();
-		assertThat(objects).hasSize(0);
+		assertThat(objects).isEmpty();
 	}
 
 	@Test
@@ -703,7 +703,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeToStringWithObjectArray() {
-		Object[] array = {"Han", Long.valueOf(43)};
+		Object[] array = {"Han", 43L};
 		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{Han, 43}");
 	}
 

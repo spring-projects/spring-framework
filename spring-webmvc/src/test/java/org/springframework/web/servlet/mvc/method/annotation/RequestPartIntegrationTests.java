@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  * @author Brian Clozel
  * @author Sam Brannen
  */
-public class RequestPartIntegrationTests {
+class RequestPartIntegrationTests {
 
 	private RestTemplate restTemplate;
 
@@ -85,7 +85,7 @@ public class RequestPartIntegrationTests {
 
 
 	@BeforeAll
-	public static void startServer() throws Exception {
+	static void startServer() throws Exception {
 		// Let server pick its own random, available port.
 		server = new Server(0);
 
@@ -106,14 +106,14 @@ public class RequestPartIntegrationTests {
 	}
 
 	@AfterAll
-	public static void stopServer() throws Exception {
+	static void stopServer() throws Exception {
 		if (server != null) {
 			server.stop();
 		}
 	}
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		ByteArrayHttpMessageConverter emptyBodyConverter = new ByteArrayHttpMessageConverter();
 		emptyBodyConverter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
 
@@ -132,13 +132,13 @@ public class RequestPartIntegrationTests {
 
 
 	@Test
-	public void standardMultipartResolver() throws Exception {
+	void standardMultipartResolver() throws Exception {
 		testCreate(baseUrl + "/standard-resolver/test", "Jason");
 		testCreate(baseUrl + "/standard-resolver/test", "Arjen");
 	}
 
 	@Test  // SPR-13319
-	public void standardMultipartResolverWithEncodedFileName() throws Exception {
+	void standardMultipartResolverWithEncodedFileName() throws Exception {
 		String boundaryText = MimeTypeUtils.generateMultipartBoundaryString();
 		Map<String, String> params = Collections.singletonMap("boundary", boundaryText);
 
@@ -152,7 +152,7 @@ public class RequestPartIntegrationTests {
 				"--" + boundaryText + "--";
 
 		RequestEntity<byte[]> requestEntity =
-				RequestEntity.post(new URI(baseUrl + "/standard-resolver/spr13319"))
+				RequestEntity.post(URI.create(baseUrl + "/standard-resolver/spr13319"))
 						.contentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params))
 						.body(content.getBytes(StandardCharsets.US_ASCII));
 

@@ -53,10 +53,7 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
-		wac.refresh();
-		return wac;
+		return new AnnotationConfigApplicationContext(WebConfig.class);
 	}
 
 
@@ -72,7 +69,7 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 	void etagCheckWithNotModifiedResponse(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		URI uri = new URI("http://localhost:" + this.port + "/html");
+		URI uri = URI.create("http://localhost:" + this.port + "/html");
 		RequestEntity<Void> request = RequestEntity.get(uri).ifNoneMatch("\"deadb33f8badf00d\"").build();
 		ResponseEntity<String> response = getRestTemplate().exchange(request, String.class);
 
@@ -92,7 +89,7 @@ class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappin
 			}
 		};
 
-		URI uri = new URI("http://localhost:" + this.port + "/redirect");
+		URI uri = URI.create("http://localhost:" + this.port + "/redirect");
 		RequestEntity<Void> request = RequestEntity.get(uri).accept(MediaType.ALL).build();
 		@SuppressWarnings("resource")
 		ResponseEntity<Void> response = new RestTemplate(factory).exchange(request, Void.class);

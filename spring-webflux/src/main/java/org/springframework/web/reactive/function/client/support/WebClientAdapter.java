@@ -133,35 +133,4 @@ public final class WebClientAdapter implements HttpClientAdapter {
 		return new WebClientAdapter(webClient);
 	}
 
-	/**
-	 * Static method to create a {@link HttpServiceProxyFactory} configured to
-	 * use the given {@link WebClient} instance. Effectively a shortcut for:
-	 * <pre>
-	 * WebClientAdapter adapter = WebClientAdapter.forClient(webClient);
-	 * HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(adapter);
-	 * </pre>
-	 * @param webClient the client to use
-	 * @return the created {@code HttpServiceProxyFactory} instance
-	 * @deprecated in favor of using {@link #forClient(WebClient)} and
-	 * {@link HttpServiceProxyFactory#builder(HttpClientAdapter)}
-	 */
-	@SuppressWarnings("removal")
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
-	public static HttpServiceProxyFactory createHttpServiceProxyFactory(WebClient webClient) {
-		return new HttpServiceProxyFactory(new WebClientAdapter(webClient));
-	}
-
-	/**
-	 * Variant of {@link #createHttpServiceProxyFactory(WebClient)} that accepts
-	 * a {@link WebClient.Builder} and uses it to create the client.
-	 * @param webClientBuilder a builder to create the client to use with
-	 * @return the created {@code HttpServiceProxyFactory} instance
-	 * @deprecated in favor of using {@link #forClient(WebClient)} and
-	 * {@link HttpServiceProxyFactory#builder(HttpClientAdapter)}
-	 */
-	@Deprecated(since = "6.0.0-RC1", forRemoval = true)
-	public static HttpServiceProxyFactory createHttpServiceProxyFactory(WebClient.Builder webClientBuilder) {
-		return createHttpServiceProxyFactory(webClientBuilder.build());
-	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,8 +148,8 @@ public class ResourceHandlerRegistry {
 	private ResourceWebHandler getRequestHandler(ResourceHandlerRegistration registration) {
 		ResourceWebHandler handler = registration.getRequestHandler();
 		for (ResourceTransformer transformer : handler.getResourceTransformers()) {
-			if (transformer instanceof ResourceTransformerSupport) {
-				((ResourceTransformerSupport) transformer).setResourceUrlProvider(this.resourceUrlProvider);
+			if (transformer instanceof ResourceTransformerSupport resourceTransformerSupport) {
+				resourceTransformerSupport.setResourceUrlProvider(this.resourceUrlProvider);
 			}
 		}
 		try {

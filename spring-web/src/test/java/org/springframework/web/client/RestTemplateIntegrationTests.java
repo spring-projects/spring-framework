@@ -199,7 +199,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		setUpClient(clientHttpRequestFactory);
 
 		URI location = template.postForLocation(baseUrl + "/{method}", helloWorld, "post");
-		assertThat(location).as("Invalid location").isEqualTo(new URI(baseUrl + "/post/1"));
+		assertThat(location).as("Invalid location").isEqualTo(URI.create(baseUrl + "/post/1"));
 	}
 
 	@ParameterizedRestTemplateTest
@@ -210,7 +210,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		entityHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 		URI location = template.postForLocation(baseUrl + "/{method}", entity, "post");
-		assertThat(location).as("Invalid location").isEqualTo(new URI(baseUrl + "/post/1"));
+		assertThat(location).as("Invalid location").isEqualTo(URI.create(baseUrl + "/post/1"));
 	}
 
 	@ParameterizedRestTemplateTest
@@ -274,7 +274,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	void optionsForAllow(ClientHttpRequestFactory clientHttpRequestFactory) throws Exception {
 		setUpClient(clientHttpRequestFactory);
 
-		Set<HttpMethod> allowed = template.optionsForAllow(new URI(baseUrl + "/get"));
+		Set<HttpMethod> allowed = template.optionsForAllow(URI.create(baseUrl + "/get"));
 		assertThat(allowed).as("Invalid response").isEqualTo(Set.of(HttpMethod.GET, HttpMethod.OPTIONS, HttpMethod.HEAD, HttpMethod.TRACE));
 	}
 
@@ -371,7 +371,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		requestHeaders.setContentType(MediaType.TEXT_PLAIN);
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, requestHeaders);
 		HttpEntity<Void> result = template.exchange(baseUrl + "/{method}", POST, entity, Void.class, "post");
-		assertThat(result.getHeaders().getLocation()).as("Invalid location").isEqualTo(new URI(baseUrl + "/post/1"));
+		assertThat(result.getHeaders().getLocation()).as("Invalid location").isEqualTo(URI.create(baseUrl + "/post/1"));
 		assertThat(result.hasBody()).isFalse();
 	}
 
@@ -425,7 +425,7 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 		list.add(new Bar("bar"));
 		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<ParentClass>>() {};
 		RequestEntity<List<ParentClass>> entity = RequestEntity
-				.post(new URI(baseUrl + "/jsonpost"))
+				.post(URI.create(baseUrl + "/jsonpost"))
 				.contentType(new MediaType("application", "json", StandardCharsets.UTF_8))
 				.body(list, typeReference.getType());
 		String content = template.exchange(entity, String.class).getBody();

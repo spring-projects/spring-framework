@@ -266,7 +266,7 @@ abstract class AbstractSockJsIntegrationTests {
 		}
 		TestClientHandler handler = new TestClientHandler();
 		initSockJsClient(transport);
-		URI url = new URI(this.baseUrl + "/echo");
+		URI url = URI.create(this.baseUrl + "/echo");
 		WebSocketSession session = this.sockJsClient.doHandshake(handler, headers, url).get();
 		for (TextMessage message : messages) {
 			session.sendMessage(message);
@@ -285,7 +285,7 @@ abstract class AbstractSockJsIntegrationTests {
 
 		TestClientHandler clientHandler = new TestClientHandler();
 		initSockJsClient(transport);
-		this.sockJsClient.doHandshake(clientHandler, headers, new URI(this.baseUrl + "/test")).get();
+		this.sockJsClient.doHandshake(clientHandler, headers, URI.create(this.baseUrl + "/test")).get();
 		TestServerHandler serverHandler = this.wac.getBean(TestServerHandler.class);
 
 		assertThat(clientHandler.session).as("afterConnectionEstablished should have been called").isNotNull();

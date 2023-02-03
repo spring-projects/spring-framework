@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,7 +223,7 @@ public class ViewResolutionResultHandler extends HandlerResultHandlerSupport imp
 						if (view == null) {
 							view = getDefaultViewName(exchange);
 						}
-						viewsMono = (view instanceof String ? resolveViews((String) view, locale) :
+						viewsMono = (view instanceof String viewName ? resolveViews(viewName, locale) :
 								Mono.just(Collections.singletonList((View) view)));
 					}
 					else if (Model.class.isAssignableFrom(clazz)) {

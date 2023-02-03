@@ -115,11 +115,11 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		return setStatusCode(statusCode != null ? HttpStatusCode.valueOf(statusCode) : null);
 	}
 
+	@Deprecated
 	@Override
 	@Nullable
-	@Deprecated
 	public Integer getRawStatusCode() {
-		return this.statusCode != null ? this.statusCode.value() : null;
+		return (this.statusCode != null ? this.statusCode.value() : null);
 	}
 
 	@Override
@@ -291,10 +291,10 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	/**
 	 * Invoked when the response is getting committed allowing subclasses to
 	 * make apply header values to the underlying response.
-	 * <p>Note that most subclasses use an {@link HttpHeaders} instance that
+	 * <p>Note that some subclasses use an {@link HttpHeaders} instance that
 	 * wraps an adapter to the native response headers such that changes are
 	 * propagated to the underlying response on the go. That means this callback
-	 * is typically not used other than for specialized updates such as setting
+	 * might not be used other than for specialized updates such as setting
 	 * the contentType or characterEncoding fields in a Servlet response.
 	 */
 	protected abstract void applyHeaders();

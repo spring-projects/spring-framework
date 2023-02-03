@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,11 @@ public class ExecutorServiceAdapter extends AbstractExecutorService {
 	@Override
 	public boolean isTerminated() {
 		return false;
+	}
+
+	// @Override on JDK 19
+	public void close() {
+		// no-op in order to avoid container-triggered shutdown call which would lead to exception logging
 	}
 
 }

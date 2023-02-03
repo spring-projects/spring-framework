@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import java.lang.annotation.Target;
 import java.util.Collections;
 import java.util.Set;
 
-import org.mockito.Mockito;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AliasFor;
@@ -42,6 +40,7 @@ import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
 
@@ -63,7 +62,7 @@ abstract class AbstractContextConfigurationUtilsTests {
 
 
 	MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
-		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = Mockito.mock(CacheAwareContextLoaderDelegate.class);
+		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = mock();
 		BootstrapContext bootstrapContext = BootstrapTestUtils.buildBootstrapContext(testClass, cacheAwareContextLoaderDelegate);
 		TestContextBootstrapper bootstrapper = BootstrapTestUtils.resolveTestContextBootstrapper(bootstrapContext);
 		return bootstrapper.buildMergedContextConfiguration();

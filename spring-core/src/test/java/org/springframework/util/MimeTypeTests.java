@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,7 +344,7 @@ class MimeTypeTests {
 		String s = String.join(",", mimeTypes);
 		List<MimeType> actual = MimeTypeUtils.parseMimeTypes(s);
 
-		assertThat(actual.size()).isEqualTo(mimeTypes.length);
+		assertThat(actual).hasSize(mimeTypes.length);
 		for (int i = 0; i < mimeTypes.length; i++) {
 			assertThat(actual.get(i).toString()).isEqualTo(mimeTypes[i]);
 		}

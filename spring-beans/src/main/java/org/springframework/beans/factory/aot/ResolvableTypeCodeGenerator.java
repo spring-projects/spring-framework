@@ -45,7 +45,7 @@ final class ResolvableTypeCodeGenerator {
 			return CodeBlock.of("$T.NONE", ResolvableType.class);
 		}
 		Class<?> type = ClassUtils.getUserClass(resolvableType.toClass());
-		if (resolvableType.hasGenerics()) {
+		if (resolvableType.hasGenerics() && !resolvableType.hasUnresolvableGenerics()) {
 			return generateCodeWithGenerics(resolvableType, type);
 		}
 		if (allowClassResult) {

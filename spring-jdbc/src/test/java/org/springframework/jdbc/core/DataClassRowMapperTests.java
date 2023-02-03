@@ -41,7 +41,7 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 		List<ConstructorPerson> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(ConstructorPerson.class));
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		verifyPerson(result.get(0));
 
 		mock.verifyClosed();
@@ -53,7 +53,7 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 		List<ConstructorPersonWithGenerics> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(ConstructorPersonWithGenerics.class));
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		ConstructorPersonWithGenerics person = result.get(0);
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
@@ -69,7 +69,7 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 		List<ConstructorPersonWithSetters> result = mock.getJdbcTemplate().query(
 				"select name, age, birthdate, balance from people",
 				new DataClassRowMapper<>(ConstructorPersonWithSetters.class));
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		ConstructorPersonWithSetters person = result.get(0);
 		assertThat(person.name()).isEqualTo("BUBBA");
 		assertThat(person.age()).isEqualTo(22L);
@@ -85,7 +85,7 @@ public class DataClassRowMapperTests extends AbstractRowMapperTests {
 		List<RecordPerson> result = mock.getJdbcTemplate().query(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(RecordPerson.class));
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		verifyPerson(result.get(0));
 
 		mock.verifyClosed();

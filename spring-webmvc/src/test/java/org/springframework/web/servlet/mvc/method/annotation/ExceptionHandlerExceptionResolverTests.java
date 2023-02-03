@@ -228,7 +228,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 
 		assertThat(mav).isNotNull();
-		assertThat(mav.getModelMap().size()).isEqualTo(1);
+		assertThat(mav.getModelMap()).hasSize(1);
 		assertThat(mav.getModelMap().get("exceptionClassName")).isEqualTo("IllegalArgumentException");
 	}
 
@@ -438,8 +438,8 @@ public class ExceptionHandlerExceptionResolverTests {
 
 
 	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
-		assertThat(this.resolver.getArgumentResolvers().getResolvers().size()).isEqualTo(resolverCount);
-		assertThat(this.resolver.getReturnValueHandlers().getHandlers().size()).isEqualTo(handlerCount);
+		assertThat(this.resolver.getArgumentResolvers().getResolvers()).hasSize(resolverCount);
+		assertThat(this.resolver.getReturnValueHandlers().getHandlers()).hasSize(handlerCount);
 	}
 
 

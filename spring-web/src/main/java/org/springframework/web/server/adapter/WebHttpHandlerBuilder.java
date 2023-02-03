@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,8 +247,9 @@ public final class WebHttpHandlerBuilder {
 
 		List<WebFilter> filtersToUse = this.filters.stream()
 				.peek(filter -> {
-					if (filter instanceof ForwardedHeaderTransformer && this.forwardedHeaderTransformer == null) {
-						this.forwardedHeaderTransformer = (ForwardedHeaderTransformer) filter;
+					if (filter instanceof ForwardedHeaderTransformer forwardedHeaderTransformerFilter
+							&& this.forwardedHeaderTransformer == null) {
+						this.forwardedHeaderTransformer = forwardedHeaderTransformerFilter;
 					}
 				})
 				.filter(filter -> !(filter instanceof ForwardedHeaderTransformer))

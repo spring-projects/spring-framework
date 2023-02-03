@@ -43,7 +43,8 @@ import org.springframework.util.Assert;
  *         and its child directories at any depth.</li>
  * </ul>
  *
- * <p>A resource pattern must not start with a slash ({@code /}).
+ * <p>A resource pattern must not start with a slash ({@code /}) unless it is the
+ * root directory.
  *
  * @author Stephane Nicoll
  * @author Brian Clozel
@@ -58,12 +59,15 @@ public final class ResourcePatternHint implements ConditionalHint {
 	@Nullable
 	private final TypeReference reachableType;
 
+
 	ResourcePatternHint(String pattern, @Nullable TypeReference reachableType) {
-		Assert.isTrue(!pattern.startsWith("/"),
-				() -> "Resource pattern [%s] must not start with a '/'".formatted(pattern));
+		Assert.isTrue(("/".equals(pattern) || !pattern.startsWith("/")),
+				() -> "Resource pattern [%s] must not start with a '/' unless it is the root directory"
+						.formatted(pattern));
 		this.pattern = pattern;
 		this.reachableType = reachableType;
 	}
+
 
 	/**
 	 * Return the pattern to use for identifying the resources to match.

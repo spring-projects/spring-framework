@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestContextManager;
-import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,9 +38,6 @@ import static org.mockito.Mockito.mock;
  * Tests for {@link DisabledIfCondition} that verify actual condition evaluation
  * results and exception handling; whereas, {@link DisabledIfTests} only tests
  * the <em>happy paths</em>.
- *
- * <p>To run these tests in an IDE that does not have built-in support for the JUnit
- * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.0
@@ -115,10 +111,10 @@ class DisabledIfConditionTests {
 	private ExtensionContext buildExtensionContext(String methodName) {
 		Class<?> testClass = SpringTestCase.class;
 		Method method = ReflectionUtils.findMethod(getClass(), methodName);
-		Store store = mock(Store.class);
+		Store store = mock();
 		given(store.getOrComputeIfAbsent(any(), any(), any())).willReturn(new TestContextManager(testClass));
 
-		ExtensionContext extensionContext = mock(ExtensionContext.class);
+		ExtensionContext extensionContext = mock();
 		given(extensionContext.getTestClass()).willReturn(Optional.of(testClass));
 		given(extensionContext.getElement()).willReturn(Optional.of(method));
 		given(extensionContext.getStore(any())).willReturn(store);

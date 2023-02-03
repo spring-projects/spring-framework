@@ -17,7 +17,6 @@
 package org.springframework.cglib.proxy;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 
 import org.springframework.cglib.core.CodeGenerationException;
 
@@ -40,20 +39,17 @@ import org.springframework.cglib.core.CodeGenerationException;
 public class Proxy implements Serializable {
     protected InvocationHandler h;
 
-    private static final CallbackFilter BAD_OBJECT_METHOD_FILTER = new CallbackFilter() {
-        @Override
-        public int accept(Method method) {
-            if (method.getDeclaringClass().getName().equals("java.lang.Object")) {
-                String name = method.getName();
-                if (!(name.equals("hashCode") ||
-                      name.equals("equals") ||
-                      name.equals("toString"))) {
-                    return 1;
-                }
-            }
-            return 0;
-        }
-    };
+    private static final CallbackFilter BAD_OBJECT_METHOD_FILTER = method -> {
+	    if (method.getDeclaringClass().getName().equals("java.lang.Object")) {
+	        String name = method.getName();
+	        if (!(name.equals("hashCode") ||
+	              name.equals("equals") ||
+	              name.equals("toString"))) {
+	            return 1;
+	        }
+	    }
+	    return 0;
+	};
 
     protected Proxy(InvocationHandler h) {
         Enhancer.registerCallbacks(getClass(), new Callback[]{ h, null });

@@ -232,7 +232,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertThat(tb).isNotSameAs(anotherBean.getTestBean6());
 
 		String[] depBeans = bf.getDependenciesForBean("annotatedBean");
-		assertThat(depBeans.length).isEqualTo(1);
+		assertThat(depBeans).hasSize(1);
 		assertThat(depBeans[0]).isEqualTo("testBean4");
 	}
 

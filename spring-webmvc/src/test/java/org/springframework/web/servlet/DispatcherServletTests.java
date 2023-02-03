@@ -98,6 +98,7 @@ public class DispatcherServletTests {
 		complexConfig.addInitParameter("publishContext", "false");
 		complexConfig.addInitParameter("class", "notWritable");
 		complexConfig.addInitParameter("unknownParam", "someValue");
+		complexConfig.addInitParameter("jakarta.servlet.http.legacyDoHead", "true");
 
 		simpleDispatcherServlet = new DispatcherServlet();
 		simpleDispatcherServlet.setContextClass(SimpleWebApplicationContext.class);
@@ -872,6 +873,14 @@ public class DispatcherServletTests {
 		servlet.init(servletConfig);
 		assertThat(getServletContext().getAttribute("initialized")).isEqualTo("true");
 		assertThat(getServletContext().getAttribute("otherInitialized")).isEqualTo("true");
+	}
+
+	@Test
+	public void webDavMethod() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "PROPFIND", "/body.do");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		complexDispatcherServlet.service(request, response);
+		assertThat(response.getContentAsString()).isEqualTo("body");
 	}
 
 

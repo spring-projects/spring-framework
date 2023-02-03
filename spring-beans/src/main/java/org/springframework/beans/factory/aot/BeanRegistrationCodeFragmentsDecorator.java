@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
 /**
  * A {@link BeanRegistrationCodeFragments} decorator implementation. Typically
  * used when part of the default code fragments have to customized, by extending
- * this class and use it as part of
+ * this class and using it as part of
  * {@link BeanRegistrationAotContribution#withCustomCodeFragments(UnaryOperator)}.
  *
  * @author Phillip Webb
@@ -41,7 +41,6 @@ import org.springframework.util.Assert;
  * @since 6.0
  */
 public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationCodeFragments {
-
 
 	private final BeanRegistrationCodeFragments delegate;
 
@@ -52,9 +51,7 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 	}
 
 	@Override
-	public ClassName getTarget(RegisteredBean registeredBean,
-			Executable constructorOrFactoryMethod) {
-
+	public ClassName getTarget(RegisteredBean registeredBean, Executable constructorOrFactoryMethod) {
 		return this.delegate.getTarget(registeredBean, constructorOrFactoryMethod);
 	}
 
@@ -64,23 +61,19 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 
 		return this.delegate.generateNewBeanDefinitionCode(generationContext,
 				beanType, beanRegistrationCode);
-
 	}
 
 	@Override
-	public CodeBlock generateSetBeanDefinitionPropertiesCode(
-			GenerationContext generationContext,
+	public CodeBlock generateSetBeanDefinitionPropertiesCode(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode, RootBeanDefinition beanDefinition,
 			Predicate<String> attributeFilter) {
 
 		return this.delegate.generateSetBeanDefinitionPropertiesCode(
 				generationContext, beanRegistrationCode, beanDefinition, attributeFilter);
-
 	}
 
 	@Override
-	public CodeBlock generateSetBeanInstanceSupplierCode(
-			GenerationContext generationContext,
+	public CodeBlock generateSetBeanInstanceSupplierCode(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode, CodeBlock instanceSupplierCode,
 			List<MethodReference> postProcessors) {
 
@@ -90,8 +83,8 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 
 	@Override
 	public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode,
-			Executable constructorOrFactoryMethod, boolean allowDirectSupplierShortcut) {
+			BeanRegistrationCode beanRegistrationCode, Executable constructorOrFactoryMethod,
+			boolean allowDirectSupplierShortcut) {
 
 		return this.delegate.generateInstanceSupplierCode(generationContext,
 				beanRegistrationCode, constructorOrFactoryMethod, allowDirectSupplierShortcut);
@@ -101,8 +94,7 @@ public class BeanRegistrationCodeFragmentsDecorator implements BeanRegistrationC
 	public CodeBlock generateReturnCode(GenerationContext generationContext,
 			BeanRegistrationCode beanRegistrationCode) {
 
-		return this.delegate.generateReturnCode(generationContext,
-				beanRegistrationCode);
+		return this.delegate.generateReturnCode(generationContext, beanRegistrationCode);
 	}
 
 }

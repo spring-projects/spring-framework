@@ -63,8 +63,8 @@ class RecordedInvocationTests {
 
 	@Test
 	void staticInvocationShouldThrowWhenGetInstance() {
-		assertThatThrownBy(staticInvocation::getInstance).isInstanceOf(IllegalArgumentException.class);
-		assertThatThrownBy(staticInvocation::getInstanceTypeReference).isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(staticInvocation::getInstance).isInstanceOf(IllegalStateException.class);
+		assertThatThrownBy(staticInvocation::getInstanceTypeReference).isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test

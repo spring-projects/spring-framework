@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,24 +42,23 @@ import static org.mockito.Mockito.mock;
  * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
  *
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
 @DisabledOnJre(value = JRE.JAVA_19, disabledReason = "Kotlin doesn't support Java 19 yet")
-public class KotlinScriptTemplateTests {
+class KotlinScriptTemplateTests {
 
-	private WebApplicationContext webAppContext;
+	private WebApplicationContext webAppContext = mock();
 
-	private ServletContext servletContext;
+	private ServletContext servletContext = new MockServletContext();
 
 
 	@BeforeEach
-	public void setup() {
-		this.webAppContext = mock(WebApplicationContext.class);
-		this.servletContext = new MockServletContext();
+	void setup() {
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webAppContext);
 	}
 
 	@Test
-	public void renderTemplateWithFrenchLocale() throws Exception {
+	void renderTemplateWithFrenchLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
 		String url = "org/springframework/web/servlet/view/script/kotlin/template.kts";
@@ -68,7 +67,7 @@ public class KotlinScriptTemplateTests {
 	}
 
 	@Test
-	public void renderTemplateWithEnglishLocale() throws Exception {
+	void renderTemplateWithEnglishLocale() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "Foo");
 		String url = "org/springframework/web/servlet/view/script/kotlin/template.kts";
@@ -77,7 +76,7 @@ public class KotlinScriptTemplateTests {
 	}
 
 	@Test
-	public void renderTemplateWithoutRenderFunction() throws Exception {
+	void renderTemplateWithoutRenderFunction() throws Exception {
 		Map<String, Object> model = new HashMap<>();
 		model.put("header", "<html><body>");
 		model.put("hello", "Hello");
@@ -89,7 +88,7 @@ public class KotlinScriptTemplateTests {
 	}
 
 
-	private MockHttpServletResponse render(String viewUrl, Map<String, Object> model,
+	private static MockHttpServletResponse render(String viewUrl, Map<String, Object> model,
 			Locale locale, Class<?> configuration) throws Exception {
 
 		ScriptTemplateView view = createViewWithUrl(viewUrl, configuration);
@@ -100,10 +99,8 @@ public class KotlinScriptTemplateTests {
 		return response;
 	}
 
-	private ScriptTemplateView createViewWithUrl(String viewUrl, Class<?> configuration) throws Exception {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(configuration);
-		ctx.refresh();
+	private static ScriptTemplateView createViewWithUrl(String viewUrl, Class<?> configuration) throws Exception {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(configuration);
 
 		ScriptTemplateView view = new ScriptTemplateView();
 		view.setApplicationContext(ctx);
@@ -117,7 +114,7 @@ public class KotlinScriptTemplateTests {
 	static class ScriptTemplatingConfiguration {
 
 		@Bean
-		public ScriptTemplateConfigurer kotlinScriptConfigurer() {
+		ScriptTemplateConfigurer kotlinScriptConfigurer() {
 			ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
 			configurer.setEngineName("kotlin");
 			configurer.setScripts("org/springframework/web/servlet/view/script/kotlin/render.kts");
@@ -126,7 +123,7 @@ public class KotlinScriptTemplateTests {
 		}
 
 		@Bean
-		public ResourceBundleMessageSource messageSource() {
+		ResourceBundleMessageSource messageSource() {
 			ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 			messageSource.setBasename("org/springframework/web/servlet/view/script/messages");
 			return messageSource;
@@ -137,7 +134,7 @@ public class KotlinScriptTemplateTests {
 	static class ScriptTemplatingConfigurationWithoutRenderFunction {
 
 		@Bean
-		public ScriptTemplateConfigurer kotlinScriptConfigurer() {
+		ScriptTemplateConfigurer kotlinScriptConfigurer() {
 			return new ScriptTemplateConfigurer("kotlin");
 		}
 	}

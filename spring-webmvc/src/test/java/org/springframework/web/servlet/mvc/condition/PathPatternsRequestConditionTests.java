@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,8 @@ public class PathPatternsRequestConditionTests {
 		PathPatternsRequestCondition c2 = createCondition();
 		PathPatternsRequestCondition c3 = c1.combine(c2);
 
-		assertThat(c3).isSameAs(c1);
 		assertThat(c1.getPatternValues()).isSameAs(c2.getPatternValues()).containsExactly("");
+		assertThat(c3.getPatternValues()).containsExactly("", "/");
 	}
 
 	@Test

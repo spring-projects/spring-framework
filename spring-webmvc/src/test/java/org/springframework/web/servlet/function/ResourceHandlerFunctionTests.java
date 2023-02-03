@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ public class ResourceHandlerFunctionTests {
 
 		assertThat(servletResponse.getStatus()).isEqualTo(200);
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
-		assertThat(actualBytes.length).isEqualTo(0);
+		assertThat(actualBytes).isEmpty();
 		assertThat(servletResponse.getContentType()).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(servletResponse.getContentLength()).isEqualTo(this.resource.contentLength());
 	}
@@ -185,7 +185,7 @@ public class ResourceHandlerFunctionTests {
 		String[] methods = StringUtils.tokenizeToStringArray(allowHeader, ",");
 		assertThat(methods).containsExactlyInAnyOrder("GET","HEAD","OPTIONS");
 		byte[] actualBytes = servletResponse.getContentAsByteArray();
-		assertThat(actualBytes.length).isEqualTo(0);
+		assertThat(actualBytes).isEmpty();
 	}
 
 }

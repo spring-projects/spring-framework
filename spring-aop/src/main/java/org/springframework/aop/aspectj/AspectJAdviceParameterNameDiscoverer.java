@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,17 +132,17 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	private static final int STEP_REFERENCE_PCUT_BINDING = 7;
 	private static final int STEP_FINISHED = 8;
 
-	private static final Set<String> singleValuedAnnotationPcds = new HashSet<>();
+	private static final Set<String> singleValuedAnnotationPcds = Set.of(
+			"@this",
+			"@target",
+			"@within",
+			"@withincode",
+			"@annotation");
+
 	private static final Set<String> nonReferencePointcutTokens = new HashSet<>();
 
 
 	static {
-		singleValuedAnnotationPcds.add("@this");
-		singleValuedAnnotationPcds.add("@target");
-		singleValuedAnnotationPcds.add("@within");
-		singleValuedAnnotationPcds.add("@withincode");
-		singleValuedAnnotationPcds.add("@annotation");
-
 		Set<PointcutPrimitive> pointcutPrimitives = PointcutParser.getAllSupportedPointcutPrimitives();
 		for (PointcutPrimitive primitive : pointcutPrimitives) {
 			nonReferencePointcutTokens.add(primitive.getName());
@@ -244,31 +244,18 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			int algorithmicStep = STEP_JOIN_POINT_BINDING;
 			while ((this.numberOfRemainingUnboundArguments > 0) && algorithmicStep < STEP_FINISHED) {
 				switch (algorithmicStep++) {
-					case STEP_JOIN_POINT_BINDING:
+					case STEP_JOIN_POINT_BINDING -> {
 						if (!maybeBindThisJoinPoint()) {
 							maybeBindThisJoinPointStaticPart();
 						}
-						break;
-					case STEP_THROWING_BINDING:
-						maybeBindThrowingVariable();
-						break;
-					case STEP_ANNOTATION_BINDING:
-						maybeBindAnnotationsFromPointcutExpression();
-						break;
-					case STEP_RETURNING_BINDING:
-						maybeBindReturningVariable();
-						break;
-					case STEP_PRIMITIVE_ARGS_BINDING:
-						maybeBindPrimitiveArgsFromPointcutExpression();
-						break;
-					case STEP_THIS_TARGET_ARGS_BINDING:
-						maybeBindThisOrTargetOrArgsFromPointcutExpression();
-						break;
-					case STEP_REFERENCE_PCUT_BINDING:
-						maybeBindReferencePointcutParameter();
-						break;
-					default:
-						throw new IllegalStateException("Unknown algorithmic step: " + (algorithmicStep - 1));
+					}
+					case STEP_THROWING_BINDING -> maybeBindThrowingVariable();
+					case STEP_ANNOTATION_BINDING -> maybeBindAnnotationsFromPointcutExpression();
+					case STEP_RETURNING_BINDING -> maybeBindReturningVariable();
+					case STEP_PRIMITIVE_ARGS_BINDING -> maybeBindPrimitiveArgsFromPointcutExpression();
+					case STEP_THIS_TARGET_ARGS_BINDING -> maybeBindThisOrTargetOrArgsFromPointcutExpression();
+					case STEP_REFERENCE_PCUT_BINDING -> maybeBindReferencePointcutParameter();
+					default -> throw new IllegalStateException("Unknown algorithmic step: " + (algorithmicStep - 1));
 				}
 			}
 		}

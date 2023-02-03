@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,7 +173,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	@Nullable
 	public Destination getDefaultDestination() {
-		return (this.defaultDestination instanceof Destination ? (Destination) this.defaultDestination : null);
+		return (this.defaultDestination instanceof Destination dest ? dest : null);
 	}
 
 	@Nullable
@@ -207,7 +207,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 */
 	@Nullable
 	public String getDefaultDestinationName() {
-		return (this.defaultDestination instanceof String ? (String) this.defaultDestination : null);
+		return (this.defaultDestination instanceof String name ? name : null);
 	}
 
 	private String getRequiredDefaultDestinationName() throws IllegalStateException {

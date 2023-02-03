@@ -1,6 +1,9 @@
 package org.springframework.cglib.core.internal;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class LoadingCache<K, KK, V> {
@@ -8,16 +11,12 @@ public class LoadingCache<K, KK, V> {
     protected final Function<K, V> loader;
     protected final Function<K, KK> keyMapper;
 
-    public static final Function IDENTITY = new Function() {
-        public Object apply(Object key) {
-            return key;
-        }
-    };
+    public static final Function IDENTITY = key -> key;
 
     public LoadingCache(Function<K, KK> keyMapper, Function<K, V> loader) {
         this.keyMapper = keyMapper;
         this.loader = loader;
-        this.map = new ConcurrentHashMap<KK, Object>();
+        this.map = new ConcurrentHashMap<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -50,11 +49,7 @@ public class LoadingCache<K, KK, V> {
             // Another thread is already loading an instance
             task = (FutureTask<V>) v;
         } else {
-            task = new FutureTask<V>(new Callable<V>() {
-                public V call() throws Exception {
-                    return loader.apply(key);
-                }
-            });
+            task = new FutureTask<>(() -> loader.apply(key));
             Object prevTask = map.putIfAbsent(cacheKey, task);
             if (prevTask == null) {
                 // creator does the load

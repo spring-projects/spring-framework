@@ -54,20 +54,24 @@ public class Signature {
         return Type.getArgumentTypes(desc);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return name + desc;
     }
 
-    public boolean equals(Object o) {
-        if (o == null)
-            return false;
-        if (!(o instanceof Signature))
-            return false;
-        Signature other = (Signature)o;
+    @Override
+	public boolean equals(Object o) {
+        if (o == null) {
+			return false;
+		}
+        if (!(o instanceof Signature other)) {
+			return false;
+		}
         return name.equals(other.name) && desc.equals(other.desc);
     }
 
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return name.hashCode() ^ desc.hashCode();
     }
 }

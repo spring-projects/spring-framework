@@ -49,11 +49,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  * @author Janne Valkealahti
+ * @author Sam Brannen
  */
-public class FileNativeConfigurationWriterTests {
+class FileNativeConfigurationWriterTests {
 
 	@TempDir
 	static Path tempDir;
+
 
 	@Test
 	void emptyConfig() {
@@ -174,6 +176,9 @@ public class FileNativeConfigurationWriterTests {
 					"resources": {
 						"includes": [
 							{"pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{"pattern": "\\\\Q/\\\\E"},
+							{"pattern": "\\\\Qcom\\\\E"},
+							{"pattern": "\\\\Qcom/example\\\\E"},
 							{"pattern": "\\\\Qcom/example/another.properties\\\\E"}
 						]
 					}
@@ -191,12 +196,12 @@ public class FileNativeConfigurationWriterTests {
 		resourceHints.registerPattern("com/example/test.properties");
 		generator.write(hints);
 		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve(groupId).resolve(artifactId).resolve(filename);
-		assertThat(jsonFile.toFile().exists()).isTrue();
+		assertThat(jsonFile.toFile()).exists();
 	}
 
 	private void assertEquals(String expectedString, String filename) throws IOException, JSONException {
 		Path jsonFile = tempDir.resolve("META-INF").resolve("native-image").resolve(filename);
-		String content = new String(Files.readAllBytes(jsonFile));
+		String content = Files.readString(jsonFile);
 		JSONAssert.assertEquals(expectedString, content, JSONCompareMode.NON_EXTENSIBLE);
 	}
 

@@ -20,10 +20,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -35,6 +38,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingMatrixVariableException;
 import org.springframework.web.bind.MissingPathVariableException;
@@ -243,11 +247,12 @@ public class ErrorResponseExceptionTests {
 		MessageSourceTestHelper messageSourceHelper = new MessageSourceTestHelper(MethodArgumentNotValidException.class);
 		BindingResult bindingResult = messageSourceHelper.initBindingResult();
 
-		ErrorResponse ex = new MethodArgumentNotValidException(this.methodParameter, bindingResult);
+		MethodArgumentNotValidException ex = new MethodArgumentNotValidException(this.methodParameter, bindingResult);
 
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
 		assertDetail(ex, "Invalid request content.");
 		messageSourceHelper.assertDetailMessage(ex);
+		messageSourceHelper.assertErrorMessages(ex::resolveErrorMessages);
 
 		assertThat(ex.getHeaders()).isEmpty();
 	}
@@ -316,7 +321,7 @@ public class ErrorResponseExceptionTests {
 		ServerErrorException ex = new ServerErrorException("Failure", null);
 
 		assertStatus(ex, HttpStatus.INTERNAL_SERVER_ERROR);
-		assertDetail(ex, null);
+		assertDetail(ex, "Failure");
 		assertDetailMessageCode(ex, null, new Object[] {ex.getReason()});
 
 		assertThat(ex.getHeaders()).isEmpty();
@@ -361,6 +366,7 @@ public class ErrorResponseExceptionTests {
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
 		assertDetail(ex, "Invalid request content.");
 		messageSourceHelper.assertDetailMessage(ex);
+		messageSourceHelper.assertErrorMessages(ex::resolveErrorMessages);
 
 		assertThat(ex.getHeaders()).isEmpty();
 	}
@@ -444,12 +450,8 @@ public class ErrorResponseExceptionTests {
 		}
 
 		private void assertDetailMessage(ErrorResponse ex) {
-			StaticMessageSource messageSource = new StaticMessageSource();
-			messageSource.addMessage(this.code, Locale.UK, "Failures {0}. nested failures: {1}");
-			messageSource.addMessage("bean.invalid.A", Locale.UK, "Bean A message");
-			messageSource.addMessage("bean.invalid.B", Locale.UK, "Bean B message");
-			messageSource.addMessage("name.required", Locale.UK, "Required name message");
-			messageSource.addMessage("age.min", Locale.UK, "Minimum age message");
+
+			StaticMessageSource messageSource = initMessageSource();
 
 			String message = messageSource.getMessage(
 					ex.getDetailMessageCode(), ex.getDetailMessageArguments(), Locale.UK);
@@ -464,6 +466,24 @@ public class ErrorResponseExceptionTests {
 			assertThat(message).isEqualTo("" +
 					"Failures ['Bean A message', 'Bean B message']. " +
 					"nested failures: [name: 'Required name message', age: 'Minimum age message']");
+		}
+
+		private void assertErrorMessages(BiFunction<MessageSource, Locale, Map<ObjectError, String>> expectedMessages) {
+			StaticMessageSource messageSource = initMessageSource();
+			Map<ObjectError, String> map = expectedMessages.apply(messageSource, Locale.UK);
+
+			assertThat(map).hasSize(4).containsValues(
+					"'Bean A message'", "'Bean B message'", "name: 'Required name message'", "age: 'Minimum age message'");
+		}
+
+		private StaticMessageSource initMessageSource() {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage(this.code, Locale.UK, "Failures {0}. nested failures: {1}");
+			messageSource.addMessage("bean.invalid.A", Locale.UK, "Bean A message");
+			messageSource.addMessage("bean.invalid.B", Locale.UK, "Bean B message");
+			messageSource.addMessage("name.required", Locale.UK, "Required name message");
+			messageSource.addMessage("age.min", Locale.UK, "Minimum age message");
+			return messageSource;
 		}
 	}
 

@@ -16,8 +16,11 @@
 package org.springframework.cglib.beans;
 
 import java.security.ProtectionDomain;
-import org.springframework.cglib.core.*;
+
 import org.springframework.asm.ClassVisitor;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.KeyFactory;
+import org.springframework.cglib.core.ReflectUtils;
 
 /**
  * @author Juozas Baliuka
@@ -27,17 +30,17 @@ abstract public class BulkBean
 {
     private static final BulkBeanKey KEY_FACTORY =
       (BulkBeanKey)KeyFactory.create(BulkBeanKey.class);
-    
+
     interface BulkBeanKey {
         public Object newInstance(String target, String[] getters, String[] setters, String[] types);
     }
-    
+
     protected Class target;
     protected String[] getters, setters;
     protected Class[] types;
-    
+
     protected BulkBean() { }
-    
+
     abstract public void getPropertyValues(Object bean, Object[] values);
     abstract public void setPropertyValues(Object bean, Object[] values);
 
@@ -46,15 +49,15 @@ abstract public class BulkBean
         getPropertyValues(bean, values);
         return values;
     }
-    
+
     public Class[] getPropertyTypes() {
         return types.clone();
     }
-    
+
     public String[] getGetters() {
         return getters.clone();
     }
-    
+
     public String[] getSetters() {
         return setters.clone();
     }
@@ -98,11 +101,13 @@ abstract public class BulkBean
             this.types = types;
         }
 
-        protected ClassLoader getDefaultClassLoader() {
+        @Override
+		protected ClassLoader getDefaultClassLoader() {
             return target.getClassLoader();
         }
 
-        protected ProtectionDomain getProtectionDomain() {
+        @Override
+		protected ProtectionDomain getProtectionDomain() {
         	return ReflectUtils.getProtectionDomain(target);
         }
 
@@ -114,28 +119,31 @@ abstract public class BulkBean
             return (BulkBean)super.create(key);
         }
 
-        public void generateClass(ClassVisitor v) throws Exception {
+        @Override
+		public void generateClass(ClassVisitor v) throws Exception {
             new BulkBeanEmitter(v, getClassName(), target, getters, setters, types);
         }
 
-        protected Object firstInstance(Class type) {
+        @Override
+		protected Object firstInstance(Class type) {
             BulkBean instance = (BulkBean)ReflectUtils.newInstance(type);
             instance.target = target;
-                    
+
             int length = getters.length;
             instance.getters = new String[length];
             System.arraycopy(getters, 0, instance.getters, 0, length);
-                    
+
             instance.setters = new String[length];
             System.arraycopy(setters, 0, instance.setters, 0, length);
-                    
+
             instance.types = new Class[types.length];
             System.arraycopy(types, 0, instance.types, 0, types.length);
 
             return instance;
         }
 
-        protected Object nextInstance(Object instance) {
+        @Override
+		protected Object nextInstance(Object instance) {
             return instance;
         }
     }

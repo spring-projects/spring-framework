@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,11 @@ import static org.mockito.Mockito.verify;
  */
 class SimpleJdbcInsertTests {
 
-	private final Connection connection = mock(Connection.class);
+	private final Connection connection = mock();
 
-	private final DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+	private final DatabaseMetaData databaseMetaData = mock();
 
-	private final DataSource dataSource = mock(DataSource.class);
+	private final DataSource dataSource = mock();
 
 
 	@BeforeEach
@@ -66,7 +66,7 @@ class SimpleJdbcInsertTests {
 
 	@Test
 	void noSuchTable() throws Exception {
-		ResultSet resultSet = mock(ResultSet.class);
+		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(false);
 
 		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
@@ -86,13 +86,13 @@ class SimpleJdbcInsertTests {
 
 	@Test  // gh-26486
 	void retrieveColumnNamesFromMetadata() throws Exception {
-		ResultSet tableResultSet = mock(ResultSet.class);
+		ResultSet tableResultSet = mock();
 		given(tableResultSet.next()).willReturn(true, false);
 
 		given(databaseMetaData.getUserName()).willReturn("me");
 		given(databaseMetaData.getTables(null, null, "me", null)).willReturn(tableResultSet);
 
-		ResultSet columnResultSet = mock(ResultSet.class);
+		ResultSet columnResultSet = mock();
 		given(databaseMetaData.getColumns(null, "me", null, null)).willReturn(columnResultSet);
 		given(columnResultSet.next()).willReturn(true, true, false);
 		given(columnResultSet.getString("COLUMN_NAME")).willReturn("col1", "col2");
@@ -109,13 +109,13 @@ class SimpleJdbcInsertTests {
 
 	@Test  // gh-26486
 	void exceptionThrownWhileRetrievingColumnNamesFromMetadata() throws Exception {
-		ResultSet tableResultSet = mock(ResultSet.class);
+		ResultSet tableResultSet = mock();
 		given(tableResultSet.next()).willReturn(true, false);
 
 		given(databaseMetaData.getUserName()).willReturn("me");
 		given(databaseMetaData.getTables(null, null, "me", null)).willReturn(tableResultSet);
 
-		ResultSet columnResultSet = mock(ResultSet.class);
+		ResultSet columnResultSet = mock();
 		given(databaseMetaData.getColumns(null, "me", null, null)).willReturn(columnResultSet);
 		// true, true, false --> simulates processing of two columns
 		given(columnResultSet.next()).willReturn(true, true, false);

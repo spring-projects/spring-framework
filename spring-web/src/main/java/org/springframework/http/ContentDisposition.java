@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,9 +236,9 @@ public final class ContentDisposition {
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.filename);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.charset);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.size);
-		result = 31 * result + (this.creationDate != null ? this.creationDate.hashCode() : 0);
-		result = 31 * result + (this.modificationDate != null ? this.modificationDate.hashCode() : 0);
-		result = 31 * result + (this.readDate != null ? this.readDate.hashCode() : 0);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.creationDate);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.modificationDate);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.readDate);
 		return result;
 	}
 
@@ -262,8 +262,10 @@ public final class ContentDisposition {
 				sb.append(encodeQuotedPairs(this.filename)).append('\"');
 			}
 			else {
+				sb.append("; filename=\"");
+				sb.append(encodeQuotedPrintableFilename(this.filename, this.charset)).append('\"');
 				sb.append("; filename*=");
-				sb.append(encodeFilename(this.filename, this.charset));
+				sb.append(encodeRfc5987Filename(this.filename, this.charset));
 			}
 		}
 		if (this.size != null) {
@@ -363,12 +365,12 @@ public final class ContentDisposition {
 					if (idx1 != -1 && idx2 != -1) {
 						charset = Charset.forName(value.substring(0, idx1).trim());
 						Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-								"Charset should be UTF-8 or ISO-8859-1");
-						filename = decodeFilename(value.substring(idx2 + 1), charset);
+								"Charset must be UTF-8 or ISO-8859-1");
+						filename = decodeRfc5987Filename(value.substring(idx2 + 1), charset);
 					}
 					else {
 						// US ASCII
-						filename = decodeFilename(value, StandardCharsets.US_ASCII);
+						filename = decodeRfc5987Filename(value, StandardCharsets.US_ASCII);
 					}
 				}
 				else if (attribute.equals("filename") && (filename == null)) {
@@ -491,9 +493,10 @@ public final class ContentDisposition {
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String decodeFilename(String filename, Charset charset) {
-		Assert.notNull(filename, "'input' String` should not be null");
-		Assert.notNull(charset, "'charset' should not be null");
+	private static String decodeRfc5987Filename(String filename, Charset charset) {
+		Assert.notNull(filename, "'filename' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
+
 		byte[] value = filename.getBytes(charset);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int index = 0;
@@ -530,12 +533,12 @@ public final class ContentDisposition {
 	 * Decode the given header field param as described in RFC 2047.
 	 * @param filename the filename
 	 * @param charset the charset for the filename
-	 * @return the encoded header field param
+	 * @return the decoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc2047">RFC 2047</a>
 	 */
 	private static String decodeQuotedPrintableFilename(String filename, Charset charset) {
-		Assert.notNull(filename, "'input' String` should not be null");
-		Assert.notNull(charset, "'charset' should not be null");
+		Assert.notNull(filename, "'filename' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
 
 		byte[] value = filename.getBytes(US_ASCII);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -561,6 +564,42 @@ public final class ContentDisposition {
 			}
 		}
 		return StreamUtils.copyToString(baos, charset);
+	}
+
+	/**
+	 * Encode the given header field param as described in RFC 2047.
+	 * @param filename the filename
+	 * @param charset the charset for the filename
+	 * @return the encoded header field param
+	 * @see <a href="https://tools.ietf.org/html/rfc2047">RFC 2047</a>
+	 */
+	private static String encodeQuotedPrintableFilename(String filename, Charset charset) {
+		Assert.notNull(filename, "'filename' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
+
+		byte[] source = filename.getBytes(charset);
+		StringBuilder sb = new StringBuilder(source.length << 1);
+		sb.append("=?");
+		sb.append(charset.name());
+		sb.append("?Q?");
+		for (byte b : source) {
+			if (isPrintable(b)) {
+				sb.append((char) b);
+			}
+			else {
+				sb.append('=');
+				char ch1 = hexDigit(b >> 4);
+				char ch2 = hexDigit(b);
+				sb.append(ch1);
+				sb.append(ch2);
+			}
+		}
+		sb.append("?=");
+		return sb.toString();
+	}
+
+	private static boolean isPrintable(byte c) {
+		return (c >= '!' && c <= '<') || (c >= '>' && c <= '~');
 	}
 
 	private static String encodeQuotedPairs(String filename) {
@@ -602,14 +641,14 @@ public final class ContentDisposition {
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String encodeFilename(String input, Charset charset) {
-		Assert.notNull(input, "`input` is required");
-		Assert.notNull(charset, "`charset` is required");
+	private static String encodeRfc5987Filename(String input, Charset charset) {
+		Assert.notNull(input, "'input' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
 		Assert.isTrue(!StandardCharsets.US_ASCII.equals(charset), "ASCII does not require encoding");
-		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset), "Only UTF-8 and ISO-8859-1 supported.");
+		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset), "Only UTF-8 and ISO-8859-1 are supported");
+
 		byte[] source = input.getBytes(charset);
-		int len = source.length;
-		StringBuilder sb = new StringBuilder(len << 1);
+		StringBuilder sb = new StringBuilder(source.length << 1);
 		sb.append(charset.name());
 		sb.append("''");
 		for (byte b : source) {
@@ -618,13 +657,17 @@ public final class ContentDisposition {
 			}
 			else {
 				sb.append('%');
-				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
-				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
+				char hex1 = hexDigit(b >> 4);
+				char hex2 = hexDigit(b);
 				sb.append(hex1);
 				sb.append(hex2);
 			}
 		}
 		return sb.toString();
+	}
+
+	private static char hexDigit(int b) {
+		return Character.toUpperCase(Character.forDigit(b & 0xF, 16));
 	}
 
 

@@ -79,12 +79,7 @@ implements CallbackGenerator
       new Signature(FIND_PROXY_NAME, METHOD_PROXY, new Type[]{ Constants.TYPE_SIGNATURE });
     private static final Signature TO_STRING =
       TypeUtils.parseSignature("String toString()");
-    private static final Transformer METHOD_TO_CLASS = new Transformer(){
-        @Override
-        public Object transform(Object value) {
-            return ((MethodInfo)value).getClassInfo();
-        }
-    };
+    private static final Transformer METHOD_TO_CLASS = value -> ((MethodInfo)value).getClassInfo();
 
     private String getMethodField(Signature impl) {
         return impl.getName() + "$Method";

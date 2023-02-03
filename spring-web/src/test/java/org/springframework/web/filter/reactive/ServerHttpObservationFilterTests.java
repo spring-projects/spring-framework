@@ -19,6 +19,7 @@ package org.springframework.web.filter.reactive;
 
 import java.util.Optional;
 
+import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import org.assertj.core.api.ThrowingConsumer;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.http.observation.reactive.ServerRequestObservationContext;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -54,6 +55,18 @@ class ServerHttpObservationFilterTests {
 			assertThat(observationContext).isPresent();
 			assertThat(observationContext.get().getCarrier()).isEqualTo(exchange.getRequest());
 			assertThat(observationContext.get().getResponse()).isEqualTo(exchange.getResponse());
+		});
+		this.filter.filter(exchange, filterChain).block();
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
+	}
+
+	@Test
+	void filterShouldAddNewObservationToReactorContext() {
+		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/test/resource"));
+		exchange.getResponse().setRawStatusCode(200);
+		WebFilterChain filterChain = webExchange -> Mono.deferContextual(contextView -> {
+			assertThat(contextView.getOrEmpty(ObservationThreadLocalAccessor.KEY)).isPresent();
+			return Mono.empty();
 		});
 		this.filter.filter(exchange, filterChain).block();
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");

@@ -80,7 +80,7 @@ class DefaultServerWebExchangeCheckNotModifiedTests {
 
 		assertThat(exchange.checkNotModified(currentDate)).isTrue();
 		assertThat(exchange.getResponse().getStatusCode().value()).isEqualTo(304);
-		assertThat(exchange.getResponse().getHeaders().get("Last-Modified").size()).isEqualTo(1);
+		assertThat(exchange.getResponse().getHeaders().get("Last-Modified")).hasSize(1);
 		assertThat(exchange.getResponse().getHeaders().getFirst("Last-Modified")).isEqualTo(CURRENT_TIME);
 	}
 

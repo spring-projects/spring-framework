@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,14 +175,14 @@ class AotServicesTests {
 		AotServices<TestService> loaded = AotServices.factoriesAndBeans(loader, beanFactory).load(TestService.class);
 		assertThat(loaded.getSource(loaded.asList().get(0))).isEqualTo(Source.SPRING_FACTORIES_LOADER);
 		assertThat(loaded.getSource(loaded.asList().get(1))).isEqualTo(Source.BEAN_FACTORY);
-		TestService missing = mock(TestService.class);
+		TestService missing = mock();
 		assertThatIllegalStateException().isThrownBy(()->loaded.getSource(missing));
 	}
 
 	@Test
 	void getSourceWhenMissingThrowsException() {
 		AotServices<TestService> loaded = AotServices.factories().load(TestService.class);
-		TestService missing = mock(TestService.class);
+		TestService missing = mock();
 		assertThatIllegalStateException().isThrownBy(()->loaded.getSource(missing));
 	}
 
@@ -238,10 +238,9 @@ class AotServicesTests {
 
 		@Override
 		public Enumeration<URL> getResources(String name) throws IOException {
-			return (!"META-INF/spring/aot.factories".equals(name))
-					? super.getResources(name)
-					: super.getResources("org/springframework/beans/factory/aot/"
-							+ this.factoriesName);
+			return (!"META-INF/spring/aot.factories".equals(name) ?
+					super.getResources(name) :
+					super.getResources("org/springframework/beans/factory/aot/" + this.factoriesName));
 		}
 
 	}

@@ -64,7 +64,7 @@ class HeadersAdaptersTests {
 	void sizeWithMultipleValuesForHeaderShouldCountHeaders(MultiValueMap<String, String> headers) {
 		headers.add("TestHeader", "first");
 		headers.add("TestHeader", "second");
-		assertThat(headers.size()).isEqualTo(1);
+		assertThat(headers).hasSize(1);
 	}
 
 	@ParameterizedHeadersTest
@@ -72,7 +72,7 @@ class HeadersAdaptersTests {
 		headers.add("TestHeader", "first");
 		headers.add("OtherHeader", "test");
 		headers.add("TestHeader", "second");
-		assertThat(headers.keySet().size()).isEqualTo(2);
+		assertThat(headers.keySet()).hasSize(2);
 	}
 
 	@ParameterizedHeadersTest
@@ -94,7 +94,7 @@ class HeadersAdaptersTests {
 		headers.add("TestHeader", "first");
 		headers.put("TestHeader", Arrays.asList("override"));
 		assertThat(headers.getFirst("TestHeader")).isEqualTo("override");
-		assertThat(headers.get("TestHeader").size()).isEqualTo(1);
+		assertThat(headers.get("TestHeader")).hasSize(1);
 	}
 
 	@ParameterizedHeadersTest
@@ -110,7 +110,7 @@ class HeadersAdaptersTests {
 		headers.add("TestHeader", "first");
 		assertThat(headers.keySet()).hasSize(1);
 		headers.keySet().removeIf("TestHeader"::equals);
-		assertThat(headers.keySet()).hasSize(0);
+		assertThat(headers.keySet()).isEmpty();
 	}
 
 	@ParameterizedHeadersTest

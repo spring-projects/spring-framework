@@ -47,7 +47,7 @@ class AnnotationConfigContextLoaderUtilsTests {
 	void detectDefaultConfigurationClassesWithoutConfigurationClass() {
 		Class<?>[] configClasses = detectDefaultConfigurationClasses(NoConfigTestCase.class);
 		assertThat(configClasses).isNotNull();
-		assertThat(configClasses.length).isEqualTo(0);
+		assertThat(configClasses).isEmpty();
 	}
 
 	@Test

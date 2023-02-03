@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -239,7 +238,7 @@ class WebSocketMessageBrokerConfigurationSupportTests {
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
 			registry.enableSimpleBroker()
-					.setTaskScheduler(mock(TaskScheduler.class))
+					.setTaskScheduler(mock())
 					.setHeartbeatValue(new long[] {15000, 15000});
 		}
 	}

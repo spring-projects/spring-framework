@@ -16,40 +16,30 @@
 
 package org.springframework.web.testfixture.http.client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
+import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Mock implementation of {@link ClientHttpRequest}.
  *
- * @author Brian Clozel
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
+ * @author Sam Brannen
+ * @since 3.2
  */
-public class MockClientHttpRequest implements ClientHttpRequest {
-
-	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
-	private final HttpHeaders headers = new HttpHeaders();
+public class MockClientHttpRequest extends MockHttpOutputMessage implements ClientHttpRequest {
 
 	private HttpMethod httpMethod;
 
 	private URI uri;
-
-	private final ByteArrayOutputStream body = new ByteArrayOutputStream(1024);
 
 	@Nullable
 	private ClientHttpResponse clientHttpResponse;
@@ -57,43 +47,36 @@ public class MockClientHttpRequest implements ClientHttpRequest {
 	private boolean executed = false;
 
 
+	/**
+	 * Create a {@code MockClientHttpRequest} with {@link HttpMethod#GET GET} as
+	 * the HTTP request method and {@code "/"} as the {@link URI}.
+	 */
 	public MockClientHttpRequest() {
-		this.httpMethod = HttpMethod.GET;
-		try {
-			this.uri = new URI("/");
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException(ex);
-		}
+		this(HttpMethod.GET, URI.create("/"));
 	}
 
-	public MockClientHttpRequest(HttpMethod httpMethod, String urlTemplate, Object... vars) {
+	/**
+	 * Create a {@code MockClientHttpRequest} with the given {@link HttpMethod},
+	 * URI template, and URI template variable values.
+	 * @since 6.0.3
+	 */
+	public MockClientHttpRequest(HttpMethod httpMethod, String uriTemplate, Object... vars) {
+		this(httpMethod, UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(vars).encode().toUri());
+	}
+
+	/**
+	 * Create a {@code MockClientHttpRequest} with the given {@link HttpMethod}
+	 * and {@link URI}.
+	 */
+	public MockClientHttpRequest(HttpMethod httpMethod, URI uri) {
 		this.httpMethod = httpMethod;
-		this.uri = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(vars).encode().toUri();
+		this.uri = uri;
 	}
 
-	@Override
-	public HttpHeaders getHeaders() {
-		return this.headers;
-	}
 
-	@Override
-	public OutputStream getBody() throws IOException {
-		return this.body;
-	}
-
-	public byte[] getBodyAsBytes() {
-		return this.body.toByteArray();
-	}
-
-	public String getBodyAsString() {
-		return getBodyAsString(DEFAULT_CHARSET);
-	}
-
-	public String getBodyAsString(Charset charset) {
-		return StreamUtils.copyToString(this.body, charset);
-	}
-
+	/**
+	 * Set the HTTP method of the request.
+	 */
 	public void setMethod(HttpMethod httpMethod) {
 		this.httpMethod = httpMethod;
 	}
@@ -103,13 +86,9 @@ public class MockClientHttpRequest implements ClientHttpRequest {
 		return this.httpMethod;
 	}
 
-	@SuppressWarnings("removal")
-	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.httpMethod.name();
-	}
-
+	/**
+	 * Set the URI of the request.
+	 */
 	public void setURI(URI uri) {
 		this.uri = uri;
 	}
@@ -119,35 +98,52 @@ public class MockClientHttpRequest implements ClientHttpRequest {
 		return this.uri;
 	}
 
+	/**
+	 * Set the {@link ClientHttpResponse} to be used as the result of executing
+	 * the this request.
+	 * @see #execute()
+	 */
 	public void setResponse(ClientHttpResponse clientHttpResponse) {
 		this.clientHttpResponse = clientHttpResponse;
 	}
 
+	/**
+	 * Get the {@link #isExecuted() executed} flag.
+	 * @see #execute()
+	 */
 	public boolean isExecuted() {
 		return this.executed;
 	}
 
+	/**
+	 * Set the {@link #isExecuted() executed} flag to {@code true} and return the
+	 * configured {@link #setResponse(ClientHttpResponse) response}.
+	 * @see #executeInternal()
+	 */
 	@Override
 	public final ClientHttpResponse execute() throws IOException {
 		this.executed = true;
 		return executeInternal();
 	}
 
+	/**
+	 * The default implementation returns the configured
+	 * {@link #setResponse(ClientHttpResponse) response}.
+	 * <p>Override this method to execute the request and provide a response,
+	 * potentially different from the configured response.
+	 */
 	protected ClientHttpResponse executeInternal() throws IOException {
 		Assert.state(this.clientHttpResponse != null, "No ClientHttpResponse");
 		return this.clientHttpResponse;
 	}
 
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.httpMethod);
-		sb.append(' ').append(this.uri);
+		sb.append(this.httpMethod).append(' ').append(this.uri);
 		if (!getHeaders().isEmpty()) {
 			sb.append(", headers: ").append(getHeaders());
-		}
-		if (sb.length() == 0) {
-			sb.append("Not yet initialized");
 		}
 		return sb.toString();
 	}

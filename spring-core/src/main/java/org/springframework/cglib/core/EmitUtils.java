@@ -187,9 +187,7 @@ public class EmitUtils {
             default:
                 throw new IllegalArgumentException("unknown switch style " + switchStyle);
             }
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Error ex) {
+        } catch (RuntimeException | Error ex) {
             throw ex;
         } catch (Exception ex) {
             throw new CodeGenerationException(ex);
@@ -201,12 +199,7 @@ public class EmitUtils {
                                            final ObjectSwitchCallback callback) throws Exception {
         final Label def = e.make_label();
         final Label end = e.make_label();
-        final Map buckets = CollectionUtils.bucket(Arrays.asList(strings), new Transformer() {
-            @Override
-            public Object transform(Object value) {
-                return ((String)value).length();
-            }
-        });
+        final Map buckets = CollectionUtils.bucket(Arrays.asList(strings), value -> ((String)value).length());
         e.dup();
         e.invoke_virtual(Constants.TYPE_STRING, STRING_LENGTH);
         e.process_switch(getSwitchKeys(buckets), new ProcessSwitchCallback() {
@@ -233,12 +226,7 @@ public class EmitUtils {
                                            final Label end,
                                            final int index) throws Exception {
         final int len = ((String)strings.get(0)).length();
-        final Map buckets = CollectionUtils.bucket(strings, new Transformer() {
-            @Override
-            public Object transform(Object value) {
-                return ((String)value).charAt(index);
-            }
-        });
+        final Map buckets = CollectionUtils.bucket(strings, value -> ((String)value).charAt(index));
         e.dup();
         e.push(index);
         e.invoke_virtual(Constants.TYPE_STRING, STRING_CHAR_AT);
@@ -274,12 +262,7 @@ public class EmitUtils {
                                            final String[] strings,
                                            final ObjectSwitchCallback callback,
                                            final boolean skipEquals) throws Exception {
-        final Map buckets = CollectionUtils.bucket(Arrays.asList(strings), new Transformer() {
-            @Override
-            public Object transform(Object value) {
-                return value.hashCode();
-            }
-        });
+        final Map buckets = CollectionUtils.bucket(Arrays.asList(strings), value -> value.hashCode());
         final Label def = e.make_label();
         final Label end = e.make_label();
         e.dup();
@@ -290,8 +273,9 @@ public class EmitUtils {
                 List bucket = (List)buckets.get(key);
                 Label next = null;
                 if (skipEquals && bucket.size() == 1) {
-                    if (skipEquals)
-                        e.pop();
+                    if (skipEquals) {
+						e.pop();
+					}
                     callback.processCase(bucket.get(0), end);
                 } else {
                     for (Iterator it = bucket.iterator(); it.hasNext();) {
@@ -373,8 +357,9 @@ public class EmitUtils {
     }
 
     private static Class remapComponentType(Class componentType) {
-        if (componentType.equals(Type.class))
-            return Class.class;
+        if (componentType.equals(Type.class)) {
+			return Class.class;
+		}
         return componentType;
     }
 
@@ -437,12 +422,7 @@ public class EmitUtils {
         Label end = e.make_label();
         e.dup();
         e.ifnull(skip);
-        EmitUtils.process_array(e, type, new ProcessArrayCallback() {
-            @Override
-            public void processElement(Type type) {
-                hash_code(e, type, multiplier, registry);
-            }
-        });
+        EmitUtils.process_array(e, type, type1 -> hash_code(e, type1, multiplier, registry));
         e.goTo(end);
         e.mark(skip);
         e.pop();
@@ -752,26 +732,18 @@ public class EmitUtils {
                                              boolean useName) {
         try {
             final Map cache = new HashMap();
-            final ParameterTyper cached = new ParameterTyper() {
-                    @Override
-                    public Type[] getParameterTypes(MethodInfo member) {
-                        Type[] types = (Type[])cache.get(member);
-                        if (types == null) {
-                            cache.put(member, types = member.getSignature().getArgumentTypes());
-                        }
-                        return types;
-                    }
-                };
+            final ParameterTyper cached = member -> {
+                Type[] types = (Type[]) cache.get(member);
+                if (types == null) {
+                    cache.put(member, types = member.getSignature().getArgumentTypes());
+                }
+                return types;
+            };
             final Label def = e.make_label();
             final Label end = e.make_label();
             if (useName) {
                 e.swap();
-                final Map buckets = CollectionUtils.bucket(members, new Transformer() {
-                        @Override
-                        public Object transform(Object value) {
-                            return ((MethodInfo)value).getSignature().getName();
-                        }
-                    });
+                final Map buckets = CollectionUtils.bucket(members, value -> ((MethodInfo)value).getSignature().getName());
                 String[] names = (String[])buckets.keySet().toArray(new String[buckets.size()]);
                 EmitUtils.string_switch(e, names, Constants.SWITCH_STYLE_HASH, new ObjectSwitchCallback() {
                         @Override
@@ -790,9 +762,7 @@ public class EmitUtils {
             e.pop();
             callback.processDefault();
             e.mark(end);
-        } catch (RuntimeException ex) {
-            throw ex;
-        } catch (Error ex) {
+        } catch (RuntimeException | Error ex) {
             throw ex;
         } catch (Exception ex) {
             throw new CodeGenerationException(ex);
@@ -805,12 +775,7 @@ public class EmitUtils {
                                            final ParameterTyper typer,
                                            final Label def,
                                            final Label end) throws Exception {
-        final Map buckets = CollectionUtils.bucket(members, new Transformer() {
-            @Override
-            public Object transform(Object value) {
-                return typer.getParameterTypes((MethodInfo)value).length;
-            }
-        });
+        final Map buckets = CollectionUtils.bucket(members, value -> typer.getParameterTypes((MethodInfo)value).length);
         e.dup();
         e.arraylength();
         e.process_switch(EmitUtils.getSwitchKeys(buckets), new ProcessSwitchCallback() {
@@ -856,12 +821,8 @@ public class EmitUtils {
             int index = -1;
             for (int i = 0; i < example.length; i++) {
                 final int j = i;
-                Map test = CollectionUtils.bucket(members, new Transformer() {
-                    @Override
-                    public Object transform(Object value) {
-                        return TypeUtils.emulateClassGetName(typer.getParameterTypes((MethodInfo)value)[j]);
-                    }
-                });
+                Map test = CollectionUtils.bucket(members,
+                        value -> TypeUtils.emulateClassGetName(typer.getParameterTypes((MethodInfo)value)[j]));
                 if (buckets == null || test.size() > buckets.size()) {
                     buckets = test;
                     index = i;
@@ -951,8 +912,9 @@ public class EmitUtils {
     public static void wrap_undeclared_throwable(CodeEmitter e, Block handler, Type[] exceptions, Type wrapper) {
         Set set = (exceptions == null) ? Collections.EMPTY_SET : new HashSet(Arrays.asList(exceptions));
 
-        if (set.contains(Constants.TYPE_THROWABLE))
-            return;
+        if (set.contains(Constants.TYPE_THROWABLE)) {
+			return;
+		}
 
         boolean needThrow = exceptions != null;
         if (!set.contains(Constants.TYPE_RUNTIME_EXCEPTION)) {
@@ -964,8 +926,8 @@ public class EmitUtils {
             needThrow = true;
         }
         if (exceptions != null) {
-            for (int i = 0; i < exceptions.length; i++) {
-                e.catch_exception(handler, exceptions[i]);
+            for (Type exception : exceptions) {
+                e.catch_exception(handler, exception);
             }
         }
         if (needThrow) {

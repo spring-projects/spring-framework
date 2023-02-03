@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,22 +32,17 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("deprecation")
 class FutureAdapterTests {
 
-	private FutureAdapter<String, Integer> adapter;
-
-	private Future<Integer> adaptee;
-
-
-	@BeforeEach
 	@SuppressWarnings("unchecked")
-	void setUp() {
-		adaptee = mock(Future.class);
-		adapter = new FutureAdapter<>(adaptee) {
-			@Override
-			protected String adapt(Integer adapteeResult) throws ExecutionException {
-				return adapteeResult.toString();
-			}
-		};
-	}
+	private Future<Integer> adaptee = mock();
+
+	private FutureAdapter<String, Integer> adapter = new FutureAdapter<>(adaptee) {
+		@Override
+		protected String adapt(Integer adapteeResult) throws ExecutionException {
+			return adapteeResult.toString();
+		}
+	};
+
+
 
 	@Test
 	void cancel() {

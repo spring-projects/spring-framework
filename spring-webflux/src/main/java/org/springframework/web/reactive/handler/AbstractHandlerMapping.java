@@ -233,8 +233,8 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 */
 	@Nullable
 	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
-		if (handler instanceof CorsConfigurationSource) {
-			return ((CorsConfigurationSource) handler).getCorsConfiguration(exchange);
+		if (handler instanceof CorsConfigurationSource ccs) {
+			return ccs.getCorsConfiguration(exchange);
 		}
 		return null;
 	}

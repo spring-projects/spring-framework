@@ -86,7 +86,7 @@ public class FileSystemGeneratedFiles implements GeneratedFiles {
 		Assert.notNull(content, "'content' must not be null");
 		Path root = this.roots.apply(kind).toAbsolutePath().normalize();
 		Path relativePath = root.resolve(path).toAbsolutePath().normalize();
-		Assert.isTrue(relativePath.startsWith(root), () -> "'path' must be relative");
+		Assert.isTrue(relativePath.startsWith(root), "'path' must be relative");
 		try {
 			try (InputStream inputStream = content.getInputStream()) {
 				Files.createDirectories(relativePath.getParent());

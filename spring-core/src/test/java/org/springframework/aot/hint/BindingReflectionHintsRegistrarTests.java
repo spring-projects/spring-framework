@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,14 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.core.ResolvableType;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -219,6 +225,46 @@ public class BindingReflectionHintsRegistrarTests {
 				});
 	}
 
+	@Test
+	void registerTypeForSerializationWithRecordWithProperty() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithProperty.class);
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleRecordWithProperty.class, "getNameProperty"))
+				.accepts(this.hints);
+	}
+
+	@Test
+	void registerTypeForSerializationWithAnonymousClass() {
+		Runnable anonymousRunnable = () -> { };
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), anonymousRunnable.getClass());
+	}
+
+	@Test
+	void registerTypeForJacksonAnnotations() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithJsonProperty.class);
+		assertThat(RuntimeHintsPredicates.reflection().onField(SampleClassWithJsonProperty.class, "privateField"))
+				.accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithJsonProperty.class, "packagePrivateMethod").invoke())
+				.accepts(this.hints);
+	}
+
+	@Test
+	void registerTypeForInheritedJacksonAnnotations() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithInheritedJsonProperty.class);
+		assertThat(RuntimeHintsPredicates.reflection().onField(SampleClassWithJsonProperty.class, "privateField"))
+				.accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleClassWithJsonProperty.class, "packagePrivateMethod").invoke())
+				.accepts(this.hints);
+	}
+
+	@Test
+	void registerTypeForJacksonCustomStrategy() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleRecordWithJacksonCustomStrategy.class);
+		assertThat(RuntimeHintsPredicates.reflection().onType(PropertyNamingStrategies.UpperSnakeCaseStrategy.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+				.accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(SampleRecordWithJacksonCustomStrategy.Builder.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+				.accepts(this.hints);
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -291,7 +337,7 @@ public class BindingReflectionHintsRegistrarTests {
 		}
 	}
 
-	class SampleClassC {
+	static class SampleClassC {
 		public String getString() {
 			return "";
 		}
@@ -302,5 +348,49 @@ public class BindingReflectionHintsRegistrarTests {
 	}
 
 	record SampleRecord(String name) {}
+
+	record SampleRecordWithProperty(String name) {
+
+		public String getNameProperty() {
+			return "";
+		}
+	}
+
+	static class SampleClassWithJsonProperty {
+
+		@JsonProperty
+		private String privateField = "";
+
+		@JsonProperty
+		String packagePrivateMethod() {
+			return "";
+		}
+	}
+
+	static class SampleClassWithInheritedJsonProperty extends SampleClassWithJsonProperty {}
+
+	@JsonNaming(PropertyNamingStrategies.UpperSnakeCaseStrategy.class)
+	@JsonDeserialize(builder = SampleRecordWithJacksonCustomStrategy.Builder.class)
+	record SampleRecordWithJacksonCustomStrategy(String name) {
+
+		@JsonPOJOBuilder(withPrefix = "")
+		public static class Builder {
+			private String name;
+
+			public static Builder newInstance() {
+				return new Builder();
+			}
+
+			public Builder id(String name) {
+				this.name = name;
+				return this;
+			}
+
+			public SampleRecordWithJacksonCustomStrategy build() {
+				return new SampleRecordWithJacksonCustomStrategy(name);
+			}
+		}
+
+	}
 
 }

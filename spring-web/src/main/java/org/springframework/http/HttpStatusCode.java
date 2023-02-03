@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,17 @@ public sealed interface HttpStatusCode extends Serializable permits DefaultHttpS
 	 */
 	boolean isError();
 
+	/**
+	 * Whether this {@code HttpStatusCode} shares the same integer {@link #value() value} as the other status code.
+	 * <p>Useful for comparisons that take deprecated aliases into account or compare arbitrary implementations
+	 * of {@code HttpStatusCode} (e.g. in place of {@link HttpStatus#equals(Object) HttpStatus enum equality}).
+	 * @param other the other {@code HttpStatusCode} to compare
+	 * @return true if the two {@code HttpStatusCode} objects share the same integer {@code value()}, false otherwise
+	 * @since 6.0.5
+	 */
+	default boolean isSameCodeAs(HttpStatusCode other) {
+		return value() == other.value();
+	}
 
 	/**
 	 * Return an {@code HttpStatusCode} object for the given integer value.
@@ -85,7 +96,8 @@ public sealed interface HttpStatusCode extends Serializable permits DefaultHttpS
 	 * positive number
 	 */
 	static HttpStatusCode valueOf(int code) {
-		Assert.isTrue(code >= 100 && code <= 999, () -> "Code '" + code + "' should be a three-digit positive integer");
+		Assert.isTrue(code >= 100 && code <= 999,
+				() -> "Status code '" + code + "' should be a three-digit positive integer");
 		HttpStatus status = HttpStatus.resolve(code);
 		if (status != null) {
 			return status;

@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * <p>Mainly for internal use within the framework, but to some degree also
  * useful for application classes. Consider
  * <a href="https://commons.apache.org/proper/commons-beanutils/">Apache Commons BeanUtils</a>,
- * <a href="https://hotelsdotcom.github.io/bull/">BULL - Bean Utils Light Library</a>,
+ * <a href="https://github.com/ExpediaGroup/bull">BULL - Bean Utils Light Library</a>,
  * or similar third-party frameworks for more comprehensive bean utilities.
  *
  * @author Rod Johnson
@@ -882,7 +882,7 @@ public abstract class BeanUtils {
 			List<KParameter> parameters = kotlinConstructor.getParameters();
 
 			Assert.isTrue(args.length <= parameters.size(),
-					"Number of provided arguments should be less of equals than number of constructor parameters");
+					"Number of provided arguments must be less than or equal to the number of constructor parameters");
 			if (parameters.isEmpty()) {
 				return kotlinConstructor.call();
 			}

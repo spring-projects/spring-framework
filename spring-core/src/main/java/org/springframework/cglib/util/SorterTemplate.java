@@ -50,10 +50,10 @@ abstract class SorterTemplate {
             int v = j;
             for (;;) {
                 while (compare(++i, v) < 0) {
-                    /* nothing */;
+                    /* nothing */
                 }
                 while (compare(--j, v) > 0) {
-                    /* nothing */;
+                    /* nothing */
                 }
                 if (j < i) {
                     break;

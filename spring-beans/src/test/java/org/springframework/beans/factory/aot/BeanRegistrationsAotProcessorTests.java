@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link BeanRegistrationsAotProcessor}.
  *
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  */
 class BeanRegistrationsAotProcessorTests {
 
@@ -51,6 +52,20 @@ class BeanRegistrationsAotProcessorTests {
 				.processAheadOfTime(beanFactory);
 		assertThat(contribution).extracting("registrations")
 				.asInstanceOf(InstanceOfAssertFactories.MAP).containsKeys("b1", "b2");
+	}
+
+	@Test
+	void processAheadOfTimeReturnsBeanRegistrationsAotContributionWithAliases() {
+		BeanRegistrationsAotProcessor processor = new BeanRegistrationsAotProcessor();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		beanFactory.registerAlias("test", "testAlias");
+		BeanRegistrationsAotContribution contribution = processor
+				.processAheadOfTime(beanFactory);
+		assertThat(contribution).extracting("registrations").asInstanceOf(InstanceOfAssertFactories.MAP)
+				.hasEntrySatisfying("test", registration ->
+						assertThat(registration).extracting("aliases").asInstanceOf(InstanceOfAssertFactories.ARRAY)
+								.singleElement().isEqualTo("testAlias"));
 	}
 
 }

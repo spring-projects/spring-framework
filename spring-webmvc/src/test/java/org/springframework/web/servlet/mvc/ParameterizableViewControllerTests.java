@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class ParameterizableViewControllerTests {
 	public void handleRequestWithFlashAttributes() throws Exception {
 		this.request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
-		assertThat(mav.getModel().size()).isEqualTo(1);
+		assertThat(mav.getModel()).hasSize(1);
 		assertThat(mav.getModel().get("name")).isEqualTo("value");
 	}
 

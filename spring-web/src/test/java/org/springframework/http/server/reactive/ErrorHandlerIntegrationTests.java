@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
-		URI url = new URI("http://localhost:" + port + "/response-body-error");
+		URI url = URI.create("http://localhost:" + port + "/response-body-error");
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -67,7 +67,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
-		URI url = new URI("http://localhost:" + port + "/handling-error");
+		URI url = URI.create("http://localhost:" + port + "/handling-error");
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -81,7 +81,7 @@ class ErrorHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setErrorHandler(NO_OP_ERROR_HANDLER);
 
-		URI url = new URI("http://localhost:" + port + "//");
+		URI url = URI.create("http://localhost:" + port + "//");
 		ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
 		// Jetty 10+ rejects empty path segments, see https://github.com/eclipse/jetty.project/issues/6302,

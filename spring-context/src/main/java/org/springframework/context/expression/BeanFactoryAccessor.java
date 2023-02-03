@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class BeanFactoryAccessor implements PropertyAccessor {
 
 	@Override
 	public boolean canRead(EvaluationContext context, @Nullable Object target, String name) throws AccessException {
-		return (target instanceof BeanFactory && ((BeanFactory) target).containsBean(name));
+		return (target instanceof BeanFactory beanFactory && beanFactory.containsBean(name));
 	}
 
 	@Override

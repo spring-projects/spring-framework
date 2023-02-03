@@ -179,7 +179,7 @@ public final class AotServices<T> implements Iterable<T> {
 	public Source getSource(T service) {
 		Source source = this.sources.get(service);
 		Assert.state(source != null,
-				"Unable to find service " + ObjectUtils.identityToString(source));
+				() -> "Unable to find service " + ObjectUtils.identityToString(source));
 		return source;
 	}
 

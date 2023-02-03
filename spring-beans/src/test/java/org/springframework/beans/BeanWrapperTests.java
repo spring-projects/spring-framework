@@ -78,6 +78,21 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	void replaceWrappedInstance() {
+		GetterBean target = new GetterBean();
+		BeanWrapperImpl accessor = createAccessor(target);
+		accessor.setPropertyValue("name", "tom");
+		assertThat(target.getAliasedName()).isEqualTo("tom");
+		assertThat(accessor.getPropertyValue("aliasedName")).isEqualTo("tom");
+
+		target = new GetterBean();
+		accessor.setWrappedInstance(target);
+		accessor.setPropertyValue("name", "tom");
+		assertThat(target.getAliasedName()).isEqualTo("tom");
+		assertThat(accessor.getPropertyValue("aliasedName")).isEqualTo("tom");
+	}
+
+	@Test
 	void setValidAndInvalidPropertyValuesShouldContainExceptionDetails() {
 		TestBean target = new TestBean();
 		String newName = "tony";
@@ -216,6 +231,10 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		assertThat(accessor.isReadableProperty("inputStream")).isFalse();
 		assertThat(accessor.isReadableProperty("filename")).isTrue();
 		assertThat(accessor.isReadableProperty("description")).isTrue();
+
+		accessor = createAccessor(new ActiveResource());
+
+		assertThat(accessor.isReadableProperty("resource")).isTrue();
 	}
 
 	@Test
@@ -372,6 +391,19 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 
 		public String getObject() {
 			return this.value;
+		}
+	}
+
+
+	@SuppressWarnings("try")
+	public static class ActiveResource implements AutoCloseable {
+
+		public ActiveResource getResource() {
+			return this;
+		}
+
+		@Override
+		public void close() throws Exception {
 		}
 	}
 

@@ -24,7 +24,7 @@ import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.observation.ServerRequestObservationContext;
+import org.springframework.http.server.observation.ServerRequestObservationContext;
 import org.springframework.web.testfixture.servlet.MockFilterChain;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
@@ -97,7 +97,18 @@ class ServerHttpObservationFilterTests {
 		ServerRequestObservationContext context = (ServerRequestObservationContext) this.request
 				.getAttribute(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE);
 		assertThat(context.getError()).isEqualTo(customError);
-		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR");
+	}
+
+	@Test
+	void filterShouldSetDefaultErrorStatusForBubblingExceptions() {
+		assertThatThrownBy(() -> {
+			this.filter.doFilter(this.request, this.response, (request, response) -> {
+				throw new ServletException(new IllegalArgumentException("custom error"));
+			});
+		}).isInstanceOf(ServletException.class);
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SERVER_ERROR")
+				.hasLowCardinalityKeyValue("status", "500");
 	}
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {

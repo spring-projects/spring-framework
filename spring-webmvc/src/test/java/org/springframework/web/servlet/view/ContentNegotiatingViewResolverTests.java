@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class ContentNegotiatingViewResolverTests {
 				new ParameterContentNegotiationStrategy(
 						Collections.singletonMap("xls", MediaType.parseMediaType(mediaType))));
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setContentNegotiationManager(manager);
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 		viewResolver.afterPropertiesSet();
@@ -121,7 +121,7 @@ public class ContentNegotiatingViewResolverTests {
 		manager.addFileExtensionResolvers(extensionsResolver);
 		viewResolver.setContentNegotiationManager(manager);
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 
 		View viewMock = mock(View.class, "application_xls");
@@ -141,7 +141,7 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameWithInvalidAcceptHeader() throws Exception {
 		request.addHeader("Accept", "application");
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 		viewResolver.afterPropertiesSet();
 
@@ -157,7 +157,7 @@ public class ContentNegotiatingViewResolverTests {
 		ParameterContentNegotiationStrategy paramStrategy = new ParameterContentNegotiationStrategy(mapping);
 		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(paramStrategy));
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 		viewResolver.afterPropertiesSet();
 
@@ -206,8 +206,8 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameAcceptHeader() throws Exception {
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 
-		ViewResolver viewResolverMock1 = mock(ViewResolver.class);
-		ViewResolver viewResolverMock2 = mock(ViewResolver.class);
+		ViewResolver viewResolverMock1 = mock();
+		ViewResolver viewResolverMock2 = mock();
 		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1, viewResolverMock2));
 
 		viewResolver.afterPropertiesSet();
@@ -235,8 +235,8 @@ public class ContentNegotiatingViewResolverTests {
 
 		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(new HeaderContentNegotiationStrategy()));
 
-		ViewResolver htmlViewResolver = mock(ViewResolver.class);
-		ViewResolver jsonViewResolver = mock(ViewResolver.class);
+		ViewResolver htmlViewResolver = mock();
+		ViewResolver jsonViewResolver = mock();
 		viewResolver.setViewResolvers(Arrays.asList(htmlViewResolver, jsonViewResolver));
 
 		View htmlView = mock(View.class, "text_html");
@@ -260,7 +260,7 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameAcceptHeaderWithSuffix() throws Exception {
 		request.addHeader("Accept", "application/vnd.example-v2+xml");
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock));
 
 		viewResolver.afterPropertiesSet();
@@ -283,8 +283,8 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNameAcceptHeaderDefaultView() throws Exception {
 		request.addHeader("Accept", "application/json");
 
-		ViewResolver viewResolverMock1 = mock(ViewResolver.class);
-		ViewResolver viewResolverMock2 = mock(ViewResolver.class);
+		ViewResolver viewResolverMock1 = mock();
+		ViewResolver viewResolverMock2 = mock();
 		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1, viewResolverMock2));
 
 		View viewMock1 = mock(View.class, "application_xml");
@@ -352,8 +352,8 @@ public class ContentNegotiatingViewResolverTests {
 				new org.springframework.web.accept.PathExtensionContentNegotiationStrategy(mapping);
 		viewResolver.setContentNegotiationManager(new ContentNegotiationManager(pathStrategy));
 
-		ViewResolver viewResolverMock1 = mock(ViewResolver.class);
-		ViewResolver viewResolverMock2 = mock(ViewResolver.class);
+		ViewResolver viewResolverMock1 = mock();
+		ViewResolver viewResolverMock2 = mock();
 		viewResolver.setViewResolvers(Arrays.asList(viewResolverMock1, viewResolverMock2));
 
 		View viewMock1 = mock(View.class, "application_xml");
@@ -385,7 +385,7 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewContentTypeNull() throws Exception {
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 
 		viewResolver.afterPropertiesSet();
@@ -413,7 +413,7 @@ public class ContentNegotiatingViewResolverTests {
 
 		UrlBasedViewResolver urlViewResolver = new InternalResourceViewResolver();
 		urlViewResolver.setApplicationContext(webAppContext);
-		ViewResolver xmlViewResolver = mock(ViewResolver.class);
+		ViewResolver xmlViewResolver = mock();
 		viewResolver.setViewResolvers(Arrays.<ViewResolver>asList(xmlViewResolver, urlViewResolver));
 
 		View xmlView = mock(View.class, "application_xml");
@@ -436,7 +436,7 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveViewNoMatch() throws Exception {
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9");
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 
 		viewResolver.afterPropertiesSet();
@@ -458,7 +458,7 @@ public class ContentNegotiatingViewResolverTests {
 		viewResolver.setUseNotAcceptableStatusCode(true);
 		request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9");
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 
 		viewResolver.afterPropertiesSet();
@@ -505,7 +505,7 @@ public class ContentNegotiatingViewResolverTests {
 	public void resolveQualityValue() throws Exception {
 		request.addHeader("Accept", "text/html;q=0.9");
 
-		ViewResolver viewResolverMock = mock(ViewResolver.class);
+		ViewResolver viewResolverMock = mock();
 		viewResolver.setViewResolvers(Collections.singletonList(viewResolverMock));
 
 		viewResolver.afterPropertiesSet();

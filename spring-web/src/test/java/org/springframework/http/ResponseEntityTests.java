@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Arjen Poutsma
  * @author Marcel Overdijk
  * @author Kazuki Shimizu
+ * @author Sebastien Deleuze
  */
 class ResponseEntityTests {
 
@@ -47,7 +47,7 @@ class ResponseEntityTests {
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseEntity.getHeaders().containsKey(headerName)).isTrue();
 		List<String> list = responseEntity.getHeaders().get(headerName);
-		assertThat(list.size()).isEqualTo(2);
+		assertThat(list).hasSize(2);
 		assertThat(list.get(0)).isEqualTo(headerValue1);
 		assertThat(list.get(1)).isEqualTo(headerValue2);
 		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
@@ -92,8 +92,27 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void createdLocation() throws URISyntaxException {
-		URI location = new URI("location");
+	void ofNullable() {
+		Integer entity = 42;
+		ResponseEntity<Integer> responseEntity = ResponseEntity.ofNullable(entity);
+
+		assertThat(responseEntity).isNotNull();
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+	}
+
+	@Test
+	void ofNullNullable() {
+		ResponseEntity<Integer> responseEntity = ResponseEntity.ofNullable(null);
+
+		assertThat(responseEntity).isNotNull();
+		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		assertThat(responseEntity.getBody()).isNull();
+	}
+
+	@Test
+	void createdLocation() {
+		URI location = URI.create("location");
 		ResponseEntity<Void> responseEntity = ResponseEntity.created(location).build();
 
 		assertThat(responseEntity).isNotNull();
@@ -106,7 +125,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void acceptedNoBody() throws URISyntaxException {
+	void acceptedNoBody() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.accepted().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -115,7 +134,7 @@ class ResponseEntityTests {
 	}
 
 	@Test // SPR-14939
-	void acceptedNoBodyWithAlternativeBodyType() throws URISyntaxException {
+	void acceptedNoBodyWithAlternativeBodyType() {
 		ResponseEntity<String> responseEntity = ResponseEntity.accepted().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -124,7 +143,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void noContent() throws URISyntaxException {
+	void noContent() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.noContent().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -133,7 +152,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void badRequest() throws URISyntaxException {
+	void badRequest() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.badRequest().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -142,7 +161,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void notFound() throws URISyntaxException {
+	void notFound() {
 		ResponseEntity<Void> responseEntity = ResponseEntity.notFound().build();
 
 		assertThat(responseEntity).isNotNull();
@@ -151,7 +170,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void unprocessableEntity() throws URISyntaxException {
+	void unprocessableEntity() {
 		ResponseEntity<String> responseEntity = ResponseEntity.unprocessableEntity().body("error");
 
 		assertThat(responseEntity).isNotNull();
@@ -160,7 +179,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void internalServerError() throws URISyntaxException {
+	void internalServerError() {
 		ResponseEntity<String> responseEntity = ResponseEntity.internalServerError().body("error");
 
 		assertThat(responseEntity).isNotNull();
@@ -169,8 +188,8 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void headers() throws URISyntaxException {
-		URI location = new URI("location");
+	void headers() {
+		URI location = URI.create("location");
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
@@ -197,7 +216,7 @@ class ResponseEntityTests {
 	}
 
 	@Test
-	void Etagheader() throws URISyntaxException {
+	void Etagheader() {
 
 		ResponseEntity<Void> responseEntity = ResponseEntity.ok().eTag("\"foo\"").build();
 		assertThat(responseEntity.getHeaders().getETag()).isEqualTo("\"foo\"");
@@ -221,8 +240,8 @@ class ResponseEntityTests {
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(responseHeaders.size()).isEqualTo(1);
-		assertThat(responseHeaders.get("X-CustomHeader").size()).isEqualTo(1);
+		assertThat(responseHeaders).hasSize(1);
+		assertThat(responseHeaders.get("X-CustomHeader")).hasSize(1);
 		assertThat(responseHeaders.getFirst("X-CustomHeader")).isEqualTo("vale");
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http.client.observation;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
@@ -24,6 +25,8 @@ import io.micrometer.common.KeyValues;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.observation.ClientHttpObservationDocumentation.HighCardinalityKeyNames;
+import org.springframework.http.client.observation.ClientHttpObservationDocumentation.LowCardinalityKeyNames;
 import org.springframework.util.StringUtils;
 
 /**
@@ -37,23 +40,25 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	private static final String DEFAULT_NAME = "http.client.requests";
 
-	private static final KeyValue URI_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
+	private static final Pattern PATTERN_BEFORE_PATH = Pattern.compile("^https?://[^/]+/");
 
-	private static final KeyValue METHOD_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, KeyValue.NONE_VALUE);
+	private static final KeyValue URI_NONE = KeyValue.of(LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
 
-	private static final KeyValue STATUS_IO_ERROR = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, "IO_ERROR");
+	private static final KeyValue METHOD_NONE = KeyValue.of(LowCardinalityKeyNames.METHOD, KeyValue.NONE_VALUE);
 
-	private static final KeyValue STATUS_CLIENT_ERROR = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, "CLIENT_ERROR");
+	private static final KeyValue STATUS_IO_ERROR = KeyValue.of(LowCardinalityKeyNames.STATUS, "IO_ERROR");
 
-	private static final KeyValue HTTP_OUTCOME_SUCCESS = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "SUCCESS");
+	private static final KeyValue STATUS_CLIENT_ERROR = KeyValue.of(LowCardinalityKeyNames.STATUS, "CLIENT_ERROR");
 
-	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
+	private static final KeyValue HTTP_OUTCOME_SUCCESS = KeyValue.of(LowCardinalityKeyNames.OUTCOME, "SUCCESS");
 
-	private static final KeyValue EXCEPTION_NONE = KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
+	private static final KeyValue HTTP_OUTCOME_UNKNOWN = KeyValue.of(LowCardinalityKeyNames.OUTCOME, "UNKNOWN");
 
-	private static final KeyValue HTTP_URL_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, KeyValue.NONE_VALUE);
+	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(LowCardinalityKeyNames.CLIENT_NAME, KeyValue.NONE_VALUE);
 
-	private static final KeyValue CLIENT_NAME_NONE = KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, KeyValue.NONE_VALUE);
+	private static final KeyValue EXCEPTION_NONE = KeyValue.of(LowCardinalityKeyNames.EXCEPTION, KeyValue.NONE_VALUE);
+
+	private static final KeyValue HTTP_URL_NONE = KeyValue.of(HighCardinalityKeyNames.HTTP_URL, KeyValue.NONE_VALUE);
 
 
 	private final String name;
@@ -85,19 +90,24 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(ClientRequestObservationContext context) {
-		return KeyValues.of(uri(context), method(context), status(context), exception(context), outcome(context));
+		return KeyValues.of(uri(context), method(context), status(context), clientName(context), exception(context), outcome(context));
 	}
 
 	protected KeyValue uri(ClientRequestObservationContext context) {
 		if (context.getUriTemplate() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.URI, context.getUriTemplate());
+			return KeyValue.of(LowCardinalityKeyNames.URI, extractPath(context.getUriTemplate()));
 		}
 		return URI_NONE;
 	}
 
+	private static String extractPath(String uriTemplate) {
+		String path = PATTERN_BEFORE_PATH.matcher(uriTemplate).replaceFirst("");
+		return (path.startsWith("/") ? path : "/" + path);
+	}
+
 	protected KeyValue method(ClientRequestObservationContext context) {
 		if (context.getCarrier() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod().name());
+			return KeyValue.of(LowCardinalityKeyNames.METHOD, context.getCarrier().getMethod().name());
 		}
 		else {
 			return METHOD_NONE;
@@ -110,24 +120,31 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 			return STATUS_CLIENT_ERROR;
 		}
 		try {
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.STATUS, String.valueOf(response.getStatusCode().value()));
+			return KeyValue.of(LowCardinalityKeyNames.STATUS, String.valueOf(response.getStatusCode().value()));
 		}
 		catch (IOException ex) {
 			return STATUS_IO_ERROR;
 		}
 	}
 
+	protected KeyValue clientName(ClientRequestObservationContext context) {
+		if (context.getCarrier() != null && context.getCarrier().getURI().getHost() != null) {
+			return KeyValue.of(LowCardinalityKeyNames.CLIENT_NAME, context.getCarrier().getURI().getHost());
+		}
+		return CLIENT_NAME_NONE;
+	}
+
 	protected KeyValue exception(ClientRequestObservationContext context) {
 		Throwable error = context.getError();
 		if (error != null) {
 			String simpleName = error.getClass().getSimpleName();
-			return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.EXCEPTION,
+			return KeyValue.of(LowCardinalityKeyNames.EXCEPTION,
 					StringUtils.hasText(simpleName) ? simpleName : error.getClass().getName());
 		}
 		return EXCEPTION_NONE;
 	}
 
-	protected static KeyValue outcome(ClientRequestObservationContext context) {
+	protected KeyValue outcome(ClientRequestObservationContext context) {
 		if (context.getResponse() != null) {
 			try {
 				return HttpOutcome.forStatus(context.getResponse().getStatusCode());
@@ -141,22 +158,16 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public KeyValues getHighCardinalityKeyValues(ClientRequestObservationContext context) {
-		return KeyValues.of(requestUri(context), clientName(context));
+		return KeyValues.of(requestUri(context));
 	}
 
 	protected KeyValue requestUri(ClientRequestObservationContext context) {
 		if (context.getCarrier() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getURI().toASCIIString());
+			return KeyValue.of(HighCardinalityKeyNames.HTTP_URL, context.getCarrier().getURI().toASCIIString());
 		}
 		return HTTP_URL_NONE;
 	}
 
-	protected KeyValue clientName(ClientRequestObservationContext context) {
-		if (context.getCarrier() != null && context.getCarrier().getURI().getHost() != null) {
-			return KeyValue.of(ClientHttpObservationDocumentation.HighCardinalityKeyNames.CLIENT_NAME, context.getCarrier().getURI().getHost());
-		}
-		return CLIENT_NAME_NONE;
-	}
 
 	static class HttpOutcome {
 
@@ -165,7 +176,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 				return HTTP_OUTCOME_SUCCESS;
 			}
 			else if (statusCode instanceof HttpStatus status) {
-				return KeyValue.of(ClientHttpObservationDocumentation.LowCardinalityKeyNames.OUTCOME, status.series().name());
+				return KeyValue.of(LowCardinalityKeyNames.OUTCOME, status.series().name());
 			}
 			else {
 				return HTTP_OUTCOME_UNKNOWN;

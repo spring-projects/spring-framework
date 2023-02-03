@@ -79,6 +79,7 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.core.type.classreading.MetadataReaderFactory
  * @see org.springframework.core.type.AnnotationMetadata
@@ -340,13 +341,13 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @see #extractStereotype(TypeFilter)
 	 */
 	private boolean indexSupportsIncludeFilter(TypeFilter filter) {
-		if (filter instanceof AnnotationTypeFilter) {
-			Class<? extends Annotation> annotation = ((AnnotationTypeFilter) filter).getAnnotationType();
-			return (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, annotation) ||
-					annotation.getName().startsWith("javax."));
+		if (filter instanceof AnnotationTypeFilter annotationTypeFilter) {
+			Class<? extends Annotation> annotationType = annotationTypeFilter.getAnnotationType();
+			return (AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, annotationType) ||
+					annotationType.getName().startsWith("jakarta."));
 		}
-		if (filter instanceof AssignableTypeFilter) {
-			Class<?> target = ((AssignableTypeFilter) filter).getTargetType();
+		if (filter instanceof AssignableTypeFilter assignableTypeFilter) {
+			Class<?> target = assignableTypeFilter.getTargetType();
 			return AnnotationUtils.isAnnotationDeclaredLocally(Indexed.class, target);
 		}
 		return false;
@@ -361,11 +362,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@Nullable
 	private String extractStereotype(TypeFilter filter) {
-		if (filter instanceof AnnotationTypeFilter) {
-			return ((AnnotationTypeFilter) filter).getAnnotationType().getName();
+		if (filter instanceof AnnotationTypeFilter annotationTypeFilter) {
+			return annotationTypeFilter.getAnnotationType().getName();
 		}
-		if (filter instanceof AssignableTypeFilter) {
-			return ((AssignableTypeFilter) filter).getTargetType().getName();
+		if (filter instanceof AssignableTypeFilter assignableTypeFilter) {
+			return assignableTypeFilter.getTargetType().getName();
 		}
 		return null;
 	}
@@ -536,10 +537,10 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * Clear the local metadata cache, if any, removing all cached class metadata.
 	 */
 	public void clearCache() {
-		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
+		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory cmrf) {
 			// Clear cache in externally provided MetadataReaderFactory; this is a no-op
 			// for a shared cache since it'll be cleared by the ApplicationContext.
-			((CachingMetadataReaderFactory) this.metadataReaderFactory).clearCache();
+			cmrf.clearCache();
 		}
 	}
 

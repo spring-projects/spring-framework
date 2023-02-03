@@ -577,7 +577,7 @@ public class PathPatternTests {
 		pri = getPathRemaining(pp, "/aaa/bbb");
 		assertThat(pri.getPathRemaining().value()).isEqualTo("");
 		assertThat(pri.getPathMatched().value()).isEqualTo("/aaa/bbb");
-		assertThat(pri.getUriVariables().size()).isEqualTo(0);
+		assertThat(pri.getUriVariables()).isEmpty();
 
 		pp = parse("/*/{foo}/b*");
 		pri = getPathRemaining(pp, "/foo");
@@ -686,6 +686,7 @@ public class PathPatternTests {
 		checkExtractPathWithinPattern("/docs/commit.html", "/docs/commit.html", "");
 		checkExtractPathWithinPattern("/docs/*", "/docs/cvs/commit", "cvs/commit");
 		checkExtractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit.html", "commit.html");
+		checkExtractPathWithinPattern("/docs/cvs/file.*.html", "/docs/cvs/file.sha.html", "file.sha.html");
 		checkExtractPathWithinPattern("/docs/**", "/docs/cvs/commit", "cvs/commit");
 		checkExtractPathWithinPattern("/doo/{*foobar}", "/doo/customer.html", "customer.html");
 		checkExtractPathWithinPattern("/doo/{*foobar}", "/doo/daa/customer.html", "daa/customer.html");
@@ -807,7 +808,7 @@ public class PathPatternTests {
 		assertThat((Object) checkCapture("/{one}/", "//")).isNull();
 		assertThat((Object) checkCapture("", "/abc")).isNull();
 
-		assertThat(checkCapture("", "").getUriVariables().size()).isEqualTo(0);
+		assertThat(checkCapture("", "").getUriVariables()).isEmpty();
 		checkCapture("{id}", "99", "id", "99");
 		checkCapture("/customer/{customerId}", "/customer/78", "customerId", "78");
 		checkCapture("/customer/{customerId}/banana", "/customer/42/banana", "customerId",
@@ -817,7 +818,7 @@ public class PathPatternTests {
 				"apple");
 		checkCapture("/{bla}.*", "/testing.html", "bla", "testing");
 		PathPattern.PathMatchInfo extracted = checkCapture("/abc", "/abc");
-		assertThat(extracted.getUriVariables().size()).isEqualTo(0);
+		assertThat(extracted.getUriVariables()).isEmpty();
 		checkCapture("/{bla}/foo","/a/foo");
 	}
 

@@ -68,7 +68,7 @@ class ValidatorFactoryTests {
 
 		ValidPerson person = new ValidPerson();
 		Set<ConstraintViolation<ValidPerson>> result = validator.validate(person);
-		assertThat(result.size()).isEqualTo(2);
+		assertThat(result).hasSize(2);
 		for (ConstraintViolation<ValidPerson> cv : result) {
 			String path = cv.getPropertyPath().toString();
 			assertThat(path).matches(actual -> "name".equals(actual) || "address.street".equals(actual));
@@ -92,7 +92,7 @@ class ValidatorFactoryTests {
 
 		ValidPerson person = new ValidPerson();
 		Set<ConstraintViolation<ValidPerson>> result = validator.validate(person);
-		assertThat(result.size()).isEqualTo(2);
+		assertThat(result).hasSize(2);
 		for (ConstraintViolation<ValidPerson> cv : result) {
 			String path = cv.getPropertyPath().toString();
 			assertThat(path).matches(actual -> "name".equals(actual) || "address.street".equals(actual));
@@ -117,7 +117,7 @@ class ValidatorFactoryTests {
 		person.setName("Juergen");
 		person.getAddress().setStreet("Juergen's Street");
 		Set<ConstraintViolation<ValidPerson>> result = validator.validate(person);
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		Iterator<ConstraintViolation<ValidPerson>> iterator = result.iterator();
 		ConstraintViolation<?> cv = iterator.next();
 		assertThat(cv.getPropertyPath().toString()).isEqualTo("");
@@ -158,7 +158,7 @@ class ValidatorFactoryTests {
 		FieldError fieldError = result.getFieldError("name");
 		assertThat(fieldError.getField()).isEqualTo("name");
 		List<String> errorCodes = Arrays.asList(fieldError.getCodes());
-		assertThat(errorCodes.size()).isEqualTo(4);
+		assertThat(errorCodes).hasSize(4);
 		assertThat(errorCodes.contains("NotNull.person.name")).isTrue();
 		assertThat(errorCodes.contains("NotNull.name")).isTrue();
 		assertThat(errorCodes.contains("NotNull.java.lang.String")).isTrue();
@@ -166,7 +166,7 @@ class ValidatorFactoryTests {
 		fieldError = result.getFieldError("address.street");
 		assertThat(fieldError.getField()).isEqualTo("address.street");
 		errorCodes = Arrays.asList(fieldError.getCodes());
-		assertThat(errorCodes.size()).isEqualTo(5);
+		assertThat(errorCodes).hasSize(5);
 		assertThat(errorCodes.contains("NotNull.person.address.street")).isTrue();
 		assertThat(errorCodes.contains("NotNull.address.street")).isTrue();
 		assertThat(errorCodes.contains("NotNull.street")).isTrue();
@@ -190,7 +190,7 @@ class ValidatorFactoryTests {
 		assertThat(result.getErrorCount()).isEqualTo(1);
 		ObjectError globalError = result.getGlobalError();
 		List<String> errorCodes = Arrays.asList(globalError.getCodes());
-		assertThat(errorCodes.size()).isEqualTo(2);
+		assertThat(errorCodes).hasSize(2);
 		assertThat(errorCodes.contains("NameAddressValid.person")).isTrue();
 		assertThat(errorCodes.contains("NameAddressValid")).isTrue();
 
@@ -212,7 +212,7 @@ class ValidatorFactoryTests {
 		assertThat(result.getErrorCount()).isEqualTo(1);
 		ObjectError globalError = result.getGlobalError();
 		List<String> errorCodes = Arrays.asList(globalError.getCodes());
-		assertThat(errorCodes.size()).isEqualTo(2);
+		assertThat(errorCodes).hasSize(2);
 		assertThat(errorCodes.contains("NameAddressValid.person")).isTrue();
 		assertThat(errorCodes.contains("NameAddressValid")).isTrue();
 

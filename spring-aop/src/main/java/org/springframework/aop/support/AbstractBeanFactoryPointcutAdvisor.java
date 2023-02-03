@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,8 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 	}
 
 	private void resetAdviceMonitor() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			this.adviceMonitor = ((ConfigurableBeanFactory) this.beanFactory).getSingletonMutex();
+		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+			this.adviceMonitor = cbf.getSingletonMutex();
 		}
 		else {
 			this.adviceMonitor = new Object();

@@ -121,8 +121,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 		return Flux.from(input).map(element -> {
 
-			ServerSentEvent<?> sse = (element instanceof ServerSentEvent ?
-					(ServerSentEvent<?>) element : ServerSentEvent.builder().data(element).build());
+			ServerSentEvent<?> sse = (element instanceof ServerSentEvent<?> serverSentEvent ?
+					serverSentEvent : ServerSentEvent.builder().data(element).build());
 
 			StringBuilder sb = new StringBuilder();
 			String id = sse.id();
@@ -150,9 +150,9 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 			if (data == null) {
 				result = Flux.just(encodeText(sb + "\n", mediaType, factory));
 			}
-			else if (data instanceof String) {
-				data = StringUtils.replace((String) data, "\n", "\ndata:");
-				result = Flux.just(encodeText(sb + (String) data + "\n\n", mediaType, factory));
+			else if (data instanceof String text) {
+				text = StringUtils.replace(text, "\n", "\ndata:");
+				result = Flux.just(encodeText(sb + text + "\n\n", mediaType, factory));
 			}
 			else {
 				result = encodeEvent(sb, data, dataType, mediaType, factory, hints);
@@ -203,9 +203,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.encoder instanceof HttpMessageEncoder) {
-			HttpMessageEncoder<?> encoder = (HttpMessageEncoder<?>) this.encoder;
-			return encoder.getEncodeHints(actualType, elementType, mediaType, request, response);
+		if (this.encoder instanceof HttpMessageEncoder<?> httpMessageEncoder) {
+			return httpMessageEncoder.getEncodeHints(actualType, elementType, mediaType, request, response);
 		}
 		return Hints.none();
 	}

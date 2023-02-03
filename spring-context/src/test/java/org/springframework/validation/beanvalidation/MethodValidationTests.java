@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
 
 import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.groups.Default;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -34,9 +37,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncAnnotationAdvisor;
 import org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.annotation.Validated;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,6 +76,18 @@ public class MethodValidationTests {
 		ac.refresh();
 		doTestProxyValidation(ac.getBean("bean", MyValidInterface.class));
 		ac.close();
+	}
+
+	@Test // gh-29782
+	@SuppressWarnings("unchecked")
+	public void testMethodValidationPostProcessorForInterfaceOnlyProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(MethodValidationPostProcessor.class);
+		context.registerBean(MyValidInterface.class, () ->
+				ProxyFactory.getProxy(MyValidInterface.class, new MyValidClientInterfaceMethodInterceptor()));
+		context.refresh();
+		doTestProxyValidation(context.getBean(MyValidInterface.class));
+		context.close();
 	}
 
 	private void doTestProxyValidation(MyValidInterface<String> proxy) {
@@ -156,6 +175,7 @@ public class MethodValidationTests {
 	}
 
 
+	@MyStereotype
 	public interface MyValidInterface<T> {
 
 		@NotNull Object myValidMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
@@ -164,6 +184,26 @@ public class MethodValidationTests {
 		@Async void myValidAsyncMethod(@NotNull(groups = OtherGroup.class) String arg1, @Max(10) int arg2);
 
 		T myGenericMethod(@NotNull T value);
+	}
+
+
+	static class MyValidClientInterfaceMethodInterceptor implements MethodInterceptor {
+
+		private final MyValidBean myValidBean = new MyValidBean();
+
+		@Nullable
+		@Override
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			Method method;
+			try {
+				method = ClassUtils.getMethod(MyValidBean.class, invocation.getMethod().getName(), (Class<?>[]) null);
+			}
+			catch (IllegalStateException ex) {
+				method = BridgeMethodResolver.findBridgedMethod(
+						ClassUtils.getMostSpecificMethod(invocation.getMethod(), MyValidBean.class));
+			}
+			return ReflectionUtils.invokeMethod(method, this.myValidBean, invocation.getArguments());
+		}
 	}
 
 

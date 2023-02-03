@@ -96,12 +96,12 @@ public class ReflectiveRuntimeHintsRegistrar {
 				.stream(Reflective.class)
 				.map(annotation -> annotation.getClassArray("value"))
 				.flatMap(Arrays::stream)
-				.map(type -> (Class<? extends ReflectiveProcessor>) type)
 				.distinct()
+				.map(type -> (Class<? extends ReflectiveProcessor>) type)
 				.map(processorClass -> this.processors.computeIfAbsent(processorClass, this::instantiateClass))
 				.toList();
-		ReflectiveProcessor processorToUse = (processors.size() == 1 ? processors.get(0)
-				: new DelegatingReflectiveProcessor(processors));
+		ReflectiveProcessor processorToUse = (processors.size() == 1 ? processors.get(0) :
+				new DelegatingReflectiveProcessor(processors));
 		return new Entry(element, processorToUse);
 	}
 

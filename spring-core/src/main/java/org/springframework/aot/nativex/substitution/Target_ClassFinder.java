@@ -23,6 +23,8 @@ import com.oracle.svm.core.annotate.TargetClass;
  * Allow to reference {@code com.sun.beans.finder.ClassFinder} from
  * {@link Target_Introspector}.
  *
+ * TODO Remove once Spring Framework requires GraalVM 23.0+, see <a href="https://github.com/oracle/graal/pull/5224">graal#5224</a>.
+ *
  * @author Sebastien Deleuze
  * @since 6.0
  */

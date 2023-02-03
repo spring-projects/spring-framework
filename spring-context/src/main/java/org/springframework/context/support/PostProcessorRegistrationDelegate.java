@@ -323,8 +323,8 @@ final class PostProcessorRegistrationDelegate {
 			return;
 		}
 		Comparator<Object> comparatorToUse = null;
-		if (beanFactory instanceof DefaultListableBeanFactory) {
-			comparatorToUse = ((DefaultListableBeanFactory) beanFactory).getDependencyComparator();
+		if (beanFactory instanceof DefaultListableBeanFactory dlbf) {
+			comparatorToUse = dlbf.getDependencyComparator();
 		}
 		if (comparatorToUse == null) {
 			comparatorToUse = OrderComparator.INSTANCE;
@@ -366,9 +366,9 @@ final class PostProcessorRegistrationDelegate {
 	private static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<? extends BeanPostProcessor> postProcessors) {
 
-		if (beanFactory instanceof AbstractBeanFactory) {
+		if (beanFactory instanceof AbstractBeanFactory abstractBeanFactory) {
 			// Bulk addition is more efficient against our CopyOnWriteArrayList there
-			((AbstractBeanFactory) beanFactory).addBeanPostProcessors(postProcessors);
+			abstractBeanFactory.addBeanPostProcessors(postProcessors);
 		}
 		else {
 			for (BeanPostProcessor postProcessor : postProcessors) {

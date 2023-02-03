@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,18 +96,18 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 	@Nullable
 	final T adaptInternal(S adapteeResult) throws ExecutionException {
 		synchronized (this.mutex) {
-			switch (this.state) {
-				case SUCCESS:
-					return (T) this.result;
-				case FAILURE:
+			return switch (this.state) {
+				case SUCCESS -> (T) this.result;
+				case FAILURE -> {
 					Assert.state(this.result instanceof ExecutionException, "Failure without exception");
 					throw (ExecutionException) this.result;
-				case NEW:
+				}
+				case NEW -> {
 					try {
 						T adapted = adapt(adapteeResult);
 						this.result = adapted;
 						this.state = State.SUCCESS;
-						return adapted;
+						yield adapted;
 					}
 					catch (ExecutionException ex) {
 						this.result = ex;
@@ -120,9 +120,8 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 						this.state = State.FAILURE;
 						throw execEx;
 					}
-				default:
-					throw new IllegalStateException();
-			}
+				}
+			};
 		}
 	}
 

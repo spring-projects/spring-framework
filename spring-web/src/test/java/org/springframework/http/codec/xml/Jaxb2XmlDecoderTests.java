@@ -99,7 +99,7 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(events -> {
-					assertThat(events.size()).isEqualTo(8);
+					assertThat(events).hasSize(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foofoo");
@@ -121,7 +121,7 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 
 		StepVerifier.create(result)
 				.consumeNextWith(events -> {
-					assertThat(events.size()).isEqualTo(8);
+					assertThat(events).hasSize(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foo");
@@ -132,7 +132,7 @@ public class Jaxb2XmlDecoderTests extends AbstractLeakCheckingTests {
 					assertEndElement(events.get(7), "pojo");
 				})
 				.consumeNextWith(events -> {
-					assertThat(events.size()).isEqualTo(8);
+					assertThat(events).hasSize(8);
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
 					assertCharacters(events.get(2), "foofoo");

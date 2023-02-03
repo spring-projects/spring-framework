@@ -107,6 +107,10 @@ public class ConsumesRequestConditionTests {
 		condition = new ConsumesRequestCondition(base);
 		request.setContentType(base + ";profile=\"a\"");
 		assertThat(condition.getMatchingCondition(request)).isNotNull();
+
+		condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		request.setContentType(base + ";profile=\"A\"");
+		assertThat(condition.getMatchingCondition(request)).isNotNull();
 	}
 
 	@Test

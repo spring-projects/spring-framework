@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,16 +83,16 @@ import static org.springframework.http.MediaType.parseMediaType;
 @SuppressWarnings("unchecked")
 class RestTemplateTests {
 
-	private final ClientHttpRequestFactory requestFactory = mock(ClientHttpRequestFactory.class);
+	private final ClientHttpRequestFactory requestFactory = mock();
 
-	private final ClientHttpRequest request = mock(ClientHttpRequest.class);
+	private final ClientHttpRequest request = mock();
 
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+	private final ClientHttpResponse response = mock();
 
-	private final ResponseErrorHandler errorHandler = mock(ResponseErrorHandler.class);
+	private final ResponseErrorHandler errorHandler = mock();
 
 	@SuppressWarnings("rawtypes")
-	private final HttpMessageConverter converter = mock(HttpMessageConverter.class);
+	private final HttpMessageConverter converter = mock();
 
 	private final RestTemplate template = new RestTemplate(Collections.singletonList(converter));
 
@@ -196,7 +196,7 @@ class RestTemplateTests {
 		mockSentRequest(GET, url);
 		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
-				.given(errorHandler).handleError(new URI(url), GET, response);
+				.given(errorHandler).handleError(URI.create(url), GET, response);
 
 		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
 				template.execute(url, GET, null, null));
@@ -241,10 +241,10 @@ class RestTemplateTests {
 
 	@Test
 	void requestAvoidsDuplicateAcceptHeaderValues() throws Exception {
-		HttpMessageConverter<?> firstConverter = mock(HttpMessageConverter.class);
+		HttpMessageConverter<?> firstConverter = mock();
 		given(firstConverter.canRead(any(), any())).willReturn(true);
 		given(firstConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		HttpMessageConverter<?> secondConverter = mock(HttpMessageConverter.class);
+		HttpMessageConverter<?> secondConverter = mock();
 		given(secondConverter.canRead(any(), any())).willReturn(true);
 		given(secondConverter.getSupportedMediaTypes(any())).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
@@ -318,7 +318,7 @@ class RestTemplateTests {
 		mockResponseStatus(HttpStatus.OK);
 		String helloWorld = "Hello World";
 		HttpHeaders responseHeaders = new HttpHeaders();
-		URI expected = new URI("https://example.com/hotels");
+		URI expected = URI.create("https://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 
@@ -336,7 +336,7 @@ class RestTemplateTests {
 
 		String helloWorld = "Hello World";
 		HttpHeaders responseHeaders = new HttpHeaders();
-		URI expected = new URI("https://example.com/hotels");
+		URI expected = URI.create("https://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 
@@ -357,7 +357,7 @@ class RestTemplateTests {
 		mockTextPlainHttpMessageConverter();
 		mockResponseStatus(HttpStatus.OK);
 		HttpHeaders responseHeaders = new HttpHeaders();
-		URI expected = new URI("https://example.com/hotels");
+		URI expected = URI.create("https://example.com/hotels");
 		responseHeaders.setLocation(expected);
 		given(response.getHeaders()).willReturn(responseHeaders);
 
@@ -654,7 +654,7 @@ class RestTemplateTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	void exchangeParameterizedType() throws Exception {
-		GenericHttpMessageConverter converter = mock(GenericHttpMessageConverter.class);
+		GenericHttpMessageConverter converter = mock();
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
 		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<>() {};
 		given(converter.canRead(intList.getType(), null, null)).willReturn(true);
@@ -762,7 +762,7 @@ class RestTemplateTests {
 	}
 
 	private void mockSentRequest(HttpMethod method, String uri, HttpHeaders requestHeaders) throws Exception {
-		given(requestFactory.createRequest(new URI(uri), method)).willReturn(request);
+		given(requestFactory.createRequest(URI.create(uri), method)).willReturn(request);
 		given(request.getHeaders()).willReturn(requestHeaders);
 	}
 

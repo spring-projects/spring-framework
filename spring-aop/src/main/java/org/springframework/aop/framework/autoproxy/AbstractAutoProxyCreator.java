@@ -473,8 +473,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	private Object buildProxy(Class<?> beanClass, @Nullable String beanName,
 			@Nullable Object[] specificInterceptors, TargetSource targetSource, boolean classOnly) {
 
-		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
-			AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
+			AutoProxyUtils.exposeTargetClass(clbf, beanName, beanClass);
 		}
 
 		ProxyFactory proxyFactory = new ProxyFactory();
@@ -511,8 +511,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 		// Use original ClassLoader if bean class not locally loaded in overriding class loader
 		ClassLoader classLoader = getProxyClassLoader();
-		if (classLoader instanceof SmartClassLoader && classLoader != beanClass.getClassLoader()) {
-			classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+		if (classLoader instanceof SmartClassLoader smartClassLoader && classLoader != beanClass.getClassLoader()) {
+			classLoader = smartClassLoader.getOriginalClassLoader();
 		}
 		return (classOnly ? proxyFactory.getProxyClass(classLoader) : proxyFactory.getProxy(classLoader));
 	}
@@ -527,8 +527,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @see AutoProxyUtils#shouldProxyTargetClass
 	 */
 	protected boolean shouldProxyTargetClass(Class<?> beanClass, @Nullable String beanName) {
-		return (this.beanFactory instanceof ConfigurableListableBeanFactory &&
-				AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName));
+		return (this.beanFactory instanceof ConfigurableListableBeanFactory clbf &&
+				AutoProxyUtils.shouldProxyTargetClass(clbf, beanName));
 	}
 
 	/**
@@ -592,7 +592,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	private Advisor[] resolveInterceptorNames() {
 		BeanFactory bf = this.beanFactory;
-		ConfigurableBeanFactory cbf = (bf instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) bf : null);
+		ConfigurableBeanFactory cbf = (bf instanceof ConfigurableBeanFactory _cbf ? _cbf : null);
 		List<Advisor> advisors = new ArrayList<>();
 		for (String beanName : this.interceptorNames) {
 			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {

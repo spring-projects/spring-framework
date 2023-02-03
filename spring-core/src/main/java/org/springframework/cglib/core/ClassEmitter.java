@@ -15,13 +15,13 @@
  */
 package org.springframework.cglib.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.FieldVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Type;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Juozas Baliuka, Chris Nokleberg
@@ -45,7 +45,8 @@ public class ClassEmitter extends ClassTransformer {
         super(Constants.ASM_API);
     }
 
-    public void setTarget(ClassVisitor cv) {
+    @Override
+	public void setTarget(ClassVisitor cv) {
         this.cv = cv;
         fieldInfo = new HashMap();
 
@@ -65,16 +66,20 @@ public class ClassEmitter extends ClassTransformer {
     public void begin_class(int version, final int access, String className, final Type superType, final Type[] interfaces, String source) {
         final Type classType = Type.getType("L" + className.replace('.', '/') + ";");
         classInfo = new ClassInfo() {
-            public Type getType() {
+            @Override
+			public Type getType() {
                 return classType;
             }
-            public Type getSuperType() {
+            @Override
+			public Type getSuperType() {
                 return (superType != null) ? superType : Constants.TYPE_OBJECT;
             }
-            public Type[] getInterfaces() {
+            @Override
+			public Type[] getInterfaces() {
                 return interfaces;
             }
-            public int getModifiers() {
+            @Override
+			public int getModifiers() {
                 return access;
             }
         };
@@ -84,8 +89,9 @@ public class ClassEmitter extends ClassTransformer {
                  null,
                  classInfo.getSuperType().getInternalName(),
                  TypeUtils.toInternalNames(interfaces));
-        if (source != null)
-            cv.visitSource(source, null);
+        if (source != null) {
+			cv.visitSource(source, null);
+		}
         init();
     }
 
@@ -137,8 +143,9 @@ public class ClassEmitter extends ClassTransformer {
     }
 
     public CodeEmitter begin_method(int access, Signature sig, Type[] exceptions) {
-        if (classInfo == null)
-            throw new IllegalStateException("classInfo is null! " + this);
+        if (classInfo == null) {
+			throw new IllegalStateException("classInfo is null! " + this);
+		}
         MethodVisitor v = cv.visitMethod(access,
                                          sig.getName(),
                                          sig.getDescriptor(),
@@ -147,10 +154,12 @@ public class ClassEmitter extends ClassTransformer {
         if (sig.equals(Constants.SIG_STATIC) && !TypeUtils.isInterface(getAccess())) {
             rawStaticInit = v;
             MethodVisitor wrapped = new MethodVisitor(Constants.ASM_API, v) {
-                public void visitMaxs(int maxStack, int maxLocals) {
+                @Override
+				public void visitMaxs(int maxStack, int maxLocals) {
                     // ignore
                 }
-                public void visitInsn(int insn) {
+                @Override
+				public void visitInsn(int insn) {
                     if (insn != Constants.RETURN) {
                         super.visitInsn(insn);
                     }
@@ -166,7 +175,8 @@ public class ClassEmitter extends ClassTransformer {
             return staticInit;
         } else if (sig.equals(staticHookSig)) {
             return new CodeEmitter(this, v, access, sig, exceptions) {
-                public boolean isStaticHook() {
+                @Override
+				public boolean isStaticHook() {
                     return true;
                 }
             };
@@ -204,13 +214,13 @@ public class ClassEmitter extends ClassTransformer {
         }
         return field;
     }
-    
+
     static class FieldInfo {
         int access;
         String name;
         Type type;
         Object value;
-        
+
         public FieldInfo(int access, String name, Type type, Object value) {
             this.access = access;
             this.name = name;
@@ -218,30 +228,36 @@ public class ClassEmitter extends ClassTransformer {
             this.value = value;
         }
 
-        public boolean equals(Object o) {
-            if (o == null)
-                return false;
-            if (!(o instanceof FieldInfo))
-                return false;
-            FieldInfo other = (FieldInfo)o;
+        @Override
+		public boolean equals(Object o) {
+            if (o == null) {
+				return false;
+			}
+            if (!(o instanceof FieldInfo other)) {
+				return false;
+			}
             if (access != other.access ||
                 !name.equals(other.name) ||
                 !type.equals(other.type)) {
                 return false;
             }
-            if ((value == null) ^ (other.value == null))
-                return false;
-            if (value != null && !value.equals(other.value))
-                return false;
+            if ((value == null) ^ (other.value == null)) {
+				return false;
+			}
+            if (value != null && !value.equals(other.value)) {
+				return false;
+			}
             return true;
         }
 
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             return access ^ name.hashCode() ^ type.hashCode() ^ ((value == null) ? 0 : value.hashCode());
         }
     }
 
-    public void visit(int version,
+    @Override
+	public void visit(int version,
                       int access,
                       String name,
                       String signature,
@@ -254,12 +270,14 @@ public class ClassEmitter extends ClassTransformer {
                     TypeUtils.fromInternalNames(interfaces),
                     null); // TODO
     }
-    
-    public void visitEnd() {
+
+    @Override
+	public void visitEnd() {
         end_class();
     }
-    
-    public FieldVisitor visitField(int access,
+
+    @Override
+	public FieldVisitor visitField(int access,
                                    String name,
                                    String desc,
                                    String signature,
@@ -267,14 +285,15 @@ public class ClassEmitter extends ClassTransformer {
         declare_field(access, name, Type.getType(desc), value);
         return null; // TODO
     }
-    
-    public MethodVisitor visitMethod(int access,
+
+    @Override
+	public MethodVisitor visitMethod(int access,
                                      String name,
                                      String desc,
                                      String signature,
                                      String[] exceptions) {
         return begin_method(access,
                             new Signature(name, desc),
-                            TypeUtils.fromInternalNames(exceptions));        
+                            TypeUtils.fromInternalNames(exceptions));
     }
 }

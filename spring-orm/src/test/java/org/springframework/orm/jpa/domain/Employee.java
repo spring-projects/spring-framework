@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -24,6 +25,7 @@ import jakarta.persistence.PreRemove;
 
 @Entity
 @IdClass(EmployeeId.class)
+@Convert(converter = EmployeeKindConverter.class, attributeName = "kind")
 public class Employee {
 
 	@Id
@@ -36,6 +38,10 @@ public class Employee {
 
 	private EmployeeLocation location;
 
+	@Convert(converter = EmployeeCategoryConverter.class)
+	private EmployeeCategory category;
+
+	private EmployeeKind kind;
 
 	public String getName() {
 		return name;
@@ -59,6 +65,22 @@ public class Employee {
 
 	public void setLocation(EmployeeLocation location) {
 		this.location = location;
+	}
+
+	public EmployeeCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(EmployeeCategory category) {
+		this.category = category;
+	}
+
+	public EmployeeKind getKind() {
+		return kind;
+	}
+
+	public void setKind(EmployeeKind kind) {
+		this.kind = kind;
 	}
 
 	@PreRemove

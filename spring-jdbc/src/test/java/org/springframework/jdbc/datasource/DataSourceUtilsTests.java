@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class DataSourceUtilsTests {
 
 	@Test
 	void testConnectionNotAcquiredExceptionIsPropagated() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		when(dataSource.getConnection()).thenReturn(null);
 		assertThatThrownBy(() -> DataSourceUtils.getConnection(dataSource))
 				.isInstanceOf(CannotGetJdbcConnectionException.class)
@@ -48,7 +48,7 @@ class DataSourceUtilsTests {
 
 	@Test
 	void testConnectionSQLExceptionIsPropagated() throws SQLException {
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		when(dataSource.getConnection()).thenThrow(new SQLException("my dummy exception"));
 		assertThatThrownBy(() -> DataSourceUtils.getConnection(dataSource))
 				.isInstanceOf(CannotGetJdbcConnectionException.class)

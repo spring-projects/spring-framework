@@ -70,14 +70,14 @@ class EvaluationTests extends AbstractExpressionTests {
 			assertThat(o).isEqualTo("");
 			o = parser.parseExpression("list[3]").getValue(new StandardEvaluationContext(testClass));
 			assertThat(o).isEqualTo("");
-			assertThat(testClass.list.size()).isEqualTo(4);
+			assertThat(testClass.list).hasSize(4);
 
 			assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
 			parser.parseExpression("list2[3]").getValue(new StandardEvaluationContext(testClass)));
 
 			o = parser.parseExpression("foo[3]").getValue(new StandardEvaluationContext(testClass));
 			assertThat(o).isEqualTo("");
-			assertThat(testClass.getFoo().size()).isEqualTo(4);
+			assertThat(testClass.getFoo()).hasSize(4);
 		}
 
 		@Test
@@ -116,6 +116,10 @@ class EvaluationTests extends AbstractExpressionTests {
 		void elvisOperator() {
 			evaluate("'Andy'?:'Dave'", "Andy", String.class);
 			evaluate("null?:'Dave'", "Dave", String.class);
+			evaluate("3?:1", 3, Integer.class);
+			evaluate("(2*3)?:1*10", 6, Integer.class);
+			evaluate("null?:2*10", 20, Integer.class);
+			evaluate("(null?:1)*10", 10, Integer.class);
 		}
 
 		@Test
@@ -315,7 +319,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e =  parser.parseExpression("listOfStrings[++index3]='def'");
 			e.getValue(ctx);
-			assertThat(instance.listOfStrings.size()).isEqualTo(2);
+			assertThat(instance.listOfStrings).hasSize(2);
 			assertThat(instance.listOfStrings.get(1)).isEqualTo("def");
 
 			// Check reference beyond end of collection
@@ -347,15 +351,64 @@ class EvaluationTests extends AbstractExpressionTests {
 			SpelExpressionParser parser = new SpelExpressionParser( new SpelParserConfiguration(true, true, 3));
 			Expression e = parser.parseExpression("foo[2]");
 			e.setValue(ctx, "2");
-			assertThat(instance.getFoo().size()).isEqualTo(3);
+			assertThat(instance.getFoo()).hasSize(3);
 			e = parser.parseExpression("foo[3]");
 			try {
 				e.setValue(ctx, "3");
 			}
 			catch (SpelEvaluationException see) {
 				assertThat(see.getMessageCode()).isEqualTo(SpelMessage.UNABLE_TO_GROW_COLLECTION);
-				assertThat(instance.getFoo().size()).isEqualTo(3);
+				assertThat(instance.getFoo()).hasSize(3);
 			}
+		}
+
+	}
+
+	@Nested
+	class StringLiterals {
+
+		@Test
+		void insideSingleQuotes() {
+			evaluate("'hello'", "hello", String.class);
+			evaluate("'hello world'", "hello world", String.class);
+		}
+
+		@Test
+		void insideDoubleQuotes() {
+			evaluate("\"hello\"", "hello", String.class);
+			evaluate("\"hello world\"", "hello world", String.class);
+		}
+
+		@Test
+		void singleQuotesInsideSingleQuotes() {
+			evaluate("'Tony''s Pizza'", "Tony's Pizza", String.class);
+			evaluate("'big ''''pizza'''' parlor'", "big ''pizza'' parlor", String.class);
+		}
+
+		@Test
+		void doubleQuotesInsideDoubleQuotes() {
+			evaluate("\"big \"\"pizza\"\" parlor\"", "big \"pizza\" parlor", String.class);
+			evaluate("\"big \"\"\"\"pizza\"\"\"\" parlor\"", "big \"\"pizza\"\" parlor", String.class);
+		}
+
+		@Test
+		void singleQuotesInsideDoubleQuotes() {
+			evaluate("\"Tony's Pizza\"", "Tony's Pizza", String.class);
+			evaluate("\"big ''pizza'' parlor\"", "big ''pizza'' parlor", String.class);
+		}
+
+		@Test
+		void doubleQuotesInsideSingleQuotes() {
+			evaluate("'big \"pizza\" parlor'", "big \"pizza\" parlor", String.class);
+			evaluate("'two double \"\" quotes'", "two double \"\" quotes", String.class);
+		}
+
+		@Test
+		void inCompoundExpressions() {
+			evaluate("'123''4' == '123''4'", true, Boolean.class);
+			evaluate("""
+				"123""4" == "123""4"\
+				""", true, Boolean.class);
 		}
 
 	}
@@ -622,6 +675,24 @@ class EvaluationTests extends AbstractExpressionTests {
 			evaluate("3?:#var=5", 3, Integer.class);
 			evaluate("null?:#var=5", 5, Integer.class);
 			evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
+		}
+
+		@Test
+		void ternaryOperator06() {
+			evaluate("3?:#var=5", 3, Integer.class);
+			evaluate("null?:#var=5", 5, Integer.class);
+			evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
+		}
+
+		@Test
+		void ternaryExpressionWithImplicitGrouping() {
+			evaluate("4 % 2 == 0 ? 2 : 3 * 10", 2, Integer.class);
+			evaluate("4 % 2 == 1 ? 2 : 3 * 10", 30, Integer.class);
+		}
+
+		@Test
+		void ternaryExpressionWithExplicitGrouping() {
+			evaluate("((4 % 2 == 0) ? 2 : 1) * 10", 20, Integer.class);
 		}
 
 		@Test

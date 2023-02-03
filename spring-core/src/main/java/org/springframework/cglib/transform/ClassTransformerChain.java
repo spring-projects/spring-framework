@@ -21,12 +21,13 @@ import org.springframework.cglib.core.ClassTransformer;
 
 public class ClassTransformerChain extends AbstractClassTransformer {
     private ClassTransformer[] chain;
-    
+
     public ClassTransformerChain(ClassTransformer[] chain) {
         this.chain = chain.clone();
     }
 
-    public void setTarget(ClassVisitor v) {
+    @Override
+	public void setTarget(ClassVisitor v) {
         super.setTarget(chain[0]);
         ClassVisitor next = v;
         for (int i = chain.length - 1; i >= 0; i--) {
@@ -35,7 +36,8 @@ public class ClassTransformerChain extends AbstractClassTransformer {
         }
     }
 
-    public MethodVisitor visitMethod(int access,
+    @Override
+	public MethodVisitor visitMethod(int access,
                                      String name,
                                      String desc,
                                      String signature,
@@ -43,7 +45,8 @@ public class ClassTransformerChain extends AbstractClassTransformer {
         return cv.visitMethod(access, name, desc, signature, exceptions);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
         sb.append("ClassTransformerChain{");
         for (int i = 0; i < chain.length; i++) {

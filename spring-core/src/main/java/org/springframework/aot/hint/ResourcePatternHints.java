@@ -31,6 +31,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Stephane Nicoll
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 6.0
  */
 public final class ResourcePatternHints {
@@ -81,10 +82,50 @@ public final class ResourcePatternHints {
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder includes(@Nullable TypeReference reachableType, String... includes) {
-			List<ResourcePatternHint> newIncludes = Arrays.stream(includes)
-					.map(include -> new ResourcePatternHint(include, reachableType)).toList();
-			this.includes.addAll(newIncludes);
+			Arrays.stream(includes)
+					.map(this::expandToIncludeDirectories)
+					.flatMap(List::stream)
+					.map(include -> new ResourcePatternHint(include, reachableType))
+					.forEach(this.includes::add);
 			return this;
+		}
+
+		/**
+		 * Expand the supplied include pattern into multiple patterns that include
+		 * all parent directories for the ultimate resource or resources.
+		 * <p>This is necessary to support classpath scanning within a GraalVM
+		 * native image.
+		 * @see <a href="https://github.com/spring-projects/spring-framework/issues/29403">gh-29403</a>
+		 */
+		private List<String> expandToIncludeDirectories(String includePattern) {
+			// Resource in root or no explicit subdirectories?
+			if (!includePattern.contains("/")) {
+				// Include the root directory as well as the pattern
+				return List.of("/", includePattern);
+			}
+
+			List<String> includePatterns = new ArrayList<>();
+			// Ensure the root directory and original pattern are always included
+			includePatterns.add("/");
+			includePatterns.add(includePattern);
+			StringBuilder path = new StringBuilder();
+			for (String pathElement : includePattern.split("/")) {
+				if (pathElement.isEmpty()) {
+					// Skip empty path elements
+					continue;
+				}
+				if (pathElement.contains("*")) {
+					// Stop at the first encountered wildcard, since we cannot reliably reason
+					// any further about the directory structure below this path element.
+					break;
+				}
+				if (!path.isEmpty()) {
+					path.append("/");
+				}
+				path.append(pathElement);
+				includePatterns.add(path.toString());
+			}
+			return includePatterns;
 		}
 
 		/**

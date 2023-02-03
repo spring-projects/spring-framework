@@ -234,8 +234,9 @@ public class MethodProxy {
 			throw ex.getTargetException();
 		}
 		catch (IllegalArgumentException ex) {
-			if (fastClassInfo.i1 < 0)
+			if (fastClassInfo.i1 < 0) {
 				throw new IllegalArgumentException("Protected method: " + sig1);
+			}
 			throw ex;
 		}
 	}

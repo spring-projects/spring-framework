@@ -38,7 +38,7 @@ public class Block
         }
         end = e.mark();
     }
-    
+
     public Label getStart() {
         return start;
     }

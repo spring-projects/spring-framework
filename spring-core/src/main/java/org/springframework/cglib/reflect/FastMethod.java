@@ -18,9 +18,8 @@ package org.springframework.cglib.reflect;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.springframework.cglib.core.Signature;
-
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.Signature;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class FastMethod extends FastMember
@@ -46,11 +45,13 @@ public class FastMethod extends FastMember
         return ((Method)member).getReturnType();
     }
 
-    public Class[] getParameterTypes() {
+    @Override
+	public Class[] getParameterTypes() {
         return ((Method)member).getParameterTypes();
     }
 
-    public Class[] getExceptionTypes() {
+    @Override
+	public Class[] getExceptionTypes() {
         return ((Method)member).getExceptionTypes();
     }
 

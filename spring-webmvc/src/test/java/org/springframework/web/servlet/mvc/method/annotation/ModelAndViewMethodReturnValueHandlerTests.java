@@ -152,7 +152,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 		ModelMap model = mavContainer.getModel();
 		assertThat(mavContainer.getView()).isSameAs(redirectView);
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		assertThat(model.get("name")).isEqualTo("value");
 	}
 

@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -131,7 +131,7 @@ public class InitBinderBindingContextTests {
 
 		SyncInvocableHandlerMethod handlerMethod = new SyncInvocableHandlerMethod(handler, method);
 		handlerMethod.setArgumentResolvers(new ArrayList<>(this.argumentResolvers));
-		handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		handlerMethod.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		return new InitBinderBindingContext(this.bindingInitializer, Collections.singletonList(handlerMethod));
 	}

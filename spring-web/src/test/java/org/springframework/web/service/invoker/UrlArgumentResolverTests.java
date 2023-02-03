@@ -21,6 +21,7 @@ import java.net.URI;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.service.annotation.GetExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Rossen Stoyanchev
  */
-public class UrlArgumentResolverTests {
+class UrlArgumentResolverTests {
 
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
@@ -51,7 +52,7 @@ public class UrlArgumentResolverTests {
 		this.service.execute(dynamicUrl);
 
 		assertThat(getRequestValues().getUri()).isEqualTo(dynamicUrl);
-		assertThat(getRequestValues().getUriTemplate()).isNull();
+		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
 	}
 
 	@Test
@@ -67,7 +68,9 @@ public class UrlArgumentResolverTests {
 	@Test
 	void ignoreNull() {
 		this.service.execute(null);
+
 		assertThat(getRequestValues().getUri()).isNull();
+		assertThat(getRequestValues().getUriTemplate()).isEqualTo("/path");
 	}
 
 	private HttpRequestValues getRequestValues() {
@@ -78,7 +81,7 @@ public class UrlArgumentResolverTests {
 	private interface Service {
 
 		@GetExchange("/path")
-		void execute(URI uri);
+		void execute(@Nullable URI uri);
 
 		@GetExchange
 		void executeNotUri(String other);

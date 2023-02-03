@@ -161,7 +161,7 @@ public class NamedParameterUtilsTests {
 		paramMap.addValue("b", "b");
 		paramMap.addValue("c", "c");
 		Object[] params = NamedParameterUtils.buildValueArray(psql1, paramMap, null);
-		assertThat(params.length).isEqualTo(4);
+		assertThat(params).hasSize(4);
 		assertThat(params[0]).isEqualTo("a");
 		assertThat(params[1]).isEqualTo("b");
 		assertThat(params[2]).isEqualTo("c");
@@ -224,7 +224,7 @@ public class NamedParameterUtilsTests {
 		String sql = "select '0\\:0' as a, foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getParameterNames().size()).isEqualTo(2);
+		assertThat(parsedSql.getParameterNames()).hasSize(2);
 		assertThat(parsedSql.getParameterNames().get(0)).isEqualTo("p1");
 		assertThat(parsedSql.getParameterNames().get(1)).isEqualTo("p2");
 		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
@@ -237,7 +237,7 @@ public class NamedParameterUtilsTests {
 		String sql = "select foo from bar where baz = b:{p1}:{p2}z";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getParameterNames().size()).isEqualTo(2);
+		assertThat(parsedSql.getParameterNames()).hasSize(2);
 		assertThat(parsedSql.getParameterNames().get(0)).isEqualTo("p1");
 		assertThat(parsedSql.getParameterNames().get(1)).isEqualTo("p2");
 		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
@@ -249,7 +249,7 @@ public class NamedParameterUtilsTests {
 		String expectedSql = "select foo from bar where baz = b:{}z";
 		String sql = "select foo from bar where baz = b:{}z";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getParameterNames().size()).isEqualTo(0);
+		assertThat(parsedSql.getParameterNames()).isEmpty();
 		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
 		assertThat(finalSql).isEqualTo(expectedSql);
 
@@ -257,7 +257,7 @@ public class NamedParameterUtilsTests {
 		String sql2 = "select foo from bar where baz = 'b:{p1}z'";
 
 		ParsedSql parsedSql2 = NamedParameterUtils.parseSqlStatement(sql2);
-		assertThat(parsedSql2.getParameterNames().size()).isEqualTo(0);
+		assertThat(parsedSql2.getParameterNames()).isEmpty();
 		String finalSql2 = NamedParameterUtils.substituteNamedParameters(parsedSql2, null);
 		assertThat(finalSql2).isEqualTo(expectedSql2);
 	}
@@ -268,7 +268,7 @@ public class NamedParameterUtilsTests {
 		String sql = "select foo from bar where baz = b:{p}z";
 
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		assertThat(parsedSql.getParameterNames().size()).isEqualTo(1);
+		assertThat(parsedSql.getParameterNames()).hasSize(1);
 		assertThat(parsedSql.getParameterNames().get(0)).isEqualTo("p");
 		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
 		assertThat(finalSql).isEqualTo(expectedSql);

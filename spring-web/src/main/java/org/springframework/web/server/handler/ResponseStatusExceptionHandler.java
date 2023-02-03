@@ -95,8 +95,8 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		int code = (statusCode != null ? statusCode.value() : determineRawStatusCode(ex));
 		if (code != -1) {
 			if (response.setStatusCode(statusCode)) {
-				if (ex instanceof ResponseStatusException) {
-					((ResponseStatusException) ex).getHeaders().forEach((name, values) ->
+				if (ex instanceof ResponseStatusException responseStatusException) {
+					responseStatusException.getHeaders().forEach((name, values) ->
 							values.forEach(value -> response.getHeaders().add(name, value)));
 				}
 				result = true;

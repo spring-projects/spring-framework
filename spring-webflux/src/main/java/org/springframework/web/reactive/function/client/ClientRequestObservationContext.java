@@ -22,26 +22,32 @@ import org.springframework.lang.Nullable;
 
 /**
  * Context that holds information for metadata collection
- * during the {@link ClientHttpObservationDocumentation#HTTP_REQUEST HTTP client exchange observations}.
+ * during the {@link ClientHttpObservationDocumentation#HTTP_REACTIVE_CLIENT_EXCHANGES HTTP client exchange observations}.
+ * <p>The {@link #getCarrier() tracing context carrier} is a {@link ClientRequest.Builder request builder},
+ * since the actual request is immutable. For {@code KeyValue} extraction, the {@link #getRequest() actual request}
+ * should be used instead.
  *
  * @author Brian Clozel
  * @since 6.0
  */
-public class ClientRequestObservationContext extends RequestReplySenderContext<ClientRequest, ClientResponse> {
+public class ClientRequestObservationContext extends RequestReplySenderContext<ClientRequest.Builder, ClientResponse> {
 
 	@Nullable
 	private String uriTemplate;
 
 	private boolean aborted;
 
+	@Nullable
+	private ClientRequest request;
+
 
 	public ClientRequestObservationContext() {
 		super(ClientRequestObservationContext::setRequestHeader);
 	}
 
-	private static void setRequestHeader(@Nullable ClientRequest request, String name, String value) {
+	private static void setRequestHeader(@Nullable ClientRequest.Builder request, String name, String value) {
 		if (request != null) {
-			request.headers().set(name, value);
+			request.headers(headers -> headers.set(name, value));
 		}
 	}
 
@@ -74,5 +80,20 @@ public class ClientRequestObservationContext extends RequestReplySenderContext<C
 	 */
 	void setAborted(boolean aborted) {
 		this.aborted = aborted;
+	}
+
+	/**
+	 * Return the immutable client request.
+	 */
+	@Nullable
+	public ClientRequest getRequest() {
+		return this.request;
+	}
+
+	/**
+	 * Set the client request.
+	 */
+	public void setRequest(ClientRequest request) {
+		this.request = request;
 	}
 }

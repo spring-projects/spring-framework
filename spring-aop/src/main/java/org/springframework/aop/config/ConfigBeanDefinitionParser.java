@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,14 +108,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		List<Element> childElts = DomUtils.getChildElements(element);
 		for (Element elt: childElts) {
 			String localName = parserContext.getDelegate().getLocalName(elt);
-			if (POINTCUT.equals(localName)) {
-				parsePointcut(elt, parserContext);
-			}
-			else if (ADVISOR.equals(localName)) {
-				parseAdvisor(elt, parserContext);
-			}
-			else if (ASPECT.equals(localName)) {
-				parseAspect(elt, parserContext);
+			switch (localName) {
+				case POINTCUT -> parsePointcut(elt, parserContext);
+				case ADVISOR -> parseAdvisor(elt, parserContext);
+				case ASPECT -> parseAspect(elt, parserContext);
 			}
 		}
 
@@ -153,13 +149,13 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 			}
 
 			Object pointcut = parsePointcutProperty(advisorElement, parserContext);
-			if (pointcut instanceof BeanDefinition) {
+			if (pointcut instanceof BeanDefinition beanDefinition) {
 				advisorDef.getPropertyValues().add(POINTCUT, pointcut);
 				parserContext.registerComponent(
-						new AdvisorComponentDefinition(advisorBeanName, advisorDef, (BeanDefinition) pointcut));
+						new AdvisorComponentDefinition(advisorBeanName, advisorDef, beanDefinition));
 			}
-			else if (pointcut instanceof String) {
-				advisorDef.getPropertyValues().add(POINTCUT, new RuntimeBeanReference((String) pointcut));
+			else if (pointcut instanceof String beanName) {
+				advisorDef.getPropertyValues().add(POINTCUT, new RuntimeBeanReference(beanName));
 				parserContext.registerComponent(
 						new AdvisorComponentDefinition(advisorBeanName, advisorDef));
 			}
@@ -389,12 +385,12 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		cav.addIndexedArgumentValue(METHOD_INDEX, methodDef);
 
 		Object pointcut = parsePointcutProperty(adviceElement, parserContext);
-		if (pointcut instanceof BeanDefinition) {
+		if (pointcut instanceof BeanDefinition beanDefinition) {
 			cav.addIndexedArgumentValue(POINTCUT_INDEX, pointcut);
-			beanDefinitions.add((BeanDefinition) pointcut);
+			beanDefinitions.add(beanDefinition);
 		}
-		else if (pointcut instanceof String) {
-			RuntimeBeanReference pointcutRef = new RuntimeBeanReference((String) pointcut);
+		else if (pointcut instanceof String beanName) {
+			RuntimeBeanReference pointcutRef = new RuntimeBeanReference(beanName);
 			cav.addIndexedArgumentValue(POINTCUT_INDEX, pointcutRef);
 			beanReferences.add(pointcutRef);
 		}

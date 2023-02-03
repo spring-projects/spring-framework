@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -655,8 +655,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		catch (SQLException ex) {
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
-			if (psc instanceof ParameterDisposer) {
-				((ParameterDisposer) psc).cleanupParameters();
+			if (psc instanceof ParameterDisposer parameterDisposer) {
+				parameterDisposer.cleanupParameters();
 			}
 			String sql = getSql(psc);
 			psc = null;
@@ -668,8 +668,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		}
 		finally {
 			if (closeResources) {
-				if (psc instanceof ParameterDisposer) {
-					((ParameterDisposer) psc).cleanupParameters();
+				if (psc instanceof ParameterDisposer parameterDisposer) {
+					parameterDisposer.cleanupParameters();
 				}
 				JdbcUtils.closeStatement(ps);
 				DataSourceUtils.releaseConnection(con, getDataSource());
@@ -724,8 +724,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				finally {
 					JdbcUtils.closeResultSet(rs);
-					if (pss instanceof ParameterDisposer) {
-						((ParameterDisposer) pss).cleanupParameters();
+					if (pss instanceof ParameterDisposer parameterDisposer) {
+						parameterDisposer.cleanupParameters();
 					}
 				}
 			}
@@ -839,8 +839,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			Connection con = ps.getConnection();
 			return new ResultSetSpliterator<>(rs, rowMapper).stream().onClose(() -> {
 				JdbcUtils.closeResultSet(rs);
-				if (pss instanceof ParameterDisposer) {
-					((ParameterDisposer) pss).cleanupParameters();
+				if (pss instanceof ParameterDisposer parameterDisposer) {
+					parameterDisposer.cleanupParameters();
 				}
 				JdbcUtils.closeStatement(ps);
 				DataSourceUtils.releaseConnection(con, getDataSource());
@@ -969,8 +969,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return rows;
 			}
 			finally {
-				if (pss instanceof ParameterDisposer) {
-					((ParameterDisposer) pss).cleanupParameters();
+				if (pss instanceof ParameterDisposer parameterDisposer) {
+					parameterDisposer.cleanupParameters();
 				}
 			}
 		}, true));
@@ -1035,8 +1035,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			try {
 				int batchSize = pss.getBatchSize();
 				InterruptibleBatchPreparedStatementSetter ipss =
-						(pss instanceof InterruptibleBatchPreparedStatementSetter ?
-						(InterruptibleBatchPreparedStatementSetter) pss : null);
+						(pss instanceof InterruptibleBatchPreparedStatementSetter ibpss ? ibpss : null);
 				if (JdbcUtils.supportsBatchUpdates(ps.getConnection())) {
 					for (int i = 0; i < batchSize; i++) {
 						pss.setValues(ps, i);
@@ -1064,8 +1063,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 			}
 			finally {
-				if (pss instanceof ParameterDisposer) {
-					((ParameterDisposer) pss).cleanupParameters();
+				if (pss instanceof ParameterDisposer parameterDisposer) {
+					parameterDisposer.cleanupParameters();
 				}
 			}
 		});
@@ -1154,8 +1153,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				return result1;
 			}
 			finally {
-				if (pss instanceof ParameterDisposer) {
-					((ParameterDisposer) pss).cleanupParameters();
+				if (pss instanceof ParameterDisposer parameterDisposer) {
+					parameterDisposer.cleanupParameters();
 				}
 			}
 		});
@@ -1193,8 +1192,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		catch (SQLException ex) {
 			// Release Connection early, to avoid potential connection pool deadlock
 			// in the case when the exception translator hasn't been initialized yet.
-			if (csc instanceof ParameterDisposer) {
-				((ParameterDisposer) csc).cleanupParameters();
+			if (csc instanceof ParameterDisposer parameterDisposer) {
+				parameterDisposer.cleanupParameters();
 			}
 			String sql = getSql(csc);
 			csc = null;
@@ -1205,8 +1204,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 			throw translateException("CallableStatementCallback", sql, ex);
 		}
 		finally {
-			if (csc instanceof ParameterDisposer) {
-				((ParameterDisposer) csc).cleanupParameters();
+			if (csc instanceof ParameterDisposer parameterDisposer) {
+				parameterDisposer.cleanupParameters();
 			}
 			JdbcUtils.closeStatement(cs);
 			DataSourceUtils.releaseConnection(con, getDataSource());
@@ -1345,14 +1344,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 				}
 				else {
 					Object out = cs.getObject(sqlColIndex);
-					if (out instanceof ResultSet) {
+					if (out instanceof ResultSet resultSet) {
 						if (outParam.isResultSetSupported()) {
-							results.putAll(processResultSet((ResultSet) out, outParam));
+							results.putAll(processResultSet(resultSet, outParam));
 						}
 						else {
 							String rsName = outParam.getName();
 							SqlReturnResultSet rsParam = new SqlReturnResultSet(rsName, getColumnMapRowMapper());
-							results.putAll(processResultSet((ResultSet) out, rsParam));
+							results.putAll(processResultSet(resultSet, rsParam));
 							if (logger.isTraceEnabled()) {
 								logger.trace("Added default SqlReturnResultSet parameter named '" + rsName + "'");
 							}
@@ -1543,18 +1542,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * Determine SQL from potential provider object.
-	 * @param sqlProvider object which is potentially an SqlProvider
+	 * @param obj object which is potentially an SqlProvider
 	 * @return the SQL string, or {@code null} if not known
 	 * @see SqlProvider
 	 */
 	@Nullable
-	private static String getSql(Object sqlProvider) {
-		if (sqlProvider instanceof SqlProvider) {
-			return ((SqlProvider) sqlProvider).getSql();
-		}
-		else {
-			return null;
-		}
+	private static String getSql(Object obj) {
+		return (obj instanceof SqlProvider sqlProvider ? sqlProvider.getSql() : null);
 	}
 
 	private static <T> T result(@Nullable T result) {
@@ -1613,8 +1607,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 				// If return value is a JDBC Statement, apply statement settings
 				// (fetch size, max rows, transaction timeout).
-				if (retVal instanceof Statement) {
-					applyStatementSettings(((Statement) retVal));
+				if (retVal instanceof Statement statement) {
+					applyStatementSettings(statement);
 				}
 
 				return retVal;

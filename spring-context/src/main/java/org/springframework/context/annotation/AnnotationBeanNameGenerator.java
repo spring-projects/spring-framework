@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,8 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-		if (definition instanceof AnnotatedBeanDefinition) {
-			String beanName = determineBeanNameFromAnnotation((AnnotatedBeanDefinition) definition);
+		if (definition instanceof AnnotatedBeanDefinition annotatedBeanDefinition) {
+			String beanName = determineBeanNameFromAnnotation(annotatedBeanDefinition);
 			if (StringUtils.hasText(beanName)) {
 				// Explicit bean name found.
 				return beanName;
@@ -107,14 +107,12 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				});
 				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
 					Object value = attributes.get("value");
-					if (value instanceof String strVal) {
-						if (StringUtils.hasLength(strVal)) {
-							if (beanName != null && !strVal.equals(beanName)) {
-								throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
-										"component names: '" + beanName + "' versus '" + strVal + "'");
-							}
-							beanName = strVal;
+					if (value instanceof String strVal && !strVal.isEmpty()) {
+						if (beanName != null && !strVal.equals(beanName)) {
+							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
+									"component names: '" + beanName + "' versus '" + strVal + "'");
 						}
+						beanName = strVal;
 					}
 				}
 			}

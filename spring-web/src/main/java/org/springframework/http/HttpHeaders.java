@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -990,7 +990,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the {@linkplain MediaType media type} of the body, as specified
 	 * by the {@code Content-Type} header.
-	 * <p>Returns {@code null} when the content-type is unknown.
+	 * <p>Returns {@code null} when the {@code Content-Type} header is not set.
+	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 */
 	@Nullable
 	public MediaType getContentType() {
@@ -1536,8 +1537,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return all values of a given header name,
-	 * even if this header is set multiple times.
+	 * Return all values of a given header name, even if this header is set
+	 * multiple times.
+	 * <p>This method supports double-quoted values, as described in
+	 * <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-5.5-8">RFC
+	 * 9110, section 5.5</a>.
 	 * @param headerName the header name
 	 * @return all associated values
 	 * @since 4.3
@@ -1548,12 +1552,59 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			List<String> result = new ArrayList<>();
 			for (String value : values) {
 				if (value != null) {
-					Collections.addAll(result, StringUtils.tokenizeToStringArray(value, ","));
+					result.addAll(tokenizeQuoted(value));
 				}
 			}
 			return result;
 		}
 		return Collections.emptyList();
+	}
+
+	private static List<String> tokenizeQuoted(String str) {
+		List<String> tokens = new ArrayList<>();
+		boolean quoted = false;
+		boolean trim = true;
+		StringBuilder builder = new StringBuilder(str.length());
+		for (int i = 0; i < str.length(); ++i) {
+			char ch = str.charAt(i);
+			if (ch == '"') {
+				if (builder.isEmpty()) {
+					quoted = true;
+				}
+				else if (quoted) {
+					quoted = false;
+					trim = false;
+				}
+				else {
+					builder.append(ch);
+				}
+			}
+			else if (ch == '\\' && quoted && i < str.length() - 1) {
+				builder.append(str.charAt(++i));
+			}
+			else if (ch == ',' && !quoted) {
+				addToken(builder, tokens, trim);
+				builder.setLength(0);
+				trim = false;
+			}
+			else if (quoted || (!builder.isEmpty() && trim) || !Character.isWhitespace(ch)) {
+				builder.append(ch);
+			}
+		}
+		if (!builder.isEmpty()) {
+			addToken(builder, tokens, trim);
+		}
+		return tokens;
+	}
+
+	private static void addToken(StringBuilder builder, List<String> tokens, boolean trim) {
+		String token = builder.toString();
+		if (trim) {
+			token = token.trim();
+		}
+		if (!token.isEmpty()) {
+			tokens.add(token);
+		}
 	}
 
 	/**
@@ -1772,19 +1823,19 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	@Override
-	public boolean equals(@Nullable Object other) {
-		if (this == other) {
+	public boolean equals(@Nullable Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(other instanceof HttpHeaders)) {
+		if (!(obj instanceof HttpHeaders other)) {
 			return false;
 		}
-		return unwrap(this).equals(unwrap((HttpHeaders) other));
+		return unwrap(this).equals(unwrap(other));
 	}
 
 	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
-		while (headers.headers instanceof HttpHeaders) {
-			headers = (HttpHeaders) headers.headers;
+		while (headers.headers instanceof HttpHeaders httpHeaders) {
+			headers = httpHeaders;
 		}
 		return headers.headers;
 	}
@@ -1809,8 +1860,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @since 5.3
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(MultiValueMap<String, String> headers) {
-		return (headers instanceof HttpHeaders ?
-				readOnlyHttpHeaders((HttpHeaders) headers) : new ReadOnlyHttpHeaders(headers));
+		return (headers instanceof HttpHeaders httpHeaders ? readOnlyHttpHeaders(httpHeaders) :
+				new ReadOnlyHttpHeaders(headers));
 	}
 
 	/**

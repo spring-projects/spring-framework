@@ -17,9 +17,19 @@ package org.springframework.cglib.beans;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import org.springframework.cglib.core.*;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.Block;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.Local;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 class BulkBeanEmitter extends ClassEmitter {
@@ -33,7 +43,7 @@ class BulkBeanEmitter extends ClassEmitter {
       TypeUtils.parseType("org.springframework.cglib.beans.BulkBean");
     private static final Type BULK_BEAN_EXCEPTION =
       TypeUtils.parseType("org.springframework.cglib.beans.BulkBeanException");
-        
+
     public BulkBeanEmitter(ClassVisitor v,
                            String className,
                            Class target,
@@ -116,7 +126,7 @@ class BulkBeanEmitter extends ClassEmitter {
         }
         e.end_method();
     }
-    
+
     private static void validate(Class target,
                                  String[] getters,
                                  String[] setters,

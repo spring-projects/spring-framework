@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class FreeMarkerViewTests {
 	public void noFreeMarkerConfig() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getBeansOfType(FreeMarkerConfig.class, true, false)).willReturn(new HashMap<>());
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
@@ -85,7 +85,7 @@ public class FreeMarkerViewTests {
 	public void validTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		MockServletContext sc = new MockServletContext();
 
 		Map<String, FreeMarkerConfig> configs = new HashMap<>();
@@ -115,7 +115,7 @@ public class FreeMarkerViewTests {
 	public void keepExistingContentType() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		MockServletContext sc = new MockServletContext();
 
 		Map<String, FreeMarkerConfig> configs = new HashMap<>();

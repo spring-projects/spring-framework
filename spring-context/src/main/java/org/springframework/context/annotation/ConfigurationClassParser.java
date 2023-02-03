@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,9 +147,8 @@ class ConfigurationClassParser {
 		this.problemReporter = problemReporter;
 		this.environment = environment;
 		this.resourceLoader = resourceLoader;
-		this.propertySourceRegistry = (this.environment instanceof ConfigurableEnvironment ce
-				? new PropertySourceRegistry(new PropertySourceProcessor(ce, this.resourceLoader))
-				: null);
+		this.propertySourceRegistry = (this.environment instanceof ConfigurableEnvironment ce ?
+				new PropertySourceRegistry(new PropertySourceProcessor(ce, this.resourceLoader)) : null);
 		this.registry = registry;
 		this.componentScanParser = new ComponentScanAnnotationParser(
 				environment, resourceLoader, componentScanBeanNameGenerator, registry);
@@ -161,11 +160,11 @@ class ConfigurationClassParser {
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
-				if (bd instanceof AnnotatedBeanDefinition) {
-					parse(((AnnotatedBeanDefinition) bd).getMetadata(), holder.getBeanName());
+				if (bd instanceof AnnotatedBeanDefinition annotatedBeanDef) {
+					parse(annotatedBeanDef.getMetadata(), holder.getBeanName());
 				}
-				else if (bd instanceof AbstractBeanDefinition && ((AbstractBeanDefinition) bd).hasBeanClass()) {
-					parse(((AbstractBeanDefinition) bd).getBeanClass(), holder.getBeanName());
+				else if (bd instanceof AbstractBeanDefinition abstractBeanDef && abstractBeanDef.hasBeanClass()) {
+					parse(abstractBeanDef.getBeanClass(), holder.getBeanName());
 				}
 				else {
 					parse(bd.getBeanClassName(), holder.getBeanName());
@@ -489,8 +488,8 @@ class ConfigurationClassParser {
 						if (selectorFilter != null) {
 							exclusionFilter = exclusionFilter.or(selectorFilter);
 						}
-						if (selector instanceof DeferredImportSelector) {
-							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
+						if (selector instanceof DeferredImportSelector deferredImportSelector) {
+							this.deferredImportSelectorHandler.handle(configClass, deferredImportSelector);
 						}
 						else {
 							String[] importClassNames = selector.selectImports(currentSourceClass.getMetadata());
@@ -554,8 +553,8 @@ class ConfigurationClassParser {
 	 */
 	private SourceClass asSourceClass(ConfigurationClass configurationClass, Predicate<String> filter) throws IOException {
 		AnnotationMetadata metadata = configurationClass.getMetadata();
-		if (metadata instanceof StandardAnnotationMetadata) {
-			return asSourceClass(((StandardAnnotationMetadata) metadata).getIntrospectedClass(), filter);
+		if (metadata instanceof StandardAnnotationMetadata standardAnnotationMetadata) {
+			return asSourceClass(standardAnnotationMetadata.getIntrospectedClass(), filter);
 		}
 		return asSourceClass(metadata.getClassName(), filter);
 	}
@@ -840,8 +839,8 @@ class ConfigurationClassParser {
 
 		public SourceClass(Object source) {
 			this.source = source;
-			if (source instanceof Class) {
-				this.metadata = AnnotationMetadata.introspect((Class<?>) source);
+			if (source instanceof Class<?> sourceClass) {
+				this.metadata = AnnotationMetadata.introspect(sourceClass);
 			}
 			else {
 				this.metadata = ((MetadataReader) source).getAnnotationMetadata();
@@ -859,23 +858,23 @@ class ConfigurationClassParser {
 		}
 
 		public Class<?> loadClass() throws ClassNotFoundException {
-			if (this.source instanceof Class) {
-				return (Class<?>) this.source;
+			if (this.source instanceof Class<?> sourceClass) {
+				return sourceClass;
 			}
 			String className = ((MetadataReader) this.source).getClassMetadata().getClassName();
 			return ClassUtils.forName(className, resourceLoader.getClassLoader());
 		}
 
 		public boolean isAssignable(Class<?> clazz) throws IOException {
-			if (this.source instanceof Class) {
-				return clazz.isAssignableFrom((Class<?>) this.source);
+			if (this.source instanceof Class<?> sourceClass) {
+				return clazz.isAssignableFrom(sourceClass);
 			}
 			return new AssignableTypeFilter(clazz).match((MetadataReader) this.source, metadataReaderFactory);
 		}
 
 		public ConfigurationClass asConfigClass(ConfigurationClass importedBy) {
-			if (this.source instanceof Class) {
-				return new ConfigurationClass((Class<?>) this.source, importedBy);
+			if (this.source instanceof Class<?> sourceClass) {
+				return new ConfigurationClass(sourceClass, importedBy);
 			}
 			return new ConfigurationClass((MetadataReader) this.source, importedBy);
 		}
@@ -918,8 +917,8 @@ class ConfigurationClassParser {
 		}
 
 		public SourceClass getSuperClass() throws IOException {
-			if (this.source instanceof Class) {
-				return asSourceClass(((Class<?>) this.source).getSuperclass(), DEFAULT_EXCLUSION_FILTER);
+			if (this.source instanceof Class<?> sourceClass) {
+				return asSourceClass(sourceClass.getSuperclass(), DEFAULT_EXCLUSION_FILTER);
 			}
 			return asSourceClass(
 					((MetadataReader) this.source).getClassMetadata().getSuperClassName(), DEFAULT_EXCLUSION_FILTER);
@@ -986,9 +985,9 @@ class ConfigurationClassParser {
 		}
 
 		private SourceClass getRelated(String className) throws IOException {
-			if (this.source instanceof Class) {
+			if (this.source instanceof Class<?> sourceClass) {
 				try {
-					Class<?> clazz = ClassUtils.forName(className, ((Class<?>) this.source).getClassLoader());
+					Class<?> clazz = ClassUtils.forName(className, sourceClass.getClassLoader());
 					return asSourceClass(clazz, DEFAULT_EXCLUSION_FILTER);
 				}
 				catch (ClassNotFoundException ex) {
@@ -1003,9 +1002,9 @@ class ConfigurationClassParser {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof SourceClass &&
-					this.metadata.getClassName().equals(((SourceClass) other).metadata.getClassName())));
+		public boolean equals(@Nullable Object obj) {
+			return (this == obj || (obj instanceof SourceClass that &&
+					this.metadata.getClassName().equals(that.metadata.getClassName())));
 		}
 
 		@Override

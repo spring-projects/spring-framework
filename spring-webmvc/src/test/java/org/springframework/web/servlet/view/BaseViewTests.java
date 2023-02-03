@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class BaseViewTests {
 
 	@Test
 	public void renderWithoutStaticAttributes() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -77,7 +77,7 @@ public class BaseViewTests {
 	 */
 	@Test
 	public void renderWithStaticAttributesNoCollision() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -103,7 +103,7 @@ public class BaseViewTests {
 
 	@Test
 	public void pathVarsOverrideStaticAttributes() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -126,14 +126,14 @@ public class BaseViewTests {
 
 		checkContainsAll(pathVars, tv.model);
 
-		assertThat(tv.model.size()).isEqualTo(3);
+		assertThat(tv.model).hasSize(3);
 		assertThat(tv.model.get("something")).isEqualTo("else");
 		assertThat(tv.initialized).isTrue();
 	}
 
 	@Test
 	public void dynamicModelOverridesStaticAttributesIfCollision() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -154,14 +154,14 @@ public class BaseViewTests {
 		// Check it contains all
 		checkContainsAll(model, tv.model);
 
-		assertThat(tv.model.size()).isEqualTo(3);
+		assertThat(tv.model).hasSize(3);
 		assertThat(tv.model.get("something")).isEqualTo("else");
 		assertThat(tv.initialized).isTrue();
 	}
 
 	@Test
 	public void dynamicModelOverridesPathVariables() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		TestView tv = new TestView(wac);
@@ -182,7 +182,7 @@ public class BaseViewTests {
 		tv.render(model, request, response);
 
 		checkContainsAll(model, tv.model);
-		assertThat(tv.model.size()).isEqualTo(3);
+		assertThat(tv.model).hasSize(3);
 		assertThat(tv.model.get("something")).isEqualTo("else");
 		assertThat(tv.initialized).isTrue();
 	}
@@ -191,7 +191,7 @@ public class BaseViewTests {
 	public void ignoresNullAttributes() {
 		AbstractView v = new ConcreteView();
 		v.setAttributes(null);
-		assertThat(v.getStaticAttributes().size()).isEqualTo(0);
+		assertThat(v.getStaticAttributes()).isEmpty();
 	}
 
 	/**
@@ -201,14 +201,14 @@ public class BaseViewTests {
 	public void attributeCSVParsingIgnoresNull() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV(null);
-		assertThat(v.getStaticAttributes().size()).isEqualTo(0);
+		assertThat(v.getStaticAttributes()).isEmpty();
 	}
 
 	@Test
 	public void attributeCSVParsingIgnoresEmptyString() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("");
-		assertThat(v.getStaticAttributes().size()).isEqualTo(0);
+		assertThat(v.getStaticAttributes()).isEmpty();
 	}
 
 	/**
@@ -259,7 +259,7 @@ public class BaseViewTests {
 	public void attributeCSVParsingIgnoresTrailingComma() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("foo=[de],");
-		assertThat(v.getStaticAttributes().size()).isEqualTo(1);
+		assertThat(v.getStaticAttributes()).hasSize(1);
 	}
 
 	/**

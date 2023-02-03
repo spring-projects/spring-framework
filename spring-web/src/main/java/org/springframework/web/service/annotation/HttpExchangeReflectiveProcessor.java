@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * {@link ReflectiveProcessor} implementation for {@link HttpExchange @HttpExchange}
- * and annotated methods. On top of registering reflection hints for invoking
+ * annotated methods. In addition to registering reflection hints for invoking
  * the annotated method, this implementation handles reflection-based
  * binding for return types and parameters annotated with {@link RequestBody}.
  *
@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 class HttpExchangeReflectiveProcessor implements ReflectiveProcessor {
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
+
 
 	@Override
 	public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {

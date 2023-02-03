@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,7 +282,7 @@ class BeanWrapperGenericsTests {
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", "5");
-		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(Long.valueOf(5));
+		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(5L);
 		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(Long.valueOf(5));
 	}
 

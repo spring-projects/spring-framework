@@ -38,7 +38,7 @@ import org.springframework.asm.Type;
  * A {@link MethodVisitor} that renumbers local variables in their order of
  * appearance. This adapter allows one to easily add new local variables to a
  * method.
- * 
+ *
  * @author Chris Nokleberg
  * @author Eric Bruneton
  */
@@ -51,7 +51,7 @@ public class LocalVariablesSorter extends MethodVisitor {
      */
     private static class State
     {
-        int[] mapping = new int[40];        
+        int[] mapping = new int[40];
         int nextLocal;
     }
 
@@ -67,8 +67,8 @@ public class LocalVariablesSorter extends MethodVisitor {
         state = new State();
         Type[] args = Type.getArgumentTypes(desc);
         state.nextLocal = ((Opcodes.ACC_STATIC & access) != 0) ? 0 : 1;
-        for (int i = 0; i < args.length; i++) {
-            state.nextLocal += args[i].getSize();
+        for (Type arg : args) {
+            state.nextLocal += arg.getSize();
         }
         firstLocal = state.nextLocal;
     }
@@ -79,30 +79,27 @@ public class LocalVariablesSorter extends MethodVisitor {
         firstLocal = lvs.firstLocal;
     }
 
-    public void visitVarInsn(final int opcode, final int var) {
-        int size;
-        switch (opcode) {
-            case Opcodes.LLOAD:
-            case Opcodes.LSTORE:
-            case Opcodes.DLOAD:
-            case Opcodes.DSTORE:
-                size = 2;
-                break;
-            default:
-                size = 1;
-        }
+    @Override
+	public void visitVarInsn(final int opcode, final int var) {
+        int size = switch (opcode) {
+			case Opcodes.LLOAD, Opcodes.LSTORE, Opcodes.DLOAD, Opcodes.DSTORE -> 2;
+			default -> 1;
+		};
         mv.visitVarInsn(opcode, remap(var, size));
     }
 
-    public void visitIincInsn(final int var, final int increment) {
+    @Override
+	public void visitIincInsn(final int var, final int increment) {
         mv.visitIincInsn(remap(var, 1), increment);
     }
 
-    public void visitMaxs(final int maxStack, final int maxLocals) {
+    @Override
+	public void visitMaxs(final int maxStack, final int maxLocals) {
         mv.visitMaxs(maxStack, state.nextLocal);
     }
 
-    public void visitLocalVariable(
+    @Override
+	public void visitLocalVariable(
         final String name,
         final String desc,
         final String signature,

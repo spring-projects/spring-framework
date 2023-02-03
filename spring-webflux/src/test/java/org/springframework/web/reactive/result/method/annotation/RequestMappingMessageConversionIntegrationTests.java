@@ -262,7 +262,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(response.hasBody()).isTrue();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(951);
-		assertThat(response.getBody().length).isEqualTo(951);
+		assertThat(response.getBody()).hasSize(951);
 		assertThat(response.getHeaders().getContentType()).isEqualTo(new MediaType("image", "png"));
 	}
 
@@ -358,7 +358,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -369,7 +369,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> response = performPost("/person-create/publisher", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -380,7 +380,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				"/person-create/mono", JSON, new Person("Robert"), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(1);
 	}
 
 	@ParameterizedHttpServerTest
@@ -391,7 +391,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				"/person-create/single", JSON, new Person("Robert"), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(1);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(1);
 	}
 
 	@ParameterizedHttpServerTest
@@ -402,7 +402,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -413,7 +413,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> response = performPost("/person-create/flux", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -424,7 +424,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -435,7 +435,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> response = performPost("/person-create/observable", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -446,7 +446,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest
@@ -457,7 +457,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		ResponseEntity<Void> response = performPost("/person-create/flowable", APPLICATION_XML, people, null, Void.class);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons.size()).isEqualTo(2);
+		assertThat(getApplicationContext().getBean(PersonCreateController.class).persons).hasSize(2);
 	}
 
 	@ParameterizedHttpServerTest // gh-23791

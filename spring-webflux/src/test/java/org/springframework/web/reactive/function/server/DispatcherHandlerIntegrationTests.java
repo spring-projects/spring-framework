@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.stereotype.Controller;
@@ -44,6 +45,7 @@ import org.springframework.web.util.pattern.PathPattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
+import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
 import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -95,7 +97,7 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		List<Person> body = result.getBody();
-		assertThat(body.size()).isEqualTo(2);
+		assertThat(body).hasSize(2);
 		assertThat(body.get(0).getName()).isEqualTo("John");
 		assertThat(body.get(1).getName()).isEqualTo("Jane");
 	}
@@ -122,6 +124,15 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
+	@ParameterizedHttpServerTest
+	void nested(HttpServer httpServer) throws Exception {
+		startServer(httpServer);
+
+		ResponseEntity<String> result = this.restTemplate
+				.getForEntity("http://localhost:" + this.port + "/foo/bar", String.class);
+
+		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+	}
 
 	@EnableWebFlux
 	@Configuration
@@ -157,6 +168,17 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 			return nest(RequestPredicates.GET("/attributes"),
 					route(RequestPredicates.GET("/{foo}"), attributesHandler::attributes));
 		}
+
+		@Bean
+		public RouterFunction<ServerResponse> nested() {
+			return route()
+					.path("/foo", () -> route()
+							.nest(accept(MediaType.APPLICATION_JSON), builder -> builder
+									.GET("/bar", request -> ServerResponse.ok().build()))
+							.build())
+					.build();
+		}
+
 	}
 
 
@@ -186,13 +208,13 @@ class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 			Map<String, String> pathVariables =
 					(Map<String, String>) request.attributes().get(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 			assertThat(pathVariables).isNotNull();
-			assertThat(pathVariables.size()).isEqualTo(1);
+			assertThat(pathVariables).hasSize(1);
 			assertThat(pathVariables.get("foo")).isEqualTo("bar");
 
 			pathVariables =
 					(Map<String, String>) request.attributes().get(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 			assertThat(pathVariables).isNotNull();
-			assertThat(pathVariables.size()).isEqualTo(1);
+			assertThat(pathVariables).hasSize(1);
 			assertThat(pathVariables.get("foo")).isEqualTo("bar");
 
 

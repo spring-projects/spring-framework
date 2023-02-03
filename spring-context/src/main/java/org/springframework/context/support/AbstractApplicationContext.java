@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -395,8 +395,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Decorate event as an ApplicationEvent if necessary
 		ApplicationEvent applicationEvent;
-		if (event instanceof ApplicationEvent) {
-			applicationEvent = (ApplicationEvent) event;
+		if (event instanceof ApplicationEvent applEvent) {
+			applicationEvent = applEvent;
 		}
 		else {
 			applicationEvent = new PayloadApplicationEvent<>(this, event, eventType);
@@ -415,8 +415,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Publish event via parent context as well...
 		if (this.parent != null) {
-			if (this.parent instanceof AbstractApplicationContext) {
-				((AbstractApplicationContext) this.parent).publishEvent(event, eventType);
+			if (this.parent instanceof AbstractApplicationContext abstractApplicationContext) {
+				abstractApplicationContext.publishEvent(event, eventType);
 			}
 			else {
 				this.parent.publishEvent(event);
@@ -439,7 +439,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public void setApplicationStartup(ApplicationStartup applicationStartup) {
-		Assert.notNull(applicationStartup, "applicationStartup should not be null");
+		Assert.notNull(applicationStartup, "applicationStartup must not be null");
 		this.applicationStartup = applicationStartup;
 	}
 
@@ -497,8 +497,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.parent = parent;
 		if (parent != null) {
 			Environment parentEnvironment = parent.getEnvironment();
-			if (parentEnvironment instanceof ConfigurableEnvironment) {
-				getEnvironment().merge((ConfigurableEnvironment) parentEnvironment);
+			if (parentEnvironment instanceof ConfigurableEnvironment configurableEnvironment) {
+				getEnvironment().merge(configurableEnvironment);
 			}
 		}
 	}
@@ -728,9 +728,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Modify the application context's internal bean factory after its standard
-	 * initialization. All bean definitions will have been loaded, but no beans
-	 * will have been instantiated yet. This allows for registering special
-	 * BeanPostProcessors etc in certain ApplicationContext implementations.
+	 * initialization. The initial definition resources will have been loaded but no
+	 * post-processors will have run and no derived bean definitions will have been
+	 * registered, and most importantly, no beans will have been instantiated yet.
+	 * <p>This template method allows for registering special BeanPostProcessors
+	 * etc in certain AbstractApplicationContext subclasses.
 	 * @param beanFactory the bean factory used by the application context
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
@@ -770,12 +772,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
 			this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
-			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource hms) {
-				if (hms.getParentMessageSource() == null) {
-					// Only set parent context as parent MessageSource if no parent MessageSource
-					// registered already.
-					hms.setParentMessageSource(getInternalParentMessageSource());
-				}
+			if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource hms &&
+					hms.getParentMessageSource() == null) {
+				// Only set parent context as parent MessageSource if no parent MessageSource
+				// registered already.
+				hms.setParentMessageSource(getInternalParentMessageSource());
 			}
 			if (logger.isTraceEnabled()) {
 				logger.trace("Using MessageSource [" + this.messageSource + "]");
@@ -1318,6 +1319,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return getBeanFactory().findAnnotationOnBean(beanName, annotationType, allowFactoryBeanInit);
 	}
 
+	@Override
+	public <A extends Annotation> Set<A> findAllAnnotationsOnBean(
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
+			throws NoSuchBeanDefinitionException {
+
+		assertBeanFactoryActive();
+		return getBeanFactory().findAllAnnotationsOnBean(beanName, annotationType, allowFactoryBeanInit);
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of HierarchicalBeanFactory interface
@@ -1341,8 +1351,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@Nullable
 	protected BeanFactory getInternalParentBeanFactory() {
-		return (getParent() instanceof ConfigurableApplicationContext ?
-				((ConfigurableApplicationContext) getParent()).getBeanFactory() : getParent());
+		return (getParent() instanceof ConfigurableApplicationContext cac ?
+				cac.getBeanFactory() : getParent());
 	}
 
 
@@ -1384,8 +1394,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	@Nullable
 	protected MessageSource getInternalParentMessageSource() {
-		return (getParent() instanceof AbstractApplicationContext ?
-				((AbstractApplicationContext) getParent()).messageSource : getParent());
+		return (getParent() instanceof AbstractApplicationContext abstractApplicationContext ?
+				abstractApplicationContext.messageSource : getParent());
 	}
 
 

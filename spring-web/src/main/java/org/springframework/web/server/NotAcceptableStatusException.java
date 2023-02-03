@@ -47,7 +47,7 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 	public NotAcceptableStatusException(String reason) {
 		super(HttpStatus.NOT_ACCEPTABLE, reason, null, PARSE_ERROR_DETAIL_CODE, null);
 		this.supportedMediaTypes = Collections.emptyList();
-		getBody().setDetail("Could not parse Accept header.");
+		setDetail("Could not parse Accept header.");
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class NotAcceptableStatusException extends ResponseStatusException {
 				"Could not find acceptable representation", null, null, new Object[] {mediaTypes});
 
 		this.supportedMediaTypes = Collections.unmodifiableList(mediaTypes);
-		getBody().setDetail("Acceptable representations: " + mediaTypes + ".");
+		setDetail("Acceptable representations: " + mediaTypes + ".");
 	}
 
 

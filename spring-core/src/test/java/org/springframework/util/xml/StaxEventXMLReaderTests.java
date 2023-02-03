@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class StaxEventXMLReaderTests extends AbstractStaxXMLReaderTests {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(CONTENT));
 		eventReader.nextTag();  // skip to root
 		StaxEventXMLReader xmlReader = new StaxEventXMLReader(eventReader);
-		ContentHandler contentHandler = mock(ContentHandler.class);
+		ContentHandler contentHandler = mock();
 		xmlReader.setContentHandler(contentHandler);
 		xmlReader.parse(new InputSource());
 		verify(contentHandler).startDocument();

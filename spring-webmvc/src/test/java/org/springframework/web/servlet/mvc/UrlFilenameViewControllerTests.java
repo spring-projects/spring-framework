@@ -192,7 +192,7 @@ class UrlFilenameViewControllerTests {
 		request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
-		assertThat(mv.getModel().size()).isEqualTo(1);
+		assertThat(mv.getModel()).hasSize(1);
 		assertThat(mv.getModel().get("name")).isEqualTo("value");
 	}
 

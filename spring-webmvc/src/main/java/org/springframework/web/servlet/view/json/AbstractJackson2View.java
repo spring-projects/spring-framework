@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,6 @@ import org.springframework.web.servlet.view.AbstractView;
 /**
  * Abstract base class for Jackson based and content type independent
  * {@link AbstractView} implementations.
- *
- * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma

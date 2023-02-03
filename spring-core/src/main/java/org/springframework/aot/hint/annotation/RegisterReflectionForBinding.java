@@ -25,24 +25,24 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Indicate that the classes specified in the annotation attributes require some
- * reflection hints for binding or reflection-based serialization purpose. For each
+ * Indicates that the classes specified in the annotation attributes require some
+ * reflection hints for binding or reflection-based serialization purposes. For each
  * class specified, hints on constructors, fields, properties, record components,
  * including types transitively used on properties and record components are registered.
  * At least one class must be specified in the {@code value} or {@code classes} annotation
  * attributes.
  *
- * <p>Annotated element can be a configuration class, for example:
+ * <p>The annotated element can be a configuration class &mdash; for example:
  *
  * <pre class="code">
  * &#064;Configuration
  * &#064;RegisterReflectionForBinding({ Foo.class, Bar.class })
  * public class MyConfig {
- *
  *     // ...
  * }</pre>
  *
- * <p>Annotated element can also be any Spring bean class, constructor, field or method, for example:
+ * <p>The annotated element can be any Spring bean class, constructor, field,
+ * or method &mdash; for example:
  *
  * <pre class="code">
  * &#064;Service
@@ -55,9 +55,13 @@ import org.springframework.core.annotation.AliasFor;
  *
  * }</pre>
  *
+ * <p>The annotated element can also be any test class that uses the <em>Spring
+ * TestContext Framework</em> to load an {@code ApplicationContext}.
+ *
  * @author Sebastien Deleuze
  * @since 6.0
  * @see org.springframework.aot.hint.BindingReflectionHintsRegistrar
+ * @see Reflective @Reflective
  */
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
@@ -66,16 +70,15 @@ import org.springframework.core.annotation.AliasFor;
 public @interface RegisterReflectionForBinding {
 
 	/**
-	 * Classes for which reflection hints should be registered. At least one class must specified
-	 * either in {@code value} or {@code classes}.
-	 * @see #classes()
+	 * Alias for {@link #classes()}.
 	 */
 	@AliasFor("classes")
 	Class<?>[] value() default {};
 
 	/**
-	 * Classes for which reflection hints should be registered. At least one class must specified
-	 * either in {@code value} or {@code classes}.
+	 * Classes for which reflection hints should be registered.
+	 * <p>At least one class must be specified either via {@link #value} or
+	 * {@link #classes}.
 	 * @see #value()
 	 */
 	@AliasFor("value")

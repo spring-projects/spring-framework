@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,11 @@ public class ArgumentResolverConfigurer {
 
 	/**
 	 * Configure resolvers for custom handler method arguments.
-	 * @param resolver the resolvers to add
+	 * @param resolvers the resolvers to add
 	 */
-	public void addCustomResolver(HandlerMethodArgumentResolver... resolver) {
-		Assert.notNull(resolver, "'resolvers' must not be null");
-		this.customResolvers.addAll(Arrays.asList(resolver));
+	public void addCustomResolver(HandlerMethodArgumentResolver... resolvers) {
+		Assert.notNull(resolvers, "'resolvers' must not be null");
+		this.customResolvers.addAll(Arrays.asList(resolvers));
 	}
 
 

@@ -417,7 +417,7 @@ public interface DataBuffer {
 	 */
 	default InputStream asInputStream(boolean releaseOnClose) {
 		return new DataBufferInputStream(this, releaseOnClose);
-	};
+	}
 
 	/**
 	 * Expose this buffer's data as an {@link OutputStream}. Both data and write position are

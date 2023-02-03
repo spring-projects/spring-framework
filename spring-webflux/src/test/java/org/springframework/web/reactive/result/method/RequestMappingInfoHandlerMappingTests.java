@@ -21,6 +21,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +37,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
@@ -63,6 +65,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
+import static org.springframework.web.filter.reactive.ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE;
 import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE;
 import static org.springframework.web.reactive.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
 import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
@@ -257,6 +260,17 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertThat(mapped).isSameAs(handlerMethod);
 	}
 
+	@Test
+	public void handleMatchBestMatchingPatternAttributeInObservationContext() {
+		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
+		ServerWebExchange exchange = MockServerWebExchange.from(get("/1/2"));
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
+		exchange.getAttributes().put(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		this.handlerMapping.handleMatch(key, handlerMethod, exchange);
+
+		assertThat(observationContext.getPathPattern()).isEqualTo("/{path1}/2");
+	}
+
 	@Test // gh-22543
 	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() {
 		ServerWebExchange exchange = MockServerWebExchange.from(get(""));
@@ -293,7 +307,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		// segment is a sequence of name-value pairs.
 
 		assertThat(matrixVariables).isNotNull();
-		assertThat(matrixVariables.size()).isEqualTo(1);
+		assertThat(matrixVariables).hasSize(1);
 		assertThat(matrixVariables.getFirst("b")).isEqualTo("c");
 		assertThat(uriVariables.get("foo")).isEqualTo("a=42");
 	}
@@ -330,6 +344,17 @@ public class RequestMappingInfoHandlerMappingTests {
 				})
 				.verify();
 
+	}
+
+	@Test // gh-29611
+	public void handleNoMatchWithoutPartialMatches() throws Exception {
+		ServerWebExchange exchange = MockServerWebExchange.from(post("/non-existent"));
+
+		HandlerMethod handlerMethod = this.handlerMapping.handleNoMatch(new HashSet<>(), exchange);
+		assertThat(handlerMethod).isNull();
+
+		handlerMethod = this.handlerMapping.handleNoMatch(null, exchange);
+		assertThat(handlerMethod).isNull();
 	}
 
 

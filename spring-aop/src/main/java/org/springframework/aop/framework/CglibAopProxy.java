@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,8 +188,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 			Enhancer enhancer = createEnhancer();
 			if (classLoader != null) {
 				enhancer.setClassLoader(classLoader);
-				if (classLoader instanceof SmartClassLoader &&
-						((SmartClassLoader) classLoader).isClassReloadable(proxySuperClass)) {
+				if (classLoader instanceof SmartClassLoader smartClassLoader &&
+						smartClassLoader.isClassReloadable(proxySuperClass)) {
 					enhancer.setUseCache(false);
 				}
 			}
@@ -251,11 +251,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 	private void validateClassIfNecessary(Class<?> proxySuperClass, @Nullable ClassLoader proxyClassLoader) {
 		if (!this.advised.isOptimize() && logger.isInfoEnabled()) {
 			synchronized (validatedClasses) {
-				if (!validatedClasses.containsKey(proxySuperClass)) {
-					doValidateClass(proxySuperClass, proxyClassLoader,
-							ClassUtils.getAllInterfacesForClassAsSet(proxySuperClass));
-					validatedClasses.put(proxySuperClass, Boolean.TRUE);
-				}
+				validatedClasses.computeIfAbsent(proxySuperClass, clazz -> {
+					doValidateClass(clazz, proxyClassLoader, ClassUtils.getAllInterfacesForClassAsSet(clazz));
+					return Boolean.TRUE;
+				});
 			}
 		}
 	}
@@ -365,8 +364,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof CglibAopProxy &&
-				AopProxyUtils.equalsInProxy(this.advised, ((CglibAopProxy) other).advised)));
+		return (this == other || (other instanceof CglibAopProxy cglibAopProxy &&
+				AopProxyUtils.equalsInProxy(this.advised, cglibAopProxy.advised)));
 	}
 
 	@Override
@@ -590,12 +589,12 @@ class CglibAopProxy implements AopProxy, Serializable {
 			if (proxy == other) {
 				return true;
 			}
-			if (other instanceof Factory) {
-				Callback callback = ((Factory) other).getCallback(INVOKE_EQUALS);
-				if (!(callback instanceof EqualsInterceptor)) {
+			if (other instanceof Factory factory) {
+				Callback callback = factory.getCallback(INVOKE_EQUALS);
+				if (!(callback instanceof EqualsInterceptor equalsInterceptor)) {
 					return false;
 				}
-				AdvisedSupport otherAdvised = ((EqualsInterceptor) callback).advised;
+				AdvisedSupport otherAdvised = equalsInterceptor.advised;
 				return AopProxyUtils.equalsInProxy(this.advised, otherAdvised);
 			}
 			else {
@@ -702,8 +701,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					// We need to create a method invocation...
 					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
 				}
-				retVal = processReturnType(proxy, target, method, retVal);
-				return retVal;
+				return processReturnType(proxy, target, method, retVal);
 			}
 			finally {
 				if (target != null && !targetSource.isStatic()) {
@@ -719,8 +717,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 		@Override
 		public boolean equals(@Nullable Object other) {
 			return (this == other ||
-					(other instanceof DynamicAdvisedInterceptor &&
-							this.advised.equals(((DynamicAdvisedInterceptor) other).advised)));
+					(other instanceof DynamicAdvisedInterceptor dynamicAdvisedInterceptor &&
+							this.advised.equals(dynamicAdvisedInterceptor.advised)));
 		}
 
 		/**
@@ -962,9 +960,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 		private static boolean equalsPointcuts(Advisor a, Advisor b) {
 			// If only one of the advisor (but not both) is PointcutAdvisor, then it is a mismatch.
 			// Takes care of the situations where an IntroductionAdvisor is used (see SPR-3959).
-			return (!(a instanceof PointcutAdvisor) ||
-					(b instanceof PointcutAdvisor &&
-							ObjectUtils.nullSafeEquals(((PointcutAdvisor) a).getPointcut(), ((PointcutAdvisor) b).getPointcut())));
+			return (!(a instanceof PointcutAdvisor pointcutAdvisor1) ||
+					(b instanceof PointcutAdvisor pointcutAdvisor2 &&
+							ObjectUtils.nullSafeEquals(pointcutAdvisor1.getPointcut(), pointcutAdvisor2.getPointcut())));
 		}
 
 		@Override

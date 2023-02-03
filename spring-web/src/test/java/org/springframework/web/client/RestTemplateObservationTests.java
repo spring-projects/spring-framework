@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,16 +58,16 @@ class RestTemplateObservationTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private final ClientHttpRequestFactory requestFactory = mock(ClientHttpRequestFactory.class);
+	private final ClientHttpRequestFactory requestFactory = mock();
 
-	private final ClientHttpRequest request = mock(ClientHttpRequest.class);
+	private final ClientHttpRequest request = mock();
 
-	private final ClientHttpResponse response = mock(ClientHttpResponse.class);
+	private final ClientHttpResponse response = mock();
 
-	private final ResponseErrorHandler errorHandler = mock(ResponseErrorHandler.class);
+	private final ResponseErrorHandler errorHandler = mock();
 
 	@SuppressWarnings("unchecked")
-	private final HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+	private final HttpMessageConverter<String> converter = mock();
 
 	private final RestTemplate template = new RestTemplate(List.of(converter));
 
@@ -88,7 +88,7 @@ class RestTemplateObservationTests {
 		template.execute("https://example.com/hotels/{hotel}/bookings/{booking}", GET,
 				null, null, "42", "21");
 
-		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "https://example.com/hotels/{hotel}/bookings/{booking}");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/hotels/{hotel}/bookings/{booking}");
 	}
 
 	@Test
@@ -101,7 +101,7 @@ class RestTemplateObservationTests {
 		template.execute("https://example.com/hotels/{hotel}/bookings/{booking}", GET,
 				null, null, vars);
 
-		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "https://example.com/hotels/{hotel}/bookings/{booking}");
+		assertThatHttpObservation().hasLowCardinalityKeyValue("uri", "/hotels/{hotel}/bookings/{booking}");
 	}
 
 
@@ -122,7 +122,7 @@ class RestTemplateObservationTests {
 		mockSentRequest(GET, url);
 		mockResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		willThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR))
-				.given(errorHandler).handleError(new URI(url), GET, response);
+				.given(errorHandler).handleError(URI.create(url), GET, response);
 
 		assertThatExceptionOfType(HttpServerErrorException.class).isThrownBy(() ->
 				template.execute(url, GET, null, null));
@@ -164,7 +164,7 @@ class RestTemplateObservationTests {
 	}
 
 	private void mockSentRequest(HttpMethod method, String uri, HttpHeaders requestHeaders) throws Exception {
-		given(requestFactory.createRequest(new URI(uri), method)).willReturn(request);
+		given(requestFactory.createRequest(URI.create(uri), method)).willReturn(request);
 		given(request.getHeaders()).willReturn(requestHeaders);
 		given(request.getMethod()).willReturn(method);
 		given(request.getURI()).willReturn(URI.create(uri));

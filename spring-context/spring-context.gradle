@@ -36,6 +36,7 @@ dependencies {
 	testImplementation("org.apache.commons:commons-pool2")
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("jakarta.inject:jakarta.inject-tck")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	testRuntimeOnly("jakarta.xml.bind:jakarta.xml.bind-api")
 	testRuntimeOnly("org.glassfish:jakarta.el")
 	// Substitute for javax.management:jmxremote_optional:1.0.1_04 (not available on Maven Central)

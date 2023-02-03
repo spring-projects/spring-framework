@@ -29,17 +29,15 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>When present, either directly or as a meta-annotation, this annotation
  * triggers the configured {@linkplain ReflectiveProcessor processors} against
- * the annotated element. By default, a reflection hint is added on the
+ * the annotated element. By default, a reflection hint is registered for the
  * annotated element so that it can be discovered and invoked if necessary.
- *
- * <p>A reflection hint is also added if necessary on the annotation that
- * <em>directly</em> uses this annotation.
  *
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 6.0
  * @see SimpleReflectiveProcessor
  * @see ReflectiveRuntimeHintsRegistrar
+ * @see RegisterReflectionForBinding @RegisterReflectionForBinding
  */
 @Target({ ElementType.ANNOTATION_TYPE, ElementType.TYPE, ElementType.CONSTRUCTOR,
 		ElementType.FIELD, ElementType.METHOD })

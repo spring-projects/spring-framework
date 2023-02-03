@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
  * strongly typed accessors for specific headers, the ability to leave headers
  * in a {@link Message} mutable, and the option to suppress automatic generation
  * of {@link MessageHeaders#ID id} and {@link MessageHeaders#TIMESTAMP
- * timesteamp} headers. Subclasses such as {@link NativeMessageHeaderAccessor}
+ * timestamp} headers. Subclasses such as {@link NativeMessageHeaderAccessor}
  * and others provide support for managing processing vs external source headers
  * as well as protocol specific headers.
  *
@@ -617,8 +617,7 @@ public class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
-		if (message.getHeaders() instanceof MutableMessageHeaders) {
-			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) message.getHeaders();
+		if (message.getHeaders() instanceof MutableMessageHeaders mutableHeaders) {
 			MessageHeaderAccessor accessor = mutableHeaders.getAccessor();
 			return (accessor.isMutable() ? accessor : accessor.createAccessor(message));
 		}

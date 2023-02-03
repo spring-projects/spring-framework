@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 
 	@Test
 	void marshalSAXResult() throws Exception {
-		ContentHandler contentHandler = mock(ContentHandler.class);
+		ContentHandler contentHandler = mock();
 		SAXResult result = new SAXResult(contentHandler);
 		marshaller.marshal(flights, result);
 		InOrder ordered = inOrder(contentHandler);
@@ -277,7 +277,7 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 		marshaller.setClassesToBeBound(BinaryObject.class);
 		marshaller.setMtomEnabled(true);
 		marshaller.afterPropertiesSet();
-		MimeContainer mimeContainer = mock(MimeContainer.class);
+		MimeContainer mimeContainer = mock();
 
 		Resource logo = new ClassPathResource("spring-ws.png", getClass());
 		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
@@ -307,7 +307,7 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 
 	@Test  // SPR-10806
 	void unmarshalStreamSourceWithXmlOptions() throws Exception {
-		final jakarta.xml.bind.Unmarshaller unmarshaller = mock(jakarta.xml.bind.Unmarshaller.class);
+		final jakarta.xml.bind.Unmarshaller unmarshaller = mock();
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
 			@Override
 			public jakarta.xml.bind.Unmarshaller createUnmarshaller() {
@@ -341,7 +341,7 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 
 	@Test  // SPR-10806
 	void unmarshalSaxSourceWithXmlOptions() throws Exception {
-		final jakarta.xml.bind.Unmarshaller unmarshaller = mock(jakarta.xml.bind.Unmarshaller.class);
+		final jakarta.xml.bind.Unmarshaller unmarshaller = mock();
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
 			@Override
 			public jakarta.xml.bind.Unmarshaller createUnmarshaller() {

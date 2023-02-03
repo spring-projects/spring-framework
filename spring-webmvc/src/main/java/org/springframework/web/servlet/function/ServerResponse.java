@@ -47,6 +47,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -104,6 +105,18 @@ public interface ServerResponse {
 	 */
 	static BodyBuilder from(ServerResponse other) {
 		return new DefaultServerResponseBuilder(other);
+	}
+
+	/**
+	 * Create a {@code ServerResponse} from the given {@link ErrorResponse}.
+	 * @param response the {@link ErrorResponse} to initialize from
+	 * @return the built response
+	 * @since 6.0
+	 */
+	static ServerResponse from(ErrorResponse response) {
+		return status(response.getStatusCode())
+				.headers(headers -> headers.putAll(response.getHeaders()))
+				.body(response.getBody());
 	}
 
 	/**

@@ -98,15 +98,33 @@ public class MediaType extends MimeType implements Serializable {
 	/**
 	 * Public constant media type for {@code application/graphql+json}.
 	 * @since 5.3.19
-	 * @see <a href="https://github.com/graphql/graphql-over-http">GraphQL over HTTP spec</a>
+	 * @see <a href="https://github.com/graphql/graphql-over-http/pull/215">GraphQL over HTTP spec change</a>
+	 * @deprecated as of 6.0.3, in favor of {@link MediaType#APPLICATION_GRAPHQL_RESPONSE}
 	 */
+	@Deprecated(since = "6.0.3", forRemoval = true)
 	public static final MediaType APPLICATION_GRAPHQL;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_GRAPHQL}.
 	 * @since 5.3.19
+	 * @deprecated as of 6.0.3, in favor of {@link MediaType#APPLICATION_GRAPHQL_RESPONSE_VALUE}
 	 */
+	@Deprecated(since = "6.0.3", forRemoval = true)
 	public static final String APPLICATION_GRAPHQL_VALUE = "application/graphql+json";
+
+	/**
+	 * Public constant media type for {@code application/graphql-response+json}.
+	 * @since 6.0.3
+	 * @see <a href="https://github.com/graphql/graphql-over-http">GraphQL over HTTP spec</a>
+	 */
+	public static final MediaType APPLICATION_GRAPHQL_RESPONSE;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_GRAPHQL_RESPONSE}.
+	 * @since 6.0.3
+	 */
+	public static final String APPLICATION_GRAPHQL_RESPONSE_VALUE = "application/graphql-response+json";
+
 
 	/**
 	 * Public constant media type for {@code application/json}.
@@ -422,6 +440,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_CBOR = new MediaType("application", "cbor");
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
 		APPLICATION_GRAPHQL = new MediaType("application", "graphql+json");
+		APPLICATION_GRAPHQL_RESPONSE = new MediaType("application", "graphql-response+json");
 		APPLICATION_JSON = new MediaType("application", "json");
 		APPLICATION_JSON_UTF8 = new MediaType("application", "json", StandardCharsets.UTF_8);
 		APPLICATION_NDJSON = new MediaType("application", "x-ndjson");
@@ -544,10 +563,10 @@ public class MediaType extends MimeType implements Serializable {
 	protected void checkParameters(String parameter, String value) {
 		super.checkParameters(parameter, value);
 		if (PARAM_QUALITY_FACTOR.equals(parameter)) {
-			value = unquote(value);
-			double d = Double.parseDouble(value);
+			String unquotedValue = unquote(value);
+			double d = Double.parseDouble(unquotedValue);
 			Assert.isTrue(d >= 0D && d <= 1D,
-					"Invalid quality value \"" + value + "\": should be between 0.0 and 1.0");
+					() -> "Invalid quality value \"" + unquotedValue + "\": should be between 0.0 and 1.0");
 		}
 	}
 
@@ -836,7 +855,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param mediaTypes the list of media types to be sorted
 	 * @deprecated As of 6.0, in favor of {@link MimeTypeUtils#sortBySpecificity(List)}
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static void sortBySpecificity(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
@@ -865,7 +884,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @see #getQualityValue()
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static void sortByQualityValue(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
@@ -891,7 +910,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * Comparator used by {@link #sortByQualityValue(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static final Comparator<MediaType> QUALITY_VALUE_COMPARATOR = (mediaType1, mediaType2) -> {
 		double quality1 = mediaType1.getQualityValue();
 		double quality2 = mediaType2.getQualityValue();
@@ -931,7 +950,8 @@ public class MediaType extends MimeType implements Serializable {
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated(since = "6.0")
+	@Deprecated(since = "6.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	public static final Comparator<MediaType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>() {
 
 		@Override

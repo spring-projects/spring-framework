@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Context that holds information for metadata collection
- * during the {@link ClientHttpObservationDocumentation#HTTP_REQUEST client HTTP exchanges} observations.
+ * during the {@link ClientHttpObservationDocumentation#HTTP_CLIENT_EXCHANGES client HTTP exchanges} observations.
  * <p>This context also extends {@link RequestReplySenderContext} for propagating tracing
  * information with the HTTP client exchange.
  * @author Brian Clozel

@@ -51,7 +51,7 @@ import org.springframework.web.socket.adapter.standard.WebSocketToStandardExtens
 import org.springframework.web.socket.client.AbstractWebSocketClient;
 
 /**
- * A WebSocketClient based on standard Java WebSocket API.
+ * A WebSocketClient based on the standard Jakarta WebSocket API.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -88,7 +88,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 
 	/**
-	 * The standard Java WebSocket API allows passing "user properties" to the
+	 * The standard Jakarta WebSocket API allows passing "user properties" to the
 	 * server via {@link ClientEndpointConfig#getUserProperties() userProperties}.
 	 * Use this property to configure one or more properties to be passed on
 	 * every handshake.

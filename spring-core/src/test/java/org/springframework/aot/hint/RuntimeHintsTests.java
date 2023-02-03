@@ -31,6 +31,7 @@ class RuntimeHintsTests {
 
 	private final RuntimeHints hints = new RuntimeHints();
 
+
 	@Test
 	void reflectionHintWithClass() {
 		this.hints.reflection().registerType(String.class, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
@@ -47,7 +48,8 @@ class RuntimeHintsTests {
 	void resourceHintWithClass() {
 		this.hints.resources().registerType(String.class);
 		assertThat(this.hints.resources().resourcePatternHints()).singleElement().satisfies(resourceHint -> {
-			assertThat(resourceHint.getIncludes()).map(ResourcePatternHint::getPattern).containsExactly("java/lang/String.class");
+			assertThat(resourceHint.getIncludes()).map(ResourcePatternHint::getPattern)
+					.containsExactlyInAnyOrder("/", "java", "java/lang", "java/lang/String.class");
 			assertThat(resourceHint.getExcludes()).isEmpty();
 		});
 	}

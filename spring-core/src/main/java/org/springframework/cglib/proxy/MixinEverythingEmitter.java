@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cglib.proxy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.asm.ClassVisitor;
 import org.springframework.cglib.core.CollectionUtils;
 import org.springframework.cglib.core.ReflectUtils;
 import org.springframework.cglib.core.RejectModifierPredicate;
-import org.springframework.asm.ClassVisitor;
 
 /**
  * @author Chris Nokleberg
@@ -34,15 +38,17 @@ class MixinEverythingEmitter extends MixinEmitter {
         super(v, className, classes, null);
     }
 
+    @Override
     protected Class[] getInterfaces(Class[] classes) {
         List list = new ArrayList();
-        for (int i = 0; i < classes.length; i++) {
-            ReflectUtils.addAllInterfaces(classes[i], list);
+        for (Class clazz : classes) {
+            ReflectUtils.addAllInterfaces(clazz, list);
         }
         return (Class[])list.toArray(new Class[list.size()]);
     }
 
-    protected Method[] getMethods(Class type) {
+    @Override
+	protected Method[] getMethods(Class type) {
         List methods = new ArrayList(Arrays.asList(type.getMethods()));
         CollectionUtils.filter(methods, new RejectModifierPredicate(Modifier.FINAL | Modifier.STATIC));
         return (Method[])methods.toArray(new Method[methods.size()]);

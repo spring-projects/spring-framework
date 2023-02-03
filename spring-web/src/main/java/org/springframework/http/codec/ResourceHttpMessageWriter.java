@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 	private static Optional<Mono<Void>> zeroCopy(Resource resource, @Nullable ResourceRegion region,
 			ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
-		if (message instanceof ZeroCopyHttpOutputMessage && resource.isFile()) {
+		if (message instanceof ZeroCopyHttpOutputMessage zeroCopyHttpOutputMessage && resource.isFile()) {
 			try {
 				File file = resource.getFile();
 				long pos = region != null ? region.getPosition() : 0;
@@ -188,7 +188,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 					String formatted = region != null ? "region " + pos + "-" + (count) + " of " : "";
 					logger.debug(Hints.getLogPrefix(hints) + "Zero-copy " + formatted + "[" + resource + "]");
 				}
-				return Optional.of(((ZeroCopyHttpOutputMessage) message).writeWith(file, pos, count));
+				return Optional.of(zeroCopyHttpOutputMessage.writeWith(file, pos, count));
 			}
 			catch (IOException ex) {
 				// should not happen

@@ -38,6 +38,7 @@ class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 
 	private final ReflectiveRuntimeHintsRegistrar reflectiveRegistrar = new ReflectiveRuntimeHintsRegistrar();
 
+
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
 		if (!ClassUtils.isPresent(SCHEDULER_FACTORY_CLASS_NAME, classLoader)) {
@@ -53,4 +54,5 @@ class SchedulerFactoryBeanRuntimeHints implements RuntimeHintsRegistrar {
 	private void typeHint(Builder typeHint) {
 		typeHint.withMembers(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS).onReachableType(SchedulerFactoryBean.class);
 	}
+
 }

@@ -149,7 +149,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 
-		assertThat(people.size()).isEqualTo(1);
+		assertThat(people).hasSize(1);
 		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
 	}
 
@@ -186,7 +186,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(0);
+		assertThat(people).isEmpty();
 		assertThatExceptionOfType(NoResultException.class).isThrownBy(q::getSingleResult);
 	}
 
@@ -198,7 +198,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(0);
+		assertThat(people).isEmpty();
 		assertThatExceptionOfType(NoResultException.class).isThrownBy(q::getSingleResult);
 	}
 
@@ -208,7 +208,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = this.sharedEntityManager.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(0);
+		assertThat(people).isEmpty();
 		assertThatExceptionOfType(NoResultException.class).isThrownBy(q::getSingleResult);
 	}
 
@@ -221,7 +221,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = em.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(0);
+		assertThat(people).isEmpty();
 		assertThatException()
 			.isThrownBy(q::getSingleResult)
 			.withMessageContaining("closed");

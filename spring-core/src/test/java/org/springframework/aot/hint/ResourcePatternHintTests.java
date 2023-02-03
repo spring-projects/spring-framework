@@ -33,7 +33,15 @@ class ResourcePatternHintTests {
 	void patternWithLeadingSlashIsRejected() {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> new ResourcePatternHint("/file.properties", null))
-				.withMessage("Resource pattern [/file.properties] must not start with a '/'");
+				.withMessage("Resource pattern [/file.properties] must not start with a '/' unless it is the root directory");
+	}
+
+	@Test
+	void rootDirectory() {
+		ResourcePatternHint hint = new ResourcePatternHint("/", null);
+		assertThat(hint.toRegex().asMatchPredicate())
+				.accepts("/")
+				.rejects("/com/example", "/file.txt");
 	}
 
 	@Test

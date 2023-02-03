@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class DefaultWebClientTests {
 
 	@BeforeEach
 	public void setup() {
-		ClientResponse mockResponse = mock(ClientResponse.class);
+		ClientResponse mockResponse = mock();
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
 		given(this.exchangeFunction.exchange(this.captor.capture())).willReturn(Mono.just(mockResponse));
@@ -293,19 +293,19 @@ public class DefaultWebClientTests {
 		// Now, verify what each client has.
 
 		WebClient.Builder builder1 = client1.mutate();
-		builder1.filters(filters -> assertThat(filters.size()).isEqualTo(1));
-		builder1.defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(1));
-		builder1.defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(1));
+		builder1.filters(filters -> assertThat(filters).hasSize(1));
+		builder1.defaultHeaders(headers -> assertThat(headers).hasSize(1));
+		builder1.defaultCookies(cookies -> assertThat(cookies).hasSize(1));
 
 		WebClient.Builder builder2 = client2.mutate();
-		builder2.filters(filters -> assertThat(filters.size()).isEqualTo(2));
-		builder2.defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
-		builder2.defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
+		builder2.filters(filters -> assertThat(filters).hasSize(2));
+		builder2.defaultHeaders(headers -> assertThat(headers).hasSize(2));
+		builder2.defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 
 		WebClient.Builder builder1a = client1a.mutate();
-		builder1a.filters(filters -> assertThat(filters.size()).isEqualTo(2));
-		builder1a.defaultHeaders(headers -> assertThat(headers.size()).isEqualTo(2));
-		builder1a.defaultCookies(cookies -> assertThat(cookies.size()).isEqualTo(2));
+		builder1a.filters(filters -> assertThat(filters).hasSize(2));
+		builder1a.defaultHeaders(headers -> assertThat(headers).hasSize(2));
+		builder1a.defaultCookies(cookies -> assertThat(cookies).hasSize(2));
 	}
 
 	@Test
@@ -380,7 +380,7 @@ public class DefaultWebClientTests {
 
 	@Test
 	public void switchToErrorOnEmptyClientResponseMono() {
-		ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+		ExchangeFunction exchangeFunction = mock();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.empty());
 		WebClient client = WebClient.builder().baseUrl("/base").exchangeFunction(exchangeFunction).build();
 		StepVerifier.create(client.get().uri("/path").retrieve().bodyToMono(Void.class))
@@ -464,8 +464,8 @@ public class DefaultWebClientTests {
 		ClientResponse response = ClientResponse.create(HttpStatus.BAD_REQUEST).build();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.just(response));
 
-		Predicate<HttpStatusCode> predicate1 = mock(Predicate.class);
-		Predicate<HttpStatusCode> predicate2 = mock(Predicate.class);
+		Predicate<HttpStatusCode> predicate1 = mock();
+		Predicate<HttpStatusCode> predicate2 = mock();
 
 		given(predicate1.test(HttpStatus.BAD_REQUEST)).willReturn(false);
 		given(predicate2.test(HttpStatus.BAD_REQUEST)).willReturn(false);

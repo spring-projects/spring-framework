@@ -15,7 +15,13 @@
  */
 package org.springframework.cglib.core;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.asm.Type;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -63,7 +69,7 @@ public class TypeUtils {
     public static boolean isAbstract(int access) {
         return (Constants.ACC_ABSTRACT & access) != 0;
     }
-    
+
     public static boolean isInterface(int access) {
         return (Constants.ACC_INTERFACE & access) != 0;
     }
@@ -71,15 +77,15 @@ public class TypeUtils {
     public static boolean isPrivate(int access) {
         return (Constants.ACC_PRIVATE & access) != 0;
     }
-    
+
     public static boolean isSynthetic(int access) {
         return (Constants.ACC_SYNTHETIC & access) != 0;
     }
-    
+
     public static boolean isBridge(int access) {
     	return (Constants.ACC_BRIDGE & access) != 0;
     }
-    
+
     // getPackage returns null on JDK 1.2
     public static String getPackageName(Type type) {
         return getPackageName(getClassName(type));
@@ -89,7 +95,7 @@ public class TypeUtils {
         int idx = className.lastIndexOf('.');
         return (idx < 0) ? "" : className.substring(0, idx);
     }
-    
+
     public static String upperFirst(String s) {
         if (s == null || s.length() == 0) {
             return s;
@@ -148,8 +154,8 @@ public class TypeUtils {
 
     public static int getStackSize(Type[] types) {
         int size = 0;
-        for (int i = 0; i < types.length; i++) {
-            size += types[i].getSize();
+        for (Type type : types) {
+            size += type.getSize();
         }
         return size;
     }
@@ -197,8 +203,8 @@ public class TypeUtils {
     public static Signature parseConstructor(Type[] types) {
 		StringBuilder sb = new StringBuilder();
         sb.append("(");
-        for (int i = 0; i < types.length; i++) {
-            sb.append(types[i].getDescriptor());
+        for (Type type : types) {
+            sb.append(type.getDescriptor());
         }
         sb.append(")");
         sb.append("V");
