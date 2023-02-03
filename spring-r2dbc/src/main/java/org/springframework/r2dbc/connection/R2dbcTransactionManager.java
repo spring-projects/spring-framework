@@ -357,24 +357,39 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 			Mono<Void> afterCleanup = Mono.empty();
 
 			if (txObject.isMustRestoreAutoCommit()) {
-				afterCleanup = afterCleanup.then(Mono.from(con.setAutoCommit(true)));
+				Mono<Void> restoreAutoCommitStep = safeCleanupStep(
+						"doCleanupAfterCompletion when restoring autocommit", Mono.from(con.setAutoCommit(true)));
+				afterCleanup = afterCleanup.then(restoreAutoCommitStep);
 			}
 
-			return afterCleanup.then(Mono.defer(() -> {
+			Mono<Void> releaseConnectionStep = Mono.defer(() -> {
 				try {
 					if (txObject.isNewConnectionHolder()) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Releasing R2DBC Connection [" + con + "] after transaction");
 						}
-						return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory());
+						return safeCleanupStep("doCleanupAfterCompletion when releasing R2DBC Connection",
+								ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory()));
 					}
 				}
 				finally {
 					txObject.getConnectionHolder().clear();
 				}
 				return Mono.empty();
-			}));
+			});
+			return afterCleanup.then(releaseConnectionStep);
 		});
+	}
+
+	private Mono<Void> safeCleanupStep(String stepDescription, Mono<Void> stepMono) {
+		if (!logger.isDebugEnabled()) {
+			return stepMono.onErrorComplete();
+		}
+		else {
+			return stepMono.doOnError(e ->
+							logger.debug(String.format("Error ignored during %s: %s", stepDescription, e)))
+					.onErrorComplete();
+		}
 	}
 
 	private Mono<Void> switchAutoCommitIfNecessary(Connection con, Object transaction) {
