@@ -25,6 +25,7 @@ import io.r2dbc.spi.IsolationLevel;
 import io.r2dbc.spi.R2dbcBadGrammarException;
 import io.r2dbc.spi.R2dbcTimeoutException;
 import io.r2dbc.spi.Statement;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -344,7 +345,10 @@ class R2dbcTransactionManagerUnitTests {
 						.doOnNext(connection -> {
 							throw new IllegalStateException("Intentional error to trigger rollback");
 						}).then()).as(StepVerifier::create)
-				.verifyError(BadSqlGrammarException.class);
+				.verifyErrorSatisfies(e -> Assertions.assertThat(e)
+						.isInstanceOf(BadSqlGrammarException.class)
+						.hasCause(new R2dbcBadGrammarException("Rollback should fail"))
+				);
 
 		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));

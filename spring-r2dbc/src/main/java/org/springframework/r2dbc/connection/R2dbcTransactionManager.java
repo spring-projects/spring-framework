@@ -358,24 +358,25 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 			if (txObject.isMustRestoreAutoCommit()) {
 				Mono<Void> restoreAutoCommitStep = safeCleanupStep(
-						"restoring autocommit", Mono.from(con.setAutoCommit(true)));
+						"doCleanupAfterCompletion when restoring autocommit", Mono.from(con.setAutoCommit(true)));
 				afterCleanup = afterCleanup.then(restoreAutoCommitStep);
 			}
 
-			Mono<Void> releaseConnectionStep = safeCleanupStep("releasing connection", Mono.defer(() -> {
+			Mono<Void> releaseConnectionStep = Mono.defer(() -> {
 				try {
 					if (txObject.isNewConnectionHolder()) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Releasing R2DBC Connection [" + con + "] after transaction");
 						}
-						return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory());
+						return safeCleanupStep("doCleanupAfterCompletion when releasing R2DBC Connection",
+								ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory()));
 					}
 				}
 				finally {
 					txObject.getConnectionHolder().clear();
 				}
 				return Mono.empty();
-			}));
+			});
 			return afterCleanup.then(releaseConnectionStep);
 		});
 	}
