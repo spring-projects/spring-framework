@@ -27,6 +27,7 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")
+	optional("io.projectreactor:reactor-core")
 	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-aop")))
 	testImplementation(testFixtures(project(":spring-beans")))
