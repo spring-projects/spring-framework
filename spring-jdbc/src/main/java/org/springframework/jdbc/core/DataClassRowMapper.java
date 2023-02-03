@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,10 @@ import org.springframework.util.Assert;
 /**
  * {@link RowMapper} implementation that converts a row into a new instance
  * of the specified mapped target class. The mapped target class must be a
- * top-level class and may either expose a data class constructor with named
- * parameters corresponding to column names or classic bean property setters
- * (or even a combination of both).
+ * top-level class or {@code static} nested class, and it may expose either a
+ * data class constructor with named parameters corresponding to column names
+ * or classic bean property setter methods with property names corresponding to
+ * column names (or even a combination of both).
  *
  * <p>Note that this class extends {@link BeanPropertyRowMapper} and can
  * therefore serve as a common choice for any mapped target class, flexibly
