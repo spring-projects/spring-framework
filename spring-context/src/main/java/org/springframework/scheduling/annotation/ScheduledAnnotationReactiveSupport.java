@@ -89,6 +89,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 					+ "#" + method.getName() + "()' [ScheduledAnnotationReactiveSupport]";
 		}
 
+
 		private Mono<Void> safeExecutionMono() {
 			Mono<Void> executionMono;
 			if (this.publisher instanceof Mono) {
@@ -97,8 +98,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 			else {
 				executionMono = Flux.from(this.publisher).then();
 			}
-			if (this.logger.isWarnEnabled()) {
-				executionMono = executionMono.doOnError(ex -> this.logger.warn(
+			if (logger.isWarnEnabled()) {
+				executionMono = executionMono.doOnError(ex -> logger.warn(
 						"Ignored error in publisher from " + this.checkpoint, ex));
 			}
 			executionMono = executionMono.onErrorComplete();
@@ -124,6 +125,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 							scheduledFlux
 					);
 				}
+				else {
+					scheduledFlux = Flux.concat(executionMono, scheduledFlux);
+				}
 			}
 			// Subscribe and ensure that errors can be traced back to the @Scheduled via a checkpoint
 			if (this.disposable.isDisposed()) {
@@ -135,6 +139,11 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 		public void cancel() {
 			this.disposable.dispose();
+		}
+
+		@Override
+		public String toString() {
+			return this.checkpoint;
 		}
 	}
 }
