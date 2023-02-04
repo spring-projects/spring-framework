@@ -18,7 +18,6 @@ package org.springframework.orm.jpa.persistenceunit;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
@@ -68,7 +67,7 @@ import org.springframework.util.ReflectionUtils;
  */
 class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	private static final List<Class<? extends Annotation>> CALLBACK_TYPES = Arrays.asList(PreUpdate.class,
+	private static final List<Class<? extends Annotation>> CALLBACK_TYPES = List.of(PreUpdate.class,
 			PostUpdate.class, PrePersist.class, PostPersist.class, PreRemove.class, PostRemove.class, PostLoad.class);
 
 	@Nullable

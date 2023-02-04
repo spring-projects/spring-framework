@@ -7175,7 +7175,7 @@ to have the relevant jars in your classpath.
 =====
 If you use Maven, the `jakarta.inject` artifact is available in the standard Maven
 repository (
-https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/[https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/]).
+https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/[https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/]).
 You can add the following dependency to your file pom.xml:
 
 [source,xml,indent=0,subs="verbatim,quotes"]

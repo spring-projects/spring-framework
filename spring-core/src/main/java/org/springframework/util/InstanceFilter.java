@@ -64,7 +64,7 @@ public class InstanceFilter<T> {
 
 
 	/**
-	 * Determine if the specified {code instance} matches this filter.
+	 * Determine if the specified {@code instance} matches this filter.
 	 */
 	public boolean match(T instance) {
 		Assert.notNull(instance, "Instance to match must not be null");

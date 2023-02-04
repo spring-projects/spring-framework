@@ -83,7 +83,7 @@ public class XpathResultMatchers {
 	}
 
 	/**
-	 * Get the response encoding if explicitly defined in the response, {code null} otherwise.
+	 * Get the response encoding if explicitly defined in the response, {@code null} otherwise.
 	 */
 	@Nullable
 	private String getDefinedEncoding(MockHttpServletResponse response) {

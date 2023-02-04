@@ -381,7 +381,7 @@ public class BindingReflectionHintsRegistrarTests {
 				return new Builder();
 			}
 
-			public Builder id(String name) {
+			public Builder name(String name) {
 				this.name = name;
 				return this;
 			}

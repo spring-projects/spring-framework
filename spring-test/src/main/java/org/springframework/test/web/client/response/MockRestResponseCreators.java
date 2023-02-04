@@ -32,7 +32,7 @@ import org.springframework.test.web.client.ResponseCreator;
  * response.
  *
  * <p>In addition, see also the {@link ExecutingResponseCreator} implementation
- * that performs an actual requests to remote services.
+ * that performs actual requests to remote services.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
