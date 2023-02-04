@@ -45,7 +45,7 @@ public abstract class CorsUtils {
 	}
 
 	/**
-	 * Returns {@code true} if the request is a valid CORS pre-flight one by checking {code OPTIONS} method with
+	 * Returns {@code true} if the request is a valid CORS pre-flight one by checking {@code OPTIONS} method with
 	 * {@code Origin} and {@code Access-Control-Request-Method} headers presence.
 	 */
 	public static boolean isPreFlightRequest(ServerHttpRequest request) {

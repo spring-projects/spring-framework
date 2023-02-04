@@ -113,7 +113,7 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	/**
 	 * Resolve global and field errors to messages with the given
 	 * {@link MessageSource} and {@link Locale}.
-	 * @return a Map with errors as key and resolves messages as value
+	 * @return a Map with errors as key and resolved messages as value
 	 * @since 6.0.3
 	 */
 	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {

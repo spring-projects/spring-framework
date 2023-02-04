@@ -86,7 +86,6 @@ class ExecutingResponseCreatorTests {
 				.first()
 				.isNotSameAs(originalRequest)
 				.satisfies(request -> {
-					assertThat(request).isNotSameAs(originalRequest);
 					assertThat(request.isExecuted()).isTrue();
 					assertThat(request.getBody()).isNotSameAs(originalRequest.getBody());
 					assertThat(request.getHeaders()).isNotSameAs(originalRequest.getHeaders());

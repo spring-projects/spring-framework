@@ -63,7 +63,7 @@ class BeanValidationBeanRegistrationAotProcessor implements BeanRegistrationAotP
 
 	private static class BeanValidationDelegate {
 
-		private static Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+		private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
 		@Nullable
 		public static BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {

@@ -107,7 +107,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 	@Repeatable(Exists.List.class)
 	private @interface Exists {
 
-		String message() default "Does not exists";
+		String message() default "Does not exist";
 
 		Class<?>[] groups() default { };
 
