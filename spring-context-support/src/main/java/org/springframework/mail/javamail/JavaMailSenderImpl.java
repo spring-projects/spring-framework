@@ -132,10 +132,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
-	 * Allow {code Map} access to the JavaMail properties of this sender,
+	 * Allow {@code Map} access to the JavaMail properties of this sender,
 	 * with the option to add or override specific entries.
 	 * <p>Useful for specifying entries directly, for example via
-	 * {code javaMailProperties[mail.smtp.auth]}.
+	 * {@code javaMailProperties[mail.smtp.auth]}.
 	 */
 	public Properties getJavaMailProperties() {
 		return this.javaMailProperties;

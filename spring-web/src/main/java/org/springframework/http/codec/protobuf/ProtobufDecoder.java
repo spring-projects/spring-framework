@@ -265,7 +265,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 		 * Parse message size as a varint from the input stream, updating {@code messageBytesToRead} and
 		 * {@code offset} fields if needed to allow processing of upcoming chunks.
 		 * Inspired from {@link CodedInputStream#readRawVarint32(int, java.io.InputStream)}
-		 * @return {code true} when the message size is parsed successfully, {code false} when the message size is
+		 * @return {@code true} when the message size is parsed successfully, {@code false} when the message size is
 		 * truncated
 		 * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">Base 128 Varints</a>
 		 */
