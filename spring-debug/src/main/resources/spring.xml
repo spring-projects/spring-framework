@@ -10,11 +10,11 @@
        					   http://www.springframework.org/schema/context
        					   https://www.springframework.org/schema/context/spring-context.xsd">
 
-	<bean id="aService" class="org.springframework.debug.spring.cache.AService">
+	<bean id="aService" class="org.springframework.debug.spring.cache.AService" scope="singleton">
 		<property name="bService" ref="bService"></property>
 	</bean>
 
-	<bean id="bService" class="org.springframework.debug.spring.cache.BService">
+	<bean id="bService" class="org.springframework.debug.spring.cache.BService" scope="singleton" >
 		<property name="aService" ref="aService"></property>
 	</bean>
 

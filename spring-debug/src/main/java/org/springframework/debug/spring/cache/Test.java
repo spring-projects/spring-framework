@@ -18,5 +18,11 @@ public class Test {
 		BService bService = applicationContext.getBean(BService.class);
 		System.out.println(bService.getaService());
 
+		Class<?>[] classes = AService.class.getClasses();
+		Class<AService> aServiceClass = AService.class;
+//		Class<?> aClass = Class.forName("");
+		new Thread(()-> System.out.println("abc")).start();
+		ThreadLocal threadLocal = new ThreadLocal<>();
+		new ThreadLocal<>();
 	}
 }

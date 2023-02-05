@@ -574,6 +574,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeanCreationException {
 
 		// Instantiate the bean.
+		// 1.实例化 Bean
 		BeanWrapper instanceWrapper = null;
 		if (mbd.isSingleton()) {
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
@@ -634,9 +635,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// TODO 此处注意(存在AOP): 如果此处自己被循环依赖了，那么它会走上面的getEarlyBeanReference，从而创建一个代理对象从三级缓存转移到二级缓存
 			//  注意此时对象还在二级缓存中，并没有在一级缓存中。并且此时可以知道exposedObject仍旧是普通对象
 			// 此时上面说到的getEarlyBeanReference方法就会被执行。这也解释了为何我们@Autowired是个代理对象，而不是普通对象根本原因
-			// 进行属性填充
+			// TODO 2.属性填充
 			populateBean(beanName, mbd, instanceWrapper);
-			// 执行初始化回调方法
+			// TODO 3.初始化 Bean
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 			// TODO (存在AOP)经过上面populateBean和initializeBean两大步骤之后，exposedObject仍是普通对象，因为AOP自动代理创建器在getEarlyBeanReference创建代理后
 			//  initializeBean就不会重复创建了，二选一的，下面有描述
@@ -704,6 +705,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Register bean as disposable.
+		// TODO 4.销毁Bean
 		try {
 			registerDisposableBeanIfNecessary(beanName, bean, mbd);
 		}
@@ -1832,6 +1834,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
 	protected Object initializeBean(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
+		// 检测Aware相关接口并设置相关依赖
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
 				invokeAwareMethods(beanName, bean);
@@ -1842,11 +1845,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			invokeAwareMethods(beanName, bean);
 		}
 
+		// BeanPostProcessor 前置处理
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
+		// 若实现 initializingBean接口，调用 afterPropertiesSet() 方法
+		// 若配置自定义的 init-method方法，则执行
 		try {
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
@@ -1855,6 +1861,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					(mbd != null ? mbd.getResourceDescription() : null),
 					beanName, "Invocation of init method failed", ex);
 		}
+		// BeanPostProcessor 后置处理
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
