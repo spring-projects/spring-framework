@@ -75,6 +75,7 @@ import org.springframework.lang.Nullable;
  * to retrieve the native JDBC Connection.
  *
  * @author Juergen Hoeller
+ * @author Réda Housni Alaoui
  * @since 1.1.4
  * @see DataSourceTransactionManager
  */
@@ -90,6 +91,8 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 	@Nullable
 	private Integer defaultTransactionIsolation;
+
+	private boolean checkDefaultConnectionPropertiesEagerly = true;
 
 
 	/**
@@ -152,6 +155,16 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 		setDefaultTransactionIsolation(constants.asNumber(constantName).intValue());
 	}
 
+	/**
+	 * Configure the activation of default connection properties eager check.
+	 * <p>If enabled, default connection properties will be checked by retrieving and inspecting a {@link Connection}
+	 * during the end of the bean initialization.
+	 * <p>If disabled, the check will be done lazily.
+	 * @see #checkDefaultConnectionProperties
+	 */
+	public void setCheckDefaultConnectionPropertiesEagerly(boolean checkDefaultConnectionPropertiesEagerly) {
+		this.checkDefaultConnectionPropertiesEagerly = checkDefaultConnectionPropertiesEagerly;
+	}
 
 	@Override
 	public void afterPropertiesSet() {
@@ -159,7 +172,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 
 		// Determine default auto-commit and transaction isolation
 		// via a Connection from the target DataSource, if possible.
-		if (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null) {
+		if (this.checkDefaultConnectionPropertiesEagerly && (this.defaultAutoCommit == null || this.defaultTransactionIsolation == null)) {
 			try {
 				try (Connection con = obtainTargetDataSource().getConnection()) {
 					checkDefaultConnectionProperties(con);
