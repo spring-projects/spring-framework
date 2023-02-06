@@ -450,14 +450,15 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 * @param hints the hints used for decoding. May be {@code null}.
 	 */
 	protected void testDecodeToMonoEmptyBuffer(ResolvableType outputType, @Nullable MimeType mimeType,
-										 @Nullable Map<String, Object> hints) {
+			@Nullable Map<String, Object> hints) {
+
 		if (!this.decoder.canDecodeEmptyDataBuffer()) {
 			return;
 		}
 
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(0);
 		Mono<?> result = this.decoder.decodeToMono(Mono.just(buffer), outputType, mimeType, hints)
-						.doOnNext(value -> releaseBufferIfIdentical(buffer, value));
+				.doOnNext(value -> releaseBufferIfIdentical(buffer, value));
 		StepVerifier.create(result)
 				.expectNextMatches(next -> outputType.toClass().isInstance(next))
 				.verifyComplete();
