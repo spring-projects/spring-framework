@@ -16,7 +16,6 @@
 
 package org.springframework.jms.listener;
 
-import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import jakarta.jms.Connection;
 import jakarta.jms.Destination;
@@ -34,13 +33,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionTagsProvider;
+import org.springframework.transaction.support.DefaultTransactionObservationConvention;
 import org.springframework.transaction.support.ObservationPlatformTransactionManager;
 import org.springframework.transaction.support.ResourceTransactionManager;
 import org.springframework.transaction.support.TransactionObservationContext;
+import org.springframework.transaction.support.TransactionObservationConvention;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionSynchronizationUtils;
-import org.springframework.transaction.support.TransactionTagsProvider;
 import org.springframework.util.Assert;
 
 /**
@@ -81,7 +80,7 @@ import org.springframework.util.Assert;
  * @see #receiveAndExecute
  * @see #setTransactionManager
  */
-public abstract class AbstractPollingMessageListenerContainer extends AbstractMessageListenerContainer implements Observation.TagsProviderAware<TransactionTagsProvider> {
+public abstract class AbstractPollingMessageListenerContainer extends AbstractMessageListenerContainer {
 
 	/**
 	 * The default receive timeout: 1000 ms = 1 second.
@@ -103,7 +102,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
-	private TransactionTagsProvider tagsProvider = new DefaultTransactionTagsProvider();
+	private TransactionObservationConvention observationConvention = new DefaultTransactionObservationConvention();
 
 
 	@Override
@@ -197,9 +196,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 		this.observationRegistry = observationRegistry;
 	}
 
-	@Override
-	public void setTagsProvider(TransactionTagsProvider tagsProvider) {
-		this.tagsProvider = tagsProvider;
+	public void setObservationConvention(TransactionObservationConvention observationConvention) {
+		this.observationConvention = observationConvention;
 	}
 
 	@Override
@@ -257,9 +255,9 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 		if (this.transactionManager != null) {
 			PlatformTransactionManager manager = this.transactionManager;
-			if (!this.observationRegistry.isNoOp()) {
+			if (!this.observationRegistry.isNoop()) {
 				TransactionObservationContext context = new TransactionObservationContext(this.transactionDefinition, this.transactionManager);
-				manager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
+				manager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.observationConvention);
 			}
 			// Execute receive within transaction.
 			TransactionStatus status = manager.getTransaction(this.transactionDefinition);

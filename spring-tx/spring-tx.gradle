@@ -27,7 +27,7 @@ dependencies {
 	testImplementation("org.apache.groovy:groovy")
 	testImplementation("jakarta.persistence:jakarta.persistence-api")
 	testImplementation("io.projectreactor:reactor-test")
-	optional("io.micrometer:micrometer-tracing-integration-test") // I don't know how to make this be in tests and testFixtures
+	optional("io.micrometer:micrometer-tracing-integration-test:1.0.2-SNAPSHOT") // I don't know how to make this be in tests and testFixtures
 	optional("io.micrometer:micrometer-core") // I don't know how to make this be in tests and testFixtures
 	testImplementation("io.micrometer:micrometer-observation-test")
 }

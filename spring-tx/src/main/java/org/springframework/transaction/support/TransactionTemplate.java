@@ -18,7 +18,6 @@ package org.springframework.transaction.support;
 
 import java.lang.reflect.UndeclaredThrowableException;
 
-import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,7 +64,7 @@ import org.springframework.util.Assert;
  */
 @SuppressWarnings("serial")
 public class TransactionTemplate extends DefaultTransactionDefinition
-		implements TransactionOperations, InitializingBean, Observation.TagsProviderAware<TransactionTagsProvider> {
+		implements TransactionOperations, InitializingBean {
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -75,7 +74,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
-	private TransactionTagsProvider tagsProvider = new DefaultTransactionTagsProvider();
+	private TransactionObservationConvention observationConvention = new DefaultTransactionObservationConvention();
 
 	/**
 	 * Construct a new TransactionTemplate for bean usage.
@@ -126,9 +125,8 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		this.observationRegistry = observationRegistry;
 	}
 
-	@Override
-	public void setTagsProvider(TransactionTagsProvider tagsProvider) {
-		this.tagsProvider = tagsProvider;
+	public void setObservationConvention(TransactionObservationConvention observationConvention) {
+		this.observationConvention = observationConvention;
 	}
 
 	@Override
@@ -149,9 +147,9 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 		}
 		else {
 			PlatformTransactionManager manager = this.transactionManager;
-			if (!this.observationRegistry.isNoOp()) {
+			if (!this.observationRegistry.isNoop()) {
 				TransactionObservationContext context = new TransactionObservationContext(this, this.transactionManager);
-				manager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.tagsProvider);
+				manager = new ObservationPlatformTransactionManager(this.transactionManager, this.observationRegistry, context, this.observationConvention);
 			}
 			TransactionStatus status = manager.getTransaction(this);
 			T result;

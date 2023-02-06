@@ -42,30 +42,29 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 
 	private final TransactionObservationContext context;
 
-	private final TransactionTagsProvider transactionTagsProvider;
+	private final TransactionObservationConvention transactionObservationConvention;
 
-	public ObservationPlatformTransactionManager(PlatformTransactionManager delegate, ObservationRegistry observationRegistry, TransactionObservationContext context, TransactionTagsProvider transactionTagsProvider) {
+	public ObservationPlatformTransactionManager(PlatformTransactionManager delegate, ObservationRegistry observationRegistry, TransactionObservationContext context, TransactionObservationConvention transactionObservationConvention) {
 		this.delegate = delegate;
 		this.observationRegistry = observationRegistry;
 		this.context = context;
-		this.transactionTagsProvider = transactionTagsProvider;
+		this.transactionObservationConvention = transactionObservationConvention;
 	}
 
 	@Override
 	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
-		if (this.observationRegistry.isNoOp()) {
+		if (this.observationRegistry.isNoop()) {
 			return this.delegate.getTransaction(definition);
 		}
 		Observation obs = this.observationRegistry.getCurrentObservation();
-		if (obs == null || obs.isNoOp()) {
+		if (obs == null || obs.isNoop()) {
 			this.context.setScope(Observation.Scope.NOOP);
 			return this.delegate.getTransaction(definition);
 		}
 		if (log.isDebugEnabled()) {
 			log.debug("A previous observation is in scope - will create a child one");
 		}
-		Observation childObs = TransactionObservation.TX_OBSERVATION.observation(this.observationRegistry, this.context)
-				.tagsProvider(this.transactionTagsProvider)
+		Observation childObs = TransactionObservation.TX_OBSERVATION.observation(this.transactionObservationConvention, new DefaultTransactionObservationConvention(), () -> this.context, this.observationRegistry)
 				.start();
 		this.context.setScope(childObs.openScope());
 		if (log.isDebugEnabled()) {
@@ -84,7 +83,7 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 
 	@Override
 	public void commit(TransactionStatus status) throws TransactionException {
-		if (this.observationRegistry.isNoOp()) {
+		if (this.observationRegistry.isNoop()) {
 			this.delegate.commit(status);
 			return;
 		}
@@ -106,7 +105,7 @@ public final class ObservationPlatformTransactionManager implements PlatformTran
 
 	@Override
 	public void rollback(TransactionStatus status) throws TransactionException {
-		if (this.observationRegistry.isNoOp()) {
+		if (this.observationRegistry.isNoop()) {
 			this.delegate.rollback(status);
 			return;
 		}

@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.observation.Tags;
+import io.micrometer.common.KeyValues;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.transaction.TransactionManager;
@@ -24,7 +24,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-class DefaultTransactionTagsProviderTests {
+class DefaultTransactionObservationConventionTests {
 
 	@Test
 	void noTagsForContinuedTransaction() {
@@ -34,8 +34,8 @@ class DefaultTransactionTagsProviderTests {
 		});
 		context.setTransactionStatus(transactionStatus);
 
-		then(new DefaultTransactionTagsProvider().getLowCardinalityTags(context)).isSameAs(Tags.empty());
-		then(new DefaultTransactionTagsProvider().getHighCardinalityTags(context)).isSameAs(Tags.empty());
+		then(new DefaultTransactionObservationConvention().getLowCardinalityKeyValues(context)).isSameAs(KeyValues.empty());
+		then(new DefaultTransactionObservationConvention().getHighCardinalityKeyValues(context)).isSameAs(KeyValues.empty());
 	}
 
 	@Test
@@ -48,7 +48,7 @@ class DefaultTransactionTagsProviderTests {
 		});
 		context.setTransactionStatus(transactionStatus);
 
-		then(new DefaultTransactionTagsProvider().getLowCardinalityTags(context)).isNotSameAs(Tags.empty());
-		then(new DefaultTransactionTagsProvider().getHighCardinalityTags(context)).isNotSameAs(Tags.empty());
+		then(new DefaultTransactionObservationConvention().getLowCardinalityKeyValues(context)).isNotSameAs(KeyValues.empty());
+		then(new DefaultTransactionObservationConvention().getHighCardinalityKeyValues(context)).isNotSameAs(KeyValues.empty());
 	}
 }

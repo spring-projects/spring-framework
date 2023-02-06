@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,10 +44,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionTagsProvider;
+import org.springframework.transaction.support.DefaultTransactionObservationConvention;
 import org.springframework.transaction.support.ObservationPlatformTransactionManager;
 import org.springframework.transaction.support.TransactionObservationContext;
-import org.springframework.transaction.support.TransactionTagsProvider;
+import org.springframework.transaction.support.TransactionObservationConvention;
 
 /**
  * Common base class for accessing a Quartz Scheduler, i.e. for registering jobs,
@@ -63,7 +62,7 @@ import org.springframework.transaction.support.TransactionTagsProvider;
  * @author Stephane Nicoll
  * @since 2.5.6
  */
-public abstract class SchedulerAccessor implements ResourceLoaderAware, Observation.TagsProviderAware<TransactionTagsProvider> {
+public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -98,7 +97,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware, Observat
 
 	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
-	private TransactionTagsProvider tagsProvider = new DefaultTransactionTagsProvider();
+	private TransactionObservationConvention observationConvention = new DefaultTransactionObservationConvention();
 
 
 	/**
@@ -213,9 +212,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware, Observat
 		this.observationRegistry = observationRegistry;
 	}
 
-	@Override
-	public void setTagsProvider(TransactionTagsProvider tagsProvider) {
-		this.tagsProvider = tagsProvider;
+	public void setObservationConvention(TransactionObservationConvention observationConvention) {
+		this.observationConvention = observationConvention;
 	}
 
 	/**
@@ -226,9 +224,9 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware, Observat
 		TransactionDefinition definition = TransactionDefinition.withDefaults();
 		PlatformTransactionManager manager = this.transactionManager;
 		if (manager != null) {
-			if (!this.observationRegistry.isNoOp()) {
+			if (!this.observationRegistry.isNoop()) {
 				TransactionObservationContext context = new TransactionObservationContext(definition, manager);
-				manager = new ObservationPlatformTransactionManager(manager, this.observationRegistry, context, this.tagsProvider);
+				manager = new ObservationPlatformTransactionManager(manager, this.observationRegistry, context, this.observationConvention);
 			}
 			transactionStatus = manager.getTransaction(definition);
 		}

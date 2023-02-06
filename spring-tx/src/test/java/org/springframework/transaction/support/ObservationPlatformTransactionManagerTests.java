@@ -16,9 +16,9 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.core.tck.TestObservationRegistry;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.tck.TestObservationRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +26,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.TransactionStatus;
 
-import static io.micrometer.core.tck.TestObservationRegistryAssert.assertThat;
+import static io.micrometer.observation.tck.TestObservationRegistryAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -141,22 +141,22 @@ class ObservationPlatformTransactionManagerTests {
 	private ObservationPlatformTransactionManager observationPlatformTransactionManager() {
 		TransactionObservationContext context = new TransactionObservationContext(transactionDefinition(), transactionManager);
 		given(this.delegate.getTransaction(any())).willReturn(new SimpleTransactionStatus());
-		return new ObservationPlatformTransactionManager(this.delegate, this.observationRegistry, context, new DefaultTransactionTagsProvider());
+		return new ObservationPlatformTransactionManager(this.delegate, this.observationRegistry, context, new DefaultTransactionObservationConvention());
 	}
 
 	private ObservationPlatformTransactionManager noOpDelegateObservationPlatformTransactionManager(TransactionObservationContext context) {
-		return new ObservationPlatformTransactionManager(this.delegate, ObservationRegistry.NOOP, context, new DefaultTransactionTagsProvider());
+		return new ObservationPlatformTransactionManager(this.delegate, ObservationRegistry.NOOP, context, new DefaultTransactionObservationConvention());
 	}
 
 	private void assertThatRegistryHasAStoppedTxObservation(Observation.Scope scope) {
 		assertThat(this.observationRegistry)
 				.hasRemainingCurrentObservationSameAs(scope.getCurrentObservation())
 				.hasObservationWithNameEqualTo("spring.tx").that()
-				.hasLowCardinalityTag("spring.tx.isolation-level", "-1")
-				.hasLowCardinalityTag("spring.tx.propagation-level", "REQUIRED")
-				.hasLowCardinalityTag("spring.tx.read-only", "false")
-				.hasLowCardinalityTag("spring.tx.transaction-manager", "org.springframework.transaction.support.ObservationPlatformTransactionManagerTests$1")
-				.hasHighCardinalityTag("spring.tx.name", "foo")
+				.hasLowCardinalityKeyValue("spring.tx.isolation-level", "-1")
+				.hasLowCardinalityKeyValue("spring.tx.propagation-level", "REQUIRED")
+				.hasLowCardinalityKeyValue("spring.tx.read-only", "false")
+				.hasLowCardinalityKeyValue("spring.tx.transaction-manager", "org.springframework.transaction.support.ObservationPlatformTransactionManagerTests$1")
+				.hasHighCardinalityKeyValue("spring.tx.name", "foo")
 				.hasBeenStarted()
 				.hasBeenStopped();
 	}

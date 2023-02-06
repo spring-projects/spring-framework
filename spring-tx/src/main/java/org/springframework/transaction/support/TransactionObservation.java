@@ -16,34 +16,32 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.observation.docs.DocumentedObservation;
-import io.micrometer.observation.docs.TagKey;
+import io.micrometer.common.docs.KeyName;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationConvention;
+import io.micrometer.observation.docs.ObservationDocumentation;
 
-enum TransactionObservation implements DocumentedObservation {
+enum TransactionObservation implements ObservationDocumentation {
 
 	/**
 	 * Observation created when there was no previous transaction. If there was one, we will
 	 * continue it unless propagation is required.
 	 */
 	TX_OBSERVATION {
+
 		@Override
-		public String getName() {
-			return "spring.tx";
+		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
+			return DefaultTransactionObservationConvention.class;
 		}
 
 		@Override
-		public String getContextualName() {
-			return "tx";
+		public KeyName[] getLowCardinalityKeyNames() {
+			return LowCardinalityKeyNames.values();
 		}
 
 		@Override
-		public TagKey[] getLowCardinalityTagKeys() {
-			return LowCardinalityTags.values();
-		}
-
-		@Override
-		public TagKey[] getHighCardinalityTagKeys() {
-			return HighCardinalityTags.values();
+		public KeyName[] getHighCardinalityKeyNames() {
+			return HighCardinalityKeyNames.values();
 		}
 
 		@Override
@@ -52,14 +50,14 @@ enum TransactionObservation implements DocumentedObservation {
 		}
 	};
 
-	enum LowCardinalityTags implements TagKey {
+	enum LowCardinalityKeyNames implements KeyName {
 
 		/**
 		 * Name of the TransactionManager.
 		 */
 		TRANSACTION_MANAGER {
 			@Override
-			public String getKey() {
+			public String asString() {
 				return "spring.tx.transaction-manager";
 			}
 		},
@@ -69,7 +67,7 @@ enum TransactionObservation implements DocumentedObservation {
 		 */
 		READ_ONLY {
 			@Override
-			public String getKey() {
+			public String asString() {
 				return "spring.tx.read-only";
 			}
 		},
@@ -79,7 +77,7 @@ enum TransactionObservation implements DocumentedObservation {
 		 */
 		PROPAGATION_LEVEL {
 			@Override
-			public String getKey() {
+			public String asString() {
 				return "spring.tx.propagation-level";
 			}
 		},
@@ -89,7 +87,7 @@ enum TransactionObservation implements DocumentedObservation {
 		 */
 		ISOLATION_LEVEL {
 			@Override
-			public String getKey() {
+			public String asString() {
 				return "spring.tx.isolation-level";
 			}
 		},
@@ -99,21 +97,21 @@ enum TransactionObservation implements DocumentedObservation {
 		 */
 		TIMEOUT {
 			@Override
-			public String getKey() {
+			public String asString() {
 				return "spring.tx.timeout";
 			}
 		}
 
 	}
 
-	enum HighCardinalityTags implements TagKey {
+	enum HighCardinalityKeyNames implements KeyName {
 
 		/**
 		 * Transaction name.
 		 */
 		NAME {
 			@Override
-			public String getKey() {
+			public String asString() {
 				return "spring.tx.name";
 			}
 		}

@@ -16,14 +16,14 @@
 
 package org.springframework.transaction.support;
 
-import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationConvention;
 
 /**
- * A {@link Observation.TagsProvider} for Spring Transaction.
+ * A {@link ObservationConvention} for Spring Transaction.
  *
  * @author Marcin Grzejszczak
  * @since 6.0.0
  */
-public interface TransactionTagsProvider extends Observation.TagsProvider<TransactionObservationContext> {
+public interface TransactionObservationConvention extends ObservationConvention<TransactionObservationContext> {
 
 }

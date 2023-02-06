@@ -16,8 +16,8 @@
 
 package org.springframework.transaction.support;
 
+import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
-import io.micrometer.observation.Tags;
 
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -26,48 +26,58 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation for {@link TransactionTagsProvider}.
+ * Default implementation for {@link TransactionObservationConvention}.
  *
  * @author Marcin Grzejszczak
  * @since 6.0.0
  */
-public class DefaultTransactionTagsProvider implements TransactionTagsProvider {
+public class DefaultTransactionObservationConvention implements TransactionObservationConvention {
 
 	private static final Propagation[] PROPAGATIONS = Propagation.values();
 
 	private static final Isolation[] ISOLATIONS = Isolation.values();
 
 	@Override
-	public Tags getLowCardinalityTags(TransactionObservationContext context) {
-		if (!context.getTransactionStatus().isNewTransaction()) {
-			return Tags.empty();
+	public KeyValues getLowCardinalityKeyValues(TransactionObservationContext context) {
+		if (context.getTransactionStatus() == null || !context.getTransactionStatus().isNewTransaction()) {
+			return KeyValues.empty();
 		}
 		TransactionDefinition transactionDefinition = context.getTransactionDefinition();
-		Tags tags = Tags.empty();
+		KeyValues tags = KeyValues.empty();
 		if (transactionDefinition.getTimeout() > 0) {
-			tags = tags.and(TransactionObservation.LowCardinalityTags.TIMEOUT.of(String.valueOf(transactionDefinition.getTimeout())));
+			tags = tags.and(TransactionObservation.LowCardinalityKeyNames.TIMEOUT.withValue(String.valueOf(transactionDefinition.getTimeout())));
 		}
-		return tags.and(TransactionObservation.LowCardinalityTags.TRANSACTION_MANAGER.of(ClassUtils.getQualifiedName(context.getTransactionManagerClass())),
-				TransactionObservation.LowCardinalityTags.READ_ONLY.of(String.valueOf(transactionDefinition.isReadOnly())),
-				TransactionObservation.LowCardinalityTags.PROPAGATION_LEVEL.of(propagationLevel(transactionDefinition)),
-				TransactionObservation.LowCardinalityTags.ISOLATION_LEVEL.of(isolationLevel(transactionDefinition)));
+		return tags.and(TransactionObservation.LowCardinalityKeyNames.TRANSACTION_MANAGER.withValue(ClassUtils.getQualifiedName(context.getTransactionManagerClass())),
+				TransactionObservation.LowCardinalityKeyNames.READ_ONLY.withValue(String.valueOf(transactionDefinition.isReadOnly())),
+				TransactionObservation.LowCardinalityKeyNames.PROPAGATION_LEVEL.withValue(propagationLevel(transactionDefinition)),
+				TransactionObservation.LowCardinalityKeyNames.ISOLATION_LEVEL.withValue(isolationLevel(transactionDefinition)));
 	}
 
 	@Override
-	public Tags getHighCardinalityTags(TransactionObservationContext context) {
-		if (!context.getTransactionStatus().isNewTransaction()) {
-			return Tags.empty();
+	public KeyValues getHighCardinalityKeyValues(TransactionObservationContext context) {
+		if (context.getTransactionStatus() == null || !context.getTransactionStatus().isNewTransaction()) {
+			return KeyValues.empty();
 		}
 		TransactionDefinition transactionDefinition = context.getTransactionDefinition();
 		if (StringUtils.hasText(transactionDefinition.getName())) {
-			return Tags.of(TransactionObservation.HighCardinalityTags.NAME.of(transactionDefinition.getName()));
+			return KeyValues.of(TransactionObservation.HighCardinalityKeyNames.NAME.withValue(transactionDefinition.getName()));
 		}
-		return Tags.empty();
+		return KeyValues.empty();
 	}
 
 	@Override
 	public boolean supportsContext(Observation.Context context) {
 		return context instanceof TransactionObservationContext;
+	}
+
+	@Override
+	public String getName() {
+		return "spring.tx";
+	}
+
+	@Override
+	public String getContextualName(TransactionObservationContext context) {
+		return "tx";
 	}
 
 	private static String propagationLevel(TransactionDefinition def) {
