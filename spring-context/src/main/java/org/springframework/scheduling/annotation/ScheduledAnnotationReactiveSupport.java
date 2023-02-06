@@ -57,7 +57,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 		private final Duration initialDelay;
 		private final Duration otherDelay;
 		private final boolean isFixedRate;
-		private final String checkpoint;
+		protected final String checkpoint;
 		private final Disposable.Swap disposable;
 
 		private final Log logger = LogFactory.getLog(getClass());

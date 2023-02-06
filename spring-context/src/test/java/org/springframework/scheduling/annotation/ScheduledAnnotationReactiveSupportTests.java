@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -238,10 +237,9 @@ class ScheduledAnnotationReactiveSupportTests {
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
 					m, target, Duration.ZERO, Duration.ofSeconds(10), true);
 
-			reactiveTask.subscribe();
-			Thread.sleep(500);
-
-			reactiveTask.cancel();
+			assertThat(reactiveTask.checkpoint).isEqualTo("@Scheduled 'org.springframework.scheduling.annotation"
+					+ ".ScheduledAnnotationReactiveSupportTests$ReactiveMethods#monoError()'"
+					+ " [ScheduledAnnotationReactiveSupport]");
 		}
 
 	}
