@@ -17,9 +17,7 @@
 package org.springframework.jdbc.core;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,7 +28,10 @@ import org.springframework.jdbc.core.test.ConstructorPersonWithSetters;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link DataClassRowMapper}.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.3
  */
 class DataClassRowMapperTests extends AbstractRowMapperTests {
@@ -38,11 +39,10 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 	@Test
 	void staticQueryWithDataClass() throws Exception {
 		Mock mock = new Mock();
-		List<ConstructorPerson> result = mock.getJdbcTemplate().query(
+		ConstructorPerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(ConstructorPerson.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 
 		mock.verifyClosed();
 	}
@@ -50,15 +50,13 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 	@Test
 	void staticQueryWithDataClassAndGenerics() throws Exception {
 		Mock mock = new Mock();
-		List<ConstructorPersonWithGenerics> result = mock.getJdbcTemplate().query(
+		ConstructorPersonWithGenerics person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(ConstructorPersonWithGenerics.class));
-		assertThat(result).hasSize(1);
-		ConstructorPersonWithGenerics person = result.get(0);
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
 		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
-		assertThat(person.balance()).isEqualTo(Collections.singletonList(new BigDecimal("1234.56")));
+		assertThat(person.balance()).containsExactly(new BigDecimal("1234.56"));
 
 		mock.verifyClosed();
 	}
@@ -66,11 +64,9 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 	@Test
 	void staticQueryWithDataClassAndSetters() throws Exception {
 		Mock mock = new Mock(MockType.FOUR);
-		List<ConstructorPersonWithSetters> result = mock.getJdbcTemplate().query(
+		ConstructorPersonWithSetters person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birthdate, balance from people",
 				new DataClassRowMapper<>(ConstructorPersonWithSetters.class));
-		assertThat(result).hasSize(1);
-		ConstructorPersonWithSetters person = result.get(0);
 		assertThat(person.name()).isEqualTo("BUBBA");
 		assertThat(person.age()).isEqualTo(22L);
 		assertThat(person.birthDate()).usingComparator(Date::compareTo).isEqualTo(new Date(1221222L));
@@ -82,11 +78,10 @@ class DataClassRowMapperTests extends AbstractRowMapperTests {
 	@Test
 	void staticQueryWithDataRecord() throws Exception {
 		Mock mock = new Mock();
-		List<RecordPerson> result = mock.getJdbcTemplate().query(
+		RecordPerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new DataClassRowMapper<>(RecordPerson.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 
 		mock.verifyClosed();
 	}
