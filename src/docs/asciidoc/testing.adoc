@@ -4343,8 +4343,7 @@ properties.
 
 		@Container
 		static GenericContainer redis =
-			new GenericContainer(DockerImageName.parse("redis:5.0.3-alpine"))
-				.withExposedPorts(6379);
+			new GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379);
 
 		@DynamicPropertySource
 		static void redisProperties(DynamicPropertyRegistry registry) {
@@ -4368,8 +4367,7 @@ properties.
 			@Container
 			@JvmStatic
 			val redis: GenericContainer =
-				GenericContainer(DockerImageName.parse("redis:5.0.3-alpine"))
-					.withExposedPorts(6379)
+				GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379)
 
 			@DynamicPropertySource
 			@JvmStatic
