@@ -26,13 +26,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import kotlin.coroutines.Continuation;
+import kotlinx.coroutines.reactor.MonoKt;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import reactor.core.publisher.Mono;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
-import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -268,18 +268,13 @@ public final class HttpServiceProxyFactory {
 		}
 
 		@Override
-		@SuppressWarnings({"unchecked"})
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
 			HttpServiceMethod httpServiceMethod = this.httpServiceMethods.get(method);
 			if (httpServiceMethod != null) {
 				if (KotlinDetector.isSuspendingFunction(method)) {
-					Object[] arguments = getSuspendedFunctionArgs(invocation.getArguments());
-					Continuation<Object> continuation = resolveContinuationArgument(invocation.getArguments());
-					Mono<Object> wrapped = (Mono<Object>) httpServiceMethod.invoke(arguments);
-					return CoroutinesUtils.awaitSingleOrNull(wrapped, continuation);
+					return KotlinDelegate.invokeSuspendingFunction(invocation, httpServiceMethod);
 				}
-
 				return httpServiceMethod.invoke(invocation.getArguments());
 			}
 			if (method.isDefault()) {
@@ -290,13 +285,23 @@ public final class HttpServiceProxyFactory {
 			}
 			throw new IllegalStateException("Unexpected method invocation: " + method);
 		}
+	}
 
-		@SuppressWarnings({"unchecked"})
-		private static <T> Continuation<T> resolveContinuationArgument(Object[] args) {
-			return (Continuation<T>) args[args.length - 1];
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	@SuppressWarnings("unchecked")
+	private static class KotlinDelegate {
+
+		public static Object invokeSuspendingFunction(MethodInvocation invocation, HttpServiceMethod httpServiceMethod) {
+			Object[] rawArguments = invocation.getArguments();
+			Object[] arguments = resolveArguments(rawArguments);
+			Continuation<Object> continuation = (Continuation<Object>) rawArguments[rawArguments.length - 1];
+			Mono<Object> wrapped = (Mono<Object>) httpServiceMethod.invoke(arguments);
+			return MonoKt.awaitSingleOrNull(wrapped, continuation);
 		}
 
-		private static Object[] getSuspendedFunctionArgs(Object[] args) {
+		private static Object[] resolveArguments(Object[] args) {
 			Object[] functionArgs = new Object[args.length - 1];
 			System.arraycopy(args, 0, functionArgs, 0, args.length - 1);
 			return functionArgs;

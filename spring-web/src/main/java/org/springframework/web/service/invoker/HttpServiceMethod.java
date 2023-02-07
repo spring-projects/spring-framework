@@ -84,7 +84,6 @@ final class HttpServiceMethod {
 		if (count == 0) {
 			return new MethodParameter[0];
 		}
-
 		if (KotlinDetector.isSuspendingFunction(method)) {
 			count -= 1;
 		}
