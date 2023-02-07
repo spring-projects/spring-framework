@@ -68,6 +68,8 @@ public final class MockMvcWebConnection implements WebConnection {
 
 	private WebClient webClient;
 
+	private static int MAX_FORWARDS = 100;
+
 
 	/**
 	 * Create a new instance that assumes the context path of the application
@@ -133,10 +135,15 @@ public final class MockMvcWebConnection implements WebConnection {
 
 		MockHttpServletResponse httpServletResponse = getResponse(requestBuilder);
 		String forwardedUrl = httpServletResponse.getForwardedUrl();
-		while (forwardedUrl != null) {
+		int forwards = 0;
+		while (forwardedUrl != null && forwards < MAX_FORWARDS) {
 			requestBuilder.setForwardPostProcessor(new ForwardRequestPostProcessor(forwardedUrl));
 			httpServletResponse = getResponse(requestBuilder);
 			forwardedUrl = httpServletResponse.getForwardedUrl();
+			forwards += 1;
+		}
+		if (forwards == MAX_FORWARDS) {
+			throw new IllegalStateException("Forwarded more than " + forwards + " times in a row, potential infinite forward loop");
 		}
 		storeCookies(webRequest, httpServletResponse.getCookies());
 
