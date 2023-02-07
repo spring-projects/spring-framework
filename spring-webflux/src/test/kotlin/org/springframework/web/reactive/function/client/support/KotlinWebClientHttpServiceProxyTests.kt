@@ -28,6 +28,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.service.invoker.HttpServiceProxyFactory
+import org.springframework.web.service.invoker.createClient
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.time.Duration
@@ -130,7 +131,7 @@ class KotlinWebClientHttpServiceProxyTests {
 		return HttpServiceProxyFactory.builder()
 			.clientAdapter(WebClientAdapter.forClient(webClient))
 			.build()
-			.createClient(TestHttpService::class.java)
+			.createClient()
 	}
 
 	private fun prepareResponse(consumer: Consumer<MockResponse>) {
