@@ -73,6 +73,10 @@ import org.springframework.util.StringUtils;
  * {@code true}. See {@link #setPrimitivesDefaultedForNullValue(boolean)} for
  * details.
  *
+ * <p>If you need to map to a target class which has a <em>data class</em> constructor
+ * &mdash; for example, a Java {@code record} or a Kotlin {@code data} class &mdash;
+ * use {@link DataClassRowMapper} instead.
+ *
  * <p>Please note that this class is designed to provide convenience rather than
  * high performance. For best performance, consider using a custom {@code RowMapper}
  * implementation.
