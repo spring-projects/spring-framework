@@ -185,6 +185,15 @@ class MockHttpServletRequestTests {
 		assertThat(request.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
+	@Test // gh-29255
+	void setContentTypeInvalidWithNonAsciiCharacterAndCharset() {
+		String contentType = "İcharset=";
+		request.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
+		assertThat(request.getContentType()).isEqualTo(contentType);
+		assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType);
+		assertThat(request.getCharacterEncoding()).isEqualTo("");
+	}
+
 	@Test
 	void contentTypeHeader() {
 		String contentType = "test/plain";
