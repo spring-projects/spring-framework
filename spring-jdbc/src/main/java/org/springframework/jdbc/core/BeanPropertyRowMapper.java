@@ -56,12 +56,12 @@ import org.springframework.util.StringUtils;
  * properties. The names are matched either directly or by transforming a name
  * separating the parts with underscores to the same name using "camel" case.
  *
- * <p>Mapping is provided for fields in the target class for many common types &mdash;
+ * <p>Mapping is provided for properties in the target class for many common types &mdash;
  * for example: String, boolean, Boolean, byte, Byte, short, Short, int, Integer,
  * long, Long, float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
  *
- * <p>To facilitate mapping between columns and fields that don't have matching names,
- * try using column aliases in the SQL statement like
+ * <p>To facilitate mapping between columns and properties that don't have matching
+ * names, try using column aliases in the SQL statement like
  * {@code "select fname as first_name from customer"}, where {@code first_name}
  * can be mapped to a {@code setFirstName(String)} method in the target class.
  *
@@ -107,13 +107,13 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	@Nullable
 	private ConversionService conversionService = DefaultConversionService.getSharedInstance();
 
-	/** Map of the fields we provide mapping for. */
+	/** Map of the properties we provide mapping for. */
 	@Nullable
-	private Map<String, PropertyDescriptor> mappedFields;
+	private Map<String, PropertyDescriptor> mappedProperties;
 
-	/** Set of bean properties we provide mapping for. */
+	/** Set of bean property names we provide mapping for. */
 	@Nullable
-	private Set<String> mappedProperties;
+	private Set<String> mappedPropertyNames;
 
 
 	/**
@@ -137,7 +137,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * Create a new {@code BeanPropertyRowMapper}.
 	 * @param mappedClass the class that each row should be mapped to
 	 * @param checkFullyPopulated whether we're strictly validating that
-	 * all bean properties have been mapped from corresponding database fields
+	 * all bean properties have been mapped from corresponding database columns
 	 */
 	public BeanPropertyRowMapper(Class<T> mappedClass, boolean checkFullyPopulated) {
 		initialize(mappedClass);
@@ -170,7 +170,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/**
 	 * Set whether we're strictly validating that all bean properties have been mapped
-	 * from corresponding database fields.
+	 * from corresponding database columns.
 	 * <p>Default is {@code false}, accepting unpopulated properties in the target bean.
 	 */
 	public void setCheckFullyPopulated(boolean checkFullyPopulated) {
@@ -179,21 +179,21 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/**
 	 * Return whether we're strictly validating that all bean properties have been
-	 * mapped from corresponding database fields.
+	 * mapped from corresponding database columns.
 	 */
 	public boolean isCheckFullyPopulated() {
 		return this.checkFullyPopulated;
 	}
 
 	/**
-	 * Set whether a {@code NULL} database field value should be ignored when
+	 * Set whether a {@code NULL} database column value should be ignored when
 	 * mapping to a corresponding primitive property in the target class.
 	 * <p>Default is {@code false}, throwing an exception when nulls are mapped
 	 * to Java primitives.
 	 * <p>If this flag is set to {@code true} and you use an <em>ignored</em>
 	 * primitive property value from the mapped bean to update the database, the
 	 * value in the database will be changed from {@code NULL} to the current value
-	 * of that primitive property. That value may be the field's initial value
+	 * of that primitive property. That value may be the property's initial value
 	 * (potentially Java's default value for the respective primitive type), or
 	 * it may be some other value set for the property in the default constructor
 	 * (or initialization block) or as a side effect of setting some other property
@@ -240,31 +240,31 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 */
 	protected void initialize(Class<T> mappedClass) {
 		this.mappedClass = mappedClass;
-		this.mappedFields = new HashMap<>();
-		this.mappedProperties = new HashSet<>();
+		this.mappedProperties = new HashMap<>();
+		this.mappedPropertyNames = new HashSet<>();
 
 		for (PropertyDescriptor pd : BeanUtils.getPropertyDescriptors(mappedClass)) {
 			if (pd.getWriteMethod() != null) {
 				String lowerCaseName = lowerCaseName(pd.getName());
-				this.mappedFields.put(lowerCaseName, pd);
+				this.mappedProperties.put(lowerCaseName, pd);
 				String underscoreName = underscoreName(pd.getName());
 				if (!lowerCaseName.equals(underscoreName)) {
-					this.mappedFields.put(underscoreName, pd);
+					this.mappedProperties.put(underscoreName, pd);
 				}
-				this.mappedProperties.add(pd.getName());
+				this.mappedPropertyNames.add(pd.getName());
 			}
 		}
 	}
 
 	/**
-	 * Remove the specified property from the mapped fields.
+	 * Remove the specified property from the mapped properties.
 	 * @param propertyName the property name (as used by property descriptors)
 	 * @since 5.3.9
 	 */
 	protected void suppressProperty(String propertyName) {
-		if (this.mappedFields != null) {
-			this.mappedFields.remove(lowerCaseName(propertyName));
-			this.mappedFields.remove(underscoreName(propertyName));
+		if (this.mappedProperties != null) {
+			this.mappedProperties.remove(lowerCaseName(propertyName));
+			this.mappedProperties.remove(underscoreName(propertyName));
 		}
 	}
 
@@ -326,8 +326,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
-			String field = lowerCaseName(StringUtils.delete(column, " "));
-			PropertyDescriptor pd = (this.mappedFields != null ? this.mappedFields.get(field) : null);
+			String property = lowerCaseName(StringUtils.delete(column, " "));
+			PropertyDescriptor pd = (this.mappedProperties != null ? this.mappedProperties.get(property) : null);
 			if (pd != null) {
 				try {
 					Object value = getColumnValue(rs, index, pd);
@@ -363,9 +363,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 			}
 		}
 
-		if (populatedProperties != null && !populatedProperties.equals(this.mappedProperties)) {
-			throw new InvalidDataAccessApiUsageException("Given ResultSet does not contain all fields " +
-					"necessary to populate object of " + this.mappedClass + ": " + this.mappedProperties);
+		if (populatedProperties != null && !populatedProperties.equals(this.mappedPropertyNames)) {
+			throw new InvalidDataAccessApiUsageException("Given ResultSet does not contain all properties " +
+					"necessary to populate object of " + this.mappedClass + ": " + this.mappedPropertyNames);
 		}
 
 		return mappedObject;
