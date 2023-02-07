@@ -32,15 +32,29 @@ import org.springframework.util.Assert;
  * {@link RowMapper} implementation that converts a row into a new instance
  * of the specified mapped target class. The mapped target class must be a
  * top-level class or {@code static} nested class, and it may expose either a
- * data class constructor with named parameters corresponding to column names
- * or classic bean property setter methods with property names corresponding to
- * column names (or even a combination of both).
+ * <em>data class</em> constructor with named parameters corresponding to column
+ * names or classic bean property setter methods with property names corresponding
+ * to column names (or even a combination of both).
+ *
+ * <p>The term "data class" applies to Java <em>records</em>, Kotlin <em>data
+ * classes</em>, and any class which has a constructor with named parameters
+ * that are intended to be mapped to corresponding column names.
+ *
+ * <p>When combining a data class constructor with setter methods, any property
+ * mapped successfully via a constructor argument will not be mapped additionally
+ * via a corresponding setter method. This means that constructor arguments take
+ * precedence over property setter methods.
  *
  * <p>Note that this class extends {@link BeanPropertyRowMapper} and can
  * therefore serve as a common choice for any mapped target class, flexibly
  * adapting to constructor style versus setter methods in the mapped class.
  *
+ * <p>Please note that this class is designed to provide convenience rather than
+ * high performance. For best performance, consider using a custom {@code RowMapper}
+ * implementation.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.3
  * @param <T> the result type
  */
