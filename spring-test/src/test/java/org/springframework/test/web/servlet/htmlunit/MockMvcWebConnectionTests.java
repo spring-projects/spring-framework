@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 
 /**
@@ -81,10 +82,10 @@ public class MockMvcWebConnectionTests {
 	}
 
 	@Test
-	public void infiniteForward() throws IOException {
+	public void infiniteForward() {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
-		Page page = this.webClient.getPage("http://localhost/infiniteForward");
-		assertThat(page.getWebResponse().getContentAsString()).isEmpty();
+		assertThatIllegalStateException().isThrownBy(() -> this.webClient.getPage("http://localhost/infiniteForward"))
+						.withMessage("Forwarded more than 100 times in a row, potential infinite forward loop");
 	}
 
 	@Test

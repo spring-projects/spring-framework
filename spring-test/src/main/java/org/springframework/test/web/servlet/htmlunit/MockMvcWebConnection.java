@@ -142,6 +142,9 @@ public final class MockMvcWebConnection implements WebConnection {
 			forwardedUrl = httpServletResponse.getForwardedUrl();
 			forwards += 1;
 		}
+		if (forwards == MAX_FORWARDS) {
+			throw new IllegalStateException("Forwarded more than " + forwards + " times in a row, potential infinite forward loop");
+		}
 		storeCookies(webRequest, httpServletResponse.getCookies());
 
 		return new MockWebResponseBuilder(startTime, webRequest, httpServletResponse).build();
