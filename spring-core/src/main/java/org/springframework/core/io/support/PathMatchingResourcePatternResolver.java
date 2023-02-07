@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -323,6 +323,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			String locationPatternWithoutPrefix = locationPattern.substring(CLASSPATH_ALL_URL_PREFIX.length());
 			// Search the module path first.
 			Set<Resource> resources = findAllModulePathResources(locationPatternWithoutPrefix);
+			// Search the class path next.
 			if (getPathMatcher().isPattern(locationPatternWithoutPrefix)) {
 				// a class path resource pattern
 				Collections.addAll(resources, findPathMatchingResources(locationPattern));
@@ -391,15 +392,21 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	 * Convert the given URL as returned from the ClassLoader into a {@link Resource}.
-	 * <p>The default implementation simply creates a {@link UrlResource} instance.
+	 * Convert the given URL as returned from the ClassLoader into a {@link Resource},
+	 * applying to path lookups without a pattern ({@link #findAllClassPathResources}).
+	 * <p>As of 6.0.5, the default implementation creates a {@link FileSystemResource}
+	 * in case of the "file" protocol or a {@link UrlResource} otherwise, matching
+	 * the outcome of pattern-based classpath traversal in the same resource layout,
+	 * as well as matching the outcome of module path searches.
 	 * @param url a URL as returned from the ClassLoader
 	 * @return the corresponding Resource object
 	 * @see java.lang.ClassLoader#getResources
-	 * @see org.springframework.core.io.Resource
+	 * @see #doFindAllClassPathResources
+	 * @see #doFindPathMatchingFileResources
 	 */
 	protected Resource convertClassLoaderURL(URL url) {
-		return new UrlResource(url);
+		return (ResourceUtils.URL_PROTOCOL_FILE.equals(url.getProtocol()) ?
+				new FileSystemResource(url.getPath()) : new UrlResource(url));
 	}
 
 	/**
@@ -845,23 +852,23 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		try {
 			ModuleLayer.boot().configuration().modules().stream()
-				.filter(isNotSystemModule)
-				.forEach(resolvedModule -> {
-					// NOTE: a ModuleReader and a Stream returned from ModuleReader.list() must be closed.
-					try (ModuleReader moduleReader = resolvedModule.reference().open();
-							Stream<String> names = moduleReader.list()) {
-						names.filter(resourcePatternMatches)
-								.map(name -> findResource(moduleReader, name))
-								.filter(Objects::nonNull)
-								.forEach(result::add);
-					}
-					catch (IOException ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Failed to read contents of module [%s]".formatted(resolvedModule), ex);
+					.filter(isNotSystemModule)
+					.forEach(resolvedModule -> {
+						// NOTE: a ModuleReader and a Stream returned from ModuleReader.list() must be closed.
+						try (ModuleReader moduleReader = resolvedModule.reference().open();
+								Stream<String> names = moduleReader.list()) {
+							names.filter(resourcePatternMatches)
+									.map(name -> findResource(moduleReader, name))
+									.filter(Objects::nonNull)
+									.forEach(result::add);
 						}
-						throw new UncheckedIOException(ex);
-					}
-				});
+						catch (IOException ex) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Failed to read contents of module [%s]".formatted(resolvedModule), ex);
+							}
+							throw new UncheckedIOException(ex);
+						}
+					});
 		}
 		catch (UncheckedIOException ex) {
 			// Unwrap IOException to conform to this method's contract.
@@ -878,9 +885,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private Resource findResource(ModuleReader moduleReader, String name) {
 		try {
 			return moduleReader.find(name)
-					// If it's a "file:" URI, use FileSystemResource to avoid duplicates
-					// for the same path discovered via class-path scanning.
-					.map(this::convertToResource)
+					.map(this::convertModuleSystemURI)
 					.orElse(null);
 		}
 		catch (Exception ex) {
@@ -891,7 +896,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		}
 	}
 
-	private Resource convertToResource(URI uri) {
+	/**
+	  * If it's a "file:" URI, use FileSystemResource to avoid duplicates
+	  * for the same path discovered via class-path scanning.
+	  */
+	private Resource convertModuleSystemURI(URI uri) {
 		return (ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme()) ?
 				new FileSystemResource(uri.getPath()) : UrlResource.from(uri));
 	}
