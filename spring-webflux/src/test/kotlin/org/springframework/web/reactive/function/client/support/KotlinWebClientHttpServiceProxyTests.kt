@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.function.client.support
 
-import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -35,13 +34,17 @@ import java.time.Duration
 import java.util.function.Consumer
 
 /**
- * Integration tests for [HTTP Service proxy][HttpServiceProxyFactory]
+ * Kotlin integration tests for [HTTP Service proxy][HttpServiceProxyFactory]
  * using [WebClient] and [MockWebServer].
  *
- * @author DongHyeon Kim (wplong11)
+ * @author DongHyeon Kim
+ * @author Sebastien Deleuze
+ *
  */
-class WebClientHttpServiceProxyKotlinTests {
-	private var server: MockWebServer? = null
+class KotlinWebClientHttpServiceProxyTests {
+
+	private lateinit var server: MockWebServer
+
 	@BeforeEach
 	fun setUp() {
 		server = MockWebServer()
@@ -49,21 +52,21 @@ class WebClientHttpServiceProxyKotlinTests {
 
 	@AfterEach
 	fun shutdown() {
-		server?.shutdown()
+		server.shutdown()
 	}
 
 	@Test
-	fun greeting() {
+	fun greetingSuspending() {
 		prepareResponse { response: MockResponse ->
 			response.setHeader(
 				"Content-Type",
 				"text/plain"
 			).setBody("Hello Spring!")
 		}
-		StepVerifier.create(mono<String> { initHttpService().getGreeting() })
-			.expectNext("Hello Spring!")
-			.expectComplete()
-			.verify(Duration.ofSeconds(5))
+		runBlocking {
+			val greeting = initHttpService().getGreetingSuspending()
+			Assertions.assertThat(greeting).isEqualTo("Hello Spring!")
+		}
 	}
 
 	@Test
@@ -88,17 +91,15 @@ class WebClientHttpServiceProxyKotlinTests {
 				"text/plain"
 			).setBody("Hello Spring!")
 		}
-		StepVerifier.create(mono<String> { initHttpService().getGreetingBlocking() })
-			.expectNext("Hello Spring!")
-			.expectComplete()
-			.verify(Duration.ofSeconds(5))
+		val greeting = initHttpService().getGreetingBlocking()
+		Assertions.assertThat(greeting).isEqualTo("Hello Spring!")
 	}
 
 	@Test
-	fun greetingWithRequestAttribute() {
+	fun greetingSuspendingWithRequestAttribute() {
 		val attributes: MutableMap<String, Any> = HashMap()
 		val webClient = WebClient.builder()
-			.baseUrl(server!!.url("/").toString())
+			.baseUrl(server.url("/").toString())
 			.filter { request: ClientRequest, next: ExchangeFunction ->
 				attributes.putAll(request.attributes())
 				next.exchange(request)
@@ -110,21 +111,17 @@ class WebClientHttpServiceProxyKotlinTests {
 				"text/plain"
 			).setBody("Hello Spring!")
 		}
-
 		val service = initHttpService(webClient)
-		val value = runBlocking {
-			service.getGreetingWithAttribute("myAttributeValue")
+		runBlocking {
+			val greeting = service.getGreetingSuspendingWithAttribute("myAttributeValue")
+			Assertions.assertThat(greeting).isEqualTo("Hello Spring!")
+			Assertions.assertThat(attributes).containsEntry("myAttribute", "myAttributeValue")
 		}
-		StepVerifier.create(mono<String> { value })
-			.expectNext("Hello Spring!")
-			.expectComplete()
-			.verify(Duration.ofSeconds(5))
-		Assertions.assertThat(attributes).containsEntry("myAttribute", "myAttributeValue")
 	}
 
 	private fun initHttpService(): TestHttpService {
 		val webClient = WebClient.builder().baseUrl(
-			server!!.url("/").toString()
+			server.url("/").toString()
 		).build()
 		return initHttpService(webClient)
 	}
@@ -139,12 +136,12 @@ class WebClientHttpServiceProxyKotlinTests {
 	private fun prepareResponse(consumer: Consumer<MockResponse>) {
 		val response = MockResponse()
 		consumer.accept(response)
-		server!!.enqueue(response)
+		server.enqueue(response)
 	}
 
 	private interface TestHttpService {
 		@GetExchange("/greeting")
-		suspend fun getGreeting(): String
+		suspend fun getGreetingSuspending(): String
 
 		@GetExchange("/greeting")
 		fun getGreetingMono(): Mono<String>
@@ -153,6 +150,6 @@ class WebClientHttpServiceProxyKotlinTests {
 		fun getGreetingBlocking(): String
 
 		@GetExchange("/greeting")
-		suspend fun getGreetingWithAttribute(@RequestAttribute myAttribute: String): String
+		suspend fun getGreetingSuspendingWithAttribute(@RequestAttribute myAttribute: String): String
 	}
 }
