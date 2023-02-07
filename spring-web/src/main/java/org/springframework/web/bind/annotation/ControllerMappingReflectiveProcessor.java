@@ -38,7 +38,7 @@ import org.springframework.stereotype.Controller;
  *
  * <ul>
  *     <li>Return types annotated with {@link ResponseBody}</li>
- *     <li>Parameters annotated with {@link RequestBody}</li>
+ *     <li>Parameters annotated with {@link RequestBody}, {@link ModelAttribute} and {@link RequestPart}</li>
  *     <li>{@link HttpEntity} return types and parameters</li>
  * </ul>
  *
