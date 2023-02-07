@@ -71,8 +71,7 @@ import java.lang.annotation.Target;
  *
  *     &#064;Container
  *     static GenericContainer redis =
- *         new GenericContainer(DockerImageName.parse("redis:5.0.3-alpine"))
- *             .withExposedPorts(6379);
+ *         new GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379);
  *
  *     // ...
  *
