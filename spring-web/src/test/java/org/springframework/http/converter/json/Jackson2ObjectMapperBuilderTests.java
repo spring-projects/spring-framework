@@ -371,7 +371,7 @@ class Jackson2ObjectMapperBuilderTests {
 				.build();
 
 		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonXmlMixin.class);
 		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
@@ -387,7 +387,7 @@ class Jackson2ObjectMapperBuilderTests {
 				.build();
 
 		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonXmlMixin.class);
 		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 

@@ -243,7 +243,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		ObjectMapper mapper = this.factory.getObject();
 
 		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonXmlMixin.class);
 		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixinSource);
 	}
 

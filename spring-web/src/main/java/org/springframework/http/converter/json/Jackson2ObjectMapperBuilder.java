@@ -99,6 +99,10 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
+	private static boolean jackson2XmlPresent = ClassUtils.isPresent(
+			"com.fasterxml.jackson.dataformat.xml.XmlMapper", Jackson2ObjectMapperBuilder.class.getClassLoader());
+
+
 	private final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<>();
 
 	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<>();
@@ -755,7 +759,12 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setFilterProvider(this.filters);
 		}
 
-		objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class);
+		if (jackson2XmlPresent) {
+			objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonXmlMixin.class);
+		}
+		else {
+			objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class);
+		}
 		this.mixIns.forEach(objectMapper::addMixIn);
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {

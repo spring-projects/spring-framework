@@ -91,9 +91,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		ENCODINGS.put("US-ASCII", JsonEncoding.UTF8);
 	}
 
-	private static final List<MediaType> problemDetailMediaTypes =
-			Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
-
 
 	protected ObjectMapper defaultObjectMapper;
 
@@ -209,11 +206,21 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (!CollectionUtils.isEmpty(result)) {
 			return result;
 		}
-		return (ProblemDetail.class.isAssignableFrom(clazz) ? problemDetailMediaTypes : getSupportedMediaTypes());
+		return (ProblemDetail.class.isAssignableFrom(clazz) ?
+				getMediaTypesForProblemDetail() : getSupportedMediaTypes());
 	}
 
 	private Map<Class<?>, Map<MediaType, ObjectMapper>> getObjectMapperRegistrations() {
 		return (this.objectMapperRegistrations != null ? this.objectMapperRegistrations : Collections.emptyMap());
+	}
+
+	/**
+	 * Return the supported media type(s) for {@link ProblemDetail}.
+	 * By default, an empty list, unless overridden in subclasses.
+	 * @since 6.0.5
+	 */
+	protected List<MediaType> getMediaTypesForProblemDetail() {
+		return Collections.emptyList();
 	}
 
 	/**

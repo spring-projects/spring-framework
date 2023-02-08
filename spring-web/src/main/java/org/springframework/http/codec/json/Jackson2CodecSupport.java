@@ -80,9 +80,6 @@ public abstract class Jackson2CodecSupport {
 			new MediaType("application", "*+json"),
 			MediaType.APPLICATION_NDJSON);
 
-	private static final List<MimeType> problemDetailMimeTypes =
-			Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
-
 
 	protected final Log logger = HttpLogging.forLogName(getClass());
 
@@ -186,7 +183,16 @@ public abstract class Jackson2CodecSupport {
 		if (!CollectionUtils.isEmpty(result)) {
 			return result;
 		}
-		return (ProblemDetail.class.isAssignableFrom(elementClass) ? problemDetailMimeTypes : getMimeTypes());
+		return (ProblemDetail.class.isAssignableFrom(elementClass) ? getMediaTypesForProblemDetail() : getMimeTypes());
+	}
+
+	/**
+	 * Return the supported media type(s) for {@link ProblemDetail}.
+	 * By default, an empty list, unless overridden in subclasses.
+	 * @since 6.0.5
+	 */
+	protected List<MimeType> getMediaTypesForProblemDetail() {
+		return Collections.emptyList();
 	}
 
 	protected boolean supportsMimeType(@Nullable MimeType mimeType) {
