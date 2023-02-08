@@ -115,6 +115,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 *     <li>{@link #testDecodeError(Publisher, ResolvableType, MimeType, Map)}</li>
 	 *     <li>{@link #testDecodeCancel(Publisher, ResolvableType, MimeType, Map)}</li>
 	 *     <li>{@link #testDecodeEmpty(ResolvableType, MimeType, Map)}</li>
+	 *     <li>{@link #testDecodeEmptyMessage(ResolvableType, MimeType, Map)}</li>
 	 * </ul>
 	 *
 	 * @param input the input to be provided to the decoder
@@ -132,7 +133,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 		testDecodeError(input, outputType, mimeType, hints);
 		testDecodeCancel(input, outputType, mimeType, hints);
 		testDecodeEmpty(outputType, mimeType, hints);
-		testDecodeEmptyBuffer(outputType, mimeType, hints);
+		testDecodeEmptyMessage(outputType, mimeType, hints);
 	}
 
 	/**
@@ -268,13 +269,13 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 * @param mimeType the mime type to use for decoding. May be {@code null}.
 	 * @param hints the hints used for decoding. May be {@code null}.
 	 */
-	protected void testDecodeEmptyBuffer(ResolvableType outputType, MimeType mimeType, Map<String, Object> hints) {
+	protected void testDecodeEmptyMessage(ResolvableType outputType, MimeType mimeType, Map<String, Object> hints) {
 		if (!this.decoder.canDecodeEmptyMessage()) {
 			return;
 		}
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(0);
 		Object result = this.decoder.decode(buffer, outputType, mimeType, hints);
-		releaseBufferIfIdentical(buffer, result);
+		releaseDataBufferIfIdentical(buffer, result);
 		Assert.notNull(result, "result expected to be non null");
 		Assert.isAssignable(outputType.toClass(), result.getClass(), "result not of specified type");
 	}
@@ -310,6 +311,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 *     <li>{@link #testDecodeToMonoError(Publisher, ResolvableType, MimeType, Map)}</li>
 	 *     <li>{@link #testDecodeToMonoCancel(Publisher, ResolvableType, MimeType, Map)}</li>
 	 *     <li>{@link #testDecodeToMonoEmpty(ResolvableType, MimeType, Map)}</li>
+	 *     <li>{@link #testDecodeToMonoEmptyMessage(ResolvableType, MimeType, Map)}</li>
 	 * </ul>
 	 *
 	 * @param input the input to be provided to the decoder
@@ -327,7 +329,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 		testDecodeToMonoError(input, outputType, mimeType, hints);
 		testDecodeToMonoCancel(input, outputType, mimeType, hints);
 		testDecodeToMonoEmpty(outputType, mimeType, hints);
-		testDecodeToMonoEmptyBuffer(outputType, mimeType, hints);
+		testDecodeToMonoEmptyMessage(outputType, mimeType, hints);
 	}
 
 	/**
@@ -449,16 +451,19 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 * @param mimeType the mime type to use for decoding. May be {@code null}.
 	 * @param hints the hints used for decoding. May be {@code null}.
 	 */
-	protected void testDecodeToMonoEmptyBuffer(ResolvableType outputType, @Nullable MimeType mimeType,
+	protected void testDecodeToMonoEmptyMessage(ResolvableType outputType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
 
 		if (!this.decoder.canDecodeEmptyMessage()) {
 			return;
 		}
 
-		DataBuffer buffer = this.bufferFactory.allocateBuffer(0);
-		Mono<?> result = this.decoder.decodeToMono(Mono.just(buffer), outputType, mimeType, hints)
-				.doOnNext(value -> releaseBufferIfIdentical(buffer, value));
+		Flux<DataBuffer> source = Flux.range(0, 2)
+				.map(i -> this.bufferFactory.allocateBuffer(0));
+
+		Mono<?> result = this.decoder.decodeToMono(source, outputType, mimeType, hints)
+						.doOnNext(this::releaseIfDataBuffer);
+
 		StepVerifier.create(result)
 				.expectNextMatches(next -> outputType.toClass().isInstance(next))
 				.verifyComplete();
@@ -477,9 +482,24 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 		});
 	}
 
-	private void releaseBufferIfIdentical(DataBuffer buffer, Object value) {
+	/**
+	 * If {@code value} is referentially identical to {@code buffer}, release it.
+	 * @param buffer the {@link DataBuffer} that is compared
+	 * @param value  the {@link Object} that is compared
+	 */
+	private void releaseDataBufferIfIdentical(DataBuffer buffer, Object value) {
 		if (buffer == value) {
 			release(buffer);
+		}
+	}
+
+	/**
+	 * If {@code value} is a {@link DataBuffer}, release it.
+	 * @param value the {@link Object} that is checked
+	 */
+	private void releaseIfDataBuffer(Object value) {
+		if (value instanceof DataBuffer) {
+			release((DataBuffer) value);
 		}
 	}
 

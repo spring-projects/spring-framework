@@ -223,7 +223,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 
 	@Test
 	public void decodeEmpty() {
-		testDecodeEmptyBuffer(ResolvableType.forClass(Msg.class), null, null);
+		testDecodeEmptyMessage(ResolvableType.forClass(Msg.class), null, null);
 	}
 
 	private Mono<DataBuffer> dataBuffer(Msg msg) {
