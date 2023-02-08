@@ -45,7 +45,7 @@ public class ByteArrayDecoder extends AbstractDataBufferDecoder<byte[]> {
 	}
 
 	@Override
-	public boolean canDecodeEmptyDataBuffer() {
+	public boolean canDecodeEmptyMessage() {
 		return true;
 	}
 

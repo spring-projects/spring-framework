@@ -106,7 +106,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 	}
 
 	@Override
-	public boolean canDecodeEmptyDataBuffer() {
+	public boolean canDecodeEmptyMessage() {
 		return true;
 	}
 

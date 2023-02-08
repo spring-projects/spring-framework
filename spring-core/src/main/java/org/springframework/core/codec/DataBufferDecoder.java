@@ -57,7 +57,7 @@ public class DataBufferDecoder extends AbstractDataBufferDecoder<DataBuffer> {
 	}
 
 	@Override
-	public boolean canDecodeEmptyDataBuffer() {
+	public boolean canDecodeEmptyMessage() {
 		return true;
 	}
 

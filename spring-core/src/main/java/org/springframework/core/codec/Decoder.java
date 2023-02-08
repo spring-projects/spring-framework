@@ -54,11 +54,13 @@ public interface Decoder<T> {
 	boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType);
 
 	/**
-	 * Whether the decoder supports decoding messages from empty data buffers.
+	 * Whether the decoder supports decoding an Object of its target type from an
+	 * empty message. When it is true, the decoder will always return a non-null
+	 * value from its {@code decode} method when an empty message is decoded.
 	 * @return {@code true} if supported, {@code false} otherwise
 	 * @since 6.0.5
 	 */
-	default boolean canDecodeEmptyDataBuffer()  {
+	default boolean canDecodeEmptyMessage()  {
 		return false;
 	}
 

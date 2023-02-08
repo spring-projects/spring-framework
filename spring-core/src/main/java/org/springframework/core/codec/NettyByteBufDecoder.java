@@ -49,7 +49,7 @@ public class NettyByteBufDecoder extends AbstractDataBufferDecoder<ByteBuf> {
 	}
 
 	@Override
-	public boolean canDecodeEmptyDataBuffer() {
+	public boolean canDecodeEmptyMessage() {
 		return true;
 	}
 

@@ -269,7 +269,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	 * @param hints the hints used for decoding. May be {@code null}.
 	 */
 	protected void testDecodeEmptyBuffer(ResolvableType outputType, MimeType mimeType, Map<String, Object> hints) {
-		if (!this.decoder.canDecodeEmptyDataBuffer()) {
+		if (!this.decoder.canDecodeEmptyMessage()) {
 			return;
 		}
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(0);
@@ -452,7 +452,7 @@ public abstract class AbstractDecoderTests<D extends Decoder<?>> extends Abstrac
 	protected void testDecodeToMonoEmptyBuffer(ResolvableType outputType, @Nullable MimeType mimeType,
 			@Nullable Map<String, Object> hints) {
 
-		if (!this.decoder.canDecodeEmptyDataBuffer()) {
+		if (!this.decoder.canDecodeEmptyMessage()) {
 			return;
 		}
 

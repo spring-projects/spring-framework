@@ -49,7 +49,7 @@ public class Netty5BufferDecoder extends AbstractDataBufferDecoder<Buffer> {
 	}
 
 	@Override
-	public boolean canDecodeEmptyDataBuffer() {
+	public boolean canDecodeEmptyMessage() {
 		return true;
 	}
 

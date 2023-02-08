@@ -57,7 +57,7 @@ public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 	}
 
 	@Override
-	public boolean canDecodeEmptyDataBuffer() {
+	public boolean canDecodeEmptyMessage() {
 		return true;
 	}
 

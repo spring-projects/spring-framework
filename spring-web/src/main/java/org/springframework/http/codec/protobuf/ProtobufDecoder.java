@@ -126,7 +126,7 @@ public class ProtobufDecoder extends ProtobufCodecSupport implements Decoder<Mes
 	}
 
 	@Override
-	public boolean canDecodeEmptyDataBuffer() {
+	public boolean canDecodeEmptyMessage() {
 		return true;
 	}
 

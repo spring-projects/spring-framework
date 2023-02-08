@@ -264,7 +264,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 	}
 
 	private boolean nonEmptyDataBuffer(DataBuffer buffer, Decoder<?> decoder) {
-		if (decoder.canDecodeEmptyDataBuffer()) {
+		if (decoder.canDecodeEmptyMessage()) {
 			return true;
 		}
 		if (buffer.readableByteCount() > 0) {
