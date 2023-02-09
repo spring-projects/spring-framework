@@ -41,32 +41,35 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
  * <a href="https://github.com/FasterXML/jackson-dataformat-xml/issues/355">FasterXML/jackson-dataformat-xml#355</a>.
  *
  * @author Rossen Stoyanchev
+ * @author Yanming Zhou
  * @since 6.0.5
  */
 @JsonInclude(NON_EMPTY)
-@JacksonXmlRootElement(localName = "problem", namespace = "urn:ietf:rfc:7807")
+@JacksonXmlRootElement(localName = "problem", namespace = ProblemDetailJacksonXmlMixin.NAMESPACE)
 public interface ProblemDetailJacksonXmlMixin {
 
-	@JacksonXmlProperty(namespace = "urn:ietf:rfc:7807")
+	String NAMESPACE = "urn:ietf:rfc:7807";
+
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	URI getType();
 
-	@JacksonXmlProperty(namespace = "urn:ietf:rfc:7807")
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	String getTitle();
 
-	@JacksonXmlProperty(namespace = "urn:ietf:rfc:7807")
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	int getStatus();
 
-	@JacksonXmlProperty(namespace = "urn:ietf:rfc:7807")
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	String getDetail();
 
-	@JacksonXmlProperty(namespace = "urn:ietf:rfc:7807")
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	URI getInstance();
 
 	@JsonAnySetter
 	void setProperty(String name, @Nullable Object value);
 
 	@JsonAnyGetter
-	@JacksonXmlProperty(namespace = "urn:ietf:rfc:7807")
+	@JacksonXmlProperty(namespace = NAMESPACE)
 	Map<String, Object> getProperties();
 
 }
