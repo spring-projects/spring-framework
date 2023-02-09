@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,10 @@ public class ConnectionFactoryUtilsUnitTests {
 
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
 				new R2dbcDataIntegrityViolationException("reason", "23000", 1062));
+		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
+
+		exception = ConnectionFactoryUtils.convertR2dbcException("", "",
+				new R2dbcDataIntegrityViolationException("reason", "23000", 2601));
 		assertThat(exception).isExactlyInstanceOf(DuplicateKeyException.class);
 
 		exception = ConnectionFactoryUtils.convertR2dbcException("", "",

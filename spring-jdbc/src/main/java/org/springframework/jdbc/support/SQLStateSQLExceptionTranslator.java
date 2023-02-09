@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,14 +153,14 @@ public class SQLStateSQLExceptionTranslator extends AbstractFallbackSQLException
 	 * of a generic SQL state value) indicate a duplicate key exception:
 	 * either SQL state 23505 as a specific indication, or the generic SQL state
 	 * 23000 with well-known vendor codes (1 for Oracle, 1062 for MySQL/MariaDB,
-	 * 2627 for MS SQL Server).
+	 * 2601/2627 for MS SQL Server).
 	 * @param sqlState the SQL state value
 	 * @param errorCode the error code value
 	 */
 	static boolean indicatesDuplicateKey(@Nullable String sqlState, int errorCode) {
 		return ("23505".equals(sqlState) ||
 				("23000".equals(sqlState) &&
-						(errorCode == 1 || errorCode == 1062 || errorCode == 2627)));
+						(errorCode == 1 || errorCode == 1062 || errorCode == 2601 || errorCode == 2627)));
 	}
 
 }
