@@ -18,6 +18,7 @@ Applying such optimizations early implies the following restrictions:
 ** `@Profile`, in particular profile-specific configuration needs to be chosen at build time.
 ** Environment properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
 * Bean definitions with instance suppliers (lambdas or method references) can't be transformed Ahead of Time (see https://github.com/spring-projects/spring-framework/issues/29555[spring-framework#29555] related issue)
+* The return type of methods annotated with `@Bean` should be the most specific one in order to allow proper hint inference (typically the concrete class, not an interface).
 
 When these restrictions are in place, it becomes possible to perform ahead-of-time processing at build time and generate additional assets.
 A Spring AOT processed application typically generates:
