@@ -109,9 +109,9 @@ import org.springframework.util.ReflectionUtils;
  * @see #onStartup(Set, ServletContext)
  * @see WebApplicationInitializer
  */
+// tomcat入口
 @HandlesTypes(WebApplicationInitializer.class)
 public class SpringServletContainerInitializer implements ServletContainerInitializer {
-
 	/**
 	 * Delegate the {@code ServletContext} to any {@link WebApplicationInitializer}
 	 * implementations present on the application classpath.
@@ -143,7 +143,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 			throws ServletException {
 
 		List<WebApplicationInitializer> initializers = new LinkedList<>();
-
+		// 所有 实现了WebApplicationInitializer的类
 		if (webAppInitializerClasses != null) {
 			for (Class<?> waiClass : webAppInitializerClasses) {
 				// Be defensive: Some servlet containers provide us with invalid classes,

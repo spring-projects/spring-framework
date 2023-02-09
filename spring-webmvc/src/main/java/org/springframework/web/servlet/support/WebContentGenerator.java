@@ -377,11 +377,15 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	protected final void checkRequest(HttpServletRequest request) throws ServletException {
 		// Check whether we should support the request method.
 		String method = request.getMethod();
+		// 可以自定义RequestMappingHandlerAdapter这个Bean来设置supportedMethods，默认是null
+		// 表示全局限制请求方法，就是Controller层面支持get，但是如果supportedMethods没有get，也是访问不成功
 		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
 			throw new HttpRequestMethodNotSupportedException(method, this.supportedMethods);
 		}
 
 		// Check whether a session is required.
+		// 也可以通过自定义RequestMappingHandlerAdapter这个Bean来设置requeireSession，默认为false
+		// 标识请求找那个一定要有session
 		if (this.requireSession && request.getSession(false) == null) {
 			throw new HttpSessionRequiredException("Pre-existing session required but none found");
 		}

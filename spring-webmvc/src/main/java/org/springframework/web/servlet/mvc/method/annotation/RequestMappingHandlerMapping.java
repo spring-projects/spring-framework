@@ -177,6 +177,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@SuppressWarnings("deprecation")
 	public void afterPropertiesSet() {
+		//入口
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setUrlPathHelper(getUrlPathHelper());
 		this.config.setPathMatcher(getPathMatcher());
@@ -234,6 +235,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * <p>Expects a handler to have either a type-level @{@link Controller}
 	 * annotation or a type-level @{@link RequestMapping} annotation.
 	 */
+	// 判断类上是否有@Controller 和@RequestMapping注解
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
 		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
@@ -251,12 +253,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	@Nullable
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+		//方法上是不是有@RequestMapping
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
+			// 类上的@RequestMapping
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
+			// 合并属性
 			if (typeInfo != null) {
 				info = typeInfo.combine(info);
 			}
+			// 合并前缀
 			String prefix = getPathPrefix(handlerType);
 			if (prefix != null) {
 				info = RequestMappingInfo.paths(prefix).options(this.config).build().combine(info);
@@ -288,7 +294,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Nullable
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+		// 获取注解
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
+		// 获取请求条件： 可扩展，如果有，该条件会在请求时匹配
 		RequestCondition<?> condition = (element instanceof Class ?
 				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
 		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);

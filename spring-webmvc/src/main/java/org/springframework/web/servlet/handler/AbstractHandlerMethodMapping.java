@@ -202,6 +202,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public void afterPropertiesSet() {
+		// 入口
 		initHandlerMethods();
 	}
 
@@ -214,9 +215,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected void initHandlerMethods() {
 		for (String beanName : getCandidateBeanNames()) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+				//进去判断每个bean上面的类有没有 @Controller或者@RequestMapping注解
 				processCandidateBean(beanName);
 			}
 		}
+		// 就打印了几行字
 		handlerMethodsInitialized(getHandlerMethods());
 	}
 
@@ -254,7 +257,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
+		// 判断类上是否有@RequestMapping 或者@Controller注解
 		if (beanType != null && isHandler(beanType)) {
+			// 有注解
 			detectHandlerMethods(beanName);
 		}
 	}
@@ -270,9 +275,11 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		if (handlerType != null) {
 			Class<?> userType = ClassUtils.getUserClass(handlerType);
+			// 循环所有方法，并过滤出有@RequestMapping注解的方法，并合并相关属性
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
+							// 解析相应的RequestMapping注解属性
 							return getMappingForMethod(method, userType);
 						}
 						catch (Throwable ex) {
@@ -283,6 +290,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
 			}
+			// 将每个方法注册mappingRegistry 。缓存
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
 				registerHandlerMethod(handler, invocableMethod, mapping);
@@ -384,16 +392,21 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<>();
+		// 根据uri从mappingRegistry.pathLookup获取RequestMappingInfo
+		// pathLookup<path,RequestMappingInfo>  在DispatcherServlet初始化的时候已经登记
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
 		if (directPathMatches != null) {
+			// 根据path能直接匹配的RequestMappingInfo，则用改mapping进行其他条件的匹配
 			addMatchingMappings(directPathMatches, matches, request);
 		}
 		if (matches.isEmpty()) {
 			// No choice but to go through all mappings...
+			// 如果无匹配，则用所有的RequestMappingInfo 通过AntPathMapping匹配
 			addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
 		}
 
 		if (!matches.isEmpty()) {
+			// 选择第一个为最匹配
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
 				Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
@@ -414,6 +427,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 							"Ambiguous handler methods mapped for '" + uri + "': {" + m1 + ", " + m2 + "}");
 				}
 			}
+			// 最匹配的放到Request中
 			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.handlerMethod);
 			handleMatch(bestMatch.mapping, lookupPath, request);
 			return bestMatch.handlerMethod;

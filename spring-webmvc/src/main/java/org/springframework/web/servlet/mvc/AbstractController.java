@@ -160,7 +160,9 @@ public abstract class AbstractController extends WebContentGenerator implements 
 		}
 
 		// Delegate to WebContentGenerator for checking and preparing.
+		// 检测 Adapter
 		checkRequest(request);
+		// http协议
 		prepareResponse(response);
 
 		// Execute handleRequestInternal in synchronized block if required.

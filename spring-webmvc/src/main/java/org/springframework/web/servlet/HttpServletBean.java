@@ -145,17 +145,21 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * @throws ServletException if bean properties are invalid (or required
 	 * properties are missing), or if subclass initialization fails.
 	 */
+	// tomcat调用，初始化方法
 	@Override
 	public final void init() throws ServletException {
 
 		// Set bean properties from init parameters.
+		// 解析 init-param 并封装到PropertyValues中(xml)
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
+				// 将当前的servlet类转换为一个BeanWrapper，从而能够以Spring的方法来对init-param的值进行处理
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 				initBeanWrapper(bw);
+				// 属性注入
 				bw.setPropertyValues(pvs, true);
 			}
 			catch (BeansException ex) {
@@ -167,6 +171,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		}
 
 		// Let subclasses do whatever initialization they like.
+		// Servlet初始化，创建Spring容器
 		initServletBean();
 	}
 
