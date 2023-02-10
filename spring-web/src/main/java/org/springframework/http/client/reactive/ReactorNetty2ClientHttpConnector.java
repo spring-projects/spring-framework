@@ -108,7 +108,7 @@ public class ReactorNetty2ClientHttpConnector implements ClientHttpConnector {
 
 		return this.httpClient
 				.request(io.netty5.handler.codec.http.HttpMethod.valueOf(method.name()))
-				.uri(uri.toString())
+				.uri(uri)
 				.send((request, outbound) -> requestCallback.apply(adaptRequest(method, uri, request, outbound)))
 				.responseConnection((response, connection) -> {
 					responseRef.set(new ReactorNetty2ClientHttpResponse(response, connection));
