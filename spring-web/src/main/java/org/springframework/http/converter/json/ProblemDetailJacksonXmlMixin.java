@@ -30,46 +30,48 @@ import org.springframework.lang.Nullable;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 /**
- * Intended to be identical to {@link ProblemDetailJacksonMixin} but for used
- * instead of it when jackson-dataformat-xml is on the classpath. Customizes the
- * XML root element name and adds namespace information.
+ * Provides the same declarations as {@link ProblemDetailJacksonMixin}, and
+ * some additional ones to support XML serialization when
+ * jackson-dataformat-xml is on the classpath. Customizes the XML root element
+ * name and adds namespace information.
  *
- * <p>Note: Unfortunately, we cannot just use {@code JsonRootName} to specify
- * the namespace since that is not inherited by fields of the class. This is
- * why we need a dedicated mixin for use when jackson-dataformat-xml is on the
- * classpath. For more details, see
+ * <p>Note that we can't use {@code JsonRootName} to specify the namespace
+ * since that is not inherited by fields of the class. This is why we need a
+ * dedicated mixin for use when jackson-dataformat-xml is on the classpath.
+ * For more details, see
  * <a href="https://github.com/FasterXML/jackson-dataformat-xml/issues/355">FasterXML/jackson-dataformat-xml#355</a>.
  *
  * @author Rossen Stoyanchev
- * @author Yanming Zhou
  * @since 6.0.5
  */
 @JsonInclude(NON_EMPTY)
-@JacksonXmlRootElement(localName = "problem", namespace = ProblemDetailJacksonXmlMixin.NAMESPACE)
+@JacksonXmlRootElement(localName = "problem", namespace = ProblemDetailJacksonXmlMixin.RFC_7807_NAMESPACE)
 public interface ProblemDetailJacksonXmlMixin {
 
-	String NAMESPACE = "urn:ietf:rfc:7807";
+	/** RFC 7807 namespace. */
+	String RFC_7807_NAMESPACE = "urn:ietf:rfc:7807";
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+
+	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
 	URI getType();
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
 	String getTitle();
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
 	int getStatus();
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
 	String getDetail();
 
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
 	URI getInstance();
 
 	@JsonAnySetter
 	void setProperty(String name, @Nullable Object value);
 
 	@JsonAnyGetter
-	@JacksonXmlProperty(namespace = NAMESPACE)
+	@JacksonXmlProperty(namespace = RFC_7807_NAMESPACE)
 	Map<String, Object> getProperties();
 
 }
