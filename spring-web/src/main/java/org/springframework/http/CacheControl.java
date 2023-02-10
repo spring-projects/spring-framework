@@ -77,6 +77,8 @@ public class CacheControl {
 	@Nullable
 	private Duration sMaxAge;
 
+	private boolean immutable = false;
+
 
 	/**
 	 * Create an empty CacheControl instance.
@@ -321,6 +323,18 @@ public class CacheControl {
 	}
 
 	/**
+	 * Add an "immutable" directive.
+	 * <p>This directive indicates that the origin server will not update the
+	 * representation of that resource during the freshness lifetime of the response.
+	 * @return {@code this}, to facilitate method chaining
+	 * @see <a href="https://tools.ietf.org/html/rfc8246">rfc8246</a>
+	 */
+	public CacheControl immutable() {
+		this.immutable = true;
+		return this;
+	}
+
+	/**
 	 * Return the "Cache-Control" header value, if any.
 	 * @return the header value, or {@code null} if no directive was added
 	 */
@@ -368,6 +382,9 @@ public class CacheControl {
 		}
 		if (this.staleWhileRevalidate != null) {
 			appendDirective(headerValue, "stale-while-revalidate=" + this.staleWhileRevalidate.getSeconds());
+		}
+		if (this.immutable) {
+			appendDirective(headerValue, "immutable");
 		}
 		return headerValue.toString();
 	}

@@ -101,4 +101,10 @@ public class CacheControlTests {
 		assertThat(cc.getHeaderValue()).isEqualTo("max-age=3600, stale-while-revalidate=7200");
 	}
 
+	@Test
+	public void immutable() throws Exception {
+		CacheControl cc = CacheControl.maxAge(Duration.ofHours(1)).immutable();
+		assertThat(cc.getHeaderValue()).isEqualTo("max-age=3600, immutable");
+	}
+
 }
