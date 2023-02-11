@@ -426,6 +426,13 @@ public interface WebTestClient {
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
+		 * Global option to specify whether or not attributes should be applied to every request,
+		 * if the used {@link ClientHttpConnector} allows it.
+		 * @param applyAttributes whether or not to apply attributes
+		 */
+		Builder applyAttributes(boolean applyAttributes);
+
+		/**
 		 * Add the given filter to the filter chain.
 		 * @param filter the filter to be added to the chain
 		 */

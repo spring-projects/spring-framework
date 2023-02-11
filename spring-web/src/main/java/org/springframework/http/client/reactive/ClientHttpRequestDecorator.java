@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -83,6 +84,11 @@ public class ClientHttpRequestDecorator implements ClientHttpRequest {
 	@Override
 	public <T> T getNativeRequest() {
 		return this.delegate.getNativeRequest();
+	}
+
+	@Override
+	public Map<String, Object> getAttributes() {
+		return this.delegate.getAttributes();
 	}
 
 	@Override

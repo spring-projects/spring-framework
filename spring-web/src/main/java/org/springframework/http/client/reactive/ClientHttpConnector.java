@@ -48,4 +48,14 @@ public interface ClientHttpConnector {
 	Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback);
 
+	/**
+	 * Set whether or not attributes should be applied to the underlying http-client library request.
+	 */
+	void setApplyAttributes(boolean applyAttributes);
+
+	/**
+	 * Whether or not attributes should be applied to the underlying http-client library request.
+	 */
+	boolean getApplyAttributes();
+
 }

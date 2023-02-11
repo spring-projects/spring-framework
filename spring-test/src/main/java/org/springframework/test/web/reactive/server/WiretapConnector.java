@@ -55,6 +55,8 @@ class WiretapConnector implements ClientHttpConnector {
 
 	private final Map<String, ClientExchangeInfo> exchanges = new ConcurrentHashMap<>();
 
+	private boolean applyAttributes = true;
+
 
 	WiretapConnector(ClientHttpConnector delegate) {
 		this.delegate = delegate;
@@ -82,6 +84,16 @@ class WiretapConnector implements ClientHttpConnector {
 					this.exchanges.put(requestId, new ClientExchangeInfo(wrappedRequest, wrappedResponse));
 					return wrappedResponse;
 				});
+	}
+
+	@Override
+	public void setApplyAttributes(boolean applyAttributes) {
+		this.applyAttributes = applyAttributes;
+	}
+
+	@Override
+	public boolean getApplyAttributes() {
+		return this.applyAttributes;
 	}
 
 	/**

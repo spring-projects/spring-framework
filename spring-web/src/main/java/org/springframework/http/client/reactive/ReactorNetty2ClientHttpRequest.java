@@ -18,13 +18,16 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Map;
 
 import io.netty5.buffer.Buffer;
 import io.netty5.handler.codec.http.headers.DefaultHttpCookiePair;
+import io.netty5.util.AttributeKey;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty5.NettyOutbound;
+import reactor.netty5.channel.ChannelOperations;
 import reactor.netty5.http.client.HttpClientRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -46,6 +49,8 @@ import org.springframework.http.support.Netty5HeadersAdapter;
  */
 class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
 
+	public static final String ATTRIBUTES_CHANNEL_KEY = "attributes";
+
 	private final HttpMethod httpMethod;
 
 	private final URI uri;
@@ -57,7 +62,8 @@ class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implement
 	private final Netty5DataBufferFactory bufferFactory;
 
 
-	public ReactorNetty2ClientHttpRequest(HttpMethod method, URI uri, HttpClientRequest request, NettyOutbound outbound) {
+	public ReactorNetty2ClientHttpRequest(HttpMethod method, URI uri, HttpClientRequest request, NettyOutbound outbound, boolean applyAttributes) {
+		super(applyAttributes);
 		this.httpMethod = method;
 		this.uri = uri;
 		this.request = request;
@@ -134,6 +140,17 @@ class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implement
 			DefaultHttpCookiePair cookie = new DefaultHttpCookiePair(value.getName(), value.getValue());
 			this.request.addCookie(cookie);
 		}));
+	}
+
+	/**
+	 * Applies the request attributes to the {@link reactor.netty.http.client.HttpClientRequest} by setting
+	 * a single {@link Map} into the {@link reactor.netty.channel.ChannelOperations#channel()},
+	 * with {@link AttributeKey#name()} equal to {@link #ATTRIBUTES_CHANNEL_KEY}.
+	 */
+	@Override
+	protected void applyAttributes() {
+		((ChannelOperations<?, ?>) this.request)
+				.channel().attr(AttributeKey.valueOf(ATTRIBUTES_CHANNEL_KEY)).set(getAttributes());
 	}
 
 	@Override

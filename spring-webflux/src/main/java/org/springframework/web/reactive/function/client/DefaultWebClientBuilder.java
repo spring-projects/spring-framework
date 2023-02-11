@@ -89,6 +89,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private MultiValueMap<String, String> defaultCookies;
 
+	private boolean applyAttributes;
+
 	@Nullable
 	private Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest;
 
@@ -137,6 +139,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.applyAttributes = other.applyAttributes;
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new LinkedHashMap<>(other.statusHandlers) : null);
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
@@ -197,6 +200,12 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Override
 	public WebClient.Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
 		cookiesConsumer.accept(initCookies());
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder applyAttributes(boolean applyAttributes) {
+		this.applyAttributes = applyAttributes;
 		return this;
 	}
 
@@ -335,21 +344,24 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	private ClientHttpConnector initConnector() {
+		final ClientHttpConnector connector;
 		if (reactorNettyClientPresent) {
-			return new ReactorClientHttpConnector();
+			connector = new ReactorClientHttpConnector();
 		}
 		else if (reactorNetty2ClientPresent) {
 			return new ReactorNetty2ClientHttpConnector();
 		}
 		else if (jettyClientPresent) {
-			return new JettyClientHttpConnector();
+			connector = new JettyClientHttpConnector();
 		}
 		else if (httpComponentsClientPresent) {
-			return new HttpComponentsClientHttpConnector();
+			connector = new HttpComponentsClientHttpConnector();
 		}
 		else {
-			return new JdkClientHttpConnector();
+			connector = new JdkClientHttpConnector();
 		}
+		connector.setApplyAttributes(this.applyAttributes);
+		return connector;
 	}
 
 	private ExchangeStrategies initExchangeStrategies() {

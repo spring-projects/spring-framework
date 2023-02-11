@@ -52,6 +52,8 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 
 	private DataBufferFactory bufferFactory = DefaultDataBufferFactory.sharedInstance;
 
+	private boolean applyAttributes = true;
+
 
 	/**
 	 * Default constructor that creates a new instance of {@link HttpClient}.
@@ -126,9 +128,19 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 		}
 
 		Request jettyRequest = this.httpClient.newRequest(uri).method(method.toString());
-		JettyClientHttpRequest request = new JettyClientHttpRequest(jettyRequest, this.bufferFactory);
+		JettyClientHttpRequest request = new JettyClientHttpRequest(jettyRequest, this.bufferFactory, getApplyAttributes());
 
 		return requestCallback.apply(request).then(execute(request));
+	}
+
+	@Override
+	public void setApplyAttributes(boolean applyAttributes) {
+		this.applyAttributes = applyAttributes;
+	}
+
+	@Override
+	public boolean getApplyAttributes() {
+		return this.applyAttributes;
 	}
 
 	private Mono<ClientHttpResponse> execute(JettyClientHttpRequest request) {

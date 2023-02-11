@@ -59,6 +59,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 
 	private DataBufferFactory dataBufferFactory = DefaultDataBufferFactory.sharedInstance;
 
+	private boolean applyAttributes = true;
 
 	/**
 	 * Default constructor that creates and starts a new instance of {@link CloseableHttpAsyncClient}.
@@ -66,6 +67,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 	public HttpComponentsClientHttpConnector() {
 		this(HttpAsyncClients.createDefault());
 	}
+
 
 	/**
 	 * Constructor with a pre-configured {@link CloseableHttpAsyncClient} instance.
@@ -111,9 +113,20 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 			context.setCookieStore(new BasicCookieStore());
 		}
 
-		HttpComponentsClientHttpRequest request =
-				new HttpComponentsClientHttpRequest(method, uri, context, this.dataBufferFactory);
+		HttpComponentsClientHttpRequest request = new HttpComponentsClientHttpRequest(
+				method, uri, context, this.dataBufferFactory, this.applyAttributes);
+
 		return requestCallback.apply(request).then(Mono.defer(() -> execute(request, context)));
+	}
+
+	@Override
+	public void setApplyAttributes(boolean applyAttributes) {
+		this.applyAttributes = applyAttributes;
+	}
+
+	@Override
+	public boolean getApplyAttributes() {
+		return this.applyAttributes;
 	}
 
 	private Mono<ClientHttpResponse> execute(HttpComponentsClientHttpRequest request, HttpClientContext context) {

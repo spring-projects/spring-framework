@@ -55,7 +55,8 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	private final ReactiveRequest.Builder builder;
 
 
-	public JettyClientHttpRequest(Request jettyRequest, DataBufferFactory bufferFactory) {
+	public JettyClientHttpRequest(Request jettyRequest, DataBufferFactory bufferFactory, boolean applyAttributes) {
+		super(applyAttributes);
 		this.jettyRequest = jettyRequest;
 		this.bufferFactory = bufferFactory;
 		this.builder = ReactiveRequest.newBuilder(this.jettyRequest).abortOnCancel(true);
@@ -136,6 +137,14 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 		getCookies().values().stream().flatMap(Collection::stream)
 				.map(cookie -> HttpCookie.build(cookie.getName(), cookie.getValue()).build())
 				.forEach(this.jettyRequest::cookie);
+	}
+
+	/**
+	 * Applies the attributes to {@link Request#getAttributes()}.
+	 */
+	@Override
+	protected void applyAttributes() {
+		getAttributes().forEach(this.jettyRequest::attribute);
 	}
 
 	@Override

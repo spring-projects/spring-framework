@@ -86,6 +86,8 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 
 	private final List<RequestPostProcessor> requestPostProcessors;
 
+	private boolean applyAttributes = true;
+
 
 	public MockMvcHttpConnector(MockMvc mockMvc) {
 		this(mockMvc, Collections.emptyList());
@@ -113,6 +115,16 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 		catch (Exception ex) {
 			return Mono.error(ex);
 		}
+	}
+
+	@Override
+	public void setApplyAttributes(boolean applyAttributes) {
+		this.applyAttributes = applyAttributes;
+	}
+
+	@Override
+	public boolean getApplyAttributes() {
+		return this.applyAttributes;
 	}
 
 	private RequestBuilder adaptRequest(

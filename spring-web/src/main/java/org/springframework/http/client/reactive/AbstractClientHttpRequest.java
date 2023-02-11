@@ -17,7 +17,10 @@
 package org.springframework.http.client.reactive;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -55,6 +58,10 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
+	private final Map<String, Object> attributes;
+
+	private final boolean applyAttributes;
+
 	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
 	private final List<Supplier<? extends Publisher<Void>>> commitActions = new ArrayList<>(4);
@@ -64,13 +71,19 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 
 	public AbstractClientHttpRequest() {
-		this(new HttpHeaders());
+		this(new HttpHeaders(), false);
 	}
 
-	public AbstractClientHttpRequest(HttpHeaders headers) {
+	public AbstractClientHttpRequest(boolean applyAttributes) {
+		this(new HttpHeaders(), applyAttributes);
+	}
+
+	public AbstractClientHttpRequest(HttpHeaders headers, boolean applyAttributes) {
 		Assert.notNull(headers, "HttpHeaders must not be null");
 		this.headers = headers;
 		this.cookies = new LinkedMultiValueMap<>();
+		this.attributes = new LinkedHashMap<>();
+		this.applyAttributes = applyAttributes;
 	}
 
 
@@ -107,6 +120,14 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	}
 
 	@Override
+	public Map<String, Object> getAttributes() {
+		if (State.COMMITTED.equals(this.state.get())) {
+			return Collections.unmodifiableMap(this.attributes);
+		}
+		return this.attributes;
+	}
+
+	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
 		Assert.notNull(action, "Action must not be null");
 		this.commitActions.add(action);
@@ -140,6 +161,9 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 				Mono.fromRunnable(() -> {
 					applyHeaders();
 					applyCookies();
+					if (this.applyAttributes) {
+						applyAttributes();
+					}
 					this.state.set(State.COMMITTED);
 				}));
 
@@ -167,5 +191,11 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	 * This method is called once only.
 	 */
 	protected abstract void applyCookies();
+
+	/**
+	 * Add additional attributes from {@link #getAttributes()} to the underlying request.
+	 * This method is called once only.
+	 */
+	protected abstract void applyAttributes();
 
 }
