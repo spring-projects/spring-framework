@@ -34,22 +34,28 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.eclipse.jetty.client.api.Request;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.http.client.reactive.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
+import reactor.netty.channel.ChannelOperations;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
@@ -68,12 +74,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
-import org.springframework.http.client.reactive.JdkClientHttpConnector;
-import org.springframework.http.client.reactive.JettyClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -188,6 +188,64 @@ class WebClientIntegrationTests {
 	}
 
 	@ParameterizedWebClientTest
+	void applyAttributesInNativeRequest(ClientHttpConnector connector) {
+		startServer(connector);
+		connector.setApplyAttributes(true);
+		checkAttributesInNativeRequest(true);
+	}
+
+	@ParameterizedWebClientTest
+	void dontApplyAttributesInNativeRequest(ClientHttpConnector connector) {
+		startServer(connector);
+		connector.setApplyAttributes(false);
+		checkAttributesInNativeRequest(false);
+	}
+
+	private void checkAttributesInNativeRequest(boolean expectAttributesApplied){
+		prepareResponse(response -> {});
+
+		final AtomicReference<Object> nativeRequest = new AtomicReference<>();
+		Mono<Void> result = this.webClient.get()
+				.uri("/pojo")
+				.attribute("foo","bar")
+				.httpRequest(clientHttpRequest -> {
+					nativeRequest.set(clientHttpRequest.getNativeRequest());
+				})
+				.retrieve()
+				.bodyToMono(Void.class);
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify();
+		if (nativeRequest.get() instanceof ChannelOperations<?,?> nativeReq) {
+			Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(AttributeKey.valueOf("attributes"));
+			if (expectAttributesApplied) {
+				assertThat(attributes.get()).isNotNull();
+				assertThat(attributes.get()).containsEntry("foo", "bar");
+			} else {
+				assertThat(attributes.get()).isNull();
+			}
+		} else if (nativeRequest.get() instanceof reactor.netty5.channel.ChannelOperations<?,?> nativeReq) {
+			io.netty5.util.Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(io.netty5.util.AttributeKey.valueOf("attributes"));
+			if (expectAttributesApplied) {
+				assertThat(attributes.get()).isNotNull();
+				assertThat(attributes.get()).containsEntry("foo", "bar");
+			} else {
+				assertThat(attributes.get()).isNull();
+			}
+		} else if (nativeRequest.get() instanceof Request nativeReq) {
+			if (expectAttributesApplied) {
+				assertThat(nativeReq.getAttributes()).containsEntry("foo", "bar");
+			} else {
+				assertThat(nativeReq.getAttributes()).doesNotContainEntry("foo", "bar");
+			}
+		} else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest nativeReq) {
+			// TODO get attributes from HttpClientContext
+		} else if (nativeRequest.get() instanceof java.net.http.HttpRequest nativeReq) {
+		}
+	}
+
+
+	@ParameterizedWebClientTest
 	void retrieveJsonWithParameterizedTypeReference(ClientHttpConnector connector) {
 		startServer(connector);
 
@@ -198,7 +256,8 @@ class WebClientIntegrationTests {
 		Mono<ValueContainer<Pojo>> result = this.webClient.get()
 				.uri("/json").accept(MediaType.APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<ValueContainer<Pojo>>() {});
+				.bodyToMono(new ParameterizedTypeReference<ValueContainer<Pojo>>() {
+				});
 
 		StepVerifier.create(result)
 				.assertNext(c -> assertThat(c.getContainerValue()).isEqualTo(new Pojo("foofoo", "barbar")))
@@ -392,7 +451,8 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@Test // gh-24788
+	@Test
+		// gh-24788
 	void retrieveJsonArrayAsBodilessEntityShouldReleasesConnection() {
 
 		// Constrain connection pool and make consecutive requests.
@@ -407,7 +467,7 @@ class WebClientIntegrationTests {
 				.baseUrl(this.server.url("/").toString())
 				.build();
 
-		for (int i=1 ; i <= 2; i++) {
+		for (int i = 1; i <= 2; i++) {
 
 			// Response must be large enough to circumvent eager prefetching
 
@@ -485,7 +545,8 @@ class WebClientIntegrationTests {
 		StepVerifier.create(result).verifyComplete();
 	}
 
-	@ParameterizedWebClientTest  // SPR-15946
+	@ParameterizedWebClientTest
+		// SPR-15946
 	void retrieve404(ClientHttpConnector connector) {
 		startServer(connector);
 
@@ -658,7 +719,7 @@ class WebClientIntegrationTests {
 				.expectErrorSatisfies(throwable -> {
 					assertThat(throwable).isInstanceOf(UnknownHttpStatusCodeException.class);
 					UnknownHttpStatusCodeException ex = (UnknownHttpStatusCodeException) throwable;
-					assertThat(ex.getMessage()).isEqualTo(("Unknown status code ["+errorStatus+"]"));
+					assertThat(ex.getMessage()).isEqualTo(("Unknown status code [" + errorStatus + "]"));
 					assertThat(ex.getRawStatusCode()).isEqualTo(errorStatus);
 					assertThat(ex.getStatusText()).isEqualTo("");
 					assertThat(ex.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
@@ -703,11 +764,13 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest  // SPR-16246
+	@ParameterizedWebClientTest
+		// SPR-16246
 	void postLargeTextFile(ClientHttpConnector connector) throws Exception {
 		startServer(connector);
 
-		prepareResponse(response -> {});
+		prepareResponse(response -> {
+		});
 
 		Resource resource = new ClassPathResource("largeTextFile.txt", getClass());
 		Flux<DataBuffer> body = DataBufferUtils.read(resource, DefaultDataBufferFactory.sharedInstance, 4096);
@@ -729,8 +792,7 @@ class WebClientIntegrationTests {
 				String actual = bos.toString(StandardCharsets.UTF_8);
 				String expected = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
 				assertThat(actual).isEqualTo(expected);
-			}
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				throw new UncheckedIOException(ex);
 			}
 		});
@@ -771,7 +833,8 @@ class WebClientIntegrationTests {
 				.uri("/greeting")
 				.retrieve()
 				.onStatus(HttpStatusCode::is5xxServerError, response -> Mono.just(new MyException("500 error!")))
-				.bodyToMono(new ParameterizedTypeReference<String>() {});
+				.bodyToMono(new ParameterizedTypeReference<String>() {
+				});
 
 		StepVerifier.create(result)
 				.expectError(MyException.class)
@@ -1285,8 +1348,7 @@ class WebClientIntegrationTests {
 						.replace("\n", "\r\n").getBytes(StandardCharsets.UTF_8));
 
 				socket.close();
-			}
-			catch (IOException ex) {
+			} catch (IOException ex) {
 				throw new RuntimeException(ex);
 			}
 		});
@@ -1311,8 +1373,7 @@ class WebClientIntegrationTests {
 	private void expectRequest(Consumer<RecordedRequest> consumer) {
 		try {
 			consumer.accept(this.server.takeRequest());
-		}
-		catch (InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			throw new IllegalStateException(ex);
 		}
 	}

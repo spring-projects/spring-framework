@@ -45,6 +45,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 
 	private final HttpClient httpClient;
 
+	private boolean applyAttributes = true;
 
 	/**
 	 * Default constructor. Initializes {@link HttpClient} via:
@@ -54,6 +55,16 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 */
 	public ReactorClientHttpConnector() {
 		this.httpClient = defaultInitializer.apply(HttpClient.create());
+	}
+
+	/**
+	 * Constructor with default initialized {@link HttpClient}
+	 * @param applyAttributes whether or not to apply request attributes to
+	 * the underlying http-library request
+	 */
+	public ReactorClientHttpConnector(boolean applyAttributes) {
+		this();
+		this.applyAttributes = applyAttributes;
 	}
 
 	/**
@@ -122,10 +133,20 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 				});
 	}
 
+	@Override
+	public void setApplyAttributes(boolean applyAttributes) {
+		this.applyAttributes = applyAttributes;
+	}
+
+	@Override
+	public boolean getApplyAttributes() {
+		return this.applyAttributes;
+	}
+
 	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request,
 			NettyOutbound nettyOutbound) {
 
-		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound);
+		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound, applyAttributes);
 	}
 
 }

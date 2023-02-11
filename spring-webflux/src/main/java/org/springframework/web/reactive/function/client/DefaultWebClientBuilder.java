@@ -89,6 +89,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private MultiValueMap<String, String> defaultCookies;
 
+	private boolean applyAttributes;
+
 	@Nullable
 	private Consumer<WebClient.RequestHeadersSpec<?>> defaultRequest;
 
@@ -137,6 +139,7 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.applyAttributes = other.applyAttributes;
 		this.defaultRequest = other.defaultRequest;
 		this.statusHandlers = (other.statusHandlers != null ? new LinkedHashMap<>(other.statusHandlers) : null);
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
@@ -197,6 +200,12 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Override
 	public WebClient.Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {
 		cookiesConsumer.accept(initCookies());
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder applyAttributes(boolean applyAttributes) {
+		this.applyAttributes = applyAttributes;
 		return this;
 	}
 
@@ -335,18 +344,20 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private ClientHttpConnector initConnector() {
 		if (reactorNettyClientPresent) {
-			return new ReactorClientHttpConnector();
+			return new ReactorClientHttpConnector(applyAttributes);
 		}
 		else if (reactorNetty2ClientPresent) {
-			return new ReactorNetty2ClientHttpConnector();
+			return new ReactorNetty2ClientHttpConnector(applyAttributes);
 		}
 		else if (jettyClientPresent) {
-			return new JettyClientHttpConnector();
+			return new JettyClientHttpConnector(applyAttributes);
 		}
 		else if (httpComponentsClientPresent) {
-			return new HttpComponentsClientHttpConnector();
+			return new HttpComponentsClientHttpConnector(applyAttributes);
 		}
 		else {
+			// TODO what if defaultAttributes is not empty? JdkClient cant apply attributes
+			//  -> throw Exception?
 			return new JdkClientHttpConnector();
 		}
 	}

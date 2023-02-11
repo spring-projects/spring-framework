@@ -251,6 +251,13 @@ public interface WebClient {
 		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
 
 		/**
+		 * Global option to specify whether or not the request attributes should be applied
+		 * to the underlying http-client request, if the used {@link ClientHttpConnector} allows it.
+		 * @param applyAttributes whether or not to apply the attributes
+		 */
+		Builder applyAttributes(boolean applyAttributes);
+
+		/**
 		 * Provide a consumer to customize every request being built.
 		 * @param defaultRequest the consumer to use for modifying requests
 		 * @since 5.1

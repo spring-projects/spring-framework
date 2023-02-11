@@ -94,6 +94,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	@Nullable
 	private MultiValueMap<String, String> defaultCookies;
 
+	private boolean applyAttributes;
+
 	@Nullable
 	private List<ExchangeFilterFunction> filters;
 
@@ -155,6 +157,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		}
 		this.defaultCookies = (other.defaultCookies != null ?
 				new LinkedMultiValueMap<>(other.defaultCookies) : null);
+		this.applyAttributes = other.applyAttributes;
 		this.filters = (other.filters != null ? new ArrayList<>(other.filters) : null);
 		this.entityResultConsumer = other.entityResultConsumer;
 		this.strategies = other.strategies;
@@ -211,6 +214,12 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 			this.defaultCookies = new LinkedMultiValueMap<>(3);
 		}
 		return this.defaultCookies;
+	}
+
+	@Override
+	public WebTestClient.Builder applyAttributes(boolean applyAttributes) {
+		this.applyAttributes = applyAttributes;
+		return this;
 	}
 
 	@Override
@@ -305,18 +314,18 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 				this.entityResultConsumer, this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
 
-	private static ClientHttpConnector initConnector() {
+	private ClientHttpConnector initConnector() {
 		if (reactorNettyClientPresent) {
-			return new ReactorClientHttpConnector();
+			return new ReactorClientHttpConnector(applyAttributes);
 		}
 		else if (reactorNetty2ClientPresent) {
-			return new ReactorNetty2ClientHttpConnector();
+			return new ReactorNetty2ClientHttpConnector(applyAttributes);
 		}
 		else if (jettyClientPresent) {
-			return new JettyClientHttpConnector();
+			return new JettyClientHttpConnector(applyAttributes);
 		}
 		else if (httpComponentsClientPresent) {
-			return new HttpComponentsClientHttpConnector();
+			return new HttpComponentsClientHttpConnector(applyAttributes);
 		}
 		else {
 			return new JdkClientHttpConnector();
