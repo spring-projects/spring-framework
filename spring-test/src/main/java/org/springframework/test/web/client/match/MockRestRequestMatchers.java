@@ -117,8 +117,8 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request query parameter values with the given Hamcrest matcher(s).
 	 * <p> Note that if the queryParam value list is larger than the number of provided
 	 * {@code matchers}, extra values are considered acceptable.
-	 * See {@link #queryParam(String, Matcher)} for a variant that takes a {@code Matcher} over
-	 * the whole list of values.
+	 * See {@link #queryParam(String, Matcher)} for a variant that takes a
+	 * {@code Matcher} over the whole list of values.
 	 * @see #queryParam(String, Matcher)
 	 */
 	@SafeVarargs
@@ -136,8 +136,8 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request query parameter values.
 	 * <p> Note that if the queryParam value list is larger than {@code expectedValues},
 	 * extra values are considered acceptable.
-	 * See {@link #queryParam(String, Matcher)} for a variant that takes a {@code Matcher} over
-	 * the whole list of values.
+	 * See {@link #queryParam(String, Matcher)} for a variant that takes a
+	 * {@code Matcher} over the whole list of values.
 	 * @see #queryParam(String, Matcher)
 	 */
 	public static RequestMatcher queryParam(String name, String... expectedValues) {
@@ -152,10 +152,11 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert request query parameter, matching on the whole {@code List} of values.
-	 * <p> This can be used to check that the list has at least one value matching a criteria ({@link Matchers#hasItem(Matcher)}),
-	 * or that every value in the list matches a common criteria ({@link Matchers#everyItem(Matcher)}),
-	 * or that each value in the list matches its corresponding dedicated criteria ({@link Matchers#contains(Matcher[])},
-	 * and more.
+	 * <p> This can be used to check that the list has at least one value matching a
+	 * criteria ({@link Matchers#hasItem(Matcher)}), or that every value in the list
+	 * matches a common criteria ({@link Matchers#everyItem(Matcher)}), or that each
+	 * value in the list matches its corresponding dedicated criteria
+	 * ({@link Matchers#contains(Matcher[])}, and more.
 	 * @param name the name of the queryParam to consider
 	 * @param matcher the matcher to apply to the whole list of values for that header
 	 * @since 6.0.5
@@ -193,8 +194,8 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request header values with the given Hamcrest matcher(s).
 	 * <p> Note that if the header's value list is larger than the number of provided
 	 * {@code matchers}, extra values are considered acceptable.
-	 * See {@link #header(String, Matcher)} for a variant that takes a {@code Matcher} over
-	 * the whole list of values.
+	 * See {@link #header(String, Matcher)} for a variant that takes a {@code Matcher}
+	 * over the whole list of values.
 	 * @see #header(String, Matcher)
 	 */
 	@SafeVarargs
@@ -213,8 +214,8 @@ public abstract class MockRestRequestMatchers {
 	 * Assert request header values.
 	 * <p> Note that if the header's value list is larger than {@code expectedValues},
 	 * extra values are considered acceptable.
-	 * See {@link #header(String, Matcher)} for a variant that takes a {@code Matcher} over
-	 * the whole list of values.
+	 * See {@link #header(String, Matcher)} for a variant that takes a {@code Matcher}
+	 * over the whole list of values.
 	 * @see #header(String, Matcher)
 	 */
 	public static RequestMatcher header(String name, String... expectedValues) {
@@ -230,10 +231,11 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert request header, matching on the whole {@code List} of values.
-	 * <p> This can be used to check that the list has at least one value matching a criteria ({@link Matchers#hasItem(Matcher)}),
-	 * or that every value in the list matches a common criteria ({@link Matchers#everyItem(Matcher)}),
-	 * or that each value in the list matches its corresponding dedicated criteria ({@link Matchers#contains(Matcher[])},
-	 * and more.
+	 * <p> This can be used to check that the list has at least one value matching a
+	 * criteria ({@link Matchers#hasItem(Matcher)}), or that every value in the list
+	 * matches a common criteria ({@link Matchers#everyItem(Matcher)}), or that each
+	 * value in the list matches its corresponding dedicated criteria
+	 * ({@link Matchers#contains(Matcher[])}, and more.
 	 * @param name the name of the header to consider
 	 * @param matcher the matcher to apply to the whole list of values for that header
 	 * @since 6.0.5
