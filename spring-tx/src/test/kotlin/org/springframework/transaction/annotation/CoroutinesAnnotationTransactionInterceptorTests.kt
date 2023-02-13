@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,11 +58,9 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(TestWithCoroutines())
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
-		runBlocking {
-			try {
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
 				proxy.suspendingNoValueFailure()
-			}
-			catch (ex: IllegalStateException) {
 			}
 		}
 		assertReactiveGetTransactionAndRollbackCount(1)
@@ -86,12 +84,9 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(TestWithCoroutines())
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
-		runBlocking {
-			try {
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
 				proxy.suspendingValueFailure()
-				fail("No exception thrown as expected")
-			}
-			catch (ex: IllegalStateException) {
 			}
 		}
 		assertReactiveGetTransactionAndRollbackCount(1)
