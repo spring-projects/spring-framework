@@ -22,6 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,8 @@ public class PayloadMethodArgumentResolverTests {
 
 	private MethodParameter paramWithSpelExpression;
 
+	private MethodParameter paramOptional;
+
 	private MethodParameter paramNotAnnotated;
 
 	private MethodParameter paramValidatedNotAnnotated;
@@ -74,16 +77,17 @@ public class PayloadMethodArgumentResolverTests {
 
 		Method payloadMethod = PayloadMethodArgumentResolverTests.class.getDeclaredMethod(
 				"handleMessage", String.class, String.class, Locale.class,
-				String.class, String.class, String.class, String.class);
+				String.class, Optional.class, String.class, String.class, String.class);
 
 		this.paramAnnotated = new SynthesizingMethodParameter(payloadMethod, 0);
 		this.paramAnnotatedNotRequired = new SynthesizingMethodParameter(payloadMethod, 1);
 		this.paramAnnotatedRequired = new SynthesizingMethodParameter(payloadMethod, 2);
 		this.paramWithSpelExpression = new SynthesizingMethodParameter(payloadMethod, 3);
-		this.paramValidated = new SynthesizingMethodParameter(payloadMethod, 4);
+		this.paramOptional = new SynthesizingMethodParameter(payloadMethod, 4);
+		this.paramValidated = new SynthesizingMethodParameter(payloadMethod, 5);
 		this.paramValidated.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
-		this.paramValidatedNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 5);
-		this.paramNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 6);
+		this.paramValidatedNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 6);
+		this.paramNotAnnotated = new SynthesizingMethodParameter(payloadMethod, 7);
 	}
 
 	@Test
@@ -127,11 +131,31 @@ public class PayloadMethodArgumentResolverTests {
 		Message<?> emptyByteArrayMessage = MessageBuilder.withPayload(new byte[0]).build();
 		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyByteArrayMessage)).isNull();
 
-		Message<?> emptyStringMessage = MessageBuilder.withPayload("").build();
+		Message<?> emptyStringMessage = MessageBuilder.withPayload(" 	").build();
 		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyStringMessage)).isNull();
+		assertThat(((Optional<?>) this.resolver.resolveArgument(this.paramOptional, emptyStringMessage)).isEmpty()).isTrue();
+
+		Message<?> emptyOptionalMessage = MessageBuilder.withPayload(Optional.empty()).build();
+		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, emptyOptionalMessage)).isNull();
 
 		Message<?> notEmptyMessage = MessageBuilder.withPayload("ABC".getBytes()).build();
 		assertThat(this.resolver.resolveArgument(this.paramAnnotatedNotRequired, notEmptyMessage)).isEqualTo("ABC");
+	}
+
+	@Test
+	public void resolveOptionalTarget() throws Exception {
+		Message<?> message = MessageBuilder.withPayload("ABC".getBytes()).build();
+		Object actual = this.resolver.resolveArgument(paramOptional, message);
+
+		assertThat(((Optional<?>) actual).get()).isEqualTo("ABC");
+	}
+
+	@Test
+	public void resolveOptionalSource() throws Exception {
+		Message<?> message = MessageBuilder.withPayload(Optional.of("ABC".getBytes())).build();
+		Object actual = this.resolver.resolveArgument(paramAnnotated, message);
+
+		assertThat(actual).isEqualTo("ABC");
 	}
 
 	@Test
@@ -218,6 +242,7 @@ public class PayloadMethodArgumentResolverTests {
 			@Payload(required=false) String paramNotRequired,
 			@Payload(required=true) Locale nonConvertibleRequiredParam,
 			@Payload("foo.bar") String paramWithSpelExpression,
+			@Payload Optional<String> optionalParam,
 			@MyValid @Payload String validParam,
 			@Validated String validParamNotAnnotated,
 			String paramNotAnnotated) {
