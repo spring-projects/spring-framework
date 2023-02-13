@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
@@ -114,6 +115,11 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert request query parameter values with the given Hamcrest matcher(s).
+	 * <p> Note that if the queryParam value list is larger than the number of provided
+	 * {@code matchers}, extra values are considered acceptable.
+	 * See {@link #queryParam(String, Matcher)} for a variant that takes a
+	 * {@code Matcher} over the whole list of values.
+	 * @see #queryParam(String, Matcher)
 	 */
 	@SafeVarargs
 	public static RequestMatcher queryParam(String name, Matcher<? super String>... matchers) {
@@ -128,6 +134,11 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert request query parameter values.
+	 * <p> Note that if the queryParam value list is larger than {@code expectedValues},
+	 * extra values are considered acceptable.
+	 * See {@link #queryParam(String, Matcher)} for a variant that takes a
+	 * {@code Matcher} over the whole list of values.
+	 * @see #queryParam(String, Matcher)
 	 */
 	public static RequestMatcher queryParam(String name, String... expectedValues) {
 		return request -> {
@@ -138,6 +149,29 @@ public abstract class MockRestRequestMatchers {
 			}
 		};
 	}
+
+	/**
+	 * Assert request query parameter, matching on the whole {@code List} of values.
+	 * <p> This can be used to check that the list has at least one value matching a
+	 * criteria ({@link Matchers#hasItem(Matcher)}), or that every value in the list
+	 * matches a common criteria ({@link Matchers#everyItem(Matcher)}), or that each
+	 * value in the list matches its corresponding dedicated criteria
+	 * ({@link Matchers#contains(Matcher[])}, and more.
+	 * @param name the name of the queryParam to consider
+	 * @param matcher the matcher to apply to the whole list of values for that header
+	 * @since 6.0.5
+	 */
+	public static RequestMatcher queryParam(String name, Matcher<? super List<String>> matcher) {
+		return request -> {
+			MultiValueMap<String, String> params = getQueryParams(request);
+			List<String> paramValues = params.get(name);
+			if (paramValues == null) {
+				fail("No queryParam [" + name + "]");
+			}
+			assertThat("Request queryParam values for [" + name + "]", paramValues, matcher);
+		};
+	}
+
 
 	private static MultiValueMap<String, String> getQueryParams(ClientHttpRequest request) {
 		return UriComponentsBuilder.fromUri(request.getURI()).build().getQueryParams();
@@ -158,6 +192,11 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert request header values with the given Hamcrest matcher(s).
+	 * <p> Note that if the header's value list is larger than the number of provided
+	 * {@code matchers}, extra values are considered acceptable.
+	 * See {@link #header(String, Matcher)} for a variant that takes a {@code Matcher}
+	 * over the whole list of values.
+	 * @see #header(String, Matcher)
 	 */
 	@SafeVarargs
 	public static RequestMatcher header(String name, Matcher<? super String>... matchers) {
@@ -173,6 +212,11 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert request header values.
+	 * <p> Note that if the header's value list is larger than {@code expectedValues},
+	 * extra values are considered acceptable.
+	 * See {@link #header(String, Matcher)} for a variant that takes a {@code Matcher}
+	 * over the whole list of values.
+	 * @see #header(String, Matcher)
 	 */
 	public static RequestMatcher header(String name, String... expectedValues) {
 		return request -> {
@@ -182,6 +226,27 @@ public abstract class MockRestRequestMatchers {
 			for (int i = 0; i < expectedValues.length; i++) {
 				assertEquals("Request header [" + name + "]", expectedValues[i], headerValues.get(i));
 			}
+		};
+	}
+
+	/**
+	 * Assert request header, matching on the whole {@code List} of values.
+	 * <p> This can be used to check that the list has at least one value matching a
+	 * criteria ({@link Matchers#hasItem(Matcher)}), or that every value in the list
+	 * matches a common criteria ({@link Matchers#everyItem(Matcher)}), or that each
+	 * value in the list matches its corresponding dedicated criteria
+	 * ({@link Matchers#contains(Matcher[])}, and more.
+	 * @param name the name of the header to consider
+	 * @param matcher the matcher to apply to the whole list of values for that header
+	 * @since 6.0.5
+	 */
+	public static RequestMatcher header(String name, Matcher<? super List<String>> matcher) {
+		return request -> {
+			List<String> headerValues = request.getHeaders().get(name);
+			if (headerValues == null) {
+				fail("No header values for header [" + name + "]");
+			}
+			assertThat("Request header values for [" + name + "]", headerValues, matcher);
 		};
 	}
 
