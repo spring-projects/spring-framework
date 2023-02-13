@@ -427,7 +427,7 @@ public interface WebTestClient {
 
 		/**
 		 * Global option to specify whether or not attributes should be applied to every request,
-		 * if the used {@link ClientHttpConnector} allows it
+		 * if the used {@link ClientHttpConnector} allows it.
 		 * @param applyAttributes whether or not to apply attributes
 		 */
 		Builder applyAttributes(boolean applyAttributes);

@@ -295,7 +295,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 			}
 		}
 		if (connectorToUse == null) {
-			connectorToUse = initConnector(this.applyAttributes);
+			connectorToUse = initConnector();
 		}
 		Function<ClientHttpConnector, ExchangeFunction> exchangeFactory = connector -> {
 			ExchangeFunction exchange = ExchangeFunctions.create(connector, initExchangeStrategies());
@@ -314,22 +314,25 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 				this.entityResultConsumer, this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
 
-	private static ClientHttpConnector initConnector(boolean applyAttributes) {
+	private ClientHttpConnector initConnector() {
+		final ClientHttpConnector connector;
 		if (reactorNettyClientPresent) {
-			return new ReactorClientHttpConnector(applyAttributes);
+			connector = new ReactorClientHttpConnector();
 		}
 		else if (reactorNetty2ClientPresent) {
-			return new ReactorNetty2ClientHttpConnector(applyAttributes);
+			return new ReactorNetty2ClientHttpConnector();
 		}
 		else if (jettyClientPresent) {
-			return new JettyClientHttpConnector(applyAttributes);
+			connector = new JettyClientHttpConnector();
 		}
 		else if (httpComponentsClientPresent) {
-			return new HttpComponentsClientHttpConnector(applyAttributes);
+			connector = new HttpComponentsClientHttpConnector();
 		}
 		else {
-			return new JdkClientHttpConnector();
+			connector = new JdkClientHttpConnector();
 		}
+		connector.setApplyAttributes(this.applyAttributes);
+		return connector;
 	}
 
 	private ExchangeStrategies initExchangeStrategies() {

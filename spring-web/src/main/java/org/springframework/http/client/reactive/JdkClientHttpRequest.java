@@ -114,7 +114,7 @@ class JdkClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	/**
-	 * Not implemented, since {@link HttpRequest} does not offer any possibility to add request attributes
+	 * Not implemented, since {@link HttpRequest} does not offer any possibility to add request attributes.
 	 */
 	@Override
 	protected void applyAttributes() {

@@ -57,14 +57,6 @@ public class JettyClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 *  Constructor that creates a new instance of {@link HttpClient}.
-	 */
-	public JettyClientHttpConnector(boolean applyAttributes) {
-		this();
-		this.applyAttributes = applyAttributes;
-	}
-
-	/**
 	 * Constructor with an initialized {@link HttpClient}.
 	 */
 	public JettyClientHttpConnector(HttpClient httpClient) {

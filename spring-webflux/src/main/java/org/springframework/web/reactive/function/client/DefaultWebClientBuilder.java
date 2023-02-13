@@ -343,23 +343,24 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	private ClientHttpConnector initConnector() {
+		final ClientHttpConnector connector;
 		if (reactorNettyClientPresent) {
-			return new ReactorClientHttpConnector(this.applyAttributes);
+			connector = new ReactorClientHttpConnector();
 		}
 		else if (reactorNetty2ClientPresent) {
-			return new ReactorNetty2ClientHttpConnector(this.applyAttributes);
+			return new ReactorNetty2ClientHttpConnector();
 		}
 		else if (jettyClientPresent) {
-			return new JettyClientHttpConnector(this.applyAttributes);
+			connector = new JettyClientHttpConnector();
 		}
 		else if (httpComponentsClientPresent) {
-			HttpComponentsClientHttpConnector httpComponentsClientHttpConnector = new HttpComponentsClientHttpConnector();
-			httpComponentsClientHttpConnector.setApplyAttributes(this.applyAttributes);
-			return httpComponentsClientHttpConnector;
+			connector = new HttpComponentsClientHttpConnector();
 		}
 		else {
-			return new JdkClientHttpConnector();
+			connector = new JdkClientHttpConnector();
 		}
+		connector.setApplyAttributes(this.applyAttributes);
+		return connector;
 	}
 
 	private ExchangeStrategies initExchangeStrategies() {

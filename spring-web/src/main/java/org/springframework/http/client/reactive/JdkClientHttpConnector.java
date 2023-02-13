@@ -110,14 +110,14 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Sets nothing, since {@link HttpRequest} does not offer any possibility to add attributes
+	 * Sets nothing, since {@link JdkClientHttpConnector} does not offer any possibility to add attributes.
 	 */
 	@Override
 	public void setApplyAttributes(boolean applyAttributes) {
 	}
 
 	/**
-	 * Returns false, since {@link HttpRequest} does not offer any possibility to add attributes
+	 * Returns false, since {@link JdkClientHttpConnector} does not offer any possibility to add attributes.
 	 */
 	@Override
 	public boolean getApplyAttributes() {

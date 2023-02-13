@@ -58,16 +58,6 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Constructor with default initialized {@link HttpClient}
-	 * @param applyAttributes whether or not to apply request attributes to
-	 * the underlying http-library request
-	 */
-	public ReactorClientHttpConnector(boolean applyAttributes) {
-		this();
-		this.applyAttributes = applyAttributes;
-	}
-
-	/**
 	 * Constructor with externally managed Reactor Netty resources, including
 	 * {@link LoopResources} for event loop threads, and {@link ConnectionProvider}
 	 * for the connection pool.
@@ -146,7 +136,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	private ReactorClientHttpRequest adaptRequest(HttpMethod method, URI uri, HttpClientRequest request,
 			NettyOutbound nettyOutbound) {
 
-		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound, applyAttributes);
+		return new ReactorClientHttpRequest(method, uri, request, nettyOutbound, this.applyAttributes);
 	}
 
 }

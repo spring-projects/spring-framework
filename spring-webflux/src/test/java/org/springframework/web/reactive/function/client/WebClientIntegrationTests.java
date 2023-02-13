@@ -51,8 +51,6 @@ import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import org.springframework.http.client.reactive.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -75,6 +73,12 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
+import org.springframework.http.client.reactive.JettyClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.testfixture.xml.Pojo;
@@ -209,9 +213,7 @@ class WebClientIntegrationTests {
 		Mono<Void> result = this.webClient.get()
 				.uri("/pojo")
 				.attribute("foo","bar")
-				.httpRequest(clientHttpRequest -> {
-					nativeRequest.set(clientHttpRequest.getNativeRequest());
-				})
+				.httpRequest(clientHttpRequest -> nativeRequest.set(clientHttpRequest.getNativeRequest()))
 				.retrieve()
 				.bodyToMono(Void.class);
 		StepVerifier.create(result)
@@ -222,26 +224,31 @@ class WebClientIntegrationTests {
 			if (expectAttributesApplied) {
 				assertThat(attributes.get()).isNotNull();
 				assertThat(attributes.get()).containsEntry("foo", "bar");
-			} else {
+			}
+			else {
 				assertThat(attributes.get()).isNull();
 			}
-		} else if (nativeRequest.get() instanceof reactor.netty5.channel.ChannelOperations<?,?> nativeReq) {
+		}
+		else if (nativeRequest.get() instanceof reactor.netty5.channel.ChannelOperations<?,?> nativeReq) {
 			io.netty5.util.Attribute<Map<String, Object>> attributes = nativeReq.channel().attr(io.netty5.util.AttributeKey.valueOf("attributes"));
 			if (expectAttributesApplied) {
 				assertThat(attributes.get()).isNotNull();
 				assertThat(attributes.get()).containsEntry("foo", "bar");
-			} else {
+			}
+			else {
 				assertThat(attributes.get()).isNull();
 			}
-		} else if (nativeRequest.get() instanceof Request nativeReq) {
+		}
+		else if (nativeRequest.get() instanceof Request nativeReq) {
 			if (expectAttributesApplied) {
 				assertThat(nativeReq.getAttributes()).containsEntry("foo", "bar");
-			} else {
+			}
+			else {
 				assertThat(nativeReq.getAttributes()).doesNotContainEntry("foo", "bar");
 			}
-		} else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest nativeReq) {
+		}
+		else if (nativeRequest.get() instanceof org.apache.hc.core5.http.HttpRequest nativeReq) {
 			// TODO get attributes from HttpClientContext
-		} else if (nativeRequest.get() instanceof java.net.http.HttpRequest nativeReq) {
 		}
 	}
 

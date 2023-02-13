@@ -153,14 +153,15 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	/**
-	 * Applies the attributes to the {@link HttpClientContext}
+	 * Applies the attributes to the {@link HttpClientContext}.
 	 */
 	@Override
 	protected void applyAttributes() {
 		getAttributes().forEach((key, value) -> {
 			if(this.context.getAttribute(key) == null) {
 				this.context.setAttribute(key, value);
-			}});
+			}
+		});
 	}
 
 	@Override

@@ -24,7 +24,6 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.util.AttributeKey;
-import org.eclipse.jetty.client.api.Request;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,7 +48,7 @@ import org.springframework.http.ZeroCopyHttpOutputMessage;
  */
 class ReactorClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
 
-	public final String ATTRIBUTES_CHANNEL_KEY = "attributes";
+	public static final String ATTRIBUTES_CHANNEL_KEY = "attributes";
 
 	private final HttpMethod httpMethod;
 

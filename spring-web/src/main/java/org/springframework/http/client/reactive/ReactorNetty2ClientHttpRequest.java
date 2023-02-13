@@ -21,14 +21,14 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 
-import io.netty5.util.AttributeKey;
 import io.netty5.buffer.Buffer;
 import io.netty5.handler.codec.http.headers.DefaultHttpCookiePair;
+import io.netty5.util.AttributeKey;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.netty5.channel.ChannelOperations;
 import reactor.netty5.NettyOutbound;
+import reactor.netty5.channel.ChannelOperations;
 import reactor.netty5.http.client.HttpClientRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -49,7 +49,7 @@ import org.springframework.http.ZeroCopyHttpOutputMessage;
  */
 class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implements ZeroCopyHttpOutputMessage {
 
-	public final String ATTRIBUTES_CHANNEL_KEY = "attributes";
+	public static final String ATTRIBUTES_CHANNEL_KEY = "attributes";
 
 	private final HttpMethod httpMethod;
 

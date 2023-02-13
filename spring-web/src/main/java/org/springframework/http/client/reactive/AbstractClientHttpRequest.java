@@ -161,7 +161,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 				Mono.fromRunnable(() -> {
 					applyHeaders();
 					applyCookies();
-					if (applyAttributes) {
+					if (this.applyAttributes) {
 						applyAttributes();
 					}
 					this.state.set(State.COMMITTED);

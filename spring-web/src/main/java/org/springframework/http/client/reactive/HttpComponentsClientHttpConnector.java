@@ -68,14 +68,6 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 		this(HttpAsyncClients.createDefault());
 	}
 
-	/**
-	 * Constructor that creates and starts a new instance of {@link CloseableHttpAsyncClient}.
-	 * @param applyAttributes whether or not to apply request attributes to
-	 */
-	public HttpComponentsClientHttpConnector(boolean applyAttributes) {
-		this();
-		this.applyAttributes = applyAttributes;
-	}
 
 	/**
 	 * Constructor with a pre-configured {@link CloseableHttpAsyncClient} instance.
@@ -123,7 +115,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 		}
 
 		HttpComponentsClientHttpRequest request = new HttpComponentsClientHttpRequest(method, uri,
-				context, this.dataBufferFactory, applyAttributes);
+				context, this.dataBufferFactory, this.applyAttributes);
 
 		return requestCallback.apply(request).then(Mono.defer(() -> execute(request, context)));
 	}

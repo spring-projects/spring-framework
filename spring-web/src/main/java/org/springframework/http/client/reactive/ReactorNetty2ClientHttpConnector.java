@@ -60,16 +60,6 @@ public class ReactorNetty2ClientHttpConnector implements ClientHttpConnector {
 	}
 
 	/**
-	 * Constructor with default initialized {@link HttpClient}
-	 * @param applyAttributes whether or not to apply request attributes to
-	 * the underlying http-library request
-	 */
-	public ReactorNetty2ClientHttpConnector(boolean applyAttributes) {
-		this();
-		this.applyAttributes = applyAttributes;
-	}
-
-	/**
 	 * Constructor with externally managed Reactor Netty resources, including
 	 * {@link LoopResources} for event loop threads, and {@link ConnectionProvider}
 	 * for the connection pool.

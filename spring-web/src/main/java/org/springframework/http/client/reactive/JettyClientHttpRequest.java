@@ -132,7 +132,7 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	/**
-	 * Applies the attributes to {@link Request#getAttributes()}
+	 * Applies the attributes to {@link Request#getAttributes()}.
 	 */
 	@Override
 	protected void applyAttributes() {
