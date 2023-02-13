@@ -19,10 +19,8 @@ package org.springframework.core.io.buffer;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
@@ -265,32 +263,31 @@ public interface DataBuffer {
 	default DataBuffer write(CharSequence charSequence, Charset charset) {
 		Assert.notNull(charSequence, "CharSequence must not be null");
 		Assert.notNull(charset, "Charset must not be null");
-		if (charSequence.length() != 0) {
-			CharsetEncoder charsetEncoder = charset.newEncoder()
+		if (charSequence.length() > 0) {
+			CharsetEncoder encoder = charset.newEncoder()
 					.onMalformedInput(CodingErrorAction.REPLACE)
 					.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			CharBuffer src = CharBuffer.wrap(charSequence);
-			int length = (int) (src.remaining() * charsetEncoder.maxBytesPerChar());
-			ensureWritable(length);
-			try (ByteBufferIterator iterator = writableByteBuffers()) {
-				Assert.state(iterator.hasNext(), "No ByteBuffer available");
-				ByteBuffer dest = iterator.next();
-				int pos = dest.position();
-				CoderResult cr = charsetEncoder.encode(src, dest, true);
-				if (!cr.isUnderflow()) {
-					cr.throwException();
+			int cap = (int) (src.remaining() * encoder.averageBytesPerChar());
+			while (true) {
+				ensureWritable(cap);
+				CoderResult cr;
+				try (ByteBufferIterator iterator = writableByteBuffers()) {
+					Assert.state(iterator.hasNext(), "No ByteBuffer available");
+					ByteBuffer dest = iterator.next();
+					cr = encoder.encode(src, dest, true);
+					if (cr.isUnderflow()) {
+						cr = encoder.flush(dest);
+					}
+					writePosition(dest.position());
 				}
-				cr = charsetEncoder.flush(dest);
-				if (!cr.isUnderflow()) {
-					cr.throwException();
+				if (cr.isUnderflow()) {
+					break;
 				}
-				length = dest.position() - pos;
+				if (cr.isOverflow()) {
+					cap = 2 * cap + 1;
+				}
 			}
-			catch (CharacterCodingException ex) {
-				// should not happen, because the encoder uses action REPLACE
-				throw new UncheckedIOException(ex);
-			}
-			writePosition(writePosition() + length);
 		}
 		return this;
 	}
