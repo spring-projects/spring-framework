@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +52,7 @@ import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.http.MediaType.MULTIPART_MIXED;
+import static org.springframework.http.MediaType.MULTIPART_RELATED;
 import static org.springframework.http.MediaType.TEXT_XML;
 
 /**
@@ -65,8 +65,6 @@ import static org.springframework.http.MediaType.TEXT_XML;
  * @author Sebastien Deleuze
  */
 public class FormHttpMessageConverterTests {
-
-	private static final MediaType MULTIPART_RELATED = new MediaType("multipart", "related");
 
 	private final FormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
 
@@ -85,8 +83,6 @@ public class FormHttpMessageConverterTests {
 		// Without custom multipart types supported
 		asssertCannotReadMultipart();
 
-		this.converter.addSupportedMediaTypes(MULTIPART_RELATED);
-
 		// Should still be the case with custom multipart types supported
 		asssertCannotReadMultipart();
 	}
@@ -96,6 +92,7 @@ public class FormHttpMessageConverterTests {
 		assertCanWrite(APPLICATION_FORM_URLENCODED);
 		assertCanWrite(MULTIPART_FORM_DATA);
 		assertCanWrite(MULTIPART_MIXED);
+		assertCanWrite(MULTIPART_RELATED);
 		assertCanWrite(new MediaType("multipart", "form-data", StandardCharsets.UTF_8));
 		assertCanWrite(MediaType.ALL);
 		assertCanWrite(null);
@@ -103,21 +100,19 @@ public class FormHttpMessageConverterTests {
 
 	@Test
 	public void setSupportedMediaTypes() {
-		assertCannotWrite(MULTIPART_RELATED);
+		this.converter.setSupportedMediaTypes(List.of(MULTIPART_FORM_DATA));
+		assertCannotWrite(MULTIPART_MIXED);
 
-		List<MediaType> supportedMediaTypes = new ArrayList<>(this.converter.getSupportedMediaTypes());
-		supportedMediaTypes.add(MULTIPART_RELATED);
-		this.converter.setSupportedMediaTypes(supportedMediaTypes);
-
-		assertCanWrite(MULTIPART_RELATED);
+		this.converter.setSupportedMediaTypes(List.of(MULTIPART_MIXED));
+		assertCanWrite(MULTIPART_MIXED);
 	}
 
 	@Test
 	public void addSupportedMediaTypes() {
-		assertCannotWrite(MULTIPART_RELATED);
+		this.converter.setSupportedMediaTypes(List.of(MULTIPART_FORM_DATA));
+		assertCannotWrite(MULTIPART_MIXED);
 
 		this.converter.addSupportedMediaTypes(MULTIPART_RELATED);
-
 		assertCanWrite(MULTIPART_RELATED);
 	}
 
