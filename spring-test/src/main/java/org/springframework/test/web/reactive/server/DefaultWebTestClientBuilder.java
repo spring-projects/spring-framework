@@ -295,7 +295,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 			}
 		}
 		if (connectorToUse == null) {
-			connectorToUse = initConnector();
+			connectorToUse = initConnector(this.applyAttributes);
 		}
 		Function<ClientHttpConnector, ExchangeFunction> exchangeFactory = connector -> {
 			ExchangeFunction exchange = ExchangeFunctions.create(connector, initExchangeStrategies());
@@ -314,7 +314,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 				this.entityResultConsumer, this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
 
-	private ClientHttpConnector initConnector() {
+	private static ClientHttpConnector initConnector(boolean applyAttributes) {
 		if (reactorNettyClientPresent) {
 			return new ReactorClientHttpConnector(applyAttributes);
 		}

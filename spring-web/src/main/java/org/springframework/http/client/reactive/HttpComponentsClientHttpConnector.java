@@ -69,7 +69,8 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 	}
 
 	/**
-	 * Default constructor that creates and starts a new instance of {@link CloseableHttpAsyncClient}.
+	 * Constructor that creates and starts a new instance of {@link CloseableHttpAsyncClient}.
+	 * @param applyAttributes whether or not to apply request attributes to
 	 */
 	public HttpComponentsClientHttpConnector(boolean applyAttributes) {
 		this();

@@ -344,20 +344,20 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	private ClientHttpConnector initConnector() {
 		if (reactorNettyClientPresent) {
-			return new ReactorClientHttpConnector(applyAttributes);
+			return new ReactorClientHttpConnector(this.applyAttributes);
 		}
 		else if (reactorNetty2ClientPresent) {
-			return new ReactorNetty2ClientHttpConnector(applyAttributes);
+			return new ReactorNetty2ClientHttpConnector(this.applyAttributes);
 		}
 		else if (jettyClientPresent) {
-			return new JettyClientHttpConnector(applyAttributes);
+			return new JettyClientHttpConnector(this.applyAttributes);
 		}
 		else if (httpComponentsClientPresent) {
-			return new HttpComponentsClientHttpConnector(applyAttributes);
+			HttpComponentsClientHttpConnector httpComponentsClientHttpConnector = new HttpComponentsClientHttpConnector();
+			httpComponentsClientHttpConnector.setApplyAttributes(this.applyAttributes);
+			return httpComponentsClientHttpConnector;
 		}
 		else {
-			// TODO what if defaultAttributes is not empty? JdkClient cant apply attributes
-			//  -> throw Exception?
 			return new JdkClientHttpConnector();
 		}
 	}
