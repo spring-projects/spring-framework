@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -42,6 +45,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -230,6 +234,27 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(503);
+	}
+
+	@Test
+	public void customModelAndView() {
+		ModelAndView expected = new ModelAndView();
+
+		HandlerExceptionResolver resolver = new DefaultHandlerExceptionResolver() {
+
+			@Override
+			protected ModelAndView handleHttpRequestMethodNotSupported(
+					HttpRequestMethodNotSupportedException ex, HttpServletRequest request,
+					HttpServletResponse response, @Nullable Object handler) {
+
+				return expected;
+			}
+		};
+
+		HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException("GET");
+
+		ModelAndView actual = resolver.resolveException(request, response, null, ex);
+		assertThat(actual).isSameAs(expected);
 	}
 
 
