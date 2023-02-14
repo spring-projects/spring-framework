@@ -7557,7 +7557,7 @@ The simplest possible `@Configuration` class reads as follows:
 	public class AppConfig {
 
 		@Bean
-		public MyService myService() {
+		public MyServiceImpl myService() {
 			return new MyServiceImpl();
 		}
 	}
@@ -7569,7 +7569,7 @@ The simplest possible `@Configuration` class reads as follows:
 	class AppConfig {
 
 		@Bean
-		fun myService(): MyService {
+		fun myService(): MyServiceImpl {
 			return MyServiceImpl()
 		}
 	}
