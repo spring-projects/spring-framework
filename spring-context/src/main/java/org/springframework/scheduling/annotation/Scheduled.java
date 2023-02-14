@@ -36,6 +36,18 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * a {@code void} return type; if not, the returned value will be ignored
  * when called through the scheduler.
  *
+ * <p>Methods that return a reactive {@code Publisher} are supported provided the
+ * Reactor library is present at runtime: it is used to implement the scheduling by
+ * repeatedly subscribing to the returned Publisher, which is only produced once.
+ * The cron configuration is not supported for this type of method. Values emitted by
+ * the publisher are ignored and discarded. Errors are logged at WARN level, which
+ * doesn't prevent further iterations.
+ *
+ * <p>Kotlin suspending functions are also supported, provided the coroutine-Reactor
+ * bridge ({@code kotlinx.coroutine.reactor}) is present at runtime. This bridge is
+ * used to adapt the suspending function into a Reactor {@code Mono} which is treated
+ * the same way as in the reactive method case (see above).
+ *
  * <p>Processing of {@code @Scheduled} annotations is performed by
  * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
  * done manually or, more conveniently, through the {@code <task:annotation-driven/>}
