@@ -167,15 +167,15 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getPathInfo()).isNull();
 	}
 
-	@Test // gh-28823
+	@Test // gh-28823, gh-29933
 	void emptyPath() {
 		this.builder = new MockHttpServletRequestBuilder(GET, "");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertThat(request.getRequestURI()).isEqualTo("");
+		assertThat(request.getRequestURI()).isEqualTo("/");
 		assertThat(request.getContextPath()).isEqualTo("");
 		assertThat(request.getServletPath()).isEqualTo("");
-		assertThat(request.getPathInfo()).isNull();
+		assertThat(request.getPathInfo()).isEqualTo("/");
 	}
 
 	@Test // SPR-16453
