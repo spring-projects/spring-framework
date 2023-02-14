@@ -519,7 +519,6 @@ public interface DataBuffer {
 	 * A dedicated iterator type that ensures the lifecycle of iterated
 	 * {@link ByteBuffer} elements. This iterator must be used in a
 	 * try-with-resources clause or explicitly {@linkplain #close() closed}.
-	 *
 	 * @see DataBuffer#readableByteBuffers()
 	 * @see DataBuffer#writableByteBuffers()
 	 */
@@ -527,7 +526,6 @@ public interface DataBuffer {
 
 		@Override
 		void close();
-
 	}
 
 }

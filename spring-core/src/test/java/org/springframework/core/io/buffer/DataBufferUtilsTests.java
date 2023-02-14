@@ -65,6 +65,7 @@ import static org.mockito.Mockito.mock;
 class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 
 	private final Resource resource;
+
 	private final Path tempFile;
 
 
@@ -207,7 +208,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 				.verify();
 	}
 
-	@ParameterizedDataBufferAllocatingTest // gh-22107
+	@ParameterizedDataBufferAllocatingTest  // gh-22107
 	void readAsynchronousFileChannelCancelWithoutDemand(DataBufferFactory bufferFactory) throws Exception {
 		super.bufferFactory = bufferFactory;
 
@@ -790,7 +791,6 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 				.consumeNextWith(stringConsumer("c"))
 				.expectComplete()
 				.verify(Duration.ofSeconds(5));
-
 	}
 
 	private Answer<Integer> putByte(int b) {
@@ -833,7 +833,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 				.verifyError(DataBufferLimitException.class);
 	}
 
-	@Test // gh-26060
+	@Test  // gh-26060
 	void joinWithLimitDoesNotOverRelease() {
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
 		byte[] bytes = "foo-bar-baz".getBytes(StandardCharsets.UTF_8);
@@ -1005,6 +1005,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		StepVerifier.create(result)
 				.verifyComplete();
 	}
+
 
 	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
 
