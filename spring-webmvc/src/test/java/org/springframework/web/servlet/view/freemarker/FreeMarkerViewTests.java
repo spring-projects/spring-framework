@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,34 @@ public class FreeMarkerViewTests {
 	}
 
 	@Test
+	public void requestAttributeVisible() throws Exception {
+		FreeMarkerView fv = new FreeMarkerView();
+
+		WebApplicationContext wac = mock(WebApplicationContext.class);
+		MockServletContext sc = new MockServletContext();
+
+		Map<String, FreeMarkerConfig> configs = new HashMap<>();
+		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+		configurer.setConfiguration(new TestConfiguration());
+		configurer.setServletContext(sc);
+		configs.put("configurer", configurer);
+		given(wac.getBeansOfType(FreeMarkerConfig.class, true, false)).willReturn(configs);
+		given(wac.getServletContext()).willReturn(sc);
+
+		fv.setUrl("templateName");
+		fv.setApplicationContext(wac);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addPreferredLocale(Locale.US);
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		HttpServletResponse response = new MockHttpServletResponse();
+
+		request.setAttribute("myattr", "myvalue");
+		fv.render(null, request, response);
+	}
+
+	@Test
 	public void freeMarkerViewResolver() throws Exception {
 		MockServletContext sc = new MockServletContext();
 
@@ -191,10 +219,9 @@ public class FreeMarkerViewTests {
 					@Override
 					public void process(Object model, Writer writer) throws TemplateException, IOException {
 						assertThat(locale).isEqualTo(Locale.US);
-						boolean condition = model instanceof AllHttpScopesHashModel;
-						assertThat(condition).isTrue();
+						assertThat(model instanceof AllHttpScopesHashModel).isTrue();
 						AllHttpScopesHashModel fmModel = (AllHttpScopesHashModel) model;
-						assertThat(fmModel.get("myattr").toString()).isEqualTo("myvalue");
+						assertThat(String.valueOf(fmModel.get("myattr"))).isEqualTo("myvalue");
 					}
 				};
 			}
