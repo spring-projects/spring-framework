@@ -93,14 +93,14 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 
 		//static helper method
 		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherForSuspendingFunction(m!!, target!!) }
-				.withMessage("Only no-args suspending functions may be annotated with @Scheduled (with 1 self-referencing synthetic arg expected)")
+				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
 
 		//constructor of task
 		Assertions.assertThatIllegalArgumentException().isThrownBy {
 			ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false, true)
 		}
-				.withMessage("Only no-args suspending functions may be annotated with @Scheduled (with 1 self-referencing synthetic arg expected)")
+				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
 	}
 
@@ -110,14 +110,14 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 
 		//static helper method
 		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherForSuspendingFunction(m!!, target!!) }
-				.withMessage("Only no-args suspending functions may be annotated with @Scheduled (with 1 self-referencing synthetic arg expected)")
+				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
 
 		//constructor of task
 		Assertions.assertThatIllegalArgumentException().isThrownBy {
 			ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false, true)
 		}
-				.withMessage("Only no-args suspending functions may be annotated with @Scheduled (with 1 self-referencing synthetic arg expected)")
+				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
 	}
 
@@ -151,7 +151,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	fun hasCheckpointToString() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspending", Continuation::class.java)
 		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false, true)
-		assertThat(reactiveTask).hasToString("@Scheduled 'org.springframework.scheduling.annotation.KotlinScheduledAnnotationReactiveSupportTests\$SuspendingFunctions#suspending()' [ScheduledAnnotationReactiveSupport]")
+		assertThat(reactiveTask).hasToString("@Scheduled 'suspending()' in bean 'org.springframework.scheduling.annotation.KotlinScheduledAnnotationReactiveSupportTests\$SuspendingFunctions'")
 	}
 
 	@Test

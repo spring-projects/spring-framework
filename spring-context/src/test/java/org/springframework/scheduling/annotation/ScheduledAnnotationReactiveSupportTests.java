@@ -141,13 +141,13 @@ class ScheduledAnnotationReactiveSupportTests {
 
 			//static helper method
 			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherForReactiveMethod(m, target))
-					.withMessage("Only no-arg reactive methods may be annotated with @Scheduled")
+					.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
 					.withNoCause();
 
 			//constructor of task
 			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
 							m, target, Duration.ZERO, Duration.ZERO, false, false))
-					.withMessage("Only no-arg reactive methods may be annotated with @Scheduled")
+					.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
 					.withNoCause();
 		}
 
@@ -189,7 +189,7 @@ class ScheduledAnnotationReactiveSupportTests {
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
 					m, target, Duration.ZERO, Duration.ZERO, false, false);
 
-			assertThat(reactiveTask).hasToString("@Scheduled 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods#mono()' [ScheduledAnnotationReactiveSupport]");
+		assertThat(reactiveTask).hasToString("@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
 		}
 
 		@Test
@@ -257,9 +257,8 @@ class ScheduledAnnotationReactiveSupportTests {
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
 					m, target, Duration.ZERO, Duration.ofSeconds(10), true, false);
 
-			assertThat(reactiveTask.checkpoint).isEqualTo("@Scheduled 'org.springframework.scheduling.annotation"
-					+ ".ScheduledAnnotationReactiveSupportTests$ReactiveMethods#monoError()'"
-					+ " [ScheduledAnnotationReactiveSupport]");
+			assertThat(reactiveTask.checkpoint).isEqualTo("@Scheduled 'monoError()' in bean "
+					+ "'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
 		}
 
 	}

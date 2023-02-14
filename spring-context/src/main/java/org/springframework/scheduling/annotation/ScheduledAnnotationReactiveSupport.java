@@ -97,7 +97,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * this method.
 	 */
 	static Publisher<?> getPublisherForReactiveMethod(Method method, Object bean) {
-		Assert.isTrue(method.getParameterCount() == 0, "Only no-arg reactive methods may be annotated with @Scheduled");
+		Assert.isTrue(method.getParameterCount() == 0, "Reactive methods may only be annotated with "
+				+ "@Scheduled if declared without arguments");
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
 		try {
 			ReflectionUtils.makeAccessible(invocableMethod);
@@ -119,8 +120,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * this method.
 	 */
 	static Publisher<?> getPublisherForSuspendingFunction(Method method, Object bean) {
-		Assert.isTrue(method.getParameterCount() == 1,"Only no-args suspending functions may be "
-				+ "annotated with @Scheduled (with 1 self-referencing synthetic arg expected)");
+		//Note that suspending functions declared without args have a single Continuation parameter in reflective inspection
+		Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be annotated "
+				+ "with @Scheduled if declared without arguments");
 
 		return CoroutinesUtils.invokeSuspendingFunction(method, bean, (Object[]) method.getParameters());
 	}
@@ -154,8 +156,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 			this.isFixedRate = isFixedRate;
 
 			this.disposable = Disposables.swap();
-			this.checkpoint = "@Scheduled '"+ method.getDeclaringClass().getName()
-					+ "#" + method.getName() + "()' [ScheduledAnnotationReactiveSupport]";
+			this.checkpoint = "@Scheduled '"+ method.getName() + "()' in bean '"
+					+ method.getDeclaringClass().getName() + "'";
 		}
 
 		private Mono<Void> safeExecutionMono() {
