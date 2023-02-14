@@ -396,12 +396,15 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
-		// If Reactor is on the classpath, check for methods that return a Publisher
-		if (ScheduledAnnotationReactiveSupport.reactorPresent) {
-			if (ScheduledAnnotationReactiveSupport.isReactive(method)) {
-				processScheduledReactive(scheduled, method, bean);
-				return;
-			}
+		// Check for Kotlin suspending functions. If one is found but reactor bridge isn't on the classpath, throw
+		if (ScheduledAnnotationReactiveSupport.checkKotlinRuntimeIfNeeded(method)) {
+			processScheduledReactive(scheduled, method, bean, true);
+			return;
+		}
+		// Check for Publisher-returning methods. If found but Reactor isn't on the classpath, throw.
+		if (ScheduledAnnotationReactiveSupport.checkReactorRuntimeIfNeeded(method)) {
+			processScheduledReactive(scheduled, method, bean, false);
+			return;
 		}
 		processScheduledSync(scheduled, method, bean);
 	}
@@ -539,16 +542,18 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Process the given {@code @Scheduled} method declaration on the given bean which
-	 * returns a {@code Publisher}, repeatedly subscribing to the returned publisher
-	 * according to the fixedDelay/fixedRate configuration. Cron configuration isn't supported,
-	 * nor is non-Publisher return types (even if a {@code ReactiveAdapter} is registered).
+	 * Process the given {@code @Scheduled} bean method declaration which returns
+	 * a {@code Publisher}, or the given Kotlin suspending function converted to a
+	 * Publisher. The publisher is then repeatedly subscribed to, according to the
+	 * fixedDelay/fixedRate configuration. Cron configuration isn't supported,nor
+	 * is non-Publisher return types (even if a {@code ReactiveAdapter} is registered).
 	 * @param scheduled the {@code @Scheduled} annotation
-	 * @param method the method that the annotation has been declared on, which MUST return a Publisher
+	 * @param method the method that the annotation has been declared on, which
+	 * MUST either return a Publisher or be a Kotlin suspending function
 	 * @param bean the target bean instance
 	 * @see #createRunnable(Object, Method)
 	 */
-	protected void processScheduledReactive(Scheduled scheduled, Method method, Object bean) {
+	protected void processScheduledReactive(Scheduled scheduled, Method method, Object bean, boolean isSuspendingFunction) {
 		try {
 			boolean processedSchedule = false;
 			String errorMessage =
@@ -587,7 +592,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			Duration fixedDelay = toDuration(scheduled.fixedDelay(), scheduled.timeUnit());
 			if (!fixedDelay.isNegative()) {
 				processedSchedule = true;
-				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false));
+				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false, isSuspendingFunction));
 			}
 
 			String fixedDelayString = scheduled.fixedDelayString();
@@ -605,7 +610,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
 					}
-					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false));
+					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false, isSuspendingFunction));
 				}
 			}
 
@@ -614,7 +619,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!fixedRate.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true));
+				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true, isSuspendingFunction));
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
@@ -631,7 +636,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
 					}
-					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true));
+					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true, isSuspendingFunction));
 				}
 			}
 
