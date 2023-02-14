@@ -143,6 +143,33 @@ public class FreeMarkerViewTests {
 	}
 
 	@Test
+	public void requestAttributeVisible() throws Exception {
+		FreeMarkerView fv = new FreeMarkerView();
+
+		WebApplicationContext wac = mock();
+		MockServletContext sc = new MockServletContext();
+
+		Map<String, FreeMarkerConfig> configs = new HashMap<>();
+		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+		configurer.setConfiguration(new TestConfiguration());
+		configs.put("configurer", configurer);
+		given(wac.getBeansOfType(FreeMarkerConfig.class, true, false)).willReturn(configs);
+		given(wac.getServletContext()).willReturn(sc);
+
+		fv.setUrl("templateName");
+		fv.setApplicationContext(wac);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addPreferredLocale(Locale.US);
+		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, wac);
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		HttpServletResponse response = new MockHttpServletResponse();
+
+		request.setAttribute("myattr", "myvalue");
+		fv.render(null, request, response);
+	}
+
+	@Test
 	public void freeMarkerViewResolver() throws Exception {
 		MockServletContext sc = new MockServletContext();
 
@@ -189,7 +216,7 @@ public class FreeMarkerViewTests {
 						assertThat(locale).isEqualTo(Locale.US);
 						assertThat(model instanceof SimpleHash).isTrue();
 						SimpleHash fmModel = (SimpleHash) model;
-						assertThat(fmModel.get("myattr").toString()).isEqualTo("myvalue");
+						assertThat(String.valueOf(fmModel.get("myattr"))).isEqualTo("myvalue");
 					}
 				};
 			}
