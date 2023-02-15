@@ -40,6 +40,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -1819,6 +1820,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
 		return this.headers.entrySet();
+	}
+
+	@Override
+	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
+		this.headers.forEach(action);
+	}
+
+	@Override
+	public List<String> putIfAbsent(String key, List<String> value) {
+		return this.headers.putIfAbsent(key, value);
 	}
 
 

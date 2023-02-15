@@ -255,10 +255,7 @@ final class DefaultClientRequestBuilder implements ClientRequest.Builder {
 		public Mono<Void> writeTo(ClientHttpRequest request, ExchangeStrategies strategies) {
 			HttpHeaders requestHeaders = request.getHeaders();
 			if (!this.headers.isEmpty()) {
-				this.headers.entrySet().stream()
-						.filter(entry -> !requestHeaders.containsKey(entry.getKey()))
-						.forEach(entry -> requestHeaders
-								.put(entry.getKey(), entry.getValue()));
+				this.headers.forEach(requestHeaders::putIfAbsent);
 			}
 
 			MultiValueMap<String, HttpCookie> requestCookies = request.getCookies();

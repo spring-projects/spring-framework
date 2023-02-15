@@ -18,7 +18,6 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Collection;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -129,9 +128,10 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 	@Override
 	protected void applyCookies() {
-		getCookies().values().stream().flatMap(Collection::stream)
-				.map(cookie -> new DefaultCookie(cookie.getName(), cookie.getValue()))
-				.forEach(this.request::addCookie);
+		getCookies().values().forEach(values -> values.forEach(value -> {
+			DefaultCookie cookie = new DefaultCookie(value.getName(), value.getValue());
+			this.request.addCookie(cookie);
+		}));
 	}
 
 	@Override

@@ -18,7 +18,6 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Collection;
 
 import io.netty5.buffer.Buffer;
 import io.netty5.handler.codec.http.headers.DefaultHttpCookiePair;
@@ -130,9 +129,10 @@ class ReactorNetty2ClientHttpRequest extends AbstractClientHttpRequest implement
 
 	@Override
 	protected void applyCookies() {
-		getCookies().values().stream().flatMap(Collection::stream)
-				.map(cookie -> new DefaultHttpCookiePair(cookie.getName(), cookie.getValue()))
-				.forEach(this.request::addCookie);
+		getCookies().values().forEach(values -> values.forEach(value -> {
+			DefaultHttpCookiePair cookie = new DefaultHttpCookiePair(value.getName(), value.getValue());
+			this.request.addCookie(cookie);
+		}));
 	}
 
 	@Override

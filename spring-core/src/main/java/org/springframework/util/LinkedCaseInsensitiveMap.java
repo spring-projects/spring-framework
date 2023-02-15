@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Spliterator;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -284,6 +285,11 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 			this.entrySet = entrySet;
 		}
 		return entrySet;
+	}
+
+	@Override
+	public void forEach(BiConsumer<? super String, ? super V> action) {
+		this.targetMap.forEach(action);
 	}
 
 	@Override
