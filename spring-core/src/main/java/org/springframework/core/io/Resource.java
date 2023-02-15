@@ -38,6 +38,7 @@ import org.springframework.util.FileCopyUtils;
  * certain resources. The actual behavior is implementation-specific.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 28.12.2003
  * @see #getInputStream()
  * @see #getURL()
@@ -139,6 +140,32 @@ public interface Resource extends InputStreamSource {
 	}
 
 	/**
+	 * Return the contents of this resource as a byte array.
+	 * @return the contents of this resource as byte array
+	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
+	 * absolute file path, i.e. if the resource is not available in a file system
+	 * @throws IOException in case of general resolution/reading failures
+	 * @since 6.0.5
+	 */
+	default byte[] getContentAsByteArray() throws IOException {
+		return FileCopyUtils.copyToByteArray(getInputStream());
+	}
+
+	/**
+	 * Returns the contents of this resource as a string, using the specified
+	 * charset.
+	 * @param charset the charset to use for decoding
+	 * @return the contents of this resource as a {@code String}
+	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
+	 * absolute file path, i.e. if the resource is not available in a file system
+	 * @throws IOException in case of general resolution/reading failures
+	 * @since 6.0.5
+	 */
+	default String getContentAsString(Charset charset) throws IOException {
+		return FileCopyUtils.copyToString(new InputStreamReader(getInputStream(), charset));
+	}
+
+	/**
 	 * Determine the content length for this resource.
 	 * @throws IOException if the resource cannot be resolved
 	 * (in the file system or as some other known physical resource type)
@@ -178,31 +205,5 @@ public interface Resource extends InputStreamSource {
 	 * @see Object#toString()
 	 */
 	String getDescription();
-
-	/**
-	 * Return the contents of this resource as a byte array.
-	 * @return the contents of this resource as byte array
-	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
-	 * absolute file path, i.e. if the resource is not available in a file system
-	 * @throws IOException in case of general resolution/reading failures
-	 * @since 6.0.5
-	 */
-	default byte[] getContentAsByteArray() throws IOException {
-		return FileCopyUtils.copyToByteArray(getInputStream());
-	}
-
-	/**
-	 * Returns the contents of this resource as a string, using the specified
-	 * charset.
-	 * @param charset the charset to use for decoding
-	 * @return the contents of this resource as a {@code String}
-	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
-	 * absolute file path, i.e. if the resource is not available in a file system
-	 * @throws IOException in case of general resolution/reading failures
-	 * @since 6.0.5
-	 */
-	default String getContentAsString(Charset charset) throws IOException {
-		return FileCopyUtils.copyToString(new InputStreamReader(getInputStream(), charset));
-	}
 
 }

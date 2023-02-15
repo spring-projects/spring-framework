@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,11 +203,6 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 
 
 		@Override
-		public InputStream getInputStream() throws IOException {
-			return this.encoded.getInputStream();
-		}
-
-		@Override
 		public boolean exists() {
 			return this.encoded.exists();
 		}
@@ -242,6 +238,26 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
+		public InputStream getInputStream() throws IOException {
+			return this.encoded.getInputStream();
+		}
+
+		@Override
+		public ReadableByteChannel readableChannel() throws IOException {
+			return this.encoded.readableChannel();
+		}
+
+		@Override
+		public byte[] getContentAsByteArray() throws IOException {
+			return this.encoded.getContentAsByteArray();
+		}
+
+		@Override
+		public String getContentAsString(Charset charset) throws IOException {
+			return this.encoded.getContentAsString(charset);
+		}
+
+		@Override
 		public long contentLength() throws IOException {
 			return this.encoded.contentLength();
 		}
@@ -265,16 +281,6 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		@Override
 		public String getDescription() {
 			return this.encoded.getDescription();
-		}
-
-		@Override
-		public byte[] getContentAsByteArray() throws IOException {
-			return this.encoded.getContentAsByteArray();
-		}
-
-		@Override
-		public String getContentAsString(Charset charset) throws IOException {
-			return this.encoded.getContentAsString(charset);
 		}
 
 		@Override
