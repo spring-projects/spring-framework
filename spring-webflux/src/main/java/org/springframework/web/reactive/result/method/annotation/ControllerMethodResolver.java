@@ -259,7 +259,7 @@ class ControllerMethodResolver {
 	 * {@code @RequestMapping} method initialized with argument resolvers.
 	 */
 	public InvocableHandlerMethod getRequestMappingMethod(HandlerMethod handlerMethod) {
-		return handlerMethodCache.computeIfAbsent(handlerMethod, hm -> {
+		return this.handlerMethodCache.computeIfAbsent(handlerMethod, hm -> {
 			final InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 			invocable.setArgumentResolvers(this.requestMappingResolvers);
 			invocable.setReactiveAdapterRegistry(this.reactiveAdapterRegistry);
