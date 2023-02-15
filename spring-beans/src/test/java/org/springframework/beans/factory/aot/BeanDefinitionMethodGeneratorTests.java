@@ -105,6 +105,23 @@ class BeanDefinitionMethodGeneratorTests {
 		});
 	}
 
+	@Test // gh-29556
+	void generateBeanDefinitionMethodGeneratesMethodWithInstanceSupplier() {
+		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(TestBean.class, TestBean::new));
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				List.of((generationContext, beanRegistrationCode) -> { }));
+		MethodReference method = generator.generateBeanDefinitionMethod(
+				this.generationContext, this.beanRegistrationsCode);
+		compile(method, (actual, compiled) -> {
+			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
+			assertThat(sourceFile).contains("Get the bean definition for 'testBean'");
+			assertThat(sourceFile).contains("beanType = TestBean.class");
+			assertThat(sourceFile).contains("setInstanceSupplier(TestBean::new)");
+			assertThat(actual).isInstanceOf(RootBeanDefinition.class);
+		});
+	}
+
 	@Test
 	void generateBeanDefinitionMethodWhenHasInnerClassTargetMethodGeneratesMethod() {
 		this.beanFactory.registerBeanDefinition("testBeanConfiguration", new RootBeanDefinition(
@@ -493,8 +510,8 @@ class BeanDefinitionMethodGeneratorTests {
 		testBeanDefinitionMethodInCurrentFile(Boolean.class, beanDefinition);
 	}
 
-	@Test
-	void throwExceptionWithInstanceSupplier() {
+	@Test // gh-29556
+	void throwExceptionWithInstanceSupplierWithoutAotContribution() {
 		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(TestBean.class, TestBean::new));
 		assertThatIllegalArgumentException().isThrownBy(() -> new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,

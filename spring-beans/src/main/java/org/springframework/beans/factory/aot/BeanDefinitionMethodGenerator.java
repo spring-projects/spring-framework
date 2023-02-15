@@ -78,7 +78,7 @@ class BeanDefinitionMethodGenerator {
 			List<BeanRegistrationAotContribution> aotContributions) {
 
 		RootBeanDefinition mbd = registeredBean.getMergedBeanDefinition();
-		if (mbd.getInstanceSupplier() != null) {
+		if (mbd.getInstanceSupplier() != null && aotContributions.isEmpty()) {
 			throw new IllegalArgumentException("Code generation is not supported for bean definitions declaring an instance supplier callback : " + mbd);
 		}
 		this.methodGeneratorFactory = methodGeneratorFactory;
