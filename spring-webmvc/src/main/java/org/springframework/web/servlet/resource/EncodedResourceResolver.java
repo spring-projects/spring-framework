@@ -201,7 +201,6 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 			this.encoded = original.createRelative(original.getFilename() + extension);
 		}
 
-
 		@Override
 		public boolean exists() {
 			return this.encoded.exists();
