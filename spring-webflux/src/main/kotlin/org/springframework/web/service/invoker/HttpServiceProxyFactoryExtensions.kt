@@ -17,7 +17,7 @@
 package org.springframework.web.service.invoker
 
 /**
- *  Extension for [HttpServiceProxyFactory.createClient] providing a `createClient<Foo>()` variant.
+ * Extension for [HttpServiceProxyFactory.createClient] providing a `createClient<Foo>()` variant.
  *
  * @author Sebastien Deleuze
  * @since 6.0.5

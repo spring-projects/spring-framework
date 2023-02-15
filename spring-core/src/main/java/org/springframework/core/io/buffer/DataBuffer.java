@@ -421,11 +421,9 @@ public interface DataBuffer {
 	 * Copies the given length from this data buffer into the given destination
 	 * {@code ByteBuffer}, beginning at the given source position, and the
 	 * given destination position in the destination byte buffer.
-	 * @param srcPos the position of this data buffer from where copying should
-	 * start
+	 * @param srcPos the position of this data buffer from where copying should start
 	 * @param dest the destination byte buffer
-	 * @param destPos the position in {@code dest} to where copying should
-	 * start
+	 * @param destPos the position in {@code dest} to where copying should start
 	 * @param length the amount of data to copy
 	 * @since 6.0.5
 	 */
@@ -436,7 +434,6 @@ public interface DataBuffer {
 	 * buffer that can be read. Calling this method is more efficient than
 	 * {@link #toByteBuffer()}, as no data is copied. However, the byte buffers
 	 * provided can only be used during the iteration.
-	 *
 	 * <p><b>Note</b> that the returned iterator must be used in a
 	 * try-with-resources clause or explicitly
 	 * {@linkplain ByteBufferIterator#close() closed}.
@@ -449,7 +446,6 @@ public interface DataBuffer {
 	 * Returns a closeable iterator over each {@link ByteBuffer} in this data
 	 * buffer that can be written to. The byte buffers provided can only be used
 	 * during the iteration.
-	 *
 	 * <p><b>Note</b> that the returned iterator must be used in a
 	 * try-with-resources clause or explicitly
 	 * {@linkplain ByteBufferIterator#close() closed}.
@@ -519,6 +515,7 @@ public interface DataBuffer {
 	 * A dedicated iterator type that ensures the lifecycle of iterated
 	 * {@link ByteBuffer} elements. This iterator must be used in a
 	 * try-with-resources clause or explicitly {@linkplain #close() closed}.
+	 * @since 6.0.5
 	 * @see DataBuffer#readableByteBuffers()
 	 * @see DataBuffer#writableByteBuffers()
 	 */

@@ -203,20 +203,20 @@ class MockRestRequestMatchersTests {
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> MockRestRequestMatchers
 						.header("foo", contains(containsString("ba"))).match(this.request))
-				.withMessage("Request header values for [foo]\n"
-						+ "Expected: iterable containing [a string containing \"ba\"]\n"
+				.withMessage("Request header values for [foo]" + System.lineSeparator()
+						+ "Expected: iterable containing [a string containing \"ba\"]" + System.lineSeparator()
 						+ "     but: not matched: \"baz\"");
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> MockRestRequestMatchers
 						.header("foo", hasItem(endsWith("ba"))).match(this.request))
-				.withMessage("Request header values for [foo]\n"
-						+ "Expected: a collection containing a string ending with \"ba\"\n"
+				.withMessage("Request header values for [foo]" + System.lineSeparator()
+						+ "Expected: a collection containing a string ending with \"ba\"" + System.lineSeparator()
 						+ "     but: mismatches were: [was \"bar\", was \"baz\"]");
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> MockRestRequestMatchers
 						.header("foo", everyItem(endsWith("ar"))).match(this.request))
-				.withMessage("Request header values for [foo]\n"
-						+ "Expected: every item is a string ending with \"ar\"\n"
+				.withMessage("Request header values for [foo]" + System.lineSeparator()
+						+ "Expected: every item is a string ending with \"ar\"" + System.lineSeparator()
 						+ "     but: an item was \"baz\"");
 	}
 
@@ -325,20 +325,20 @@ class MockRestRequestMatchersTests {
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> MockRestRequestMatchers
 						.queryParam("foo", contains(containsString("ba"))).match(this.request))
-				.withMessage("Request queryParam values for [foo]\n"
-						+ "Expected: iterable containing [a string containing \"ba\"]\n"
+				.withMessage("Request queryParam values for [foo]" + System.lineSeparator()
+						+ "Expected: iterable containing [a string containing \"ba\"]" + System.lineSeparator()
 						+ "     but: not matched: \"baz\"");
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> MockRestRequestMatchers
 						.queryParam("foo", hasItem(endsWith("ba"))).match(this.request))
-				.withMessage("Request queryParam values for [foo]\n"
-						+ "Expected: a collection containing a string ending with \"ba\"\n"
+				.withMessage("Request queryParam values for [foo]" + System.lineSeparator()
+						+ "Expected: a collection containing a string ending with \"ba\"" + System.lineSeparator()
 						+ "     but: mismatches were: [was \"bar\", was \"baz\"]");
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> MockRestRequestMatchers
 						.queryParam("foo", everyItem(endsWith("ar"))).match(this.request))
-				.withMessage("Request queryParam values for [foo]\n"
-						+ "Expected: every item is a string ending with \"ar\"\n"
+				.withMessage("Request queryParam values for [foo]" + System.lineSeparator()
+						+ "Expected: every item is a string ending with \"ar\"" + System.lineSeparator()
 						+ "     but: an item was \"baz\"");
 	}
 
