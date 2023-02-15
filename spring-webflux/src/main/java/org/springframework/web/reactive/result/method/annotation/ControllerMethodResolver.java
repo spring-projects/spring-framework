@@ -109,6 +109,8 @@ class ControllerMethodResolver {
 
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache = new ConcurrentHashMap<>(64);
 
+	private final Map<HandlerMethod, InvocableHandlerMethod> handlerMethodCache = new ConcurrentHashMap<>(64);
+
 
 	ControllerMethodResolver(ArgumentResolverConfigurer customResolvers, ReactiveAdapterRegistry adapterRegistry,
 			ConfigurableApplicationContext context, List<HttpMessageReader<?>> readers) {
@@ -257,10 +259,12 @@ class ControllerMethodResolver {
 	 * {@code @RequestMapping} method initialized with argument resolvers.
 	 */
 	public InvocableHandlerMethod getRequestMappingMethod(HandlerMethod handlerMethod) {
-		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
-		invocable.setArgumentResolvers(this.requestMappingResolvers);
-		invocable.setReactiveAdapterRegistry(this.reactiveAdapterRegistry);
-		return invocable;
+		return handlerMethodCache.computeIfAbsent(handlerMethod, hm -> {
+			final InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
+			invocable.setArgumentResolvers(this.requestMappingResolvers);
+			invocable.setReactiveAdapterRegistry(this.reactiveAdapterRegistry);
+			return invocable;
+		});
 	}
 
 	/**
