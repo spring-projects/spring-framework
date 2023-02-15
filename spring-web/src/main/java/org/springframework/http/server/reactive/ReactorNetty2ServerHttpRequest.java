@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,12 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
 		String scheme = getScheme(request);
+
+		InetSocketAddress hostAddress = request.hostAddress();
+		if (hostAddress != null) {
+			return new URI(scheme, null, hostAddress.getHostString(), hostAddress.getPort(), null, null, null);
+		}
+
 		CharSequence charSequence = request.requestHeaders().get(HttpHeaderNames.HOST);
 		if (charSequence != null) {
 			String header = charSequence.toString();
@@ -103,12 +109,8 @@ class ReactorNetty2ServerHttpRequest extends AbstractServerHttpRequest {
 				return new URI(scheme, header, null, null);
 			}
 		}
-		else {
-			InetSocketAddress localAddress = request.hostAddress();
-			Assert.state(localAddress != null, "No host address available");
-			return new URI(scheme, null, localAddress.getHostString(),
-					localAddress.getPort(), null, null, null);
-		}
+
+		throw new IllegalStateException("Neither local hostAddress nor HOST header available");
 	}
 
 	private static String getScheme(HttpServerRequest request) {
