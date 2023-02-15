@@ -897,9 +897,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	/**
-	  * If it's a "file:" URI, use FileSystemResource to avoid duplicates
-	  * for the same path discovered via class-path scanning.
-	  */
+	 * If it's a "file:" URI, use FileSystemResource to avoid duplicates
+	 * for the same path discovered via class-path scanning.
+	 */
 	private Resource convertModuleSystemURI(URI uri) {
 		return (ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme()) ?
 				new FileSystemResource(uri.getPath()) : UrlResource.from(uri));

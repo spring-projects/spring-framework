@@ -4777,7 +4777,7 @@ directly. For example:
 	ContextSnapshot snapshot = ContextSnapshot.captureAll();
 
 	// On a different thread: restore ThreadLocal values
-	try (ContextSnapshot.Scope scoped = snapshot.setThreadLocals()) {
+	try (ContextSnapshot.Scope scope = snapshot.setThreadLocals()) {
 		// ...
 	}
 ----

@@ -45,6 +45,8 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	private static final KeyValue URI_NONE = KeyValue.of(LowCardinalityKeyNames.URI, KeyValue.NONE_VALUE);
 
+	private static final KeyValue URI_ROOT = KeyValue.of(LowCardinalityKeyNames.URI, ROOT_PATH);
+
 	private static final KeyValue METHOD_NONE = KeyValue.of(LowCardinalityKeyNames.METHOD, KeyValue.NONE_VALUE);
 
 	private static final KeyValue STATUS_IO_ERROR = KeyValue.of(LowCardinalityKeyNames.STATUS, "IO_ERROR");
@@ -101,7 +103,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 		}
 		ClientRequest request = context.getRequest();
 		if (request != null && ROOT_PATH.equals(request.url().getPath())) {
-			return KeyValue.of(LowCardinalityKeyNames.URI, ROOT_PATH);
+			return URI_ROOT;
 		}
 		return URI_NONE;
 	}

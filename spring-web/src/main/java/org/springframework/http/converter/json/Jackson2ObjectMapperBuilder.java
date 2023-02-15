@@ -99,7 +99,7 @@ import org.springframework.util.xml.StaxUtils;
  */
 public class Jackson2ObjectMapperBuilder {
 
-	private static boolean jackson2XmlPresent = ClassUtils.isPresent(
+	private static final boolean jackson2XmlPresent = ClassUtils.isPresent(
 			"com.fasterxml.jackson.dataformat.xml.XmlMapper", Jackson2ObjectMapperBuilder.class.getClassLoader());
 
 

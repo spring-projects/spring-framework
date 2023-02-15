@@ -16,7 +16,8 @@
 
 package org.springframework.web.method.annotation
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.*
@@ -61,7 +62,7 @@ class ModelAttributeMethodProcessorKotlinTests {
 		val factory = Mockito.mock<WebDataBinderFactory>()
 		BDDMockito.given(factory.createBinder(any(), any(), eq("param")))
 			.willAnswer { WebRequestDataBinder(it.getArgument(1)) }
-		Assertions.assertThat(processor.resolveArgument(this.param, container, requestWithParam, factory)).isEqualTo(Param("b"))
+		assertThat(processor.resolveArgument(this.param, container, requestWithParam, factory)).isEqualTo(Param("b"))
 	}
 
 	@Test
@@ -71,7 +72,7 @@ class ModelAttributeMethodProcessorKotlinTests {
 		val factory = Mockito.mock<WebDataBinderFactory>()
 		BDDMockito.given(factory.createBinder(any(), any(), eq("param")))
 			.willAnswer { WebRequestDataBinder(it.getArgument(1)) }
-		Assertions.assertThatThrownBy {
+		assertThatThrownBy {
 			processor.resolveArgument(this.param, container, requestWithParam, factory)
 		}.isInstanceOf(MethodArgumentNotValidException::class.java)
 			.hasMessageContaining("parameter a")

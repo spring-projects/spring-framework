@@ -68,7 +68,7 @@ public final class MockMvcWebConnection implements WebConnection {
 
 	private WebClient webClient;
 
-	private static int MAX_FORWARDS = 100;
+	private static final int MAX_FORWARDS = 100;
 
 
 	/**
@@ -143,7 +143,7 @@ public final class MockMvcWebConnection implements WebConnection {
 			forwards += 1;
 		}
 		if (forwards == MAX_FORWARDS) {
-			throw new IllegalStateException("Forwarded more than " + forwards + " times in a row, potential infinite forward loop");
+			throw new IllegalStateException("Forwarded " + forwards + " times in a row, potential infinite forward loop");
 		}
 		storeCookies(webRequest, httpServletResponse.getCookies());
 

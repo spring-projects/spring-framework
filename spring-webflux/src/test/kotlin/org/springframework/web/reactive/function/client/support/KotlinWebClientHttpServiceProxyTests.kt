@@ -18,7 +18,7 @@ package org.springframework.web.reactive.function.client.support
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -66,7 +66,7 @@ class KotlinWebClientHttpServiceProxyTests {
 		}
 		runBlocking {
 			val greeting = initHttpService().getGreetingSuspending()
-			Assertions.assertThat(greeting).isEqualTo("Hello Spring!")
+			assertThat(greeting).isEqualTo("Hello Spring!")
 		}
 	}
 
@@ -93,7 +93,7 @@ class KotlinWebClientHttpServiceProxyTests {
 			).setBody("Hello Spring!")
 		}
 		val greeting = initHttpService().getGreetingBlocking()
-		Assertions.assertThat(greeting).isEqualTo("Hello Spring!")
+		assertThat(greeting).isEqualTo("Hello Spring!")
 	}
 
 	@Test
@@ -115,8 +115,8 @@ class KotlinWebClientHttpServiceProxyTests {
 		val service = initHttpService(webClient)
 		runBlocking {
 			val greeting = service.getGreetingSuspendingWithAttribute("myAttributeValue")
-			Assertions.assertThat(greeting).isEqualTo("Hello Spring!")
-			Assertions.assertThat(attributes).containsEntry("myAttribute", "myAttributeValue")
+			assertThat(greeting).isEqualTo("Hello Spring!")
+			assertThat(attributes).containsEntry("myAttribute", "myAttributeValue")
 		}
 	}
 

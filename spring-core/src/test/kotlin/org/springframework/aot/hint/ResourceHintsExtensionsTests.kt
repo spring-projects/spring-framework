@@ -32,7 +32,7 @@ class ResourceHintsExtensionsTests {
 	private val resourceHints = mockk<ResourceHints>()
 
 	@Test
-	fun `registerType extension with MemberCategory`() {
+	fun `registerType extension`() {
 		every { resourceHints.registerType(any<Class<String>>()) } returns resourceHints
 		resourceHints.registerType<String>()
 		verify { resourceHints.registerType(String::class.java) }

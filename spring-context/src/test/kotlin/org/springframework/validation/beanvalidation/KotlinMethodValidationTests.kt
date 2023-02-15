@@ -20,7 +20,8 @@ import jakarta.validation.ValidationException
 import jakarta.validation.Validator
 import jakarta.validation.constraints.NotEmpty
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.ProxyFactory
 import org.springframework.validation.annotation.Validated
@@ -41,8 +42,8 @@ class KotlinMethodValidationTests {
 		validator.afterPropertiesSet()
 		proxyFactory.addAdvice(MethodValidationInterceptor(validator as Validator))
 		val proxy = proxyFactory.getProxy() as MyValidBean
-		Assertions.assertThat(proxy.validName("name")).isEqualTo("name")
-		Assertions.assertThatExceptionOfType(ValidationException::class.java).isThrownBy {
+		assertThat(proxy.validName("name")).isEqualTo("name")
+		assertThatExceptionOfType(ValidationException::class.java).isThrownBy {
 			proxy.validName("")
 		}
 	}
@@ -55,8 +56,8 @@ class KotlinMethodValidationTests {
 		validator.afterPropertiesSet()
 		proxyFactory.addAdvice(MethodValidationInterceptor(validator as Validator))
 		val proxy = proxyFactory.getProxy() as MyValidCoroutinesBean
-		Assertions.assertThat(proxy.validName("name")).isEqualTo("name")
-		Assertions.assertThatExceptionOfType(ValidationException::class.java).isThrownBy {
+		assertThat(proxy.validName("name")).isEqualTo("name")
+		assertThatExceptionOfType(ValidationException::class.java).isThrownBy {
 			runBlocking {
 				proxy.validName("")
 			}

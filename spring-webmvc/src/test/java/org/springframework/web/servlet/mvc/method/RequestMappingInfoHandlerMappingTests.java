@@ -177,7 +177,7 @@ class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@PathPatternsParameterizedTest // gh-28062
-	void getHandlerMethodTypeNotSupportedWithParseError(TestRequestMappingInfoHandlerMapping mapping) {
+	void getHandlerMediaTypeNotSupportedWithParseError(TestRequestMappingInfoHandlerMapping mapping) {
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/person/1");
 		request.setContentType("This string");
 		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class)

@@ -145,7 +145,7 @@ public abstract class RepeatableContainers {
 
 		private static final Object NONE = new Object();
 
-		private static StandardRepeatableContainers INSTANCE = new StandardRepeatableContainers();
+		private static final StandardRepeatableContainers INSTANCE = new StandardRepeatableContainers();
 
 		StandardRepeatableContainers() {
 			super(null);
@@ -270,7 +270,7 @@ public abstract class RepeatableContainers {
 	 */
 	private static class NoRepeatableContainers extends RepeatableContainers {
 
-		private static NoRepeatableContainers INSTANCE = new NoRepeatableContainers();
+		private static final NoRepeatableContainers INSTANCE = new NoRepeatableContainers();
 
 		NoRepeatableContainers() {
 			super(null);

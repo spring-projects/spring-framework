@@ -17,7 +17,6 @@
 package org.springframework.http;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -46,11 +45,8 @@ class ResponseEntityTests {
 		assertThat(responseEntity).isNotNull();
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseEntity.getHeaders().containsKey(headerName)).isTrue();
-		List<String> list = responseEntity.getHeaders().get(headerName);
-		assertThat(list).hasSize(2);
-		assertThat(list.get(0)).isEqualTo(headerValue1);
-		assertThat(list.get(1)).isEqualTo(headerValue2);
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getHeaders().get(headerName)).containsExactly(headerValue1, headerValue2);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 	}
 
 	@Test
@@ -69,7 +65,7 @@ class ResponseEntityTests {
 
 		assertThat(responseEntity).isNotNull();
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 	}
 
 	@Test
@@ -79,7 +75,7 @@ class ResponseEntityTests {
 
 		assertThat(responseEntity).isNotNull();
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 	}
 
 	@Test
@@ -98,7 +94,7 @@ class ResponseEntityTests {
 
 		assertThat(responseEntity).isNotNull();
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 	}
 
 	@Test
@@ -270,7 +266,7 @@ class ResponseEntityTests {
 		assertThat(responseEntity).isNotNull();
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL)).isFalse();
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 	}
 
 	@Test
@@ -286,7 +282,7 @@ class ResponseEntityTests {
 		assertThat(responseEntity).isNotNull();
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL)).isTrue();
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
 		assertThat(cacheControlHeader).isEqualTo(
 				"max-age=3600, must-revalidate, private, proxy-revalidate, s-maxage=1800");
@@ -304,7 +300,7 @@ class ResponseEntityTests {
 		assertThat(responseEntity).isNotNull();
 		assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(responseEntity.getHeaders().containsKey(HttpHeaders.CACHE_CONTROL)).isTrue();
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
 		assertThat(cacheControlHeader).isEqualTo("no-store");
@@ -316,7 +312,7 @@ class ResponseEntityTests {
 		ResponseEntity<Integer> responseEntity = ResponseEntity.status(200).body(entity);
 
 		assertThat(responseEntity.getStatusCode().value()).isEqualTo(200);
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 	}
 
 	@Test
@@ -326,7 +322,7 @@ class ResponseEntityTests {
 		ResponseEntity<Integer> responseEntity = ResponseEntity.status(299).body(entity);
 
 		assertThat(responseEntity.getStatusCodeValue()).isEqualTo(299);
-		assertThat((int) responseEntity.getBody()).isEqualTo((int) entity);
+		assertThat(responseEntity.getBody()).isEqualTo(entity);
 	}
 
 }

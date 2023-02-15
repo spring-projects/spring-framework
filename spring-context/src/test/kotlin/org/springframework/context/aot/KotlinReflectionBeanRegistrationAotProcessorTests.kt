@@ -16,10 +16,9 @@
 
 package org.springframework.context.aot
 
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.springframework.aot.generate.GenerationContext
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates
 import org.springframework.aot.test.generate.TestGenerationContext
@@ -41,7 +40,7 @@ class KotlinReflectionBeanRegistrationAotProcessorTests {
 
 	@Test
 	fun processorIsRegistered() {
-		Assertions.assertThat(
+		assertThat(
 			AotServices.factories(javaClass.classLoader).load(BeanRegistrationAotProcessor::class.java))
 			.anyMatch(KotlinReflectionBeanRegistrationAotProcessor::class.java::isInstance)
 	}
@@ -49,12 +48,12 @@ class KotlinReflectionBeanRegistrationAotProcessorTests {
 	@Test
 	fun shouldProcessKotlinBean() {
 		process(SampleKotlinBean::class.java)
-		Assertions.assertThat(
+		assertThat(
 			RuntimeHintsPredicates.reflection()
 				.onType(SampleKotlinBean::class.java)
 				.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS)
 		).accepts(generationContext.runtimeHints)
-		Assertions.assertThat(
+		assertThat(
 			RuntimeHintsPredicates.reflection()
 				.onType(BaseKotlinBean::class.java)
 				.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS)
@@ -64,7 +63,7 @@ class KotlinReflectionBeanRegistrationAotProcessorTests {
 	@Test
 	fun shouldNotProcessJavaBean() {
 		process(SampleJavaBean::class.java)
-		Assertions.assertThat(generationContext.runtimeHints.reflection().typeHints()).isEmpty()
+		assertThat(generationContext.runtimeHints.reflection().typeHints()).isEmpty()
 	}
 
 	private fun process(beanClass: Class<*>) {

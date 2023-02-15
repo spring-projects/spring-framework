@@ -17,7 +17,7 @@
 package org.springframework.aot.hint
 
 /**
- * Extension for [TypeHint.Builder.onReachableType] providing a `onReachableType<Foo>())`
+ * Extension for [TypeHint.Builder.onReachableType] providing a `onReachableType<Foo>()`
  * variant.
  *
  * @author Sebastien Deleuze

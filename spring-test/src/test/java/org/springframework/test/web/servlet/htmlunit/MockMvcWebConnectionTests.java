@@ -85,7 +85,7 @@ public class MockMvcWebConnectionTests {
 	public void infiniteForward() {
 		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 		assertThatIllegalStateException().isThrownBy(() -> this.webClient.getPage("http://localhost/infiniteForward"))
-						.withMessage("Forwarded more than 100 times in a row, potential infinite forward loop");
+						.withMessage("Forwarded 100 times in a row, potential infinite forward loop");
 	}
 
 	@Test

@@ -42,7 +42,7 @@ import org.springframework.util.MimeTypeUtils;
 public class ResourceDecoder extends AbstractDataBufferDecoder<Resource> {
 
 	/** Name of hint with a filename for the resource(e.g. from "Content-Disposition" HTTP header). */
-	public static String FILENAME_HINT = ResourceDecoder.class.getName() + ".filename";
+	public static final String FILENAME_HINT = ResourceDecoder.class.getName() + ".filename";
 
 
 	public ResourceDecoder() {
