@@ -396,14 +396,10 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
-		// Check for Kotlin suspending functions. If one is found but reactor bridge isn't on the classpath, throw
-		if (ScheduledAnnotationReactiveSupport.checkKotlinRuntimeIfNeeded(method)) {
-			processScheduledReactive(scheduled, method, bean, true);
-			return;
-		}
-		// Check for Publisher-returning methods. If found but Reactor isn't on the classpath, throw.
-		if (ScheduledAnnotationReactiveSupport.checkReactorRuntimeIfNeeded(method)) {
-			processScheduledReactive(scheduled, method, bean, false);
+		// Is method a Kotlin suspending function? Throws if true but reactor bridge isn't on the classpath.
+		// Is method returning a Publisher instance? Throws if true but Reactor isn't on the classpath.
+		if (ScheduledAnnotationReactiveSupport.isReactive(method)) {
+			processScheduledReactive(scheduled, method, bean);
 			return;
 		}
 		processScheduledSync(scheduled, method, bean);
@@ -553,7 +549,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @param bean the target bean instance
 	 * @see #createRunnable(Object, Method)
 	 */
-	protected void processScheduledReactive(Scheduled scheduled, Method method, Object bean, boolean isSuspendingFunction) {
+	protected void processScheduledReactive(Scheduled scheduled, Method method, Object bean) {
 		try {
 			boolean processedSchedule = false;
 			String errorMessage =
@@ -592,7 +588,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			Duration fixedDelay = toDuration(scheduled.fixedDelay(), scheduled.timeUnit());
 			if (!fixedDelay.isNegative()) {
 				processedSchedule = true;
-				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false, isSuspendingFunction));
+				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false));
 			}
 
 			String fixedDelayString = scheduled.fixedDelayString();
@@ -610,7 +606,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
 					}
-					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false, isSuspendingFunction));
+					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false));
 				}
 			}
 
@@ -619,7 +615,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			if (!fixedRate.isNegative()) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true, isSuspendingFunction));
+				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true));
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
@@ -636,7 +632,7 @@ public class ScheduledAnnotationBeanPostProcessor
 						throw new IllegalArgumentException(
 								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
 					}
-					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true, isSuspendingFunction));
+					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true));
 				}
 			}
 

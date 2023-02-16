@@ -39,7 +39,7 @@ import org.springframework.util.ReflectionUtils;
  * Helper class for @{@link ScheduledAnnotationBeanPostProcessor} to support reactive cases
  * without a dependency on optional classes.
  * @author Simon Baslé
- * @since 6.0.x //FIXME
+ * @since 6.1.0 //FIXME
  */
 abstract class ScheduledAnnotationReactiveSupport {
 
@@ -53,17 +53,35 @@ abstract class ScheduledAnnotationReactiveSupport {
 			"kotlinx.coroutines.reactor.MonoKt", ScheduledAnnotationReactiveSupport.class.getClassLoader());
 
 	/**
-	 * Checks that if the method is reactive, it can be scheduled. If it isn't reactive
-	 * (Reactive Streams {@code Publisher} is not present at runtime or the method doesn't
-	 * return a form of Publisher) then this check returns {@code false}. Otherwise, it is
-	 * eligible for reactive scheduling and Reactor MUST also be present at runtime.
+	 * Checks that if the method is reactive, it can be scheduled. Methods are considered
+	 * eligible for reactive scheduling if they either return an instance of
+	 * {@code Publisher} or are a Kotlin Suspending Function. If the method isn't matching
+	 * these criteria then this check returns {@code false}.
+	 * <p>For reactive scheduling, Reactor MUST be present at runtime. In the case of
+	 * Kotlin, the Coroutine {@code kotlinx.coroutines.reactor} bridge MUST also be
+	 * present at runtime (in order to invoke suspending functions as a {@code Mono}).
 	 * Provided that is the case, this method returns {@code true}. Otherwise, it throws
 	 * an {@code IllegalStateException}.
+	 * @throws IllegalStateException if the method is reactive but Reactor and/or the
+	 * Kotlin coroutines bridge are not present at runtime
 	 */
-	static boolean checkReactorRuntimeIfNeeded(Method method) {
-		if (!(publisherPresent && Publisher.class.isAssignableFrom(method.getReturnType()))) {
+	static boolean isReactive(Method method) {
+		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
+			if (coroutinesReactorPresent) {
+				return true;
+			}
+			else {
+				throw new IllegalStateException("Kotlin suspending functions may only be annotated with @Scheduled"
+						+ "if Reactor and the Reactor-Coroutine bridge (kotlinx.coroutines.reactor) are present at runtime");
+			}
+		}
+		if (!publisherPresent) {
 			return false;
 		}
+		if (!Publisher.class.isAssignableFrom(method.getReturnType())) {
+			return false;
+		}
+
 		if (reactorPresent) {
 			return true;
 		}
@@ -72,31 +90,21 @@ abstract class ScheduledAnnotationReactiveSupport {
 	}
 
 	/**
-	 * Checks that if the method is a Kotlin suspending function, it can be scheduled.
-	 * If it isn't a suspending function (or Kotlin is not detected at runtime) then this
-	 * check returns {@code false}. Otherwise, it is eligible for conversion to a
-	 * {@code Mono} for reactive scheduling and both Reactor and the
-	 * {@code kotlinx.coroutines.reactor} bridge MUST also be present at runtime.
-	 * Provided that is the case, this method returns {@code true}. Otherwise, it throws
-	 * an {@code IllegalStateException}.
+	 * Turn the invocation of the provided {@code Method} into a {@code Publisher},
+	 * either by reflectively invoking it and returning the resulting {@code Publisher}
+	 * or by converting a Kotlin suspending function into a Publisher via
+	 * {@link CoroutinesUtils}.
+	 * The {@link #isReactive(Method)} check is a precondition to calling this method.
 	 */
-	static boolean checkKotlinRuntimeIfNeeded(Method method) {
-		if (!(KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method))) {
-			return false;
-		}
-		if (coroutinesReactorPresent) {
-			return true;
-		}
-		throw new IllegalStateException("Kotlin suspending functions may only be annotated with @Scheduled"
-				+ "if Reactor and the Reactor-Coroutine bridge (kotlinx.coroutines.reactor) are present at runtime");
-	}
+	static Publisher<?> getPublisherFor(Method method, Object bean) {
+		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
+			//Note that suspending functions declared without args have a single Continuation parameter in reflective inspection
+			Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be annotated "
+					+ "with @Scheduled if declared without arguments");
 
-	/**
-	 * Reflectively invoke a reactive method and return the resulting {@code Publisher}.
-	 * The {@link #checkReactorRuntimeIfNeeded(Method)} check is a precondition to calling
-	 * this method.
-	 */
-	static Publisher<?> getPublisherForReactiveMethod(Method method, Object bean) {
+			return CoroutinesUtils.invokeSuspendingFunction(method, bean, (Object[]) method.getParameters());
+		}
+
 		Assert.isTrue(method.getParameterCount() == 0, "Reactive methods may only be annotated with "
 				+ "@Scheduled if declared without arguments");
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
@@ -114,21 +122,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 	}
 
 	/**
-	 * Turn the provided suspending function method into a {@code Publisher} via
-	 * {@link CoroutinesUtils} and return that Publisher.
-	 * The {@link #checkKotlinRuntimeIfNeeded(Method)} check is a precondition to calling
-	 * this method.
-	 */
-	static Publisher<?> getPublisherForSuspendingFunction(Method method, Object bean) {
-		//Note that suspending functions declared without args have a single Continuation parameter in reflective inspection
-		Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be annotated "
-				+ "with @Scheduled if declared without arguments");
-
-		return CoroutinesUtils.invokeSuspendingFunction(method, bean, (Object[]) method.getParameters());
-	}
-
-	/**
 	 * Encapsulates the logic of {@code @Scheduled} on reactive types, using Reactor.
+	 * The {@link ScheduledAnnotationReactiveSupport#isReactive(Method)} check is a
+	 * precondition to instantiating this class.
 	 */
 	static class ReactiveTask {
 
@@ -142,14 +138,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 		private final Log logger = LogFactory.getLog(getClass());
 
 
-		protected ReactiveTask(Method method, Object bean, Duration initialDelay,
-				Duration otherDelay, boolean isFixedRate, boolean isSuspendingFunction) {
-			if (isSuspendingFunction) {
-				this.publisher = getPublisherForSuspendingFunction(method, bean);
-			}
-			else {
-				this.publisher = getPublisherForReactiveMethod(method, bean);
-			}
+		protected ReactiveTask(Method method, Object bean, Duration initialDelay, Duration otherDelay, boolean isFixedRate) {
+			this.publisher = getPublisherFor(method, bean);
 
 			this.initialDelay = initialDelay;
 			this.otherDelay = otherDelay;

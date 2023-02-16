@@ -21,9 +21,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.ReactiveTask
-import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.checkKotlinRuntimeIfNeeded
-import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.getPublisherForSuspendingFunction
-import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests.ReactiveMethods
+import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.getPublisherFor
+import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.isReactive
 import org.springframework.util.ReflectionUtils
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -45,7 +44,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	@Test
 	fun kotlinSuspendingFunctionIsNotReactive() {
 		val suspending = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspending", Continuation::class.java)
-		Assertions.assertThat(ScheduledAnnotationReactiveSupport.checkReactorRuntimeIfNeeded(suspending!!)).isFalse
+		Assertions.assertThat(isReactive(suspending!!)).isFalse
 	}
 
 	internal class SuspendingFunctions {
@@ -83,8 +82,8 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 		val suspendingMethod = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspending", Continuation::class.java)!!
 		val notSuspendingMethod = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "notSuspending")!!
 
-		assertThat(checkKotlinRuntimeIfNeeded(suspendingMethod)).describedAs("suspending").isTrue()
-		assertThat(checkKotlinRuntimeIfNeeded(notSuspendingMethod)).describedAs("not suspending").isFalse()
+		assertThat(isReactive(suspendingMethod)).describedAs("suspending").isTrue()
+		assertThat(isReactive(notSuspendingMethod)).describedAs("not suspending").isFalse()
 	}
 
 	@Test
@@ -92,13 +91,13 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "withParam", String::class.java, Continuation::class.java)
 
 		//static helper method
-		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherForSuspendingFunction(m!!, target!!) }
+		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherFor(m!!, target!!) }
 				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
 
 		//constructor of task
 		Assertions.assertThatIllegalArgumentException().isThrownBy {
-			ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false, true)
+			ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false)
 		}
 				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
@@ -109,13 +108,13 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "notSuspending")
 
 		//static helper method
-		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherForSuspendingFunction(m!!, target!!) }
+		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherFor(m!!, target!!) }
 				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
 
 		//constructor of task
 		Assertions.assertThatIllegalArgumentException().isThrownBy {
-			ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false, true)
+			ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false)
 		}
 				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
@@ -125,7 +124,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	fun suspendingThrowIsTurnedToMonoError() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "throwsIllegalState", Continuation::class.java)
 
-		val mono = Mono.from(getPublisherForSuspendingFunction(m!!, target!!))
+		val mono = Mono.from(getPublisherFor(m!!, target!!))
 
 		Assertions.assertThatIllegalStateException().isThrownBy { mono.block() }
 				.withMessage("expected")
@@ -133,14 +132,14 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 
 		//constructor of task doesn't throw
 		Assertions.assertThatNoException().isThrownBy {
-			ReactiveTask(m, target!!, Duration.ZERO, Duration.ZERO, false, true)
+			ReactiveTask(m, target!!, Duration.ZERO, Duration.ZERO, false)
 		}
 	}
 
 	@Test
 	fun turningSuspendingFunctionToMonoDoesntExecuteTheMethod() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspendingTracking", Continuation::class.java)
-		val mono = Mono.from(getPublisherForSuspendingFunction(m!!, target!!))
+		val mono = Mono.from(getPublisherFor(m!!, target!!))
 
 		assertThat(target!!.subscription).hasValue(0)
 		mono.block()
@@ -150,14 +149,14 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	@Test
 	fun hasCheckpointToString() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspending", Continuation::class.java)
-		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false, true)
+		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false)
 		assertThat(reactiveTask).hasToString("@Scheduled 'suspending()' in bean 'org.springframework.scheduling.annotation.KotlinScheduledAnnotationReactiveSupportTests\$SuspendingFunctions'")
 	}
 
 	@Test
 	fun cancelledEarlyPreventsSubscription() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspendingTracking", Continuation::class.java)
-		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ofSeconds(10), false, true)
+		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ofSeconds(10), false)
 		reactiveTask.cancel()
 		reactiveTask.subscribe()
 		assertThat(target!!.subscription).hasValue(0)
@@ -166,7 +165,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	@Test
 	fun multipleSubscriptionsTracked() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspendingTracking", Continuation::class.java)
-		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ofMillis(500), false, true)
+		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ofMillis(500), false)
 		reactiveTask.subscribe()
 		Thread.sleep(1500)
 		reactiveTask.cancel()
@@ -177,7 +176,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	@Throws(InterruptedException::class)
 	fun noInitialDelayFixedDelay() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspendingTracking", Continuation::class.java)
-		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ofSeconds(10), false, true)
+		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ofSeconds(10), false)
 		reactiveTask.subscribe()
 		Thread.sleep(500)
 		reactiveTask.cancel()
@@ -188,7 +187,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	@Throws(InterruptedException::class)
 	fun noInitialDelayFixedRate() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspendingTracking", Continuation::class.java)
-		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ofSeconds(10), true, true)
+		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ofSeconds(10), true)
 		reactiveTask.subscribe()
 		Thread.sleep(500)
 		reactiveTask.cancel()
@@ -199,7 +198,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	@Throws(InterruptedException::class)
 	fun initialDelayFixedDelay() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspendingTracking", Continuation::class.java)
-		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ofSeconds(10), Duration.ofMillis(500), false, true)
+		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ofSeconds(10), Duration.ofMillis(500), false)
 		reactiveTask.subscribe()
 		Thread.sleep(500)
 		reactiveTask.cancel()
@@ -210,7 +209,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	@Throws(InterruptedException::class)
 	fun initialDelayFixedRate() {
 		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspendingTracking", Continuation::class.java)
-		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ofSeconds(10), Duration.ofMillis(500), true, true)
+		val reactiveTask = ReactiveTask(m!!, target!!, Duration.ofSeconds(10), Duration.ofMillis(500), true)
 		reactiveTask.subscribe()
 		Thread.sleep(500)
 		reactiveTask.cancel()

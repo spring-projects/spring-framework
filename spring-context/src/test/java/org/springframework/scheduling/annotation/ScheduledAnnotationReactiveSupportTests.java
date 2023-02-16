@@ -34,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.getPublisherForReactiveMethod;
+import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.getPublisherFor;
 
 class ScheduledAnnotationReactiveSupportTests {
 
@@ -48,7 +48,7 @@ class ScheduledAnnotationReactiveSupportTests {
 			"publisherString", "monoThrows" }) //note: monoWithParams can't be found by this test
 	void checkIsReactive(String method) {
 		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, method);
-		assertThat(ScheduledAnnotationReactiveSupport.checkReactorRuntimeIfNeeded(m)).as(m.getName()).isTrue();
+		assertThat(ScheduledAnnotationReactiveSupport.isReactive(m)).as(m.getName()).isTrue();
 	}
 
 	@Test
@@ -56,9 +56,9 @@ class ScheduledAnnotationReactiveSupportTests {
 		Method string = ReflectionUtils.findMethod(ReactiveMethods.class, "oops");
 		Method future = ReflectionUtils.findMethod(ReactiveMethods.class, "future");
 
-		assertThat(ScheduledAnnotationReactiveSupport.checkReactorRuntimeIfNeeded(string))
+		assertThat(ScheduledAnnotationReactiveSupport.isReactive(string))
 				.as("String-returning").isFalse();
-		assertThat(ScheduledAnnotationReactiveSupport.checkReactorRuntimeIfNeeded(future))
+		assertThat(ScheduledAnnotationReactiveSupport.isReactive(future))
 				.as("Future-returning").isFalse();
 	}
 
@@ -137,16 +137,16 @@ class ScheduledAnnotationReactiveSupportTests {
 		void rejectWithParams() {
 			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoWithParam", String.class);
 
-			assertThat(ScheduledAnnotationReactiveSupport.checkReactorRuntimeIfNeeded(m)).as("isReactive").isTrue();
+			assertThat(ScheduledAnnotationReactiveSupport.isReactive(m)).as("isReactive").isTrue();
 
 			//static helper method
-			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherForReactiveMethod(m, target))
+			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
 					.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
 					.withNoCause();
 
 			//constructor of task
 			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
-							m, target, Duration.ZERO, Duration.ZERO, false, false))
+							m, target, Duration.ZERO, Duration.ZERO, false))
 					.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
 					.withNoCause();
 		}
@@ -156,13 +156,13 @@ class ScheduledAnnotationReactiveSupportTests {
 			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoThrows");
 
 			//static helper method
-			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherForReactiveMethod(m, target))
+			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
 					.withMessage("Cannot obtain a Publisher from the @Scheduled reactive method")
 					.withCause(new IllegalStateException("expected"));
 
 			//constructor of task
 			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
-							m, target, Duration.ZERO, Duration.ZERO, false, false))
+							m, target, Duration.ZERO, Duration.ZERO, false))
 					.withMessage("Cannot obtain a Publisher from the @Scheduled reactive method")
 					.withCause(new IllegalStateException("expected"));
 		}
@@ -172,13 +172,13 @@ class ScheduledAnnotationReactiveSupportTests {
 			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoThrowsIllegalAccess");
 
 			//static helper method
-			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherForReactiveMethod(m, target))
+			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
 					.withMessage("Cannot obtain a Publisher from the @Scheduled reactive method")
 					.withCause(new IllegalAccessException("expected"));
 
 			//constructor of task
 			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
-							m, target, Duration.ZERO, Duration.ZERO, false, false))
+							m, target, Duration.ZERO, Duration.ZERO, false))
 					.withMessage("Cannot obtain a Publisher from the @Scheduled reactive method")
 					.withCause(new IllegalAccessException("expected"));
 		}
@@ -187,7 +187,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		void hasCheckpointToString() {
 			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "mono");
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ZERO, false, false);
+					m, target, Duration.ZERO, Duration.ZERO, false);
 
 		assertThat(reactiveTask).hasToString("@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
 		}
@@ -196,7 +196,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		void cancelledEarlyPreventsSubscription() {
 			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "trackingMono");
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ofSeconds(10), false, false);
+					m, target, Duration.ZERO, Duration.ofSeconds(10), false);
 			reactiveTask.cancel();
 			reactiveTask.subscribe();
 
@@ -207,7 +207,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		void noInitialDelayFixedDelay() throws InterruptedException {
 			Method m = ReflectionUtils.findMethod(target.getClass(), "trackingMono");
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ofSeconds(10), false, false);
+					m, target, Duration.ZERO, Duration.ofSeconds(10), false);
 			reactiveTask.subscribe();
 			Thread.sleep(500);
 			reactiveTask.cancel();
@@ -219,7 +219,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		void noInitialDelayFixedRate() throws InterruptedException {
 			Method m = ReflectionUtils.findMethod(target.getClass(), "trackingMono");
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ofSeconds(10), true, false);
+					m, target, Duration.ZERO, Duration.ofSeconds(10), true);
 			reactiveTask.subscribe();
 			Thread.sleep(500);
 			reactiveTask.cancel();
@@ -231,7 +231,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		void initialDelayFixedDelay() throws InterruptedException {
 			Method m = ReflectionUtils.findMethod(target.getClass(), "trackingMono");
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ofSeconds(10), Duration.ofMillis(500), false, false);
+					m, target, Duration.ofSeconds(10), Duration.ofMillis(500), false);
 			reactiveTask.subscribe();
 			Thread.sleep(500);
 			reactiveTask.cancel();
@@ -243,7 +243,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		void initialDelayFixedRate() throws InterruptedException {
 			Method m = ReflectionUtils.findMethod(target.getClass(), "trackingMono");
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ofSeconds(10), Duration.ofMillis(500), true, false);
+					m, target, Duration.ofSeconds(10), Duration.ofMillis(500), true);
 			reactiveTask.subscribe();
 			Thread.sleep(500);
 			reactiveTask.cancel();
@@ -255,7 +255,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		void monoErrorHasCheckpoint() throws InterruptedException {
 			Method m = ReflectionUtils.findMethod(target.getClass(), "monoError");
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ofSeconds(10), true, false);
+					m, target, Duration.ZERO, Duration.ofSeconds(10), true);
 
 			assertThat(reactiveTask.checkpoint).isEqualTo("@Scheduled 'monoError()' in bean "
 					+ "'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
