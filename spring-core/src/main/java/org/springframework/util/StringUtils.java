@@ -210,6 +210,13 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check (may be {@code null})
 	 * @return {@code true} if the {@code String} is not empty and
 	 * contains at least 1 whitespace character
+	 * <p><pre class="code">
+	 * StringUtils.containsWhitespace(null) 	= false
+	 * StringUtils.containsWhitespace("abc") 	= false
+	 * StringUtils.containsWhitespace("abc ") 	= true
+	 * StringUtils.containsWhitespace(" abc") 	= true
+	 * StringUtils.containsWhitespace("ab c") 	= true
+	 * </pre>
 	 * @see #containsWhitespace(CharSequence)
 	 */
 	public static boolean containsWhitespace(@Nullable String str) {
@@ -237,6 +244,14 @@ public abstract class StringUtils {
 	 * leading, trailing, and in between characters.
 	 * @param text the {@code CharSequence} to check
 	 * @return the trimmed {@code CharSequence}
+	 * <p><pre class="code">
+	 * StringUtils.trimAllWhitespace(null) 		= null
+	 * StringUtils.trimAllWhitespace("abc") 	= "abc"
+	 * StringUtils.trimAllWhitespace("abc ") 	= "abc"
+	 * StringUtils.trimAllWhitespace(" abc") 	= "abc"
+	 * StringUtils.trimAllWhitespace(" abc ") 	= "abc"
+	 * StringUtils.trimAllWhitespace("ab c") 	= "abc"
+	 * </pre>
 	 * @since 5.3.22
 	 * @see #trimAllWhitespace(String)
 	 * @see java.lang.Character#isWhitespace
