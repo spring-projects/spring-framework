@@ -536,6 +536,11 @@ public abstract class StringUtils {
 	 * Capitalize a {@code String}, changing the first letter to
 	 * upper case as per {@link Character#toUpperCase(char)}.
 	 * No other letters are changed.
+	 * <p><pre class="code">
+	 * StringUtils.capitalize(null) 	= null
+	 * StringUtils.capitalize("abc") 	= "Abc"
+	 * StringUtils.capitalize(" abc") 	= " abc"
+	 * </pre>
 	 * @param str the {@code String} to capitalize
 	 * @return the capitalized {@code String}
 	 */
@@ -547,6 +552,11 @@ public abstract class StringUtils {
 	 * Uncapitalize a {@code String}, changing the first letter to
 	 * lower case as per {@link Character#toLowerCase(char)}.
 	 * No other letters are changed.
+	 * <p><pre class="code">
+	 * StringUtils.uncapitalize(null) 	= null
+	 * StringUtils.uncapitalize("ABC") 	= "aBC"
+	 * StringUtils.uncapitalize(" ABC") = " ABC"
+	 * </pre>
 	 * @param str the {@code String} to uncapitalize
 	 * @return the uncapitalized {@code String}
 	 */
