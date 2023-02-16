@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  *
  * <p>If Lazy is present on a {@link Configuration @Configuration} class, this
  * indicates that all {@code @Bean} methods within that {@code @Configuration}
- * should be lazily initialized. If {@code @Lazy} is present and false on a {@code @Bean}
+ * should be lazily initialized. If {@code @Lazy} is present and {@code false} on a {@code @Bean}
  * method within a {@code @Lazy}-annotated {@code @Configuration} class, this indicates
  * overriding the 'default lazy' behavior and that the bean should be eagerly initialized.
  *
