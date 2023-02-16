@@ -353,6 +353,16 @@ public abstract class StringUtils {
 	/**
 	 * Test if the given {@code String} starts with the specified prefix,
 	 * ignoring upper/lower case.
+	 * <p><pre class="code">
+	 * StringUtils.startsWithIgnoreCase(null, null) 	= false
+	 * StringUtils.startsWithIgnoreCase(" abc", "a") 	= false
+	 * StringUtils.startsWithIgnoreCase(" abc", " ") 	= true
+	 * StringUtils.startsWithIgnoreCase("abc", "a")		= true
+	 * StringUtils.startsWithIgnoreCase("Abc", "a")		= true
+	 * StringUtils.startsWithIgnoreCase("abc", "A")		= true
+	 * StringUtils.startsWithIgnoreCase("Abc", "A")		= true
+	 * StringUtils.startsWithIgnoreCase("def", "A")		= false
+	 * </pre>
 	 * @param str the {@code String} to check
 	 * @param prefix the prefix to look for
 	 * @see java.lang.String#startsWith
@@ -365,6 +375,16 @@ public abstract class StringUtils {
 	/**
 	 * Test if the given {@code String} ends with the specified suffix,
 	 * ignoring upper/lower case.
+	 * <p><pre class="code">
+	 * StringUtils.endsWithIgnoreCase(null, null) 	= false
+	 * StringUtils.endsWithIgnoreCase("abc ", "c") 	= false
+	 * StringUtils.endsWithIgnoreCase("abc ", " ") 	= true
+	 * StringUtils.endsWithIgnoreCase("abc", "c")	= true
+	 * StringUtils.endsWithIgnoreCase("abC", "c")	= true
+	 * StringUtils.endsWithIgnoreCase("abc", "C")	= true
+	 * StringUtils.endsWithIgnoreCase("abC", "C")	= true
+	 * StringUtils.endsWithIgnoreCase("def", "C")	= false
+	 * </pre>
 	 * @param str the {@code String} to check
 	 * @param suffix the suffix to look for
 	 * @see java.lang.String#endsWith
