@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
@@ -37,6 +36,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -187,9 +187,9 @@ public class ResourceRegionHttpMessageConverterTests {
 	public void applicationOctetStreamDefaultContentType() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		ClassPathResource body = mock();
-		BDDMockito.given(body.getFilename()).willReturn("spring.dat");
-		BDDMockito.given(body.contentLength()).willReturn(12L);
-		BDDMockito.given(body.getInputStream()).willReturn(new ByteArrayInputStream("Spring Framework".getBytes()));
+		given(body.getFilename()).willReturn("spring.dat");
+		given(body.contentLength()).willReturn(12L);
+		given(body.getInputStream()).willReturn(new ByteArrayInputStream("Spring Framework".getBytes()));
 		HttpRange range = HttpRange.createByteRange(0, 5);
 		ResourceRegion resourceRegion = range.toResourceRegion(body);
 

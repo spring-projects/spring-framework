@@ -18,7 +18,7 @@ package org.springframework.web.server
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest
 import org.springframework.web.testfixture.server.MockServerWebExchange
@@ -35,7 +35,7 @@ class CoWebFilterTests {
 		val exchange = MockServerWebExchange.from(MockServerHttpRequest.get("https://example.com"))
 
 		val chain = Mockito.mock(WebFilterChain::class.java)
-		BDDMockito.given(chain.filter(exchange)).willReturn(Mono.empty())
+		given(chain.filter(exchange)).willReturn(Mono.empty())
 
 		val filter = MyCoWebFilter()
 		val result = filter.filter(exchange, chain)
