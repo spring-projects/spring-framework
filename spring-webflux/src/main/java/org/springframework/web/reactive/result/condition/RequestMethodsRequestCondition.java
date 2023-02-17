@@ -46,9 +46,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 
 	static {
 		requestMethodConditionCache = CollectionUtils.newHashMap(RequestMethod.values().length);
-		for (RequestMethod method : RequestMethod.values()) {
-			requestMethodConditionCache.put(
-					HttpMethod.valueOf(method.name()), new RequestMethodsRequestCondition(method));
+		for (RequestMethod requestMethod : RequestMethod.values()) {
+			requestMethodConditionCache.put(requestMethod.asHttpMethod(),
+					new RequestMethodsRequestCondition(requestMethod));
 		}
 	}
 
@@ -150,16 +150,15 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	}
 
 	@Nullable
-	private RequestMethodsRequestCondition matchRequestMethod(@Nullable HttpMethod httpMethod) {
-		if (httpMethod == null) {
-			return null;
-		}
-		RequestMethod requestMethod = RequestMethod.valueOf(httpMethod.name());
-		if (getMethods().contains(requestMethod)) {
-			return requestMethodConditionCache.get(httpMethod);
-		}
-		if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
-			return requestMethodConditionCache.get(HttpMethod.GET);
+	private RequestMethodsRequestCondition matchRequestMethod(HttpMethod httpMethod) {
+		RequestMethod requestMethod = RequestMethod.resolve(httpMethod);
+		if (requestMethod != null) {
+			if (getMethods().contains(requestMethod)) {
+				return requestMethodConditionCache.get(httpMethod);
+			}
+			if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
+				return requestMethodConditionCache.get(HttpMethod.GET);
+			}
 		}
 		return null;
 	}
