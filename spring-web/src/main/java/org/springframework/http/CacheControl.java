@@ -329,6 +329,7 @@ public class CacheControl {
 	 * Adding a {@link #maxAge(Duration) max-age} directive is strongly advised
 	 * to enforce the actual freshness lifetime.
 	 * @return {@code this}, to facilitate method chaining
+	 * @since 6.0.5
 	 * @see <a href="https://tools.ietf.org/html/rfc8246">rfc8246</a>
 	 */
 	public CacheControl immutable() {

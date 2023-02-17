@@ -21,8 +21,8 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.*
-import org.mockito.BDDMockito
-import org.mockito.Mockito
+import org.mockito.BDDMockito.given
+import org.mockito.Mockito.mock
 import org.springframework.core.MethodParameter
 import org.springframework.core.annotation.SynthesizingMethodParameter
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -51,7 +51,7 @@ class ModelAttributeMethodProcessorKotlinTests {
 	fun setup() {
 		container = ModelAndViewContainer()
 		processor = ModelAttributeMethodProcessor(false)
-		var method = ModelAttributeHandler::class.java.getDeclaredMethod("test",Param::class.java)
+		val method = ModelAttributeHandler::class.java.getDeclaredMethod("test", Param::class.java)
 		param = SynthesizingMethodParameter(method, 0)
 	}
 
@@ -59,8 +59,8 @@ class ModelAttributeMethodProcessorKotlinTests {
 	fun resolveArgumentWithValue() {
 		val mockRequest = MockHttpServletRequest().apply { addParameter("a", "b") }
 		val requestWithParam = ServletWebRequest(mockRequest)
-		val factory = Mockito.mock<WebDataBinderFactory>()
-		BDDMockito.given(factory.createBinder(any(), any(), eq("param")))
+		val factory = mock<WebDataBinderFactory>()
+		given(factory.createBinder(any(), any(), eq("param")))
 			.willAnswer { WebRequestDataBinder(it.getArgument(1)) }
 		assertThat(processor.resolveArgument(this.param, container, requestWithParam, factory)).isEqualTo(Param("b"))
 	}
@@ -69,8 +69,8 @@ class ModelAttributeMethodProcessorKotlinTests {
 	fun throwMethodArgumentNotValidExceptionWithNull() {
 		val mockRequest = MockHttpServletRequest().apply { addParameter("a", null) }
 		val requestWithParam = ServletWebRequest(mockRequest)
-		val factory = Mockito.mock<WebDataBinderFactory>()
-		BDDMockito.given(factory.createBinder(any(), any(), eq("param")))
+		val factory = mock<WebDataBinderFactory>()
+		given(factory.createBinder(any(), any(), eq("param")))
 			.willAnswer { WebRequestDataBinder(it.getArgument(1)) }
 		assertThatThrownBy {
 			processor.resolveArgument(this.param, container, requestWithParam, factory)
@@ -80,8 +80,8 @@ class ModelAttributeMethodProcessorKotlinTests {
 
 	private data class Param(val a: String)
 
-	@Suppress("UNUSED_PARAMETER")
 	private class ModelAttributeHandler {
+		@Suppress("UNUSED_PARAMETER")
 		fun test(param: Param) { }
 	}
 
