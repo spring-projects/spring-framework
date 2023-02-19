@@ -219,8 +219,8 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 				Object[] validationHints = (hints instanceof Object[] objectHint ? objectHint : new Object[] {hints});
 				BeanPropertyBindingResult bindingResult =
 						new BeanPropertyBindingResult(target, getParameterName(parameter));
-				if (!ObjectUtils.isEmpty(validationHints) && this.validator instanceof SmartValidator smartValidator) {
-					(smartValidator).validate(target, bindingResult, validationHints);
+				if (!ObjectUtils.isEmpty(validationHints) && this.validator instanceof SmartValidator sv) {
+					sv.validate(target, bindingResult, validationHints);
 				}
 				else {
 					this.validator.validate(target, bindingResult);
