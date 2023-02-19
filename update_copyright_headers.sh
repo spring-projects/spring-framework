@@ -11,11 +11,11 @@ current_year=$(date +'%Y')
 echo Updating copyright headers in Java, Kotlin, and Groovy source code for year $current_year
 
 # Added/Modified this year and committed
-for file in $(git --no-pager diff --name-only --diff-filter=AM @{$current_year-01-01}..@{$current_year-12-31} | egrep "^.+\.(java|kotlin|groovy)$" | uniq); do
+for file in $(git --no-pager diff --name-only --diff-filter=AM @{$current_year-01-01}..@{$current_year-12-31} | egrep "^.+\.(java|kt|groovy)$" | uniq); do
 	sed -i '' -E "s/Copyright 2002-[0-9]{4}/Copyright 2002-$current_year/g" $file;
 done
 
 # Added/Modified and staged but not yet committed
-for file in $(git --no-pager diff --name-only --diff-filter=AM --cached | egrep "^.+\.(java|kotlin|groovy)$" | uniq); do
+for file in $(git --no-pager diff --name-only --diff-filter=AM --cached | egrep "^.+\.(java|kt|groovy)$" | uniq); do
 	sed -i '' -E "s/Copyright 2002-[0-9]{4}/Copyright 2002-$current_year/g" $file;
 done
