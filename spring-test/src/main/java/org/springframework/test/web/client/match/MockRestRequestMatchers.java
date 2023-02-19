@@ -159,7 +159,7 @@ public abstract class MockRestRequestMatchers {
 	 * ({@link Matchers#contains(Matcher[])}, and more.
 	 * @param name the name of the query parameter to consider
 	 * @param matcher the matcher to apply to the whole list of values for that header
-	 * @since 6.0.5
+	 * @since 5.3.26
 	 */
 	public static RequestMatcher queryParam(String name, Matcher<? super List<String>> matcher) {
 		return request -> {
@@ -238,7 +238,7 @@ public abstract class MockRestRequestMatchers {
 	 * ({@link Matchers#contains(Matcher[])}, and more.
 	 * @param name the name of the request header to consider
 	 * @param matcher the matcher to apply to the whole list of values for that header
-	 * @since 6.0.5
+	 * @since 5.3.26
 	 */
 	public static RequestMatcher header(String name, Matcher<? super List<String>> matcher) {
 		return request -> {
