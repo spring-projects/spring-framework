@@ -33,7 +33,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
  * the Jackson library.
  *
  * <p>The annotations ensure the {@link ProblemDetail#getProperties() properties}
- * map is unwrapped and rendered as top level JSON properties, and likewise that
+ * map is unwrapped and rendered as top-level JSON properties, and likewise that
  * the {@code properties} map contains unknown properties from the JSON.
  *
  * <p>{@link Jackson2ObjectMapperBuilder} automatically registers this as a

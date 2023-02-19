@@ -57,14 +57,15 @@ dependencies {
 		exclude group: "pull-parser", module: "pull-parser"
 		exclude group: "xpp3", module: "xpp3"
 	}
-	testImplementation("jaxen:jaxen")
-	testImplementation("org.xmlunit:xmlunit-assertj")
-	testImplementation("org.xmlunit:xmlunit-matchers")
-	testImplementation("org.hibernate:hibernate-validator")
-	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("io.reactivex.rxjava3:rxjava")
+	testImplementation("jakarta.validation:jakarta.validation-api")
+	testImplementation("jaxen:jaxen")
+	testImplementation("org.hibernate:hibernate-validator")
 	testImplementation("org.jetbrains.kotlin:kotlin-script-runtime")
+	testImplementation("org.skyscreamer:jsonassert")
+	testImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("org.xmlunit:xmlunit-matchers")
 	testRuntimeOnly("org.apache.httpcomponents.client5:httpclient5")
 	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntimeOnly("org.jruby:jruby")
