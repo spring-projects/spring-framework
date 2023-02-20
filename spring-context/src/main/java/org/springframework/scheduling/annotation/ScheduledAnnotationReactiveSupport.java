@@ -31,6 +31,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.KotlinDetector;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -43,9 +45,6 @@ import org.springframework.util.ReflectionUtils;
  */
 abstract class ScheduledAnnotationReactiveSupport {
 
-	static final boolean publisherPresent = ClassUtils.isPresent(
-			"org.reactivestreams.Publisher", ScheduledAnnotationReactiveSupport.class.getClassLoader());
-
 	static final boolean reactorPresent = ClassUtils.isPresent(
 			"reactor.core.publisher.Flux", ScheduledAnnotationReactiveSupport.class.getClassLoader());
 
@@ -54,9 +53,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 	/**
 	 * Checks that if the method is reactive, it can be scheduled. Methods are considered
-	 * eligible for reactive scheduling if they either return an instance of
-	 * {@code Publisher} or are a Kotlin Suspending Function. If the method isn't matching
-	 * these criteria then this check returns {@code false}.
+	 * eligible for reactive scheduling if they either return an instance of a type that
+	 * can be converted to {@code Publisher} or are a Kotlin Suspending Function.
+	 * If the method isn't matching these criteria then this check returns {@code false}.
 	 * <p>For reactive scheduling, Reactor MUST be present at runtime. In the case of
 	 * Kotlin, the Coroutine {@code kotlinx.coroutines.reactor} bridge MUST also be
 	 * present at runtime (in order to invoke suspending functions as a {@code Mono}).
@@ -67,57 +66,64 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 */
 	static boolean isReactive(Method method) {
 		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
-			if (coroutinesReactorPresent) {
-				return true;
-			}
-			else {
-				throw new IllegalStateException("Kotlin suspending functions may only be annotated with @Scheduled"
-						+ "if Reactor and the Reactor-Coroutine bridge (kotlinx.coroutines.reactor) are present at runtime");
-			}
-		}
-		if (!publisherPresent) {
-			return false;
-		}
-		if (!Publisher.class.isAssignableFrom(method.getReturnType())) {
-			return false;
-		}
-
-		if (reactorPresent) {
+			//Note that suspending functions declared without args have a single Continuation parameter in reflective inspection
+			Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be"
+					+ " annotated with @Scheduled if declared without arguments");
+			Assert.isTrue(coroutinesReactorPresent, "Kotlin suspending functions may only be annotated with"
+					+ " @Scheduled if Reactor and the Reactor-Coroutine bridge (kotlinx.coroutines.reactor) are present at runtime");
 			return true;
 		}
-		throw new IllegalStateException("Reactive methods returning a Publisher may only be annotated with @Scheduled"
-				+ "if Reactor is present at runtime");
+		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
+		if (!registry.hasAdapters()) {
+			return false;
+		}
+		Class<?> returnType = method.getReturnType();
+		ReactiveAdapter candidateAdapter = registry.getAdapter(returnType);
+		if (candidateAdapter == null) {
+			return false;
+		}
+		Assert.isTrue(method.getParameterCount() == 0, "Reactive methods may only be annotated with"
+				+ " @Scheduled if declared without arguments");
+		Assert.isTrue(candidateAdapter.getDescriptor().isDeferred(), "Reactive methods may only be annotated with"
+				+ " @Scheduled if the return type supports deferred execution");
+		Assert.isTrue(reactorPresent, "Reactive methods may only be annotated with @Scheduled if Reactor is"
+				+ " present at runtime");
+		return true;
 	}
 
 	/**
 	 * Turn the invocation of the provided {@code Method} into a {@code Publisher},
-	 * either by reflectively invoking it and returning the resulting {@code Publisher}
-	 * or by converting a Kotlin suspending function into a Publisher via
-	 * {@link CoroutinesUtils}.
+	 * either by reflectively invoking it and converting the result to a {@code Publisher}
+	 * via {@link ReactiveAdapterRegistry} or by converting a Kotlin suspending function
+	 * into a {@code Publisher} via {@link CoroutinesUtils}.
 	 * The {@link #isReactive(Method)} check is a precondition to calling this method.
 	 */
 	static Publisher<?> getPublisherFor(Method method, Object bean) {
 		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
-			//Note that suspending functions declared without args have a single Continuation parameter in reflective inspection
-			Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be annotated "
-					+ "with @Scheduled if declared without arguments");
-
 			return CoroutinesUtils.invokeSuspendingFunction(method, bean, (Object[]) method.getParameters());
 		}
 
-		Assert.isTrue(method.getParameterCount() == 0, "Reactive methods may only be annotated with "
-				+ "@Scheduled if declared without arguments");
+		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
+		Class<?> returnType = method.getReturnType();
+		ReactiveAdapter adapter = registry.getAdapter(returnType);
+		if (adapter == null) {
+			throw new IllegalArgumentException("Cannot convert the @Scheduled reactive method return type to Publisher");
+		}
+		if (!adapter.getDescriptor().isDeferred()) {
+			throw new IllegalArgumentException("Cannot convert the @Scheduled reactive method return type to Publisher, "
+					+ returnType.getSimpleName() + " is not a deferred reactive type");
+		}
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
 		try {
 			ReflectionUtils.makeAccessible(invocableMethod);
 			Object r = invocableMethod.invoke(bean);
-			return (Publisher<?>) r;
+			return adapter.toPublisher(r);
 		}
 		catch (InvocationTargetException ex) {
-			throw new IllegalArgumentException("Cannot obtain a Publisher from the @Scheduled reactive method", ex.getTargetException());
+			throw new IllegalArgumentException("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex.getTargetException());
 		}
 		catch (IllegalAccessException ex) {
-			throw new IllegalArgumentException("Cannot obtain a Publisher from the @Scheduled reactive method", ex);
+			throw new IllegalArgumentException("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex);
 		}
 	}
 

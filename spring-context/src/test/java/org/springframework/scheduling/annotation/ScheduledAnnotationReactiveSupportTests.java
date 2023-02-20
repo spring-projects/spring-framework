@@ -21,6 +21,8 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Flowable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,7 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.getPublisherFor;
+import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.isReactive;
 
 class ScheduledAnnotationReactiveSupportTests {
 
@@ -45,21 +48,28 @@ class ScheduledAnnotationReactiveSupportTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = { "mono", "flux", "monoString", "fluxString", "publisherMono",
-			"publisherString", "monoThrows" }) //note: monoWithParams can't be found by this test
+			"publisherString", "monoThrows", "flowable", "completable" }) //note: monoWithParams can't be found by this test
 	void checkIsReactive(String method) {
 		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, method);
-		assertThat(ScheduledAnnotationReactiveSupport.isReactive(m)).as(m.getName()).isTrue();
+		assertThat(isReactive(m)).as(m.getName()).isTrue();
 	}
 
 	@Test
 	void checkNotReactive() {
 		Method string = ReflectionUtils.findMethod(ReactiveMethods.class, "oops");
+
+		assertThat(isReactive(string))
+				.as("String-returning").isFalse();
+	}
+
+	@Test
+	void rejectReactiveAdaptableButNotDeferred() {
 		Method future = ReflectionUtils.findMethod(ReactiveMethods.class, "future");
 
-		assertThat(ScheduledAnnotationReactiveSupport.isReactive(string))
-				.as("String-returning").isFalse();
-		assertThat(ScheduledAnnotationReactiveSupport.isReactive(future))
-				.as("Future-returning").isFalse();
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> isReactive(future)
+		)
+						.withMessage("Reactive methods may only be annotated with @Scheduled if the return type supports deferred execution");
 	}
 
 	static class ReactiveMethods {
@@ -109,6 +119,14 @@ class ScheduledAnnotationReactiveSupportTests {
 			throw new IllegalAccessException("expected");
 		}
 
+		public Flowable<Void> flowable() {
+			return Flowable.empty();
+		}
+
+		public Completable completable() {
+			return Completable.complete();
+		}
+
 		AtomicInteger subscription = new AtomicInteger();
 
 		public Mono<Void> trackingMono() {
@@ -132,22 +150,19 @@ class ScheduledAnnotationReactiveSupportTests {
 			this.target = new ReactiveMethods();
 		}
 
-		@SuppressWarnings("ReactiveStreamsUnusedPublisher")
 		@Test
-		void rejectWithParams() {
+		void isReactiveRejectsWithParams() {
 			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoWithParam", String.class);
 
-			assertThat(ScheduledAnnotationReactiveSupport.isReactive(m)).as("isReactive").isTrue();
-
-			//static helper method
-			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
+			//isReactive rejects with context
+			assertThatIllegalArgumentException().isThrownBy(() -> isReactive(m))
 					.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
 					.withNoCause();
 
-			//constructor of task
+			//constructor of task doesn't provide the context isReactive does
 			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
 							m, target, Duration.ZERO, Duration.ZERO, false))
-					.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
+					.withMessage("wrong number of arguments")
 					.withNoCause();
 		}
 
@@ -157,13 +172,13 @@ class ScheduledAnnotationReactiveSupportTests {
 
 			//static helper method
 			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
-					.withMessage("Cannot obtain a Publisher from the @Scheduled reactive method")
+					.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
 					.withCause(new IllegalStateException("expected"));
 
 			//constructor of task
 			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
 							m, target, Duration.ZERO, Duration.ZERO, false))
-					.withMessage("Cannot obtain a Publisher from the @Scheduled reactive method")
+					.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
 					.withCause(new IllegalStateException("expected"));
 		}
 
@@ -173,13 +188,13 @@ class ScheduledAnnotationReactiveSupportTests {
 
 			//static helper method
 			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
-					.withMessage("Cannot obtain a Publisher from the @Scheduled reactive method")
+					.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
 					.withCause(new IllegalAccessException("expected"));
 
 			//constructor of task
 			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
 							m, target, Duration.ZERO, Duration.ZERO, false))
-					.withMessage("Cannot obtain a Publisher from the @Scheduled reactive method")
+					.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
 					.withCause(new IllegalAccessException("expected"));
 		}
 

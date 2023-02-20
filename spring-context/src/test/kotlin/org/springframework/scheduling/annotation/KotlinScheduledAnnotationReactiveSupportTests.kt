@@ -16,10 +16,16 @@
 
 package org.springframework.scheduling.annotation
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.ReactiveTask
 import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.getPublisherFor
 import org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.isReactive
@@ -33,18 +39,32 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 
 	@Test
 	fun ensureReactor() {
-		Assertions.assertThat(ScheduledAnnotationReactiveSupport.reactorPresent).isTrue
+		assertThat(ScheduledAnnotationReactiveSupport.reactorPresent).isTrue
 	}
 
 	@Test
 	fun ensureKotlinCoroutineReactorBridge() {
-		Assertions.assertThat(ScheduledAnnotationReactiveSupport.coroutinesReactorPresent).isTrue
+		assertThat(ScheduledAnnotationReactiveSupport.coroutinesReactorPresent).isTrue
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = ["suspending", "suspendingReturns"])
+	fun isReactiveSuspending(methodName: String) {
+		val method = ReflectionUtils.findMethod(SuspendingFunctions::class.java, methodName, Continuation::class.java)!!
+		assertThat(isReactive(method)).isTrue
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = ["flow", "deferred"])
+	fun isReactiveKotlinType(methodName: String) {
+		val method = ReflectionUtils.findMethod(SuspendingFunctions::class.java, methodName)!!
+		assertThat(isReactive(method)).isTrue
 	}
 
 	@Test
-	fun kotlinSuspendingFunctionIsNotReactive() {
-		val suspending = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "suspending", Continuation::class.java)
-		Assertions.assertThat(isReactive(suspending!!)).isFalse
+	fun isNotReactive() {
+		val method = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "notSuspending")!!
+		assertThat(isReactive(method)).isFalse
 	}
 
 	internal class SuspendingFunctions {
@@ -67,6 +87,14 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 		}
 
 		fun notSuspending() { }
+
+		fun flow(): Flow<Void> {
+			return flowOf()
+		}
+
+		fun deferred(): Deferred<Void> {
+			return CompletableDeferred()
+		}
 	}
 
 
@@ -87,20 +115,18 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	}
 
 	@Test
-	fun rejectWithParams() {
-		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "withParam", String::class.java, Continuation::class.java)
+	fun isReactiveRejectsWithParams() {
+		val m = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "withParam", String::class.java, Continuation::class.java)!!
 
-		//static helper method
-		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherFor(m!!, target!!) }
+		//isReactive rejects with some context
+		Assertions.assertThatIllegalArgumentException().isThrownBy { isReactive(m) }
 				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause()
 
-		//constructor of task
-		Assertions.assertThatIllegalArgumentException().isThrownBy {
-			ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false)
+		//constructor of task doesn't reject
+		Assertions.assertThatNoException().isThrownBy {
+			ReactiveTask(m, target!!, Duration.ZERO, Duration.ZERO, false)
 		}
-				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
-				.withNoCause()
 	}
 
 	@Test
@@ -109,14 +135,14 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 
 		//static helper method
 		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherFor(m!!, target!!) }
-				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
+				.withMessage("Cannot convert the @Scheduled reactive method return type to Publisher")
 				.withNoCause()
 
 		//constructor of task
 		Assertions.assertThatIllegalArgumentException().isThrownBy {
 			ReactiveTask(m!!, target!!, Duration.ZERO, Duration.ZERO, false)
 		}
-				.withMessage("Kotlin suspending functions may only be annotated with @Scheduled if declared without arguments")
+				.withMessage("Cannot convert the @Scheduled reactive method return type to Publisher")
 				.withNoCause()
 	}
 
