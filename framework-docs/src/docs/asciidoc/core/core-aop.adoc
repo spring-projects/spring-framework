@@ -1778,7 +1778,7 @@ annotation. Consider the following example:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@Aspect("perthis(com.xyz.myapp.CommonPointcuts.businessService())")
+	@Aspect("perthis(execution(* com.xyz.myapp.CommonPointcuts.businessService()))")
 	public class MyAspect {
 
 		private int someState;
@@ -1792,7 +1792,7 @@ annotation. Consider the following example:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@Aspect("perthis(com.xyz.myapp.CommonPointcuts.businessService())")
+	@Aspect("perthis(execution(* com.xyz.myapp.CommonPointcuts.businessService()))")
 	class MyAspect {
 
 		private val someState: Int = 0
