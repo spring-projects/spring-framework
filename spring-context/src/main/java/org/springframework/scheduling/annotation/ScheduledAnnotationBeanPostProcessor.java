@@ -395,6 +395,16 @@ public class ScheduledAnnotationBeanPostProcessor
 		return bean;
 	}
 
+	/**
+	 * Process the given {@code @Scheduled} method declaration on the given bean,
+	 * attempting to distinguish {@link #processScheduledReactive(Scheduled, Method, Object) reactive}
+	 * method from {@link #processScheduledSync(Scheduled, Method, Object) synchronous} methods.
+	 * @param scheduled the {@code @Scheduled} annotation
+	 * @param method the method that the annotation has been declared on
+	 * @param bean the target bean instance
+	 * @see #processScheduledSync(Scheduled, Method, Object)
+	 * @see #processScheduledReactive(Scheduled, Method, Object)
+	 */
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		// Is method a Kotlin suspending function? Throws if true but reactor bridge isn't on the classpath.
 		// Is method returning a Publisher instance? Throws if true but Reactor isn't on the classpath.
@@ -406,7 +416,10 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Process the given {@code @Scheduled} method declaration on the given bean.
+	 * Process the given {@code @Scheduled} method declaration on the given bean,
+	 * as a synchronous method. The method MUST take no arguments. Its return value
+	 * is ignored (if any) and the scheduled invocations of the method take place
+	 * using the underlying {@link TaskScheduler} infrastructure.
 	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on
 	 * @param bean the target bean instance
@@ -547,7 +560,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @param method the method that the annotation has been declared on, which
 	 * MUST either return a Publisher or be a Kotlin suspending function
 	 * @param bean the target bean instance
-	 * @see #createRunnable(Object, Method)
+	 * @see ScheduledAnnotationReactiveSupport
 	 */
 	protected void processScheduledReactive(Scheduled scheduled, Method method, Object bean) {
 		try {
