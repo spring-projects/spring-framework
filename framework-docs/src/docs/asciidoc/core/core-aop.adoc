@@ -1,3 +1,5 @@
+:chomp: -packages
+:fold: -imports
 [[aop]]
 = Aspect Oriented Programming with Spring
 
