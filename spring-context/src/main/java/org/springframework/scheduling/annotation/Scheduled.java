@@ -36,9 +36,11 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * a {@code void} return type; if not, the returned value will be ignored
  * when called through the scheduler.
  *
- * <p>Methods that return a reactive {@code Publisher} are supported provided the
- * Reactor library is present at runtime: it is used to implement the scheduling by
- * repeatedly subscribing to the returned Publisher, which is only produced once.
+ * <p>Methods that return a reactive {@code Publisher} or a type which can be adapted
+ * to {@code Publisher} by the default {@code ReactiveAdapterRegistry} are supported
+ * provided the Reactor library is present at runtime. Reactor is used to implement
+ * the scheduling by repeatedly subscribing to the returned Publisher, which is only
+ * produced once.
  * The cron configuration is not supported for this type of method. Values emitted by
  * the publisher are ignored and discarded. Errors are logged at WARN level, which
  * doesn't prevent further iterations.

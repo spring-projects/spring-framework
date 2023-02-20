@@ -396,11 +396,11 @@ container and once through the `@Configurable` aspect), with the consequence of 
 [[scheduling-annotation-support-scheduled-reactive]]
 === The `@Scheduled` annotation on Reactive methods or Kotlin suspending functions
 
-As of Spring Framework 6.1, `@Scheduled` methods are also supported on two types
-of asynchronous methods:
+As of Spring Framework 6.1, `@Scheduled` methods are also supported on several types
+of reactive methods:
 
- - Reactive methods, i.e. methods with a `Publisher` return type (or any concrete
-implementation of `Publisher`) like in the following example:
+ - methods with a `Publisher` return type (or any concrete implementation of `Publisher`)
+like in the following example:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -409,6 +409,26 @@ implementation of `Publisher`) like in the following example:
 		// return an instance of Publisher
 	}
 ----
+
+ - methods with a return type that can be adapted to `Publisher` via the shared instance
+of the `ReactiveAdapterRegistry`, provided the type supports _deferred subscription_ like
+in the following example:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedDelay = 500)
+	public Single<String> rxjavaNonPublisher() {
+		return Single.just("example");
+	}
+----
+
+[NOTE]
+====
+The `CompletableFuture` class is an example of a type that can typically be adapted
+to `Publisher` but doesn't support deferred subscription. Its `ReactiveAdapter` in the
+registry denotes that by having the `getDescriptor().isDeferred()` method return `false`.
+====
+
 
  - Kotlin suspending functions, like in the following example:
 
@@ -420,8 +440,20 @@ implementation of `Publisher`) like in the following example:
 	}
 ----
 
-Both types of methods must be declared without any arguments. Additionally, the `cron`
-configuration elements are not supported for these two cases.
+ - methods that return a Kotlin `Flow` or `Deferred` instance, like in the following example:
+
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedDelay = 500)
+	fun something(): Flow<Void> {
+		flow {
+			// do something asynchronous
+		}
+	}
+----
+
+All these types of methods must be declared without any arguments. Additionally, the `cron`
+configuration elements are not supported for these cases.
 
 Note that the `TaskExecutor`/`TaskScheduler` infrastructure is not used and the scheduling
 is instead performed by the Reactor library, which must be present at runtime.
