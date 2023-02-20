@@ -40,7 +40,6 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,9 +48,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.util.FileCopyUtils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * Unit tests for various {@link Resource} implementations.
@@ -67,11 +69,11 @@ class ResourceTests {
 	@MethodSource("resource")
 	void resourceIsValid(Resource resource) throws Exception {
 		assertThat(resource.getFilename()).isEqualTo("Resource.class");
-		assertThat(resource.getURL().getFile().endsWith("Resource.class")).isTrue();
+		assertThat(resource.getURL().getFile()).endsWith("Resource.class");
 		assertThat(resource.exists()).isTrue();
 		assertThat(resource.isReadable()).isTrue();
-		assertThat(resource.contentLength() > 0).isTrue();
-		assertThat(resource.lastModified() > 0).isTrue();
+		assertThat(resource.contentLength()).isGreaterThan(0);
+		assertThat(resource.lastModified()).isGreaterThan(0);
 		assertThat(resource.getContentAsByteArray()).containsExactly(Files.readAllBytes(Path.of(resource.getURI())));
 	}
 
@@ -83,8 +85,8 @@ class ResourceTests {
 		assertThat(relative1.getURL().getFile().endsWith("ClassPathResource.class")).isTrue();
 		assertThat(relative1.exists()).isTrue();
 		assertThat(relative1.isReadable()).isTrue();
-		assertThat(relative1.contentLength() > 0).isTrue();
-		assertThat(relative1.lastModified() > 0).isTrue();
+		assertThat(relative1.contentLength()).isGreaterThan(0);
+		assertThat(relative1.lastModified()).isGreaterThan(0);
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -92,11 +94,11 @@ class ResourceTests {
 	void resourceCreateRelativeWithFolder(Resource resource) throws Exception {
 		Resource relative2 = resource.createRelative("support/ResourcePatternResolver.class");
 		assertThat(relative2.getFilename()).isEqualTo("ResourcePatternResolver.class");
-		assertThat(relative2.getURL().getFile().endsWith("ResourcePatternResolver.class")).isTrue();
+		assertThat(relative2.getURL().getFile()).endsWith("ResourcePatternResolver.class");
 		assertThat(relative2.exists()).isTrue();
 		assertThat(relative2.isReadable()).isTrue();
-		assertThat(relative2.contentLength() > 0).isTrue();
-		assertThat(relative2.lastModified() > 0).isTrue();
+		assertThat(relative2.contentLength()).isGreaterThan(0);
+		assertThat(relative2.lastModified()).isGreaterThan(0);
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -104,11 +106,11 @@ class ResourceTests {
 	void resourceCreateRelativeWithDotPath(Resource resource) throws Exception {
 		Resource relative3 = resource.createRelative("../SpringVersion.class");
 		assertThat(relative3.getFilename()).isEqualTo("SpringVersion.class");
-		assertThat(relative3.getURL().getFile().endsWith("SpringVersion.class")).isTrue();
+		assertThat(relative3.getURL().getFile()).endsWith("SpringVersion.class");
 		assertThat(relative3.exists()).isTrue();
 		assertThat(relative3.isReadable()).isTrue();
-		assertThat(relative3.contentLength() > 0).isTrue();
-		assertThat(relative3.lastModified() > 0).isTrue();
+		assertThat(relative3.contentLength()).isGreaterThan(0);
+		assertThat(relative3.lastModified()).isGreaterThan(0);
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -122,21 +124,20 @@ class ResourceTests {
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::getInputStream);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::readableChannel);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::getContentAsByteArray);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
-				() -> relative4.getContentAsString(StandardCharsets.UTF_8));
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> relative4.getContentAsString(UTF_8));
 	}
 
 	private static Stream<Arguments> resource() throws URISyntaxException {
 		URL resourceClass = ResourceTests.class.getResource("Resource.class");
 		Path resourceClassFilePath = Paths.get(resourceClass.toURI());
 		return Stream.of(
-				Arguments.of(Named.of("ClassPathResource", new ClassPathResource("org/springframework/core/io/Resource.class"))),
-				Arguments.of(Named.of("ClassPathResource with ClassLoader", new ClassPathResource("org/springframework/core/io/Resource.class", ResourceTests.class.getClassLoader()))),
-				Arguments.of(Named.of("ClassPathResource with Class", new ClassPathResource("Resource.class", ResourceTests.class))),
-				Arguments.of(Named.of("FileSystemResource", new FileSystemResource(resourceClass.getFile()))),
-				Arguments.of(Named.of("FileSystemResource with File", new FileSystemResource(new File(resourceClass.getFile())))),
-				Arguments.of(Named.of("FileSystemResource with File path", new FileSystemResource(resourceClassFilePath))),
-				Arguments.of(Named.of("UrlResource", new UrlResource(resourceClass)))
+				arguments(named("ClassPathResource", new ClassPathResource("org/springframework/core/io/Resource.class"))),
+				arguments(named("ClassPathResource with ClassLoader", new ClassPathResource("org/springframework/core/io/Resource.class", ResourceTests.class.getClassLoader()))),
+				arguments(named("ClassPathResource with Class", new ClassPathResource("Resource.class", ResourceTests.class))),
+				arguments(named("FileSystemResource", new FileSystemResource(resourceClass.getFile()))),
+				arguments(named("FileSystemResource with File", new FileSystemResource(new File(resourceClass.getFile())))),
+				arguments(named("FileSystemResource with File path", new FileSystemResource(resourceClassFilePath))),
+				arguments(named("UrlResource", new UrlResource(resourceClass)))
 		);
 	}
 
@@ -258,7 +259,7 @@ class ResourceTests {
 				ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 				channel.read(buffer);
 				buffer.rewind();
-				assertThat(buffer.limit() > 0).isTrue();
+				assertThat(buffer.limit()).isGreaterThan(0);
 			}
 		}
 

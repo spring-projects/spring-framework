@@ -621,6 +621,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		buffer.write(new byte[]{'a', 'b', 'c'});
 		buffer.read(); // skip a
 
+		@SuppressWarnings("deprecation")
 		ByteBuffer result = buffer.toByteBuffer();
 		assertThat(result.capacity()).isEqualTo(2);
 		assertThat(result.remaining()).isEqualTo(2);
@@ -639,6 +640,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		DataBuffer buffer = createDataBuffer(3);
 		buffer.write(new byte[]{'a', 'b', 'c'});
 
+		@SuppressWarnings("deprecation")
 		ByteBuffer result = buffer.toByteBuffer(1, 2);
 		assertThat(result.capacity()).isEqualTo(2);
 		assertThat(result.remaining()).isEqualTo(2);

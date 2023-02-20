@@ -211,6 +211,7 @@ class MetadataEncoderTests {
 				.encode()
 				.block();
 
+		@SuppressWarnings("deprecation")
 		ByteBuf byteBuf = new NettyDataBufferFactory(ByteBufAllocator.DEFAULT)
 				.wrap(buffer.toByteBuffer())
 				.getNativeBuffer();
