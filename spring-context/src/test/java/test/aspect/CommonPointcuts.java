@@ -16,22 +16,15 @@
 
 package test.aspect;
 
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 
-@Aspect("perthis(test.aspect.CommonPointcuts.getAgeExecution())")
-public class PerThisAspect {
+/**
+ * @author Sam Brannen
+ * @since 6.0.6
+ */
+public class CommonPointcuts {
 
-	private int invocations = 0;
-
-	public int getInvocations() {
-		return this.invocations;
-	}
-
-	@Around("test.aspect.CommonPointcuts.getAgeExecution()")
-	public int changeAge(ProceedingJoinPoint pjp) {
-		return this.invocations++;
-	}
+	@Pointcut("execution(* getAge())")
+	public void getAgeExecution() {}
 
 }
