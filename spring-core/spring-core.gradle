@@ -86,6 +86,7 @@ dependencies {
 	testImplementation("com.squareup.okhttp3:mockwebserver")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	testImplementation("com.fasterxml.jackson.core:jackson-databind")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	testFixturesImplementation("com.google.code.findbugs:jsr305")
 	testFixturesImplementation("org.junit.platform:junit-platform-launcher")
 	testFixturesImplementation("org.junit.jupiter:junit-jupiter-api")
