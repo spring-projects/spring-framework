@@ -121,7 +121,7 @@ public abstract class MockRestRequestMatchers {
 	 * {@link org.hamcrest.Matchers#hasItem(Matcher)}), that every value in the list
 	 * matches common criteria (such as {@link org.hamcrest.Matchers#everyItem(Matcher)}),
 	 * that each value in the list matches corresponding dedicated criteria
-	 * (such as {@link org.hamcrest.Matchers#contains(Matcher[])}, etc.
+	 * (such as {@link org.hamcrest.Matchers#contains(Matcher[])}), etc.
 	 * @param name the name of the query parameter whose value(s) will be asserted
 	 * @param matcher the Hamcrest matcher to apply to the entire list of values
 	 * for the given query parameter
@@ -207,7 +207,7 @@ public abstract class MockRestRequestMatchers {
 	 * {@link org.hamcrest.Matchers#hasItem(Matcher)}), that every value in the list
 	 * matches common criteria (such as {@link org.hamcrest.Matchers#everyItem(Matcher)}),
 	 * that each value in the list matches corresponding dedicated criteria
-	 * (such as {@link org.hamcrest.Matchers#contains(Matcher[])}, etc.
+	 * (such as {@link org.hamcrest.Matchers#contains(Matcher[])}), etc.
 	 * @param name the name of the header whose value(s) will be asserted
 	 * @param matcher the Hamcrest matcher to apply to the entire list of values
 	 * for the given header
