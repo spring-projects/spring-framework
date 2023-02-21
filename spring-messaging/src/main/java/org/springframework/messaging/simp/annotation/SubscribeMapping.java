@@ -22,6 +22,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
+import org.springframework.messaging.handler.annotation.MessageMappingReflectiveProcessor;
+
 /**
  * Annotation for mapping subscription messages onto specific handler methods based
  * on the destination of a subscription. Supported with STOMP over WebSocket only
@@ -54,6 +57,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Reflective(MessageMappingReflectiveProcessor.class)
 public @interface SubscribeMapping {
 
 	/**

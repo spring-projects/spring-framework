@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
+
 /**
  * Annotation for handling exceptions thrown from message-handling methods within a
  * specific handler class.
@@ -32,6 +34,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Reflective(MessageMappingReflectiveProcessor.class)
 public @interface MessageExceptionHandler {
 
 	/**
