@@ -24,6 +24,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -630,8 +631,8 @@ public abstract class ScriptUtils {
 	 */
 	@Deprecated
 	public static void splitSqlScript(@Nullable EncodedResource resource, String script,
-			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
-			String blockCommentEndDelimiter, List<String> statements) throws ScriptException {
+									  String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
+									  String blockCommentEndDelimiter, List<String> statements) throws ScriptException {
 
 		Assert.hasText(script, "'script' must not be null or empty");
 		Assert.notNull(separator, "'separator' must not be null");
@@ -645,7 +646,13 @@ public abstract class ScriptUtils {
 		StringBuilder sb = new StringBuilder();
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
+		boolean scanningStartTag = false;
 		boolean inEscape = false;
+		boolean foundStartTag = false;
+		boolean possibleEndTag = false;
+		int startTagIndex = -1;
+		StringBuilder startTag = new StringBuilder();
+		Stack<String> tags = new Stack<>();
 
 		for (int i = 0; i < script.length(); i++) {
 			char c = script.charAt(i);
@@ -665,6 +672,68 @@ public abstract class ScriptUtils {
 			}
 			else if (!inSingleQuote && (c == '"')) {
 				inDoubleQuote = !inDoubleQuote;
+			}
+			if ( c == '$' ){
+				if(foundStartTag){
+					if(scanningStartTag) {
+						scanningStartTag = false;
+						for(int j = 0 ; j < tags.size()+1; j++){
+							sb.append('\'');
+						}
+
+					}else if (possibleEndTag) {
+						if (startTag.length() == startTagIndex) {
+							//found end tag
+
+							for(int j = 0 ; j < tags.size()+1; j++){
+								sb.append('\'');
+							}
+							if(tags.size()>0){
+								startTag = new StringBuilder(tags.pop());
+								possibleEndTag = false;
+							}
+
+
+						} else {
+							//not the end tag but the current & can be the start of the end tag we are looking for
+							// so reset the startTagIndex
+							startTagIndex = 0;
+						}
+					} else {
+						possibleEndTag = true;
+						startTagIndex = 0;
+					}
+				} else{
+					foundStartTag = true;
+					scanningStartTag = true;
+				}
+			}else{
+				if(scanningStartTag){
+					startTag.append(c);
+				}else if(!possibleEndTag){
+					if(c == '\''){
+						sb.append('\'');
+					}
+					sb.append(c);
+				}else{
+					if(startTagIndex >= startTag.length() || c != startTag.charAt(startTagIndex)){
+						//this is not the end tag we are looking for
+
+						if(startTag != null) {
+							tags.push(startTag.toString());
+						}else{
+							tags.push(null);
+						}
+						i = i - startTagIndex - 1;
+						possibleEndTag = false;
+						startTagIndex = -1;
+						startTag = new StringBuilder();
+
+						scanningStartTag = true;
+					}else{
+						startTagIndex++;
+					}
+				}
 			}
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
@@ -710,7 +779,7 @@ public abstract class ScriptUtils {
 					}
 				}
 			}
-			sb.append(c);
+
 		}
 
 		if (StringUtils.hasText(sb)) {
