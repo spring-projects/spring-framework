@@ -1978,7 +1978,7 @@ The definition of `TemplateParserContext` follows:
 
 This section lists the classes used in the examples throughout this chapter.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Inventor.Java
 ----
 	package org.spring.samples.spel.inventor;
@@ -2051,7 +2051,7 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Inventor.kt
 ----
 	package org.spring.samples.spel.inventor
@@ -2064,7 +2064,7 @@ This section lists the classes used in the examples throughout this chapter.
 		var placeOfBirth: PlaceOfBirth? = null)
 ----
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .PlaceOfBirth.java
 ----
 	package org.spring.samples.spel.inventor;
@@ -2100,7 +2100,7 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .PlaceOfBirth.kt
 ----
 	package org.spring.samples.spel.inventor
@@ -2108,7 +2108,7 @@ This section lists the classes used in the examples throughout this chapter.
 	class PlaceOfBirth(var city: String, var country: String? = null) {
 ----
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Society.java
 ----
 	package org.spring.samples.spel.inventor;
@@ -2151,7 +2151,7 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Society.kt
 ----
 	package org.spring.samples.spel.inventor

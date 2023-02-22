@@ -1,5 +1,3 @@
-:chomp: -packages
-:fold: -imports
 [[aop]]
 = Aspect Oriented Programming with Spring
 
@@ -291,7 +289,7 @@ context that points to a bean class that has the `@Aspect` annotation:
 The second of the two examples shows the `NotVeryUsefulAspect` class definition,
 which is annotated with the `org.aspectj.lang.annotation.Aspect` annotation;
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package org.xyz;
@@ -302,7 +300,7 @@ which is annotated with the `org.aspectj.lang.annotation.Aspect` annotation;
 	public class NotVeryUsefulAspect {
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package org.xyz
@@ -531,7 +529,7 @@ the application and particular sets of operations from within several aspects. W
 recommend defining a `CommonPointcuts` aspect that captures common pointcut expressions
 for this purpose. Such an aspect typically resembles the following example:
 
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.xyz.myapp;
@@ -593,7 +591,7 @@ for this purpose. Such an aspect typically resembles the following example:
 
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.xyz.myapp
@@ -2426,7 +2424,7 @@ The `arg-names` attribute accepts a comma-delimited list of parameter names.
 The following slightly more involved example of the XSD-based approach shows
 some around advice used in conjunction with a number of strongly typed parameters:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package x.y.service;
@@ -2443,7 +2441,7 @@ some around advice used in conjunction with a number of strongly typed parameter
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package x.y.service
@@ -2466,7 +2464,7 @@ strongly-typed parameters, the first of which happens to be the join point used 
 proceed with the method call. The presence of this parameter is an indication that the
 `profile(..)` is to be used as `around` advice, as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package x.y;
@@ -2488,7 +2486,7 @@ proceed with the method call. The presence of this parameter is an indication th
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package x.y
@@ -3355,7 +3353,7 @@ The `@Configurable` annotation marks a class as being eligible for Spring-driven
 configuration. In the simplest case, you can use purely it as a marker annotation, as the
 following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.xyz.myapp.domain;
@@ -3367,7 +3365,7 @@ following example shows:
 		// ...
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.xyz.myapp.domain
@@ -3397,7 +3395,7 @@ is to omit the `id` attribute, as the following example shows:
 If you want to explicitly specify the name of the prototype bean definition to use, you
 can do so directly in the annotation, as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.xyz.myapp.domain;
@@ -3409,7 +3407,7 @@ can do so directly in the annotation, as the following example shows:
 		// ...
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.xyz.myapp.domain
@@ -3740,7 +3738,7 @@ use @AspectJ with <<beans-java, Java configuration>>. Specifically, you can use 
 The following example shows the profiling aspect, which is not fancy.
 It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
 
-[source,java,indent=0,subs="verbatim",role="primary"]
+[source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
 .Java
 ----
 	package foo;
@@ -3771,7 +3769,7 @@ It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
 		public void methodsToBeProfiled(){}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package foo
@@ -3860,7 +3858,7 @@ Now that all the required artifacts (the aspect, the `META-INF/aop.xml`
 file, and the Spring configuration) are in place, we can create the following
 driver class with a `main(..)` method to demonstrate the LTW in action:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package foo;
@@ -3880,7 +3878,7 @@ driver class with a `main(..)` method to demonstrate the LTW in action:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package foo
@@ -3935,7 +3933,7 @@ Since this LTW is effected by using full-blown AspectJ, we are not limited only 
 Spring beans. The following slight variation on the `Main` program yields the same
 result:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package foo;
@@ -3955,7 +3953,7 @@ result:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package foo

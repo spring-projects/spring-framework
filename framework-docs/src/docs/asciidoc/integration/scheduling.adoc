@@ -816,8 +816,7 @@ its properties from the job data mapped to properties of the job instance. So, i
 the `ExampleJob` contains a bean property named `timeout`, and the `JobDetail`
 has it applied automatically:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example;
 
