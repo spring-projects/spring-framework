@@ -2068,6 +2068,12 @@ The following code shows the simple profiling aspect discussed earlier:
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
+	package x.y
+
+	import org.aspectj.lang.ProceedingJoinPoint
+	import org.springframework.util.StopWatch
+	import org.springframework.core.Ordered
+
 	class SimpleProfiler : Ordered {
 
 		private var order: Int = 0

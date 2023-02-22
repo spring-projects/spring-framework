@@ -1410,7 +1410,7 @@ JCache-initializing `BeanDefinition`. The following listing shows our `JCacheIni
 
 	public class JCacheInitializer {
 
-		private String name;
+		private final String name;
 
 		public JCacheInitializer(String name) {
 			this.name = name;

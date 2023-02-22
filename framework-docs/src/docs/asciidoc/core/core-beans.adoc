@@ -2279,7 +2279,6 @@ shows this approach:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	// a class that uses a stateful Command-style class to perform some processing
 	package fiona.apple;
 
 	// Spring-API imports
@@ -2287,6 +2286,10 @@ shows this approach:
 	import org.springframework.context.ApplicationContext;
 	import org.springframework.context.ApplicationContextAware;
 
+	/**
+	 * A class that uses a stateful Command-style class to perform
+	 * some processing.
+	 */
 	public class CommandManager implements ApplicationContextAware {
 
 		private ApplicationContext applicationContext;
@@ -2313,13 +2316,14 @@ shows this approach:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// a class that uses a stateful Command-style class to perform some processing
 	package fiona.apple
 
 	// Spring-API imports
 	import org.springframework.context.ApplicationContext
 	import org.springframework.context.ApplicationContextAware
 
+	// A class that uses a stateful Command-style class to perform
+	// some processing.
 	class CommandManager : ApplicationContextAware {
 
 		private lateinit var applicationContext: ApplicationContext
@@ -4237,6 +4241,8 @@ The following listing shows the custom `BeanPostProcessor` implementation class 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
+	package scripting
+
 	import org.springframework.beans.factory.config.BeanPostProcessor
 
 	class InstantiationTracingBeanPostProcessor : BeanPostProcessor {

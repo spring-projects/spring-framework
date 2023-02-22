@@ -2054,12 +2054,14 @@ This section lists the classes used in the examples throughout this chapter.
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Inventor.kt
 ----
-class Inventor(
-	var name: String,
-	var nationality: String,
-	var inventions: Array<String>? = null,
-	var birthdate: Date =  GregorianCalendar().time,
-	var placeOfBirth: PlaceOfBirth? = null)
+	package org.spring.samples.spel.inventor
+
+	class Inventor(
+		var name: String,
+		var nationality: String,
+		var inventions: Array<String>? = null,
+		var birthdate: Date =  GregorianCalendar().time,
+		var placeOfBirth: PlaceOfBirth? = null)
 ----
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -2101,6 +2103,8 @@ class Inventor(
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .PlaceOfBirth.kt
 ----
+	package org.spring.samples.spel.inventor
+
 	class PlaceOfBirth(var city: String, var country: String? = null) {
 ----
 

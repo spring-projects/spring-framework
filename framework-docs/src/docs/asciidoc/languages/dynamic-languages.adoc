@@ -67,13 +67,12 @@ The following example implements the `Messenger` interface in Groovy:
 
 [source,groovy,indent=0,subs="verbatim,quotes"]
 ----
-	// from the file 'Messenger.groovy'
-	package org.springframework.scripting.groovy;
+	package org.springframework.scripting.groovy
 
-	// import the Messenger interface (written in Java) that is to be implemented
+	// Import the Messenger interface (written in Java) that is to be implemented
 	import org.springframework.scripting.Messenger
 
-	// define the implementation in Groovy
+	// Define the implementation in Groovy in file 'Messenger.groovy'
 	class GroovyMessenger implements Messenger {
 
 		String message
@@ -331,13 +330,13 @@ feature works:
 	<lang:groovy id="messenger">
 		<lang:inline-script>
 
-	package org.springframework.scripting.groovy;
+			package org.springframework.scripting.groovy
 
-	import org.springframework.scripting.Messenger
+			import org.springframework.scripting.Messenger
 
-	class GroovyMessenger implements Messenger {
-		String message
-	}
+			class GroovyMessenger implements Messenger {
+				String message
+			}
 
 		</lang:inline-script>
 		<lang:property name="message" value="I Can Do The Frug" />
@@ -365,11 +364,11 @@ does not work:
 .An approach that cannot work
 [source,groovy,indent=0,subs="verbatim,quotes"]
 ----
-	// from the file 'Messenger.groovy'
-	package org.springframework.scripting.groovy;
+	package org.springframework.scripting.groovy
 
 	import org.springframework.scripting.Messenger
 
+	// from the file 'Messenger.groovy'
 	class GroovyMessenger implements Messenger {
 
 		GroovyMessenger() {}
@@ -434,9 +433,9 @@ The following example implements the `Calculator` interface in Groovy:
 
 [source,groovy,indent=0,subs="verbatim,quotes"]
 ----
-	// from the file 'calculator.groovy'
 	package org.springframework.scripting.groovy
 
+	// from the file 'calculator.groovy'
 	class GroovyCalculator implements Calculator {
 
 		int add(int x, int y) {
@@ -678,7 +677,6 @@ by using the Groovy dynamic language:
 
 [source,groovy,indent=0,subs="verbatim,quotes"]
 ----
-	// from the file '/WEB-INF/groovy/FortuneController.groovy'
 	package org.springframework.showcase.fortune.web
 
 	import org.springframework.showcase.fortune.service.FortuneService
@@ -689,6 +687,7 @@ by using the Groovy dynamic language:
 	import jakarta.servlet.http.HttpServletRequest
 	import jakarta.servlet.http.HttpServletResponse
 
+	// from the file '/WEB-INF/groovy/FortuneController.groovy'
 	class FortuneController implements Controller {
 
 		@Property FortuneService fortuneService

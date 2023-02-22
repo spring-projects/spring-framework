@@ -692,9 +692,11 @@ The `PropertyEditor` implementation could look similar to the following:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	// converts string representation to ExoticType object
 	package example;
 
+	import java.beans.PropertyEditorSupport;
+
+	// converts string representation to ExoticType object
 	public class ExoticTypeEditor extends PropertyEditorSupport {
 
 		public void setAsText(String text) {
@@ -705,11 +707,11 @@ The `PropertyEditor` implementation could look similar to the following:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	// converts string representation to ExoticType object
 	package example
 
 	import java.beans.PropertyEditorSupport
 
+	// converts string representation to ExoticType object
 	class ExoticTypeEditor : PropertyEditorSupport() {
 
 		override fun setAsText(text: String) {
@@ -1350,15 +1352,14 @@ listing shows the definition of the `AnnotationFormatterFactory` interface:
 
 To create an implementation:
 
-. Parameterize A to be the field `annotationType` with which you wish to associate
+. Parameterize `A` to be the field `annotationType` with which you wish to associate
 formatting  logic -- for example `org.springframework.format.annotation.DateTimeFormat`.
 . Have `getFieldTypes()` return the types of fields on which the annotation can be used.
 . Have `getPrinter()` return a `Printer` to print the value of an annotated field.
 . Have `getParser()` return a `Parser` to parse a `clientValue` for an annotated field.
 
 The following example `AnnotationFormatterFactory` implementation binds the `@NumberFormat`
-annotation to a formatter to let a number style or pattern be
-specified:
+annotation to a formatter to let a number style or pattern be specified:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1366,10 +1367,12 @@ specified:
 	public final class NumberFormatAnnotationFormatterFactory
 			implements AnnotationFormatterFactory<NumberFormat> {
 
+		private static final Set<Class<?>> FIELD_TYPES = Set.of(Short.class,
+				Integer.class, Long.class, Float.class, Double.class,
+				BigDecimal.class, BigInteger.class);
+
 		public Set<Class<?>> getFieldTypes() {
-			return new HashSet<Class<?>>(asList(new Class<?>[] {
-				Short.class, Integer.class, Long.class, Float.class,
-				Double.class, BigDecimal.class, BigInteger.class }));
+			return FIELD_TYPES;
 		}
 
 		public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
@@ -1383,16 +1386,13 @@ specified:
 		private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
 			if (!annotation.pattern().isEmpty()) {
 				return new NumberStyleFormatter(annotation.pattern());
-			} else {
-				Style style = annotation.style();
-				if (style == Style.PERCENT) {
-					return new PercentStyleFormatter();
-				} else if (style == Style.CURRENCY) {
-					return new CurrencyStyleFormatter();
-				} else {
-					return new NumberStyleFormatter();
-				}
 			}
+			// else
+			return switch(annotation.style()) {
+				case Style.PERCENT -> new PercentStyleFormatter();
+				case Style.CURRENCY -> new CurrencyStyleFormatter();
+				default -> new NumberStyleFormatter();
+			};
 		}
 	}
 ----
@@ -1428,7 +1428,7 @@ specified:
 	}
 ----
 
-To trigger formatting, you can annotate fields with @NumberFormat, as the following
+To trigger formatting, you can annotate fields with `@NumberFormat`, as the following
 example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

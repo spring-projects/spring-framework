@@ -295,11 +295,11 @@ which is annotated with the `org.aspectj.lang.annotation.Aspect` annotation;
 .Java
 ----
 	package org.xyz;
+
 	import org.aspectj.lang.annotation.Aspect;
 
 	@Aspect
 	public class NotVeryUsefulAspect {
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -307,7 +307,7 @@ which is annotated with the `org.aspectj.lang.annotation.Aspect` annotation;
 ----
 	package org.xyz
 
-	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Aspect
 
 	@Aspect
 	class NotVeryUsefulAspect
@@ -2491,6 +2491,8 @@ proceed with the method call. The presence of this parameter is an indication th
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
+	package x.y
+
 	import org.aspectj.lang.ProceedingJoinPoint
 	import org.springframework.util.StopWatch
 

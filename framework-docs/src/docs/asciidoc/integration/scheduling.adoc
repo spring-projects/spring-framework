@@ -827,7 +827,7 @@ has it applied automatically:
 
 		/**
 		 * Setter called after the ExampleJob is instantiated
-		 * with the value from the JobDetailFactoryBean (5)
+		 * with the value from the JobDetailFactoryBean.
 		 */
 		public void setTimeout(int timeout) {
 			this.timeout = timeout;
