@@ -20,14 +20,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.ThrowableTypeAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.anything;
@@ -149,7 +148,7 @@ class MockRestRequestMatchersTests {
 	void headerContainsWithMissingHeader() {
 		assertThatAssertionError()
 			.isThrownBy(() -> MockRestRequestMatchers.header("foo", containsString("baz")).match(this.request))
-			.withMessageContaining("but was null");
+			.withMessage("Expected header <foo> to exist but was null");
 	}
 
 	@Test
@@ -174,7 +173,7 @@ class MockRestRequestMatchersTests {
 
 		MockRestRequestMatchers.header("foo", containsInAnyOrder(endsWith("baz"), endsWith("bar"))).match(this.request);
 		MockRestRequestMatchers.header("foo", contains(is("bar"), is("baz"))).match(this.request);
-		MockRestRequestMatchers.header("foo", contains(is("bar"), Matchers.anything())).match(this.request);
+		MockRestRequestMatchers.header("foo", contains(is("bar"), anything())).match(this.request);
 		MockRestRequestMatchers.header("foo", hasItem(endsWith("baz"))).match(this.request);
 		MockRestRequestMatchers.header("foo", everyItem(startsWith("ba"))).match(this.request);
 		MockRestRequestMatchers.header("foo", hasSize(2)).match(this.request);
@@ -234,7 +233,7 @@ class MockRestRequestMatchersTests {
 	void headersWithMissingHeader() {
 		assertThatAssertionError()
 			.isThrownBy(() -> MockRestRequestMatchers.header("foo", "bar").match(this.request))
-			.withMessageContaining("but was null");
+			.withMessage("Expected header <foo> to exist but was null");
 	}
 
 	@Test
@@ -259,7 +258,7 @@ class MockRestRequestMatchersTests {
 
 		assertThatAssertionError()
 			.isThrownBy(() -> MockRestRequestMatchers.queryParam("foo", "bar").match(this.request))
-			.withMessageContaining("but was null");
+			.withMessage("Expected query param <foo> to exist but was null");
 	}
 
 	@Test
@@ -301,7 +300,7 @@ class MockRestRequestMatchersTests {
 
 		MockRestRequestMatchers.queryParam("foo", containsInAnyOrder(endsWith("baz"), endsWith("bar"))).match(this.request);
 		MockRestRequestMatchers.queryParam("foo", contains(is("bar"), is("baz"))).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", contains(is("bar"), Matchers.anything())).match(this.request);
+		MockRestRequestMatchers.queryParam("foo", contains(is("bar"), anything())).match(this.request);
 		MockRestRequestMatchers.queryParam("foo", hasItem(endsWith("baz"))).match(this.request);
 		MockRestRequestMatchers.queryParam("foo", everyItem(startsWith("ba"))).match(this.request);
 		MockRestRequestMatchers.queryParam("foo", hasSize(2)).match(this.request);
@@ -351,7 +350,7 @@ class MockRestRequestMatchersTests {
 	}
 
 	private static ThrowableTypeAssert<AssertionError> assertThatAssertionError() {
-		return AssertionsForClassTypes.assertThatExceptionOfType(AssertionError.class);
+		return assertThatExceptionOfType(AssertionError.class);
 	}
 
 }
