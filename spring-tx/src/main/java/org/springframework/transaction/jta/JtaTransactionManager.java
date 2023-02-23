@@ -547,8 +547,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @return a corresponding UserTransaction handle
 	 */
 	protected UserTransaction buildUserTransaction(TransactionManager transactionManager) {
-		if (transactionManager instanceof UserTransaction) {
-			return (UserTransaction) transactionManager;
+		if (transactionManager instanceof UserTransaction userTransaction) {
+			return userTransaction;
 		}
 		else {
 			return new UserTransactionAdapter(transactionManager);
@@ -702,11 +702,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	@Nullable
 	protected TransactionManager findTransactionManager(@Nullable UserTransaction ut) {
-		if (ut instanceof TransactionManager) {
+		if (ut instanceof TransactionManager transactionManager) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("JTA UserTransaction object [" + ut + "] implements TransactionManager");
 			}
-			return (TransactionManager) ut;
+			return transactionManager;
 		}
 
 		// Check fallback JNDI locations.
@@ -762,11 +762,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		// Check whether the UserTransaction or TransactionManager implements it...
-		if (ut instanceof TransactionSynchronizationRegistry) {
-			return (TransactionSynchronizationRegistry) ut;
+		if (ut instanceof TransactionSynchronizationRegistry tsr) {
+			return tsr;
 		}
-		if (tm instanceof TransactionSynchronizationRegistry) {
-			return (TransactionSynchronizationRegistry) tm;
+		if (tm instanceof TransactionSynchronizationRegistry tsr) {
+			return tsr;
 		}
 		// OK, so no JTA 1.1 TransactionSynchronizationRegistry is available...
 		return null;
