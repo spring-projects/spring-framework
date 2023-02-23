@@ -55,8 +55,8 @@ abstract class TransactionSynchronizationUtils {
 		Assert.notNull(resource, "Resource must not be null");
 		Object resourceRef = resource;
 		// unwrap infrastructure proxy
-		if (resourceRef instanceof InfrastructureProxy) {
-			resourceRef = ((InfrastructureProxy) resourceRef).getWrappedObject();
+		if (resourceRef instanceof InfrastructureProxy infraProxy) {
+			resourceRef = infraProxy.getWrappedObject();
 		}
 		if (aopAvailable) {
 			// now unwrap scoped proxy
@@ -125,8 +125,8 @@ abstract class TransactionSynchronizationUtils {
 	private static class ScopedProxyUnwrapper {
 
 		public static Object unwrapIfNecessary(Object resource) {
-			if (resource instanceof ScopedObject) {
-				return ((ScopedObject) resource).getTargetObject();
+			if (resource instanceof ScopedObject so) {
+				return so.getTargetObject();
 			}
 			else {
 				return resource;

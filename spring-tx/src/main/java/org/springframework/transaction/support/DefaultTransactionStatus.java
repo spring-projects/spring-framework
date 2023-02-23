@@ -174,11 +174,11 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	@Override
 	protected SavepointManager getSavepointManager() {
 		Object transaction = this.transaction;
-		if (!(transaction instanceof SavepointManager)) {
+		if (!(transaction instanceof SavepointManager manager)) {
 			throw new NestedTransactionNotSupportedException(
 					"Transaction object [" + this.transaction + "] does not support savepoints");
 		}
-		return (SavepointManager) transaction;
+		return manager;
 	}
 
 	/**
@@ -198,8 +198,8 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 */
 	@Override
 	public void flush() {
-		if (this.transaction instanceof SmartTransactionObject) {
-			((SmartTransactionObject) this.transaction).flush();
+		if (this.transaction instanceof SmartTransactionObject transactionObject) {
+			transactionObject.flush();
 		}
 	}
 

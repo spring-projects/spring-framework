@@ -429,8 +429,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					catch (Throwable ex) {
 						if (txAttr.rollbackOn(ex)) {
 							// A RuntimeException: will lead to a rollback.
-							if (ex instanceof RuntimeException) {
-								throw (RuntimeException) ex;
+							if (ex instanceof RuntimeException rex) {
+								throw rex;
 							}
 							else {
 								throw new ThrowableHolderException(ex);
@@ -538,8 +538,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 		String methodIdentification = methodIdentification(method, targetClass);
 		if (methodIdentification == null) {
-			if (txAttr instanceof DefaultTransactionAttribute) {
-				methodIdentification = ((DefaultTransactionAttribute) txAttr).getDescriptor();
+			if (txAttr instanceof DefaultTransactionAttribute dta) {
+				methodIdentification = dta.getDescriptor();
 			}
 			if (methodIdentification == null) {
 				methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
@@ -1047,8 +1047,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				if (txInfo.transactionAttribute != null && txInfo.transactionAttribute.rollbackOn(ex)) {
 					return txInfo.getTransactionManager().rollback(txInfo.getReactiveTransaction()).onErrorMap(ex2 -> {
 								logger.error("Application exception overridden by rollback exception", ex);
-								if (ex2 instanceof TransactionSystemException) {
-									((TransactionSystemException) ex2).initApplicationException(ex);
+								if (ex2 instanceof TransactionSystemException systemException) {
+									systemException.initApplicationException(ex);
 								}
 								return ex2;
 							}
@@ -1059,8 +1059,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 					// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 					return txInfo.getTransactionManager().commit(txInfo.getReactiveTransaction()).onErrorMap(ex2 -> {
 								logger.error("Application exception overridden by commit exception", ex);
-								if (ex2 instanceof TransactionSystemException) {
-									((TransactionSystemException) ex2).initApplicationException(ex);
+								if (ex2 instanceof TransactionSystemException systemException) {
+									systemException.initApplicationException(ex);
 								}
 								return ex2;
 							}

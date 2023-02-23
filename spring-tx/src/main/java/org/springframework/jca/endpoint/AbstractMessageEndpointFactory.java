@@ -77,11 +77,11 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	 * @see #setTransactionTimeout
 	 */
 	public void setTransactionManager(Object transactionManager) {
-		if (transactionManager instanceof TransactionFactory) {
-			this.transactionFactory = (TransactionFactory) transactionManager;
+		if (transactionManager instanceof TransactionFactory factory) {
+			this.transactionFactory = factory;
 		}
-		else if (transactionManager instanceof TransactionManager) {
-			this.transactionFactory = new SimpleTransactionFactory((TransactionManager) transactionManager);
+		else if (transactionManager instanceof TransactionManager manager) {
+			this.transactionFactory = new SimpleTransactionFactory(manager);
 		}
 		else {
 			throw new IllegalArgumentException("Transaction manager [" + transactionManager +

@@ -181,8 +181,8 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (super.equals(other) && (!(other instanceof TransactionTemplate) ||
-				getTransactionManager() == ((TransactionTemplate) other).getTransactionManager())));
+		return (this == other || (super.equals(other) && (!(other instanceof TransactionTemplate template) ||
+				getTransactionManager() == template.getTransactionManager())));
 	}
 
 }
