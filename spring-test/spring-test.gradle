@@ -76,6 +76,7 @@ dependencies {
 	}
 	testImplementation("io.projectreactor.netty:reactor-netty-http")
 	testImplementation("de.bechte.junit:junit-hierarchicalcontextrunner")
+	testImplementation("org.awaitility:awaitility")
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,15 @@ package org.springframework.test.context.junit.jupiter.event;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.awaitility.Awaitility;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -28,15 +34,19 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.engine.TestExecutionResult;
+import org.junit.platform.testkit.engine.EngineExecutionResults;
 import org.junit.platform.testkit.engine.EngineTestKit;
+import org.junit.platform.testkit.engine.Events;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.ApplicationEventsHolder;
 import org.springframework.test.context.event.RecordApplicationEvents;
+import org.springframework.test.context.event.TestContextEvent;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,23 +57,52 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass
  * in conjunction with JUnit Jupiter.
  *
  * @author Sam Brannen
+ * @author Simon Baslé
  * @since 5.3.3
  */
 class ParallelApplicationEventsIntegrationTests {
 
 	private static final Set<String> payloads = ConcurrentHashMap.newKeySet();
 
+	@Test
+	void rejectTestsInParallelWithInstancePerClassAndRecordApplicationEvents() {
+		Class<?> testClass = TestInstancePerClassTestCase.class;
 
-	@ParameterizedTest
-	@ValueSource(classes = {TestInstancePerMethodTestCase.class, TestInstancePerClassTestCase.class})
-	void executeTestsInParallel(Class<?> testClass) {
-		EngineTestKit.engine("junit-jupiter")//
+		final EngineExecutionResults results = EngineTestKit.engine("junit-jupiter")//
+				.selectors(selectClass(testClass))//
+				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
+				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
+				.execute();
+
+		//extract the messages from failed TextExecutionResults
+		assertThat(results.containerEvents().failed()//
+				.stream().map(e -> e.getRequiredPayload(TestExecutionResult.class)//
+				.getThrowable().get().getMessage()))//
+				.singleElement(InstanceOfAssertFactories.STRING)
+				.isEqualToIgnoringNewLines("""
+		Test classes or inner classes that @RecordApplicationEvents\s
+		must not be run in parallel with the @TestInstance(Lifecycle.PER_CLASS) configuration.\s
+		Use either @Execution(SAME_THREAD), @TestInstance(PER_METHOD) or disable parallel\s
+		execution altogether. Note that when recording events in parallel, one might see events\s
+		published by other tests as the application context can be common.
+		""");
+	}
+
+	@Test
+	void executeTestsInParallelInstancePerMethod() {
+		Class<?> testClass = TestInstancePerMethodTestCase.class;
+		Events testEvents = EngineTestKit.engine("junit-jupiter")//
 				.selectors(selectClass(testClass))//
 				.configurationParameter("junit.jupiter.execution.parallel.enabled", "true")//
 				.configurationParameter("junit.jupiter.execution.parallel.config.dynamic.factor", "10")//
 				.execute()//
-				.testEvents()//
-				.assertStatistics(stats -> stats.started(10).succeeded(10).failed(0));
+				.testEvents();
+		//list failed events in case of test errors to get a sense of which tests failed
+		Events failedTests = testEvents.failed();
+		if (failedTests.count() > 0) {
+			failedTests.debug();
+		}
+		testEvents.assertStatistics(stats -> stats.started(13).succeeded(13).failed(0));
 
 		Set<String> testNames = payloads.stream()//
 				.map(payload -> payload.substring(0, payload.indexOf("-")))//
@@ -160,6 +199,39 @@ class ParallelApplicationEventsIntegrationTests {
 		@Test
 		void test10(ApplicationEvents events, TestInfo testInfo) {
 			assertTestExpectations(events, testInfo);
+		}
+
+		@Test
+		void compareToApplicationEventsHolder(ApplicationEvents applicationEvents) {
+			ApplicationEvents fromThreadHolder = ApplicationEventsHolder.getRequiredApplicationEvents();
+			assertThat(fromThreadHolder.stream())
+					.hasSameElementsAs(this.events.stream().toList())
+					.hasSameElementsAs(applicationEvents.stream().toList());
+		}
+
+		@Test
+		void asyncPublication(ApplicationEvents events) throws InterruptedException {
+			final ExecutorService executorService = Executors.newSingleThreadExecutor();
+			executorService.execute(() -> this.context.publishEvent("asyncPublication"));
+			executorService.shutdown();
+			executorService.awaitTermination(10, TimeUnit.SECONDS);
+
+			assertThat(events.stream().filter(e -> !(e instanceof TestContextEvent))
+					.map(e -> (e instanceof PayloadApplicationEvent<?> pae ? pae.getPayload().toString() : e.toString())))
+					.containsExactly("asyncPublication");
+		}
+
+		@Test
+		void asyncConsumption() {
+			this.context.publishEvent("asyncConsumption");
+
+			Awaitility.await().atMost(Durations.ONE_SECOND).untilAsserted(() ->//
+					assertThat(ApplicationEventsHolder//
+							.getRequiredApplicationEvents()//
+							.stream()//
+							.filter(e -> !(e instanceof TestContextEvent))//
+							.map(e -> (e instanceof PayloadApplicationEvent<?> pae ? pae.getPayload().toString() : e.toString()))//
+					).containsExactly("asyncConsumption"));
 		}
 
 		private void assertTestExpectations(ApplicationEvents events, TestInfo testInfo) {
