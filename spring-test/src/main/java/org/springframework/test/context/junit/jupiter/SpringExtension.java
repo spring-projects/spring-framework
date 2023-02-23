@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
@@ -41,6 +42,8 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.annotation.Testable;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +54,10 @@ import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestConstructor;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.context.support.PropertyProvider;
 import org.springframework.test.context.support.TestConstructorUtils;
 import org.springframework.util.Assert;
@@ -68,6 +73,7 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  * {@code @SpringJUnitWebConfig}.
  *
  * @author Sam Brannen
+ * @author Simon Baslé
  * @since 5.0
  * @see org.springframework.test.context.junit.jupiter.EnabledIf
  * @see org.springframework.test.context.junit.jupiter.DisabledIf
@@ -93,6 +99,13 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 			Namespace.create(SpringExtension.class.getName() + "#autowired.validation");
 
 	private static final String NO_AUTOWIRED_VIOLATIONS_DETECTED = "NO AUTOWIRED VIOLATIONS DETECTED";
+
+	/**
+	 * {@link Namespace} in which {@code @RecordApplicationEvents} validation error messages
+	 * are stored, keyed by test class.
+	 */
+	private static final Namespace RECORD_APPLICATION_EVENTS_VALIDATION_NAMESPACE =
+			Namespace.create(SpringExtension.class.getName() + "#recordApplicationEvents.validation");
 
 	// Note that @Test, @TestFactory, @TestTemplate, @RepeatedTest, and @ParameterizedTest
 	// are all meta-annotated with @Testable.
@@ -135,7 +148,49 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	@Override
 	public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {
 		validateAutowiredConfig(context);
+		validateRecordApplicationEventsConfig(context);
 		getTestContextManager(context).prepareTestInstance(testInstance);
+	}
+
+	/**
+	 * Validate that test class or its enclosing class doesn't attempt to record
+	 * application events in a parallel mode that makes it un-deterministic
+	 * ({@code @TestInstance(PER_CLASS)} and {@code @Execution(CONCURRENT)}
+	 * combination).
+	 * @since 6.1.0
+	 */
+	private void validateRecordApplicationEventsConfig(ExtensionContext context) {
+		// We save the result in the ExtensionContext.Store so that we don't
+		// re-validate all methods for the same test class multiple times.
+		Store store = context.getStore(RECORD_APPLICATION_EVENTS_VALIDATION_NAMESPACE);
+
+		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(), testClass -> {
+			boolean record = TestContextAnnotationUtils.hasAnnotation(testClass, RecordApplicationEvents.class);
+			if (!record) {
+				return NO_AUTOWIRED_VIOLATIONS_DETECTED;
+			}
+			final TestInstance testInstance = TestContextAnnotationUtils.findMergedAnnotation(testClass, TestInstance.class);
+
+			if (testInstance == null || testInstance.value() != TestInstance.Lifecycle.PER_CLASS) {
+				return NO_AUTOWIRED_VIOLATIONS_DETECTED;
+			}
+
+			final Execution execution = TestContextAnnotationUtils.findMergedAnnotation(testClass, Execution.class);
+
+			if (execution == null || execution.value() != ExecutionMode.CONCURRENT) {
+				return NO_AUTOWIRED_VIOLATIONS_DETECTED;
+			}
+
+			return "Test classes or inner classes that @RecordApplicationEvents must not be run in parallel "
+					+ "with the @TestInstance(Lifecycle.PER_CLASS) configuration. Use either @Execution(SAME_THREAD), "
+					+ "@TestInstance(PER_METHOD) or disable parallel execution altogether. Note that when recording "
+					+ "events in parallel, one might see events published by other tests as the application context "
+					+ "can be common.";
+		}, String.class);
+
+		if (errorMessage != NO_AUTOWIRED_VIOLATIONS_DETECTED) {
+			throw new IllegalStateException(errorMessage);
+		}
 	}
 
 	/**

@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.event;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationEvent;
@@ -32,7 +32,7 @@ import org.springframework.context.PayloadApplicationEvent;
  */
 class DefaultApplicationEvents implements ApplicationEvents {
 
-	private final List<ApplicationEvent> events = new ArrayList<>();
+	private final List<ApplicationEvent> events = new CopyOnWriteArrayList<>();
 
 
 	void addEvent(ApplicationEvent event) {
