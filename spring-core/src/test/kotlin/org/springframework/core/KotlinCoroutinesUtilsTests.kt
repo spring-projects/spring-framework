@@ -117,7 +117,8 @@ class KotlinCoroutinesUtilsTests {
 	@Test
 	fun invokeNonSuspendingFunctionWithContext() {
 		val method = KotlinCoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
-		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(method, this, "foo") }
+		val context = CoroutineName("name")
+		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(context, method, this, "foo") }
 	}
 
 	suspend fun suspendingFunction(value: String): String {
