@@ -5,7 +5,7 @@ Aspect-oriented Programming (AOP) complements Object-oriented Programming (OOP) 
 providing another way of thinking about program structure. The key unit of modularity
 in OOP is the class, whereas in AOP the unit of modularity is the aspect. Aspects
 enable the modularization of concerns (such as transaction management) that cut across
-multiple types and objects. (Such concerns are often termed "`crosscutting`" concerns
+multiple types and objects. (Such concerns are often termed "crosscutting" concerns
 in AOP literature.)
 
 One of the key components of Spring is the AOP framework. While the Spring IoC
@@ -52,7 +52,7 @@ However, it would be even more confusing if Spring used its own terminology.
   method or the handling of an exception. In Spring AOP, a join point always
   represents a method execution.
 * Advice: Action taken by an aspect at a particular join point. Different types of
-  advice include "`around`", "`before`" and "`after`" advice. (Advice types are discussed
+  advice include "around", "before", and "after" advice. (Advice types are discussed
   later.) Many AOP frameworks, including Spring, model an advice as an interceptor and
   maintain a chain of interceptors around the join point.
 * Pointcut: A predicate that matches join points. Advice is associated with a
@@ -66,7 +66,7 @@ However, it would be even more confusing if Spring used its own terminology.
   `IsModified` interface, to simplify caching. (An introduction is known as an
   inter-type declaration in the AspectJ community.)
 * Target object: An object being advised by one or more aspects. Also referred to as
-  the "`advised object`". Since Spring AOP is implemented by using runtime proxies, this
+  the "advised object". Since Spring AOP is implemented by using runtime proxies, this
   object is always a proxied object.
 * AOP proxy: An object created by the AOP framework in order to implement the aspect
   contracts (advise method executions and so on). In the Spring Framework, an AOP proxy
@@ -134,7 +134,7 @@ Spring IoC, to help solve common problems in enterprise applications.
 
 Thus, for example, the Spring Framework's AOP functionality is normally used in
 conjunction with the Spring IoC container. Aspects are configured by using normal bean
-definition syntax (although this allows powerful "`auto-proxying`" capabilities). This is a
+definition syntax (although this allows powerful "auto-proxying" capabilities). This is a
 crucial difference from other AOP implementations. You cannot do some things
 easily or efficiently with Spring AOP, such as advise very fine-grained objects (typically,
 domain objects). AspectJ is the best choice in such cases. However, our
@@ -169,7 +169,7 @@ configuration-style approach. The fact that this chapter chooses to introduce th
 @AspectJ-style approach first should not be taken as an indication that the Spring team
 favors the @AspectJ annotation-style approach over the Spring XML configuration-style.
 
-See <<aop-choosing>> for a more complete discussion of the "`whys and wherefores`" of
+See <<aop-choosing>> for a more complete discussion of the advantages and disadvantages of
 each style.
 ====
 
@@ -239,7 +239,6 @@ annotation, as the following example shows:
 	@Configuration
 	@EnableAspectJAutoProxy
 	public class AppConfig {
-
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -508,20 +507,21 @@ of any public method.
 <3> `tradingOperation` matches if a method execution represents any public method in the
 trading module.
 
-It is a best practice to build more complex pointcut expressions out of smaller named
-components, as shown above. When referring to pointcuts by name, normal Java visibility
-rules apply (you can see private pointcuts in the same type, protected pointcuts in the
-hierarchy, public pointcuts anywhere, and so on). Visibility does not affect pointcut
-matching.
+It is a best practice to build more complex pointcut expressions out of smaller _named
+pointcuts_, as shown above. When referring to pointcuts by name, normal Java visibility
+rules apply (you can see `private` pointcuts in the same type, `protected` pointcuts in
+the hierarchy, `public` pointcuts anywhere, and so on). Visibility does not affect
+pointcut matching.
 
 
 [[aop-common-pointcuts]]
-==== Sharing Common Pointcut Definitions
+==== Sharing Named Pointcut Definitions
 
-When working with enterprise applications, developers often want to refer to modules of
-the application and particular sets of operations from within several aspects. We
-recommend defining a dedicated aspect that captures common pointcut expressions for this
-purpose. Such an aspect typically resembles the following `CommonPointcuts` example:
+When working with enterprise applications, developers often have the need to refer to
+modules of the application and particular sets of operations from within several aspects.
+We recommend defining a dedicated aspect that captures commonly used _named pointcut_
+expressions for this purpose. Such an aspect typically resembles the following
+`CommonPointcuts` example (though what you name the aspect is up to you):
 
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
 .Java
@@ -686,7 +686,9 @@ The format of an execution expression follows:
 
 [literal,indent=0,subs="verbatim,quotes"]
 ----
-	execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-pattern(param-pattern)
+	execution(modifiers-pattern?
+				ret-type-pattern
+				declaring-type-pattern?name-pattern(param-pattern)
 				throws-pattern?)
 ----
 
@@ -898,9 +900,9 @@ pointcut should always include one if possible.
 [[aop-advice]]
 === Declaring Advice
 
-Advice is associated with a pointcut expression and runs before, after, or around
-method executions matched by the pointcut. The pointcut expression may be either a
-simple reference to a named pointcut or a pointcut expression declared in place.
+Advice is associated with a pointcut expression and runs before, after, or around method
+executions matched by the pointcut. The pointcut expression may be either an _inline
+pointcut_ or a reference to a <<aop-common-pointcuts,_named pointcut_>>.
 
 
 [[aop-advice-before]]
@@ -1397,10 +1399,10 @@ See the AspectJ programming guide for more details.
 
 The proxy object (`this`), target object (`target`), and annotations (`@within`,
 `@target`, `@annotation`, and `@args`) can all be bound in a similar fashion. The next
-two examples show how to match the execution of methods annotated with an `@Auditable`
-annotation and extract the audit code:
+set of examples shows how to match the execution of methods annotated with an
+`@Auditable` annotation and extract the audit code:
 
-The first of the two examples shows the definition of the `@Auditable` annotation:
+The following shows the definition of the `@Auditable` annotation:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1419,7 +1421,7 @@ The first of the two examples shows the definition of the `@Auditable` annotatio
 	annotation class Auditable(val value: AuditCode)
 ----
 
-The second of the two examples shows the advice that matches the execution of `@Auditable` methods:
+The following shows the advice that matches the execution of `@Auditable` methods:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1746,12 +1748,12 @@ you would write the following:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	UsageTracked usageTracked = (UsageTracked) context.getBean("myService");
+	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val usageTracked = context.getBean("myService") as UsageTracked
+	val usageTracked = context.getBean("myService", UsageTracked.class)
 ----
 
 
@@ -1939,15 +1941,16 @@ To refine the aspect so that it retries only idempotent operations, we might def
 .Java
 ----
 	@Retention(RetentionPolicy.RUNTIME)
+	// marker annotation
 	public @interface Idempotent {
-		// marker annotation
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@Retention(AnnotationRetention.RUNTIME)
-	annotation class Idempotent// marker annotation
+	// marker annotation
+	annotation class Idempotent
 ----
 
 We can then use the annotation to annotate the implementation of service operations. The change
@@ -2035,7 +2038,7 @@ dependency injected just like any other Spring bean.
 [[aop-schema-pointcuts]]
 === Declaring a Pointcut
 
-You can declare a named pointcut inside an `<aop:config>` element, letting the pointcut
+You can declare a _named pointcut_ inside an `<aop:config>` element, letting the pointcut
 definition be shared across several aspects and advisors.
 
 A pointcut that represents the execution of any business service in the service layer can
@@ -2051,10 +2054,10 @@ be defined as follows:
 	</aop:config>
 ----
 
-Note that the pointcut expression itself is using the same AspectJ pointcut expression
+Note that the pointcut expression itself uses the same AspectJ pointcut expression
 language as described in <<aop-ataspectj>>. If you use the schema based declaration
-style, you can refer to named pointcuts defined in types (@Aspects) within the
-pointcut expression. Another way of defining the above pointcut would be as follows:
+style, you can also refer to _named pointcuts_ defined in `@Aspect` types within the
+pointcut expression. Thus, another way of defining the above pointcut would be as follows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -2066,9 +2069,7 @@ pointcut expression. Another way of defining the above pointcut would be as foll
 	</aop:config>
 ----
 
-Assume that you have a `CommonPointcuts` aspect as described in <<aop-common-pointcuts>>.
-
-Then declaring a pointcut inside an aspect is very similar to declaring a top-level pointcut,
+Declaring a pointcut _inside_ an aspect is very similar to declaring a top-level pointcut,
 as the following example shows:
 
 [source,xml,indent=0,subs="verbatim"]
@@ -2143,6 +2144,7 @@ follows:
 
 			...
 		</aop:aspect>
+
 	</aop:config>
 ----
 
@@ -2179,9 +2181,15 @@ Before advice runs before a matched method execution. It is declared inside an
 	</aop:aspect>
 ----
 
-Here, `dataAccessOperation` is the `id` of a pointcut defined at the top (`<aop:config>`)
-level. To define the pointcut inline instead, replace the `pointcut-ref` attribute with
-a `pointcut` attribute, as follows:
+In the example above, `dataAccessOperation` is the `id` of a _named pointcut_ defined at
+the top (`<aop:config>`) level (see <<aop-schema-pointcuts>>).
+
+NOTE: As we noted in the discussion of the @AspectJ style, using _named pointcuts_ can
+significantly improve the readability of your code. See <<aop-common-pointcuts>> for
+details.
+
+To define the pointcut inline instead, replace the `pointcut-ref` attribute with a
+`pointcut` attribute, as follows:
 
 [source,xml,indent=0,subs="verbatim"]
 ----
@@ -2192,11 +2200,9 @@ a `pointcut` attribute, as follows:
 			method="doAccessCheck"/>
 
 		...
+
 	</aop:aspect>
 ----
-
-As we noted in the discussion of the @AspectJ style, using named pointcuts can
-significantly improve the readability of your code.
 
 The `method` attribute identifies a method (`doAccessCheck`) that provides the body of
 the advice. This method must be defined for the bean referenced by the aspect element
@@ -2411,7 +2417,7 @@ The following example shows how to specify an argument name in XML:
 	<aop:before
 		pointcut="com.xyz.lib.Pointcuts.anyPublicMethod() and @annotation(auditable)"
 		method="audit"
-		arg-names="auditable"/>
+		arg-names="auditable" />
 ----
 
 The `arg-names` attribute accepts a comma-delimited list of parameter names.
@@ -2513,8 +2519,10 @@ preceding advice for a particular join point:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/aop
+			https://www.springframework.org/schema/aop/spring-aop.xsd">
 
 		<!-- this is the object that will be proxied by Spring's AOP infrastructure -->
 		<bean id="personService" class="x.y.service.DefaultPersonService"/>
@@ -2543,15 +2551,11 @@ Consider the following driver script:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	import org.springframework.beans.factory.BeanFactory;
-	import org.springframework.context.support.ClassPathXmlApplicationContext;
-	import x.y.service.PersonService;
+	public class Boot {
 
-	public final class Boot {
-
-		public static void main(final String[] args) throws Exception {
-			BeanFactory ctx = new ClassPathXmlApplicationContext("x/y/plain.xml");
-			PersonService person = (PersonService) ctx.getBean("personService");
+		public static void main(String[] args) {
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+			PersonService person = ctx.getBean(PersonService.class);
 			person.getPerson("Pengo", 12);
 		}
 	}
@@ -2560,13 +2564,13 @@ Consider the following driver script:
 .Kotlin
 ----
 	fun main() {
-		val ctx = ClassPathXmlApplicationContext("x/y/plain.xml")
-		val person = ctx.getBean("personService") as PersonService
+		val ctx = ClassPathXmlApplicationContext("beans.xml")
+		val person = ctx.getBean(PersonService.class)
 		person.getPerson("Pengo", 12)
 	}
 ----
 
-With such a Boot class, we would get output similar to the following on standard output:
+With such a `Boot` class, we would get output similar to the following on standard output:
 
 [literal,subs="verbatim,quotes"]
 ----
@@ -2667,12 +2671,12 @@ following:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	UsageTracked usageTracked = (UsageTracked) context.getBean("myService");
+	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	val usageTracked = context.getBean("myService") as UsageTracked
+	val usageTracked = context.getBean("myService", UsageTracked.class)
 ----
 
 
@@ -2688,7 +2692,7 @@ model. Other instantiation models may be supported in future releases.
 [[aop-schema-advisors]]
 === Advisors
 
-The concept of "`advisors`" comes from the AOP support defined in Spring
+The concept of "advisors" comes from the AOP support defined in Spring
 and does not have a direct equivalent in AspectJ. An advisor is like a small
 self-contained aspect that has a single piece of advice. The advice itself is
 represented by a bean and must implement one of the advice interfaces described in
@@ -2707,7 +2711,7 @@ namespace support in Spring. The following example shows an advisor:
 
 		<aop:advisor
 			pointcut-ref="businessService"
-			advice-ref="tx-advice"/>
+			advice-ref="tx-advice" />
 
 	</aop:config>
 
@@ -2867,17 +2871,16 @@ to annotate the implementation of service operations, as the following example s
 .Java
 ----
 	@Retention(RetentionPolicy.RUNTIME)
+	// marker annotation
 	public @interface Idempotent {
-		// marker annotation
 	}
 ----
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@Retention(AnnotationRetention.RUNTIME)
-	annotation class Idempotent {
-		// marker annotation
-	}
+	// marker annotation
+	annotation class Idempotent
 ----
 
 The
@@ -2917,7 +2920,7 @@ AspectJ. You also need to use AspectJ if you wish to advise join points other th
 simple method executions (for example, field get or set join points and so on).
 
 When you use AspectJ, you have the choice of the AspectJ language syntax (also known as
-the "`code style`") or the @AspectJ annotation style. If aspects play a large
+the "code style") or the @AspectJ annotation style. If aspects play a large
 role in your design, and you are able to use the https://www.eclipse.org/ajdt/[AspectJ
 Development Tools (AJDT)] plugin for Eclipse, the AspectJ language syntax is the
 preferred option. It is cleaner and simpler because the language was purposefully
@@ -2947,7 +2950,7 @@ knowledge within a system. When using the XML style, the knowledge of how a requ
 is implemented is split across the declaration of the backing bean class and the XML in
 the configuration file. When you use the @AspectJ style, this information is encapsulated
 in a single module: the aspect. Secondly, the XML style is slightly more limited in what
-it can express than the @AspectJ style: Only the "`singleton`" aspect instantiation model
+it can express than the @AspectJ style: Only the "singleton" aspect instantiation model
 is supported, and it is not possible to combine named pointcuts declared in XML.
 For example, in the @AspectJ style you can write something like the following:
 
@@ -2995,7 +2998,7 @@ composition. It has the advantage of keeping the aspect as a modular unit. It al
 the advantage that the @AspectJ aspects can be understood (and thus consumed) both by
 Spring AOP and by AspectJ. So, if you later decide you need the capabilities of AspectJ
 to implement additional requirements, you can easily migrate to a classic AspectJ setup.
-On balance, the Spring team prefers the @AspectJ style for custom aspects beyond simple
+In general, the Spring team prefers the @AspectJ style for custom aspects beyond simple
 configuration of enterprise services.
 
 
@@ -3286,7 +3289,8 @@ The basic usage for this class is very simple, as the following example shows:
 	// you can call this as many times as you need with different aspects
 	factory.addAspect(SecurityManager.class);
 
-	// you can also add existing aspect instances, the type of the object supplied must be an @AspectJ aspect
+	// you can also add existing aspect instances, the type of the object supplied
+	// must be an @AspectJ aspect
 	factory.addAspect(usageTracker);
 
 	// now get the proxy object...
@@ -3302,7 +3306,8 @@ The basic usage for this class is very simple, as the following example shows:
 	// you can call this as many times as you need with different aspects
 	factory.addAspect(SecurityManager::class.java)
 
-	// you can also add existing aspect instances, the type of the object supplied must be an @AspectJ aspect
+	// you can also add existing aspect instances, the type of the object supplied
+	// must be an @AspectJ aspect
 	factory.addAspect(usageTracker)
 
 	// now get the proxy object...
@@ -3434,19 +3439,19 @@ are not primitives or collections) have been set.
 
 Note that using the annotation on its own does nothing. It is the
 `AnnotationBeanConfigurerAspect` in `spring-aspects.jar` that acts on the presence of
-the annotation. In essence, the aspect says, "`after returning from the initialization of
+the annotation. In essence, the aspect says, "after returning from the initialization of
 a new object of a type annotated with `@Configurable`, configure the newly created object
-using Spring in accordance with the properties of the annotation`". In this context,
-"`initialization`" refers to newly instantiated objects (for example, objects instantiated
+using Spring in accordance with the properties of the annotation". In this context,
+"initialization" refers to newly instantiated objects (for example, objects instantiated
 with the `new` operator) as well as to `Serializable` objects that are undergoing
 deserialization (for example, through
 https://docs.oracle.com/javase/8/docs/api/java/io/Serializable.html[readResolve()]).
 
 [NOTE]
 =====
-One of the key phrases in the above paragraph is "`in essence`". For most cases, the
-exact semantics of "`after returning from the initialization of a new object`" are
-fine. In this context, "`after initialization`" means that the dependencies are
+One of the key phrases in the above paragraph is "in essence". For most cases, the
+exact semantics of "after returning from the initialization of a new object" are
+fine. In this context, "after initialization" means that the dependencies are
 injected after the object has been constructed. This means that the dependencies
 are not available for use in the constructor bodies of the class. If you want the
 dependencies to be injected before the constructor bodies run and thus be
@@ -3549,15 +3554,15 @@ not been configured by Spring.
 
 The `AnnotationBeanConfigurerAspect` that is used to implement the `@Configurable` support
 is an AspectJ singleton aspect. The scope of a singleton aspect is the same as the scope
-of `static` members: There is one aspect instance per classloader that defines the type.
-This means that, if you define multiple application contexts within the same classloader
+of `static` members: There is one aspect instance per `ClassLoader` that defines the type.
+This means that, if you define multiple application contexts within the same `ClassLoader`
 hierarchy, you need to consider where to define the `@EnableSpringConfigured` bean and
 where to place `spring-aspects.jar` on the classpath.
 
 Consider a typical Spring web application configuration that has a shared parent application
 context that defines common business services, everything needed to support those services,
 and one child application context for each servlet (which contains definitions particular
-to that servlet). All of these contexts co-exist within the same classloader hierarchy,
+to that servlet). All of these contexts co-exist within the same `ClassLoader` hierarchy,
 and so the `AnnotationBeanConfigurerAspect` can hold a reference to only one of them.
 In this case, we recommend defining the `@EnableSpringConfigured` bean in the shared
 (parent) application context. This defines the services that you are likely to want to
@@ -3566,10 +3571,10 @@ with references to beans defined in the child (servlet-specific) contexts by usi
 @Configurable mechanism (which is probably not something you want to do anyway).
 
 When deploying multiple web applications within the same container, ensure that each
-web application loads the types in `spring-aspects.jar` by using its own classloader
+web application loads the types in `spring-aspects.jar` by using its own `ClassLoader`
 (for example, by placing `spring-aspects.jar` in `WEB-INF/lib`). If `spring-aspects.jar`
 is added only to the container-wide classpath (and hence loaded by the shared parent
-classloader), all web applications share the same aspect instance (which is probably
+`ClassLoader`), all web applications share the same aspect instance (which is probably
 not what you want).
 
 
@@ -3858,18 +3863,18 @@ driver class with a `main(..)` method to demonstrate the LTW in action:
 ----
 	package foo;
 
-	import org.springframework.context.support.ClassPathXmlApplicationContext;
+	// imports
 
-	public final class Main {
+	public class Main {
 
 		public static void main(String[] args) {
-			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml", Main.class);
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
 
-			EntitlementCalculationService entitlementCalculationService =
-					(EntitlementCalculationService) ctx.getBean("entitlementCalculationService");
+			EntitlementCalculationService service =
+					ctx.getBean(EntitlementCalculationService.class);
 
 			// the profiling aspect is 'woven' around this method execution
-			entitlementCalculationService.calculateEntitlement();
+			service.calculateEntitlement();
 		}
 	}
 ----
@@ -3878,15 +3883,15 @@ driver class with a `main(..)` method to demonstrate the LTW in action:
 ----
 	package foo
 
-	import org.springframework.context.support.ClassPathXmlApplicationContext
+	// imports
 
 	fun main() {
 		val ctx = ClassPathXmlApplicationContext("beans.xml")
 
-		val entitlementCalculationService = ctx.getBean("entitlementCalculationService") as EntitlementCalculationService
+		val service = ctx.getBean(EntitlementCalculationService.class)
 
 		// the profiling aspect is 'woven' around this method execution
-		entitlementCalculationService.calculateEntitlement()
+		service.calculateEntitlement()
 	}
 ----
 
@@ -3933,18 +3938,18 @@ result:
 ----
 	package foo;
 
-	import org.springframework.context.support.ClassPathXmlApplicationContext;
+	// imports
 
-	public final class Main {
+	public class Main {
 
 		public static void main(String[] args) {
-			new ClassPathXmlApplicationContext("beans.xml", Main.class);
+			new ClassPathXmlApplicationContext("beans.xml");
 
-			EntitlementCalculationService entitlementCalculationService =
+			EntitlementCalculationService service =
 					new StubEntitlementCalculationService();
 
 			// the profiling aspect will be 'woven' around this method execution
-			entitlementCalculationService.calculateEntitlement();
+			service.calculateEntitlement();
 		}
 	}
 ----
@@ -3953,15 +3958,15 @@ result:
 ----
 	package foo
 
-	import org.springframework.context.support.ClassPathXmlApplicationContext
+	// imports
 
 	fun main(args: Array<String>) {
 		ClassPathXmlApplicationContext("beans.xml")
 
-		val entitlementCalculationService = StubEntitlementCalculationService()
+		val service = StubEntitlementCalculationService()
 
 		// the profiling aspect will be 'woven' around this method execution
-		entitlementCalculationService.calculateEntitlement()
+		service.calculateEntitlement()
 	}
 ----
 
@@ -3971,7 +3976,7 @@ the context of Spring. The profiling advice still gets woven in.
 
 Admittedly, the example is simplistic. However, the basics of the LTW support in Spring
 have all been introduced in the earlier example, and the rest of this section explains
-the "`why`" behind each bit of configuration and usage in detail.
+the "why" behind each bit of configuration and usage in detail.
 
 NOTE: The `ProfilingAspect` used in this example may be basic, but it is quite useful. It is a
 nice example of a development-time aspect that developers can use during development
@@ -4079,7 +4084,7 @@ The preceding configuration automatically defines and registers a number of LTW-
 infrastructure beans, such as a `LoadTimeWeaver` and an `AspectJWeavingEnabler`, for you.
 The default `LoadTimeWeaver` is the `DefaultContextLoadTimeWeaver` class, which attempts
 to decorate an automatically detected `LoadTimeWeaver`. The exact type of `LoadTimeWeaver`
-that is "`automatically detected`" is dependent upon your runtime environment.
+that is "automatically detected" is dependent upon your runtime environment.
 The following table summarizes various `LoadTimeWeaver` implementations:
 
 [[aop-aj-ltw-spring-env-impls]]
