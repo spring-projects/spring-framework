@@ -34,7 +34,7 @@ class JdkProxyHintExtensionsTests {
 	fun `proxiedInterfaces builder extension`() {
 		every { builder.proxiedInterfaces(*anyVararg<Class<*>>()) } returns builder
 		builder.proxiedInterfaces(String::class, Int::class)
-		verify { builder.proxiedInterfaces(*anyVararg<Class<*>>()) }
+		verify { builder.proxiedInterfaces(String::class.java, Int::class.java) }
 	}
 
 }
