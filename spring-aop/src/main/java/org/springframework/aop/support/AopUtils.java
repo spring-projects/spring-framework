@@ -247,6 +247,10 @@ public abstract class AopUtils {
 		for (Class<?> clazz : classes) {
 			Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
 			for (Method method : methods) {
+				int methodModifiers = method.getModifiers();
+				if(Modifier.isPrivate(methodModifiers) || Modifier.isFinal(methodModifiers)){
+					continue;
+				}
 				if (introductionAwareMethodMatcher != null ?
 						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions) :
 						methodMatcher.matches(method, targetClass)) {
