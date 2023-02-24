@@ -518,6 +518,9 @@ class AnnotationConfigApplicationContextTests {
 				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
 						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS))
 				.accepts(runtimeHints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(CglibConfiguration.class)
+				.withMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS))
+				.accepts(runtimeHints);
 	}
 
 	@Test
