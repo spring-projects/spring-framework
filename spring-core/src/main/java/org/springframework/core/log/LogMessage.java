@@ -22,10 +22,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * A simple log message type for use with Commons Logging, allowing
- * for convenient lazy resolution of a given {@link Supplier} instance
- * (typically bound to a Java 8 lambda expression) or a printf-style
- * format string ({@link String#format}) in its {@link #toString()}.
+ * A simple log message type for use with Commons Logging, allowing for convenient
+ * lazy resolution of a given {@link Supplier} instance (typically bound to a lambda
+ * expression) or a printf-style format string ({@link String#format}) in its
+ * {@link #toString()}.
  *
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
@@ -78,7 +78,7 @@ public abstract class LogMessage implements CharSequence {
 
 	/**
 	 * Build a lazily resolving message from the given supplier.
-	 * @param supplier the supplier (typically bound to a Java 8 lambda expression)
+	 * @param supplier the supplier (typically bound to a lambda expression)
 	 * @see #toString()
 	 */
 	public static LogMessage of(Supplier<? extends CharSequence> supplier) {
@@ -134,8 +134,12 @@ public abstract class LogMessage implements CharSequence {
 
 	/**
 	 * Build a lazily formatted message from the given format string and varargs.
+	 * <p>This varargs {@code format()} variant may be costly. You should therefore
+	 * use the individual argument variants whenever possible;
+	 * {@link #format(String, Object)}, {@link #format(String, Object, Object)}, etc.
 	 * @param format the format string (following {@link String#format} rules)
-	 * @param args the varargs array (can be {@code null}, costly, prefer individual arguments)
+	 * @param args the varargs array (can be {@code null} and can contain {@code null}
+	 * elements)
 	 * @see String#format(String, Object...)
 	 */
 	public static LogMessage format(String format, @Nullable Object... args) {
