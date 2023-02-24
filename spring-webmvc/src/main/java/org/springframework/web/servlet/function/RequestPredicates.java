@@ -23,7 +23,6 @@ import java.security.Principal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -295,11 +294,6 @@ public abstract class RequestPredicates {
 		}
 	}
 
-	private static void restoreAttributes(ServerRequest request, Map<String, Object> attributes) {
-		request.attributes().clear();
-		request.attributes().putAll(attributes);
-	}
-
 	private static Map<String, String> mergePathVariables(Map<String, String> oldVariables,
 			Map<String, String> newVariables) {
 
@@ -431,6 +425,81 @@ public abstract class RequestPredicates {
 	}
 
 
+	/**
+	 * A boolean result with a state-changing commit step to be conditionally
+	 * applied by a caller.
+	 */
+	static abstract class Evaluation {
+		static final Evaluation TRUE = new NopEvaluation(true);
+		static final Evaluation FALSE = new NopEvaluation(false);
+
+		private final boolean value;
+
+		Evaluation(boolean value) {
+			this.value = value;
+		}
+
+		abstract void doCommit();
+
+
+		private static final class NopEvaluation extends Evaluation {
+			private NopEvaluation(boolean value) {
+				super(value);
+			}
+
+			@Override
+			void doCommit() {
+				// pass
+			}
+		}
+	}
+
+
+	/**
+	 * Evaluates a {@link ServerRequest} and returns an {@link Evaluation}.
+	 */
+	private static abstract class Evaluator {
+		private static Evaluator of(RequestPredicate requestPredicate) {
+			if (requestPredicate instanceof EvaluatorRequestPredicate evaluatorRequestPredicate) {
+				return evaluatorRequestPredicate;
+			}
+			// Wrap the RequestPredicate with an Evaluator
+			return new RequestPredicateEvaluator(requestPredicate);
+		}
+
+		abstract Evaluation apply(ServerRequest request);
+
+
+		private static final class RequestPredicateEvaluator extends Evaluator {
+			private final RequestPredicate requestPredicate;
+
+			private RequestPredicateEvaluator(RequestPredicate requestPredicate) {
+				this.requestPredicate = requestPredicate;
+			}
+
+			@Override
+			Evaluation apply(ServerRequest request) {
+				return this.requestPredicate.test(request) ? Evaluation.TRUE : Evaluation.FALSE;
+			}
+		}
+	}
+
+	/**
+	 * A {@link RequestPredicate} which may modify the request.
+	 */
+	static abstract class EvaluatorRequestPredicate extends Evaluator implements RequestPredicate {
+		@Override
+		public final boolean test(ServerRequest request) {
+			Evaluation result = apply(request);
+			boolean value = result.value;
+			if (value) {
+				result.doCommit();
+			}
+			return value;
+		}
+	}
+
+
 	private static class HttpMethodPredicate implements RequestPredicate {
 
 		private final Set<HttpMethod> httpMethods;
@@ -481,7 +550,7 @@ public abstract class RequestPredicates {
 	}
 
 
-	private static class PathPatternPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
+	private static class PathPatternPredicate extends EvaluatorRequestPredicate implements ChangePathPatternParserVisitor.Target {
 
 		private PathPattern pattern;
 
@@ -491,29 +560,28 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public boolean test(ServerRequest request) {
+		public Evaluation apply(ServerRequest request) {
 			PathContainer pathContainer = request.requestPath().pathWithinApplication();
 			PathPattern.PathMatchInfo info = this.pattern.matchAndExtract(pathContainer);
 			traceMatch("Pattern", this.pattern.getPatternString(), request.path(), info != null);
-			if (info != null) {
-				mergeAttributes(request, info.getUriVariables(), this.pattern);
-				return true;
+			if (info == null) {
+				return Evaluation.FALSE;
 			}
-			else {
-				return false;
-			}
-		}
+			return new Evaluation(true) {
+				@Override
+				void doCommit() {
+					Map<String, Object> attributes = request.attributes();
+					Map<String, String> pathVariables = mergePathVariables(request.pathVariables(),
+							info.getUriVariables());
+					attributes.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+							Collections.unmodifiableMap(pathVariables));
 
-		private static void mergeAttributes(ServerRequest request, Map<String, String> variables,
-				PathPattern pattern) {
-			Map<String, String> pathVariables = mergePathVariables(request.pathVariables(), variables);
-			request.attributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
-						Collections.unmodifiableMap(pathVariables));
-
-			pattern = mergePatterns(
-					(PathPattern) request.attributes().get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
-					pattern);
-			request.attributes().put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, pattern);
+					PathPattern newPattern = mergePatterns(
+							(PathPattern) attributes.get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE),
+							PathPatternPredicate.this.pattern);
+					attributes.put(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE, newPattern);
+				}
+			};
 		}
 
 		@Override
@@ -755,28 +823,40 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} for where both {@code left} and {@code right} predicates
 	 * must match.
 	 */
-	static class AndRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
+	static class AndRequestPredicate extends EvaluatorRequestPredicate implements ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
+		private final Evaluator leftEvaluator;
 
 		private final RequestPredicate right;
+		private final Evaluator rightEvaluator;
 
 		public AndRequestPredicate(RequestPredicate left, RequestPredicate right) {
 			Assert.notNull(left, "Left RequestPredicate must not be null");
 			Assert.notNull(right, "Right RequestPredicate must not be null");
 			this.left = left;
+			this.leftEvaluator = Evaluator.of(left);
 			this.right = right;
+			this.rightEvaluator = Evaluator.of(right);
 		}
 
 		@Override
-		public boolean test(ServerRequest request) {
-			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
-
-			if (this.left.test(request) && this.right.test(request)) {
-				return true;
+		public Evaluation apply(ServerRequest request) {
+			Evaluation leftResult = this.leftEvaluator.apply(request);
+			if (!leftResult.value) {
+				return leftResult;
 			}
-			restoreAttributes(request, oldAttributes);
-			return false;
+			Evaluation rightResult = this.rightEvaluator.apply(request);
+			if (!rightResult.value) {
+				return rightResult;
+			}
+			return new Evaluation(true) {
+				@Override
+				void doCommit() {
+					leftResult.doCommit();
+					rightResult.doCommit();
+				}
+			};
 		}
 
 		@Override
@@ -813,23 +893,26 @@ public abstract class RequestPredicates {
 	/**
 	 * {@link RequestPredicate} that negates a delegate predicate.
 	 */
-	static class NegateRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
+	static class NegateRequestPredicate extends EvaluatorRequestPredicate implements ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate delegate;
+		private final Evaluator delegateEvaluator;
 
 		public NegateRequestPredicate(RequestPredicate delegate) {
 			Assert.notNull(delegate, "Delegate must not be null");
 			this.delegate = delegate;
+			this.delegateEvaluator = Evaluator.of(delegate);
 		}
 
 		@Override
-		public boolean test(ServerRequest request) {
-			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
-			boolean result = !this.delegate.test(request);
-			if (!result) {
-				restoreAttributes(request, oldAttributes);
-			}
-			return result;
+		public Evaluation apply(ServerRequest request) {
+			Evaluation result = this.delegateEvaluator.apply(request);
+			return new Evaluation(!result.value) {
+				@Override
+				void doCommit() {
+					result.doCommit();
+				}
+			};
 		}
 
 		@Override
@@ -857,34 +940,30 @@ public abstract class RequestPredicates {
 	 * {@link RequestPredicate} where either {@code left} or {@code right} predicates
 	 * may match.
 	 */
-	static class OrRequestPredicate implements RequestPredicate, ChangePathPatternParserVisitor.Target {
+	static class OrRequestPredicate extends EvaluatorRequestPredicate implements ChangePathPatternParserVisitor.Target {
 
 		private final RequestPredicate left;
+		private final Evaluator leftEvaluator;
 
 		private final RequestPredicate right;
+		private final Evaluator rightEvaluator;
 
 		public OrRequestPredicate(RequestPredicate left, RequestPredicate right) {
 			Assert.notNull(left, "Left RequestPredicate must not be null");
 			Assert.notNull(right, "Right RequestPredicate must not be null");
 			this.left = left;
+			this.leftEvaluator = Evaluator.of(left);
 			this.right = right;
+			this.rightEvaluator = Evaluator.of(right);
 		}
 
 		@Override
-		public boolean test(ServerRequest request) {
-			Map<String, Object> oldAttributes = new HashMap<>(request.attributes());
-
-			if (this.left.test(request)) {
-				return true;
+		public Evaluation apply(ServerRequest request) {
+			Evaluation leftResult = this.leftEvaluator.apply(request);
+			if (leftResult.value) {
+				return leftResult;
 			}
-			else {
-				restoreAttributes(request, oldAttributes);
-				if (this.right.test(request)) {
-					return true;
-				}
-			}
-			restoreAttributes(request, oldAttributes);
-			return false;
+			return this.rightEvaluator.apply(request);
 		}
 
 		@Override
