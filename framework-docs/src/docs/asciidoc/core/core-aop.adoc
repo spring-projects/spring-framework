@@ -1536,7 +1536,7 @@ following strategy to determine parameter names:
   an optional `argNames` attribute that you can use to specify the argument names of
   the annotated method. These argument names are available at runtime. The following example
   shows how to use the `argNames` attribute:
-
++
 [source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
@@ -1549,7 +1549,7 @@ following strategy to determine parameter names:
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
-
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
@@ -1562,12 +1562,12 @@ following strategy to determine parameter names:
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
-
++
 If the first parameter is of the `JoinPoint`, `ProceedingJoinPoint`, or
 `JoinPoint.StaticPart` type, you can leave out the name of the parameter from the value
 of the `argNames` attribute. For example, if you modify the preceding advice to receive
 the join point object, the `argNames` attribute need not include it:
-
++
 [source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
@@ -1580,7 +1580,7 @@ the join point object, the `argNames` attribute need not include it:
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
-
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
@@ -1593,13 +1593,13 @@ the join point object, the `argNames` attribute need not include it:
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
-
++
 The special treatment given to the first parameter of the `JoinPoint`,
 `ProceedingJoinPoint`, and `JoinPoint.StaticPart` types is particularly convenient for
 advice instances that do not collect any other join point context. In such situations, you may
 omit the `argNames` attribute. For example, the following advice need not declare
 the `argNames` attribute:
-
++
 [source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
@@ -1609,7 +1609,7 @@ the `argNames` attribute:
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
-
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
@@ -1632,7 +1632,7 @@ the `argNames` attribute:
 +
 NOTE: If an @AspectJ aspect has been compiled by the AspectJ compiler (`ajc`) even
 without the debug information, you need not add the `argNames` attribute, as the compiler
-retain the needed information.
+retains the needed information.
 
 * If the code has been compiled without the necessary debug information, Spring AOP
   tries to deduce the pairing of binding variables to parameters (for example, if
