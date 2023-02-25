@@ -1589,9 +1589,9 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 			registrar.registerFormatters(conversionService);
 
 			// Register date conversion with a specific global format
-			DateFormatterRegistrar registrar = new DateFormatterRegistrar();
-			registrar.setFormatter(new DateFormatter("yyyyMMdd"));
-			registrar.registerFormatters(conversionService);
+			DateFormatterRegistrar anotherRegistrar = new DateFormatterRegistrar();
+			anotherRegistrar.setFormatter(new DateFormatter("yyyyMMdd"));
+			anotherRegistrar.registerFormatters(conversionService);
 
 			return conversionService;
 		}
@@ -1617,9 +1617,9 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 				registrar.registerFormatters(this)
 
 				// Register date conversion with a specific global format
-				val registrar = DateFormatterRegistrar()
-				registrar.setFormatter(DateFormatter("yyyyMMdd"))
-				registrar.registerFormatters(this)
+				val anotherRegistrar = DateFormatterRegistrar()
+				anotherRegistrar.setFormatter(DateFormatter("yyyyMMdd"))
+				anotherRegistrar.registerFormatters(this)
 			}
 		}
 	}
