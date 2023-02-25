@@ -377,10 +377,10 @@ class StatusResultMatchersDsl internal constructor (private val actions: ResultA
 	}
 
 	/**
-	 * @see StatusResultMatchers.isUnprocessableEntity
+	 * @see StatusResultMatchers.isUnprocessableContent
 	 */
-	fun isUnprocessableEntity() {
-		actions.andExpect(matchers.isUnprocessableEntity())
+	fun isUnprocessableContent() {
+		actions.andExpect(matchers.isUnprocessableContent())
 	}
 
 	/**

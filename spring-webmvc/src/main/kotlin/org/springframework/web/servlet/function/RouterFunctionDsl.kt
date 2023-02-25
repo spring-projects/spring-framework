@@ -784,9 +784,9 @@ class RouterFunctionDsl internal constructor (private val init: (RouterFunctionD
 	fun notFound() = ServerResponse.notFound()
 
 	/**
-	 * @see ServerResponse.unprocessableEntity
+	 * @see ServerResponse.unprocessableContent
 	 */
-	fun unprocessableEntity() = ServerResponse.unprocessableEntity()
+	fun unprocessableContent() = ServerResponse.unprocessableContent()
 
 	/**
 	 * @see ServerResponse.status

@@ -482,10 +482,10 @@ public class StatusResultMatchers {
 	}
 
 	/**
-	 * Assert the response status code is {@code HttpStatus.UNPROCESSABLE_ENTITY} (422).
+	 * Assert the response status code is {@code HttpStatus.UNPROCESSABLE_CONTENT} (422).
 	 */
-	public ResultMatcher isUnprocessableEntity() {
-		return matcher(HttpStatus.UNPROCESSABLE_ENTITY);
+	public ResultMatcher isUnprocessableContent() {
+		return matcher(HttpStatus.UNPROCESSABLE_CONTENT);
 	}
 
 	/**

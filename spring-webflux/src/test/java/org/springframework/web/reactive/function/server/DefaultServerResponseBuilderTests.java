@@ -181,10 +181,10 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void unprocessableEntity() {
-		Mono<ServerResponse> result = ServerResponse.unprocessableEntity().build();
+	void unprocessableContent() {
+		Mono<ServerResponse> result = ServerResponse.unprocessableContent().build();
 		StepVerifier.create(result)
-				.expectNextMatches(response -> HttpStatus.UNPROCESSABLE_ENTITY.equals(response.statusCode()))
+				.expectNextMatches(response -> HttpStatus.UNPROCESSABLE_CONTENT.equals(response.statusCode()))
 				.expectComplete()
 				.verify();
 	}

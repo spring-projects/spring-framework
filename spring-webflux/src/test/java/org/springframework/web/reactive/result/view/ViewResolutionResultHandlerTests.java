@@ -188,7 +188,7 @@ class ViewResolutionResultHandlerTests {
 		testHandle("/account", returnType, 99L, "account: {id=123, myLong=99}", resolver);
 
 		returnType = on(Handler.class).resolveReturnType(Rendering.class);
-		HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+		HttpStatus status = HttpStatus.UNPROCESSABLE_CONTENT;
 		returnValue = Rendering.view("account").modelAttribute("a", "a1").status(status).header("h", "h1").build();
 		String expected = "account: {a=a1, id=123}";
 		ServerWebExchange exchange = testHandle("/path", returnType, returnValue, expected, resolver);

@@ -223,11 +223,11 @@ public interface ServerResponse {
 
 	/**
 	 * Create a builder with a
-	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY 422 Unprocessable Entity} status.
+	 * {@linkplain HttpStatus#UNPROCESSABLE_CONTENT 422 Unprocessable Content} status.
 	 * @return the created builder
 	 */
-	static BodyBuilder unprocessableEntity() {
-		return status(HttpStatus.UNPROCESSABLE_ENTITY);
+	static BodyBuilder unprocessableContent() {
+		return status(HttpStatus.UNPROCESSABLE_CONTENT);
 	}
 
 	/**

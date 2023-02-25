@@ -844,11 +844,11 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 
 	/**
 	 * Create a builder with an
-	 * [422 Unprocessable Entity][HttpStatus.UNPROCESSABLE_ENTITY] status.
+	 * [422 Unprocessable Content][HttpStatus.UNPROCESSABLE_CONTENT] status.
 	 * @return the created builder
 	 * @since 5.1
 	 */
-	fun unprocessableEntity(): ServerResponse.BodyBuilder =
-			ServerResponse.unprocessableEntity()
+	fun unprocessableContent(): ServerResponse.BodyBuilder =
+			ServerResponse.unprocessableContent()
 
 }

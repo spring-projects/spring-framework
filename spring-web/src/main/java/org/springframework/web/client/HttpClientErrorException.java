@@ -129,9 +129,9 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 				case TOO_MANY_REQUESTS -> message != null ?
 						new TooManyRequests(message, statusText, headers, body, charset) :
 						new TooManyRequests(statusText, headers, body, charset);
-				case UNPROCESSABLE_ENTITY -> message != null ?
-						new UnprocessableEntity(message, statusText, headers, body, charset) :
-						new UnprocessableEntity(statusText, headers, body, charset);
+				case UNPROCESSABLE_CONTENT -> message != null ?
+						new UnprocessableContent(message, statusText, headers, body, charset) :
+						new UnprocessableContent(statusText, headers, body, charset);
 				default -> message != null ?
 						new HttpClientErrorException(message, statusCode, statusText, headers, body, charset) :
 						new HttpClientErrorException(statusCode, statusText, headers, body, charset);
@@ -307,20 +307,20 @@ public class HttpClientErrorException extends HttpStatusCodeException {
 	}
 
 	/**
-	 * {@link HttpClientErrorException} for status HTTP 422 Unprocessable Entity.
+	 * {@link HttpClientErrorException} for status HTTP 422 Unprocessable Content.
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")
-	public static final class UnprocessableEntity extends HttpClientErrorException {
+	public static final class UnprocessableContent extends HttpClientErrorException {
 
-		private UnprocessableEntity(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
-			super(HttpStatus.UNPROCESSABLE_ENTITY, statusText, headers, body, charset);
+		private UnprocessableContent(String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
+			super(HttpStatus.UNPROCESSABLE_CONTENT, statusText, headers, body, charset);
 		}
 
-		private UnprocessableEntity(String message, String statusText,
+		private UnprocessableContent(String message, String statusText,
 				HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
-			super(message, HttpStatus.UNPROCESSABLE_ENTITY, statusText, headers, body, charset);
+			super(message, HttpStatus.UNPROCESSABLE_CONTENT, statusText, headers, body, charset);
 		}
 	}
 

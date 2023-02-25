@@ -313,10 +313,10 @@ public enum HttpStatus implements HttpStatusCode {
 	@Deprecated
 	DESTINATION_LOCKED(421, Series.CLIENT_ERROR, "Destination Locked"),
 	/**
-	 * {@code 422 Unprocessable Entity}.
-	 * @see <a href="https://tools.ietf.org/html/rfc4918#section-11.2">WebDAV</a>
+	 * {@code 422 Unprocessable Content}.
+	 * @see <a href="https://www.rfc-editor.org/rfc/rfc9110.html#name-422-unprocessable-content">HTTP Semantics</a>
 	 */
-	UNPROCESSABLE_ENTITY(422, Series.CLIENT_ERROR, "Unprocessable Entity"),
+	UNPROCESSABLE_CONTENT(422, Series.CLIENT_ERROR, "Unprocessable Content"),
 	/**
 	 * {@code 423 Locked}.
 	 * @see <a href="https://tools.ietf.org/html/rfc4918#section-11.3">WebDAV</a>

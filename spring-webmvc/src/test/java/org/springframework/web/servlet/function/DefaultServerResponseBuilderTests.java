@@ -141,9 +141,9 @@ class DefaultServerResponseBuilderTests {
 	}
 
 	@Test
-	void unprocessableEntity() {
-		ServerResponse response = ServerResponse.unprocessableEntity().build();
-		assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+	void unprocessableContent() {
+		ServerResponse response = ServerResponse.unprocessableContent().build();
+		assertThat(response.statusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT);
 	}
 
 	@Test

@@ -3909,7 +3909,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		@RequestMapping("/path")
 		public ModelAndView methodWithHttpStatus(MyEntity object) {
-			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_ENTITY);
+			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_CONTENT);
 		}
 
 		@RequestMapping("/redirect")
@@ -3924,7 +3924,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		@ExceptionHandler(TestException.class)
 		public ModelAndView handleException() {
-			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_ENTITY);
+			return new ModelAndView("view", HttpStatus.UNPROCESSABLE_CONTENT);
 		}
 
 		@SuppressWarnings("serial")

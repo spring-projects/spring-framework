@@ -88,7 +88,7 @@ class HttpStatusTests {
 		statusCodes.put(419, "INSUFFICIENT_SPACE_ON_RESOURCE");
 		statusCodes.put(420, "METHOD_FAILURE");
 		statusCodes.put(421, "DESTINATION_LOCKED");
-		statusCodes.put(422, "UNPROCESSABLE_ENTITY");
+		statusCodes.put(422, "UNPROCESSABLE_CONTENT");
 		statusCodes.put(423, "LOCKED");
 		statusCodes.put(424, "FAILED_DEPENDENCY");
 		statusCodes.put(425, "TOO_EARLY");

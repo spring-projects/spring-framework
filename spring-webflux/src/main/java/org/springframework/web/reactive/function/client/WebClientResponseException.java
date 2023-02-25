@@ -325,8 +325,8 @@ public class WebClientResponseException extends WebClientException {
 					return new WebClientResponseException.UnsupportedMediaType(statusText, headers, body, charset, request);
 				case TOO_MANY_REQUESTS:
 					return new WebClientResponseException.TooManyRequests(statusText, headers, body, charset, request);
-				case UNPROCESSABLE_ENTITY:
-					return new WebClientResponseException.UnprocessableEntity(statusText, headers, body, charset, request);
+				case UNPROCESSABLE_CONTENT:
+					return new WebClientResponseException.UnprocessableContent(statusText, headers, body, charset, request);
 				case INTERNAL_SERVER_ERROR:
 					return new WebClientResponseException.InternalServerError(statusText, headers, body, charset, request);
 				case NOT_IMPLEMENTED:
@@ -486,13 +486,13 @@ public class WebClientResponseException extends WebClientException {
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")
-	public static class UnprocessableEntity extends WebClientResponseException {
+	public static class UnprocessableContent extends WebClientResponseException {
 
-		UnprocessableEntity(
+		UnprocessableContent(
 				String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset,
 				@Nullable HttpRequest request) {
 
-			super(HttpStatus.UNPROCESSABLE_ENTITY.value(), statusText, headers, body, charset, request);
+			super(HttpStatus.UNPROCESSABLE_CONTENT.value(), statusText, headers, body, charset, request);
 		}
 	}
 

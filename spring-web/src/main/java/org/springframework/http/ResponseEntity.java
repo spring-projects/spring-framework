@@ -349,12 +349,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Create a builder with an
-	 * {@linkplain HttpStatus#UNPROCESSABLE_ENTITY UNPROCESSABLE_ENTITY} status.
+	 * {@linkplain HttpStatus#UNPROCESSABLE_CONTENT UNPROCESSABLE_CONTENT} status.
 	 * @return the created builder
 	 * @since 4.1.3
 	 */
-	public static BodyBuilder unprocessableEntity() {
-		return status(HttpStatus.UNPROCESSABLE_ENTITY);
+	public static BodyBuilder unprocessableContent() {
+		return status(HttpStatus.UNPROCESSABLE_CONTENT);
 	}
 
 	/**
