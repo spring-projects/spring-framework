@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -290,7 +290,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
 			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
 				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-				Object[] validationHints = (hints instanceof Object[] objectHint ? objectHint : new Object[] {hints});
+				Object[] validationHints = (hints instanceof Object[] objectHints ? objectHints : new Object[] {hints});
 				String name = Conventions.getVariableNameForParameter(parameter);
 				return target -> {
 					BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, name);

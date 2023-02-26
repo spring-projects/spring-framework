@@ -172,8 +172,8 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 		else if (payload instanceof byte[] bytes) {
 			return bytes.length == 0;
 		}
-		else if (payload instanceof String s) {
-			return !StringUtils.hasText(s);
+		else if (payload instanceof String text) {
+			return !StringUtils.hasText(text);
 		}
 		else if (payload instanceof Optional<?> optional) {
 			return optional.isEmpty();
@@ -216,7 +216,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
 			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
 				Object hints = (validatedAnn != null ? validatedAnn.value() : AnnotationUtils.getValue(ann));
-				Object[] validationHints = (hints instanceof Object[] objectHint ? objectHint : new Object[] {hints});
+				Object[] validationHints = (hints instanceof Object[] objectHints ? objectHints : new Object[] {hints});
 				BeanPropertyBindingResult bindingResult =
 						new BeanPropertyBindingResult(target, getParameterName(parameter));
 				if (!ObjectUtils.isEmpty(validationHints) && this.validator instanceof SmartValidator sv) {
