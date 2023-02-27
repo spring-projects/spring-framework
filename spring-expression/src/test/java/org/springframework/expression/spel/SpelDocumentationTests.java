@@ -16,6 +16,9 @@
 
 package org.springframework.expression.spel;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -413,6 +416,38 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 		String helloWorldReversed = parser.parseExpression("#reverseString('hello world')").getValue(context, String.class);
 		assertThat(helloWorldReversed).isEqualTo("dlrow olleh");
+	}
+
+	@Test
+	void methodHandlesNotBound() throws Throwable {
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+
+		MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
+				MethodType.methodType(String.class, Object[].class));
+		context.setVariable("message", mh);
+
+		String message = parser.parseExpression("#message('Simple message: <%s>', 'Hello World', 'ignored')")
+				.getValue(context, String.class);
+		assertThat(message).isEqualTo("Simple message: <Hello World>");
+	}
+
+	@Test
+	void methodHandlesFullyBound() throws Throwable {
+		ExpressionParser parser = new SpelExpressionParser();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+
+		String template = "This is a %s message with %s words: <%s>";
+		Object varargs = new Object[] { "prerecorded", 3, "Oh Hello World!", "ignored" };
+		MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
+						MethodType.methodType(String.class, Object[].class))
+				.bindTo(template)
+				.bindTo(varargs); //here we have to provide arguments in a single array binding
+		context.setVariable("message", mh);
+
+		String message = parser.parseExpression("#message()")
+				.getValue(context, String.class);
+		assertThat(message).isEqualTo("This is a prerecorded message with 3 words: <Oh Hello World!>");
 	}
 
 	// 7.5.10

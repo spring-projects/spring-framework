@@ -15,7 +15,7 @@ topics:
 * xref:core/expressions/language-ref/types.adoc[Types]
 * xref:core/expressions/language-ref/constructors.adoc[Constructors]
 * xref:core/expressions/language-ref/variables.adoc[Variables]
-* xref:core/expressions/language-ref/functions.adoc[Functions]
+* xref:core/expressions/language-ref/functions.adoc[User-Defined Functions]
 * xref:core/expressions/language-ref/bean-references.adoc[Bean References]
 * xref:core/expressions/language-ref/operator-ternary.adoc[Ternary Operator (If-Then-Else)]
 * xref:core/expressions/language-ref/operator-elvis.adoc[The Elvis Operator]

@@ -189,6 +189,45 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	}
 
 	/**
+	 * Scenario: looking up your own MethodHandles and calling them from the expression
+	 */
+	@Test
+	public void testScenario_RegisteringJavaMethodsAsMethodHandlesAndCallingThem() throws SecurityException, NoSuchMethodException {
+		try {
+			// Create a parser
+			SpelExpressionParser parser = new SpelExpressionParser();
+			//this.context is already populated with all relevant MethodHandle examples
+
+			Expression expr = parser.parseRaw("#message('Message with %s words: <%s>', 2, 'Hello World', 'ignored')");
+			Object value = expr.getValue(this.context);
+			assertThat(value).isEqualTo("Message with 2 words: <Hello World>");
+
+			expr = parser.parseRaw("#messageTemplate('bound', 2, 'Hello World', 'ignored')");
+			value = expr.getValue(this.context);
+			assertThat(value).isEqualTo("This is a bound message with 2 words: <Hello World>");
+
+			expr = parser.parseRaw("#messageBound()");
+			value = expr.getValue(this.context);
+			assertThat(value).isEqualTo("This is a prerecorded message with 3 words: <Oh Hello World>");
+
+			Expression staticExpr = parser.parseRaw("#messageStatic('Message with %s words: <%s>', 2, 'Hello World', 'ignored')");
+			Object staticValue = staticExpr.getValue(this.context);
+			assertThat(staticValue).isEqualTo("Message with 2 words: <Hello World>");
+
+			staticExpr = parser.parseRaw("#messageStaticTemplate('bound', 2, 'Hello World', 'ignored')");
+			staticValue = staticExpr.getValue(this.context);
+			assertThat(staticValue).isEqualTo("This is a bound message with 2 words: <Hello World>");
+
+			staticExpr = parser.parseRaw("#messageStaticBound()");
+			staticValue = staticExpr.getValue(this.context);
+			assertThat(staticValue).isEqualTo("This is a prerecorded message with 3 words: <Oh Hello World>");
+		}
+		catch (EvaluationException | ParseException ex) {
+			throw new AssertionError(ex.getMessage(), ex);
+		}
+	}
+
+	/**
 	 * Scenario: add a property resolver that will get called in the resolver chain, this one only supports reading.
 	 */
 	@Test
