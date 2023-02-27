@@ -1578,20 +1578,22 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 		public FormattingConversionService conversionService() {
 
 			// Use the DefaultFormattingConversionService but do not register defaults
-			DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService(false);
+			DefaultFormattingConversionService conversionService =
+				new DefaultFormattingConversionService(false);
 
 			// Ensure @NumberFormat is still supported
-			conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+			conversionService.addFormatterForFieldAnnotation(
+				new NumberFormatAnnotationFormatterFactory());
 
 			// Register JSR-310 date conversion with a specific global format
-			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
-			registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
-			registrar.registerFormatters(conversionService);
+			DateTimeFormatterRegistrar dateTimeRegistrar = new DateTimeFormatterRegistrar();
+			dateTimeRegistrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			dateTimeRegistrar.registerFormatters(conversionService);
 
 			// Register date conversion with a specific global format
-			DateFormatterRegistrar anotherRegistrar = new DateFormatterRegistrar();
-			anotherRegistrar.setFormatter(new DateFormatter("yyyyMMdd"));
-			anotherRegistrar.registerFormatters(conversionService);
+			DateFormatterRegistrar dateRegistrar = new DateFormatterRegistrar();
+			dateRegistrar.setFormatter(new DateFormatter("yyyyMMdd"));
+			dateRegistrar.registerFormatters(conversionService);
 
 			return conversionService;
 		}
@@ -1612,14 +1614,14 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 				addFormatterForFieldAnnotation(NumberFormatAnnotationFormatterFactory())
 
 				// Register JSR-310 date conversion with a specific global format
-				val registrar = DateTimeFormatterRegistrar()
-				registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"))
-				registrar.registerFormatters(this)
+				val dateTimeRegistrar = DateTimeFormatterRegistrar()
+				dateTimeRegistrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"))
+				dateTimeRegistrar.registerFormatters(this)
 
 				// Register date conversion with a specific global format
-				val anotherRegistrar = DateFormatterRegistrar()
-				anotherRegistrar.setFormatter(DateFormatter("yyyyMMdd"))
-				anotherRegistrar.registerFormatters(this)
+				val dateRegistrar = DateFormatterRegistrar()
+				dateRegistrar.setFormatter(DateFormatter("yyyyMMdd"))
+				dateRegistrar.registerFormatters(this)
 			}
 		}
 	}
