@@ -16,6 +16,9 @@
 
 package org.springframework.expression.spel;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 
@@ -37,6 +40,12 @@ class TestScenarioCreator {
 		setupRootContextObject(testContext);
 		populateVariables(testContext);
 		populateFunctions(testContext);
+		try {
+			populateMethodHandles(testContext);
+		}
+		catch (NoSuchMethodException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		}
 		return testContext;
 	}
 
@@ -60,6 +69,36 @@ class TestScenarioCreator {
 		catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+
+	/**
+	 * Register some Java {@code MethodHandle} as well known functions that can be called from an expression.
+	 * @param testContext the test evaluation context
+	 */
+	private static void populateMethodHandles(StandardEvaluationContext testContext) throws NoSuchMethodException, IllegalAccessException {
+		// #message(template, args...)
+		MethodHandle message = MethodHandles.lookup().findVirtual(String.class, "formatted",
+				MethodType.methodType(String.class, Object[].class));
+		testContext.registerFunction("message", message);
+		// #messageTemplate(args...)
+		MethodHandle messageWithParameters = message.bindTo("This is a %s message with %s words: <%s>");
+		testContext.registerFunction("messageTemplate", messageWithParameters);
+		// #messageTemplateBound()
+		MethodHandle messageBound = messageWithParameters
+				.bindTo(new Object[] { "prerecorded", 3, "Oh Hello World", "ignored"});
+		testContext.registerFunction("messageBound", messageBound);
+
+		//#messageStatic(template, args...)
+		MethodHandle messageStatic = MethodHandles.lookup().findStatic(TestScenarioCreator.class,
+				"message", MethodType.methodType(String.class, String.class, String[].class));
+		testContext.registerFunction("messageStatic", messageStatic);
+		//#messageStaticTemplate(args...)
+		MethodHandle messageStaticPartiallyBound = messageStatic.bindTo("This is a %s message with %s words: <%s>");
+		testContext.registerFunction("messageStaticTemplate", messageStaticPartiallyBound);
+		//#messageStaticBound()
+		MethodHandle messageStaticFullyBound = messageStaticPartiallyBound
+				.bindTo(new String[] { "prerecorded", "3", "Oh Hello World", "ignored"});
+		testContext.registerFunction("messageStaticBound", messageStaticFullyBound);
 	}
 
 	/**
@@ -115,6 +154,10 @@ class TestScenarioCreator {
 
 	public static String varargsFunction2(int i, String... strings) {
 		return String.valueOf(i) + "-" + Arrays.toString(strings);
+	}
+
+	public static String message(String template, String... args) {
+		return template.formatted((Object[]) args);
 	}
 
 }

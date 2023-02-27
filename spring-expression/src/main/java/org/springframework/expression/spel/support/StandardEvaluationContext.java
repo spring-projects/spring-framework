@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.support;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -249,6 +250,10 @@ public class StandardEvaluationContext implements EvaluationContext {
 
 	public void registerFunction(String name, Method method) {
 		this.variables.put(name, method);
+	}
+
+	public void registerFunction(String name, MethodHandle methodHandle) {
+		this.variables.put(name, methodHandle);
 	}
 
 	@Override

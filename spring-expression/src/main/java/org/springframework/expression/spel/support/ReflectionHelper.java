@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.support;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypeConverter;
@@ -323,6 +326,91 @@ public abstract class ReflectionHelper {
 				for (int i = varargsPosition; i < arguments.length; i++) {
 					Object argument = arguments[i];
 					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+					conversionOccurred |= (argument != arguments[i]);
+				}
+			}
+		}
+		return conversionOccurred;
+	}
+
+	/**
+	 * Takes an input set of argument values and converts them to the types specified as the
+	 * required parameter types. The arguments are converted 'in-place' in the input array.
+	 * @param converter the type converter to use for attempting conversions
+	 * @param arguments the actual arguments that need conversion
+	 * @param methodHandle the target MethodHandle
+	 * @param varargsPosition the known position of the varargs argument, if any
+	 * ({@code null} if not varargs)
+	 * @return {@code true} if some kind of conversion occurred on an argument
+	 * @throws EvaluationException if a problem occurs during conversion
+	 * @since 6.1.0
+	 */
+	public static boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,
+			MethodHandle methodHandle, @Nullable Integer varargsPosition) throws EvaluationException {
+		boolean conversionOccurred = false;
+		final MethodType methodHandleArgumentTypes = methodHandle.type();
+		if (varargsPosition == null) {
+			for (int i = 0; i < arguments.length; i++) {
+				Class<?> argumentClass = methodHandleArgumentTypes.parameterType(i);
+				ResolvableType resolvableType = ResolvableType.forClass(argumentClass);
+				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
+
+				Object argument = arguments[i];
+				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				conversionOccurred |= (argument != arguments[i]);
+			}
+		}
+		else {
+			// Convert everything up to the varargs position
+			for (int i = 0; i < varargsPosition; i++) {
+				Class<?> argumentClass = methodHandleArgumentTypes.parameterType(i);
+				ResolvableType resolvableType = ResolvableType.forClass(argumentClass);
+				TypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);
+
+				Object argument = arguments[i];
+				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
+				conversionOccurred |= (argument != arguments[i]);
+			}
+
+			final Class<?> varArgClass = methodHandleArgumentTypes.lastParameterType().getComponentType();
+			ResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);
+			TypeDescriptor varArgContentType = new TypeDescriptor(varArgResolvableType, varArgClass, null);
+
+			// If the target is varargs and there is just one more argument, then convert it here.
+			if (varargsPosition == arguments.length - 1) {
+				Object argument = arguments[varargsPosition];
+				TypeDescriptor sourceType = TypeDescriptor.forObject(argument);
+				if (argument == null) {
+					// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.
+					if (varArgContentType.getElementTypeDescriptor().getObjectType() == Optional.class) {
+						arguments[varargsPosition] = Optional.empty();
+						conversionOccurred = true;
+					}
+				}
+				// If the argument type is equal to the varargs element type, there is no need to
+				// convert it or wrap it in an array. For example, using StringToArrayConverter to
+				// convert a String containing a comma would result in the String being split and
+				// repackaged in an array when it should be used as-is.
+				else if (!sourceType.equals(varArgContentType.getElementTypeDescriptor())) {
+					arguments[varargsPosition] = converter.convertValue(argument, sourceType, varArgContentType);
+				}
+				// Possible outcomes of the above if-else block:
+				// 1) the input argument was null, and nothing was done.
+				// 2) the input argument was null; the varargs element type is Optional; and the argument was converted to Optional.empty().
+				// 3) the input argument was correct type but not wrapped in an array, and nothing was done.
+				// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.
+				// 5) the input argument was the wrong type and got converted and wrapped in an array.
+				if (argument != arguments[varargsPosition] &&
+						!isFirstEntryInArray(argument, arguments[varargsPosition])) {
+					conversionOccurred = true; // case 5
+				}
+			}
+			// Otherwise, convert remaining arguments to the varargs element type.
+			else {
+				Assert.state(varArgContentType != null, "No element type");
+				for (int i = varargsPosition; i < arguments.length; i++) {
+					Object argument = arguments[i];
+					arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), varArgContentType);
 					conversionOccurred |= (argument != arguments[i]);
 				}
 			}
