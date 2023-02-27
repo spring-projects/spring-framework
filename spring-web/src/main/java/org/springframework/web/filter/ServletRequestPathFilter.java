@@ -36,10 +36,9 @@ import org.springframework.web.util.ServletRequestPathUtils;
  * {@link org.springframework.web.util.pattern.PathPattern}s are in use anywhere
  * in an application instead of String pattern matching with
  * {@link org.springframework.util.PathMatcher}.
- * <p>Note that in Spring MVC, the {@code DispatcherServlet} will also parse and
+ * <p>Note that in Spring MVC, the {@code DispatcherServlet} will always parse and
  * cache the {@code RequestPath} if it detects that parsed {@code PathPatterns}
- * are enabled for any {@code HandlerMapping} but it will skip doing that if it
- * finds the {@link ServletRequestPathUtils#PATH_ATTRIBUTE} already exists.
+ * are enabled for any {@code HandlerMapping}.
  *
  * @author Rossen Stoyanchev
  * @since 5.3
