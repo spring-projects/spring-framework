@@ -105,7 +105,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER, TYPE_USE })
 	@Retention(RUNTIME)
 	@Repeatable(Exists.List.class)
-	private @interface Exists {
+	@interface Exists {
 
 		String message() default "Does not exist";
 
@@ -121,7 +121,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		}
 	}
 
-	private static class ExistsValidator implements ConstraintValidator<Exists, String> {
+	static class ExistsValidator implements ConstraintValidator<Exists, String> {
 
 		@Override
 		public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
@@ -129,7 +129,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 		}
 	}
 
-	private static class MethodParameterLevelConstraint {
+	static class MethodParameterLevelConstraint {
 
 		@SuppressWarnings("unused")
 		public String hello(@Exists String name) {
@@ -139,7 +139,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 	}
 
 	@SuppressWarnings("unused")
-	private static class ConstructorParameterLevelConstraint {
+	static class ConstructorParameterLevelConstraint {
 
 		private final String name;
 
@@ -154,7 +154,7 @@ class BeanValidationBeanRegistrationAotProcessorTests {
 	}
 
 	@SuppressWarnings("unused")
-	private static class PropertyLevelConstraint {
+	static class PropertyLevelConstraint {
 
 		@Exists
 		private String name;
