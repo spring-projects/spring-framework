@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
-import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -33,6 +32,7 @@ import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.springframework.aot.hint.predicate.RuntimeHintsPredicates.proxies;
 
 /**
  * Tests for {@link HttpExchangeBeanRegistrationAotProcessor}.
@@ -41,36 +41,40 @@ import static org.mockito.Mockito.mock;
  */
 class HttpExchangeBeanRegistrationAotProcessorTests {
 
-	private final HttpExchangeBeanRegistrationAotProcessor processor = new HttpExchangeBeanRegistrationAotProcessor();
-
 	private final GenerationContext generationContext = new TestGenerationContext();
+
+	private final RuntimeHints runtimeHints = this.generationContext.getRuntimeHints();
+
 
 	@Test
 	void shouldSkipNonAnnotatedInterface() {
 		process(NonAnnotatedInterface.class);
-		assertThat(this.generationContext.getRuntimeHints().proxies().jdkProxyHints()).isEmpty();
+		assertThat(this.runtimeHints.proxies().jdkProxyHints()).isEmpty();
 	}
 
 	@Test
 	void shouldProcessAnnotatedInterface() {
 		process(AnnotatedInterface.class);
-		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(AnnotatedInterface.class, SpringProxy.class, Advised.class,
-				DecoratingProxy.class)).accepts(this.generationContext.getRuntimeHints());
+		assertThat(proxies().forInterfaces(AnnotatedInterface.class, SpringProxy.class, Advised.class, DecoratingProxy.class))
+				.accepts(this.runtimeHints);
 	}
+
 
 	private void process(Class<?> beanClass) {
 		BeanRegistrationAotContribution contribution = createContribution(beanClass);
 		if (contribution != null) {
-			contribution.applyTo(this.generationContext, mock(BeanRegistrationCode.class));
+			contribution.applyTo(this.generationContext, mock());
 		}
 	}
 
 	@Nullable
-	private BeanRegistrationAotContribution createContribution(Class<?> beanClass) {
+	private static BeanRegistrationAotContribution createContribution(Class<?> beanClass) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition(beanClass.getName(), new RootBeanDefinition(beanClass));
-		return this.processor.processAheadOfTime(RegisteredBean.of(beanFactory, beanClass.getName()));
+		return new HttpExchangeBeanRegistrationAotProcessor()
+				.processAheadOfTime(RegisteredBean.of(beanFactory, beanClass.getName()));
 	}
+
 
 	interface NonAnnotatedInterface {
 

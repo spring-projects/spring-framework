@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,30 +75,23 @@ import static org.mockito.Mockito.verify;
  */
 public class JdbcTemplateTests {
 
-	private Connection connection;
+	private Connection connection = mock();
 
-	private DataSource dataSource;
+	private DataSource dataSource = mock();
 
-	private PreparedStatement preparedStatement;
+	private Statement statement = mock();
 
-	private Statement statement;
+	private PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet;
+	private ResultSet resultSet = mock();
 
-	private JdbcTemplate template;
+	private CallableStatement callableStatement = mock();
 
-	private CallableStatement callableStatement;
+	private JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
 
 	@BeforeEach
 	public void setup() throws Exception {
-		this.connection = mock(Connection.class);
-		this.dataSource = mock(DataSource.class);
-		this.preparedStatement = mock(PreparedStatement.class);
-		this.statement = mock(Statement.class);
-		this.resultSet = mock(ResultSet.class);
-		this.template = new JdbcTemplate(this.dataSource);
-		this.callableStatement = mock(CallableStatement.class);
 		given(this.dataSource.getConnection()).willReturn(this.connection);
 		given(this.connection.prepareStatement(anyString())).willReturn(this.preparedStatement);
 		given(this.preparedStatement.executeQuery()).willReturn(this.resultSet);
@@ -779,7 +772,6 @@ public class JdbcTemplateTests {
 	@Test
 	public void testCouldNotGetConnectionForOperationOrExceptionTranslator() throws SQLException {
 		SQLException sqlException = new SQLException("foo", "07xxx");
-		this.dataSource = mock(DataSource.class);
 		given(this.dataSource.getConnection()).willThrow(sqlException);
 		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
@@ -792,7 +784,6 @@ public class JdbcTemplateTests {
 	@Test
 	public void testCouldNotGetConnectionForOperationWithLazyExceptionTranslator() throws SQLException {
 		SQLException sqlException = new SQLException("foo", "07xxx");
-		this.dataSource = mock(DataSource.class);
 		given(this.dataSource.getConnection()).willThrow(sqlException);
 		this.template = new JdbcTemplate();
 		this.template.setDataSource(this.dataSource);
@@ -826,7 +817,6 @@ public class JdbcTemplateTests {
 			throws SQLException {
 
 		SQLException sqlException = new SQLException("foo", "07xxx");
-		this.dataSource = mock(DataSource.class);
 		given(this.dataSource.getConnection()).willThrow(sqlException);
 		this.template = new JdbcTemplate();
 		this.template.setDataSource(this.dataSource);
@@ -1008,7 +998,7 @@ public class JdbcTemplateTests {
 
 	@Test
 	public void testStaticResultSetClosed() throws Exception {
-		ResultSet resultSet2 = mock(ResultSet.class);
+		ResultSet resultSet2 = mock();
 		reset(this.preparedStatement);
 		given(this.preparedStatement.executeQuery()).willReturn(resultSet2);
 		given(this.connection.createStatement()).willReturn(this.statement);
@@ -1071,7 +1061,7 @@ public class JdbcTemplateTests {
 	public void testEquallyNamedColumn() throws SQLException {
 		given(this.connection.createStatement()).willReturn(this.statement);
 
-		ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+		ResultSetMetaData metaData = mock();
 		given(metaData.getColumnCount()).willReturn(2);
 		given(metaData.getColumnLabel(1)).willReturn("x");
 		given(metaData.getColumnLabel(2)).willReturn("X");
@@ -1088,7 +1078,7 @@ public class JdbcTemplateTests {
 
 
 	private void mockDatabaseMetaData(boolean supportsBatchUpdates) throws SQLException {
-		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		DatabaseMetaData databaseMetaData = mock();
 		given(databaseMetaData.getDatabaseProductName()).willReturn("MySQL");
 		given(databaseMetaData.supportsBatchUpdates()).willReturn(supportsBatchUpdates);
 		given(this.connection.getMetaData()).willReturn(databaseMetaData);

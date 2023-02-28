@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.handler;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
@@ -32,28 +31,17 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class ExceptionWebSocketHandlerDecoratorTests {
+class ExceptionWebSocketHandlerDecoratorTests {
 
-	private TestWebSocketSession session;
+	private TestWebSocketSession session = new TestWebSocketSession(true);
 
-	private ExceptionWebSocketHandlerDecorator decorator;
+	private WebSocketHandler delegate = mock();
 
-	private WebSocketHandler delegate;
+	private ExceptionWebSocketHandlerDecorator decorator = new ExceptionWebSocketHandlerDecorator(this.delegate);
 
-
-	@BeforeEach
-	public void setup() {
-
-		this.delegate = mock(WebSocketHandler.class);
-		this.decorator = new ExceptionWebSocketHandlerDecorator(this.delegate);
-
-		this.session = new TestWebSocketSession();
-		this.session.setOpen(true);
-	}
 
 	@Test
-	public void afterConnectionEstablished() throws Exception {
-
+	void afterConnectionEstablished() throws Exception {
 		willThrow(new IllegalStateException("error"))
 			.given(this.delegate).afterConnectionEstablished(this.session);
 
@@ -63,8 +51,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 	}
 
 	@Test
-	public void handleMessage() throws Exception {
-
+	void handleMessage() throws Exception {
 		TextMessage message = new TextMessage("payload");
 
 		willThrow(new IllegalStateException("error"))
@@ -76,8 +63,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 	}
 
 	@Test
-	public void handleTransportError() throws Exception {
-
+	void handleTransportError() throws Exception {
 		Exception exception = new Exception("transport error");
 
 		willThrow(new IllegalStateException("error"))
@@ -89,8 +75,7 @@ public class ExceptionWebSocketHandlerDecoratorTests {
 	}
 
 	@Test
-	public void afterConnectionClosed() throws Exception {
-
+	void afterConnectionClosed() throws Exception {
 		CloseStatus closeStatus = CloseStatus.NORMAL;
 
 		willThrow(new IllegalStateException("error"))

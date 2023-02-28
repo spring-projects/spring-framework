@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,10 +49,10 @@ class LruContextCacheTests {
 	private static final MergedContextConfiguration bazConfig = config(Baz.class);
 
 
-	private final ConfigurableApplicationContext abcContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext fooContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext barContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext bazContext = mock(ConfigurableApplicationContext.class);
+	private final ConfigurableApplicationContext abcContext = mock();
+	private final ConfigurableApplicationContext fooContext = mock();
+	private final ConfigurableApplicationContext barContext = mock();
+	private final ConfigurableApplicationContext bazContext = mock();
 
 
 	@Test

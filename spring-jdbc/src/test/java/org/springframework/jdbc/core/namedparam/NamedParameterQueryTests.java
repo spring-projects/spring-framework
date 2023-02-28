@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,27 +48,21 @@ import static org.mockito.Mockito.verify;
  */
 public class NamedParameterQueryTests {
 
-	private DataSource dataSource;
+	private Connection connection = mock();
 
-	private Connection connection;
+	private DataSource dataSource = mock();
 
-	private PreparedStatement preparedStatement;
+	private PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet;
+	private ResultSet resultSet = mock();
 
-	private ResultSetMetaData resultSetMetaData;
+	private ResultSetMetaData resultSetMetaData = mock();
 
-	private NamedParameterJdbcTemplate template;
+	private NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(dataSource);
 
 
 	@BeforeEach
 	public void setup() throws Exception {
-		connection = mock(Connection.class);
-		dataSource = mock(DataSource.class);
-		preparedStatement = mock(PreparedStatement.class);
-		resultSet = mock(ResultSet.class);
-		resultSetMetaData = mock(ResultSetMetaData.class);
-		template = new NamedParameterJdbcTemplate(dataSource);
 		given(dataSource.getConnection()).willReturn(connection);
 		given(resultSetMetaData.getColumnCount()).willReturn(1);
 		given(resultSetMetaData.getColumnLabel(1)).willReturn("age");

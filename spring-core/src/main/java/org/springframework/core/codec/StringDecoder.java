@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec;
 
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -189,9 +188,8 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		Charset charset = getCharset(mimeType);
-		CharBuffer charBuffer = charset.decode(dataBuffer.toByteBuffer());
+		String value = dataBuffer.toString(charset);
 		DataBufferUtils.release(dataBuffer);
-		String value = charBuffer.toString();
 		LogFormatUtils.traceDebug(logger, traceOn -> {
 			String formatted = LogFormatUtils.formatValue(value, !traceOn);
 			return Hints.getLogPrefix(hints) + "Decoded " + formatted;

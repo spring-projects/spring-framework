@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -762,7 +762,7 @@ public class ResolvableType implements Serializable {
 
 	/**
 	 * Convenience method that will {@link #getGeneric(int...) get} and
-	 * {@link #resolve() resolve} a specific generic parameters.
+	 * {@link #resolve() resolve} a specific generic parameter.
 	 * @param indexes the indexes that refer to the generic parameter
 	 * (may be omitted to return the first generic)
 	 * @return a resolved {@link Class} or {@code null}

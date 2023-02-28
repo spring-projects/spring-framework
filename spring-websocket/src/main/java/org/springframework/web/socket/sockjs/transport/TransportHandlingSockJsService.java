@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -276,12 +276,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			SockJsSession session = this.sessions.get(sessionId);
 			boolean isNewSession = false;
 			if (session == null) {
-				if (transportHandler instanceof SockJsSessionFactory) {
+				if (transportHandler instanceof SockJsSessionFactory sessionFactory) {
 					Map<String, Object> attributes = new HashMap<>();
 					if (!chain.applyBeforeHandshake(request, response, attributes)) {
 						return;
 					}
-					SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
 					session = createSockJsSession(sessionId, sessionFactory, handler, attributes);
 					isNewSession = true;
 				}

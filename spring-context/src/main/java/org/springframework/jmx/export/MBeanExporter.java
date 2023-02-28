@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -587,12 +587,11 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	protected ObjectName registerBeanNameOrInstance(Object mapValue, String beanKey) throws MBeanExportException {
 		try {
-			if (mapValue instanceof String) {
+			if (mapValue instanceof String beanName) {
 				// Bean name pointing to a potentially lazy-init bean in the factory.
 				if (this.beanFactory == null) {
 					throw new MBeanExportException("Cannot resolve bean names if not running in a BeanFactory");
 				}
-				String beanName = (String) mapValue;
 				if (isBeanDefinitionLazyInit(this.beanFactory, beanName)) {
 					ObjectName objectName = registerLazyInit(beanName, beanKey);
 					replaceNotificationListenerBeanNameKeysIfNecessary(beanName, objectName);

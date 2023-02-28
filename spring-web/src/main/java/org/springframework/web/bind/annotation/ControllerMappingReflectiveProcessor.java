@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Controller;
  *
  * <ul>
  *     <li>Return types annotated with {@link ResponseBody}</li>
- *     <li>Parameters annotated with {@link RequestBody}</li>
+ *     <li>Parameters annotated with {@link RequestBody}, {@link ModelAttribute} and {@link RequestPart}</li>
  *     <li>{@link HttpEntity} return types and parameters</li>
  * </ul>
  *
@@ -79,7 +79,8 @@ class ControllerMappingReflectiveProcessor implements ReflectiveProcessor {
 
 	protected void registerParameterTypeHints(ReflectionHints hints, MethodParameter methodParameter) {
 		if (methodParameter.hasParameterAnnotation(RequestBody.class) ||
-				methodParameter.hasParameterAnnotation(ModelAttribute.class)) {
+				methodParameter.hasParameterAnnotation(ModelAttribute.class) ||
+				methodParameter.hasParameterAnnotation(RequestPart.class)) {
 			this.bindingRegistrar.registerReflectionHints(hints, methodParameter.getGenericParameterType());
 		}
 		else if (HttpEntity.class.isAssignableFrom(methodParameter.getParameterType())) {

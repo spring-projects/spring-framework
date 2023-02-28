@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,11 +251,10 @@ class CglibAopProxy implements AopProxy, Serializable {
 	private void validateClassIfNecessary(Class<?> proxySuperClass, @Nullable ClassLoader proxyClassLoader) {
 		if (!this.advised.isOptimize() && logger.isInfoEnabled()) {
 			synchronized (validatedClasses) {
-				if (!validatedClasses.containsKey(proxySuperClass)) {
-					doValidateClass(proxySuperClass, proxyClassLoader,
-							ClassUtils.getAllInterfacesForClassAsSet(proxySuperClass));
-					validatedClasses.put(proxySuperClass, Boolean.TRUE);
-				}
+				validatedClasses.computeIfAbsent(proxySuperClass, clazz -> {
+					doValidateClass(clazz, proxyClassLoader, ClassUtils.getAllInterfacesForClassAsSet(clazz));
+					return Boolean.TRUE;
+				});
 			}
 		}
 	}
@@ -702,8 +701,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 					// We need to create a method invocation...
 					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
 				}
-				retVal = processReturnType(proxy, target, method, retVal);
-				return retVal;
+				return processReturnType(proxy, target, method, retVal);
 			}
 			finally {
 				if (target != null && !targetSource.isStatic()) {

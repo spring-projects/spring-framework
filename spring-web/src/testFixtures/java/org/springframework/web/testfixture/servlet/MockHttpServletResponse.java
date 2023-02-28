@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -424,7 +424,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append("; Domain=").append(cookie.getDomain());
 		}
 		int maxAge = cookie.getMaxAge();
-		ZonedDateTime expires = (cookie instanceof MockCookie mockCookie? mockCookie.getExpires() : null);
+		ZonedDateTime expires = (cookie instanceof MockCookie mockCookie ? mockCookie.getExpires() : null);
 		if (maxAge >= 0) {
 			buf.append("; Max-Age=").append(maxAge);
 			buf.append("; Expires=");
@@ -491,12 +491,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return the primary value for the given header as a String, if any.
-	 * Will return the first value in case of multiple values.
-	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
-	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
-	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
+	 * <p>Will return the first value in case of multiple values.
+	 * <p>Returns a stringified value for Servlet 3.0 compatibility. Consider
+	 * using {@link #getHeaderValue(String)} for raw Object access.
 	 * @param name the name of the header
 	 * @return the associated header value, or {@code null} if none
+	 * @see HttpServletResponse#getHeader(String)
 	 */
 	@Override
 	@Nullable
@@ -507,11 +507,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return all values for the given header as a List of Strings.
-	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
-	 * As of Spring 3.1, it returns a List of stringified values for Servlet 3.0 compatibility.
+	 * <p>Returns a List of stringified values for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValues(String)} for raw Object access.
 	 * @param name the name of the header
 	 * @return the associated header values, or an empty List if none
+	 * @see HttpServletResponse#getHeaders(String)
 	 */
 	@Override
 	public List<String> getHeaders(String name) {

@@ -60,6 +60,7 @@ dependencies {
 	optional("org.apache.groovy:groovy")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-cbor")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
 	optional("org.jetbrains.kotlinx:kotlinx-serialization-protobuf")

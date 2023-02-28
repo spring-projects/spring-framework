@@ -117,6 +117,9 @@ TIP: Note that the `java.net` implementation for HTTP requests can raise an exce
 accessing the status of a response that represents an error (such as 401). If this is an
 issue, switch to another HTTP client library.
 
+NOTE: `RestTemplate` can be instrumented for observability, in order to produce metrics and traces.
+See the <<integration.adoc#integration.observability.http-client.resttemplate,RestTemplate Observability support>> section.
+
 [[rest-resttemplate-uri]]
 ==== URIs
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -766,8 +766,8 @@ class ConstructorResolver {
 										"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
 					}
 					Object sourceHolder = valueHolder.getSource();
-					if (sourceHolder instanceof ConstructorArgumentValues.ValueHolder) {
-						Object sourceValue = ((ConstructorArgumentValues.ValueHolder) sourceHolder).getValue();
+					if (sourceHolder instanceof ConstructorArgumentValues.ValueHolder constructorValueHolder) {
+						Object sourceValue = constructorValueHolder.getValue();
 						args.resolveNecessary = true;
 						args.preparedArguments[paramIndex] = sourceValue;
 					}
@@ -834,8 +834,8 @@ class ConstructorResolver {
 			else if (argValue instanceof BeanMetadataElement) {
 				argValue = valueResolver.resolveValueIfNecessary("constructor argument", argValue);
 			}
-			else if (argValue instanceof String) {
-				argValue = this.beanFactory.evaluateBeanDefinitionString((String) argValue, mbd);
+			else if (argValue instanceof String text) {
+				argValue = this.beanFactory.evaluateBeanDefinitionString(text, mbd);
 			}
 			Class<?> paramType = paramTypes[argIndex];
 			try {

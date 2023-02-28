@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,17 +26,15 @@ import java.util.Map;
 import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
+import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
@@ -92,6 +92,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class MvcUriComponentsBuilder {
@@ -179,6 +180,7 @@ public class MvcUriComponentsBuilder {
 		builder.path(prefix);
 
 		String mapping = getClassMapping(controllerType);
+		mapping = (!StringUtils.hasText(prefix + mapping) ? "/" : mapping);
 		builder.path(mapping);
 
 		return builder;
@@ -279,10 +281,10 @@ public class MvcUriComponentsBuilder {
 	 * &#064;RequestMapping("/people/{id}/addresses")
 	 * class AddressController {
 	 *
-	 *   &#064;RequestMapping("/{country}")
+	 *   &#064;GetMapping("/{country}")
 	 *   public HttpEntity&lt;Void&gt; getAddressesForCountry(&#064;PathVariable String country) { ... }
 	 *
-	 *   &#064;RequestMapping(value="/", method=RequestMethod.POST)
+	 *   &#064;PostMapping
 	 *   public void addAddress(Address address) { ... }
 	 * }
 	 * </pre>
@@ -545,6 +547,9 @@ public class MvcUriComponentsBuilder {
 		if (StringUtils.hasLength(path) && !path.startsWith("/")) {
 			path = "/" + path;
 		}
+		else if (!StringUtils.hasText(prefix + path)) {
+			path = "/";
+		}
 		builder.path(path);
 
 		return applyContributors(builder, method, args);
@@ -576,11 +581,11 @@ public class MvcUriComponentsBuilder {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
 		RequestMapping mapping = AnnotatedElementUtils.findMergedAnnotation(controllerType, RequestMapping.class);
 		if (mapping == null) {
-			return "/";
+			return "";
 		}
 		String[] paths = mapping.path();
 		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
-			return "/";
+			return "";
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {
 			logger.trace("Using first of multiple paths on " + controllerType.getName());
@@ -596,7 +601,7 @@ public class MvcUriComponentsBuilder {
 		}
 		String[] paths = requestMapping.path();
 		if (ObjectUtils.isEmpty(paths) || !StringUtils.hasLength(paths[0])) {
-			return "/";
+			return "";
 		}
 		if (paths.length > 1 && logger.isTraceEnabled()) {
 			logger.trace("Using first of multiple paths on " + method.toGenericString());
@@ -699,7 +704,7 @@ public class MvcUriComponentsBuilder {
 
 
 	private static class ControllerMethodInvocationInterceptor
-			implements org.springframework.cglib.proxy.MethodInterceptor, MethodInterceptor, MethodInvocationInfo {
+			implements MethodInterceptor, InvocationHandler, MethodInvocationInfo {
 
 		private final Class<?> controllerType;
 
@@ -740,8 +745,8 @@ public class MvcUriComponentsBuilder {
 
 		@Override
 		@Nullable
-		public Object invoke(org.aopalliance.intercept.MethodInvocation inv) throws Throwable {
-			return intercept(inv.getThis(), inv.getMethod(), inv.getArguments(), null);
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			return intercept(proxy, method, args, null);
 		}
 
 		@Override
@@ -766,19 +771,17 @@ public class MvcUriComponentsBuilder {
 		private static <T> T initProxy(
 				Class<?> controllerType, @Nullable ControllerMethodInvocationInterceptor interceptor) {
 
-			interceptor = interceptor != null ?
-					interceptor : new ControllerMethodInvocationInterceptor(controllerType);
+			interceptor = (interceptor != null ?
+					interceptor : new ControllerMethodInvocationInterceptor(controllerType));
 
 			if (controllerType == Object.class) {
 				return (T) interceptor;
 			}
 
 			else if (controllerType.isInterface()) {
-				ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
-				factory.addInterface(controllerType);
-				factory.addInterface(MethodInvocationInfo.class);
-				factory.addAdvice(interceptor);
-				return (T) factory.getProxy();
+				return (T) Proxy.newProxyInstance(controllerType.getClassLoader(),
+						new Class<?>[] {controllerType, MethodInvocationInfo.class},
+						interceptor);
 			}
 
 			else {
@@ -787,7 +790,7 @@ public class MvcUriComponentsBuilder {
 				enhancer.setInterfaces(new Class<?>[] {MethodInvocationInfo.class});
 				enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 				enhancer.setAttemptLoad(true);
-				enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
+				enhancer.setCallbackType(MethodInterceptor.class);
 
 				Class<?> proxyClass = enhancer.createClass();
 				Object proxy = null;
@@ -846,7 +849,7 @@ public class MvcUriComponentsBuilder {
 		public MethodArgumentBuilder(@Nullable UriComponentsBuilder baseUrl, Class<?> controllerType, Method method) {
 			Assert.notNull(controllerType, "'controllerType' is required");
 			Assert.notNull(method, "'method' is required");
-			this.baseUrl = baseUrl != null ? baseUrl : UriComponentsBuilder.fromPath(getPath());
+			this.baseUrl = (baseUrl != null ? baseUrl : UriComponentsBuilder.fromPath(getPath()));
 			this.controllerType = controllerType;
 			this.method = method;
 			this.argumentValues = new Object[method.getParameterCount()];
@@ -855,7 +858,7 @@ public class MvcUriComponentsBuilder {
 		private static String getPath() {
 			UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
 			String path = builder.build().getPath();
-			return path != null ? path : "";
+			return (path != null ? path : "");
 		}
 
 		public MethodArgumentBuilder arg(int index, Object value) {

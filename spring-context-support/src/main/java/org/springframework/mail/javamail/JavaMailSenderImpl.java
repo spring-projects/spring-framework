@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,10 +132,10 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	}
 
 	/**
-	 * Allow {code Map} access to the JavaMail properties of this sender,
+	 * Allow {@code Map} access to the JavaMail properties of this sender,
 	 * with the option to add or override specific entries.
 	 * <p>Useful for specifying entries directly, for example via
-	 * {code javaMailProperties[mail.smtp.auth]}.
+	 * {@code javaMailProperties[mail.smtp.auth]}.
 	 */
 	public Properties getJavaMailProperties() {
 		return this.javaMailProperties;

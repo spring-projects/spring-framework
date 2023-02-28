@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,8 @@ public class ParameterResolutionTests {
 
 	@Test
 	public void resolveDependencyPreconditionsForParameter() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ParameterResolutionDelegate.resolveDependency(null, 0, null, mock(AutowireCapableBeanFactory.class)))
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> ParameterResolutionDelegate.resolveDependency(null, 0, null, mock()))
 			.withMessageContaining("Parameter must not be null");
 	}
 
@@ -121,7 +121,7 @@ public class ParameterResolutionTests {
 	public void resolveDependencyForAnnotatedParametersInTopLevelClassConstructor() throws Exception {
 		Constructor<?> constructor = AutowirableClass.class.getConstructor(String.class, String.class, String.class, String.class);
 
-		AutowireCapableBeanFactory beanFactory = mock(AutowireCapableBeanFactory.class);
+		AutowireCapableBeanFactory beanFactory = mock();
 		// Configure the mocked BeanFactory to return the DependencyDescriptor for convenience and
 		// to avoid using an ArgumentCaptor.
 		given(beanFactory.resolveDependency(any(), isNull())).willAnswer(invocation -> invocation.getArgument(0));

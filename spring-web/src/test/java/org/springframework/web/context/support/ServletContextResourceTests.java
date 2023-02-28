@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class ServletContextResourceTests {
 
 	@Test
 	void missingResourceShouldHaveExpectedProperties() {
-		MockServletContext context = mock(MockServletContext.class);
+		MockServletContext context = mock();
 		given(context.getRealPath(eq("/org/springframework/web/context/support/missing.txt")))
 				.willReturn(this.servletContext.getRealPath("org/springframework/web/context/support/") + "missing.txt");
 		Resource missing = new ServletContextResource(context, "org/springframework/web/context/support/missing.txt");

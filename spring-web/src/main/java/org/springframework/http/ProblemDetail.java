@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,10 +206,11 @@ public class ProblemDetail {
 	 * are rendered as top level key-value pairs in the output JSON. Otherwise,
 	 * they are rendered as a {@code "properties"} sub-map.
 	 * @param name the property name
-	 * @param value the property value
+	 * @param value the property value, possibly {@code null} if the intent is
+	 * to include a property with its value set to "null"
 	 * @see org.springframework.http.converter.json.ProblemDetailJacksonMixin
 	 */
-	public void setProperty(String name, Object value) {
+	public void setProperty(String name, @Nullable Object value) {
 		this.properties = (this.properties != null ? this.properties : new LinkedHashMap<>());
 		this.properties.put(name, value);
 	}

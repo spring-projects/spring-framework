@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,9 +100,6 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private static final String CHARSET_PREFIX = "charset=";
 
 	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
-
-	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
-			new DelegatingServletInputStream(InputStream.nullInputStream());
 
 	private static final BufferedReader EMPTY_BUFFERED_READER =
 			new BufferedReader(new StringReader(""));
@@ -491,7 +488,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			}
 			catch (IllegalArgumentException ex) {
 				// Try to get charset value anyway
-				int charsetIndex = contentType.toLowerCase().indexOf(CHARSET_PREFIX);
+				contentType = contentType.toLowerCase();
+				int charsetIndex = contentType.indexOf(CHARSET_PREFIX);
 				if (charsetIndex != -1) {
 					this.characterEncoding = contentType.substring(charsetIndex + CHARSET_PREFIX.length());
 				}
@@ -513,12 +511,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 		else if (this.reader != null) {
 			throw new IllegalStateException(
-					"Cannot call getInputStream() after getReader() has already been called for the current request")			;
+					"Cannot call getInputStream() after getReader() has already been called for the current request");
 		}
 
 		this.inputStream = (this.content != null ?
 				new DelegatingServletInputStream(new ByteArrayInputStream(this.content)) :
-				EMPTY_SERVLET_INPUT_STREAM);
+				new DelegatingServletInputStream(InputStream.nullInputStream()));
 		return this.inputStream;
 	}
 

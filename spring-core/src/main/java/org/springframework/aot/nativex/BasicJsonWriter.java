@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,42 +152,26 @@ class BasicJsonWriter {
 
 	private static String escape(CharSequence input) {
 		StringBuilder builder = new StringBuilder();
-		input.chars().forEach(c -> {
+		input.chars().forEach(c -> builder.append(
 			switch (c) {
-				case '"':
-					builder.append("\\\"");
-					break;
-				case '\\':
-					builder.append("\\\\");
-					break;
-				case '/':
-					builder.append("\\/");
-					break;
-				case '\b':
-					builder.append("\\b");
-					break;
-				case '\f':
-					builder.append("\\f");
-					break;
-				case '\n':
-					builder.append("\\n");
-					break;
-				case '\r':
-					builder.append("\\r");
-					break;
-				case '\t':
-					builder.append("\\t");
-					break;
-				default:
+				case '"' -> "\\\"";
+				case '\\' -> "\\\\";
+				case '/' -> "\\/";
+				case '\b' -> "\\b";
+				case '\f' -> "\\f";
+				case '\n' -> "\\n";
+				case '\r' -> "\\r";
+				case '\t' -> "\\t";
+				default -> {
 					if (c <= 0x1F) {
-						builder.append(String.format("\\u%04x", c));
+						yield String.format("\\u%04x", c);
 					}
 					else {
-						builder.append((char) c);
+						yield (char) c;
 					}
-					break;
+				}
 			}
-		});
+		));
 		return builder.toString();
 	}
 

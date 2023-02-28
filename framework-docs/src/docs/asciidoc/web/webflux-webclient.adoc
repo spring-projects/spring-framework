@@ -38,6 +38,8 @@ You can also use `WebClient.builder()` with further options:
 * `filter`: Client filter for every request.
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
+* `observationRegistry`: the registry to use for enabling <<integration.adoc#integration.observability.http-client.webclient, Observability support>>.
+* `observationConvention`: <<integration.adoc#integration.observability.config,an optional, custom convention to extract metadata>> for recorded observations.
 
 For example:
 

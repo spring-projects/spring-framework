@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -91,8 +92,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 
-	private List<MediaType> problemDetailMediaTypes = Collections.singletonList(MediaType.APPLICATION_PROBLEM_JSON);
-
 	protected ObjectMapper defaultObjectMapper;
 
 	@Nullable
@@ -125,15 +124,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	@Override
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
-		this.problemDetailMediaTypes = initProblemDetailMediaTypes(supportedMediaTypes);
 		super.setSupportedMediaTypes(supportedMediaTypes);
-	}
-
-	private List<MediaType> initProblemDetailMediaTypes(List<MediaType> supportedMediaTypes) {
-		List<MediaType> mediaTypes = new ArrayList<>();
-		mediaTypes.add(MediaType.APPLICATION_PROBLEM_JSON);
-		mediaTypes.addAll(supportedMediaTypes);
-		return Collections.unmodifiableList(mediaTypes);
 	}
 
 	/**
@@ -216,11 +207,20 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return result;
 		}
 		return (ProblemDetail.class.isAssignableFrom(clazz) ?
-				this.problemDetailMediaTypes : getSupportedMediaTypes());
+				getMediaTypesForProblemDetail() : getSupportedMediaTypes());
 	}
 
 	private Map<Class<?>, Map<MediaType, ObjectMapper>> getObjectMapperRegistrations() {
 		return (this.objectMapperRegistrations != null ? this.objectMapperRegistrations : Collections.emptyMap());
+	}
+
+	/**
+	 * Return the supported media type(s) for {@link ProblemDetail}.
+	 * By default, an empty list, unless overridden in subclasses.
+	 * @since 6.0.5
+	 */
+	protected List<MediaType> getMediaTypesForProblemDetail() {
+		return Collections.emptyList();
 	}
 
 	/**
@@ -471,7 +471,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			if (filters != null) {
 				objectWriter = objectWriter.with(filters);
 			}
-			if (javaType != null && javaType.isContainerType()) {
+			if (javaType != null && (javaType.isContainerType() || javaType.isTypeOrSubTypeOf(Optional.class))) {
 				objectWriter = objectWriter.forType(javaType);
 			}
 			SerializationConfig config = objectWriter.getConfig();

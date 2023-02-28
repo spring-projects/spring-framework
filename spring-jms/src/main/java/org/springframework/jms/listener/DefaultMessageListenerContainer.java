@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -568,8 +568,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			if (this.taskExecutor == null) {
 				this.taskExecutor = createDefaultTaskExecutor();
 			}
-			else if (this.taskExecutor instanceof SchedulingTaskExecutor &&
-					((SchedulingTaskExecutor) this.taskExecutor).prefersShortLivedTasks() &&
+			else if (this.taskExecutor instanceof SchedulingTaskExecutor ste &&
+					ste.prefersShortLivedTasks() &&
 					this.maxMessagesPerTask == Integer.MIN_VALUE) {
 				// TaskExecutor indicated a preference for short-lived tasks. According to
 				// setMaxMessagesPerTask javadoc, we'll use 10 message per task in this case
@@ -861,8 +861,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			super.establishSharedConnection();
 		}
 		catch (Exception ex) {
-			if (ex instanceof JMSException) {
-				invokeExceptionListener((JMSException) ex);
+			if (ex instanceof JMSException jmsException) {
+				invokeExceptionListener(jmsException);
 			}
 			logger.debug("Could not establish shared JMS Connection - " +
 					"leaving it up to asynchronous invokers to establish a Connection as soon as possible", ex);
@@ -913,8 +913,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #recoverAfterListenerSetupFailure()
 	 */
 	protected void handleListenerSetupFailure(Throwable ex, boolean alreadyRecovered) {
-		if (ex instanceof JMSException) {
-			invokeExceptionListener((JMSException) ex);
+		if (ex instanceof JMSException jmsException) {
+			invokeExceptionListener(jmsException);
 		}
 		if (ex instanceof SharedConnectionNotInitializedException) {
 			if (!alreadyRecovered) {
@@ -930,7 +930,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				StringBuilder msg = new StringBuilder();
 				msg.append("Setup of JMS message listener invoker failed for destination '");
 				msg.append(getDestinationDescription()).append("' - trying to recover. Cause: ");
-				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
+				msg.append(ex instanceof JMSException jmsException ? JmsUtils.buildExceptionMessage(jmsException) :
+						ex.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.warn(msg, ex);
 				}
@@ -990,14 +991,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				break;
 			}
 			catch (Exception ex) {
-				if (ex instanceof JMSException) {
-					invokeExceptionListener((JMSException) ex);
+				if (ex instanceof JMSException jmsException) {
+					invokeExceptionListener(jmsException);
 				}
 				StringBuilder msg = new StringBuilder();
 				msg.append("Could not refresh JMS Connection for destination '");
 				msg.append(getDestinationDescription()).append("' - retrying using ");
 				msg.append(execution).append(". Cause: ");
-				msg.append(ex instanceof JMSException ? JmsUtils.buildExceptionMessage((JMSException) ex) : ex.getMessage());
+				msg.append(ex instanceof JMSException jmsException ? JmsUtils.buildExceptionMessage(jmsException) :
+						ex.getMessage());
 				if (logger.isDebugEnabled()) {
 					logger.error(msg, ex);
 				}
@@ -1026,8 +1028,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		String destName = getDestinationName();
 		if (destName != null) {
 			DestinationResolver destResolver = getDestinationResolver();
-			if (destResolver instanceof CachingDestinationResolver) {
-				((CachingDestinationResolver) destResolver).removeFromCache(destName);
+			if (destResolver instanceof CachingDestinationResolver cachingResolver) {
+				cachingResolver.removeFromCache(destName);
 			}
 		}
 	}

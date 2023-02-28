@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -310,7 +310,7 @@ class GenericApplicationContextTests {
 
 	@Test
 	void refreshForAotRegistersEnvironment() {
-		ConfigurableEnvironment environment = mock(ConfigurableEnvironment.class);
+		ConfigurableEnvironment environment = mock();
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.setEnvironment(environment);
 		context.refreshForAotProcessing(new RuntimeHints());
@@ -363,7 +363,7 @@ class GenericApplicationContextTests {
 	@Test
 	void refreshForAotInvokesBeanFactoryPostProcessors() {
 		GenericApplicationContext context = new GenericApplicationContext();
-		BeanFactoryPostProcessor bfpp = mock(BeanFactoryPostProcessor.class);
+		BeanFactoryPostProcessor bfpp = mock();
 		context.addBeanFactoryPostProcessor(bfpp);
 		context.refreshForAotProcessing(new RuntimeHints());
 		verify(bfpp).postProcessBeanFactory(context.getBeanFactory());
@@ -510,7 +510,7 @@ class GenericApplicationContextTests {
 	}
 
 	private MergedBeanDefinitionPostProcessor registerMockMergedBeanDefinitionPostProcessor(GenericApplicationContext context) {
-		MergedBeanDefinitionPostProcessor bpp = mock(MergedBeanDefinitionPostProcessor.class);
+		MergedBeanDefinitionPostProcessor bpp = mock();
 		context.registerBeanDefinition("bpp", BeanDefinitionBuilder.rootBeanDefinition(
 						MergedBeanDefinitionPostProcessor.class, () -> bpp)
 				.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());

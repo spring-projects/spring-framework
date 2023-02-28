@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package org.springframework.orm.jpa.persistenceunit;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.lang.model.element.Modifier;
 
+import jakarta.persistence.Convert;
 import jakarta.persistence.Converter;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.IdClass;
@@ -67,7 +67,7 @@ import org.springframework.util.ReflectionUtils;
  */
 class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
-	private static final List<Class<? extends Annotation>> CALLBACK_TYPES = Arrays.asList(PreUpdate.class,
+	private static final List<Class<? extends Annotation>> CALLBACK_TYPES = List.of(PreUpdate.class,
 			PostUpdate.class, PrePersist.class, PostPersist.class, PreRemove.class, PostRemove.class, PostLoad.class);
 
 	@Nullable
@@ -156,9 +156,20 @@ class PersistenceManagedTypesBeanRegistrationAotProcessor implements BeanRegistr
 
 		private void contributeConverterHints(RuntimeHints hints, Class<?> managedClass) {
 			Converter converter = AnnotationUtils.findAnnotation(managedClass, Converter.class);
+			ReflectionHints reflectionHints = hints.reflection();
 			if (converter != null) {
-				hints.reflection().registerType(managedClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_METHODS);
+				reflectionHints.registerType(managedClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 			}
+			Convert convertClassAnnotation = AnnotationUtils.findAnnotation(managedClass, Convert.class);
+			if (convertClassAnnotation != null) {
+				reflectionHints.registerType(convertClassAnnotation.converter(), MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+			}
+			ReflectionUtils.doWithFields(managedClass, field -> {
+				Convert convertFieldAnnotation = AnnotationUtils.findAnnotation(field, Convert.class);
+				if (convertFieldAnnotation != null && convertFieldAnnotation.converter() != void.class) {
+					reflectionHints.registerType(convertFieldAnnotation.converter(), MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				}
+			});
 		}
 
 		private void contributeCallbackHints(RuntimeHints hints, Class<?> managedClass) {

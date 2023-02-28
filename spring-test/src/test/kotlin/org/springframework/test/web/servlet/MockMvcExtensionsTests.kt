@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.hamcrest.CoreMatchers
 import org.junit.jupiter.api.Test
@@ -25,6 +26,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_ATOM_XML
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_XML
+import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.test.web.Person
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.bind.annotation.GetMapping
@@ -95,6 +97,24 @@ class MockMvcExtensionsTests {
 		}
 		assertThat(matcherInvoked).isTrue()
 		assertThat(handlerInvoked).isTrue()
+	}
+
+	@Test
+	fun `request with two custom matchers and matchAll`() {
+		var matcher1Invoked = false
+		var matcher2Invoked = false
+		val matcher1 = ResultMatcher { matcher1Invoked = true; throw AssertionError("expected") }
+		val matcher2 = ResultMatcher { matcher2Invoked = true }
+		assertThatExceptionOfType(AssertionError::class.java).isThrownBy {
+			mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee")
+					.andExpect {
+						matchAll(matcher1, matcher2)
+					}
+		}
+				.withMessage("expected")
+
+		assertThat(matcher1Invoked).describedAs("matcher1").isTrue()
+		assertThat(matcher2Invoked).describedAs("matcher2").isTrue()
 	}
 
 	@Test
@@ -181,6 +201,22 @@ class MockMvcExtensionsTests {
 				attribute("foo", "foo")
 			}
 		}
+	}
+
+	@Test
+	fun `andExpectAll reports multiple assertion errors`() {
+		assertThatCode {
+			mockMvc.request(HttpMethod.GET, "/person/{name}", "Lee") {
+				accept = APPLICATION_JSON
+			}.andExpectAll {
+				status { is4xxClientError() }
+				content { contentType(TEXT_PLAIN) }
+				jsonPath("$.name") { value("Lee") }
+			}
+		}
+				.hasMessage("Multiple Exceptions (2):\n" +
+						"Range for response status value 200 expected:<CLIENT_ERROR> but was:<SUCCESSFUL>\n" +
+						"Content type expected:<text/plain> but was:<application/json>")
 	}
 
 

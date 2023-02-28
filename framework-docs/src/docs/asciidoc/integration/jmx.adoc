@@ -31,7 +31,7 @@ The core class in Spring's JMX framework is the `MBeanExporter`. This class is
 responsible for taking your Spring beans and registering them with a JMX `MBeanServer`.
 For example, consider the following class:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages",chomp="-packages"]
 ----
 	package org.springframework.jmx;
 
@@ -358,7 +358,7 @@ an operation or an attribute.
 The following example shows the annotated version of the `JmxTestBean` class that we
 used in <<jmx-exporting-mbeanserver>>:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.jmx;
 
@@ -1067,7 +1067,7 @@ example, consider the scenario where one would like to be informed (through a
 `Notification`) each and every time an attribute of a target MBean changes. The following
 example writes notifications to the console:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package com.example;
 
@@ -1317,7 +1317,7 @@ published, and invoke the `sendNotification(Notification)` on the
 In the following example, exported instances of the `JmxTestBean` publish a
 `NotificationEvent` every time the `add(int, int)` operation is invoked:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.jmx;
 

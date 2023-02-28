@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,11 +255,11 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			this.pubSubMode = Boolean.FALSE;
 			con = createConnection();
 		}
-		if (!(con instanceof QueueConnection)) {
+		if (!(con instanceof QueueConnection queueConnection)) {
 			throw new jakarta.jms.IllegalStateException(
 					"This SingleConnectionFactory does not hold a QueueConnection but rather: " + con);
 		}
-		return ((QueueConnection) con);
+		return queueConnection;
 	}
 
 	@Override
@@ -275,11 +275,11 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			this.pubSubMode = Boolean.TRUE;
 			con = createConnection();
 		}
-		if (!(con instanceof TopicConnection)) {
+		if (!(con instanceof TopicConnection topicConnection)) {
 			throw new jakarta.jms.IllegalStateException(
 					"This SingleConnectionFactory does not hold a TopicConnection but rather: " + con);
 		}
-		return ((TopicConnection) con);
+		return topicConnection;
 	}
 
 	@Override
@@ -399,11 +399,11 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	 */
 	protected Connection doCreateConnection() throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
-		if (Boolean.FALSE.equals(this.pubSubMode) && cf instanceof QueueConnectionFactory) {
-			return ((QueueConnectionFactory) cf).createQueueConnection();
+		if (Boolean.FALSE.equals(this.pubSubMode) && cf instanceof QueueConnectionFactory queueFactory) {
+			return queueFactory.createQueueConnection();
 		}
-		else if (Boolean.TRUE.equals(this.pubSubMode) && cf instanceof TopicConnectionFactory) {
-			return ((TopicConnectionFactory) cf).createTopicConnection();
+		else if (Boolean.TRUE.equals(this.pubSubMode) && cf instanceof TopicConnectionFactory topicFactory) {
+			return topicFactory.createTopicConnection();
 		}
 		else {
 			return obtainTargetConnectionFactory().createConnection();
@@ -472,11 +472,11 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 		boolean transacted = (mode == Session.SESSION_TRANSACTED);
 		int ackMode = (transacted ? Session.AUTO_ACKNOWLEDGE : mode);
 		// Now actually call the appropriate JMS factory method...
-		if (Boolean.FALSE.equals(this.pubSubMode) && con instanceof QueueConnection) {
-			return ((QueueConnection) con).createQueueSession(transacted, ackMode);
+		if (Boolean.FALSE.equals(this.pubSubMode) && con instanceof QueueConnection queueConnection) {
+			return queueConnection.createQueueSession(transacted, ackMode);
 		}
-		else if (Boolean.TRUE.equals(this.pubSubMode) && con instanceof TopicConnection) {
-			return ((TopicConnection) con).createTopicSession(transacted, ackMode);
+		else if (Boolean.TRUE.equals(this.pubSubMode) && con instanceof TopicConnection topicConnection) {
+			return topicConnection.createTopicSession(transacted, ackMode);
 		}
 		else {
 			return con.createSession(transacted, ackMode);
@@ -554,8 +554,8 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 						return false;
 					}
 					InvocationHandler otherHandler = Proxy.getInvocationHandler(other);
-					return (otherHandler instanceof SharedConnectionInvocationHandler &&
-							factory() == ((SharedConnectionInvocationHandler) otherHandler).factory());
+					return (otherHandler instanceof SharedConnectionInvocationHandler sharedHandler &&
+							factory() == sharedHandler.factory());
 				case "hashCode":
 					// Use hashCode of containing SingleConnectionFactory.
 					return System.identityHashCode(factory());

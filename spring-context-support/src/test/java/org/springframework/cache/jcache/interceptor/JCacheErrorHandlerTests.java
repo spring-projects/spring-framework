@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ public class JCacheErrorHandlerTests {
 		@Bean
 		@Override
 		public CacheErrorHandler errorHandler() {
-			return mock(CacheErrorHandler.class);
+			return mock();
 		}
 
 		@Bean
@@ -164,14 +164,14 @@ public class JCacheErrorHandlerTests {
 
 		@Bean
 		public Cache mockCache() {
-			Cache cache = mock(Cache.class);
+			Cache cache = mock();
 			given(cache.getName()).willReturn("test");
 			return cache;
 		}
 
 		@Bean
 		public Cache mockErrorCache() {
-			Cache cache = mock(Cache.class);
+			Cache cache = mock();
 			given(cache.getName()).willReturn("error");
 			return cache;
 		}

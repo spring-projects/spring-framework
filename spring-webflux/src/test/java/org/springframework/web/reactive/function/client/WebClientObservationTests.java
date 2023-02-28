@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class WebClientObservationTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
-	private final ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+	private final ExchangeFunction exchangeFunction = mock();
 
 	private final ArgumentCaptor<ClientRequest> request = ArgumentCaptor.forClass(ClientRequest.class);
 
@@ -57,7 +57,7 @@ class WebClientObservationTests {
 
 	@BeforeEach
 	void setup() {
-		ClientResponse mockResponse = mock(ClientResponse.class);
+		ClientResponse mockResponse = mock();
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
 		given(this.exchangeFunction.exchange(this.request.capture())).willReturn(Mono.just(mockResponse));
@@ -95,7 +95,7 @@ class WebClientObservationTests {
 
 	@Test
 	void recordsObservationForErrorExchange() {
-		ExchangeFunction exchangeFunction = mock(ExchangeFunction.class);
+		ExchangeFunction exchangeFunction = mock();
 		given(exchangeFunction.exchange(any())).willReturn(Mono.error(new IllegalStateException()));
 		WebClient client = WebClient.builder().observationRegistry(observationRegistry).exchangeFunction(exchangeFunction).build();
 		StepVerifier.create(client.get().uri("/path").retrieve().bodyToMono(Void.class))
@@ -112,6 +112,25 @@ class WebClientObservationTests {
 				.verify(Duration.ofSeconds(5));
 		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "UNKNOWN")
 				.hasLowCardinalityKeyValue("status", "CLIENT_ERROR");
+	}
+
+	@Test
+	void setsCurrentObservationInReactorContext() {
+		ExchangeFilterFunction assertionFilter = new ExchangeFilterFunction() {
+			@Override
+			public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction chain) {
+				return chain.exchange(request).contextWrite(context -> {
+					Observation currentObservation = context.get(ObservationThreadLocalAccessor.KEY);
+					assertThat(currentObservation).isNotNull();
+					assertThat(currentObservation.getContext()).isInstanceOf(ClientRequestObservationContext.class);
+					return context;
+				});
+			}
+		};
+		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
+				.retrieve().bodyToMono(Void.class)
+				.block(Duration.ofSeconds(10));
+			verifyAndGetRequest();
 	}
 
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {

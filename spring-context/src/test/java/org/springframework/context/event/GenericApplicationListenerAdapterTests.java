@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class GenericApplicationListenerAdapterTests extends AbstractApplicationE
 
 	@Test
 	public void supportsEventTypeWithSmartApplicationListener() {
-		SmartApplicationListener smartListener = mock(SmartApplicationListener.class);
+		SmartApplicationListener smartListener = mock();
 		GenericApplicationListenerAdapter listener = new GenericApplicationListenerAdapter(smartListener);
 		ResolvableType type = ResolvableType.forClass(ApplicationEvent.class);
 		listener.supportsEventType(type);
@@ -45,7 +45,7 @@ public class GenericApplicationListenerAdapterTests extends AbstractApplicationE
 
 	@Test
 	public void supportsSourceTypeWithSmartApplicationListener() {
-		SmartApplicationListener smartListener = mock(SmartApplicationListener.class);
+		SmartApplicationListener smartListener = mock();
 		GenericApplicationListenerAdapter listener = new GenericApplicationListenerAdapter(smartListener);
 		listener.supportsSourceType(Object.class);
 		verify(smartListener, times(1)).supportsSourceType(Object.class);

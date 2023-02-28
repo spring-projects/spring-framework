@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ public abstract class RepeatableContainers {
 
 		private static final Object NONE = new Object();
 
-		private static StandardRepeatableContainers INSTANCE = new StandardRepeatableContainers();
+		private static final StandardRepeatableContainers INSTANCE = new StandardRepeatableContainers();
 
 		StandardRepeatableContainers() {
 			super(null);
@@ -270,7 +270,7 @@ public abstract class RepeatableContainers {
 	 */
 	private static class NoRepeatableContainers extends RepeatableContainers {
 
-		private static NoRepeatableContainers INSTANCE = new NoRepeatableContainers();
+		private static final NoRepeatableContainers INSTANCE = new NoRepeatableContainers();
 
 		NoRepeatableContainers() {
 			super(null);

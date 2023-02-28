@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -869,7 +869,7 @@ class ResolvableTypeTests {
 
 	@Test
 	void resolveTypeWithCustomVariableResolver() throws Exception {
-		VariableResolver variableResolver = mock(VariableResolver.class);
+		VariableResolver variableResolver = mock();
 		given(variableResolver.getSource()).willReturn(this);
 		ResolvableType longType = ResolvableType.forClass(Long.class);
 		given(variableResolver.resolveVariable(any())).willReturn(longType);

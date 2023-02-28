@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 	void processAheadOfTimeWhenPersistenceUnitOnPublicField() {
 		RegisteredBean registeredBean = registerBean(DefaultPersistenceUnitField.class);
 		testCompile(registeredBean, (actual, compiled) -> {
-			EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
+			EntityManagerFactory entityManagerFactory = mock();
 			this.beanFactory.registerSingleton("entityManagerFactory",
 					entityManagerFactory);
 			DefaultPersistenceUnitField instance = new DefaultPersistenceUnitField();
@@ -85,7 +85,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 	void processAheadOfTimeWhenPersistenceUnitOnPublicSetter() {
 		RegisteredBean registeredBean = registerBean(DefaultPersistenceUnitMethod.class);
 		testCompile(registeredBean, (actual, compiled) -> {
-			EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
+			EntityManagerFactory entityManagerFactory = mock();
 			this.beanFactory.registerSingleton("entityManagerFactory",
 					entityManagerFactory);
 			DefaultPersistenceUnitMethod instance = new DefaultPersistenceUnitMethod();
@@ -101,7 +101,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		RegisteredBean registeredBean = registerBean(
 				CustomUnitNamePublicPersistenceUnitMethod.class);
 		testCompile(registeredBean, (actual, compiled) -> {
-			EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
+			EntityManagerFactory entityManagerFactory = mock();
 			this.beanFactory.registerSingleton("custom", entityManagerFactory);
 			CustomUnitNamePublicPersistenceUnitMethod instance = new CustomUnitNamePublicPersistenceUnitMethod();
 			actual.accept(registeredBean, instance);
@@ -118,7 +118,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		RegisteredBean registeredBean = registerBean(
 				DefaultPersistenceContextField.class);
 		testCompile(registeredBean, (actual, compiled) -> {
-			EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
+			EntityManagerFactory entityManagerFactory = mock();
 			this.beanFactory.registerSingleton("entityManagerFactory",
 					entityManagerFactory);
 			DefaultPersistenceContextField instance = new DefaultPersistenceContextField();
@@ -139,7 +139,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		RegisteredBean registeredBean = registerBean(
 				CustomPropertiesPersistenceContextMethod.class);
 		testCompile(registeredBean, (actual, compiled) -> {
-			EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
+			EntityManagerFactory entityManagerFactory = mock();
 			this.beanFactory.registerSingleton("entityManagerFactory",
 					entityManagerFactory);
 			CustomPropertiesPersistenceContextMethod instance = new CustomPropertiesPersistenceContextMethod();
@@ -172,7 +172,7 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		PersistenceAnnotationBeanPostProcessor postProcessor = new PersistenceAnnotationBeanPostProcessor();
 		BeanRegistrationAotContribution contribution = postProcessor
 				.processAheadOfTime(registeredBean);
-		BeanRegistrationCode beanRegistrationCode = mock(BeanRegistrationCode.class);
+		BeanRegistrationCode beanRegistrationCode = mock();
 		contribution.applyTo(generationContext, beanRegistrationCode);
 		generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().with(generationContext)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.util.function.ThrowingSupplier;
  * the form of a {@link BeanInstanceSupplier} that retains the executable
  * that is used to instantiate the bean.
  *
- * <p>Generated code is usually a method reference that generate the
+ * <p>Generated code is usually a method reference that generates the
  * {@link BeanInstanceSupplier}, but some shortcut can be used as well such as:
  * <pre class="code">
  * {@code InstanceSupplier.of(TheGeneratedClass::getMyBeanInstance);}

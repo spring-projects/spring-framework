@@ -613,8 +613,8 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 ----
 
 The `DefaultServerWebExchange` uses the configured
-`HttpMessageReader<MultiValueMap<String, Part>>` to parse `multipart/form-data` content
-into a `MultiValueMap`.
+`HttpMessageReader<MultiValueMap<String, Part>>` to parse `multipart/form-data`,  
+`multipart/mixed`, and `multipart/related` content into a `MultiValueMap`.
 By default, this is the `DefaultPartHttpMessageReader`, which does not have any third-party
 dependencies.
 Alternatively, the `SynchronossPartHttpMessageReader` can be used, which is based on the
@@ -805,9 +805,9 @@ consistently for access to the cached form data versus reading from the raw requ
 ==== Multipart
 
 `MultipartHttpMessageReader` and `MultipartHttpMessageWriter` support decoding and
-encoding "multipart/form-data" content. In turn `MultipartHttpMessageReader` delegates to
-another `HttpMessageReader` for the actual parsing to a `Flux<Part>` and then simply
-collects the parts into a `MultiValueMap`.
+encoding "multipart/form-data", "multipart/mixed", and "multipart/related" content.
+In turn `MultipartHttpMessageReader` delegates to another `HttpMessageReader` 
+for the actual parsing to a `Flux<Part>` and then simply collects the parts into a `MultiValueMap`.
 By default, the `DefaultPartHttpMessageReader` is used, but this can be changed through the
 `ServerCodecConfigurer`.
 For more information about the `DefaultPartHttpMessageReader`, refer to the

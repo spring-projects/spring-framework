@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,9 +51,11 @@ public class ByteBufferDecoder extends AbstractDataBufferDecoder<ByteBuffer> {
 	public ByteBuffer decode(DataBuffer dataBuffer, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		ByteBuffer result = dataBuffer.toByteBuffer();
+		int len = dataBuffer.readableByteCount();
+		ByteBuffer result = ByteBuffer.allocate(len);
+		dataBuffer.toByteBuffer(result);
 		if (logger.isDebugEnabled()) {
-			logger.debug(Hints.getLogPrefix(hints) + "Read " + dataBuffer.readableByteCount() + " bytes");
+			logger.debug(Hints.getLogPrefix(hints) + "Read " + len + " bytes");
 		}
 		DataBufferUtils.release(dataBuffer);
 		return result;

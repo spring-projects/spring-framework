@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,11 @@ import org.springframework.web.reactive.resource.VersionResourceResolver;
 import org.springframework.web.reactive.resource.WebJarsResourceResolver;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ResourceHandlerRegistry}.
@@ -81,6 +83,8 @@ class ResourceHandlerRegistryTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,
 				PathContainer.parsePath("/testStylesheet.css"));
+		exchange.getAttributes().put(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE,
+				new PathPatternParser().parse("/**"));
 
 		ResourceWebHandler handler = getHandler("/resources/**");
 		handler.handle(exchange).block(Duration.ofSeconds(5));
@@ -126,10 +130,10 @@ class ResourceHandlerRegistryTests {
 
 	@Test
 	void resourceChain() {
-		ResourceUrlProvider resourceUrlProvider = Mockito.mock(ResourceUrlProvider.class);
+		ResourceUrlProvider resourceUrlProvider = mock();
 		this.registry.setResourceUrlProvider(resourceUrlProvider);
-		ResourceResolver mockResolver = Mockito.mock(ResourceResolver.class);
-		ResourceTransformerSupport mockTransformer = Mockito.mock(ResourceTransformerSupport.class);
+		ResourceResolver mockResolver = mock();
+		ResourceTransformerSupport mockTransformer = mock();
 
 		this.registration.resourceChain(true).addResolver(mockResolver).addTransformer(mockTransformer);
 
@@ -189,11 +193,11 @@ class ResourceHandlerRegistryTests {
 	@Test
 	@SuppressWarnings("deprecation")
 	void resourceChainWithOverrides() {
-		CachingResourceResolver cachingResolver = Mockito.mock(CachingResourceResolver.class);
-		VersionResourceResolver versionResolver = Mockito.mock(VersionResourceResolver.class);
-		WebJarsResourceResolver webjarsResolver = Mockito.mock(WebJarsResourceResolver.class);
+		CachingResourceResolver cachingResolver = mock();
+		VersionResourceResolver versionResolver = mock();
+		WebJarsResourceResolver webjarsResolver = mock();
 		PathResourceResolver pathResourceResolver = new PathResourceResolver();
-		CachingResourceTransformer cachingTransformer = Mockito.mock(CachingResourceTransformer.class);
+		CachingResourceTransformer cachingTransformer = mock();
 		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
 
 		this.registration.setCacheControl(CacheControl.maxAge(3600, TimeUnit.MILLISECONDS))

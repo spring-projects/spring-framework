@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void payloadConverterIsConsistentConstructor() {
-		MessageConverter messageConverter = mock(MessageConverter.class);
+		MessageConverter messageConverter = mock();
 		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
 		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate(this.jmsTemplate);
 		messagingTemplate.afterPropertiesSet();
@@ -98,7 +98,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void payloadConverterIsConsistentSetter() {
-		MessageConverter messageConverter = mock(MessageConverter.class);
+		MessageConverter messageConverter = mock();
 		given(this.jmsTemplate.getMessageConverter()).willReturn(messageConverter);
 		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate();
 		messagingTemplate.setJmsTemplate(this.jmsTemplate);
@@ -108,7 +108,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void customConverterAlwaysTakesPrecedence() {
-		MessageConverter customMessageConverter = mock(MessageConverter.class);
+		MessageConverter customMessageConverter = mock();
 		JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate();
 		messagingTemplate.setJmsMessageConverter(
 				new MessagingMessageConverter(customMessageConverter));
@@ -246,7 +246,7 @@ public class JmsMessagingTemplateTests {
 		verify(this.jmsTemplate).send(eq("myQueue"), this.messageCreator.capture());
 
 		assertThatExceptionOfType(org.springframework.messaging.converter.MessageConversionException.class).isThrownBy(() ->
-				this.messageCreator.getValue().createMessage(mock(Session.class)))
+				this.messageCreator.getValue().createMessage(mock()))
 			.withMessageContaining("Test exception");
 	}
 
@@ -502,7 +502,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertMessageConversionExceptionOnSend() throws JMSException {
 		Message<String> message = createTextMessage();
-		MessageConverter messageConverter = mock(MessageConverter.class);
+		MessageConverter messageConverter = mock();
 		willThrow(org.springframework.jms.support.converter.MessageConversionException.class)
 				.given(messageConverter).toMessage(eq(message), any());
 		this.messagingTemplate.setJmsMessageConverter(messageConverter);
@@ -515,7 +515,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertMessageConversionExceptionOnReceive() throws JMSException {
 		jakarta.jms.Message message = createJmsTextMessage();
-		MessageConverter messageConverter = mock(MessageConverter.class);
+		MessageConverter messageConverter = mock();
 		willThrow(org.springframework.jms.support.converter.MessageConversionException.class)
 				.given(messageConverter).fromMessage(message);
 		this.messagingTemplate.setJmsMessageConverter(messageConverter);
@@ -554,7 +554,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertMessageFormatException() throws JMSException {
 		Message<String> message = createTextMessage();
-		MessageConverter messageConverter = mock(MessageConverter.class);
+		MessageConverter messageConverter = mock();
 		willThrow(MessageFormatException.class).given(messageConverter).toMessage(eq(message), any());
 		this.messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator();
@@ -566,7 +566,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertMessageNotWritableException() throws JMSException {
 		Message<String> message = createTextMessage();
-		MessageConverter messageConverter = mock(MessageConverter.class);
+		MessageConverter messageConverter = mock();
 		willThrow(MessageNotWriteableException.class).given(messageConverter).toMessage(eq(message), any());
 		this.messagingTemplate.setJmsMessageConverter(messageConverter);
 		invokeMessageCreator();
@@ -645,7 +645,7 @@ public class JmsMessagingTemplateTests {
 
 
 	protected TextMessage createTextMessage(MessageCreator creator) throws JMSException {
-		Session mock = mock(Session.class);
+		Session mock = mock();
 		given(mock.createTextMessage(any())).willAnswer(
 				(Answer<TextMessage>) invocation ->
 						new StubTextMessage((String) invocation.getArguments()[0]));

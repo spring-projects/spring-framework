@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,30 +50,23 @@ import static org.mockito.Mockito.verify;
  */
 public class JdbcTemplateQueryTests {
 
-	private Connection connection;
+	private Connection connection = mock();
 
-	private DataSource dataSource;
+	private DataSource dataSource = mock();
 
-	private Statement statement;
+	private Statement statement = mock();
 
-	private PreparedStatement preparedStatement;
+	private PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet;
+	private ResultSet resultSet = mock();
 
-	private ResultSetMetaData resultSetMetaData;
+	private ResultSetMetaData resultSetMetaData = mock();
 
-	private JdbcTemplate template;
+	private JdbcTemplate template = new JdbcTemplate(this.dataSource);
 
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		this.connection = mock(Connection.class);
-		this.dataSource = mock(DataSource.class);
-		this.statement = mock(Statement.class);
-		this.preparedStatement = mock(PreparedStatement.class);
-		this.resultSet = mock(ResultSet.class);
-		this.resultSetMetaData = mock(ResultSetMetaData.class);
-		this.template = new JdbcTemplate(this.dataSource);
 		given(this.dataSource.getConnection()).willReturn(this.connection);
 		given(this.resultSet.getMetaData()).willReturn(this.resultSetMetaData);
 		given(this.resultSetMetaData.getColumnCount()).willReturn(1);

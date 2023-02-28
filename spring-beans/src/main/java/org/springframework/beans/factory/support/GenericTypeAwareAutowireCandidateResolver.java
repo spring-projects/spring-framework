@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,8 +83,8 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		ResolvableType targetType = null;
 		boolean cacheType = false;
 		RootBeanDefinition rbd = null;
-		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
-			rbd = (RootBeanDefinition) bdHolder.getBeanDefinition();
+		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition rootBeanDef) {
+			rbd = rootBeanDef;
 		}
 		if (rbd != null) {
 			targetType = rbd.targetType;
@@ -161,8 +161,8 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		if (decDef != null && this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
 			if (clbf.containsBeanDefinition(decDef.getBeanName())) {
 				BeanDefinition dbd = clbf.getMergedBeanDefinition(decDef.getBeanName());
-				if (dbd instanceof RootBeanDefinition) {
-					return (RootBeanDefinition) dbd;
+				if (dbd instanceof RootBeanDefinition rootBeanDef) {
+					return rootBeanDef;
 				}
 			}
 		}

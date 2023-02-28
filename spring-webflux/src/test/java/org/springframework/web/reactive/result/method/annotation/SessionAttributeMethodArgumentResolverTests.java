@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,38 +48,35 @@ import static org.mockito.Mockito.mock;
  * Unit tests for {@link SessionAttributeMethodArgumentResolver}.
  * @author Rossen Stoyanchev
  */
-public class SessionAttributeMethodArgumentResolverTests {
+class SessionAttributeMethodArgumentResolverTests {
+
+	private WebSession session = mock();
+
+	private ServerWebExchange exchange = MockServerWebExchange.builder(MockServerHttpRequest.get("/")).session(this.session).build();
+
+	private Method handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithSessionAttribute", (Class<?>[]) null);
 
 	private SessionAttributeMethodArgumentResolver resolver;
-
-	private ServerWebExchange exchange;
-
-	private WebSession session;
-
-	private Method handleMethod;
 
 
 	@BeforeEach
 	@SuppressWarnings("resource")
-	public void setup() {
+	void setup() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
 		ReactiveAdapterRegistry adapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		this.resolver = new SessionAttributeMethodArgumentResolver(context.getBeanFactory(), adapterRegistry);
-		this.session = mock(WebSession.class);
-		this.exchange = MockServerWebExchange.builder(MockServerHttpRequest.get("/")).session(this.session).build();
-		this.handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithSessionAttribute", (Class<?>[]) null);
 	}
 
 
 	@Test
-	public void supportsParameter() {
+	void supportsParameter() {
 		assertThat(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 0))).isTrue();
 		assertThat(this.resolver.supportsParameter(new MethodParameter(this.handleMethod, 4))).isFalse();
 	}
 
 	@Test
-	public void resolve() {
+	void resolve() {
 		MethodParameter param = initMethodParameter(0);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		StepVerifier.create(mono).expectError(ServerWebInputException.class).verify();
@@ -91,7 +88,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithName() {
+	void resolveWithName() {
 		MethodParameter param = initMethodParameter(1);
 		Foo foo = new Foo();
 		given(this.session.getAttribute("specialFoo")).willReturn(foo);
@@ -100,7 +97,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveNotRequired() {
+	void resolveNotRequired() {
 		MethodParameter param = initMethodParameter(2);
 		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertThat(mono.block()).isNull();
@@ -113,7 +110,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void resolveOptional() {
+	void resolveOptional() {
 		MethodParameter param = initMethodParameter(3);
 		Optional<Object> actual = (Optional<Object>) this.resolver
 				.resolveArgument(param, new BindingContext(), this.exchange).block();
@@ -129,9 +126,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 		given(this.session.getAttribute("foo")).willReturn(foo);
 		actual = (Optional<Object>) this.resolver.resolveArgument(param, bindingContext, this.exchange).block();
 
-		assertThat(actual).isNotNull();
-		assertThat(actual.isPresent()).isTrue();
-		assertThat(actual.get()).isSameAs(foo);
+		assertThat(actual).hasValue(foo);
 	}
 
 

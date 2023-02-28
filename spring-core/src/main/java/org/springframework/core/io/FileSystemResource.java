@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -190,6 +191,26 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	public InputStream getInputStream() throws IOException {
 		try {
 			return Files.newInputStream(this.filePath);
+		}
+		catch (NoSuchFileException ex) {
+			throw new FileNotFoundException(ex.getMessage());
+		}
+	}
+
+	@Override
+	public byte[] getContentAsByteArray() throws IOException {
+		try {
+			return Files.readAllBytes(this.filePath);
+		}
+		catch (NoSuchFileException ex) {
+			throw new FileNotFoundException(ex.getMessage());
+		}
+	}
+
+	@Override
+	public String getContentAsString(Charset charset) throws IOException {
+		try {
+			return Files.readString(this.filePath, charset);
 		}
 		catch (NoSuchFileException ex) {
 			throw new FileNotFoundException(ex.getMessage());

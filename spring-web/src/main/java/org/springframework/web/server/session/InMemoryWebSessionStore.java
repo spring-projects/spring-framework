@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,12 +229,17 @@ public class InMemoryWebSessionStore implements WebSessionStore {
 
 		@Override
 		public Mono<Void> changeSessionId() {
-			String currentId = this.id.get();
-			InMemoryWebSessionStore.this.sessions.remove(currentId);
-			String newId = String.valueOf(idGenerator.generateId());
-			this.id.set(newId);
-			InMemoryWebSessionStore.this.sessions.put(this.getId(), this);
-			return Mono.empty();
+			return Mono.<Void>defer(() -> {
+						String currentId = this.id.get();
+						InMemoryWebSessionStore.this.sessions.remove(currentId);
+						String newId = String.valueOf(idGenerator.generateId());
+						this.id.set(newId);
+						InMemoryWebSessionStore.this.sessions.put(this.getId(), this);
+						return Mono.empty();
+					})
+					.subscribeOn(Schedulers.boundedElastic())
+					.publishOn(Schedulers.parallel())
+					.then();
 		}
 
 		@Override

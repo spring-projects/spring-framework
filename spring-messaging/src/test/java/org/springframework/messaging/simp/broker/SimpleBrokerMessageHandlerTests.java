@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public class SimpleBrokerMessageHandlerTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void startAndStopWithHeartbeatValue() {
-		ScheduledFuture future = mock(ScheduledFuture.class);
+		ScheduledFuture future = mock();
 		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMillis(15000)))).willReturn(future);
 
 		this.messageHandler.setTaskScheduler(this.taskScheduler);

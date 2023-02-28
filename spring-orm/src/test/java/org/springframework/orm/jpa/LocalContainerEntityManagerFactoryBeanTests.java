@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 	@Test
 	public void testApplicationManagedEntityManagerWithoutTransaction() throws Exception {
 		Object testEntity = new Object();
-		EntityManager mockEm = mock(EntityManager.class);
+		EntityManager mockEm = mock();
 
 		given(mockEmf.createEntityManager()).willReturn(mockEm);
 
@@ -122,14 +122,14 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 	public void testApplicationManagedEntityManagerWithTransaction() throws Exception {
 		Object testEntity = new Object();
 
-		EntityTransaction mockTx = mock(EntityTransaction.class);
+		EntityTransaction mockTx = mock();
 
 		// This one's for the tx (shared)
-		EntityManager sharedEm = mock(EntityManager.class);
+		EntityManager sharedEm = mock();
 		given(sharedEm.getTransaction()).willReturn(new NoOpEntityTransaction());
 
 		// This is the application-specific one
-		EntityManager mockEm = mock(EntityManager.class);
+		EntityManager mockEm = mock();
 		given(mockEm.getTransaction()).willReturn(mockTx);
 
 		given(mockEmf.createEntityManager()).willReturn(sharedEm, mockEm);
@@ -163,15 +163,15 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 	public void testApplicationManagedEntityManagerWithTransactionAndCommitException() throws Exception {
 		Object testEntity = new Object();
 
-		EntityTransaction mockTx = mock(EntityTransaction.class);
+		EntityTransaction mockTx = mock();
 		willThrow(new OptimisticLockException()).given(mockTx).commit();
 
 		// This one's for the tx (shared)
-		EntityManager sharedEm = mock(EntityManager.class);
+		EntityManager sharedEm = mock();
 		given(sharedEm.getTransaction()).willReturn(new NoOpEntityTransaction());
 
 		// This is the application-specific one
-		EntityManager mockEm = mock(EntityManager.class);
+		EntityManager mockEm = mock();
 		given(mockEm.getTransaction()).willReturn(mockTx);
 
 		given(mockEmf.createEntityManager()).willReturn(sharedEm, mockEm);
@@ -206,11 +206,11 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 		Object testEntity = new Object();
 
 		// This one's for the tx (shared)
-		EntityManager sharedEm = mock(EntityManager.class);
+		EntityManager sharedEm = mock();
 		given(sharedEm.getTransaction()).willReturn(new NoOpEntityTransaction());
 
 		// This is the application-specific one
-		EntityManager mockEm = mock(EntityManager.class);
+		EntityManager mockEm = mock();
 
 		given(mockEmf.createEntityManager()).willReturn(sharedEm, mockEm);
 

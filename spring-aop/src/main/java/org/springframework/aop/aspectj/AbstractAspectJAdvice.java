@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,18 +268,16 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 						this.argumentNames[i] + "' that is not a valid Java identifier");
 			}
 		}
-		if (this.argumentNames != null) {
-			if (this.aspectJAdviceMethod.getParameterCount() == this.argumentNames.length + 1) {
-				// May need to add implicit join point arg name...
-				Class<?> firstArgType = this.aspectJAdviceMethod.getParameterTypes()[0];
-				if (firstArgType == JoinPoint.class ||
-						firstArgType == ProceedingJoinPoint.class ||
-						firstArgType == JoinPoint.StaticPart.class) {
-					String[] oldNames = this.argumentNames;
-					this.argumentNames = new String[oldNames.length + 1];
-					this.argumentNames[0] = "THIS_JOIN_POINT";
-					System.arraycopy(oldNames, 0, this.argumentNames, 1, oldNames.length);
-				}
+		if (this.aspectJAdviceMethod.getParameterCount() == this.argumentNames.length + 1) {
+			// May need to add implicit join point arg name...
+			Class<?> firstArgType = this.aspectJAdviceMethod.getParameterTypes()[0];
+			if (firstArgType == JoinPoint.class ||
+					firstArgType == ProceedingJoinPoint.class ||
+					firstArgType == JoinPoint.StaticPart.class) {
+				String[] oldNames = this.argumentNames;
+				this.argumentNames = new String[oldNames.length + 1];
+				this.argumentNames[0] = "THIS_JOIN_POINT";
+				System.arraycopy(oldNames, 0, this.argumentNames, 1, oldNames.length);
 			}
 		}
 	}

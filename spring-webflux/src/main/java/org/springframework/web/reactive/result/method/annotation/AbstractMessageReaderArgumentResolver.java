@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Set;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
@@ -154,7 +155,8 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		}
 		catch (InvalidMediaTypeException ex) {
 			throw new UnsupportedMediaTypeStatusException(
-					"Can't parse Content-Type [" + headers.getFirst("Content-Type") + "]: " + ex.getMessage());
+					"Can't parse Content-Type [" + headers.getFirst("Content-Type") + "]: " + ex.getMessage(),
+					getSupportedMediaTypes(elementType));
 		}
 
 		MediaType mediaType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
@@ -268,7 +270,13 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 
 		String name = Conventions.getVariableNameForParameter(param);
 		WebExchangeDataBinder binder = binding.createDataBinder(exchange, target, name);
-		binder.validate(validationHints);
+		try {
+			LocaleContextHolder.setLocaleContext(exchange.getLocaleContext());
+			binder.validate(validationHints);
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 		if (binder.getBindingResult().hasErrors()) {
 			throw new WebExchangeBindException(param, binder.getBindingResult());
 		}

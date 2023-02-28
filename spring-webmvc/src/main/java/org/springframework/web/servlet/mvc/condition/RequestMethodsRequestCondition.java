@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,18 +157,14 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 
 	@Nullable
 	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
-		RequestMethod requestMethod;
-		try {
-			requestMethod = RequestMethod.valueOf(httpMethodValue);
+		RequestMethod requestMethod = RequestMethod.resolve(httpMethodValue);
+		if (requestMethod != null) {
 			if (getMethods().contains(requestMethod)) {
 				return requestMethodConditionCache.get(httpMethodValue);
 			}
 			if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
 				return requestMethodConditionCache.get(HttpMethod.GET.name());
 			}
-		}
-		catch (IllegalArgumentException ex) {
-			// Custom request method
 		}
 		return null;
 	}

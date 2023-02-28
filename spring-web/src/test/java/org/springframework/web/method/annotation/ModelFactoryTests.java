@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,7 +168,7 @@ public class ModelFactoryTests {
 		container.addAttribute(commandName, command);
 
 		WebDataBinder dataBinder = new WebDataBinder(command, commandName);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.webRequest, command, commandName)).willReturn(dataBinder);
 
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
@@ -188,7 +188,7 @@ public class ModelFactoryTests {
 		container.addAttribute(attributeName, attribute);
 
 		WebDataBinder dataBinder = new WebDataBinder(attribute, attributeName);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.webRequest, attribute, attributeName)).willReturn(dataBinder);
 
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
@@ -208,7 +208,7 @@ public class ModelFactoryTests {
 		this.attributeStore.storeAttribute(this.webRequest, attributeName, attribute);
 
 		WebDataBinder dataBinder = new WebDataBinder(attribute, attributeName);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.webRequest, attribute, attributeName)).willReturn(dataBinder);
 
 		container.getSessionStatus().setComplete();
@@ -233,7 +233,7 @@ public class ModelFactoryTests {
 		container.setRedirectModelScenario(true);
 
 		WebDataBinder dataBinder = new WebDataBinder(attribute, attributeName);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.webRequest, attribute, attributeName)).willReturn(dataBinder);
 
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);

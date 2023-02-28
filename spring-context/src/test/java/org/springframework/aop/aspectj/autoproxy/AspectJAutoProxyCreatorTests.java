@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,10 +77,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Sam Brannen
  */
-public class AspectJAutoProxyCreatorTests {
+class AspectJAutoProxyCreatorTests {
 
 	@Test
-	public void testAspectsAreApplied() {
+	void aspectsAreApplied() {
 		ClassPathXmlApplicationContext bf = newContext("aspects.xml");
 
 		ITestBean tb = (ITestBean) bf.getBean("adrian");
@@ -91,7 +91,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testMultipleAspectsWithParameterApplied() {
+	void multipleAspectsWithParameterApplied() {
 		ClassPathXmlApplicationContext bf = newContext("aspects.xml");
 
 		ITestBean tb = (ITestBean) bf.getBean("adrian");
@@ -100,7 +100,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testAspectsAreAppliedInDefinedOrder() {
+	void aspectsAreAppliedInDefinedOrder() {
 		ClassPathXmlApplicationContext bf = newContext("aspectsWithOrdering.xml");
 
 		ITestBean tb = (ITestBean) bf.getBean("adrian");
@@ -108,7 +108,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testAspectsAndAdvisorAreApplied() {
+	void aspectsAndAdvisorAreApplied() {
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 
 		ITestBean shouldBeWeaved = (ITestBean) ac.getBean("adrian");
@@ -116,7 +116,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
+	void aspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 
 		GenericApplicationContext childAc = new GenericApplicationContext(ac);
@@ -153,7 +153,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testPerThisAspect() {
+	void perThisAspect() {
 		ClassPathXmlApplicationContext bf = newContext("perthis.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -173,7 +173,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testPerTargetAspect() throws SecurityException, NoSuchMethodException {
+	void perTargetAspect() throws SecurityException, NoSuchMethodException {
 		ClassPathXmlApplicationContext bf = newContext("pertarget.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -209,7 +209,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testTwoAdviceAspect() {
+	void twoAdviceAspect() {
 		ClassPathXmlApplicationContext bf = newContext("twoAdviceAspect.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -217,7 +217,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testTwoAdviceAspectSingleton() {
+	void twoAdviceAspectSingleton() {
 		ClassPathXmlApplicationContext bf = newContext("twoAdviceAspectSingleton.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -228,7 +228,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testTwoAdviceAspectPrototype() {
+	void twoAdviceAspectPrototype() {
 		ClassPathXmlApplicationContext bf = newContext("twoAdviceAspectPrototype.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -244,13 +244,13 @@ public class AspectJAutoProxyCreatorTests {
 		assertThat(adrian.age()).isEqualTo(start);
 		int newAge = 32;
 		adrian.setAge(newAge);
-		assertThat(adrian.age()).isEqualTo((start + increment));
+		assertThat(adrian.age()).isEqualTo(start + increment);
 		adrian.setAge(0);
-		assertThat(adrian.age()).isEqualTo((start + increment * 2));
+		assertThat(adrian.age()).isEqualTo(start + increment * 2);
 	}
 
 	@Test
-	public void testAdviceUsingJoinPoint() {
+	void adviceUsingJoinPoint() {
 		ClassPathXmlApplicationContext bf = newContext("usesJoinPointAspect.xml");
 
 		ITestBean adrian1 = (ITestBean) bf.getBean("adrian");
@@ -262,7 +262,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testIncludeMechanism() {
+	void includeMechanism() {
 		ClassPathXmlApplicationContext bf = newContext("usesInclude.xml");
 
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
@@ -271,7 +271,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testForceProxyTargetClass() {
+	void forceProxyTargetClass() {
 		ClassPathXmlApplicationContext bf = newContext("aspectsWithCGLIB.xml");
 
 		ProxyConfig pc = (ProxyConfig) bf.getBean(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
@@ -280,7 +280,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testWithAbstractFactoryBeanAreApplied() {
+	void withAbstractFactoryBeanAreApplied() {
 		ClassPathXmlApplicationContext bf = newContext("aspectsWithAbstractBean.xml");
 
 		ITestBean adrian = (ITestBean) bf.getBean("adrian");
@@ -289,7 +289,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testRetryAspect() {
+	void retryAspect() {
 		ClassPathXmlApplicationContext bf = newContext("retryAspect.xml");
 
 		UnreliableBean bean = (UnreliableBean) bf.getBean("unreliableBean");
@@ -302,7 +302,7 @@ public class AspectJAutoProxyCreatorTests {
 	}
 
 	@Test
-	public void testWithBeanNameAutoProxyCreator() {
+	void withBeanNameAutoProxyCreator() {
 		ClassPathXmlApplicationContext bf = newContext("withBeanNameAutoProxyCreator.xml");
 
 		ITestBean tb = (ITestBean) bf.getBean("adrian");
@@ -571,11 +571,11 @@ class RetryAspect {
 @SuppressWarnings("serial")
 class RetryableException extends NestedRuntimeException {
 
-	public RetryableException(String msg) {
+	RetryableException(String msg) {
 		super(msg);
 	}
 
-	public RetryableException(String msg, Throwable cause) {
+	RetryableException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 }

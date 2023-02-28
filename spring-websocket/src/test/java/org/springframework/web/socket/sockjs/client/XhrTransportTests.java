@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,13 +89,13 @@ class XhrTransportTests {
 		HttpHeaders handshakeHeaders = new HttpHeaders();
 		handshakeHeaders.setOrigin("foo");
 
-		TransportRequest request = mock(TransportRequest.class);
+		TransportRequest request = mock();
 		given(request.getSockJsUrlInfo()).willReturn(new SockJsUrlInfo(URI.create("https://example.com")));
 		given(request.getHandshakeHeaders()).willReturn(handshakeHeaders);
 		given(request.getHttpRequestHeaders()).willReturn(new HttpHeaders());
 
 		TestXhrTransport transport = new TestXhrTransport();
-		WebSocketHandler handler = mock(WebSocketHandler.class);
+		WebSocketHandler handler = mock();
 		transport.connect(request, handler);
 
 		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);

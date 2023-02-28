@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.UriUtils;
+import org.springframework.web.util.pattern.PathPatternParser;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,6 +73,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Brian Clozel
  */
 class ResourceWebHandlerTests {
 
@@ -102,6 +104,7 @@ class ResourceWebHandlerTests {
 	void getResource() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();
@@ -119,6 +122,7 @@ class ResourceWebHandlerTests {
 	void getResourceHttpHeader() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.head(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat((Object) exchange.getResponse().getStatusCode()).isNull();
@@ -139,6 +143,7 @@ class ResourceWebHandlerTests {
 	void getResourceHttpOptions() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.options(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isNull();
@@ -149,6 +154,7 @@ class ResourceWebHandlerTests {
 	void getResourceNoCache() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.setCacheControl(CacheControl.noStore());
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -169,6 +175,7 @@ class ResourceWebHandlerTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "versionString/foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getHeaders().getETag()).isEqualTo("W/\"versionString\"");
@@ -180,6 +187,7 @@ class ResourceWebHandlerTests {
 	void getResourceWithHtmlMediaType() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "foo.html");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();
@@ -195,6 +203,7 @@ class ResourceWebHandlerTests {
 	void getResourceFromAlternatePath() throws Exception {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "baz.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();
@@ -212,6 +221,7 @@ class ResourceWebHandlerTests {
 	void getResourceFromSubDirectory() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "js/foo.js");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.parseMediaType("application/javascript"));
@@ -222,11 +232,24 @@ class ResourceWebHandlerTests {
 	void getResourceFromSubDirectoryOfAlternatePath() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "js/baz.js");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();
 		assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("application/javascript"));
 		assertResponseBody(exchange, "function foo() { console.log(\"hello world\"); }");
+	}
+
+	@Test
+	void getResourceWithFullPathAsPattern() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/foo.css"));
+		setPathWithinHandlerMapping(exchange, "");
+		setBestMachingPattern(exchange, "/foo.css");
+		this.handler.handle(exchange).block(TIMEOUT);
+		HttpHeaders headers = exchange.getResponse().getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(MediaType.parseMediaType("text/css"));
+		assertThat(headers.getContentLength()).isEqualTo(17);
+		assertResponseBody(exchange, "h1 { color:red; }");
 	}
 
 	@Test
@@ -240,6 +263,7 @@ class ResourceWebHandlerTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "foo.bar");
+		setBestMachingPattern(exchange, "/**");
 		handler.handle(exchange).block(TIMEOUT);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();
@@ -258,6 +282,7 @@ class ResourceWebHandlerTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, UriUtils.encodePath("test/foo with spaces.css", UTF_8));
+		setBestMachingPattern(exchange, "/**");
 		handler.handle(exchange).block(TIMEOUT);
 
 		HttpHeaders headers = exchange.getResponse().getHeaders();
@@ -294,6 +319,7 @@ class ResourceWebHandlerTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("")
 				.header("Accept", "application/json,text/plain,*/*"));
 		setPathWithinHandlerMapping(exchange, "foo.html");
+		setBestMachingPattern(exchange, "/**");
 		handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getHeaders().getContentType()).isEqualTo(MediaType.TEXT_HTML);
@@ -304,10 +330,10 @@ class ResourceWebHandlerTests {
 
 		// Use mock ResourceResolver: i.e. we're only testing upfront validations...
 
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		given(resource.getFilename()).willThrow(new AssertionError("Resource should not be resolved"));
 		given(resource.getInputStream()).willThrow(new AssertionError("Resource should not be resolved"));
-		ResourceResolver resolver = mock(ResourceResolver.class);
+		ResourceResolver resolver = mock();
 		given(resolver.resolveResource(any(), any(), any(), any())).willReturn(Mono.just(resource));
 
 		ResourceWebHandler handler = new ResourceWebHandler();
@@ -337,7 +363,7 @@ class ResourceWebHandlerTests {
 	private void testInvalidPath(String requestPath, ResourceWebHandler handler) {
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, requestPath);
-
+		setBestMachingPattern(exchange, "/**");
 		StepVerifier.create(handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
@@ -379,6 +405,7 @@ class ResourceWebHandlerTests {
 
 		ServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.method(httpMethod, ""));
 		setPathWithinHandlerMapping(exchange, requestPath);
+		setBestMachingPattern(exchange, "/**");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
@@ -449,6 +476,7 @@ class ResourceWebHandlerTests {
 				MockServerHttpRequest.get("").ifModifiedSince(resourceLastModified("test/foo.css")));
 
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.NOT_MODIFIED);
 	}
@@ -459,6 +487,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("").ifModifiedSince(timestamp).build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat((Object) exchange.getResponse().getStatusCode()).isNull();
@@ -469,6 +498,7 @@ class ResourceWebHandlerTests {
 	void directory() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "js/");
+		setBestMachingPattern(exchange, "/**");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
@@ -480,6 +510,7 @@ class ResourceWebHandlerTests {
 	void directoryInJarFile() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "underscorejs/");
+		setBestMachingPattern(exchange, "/**");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
@@ -491,6 +522,7 @@ class ResourceWebHandlerTests {
 	void missingResourcePath() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "");
+		setBestMachingPattern(exchange, "/**");
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectErrorSatisfies(err -> {
 					assertThat(err).isInstanceOf(ResponseStatusException.class);
@@ -509,6 +541,7 @@ class ResourceWebHandlerTests {
 	void unsupportedHttpMethod() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		assertThatExceptionOfType(MethodNotAllowedException.class).isThrownBy(() ->
 				this.handler.handle(exchange).block(TIMEOUT));
 	}
@@ -519,6 +552,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.method(method, "").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "not-there.css");
+		setBestMachingPattern(exchange, "/**");
 		Mono<Void> mono = this.handler.handle(exchange);
 
 		StepVerifier.create(mono)
@@ -538,6 +572,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("").header("Range", "bytes=0-1").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "foo.txt");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
@@ -554,6 +589,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("").header("range", "bytes=9-").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "foo.txt");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
@@ -570,6 +606,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("").header("range", "bytes=9-10000").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "foo.txt");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
@@ -586,6 +623,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("").header("range", "bytes=-1").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "foo.txt");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
@@ -602,6 +640,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("").header("range", "bytes=-11").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "foo.txt");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
@@ -618,6 +657,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("").header("range", "bytes=foo bar").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "foo.txt");
+		setBestMachingPattern(exchange, "/**");
 
 		StepVerifier.create(this.handler.handle(exchange))
 				.expectNextCount(0)
@@ -633,6 +673,7 @@ class ResourceWebHandlerTests {
 		MockServerHttpRequest request = MockServerHttpRequest.get("").header("Range", "bytes=0-1, 4-5, 8-9").build();
 		MockServerWebExchange exchange = MockServerWebExchange.from(request);
 		setPathWithinHandlerMapping(exchange, "foo.txt");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
@@ -677,6 +718,7 @@ class ResourceWebHandlerTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		exchange.getResponse().getHeaders().setCacheControl(CacheControl.noStore().getHeaderValue());
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getHeaders().getCacheControl()).isEqualTo("max-age=3600");
@@ -686,6 +728,7 @@ class ResourceWebHandlerTests {
 	void ignoreLastModified() {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(""));
 		setPathWithinHandlerMapping(exchange, "foo.css");
+		setBestMachingPattern(exchange, "/**");
 		this.handler.setUseLastModified(false);
 		this.handler.handle(exchange).block(TIMEOUT);
 
@@ -700,6 +743,11 @@ class ResourceWebHandlerTests {
 	private void setPathWithinHandlerMapping(ServerWebExchange exchange, String path) {
 		exchange.getAttributes().put(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE,
 				PathContainer.parsePath(path));
+	}
+
+	private void setBestMachingPattern(ServerWebExchange exchange, String pattern) {
+		exchange.getAttributes().put(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE,
+				new PathPatternParser().parse(pattern));
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {

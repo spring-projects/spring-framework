@@ -123,7 +123,7 @@ easy to do in Spring. You do not actually have to do anything or know anything a
 the Spring internals (or even about classes such as the `FieldRetrievingFactoryBean`).
 The following example enumeration shows how easy injecting an enum value is:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package jakarta.persistence;
@@ -134,7 +134,7 @@ The following example enumeration shows how easy injecting an enum value is:
 		EXTENDED
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package jakarta.persistence
@@ -148,7 +148,7 @@ The following example enumeration shows how easy injecting an enum value is:
 
 Now consider the following setter of type `PersistenceContextType` and the corresponding bean definition:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package example;
@@ -162,7 +162,7 @@ Now consider the following setter of type `PersistenceContextType` and the corre
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package example
@@ -796,7 +796,7 @@ element results in a single `SimpleDateFormat` bean definition). Spring features
 number of convenience classes that support this scenario. In the following example, we
 use the `NamespaceHandlerSupport` class:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package org.springframework.samples.xml;
@@ -810,7 +810,7 @@ use the `NamespaceHandlerSupport` class:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package org.springframework.samples.xml
@@ -847,7 +847,7 @@ responsible for parsing one distinct top-level XML element defined in the schema
 the parser, we' have access to the XML element (and thus to its subelements, too) so that
 we can parse our custom XML content, as you can see in the following example:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package org.springframework.samples.xml;
@@ -884,7 +884,7 @@ the basic grunt work of creating a single `BeanDefinition`.
 <2> We supply the `AbstractSingleBeanDefinitionParser` superclass with the type that our
 single `BeanDefinition` represents.
 
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package org.springframework.samples.xml
@@ -1056,7 +1056,7 @@ setter method for the `components` property. This makes it hard (or rather impos
 to configure a bean definition for the `Component` class by using setter injection.
 The following listing shows the `Component` class:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.foo;
@@ -1087,7 +1087,7 @@ The following listing shows the `Component` class:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.foo
@@ -1114,7 +1114,7 @@ The typical solution to this issue is to create a custom `FactoryBean` that expo
 setter property for the `components` property. The following listing shows such a custom
 `FactoryBean`:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.foo;
@@ -1154,7 +1154,7 @@ setter property for the `components` property. The following listing shows such 
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.foo
@@ -1226,7 +1226,7 @@ listing shows:
 Again following <<core.appendix.xsd-custom-introduction, the process described earlier>>,
 we then create a custom `NamespaceHandler`:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.foo;
@@ -1240,7 +1240,7 @@ we then create a custom `NamespaceHandler`:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.foo
@@ -1259,7 +1259,7 @@ Next up is the custom `BeanDefinitionParser`. Remember that we are creating
 a `BeanDefinition` that describes a `ComponentFactoryBean`. The following
 listing shows our custom `BeanDefinitionParser` implementation:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.foo;
@@ -1308,7 +1308,7 @@ listing shows our custom `BeanDefinitionParser` implementation:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.foo
@@ -1403,14 +1403,14 @@ the named JCache for us. We can also modify the existing `BeanDefinition` for th
 `'checkingAccountService'` so that it has a dependency on this new
 JCache-initializing `BeanDefinition`. The following listing shows our `JCacheInitializer`:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.foo;
 
 	public class JCacheInitializer {
 
-		private String name;
+		private final String name;
 
 		public JCacheInitializer(String name) {
 			this.name = name;
@@ -1421,7 +1421,7 @@ JCache-initializing `BeanDefinition`. The following listing shows our `JCacheIni
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.foo
@@ -1453,7 +1453,7 @@ the XSD schema that describes the custom attribute, as follows:
 
 Next, we need to create the associated `NamespaceHandler`, as follows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.foo;
@@ -1469,7 +1469,7 @@ Next, we need to create the associated `NamespaceHandler`, as follows:
 
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.foo
@@ -1490,7 +1490,7 @@ Next, we need to create the parser. Note that, in this case, because we are goin
 an XML attribute, we write a `BeanDefinitionDecorator` rather than a `BeanDefinitionParser`.
 The following listing shows our `BeanDefinitionDecorator` implementation:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.foo;
@@ -1544,7 +1544,7 @@ The following listing shows our `BeanDefinitionDecorator` implementation:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.foo

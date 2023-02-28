@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,14 +141,14 @@ class CodecConfigurerTests {
 
 	@Test
 	void defaultAndCustomReaders() {
-		Decoder<?> customDecoder1 = mock(Decoder.class);
-		Decoder<?> customDecoder2 = mock(Decoder.class);
+		Decoder<?> customDecoder1 = mock();
+		Decoder<?> customDecoder2 = mock();
 
 		given(customDecoder1.canDecode(ResolvableType.forClass(Object.class), null)).willReturn(false);
 		given(customDecoder2.canDecode(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
-		HttpMessageReader<?> customReader1 = mock(HttpMessageReader.class);
-		HttpMessageReader<?> customReader2 = mock(HttpMessageReader.class);
+		HttpMessageReader<?> customReader1 = mock();
+		HttpMessageReader<?> customReader2 = mock();
 
 		given(customReader1.canRead(ResolvableType.forClass(Object.class), null)).willReturn(false);
 		given(customReader2.canRead(ResolvableType.forClass(Object.class), null)).willReturn(true);
@@ -189,14 +189,14 @@ class CodecConfigurerTests {
 
 	@Test
 	void defaultAndCustomWriters() {
-		Encoder<?> customEncoder1 = mock(Encoder.class);
-		Encoder<?> customEncoder2 = mock(Encoder.class);
+		Encoder<?> customEncoder1 = mock();
+		Encoder<?> customEncoder2 = mock();
 
 		given(customEncoder1.canEncode(ResolvableType.forClass(Object.class), null)).willReturn(false);
 		given(customEncoder2.canEncode(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
-		HttpMessageWriter<?> customWriter1 = mock(HttpMessageWriter.class);
-		HttpMessageWriter<?> customWriter2 = mock(HttpMessageWriter.class);
+		HttpMessageWriter<?> customWriter1 = mock();
+		HttpMessageWriter<?> customWriter2 = mock();
 
 		given(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).willReturn(false);
 		given(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).willReturn(true);
@@ -236,14 +236,14 @@ class CodecConfigurerTests {
 
 	@Test
 	void defaultsOffCustomReaders() {
-		Decoder<?> customDecoder1 = mock(Decoder.class);
-		Decoder<?> customDecoder2 = mock(Decoder.class);
+		Decoder<?> customDecoder1 = mock();
+		Decoder<?> customDecoder2 = mock();
 
 		given(customDecoder1.canDecode(ResolvableType.forClass(Object.class), null)).willReturn(false);
 		given(customDecoder2.canDecode(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
-		HttpMessageReader<?> customReader1 = mock(HttpMessageReader.class);
-		HttpMessageReader<?> customReader2 = mock(HttpMessageReader.class);
+		HttpMessageReader<?> customReader1 = mock();
+		HttpMessageReader<?> customReader2 = mock();
 
 		given(customReader1.canRead(ResolvableType.forClass(Object.class), null)).willReturn(false);
 		given(customReader2.canRead(ResolvableType.forClass(Object.class), null)).willReturn(true);
@@ -267,14 +267,14 @@ class CodecConfigurerTests {
 
 	@Test
 	void defaultsOffWithCustomWriters() {
-		Encoder<?> customEncoder1 = mock(Encoder.class);
-		Encoder<?> customEncoder2 = mock(Encoder.class);
+		Encoder<?> customEncoder1 = mock();
+		Encoder<?> customEncoder2 = mock();
 
 		given(customEncoder1.canEncode(ResolvableType.forClass(Object.class), null)).willReturn(false);
 		given(customEncoder2.canEncode(ResolvableType.forClass(Object.class), null)).willReturn(true);
 
-		HttpMessageWriter<?> customWriter1 = mock(HttpMessageWriter.class);
-		HttpMessageWriter<?> customWriter2 = mock(HttpMessageWriter.class);
+		HttpMessageWriter<?> customWriter1 = mock();
+		HttpMessageWriter<?> customWriter2 = mock();
 
 		given(customWriter1.canWrite(ResolvableType.forClass(Object.class), null)).willReturn(false);
 		given(customWriter2.canWrite(ResolvableType.forClass(Object.class), null)).willReturn(true);

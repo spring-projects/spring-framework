@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,12 +140,12 @@ class TypeConverterDelegate {
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
 			if (typeDescriptor != null && requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
-					convertedValue instanceof String) {
+					convertedValue instanceof String text) {
 				TypeDescriptor elementTypeDesc = typeDescriptor.getElementTypeDescriptor();
 				if (elementTypeDesc != null) {
 					Class<?> elementType = elementTypeDesc.getType();
 					if (Class.class == elementType || Enum.class.isAssignableFrom(elementType)) {
-						convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
+						convertedValue = StringUtils.commaDelimitedListToStringArray(text);
 					}
 				}
 			}
@@ -166,21 +166,19 @@ class TypeConverterDelegate {
 				}
 				else if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
-					if (convertedValue instanceof String && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
-						convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
+					if (convertedValue instanceof String text && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
+						convertedValue = StringUtils.commaDelimitedListToStringArray(text);
 					}
 					return (T) convertToTypedArray(convertedValue, propertyName, requiredType.getComponentType());
 				}
-				else if (convertedValue instanceof Collection) {
+				else if (convertedValue instanceof Collection<?> coll) {
 					// Convert elements to target type, if determined.
-					convertedValue = convertToTypedCollection(
-							(Collection<?>) convertedValue, propertyName, requiredType, typeDescriptor);
+					convertedValue = convertToTypedCollection(coll, propertyName, requiredType, typeDescriptor);
 					standardConversion = true;
 				}
-				else if (convertedValue instanceof Map) {
+				else if (convertedValue instanceof Map<?, ?> map) {
 					// Convert keys and values to respective target type, if determined.
-					convertedValue = convertToTypedMap(
-							(Map<?, ?>) convertedValue, propertyName, requiredType, typeDescriptor);
+					convertedValue = convertToTypedMap(map, propertyName, requiredType, typeDescriptor);
 					standardConversion = true;
 				}
 				if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
@@ -191,7 +189,7 @@ class TypeConverterDelegate {
 					// We can stringify any primitive value...
 					return (T) convertedValue.toString();
 				}
-				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
+				else if (convertedValue instanceof String text && !requiredType.isInstance(convertedValue)) {
 					if (conversionAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
 						try {
 							Constructor<T> strCtor = requiredType.getConstructor(String.class);
@@ -209,7 +207,7 @@ class TypeConverterDelegate {
 							}
 						}
 					}
-					String trimmedValue = ((String) convertedValue).trim();
+					String trimmedValue = text.trim();
 					if (requiredType.isEnum() && trimmedValue.isEmpty()) {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
@@ -217,9 +215,8 @@ class TypeConverterDelegate {
 					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
 					standardConversion = true;
 				}
-				else if (convertedValue instanceof Number && Number.class.isAssignableFrom(requiredType)) {
-					convertedValue = NumberUtils.convertNumberToTargetClass(
-							(Number) convertedValue, (Class<Number>) requiredType);
+				else if (convertedValue instanceof Number num && Number.class.isAssignableFrom(requiredType)) {
+					convertedValue = NumberUtils.convertNumberToTargetClass(num, (Class<Number>) requiredType);
 					standardConversion = true;
 				}
 			}
@@ -382,23 +379,22 @@ class TypeConverterDelegate {
 
 		Object returnValue = convertedValue;
 
-		if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[]) {
+		if (requiredType != null && !requiredType.isArray() && convertedValue instanceof String[] array) {
 			// Convert String array to a comma-separated String.
 			// Only applies if no PropertyEditor converted the String array before.
 			// The CSV String will be passed into a PropertyEditor's setAsText method, if any.
 			if (logger.isTraceEnabled()) {
 				logger.trace("Converting String array to comma-delimited String [" + convertedValue + "]");
 			}
-			convertedValue = StringUtils.arrayToCommaDelimitedString((String[]) convertedValue);
+			convertedValue = StringUtils.arrayToCommaDelimitedString(array);
 		}
 
-		if (convertedValue instanceof String) {
+		if (convertedValue instanceof String newTextValue) {
 			if (editor != null) {
 				// Use PropertyEditor's setAsText in case of a String value.
 				if (logger.isTraceEnabled()) {
 					logger.trace("Converting String to [" + requiredType + "] using property editor [" + editor + "]");
 				}
-				String newTextValue = (String) convertedValue;
 				return doConvertTextValue(oldValue, newTextValue, editor);
 			}
 			else if (String.class == requiredType) {
@@ -431,9 +427,8 @@ class TypeConverterDelegate {
 	}
 
 	private Object convertToTypedArray(Object input, @Nullable String propertyName, Class<?> componentType) {
-		if (input instanceof Collection) {
+		if (input instanceof Collection<?> coll) {
 			// Convert Collection elements to array elements.
-			Collection<?> coll = (Collection<?>) input;
 			Object result = Array.newInstance(componentType, coll.size());
 			int i = 0;
 			for (Iterator<?> it = coll.iterator(); it.hasNext(); i++) {

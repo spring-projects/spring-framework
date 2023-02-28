@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.web.testfixture.method;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,16 +30,14 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
+import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodIntrospector;
@@ -122,6 +122,7 @@ import static java.util.stream.Collectors.joining;
  * </pre>
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class ResolvableMethod {
@@ -614,15 +615,9 @@ public class ResolvableMethod {
 	}
 
 
-	private static class MethodInvocationInterceptor
-			implements org.springframework.cglib.proxy.MethodInterceptor, MethodInterceptor {
+	private static class MethodInvocationInterceptor implements MethodInterceptor, InvocationHandler {
 
 		private Method invokedMethod;
-
-
-		Method getInvokedMethod() {
-			return this.invokedMethod;
-		}
 
 		@Override
 		@Nullable
@@ -638,20 +633,23 @@ public class ResolvableMethod {
 
 		@Override
 		@Nullable
-		public Object invoke(org.aopalliance.intercept.MethodInvocation inv) throws Throwable {
-			return intercept(inv.getThis(), inv.getMethod(), inv.getArguments(), null);
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			return intercept(proxy, method, args, null);
+		}
+
+		Method getInvokedMethod() {
+			return this.invokedMethod;
 		}
 	}
+
 
 	@SuppressWarnings("unchecked")
 	private static <T> T initProxy(Class<?> type, MethodInvocationInterceptor interceptor) {
 		Assert.notNull(type, "'type' must not be null");
 		if (type.isInterface()) {
-			ProxyFactory factory = new ProxyFactory(EmptyTargetSource.INSTANCE);
-			factory.addInterface(type);
-			factory.addInterface(Supplier.class);
-			factory.addAdvice(interceptor);
-			return (T) factory.getProxy();
+			return (T) Proxy.newProxyInstance(type.getClassLoader(),
+					new Class<?>[] {type, Supplier.class},
+					interceptor);
 		}
 
 		else {

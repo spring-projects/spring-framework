@@ -16,7 +16,9 @@ Applying such optimizations early implies the following restrictions:
 * The classpath is fixed and fully defined at build time.
 * The beans defined in your application cannot change at runtime, meaning:
 ** `@Profile`, in particular profile-specific configuration needs to be chosen at build time.
-** Environment properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
+** `Environment` properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
+* Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead-of-time (see related https://github.com/spring-projects/spring-framework/issues/29555[spring-framework#29555] issue).
+* The return type of methods annotated with `@Bean` should be the most specific type possible (typically the concrete class, not an interface) in order to support proper type inference without invoking the corresponding `@Bean` method at build time.
 
 When these restrictions are in place, it becomes possible to perform ahead-of-time processing at build time and generate additional assets.
 A Spring AOT processed application typically generates:
@@ -72,7 +74,7 @@ These are:
 * `SmartInstantiationAwareBeanPostProcessor` implementations determine a more precise bean type if necessary.
 This makes sure to create any proxy that will be required at runtime.
 
-One this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiation but allows the AOT engine to inspect the beans that will be created at runtime.
+Once this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiation but allows the AOT engine to inspect the beans that will be created at runtime.
 
 [[core.aot.bean-factory-initialization-contributions]]
 == Bean Factory Initialization AOT Contributions

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,8 @@ public class SQLExceptionSubclassTranslatorTests {
 		doTest(new SQLIntegrityConstraintViolationException("", "23505", 0), DuplicateKeyException.class);
 		doTest(new SQLIntegrityConstraintViolationException("", "23000", 1), DuplicateKeyException.class);
 		doTest(new SQLIntegrityConstraintViolationException("", "23000", 1062), DuplicateKeyException.class);
-		doTest(new SQLIntegrityConstraintViolationException("", "23505", 2627), DuplicateKeyException.class);
+		doTest(new SQLIntegrityConstraintViolationException("", "23000", 2601), DuplicateKeyException.class);
+		doTest(new SQLIntegrityConstraintViolationException("", "23000", 2627), DuplicateKeyException.class);
 		doTest(new SQLInvalidAuthorizationSpecException("", "", 0), PermissionDeniedDataAccessException.class);
 		doTest(new SQLNonTransientConnectionException("", "", 0), DataAccessResourceFailureException.class);
 		doTest(new SQLRecoverableException("", "", 0), RecoverableDataAccessException.class);

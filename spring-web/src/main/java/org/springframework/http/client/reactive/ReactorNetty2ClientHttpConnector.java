@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ public class ReactorNetty2ClientHttpConnector implements ClientHttpConnector {
 
 		return this.httpClient
 				.request(io.netty5.handler.codec.http.HttpMethod.valueOf(method.name()))
-				.uri(uri.toString())
+				.uri(uri)
 				.send((request, outbound) -> requestCallback.apply(adaptRequest(method, uri, request, outbound)))
 				.responseConnection((response, connection) -> {
 					responseRef.set(new ReactorNetty2ClientHttpResponse(response, connection));

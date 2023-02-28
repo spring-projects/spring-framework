@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
 /**
  * {@link MockMvcWebTestClient} equivalent of the MockMvc
@@ -97,7 +98,7 @@ public class AsyncControllerJavaConfigTests {
 
 		@Bean
 		public CallableProcessingInterceptor callableInterceptor() {
-			return Mockito.mock(CallableProcessingInterceptor.class);
+			return mock();
 		}
 
 		@Bean

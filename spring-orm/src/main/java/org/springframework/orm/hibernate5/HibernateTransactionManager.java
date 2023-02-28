@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -362,11 +362,10 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (this.entityInterceptor instanceof Interceptor) {
 			return (Interceptor) this.entityInterceptor;
 		}
-		else if (this.entityInterceptor instanceof String) {
+		else if (this.entityInterceptor instanceof String beanName) {
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
 			}
-			String beanName = (String) this.entityInterceptor;
 			return this.beanFactory.getBean(beanName, Interceptor.class);
 		}
 		else {

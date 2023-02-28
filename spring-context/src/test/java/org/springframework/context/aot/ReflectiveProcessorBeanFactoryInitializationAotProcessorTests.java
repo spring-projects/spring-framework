@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
-import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
@@ -76,7 +75,7 @@ class ReflectiveProcessorBeanFactoryInitializationAotProcessorTests {
 		}
 		BeanFactoryInitializationAotContribution contribution = this.processor.processAheadOfTime(beanFactory);
 		assertThat(contribution).isNotNull();
-		contribution.applyTo(this.generationContext, mock(BeanFactoryInitializationCode.class));
+		contribution.applyTo(this.generationContext, mock());
 	}
 
 	@Reflective

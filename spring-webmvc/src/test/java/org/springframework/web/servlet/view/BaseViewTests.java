@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class BaseViewTests {
 
 	@Test
 	public void renderWithoutStaticAttributes() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -77,7 +77,7 @@ public class BaseViewTests {
 	 */
 	@Test
 	public void renderWithStaticAttributesNoCollision() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -103,7 +103,7 @@ public class BaseViewTests {
 
 	@Test
 	public void pathVarsOverrideStaticAttributes() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -133,7 +133,7 @@ public class BaseViewTests {
 
 	@Test
 	public void dynamicModelOverridesStaticAttributesIfCollision() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		HttpServletRequest request = new MockHttpServletRequest();
@@ -161,7 +161,7 @@ public class BaseViewTests {
 
 	@Test
 	public void dynamicModelOverridesPathVariables() throws Exception {
-		WebApplicationContext wac = mock(WebApplicationContext.class);
+		WebApplicationContext wac = mock();
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		TestView tv = new TestView(wac);

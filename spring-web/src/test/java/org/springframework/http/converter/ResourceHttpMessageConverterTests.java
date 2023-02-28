@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public class ResourceHttpMessageConverterTests {
 	@Test  // SPR-12999
 	public void writeContentNotGettingInputStream() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource resource = mock(Resource.class);
+		Resource resource = mock();
 		given(resource.getInputStream()).willThrow(FileNotFoundException.class);
 		converter.write(resource, MediaType.APPLICATION_OCTET_STREAM, outputMessage);
 
@@ -135,8 +135,8 @@ public class ResourceHttpMessageConverterTests {
 	@Test  // SPR-12999
 	public void writeContentNotClosingInputStream() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource resource = mock(Resource.class);
-		InputStream inputStream = mock(InputStream.class);
+		Resource resource = mock();
+		InputStream inputStream = mock();
 		given(resource.getInputStream()).willReturn(inputStream);
 		given(inputStream.read(any())).willReturn(-1);
 		willThrow(new NullPointerException()).given(inputStream).close();
@@ -148,8 +148,8 @@ public class ResourceHttpMessageConverterTests {
 	@Test  // SPR-13620
 	public void writeContentInputStreamThrowingNullPointerException() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource resource = mock(Resource.class);
-		InputStream in = mock(InputStream.class);
+		Resource resource = mock();
+		InputStream in = mock();
 		given(resource.getInputStream()).willReturn(in);
 		given(in.read(any())).willThrow(NullPointerException.class);
 		converter.write(resource, MediaType.APPLICATION_OCTET_STREAM, outputMessage);
