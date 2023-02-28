@@ -360,7 +360,9 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 					con.close();
 				}
 				catch(Throwable th) {
-					logger.warn("Could not close new (not used as shared) JMS Connection", th);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not close newly obtained JMS Connection that failed to prepare", th);
+					}
 				}
 				throw ex;
 			}
