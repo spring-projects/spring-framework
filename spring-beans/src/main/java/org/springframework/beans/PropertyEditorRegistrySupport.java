@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Sebastien Deleuze
  * @since 1.2.6
  * @see java.beans.PropertyEditorManager
  * @see java.beans.PropertyEditorSupport#setAsText
@@ -115,7 +116,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 
 	/**
-	 * Specify a Spring 3.0 ConversionService to use for converting
+	 * Specify a {@link ConversionService} to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 */
 	public void setConversionService(@Nullable ConversionService conversionService) {
@@ -410,16 +411,19 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			}
 			if (editor == null) {
 				// Find editor for superclass or interface.
-				for (Iterator<Class<?>> it = this.customEditors.keySet().iterator(); it.hasNext() && editor == null;) {
-					Class<?> key = it.next();
+				for (Map.Entry<Class<?>, PropertyEditor> entry : this.customEditors.entrySet()) {
+					Class<?> key = entry.getKey();
 					if (key.isAssignableFrom(requiredType)) {
-						editor = this.customEditors.get(key);
+						editor = entry.getValue();
 						// Cache editor for search type, to avoid the overhead
 						// of repeated assignable-from checks.
 						if (this.customEditorCache == null) {
 							this.customEditorCache = new HashMap<>();
 						}
 						this.customEditorCache.put(requiredType, editor);
+						if (editor != null) {
+							break;
+						}
 					}
 				}
 			}
@@ -501,7 +505,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 			if (endIndex != -1) {
 				String prefix = propertyPath.substring(0, startIndex);
 				String key = propertyPath.substring(startIndex, endIndex + 1);
-				String suffix = propertyPath.substring(endIndex + 1, propertyPath.length());
+				String suffix = propertyPath.substring(endIndex + 1);
 				// Strip the first key.
 				strippedPaths.add(nestedPath + prefix + suffix);
 				// Search for further keys to strip, with the first key stripped.

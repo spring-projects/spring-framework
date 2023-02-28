@@ -22,7 +22,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
 /**
- * Main class for for access to the {@link WebSession} for an HTTP request.
+ * Main class for access to the {@link WebSession} for an HTTP request.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

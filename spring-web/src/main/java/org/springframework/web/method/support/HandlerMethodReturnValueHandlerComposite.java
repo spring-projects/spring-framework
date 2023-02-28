@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Handles method return values by delegating to a list of registered {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}.
+ * Handles method return values by delegating to a list of registered
+ * {@link HandlerMethodReturnValueHandler HandlerMethodReturnValueHandlers}.
  * Previously resolved return types are cached for faster lookups.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
 
@@ -98,8 +94,8 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	private boolean isAsyncReturnValue(@Nullable Object value, MethodParameter returnType) {
 		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
-			if (handler instanceof AsyncHandlerMethodReturnValueHandler &&
-					((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(value, returnType)) {
+			if (handler instanceof AsyncHandlerMethodReturnValueHandler asyncHandler &&
+					asyncHandler.isAsyncReturnValue(value, returnType)) {
 				return true;
 			}
 		}

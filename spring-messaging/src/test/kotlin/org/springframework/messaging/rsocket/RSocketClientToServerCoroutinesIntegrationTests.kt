@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.messaging.rsocket
 
 import io.netty.buffer.PooledByteBufAllocator
-import io.rsocket.RSocketFactory
+import io.rsocket.core.RSocketServer
 import io.rsocket.frame.decoder.PayloadDecoder
 import io.rsocket.transport.netty.server.CloseableChannel
 import io.rsocket.transport.netty.server.TcpServerTransport
@@ -39,7 +39,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler
 import org.springframework.stereotype.Controller
 import reactor.core.publisher.Flux
-import reactor.core.publisher.ReplayProcessor
+import reactor.core.publisher.Sinks
 import reactor.test.StepVerifier
 import java.time.Duration
 
@@ -56,7 +56,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 		Flux.range(1, 3)
 				.concatMap { requester.route("receive").data("Hello $it").send() }
 				.blockLast()
-		StepVerifier.create(context.getBean(ServerController::class.java).fireForgetPayloads)
+		StepVerifier.create(context.getBean(ServerController::class.java).fireForgetPayloads.asFlux())
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
@@ -70,7 +70,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 		Flux.range(1, 3)
 				.concatMap { i: Int -> requester.route("receive-async").data("Hello $i").send() }
 				.blockLast()
-		StepVerifier.create(context.getBean(ServerController::class.java).fireForgetPayloads)
+		StepVerifier.create(context.getBean(ServerController::class.java).fireForgetPayloads.asFlux())
 				.expectNext("Hello 1")
 				.expectNext("Hello 2")
 				.expectNext("Hello 3")
@@ -145,17 +145,17 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 	@Controller
 	class ServerController {
 
-		val fireForgetPayloads = ReplayProcessor.create<String>()
+		val fireForgetPayloads = Sinks.many().replay().all<String>()
 
 		@MessageMapping("receive")
 		fun receive(payload: String) {
-			fireForgetPayloads.onNext(payload)
+			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("receive-async")
 		suspend fun receiveAsync(payload: String) {
 			delay(10)
-			fireForgetPayloads.onNext(payload)
+			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("echo-async")
@@ -257,24 +257,21 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 		fun setupOnce() {
 			context = AnnotationConfigApplicationContext(ServerConfig::class.java)
 
-			server = RSocketFactory.receive()
-					.frameDecoder(PayloadDecoder.ZERO_COPY)
-					.acceptor(context.getBean(RSocketMessageHandler::class.java).responder())
-					.transport(TcpServerTransport.create("localhost", 7000))
-					.start()
+			server = RSocketServer.create(context.getBean(RSocketMessageHandler::class.java).responder())
+					.payloadDecoder(PayloadDecoder.ZERO_COPY)
+					.bind(TcpServerTransport.create("localhost", 7000))
 					.block()!!
 
 			requester = RSocketRequester.builder()
-					.rsocketFactory { factory -> factory.frameDecoder(PayloadDecoder.ZERO_COPY) }
+					.rsocketConnector { connector -> connector.payloadDecoder(PayloadDecoder.ZERO_COPY) }
 					.rsocketStrategies(context.getBean(RSocketStrategies::class.java))
-					.connectTcp("localhost", 7000)
-					.block()!!
+					.tcp("localhost", 7000)
 		}
 
 		@AfterAll
 		@JvmStatic
 		fun tearDownOnce() {
-			requester.rsocket().dispose()
+			requester.rsocketClient().dispose()
 			server.dispose()
 		}
 	}

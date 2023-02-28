@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.result;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.lang.Nullable;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.ui.ModelMap;
@@ -57,7 +58,7 @@ public class ModelResultMatchers {
 	 * Assert a model attribute value with the given Hamcrest {@link Matcher}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> ResultMatcher attribute(String name, Matcher<T> matcher) {
+	public <T> ResultMatcher attribute(String name, Matcher<? super T> matcher) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			assertThat("Model attribute '" + name + "'", (T) mav.getModel().get(name), matcher);
@@ -67,7 +68,7 @@ public class ModelResultMatchers {
 	/**
 	 * Assert a model attribute value.
 	 */
-	public ResultMatcher attribute(String name, Object value) {
+	public ResultMatcher attribute(String name, @Nullable Object value) {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			assertEquals("Model attribute '" + name + "'", value, mav.getModel().get(name));
@@ -213,8 +214,8 @@ public class ModelResultMatchers {
 		return result -> {
 			ModelAndView mav = getModelAndView(result);
 			for (Object value : mav.getModel().values()) {
-				if (value instanceof Errors) {
-					assertFalse("Unexpected binding/validation errors: " + value, ((Errors) value).hasErrors());
+				if (value instanceof Errors errors) {
+					assertFalse("Unexpected binding/validation errors: " + value, errors.hasErrors());
 				}
 			}
 		};
@@ -251,8 +252,8 @@ public class ModelResultMatchers {
 	private int getErrorCount(ModelMap model) {
 		int count = 0;
 		for (Object value : model.values()) {
-			if (value instanceof Errors) {
-				count += ((Errors) value).getErrorCount();
+			if (value instanceof Errors errors) {
+				count += errors.getErrorCount();
 			}
 		}
 		return count;

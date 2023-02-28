@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.metrics.StartupStep;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -30,7 +32,7 @@ import org.springframework.util.Assert;
  * Standalone application context, accepting <em>component classes</em> as input &mdash;
  * in particular {@link Configuration @Configuration}-annotated classes, but also plain
  * {@link org.springframework.stereotype.Component @Component} types and JSR-330 compliant
- * classes using {@code javax.inject} annotations.
+ * classes using {@code jakarta.inject} annotations.
  *
  * <p>Allows for registering classes one by one using {@link #register(Class...)}
  * as well as for classpath scanning using {@link #scan(String...)}.
@@ -63,7 +65,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		StartupStep createAnnotatedBeanDefReader = this.getApplicationStartup().start("spring.context.annotated-bean-reader.create");
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		createAnnotatedBeanDefReader.end();
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -159,7 +163,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	@Override
 	public void register(Class<?>... componentClasses) {
 		Assert.notEmpty(componentClasses, "At least one component class must be specified");
+		StartupStep registerComponentClass = this.getApplicationStartup().start("spring.context.component-classes.register")
+				.tag("classes", () -> Arrays.toString(componentClasses));
 		this.reader.register(componentClasses);
+		registerComponentClass.end();
 	}
 
 	/**
@@ -173,7 +180,10 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	@Override
 	public void scan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
+		StartupStep scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan")
+				.tag("packages", () -> Arrays.toString(basePackages));
 		this.scanner.scan(basePackages);
+		scanPackages.end();
 	}
 
 

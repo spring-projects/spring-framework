@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -90,7 +93,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 		AnnotatedElement element = context.getElement().get();
 		Optional<A> annotation = findMergedAnnotation(element, annotationType);
 
-		if (!annotation.isPresent()) {
+		if (annotation.isEmpty()) {
 			String reason = String.format("%s is enabled since @%s is not present", element,
 					annotationType.getSimpleName());
 			if (logger.isDebugEnabled()) {
@@ -105,6 +108,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 
 		boolean loadContext = loadContextExtractor.apply(annotation.get());
 		boolean evaluatedToTrue = evaluateExpression(expression, loadContext, annotationType, context);
+		ConditionEvaluationResult result;
 
 		if (evaluatedToTrue) {
 			String adjective = (enabledOnTrue ? "enabled" : "disabled");
@@ -114,7 +118,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 			if (logger.isInfoEnabled()) {
 				logger.info(reason);
 			}
-			return (enabledOnTrue ? ConditionEvaluationResult.enabled(reason)
+			result = (enabledOnTrue ? ConditionEvaluationResult.enabled(reason)
 					: ConditionEvaluationResult.disabled(reason));
 		}
 		else {
@@ -124,9 +128,25 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 			if (logger.isDebugEnabled()) {
 				logger.debug(reason);
 			}
-			return (enabledOnTrue ? ConditionEvaluationResult.disabled(reason) :
+			result = (enabledOnTrue ? ConditionEvaluationResult.disabled(reason) :
 					ConditionEvaluationResult.enabled(reason));
 		}
+
+		// If we eagerly loaded the ApplicationContext to evaluate SpEL expressions
+		// and the test class ends up being disabled, we have to check if the
+		// user asked for the ApplicationContext to be closed via @DirtiesContext,
+		// since the DirtiesContextTestExecutionListener will never be invoked for
+		// a disabled test class.
+		// See https://github.com/spring-projects/spring-framework/issues/26694
+		if (loadContext && result.isDisabled() && element instanceof Class<?> testClass) {
+			DirtiesContext dirtiesContext = TestContextAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);
+			if (dirtiesContext != null) {
+				HierarchyMode hierarchyMode = dirtiesContext.hierarchyMode();
+				SpringExtension.getTestContextManager(context).getTestContext().markApplicationContextDirty(hierarchyMode);
+			}
+		}
+
+		return result;
 	}
 
 	private <A extends Annotation> boolean evaluateExpression(String expression, boolean loadContext,
@@ -146,7 +166,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 			applicationContext = gac;
 		}
 
-		if (!(applicationContext instanceof ConfigurableApplicationContext)) {
+		if (!(applicationContext instanceof ConfigurableApplicationContext cac)) {
 			if (logger.isWarnEnabled()) {
 				String contextType = applicationContext.getClass().getName();
 				logger.warn(String.format("@%s(\"%s\") could not be evaluated on [%s] since the test " +
@@ -156,7 +176,7 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 			return false;
 		}
 
-		ConfigurableBeanFactory configurableBeanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
+		ConfigurableBeanFactory configurableBeanFactory = cac.getBeanFactory();
 		BeanExpressionResolver expressionResolver = configurableBeanFactory.getBeanExpressionResolver();
 		Assert.state(expressionResolver != null, "No BeanExpressionResolver");
 		BeanExpressionContext beanExpressionContext = new BeanExpressionContext(configurableBeanFactory, null);
@@ -168,11 +188,11 @@ abstract class AbstractExpressionEvaluatingCondition implements ExecutionConditi
 			gac.close();
 		}
 
-		if (result instanceof Boolean) {
-			return (Boolean) result;
+		if (result instanceof Boolean b) {
+			return b;
 		}
-		else if (result instanceof String) {
-			String str = ((String) result).trim().toLowerCase();
+		else if (result instanceof String str) {
+			str = str.trim().toLowerCase();
 			if ("true".equals(str)) {
 				return true;
 			}

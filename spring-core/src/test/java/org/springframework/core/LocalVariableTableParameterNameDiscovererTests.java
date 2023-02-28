@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class LocalVariableTableParameterNameDiscovererTests {
 
-	private final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
+	@SuppressWarnings("removal")
+	private final ParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
 
 	@Test
@@ -162,23 +163,23 @@ class LocalVariableTableParameterNameDiscovererTests {
 
 		Constructor<?> ctor = clazz.getDeclaredConstructor(Object.class);
 		String[] names = discoverer.getParameterNames(ctor);
-		assertThat(names.length).isEqualTo(1);
+		assertThat(names).hasSize(1);
 		assertThat(names[0]).isEqualTo("key");
 
 		ctor = clazz.getDeclaredConstructor(Object.class, Object.class);
 		names = discoverer.getParameterNames(ctor);
-		assertThat(names.length).isEqualTo(2);
+		assertThat(names).hasSize(2);
 		assertThat(names[0]).isEqualTo("key");
 		assertThat(names[1]).isEqualTo("value");
 
 		Method m = clazz.getMethod("generifiedStaticMethod", Object.class);
 		names = discoverer.getParameterNames(m);
-		assertThat(names.length).isEqualTo(1);
+		assertThat(names).hasSize(1);
 		assertThat(names[0]).isEqualTo("param");
 
 		m = clazz.getMethod("generifiedMethod", Object.class, long.class, Object.class, Object.class);
 		names = discoverer.getParameterNames(m);
-		assertThat(names.length).isEqualTo(4);
+		assertThat(names).hasSize(4);
 		assertThat(names[0]).isEqualTo("param");
 		assertThat(names[1]).isEqualTo("x");
 		assertThat(names[2]).isEqualTo("key");
@@ -186,21 +187,21 @@ class LocalVariableTableParameterNameDiscovererTests {
 
 		m = clazz.getMethod("voidStaticMethod", Object.class, long.class, int.class);
 		names = discoverer.getParameterNames(m);
-		assertThat(names.length).isEqualTo(3);
+		assertThat(names).hasSize(3);
 		assertThat(names[0]).isEqualTo("obj");
 		assertThat(names[1]).isEqualTo("x");
 		assertThat(names[2]).isEqualTo("i");
 
 		m = clazz.getMethod("nonVoidStaticMethod", Object.class, long.class, int.class);
 		names = discoverer.getParameterNames(m);
-		assertThat(names.length).isEqualTo(3);
+		assertThat(names).hasSize(3);
 		assertThat(names[0]).isEqualTo("obj");
 		assertThat(names[1]).isEqualTo("x");
 		assertThat(names[2]).isEqualTo("i");
 
 		m = clazz.getMethod("getDate");
 		names = discoverer.getParameterNames(m);
-		assertThat(names.length).isEqualTo(0);
+		assertThat(names).isEmpty();
 	}
 
 	@Disabled("Ignored because Ubuntu packages OpenJDK with debug symbols enabled. See SPR-8078.")

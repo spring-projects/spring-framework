@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,10 +39,9 @@ import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureTask;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -55,18 +54,17 @@ class StompBrokerRelayMessageHandlerTests {
 
 	private StompBrokerRelayMessageHandler brokerRelay;
 
-	private StubMessageChannel outboundChannel;
+	private StubMessageChannel outboundChannel = new StubMessageChannel();
 
-	private StubTcpOperations tcpClient;
+	private StubTcpOperations tcpClient = new StubTcpOperations();
+
+	private ArgumentCaptor<Runnable> messageCountTaskCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 
 	@BeforeEach
 	void setup() {
-
-		this.outboundChannel = new StubMessageChannel();
-
 		this.brokerRelay = new StompBrokerRelayMessageHandler(new StubMessageChannel(),
-				this.outboundChannel, new StubMessageChannel(), Arrays.asList("/topic")) {
+				this.outboundChannel, new StubMessageChannel(), Collections.singletonList("/topic")) {
 
 			@Override
 			protected void startInternal() {
@@ -75,20 +73,19 @@ class StompBrokerRelayMessageHandlerTests {
 			}
 		};
 
-		this.tcpClient = new StubTcpOperations();
 		this.brokerRelay.setTcpClient(this.tcpClient);
-	}
 
+		this.brokerRelay.setTaskScheduler(mock());
+	}
 
 	@Test
 	void virtualHost() {
-
 		this.brokerRelay.setVirtualHost("ABC");
 
 		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 
 		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
 		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
@@ -103,7 +100,6 @@ class StompBrokerRelayMessageHandlerTests {
 
 	@Test
 	void loginAndPasscode() {
-
 		this.brokerRelay.setSystemLogin("syslogin");
 		this.brokerRelay.setSystemPasscode("syspasscode");
 		this.brokerRelay.setClientLogin("clientlogin");
@@ -112,7 +108,7 @@ class StompBrokerRelayMessageHandlerTests {
 		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 
 		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
 		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
@@ -127,27 +123,59 @@ class StompBrokerRelayMessageHandlerTests {
 
 	@Test
 	void destinationExcluded() {
+		this.brokerRelay.start();
+		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
+
+		SimpMessageHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		accessor.setLeaveMutable(true);
+		this.tcpClient.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
+
+		accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		accessor.setSessionId("sess1");
+		accessor.setDestination("/user/daisy/foo");
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
+
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
+		StompHeaderAccessor headers = this.tcpClient.getSentHeaders(0);
+		assertThat(headers.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
+
+		headers = this.tcpClient.getSentHeaders(1);
+		assertThat(headers.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers.getSessionId()).isEqualTo("sess1");
+	}
+
+	@Test // gh-22822
+	void destinationExcludedWithHeartbeat() {
+		Message<byte[]> connectMessage = connectMessage("sess1", "joe");
+		MessageHeaderAccessor.getAccessor(connectMessage, StompHeaderAccessor.class).setHeartbeat(10000, 10000);
 
 		this.brokerRelay.start();
+		this.brokerRelay.handleMessage(connectMessage);
 
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-		headers.setSessionId("sess1");
-		headers.setDestination("/user/daisy/foo");
-		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders()));
+		SimpMessageHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		accessor.setLeaveMutable(true);
+		this.tcpClient.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(1);
-		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
-		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
-		assertThat(headers1.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
+		// Run the messageCountTask to clear the message count
+		verify(this.brokerRelay.getTaskScheduler()).scheduleWithFixedDelay(this.messageCountTaskCaptor.capture(), eq(Duration.ofMillis(5000L)));
+		this.messageCountTaskCaptor.getValue().run();
+
+		accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		accessor.setSessionId("sess1");
+		accessor.setDestination("/user/daisy/foo");
+		this.brokerRelay.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
+
+		assertThat(this.tcpClient.getSentMessages()).hasSize(3);
+		assertThat(this.tcpClient.getSentHeaders(2).getMessageType()).isEqualTo(SimpMessageType.HEARTBEAT);
 	}
 
 	@Test
 	void messageFromBrokerIsEnriched() {
-
 		this.brokerRelay.start();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 		assertThat(this.tcpClient.getSentHeaders(0).getCommand()).isEqualTo(StompCommand.CONNECT);
 		assertThat(this.tcpClient.getSentHeaders(1).getCommand()).isEqualTo(StompCommand.CONNECT);
 
@@ -163,7 +191,6 @@ class StompBrokerRelayMessageHandlerTests {
 
 	@Test
 	void connectWhenBrokerNotAvailable() {
-
 		this.brokerRelay.start();
 		this.brokerRelay.stopInternal();
 		this.brokerRelay.handleMessage(connectMessage("sess1", "joe"));
@@ -178,7 +205,6 @@ class StompBrokerRelayMessageHandlerTests {
 
 	@Test
 	void sendAfterBrokerUnavailable() {
-
 		this.brokerRelay.start();
 		assertThat(this.brokerRelay.getConnectionCount()).isEqualTo(1);
 
@@ -200,8 +226,7 @@ class StompBrokerRelayMessageHandlerTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	void systemSubscription() {
-
-		MessageHandler handler = mock(MessageHandler.class);
+		MessageHandler handler = mock();
 		this.brokerRelay.setSystemSubscriptions(Collections.singletonMap("/topic/foo", handler));
 		this.brokerRelay.start();
 
@@ -210,7 +235,7 @@ class StompBrokerRelayMessageHandlerTests {
 		MessageHeaders headers = accessor.getMessageHeaders();
 		this.tcpClient.handleMessage(MessageBuilder.createMessage(new byte[0], headers));
 
-		assertThat(this.tcpClient.getSentMessages().size()).isEqualTo(2);
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
 		assertThat(this.tcpClient.getSentHeaders(0).getCommand()).isEqualTo(StompCommand.CONNECT);
 		assertThat(this.tcpClient.getSentHeaders(1).getCommand()).isEqualTo(StompCommand.SUBSCRIBE);
 		assertThat(this.tcpClient.getSentHeaders(1).getDestination()).isEqualTo("/topic/foo");
@@ -223,10 +248,34 @@ class StompBrokerRelayMessageHandlerTests {
 		assertThat(captor.getValue()).isSameAs(message);
 	}
 
+	@Test
+	void alreadyConnected() {
+		this.brokerRelay.start();
+
+		Message<byte[]> connect = connectMessage("sess1", "joe");
+		this.brokerRelay.handleMessage(connect);
+
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
+
+		StompHeaderAccessor headers1 = this.tcpClient.getSentHeaders(0);
+		assertThat(headers1.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers1.getSessionId()).isEqualTo(StompBrokerRelayMessageHandler.SYSTEM_SESSION_ID);
+
+		StompHeaderAccessor headers2 = this.tcpClient.getSentHeaders(1);
+		assertThat(headers2.getCommand()).isEqualTo(StompCommand.CONNECT);
+		assertThat(headers2.getSessionId()).isEqualTo("sess1");
+
+		this.brokerRelay.handleMessage(connect);
+
+		assertThat(this.tcpClient.getSentMessages()).hasSize(2);
+		assertThat(this.outboundChannel.getMessages()).isEmpty();
+	}
+
 	private Message<byte[]> connectMessage(String sessionId, String user) {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
 		headers.setSessionId(sessionId);
 		headers.setUser(new TestPrincipal(user));
+		headers.setLeaveMutable(true);
 		return MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 	}
 
@@ -246,15 +295,8 @@ class StompBrokerRelayMessageHandlerTests {
 	}
 
 
-	private static ListenableFutureTask<Void> getVoidFuture() {
-		ListenableFutureTask<Void> futureTask = new ListenableFutureTask<>(new Callable<Void>() {
-			@Override
-			public Void call() {
-				return null;
-			}
-		});
-		futureTask.run();
-		return futureTask;
+	private static CompletableFuture<Void> getVoidFuture() {
+		return CompletableFuture.completedFuture(null);
 	}
 
 
@@ -278,21 +320,22 @@ class StompBrokerRelayMessageHandlerTests {
 		}
 
 		@Override
-		public ListenableFuture<Void> connect(TcpConnectionHandler<byte[]> handler) {
+		public CompletableFuture<Void> connectAsync(TcpConnectionHandler<byte[]> handler) {
 			this.connectionHandler = handler;
 			handler.afterConnected(this.connection);
 			return getVoidFuture();
 		}
 
 		@Override
-		public ListenableFuture<Void> connect(TcpConnectionHandler<byte[]> handler, ReconnectStrategy strategy) {
+		public CompletableFuture<Void> connectAsync(TcpConnectionHandler<byte[]> handler,
+				ReconnectStrategy reconnectStrategy) {
 			this.connectionHandler = handler;
 			handler.afterConnected(this.connection);
 			return getVoidFuture();
 		}
 
 		@Override
-		public ListenableFuture<Void> shutdown() {
+		public CompletableFuture<Void> shutdownAsync() {
 			return getVoidFuture();
 		}
 
@@ -313,7 +356,7 @@ class StompBrokerRelayMessageHandlerTests {
 		}
 
 		@Override
-		public ListenableFuture<Void> send(Message<byte[]> message) {
+		public CompletableFuture<Void> sendAsync(Message<byte[]> message) {
 			this.messages.add(message);
 			return getVoidFuture();
 		}

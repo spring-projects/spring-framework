@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,26 +22,38 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StreamUtils;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 /**
- * Represent the Content-Disposition type and parameters as defined in RFC 6266.
+ * Representation of the Content-Disposition type and parameters as defined in RFC 6266.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sergey Tsypanov
  * @since 5.0
  * @see <a href="https://tools.ietf.org/html/rfc6266">RFC 6266</a>
  */
 public final class ContentDisposition {
+
+	private final static Pattern BASE64_ENCODED_PATTERN =
+			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?B\\?([+/0-9a-zA-Z]+=*)\\?=");
+
+	private final static Pattern QUOTED_PRINTABLE_ENCODED_PATTERN =
+			Pattern.compile("=\\?([0-9a-zA-Z-_]+)\\?Q\\?([!->@-~]+)\\?="); // Printable ASCII other than "?" or SPACE
 
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
@@ -91,8 +103,34 @@ public final class ContentDisposition {
 
 
 	/**
-	 * Return the disposition type, like for example {@literal inline}, {@literal attachment},
-	 * {@literal form-data}, or {@code null} if not defined.
+	 * Return whether the {@link #getType() type} is {@literal "attachment"}.
+	 * @since 5.3
+	 */
+	public boolean isAttachment() {
+		return (this.type != null && this.type.equalsIgnoreCase("attachment"));
+	}
+
+	/**
+	 * Return whether the {@link #getType() type} is {@literal "form-data"}.
+	 * @since 5.3
+	 */
+	public boolean isFormData() {
+		return (this.type != null && this.type.equalsIgnoreCase("form-data"));
+	}
+
+	/**
+	 * Return whether the {@link #getType() type} is {@literal "inline"}.
+	 * @since 5.3
+	 */
+	public boolean isInline() {
+		return (this.type != null && this.type.equalsIgnoreCase("inline"));
+	}
+
+	/**
+	 * Return the disposition type.
+	 * @see #isAttachment()
+	 * @see #isFormData()
+	 * @see #isInline()
 	 */
 	@Nullable
 	public String getType() {
@@ -108,8 +146,9 @@ public final class ContentDisposition {
 	}
 
 	/**
-	 * Return the value of the {@literal filename} parameter (or the value of the
-	 * {@literal filename*} one decoded as defined in the RFC 5987), or {@code null} if not defined.
+	 * Return the value of the {@literal filename} parameter, possibly decoded
+	 * from BASE64 encoding based on RFC 2047, or of the {@literal filename*}
+	 * parameter, possibly decoded as defined in the RFC 5987.
 	 */
 	@Nullable
 	public String getFilename() {
@@ -127,7 +166,7 @@ public final class ContentDisposition {
 	/**
 	 * Return the value of the {@literal size} parameter, or {@code null} if not defined.
 	 * @deprecated since 5.2.3 as per
-	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 	 * to be removed in a future release.
 	 */
 	@Deprecated
@@ -139,7 +178,7 @@ public final class ContentDisposition {
 	/**
 	 * Return the value of the {@literal creation-date} parameter, or {@code null} if not defined.
 	 * @deprecated since 5.2.3 as per
-	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 	 * to be removed in a future release.
 	 */
 	@Deprecated
@@ -151,7 +190,7 @@ public final class ContentDisposition {
 	/**
 	 * Return the value of the {@literal modification-date} parameter, or {@code null} if not defined.
 	 * @deprecated since 5.2.3 as per
-	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 	 * to be removed in a future release.
 	 */
 	@Deprecated
@@ -163,7 +202,7 @@ public final class ContentDisposition {
 	/**
 	 * Return the value of the {@literal read-date} parameter, or {@code null} if not defined.
 	 * @deprecated since 5.2.3 as per
-	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+	 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 	 * to be removed in a future release.
 	 */
 	@Deprecated
@@ -172,16 +211,14 @@ public final class ContentDisposition {
 		return this.readDate;
 	}
 
-
 	@Override
 	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ContentDisposition)) {
+		if (!(other instanceof ContentDisposition otherCd)) {
 			return false;
 		}
-		ContentDisposition otherCd = (ContentDisposition) other;
 		return (ObjectUtils.nullSafeEquals(this.type, otherCd.type) &&
 				ObjectUtils.nullSafeEquals(this.name, otherCd.name) &&
 				ObjectUtils.nullSafeEquals(this.filename, otherCd.filename) &&
@@ -199,9 +236,9 @@ public final class ContentDisposition {
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.filename);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.charset);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.size);
-		result = 31 * result + (this.creationDate != null ? this.creationDate.hashCode() : 0);
-		result = 31 * result + (this.modificationDate != null ? this.modificationDate.hashCode() : 0);
-		result = 31 * result + (this.readDate != null ? this.readDate.hashCode() : 0);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.creationDate);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.modificationDate);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.readDate);
 		return result;
 	}
 
@@ -222,11 +259,13 @@ public final class ContentDisposition {
 		if (this.filename != null) {
 			if (this.charset == null || StandardCharsets.US_ASCII.equals(this.charset)) {
 				sb.append("; filename=\"");
-				sb.append(escapeQuotationsInFilename(this.filename)).append('\"');
+				sb.append(encodeQuotedPairs(this.filename)).append('\"');
 			}
 			else {
+				sb.append("; filename=\"");
+				sb.append(encodeQuotedPrintableFilename(this.filename, this.charset)).append('\"');
 				sb.append("; filename*=");
-				sb.append(encodeFilename(this.filename, this.charset));
+				sb.append(encodeRfc5987Filename(this.filename, this.charset));
 			}
 		}
 		if (this.size != null) {
@@ -251,6 +290,30 @@ public final class ContentDisposition {
 		return sb.toString();
 	}
 
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} of type {@literal "attachment"}.
+	 * @since 5.3
+	 */
+	public static Builder attachment() {
+		return builder("attachment");
+	}
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} of type {@literal "form-data"}.
+	 * @since 5.3
+	 */
+	public static Builder formData() {
+		return builder("form-data");
+	}
+
+	/**
+	 * Return a builder for a {@code ContentDisposition} of type {@literal "inline"}.
+	 * @since 5.3
+	 */
+	public static Builder inline() {
+		return builder("inline");
+	}
 
 	/**
 	 * Return a builder for a {@code ContentDisposition}.
@@ -302,16 +365,53 @@ public final class ContentDisposition {
 					if (idx1 != -1 && idx2 != -1) {
 						charset = Charset.forName(value.substring(0, idx1).trim());
 						Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset),
-								"Charset should be UTF-8 or ISO-8859-1");
-						filename = decodeFilename(value.substring(idx2 + 1), charset);
+								"Charset must be UTF-8 or ISO-8859-1");
+						filename = decodeRfc5987Filename(value.substring(idx2 + 1), charset);
 					}
 					else {
 						// US ASCII
-						filename = decodeFilename(value, StandardCharsets.US_ASCII);
+						filename = decodeRfc5987Filename(value, StandardCharsets.US_ASCII);
 					}
 				}
 				else if (attribute.equals("filename") && (filename == null)) {
-					filename = value;
+					if (value.startsWith("=?") ) {
+						Matcher matcher = BASE64_ENCODED_PATTERN.matcher(value);
+						if (matcher.find()) {
+							Base64.Decoder decoder = Base64.getDecoder();
+							StringBuilder builder = new StringBuilder();
+							do {
+								charset = Charset.forName(matcher.group(1));
+								byte[] decoded = decoder.decode(matcher.group(2));
+								builder.append(new String(decoded, charset));
+							}
+							while (matcher.find());
+
+							filename = builder.toString();
+						}
+						else {
+							matcher = QUOTED_PRINTABLE_ENCODED_PATTERN.matcher(value);
+							if (matcher.find()) {
+								StringBuilder builder = new StringBuilder();
+								do {
+									charset = Charset.forName(matcher.group(1));
+									String decoded = decodeQuotedPrintableFilename(matcher.group(2), charset);
+									builder.append(decoded);
+								}
+								while (matcher.find());
+
+								filename = builder.toString();
+							}
+							else {
+								filename = value;
+							}
+						}
+					}
+					else if (value.indexOf('\\') != -1) {
+						filename = decodeQuotedPairs(value);
+					}
+					else {
+						filename = value;
+					}
 				}
 				else if (attribute.equals("size") ) {
 					size = Long.parseLong(value);
@@ -393,22 +493,23 @@ public final class ContentDisposition {
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String decodeFilename(String filename, Charset charset) {
-		Assert.notNull(filename, "'input' String` should not be null");
-		Assert.notNull(charset, "'charset' should not be null");
+	private static String decodeRfc5987Filename(String filename, Charset charset) {
+		Assert.notNull(filename, "'filename' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
+
 		byte[] value = filename.getBytes(charset);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		int index = 0;
 		while (index < value.length) {
 			byte b = value[index];
 			if (isRFC5987AttrChar(b)) {
-				bos.write((char) b);
+				baos.write((char) b);
 				index++;
 			}
 			else if (b == '%' && index < value.length - 2) {
 				char[] array = new char[]{(char) value[index + 1], (char) value[index + 2]};
 				try {
-					bos.write(Integer.parseInt(String.valueOf(array), 16));
+					baos.write(Integer.parseInt(String.valueOf(array), 16));
 				}
 				catch (NumberFormatException ex) {
 					throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT, ex);
@@ -419,7 +520,7 @@ public final class ContentDisposition {
 				throw new IllegalArgumentException(INVALID_HEADER_FIELD_PARAMETER_FORMAT);
 			}
 		}
-		return new String(bos.toByteArray(), charset);
+		return StreamUtils.copyToString(baos, charset);
 	}
 
 	private static boolean isRFC5987AttrChar(byte c) {
@@ -428,19 +529,106 @@ public final class ContentDisposition {
 				c == '.' || c == '^' || c == '_' || c == '`' || c == '|' || c == '~';
 	}
 
-	private static String escapeQuotationsInFilename(String filename) {
+	/**
+	 * Decode the given header field param as described in RFC 2047.
+	 * @param filename the filename
+	 * @param charset the charset for the filename
+	 * @return the decoded header field param
+	 * @see <a href="https://tools.ietf.org/html/rfc2047">RFC 2047</a>
+	 */
+	private static String decodeQuotedPrintableFilename(String filename, Charset charset) {
+		Assert.notNull(filename, "'filename' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
+
+		byte[] value = filename.getBytes(US_ASCII);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		int index = 0;
+		while (index < value.length) {
+			byte b = value[index];
+			if (b == '_') {
+				baos.write(' ');
+				index++;
+			}
+			else if (b == '=' && index < value.length - 2) {
+				int i1 = Character.digit((char) value[index + 1], 16);
+				int i2 = Character.digit((char) value[index + 2], 16);
+				if (i1 == -1 || i2 == -1) {
+					throw new IllegalArgumentException("Not a valid hex sequence: " + filename.substring(index));
+				}
+				baos.write((i1 << 4) | i2);
+				index += 3;
+			}
+			else {
+				baos.write(b);
+				index++;
+			}
+		}
+		return StreamUtils.copyToString(baos, charset);
+	}
+
+	/**
+	 * Encode the given header field param as described in RFC 2047.
+	 * @param filename the filename
+	 * @param charset the charset for the filename
+	 * @return the encoded header field param
+	 * @see <a href="https://tools.ietf.org/html/rfc2047">RFC 2047</a>
+	 */
+	private static String encodeQuotedPrintableFilename(String filename, Charset charset) {
+		Assert.notNull(filename, "'filename' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
+
+		byte[] source = filename.getBytes(charset);
+		StringBuilder sb = new StringBuilder(source.length << 1);
+		sb.append("=?");
+		sb.append(charset.name());
+		sb.append("?Q?");
+		for (byte b : source) {
+			if (isPrintable(b)) {
+				sb.append((char) b);
+			}
+			else {
+				sb.append('=');
+				char ch1 = hexDigit(b >> 4);
+				char ch2 = hexDigit(b);
+				sb.append(ch1);
+				sb.append(ch2);
+			}
+		}
+		sb.append("?=");
+		return sb.toString();
+	}
+
+	private static boolean isPrintable(byte c) {
+		return (c >= '!' && c <= '<') || (c >= '>' && c <= '~');
+	}
+
+	private static String encodeQuotedPairs(String filename) {
 		if (filename.indexOf('"') == -1 && filename.indexOf('\\') == -1) {
 			return filename;
 		}
-		boolean escaped = false;
 		StringBuilder sb = new StringBuilder();
-		for (char c : filename.toCharArray()) {
-			sb.append((c == '"' && !escaped) ? "\\\"" : c);
-			escaped = (!escaped && c == '\\');
+		for (int i = 0; i < filename.length() ; i++) {
+			char c = filename.charAt(i);
+			if (c == '"' || c == '\\') {
+				sb.append('\\');
+			}
+			sb.append(c);
 		}
-		// Remove backslash at the end..
-		if (escaped) {
-			sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
+	}
+
+	private static String decodeQuotedPairs(String filename) {
+		StringBuilder sb = new StringBuilder();
+		int length = filename.length();
+		for (int i = 0; i < length; i++) {
+			char c = filename.charAt(i);
+			if (filename.charAt(i) == '\\' && i + 1 < length) {
+				i++;
+				sb.append(filename.charAt(i));
+			}
+			else {
+				sb.append(c);
+			}
 		}
 		return sb.toString();
 	}
@@ -453,14 +641,14 @@ public final class ContentDisposition {
 	 * @return the encoded header field param
 	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
 	 */
-	private static String encodeFilename(String input, Charset charset) {
-		Assert.notNull(input, "`input` is required");
-		Assert.notNull(charset, "`charset` is required");
+	private static String encodeRfc5987Filename(String input, Charset charset) {
+		Assert.notNull(input, "'input' must not be null");
+		Assert.notNull(charset, "'charset' must not be null");
 		Assert.isTrue(!StandardCharsets.US_ASCII.equals(charset), "ASCII does not require encoding");
-		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset), "Only UTF-8 and ISO-8859-1 supported.");
+		Assert.isTrue(UTF_8.equals(charset) || ISO_8859_1.equals(charset), "Only UTF-8 and ISO-8859-1 are supported");
+
 		byte[] source = input.getBytes(charset);
-		int len = source.length;
-		StringBuilder sb = new StringBuilder(len << 1);
+		StringBuilder sb = new StringBuilder(source.length << 1);
 		sb.append(charset.name());
 		sb.append("''");
 		for (byte b : source) {
@@ -469,13 +657,17 @@ public final class ContentDisposition {
 			}
 			else {
 				sb.append('%');
-				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
-				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
+				char hex1 = hexDigit(b >> 4);
+				char hex2 = hexDigit(b);
 				sb.append(hex1);
 				sb.append(hex2);
 			}
 		}
 		return sb.toString();
+	}
+
+	private static char hexDigit(int b) {
+		return Character.toUpperCase(Character.forDigit(b & 0xF, 16));
 	}
 
 
@@ -499,21 +691,20 @@ public final class ContentDisposition {
 		Builder filename(String filename);
 
 		/**
-		 * Set the value of the {@literal filename*} that will be encoded as
-		 * defined in the RFC 5987. Only the US-ASCII, UTF-8 and ISO-8859-1
+		 * Set the value of the {@code filename} that will be encoded as
+		 * defined in RFC 5987. Only the US-ASCII, UTF-8, and ISO-8859-1
 		 * charsets are supported.
 		 * <p><strong>Note:</strong> Do not use this for a
-		 * {@code "multipart/form-data"} requests as per
-		 * <a link="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
-		 * and also RFC 5987 itself mentions it does not apply to multipart
-		 * requests.
+		 * {@code "multipart/form-data"} request since
+		 * <a href="https://tools.ietf.org/html/rfc7578#section-4.2">RFC 7578, Section 4.2</a>
+		 * and also RFC 5987 mention it does not apply to multipart requests.
 		 */
 		Builder filename(String filename, Charset charset);
 
 		/**
 		 * Set the value of the {@literal size} parameter.
 		 * @deprecated since 5.2.3 as per
-		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 		 * to be removed in a future release.
 		 */
 		@Deprecated
@@ -522,7 +713,7 @@ public final class ContentDisposition {
 		/**
 		 * Set the value of the {@literal creation-date} parameter.
 		 * @deprecated since 5.2.3 as per
-		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 		 * to be removed in a future release.
 		 */
 		@Deprecated
@@ -531,7 +722,7 @@ public final class ContentDisposition {
 		/**
 		 * Set the value of the {@literal modification-date} parameter.
 		 * @deprecated since 5.2.3 as per
-		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 		 * to be removed in a future release.
 		 */
 		@Deprecated
@@ -540,7 +731,7 @@ public final class ContentDisposition {
 		/**
 		 * Set the value of the {@literal read-date} parameter.
 		 * @deprecated since 5.2.3 as per
-		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Apendix B</a>,
+		 * <a href="https://tools.ietf.org/html/rfc6266#appendix-B">RFC 6266, Appendix B</a>,
 		 * to be removed in a future release.
 		 */
 		@Deprecated
@@ -555,7 +746,7 @@ public final class ContentDisposition {
 
 	private static class BuilderImpl implements Builder {
 
-		private String type;
+		private final String type;
 
 		@Nullable
 		private String name;
@@ -605,24 +796,28 @@ public final class ContentDisposition {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public Builder size(Long size) {
 			this.size = size;
 			return this;
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public Builder creationDate(ZonedDateTime creationDate) {
 			this.creationDate = creationDate;
 			return this;
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public Builder modificationDate(ZonedDateTime modificationDate) {
 			this.modificationDate = modificationDate;
 			return this;
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public Builder readDate(ZonedDateTime readDate) {
 			this.readDate = readDate;
 			return this;

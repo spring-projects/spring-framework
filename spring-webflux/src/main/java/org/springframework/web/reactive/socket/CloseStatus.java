@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.reactive.socket;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Representation of WebSocket "close" status codes and reasons. Status codes
@@ -153,7 +154,7 @@ public final class CloseStatus {
 	 * @param reason the reason
 	 */
 	public CloseStatus(int code, @Nullable String reason) {
-		Assert.isTrue((code >= 1000 && code < 5000), "Invalid status code");
+		Assert.isTrue((code >= 1000 && code < 5000), () -> "Invalid status code: " + code);
 		this.code = code;
 		this.reason = reason;
 	}
@@ -184,20 +185,51 @@ public final class CloseStatus {
 		return new CloseStatus(this.code, reason);
 	}
 
-
+	/**
+	 * @deprecated as of 5.3 in favor of comparing codes directly
+	 */
+	@Deprecated
 	public boolean equalsCode(CloseStatus other) {
 		return (this.code == other.code);
 	}
+
+
+	/**
+	 * Return a constant for the given code, or create a new instance if the
+	 * code does not match or there is a reason.
+	 * @since 5.3
+	 */
+	public static CloseStatus create(int code, @Nullable String reason) {
+		if (!StringUtils.hasText(reason)) {
+			return switch (code) {
+				case 1000 -> NORMAL;
+				case 1001 -> GOING_AWAY;
+				case 1002 -> PROTOCOL_ERROR;
+				case 1003 -> NOT_ACCEPTABLE;
+				case 1005 -> NO_STATUS_CODE;
+				case 1006 -> NO_CLOSE_FRAME;
+				case 1007 -> BAD_DATA;
+				case 1008 -> POLICY_VIOLATION;
+				case 1009 -> TOO_BIG_TO_PROCESS;
+				case 1010 -> REQUIRED_EXTENSION;
+				case 1011 -> SERVER_ERROR;
+				case 1012 -> SERVICE_RESTARTED;
+				case 1013 -> SERVICE_OVERLOAD;
+				default -> new CloseStatus(code, reason);
+			};
+		}
+		return new CloseStatus(code, reason);
+	}
+
 
 	@Override
 	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof CloseStatus)) {
+		if (!(other instanceof CloseStatus otherStatus)) {
 			return false;
 		}
-		CloseStatus otherStatus = (CloseStatus) other;
 		return (this.code == otherStatus.code &&
 				ObjectUtils.nullSafeEquals(this.reason, otherStatus.reason));
 	}

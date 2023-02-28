@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,17 +47,17 @@ import org.springframework.util.ClassUtils;
  * which uses this class to call a static initialization method:
  *
  * <pre class="code">
- * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingBean">
- *   &lt;property name="staticMethod" value="com.whatever.MyClass.init"/>
- * &lt;/bean></pre>
+ * &lt;bean id="myObject" class="org.springframework.beans.factory.config.MethodInvokingBean"&gt;
+ *   &lt;property name="staticMethod" value="com.whatever.MyClass.init"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * <p>An example of calling an instance method to start some server bean:
  *
  * <pre class="code">
- * &lt;bean id="myStarter" class="org.springframework.beans.factory.config.MethodInvokingBean">
- *   &lt;property name="targetObject" ref="myServer"/>
- *   &lt;property name="targetMethod" value="start"/>
- * &lt;/bean></pre>
+ * &lt;bean id="myStarter" class="org.springframework.beans.factory.config.MethodInvokingBean"&gt;
+ *   &lt;property name="targetObject" ref="myServer"/&gt;
+ *   &lt;property name="targetMethod" value="start"/&gt;
+ * &lt;/bean&gt;</pre>
  *
  * @author Juergen Hoeller
  * @since 4.0.3
@@ -86,8 +86,8 @@ public class MethodInvokingBean extends ArgumentConvertingMethodInvoker
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		if (beanFactory instanceof ConfigurableBeanFactory cbf) {
+			this.beanFactory = cbf;
 		}
 	}
 
@@ -123,11 +123,11 @@ public class MethodInvokingBean extends ArgumentConvertingMethodInvoker
 			return invoke();
 		}
 		catch (InvocationTargetException ex) {
-			if (ex.getTargetException() instanceof Exception) {
-				throw (Exception) ex.getTargetException();
+			if (ex.getTargetException() instanceof Exception exception) {
+				throw exception;
 			}
-			if (ex.getTargetException() instanceof Error) {
-				throw (Error) ex.getTargetException();
+			if (ex.getTargetException() instanceof Error error) {
+				throw error;
 			}
 			throw ex;
 		}

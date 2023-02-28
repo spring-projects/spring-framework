@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.cors.reactive;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -37,9 +36,9 @@ import org.springframework.web.server.ServerWebExchange;
  * The default implementation of {@link CorsProcessor},
  * as defined by the <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>.
  *
- * <p>Note that when input {@link CorsConfiguration} is {@code null}, this
+ * <p>Note that when the supplied {@link CorsConfiguration} is {@code null}, this
  * implementation does not reject simple or actual requests outright but simply
- * avoid adding CORS headers to the response. CORS processing is also skipped
+ * avoids adding CORS headers to the response. CORS processing is also skipped
  * if the response already contains CORS headers.
  *
  * @author Sebastien Deleuze
@@ -50,22 +49,33 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 	private static final Log logger = LogFactory.getLog(DefaultCorsProcessor.class);
 
-	private static final List<String> VARY_HEADERS = Arrays.asList(
+	private static final List<String> VARY_HEADERS = List.of(
 			HttpHeaders.ORIGIN, HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
 
 
 	@Override
 	public boolean process(@Nullable CorsConfiguration config, ServerWebExchange exchange) {
-
 		ServerHttpRequest request = exchange.getRequest();
 		ServerHttpResponse response = exchange.getResponse();
-		response.getHeaders().addAll(HttpHeaders.VARY, VARY_HEADERS);
+		HttpHeaders responseHeaders = response.getHeaders();
+
+		List<String> varyHeaders = responseHeaders.get(HttpHeaders.VARY);
+		if (varyHeaders == null) {
+			responseHeaders.addAll(HttpHeaders.VARY, VARY_HEADERS);
+		}
+		else {
+			for (String header : VARY_HEADERS) {
+				if (!varyHeaders.contains(header)) {
+					responseHeaders.add(HttpHeaders.VARY, header);
+				}
+			}
+		}
 
 		if (!CorsUtils.isCorsRequest(request)) {
 			return true;
 		}
 
-		if (response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {
+		if (responseHeaders.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) != null) {
 			logger.trace("Skip: response already contains \"Access-Control-Allow-Origin\"");
 			return true;
 		}
@@ -163,7 +173,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	/**
 	 * Check the HTTP method and determine the methods for the response of a
 	 * pre-flight request. The default implementation simply delegates to
-	 * {@link CorsConfiguration#checkOrigin(String)}.
+	 * {@link CorsConfiguration#checkHttpMethod(HttpMethod)}.
 	 */
 	@Nullable
 	protected List<HttpMethod> checkMethods(CorsConfiguration config, @Nullable HttpMethod requestMethod) {
@@ -181,7 +191,6 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 * {@link CorsConfiguration#checkOrigin(String)}.
 	 */
 	@Nullable
-
 	protected List<String> checkHeaders(CorsConfiguration config, List<String> requestHeaders) {
 		return config.checkHeaders(requestHeaders);
 	}

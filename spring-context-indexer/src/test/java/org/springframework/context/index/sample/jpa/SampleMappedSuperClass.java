@@ -16,7 +16,7 @@
 
 package org.springframework.context.index.sample.jpa;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
 
 /**
  * Test candidate for {@link MappedSuperclass}.

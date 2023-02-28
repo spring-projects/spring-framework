@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,31 @@
 
 package org.springframework.web.servlet.mvc.method.annotation
 
+import kotlinx.coroutines.delay
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.context.request.async.WebAsyncUtils
+import org.springframework.web.servlet.handler.PathPatternsParameterizedTest
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse
+import java.util.stream.Stream
 
 /**
  * @author Sebastien Deleuze
  */
 class ServletAnnotationControllerHandlerMethodKotlinTests : AbstractServletHandlerMethodTests() {
 
-	@Test
-	fun dataClassBinding() {
-		initServletWithControllers(DataClassController::class.java)
+	companion object {
+		@JvmStatic
+		fun pathPatternsArguments(): Stream<Boolean> {
+			return Stream.of(true, false)
+		}
+	}
+
+	@PathPatternsParameterizedTest
+	fun dataClassBinding(usePathPatterns: Boolean) {
+		initDispatcherServlet(DataClassController::class.java, usePathPatterns)
 
 		val request = MockHttpServletRequest("GET", "/bind")
 		request.addParameter("param1", "value1")
@@ -40,9 +50,9 @@ class ServletAnnotationControllerHandlerMethodKotlinTests : AbstractServletHandl
 		assertThat(response.contentAsString).isEqualTo("value1-2")
 	}
 
-	@Test
-	fun dataClassBindingWithOptionalParameterAndAllParameters() {
-		initServletWithControllers(DataClassController::class.java)
+	@PathPatternsParameterizedTest
+	fun dataClassBindingWithOptionalParameterAndAllParameters(usePathPatterns: Boolean) {
+		initDispatcherServlet(DataClassController::class.java, usePathPatterns)
 
 		val request = MockHttpServletRequest("GET", "/bind-optional-parameter")
 		request.addParameter("param1", "value1")
@@ -52,15 +62,26 @@ class ServletAnnotationControllerHandlerMethodKotlinTests : AbstractServletHandl
 		assertThat(response.contentAsString).isEqualTo("value1-2")
 	}
 
-	@Test
-	fun dataClassBindingWithOptionalParameterAndOnlyMissingParameters() {
-		initServletWithControllers(DataClassController::class.java)
+	@PathPatternsParameterizedTest
+	fun dataClassBindingWithOptionalParameterAndOnlyMissingParameters(usePathPatterns: Boolean) {
+		initDispatcherServlet(DataClassController::class.java, usePathPatterns)
 
 		val request = MockHttpServletRequest("GET", "/bind-optional-parameter")
 		request.addParameter("param1", "value1")
 		val response = MockHttpServletResponse()
 		servlet.service(request, response)
 		assertThat(response.contentAsString).isEqualTo("value1-12")
+	}
+
+	@PathPatternsParameterizedTest
+	fun suspendingMethod(usePathPatterns: Boolean) {
+		initDispatcherServlet(CoroutinesController::class.java, usePathPatterns)
+
+		val request = MockHttpServletRequest("GET", "/suspending")
+		request.isAsyncSupported = true
+		val response = MockHttpServletResponse()
+		servlet.service(request, response)
+		assertThat(WebAsyncUtils.getAsyncManager(request).concurrentResult).isEqualTo("foo")
 	}
 
 
@@ -76,6 +97,17 @@ class ServletAnnotationControllerHandlerMethodKotlinTests : AbstractServletHandl
 
 		@RequestMapping("/bind-optional-parameter")
 		fun handle(data: DataClassWithOptionalParameter) = "${data.param1}-${data.param2}"
+	}
+
+	@RestController
+	class CoroutinesController {
+
+		@Suppress("RedundantSuspendModifier")
+		@RequestMapping("/suspending")
+		suspend fun handle(): String {
+			return "foo"
+		}
+
 	}
 
 }

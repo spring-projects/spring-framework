@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.filter.reactive;
 
 import java.time.Duration;
@@ -21,7 +22,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -33,18 +33,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link ServerWebExchangeContextFilter}.
  * @author Rossen Stoyanchev
  */
-public class ServerWebExchangeContextFilterTests {
+class ServerWebExchangeContextFilterTests {
+
 
 	@Test
-	public void extractServerWebExchangeFromContext() {
+	void extractServerWebExchangeFromContext() {
 		MyService service = new MyService();
 
-		HttpHandler httpHandler = WebHttpHandlerBuilder
+		WebHttpHandlerBuilder
 				.webHandler(exchange -> service.service().then())
 				.filter(new ServerWebExchangeContextFilter())
-				.build();
-
-		httpHandler.handle(MockServerHttpRequest.get("/path").build(), new MockServerHttpResponse())
+				.build()
+				.handle(MockServerHttpRequest.get("/path").build(), new MockServerHttpResponse())
 				.block(Duration.ofSeconds(5));
 
 		assertThat(service.getExchange()).isNotNull();
@@ -55,16 +55,16 @@ public class ServerWebExchangeContextFilterTests {
 
 		private final AtomicReference<ServerWebExchange> exchangeRef = new AtomicReference<>();
 
-
 		public ServerWebExchange getExchange() {
 			return this.exchangeRef.get();
 		}
 
 		public Mono<String> service() {
-			return Mono.just("result").subscriberContext(context -> {
-				ServerWebExchangeContextFilter.get(context).ifPresent(exchangeRef::set);
-				return context;
-			});
+			return Mono.just("result")
+					.transformDeferredContextual((mono, contextView) -> {
+						ServerWebExchangeContextFilter.getExchange(contextView).ifPresent(exchangeRef::set);
+						return mono;
+					});
 		}
 	}
 

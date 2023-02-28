@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,15 @@
 package org.springframework.web.socket.sockjs.transport.session;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
-import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
@@ -46,16 +44,16 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
+class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 
 	@Override
 	protected TestSockJsSession initSockJsSession() {
-		return new TestSockJsSession("1", this.sockJsConfig, this.webSocketHandler, Collections.<String, Object>emptyMap());
+		return new TestSockJsSession("1", this.sockJsConfig, this.webSocketHandler, Collections.emptyMap());
 	}
 
 
 	@Test
-	public void getTimeSinceLastActive() throws Exception {
+	void getTimeSinceLastActive() throws Exception {
 		Thread.sleep(1);
 
 		long time1 = this.session.getTimeSinceLastActive();
@@ -78,7 +76,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void delegateConnectionEstablished() throws Exception {
+	void delegateConnectionEstablished() throws Exception {
 		assertNew();
 		this.session.delegateConnectionEstablished();
 		assertOpen();
@@ -86,16 +84,17 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void delegateError() throws Exception {
+	void delegateError() throws Exception {
 		Exception ex = new Exception();
 		this.session.delegateError(ex);
 		verify(this.webSocketHandler).handleTransportError(this.session, ex);
 	}
 
 	@Test
-	public void delegateMessages() throws Exception {
+	void delegateMessages() throws Exception {
 		String msg1 = "message 1";
 		String msg2 = "message 2";
+
 		this.session.delegateMessages(msg1, msg2);
 
 		verify(this.webSocketHandler).handleMessage(this.session, new TextMessage(msg1));
@@ -104,30 +103,44 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void delegateMessagesWithErrorAndConnectionClosing() throws Exception {
-		WebSocketHandler wsHandler = new ExceptionWebSocketHandlerDecorator(this.webSocketHandler);
-		TestSockJsSession sockJsSession = new TestSockJsSession(
-				"1", this.sockJsConfig, wsHandler, Collections.<String, Object>emptyMap());
+	void delegateMessagesWithError() throws Exception {
+		TestSockJsSession session = new TestSockJsSession("1", this.sockJsConfig,
+				new ExceptionWebSocketHandlerDecorator(this.webSocketHandler), Collections.emptyMap());
 
 		String msg1 = "message 1";
 		String msg2 = "message 2";
 		String msg3 = "message 3";
 
-		willThrow(new IOException()).given(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
+		willThrow(new IOException()).given(this.webSocketHandler).handleMessage(session, new TextMessage(msg2));
 
-		sockJsSession.delegateConnectionEstablished();
-		assertThatExceptionOfType(SockJsMessageDeliveryException.class).isThrownBy(() ->
-				sockJsSession.delegateMessages(msg1, msg2, msg3))
-			.satisfies(ex -> assertThat(ex.getUndeliveredMessages()).containsExactly(msg3));
-		verify(this.webSocketHandler).afterConnectionEstablished(sockJsSession);
-		verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg1));
-		verify(this.webSocketHandler).handleMessage(sockJsSession, new TextMessage(msg2));
-		verify(this.webSocketHandler).afterConnectionClosed(sockJsSession, CloseStatus.SERVER_ERROR);
+		session.delegateConnectionEstablished();
+		session.delegateMessages(msg1, msg2, msg3);
+
+		verify(this.webSocketHandler).afterConnectionEstablished(session);
+		verify(this.webSocketHandler).handleMessage(session, new TextMessage(msg1));
+		verify(this.webSocketHandler).handleMessage(session, new TextMessage(msg2));
+		verify(this.webSocketHandler).afterConnectionClosed(session, CloseStatus.SERVER_ERROR);
+		verifyNoMoreInteractions(this.webSocketHandler);
+	}
+
+	@Test // gh-23828
+	void delegateMessagesEmptyAfterConnectionClosed() throws Exception {
+		TestSockJsSession session = new TestSockJsSession("1", this.sockJsConfig,
+				new ExceptionWebSocketHandlerDecorator(this.webSocketHandler), Collections.emptyMap());
+
+		session.delegateConnectionEstablished();
+		session.close(CloseStatus.NORMAL);
+		session.delegateMessages("", " ", "\n");
+
+		// No exception for empty messages
+
+		verify(this.webSocketHandler).afterConnectionEstablished(session);
+		verify(this.webSocketHandler).afterConnectionClosed(session, CloseStatus.NORMAL);
 		verifyNoMoreInteractions(this.webSocketHandler);
 	}
 
 	@Test
-	public void delegateConnectionClosed() throws Exception {
+	void delegateConnectionClosed() throws Exception {
 		this.session.delegateConnectionEstablished();
 		this.session.delegateConnectionClosed(CloseStatus.GOING_AWAY);
 
@@ -137,7 +150,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void closeWhenNotOpen() throws Exception {
+	void closeWhenNotOpen() throws Exception {
 		assertNew();
 
 		this.session.close();
@@ -151,11 +164,11 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		assertThat(this.session.getCloseStatus().getCode()).isEqualTo(3000);
 
 		this.session.close(CloseStatus.SERVER_ERROR);
-		assertThat(this.session.getCloseStatus().getCode()).as("Close should be ignored if already closed").isEqualTo(3000);
+		assertThat(this.session.getCloseStatus().getCode()).as("Should ignore close if already closed").isEqualTo(3000);
 	}
 
 	@Test
-	public void closeWhenNotActive() throws Exception {
+	void closeWhenNotActive() throws Exception {
 		this.session.delegateConnectionEstablished();
 		assertOpen();
 
@@ -166,14 +179,14 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void close() throws Exception {
+	void close() throws Exception {
 		this.session.delegateConnectionEstablished();
 		assertOpen();
 
 		this.session.setActive(true);
 		this.session.close();
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.closeFrameGoAway());
 
 		assertThat(this.session.getNumberOfLastActiveTimeUpdates()).isEqualTo(1);
@@ -185,7 +198,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void closeWithWriteFrameExceptions() throws Exception {
+	void closeWithWriteFrameExceptions() throws Exception {
 		this.session.setExceptionOnWrite(new IOException());
 
 		this.session.delegateConnectionEstablished();
@@ -197,7 +210,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void closeWithWebSocketHandlerExceptions() throws Exception {
+	void closeWithWebSocketHandlerExceptions() throws Exception {
 		willThrow(new Exception()).given(this.webSocketHandler).afterConnectionClosed(this.session, CloseStatus.NORMAL);
 
 		this.session.delegateConnectionEstablished();
@@ -209,7 +222,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void tryCloseWithWebSocketHandlerExceptions() throws Exception {
+	void tryCloseWithWebSocketHandlerExceptions() throws Exception {
 		this.session.delegateConnectionEstablished();
 		this.session.setActive(true);
 		this.session.tryCloseWithSockJsTransportError(new Exception(), CloseStatus.BAD_DATA);
@@ -219,15 +232,15 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void writeFrame() throws Exception {
+	void writeFrame() {
 		this.session.writeFrame(SockJsFrame.openFrame());
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.openFrame());
 	}
 
 	@Test
-	public void writeFrameIoException() throws Exception {
+	void writeFrameIoException() throws Exception {
 		this.session.setExceptionOnWrite(new IOException());
 		this.session.delegateConnectionEstablished();
 
@@ -238,19 +251,19 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void sendHeartbeat() throws Exception {
+	void sendHeartbeat() {
 		this.session.setActive(true);
 		this.session.sendHeartbeat();
 
-		assertThat(this.session.getSockJsFramesWritten().size()).isEqualTo(1);
+		assertThat(this.session.getSockJsFramesWritten()).hasSize(1);
 		assertThat(this.session.getSockJsFramesWritten().get(0)).isEqualTo(SockJsFrame.heartbeatFrame());
 
-		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 	}
 
 	@Test
-	public void scheduleHeartbeatNotActive() throws Exception {
+	void scheduleHeartbeatNotActive() {
 		this.session.setActive(false);
 		this.session.scheduleHeartbeat();
 
@@ -258,7 +271,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void sendHeartbeatWhenDisabled() throws Exception {
+	void sendHeartbeatWhenDisabled() {
 		this.session.disableHeartbeat();
 		this.session.setActive(true);
 		this.session.sendHeartbeat();
@@ -267,14 +280,14 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	}
 
 	@Test
-	public void scheduleAndCancelHeartbeat() throws Exception {
-		ScheduledFuture<?> task = mock(ScheduledFuture.class);
-		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+	void scheduleAndCancelHeartbeat() {
+		ScheduledFuture<?> task = mock();
+		willReturn(task).given(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 
 		this.session.setActive(true);
 		this.session.scheduleHeartbeat();
 
-		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Instant.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 
 		given(task.isCancelled()).willReturn(false);

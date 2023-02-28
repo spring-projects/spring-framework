@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.http.server.reactive;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -27,14 +29,23 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.channel.AbortedException;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.LeakAwareDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
+import org.springframework.web.testfixture.http.server.reactive.MockServerHttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sebastien Deleuze
  * @author Brian Clozel
  */
-public class ServerHttpResponseTests {
+class ServerHttpResponseTests {
 
 	@Test
 	void writeWith() {
@@ -56,10 +67,10 @@ public class ServerHttpResponseTests {
 		assertThat(response.headersWritten).isTrue();
 		assertThat(response.cookiesWritten).isTrue();
 
-		assertThat(response.body.size()).isEqualTo(3);
-		assertThat(new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("a");
-		assertThat(new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("b");
-		assertThat(new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("c");
+		assertThat(response.body).hasSize(3);
+		assertThat(response.body.get(0).toString(StandardCharsets.UTF_8)).isEqualTo("a");
+		assertThat(response.body.get(1).toString(StandardCharsets.UTF_8)).isEqualTo("b");
+		assertThat(response.body.get(2).toString(StandardCharsets.UTF_8)).isEqualTo("c");
 	}
 
 	@Test  // SPR-14952
@@ -72,8 +83,8 @@ public class ServerHttpResponseTests {
 		assertThat(response.headersWritten).isTrue();
 		assertThat(response.cookiesWritten).isTrue();
 
-		assertThat(response.body.size()).isEqualTo(1);
-		assertThat(new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("foo");
+		assertThat(response.body).hasSize(1);
+		assertThat(response.body.get(0).toString(StandardCharsets.UTF_8)).isEqualTo("foo");
 	}
 
 	@Test
@@ -127,10 +138,10 @@ public class ServerHttpResponseTests {
 		assertThat(response.cookiesWritten).isTrue();
 		assertThat(response.getCookies().getFirst("ID")).isSameAs(cookie);
 
-		assertThat(response.body.size()).isEqualTo(3);
-		assertThat(new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("a");
-		assertThat(new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("b");
-		assertThat(new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8)).isEqualTo("c");
+		assertThat(response.body).hasSize(3);
+		assertThat(response.body.get(0).toString(StandardCharsets.UTF_8)).isEqualTo("a");
+		assertThat(response.body.get(1).toString(StandardCharsets.UTF_8)).isEqualTo("b");
+		assertThat(response.body.get(2).toString(StandardCharsets.UTF_8)).isEqualTo("c");
 	}
 
 	@Test
@@ -150,7 +161,7 @@ public class ServerHttpResponseTests {
 		assertThat(response.getCookies().getFirst("ID")).isSameAs(cookie);
 	}
 
-	@Test // gh-24186
+	@Test // gh-24186, gh-25753
 	void beforeCommitErrorShouldLeaveResponseNotCommitted() {
 
 		Consumer<Supplier<Mono<Void>>> tester = preCommitAction -> {
@@ -168,6 +179,15 @@ public class ServerHttpResponseTests {
 			assertThat(response.cookiesWritten).isFalse();
 			assertThat(response.isCommitted()).isFalse();
 			assertThat(response.getHeaders()).isEmpty();
+
+			// Handle the error
+			response.setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+			StepVerifier.create(response.setComplete()).verifyComplete();
+
+			assertThat(response.statusCodeWritten).isTrue();
+			assertThat(response.headersWritten).isTrue();
+			assertThat(response.cookiesWritten).isTrue();
+			assertThat(response.isCommitted()).isTrue();
 		};
 
 		tester.accept(() -> Mono.error(new IllegalStateException("Max sessions")));
@@ -176,9 +196,28 @@ public class ServerHttpResponseTests {
 		});
 	}
 
+	@Test // gh-26232
+	void monoResponseShouldNotLeakIfCancelled() {
+		LeakAwareDataBufferFactory bufferFactory = new LeakAwareDataBufferFactory();
+		MockServerHttpRequest request = MockServerHttpRequest.get("/").build();
+		MockServerHttpResponse response = new MockServerHttpResponse(bufferFactory);
+		response.setWriteHandler(flux -> {
+			throw AbortedException.beforeSend();
+		});
+
+		HttpMessageWriter<Object> messageWriter = new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder());
+		Mono<Void> result = messageWriter.write(Mono.just(Collections.singletonMap("foo", "bar")),
+				ResolvableType.forClass(Mono.class), ResolvableType.forClass(Map.class), null,
+				request, response, Collections.emptyMap());
+
+		StepVerifier.create(result).expectError(AbortedException.class).verify();
+
+		bufferFactory.checkForLeaks();
+	}
+
 
 	private DefaultDataBuffer wrap(String a) {
-		return new DefaultDataBufferFactory().wrap(ByteBuffer.wrap(a.getBytes(StandardCharsets.UTF_8)));
+		return DefaultDataBufferFactory.sharedInstance.wrap(ByteBuffer.wrap(a.getBytes(StandardCharsets.UTF_8)));
 	}
 
 
@@ -193,7 +232,7 @@ public class ServerHttpResponseTests {
 		private final List<DataBuffer> body = new ArrayList<>();
 
 		public TestServerHttpResponse() {
-			super(new DefaultDataBufferFactory());
+			super(DefaultDataBufferFactory.sharedInstance);
 		}
 
 		@Override

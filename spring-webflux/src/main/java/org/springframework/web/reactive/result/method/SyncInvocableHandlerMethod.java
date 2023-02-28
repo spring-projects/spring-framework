@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import reactor.core.publisher.MonoProcessor;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -57,11 +55,11 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Configure the argument resolvers to use to use for resolving method
+	 * Configure the argument resolvers to use for resolving method
 	 * argument values against a {@code ServerWebExchange}.
 	 */
 	public void setArgumentResolvers(List<SyncHandlerMethodArgumentResolver> resolvers) {
-		this.delegate.setArgumentResolvers(new ArrayList<>(resolvers));
+		this.delegate.setArgumentResolvers(resolvers);
 	}
 
 	/**
@@ -70,7 +68,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	public List<SyncHandlerMethodArgumentResolver> getResolvers() {
 		return this.delegate.getResolvers().stream()
 				.map(resolver -> (SyncHandlerMethodArgumentResolver) resolver)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**
@@ -102,22 +100,26 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	public HandlerResult invokeForHandlerResult(ServerWebExchange exchange,
 			BindingContext bindingContext, Object... providedArgs) {
 
-		MonoProcessor<HandlerResult> processor = MonoProcessor.create();
-		this.delegate.invoke(exchange, bindingContext, providedArgs).subscribeWith(processor);
+		CompletableFuture<HandlerResult> future =
+				this.delegate.invoke(exchange, bindingContext, providedArgs).toFuture();
 
-		if (processor.isTerminated()) {
-			Throwable ex = processor.getError();
-			if (ex != null) {
-				throw (ex instanceof ServerErrorException ? (ServerErrorException) ex :
-						new ServerErrorException("Failed to invoke: " + getShortLogMessage(), getMethod(), ex));
-			}
-			return processor.peek();
-		}
-		else {
-			// Should never happen...
+		if (!future.isDone()) {
 			throw new IllegalStateException(
 					"SyncInvocableHandlerMethod should have completed synchronously.");
 		}
+
+		Throwable failure;
+		try {
+			return future.get();
+		}
+		catch (ExecutionException ex) {
+			failure = ex.getCause();
+		}
+		catch (InterruptedException ex) {
+			failure = ex;
+		}
+		throw (new ServerErrorException(
+				"Failed to invoke: " + getShortLogMessage(), getMethod(), failure));
 	}
 
 }

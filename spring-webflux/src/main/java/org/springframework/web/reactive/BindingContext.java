@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,11 @@
  */
 
 package org.springframework.web.reactive;
+
+import java.util.Collections;
+import java.util.Map;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
@@ -35,6 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  * <p>Container for the default model for the request.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class BindingContext {
@@ -79,7 +85,7 @@ public class BindingContext {
 	 * @throws ServerErrorException if {@code @InitBinder} method invocation fails
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, @Nullable Object target, String name) {
-		WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(target, name);
+		WebExchangeDataBinder dataBinder = new ExtendedWebExchangeDataBinder(target, name);
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);
 		}
@@ -104,6 +110,24 @@ public class BindingContext {
 	 */
 	public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {
 		return createDataBinder(exchange, null, name);
+	}
+
+
+	/**
+	 * Extended variant of {@link WebExchangeDataBinder}, adding path variables.
+	 */
+	private static class ExtendedWebExchangeDataBinder extends WebExchangeDataBinder {
+
+		public ExtendedWebExchangeDataBinder(@Nullable Object target, String objectName) {
+			super(target, objectName);
+		}
+
+		@Override
+		public Mono<Map<String, Object>> getValuesToBind(ServerWebExchange exchange) {
+			return super.getValuesToBind(exchange).doOnNext(map ->
+					map.putAll(exchange.<Map<String, String>>getAttributeOrDefault(
+							HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap())));
+		}
 	}
 
 }

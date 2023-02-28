@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,24 +88,11 @@ class ProgrammaticTxMgmtTests {
 	@AfterTransaction
 	void afterTransaction() {
 		switch (this.methodName) {
-			case "commitTxAndStartNewTx":
-			case "commitTxButDoNotStartNewTx": {
-				assertUsers("Dogbert");
-				break;
-			}
-			case "rollbackTxAndStartNewTx":
-			case "rollbackTxButDoNotStartNewTx":
-			case "startTxWithExistingTransaction": {
-				assertUsers("Dilbert");
-				break;
-			}
-			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics": {
-				assertUsers("Dilbert", "Dogbert");
-				break;
-			}
-			default: {
-				fail("missing 'after transaction' assertion for test method: " + this.methodName);
-			}
+			case "commitTxAndStartNewTx", "commitTxButDoNotStartNewTx" -> assertUsers("Dogbert");
+			case "rollbackTxAndStartNewTx", "rollbackTxButDoNotStartNewTx", "startTxWithExistingTransaction" ->
+					assertUsers("Dilbert");
+			case "rollbackTxAndStartNewTxWithDefaultCommitSemantics" -> assertUsers("Dilbert", "Dogbert");
+			default -> fail("missing 'after transaction' assertion for test method: " + this.methodName);
 		}
 	}
 
@@ -134,7 +121,7 @@ class ProgrammaticTxMgmtTests {
 	}
 
 	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(propagation = Propagation.NEVER)
 	void startTxWithNonExistentTransactionContext() {
 		assertThatIllegalStateException().isThrownBy(TestTransaction::start);
 	}
@@ -145,7 +132,7 @@ class ProgrammaticTxMgmtTests {
 	}
 
 	@Test
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	@Transactional(propagation = Propagation.NEVER)
 	void endTxWithNonExistentTransactionContext() {
 		assertThatIllegalStateException().isThrownBy(TestTransaction::end);
 	}

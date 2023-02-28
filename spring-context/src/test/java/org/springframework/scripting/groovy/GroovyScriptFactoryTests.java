@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -283,7 +284,7 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testScriptedClassThatDoesNotHaveANoArgCtor() throws Exception {
-		ScriptSource script = mock(ScriptSource.class);
+		ScriptSource script = mock();
 		String badScript = "class Foo { public Foo(String foo) {}}";
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.suggestedClassName()).willReturn("someName");
@@ -296,7 +297,7 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testScriptedClassThatHasNoPublicNoArgCtor() throws Exception {
-		ScriptSource script = mock(ScriptSource.class);
+		ScriptSource script = mock();
 		String badScript = "class Foo { protected Foo() {} \n String toString() { 'X' }}";
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.suggestedClassName()).willReturn("someName");
@@ -318,7 +319,7 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testWithTwoClassesDefinedInTheOneGroovyFile_WrongClassFirst() throws Exception {
-		assertThatExceptionOfType(Exception.class).as("two classes defined in GroovyScriptFactory source, non-Messenger class defined first").isThrownBy(() -> {
+		assertThatException().as("two classes defined in GroovyScriptFactory source, non-Messenger class defined first").isThrownBy(() -> {
 				ApplicationContext ctx = new ClassPathXmlApplicationContext("twoClassesWrongOneFirst.xml", getClass());
 				ctx.getBean("messenger", Messenger.class);
 		});
@@ -351,7 +352,7 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testGetScriptedObjectDoesNotChokeOnNullInterfacesBeingPassedIn() throws Exception {
-		ScriptSource script = mock(ScriptSource.class);
+		ScriptSource script = mock();
 		given(script.getScriptAsString()).willReturn("class Bar {}");
 		given(script.suggestedClassName()).willReturn("someName");
 
@@ -462,7 +463,7 @@ public class GroovyScriptFactoryTests {
 	public void testAnonymousScriptDetected() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Map<?, Messenger> beans = ctx.getBeansOfType(Messenger.class);
-		assertThat(beans.size()).isEqualTo(4);
+		assertThat(beans).hasSize(4);
 		assertThat(ctx.getBean(MyBytecodeProcessor.class).processed.contains(
 				"org.springframework.scripting.groovy.GroovyMessenger2")).isTrue();
 	}

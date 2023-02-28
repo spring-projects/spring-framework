@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.MockHttpInputMessage;
-import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.web.testfixture.http.MockHttpInputMessage;
+import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,8 +63,10 @@ public class ByteArrayHttpMessageConverterTests {
 		byte[] body = new byte[]{0x1, 0x2};
 		converter.write(body, null, outputMessage);
 		assertThat(outputMessage.getBodyAsBytes()).as("Invalid result").isEqualTo(body);
-		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content-type").isEqualTo(new MediaType("application", "octet-stream"));
-		assertThat(outputMessage.getHeaders().getContentLength()).as("Invalid content-length").isEqualTo(2);
+		assertThat(outputMessage.getHeaders().getContentType())
+				.as("Invalid content-type").isEqualTo(MediaType.APPLICATION_OCTET_STREAM);
+		assertThat(outputMessage.getHeaders().getContentLength())
+				.as("Invalid content-length").isEqualTo(2);
 	}
 
 }

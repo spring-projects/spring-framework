@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,19 +18,20 @@ package org.springframework.web.servlet.support;
 
 import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterRegistration;
-import javax.servlet.FilterRegistration.Dynamic;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.FilterRegistration.Dynamic;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
 
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.core.Conventions;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.AbstractContextLoaderInitializer;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -77,13 +78,13 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() must not return null or empty");
+		Assert.state(StringUtils.hasLength(servletName), "getServletName() must not return null or empty");
 
 		WebApplicationContext servletAppContext = createServletApplicationContext();
-		Assert.notNull(servletAppContext, "createServletApplicationContext() must not return null");
+		Assert.state(servletAppContext != null, "createServletApplicationContext() must not return null");
 
 		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
-		Assert.notNull(dispatcherServlet, "createDispatcherServlet(WebApplicationContext) must not return null");
+		Assert.state(dispatcherServlet != null, "createDispatcherServlet(WebApplicationContext) must not return null");
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);

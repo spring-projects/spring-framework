@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,15 @@ public class WebExchangeDataBinderTests {
 		assertThat(this.testBean.isPostProcessed()).isFalse();
 	}
 
+	@Test // gh-25836
+	public void testFieldWithEmptyArrayIndex() {
+		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+		formData.add("stringArray[]", "ONE");
+		formData.add("stringArray[]", "TWO");
+		this.binder.bind(exchange(formData)).block(Duration.ofMillis(5000));
+		assertThat(this.testBean.getStringArray()).containsExactly("ONE", "TWO");
+	}
+
 	@Test
 	public void testFieldDefault() throws Exception {
 		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -205,7 +214,7 @@ public class WebExchangeDataBinderTests {
 		assertThat(bean.getSomeList()).isEqualTo(Arrays.asList("123", "abc"));
 		assertThat(bean.getSomeArray()).isEqualTo(new String[] {"dec", "456"});
 		assertThat(bean.getPart().filename()).isEqualTo("foo.txt");
-		assertThat(bean.getSomePartList().size()).isEqualTo(2);
+		assertThat(bean.getSomePartList()).hasSize(2);
 		assertThat(bean.getSomePartList().get(0).filename()).isEqualTo("foo.txt");
 		assertThat(bean.getSomePartList().get(1).filename()).isEqualTo("spring.png");
 	}

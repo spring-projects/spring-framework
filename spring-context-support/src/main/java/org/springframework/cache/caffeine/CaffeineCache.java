@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 4.3
+ * @see CaffeineCacheManager
  */
 public class CaffeineCache extends AbstractValueAdaptingCache {
 
@@ -82,16 +83,6 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		return this.cache;
 	}
 
-	@Override
-	@Nullable
-	public ValueWrapper get(Object key) {
-		if (this.cache instanceof LoadingCache) {
-			Object value = ((LoadingCache<Object, Object>) this.cache).get(key);
-			return toValueWrapper(value);
-		}
-		return super.get(key);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
@@ -102,6 +93,9 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 	@Override
 	@Nullable
 	protected Object lookup(Object key) {
+		if (this.cache instanceof LoadingCache) {
+			return ((LoadingCache<Object, Object>) this.cache).get(key);
+		}
 		return this.cache.getIfPresent(key);
 	}
 

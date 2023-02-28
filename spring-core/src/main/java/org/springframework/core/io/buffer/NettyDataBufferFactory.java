@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of the {@code DataBufferFactory} interface based on a
- * Netty {@link ByteBufAllocator}.
+ * Netty 4 {@link ByteBufAllocator}.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -61,6 +61,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 	}
 
 	@Override
+	@Deprecated
 	public NettyDataBuffer allocateBuffer() {
 		ByteBuf byteBuf = this.byteBufAllocator.buffer();
 		return new NettyDataBuffer(byteBuf, this);
@@ -113,20 +114,27 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 		return new NettyDataBuffer(composite, this);
 	}
 
+	@Override
+	public boolean isDirect() {
+		return this.byteBufAllocator.isDirectBufferPooled();
+	}
+
 	/**
 	 * Return the given Netty {@link DataBuffer} as a {@link ByteBuf}.
 	 * <p>Returns the {@linkplain NettyDataBuffer#getNativeBuffer() native buffer}
-	 * if {@code buffer} is a {@link NettyDataBuffer}; returns
+	 * if {@code dataBuffer} is a {@link NettyDataBuffer}; returns
 	 * {@link Unpooled#wrappedBuffer(ByteBuffer)} otherwise.
-	 * @param buffer the {@code DataBuffer} to return a {@code ByteBuf} for
+	 * @param dataBuffer the {@code DataBuffer} to return a {@code ByteBuf} for
 	 * @return the netty {@code ByteBuf}
 	 */
-	public static ByteBuf toByteBuf(DataBuffer buffer) {
-		if (buffer instanceof NettyDataBuffer) {
-			return ((NettyDataBuffer) buffer).getNativeBuffer();
+	public static ByteBuf toByteBuf(DataBuffer dataBuffer) {
+		if (dataBuffer instanceof NettyDataBuffer nettyDataBuffer) {
+			return nettyDataBuffer.getNativeBuffer();
 		}
 		else {
-			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
+			ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+			dataBuffer.toByteBuffer(byteBuffer);
+			return Unpooled.wrappedBuffer(byteBuffer);
 		}
 	}
 

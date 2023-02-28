@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.scheduling;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Date;
 
 import org.springframework.lang.Nullable;
@@ -30,24 +32,74 @@ import org.springframework.lang.Nullable;
 public interface TriggerContext {
 
 	/**
+	 * Return the clock to use for trigger calculation.
+	 * <p>Defaults to {@link Clock#systemDefaultZone()}.
+	 * @since 5.3
+	 * @see TaskScheduler#getClock()
+	 */
+	default Clock getClock() {
+		return Clock.systemDefaultZone();
+	}
+
+	/**
 	 * Return the last <i>scheduled</i> execution time of the task,
 	 * or {@code null} if not scheduled before.
+	 * <p>The default implementation delegates to {@link #lastScheduledExecution()}.
+	 * @deprecated as of 6.0, in favor on {@link #lastScheduledExecution()}
 	 */
 	@Nullable
-	Date lastScheduledExecutionTime();
+	@Deprecated(since = "6.0")
+	default Date lastScheduledExecutionTime() {
+		Instant instant = lastScheduledExecution();
+		return instant != null ? Date.from(instant) : null;
+	}
+
+	/**
+	 * Return the last <i>scheduled</i> execution time of the task,
+	 * or {@code null} if not scheduled before.
+	 * @since 6.0
+	 */
+	@Nullable
+	Instant lastScheduledExecution();
+
+	/**
+	 * Return the last <i>actual</i> execution time of the task,
+	 * or {@code null} if not scheduled before.
+	 * <p>The default implementation delegates to {@link #lastActualExecution()}.
+	 * @deprecated as of 6.0, in favor on {@link #lastActualExecution()}
+	 */
+	@Nullable
+	@Deprecated(since = "6.0")
+	default Date lastActualExecutionTime() {
+		Instant instant = lastActualExecution();
+		return instant != null ? Date.from(instant) : null;
+	}
 
 	/**
 	 * Return the last <i>actual</i> execution time of the task,
 	 * or {@code null} if not scheduled before.
 	 */
 	@Nullable
-	Date lastActualExecutionTime();
+	Instant lastActualExecution();
+
+	/**
+	 * Return the last completion time of the task,
+	 * or {@code null} if not scheduled before.
+	 * <p>The default implementation delegates to {@link #lastCompletion()}.
+	 * @deprecated as of 6.0, in favor on {@link #lastCompletion()}
+	 */
+	@Deprecated(since = "6.0")
+	@Nullable
+	default Date lastCompletionTime() {
+		Instant instant = lastCompletion();
+		return instant != null ? Date.from(instant) : null;
+	}
 
 	/**
 	 * Return the last completion time of the task,
 	 * or {@code null} if not scheduled before.
 	 */
 	@Nullable
-	Date lastCompletionTime();
+	Instant lastCompletion();
 
 }

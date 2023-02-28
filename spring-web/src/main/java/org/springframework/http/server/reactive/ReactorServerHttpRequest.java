@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,21 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.SSLSession;
 
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
+import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
+import reactor.netty.ChannelOperationsId;
 import reactor.netty.Connection;
 import reactor.netty.http.server.HttpServerRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpLogging;
+import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -48,7 +52,10 @@ import org.springframework.util.MultiValueMap;
  */
 class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
-	private static final AtomicLong logPrefixIndex = new AtomicLong(0);
+	private static final Log logger = HttpLogging.forLogName(ReactorServerHttpRequest.class);
+
+
+	private static final AtomicLong logPrefixIndex = new AtomicLong();
 
 
 	private final HttpServerRequest request;
@@ -59,7 +66,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory)
 			throws URISyntaxException {
 
-		super(initUri(request), "", initHeaders(request));
+		super(initUri(request), "", new NettyHeadersAdapter(request.requestHeaders()));
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;
@@ -67,11 +74,17 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
 		Assert.notNull(request, "HttpServerRequest must not be null");
-		return new URI(resolveBaseUrl(request).toString() + resolveRequestUri(request));
+		return new URI(resolveBaseUrl(request) + resolveRequestUri(request));
 	}
 
 	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
 		String scheme = getScheme(request);
+
+		InetSocketAddress hostAddress = request.hostAddress();
+		if (hostAddress != null) {
+			return new URI(scheme, null, hostAddress.getHostString(), hostAddress.getPort(), null, null, null);
+		}
+
 		String header = request.requestHeaders().get(HttpHeaderNames.HOST);
 		if (header != null) {
 			final int portIndex;
@@ -84,7 +97,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 			if (portIndex != -1) {
 				try {
 					return new URI(scheme, null, header.substring(0, portIndex),
-							Integer.parseInt(header.substring(portIndex + 1)), null, null, null);
+							Integer.parseInt(header, portIndex + 1, header.length(), 10), null, null, null);
 				}
 				catch (NumberFormatException ex) {
 					throw new URISyntaxException(header, "Unable to parse port", portIndex);
@@ -94,11 +107,8 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 				return new URI(scheme, header, null, null);
 			}
 		}
-		else {
-			InetSocketAddress localAddress = request.hostAddress();
-			return new URI(scheme, null, localAddress.getHostString(),
-					localAddress.getPort(), null, null, null);
-		}
+
+		throw new IllegalStateException("Neither local hostAddress nor HOST header available");
 	}
 
 	private static String getScheme(HttpServerRequest request) {
@@ -127,15 +137,9 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return uri;
 	}
 
-	private static HttpHeaders initHeaders(HttpServerRequest channel) {
-		NettyHeadersAdapter headersMap = new NettyHeadersAdapter(channel.requestHeaders());
-		return new HttpHeaders(headersMap);
-	}
-
-
 	@Override
-	public String getMethodValue() {
-		return this.request.method().name();
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.request.method().name());
 	}
 
 	@Override
@@ -151,19 +155,25 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public InetSocketAddress getRemoteAddress() {
-		return this.request.remoteAddress();
-	}
-
-	@Override
+	@Nullable
 	public InetSocketAddress getLocalAddress() {
 		return this.request.hostAddress();
 	}
 
 	@Override
 	@Nullable
+	public InetSocketAddress getRemoteAddress() {
+		return this.request.remoteAddress();
+	}
+
+	@Override
+	@Nullable
 	protected SslInfo initSslInfo() {
-		SslHandler sslHandler = ((Connection) this.request).channel().pipeline().get(SslHandler.class);
+		Channel channel = ((Connection) this.request).channel();
+		SslHandler sslHandler = channel.pipeline().get(SslHandler.class);
+		if (sslHandler == null && channel.parent() != null) { // HTTP/2
+			sslHandler = channel.parent().pipeline().get(SslHandler.class);
+		}
 		if (sslHandler != null) {
 			SSLSession session = sslHandler.engine().getSession();
 			return new DefaultSslInfo(session);
@@ -185,11 +195,27 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	@Nullable
 	protected String initId() {
-		if (this.request instanceof Connection) {
-			return ((Connection) this.request).channel().id().asShortText() +
+		if (this.request instanceof Connection connection) {
+			return connection.channel().id().asShortText() +
 					"-" + logPrefixIndex.incrementAndGet();
 		}
 		return null;
+	}
+
+	@Override
+	protected String initLogPrefix() {
+		String id = null;
+		if (this.request instanceof ChannelOperationsId operationsId) {
+			id = (logger.isDebugEnabled() ? operationsId.asLongText() : operationsId.asShortText());
+		}
+		if (id != null) {
+			return id;
+		}
+		if (this.request instanceof Connection connection) {
+			return connection.channel().id().asShortText() +
+					"-" + logPrefixIndex.incrementAndGet();
+		}
+		return getId();
 	}
 
 }

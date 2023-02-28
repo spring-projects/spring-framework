@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
@@ -71,17 +72,14 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 	private static final XMLResolver NO_OP_XML_RESOLVER =
-			(publicID, systemID, base, ns) -> StreamUtils.emptyInput();
+			(publicID, systemID, base, ns) -> InputStream.nullInputStream();
 
-	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<>(8);
-
-	static {
-		SUPPORTED_CLASSES.add(DOMSource.class);
-		SUPPORTED_CLASSES.add(SAXSource.class);
-		SUPPORTED_CLASSES.add(StAXSource.class);
-		SUPPORTED_CLASSES.add(StreamSource.class);
-		SUPPORTED_CLASSES.add(Source.class);
-	}
+	private static final Set<Class<?>> SUPPORTED_CLASSES = Set.of(
+			DOMSource.class,
+			SAXSource.class,
+			StAXSource.class,
+			StreamSource.class,
+			Source.class);
 
 
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -146,7 +144,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		InputStream body = inputMessage.getBody();
+		InputStream body = StreamUtils.nonClosing(inputMessage.getBody());
 		if (DOMSource.class == clazz) {
 			return (T) readDOMSource(body, inputMessage);
 		}
@@ -197,19 +195,21 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		}
 	}
 
-	@SuppressWarnings("deprecation")  // on JDK 9
 	private SAXSource readSAXSource(InputStream body, HttpInputMessage inputMessage) throws IOException {
 		try {
-			XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+			SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+			saxParserFactory.setNamespaceAware(true);
+			saxParserFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			saxParserFactory.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+			SAXParser saxParser = saxParserFactory.newSAXParser();
+			XMLReader xmlReader = saxParser.getXMLReader();
 			if (!isProcessExternalEntities()) {
 				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 			}
 			byte[] bytes = StreamUtils.copyToByteArray(body);
 			return new SAXSource(xmlReader, new InputSource(new ByteArrayInputStream(bytes)));
 		}
-		catch (SAXException ex) {
+		catch (SAXException | ParserConfigurationException ex) {
 			throw new HttpMessageNotReadableException(
 					"Could not parse document: " + ex.getMessage(), ex, inputMessage);
 		}

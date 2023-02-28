@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.nio.charset.StandardCharsets;
@@ -30,31 +31,30 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBuffer;
-import org.springframework.core.testfixture.io.buffer.DataBufferTestUtils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link PayloadUtils}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.2
  */
-public class PayloadUtilsTests {
+class PayloadUtilsTests {
 
 	private LeakAwareNettyDataBufferFactory nettyBufferFactory =
 			new LeakAwareNettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
 
-	private DefaultDataBufferFactory defaultBufferFactory = new DefaultDataBufferFactory();
-
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		this.nettyBufferFactory.checkForLeaks(Duration.ofSeconds(5));
 	}
 
 
 	@Test
-	public void retainAndReleaseWithNettyFactory() {
+	void retainAndReleaseWithNettyFactory() {
 		Payload payload = ByteBufPayload.create("sample data");
 		DataBuffer buffer = PayloadUtils.retainDataAndReleasePayload(payload, this.nettyBufferFactory);
 		try {
@@ -68,16 +68,16 @@ public class PayloadUtilsTests {
 	}
 
 	@Test
-	public void retainAndReleaseWithDefaultFactory() {
+	void retainAndReleaseWithDefaultFactory() {
 		Payload payload = ByteBufPayload.create("sample data");
-		DataBuffer buffer = PayloadUtils.retainDataAndReleasePayload(payload, this.defaultBufferFactory);
+		DataBuffer buffer = PayloadUtils.retainDataAndReleasePayload(payload, DefaultDataBufferFactory.sharedInstance);
 
 		assertThat(buffer).isInstanceOf(DefaultDataBuffer.class);
 		assertThat(payload.refCnt()).isEqualTo(0);
 	}
 
 	@Test
-	public void createWithNettyBuffers() {
+	void createWithNettyBuffers() {
 		NettyDataBuffer data = createNettyDataBuffer("sample data");
 		NettyDataBuffer metadata = createNettyDataBuffer("sample metadata");
 
@@ -93,25 +93,25 @@ public class PayloadUtilsTests {
 	}
 
 	@Test
-	public void createWithDefaultBuffers() {
+	void createWithDefaultBuffers() {
 		DataBuffer data = createDefaultDataBuffer("sample data");
 		DataBuffer metadata = createDefaultDataBuffer("sample metadata");
 		Payload payload = PayloadUtils.createPayload(data, metadata);
 
 		assertThat(payload).isInstanceOf(DefaultPayload.class);
-		assertThat(payload.getDataUtf8()).isEqualTo(dataBufferToString(data));
-		assertThat(payload.getMetadataUtf8()).isEqualTo(dataBufferToString(metadata));
+		assertThat(payload.getDataUtf8()).isEqualTo(data.toString(UTF_8));
+		assertThat(payload.getMetadataUtf8()).isEqualTo(metadata.toString(UTF_8));
 	}
 
 	@Test
-	public void createWithNettyAndDefaultBuffers() {
+	void createWithNettyAndDefaultBuffers() {
 		NettyDataBuffer data = createNettyDataBuffer("sample data");
 		DefaultDataBuffer metadata = createDefaultDataBuffer("sample metadata");
 		Payload payload = PayloadUtils.createPayload(data, metadata);
 		try {
 			assertThat(payload).isInstanceOf(ByteBufPayload.class);
 			assertThat(payload.data()).isSameAs(data.getNativeBuffer());
-			assertThat(payload.getMetadataUtf8()).isEqualTo(dataBufferToString(metadata));
+			assertThat(payload.getMetadataUtf8()).isEqualTo(metadata.toString(UTF_8));
 		}
 		finally {
 			payload.release();
@@ -119,13 +119,13 @@ public class PayloadUtilsTests {
 	}
 
 	@Test
-	public void createWithDefaultAndNettyBuffers() {
+	void createWithDefaultAndNettyBuffers() {
 		DefaultDataBuffer data = createDefaultDataBuffer("sample data");
 		NettyDataBuffer metadata = createNettyDataBuffer("sample metadata");
 		Payload payload = PayloadUtils.createPayload(data, metadata);
 		try {
 			assertThat(payload).isInstanceOf(ByteBufPayload.class);
-			assertThat(payload.getDataUtf8()).isEqualTo(dataBufferToString(data));
+			assertThat(payload.getDataUtf8()).isEqualTo(data.toString(UTF_8));
 			assertThat(payload.metadata()).isSameAs(metadata.getNativeBuffer());
 		}
 		finally {
@@ -134,7 +134,7 @@ public class PayloadUtilsTests {
 	}
 
 	@Test
-	public void createWithNettyBuffer() {
+	void createWithNettyBuffer() {
 		NettyDataBuffer data = createNettyDataBuffer("sample data");
 		Payload payload = PayloadUtils.createPayload(data);
 		try {
@@ -147,12 +147,12 @@ public class PayloadUtilsTests {
 	}
 
 	@Test
-	public void createWithDefaultBuffer() {
+	void createWithDefaultBuffer() {
 		DataBuffer data = createDefaultDataBuffer("sample data");
 		Payload payload = PayloadUtils.createPayload(data);
 
 		assertThat(payload).isInstanceOf(DefaultPayload.class);
-		assertThat(payload.getDataUtf8()).isEqualTo(dataBufferToString(data));
+		assertThat(payload.getDataUtf8()).isEqualTo(data.toString(UTF_8));
 	}
 
 
@@ -163,13 +163,9 @@ public class PayloadUtilsTests {
 	}
 
 	private DefaultDataBuffer createDefaultDataBuffer(String content) {
-		DefaultDataBuffer buffer = this.defaultBufferFactory.allocateBuffer();
+		DefaultDataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer(256);
 		buffer.write(content, StandardCharsets.UTF_8);
 		return buffer;
-	}
-
-	private String dataBufferToString(DataBuffer metadata) {
-		return DataBufferTestUtils.dumpString(metadata, StandardCharsets.UTF_8);
 	}
 
 }

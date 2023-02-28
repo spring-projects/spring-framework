@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ import static org.springframework.web.servlet.function.RouterFunctions.route;
 /**
  * @author Arjen Poutsma
  */
-public class ToStringVisitorTests {
+class ToStringVisitorTests {
 
 	@Test
-	public void nested() {
+	void nested() {
 		HandlerFunction<ServerResponse> handler = new SimpleHandlerFunction();
 		RouterFunction<ServerResponse> routerFunction = route()
 				.path("/foo", builder ->
@@ -52,16 +52,17 @@ public class ToStringVisitorTests {
 		routerFunction.accept(visitor);
 		String result = visitor.toString();
 
-		String expected = "/foo => {\n" +
-				" /bar => {\n" +
-				"  (GET && /baz) -> \n" +
-				" }\n" +
-				"}";
+		String expected = """
+				/foo => {
+					/bar => {
+						(GET && /baz) ->\s
+					}
+				}""".replace('\t', ' ');
 		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
-	public void predicates() {
+	void predicates() {
 		testPredicate(methods(HttpMethod.GET), "GET");
 		testPredicate(methods(HttpMethod.GET, HttpMethod.POST), "[GET, POST]");
 
@@ -70,7 +71,10 @@ public class ToStringVisitorTests {
 		testPredicate(pathExtension("foo"), "*.foo");
 
 		testPredicate(contentType(MediaType.APPLICATION_JSON), "Content-Type: application/json");
-		testPredicate(contentType(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN), "Content-Type: [application/json, text/plain]");
+
+		ToStringVisitor visitor = new ToStringVisitor();
+		contentType(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN).accept(visitor);
+		assertThat(visitor.toString()).matches("Content-Type: \\[.+, .+\\]").contains("application/json", "text/plain");
 
 		testPredicate(accept(MediaType.APPLICATION_JSON), "Accept: application/json");
 
@@ -91,9 +95,7 @@ public class ToStringVisitorTests {
 	private void testPredicate(RequestPredicate predicate, String expected) {
 		ToStringVisitor visitor = new ToStringVisitor();
 		predicate.accept(visitor);
-		String result = visitor.toString();
-
-		assertThat(result).isEqualTo(expected);
+		assertThat(visitor).asString().isEqualTo(expected);
 	}
 
 

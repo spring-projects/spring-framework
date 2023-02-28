@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,21 +65,19 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	@Override
 	public boolean getFeature(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
-		switch (name) {
-			case NAMESPACES_FEATURE_NAME:
-				return this.namespacesFeature;
-			case NAMESPACE_PREFIXES_FEATURE_NAME:
-				return this.namespacePrefixesFeature;
-			case IS_STANDALONE_FEATURE_NAME:
+		return switch (name) {
+			case NAMESPACES_FEATURE_NAME -> this.namespacesFeature;
+			case NAMESPACE_PREFIXES_FEATURE_NAME -> this.namespacePrefixesFeature;
+			case IS_STANDALONE_FEATURE_NAME -> {
 				if (this.isStandalone != null) {
-					return this.isStandalone;
+					yield this.isStandalone;
 				}
 				else {
 					throw new SAXNotSupportedException("startDocument() callback not completed yet");
 				}
-			default:
-				return super.getFeature(name);
-		}
+			}
+			default -> super.getFeature(name);
+		};
 	}
 
 	@Override

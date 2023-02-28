@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,13 @@ package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
 import java.security.Principal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,8 +33,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
@@ -59,7 +60,7 @@ class DefaultTransportRequest implements TransportRequest {
 
 	private final TransportType serverTransportType;
 
-	private SockJsMessageCodec codec;
+	private final SockJsMessageCodec codec;
 
 	@Nullable
 	private Principal user;
@@ -145,22 +146,47 @@ class DefaultTransportRequest implements TransportRequest {
 	}
 
 
-	public void connect(WebSocketHandler handler, SettableListenableFuture<WebSocketSession> future) {
+	@Deprecated
+	public void connect(WebSocketHandler handler,
+			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future) {
+
 		if (logger.isTraceEnabled()) {
 			logger.trace("Starting " + this);
 		}
-		ConnectCallback connectCallback = new ConnectCallback(handler, future);
+		ListenableConnectCallback connectCallback = new ListenableConnectCallback(handler, future);
 		scheduleConnectTimeoutTask(connectCallback);
 		this.transport.connect(this, handler).addCallback(connectCallback);
 	}
 
+	public void connect(WebSocketHandler handler, CompletableFuture<WebSocketSession> future) {
+		if (logger.isTraceEnabled()) {
+			logger.trace("Starting " + this);
+		}
+		CompletableConnectCallback connectCallback = new CompletableConnectCallback(handler, future);
+		scheduleConnectTimeoutTask(connectCallback);
+		this.transport.connectAsync(this, handler).whenComplete(connectCallback);
+	}
 
-	private void scheduleConnectTimeoutTask(ConnectCallback connectHandler) {
+
+	private void scheduleConnectTimeoutTask(ListenableConnectCallback connectHandler) {
 		if (this.timeoutScheduler != null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Scheduling connect to time out after " + this.timeoutValue + " ms.");
 			}
-			Date timeoutDate = new Date(System.currentTimeMillis() + this.timeoutValue);
+			Instant timeoutDate = Instant.now().plus(this.timeoutValue, ChronoUnit.MILLIS);
+			this.timeoutScheduler.schedule(connectHandler, timeoutDate);
+		}
+		else if (logger.isTraceEnabled()) {
+			logger.trace("Connect timeout task not scheduled (no TaskScheduler configured).");
+		}
+	}
+
+	private void scheduleConnectTimeoutTask(CompletableConnectCallback connectHandler) {
+		if (this.timeoutScheduler != null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Scheduling connect to time out after " + this.timeoutValue + " ms.");
+			}
+			Instant timeoutDate = Instant.now().plus(this.timeoutValue, ChronoUnit.MILLIS);
 			this.timeoutScheduler.schedule(connectHandler, timeoutDate);
 		}
 		else if (logger.isTraceEnabled()) {
@@ -181,15 +207,18 @@ class DefaultTransportRequest implements TransportRequest {
 	 * to connect. Also implements {@code Runnable} to handle a scheduled timeout
 	 * callback.
 	 */
-	private class ConnectCallback implements ListenableFutureCallback<WebSocketSession>, Runnable {
+	@SuppressWarnings("deprecation")
+	private class ListenableConnectCallback implements
+			org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession>, Runnable {
 
 		private final WebSocketHandler handler;
 
-		private final SettableListenableFuture<WebSocketSession> future;
+		private final org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future;
 
-		private final AtomicBoolean handled = new AtomicBoolean(false);
+		private final AtomicBoolean handled = new AtomicBoolean();
 
-		public ConnectCallback(WebSocketHandler handler, SettableListenableFuture<WebSocketSession> future) {
+		public ListenableConnectCallback(WebSocketHandler handler,
+				org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future) {
 			this.handler = handler;
 			this.future = future;
 		}
@@ -229,6 +258,81 @@ class DefaultTransportRequest implements TransportRequest {
 					logger.error("No more fallback transports after " + DefaultTransportRequest.this, ex);
 					if (ex != null) {
 						this.future.setException(ex);
+					}
+				}
+				if (isTimeoutFailure) {
+					try {
+						for (Runnable runnable : timeoutTasks) {
+							runnable.run();
+						}
+					}
+					catch (Throwable ex2) {
+						logger.error("Transport failed to run timeout tasks for " + DefaultTransportRequest.this, ex2);
+					}
+				}
+			}
+			else {
+				logger.error("Connect success/failure events already took place for " +
+						DefaultTransportRequest.this + ". Ignoring this additional failure event.", ex);
+			}
+		}
+	}
+
+	/**
+	 * Updates the given (global) future based success or failure to connect for
+	 * the entire SockJS request regardless of which transport actually managed
+	 * to connect. Also implements {@code Runnable} to handle a scheduled timeout
+	 * callback.
+	 */
+	private class CompletableConnectCallback
+			implements Runnable, BiConsumer<WebSocketSession, Throwable> {
+
+		private final WebSocketHandler handler;
+
+		private final CompletableFuture<WebSocketSession> future;
+
+		private final AtomicBoolean handled = new AtomicBoolean();
+
+		public CompletableConnectCallback(WebSocketHandler handler, CompletableFuture<WebSocketSession> future) {
+			this.handler = handler;
+			this.future = future;
+		}
+
+		@Override
+		public void accept(@Nullable WebSocketSession session, @Nullable Throwable throwable) {
+			if (session != null) {
+				if (this.handled.compareAndSet(false, true)) {
+					this.future.complete(session);
+				}
+				else if (logger.isErrorEnabled()) {
+					logger.error("Connect success/failure already handled for " + DefaultTransportRequest.this);
+				}
+			}
+			else if (throwable != null) {
+				handleFailure(throwable, false);
+			}
+		}
+
+		@Override
+		public void run() {
+			handleFailure(null, true);
+		}
+
+		private void handleFailure(@Nullable Throwable ex, boolean isTimeoutFailure) {
+			if (this.handled.compareAndSet(false, true)) {
+				if (isTimeoutFailure) {
+					String message = "Connect timed out for " + DefaultTransportRequest.this;
+					logger.error(message);
+					ex = new SockJsTransportFailureException(message, getSockJsUrlInfo().getSessionId(), ex);
+				}
+				if (fallbackRequest != null) {
+					logger.error(DefaultTransportRequest.this + " failed. Falling back on next transport.", ex);
+					fallbackRequest.connect(this.handler, this.future);
+				}
+				else {
+					logger.error("No more fallback transports after " + DefaultTransportRequest.this, ex);
+					if (ex != null) {
+						this.future.completeExceptionally(ex);
 					}
 				}
 				if (isTimeoutFailure) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@ package org.springframework.mock.web;
 
 import java.io.IOException;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -54,28 +53,24 @@ class MockFilterChainTests {
 
 	@Test
 	void constructorNullServlet() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new MockFilterChain((Servlet) null));
+		assertThatIllegalArgumentException().isThrownBy(() -> new MockFilterChain(null));
 	}
 
 	@Test
 	void constructorNullFilter() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new MockFilterChain(mock(Servlet.class), (Filter) null));
+		assertThatIllegalArgumentException().isThrownBy(() -> new MockFilterChain(mock(), (Filter) null));
 	}
 
 	@Test
 	void doFilterNullRequest() throws Exception {
 		MockFilterChain chain = new MockFilterChain();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				chain.doFilter(null, this.response));
+		assertThatIllegalArgumentException().isThrownBy(() -> chain.doFilter(null, this.response));
 	}
 
 	@Test
 	void doFilterNullResponse() throws Exception {
 		MockFilterChain chain = new MockFilterChain();
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				chain.doFilter(this.request, null));
+		assertThatIllegalArgumentException().isThrownBy(() -> chain.doFilter(this.request, null));
 	}
 
 	@Test
@@ -86,25 +81,25 @@ class MockFilterChainTests {
 		assertThat(chain.getRequest()).isEqualTo(request);
 		assertThat(chain.getResponse()).isEqualTo(response);
 
-		assertThatIllegalStateException().isThrownBy(() ->
-				chain.doFilter(this.request, this.response))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> chain.doFilter(this.request, this.response))
 			.withMessage("This FilterChain has already been called!");
 	}
 
 	@Test
 	void doFilterWithServlet() throws Exception {
-		Servlet servlet = mock(Servlet.class);
+		Servlet servlet = mock();
 		MockFilterChain chain = new MockFilterChain(servlet);
 		chain.doFilter(this.request, this.response);
 		verify(servlet).service(this.request, this.response);
-		assertThatIllegalStateException().isThrownBy(() ->
-				chain.doFilter(this.request, this.response))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> chain.doFilter(this.request, this.response))
 			.withMessage("This FilterChain has already been called!");
 	}
 
 	@Test
 	void doFilterWithServletAndFilters() throws Exception {
-		Servlet servlet = mock(Servlet.class);
+		Servlet servlet = mock();
 
 		MockFilter filter2 = new MockFilter(servlet);
 		MockFilter filter1 = new MockFilter(null);
@@ -117,8 +112,8 @@ class MockFilterChainTests {
 
 		verify(servlet).service(this.request, this.response);
 
-		assertThatIllegalStateException().isThrownBy(() ->
-				chain.doFilter(this.request, this.response))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> chain.doFilter(this.request, this.response))
 			.withMessage("This FilterChain has already been called!");
 	}
 

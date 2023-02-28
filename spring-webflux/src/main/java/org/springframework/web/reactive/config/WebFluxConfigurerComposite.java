@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.codec.ServerCodecConfigurer;
@@ -30,6 +29,7 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.method.annotation.ArgumentResolverConfigurer;
+import org.springframework.web.reactive.socket.server.WebSocketService;
 
 /**
  * A {@link WebFluxConfigurer} that delegates to one or more others.
@@ -70,6 +70,12 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 		this.delegates.forEach(delegate -> delegate.addResourceHandlers(registry));
 	}
 
+	@Nullable
+	@Override
+	public WebSocketService getWebSocketService() {
+		return createSingleBean(WebFluxConfigurer::getWebSocketService, WebSocketService.class);
+	}
+
 	@Override
 	public void configureArgumentResolvers(ArgumentResolverConfigurer configurer) {
 		this.delegates.forEach(delegate -> delegate.configureArgumentResolvers(configurer));
@@ -102,7 +108,7 @@ public class WebFluxConfigurerComposite implements WebFluxConfigurer {
 
 	@Nullable
 	private <T> T createSingleBean(Function<WebFluxConfigurer, T> factory, Class<T> beanType) {
-		List<T> result = this.delegates.stream().map(factory).filter(Objects::nonNull).collect(Collectors.toList());
+		List<T> result = this.delegates.stream().map(factory).filter(Objects::nonNull).toList();
 		if (result.isEmpty()) {
 			return null;
 		}

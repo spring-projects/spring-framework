@@ -39,7 +39,7 @@ import org.springframework.util.xml.XmlValidationModeDetector;
  * when starting your JVM. For example, to use the Oracle {@link DocumentBuilder},
  * you might start your application like as follows:
  *
- * <pre code="class">java -Djavax.xml.parsers.DocumentBuilderFactory=oracle.xml.jaxp.JXDocumentBuilderFactory MyMainClass</pre>
+ * <pre class="code">java -Djavax.xml.parsers.DocumentBuilderFactory=oracle.xml.jaxp.JXDocumentBuilderFactory MyMainClass</pre>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
@@ -121,6 +122,33 @@ class TestPropertySourceUtilsTests {
 				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
 	}
 
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void locationsAndPropertiesDuplicatedLocally() {
+		assertMergedTestPropertySources(LocallyDuplicatedLocationsAndProperties.class,
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+	}
+
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void locationsAndPropertiesDuplicatedOnSuperclass() {
+		assertMergedTestPropertySources(DuplicatedLocationsAndPropertiesPropertySources.class,
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+	}
+
+	/**
+	 * @since 5.3
+	 */
+	@Test
+	void locationsAndPropertiesDuplicatedOnEnclosingClass() {
+		assertMergedTestPropertySources(LocationsAndPropertiesPropertySources.Nested.class,
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+	}
+
 	@Test
 	void extendedLocationsAndProperties() {
 		assertMergedTestPropertySources(ExtendedPropertySources.class,
@@ -146,7 +174,6 @@ class TestPropertySourceUtilsTests {
 				asArray("classpath:/baz.properties"), KEY_VALUE_PAIR);
 	}
 
-
 	@Test
 	void addPropertiesFilesToEnvironmentWithNullContext() {
 		assertThatIllegalArgumentException()
@@ -164,7 +191,7 @@ class TestPropertySourceUtilsTests {
 	@Test
 	void addPropertiesFilesToEnvironmentWithNullEnvironment() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(ResourceLoader.class), FOO_LOCATIONS))
+			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(), FOO_LOCATIONS))
 			.withMessageContaining("'environment' must not be null");
 	}
 
@@ -178,7 +205,7 @@ class TestPropertySourceUtilsTests {
 	@Test
 	void addPropertiesFilesToEnvironmentWithEnvironmentAndNullLocations() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> addPropertiesFilesToEnvironment(new MockEnvironment(), mock(ResourceLoader.class), (String[]) null))
+			.isThrownBy(() -> addPropertiesFilesToEnvironment(new MockEnvironment(), mock(), (String[]) null))
 			.withMessageContaining("'locations' must not be null");
 	}
 
@@ -188,15 +215,15 @@ class TestPropertySourceUtilsTests {
 
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertThat(propertySources.size()).isEqualTo(0);
+		assertThat(propertySources).isEmpty();
 
 		String pair = "key = value";
 		ByteArrayResource resource = new ByteArrayResource(pair.getBytes(), "from inlined property: " + pair);
-		ResourceLoader resourceLoader = mock(ResourceLoader.class);
+		ResourceLoader resourceLoader = mock();
 		given(resourceLoader.getResource(anyString())).willReturn(resource);
 
 		addPropertiesFilesToEnvironment(environment, resourceLoader, FOO_LOCATIONS);
-		assertThat(propertySources.size()).isEqualTo(1);
+		assertThat(propertySources).hasSize(1);
 		assertThat(environment.getProperty("key")).isEqualTo("value");
 	}
 
@@ -248,10 +275,10 @@ class TestPropertySourceUtilsTests {
 		ConfigurableEnvironment environment = new MockEnvironment();
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertThat(propertySources.size()).isEqualTo(0);
+		assertThat(propertySources).isEmpty();
 		addInlinedPropertiesToEnvironment(environment, asArray("  "));
-		assertThat(propertySources.size()).isEqualTo(1);
-		assertThat(((Map) propertySources.iterator().next().getSource()).size()).isEqualTo(0);
+		assertThat(propertySources).hasSize(1);
+		assertThat(((Map<?, ?>) propertySources.iterator().next().getSource())).isEmpty();
 	}
 
 	@Test
@@ -266,9 +293,11 @@ class TestPropertySourceUtilsTests {
 			String[] expectedProperties) {
 
 		MergedTestPropertySources mergedPropertySources = buildMergedTestPropertySources(testClass);
-		assertThat(mergedPropertySources).isNotNull();
-		assertThat(mergedPropertySources.getLocations()).isEqualTo(expectedLocations);
-		assertThat(mergedPropertySources.getProperties()).isEqualTo(expectedProperties);
+		SoftAssertions.assertSoftly(softly -> {
+			softly.assertThat(mergedPropertySources).isNotNull();
+			softly.assertThat(mergedPropertySources.getLocations()).isEqualTo(expectedLocations);
+			softly.assertThat(mergedPropertySources.getProperties()).isEqualTo(expectedProperties);
+		});
 	}
 
 
@@ -315,6 +344,10 @@ class TestPropertySourceUtilsTests {
 
 	@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
 	static class LocationsAndPropertiesPropertySources {
+
+		@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
+		class Nested {
+		}
 	}
 
 	static class InheritedPropertySources extends LocationsAndPropertiesPropertySources {
@@ -334,6 +367,15 @@ class TestPropertySourceUtilsTests {
 
 	@TestPropertySource(locations = "/baz.properties", properties = "key = value", inheritLocations = false, inheritProperties = false)
 	static class OverriddenLocationsAndPropertiesPropertySources extends LocationsAndPropertiesPropertySources {
+	}
+
+	@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
+	@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
+	static class LocallyDuplicatedLocationsAndProperties {
+	}
+
+	@TestPropertySource(locations = { "/foo1.xml", "/foo2.xml" }, properties = { "k1a=v1a", "k1b: v1b" })
+	static class DuplicatedLocationsAndPropertiesPropertySources extends LocationsAndPropertiesPropertySources {
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -65,7 +67,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class VersionResourceResolver extends AbstractResourceResolver {
 
-	private AntPathMatcher pathMatcher = new AntPathMatcher();
+	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	/** Map from path pattern -> VersionStrategy. */
 	private final Map<String, VersionStrategy> versionStrategyMap = new LinkedHashMap<>();
@@ -75,7 +77,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * Set a Map with URL paths as keys and {@code VersionStrategy} as values.
 	 * <p>Supports direct URL matches and Ant-style pattern matches. For syntax
 	 * details, see the {@link AntPathMatcher} javadoc.
-	 * @param map map with URLs as keys and version strategies as values
+	 * @param map a map with URLs as keys and version strategies as values
 	 */
 	public void setStrategyMap(Map<String, VersionStrategy> map) {
 		this.versionStrategyMap.clear();
@@ -116,7 +118,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * in Java config).
 	 * <p>If not done already, variants of the given {@code pathPatterns}, prefixed with
 	 * the {@code version} will be also configured. For example, adding a {@code "/js/**"} path pattern
-	 * will also cofigure automatically a {@code "/v1.0.0/js/**"} with {@code "v1.0.0"} the
+	 * will also configure automatically a {@code "/v1.0.0/js/**"} with {@code "v1.0.0"} the
 	 * {@code version} String given as an argument.
 	 * @param version a version string
 	 * @param pathPatterns one or more resource URL path patterns,
@@ -236,7 +238,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	}
 
 
-	private class FileNameVersionedResource extends AbstractResource implements HttpResource {
+	private static class FileNameVersionedResource extends AbstractResource implements HttpResource {
 
 		private final Resource original;
 
@@ -283,9 +285,23 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
-		@Nullable
-		public String getFilename() {
-			return this.original.getFilename();
+		public InputStream getInputStream() throws IOException {
+			return this.original.getInputStream();
+		}
+
+		@Override
+		public ReadableByteChannel readableChannel() throws IOException {
+			return this.original.readableChannel();
+		}
+
+		@Override
+		public byte[] getContentAsByteArray() throws IOException {
+			return this.original.getContentAsByteArray();
+		}
+
+		@Override
+		public String getContentAsString(Charset charset) throws IOException {
+			return this.original.getContentAsString(charset);
 		}
 
 		@Override
@@ -304,20 +320,21 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
+		@Nullable
+		public String getFilename() {
+			return this.original.getFilename();
+		}
+
+		@Override
 		public String getDescription() {
 			return this.original.getDescription();
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
-			return this.original.getInputStream();
-		}
-
-		@Override
 		public HttpHeaders getResponseHeaders() {
-			HttpHeaders headers = (this.original instanceof HttpResource ?
-					((HttpResource) this.original).getResponseHeaders() : new HttpHeaders());
-			headers.setETag("\"" + this.version + "\"");
+			HttpHeaders headers = (this.original instanceof HttpResource httpResource ?
+					httpResource.getResponseHeaders() : new HttpHeaders());
+			headers.setETag("W/\"" + this.version + "\"");
 			return headers;
 		}
 	}

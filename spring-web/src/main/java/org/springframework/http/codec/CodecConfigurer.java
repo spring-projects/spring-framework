@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.lang.Nullable;
  * <li>Catch-all readers or writers, e.g. String with any media type.
  * </ol>
  *
- * <p>Typed and object readers are further sub-divided and ordered as follows:
+ * <p>Typed and object readers are further subdivided and ordered as follows:
  * <ol>
  * <li>Default HTTP reader and writer registrations.
  * <li>Custom readers and writers.
@@ -177,6 +177,65 @@ public interface CodecConfigurer {
 		void jaxb2Encoder(Encoder<?> encoder);
 
 		/**
+		 * Override the default Kotlin Serialization CBOR {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 6.0
+		 * @see org.springframework.http.codec.cbor.KotlinSerializationCborDecoder
+		 */
+		void kotlinSerializationCborDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Kotlin Serialization CBOR {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 6.0
+		 * @see org.springframework.http.codec.cbor.KotlinSerializationCborDecoder
+		 */
+		void kotlinSerializationCborEncoder(Encoder<?> encoder);
+
+		/**
+		 * Override the default Kotlin Serialization JSON {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 5.3
+		 * @see org.springframework.http.codec.json.KotlinSerializationJsonDecoder
+		 */
+		void kotlinSerializationJsonDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Kotlin Serialization JSON {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 5.3
+		 * @see org.springframework.http.codec.json.KotlinSerializationJsonEncoder
+		 */
+		void kotlinSerializationJsonEncoder(Encoder<?> encoder);
+
+		/**
+		 * Override the default Kotlin Serialization Protobuf {@code Decoder}.
+		 * @param decoder the decoder instance to use
+		 * @since 6.0
+		 * @see org.springframework.http.codec.protobuf.KotlinSerializationProtobufDecoder
+		 */
+		void kotlinSerializationProtobufDecoder(Decoder<?> decoder);
+
+		/**
+		 * Override the default Kotlin Serialization Protobuf {@code Encoder}.
+		 * @param encoder the encoder instance to use
+		 * @since 6.0
+		 * @see org.springframework.http.codec.protobuf.KotlinSerializationProtobufEncoder
+		 */
+		void kotlinSerializationProtobufEncoder(Encoder<?> encoder);
+
+		/**
+		 * Register a consumer to apply to default config instances. This can be
+		 * used to configure rather than replace a specific codec or multiple
+		 * codecs. The consumer is applied to every default {@link Encoder},
+		 * {@link Decoder}, {@link HttpMessageReader} and {@link HttpMessageWriter}
+		 * instance.
+		 * @param codecConsumer the consumer to apply
+		 * @since 5.3.4
+		 */
+		void configureDefaultCodec(Consumer<Object> codecConsumer);
+
+		/**
 		 * Configure a limit on the number of bytes that can be buffered whenever
 		 * the input stream needs to be aggregated. This can be a result of
 		 * decoding to a single {@code DataBuffer},
@@ -199,6 +258,24 @@ public interface CodecConfigurer {
 		 * @since 5.1
 		 */
 		void enableLoggingRequestDetails(boolean enable);
+
+		/**
+		 * Configure encoders or writers for use with
+		 * {@link org.springframework.http.codec.multipart.MultipartHttpMessageWriter
+		 * MultipartHttpMessageWriter}.
+		 * @since 6.0.3
+		 */
+		MultipartCodecs multipartCodecs();
+
+		/**
+		 * Configure the {@code HttpMessageReader} to use for multipart requests.
+		 * <p>Note that {@link #maxInMemorySize(int)} and/or
+		 * {@link #enableLoggingRequestDetails(boolean)}, if configured, will be
+		 * applied to the given reader, if applicable.
+		 * @param reader the message reader to use for multipart requests.
+		 * @since 6.0.3
+		 */
+		void multipartReader(HttpMessageReader<?> reader);
 	}
 
 
@@ -328,6 +405,29 @@ public interface CodecConfigurer {
 		 */
 		@Nullable
 		Boolean isEnableLoggingRequestDetails();
+	}
+
+
+	/**
+	 * Registry and container for multipart HTTP message writers.
+	 * @since 6.0.3
+	 */
+	interface MultipartCodecs {
+
+		/**
+		 * Add a Part {@code Encoder}, internally wrapped with
+		 * {@link EncoderHttpMessageWriter}.
+		 * @param encoder the encoder to add
+		 */
+		MultipartCodecs encoder(Encoder<?> encoder);
+
+		/**
+		 * Add a Part {@link HttpMessageWriter}. For writers of type
+		 * {@link EncoderHttpMessageWriter} consider using the shortcut
+		 * {@link #encoder(Encoder)} instead.
+		 * @param writer the writer to add
+		 */
+		MultipartCodecs writer(HttpMessageWriter<?> writer);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,23 @@ package org.springframework.web.servlet;
 
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.lang.Nullable;
 
 /**
- * Extension of {@link LocaleResolver}, adding support for a rich locale context
+ * Extension of {@link LocaleResolver} that adds support for a rich locale context
  * (potentially including locale and time zone information).
  *
+ * <p>Also provides {@code default} implementations of {@link #resolveLocale} and
+ * {@link #setLocale} which delegate to {@link #resolveLocaleContext} and
+ * {@link #setLocaleContext}, respectively.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  * @see org.springframework.context.i18n.LocaleContext
  * @see org.springframework.context.i18n.TimeZoneAwareLocaleContext
@@ -72,5 +78,36 @@ public interface LocaleContextResolver extends LocaleResolver {
 	 */
 	void setLocaleContext(HttpServletRequest request, @Nullable HttpServletResponse response,
 			@Nullable LocaleContext localeContext);
+
+	/**
+	 * Default implementation of {@link LocaleResolver#resolveLocale(HttpServletRequest)}
+	 * that delegates to {@link #resolveLocaleContext(HttpServletRequest)}, falling
+	 * back to {@link HttpServletRequest#getLocale()} if necessary.
+	 * @param request the request to resolve the locale for
+	 * @return the current locale (never {@code null})
+	 * @since 6.0
+	 */
+	@Override
+	default Locale resolveLocale(HttpServletRequest request) {
+		Locale locale = resolveLocaleContext(request).getLocale();
+		return (locale != null ? locale : request.getLocale());
+	}
+
+	/**
+	 * Default implementation of {@link LocaleResolver#setLocale(HttpServletRequest,
+	 * HttpServletResponse, Locale)} that delegates to
+	 * {@link #setLocaleContext(HttpServletRequest, HttpServletResponse, LocaleContext)},
+	 * using a {@link SimpleLocaleContext}.
+	 * @param request the request to be used for locale modification
+	 * @param response the response to be used for locale modification
+	 * @param locale the new locale, or {@code null} to clear the locale
+	 * @throws UnsupportedOperationException if the LocaleResolver implementation
+	 * does not support dynamic changing of the locale
+	 * @since 6.0
+	 */
+	@Override
+	default void setLocale(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Locale locale) {
+		setLocaleContext(request, response, (locale != null ? new SimpleLocaleContext(locale) : null));
+	}
 
 }

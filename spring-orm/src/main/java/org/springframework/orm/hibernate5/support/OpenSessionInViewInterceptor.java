@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	}
 
 	/**
-	 * Unbind the Hibernate {@code Session} from the thread and close it).
+	 * Unbind the Hibernate {@code Session} from the thread and close it.
 	 * @see TransactionSynchronizationManager
 	 */
 	@Override
@@ -186,11 +186,10 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 * @throws DataAccessResourceFailureException if the Session could not be created
 	 * @see FlushMode#MANUAL
 	 */
-	@SuppressWarnings("deprecation")
 	protected Session openSession() throws DataAccessResourceFailureException {
 		try {
 			Session session = obtainSessionFactory().openSession();
-			session.setFlushMode(FlushMode.MANUAL);
+			session.setHibernateFlushMode(FlushMode.MANUAL);
 			return session;
 		}
 		catch (HibernateException ex) {

@@ -16,8 +16,7 @@
 
 package org.springframework.dao.annotation;
 
-import javax.persistence.PersistenceException;
-
+import jakarta.persistence.PersistenceException;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +87,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(new NopInterceptor());
 		AopProxy aop = createAopProxy(pc);
-		assertThatExceptionOfType(AopConfigException.class).isThrownBy(
-				aop::getProxy);
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(aop::getProxy);
 	}
 
 	@Test
@@ -513,6 +512,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 			this.name = name;
 		}
 
+		@SuppressWarnings("unused")
 		public String getName() {
 			return this.name;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.jms;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.lang.Nullable;
@@ -44,7 +44,7 @@ public abstract class JmsException extends NestedRuntimeException {
 	 * Constructor that takes a message and a root cause.
 	 * @param msg the detail message
 	 * @param cause the cause of the exception. This argument is generally
-	 * expected to be a proper subclass of {@link javax.jms.JMSException},
+	 * expected to be a proper subclass of {@link jakarta.jms.JMSException},
 	 * but can also be a JNDI NamingException or the like.
 	 */
 	public JmsException(String msg, @Nullable Throwable cause) {
@@ -53,9 +53,9 @@ public abstract class JmsException extends NestedRuntimeException {
 
 	/**
 	 * Constructor that takes a plain root cause, intended for
-	 * subclasses mirroring corresponding {@code javax.jms} exceptions.
+	 * subclasses mirroring corresponding {@code jakarta.jms} exceptions.
 	 * @param cause the cause of the exception. This argument is generally
-	 * expected to be a proper subclass of {@link javax.jms.JMSException}.
+	 * expected to be a proper subclass of {@link jakarta.jms.JMSException}.
 	 */
 	public JmsException(@Nullable Throwable cause) {
 		super(cause != null ? cause.getMessage() : null, cause);
@@ -71,8 +71,8 @@ public abstract class JmsException extends NestedRuntimeException {
 	@Nullable
 	public String getErrorCode() {
 		Throwable cause = getCause();
-		if (cause instanceof JMSException) {
-			return ((JMSException) cause).getErrorCode();
+		if (cause instanceof JMSException jmsException) {
+			return jmsException.getErrorCode();
 		}
 		return null;
 	}
@@ -80,15 +80,15 @@ public abstract class JmsException extends NestedRuntimeException {
 	/**
 	 * Return the detail message, including the message from the linked exception
 	 * if there is one.
-	 * @see javax.jms.JMSException#getLinkedException()
+	 * @see jakarta.jms.JMSException#getLinkedException()
 	 */
 	@Override
 	@Nullable
 	public String getMessage() {
 		String message = super.getMessage();
 		Throwable cause = getCause();
-		if (cause instanceof JMSException) {
-			Exception linkedEx = ((JMSException) cause).getLinkedException();
+		if (cause instanceof JMSException jmsException) {
+			Exception linkedEx = jmsException.getLinkedException();
 			if (linkedEx != null) {
 				String linkedMessage = linkedEx.getMessage();
 				String causeMessage = cause.getMessage();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -75,9 +74,9 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Date date = new Date();
 
-	private Float myFloat = Float.valueOf(0.0f);
+	private Float myFloat = 0.0f;
 
-	private Collection<? super Object> friends = new LinkedList<>();
+	private Collection<? super Object> friends = new ArrayList<>();
 
 	private Set<?> someSet = new HashSet<>();
 
@@ -469,10 +468,9 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !(other instanceof TestBean)) {
+		if (!(other instanceof TestBean tb2)) {
 			return false;
 		}
-		TestBean tb2 = (TestBean) other;
 		return (ObjectUtils.nullSafeEquals(this.name, tb2.name) && this.age == tb2.age);
 	}
 

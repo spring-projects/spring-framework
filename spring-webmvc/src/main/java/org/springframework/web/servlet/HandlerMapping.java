@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 
@@ -44,7 +45,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Note: Implementations can implement the {@link org.springframework.core.Ordered}
  * interface to be able to specify a sorting order and thus a priority for getting
- * applied by DispatcherServlet. Non-Ordered instances get treated as lowest priority.
+ * applied by DispatcherServlet. Non-Ordered instances get treated as the lowest priority.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -68,7 +69,13 @@ public interface HandlerMapping {
 	 * {@link org.springframework.web.util.UrlPathHelper} could be the full path
 	 * or without the context path, decoded or not, etc.
 	 * @since 5.2
+	 * @deprecated as of 5.3 in favor of
+	 * {@link org.springframework.web.util.UrlPathHelper#PATH_ATTRIBUTE} and
+	 * {@link org.springframework.web.util.ServletRequestPathUtils#PATH_ATTRIBUTE}.
+	 * To access the cached path used for request mapping, use
+	 * {@link org.springframework.web.util.ServletRequestPathUtils#getCachedPathValue(ServletRequest)}.
 	 */
+	@Deprecated
 	String LOOKUP_PATH = HandlerMapping.class.getName() + ".lookupPath";
 
 	/**
@@ -128,6 +135,22 @@ public interface HandlerMapping {
 	 * this request attribute to be present in all scenarios.
 	 */
 	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
+
+
+	/**
+	 * Whether this {@code HandlerMapping} instance has been enabled to use parsed
+	 * {@link org.springframework.web.util.pattern.PathPattern}s in which case
+	 * the {@link DispatcherServlet} automatically
+	 * {@link org.springframework.web.util.ServletRequestPathUtils#parseAndCache parses}
+	 * the {@code RequestPath} to make it available for
+	 * {@link org.springframework.web.util.ServletRequestPathUtils#getParsedRequestPath
+	 * access} in {@code HandlerMapping}s, {@code HandlerInterceptor}s, and
+	 * other components.
+	 * @since 5.3
+	 */
+	default boolean usesPathPatterns() {
+		return false;
+	}
 
 	/**
 	 * Return a handler and any interceptors for this request. The choice may be made

@@ -77,7 +77,7 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	}
 
 	/**
-	 * Check whether a default JNDI environment, as in a Java EE environment,
+	 * Check whether a default JNDI environment, as in a Jakarta EE environment,
 	 * is available on this JVM.
 	 * @return {@code true} if a default InitialContext can be used,
 	 * {@code false} if not

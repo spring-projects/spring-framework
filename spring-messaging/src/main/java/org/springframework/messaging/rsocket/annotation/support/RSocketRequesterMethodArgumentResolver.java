@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class RSocketRequesterMethodArgumentResolver implements HandlerMethodArgu
 			return Mono.just(requester);
 		}
 		else if (RSocket.class.isAssignableFrom(type)) {
-			return Mono.just(requester.rsocket());
+			return Mono.justOrEmpty(requester.rsocket());
 		}
 		else {
 			return Mono.error(new IllegalArgumentException("Unexpected parameter type: " + parameter));

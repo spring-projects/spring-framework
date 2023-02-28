@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.aop.testfixture.advice;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Abstract superclass for counting advices etc.
@@ -31,7 +32,7 @@ import java.util.HashMap;
 public class MethodCounter implements Serializable {
 
 	/** Method name --> count, does not understand overloading */
-	private HashMap<String, Integer> map = new HashMap<>();
+	private Map<String, Integer> map = new HashMap<>();
 
 	private int allCount;
 

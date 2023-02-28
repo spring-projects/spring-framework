@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,8 +192,8 @@ class InternalPathPatternParser {
 	 * Just hit a ':' and want to jump over the regex specification for this
 	 * variable. pos will be pointing at the ':', we want to skip until the }.
 	 * <p>
-	 * Nested {...} pairs don't have to be escaped: <tt>/abc/{var:x{1,2}}/def</tt>
-	 * <p>An escaped } will not be treated as the end of the regex: <tt>/abc/{var:x\\{y:}/def</tt>
+	 * Nested {...} pairs don't have to be escaped: <code>/abc/{var:x{1,2}}/def</code>
+	 * <p>An escaped } will not be treated as the end of the regex: <code>/abc/{var:x\\{y:}/def</code>
 	 * <p>A separator that should not indicate the end of the regex can be escaped:
 	 */
 	private void skipCaptureRegex() {
@@ -236,7 +236,7 @@ class InternalPathPatternParser {
 
 	/**
 	 * After processing a separator, a quick peek whether it is followed by
-	 * (and only before the end of the pattern or the next separator).
+	 * a double wildcard (and only as the last path element).
 	 */
 	private boolean peekDoubleWildcard() {
 		if ((this.pos + 2) >= this.pathPatternLength) {
@@ -244,6 +244,11 @@ class InternalPathPatternParser {
 		}
 		if (this.pathPatternData[this.pos + 1] != '*' || this.pathPatternData[this.pos + 2] != '*') {
 			return false;
+		}
+		char separator = this.parser.getPathOptions().separator();
+		if ((this.pos + 3) < this.pathPatternLength && this.pathPatternData[this.pos + 3] == separator) {
+			throw new PatternParseException(this.pos, this.pathPatternData,
+					PatternMessage.NO_MORE_DATA_EXPECTED_AFTER_CAPTURE_THE_REST);
 		}
 		return (this.pos + 3 == this.pathPatternLength);
 	}

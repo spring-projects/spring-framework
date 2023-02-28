@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	private <T> HandlerMethodArgumentResolver stubResolver(Mono<Object> stubValue) {
-		HandlerMethodArgumentResolver resolver = mock(HandlerMethodArgumentResolver.class);
+		HandlerMethodArgumentResolver resolver = mock();
 		given(resolver.supportsParameter(any())).willReturn(true);
 		given(resolver.resolveArgument(any(), any(), any())).willReturn(stubValue);
 		return resolver;
@@ -292,7 +292,8 @@ public class InvocableHandlerMethodTests {
 		}
 
 		private Flux<DataBuffer> getBody(String body) {
-			return Flux.just(new DefaultDataBufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8)));
+			byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+			return Flux.just(DefaultDataBufferFactory.sharedInstance.wrap(bytes));
 		}
 	}
 

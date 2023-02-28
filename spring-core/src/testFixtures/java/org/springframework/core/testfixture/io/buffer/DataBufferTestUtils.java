@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.core.testfixture.io.buffer;
-
-import java.nio.charset.Charset;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
@@ -43,20 +41,6 @@ public abstract class DataBufferTestUtils {
 		byte[] bytes = new byte[buffer.readableByteCount()];
 		buffer.read(bytes);
 		return bytes;
-	}
-
-	/**
-	 * Dump all the bytes in the given data buffer, and returns them as a string.
-	 * <p>Note that this method reads the entire buffer into the heap,  which might
-	 * consume a lot of memory.
-	 * @param buffer the data buffer to dump the string contents of
-	 * @param charset the charset of the data
-	 * @return the string representation of the given data buffer
-	 */
-	public static String dumpString(DataBuffer buffer, Charset charset) {
-		Assert.notNull(charset, "'charset' must not be null");
-		byte[] bytes = dumpBytes(buffer);
-		return new String(bytes, charset);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -99,6 +99,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-5.3.5">Section 5.3.5 of RFC 7231</a>
 	 */
 	public static final String ACCEPT_LANGUAGE = "Accept-Language";
+	/**
+	 * The HTTP {@code Accept-Patch} header field name.
+	 * @since 5.3.6
+	 * @see <a href="https://tools.ietf.org/html/rfc5789#section-3.1">Section 3.1 of RFC 5789</a>
+	 */
+	public static final String ACCEPT_PATCH = "Accept-Patch";
 	/**
 	 * The HTTP {@code Accept-Ranges} header field name.
 	 * @see <a href="https://tools.ietf.org/html/rfc7233#section-2.3">Section 5.3.5 of RFC 7233</a>
@@ -385,7 +391,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * An empty {@code HttpHeaders} instance (immutable).
 	 * @since 5.0
 	 */
-	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new HttpHeaders(new LinkedMultiValueMap<>(0)));
+	public static final HttpHeaders EMPTY = new ReadOnlyHttpHeaders(new LinkedMultiValueMap<>());
 
 	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
@@ -414,6 +420,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	};
 
 
+	@SuppressWarnings("serial")
 	final MultiValueMap<String, String> headers;
 
 
@@ -479,7 +486,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 						range.getWeight() == Locale.LanguageRange.MAX_WEIGHT ?
 								range.getRange() :
 								range.getRange() + ";q=" + decimal.format(range.getWeight()))
-				.collect(Collectors.toList());
+				.toList();
 		set(ACCEPT_LANGUAGE, toCommaDelimitedString(values));
 	}
 
@@ -504,7 +511,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public void setAcceptLanguageAsLocales(List<Locale> locales) {
 		setAcceptLanguage(locales.stream()
 				.map(locale -> new Locale.LanguageRange(locale.toLanguageTag()))
-				.collect(Collectors.toList()));
+				.toList());
 	}
 
 	/**
@@ -522,7 +529,26 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		return ranges.stream()
 				.map(range -> Locale.forLanguageTag(range.getRange()))
 				.filter(locale -> StringUtils.hasText(locale.getDisplayName()))
-				.collect(Collectors.toList());
+				.toList();
+	}
+
+	/**
+	 * Set the list of acceptable {@linkplain MediaType media types} for
+	 * {@code PATCH} methods, as specified by the {@code Accept-Patch} header.
+	 * @since 5.3.6
+	 */
+	public void setAcceptPatch(List<MediaType> mediaTypes) {
+		set(ACCEPT_PATCH, MediaType.toString(mediaTypes));
+	}
+
+	/**
+	 * Return the list of acceptable {@linkplain MediaType media types} for
+	 * {@code PATCH} methods, as specified by the {@code Accept-Patch} header.
+	 * <p>Returns an empty list when the acceptable media types are unspecified.
+	 * @since 5.3.6
+	 */
+	public List<MediaType> getAcceptPatch() {
+		return MediaType.parseMediaTypes(get(ACCEPT_PATCH));
 	}
 
 	/**
@@ -564,18 +590,19 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Access-Control-Allow-Methods} response header.
 	 */
 	public List<HttpMethod> getAccessControlAllowMethods() {
-		List<HttpMethod> result = new ArrayList<>();
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+			List<HttpMethod> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
-				HttpMethod resolved = HttpMethod.resolve(token);
-				if (resolved != null) {
-					result.add(resolved);
-				}
+				HttpMethod method = HttpMethod.valueOf(token);
+				result.add(method);
 			}
+			return result;
 		}
-		return result;
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**
@@ -657,7 +684,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Nullable
 	public HttpMethod getAccessControlRequestMethod() {
-		return HttpMethod.resolve(getFirst(ACCESS_CONTROL_REQUEST_METHOD));
+		String requestMethod = getFirst(ACCESS_CONTROL_REQUEST_METHOD);
+		if (requestMethod != null) {
+			return HttpMethod.valueOf(requestMethod);
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -718,17 +751,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String value = getFirst(ALLOW);
 		if (StringUtils.hasLength(value)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-			List<HttpMethod> result = new ArrayList<>(tokens.length);
+			Set<HttpMethod> result = new LinkedHashSet<>(tokens.length);
 			for (String token : tokens) {
-				HttpMethod resolved = HttpMethod.resolve(token);
-				if (resolved != null) {
-					result.add(resolved);
-				}
+				HttpMethod method = HttpMethod.valueOf(token);
+				result.add(method);
 			}
-			return EnumSet.copyOf(result);
+			return result;
 		}
 		else {
-			return EnumSet.noneOf(HttpMethod.class);
+			return Collections.emptySet();
 		}
 	}
 
@@ -860,8 +891,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public void setContentDispositionFormData(String name, @Nullable String filename) {
 		Assert.notNull(name, "Name must not be null");
-		ContentDisposition.Builder disposition = ContentDisposition.builder("form-data").name(name);
-		if (filename != null) {
+		ContentDisposition.Builder disposition = ContentDisposition.formData().name(name);
+		if (StringUtils.hasText(filename)) {
 			disposition.filename(filename);
 		}
 		setContentDisposition(disposition.build());
@@ -888,7 +919,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public ContentDisposition getContentDisposition() {
 		String contentDisposition = getFirst(CONTENT_DISPOSITION);
-		if (contentDisposition != null) {
+		if (StringUtils.hasText(contentDisposition)) {
 			return ContentDisposition.parse(contentDisposition);
 		}
 		return ContentDisposition.empty();
@@ -906,11 +937,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return the first {@link Locale} of the content languages,
-	 * as specified by the {@literal Content-Language} header.
-	 * <p>Returns {@code null} when the content language is unknown.
-	 * <p>Use {@code getValuesAsList(CONTENT_LANGUAGE)} if you need
-	 * to get multiple content languages.</p>
+	 * Get the first {@link Locale} of the content languages, as specified by the
+	 * {@code Content-Language} header.
+	 * <p>Use {@link #getValuesAsList(String)} if you need to get multiple content
+	 * languages.
+	 * @return the first {@code Locale} of the content languages, or {@code null}
+	 * if unknown
 	 * @since 5.0
 	 */
 	@Nullable
@@ -958,7 +990,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the {@linkplain MediaType media type} of the body, as specified
 	 * by the {@code Content-Type} header.
-	 * <p>Returns {@code null} when the content-type is unknown.
+	 * <p>Returns {@code null} when the {@code Content-Type} header is not set.
+	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 */
 	@Nullable
 	public MediaType getContentType() {
@@ -1140,6 +1173,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the value of the {@code If-Match} header.
+	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
 	public List<String> getIfMatch() {
@@ -1199,6 +1233,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Return the value of the {@code If-None-Match} header.
+	 * @throws IllegalArgumentException if parsing fails
 	 */
 	public List<String> getIfNoneMatch() {
 		return getETagValuesAsList(IF_NONE_MATCH);
@@ -1502,8 +1537,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Return all values of a given header name,
-	 * even if this header is set multiple times.
+	 * Return all values of a given header name, even if this header is set
+	 * multiple times.
+	 * <p>This method supports double-quoted values, as described in
+	 * <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-5.5-8">RFC
+	 * 9110, section 5.5</a>.
 	 * @param headerName the header name
 	 * @return all associated values
 	 * @since 4.3
@@ -1514,12 +1552,59 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			List<String> result = new ArrayList<>();
 			for (String value : values) {
 				if (value != null) {
-					Collections.addAll(result, StringUtils.tokenizeToStringArray(value, ","));
+					result.addAll(tokenizeQuoted(value));
 				}
 			}
 			return result;
 		}
 		return Collections.emptyList();
+	}
+
+	private static List<String> tokenizeQuoted(String str) {
+		List<String> tokens = new ArrayList<>();
+		boolean quoted = false;
+		boolean trim = true;
+		StringBuilder builder = new StringBuilder(str.length());
+		for (int i = 0; i < str.length(); ++i) {
+			char ch = str.charAt(i);
+			if (ch == '"') {
+				if (builder.isEmpty()) {
+					quoted = true;
+				}
+				else if (quoted) {
+					quoted = false;
+					trim = false;
+				}
+				else {
+					builder.append(ch);
+				}
+			}
+			else if (ch == '\\' && quoted && i < str.length() - 1) {
+				builder.append(str.charAt(++i));
+			}
+			else if (ch == ',' && !quoted) {
+				addToken(builder, tokens, trim);
+				builder.setLength(0);
+				trim = false;
+			}
+			else if (quoted || (!builder.isEmpty() && trim) || !Character.isWhitespace(ch)) {
+				builder.append(ch);
+			}
+		}
+		if (!builder.isEmpty()) {
+			addToken(builder, tokens, trim);
+		}
+		return tokens;
+	}
+
+	private static void addToken(StringBuilder builder, List<String> tokens, boolean trim) {
+		String token = builder.toString();
+		if (trim) {
+			token = token.trim();
+		}
+		if (!token.isEmpty()) {
+			tokens.add(token);
+		}
 	}
 
 	/**
@@ -1542,6 +1627,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Retrieve a combined result from the field values of the ETag header.
 	 * @param headerName the header name
 	 * @return the combined result
+	 * @throws IllegalArgumentException if parsing fails
 	 * @since 4.3
 	 */
 	protected List<String> getETagValuesAsList(String headerName) {
@@ -1571,7 +1657,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Retrieve a combined result from the field values of multi-valued headers.
+	 * Retrieve a combined result from the field values of multivalued headers.
 	 * @param headerName the header name
 	 * @return the combined result
 	 * @since 4.3
@@ -1737,15 +1823,21 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	@Override
-	public boolean equals(@Nullable Object other) {
-		if (this == other) {
+	public boolean equals(@Nullable Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(other instanceof HttpHeaders)) {
+		if (!(obj instanceof HttpHeaders other)) {
 			return false;
 		}
-		HttpHeaders otherHeaders = (HttpHeaders) other;
-		return this.headers.equals(otherHeaders.headers);
+		return unwrap(this).equals(unwrap(other));
+	}
+
+	private static MultiValueMap<String, String> unwrap(HttpHeaders headers) {
+		while (headers.headers instanceof HttpHeaders httpHeaders) {
+			headers = httpHeaders;
+		}
+		return headers.headers;
 	}
 
 	@Override
@@ -1760,20 +1852,34 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 
 	/**
-	 * Return an {@code HttpHeaders} object that can only be read, not written to.
+	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
+	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
+	 * @param headers the headers to expose
+	 * @return a read-only variant of the headers, or the original headers as-is
+	 * (in case it happens to be a read-only {@code HttpHeaders} instance already)
+	 * @since 5.3
 	 */
-	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
-		Assert.notNull(headers, "HttpHeaders must not be null");
-		if (headers instanceof ReadOnlyHttpHeaders) {
-			return headers;
-		}
-		else {
-			return new ReadOnlyHttpHeaders(headers);
-		}
+	public static HttpHeaders readOnlyHttpHeaders(MultiValueMap<String, String> headers) {
+		return (headers instanceof HttpHeaders httpHeaders ? readOnlyHttpHeaders(httpHeaders) :
+				new ReadOnlyHttpHeaders(headers));
 	}
 
 	/**
-	 * Return an {@code HttpHeaders} object that can be read and written to.
+	 * Apply a read-only {@code HttpHeaders} wrapper around the given headers, if necessary.
+	 * <p>Also caches the parsed representations of the "Accept" and "Content-Type" headers.
+	 * @param headers the headers to expose
+	 * @return a read-only variant of the headers, or the original headers as-is
+	 */
+	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
+		Assert.notNull(headers, "HttpHeaders must not be null");
+		return (headers instanceof ReadOnlyHttpHeaders ? headers : new ReadOnlyHttpHeaders(headers.headers));
+	}
+
+	/**
+	 * Remove any read-only wrapper that may have been previously applied around
+	 * the given headers via {@link #readOnlyHttpHeaders(HttpHeaders)}.
+	 * @param headers the headers to expose
+	 * @return a writable variant of the headers, or the original headers as-is
 	 * @since 5.1.1
 	 */
 	public static HttpHeaders writableHttpHeaders(HttpHeaders headers) {
@@ -1781,12 +1887,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (headers == EMPTY) {
 			return new HttpHeaders();
 		}
-		else if (headers instanceof ReadOnlyHttpHeaders) {
-			return new HttpHeaders(headers.headers);
-		}
-		else {
-			return headers;
-		}
+		return (headers instanceof ReadOnlyHttpHeaders ? new HttpHeaders(headers.headers) : headers);
 	}
 
 	/**

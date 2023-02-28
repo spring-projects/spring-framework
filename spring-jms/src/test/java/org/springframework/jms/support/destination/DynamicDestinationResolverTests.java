@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.jms.support.destination;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.jms.TopicSession;
-
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Queue;
+import jakarta.jms.QueueSession;
+import jakarta.jms.Session;
+import jakarta.jms.Topic;
+import jakarta.jms.TopicSession;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.jms.StubQueue;
@@ -44,7 +43,7 @@ public class DynamicDestinationResolverTests {
 	@Test
 	public void resolveWithPubSubTopicSession() throws Exception {
 		Topic expectedDestination = new StubTopic();
-		TopicSession session = mock(TopicSession.class);
+		TopicSession session = mock();
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination);
 		testResolveDestination(session, expectedDestination, true);
 	}
@@ -52,7 +51,7 @@ public class DynamicDestinationResolverTests {
 	@Test
 	public void resolveWithPubSubVanillaSession() throws Exception {
 		Topic expectedDestination = new StubTopic();
-		Session session = mock(Session.class);
+		Session session = mock();
 		given(session.createTopic(DESTINATION_NAME)).willReturn(expectedDestination);
 		testResolveDestination(session, expectedDestination, true);
 	}
@@ -60,7 +59,7 @@ public class DynamicDestinationResolverTests {
 	@Test
 	public void resolveWithPointToPointQueueSession() throws Exception {
 		Queue expectedDestination = new StubQueue();
-		Session session = mock(QueueSession.class);
+		QueueSession session = mock();
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);
 		testResolveDestination(session, expectedDestination, false);
 	}
@@ -68,7 +67,7 @@ public class DynamicDestinationResolverTests {
 	@Test
 	public void resolveWithPointToPointVanillaSession() throws Exception {
 		Queue expectedDestination = new StubQueue();
-		Session session = mock(Session.class);
+		Session session = mock();
 		given(session.createQueue(DESTINATION_NAME)).willReturn(expectedDestination);
 		testResolveDestination(session, expectedDestination, false);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,23 +34,22 @@ package org.springframework.core.env;
  * <p><em>Properties</em> play an important role in almost all applications, and may
  * originate from a variety of sources: properties files, JVM system properties, system
  * environment variables, JNDI, servlet context parameters, ad-hoc Properties objects,
- * Maps, and so on. The role of the environment object with relation to properties is to
- * provide the user with a convenient service interface for configuring property sources
- * and resolving properties from them.
+ * Maps, and so on. The role of the {@code Environment} object with relation to properties
+ * is to provide the user with a convenient service interface for configuring property
+ * sources and resolving properties from them.
  *
  * <p>Beans managed within an {@code ApplicationContext} may register to be {@link
  * org.springframework.context.EnvironmentAware EnvironmentAware} or {@code @Inject} the
  * {@code Environment} in order to query profile state or resolve properties directly.
  *
  * <p>In most cases, however, application-level beans should not need to interact with the
- * {@code Environment} directly but instead may have to have {@code ${...}} property
+ * {@code Environment} directly but instead may request to have {@code ${...}} property
  * values replaced by a property placeholder configurer such as
  * {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  * PropertySourcesPlaceholderConfigurer}, which itself is {@code EnvironmentAware} and
- * as of Spring 3.1 is registered by default when using
- * {@code <context:property-placeholder/>}.
+ * registered by default when using {@code <context:property-placeholder/>}.
  *
- * <p>Configuration of the environment object must be done through the
+ * <p>Configuration of the {@code Environment} object must be done through the
  * {@code ConfigurableEnvironment} interface, returned from all
  * {@code AbstractApplicationContext} subclass {@code getEnvironment()} methods. See
  * {@link ConfigurableEnvironment} Javadoc for usage examples demonstrating manipulation

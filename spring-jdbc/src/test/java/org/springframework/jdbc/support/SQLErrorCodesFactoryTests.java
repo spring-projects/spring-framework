@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.io.Resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -39,6 +40,7 @@ import static org.mockito.Mockito.verify;
  * @author Rod Johnson
  * @author Thomas Risberg
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class SQLErrorCodesFactoryTests {
 
@@ -183,7 +185,7 @@ public class SQLErrorCodesFactoryTests {
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length).isEqualTo(2);
+		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()).hasSize(2);
 		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[0]).isEqualTo("1");
 		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[1]).isEqualTo("2");
 	}
@@ -204,7 +206,7 @@ public class SQLErrorCodesFactoryTests {
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length).isEqualTo(0);
+		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()).isEmpty();
 	}
 
 	/**
@@ -224,22 +226,26 @@ public class SQLErrorCodesFactoryTests {
 
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
-		assertThat(sf.getErrorCodes("Oracle").getCustomTranslations().length).isEqualTo(1);
+		assertThat(sf.getErrorCodes("Oracle").getCustomTranslations()).hasSize(1);
 		CustomSQLErrorCodesTranslation translation =
 				sf.getErrorCodes("Oracle").getCustomTranslations()[0];
 		assertThat(translation.getExceptionClass()).isEqualTo(CustomErrorCodeException.class);
-		assertThat(translation.getErrorCodes().length).isEqualTo(1);
+		assertThat(translation.getErrorCodes()).hasSize(1);
 	}
 
 	@Test
 	public void testDataSourceWithNullMetadata() throws Exception {
-		Connection connection = mock(Connection.class);
-		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock();
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
 		assertIsEmpty(sec);
+		verify(connection).close();
 
+		reset(connection);
+		sec = SQLErrorCodesFactory.getInstance().resolveErrorCodes(dataSource);
+		assertThat(sec).isNull();
 		verify(connection).close();
 	}
 
@@ -247,39 +253,28 @@ public class SQLErrorCodesFactoryTests {
 	public void testGetFromDataSourceWithSQLException() throws Exception {
 		SQLException expectedSQLException = new SQLException();
 
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willThrow(expectedSQLException);
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
 		assertIsEmpty(sec);
-	}
 
-	private void assertIsEmpty(SQLErrorCodes sec) {
-		// Codes should be empty
-		assertThat(sec.getBadSqlGrammarCodes().length).isEqualTo(0);
-		assertThat(sec.getDataIntegrityViolationCodes().length).isEqualTo(0);
+		sec = SQLErrorCodesFactory.getInstance().resolveErrorCodes(dataSource);
+		assertThat(sec).isNull();
 	}
 
 	private SQLErrorCodes getErrorCodesFromDataSource(String productName, SQLErrorCodesFactory factory) throws Exception {
-		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		DatabaseMetaData databaseMetaData = mock();
 		given(databaseMetaData.getDatabaseProductName()).willReturn(productName);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 
-		SQLErrorCodesFactory secf = null;
-		if (factory != null) {
-			secf = factory;
-		}
-		else {
-			secf = SQLErrorCodesFactory.getInstance();
-		}
-
+		SQLErrorCodesFactory secf = (factory != null ? factory : SQLErrorCodesFactory.getInstance());
 		SQLErrorCodes sec = secf.getErrorCodes(dataSource);
-
 
 		SQLErrorCodes sec2 = secf.getErrorCodes(dataSource);
 		assertThat(sec).as("Cached per DataSource").isSameAs(sec2);
@@ -373,6 +368,11 @@ public class SQLErrorCodesFactoryTests {
 		assertIsEmpty(sec);
 		sec = getErrorCodesFromDataSource("/DB0/", factory);
 		assertIsEmpty(sec);
+	}
+
+	private void assertIsEmpty(SQLErrorCodes sec) {
+		assertThat(sec.getBadSqlGrammarCodes()).isEmpty();
+		assertThat(sec.getDataIntegrityViolationCodes()).isEmpty();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * A test fixture with a test sub-class of AbstractMappingContentNegotiationStrategy.
+ * A test fixture with a test subclass of AbstractMappingContentNegotiationStrategy.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -42,7 +42,7 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertThat(mediaTypes.size()).isEqualTo(1);
+		assertThat(mediaTypes).hasSize(1);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("application/json");
 	}
 
@@ -73,7 +73,7 @@ public class MappingContentNegotiationStrategyTests {
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(null);
 
-		assertThat(mediaTypes.size()).isEqualTo(1);
+		assertThat(mediaTypes).hasSize(1);
 		assertThat(mediaTypes.get(0).toString()).isEqualTo("application/xml");
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package org.springframework.core;
 
 import java.lang.annotation.Annotation;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.lang.reflect.Method;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
@@ -34,10 +32,11 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("unchecked")
 public abstract class KotlinDetector {
 
-	private static final Log logger = LogFactory.getLog(KotlinDetector.class);
-
 	@Nullable
 	private static final Class<? extends Annotation> kotlinMetadata;
+
+	// For ConstantFieldFeature compliance, otherwise could be deduced from kotlinMetadata
+	private static final boolean kotlinPresent;
 
 	private static final boolean kotlinReflectPresent;
 
@@ -52,10 +51,8 @@ public abstract class KotlinDetector {
 			metadata = null;
 		}
 		kotlinMetadata = (Class<? extends Annotation>) metadata;
+		kotlinPresent = (kotlinMetadata != null);
 		kotlinReflectPresent = ClassUtils.isPresent("kotlin.reflect.full.KClasses", classLoader);
-		if (kotlinMetadata != null && !kotlinReflectPresent) {
-			logger.info("Kotlin reflection implementation not found at runtime, related features won't be available.");
-		}
 	}
 
 
@@ -63,7 +60,7 @@ public abstract class KotlinDetector {
 	 * Determine whether Kotlin is present in general.
 	 */
 	public static boolean isKotlinPresent() {
-		return (kotlinMetadata != null);
+		return kotlinPresent;
 	}
 
 	/**
@@ -80,6 +77,20 @@ public abstract class KotlinDetector {
 	 */
 	public static boolean isKotlinType(Class<?> clazz) {
 		return (kotlinMetadata != null && clazz.getDeclaredAnnotation(kotlinMetadata) != null);
+	}
+
+	/**
+	 * Return {@code true} if the method is a suspending function.
+	 * @since 5.3
+	 */
+	public static boolean isSuspendingFunction(Method method) {
+		if (KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+			Class<?>[] types = method.getParameterTypes();
+			if (types.length > 0 && "kotlin.coroutines.Continuation".equals(types[types.length - 1].getName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

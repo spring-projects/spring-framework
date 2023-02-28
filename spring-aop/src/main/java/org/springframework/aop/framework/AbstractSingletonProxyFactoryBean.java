@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,13 +189,13 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 
 	/**
 	 * Determine a TargetSource for the given target (or TargetSource).
-	 * @param target target. If this is an implementation of TargetSource it is
+	 * @param target the target. If this is an implementation of TargetSource it is
 	 * used as our TargetSource; otherwise it is wrapped in a SingletonTargetSource.
 	 * @return a TargetSource for this object
 	 */
 	protected TargetSource createTargetSource(Object target) {
-		if (target instanceof TargetSource) {
-			return (TargetSource) target;
+		if (target instanceof TargetSource targetSource) {
+			return targetSource;
 		}
 		else {
 			return new SingletonTargetSource(target);
@@ -229,8 +229,8 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		if (this.proxyInterfaces != null && this.proxyInterfaces.length == 1) {
 			return this.proxyInterfaces[0];
 		}
-		if (this.target instanceof TargetSource) {
-			return ((TargetSource) this.target).getTargetClass();
+		if (this.target instanceof TargetSource targetSource) {
+			return targetSource.getTargetClass();
 		}
 		if (this.target != null) {
 			return this.target.getClass();

@@ -19,10 +19,10 @@ package org.springframework.web.servlet.handler;
 import java.util.Collections;
 import java.util.Enumeration;
 
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -34,7 +34,7 @@ import org.springframework.web.context.ServletContextAware;
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
  * that applies initialization and destruction callbacks to beans that
- * implement the {@link javax.servlet.Servlet} interface.
+ * implement the {@link jakarta.servlet.Servlet} interface.
  *
  * <p>After initialization of the bean instance, the Servlet {@code init}
  * method will be called with a ServletConfig that contains the bean name
@@ -61,8 +61,8 @@ import org.springframework.web.context.ServletContextAware;
  *
  * @author Juergen Hoeller
  * @since 1.1.5
- * @see javax.servlet.Servlet#init(javax.servlet.ServletConfig)
- * @see javax.servlet.Servlet#destroy()
+ * @see jakarta.servlet.Servlet#init(jakarta.servlet.ServletConfig)
+ * @see jakarta.servlet.Servlet#destroy()
  * @see SimpleServletHandlerAdapter
  */
 public class SimpleServletPostProcessor implements

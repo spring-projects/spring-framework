@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,13 +85,20 @@ public class DataBufferWrapper implements DataBuffer {
 	}
 
 	@Override
+	@Deprecated
 	public DataBuffer capacity(int capacity) {
 		return this.delegate.capacity(capacity);
 	}
 
 	@Override
+	@Deprecated
 	public DataBuffer ensureCapacity(int capacity) {
 		return this.delegate.ensureCapacity(capacity);
+	}
+
+	@Override
+	public DataBuffer ensureWritable(int capacity) {
+		return this.delegate.ensureWritable(capacity);
 	}
 
 	@Override
@@ -166,23 +173,64 @@ public class DataBufferWrapper implements DataBuffer {
 	}
 
 	@Override
+	@Deprecated
 	public DataBuffer slice(int index, int length) {
 		return this.delegate.slice(index, length);
 	}
 
 	@Override
+	@Deprecated
 	public DataBuffer retainedSlice(int index, int length) {
 		return this.delegate.retainedSlice(index, length);
 	}
 
 	@Override
+	public DataBuffer split(int index) {
+		return this.delegate.split(index);
+	}
+
+	@Override
+	@Deprecated
 	public ByteBuffer asByteBuffer() {
 		return this.delegate.asByteBuffer();
 	}
 
 	@Override
+	@Deprecated
 	public ByteBuffer asByteBuffer(int index, int length) {
 		return this.delegate.asByteBuffer(index, length);
+	}
+
+	@Override
+	@Deprecated
+	public ByteBuffer toByteBuffer() {
+		return this.delegate.toByteBuffer();
+	}
+
+	@Override
+	@Deprecated
+	public ByteBuffer toByteBuffer(int index, int length) {
+		return this.delegate.toByteBuffer(index, length);
+	}
+
+	@Override
+	public void toByteBuffer(ByteBuffer dest) {
+		this.delegate.toByteBuffer(dest);
+	}
+
+	@Override
+	public void toByteBuffer(int srcPos, ByteBuffer dest, int destPos, int length) {
+		this.delegate.toByteBuffer(srcPos, dest, destPos, length);
+	}
+
+	@Override
+	public ByteBufferIterator readableByteBuffers() {
+		return this.delegate.readableByteBuffers();
+	}
+
+	@Override
+	public ByteBufferIterator writableByteBuffers() {
+		return this.delegate.writableByteBuffers();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,7 +39,7 @@ import org.springframework.core.codec.Hints;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ResponseCookie;
@@ -65,7 +64,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
-	private final int statusCode;
+	private final HttpStatusCode statusCode;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
@@ -78,23 +77,15 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		Assert.notNull(other, "ServerResponse must not be null");
 		this.headers.addAll(other.headers());
 		this.cookies.addAll(other.cookies());
-		if (other instanceof AbstractServerResponse) {
-			AbstractServerResponse abstractOther = (AbstractServerResponse) other;
-			this.statusCode = abstractOther.statusCode;
+		this.statusCode = other.statusCode();
+		if (other instanceof AbstractServerResponse abstractOther) {
 			this.hints.putAll(abstractOther.hints);
 		}
-		else {
-			this.statusCode = other.statusCode().value();
-		}
 	}
 
-	public DefaultServerResponseBuilder(HttpStatus status) {
-		Assert.notNull(status, "HttpStatus must not be null");
-		this.statusCode = status.value();
-	}
-
-	public DefaultServerResponseBuilder(int statusCode) {
-		this.statusCode = statusCode;
+	public DefaultServerResponseBuilder(HttpStatusCode status) {
+		Assert.notNull(status, "HttpStatusCode must not be null");
+		this.statusCode = status;
 	}
 
 
@@ -298,9 +289,9 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	 */
 	abstract static class AbstractServerResponse implements ServerResponse {
 
-		private static final Set<HttpMethod> SAFE_METHODS = EnumSet.of(HttpMethod.GET, HttpMethod.HEAD);
+		private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
-		final int statusCode;
+		private final HttpStatusCode statusCode;
 
 		private final HttpHeaders headers;
 
@@ -310,7 +301,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 
 		protected AbstractServerResponse(
-				int statusCode, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
+				HttpStatusCode statusCode, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
 				Map<String, Object> hints) {
 
 			this.statusCode = statusCode;
@@ -320,13 +311,14 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		@Override
-		public final HttpStatus statusCode() {
-			return HttpStatus.valueOf(this.statusCode);
+		public final HttpStatusCode statusCode() {
+			return this.statusCode;
 		}
 
 		@Override
+		@Deprecated
 		public int rawStatusCode() {
-			return this.statusCode;
+			return this.statusCode.value();
 		}
 
 		@Override
@@ -353,7 +345,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		}
 
 		private void writeStatusAndHeaders(ServerHttpResponse response) {
-			response.setRawStatusCode(this.statusCode);
+			response.setStatusCode(this.statusCode);
 			copy(this.headers, response.getHeaders());
 			copy(this.cookies, response.getCookies());
 		}
@@ -362,9 +354,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private static <K,V> void copy(MultiValueMap<K,V> src, MultiValueMap<K,V> dst) {
 			if (!src.isEmpty()) {
-				src.entrySet().stream()
-						.filter(entry -> !dst.containsKey(entry.getKey()))
-						.forEach(entry -> dst.put(entry.getKey(), entry.getValue()));
+				dst.putAll(src);
 			}
 		}
 	}
@@ -374,7 +364,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 		private final BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction;
 
-		public WriterFunctionResponse(int statusCode, HttpHeaders headers,
+		public WriterFunctionResponse(HttpStatusCode statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies,
 				BiFunction<ServerWebExchange, Context, Mono<Void>> writeFunction) {
 
@@ -395,7 +385,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
 
-		public BodyInserterResponse(int statusCode, HttpHeaders headers,
+		public BodyInserterResponse(HttpStatusCode statusCode, HttpHeaders headers,
 				MultiValueMap<String, ResponseCookie> cookies,
 				BodyInserter<T, ? super ServerHttpResponse> body, Map<String, Object> hints) {
 

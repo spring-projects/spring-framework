@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.mock.web;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,8 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -37,6 +38,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
@@ -81,6 +83,17 @@ class MockHttpServletRequestTests {
 	}
 
 	@Test
+	void readEmptyInputStreamWorksAcrossRequests() throws IOException {
+		MockHttpServletRequest firstRequest = new MockHttpServletRequest();
+		firstRequest.getInputStream().readAllBytes();
+		firstRequest.getInputStream().close();
+
+		MockHttpServletRequest secondRequest = new MockHttpServletRequest();
+		secondRequest.getInputStream().readAllBytes();
+		secondRequest.getInputStream().close();
+	}
+
+	@Test
 	void setContentAndGetReader() throws IOException {
 		byte[] bytes = "body".getBytes(Charset.defaultCharset());
 		request.setContent(bytes);
@@ -110,7 +123,7 @@ class MockHttpServletRequestTests {
 	@Test
 	void setContentAndGetContentAsStringWithExplicitCharacterEncoding() throws IOException {
 		String palindrome = "ablE was I ere I saw Elba";
-		byte[] bytes = palindrome.getBytes("UTF-16");
+		byte[] bytes = palindrome.getBytes(StandardCharsets.UTF_16);
 		request.setCharacterEncoding("UTF-16");
 		request.setContent(bytes);
 		assertThat(request.getContentLength()).isEqualTo(bytes.length);
@@ -170,6 +183,15 @@ class MockHttpServletRequestTests {
 		assertThat(request.getContentType()).isEqualTo(contentType);
 		assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(request.getCharacterEncoding()).isEqualTo("UTF-8");
+	}
+
+	@Test // gh-29255
+	void setContentTypeInvalidWithNonAsciiCharacterAndCharset() {
+		String contentType = "İcharset=";
+		request.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
+		assertThat(request.getContentType()).isEqualTo(contentType);
+		assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType);
+		assertThat(request.getCharacterEncoding()).isEqualTo("");
 	}
 
 	@Test
@@ -234,11 +256,11 @@ class MockHttpServletRequestTests {
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.setParameters(params);
 		String[] values1 = request.getParameterValues("key1");
-		assertThat(values1.length).isEqualTo(1);
+		assertThat(values1).hasSize(1);
 		assertThat(request.getParameter("key1")).isEqualTo("newValue1");
 		assertThat(request.getParameter("key2")).isEqualTo("value2");
 		String[] values3 = request.getParameterValues("key3");
-		assertThat(values3.length).isEqualTo(2);
+		assertThat(values3).hasSize(2);
 		assertThat(values3[0]).isEqualTo("value3A");
 		assertThat(values3[1]).isEqualTo("value3B");
 	}
@@ -252,12 +274,12 @@ class MockHttpServletRequestTests {
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
 		String[] values1 = request.getParameterValues("key1");
-		assertThat(values1.length).isEqualTo(2);
+		assertThat(values1).hasSize(2);
 		assertThat(values1[0]).isEqualTo("value1");
 		assertThat(values1[1]).isEqualTo("newValue1");
 		assertThat(request.getParameter("key2")).isEqualTo("value2");
 		String[] values3 = request.getParameterValues("key3");
-		assertThat(values3.length).isEqualTo(2);
+		assertThat(values3).hasSize(2);
 		assertThat(values3[0]).isEqualTo("value3A");
 		assertThat(values3[1]).isEqualTo("value3B");
 	}
@@ -269,9 +291,9 @@ class MockHttpServletRequestTests {
 		params.put("key2", "value2");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
-		assertThat(request.getParameterMap().size()).isEqualTo(3);
+		assertThat(request.getParameterMap()).hasSize(3);
 		request.removeAllParameters();
-		assertThat(request.getParameterMap().size()).isEqualTo(0);
+		assertThat(request.getParameterMap()).isEmpty();
 	}
 
 	@Test
@@ -295,8 +317,7 @@ class MockHttpServletRequestTests {
 
 		assertThat(cookieHeaders)
 				.describedAs("Cookies -> Header conversion works as expected per RFC6265")
-				.hasSize(1)
-				.hasOnlyOneElementSatisfying(header -> assertThat(header).isEqualTo("foo=bar; baz=qux"));
+				.singleElement().isEqualTo("foo=bar; baz=qux");
 	}
 
 	@Test
@@ -390,17 +411,24 @@ class MockHttpServletRequestTests {
 	}
 
 	@Test
+	void getServerNameWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd"); // missing closing bracket
+		assertThatIllegalStateException()
+			.isThrownBy(request::getServerName)
+			.withMessageStartingWith("Invalid Host header: ");
+	}
+
+	@Test
 	void getServerNameViaHostHeaderAsIpv6AddressWithoutPort() {
-		String ipv6Address = "[2001:db8:0:1]";
-		request.addHeader(HOST, ipv6Address);
-		assertThat(request.getServerName()).isEqualTo("2001:db8:0:1");
+		String host = "[2001:db8:0:1]";
+		request.addHeader(HOST, host);
+		assertThat(request.getServerName()).isEqualTo(host);
 	}
 
 	@Test
 	void getServerNameViaHostHeaderAsIpv6AddressWithPort() {
-		String ipv6Address = "[2001:db8:0:1]:8081";
-		request.addHeader(HOST, ipv6Address);
-		assertThat(request.getServerName()).isEqualTo("2001:db8:0:1");
+		request.addHeader(HOST, "[2001:db8:0:1]:8081");
+		assertThat(request.getServerName()).isEqualTo("[2001:db8:0:1]");
 	}
 
 	@Test
@@ -412,6 +440,22 @@ class MockHttpServletRequestTests {
 	void getServerPortWithCustomPort() {
 		request.setServerPort(8080);
 		assertThat(request.getServerPort()).isEqualTo(8080);
+	}
+
+	@Test
+	void getServerPortWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd:8080"); // missing closing bracket
+		assertThatIllegalStateException()
+			.isThrownBy(request::getServerPort)
+			.withMessageStartingWith("Invalid Host header: ");
+	}
+
+	@Test
+	void getServerPortWithIpv6AddressAndInvalidPortViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]:bogus"); // "bogus" is not a port number
+		assertThatExceptionOfType(NumberFormatException.class)
+			.isThrownBy(request::getServerPort)
+			.withMessageContaining("bogus");
 	}
 
 	@Test
@@ -476,6 +520,43 @@ class MockHttpServletRequestTests {
 		request.addHeader(HOST, testServer);
 		StringBuffer requestURL = request.getRequestURL();
 		assertThat(requestURL.toString()).isEqualTo(("http://" + testServer));
+	}
+
+	@Test
+	void getRequestURLWithIpv6AddressViaServerNameWithoutPort() throws Exception {
+		request.setServerName("[::ffff:abcd:abcd]");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]");
+	}
+
+	@Test
+	void getRequestURLWithIpv6AddressViaServerNameWithPort() throws Exception {
+		request.setServerName("[::ffff:abcd:abcd]");
+		request.setServerPort(9999);
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]:9999");
+	}
+
+	@Test
+	void getRequestURLWithInvalidIpv6AddressViaHostHeader() {
+		request.addHeader(HOST, "[::ffff:abcd:abcd"); // missing closing bracket
+		assertThatIllegalStateException()
+			.isThrownBy(request::getRequestURL)
+			.withMessageStartingWith("Invalid Host header: ");
+	}
+
+	@Test
+	void getRequestURLWithIpv6AddressViaHostHeaderWithoutPort() throws Exception {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]");
+	}
+
+	@Test
+	void getRequestURLWithIpv6AddressViaHostHeaderWithPort() throws Exception {
+		request.addHeader(HOST, "[::ffff:abcd:abcd]:9999");
+		URL url = new java.net.URL(request.getRequestURL().toString());
+		assertThat(url).asString().isEqualTo("http://[::ffff:abcd:abcd]:9999");
 	}
 
 	@Test

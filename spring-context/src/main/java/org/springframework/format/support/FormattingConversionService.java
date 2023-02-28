@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,9 @@ public class FormattingConversionService extends GenericConversionService
 	@Override
 	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory) {
 		Class<? extends Annotation> annotationType = getAnnotationType(annotationFormatterFactory);
-		if (this.embeddedValueResolver != null && annotationFormatterFactory instanceof EmbeddedValueResolverAware) {
-			((EmbeddedValueResolverAware) annotationFormatterFactory).setEmbeddedValueResolver(this.embeddedValueResolver);
+		if (this.embeddedValueResolver != null &&
+				annotationFormatterFactory instanceof EmbeddedValueResolverAware embeddedValueResolverAware) {
+			embeddedValueResolverAware.setEmbeddedValueResolver(this.embeddedValueResolver);
 		}
 		Set<Class<?>> fieldTypes = annotationFormatterFactory.getFieldTypes();
 		for (Class<?> fieldType : fieldTypes) {
@@ -370,10 +371,9 @@ public class FormattingConversionService extends GenericConversionService
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof AnnotationConverterKey)) {
+			if (!(other instanceof AnnotationConverterKey otherKey)) {
 				return false;
 			}
-			AnnotationConverterKey otherKey = (AnnotationConverterKey) other;
 			return (this.fieldType == otherKey.fieldType && this.annotation.equals(otherKey.annotation));
 		}
 

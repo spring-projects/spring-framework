@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,14 @@ package org.springframework.web.servlet.mvc;
 
 import java.util.Properties;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -82,10 +81,10 @@ public class ControllerTests {
 	private void doTestServletForwardingController(ServletForwardingController sfc, boolean include)
 			throws Exception {
 
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		ServletContext context = mock(ServletContext.class);
-		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		HttpServletRequest request = mock();
+		HttpServletResponse response = mock();
+		ServletContext context = mock();
+		RequestDispatcher dispatcher = mock();
 
 		given(request.getMethod()).willReturn("GET");
 		given(context.getNamedDispatcher("action")).willReturn(dispatcher);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,18 @@ public class WebRequestDataBinderTests {
 		request.removeParameter("postProcessed");
 		binder.bind(new ServletWebRequest(request));
 		assertThat(target.isPostProcessed()).isFalse();
+	}
+
+	@Test // gh-25836
+	public void testFieldWithEmptyArrayIndex() {
+		TestBean target = new TestBean();
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("stringArray[]", "ONE");
+		request.addParameter("stringArray[]", "TWO");
+		binder.bind(new ServletWebRequest(request));
+		assertThat(target.getStringArray()).containsExactly("ONE", "TWO");
 	}
 
 	@Test
@@ -257,7 +269,7 @@ public class WebRequestDataBinderTests {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		request.addFile(new MockMultipartFile("stringArray", "Juergen".getBytes()));
 		binder.bind(new ServletWebRequest(request));
-		assertThat(target.getStringArray().length).isEqualTo(1);
+		assertThat(target.getStringArray()).hasSize(1);
 		assertThat(target.getStringArray()[0]).isEqualTo("Juergen");
 	}
 
@@ -271,7 +283,7 @@ public class WebRequestDataBinderTests {
 		request.addFile(new MockMultipartFile("stringArray", "Juergen".getBytes()));
 		request.addFile(new MockMultipartFile("stringArray", "Eva".getBytes()));
 		binder.bind(new ServletWebRequest(request));
-		assertThat(target.getStringArray().length).isEqualTo(2);
+		assertThat(target.getStringArray()).hasSize(2);
 		assertThat(target.getStringArray()[0]).isEqualTo("Juergen");
 		assertThat(target.getStringArray()[1]).isEqualTo("Eva");
 	}

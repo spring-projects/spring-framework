@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,6 @@ import org.springframework.lang.Nullable;
  * {@link AsyncUncaughtExceptionHandler} instance used to process exception thrown from
  * async method with {@code void} return type.
  *
- * <p>Consider using {@link AsyncConfigurerSupport} providing default implementations for
- * both methods if only one element needs to be customized. Furthermore, backward compatibility
- * of this interface will be insured in case new customization options are introduced
- * in the future.
- *
  * <p>See @{@link EnableAsync} for usage examples.
  *
  * @author Chris Beams
@@ -40,7 +35,6 @@ import org.springframework.lang.Nullable;
  * @since 3.1
  * @see AbstractAsyncConfiguration
  * @see EnableAsync
- * @see AsyncConfigurerSupport
  */
 public interface AsyncConfigurer {
 

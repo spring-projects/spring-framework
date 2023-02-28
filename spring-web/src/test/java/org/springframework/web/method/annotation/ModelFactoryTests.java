@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -168,7 +168,7 @@ public class ModelFactoryTests {
 		container.addAttribute(commandName, command);
 
 		WebDataBinder dataBinder = new WebDataBinder(command, commandName);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.webRequest, command, commandName)).willReturn(dataBinder);
 
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
@@ -177,7 +177,7 @@ public class ModelFactoryTests {
 		assertThat(container.getModel().get(commandName)).isEqualTo(command);
 		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + commandName;
 		assertThat(container.getModel().get(bindingResultKey)).isSameAs(dataBinder.getBindingResult());
-		assertThat(container.getModel().size()).isEqualTo(2);
+		assertThat(container.getModel()).hasSize(2);
 	}
 
 	@Test
@@ -188,7 +188,7 @@ public class ModelFactoryTests {
 		container.addAttribute(attributeName, attribute);
 
 		WebDataBinder dataBinder = new WebDataBinder(attribute, attributeName);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.webRequest, attribute, attributeName)).willReturn(dataBinder);
 
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
@@ -208,7 +208,7 @@ public class ModelFactoryTests {
 		this.attributeStore.storeAttribute(this.webRequest, attributeName, attribute);
 
 		WebDataBinder dataBinder = new WebDataBinder(attribute, attributeName);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.webRequest, attribute, attributeName)).willReturn(dataBinder);
 
 		container.getSessionStatus().setComplete();
@@ -233,14 +233,14 @@ public class ModelFactoryTests {
 		container.setRedirectModelScenario(true);
 
 		WebDataBinder dataBinder = new WebDataBinder(attribute, attributeName);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.webRequest, attribute, attributeName)).willReturn(dataBinder);
 
 		ModelFactory modelFactory = new ModelFactory(null, binderFactory, this.attributeHandler);
 		modelFactory.updateModel(this.webRequest, container);
 
 		assertThat(container.getModel().get(queryParamName)).isEqualTo(queryParam);
-		assertThat(container.getModel().size()).isEqualTo(1);
+		assertThat(container.getModel()).hasSize(1);
 		assertThat(this.attributeStore.retrieveAttribute(this.webRequest, attributeName)).isEqualTo(attribute);
 	}
 
@@ -252,7 +252,7 @@ public class ModelFactoryTests {
 		InvocableHandlerMethod modelMethod = createHandlerMethod(methodName, parameterTypes);
 		modelMethod.setHandlerMethodArgumentResolvers(resolvers);
 		modelMethod.setDataBinderFactory(null);
-		modelMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
+		modelMethod.setParameterNameDiscoverer(new DefaultParameterNameDiscoverer());
 
 		return new ModelFactory(Collections.singletonList(modelMethod), null, this.attributeHandler);
 	}

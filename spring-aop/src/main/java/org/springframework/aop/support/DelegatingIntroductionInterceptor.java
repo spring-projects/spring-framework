@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,8 +112,8 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
-			if (retVal == this.delegate && mi instanceof ProxyMethodInvocation) {
-				Object proxy = ((ProxyMethodInvocation) mi).getProxy();
+			if (retVal == this.delegate && mi instanceof ProxyMethodInvocation pmi) {
+				Object proxy = pmi.getProxy();
 				if (mi.getMethod().getReturnType().isInstance(proxy)) {
 					retVal = proxy;
 				}
@@ -131,6 +131,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	 * that it is introduced into. This method is <strong>never</strong> called for
 	 * {@link MethodInvocation MethodInvocations} on the introduced interfaces.
 	 */
+	@Nullable
 	protected Object doProceed(MethodInvocation mi) throws Throwable {
 		// If we get here, just pass the invocation on.
 		return mi.proceed();

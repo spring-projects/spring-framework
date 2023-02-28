@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Wraps another {@link ClientHttpRequest} and delegates all methods to it.
- * Sub-classes can override specific methods selectively.
+ * Subclasses can override specific methods selectively.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -78,6 +78,11 @@ public class ClientHttpRequestDecorator implements ClientHttpRequest {
 	@Override
 	public DataBufferFactory bufferFactory() {
 		return this.delegate.bufferFactory();
+	}
+
+	@Override
+	public <T> T getNativeRequest() {
+		return this.delegate.getNativeRequest();
 	}
 
 	@Override

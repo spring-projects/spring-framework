@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -31,6 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.lang.Nullable;
@@ -40,8 +39,6 @@ import org.springframework.web.servlet.view.AbstractView;
 /**
  * Abstract base class for Jackson based and content type independent
  * {@link AbstractView} implementations.
- *
- * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
  * @author Jeremy Grelle
  * @author Arjen Poutsma
@@ -206,29 +203,29 @@ public abstract class AbstractJackson2View extends AbstractView {
 	 * @throws IOException if writing failed
 	 */
 	protected void writeContent(OutputStream stream, Object object) throws IOException {
-		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(stream, this.encoding);
-		writePrefix(generator, object);
+		try (JsonGenerator generator = this.objectMapper.getFactory().createGenerator(stream, this.encoding)) {
+			writePrefix(generator, object);
 
-		Object value = object;
-		Class<?> serializationView = null;
-		FilterProvider filters = null;
+			Object value = object;
+			Class<?> serializationView = null;
+			FilterProvider filters = null;
 
-		if (value instanceof MappingJacksonValue) {
-			MappingJacksonValue container = (MappingJacksonValue) value;
-			value = container.getValue();
-			serializationView = container.getSerializationView();
-			filters = container.getFilters();
+			if (value instanceof MappingJacksonValue container) {
+				value = container.getValue();
+				serializationView = container.getSerializationView();
+				filters = container.getFilters();
+			}
+
+			ObjectWriter objectWriter = (serializationView != null ?
+					this.objectMapper.writerWithView(serializationView) : this.objectMapper.writer());
+			if (filters != null) {
+				objectWriter = objectWriter.with(filters);
+			}
+			objectWriter.writeValue(generator, value);
+
+			writeSuffix(generator, object);
+			generator.flush();
 		}
-
-		ObjectWriter objectWriter = (serializationView != null ?
-				this.objectMapper.writerWithView(serializationView) : this.objectMapper.writer());
-		if (filters != null) {
-			objectWriter = objectWriter.with(filters);
-		}
-		objectWriter.writeValue(generator, value);
-
-		writeSuffix(generator, object);
-		generator.flush();
 	}
 
 

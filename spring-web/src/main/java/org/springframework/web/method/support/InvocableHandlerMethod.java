@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import org.reactivestreams.Publisher;
+
+import org.springframework.context.MessageSource;
+import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -39,6 +43,7 @@ import org.springframework.web.method.HandlerMethod;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.1
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -46,12 +51,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
 
-	@Nullable
-	private WebDataBinderFactory dataBinderFactory;
-
 	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+
+	@Nullable
+	private WebDataBinderFactory dataBinderFactory;
 
 
 	/**
@@ -69,6 +74,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
+	 * Variant of {@link #InvocableHandlerMethod(Object, Method)} that
+	 * also accepts a {@link MessageSource}, for use in subclasses.
+	 * @since 5.3.10
+	 */
+	protected InvocableHandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {
+		super(bean, method, messageSource);
+	}
+
+	/**
 	 * Construct a new handler method with the given bean instance, method name and parameters.
 	 * @param bean the object bean
 	 * @param methodName the method name
@@ -83,16 +97,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Set the {@link WebDataBinderFactory} to be passed to argument resolvers allowing them to create
-	 * a {@link WebDataBinder} for data binding and type conversion purposes.
-	 * @param dataBinderFactory the data binder factory.
-	 */
-	public void setDataBinderFactory(WebDataBinderFactory dataBinderFactory) {
-		this.dataBinderFactory = dataBinderFactory;
-	}
-
-	/**
-	 * Set {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers} to use to use for resolving method argument values.
+	 * Set {@link HandlerMethodArgumentResolver HandlerMethodArgumentResolvers}
+	 * to use for resolving method argument values.
 	 */
 	public void setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
 		this.resolvers = argumentResolvers;
@@ -105,6 +111,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
+	}
+
+	/**
+	 * Set the {@link WebDataBinderFactory} to be passed to argument resolvers allowing them
+	 * to create a {@link WebDataBinder} for data binding and type conversion purposes.
+	 */
+	public void setDataBinderFactory(WebDataBinderFactory dataBinderFactory) {
+		this.dataBinderFactory = dataBinderFactory;
 	}
 
 
@@ -185,31 +199,49 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 */
 	@Nullable
 	protected Object doInvoke(Object... args) throws Exception {
-		ReflectionUtils.makeAccessible(getBridgedMethod());
+		Method method = getBridgedMethod();
 		try {
-			return getBridgedMethod().invoke(getBean(), args);
+			if (KotlinDetector.isSuspendingFunction(method)) {
+				return invokeSuspendingFunction(method, getBean(), args);
+			}
+			return method.invoke(getBean(), args);
 		}
 		catch (IllegalArgumentException ex) {
-			assertTargetBean(getBridgedMethod(), getBean(), args);
-			String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+			assertTargetBean(method, getBean(), args);
+			String text = (ex.getMessage() == null || ex.getCause() instanceof NullPointerException) ?
+					"Illegal argument" : ex.getMessage();
 			throw new IllegalStateException(formatInvokeError(text, args), ex);
 		}
 		catch (InvocationTargetException ex) {
 			// Unwrap for HandlerExceptionResolvers ...
-			Throwable targetException = ex.getTargetException();
-			if (targetException instanceof RuntimeException) {
-				throw (RuntimeException) targetException;
+			Throwable targetException = ex.getCause();
+			if (targetException instanceof RuntimeException runtimeException) {
+				throw runtimeException;
 			}
-			else if (targetException instanceof Error) {
-				throw (Error) targetException;
+			else if (targetException instanceof Error error) {
+				throw error;
 			}
-			else if (targetException instanceof Exception) {
-				throw (Exception) targetException;
+			else if (targetException instanceof Exception exception) {
+				throw exception;
 			}
 			else {
 				throw new IllegalStateException(formatInvokeError("Invocation failure", args), targetException);
 			}
 		}
+	}
+
+	/**
+	 * Invoke the given Kotlin coroutine suspended function.
+	 *
+	 * <p>The default implementation invokes
+	 * {@link CoroutinesUtils#invokeSuspendingFunction(Method, Object, Object...)},
+	 * but subclasses can override this method to use
+	 * {@link CoroutinesUtils#invokeSuspendingFunction(kotlin.coroutines.CoroutineContext, Method, Object, Object...)}
+	 * instead.
+	 * @since 6.0
+	 */
+	protected Publisher<?> invokeSuspendingFunction(Method method, Object target, Object[] args) {
+		return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
 	}
 
 }

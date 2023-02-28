@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Ben Blinebury
  */
 public abstract class JdbcUtils {
 
@@ -212,10 +213,10 @@ public abstract class JdbcUtils {
 			if (obj instanceof String) {
 				return obj;
 			}
-			else if (obj instanceof Number) {
+			else if (obj instanceof Number number) {
 				// Defensively convert any Number to an Integer (as needed by our
 				// ConversionService's IntegerToEnumConverterFactory) for use as index
-				return NumberUtils.convertNumberToTargetClass((Number) obj, Integer.class);
+				return NumberUtils.convertNumberToTargetClass(number, Integer.class);
 			}
 			else {
 				// e.g. on Postgres: getObject returns a PGObject but we need a String
@@ -285,12 +286,10 @@ public abstract class JdbcUtils {
 		if (obj != null) {
 			className = obj.getClass().getName();
 		}
-		if (obj instanceof Blob) {
-			Blob blob = (Blob) obj;
+		if (obj instanceof Blob blob) {
 			obj = blob.getBytes(1, (int) blob.length());
 		}
-		else if (obj instanceof Clob) {
-			Clob clob = (Clob) obj;
+		else if (obj instanceof Clob clob) {
 			obj = clob.getSubString(1, (int) clob.length());
 		}
 		else if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
@@ -315,26 +314,44 @@ public abstract class JdbcUtils {
 
 	/**
 	 * Extract database meta-data via the given DatabaseMetaDataCallback.
-	 * <p>This method will open a connection to the database and retrieve the database meta-data.
-	 * Since this method is called before the exception translation feature is configured for
-	 * a datasource, this method can not rely on the SQLException translation functionality.
-	 * <p>Any exceptions will be wrapped in a MetaDataAccessException. This is a checked exception
-	 * and any calling code should catch and handle this exception. You can just log the
-	 * error and hope for the best, but there is probably a more serious error that will
-	 * reappear when you try to access the database again.
+	 * <p>This method will open a connection to the database and retrieve its meta-data.
+	 * Since this method is called before the exception translation feature is configured
+	 * for a DataSource, this method can not rely on SQLException translation itself.
+	 * <p>Any exceptions will be wrapped in a MetaDataAccessException. This is a checked
+	 * exception and any calling code should catch and handle this exception. You can just
+	 * log the error and hope for the best, but there is probably a more serious error that
+	 * will reappear when you try to access the database again.
 	 * @param dataSource the DataSource to extract meta-data for
 	 * @param action callback that will do the actual work
 	 * @return object containing the extracted information, as returned by
 	 * the DatabaseMetaDataCallback's {@code processMetaData} method
 	 * @throws MetaDataAccessException if meta-data access failed
+	 * @see java.sql.DatabaseMetaData
 	 */
-	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback action)
+	public static <T> T extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback<T> action)
 			throws MetaDataAccessException {
 
 		Connection con = null;
 		try {
 			con = DataSourceUtils.getConnection(dataSource);
-			DatabaseMetaData metaData = con.getMetaData();
+			DatabaseMetaData metaData;
+			try {
+				metaData = con.getMetaData();
+			}
+			catch (SQLException ex) {
+				if (DataSourceUtils.isConnectionTransactional(con, dataSource)) {
+					// Probably a closed thread-bound Connection - retry against fresh Connection
+					DataSourceUtils.releaseConnection(con, dataSource);
+					con = null;
+					logger.debug("Failed to obtain DatabaseMetaData from transactional Connection - " +
+							"retrying against fresh Connection", ex);
+					con = dataSource.getConnection();
+					metaData = con.getMetaData();
+				}
+				else {
+					throw ex;
+				}
+			}
 			if (metaData == null) {
 				// should only happen in test environments
 				throw new MetaDataAccessException("DatabaseMetaData returned by Connection [" + con + "] was null");
@@ -365,7 +382,11 @@ public abstract class JdbcUtils {
 	 * @throws MetaDataAccessException if we couldn't access the DatabaseMetaData
 	 * or failed to invoke the specified method
 	 * @see java.sql.DatabaseMetaData
+	 * @deprecated as of 5.2.9, in favor of
+	 * {@link #extractDatabaseMetaData(DataSource, DatabaseMetaDataCallback)}
+	 * with a lambda expression or method reference and a generically typed result
 	 */
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static <T> T extractDatabaseMetaData(DataSource dataSource, final String metaDataMethodName)
 			throws MetaDataAccessException {
@@ -384,8 +405,8 @@ public abstract class JdbcUtils {
 								"Could not access DatabaseMetaData method '" + metaDataMethodName + "'", ex);
 					}
 					catch (InvocationTargetException ex) {
-						if (ex.getTargetException() instanceof SQLException) {
-							throw (SQLException) ex.getTargetException();
+						if (ex.getTargetException() instanceof SQLException sqlException) {
+							throw sqlException;
 						}
 						throw new MetaDataAccessException(
 								"Invocation of DatabaseMetaData method '" + metaDataMethodName + "' failed", ex);
@@ -435,9 +456,6 @@ public abstract class JdbcUtils {
 		if (source != null && source.startsWith("DB2")) {
 			name = "DB2";
 		}
-		else if ("MariaDB".equals(source)) {
-			name = "MySQL";
-		}
 		else if ("Sybase SQL Server".equals(source) ||
 				"Adaptive Server Enterprise".equals(source) ||
 				"ASE".equals(source) ||
@@ -479,7 +497,7 @@ public abstract class JdbcUtils {
 	 * <p><i>columnLabel - the label for the column specified with the SQL AS clause.
 	 * If the SQL AS clause was not specified, then the label is the name of the column</i>.
 	 * @param resultSetMetaData the current meta-data to use
-	 * @param columnIndex the index of the column for the look up
+	 * @param columnIndex the index of the column for the lookup
 	 * @return the column name to use
 	 * @throws SQLException in case of lookup failure
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -80,8 +81,15 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 	protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner,
 			@Nullable Constructor<?> ctor, Object... args) {
 
-		// Must generate CGLIB subclass...
 		return new CglibSubclassCreator(bd, owner).instantiate(ctor, args);
+	}
+
+	@Override
+	public Class<?> getActualBeanClass(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+		if (!bd.hasMethodOverrides()) {
+			return super.getActualBeanClass(bd, beanName, owner);
+		}
+		return new CglibSubclassCreator(bd, owner).createEnhancedSubclass(bd);
 	}
 
 
@@ -141,12 +149,13 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 * Create an enhanced subclass of the bean class for the provided bean
 		 * definition, using CGLIB.
 		 */
-		private Class<?> createEnhancedSubclass(RootBeanDefinition beanDefinition) {
+		public Class<?> createEnhancedSubclass(RootBeanDefinition beanDefinition) {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(beanDefinition.getBeanClass());
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			if (this.owner instanceof ConfigurableBeanFactory) {
-				ClassLoader cl = ((ConfigurableBeanFactory) this.owner).getBeanClassLoader();
+			enhancer.setAttemptLoad(true);
+			if (this.owner instanceof ConfigurableBeanFactory cbf) {
+				ClassLoader cl = cbf.getBeanClassLoader();
 				enhancer.setStrategy(new ClassLoaderAwareGeneratorStrategy(cl));
 			}
 			enhancer.setCallbackFilter(new MethodOverrideCallbackFilter(beanDefinition));
@@ -238,12 +247,16 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 			Assert.state(lo != null, "LookupOverride not found");
 			Object[] argsToUse = (args.length > 0 ? args : null);  // if no-arg, don't insist on args at all
 			if (StringUtils.hasText(lo.getBeanName())) {
-				return (argsToUse != null ? this.owner.getBean(lo.getBeanName(), argsToUse) :
+				Object bean = (argsToUse != null ? this.owner.getBean(lo.getBeanName(), argsToUse) :
 						this.owner.getBean(lo.getBeanName()));
+				// Detect package-protected NullBean instance through equals(null) check
+				return (bean.equals(null) ? null : bean);
 			}
 			else {
-				return (argsToUse != null ? this.owner.getBean(method.getReturnType(), argsToUse) :
-						this.owner.getBean(method.getReturnType()));
+				// Find target bean matching the (potentially generic) method return type
+				ResolvableType genericReturnType = ResolvableType.forMethodReturnType(method);
+				return (argsToUse != null ? this.owner.getBeanProvider(genericReturnType).getObject(argsToUse) :
+						this.owner.getBeanProvider(genericReturnType).getObject());
 			}
 		}
 	}

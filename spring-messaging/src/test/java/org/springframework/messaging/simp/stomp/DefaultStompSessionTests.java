@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,10 @@
 package org.springframework.messaging.simp.stomp;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -45,7 +46,6 @@ import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.concurrent.SettableListenableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -90,9 +90,9 @@ public class DefaultStompSessionTests {
 				new CompositeMessageConverter(
 						Arrays.asList(new StringMessageConverter(), new ByteArrayMessageConverter())));
 
-		SettableListenableFuture<Void> future = new SettableListenableFuture<>();
-		future.set(null);
-		given(this.connection.send(this.messageCaptor.capture())).willReturn(future);
+		CompletableFuture<Void> future = new CompletableFuture<>();
+		future.complete(null);
+		given(this.connection.sendAsync(this.messageCaptor.capture())).willReturn(future);
 	}
 
 
@@ -177,7 +177,7 @@ public class DefaultStompSessionTests {
 	@Test
 	public void heartbeatNotSupportedByServer() {
 		this.session.afterConnected(this.connection);
-		verify(this.connection).send(any());
+		verify(this.connection).sendAsync(any());
 
 		this.connectHeaders.setHeartbeat(new long[] {10000, 10000});
 
@@ -193,7 +193,7 @@ public class DefaultStompSessionTests {
 	@Test
 	public void heartbeatTasks() {
 		this.session.afterConnected(this.connection);
-		verify(this.connection).send(any());
+		verify(this.connection).sendAsync(any());
 
 		this.connectHeaders.setHeartbeat(new long[] {10000, 10000});
 
@@ -216,7 +216,7 @@ public class DefaultStompSessionTests {
 		writeTask.run();
 		StompHeaderAccessor accessor = StompHeaderAccessor.createForHeartbeat();
 		Message<byte[]> message = MessageBuilder.createMessage(new byte[] {'\n'}, accessor.getMessageHeaders());
-		verify(this.connection).send(eq(message));
+		verify(this.connection).sendAsync(eq(message));
 		verifyNoMoreInteractions(this.connection);
 
 		reset(this.sessionHandler);
@@ -279,7 +279,7 @@ public class DefaultStompSessionTests {
 	public void handleMessageFrame() {
 		this.session.afterConnected(this.connection);
 
-		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
+		StompFrameHandler frameHandler = mock();
 		String destination = "/topic/foo";
 		Subscription subscription = this.session.subscribe(destination, frameHandler);
 
@@ -307,7 +307,7 @@ public class DefaultStompSessionTests {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
-		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
+		StompFrameHandler frameHandler = mock();
 		String destination = "/topic/foo";
 		Subscription subscription = this.session.subscribe(destination, frameHandler);
 
@@ -377,7 +377,7 @@ public class DefaultStompSessionTests {
 		this.session.afterConnected(this.connection);
 		assertThat(this.session.isConnected()).isTrue();
 
-		this.session.setTaskScheduler(mock(TaskScheduler.class));
+		this.session.setTaskScheduler(mock());
 		this.session.setAutoReceipt(true);
 		this.session.send("/topic/foo", "sample payload");
 
@@ -435,10 +435,9 @@ public class DefaultStompSessionTests {
 		assertThat(this.session.isConnected()).isTrue();
 
 		IllegalStateException exception = new IllegalStateException("simulated exception");
-		SettableListenableFuture<Void> future = new SettableListenableFuture<>();
-		future.setException(exception);
+		CompletableFuture<Void> future = CompletableFuture.failedFuture(exception);
 
-		given(this.connection.send(any())).willReturn(future);
+		given(this.connection.sendAsync(any())).willReturn(future);
 		assertThatExceptionOfType(MessageDeliveryException.class).isThrownBy(() ->
 				this.session.send("/topic/foo", "sample payload".getBytes(StandardCharsets.UTF_8)))
 			.withCause(exception);
@@ -450,7 +449,7 @@ public class DefaultStompSessionTests {
 		assertThat(this.session.isConnected()).isTrue();
 
 		String destination = "/topic/foo";
-		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
+		StompFrameHandler frameHandler = mock();
 		Subscription subscription = this.session.subscribe(destination, frameHandler);
 
 		Message<byte[]> message = this.messageCaptor.getValue();
@@ -474,7 +473,7 @@ public class DefaultStompSessionTests {
 		StompHeaders stompHeaders = new StompHeaders();
 		stompHeaders.setId(subscriptionId);
 		stompHeaders.setDestination(destination);
-		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
+		StompFrameHandler frameHandler = mock();
 
 		Subscription subscription = this.session.subscribe(stompHeaders, frameHandler);
 		assertThat(subscription.getSubscriptionId()).isEqualTo(subscriptionId);
@@ -495,7 +494,7 @@ public class DefaultStompSessionTests {
 		assertThat(this.session.isConnected()).isTrue();
 
 		String destination = "/topic/foo";
-		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
+		StompFrameHandler frameHandler = mock();
 		Subscription subscription = this.session.subscribe(destination, frameHandler);
 		subscription.unsubscribe();
 
@@ -519,7 +518,7 @@ public class DefaultStompSessionTests {
 		StompHeaders subscribeHeaders = new StompHeaders();
 		subscribeHeaders.setDestination("/topic/foo");
 		subscribeHeaders.set(headerName, headerValue);
-		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
+		StompFrameHandler frameHandler = mock();
 		Subscription subscription = this.session.subscribe(subscribeHeaders, frameHandler);
 
 		StompHeaders unsubscribeHeaders = new StompHeaders();
@@ -573,62 +572,78 @@ public class DefaultStompSessionTests {
 	@Test
 	public void receiptReceived() {
 		this.session.afterConnected(this.connection);
-		this.session.setTaskScheduler(mock(TaskScheduler.class));
+		this.session.setTaskScheduler(mock());
 
 		AtomicReference<Boolean> received = new AtomicReference<>();
+		AtomicReference<StompHeaders> receivedHeaders = new AtomicReference<>();
 
 		StompHeaders headers = new StompHeaders();
 		headers.setDestination("/topic/foo");
 		headers.setReceipt("my-receipt");
-		Subscription subscription = this.session.subscribe(headers, mock(StompFrameHandler.class));
-		subscription.addReceiptTask(() -> received.set(true));
+		Subscription subscription = this.session.subscribe(headers, mock());
+		subscription.addReceiptTask(receiptHeaders -> {
+			received.set(true);
+			receivedHeaders.set(receiptHeaders);
+		});
 
 		assertThat((Object) received.get()).isNull();
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
 		accessor.setReceiptId("my-receipt");
+		accessor.setNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
 		this.session.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
 		assertThat(received.get()).isNotNull();
 		assertThat(received.get()).isTrue();
+		assertThat(receivedHeaders.get()).isNotNull();
+		assertThat(receivedHeaders.get().get("foo")).hasSize(1);
+		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
 	}
 
 	@Test
 	public void receiptReceivedBeforeTaskAdded() {
 		this.session.afterConnected(this.connection);
-		this.session.setTaskScheduler(mock(TaskScheduler.class));
+		this.session.setTaskScheduler(mock());
 
 		AtomicReference<Boolean> received = new AtomicReference<>();
+		AtomicReference<StompHeaders> receivedHeaders = new AtomicReference<>();
 
 		StompHeaders headers = new StompHeaders();
 		headers.setDestination("/topic/foo");
 		headers.setReceipt("my-receipt");
-		Subscription subscription = this.session.subscribe(headers, mock(StompFrameHandler.class));
+		Subscription subscription = this.session.subscribe(headers, mock());
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
 		accessor.setReceiptId("my-receipt");
+		accessor.setNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
 		this.session.handleMessage(MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders()));
 
-		subscription.addReceiptTask(() -> received.set(true));
+		subscription.addReceiptTask(receiptHeaders -> {
+			received.set(true);
+			receivedHeaders.set(receiptHeaders);
+		});
 
 		assertThat(received.get()).isNotNull();
 		assertThat(received.get()).isTrue();
+		assertThat(receivedHeaders.get()).isNotNull();
+		assertThat(receivedHeaders.get().get("foo")).hasSize(1);
+		assertThat(receivedHeaders.get().get("foo").get(0)).isEqualTo("bar");
 	}
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void receiptNotReceived() {
-		TaskScheduler taskScheduler = mock(TaskScheduler.class);
+		TaskScheduler taskScheduler = mock();
 
 		this.session.afterConnected(this.connection);
 		this.session.setTaskScheduler(taskScheduler);
 
 		AtomicReference<Boolean> notReceived = new AtomicReference<>();
 
-		ScheduledFuture future = mock(ScheduledFuture.class);
-		given(taskScheduler.schedule(any(Runnable.class), any(Date.class))).willReturn(future);
+		ScheduledFuture future = mock();
+		given(taskScheduler.schedule(any(Runnable.class), any(Instant.class))).willReturn(future);
 
 		StompHeaders headers = new StompHeaders();
 		headers.setDestination("/topic/foo");
@@ -637,7 +652,7 @@ public class DefaultStompSessionTests {
 		receiptable.addReceiptLostTask(() -> notReceived.set(true));
 
 		ArgumentCaptor<Runnable> taskCaptor = ArgumentCaptor.forClass(Runnable.class);
-		verify(taskScheduler).schedule(taskCaptor.capture(), (Date) notNull());
+		verify(taskScheduler).schedule(taskCaptor.capture(), (Instant) notNull());
 		Runnable scheduledTask = taskCaptor.getValue();
 		assertThat(scheduledTask).isNotNull();
 
@@ -673,7 +688,7 @@ public class DefaultStompSessionTests {
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		headers = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		assertThat(headers.size()).as(headers.toString()).isEqualTo(1);
-		assertThat(headers.get("foo").size()).isEqualTo(1);
+		assertThat(headers.get("foo")).hasSize(1);
 		assertThat(headers.get("foo").get(0)).isEqualTo("bar");
 
 		assertThat(this.session.isConnected()).isFalse();

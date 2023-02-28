@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorResourceFactory;
-import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -85,10 +84,10 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	private ReactorClientHttpConnector initConnector() {
 		assertThat(super.bufferFactory).isNotNull();
 
-		if (super.bufferFactory instanceof NettyDataBufferFactory) {
-			ByteBufAllocator allocator = ((NettyDataBufferFactory) super.bufferFactory).getByteBufAllocator();
-			return new ReactorClientHttpConnector(this.factory, httpClient ->
-					httpClient.tcpConfiguration(tcpClient -> tcpClient.option(ChannelOption.ALLOCATOR, allocator)));
+		if (super.bufferFactory instanceof NettyDataBufferFactory nettyDataBufferFactory) {
+			ByteBufAllocator allocator = nettyDataBufferFactory.getByteBufAllocator();
+			return new ReactorClientHttpConnector(this.factory,
+					client -> client.option(ChannelOption.ALLOCATOR, allocator));
 		}
 		else {
 			return new ReactorClientHttpConnector();
@@ -97,7 +96,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 
 
 	@ParameterizedDataBufferAllocatingTest
-	void bodyToMonoVoid(String displayName, DataBufferFactory bufferFactory) {
+	void bodyToMonoVoid(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse()
@@ -115,7 +114,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest // SPR-17482
-	void bodyToMonoVoidWithoutContentType(String displayName, DataBufferFactory bufferFactory) {
+	void bodyToMonoVoidWithoutContentType(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse()
@@ -127,12 +126,12 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.retrieve()
 				.bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {});
 
-		StepVerifier.create(mono).expectError(UnsupportedMediaTypeException.class).verify(Duration.ofSeconds(3));
+		StepVerifier.create(mono).expectError(WebClientResponseException.class).verify(Duration.ofSeconds(3));
 		assertThat(this.server.getRequestCount()).isEqualTo(1);
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithBodyNotConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -140,7 +139,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithBodyConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithBodyConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -148,7 +147,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest // SPR-17473
-	void onStatusWithMonoErrorAndBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithMonoErrorAndBodyNotConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -156,7 +155,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void onStatusWithMonoErrorAndBodyConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithMonoErrorAndBodyConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -164,7 +163,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest // gh-23230
-	void onStatusWithImmediateErrorAndBodyNotConsumed(String displayName, DataBufferFactory bufferFactory) {
+	void onStatusWithImmediateErrorAndBodyNotConsumed(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		RuntimeException ex = new RuntimeException("response error");
@@ -174,7 +173,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void releaseBody(String displayName, DataBufferFactory bufferFactory) {
+	void releaseBody(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse()
@@ -183,9 +182,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setBody("foo bar"));
 
 		Mono<Void> result  = this.webClient.get()
-				.exchange()
-				.flatMap(ClientResponse::releaseBody);
-
+				.exchangeToMono(ClientResponse::releaseBody);
 
 		StepVerifier.create(result)
 				.expectComplete()
@@ -193,7 +190,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	}
 
 	@ParameterizedDataBufferAllocatingTest
-	void exchangeToBodilessEntity(String displayName, DataBufferFactory bufferFactory) {
+	void exchangeToBodilessEntity(DataBufferFactory bufferFactory) {
 		setUp(bufferFactory);
 
 		this.server.enqueue(new MockResponse()
@@ -202,8 +199,7 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 				.setBody("foo bar"));
 
 		Mono<ResponseEntity<Void>> result  = this.webClient.get()
-				.exchange()
-				.flatMap(ClientResponse::toBodilessEntity);
+				.exchangeToMono(ClientResponse::toBodilessEntity);
 
 		StepVerifier.create(result)
 				.assertNext(entity -> {

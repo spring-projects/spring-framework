@@ -41,9 +41,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.jca.context.ResourceAdapterApplicationContext;
-import org.springframework.jca.support.SimpleBootstrapContext;
-import org.springframework.jca.work.SimpleTaskWorkManager;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 import org.springframework.mock.web.MockServletConfig;
@@ -533,22 +530,6 @@ public class EnvironmentSystemIntegrationTests {
 		// assert that servletconfig params resolve with higher precedence than sysprops
 		assertThat(environment.getProperty("pCommon")).isEqualTo("pCommonConfigValue");
 		assertThat(environment.getProperty("pSysProps1")).isEqualTo("pSysProps1Value");
-	}
-
-	@Test
-	void resourceAdapterApplicationContext() {
-		ResourceAdapterApplicationContext ctx = new ResourceAdapterApplicationContext(new SimpleBootstrapContext(new SimpleTaskWorkManager()));
-
-		assertHasStandardEnvironment(ctx);
-
-		registerEnvironmentBeanDefinition(ctx);
-
-		ctx.setEnvironment(prodEnv);
-		ctx.refresh();
-
-		assertHasEnvironment(ctx, prodEnv);
-		assertEnvironmentBeanRegistered(ctx);
-		assertEnvironmentAwareInvoked(ctx, prodEnv);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -47,8 +46,6 @@ class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 
 	private final RandomHandler handler = new RandomHandler();
 
-	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-
 
 	@Override
 	protected RandomHandler createHttpHandler() {
@@ -62,15 +59,16 @@ class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 
 		// TODO: fix Reactor support
 
+		@SuppressWarnings("resource")
 		RestTemplate restTemplate = new RestTemplate();
 
 		byte[] body = randomBytes();
-		RequestEntity<byte[]> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
+		RequestEntity<byte[]> request = RequestEntity.post(URI.create("http://localhost:" + port)).body(body);
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
 		assertThat(response.getBody()).isNotNull();
 		assertThat(response.getHeaders().getContentLength()).isEqualTo(RESPONSE_SIZE);
-		assertThat(response.getBody().length).isEqualTo(RESPONSE_SIZE);
+		assertThat(response.getBody()).hasSize(RESPONSE_SIZE);
 	}
 
 
@@ -105,7 +103,7 @@ class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 		private DataBuffer randomBuffer(int size) {
 			byte[] bytes = new byte[size];
 			rnd.nextBytes(bytes);
-			DataBuffer buffer = dataBufferFactory.allocateBuffer(size);
+			DataBuffer buffer = DefaultDataBufferFactory.sharedInstance.allocateBuffer(size);
 			buffer.write(bytes);
 			return buffer;
 		}

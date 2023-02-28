@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
  *
  * @author Rossen Stoyanchev
  */
-public class ViewResolutionTests {
+class ViewResolutionTests {
 
 	@Test
-	public void testJspOnly() throws Exception {
+	void jspOnly() throws Exception {
 		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver("/WEB-INF/", ".jsp");
 
 		standaloneSetup(new PersonController()).setViewResolvers(viewResolver).build()
@@ -69,16 +69,16 @@ public class ViewResolutionTests {
 	}
 
 	@Test
-	public void testJsonOnly() throws Exception {
+	void jsonOnly() throws Exception {
 		standaloneSetup(new PersonController()).setSingleView(new MappingJackson2JsonView()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.person.name").value("Corea"));
 	}
 
 	@Test
-	public void testXmlOnly() throws Exception {
+	void xmlOnly() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
@@ -90,7 +90,7 @@ public class ViewResolutionTests {
 	}
 
 	@Test
-	public void testContentNegotiation() throws Exception {
+	void contentNegotiation() throws Exception {
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setClassesToBeBound(Person.class);
 
@@ -119,7 +119,7 @@ public class ViewResolutionTests {
 
 		mockMvc.perform(get("/person/Corea").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.person.name").value("Corea"));
 
 		mockMvc.perform(get("/person/Corea").accept(MediaType.APPLICATION_XML))
@@ -129,7 +129,7 @@ public class ViewResolutionTests {
 	}
 
 	@Test
-	public void defaultViewResolver() throws Exception {
+	void defaultViewResolver() throws Exception {
 		standaloneSetup(new PersonController()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(model().attribute("person", hasProperty("name", equalTo("Corea"))))
@@ -142,7 +142,7 @@ public class ViewResolutionTests {
 	private static class PersonController {
 
 		@GetMapping("/person/{name}")
-		public String show(@PathVariable String name, Model model) {
+		String show(@PathVariable String name, Model model) {
 			Person person = new Person(name);
 			model.addAttribute(person);
 			return "person/show";
@@ -150,4 +150,3 @@ public class ViewResolutionTests {
 	}
 
 }
-

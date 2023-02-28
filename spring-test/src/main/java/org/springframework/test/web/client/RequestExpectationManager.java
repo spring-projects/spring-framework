@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.client;
 
 import java.io.IOException;
+import java.time.Duration;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
@@ -41,7 +42,6 @@ public interface RequestExpectationManager {
 	 * used to add more expectations and define a response.
 	 * <p>This is a delegate for
 	 * {@link MockRestServiceServer#expect(ExpectedCount, RequestMatcher)}.
-	 *
 	 * @param requestMatcher a request expectation
 	 * @return for setting up further expectations and define a response
 	 * @see MockRestServiceServer#expect(RequestMatcher)
@@ -52,10 +52,21 @@ public interface RequestExpectationManager {
 	/**
 	 * Verify that all expectations have been met.
 	 * <p>This is a delegate for {@link MockRestServiceServer#verify()}.
-	 * @throws AssertionError when some expectations were not met
+	 * @throws AssertionError if not all expectations are met
 	 * @see MockRestServiceServer#verify()
 	 */
 	void verify();
+
+	/**
+	 * Variant of {@link #verify()} that waits for up to the specified time for
+	 * all expectations to be fulfilled. This can be useful for tests that
+	 * involve asynchronous requests.
+	 * @param timeout how long to wait for all expectations to be met
+	 * @throws AssertionError if not all expectations are met by the specified
+	 * timeout, or if any expectation fails at any time before that.
+	 * @since 5.3.4
+	 */
+	void verify(Duration timeout);
 
 	/**
 	 * Reset the internal state removing all expectations and recorded requests.
@@ -75,5 +86,4 @@ public interface RequestExpectationManager {
 	 * @throws IOException in case of any validation errors
 	 */
 	ClientHttpResponse validateRequest(ClientHttpRequest request) throws IOException;
-
 }

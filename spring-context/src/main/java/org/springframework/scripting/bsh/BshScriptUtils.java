@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,7 @@ public abstract class BshScriptUtils {
 			throws EvalError {
 
 		Object result = evaluateBshScript(scriptSource, scriptInterfaces, classLoader);
-		if (result instanceof Class) {
-			Class<?> clazz = (Class<?>) result;
+		if (result instanceof Class<?> clazz) {
 			try {
 				return ReflectionUtils.accessibleConstructor(clazz).newInstance();
 			}

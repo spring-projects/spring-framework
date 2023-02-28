@@ -86,8 +86,8 @@ public interface EvaluationContext {
 
 	/**
 	 * Set a named variable within this evaluation context to a specified value.
-	 * @param name variable to set
-	 * @param value value to be placed in the variable
+	 * @param name the name of the variable to set
+	 * @param value the value to be placed in the variable
 	 */
 	void setVariable(String name, @Nullable Object value);
 

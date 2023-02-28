@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
@@ -59,7 +60,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 
 	private List<HttpMessageConverter<?>> messageConverters = Collections.emptyList();
 
-	private final Map<HttpStatus, Class<? extends RestClientException>> statusMapping = new LinkedHashMap<>();
+	private final Map<HttpStatusCode, Class<? extends RestClientException>> statusMapping = new LinkedHashMap<>();
 
 	private final Map<HttpStatus.Series, Class<? extends RestClientException>> seriesMapping = new LinkedHashMap<>();
 
@@ -84,6 +85,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 	/**
 	 * Set the message converters to use by this extractor.
 	 */
+	@Override
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
 		this.messageConverters = messageConverters;
 	}
@@ -97,7 +99,7 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 	 * {@linkplain #setMessageConverters(List) configured message converters} to convert the
 	 * response into the mapped subclass of {@link RestClientException}.
 	 */
-	public void setStatusMapping(Map<HttpStatus, Class<? extends RestClientException>> statusMapping) {
+	public void setStatusMapping(Map<HttpStatusCode, Class<? extends RestClientException>> statusMapping) {
 		if (!CollectionUtils.isEmpty(statusMapping)) {
 			this.statusMapping.putAll(statusMapping);
 		}
@@ -120,12 +122,13 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 
 
 	@Override
-	protected boolean hasError(HttpStatus statusCode) {
+	protected boolean hasError(HttpStatusCode statusCode) {
 		if (this.statusMapping.containsKey(statusCode)) {
 			return this.statusMapping.get(statusCode) != null;
 		}
-		else if (this.seriesMapping.containsKey(statusCode.series())) {
-			return this.seriesMapping.get(statusCode.series()) != null;
+		HttpStatus.Series series = HttpStatus.Series.resolve(statusCode.value());
+		if (this.seriesMapping.containsKey(series)) {
+			return this.seriesMapping.get(series) != null;
 		}
 		else {
 			return super.hasError(statusCode);
@@ -133,12 +136,13 @@ public class ExtractingResponseErrorHandler extends DefaultResponseErrorHandler 
 	}
 
 	@Override
-	public void handleError(ClientHttpResponse response, HttpStatus statusCode) throws IOException {
+	public void handleError(ClientHttpResponse response, HttpStatusCode statusCode) throws IOException {
 		if (this.statusMapping.containsKey(statusCode)) {
 			extract(this.statusMapping.get(statusCode), response);
 		}
-		else if (this.seriesMapping.containsKey(statusCode.series())) {
-			extract(this.seriesMapping.get(statusCode.series()), response);
+		HttpStatus.Series series = HttpStatus.Series.resolve(statusCode.value());
+		if (this.seriesMapping.containsKey(series)) {
+			extract(this.seriesMapping.get(series), response);
 		}
 		else {
 			super.handleError(response, statusCode);

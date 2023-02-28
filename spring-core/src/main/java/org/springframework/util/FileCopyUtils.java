@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,12 +108,10 @@ public abstract class FileCopyUtils {
 		Assert.notNull(in, "No InputStream specified");
 		Assert.notNull(out, "No OutputStream specified");
 
-		try {
-			return StreamUtils.copy(in, out);
-		}
-		finally {
-			close(in);
-			close(out);
+		try (in; out) {
+			int count = (int) in.transferTo(out);
+			out.flush();
+			return count;
 		}
 	}
 
@@ -171,15 +169,15 @@ public abstract class FileCopyUtils {
 		Assert.notNull(out, "No Writer specified");
 
 		try {
-			int byteCount = 0;
+			int charCount = 0;
 			char[] buffer = new char[BUFFER_SIZE];
-			int bytesRead = -1;
-			while ((bytesRead = in.read(buffer)) != -1) {
-				out.write(buffer, 0, bytesRead);
-				byteCount += bytesRead;
+			int charsRead;
+			while ((charsRead = in.read(buffer)) != -1) {
+				out.write(buffer, 0, charsRead);
+				charCount += charsRead;
 			}
 			out.flush();
-			return byteCount;
+			return charCount;
 		}
 		finally {
 			close(in);
@@ -188,7 +186,7 @@ public abstract class FileCopyUtils {
 	}
 
 	/**
-	 * Copy the contents of the given String to the given output Writer.
+	 * Copy the contents of the given String to the given Writer.
 	 * Closes the writer when done.
 	 * @param in the String to copy from
 	 * @param out the Writer to copy to
@@ -218,7 +216,7 @@ public abstract class FileCopyUtils {
 			return "";
 		}
 
-		StringWriter out = new StringWriter();
+		StringWriter out = new StringWriter(BUFFER_SIZE);
 		copy(in, out);
 		return out.toString();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -127,8 +126,8 @@ public class ImportSelectorTests {
 		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
 		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(1);
-		assertThat(TestImportGroup.imports.size()).isEqualTo(1);
-		assertThat(TestImportGroup.imports.values().iterator().next().size()).isEqualTo(2);
+		assertThat(TestImportGroup.imports).hasSize(1);
+		assertThat(TestImportGroup.imports.values().iterator().next()).hasSize(2);
 	}
 
 	@Test
@@ -142,7 +141,7 @@ public class ImportSelectorTests {
 		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
 		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(1);
-		assertThat(TestImportGroup.imports.size()).isEqualTo(2);
+		assertThat(TestImportGroup.imports).hasSize(2);
 		Iterator<AnnotationMetadata> iterator = TestImportGroup.imports.keySet().iterator();
 		assertThat(iterator.next().getClassName()).isEqualTo(GroupedConfig2.class.getName());
 		assertThat(iterator.next().getClassName()).isEqualTo(GroupedConfig1.class.getName());
@@ -159,7 +158,7 @@ public class ImportSelectorTests {
 		ordered.verify(beanFactory).registerBeanDefinition(eq("e"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("c"), any());
 		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(2);
-		assertThat(TestImportGroup.imports.size()).isEqualTo(2);
+		assertThat(TestImportGroup.imports).hasSize(2);
 		assertThat(TestImportGroup.allImports())
 			.containsOnlyKeys(ParentConfiguration1.class.getName(), ChildConfiguration1.class.getName());
 		assertThat(TestImportGroup.allImports().get(ParentConfiguration1.class.getName()))
@@ -178,7 +177,7 @@ public class ImportSelectorTests {
 		ordered.verify(beanFactory).registerBeanDefinition(eq("b"), any());
 		ordered.verify(beanFactory).registerBeanDefinition(eq("d"), any());
 		assertThat(TestImportGroup.instancesCount.get()).isEqualTo(2);
-		assertThat(TestImportGroup.allImports().size()).isEqualTo(2);
+		assertThat(TestImportGroup.allImports()).hasSize(2);
 		assertThat(TestImportGroup.allImports())
 			.containsOnlyKeys(ParentConfiguration2.class.getName(), ChildConfiguration2.class.getName());
 		assertThat(TestImportGroup.allImports().get(ParentConfiguration2.class.getName()))
@@ -555,7 +554,7 @@ public class ImportSelectorTests {
 
 		@Override
 		public Iterable<Entry> selectImports() {
-			LinkedList<Entry> content = new LinkedList<>(this.instanceImports);
+			ArrayList<Entry> content = new ArrayList<>(this.instanceImports);
 			Collections.reverse(content);
 			return content;
 		}

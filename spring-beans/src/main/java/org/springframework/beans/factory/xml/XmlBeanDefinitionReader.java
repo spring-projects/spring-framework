@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	private final XmlValidationModeDetector validationModeDetector = new XmlValidationModeDetector();
 
 	private final ThreadLocal<Set<EncodedResource>> resourcesCurrentlyBeingLoaded =
-			new NamedThreadLocal<>("XML bean definition resources currently being loaded");
+			new NamedThreadLocal<>("XML bean definition resources currently being loaded"){
+				@Override
+				protected Set<EncodedResource> initialValue() {
+					return new HashSet<>(4);
+				}
+			};
 
 
 	/**
@@ -179,7 +184,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set whether or not the XML parser should be XML namespace aware.
+	 * Set whether the XML parser should be XML namespace aware.
 	 * Default is "false".
 	 * <p>This is typically not needed when schema validation is active.
 	 * However, without validation, this has to be switched to "true"
@@ -190,7 +195,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Return whether or not the XML parser should be XML namespace aware.
+	 * Return whether the XML parser should be XML namespace aware.
 	 */
 	public boolean isNamespaceAware() {
 		return this.namespaceAware;
@@ -319,10 +324,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 		}
 
 		Set<EncodedResource> currentResources = this.resourcesCurrentlyBeingLoaded.get();
-		if (currentResources == null) {
-			currentResources = new HashSet<>(4);
-			this.resourcesCurrentlyBeingLoaded.set(currentResources);
-		}
+
 		if (!currentResources.add(encodedResource)) {
 			throw new BeanDefinitionStoreException(
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");

@@ -28,7 +28,7 @@ public class MessengerScrambler {
 
 	public String scramble(ProceedingJoinPoint pjp) throws Throwable {
 		String message = (String) pjp.proceed();
-		return new StringBuffer(message).reverse().toString();
+		return new StringBuilder(message).reverse().toString();
 	}
 
 }

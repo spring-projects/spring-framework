@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
+import org.springframework.lang.Nullable;
 
 /**
  * Converts from a String to a {@link java.lang.Enum} by calling {@link Enum#valueOf(Class, String)}.
@@ -39,11 +40,12 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 
 		private final Class<T> enumType;
 
-		public StringToEnum(Class<T> enumType) {
+		StringToEnum(Class<T> enumType) {
 			this.enumType = enumType;
 		}
 
 		@Override
+		@Nullable
 		public T convert(String source) {
 			if (source.isEmpty()) {
 				// It's an empty enum identifier: reset the enum value to null.

@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  *
  * <p>This is the most flexible of the Converter SPI interfaces, but also the most complex.
  * It is flexible in that a GenericConverter may support converting between multiple source/target
- * type pairs (see {@link #getConvertibleTypes()}. In addition, GenericConverter implementations
+ * type pairs (see {@link #getConvertibleTypes()}). In addition, GenericConverter implementations
  * have access to source/target {@link TypeDescriptor field context} during the type conversion
  * process. This allows for resolving source and target field metadata such as annotations and
  * generics information, which can be used to influence the conversion logic.

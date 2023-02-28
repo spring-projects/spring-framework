@@ -30,17 +30,18 @@ package org.springframework.asm;
 /**
  * A visitor to visit a Java class. The methods of this class must be called in the following order:
  * {@code visit} [ {@code visitSource} ] [ {@code visitModule} ][ {@code visitNestHost} ][ {@code
- * visitPermittedSubtype} ][ {@code visitOuterClass} ] ( {@code visitAnnotation} | {@code
- * visitTypeAnnotation} | {@code visitAttribute} )* ( {@code visitNestMember} | {@code
- * visitInnerClass} | {@code visitField} | {@code visitMethod} )* {@code visitEnd}.
+ * visitOuterClass} ] ( {@code visitAnnotation} | {@code visitTypeAnnotation} | {@code
+ * visitAttribute} )* ( {@code visitNestMember} | [ {@code * visitPermittedSubclass} ] | {@code
+ * visitInnerClass} | {@code visitRecordComponent} | {@code visitField} | {@code visitMethod} )*
+ * {@code visitEnd}.
  *
  * @author Eric Bruneton
  */
 public abstract class ClassVisitor {
 
   /**
-   * The ASM API version implemented by this visitor. The value of this field must be one of {@link
-   * Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
+   * The ASM API version implemented by this visitor. The value of this field must be one of the
+   * {@code ASM}<i>x</i> values in {@link Opcodes}.
    */
   protected final int api;
 
@@ -50,35 +51,43 @@ public abstract class ClassVisitor {
   /**
    * Constructs a new {@link ClassVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
+   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
+   *     ASM}<i>x</i> values in {@link Opcodes}.
    */
-  public ClassVisitor(final int api) {
+  protected ClassVisitor(final int api) {
     this(api, null);
   }
 
   /**
    * Constructs a new {@link ClassVisitor}.
    *
-   * @param api the ASM API version implemented by this visitor. Must be one of {@link
-   *     Opcodes#ASM4}, {@link Opcodes#ASM5}, {@link Opcodes#ASM6} or {@link Opcodes#ASM7}.
+   * @param api the ASM API version implemented by this visitor. Must be one of the {@code
+   *     ASM}<i>x</i> values in {@link Opcodes}.
    * @param classVisitor the class visitor to which this visitor must delegate method calls. May be
    *     null.
    */
-  @SuppressWarnings("deprecation")
-  public ClassVisitor(final int api, final ClassVisitor classVisitor) {
-    if (api != Opcodes.ASM7
+  protected ClassVisitor(final int api, final ClassVisitor classVisitor) {
+    if (api != Opcodes.ASM9
+        && api != Opcodes.ASM8
+        && api != Opcodes.ASM7
         && api != Opcodes.ASM6
         && api != Opcodes.ASM5
         && api != Opcodes.ASM4
-        && api != Opcodes.ASM8_EXPERIMENTAL) {
+        && api != Opcodes.ASM10_EXPERIMENTAL) {
       throw new IllegalArgumentException("Unsupported api " + api);
     }
-    if (api == Opcodes.ASM8_EXPERIMENTAL) {
-      Constants.checkAsm8Experimental(this);
-    }
+    // SPRING PATCH: no preview mode check for ASM experimental
     this.api = api;
     this.cv = classVisitor;
+  }
+
+  /**
+   * The class visitor to which this visitor must delegate method calls. May be {@literal null}.
+   *
+   * @return the class visitor to which this visitor must delegate method calls, or {@literal null}.
+   */
+  public ClassVisitor getDelegate() {
+    return cv;
   }
 
   /**
@@ -87,7 +96,8 @@ public abstract class ClassVisitor {
    * @param version the class version. The minor version is stored in the 16 most significant bits,
    *     and the major version in the 16 least significant bits.
    * @param access the class's access flags (see {@link Opcodes}). This parameter also indicates if
-   *     the class is deprecated.
+   *     the class is deprecated {@link Opcodes#ACC_DEPRECATED} or a record {@link
+   *     Opcodes#ACC_RECORD}.
    * @param name the internal name of the class (see {@link Type#getInternalName()}).
    * @param signature the signature of this class. May be {@literal null} if the class is not a
    *     generic one, and does not extend or implement generic classes or interfaces.
@@ -104,6 +114,9 @@ public abstract class ClassVisitor {
       final String signature,
       final String superName,
       final String[] interfaces) {
+    if (api < Opcodes.ASM8 && (access & Opcodes.ACC_RECORD) != 0) {
+      throw new UnsupportedOperationException("Records requires ASM8");
+    }
     if (cv != null) {
       cv.visit(version, access, name, signature, superName, interfaces);
     }
@@ -135,7 +148,7 @@ public abstract class ClassVisitor {
    */
   public ModuleVisitor visitModule(final String name, final int access, final String version) {
     if (api < Opcodes.ASM6) {
-      throw new UnsupportedOperationException("This feature requires ASM6");
+      throw new UnsupportedOperationException("Module requires ASM6");
     }
     if (cv != null) {
       return cv.visitModule(name, access, version);
@@ -151,11 +164,12 @@ public abstract class ClassVisitor {
    * implicitly its own nest, so it's invalid to call this method with the visited class name as
    * argument.
    *
-   * @param nestHost the internal name of the host class of the nest.
+   * @param nestHost the internal name of the host class of the nest (see {@link
+   *     Type#getInternalName()}).
    */
   public void visitNestHost(final String nestHost) {
     if (api < Opcodes.ASM7) {
-      throw new UnsupportedOperationException("This feature requires ASM7");
+      throw new UnsupportedOperationException("NestHost requires ASM7");
     }
     if (cv != null) {
       cv.visitNestHost(nestHost);
@@ -163,14 +177,19 @@ public abstract class ClassVisitor {
   }
 
   /**
-   * Visits the enclosing class of the class. This method must be called only if the class has an
-   * enclosing class.
+   * Visits the enclosing class of the class. This method must be called only if this class is a
+   * local or anonymous class. See the JVMS 4.7.7 section for more details.
    *
-   * @param owner internal name of the enclosing class of the class.
+   * @param owner internal name of the enclosing class of the class (see {@link
+   *     Type#getInternalName()}).
    * @param name the name of the method that contains the class, or {@literal null} if the class is
-   *     not enclosed in a method of its enclosing class.
+   *     not enclosed in a method or constructor of its enclosing class (e.g. if it is enclosed in
+   *     an instance initializer, static initializer, instance variable initializer, or class
+   *     variable initializer).
    * @param descriptor the descriptor of the method that contains the class, or {@literal null} if
-   *     the class is not enclosed in a method of its enclosing class.
+   *     the class is not enclosed in a method or constructor of its enclosing class (e.g. if it is
+   *     enclosed in an instance initializer, static initializer, instance variable initializer, or
+   *     class variable initializer).
    */
   public void visitOuterClass(final String owner, final String name, final String descriptor) {
     if (cv != null) {
@@ -211,7 +230,7 @@ public abstract class ClassVisitor {
   public AnnotationVisitor visitTypeAnnotation(
       final int typeRef, final TypePath typePath, final String descriptor, final boolean visible) {
     if (api < Opcodes.ASM5) {
-      throw new UnsupportedOperationException("This feature requires ASM5");
+      throw new UnsupportedOperationException("TypeAnnotation requires ASM5");
     }
     if (cv != null) {
       return cv.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
@@ -237,11 +256,11 @@ public abstract class ClassVisitor {
    * the visited class is the host of a nest. A nest host is implicitly a member of its own nest, so
    * it's invalid to call this method with the visited class name as argument.
    *
-   * @param nestMember the internal name of a nest member.
+   * @param nestMember the internal name of a nest member (see {@link Type#getInternalName()}).
    */
   public void visitNestMember(final String nestMember) {
     if (api < Opcodes.ASM7) {
-      throw new UnsupportedOperationException("This feature requires ASM7");
+      throw new UnsupportedOperationException("NestMember requires ASM7");
     }
     if (cv != null) {
       cv.visitNestMember(nestMember);
@@ -249,34 +268,35 @@ public abstract class ClassVisitor {
   }
 
   /**
-   * <b>Experimental, use at your own risk. This method will be renamed when it becomes stable, this
-   * will break existing code using it</b>. Visits a permitted subtypes. A permitted subtypes is one
-   * of the allowed subtypes of the current class.
+   * Visits a permitted subclasses. A permitted subclass is one of the allowed subclasses of the
+   * current class.
    *
-   * @param permittedSubtype the internal name of a permitted subtype.
-   * @deprecated this API is experimental.
+   * @param permittedSubclass the internal name of a permitted subclass (see {@link
+   *     Type#getInternalName()}).
    */
-  @Deprecated
-  public void visitPermittedSubtypeExperimental(final String permittedSubtype) {
-    if (api != Opcodes.ASM8_EXPERIMENTAL) {
-      throw new UnsupportedOperationException("This feature requires ASM8_EXPERIMENTAL");
+  public void visitPermittedSubclass(final String permittedSubclass) {
+    if (api < Opcodes.ASM9) {
+      throw new UnsupportedOperationException("PermittedSubclasses requires ASM9");
     }
     if (cv != null) {
-      cv.visitPermittedSubtypeExperimental(permittedSubtype);
+      cv.visitPermittedSubclass(permittedSubclass);
     }
   }
 
   /**
    * Visits information about an inner class. This inner class is not necessarily a member of the
-   * class being visited.
+   * class being visited. More precisely, every class or interface C which is referenced by this
+   * class and which is not a package member must be visited with this method. This class must
+   * reference its nested class or interface members, and its enclosing class, if any. See the JVMS
+   * 4.7.6 section for more details.
    *
-   * @param name the internal name of an inner class (see {@link Type#getInternalName()}).
-   * @param outerName the internal name of the class to which the inner class belongs (see {@link
-   *     Type#getInternalName()}). May be {@literal null} for not member classes.
-   * @param innerName the (simple) name of the inner class inside its enclosing class. May be
-   *     {@literal null} for anonymous inner classes.
-   * @param access the access flags of the inner class as originally declared in the enclosing
-   *     class.
+   * @param name the internal name of C (see {@link Type#getInternalName()}).
+   * @param outerName the internal name of the class or interface C is a member of (see {@link
+   *     Type#getInternalName()}). Must be {@literal null} if C is not the member of a class or
+   *     interface (e.g. for local or anonymous classes).
+   * @param innerName the (simple) name of C. Must be {@literal null} for anonymous inner classes.
+   * @param access the access flags of C originally declared in the source code from which this
+   *     class was compiled.
    */
   public void visitInnerClass(
       final String name, final String outerName, final String innerName, final int access) {
@@ -288,24 +308,20 @@ public abstract class ClassVisitor {
   /**
    * Visits a record component of the class.
    *
-   * @param access the record component access flags, the only possible value is {@link
-   *     Opcodes#ACC_DEPRECATED}.
    * @param name the record component name.
    * @param descriptor the record component descriptor (see {@link Type}).
    * @param signature the record component signature. May be {@literal null} if the record component
    *     type does not use generic types.
    * @return a visitor to visit this record component annotations and attributes, or {@literal null}
    *     if this class visitor is not interested in visiting these annotations and attributes.
-   * @deprecated this API is experimental.
    */
-  @Deprecated
-  public RecordComponentVisitor visitRecordComponentExperimental(
-      final int access, final String name, final String descriptor, final String signature) {
-    if (api < Opcodes.ASM8_EXPERIMENTAL) {
-      throw new UnsupportedOperationException("This feature requires ASM8_EXPERIMENTAL");
+  public RecordComponentVisitor visitRecordComponent(
+      final String name, final String descriptor, final String signature) {
+    if (api < Opcodes.ASM8) {
+      throw new UnsupportedOperationException("Record requires ASM8");
     }
     if (cv != null) {
-      return cv.visitRecordComponentExperimental(access, name, descriptor, signature);
+      return cv.visitRecordComponent(name, descriptor, signature);
     }
     return null;
   }

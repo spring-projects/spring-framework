@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,12 @@
 
 package org.springframework.test.context.support;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,22 +35,56 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  */
 class AnnotationConfigContextLoaderTests {
 
-	private final AnnotationConfigContextLoader contextLoader = new AnnotationConfigContextLoader();
-
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
+
+	private final AnnotationConfigContextLoader contextLoader = new AnnotationConfigContextLoader();
 
 
 	/**
 	 * @since 4.0.4
 	 */
 	@Test
-	void configMustNotContainLocations() throws Exception {
+	void loadContextWithConfigContainingLocationsResultsInException() {
 		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(getClass(),
 			new String[] { "config.xml" }, EMPTY_CLASS_ARRAY, EMPTY_STRING_ARRAY, contextLoader);
-		assertThatIllegalStateException().isThrownBy(() ->
-				contextLoader.loadContext(mergedConfig))
+		assertThatIllegalStateException()
+			.isThrownBy(() -> contextLoader.loadContext(mergedConfig))
 			.withMessageContaining("does not support resource locations");
+	}
+
+	/**
+	 * @since 6.0
+	 */
+	@Test
+	void loadContextRefreshesContext() throws Exception {
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
+				AnnotatedFooConfigInnerClassTestCase.class, EMPTY_STRING_ARRAY,
+				new Class<?>[] {AnnotatedFooConfigInnerClassTestCase.FooConfig.class},
+				EMPTY_STRING_ARRAY, contextLoader);
+		ApplicationContext context = contextLoader.loadContext(mergedConfig);
+		assertThat(context).isInstanceOf(ConfigurableApplicationContext.class);
+		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+		assertThat(cac.isActive()).as("ApplicationContext is active").isTrue();
+		assertThat(context.getBean(String.class)).isEqualTo("foo");
+		cac.close();
+	}
+
+	/**
+	 * @since 6.0
+	 */
+	@Test
+	void loadContextForAotProcessingDoesNotRefreshContext() throws Exception {
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(
+				AnnotatedFooConfigInnerClassTestCase.class, EMPTY_STRING_ARRAY,
+				new Class<?>[] {AnnotatedFooConfigInnerClassTestCase.FooConfig.class},
+				EMPTY_STRING_ARRAY, contextLoader);
+		ApplicationContext context = contextLoader.loadContextForAotProcessing(mergedConfig);
+		assertThat(context).isInstanceOf(ConfigurableApplicationContext.class);
+		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
+		assertThat(cac.isActive()).as("ApplicationContext is active").isFalse();
+		assertThat(Arrays.stream(context.getBeanDefinitionNames())).anyMatch(name -> name.contains("FooConfig"));
+		cac.close();
 	}
 
 	@Test

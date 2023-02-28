@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -50,15 +50,15 @@ import org.springframework.web.context.ServletContextAware;
  * <th>Enabled Or Not</th>
  * </tr>
  * <tr>
- * <td>{@link #setFavorPathExtension favorPathExtension}</td>
- * <td>true</td>
- * <td>{@link PathExtensionContentNegotiationStrategy}</td>
- * <td>Enabled</td>
- * </tr>
- * <tr>
  * <td>{@link #setFavorParameter favorParameter}</td>
  * <td>false</td>
  * <td>{@link ParameterContentNegotiationStrategy}</td>
+ * <td>Off</td>
+ * </tr>
+ * <tr>
+ * <td>{@link #setFavorPathExtension favorPathExtension}</td>
+ * <td>false (as of 5.3)</td>
+ * <td>{@link PathExtensionContentNegotiationStrategy}</td>
  * <td>Off</td>
  * </tr>
  * <tr>
@@ -85,15 +85,14 @@ import org.springframework.web.context.ServletContextAware;
  * methods and set the exact strategies to use via
  * {@link #setStrategies(List)}.
  *
- * <p><strong>Note:</strong> As of 5.2.4,
+ * <p><strong>Deprecation Note:</strong> As of 5.2.4,
  * {@link #setFavorPathExtension(boolean) favorPathExtension} and
  * {@link #setIgnoreUnknownPathExtensions(boolean) ignoreUnknownPathExtensions}
- * are deprecated in order to discourage use of path extensions for content
- * negotiation as well as for request mapping (with similar deprecations in
+ * are deprecated in order to discourage using path extensions for content
+ * negotiation and for request mapping with similar deprecations on
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
- * RequestMappingHandlerMapping}). For further context, please read issue
+ * RequestMappingHandlerMapping}. For further context, please read issue
  * <a href="https://github.com/spring-projects/spring-framework/issues/24179">#24719</a>.
- *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @since 3.2
@@ -105,20 +104,20 @@ public class ContentNegotiationManagerFactoryBean
 	private List<ContentNegotiationStrategy> strategies;
 
 
-	private boolean favorPathExtension = true;
-
 	private boolean favorParameter = false;
 
-	private boolean ignoreAcceptHeader = false;
+	private String parameterName = "format";
 
-	private Map<String, MediaType> mediaTypes = new HashMap<>();
+	private boolean favorPathExtension = false;
+
+	private final Map<String, MediaType> mediaTypes = new HashMap<>();
 
 	private boolean ignoreUnknownPathExtensions = true;
 
 	@Nullable
 	private Boolean useRegisteredExtensionsOnly;
 
-	private String parameterName = "format";
+	private boolean ignoreAcceptHeader = false;
 
 	@Nullable
 	private ContentNegotiationStrategy defaultNegotiationStrategy;
@@ -143,13 +142,34 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
+	 * Whether a request parameter ("format" by default) should be used to
+	 * determine the requested media type. For this option to work you must
+	 * register {@link #setMediaTypes media type mappings}.
+	 * <p>By default this is set to {@code false}.
+	 * @see #setParameterName
+	 */
+	public void setFavorParameter(boolean favorParameter) {
+		this.favorParameter = favorParameter;
+	}
+
+	/**
+	 * Set the query parameter name to use when {@link #setFavorParameter} is on.
+	 * <p>The default parameter name is {@code "format"}.
+	 */
+	public void setParameterName(String parameterName) {
+		Assert.notNull(parameterName, "parameterName is required");
+		this.parameterName = parameterName;
+	}
+
+	/**
 	 * Whether the path extension in the URL path should be used to determine
 	 * the requested media type.
-	 * <p>By default this is set to {@code true} in which case a request
-	 * for {@code /hotels.pdf} will be interpreted as a request for
-	 * {@code "application/pdf"} regardless of the 'Accept' header.
+	 * <p>By default this is set to {@code false} in which case path extensions
+	 * have no impact on content negotiation.
 	 * @deprecated as of 5.2.4. See class-level note on the deprecation of path
-	 * extension config options.
+	 * extension config options. As there is no replacement for this method,
+	 * in 5.2.x it is necessary to set it to {@code false}. In 5.3 the default
+	 * changes to {@code false} and use of this property becomes unnecessary.
 	 */
 	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {
@@ -176,7 +196,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * {@code ResourceHttpRequestHandler}.
 	 * <li>Determine the media type of views rendered with
 	 * {@code ContentNegotiatingViewResolver}.
-	 * <li>Whitelist extensions for RFD attack detection (check the Spring
+	 * <li>List safe extensions for RFD attack detection (check the Spring
 	 * Framework reference docs for details).
 	 * </ul>
 	 * @param mediaTypes media type mappings
@@ -222,8 +242,8 @@ public class ContentNegotiationManagerFactoryBean
 	/**
 	 * Indicate whether to use the Java Activation Framework as a fallback option
 	 * to map from file extensions to media types.
-	 * @deprecated as of 5.0, in favor of {@link #setUseRegisteredExtensionsOnly(boolean)}, which
-	 * has reverse behavior.
+	 * @deprecated as of 5.0, in favor of {@link #setUseRegisteredExtensionsOnly(boolean)},
+	 * which has reverse behavior.
 	 */
 	@Deprecated
 	public void setUseJaf(boolean useJaf) {
@@ -243,26 +263,6 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean useRegisteredExtensionsOnly() {
 		return (this.useRegisteredExtensionsOnly != null && this.useRegisteredExtensionsOnly);
-	}
-
-	/**
-	 * Whether a request parameter ("format" by default) should be used to
-	 * determine the requested media type. For this option to work you must
-	 * register {@link #setMediaTypes media type mappings}.
-	 * <p>By default this is set to {@code false}.
-	 * @see #setParameterName
-	 */
-	public void setFavorParameter(boolean favorParameter) {
-		this.favorParameter = favorParameter;
-	}
-
-	/**
-	 * Set the query parameter name to use when {@link #setFavorParameter} is on.
-	 * <p>The default parameter name is {@code "format"}.
-	 */
-	public void setParameterName(String parameterName) {
-		Assert.notNull(parameterName, "parameterName is required");
-		this.parameterName = parameterName;
 	}
 
 	/**

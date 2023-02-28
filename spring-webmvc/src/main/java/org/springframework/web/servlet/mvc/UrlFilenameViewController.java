@@ -19,11 +19,12 @@ package org.springframework.web.servlet.mvc;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.ServletRequestPathUtils;
 
 /**
  * Simple {@code Controller} implementation that transforms the virtual
@@ -111,7 +112,7 @@ public class UrlFilenameViewController extends AbstractUrlViewController {
 	protected String extractOperableUrl(HttpServletRequest request) {
 		String urlPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
 		if (!StringUtils.hasText(urlPath)) {
-			urlPath = getUrlPathHelper().getLookupPathForRequest(request, HandlerMapping.LOOKUP_PATH);
+			urlPath = ServletRequestPathUtils.getCachedPathValue(request);
 		}
 		return urlPath;
 	}

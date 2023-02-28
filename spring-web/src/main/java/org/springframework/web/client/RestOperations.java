@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Interface specifying a basic set of RESTful operations.
- * Implemented by {@link RestTemplate}. Not often used directly, but a useful
+ *
+ * <p>Implemented by {@link RestTemplate}. Not often used directly, but a useful
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
  * @author Arjen Poutsma
@@ -67,7 +68,7 @@ public interface RestOperations {
 	<T> T getForObject(String url, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
-	 * Retrieve a representation by doing a GET on the URL .
+	 * Retrieve a representation by doing a GET on the URL.
 	 * The response (if any) is converted and returned.
 	 * @param url the URL
 	 * @param responseType the type of the return value
@@ -78,7 +79,7 @@ public interface RestOperations {
 
 	/**
 	 * Retrieve an entity by doing a GET on the specified URL.
-	 * The response is converted and stored in an {@link ResponseEntity}.
+	 * The response is converted and stored in a {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param responseType the type of the return value
@@ -91,7 +92,7 @@ public interface RestOperations {
 
 	/**
 	 * Retrieve a representation by doing a GET on the URI template.
-	 * The response is converted and stored in an {@link ResponseEntity}.
+	 * The response is converted and stored in a {@link ResponseEntity}.
 	 * <p>URI Template variables are expanded using the given map.
 	 * @param url the URL
 	 * @param responseType the type of the return value
@@ -103,8 +104,8 @@ public interface RestOperations {
 			throws RestClientException;
 
 	/**
-	 * Retrieve a representation by doing a GET on the URL .
-	 * The response is converted and stored in an {@link ResponseEntity}.
+	 * Retrieve a representation by doing a GET on the URL.
+	 * The response is converted and stored in a {@link ResponseEntity}.
 	 * @param url the URL
 	 * @param responseType the type of the return value
 	 * @return the converted object
@@ -448,7 +449,6 @@ public interface RestOperations {
 	/**
 	 * Delete the resources at the specified URI.
 	 * <p>URI Template variables are expanded using the given map.
-	 *
 	 * @param url the URL
 	 * @param uriVariables the variables to expand the template
 	 */
@@ -464,27 +464,27 @@ public interface RestOperations {
 	// OPTIONS
 
 	/**
-	 * Return the value of the Allow header for the given URI.
+	 * Return the value of the {@code Allow} header for the given URI.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
-	 * @return the value of the allow header
+	 * @return the value of the {@code Allow} header
 	 */
 	Set<HttpMethod> optionsForAllow(String url, Object... uriVariables) throws RestClientException;
 
 	/**
-	 * Return the value of the Allow header for the given URI.
+	 * Return the value of the {@code Allow} header for the given URI.
 	 * <p>URI Template variables are expanded using the given map.
 	 * @param url the URL
 	 * @param uriVariables the variables to expand in the template
-	 * @return the value of the allow header
+	 * @return the value of the {@code Allow} header
 	 */
 	Set<HttpMethod> optionsForAllow(String url, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
-	 * Return the value of the Allow header for the given URL.
+	 * Return the value of the {@code Allow} header for the given URL.
 	 * @param url the URL
-	 * @return the value of the allow header
+	 * @return the value of the {@code Allow} header
 	 */
 	Set<HttpMethod> optionsForAllow(URI url) throws RestClientException;
 
@@ -499,7 +499,7 @@ public interface RestOperations {
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the request
 	 * may be {@code null})
-	 * @param responseType the type of the return value
+	 * @param responseType the type to convert the response to, or {@code Void.class} for no body
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity
 	 * @since 3.0.2
@@ -515,7 +515,7 @@ public interface RestOperations {
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the request
 	 * (may be {@code null})
-	 * @param responseType the type of the return value
+	 * @param responseType the type to convert the response to, or {@code Void.class} for no body
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity
 	 * @since 3.0.2
@@ -530,7 +530,7 @@ public interface RestOperations {
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the request
 	 * (may be {@code null})
-	 * @param responseType the type of the return value
+	 * @param responseType the type to convert the response to, or {@code Void.class} for no body
 	 * @return the response as entity
 	 * @since 3.0.2
 	 */
@@ -552,7 +552,7 @@ public interface RestOperations {
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the
 	 * request (may be {@code null})
-	 * @param responseType the type of the return value
+	 * @param responseType the type to convert the response to, or {@code Void.class} for no body
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity
 	 * @since 3.2
@@ -575,7 +575,7 @@ public interface RestOperations {
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the request
 	 * (may be {@code null})
-	 * @param responseType the type of the return value
+	 * @param responseType the type to convert the response to, or {@code Void.class} for no body
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity
 	 * @since 3.2
@@ -598,7 +598,7 @@ public interface RestOperations {
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestEntity the entity (headers and/or body) to write to the request
 	 * (may be {@code null})
-	 * @param responseType the type of the return value
+	 * @param responseType the type to convert the response to, or {@code Void.class} for no body
 	 * @return the response as entity
 	 * @since 3.2
 	 */
@@ -612,13 +612,13 @@ public interface RestOperations {
 	 * <pre class="code">
 	 * MyRequest body = ...
 	 * RequestEntity request = RequestEntity
-	 *     .post(new URI(&quot;https://example.com/foo&quot;))
+	 *     .post(URI.create(&quot;https://example.com/foo&quot;))
 	 *     .accept(MediaType.APPLICATION_JSON)
 	 *     .body(body);
 	 * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
 	 * </pre>
 	 * @param requestEntity the entity to write to the request
-	 * @param responseType the type of the return value
+	 * @param responseType the type to convert the response to, or {@code Void.class} for no body
 	 * @return the response as entity
 	 * @since 4.1
 	 */
@@ -632,7 +632,7 @@ public interface RestOperations {
 	 * <pre class="code">
 	 * MyRequest body = ...
 	 * RequestEntity request = RequestEntity
-	 *     .post(new URI(&quot;https://example.com/foo&quot;))
+	 *     .post(URI.create(&quot;https://example.com/foo&quot;))
 	 *     .accept(MediaType.APPLICATION_JSON)
 	 *     .body(body);
 	 * ParameterizedTypeReference&lt;List&lt;MyResponse&gt;&gt; myBean =
@@ -640,7 +640,7 @@ public interface RestOperations {
 	 * ResponseEntity&lt;List&lt;MyResponse&gt;&gt; response = template.exchange(request, myBean);
 	 * </pre>
 	 * @param requestEntity the entity to write to the request
-	 * @param responseType the type of the return value
+	 * @param responseType the type to convert the response to, or {@code Void.class} for no body
 	 * @return the response as entity
 	 * @since 4.1
 	 */
@@ -654,7 +654,7 @@ public interface RestOperations {
 	 * Execute the HTTP method to the given URI template, preparing the request with the
 	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
-	 * @param url the URL
+	 * @param uriTemplate the URI template
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestCallback object that prepares the request
 	 * @param responseExtractor object that extracts the return value from the response
@@ -662,7 +662,7 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Object... uriVariables)
 			throws RestClientException;
 
@@ -670,7 +670,7 @@ public interface RestOperations {
 	 * Execute the HTTP method to the given URI template, preparing the request with the
 	 * {@link RequestCallback}, and reading the response with a {@link ResponseExtractor}.
 	 * <p>URI Template variables are expanded using the given URI variables map.
-	 * @param url the URL
+	 * @param uriTemplate the URI template
 	 * @param method the HTTP method (GET, POST, etc)
 	 * @param requestCallback object that prepares the request
 	 * @param responseExtractor object that extracts the return value from the response
@@ -678,7 +678,7 @@ public interface RestOperations {
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	@Nullable
-	<T> T execute(String url, HttpMethod method, @Nullable RequestCallback requestCallback,
+	<T> T execute(String uriTemplate, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor, Map<String, ?> uriVariables)
 			throws RestClientException;
 

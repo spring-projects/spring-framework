@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class TransactionContext {
 	@Nullable
 	private TransactionStatus transactionStatus;
 
-	private final AtomicInteger transactionsStarted = new AtomicInteger(0);
+	private final AtomicInteger transactionsStarted = new AtomicInteger();
 
 
 	TransactionContext(TestContext testContext, PlatformTransactionManager transactionManager,
@@ -103,10 +103,14 @@ class TransactionContext {
 		this.transactionStatus = this.transactionManager.getTransaction(this.transactionDefinition);
 		int transactionsStarted = this.transactionsStarted.incrementAndGet();
 
-		if (logger.isInfoEnabled()) {
-			logger.info(String.format(
-					"Began transaction (%s) for test context %s; transaction manager [%s]; rollback [%s]",
-					transactionsStarted, this.testContext, this.transactionManager, this.flaggedForRollback));
+		if (logger.isTraceEnabled()) {
+			logger.trace("Began transaction (%d) for test context %s; transaction manager [%s]; rollback [%s]"
+					.formatted(transactionsStarted, this.testContext, this.transactionManager, this.flaggedForRollback));
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Began transaction (%d) for test class [%s]; test method [%s]; transaction manager [%s]; rollback [%s]"
+					.formatted(transactionsStarted, this.testContext.getTestClass().getName(),
+						this.testContext.getTestMethod().getName(), this.transactionManager, this.flaggedForRollback));
 		}
 	}
 
@@ -135,9 +139,16 @@ class TransactionContext {
 			this.transactionStatus = null;
 		}
 
-		if (logger.isInfoEnabled()) {
-			logger.info((this.flaggedForRollback ? "Rolled back" : "Committed") +
-					" transaction for test: " + this.testContext);
+		int transactionsStarted = this.transactionsStarted.get();
+		if (logger.isTraceEnabled()) {
+			logger.trace("%s transaction (%d) for test context: %s"
+					.formatted((this.flaggedForRollback ? "Rolled back" : "Committed"),
+						transactionsStarted, this.testContext));
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("%s transaction (%d) for test class [%s]; test method [%s]"
+					.formatted((this.flaggedForRollback ? "Rolled back" : "Committed"), transactionsStarted,
+						this.testContext.getTestClass().getName(), this.testContext.getTestMethod().getName()));
 		}
 	}
 

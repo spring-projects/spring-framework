@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ public interface PropertySourceFactory {
 	/**
 	 * Create a {@link PropertySource} that wraps the given resource.
 	 * @param name the name of the property source
+	 * (can be {@code null} in which case the factory implementation
+	 * will have to generate a name based on the given resource)
 	 * @param resource the resource (potentially encoded) to wrap
 	 * @return the new {@link PropertySource} (never {@code null})
 	 * @throws IOException if resource resolution failed

@@ -10,6 +10,6 @@
 		<aop:advisor advice-ref="countingAdvice" pointcut-ref="pc"/>
 	</aop:config>
 
-	<bean id="countingAdvice" class="org.springframework.aop.framework.CountingBeforeAdvice"/>
+	<bean id="countingAdvice" class="org.springframework.aop.testfixture.advice.CountingBeforeAdvice"/>
 
 </beans>

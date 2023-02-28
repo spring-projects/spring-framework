@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.beans.factory.ObjectFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -38,19 +38,16 @@ import static org.mockito.Mockito.verify;
  */
 public class SimpSessionScopeTests {
 
-	private SimpSessionScope scope;
+	private SimpSessionScope scope = new SimpSessionScope();
 
 	@SuppressWarnings("rawtypes")
-	private ObjectFactory objectFactory;
+	private ObjectFactory objectFactory = mock();
 
-	private SimpAttributes simpAttributes;
+	private SimpAttributes simpAttributes = new SimpAttributes("session1", new ConcurrentHashMap<>());
 
 
 	@BeforeEach
 	public void setUp() {
-		this.scope = new SimpSessionScope();
-		this.objectFactory = Mockito.mock(ObjectFactory.class);
-		this.simpAttributes = new SimpAttributes("session1", new ConcurrentHashMap<>());
 		SimpAttributesContextHolder.setAttributes(this.simpAttributes);
 	}
 
@@ -90,7 +87,7 @@ public class SimpSessionScopeTests {
 
 	@Test
 	public void registerDestructionCallback() {
-		Runnable runnable = Mockito.mock(Runnable.class);
+		Runnable runnable = mock();
 		this.scope.registerDestructionCallback("name", runnable);
 
 		this.simpAttributes.sessionCompleted();
@@ -101,6 +98,5 @@ public class SimpSessionScopeTests {
 	public void getSessionId() {
 		assertThat(this.scope.getConversationId()).isEqualTo("session1");
 	}
-
 
 }

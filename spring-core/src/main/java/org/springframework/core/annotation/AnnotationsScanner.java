@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.MergedAnnotations.Search;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -68,77 +69,54 @@ abstract class AnnotationsScanner {
 	 * processor
 	 * @param source the source element to scan
 	 * @param searchStrategy the search strategy to use
+	 * @param searchEnclosingClass a predicate which evaluates to {@code true}
+	 * if a search should be performed on the enclosing class of the class
+	 * supplied to the predicate
 	 * @param processor the processor that receives the annotations
 	 * @return the result of {@link AnnotationsProcessor#finish(Object)}
 	 */
 	@Nullable
 	static <C, R> R scan(C context, AnnotatedElement source, SearchStrategy searchStrategy,
-			AnnotationsProcessor<C, R> processor) {
+			Predicate<Class<?>> searchEnclosingClass, AnnotationsProcessor<C, R> processor) {
 
-		return scan(context, source, searchStrategy, processor, null);
-	}
-
-	/**
-	 * Scan the hierarchy of the specified element for relevant annotations and
-	 * call the processor as required.
-	 * @param context an optional context object that will be passed back to the
-	 * processor
-	 * @param source the source element to scan
-	 * @param searchStrategy the search strategy to use
-	 * @param processor the processor that receives the annotations
-	 * @param classFilter an optional filter that can be used to entirely filter
-	 * out a specific class from the hierarchy
-	 * @return the result of {@link AnnotationsProcessor#finish(Object)}
-	 */
-	@Nullable
-	static <C, R> R scan(C context, AnnotatedElement source, SearchStrategy searchStrategy,
-			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
-
-		R result = process(context, source, searchStrategy, processor, classFilter);
+		R result = process(context, source, searchStrategy, searchEnclosingClass, processor);
 		return processor.finish(result);
 	}
 
 	@Nullable
 	private static <C, R> R process(C context, AnnotatedElement source,
-			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor,
-			@Nullable BiPredicate<C, Class<?>> classFilter) {
+			SearchStrategy searchStrategy, Predicate<Class<?>> searchEnclosingClass,
+			AnnotationsProcessor<C, R> processor) {
 
-		if (source instanceof Class) {
-			return processClass(context, (Class<?>) source, searchStrategy, processor, classFilter);
+		if (source instanceof Class<?> clazz) {
+			return processClass(context, clazz, searchStrategy, searchEnclosingClass, processor);
 		}
-		if (source instanceof Method) {
-			return processMethod(context, (Method) source, searchStrategy, processor, classFilter);
+		if (source instanceof Method method) {
+			return processMethod(context, method, searchStrategy, processor);
 		}
-		return processElement(context, source, processor, classFilter);
+		return processElement(context, source, processor);
 	}
 
 	@Nullable
-	private static <C, R> R processClass(C context, Class<?> source,
-			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor,
-			@Nullable BiPredicate<C, Class<?>> classFilter) {
+	@SuppressWarnings("deprecation")
+	private static <C, R> R processClass(C context, Class<?> source, SearchStrategy searchStrategy,
+			Predicate<Class<?>> searchEnclosingClass, AnnotationsProcessor<C, R> processor) {
 
-		switch (searchStrategy) {
-			case DIRECT:
-				return processElement(context, source, processor, classFilter);
-			case INHERITED_ANNOTATIONS:
-				return processClassInheritedAnnotations(context, source, searchStrategy, processor, classFilter);
-			case SUPERCLASS:
-				return processClassHierarchy(context, source, processor, classFilter, false, false);
-			case TYPE_HIERARCHY:
-				return processClassHierarchy(context, source, processor, classFilter, true, false);
-			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES:
-				return processClassHierarchy(context, source, processor, classFilter, true, true);
-		}
-		throw new IllegalStateException("Unsupported search strategy " + searchStrategy);
+		return switch (searchStrategy) {
+			case DIRECT -> processElement(context, source, processor);
+			case INHERITED_ANNOTATIONS -> processClassInheritedAnnotations(context, source, searchStrategy, processor);
+			case SUPERCLASS -> processClassHierarchy(context, source, processor, false, Search.never);
+			case TYPE_HIERARCHY -> processClassHierarchy(context, source, processor, true, searchEnclosingClass);
+		};
 	}
 
 	@Nullable
 	private static <C, R> R processClassInheritedAnnotations(C context, Class<?> source,
-			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
+			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
 
 		try {
-			if (isWithoutHierarchy(source, searchStrategy)) {
-				return processElement(context, source, processor, classFilter);
+			if (isWithoutHierarchy(source, searchStrategy, Search.never)) {
+				return processElement(context, source, processor);
 			}
 			Annotation[] relevant = null;
 			int remaining = Integer.MAX_VALUE;
@@ -150,11 +128,7 @@ abstract class AnnotationsScanner {
 				if (result != null) {
 					return result;
 				}
-				if (isFiltered(source, context, classFilter)) {
-					continue;
-				}
-				Annotation[] declaredAnnotations =
-						getDeclaredAnnotations(context, source, classFilter, true);
+				Annotation[] declaredAnnotations = getDeclaredAnnotations(source, true);
 				if (relevant == null && declaredAnnotations.length > 0) {
 					relevant = root.getAnnotations();
 					remaining = relevant.length;
@@ -192,17 +166,17 @@ abstract class AnnotationsScanner {
 
 	@Nullable
 	private static <C, R> R processClassHierarchy(C context, Class<?> source,
-			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter,
-			boolean includeInterfaces, boolean includeEnclosing) {
+			AnnotationsProcessor<C, R> processor, boolean includeInterfaces,
+			Predicate<Class<?>> searchEnclosingClass) {
 
 		return processClassHierarchy(context, new int[] {0}, source, processor,
-				classFilter, includeInterfaces, includeEnclosing);
+				includeInterfaces, searchEnclosingClass);
 	}
 
 	@Nullable
 	private static <C, R> R processClassHierarchy(C context, int[] aggregateIndex, Class<?> source,
-			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter,
-			boolean includeInterfaces, boolean includeEnclosing) {
+			AnnotationsProcessor<C, R> processor, boolean includeInterfaces,
+			Predicate<Class<?>> searchEnclosingClass) {
 
 		try {
 			R result = processor.doWithAggregate(context, aggregateIndex[0]);
@@ -212,7 +186,7 @@ abstract class AnnotationsScanner {
 			if (hasPlainJavaAnnotationsOnly(source)) {
 				return null;
 			}
-			Annotation[] annotations = getDeclaredAnnotations(context, source, classFilter, false);
+			Annotation[] annotations = getDeclaredAnnotations(source, false);
 			result = processor.doWithAnnotations(context, aggregateIndex[0], source, annotations);
 			if (result != null) {
 				return result;
@@ -221,7 +195,7 @@ abstract class AnnotationsScanner {
 			if (includeInterfaces) {
 				for (Class<?> interfaceType : source.getInterfaces()) {
 					R interfacesResult = processClassHierarchy(context, aggregateIndex,
-						interfaceType, processor, classFilter, true, includeEnclosing);
+						interfaceType, processor, true, searchEnclosingClass);
 					if (interfacesResult != null) {
 						return interfacesResult;
 					}
@@ -230,12 +204,12 @@ abstract class AnnotationsScanner {
 			Class<?> superclass = source.getSuperclass();
 			if (superclass != Object.class && superclass != null) {
 				R superclassResult = processClassHierarchy(context, aggregateIndex,
-					superclass, processor, classFilter, includeInterfaces, includeEnclosing);
+					superclass, processor, includeInterfaces, searchEnclosingClass);
 				if (superclassResult != null) {
 					return superclassResult;
 				}
 			}
-			if (includeEnclosing) {
+			if (searchEnclosingClass.test(source)) {
 				// Since merely attempting to load the enclosing class may result in
 				// automatic loading of sibling nested classes that in turn results
 				// in an exception such as NoClassDefFoundError, we wrap the following
@@ -245,7 +219,7 @@ abstract class AnnotationsScanner {
 					Class<?> enclosingClass = source.getEnclosingClass();
 					if (enclosingClass != null) {
 						R enclosingResult = processClassHierarchy(context, aggregateIndex,
-							enclosingClass, processor, classFilter, includeInterfaces, true);
+							enclosingClass, processor, includeInterfaces, searchEnclosingClass);
 						if (enclosingResult != null) {
 							return enclosingResult;
 						}
@@ -263,33 +237,27 @@ abstract class AnnotationsScanner {
 	}
 
 	@Nullable
+	@SuppressWarnings("deprecation")
 	private static <C, R> R processMethod(C context, Method source,
-			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor,
-			@Nullable BiPredicate<C, Class<?>> classFilter) {
+			SearchStrategy searchStrategy, AnnotationsProcessor<C, R> processor) {
 
-		switch (searchStrategy) {
-			case DIRECT:
-			case INHERITED_ANNOTATIONS:
-				return processMethodInheritedAnnotations(context, source, processor, classFilter);
-			case SUPERCLASS:
-				return processMethodHierarchy(context, new int[] {0}, source.getDeclaringClass(),
-						processor, classFilter, source, false);
-			case TYPE_HIERARCHY:
-			case TYPE_HIERARCHY_AND_ENCLOSING_CLASSES:
-				return processMethodHierarchy(context, new int[] {0}, source.getDeclaringClass(),
-						processor, classFilter, source, true);
-		}
-		throw new IllegalStateException("Unsupported search strategy " + searchStrategy);
+		return switch (searchStrategy) {
+			case DIRECT, INHERITED_ANNOTATIONS -> processMethodInheritedAnnotations(context, source, processor);
+			case SUPERCLASS -> processMethodHierarchy(context, new int[]{0}, source.getDeclaringClass(),
+					processor, source, false);
+			case TYPE_HIERARCHY -> processMethodHierarchy(context, new int[]{0}, source.getDeclaringClass(),
+					processor, source, true);
+		};
 	}
 
 	@Nullable
 	private static <C, R> R processMethodInheritedAnnotations(C context, Method source,
-			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
+			AnnotationsProcessor<C, R> processor) {
 
 		try {
 			R result = processor.doWithAggregate(context, 0);
 			return (result != null ? result :
-				processMethodAnnotations(context, 0, source, processor, classFilter));
+				processMethodAnnotations(context, 0, source, processor));
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.handleIntrospectionFailure(source, ex);
@@ -299,8 +267,7 @@ abstract class AnnotationsScanner {
 
 	@Nullable
 	private static <C, R> R processMethodHierarchy(C context, int[] aggregateIndex,
-			Class<?> sourceClass, AnnotationsProcessor<C, R> processor,
-			@Nullable BiPredicate<C, Class<?>> classFilter, Method rootMethod,
+			Class<?> sourceClass, AnnotationsProcessor<C, R> processor, Method rootMethod,
 			boolean includeInterfaces) {
 
 		try {
@@ -314,17 +281,17 @@ abstract class AnnotationsScanner {
 			boolean calledProcessor = false;
 			if (sourceClass == rootMethod.getDeclaringClass()) {
 				result = processMethodAnnotations(context, aggregateIndex[0],
-					rootMethod, processor, classFilter);
+					rootMethod, processor);
 				calledProcessor = true;
 				if (result != null) {
 					return result;
 				}
 			}
 			else {
-				for (Method candidateMethod : getBaseTypeMethods(context, sourceClass, classFilter)) {
+				for (Method candidateMethod : getBaseTypeMethods(context, sourceClass)) {
 					if (candidateMethod != null && isOverride(rootMethod, candidateMethod)) {
 						result = processMethodAnnotations(context, aggregateIndex[0],
-							candidateMethod, processor, classFilter);
+							candidateMethod, processor);
 						calledProcessor = true;
 						if (result != null) {
 							return result;
@@ -341,7 +308,7 @@ abstract class AnnotationsScanner {
 			if (includeInterfaces) {
 				for (Class<?> interfaceType : sourceClass.getInterfaces()) {
 					R interfacesResult = processMethodHierarchy(context, aggregateIndex,
-						interfaceType, processor, classFilter, rootMethod, true);
+						interfaceType, processor, rootMethod, true);
 					if (interfacesResult != null) {
 						return interfacesResult;
 					}
@@ -350,7 +317,7 @@ abstract class AnnotationsScanner {
 			Class<?> superclass = sourceClass.getSuperclass();
 			if (superclass != Object.class && superclass != null) {
 				R superclassResult = processMethodHierarchy(context, aggregateIndex,
-					superclass, processor, classFilter, rootMethod, includeInterfaces);
+					superclass, processor, rootMethod, includeInterfaces);
 				if (superclassResult != null) {
 					return superclassResult;
 				}
@@ -362,11 +329,8 @@ abstract class AnnotationsScanner {
 		return null;
 	}
 
-	private static <C> Method[] getBaseTypeMethods(
-			C context, Class<?> baseType, @Nullable BiPredicate<C, Class<?>> classFilter) {
-
-		if (baseType == Object.class || hasPlainJavaAnnotationsOnly(baseType) ||
-				isFiltered(baseType, context, classFilter)) {
+	private static <C> Method[] getBaseTypeMethods(C context, Class<?> baseType) {
+		if (baseType == Object.class || hasPlainJavaAnnotationsOnly(baseType)) {
 			return NO_METHODS;
 		}
 
@@ -430,16 +394,16 @@ abstract class AnnotationsScanner {
 
 	@Nullable
 	private static <C, R> R processMethodAnnotations(C context, int aggregateIndex, Method source,
-			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
+			AnnotationsProcessor<C, R> processor) {
 
-		Annotation[] annotations = getDeclaredAnnotations(context, source, classFilter, false);
+		Annotation[] annotations = getDeclaredAnnotations(source, false);
 		R result = processor.doWithAnnotations(context, aggregateIndex, source, annotations);
 		if (result != null) {
 			return result;
 		}
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(source);
 		if (bridgedMethod != source) {
-			Annotation[] bridgedAnnotations = getDeclaredAnnotations(context, bridgedMethod, classFilter, true);
+			Annotation[] bridgedAnnotations = getDeclaredAnnotations(bridgedMethod, true);
 			for (int i = 0; i < bridgedAnnotations.length; i++) {
 				if (ObjectUtils.containsElement(annotations, bridgedAnnotations[i])) {
 					bridgedAnnotations[i] = null;
@@ -452,29 +416,17 @@ abstract class AnnotationsScanner {
 
 	@Nullable
 	private static <C, R> R processElement(C context, AnnotatedElement source,
-			AnnotationsProcessor<C, R> processor, @Nullable BiPredicate<C, Class<?>> classFilter) {
+			AnnotationsProcessor<C, R> processor) {
 
 		try {
 			R result = processor.doWithAggregate(context, 0);
 			return (result != null ? result : processor.doWithAnnotations(
-				context, 0, source, getDeclaredAnnotations(context, source, classFilter, false)));
+				context, 0, source, getDeclaredAnnotations(source, false)));
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.handleIntrospectionFailure(source, ex);
 		}
 		return null;
-	}
-
-	private static <C, R> Annotation[] getDeclaredAnnotations(C context,
-			AnnotatedElement source, @Nullable BiPredicate<C, Class<?>> classFilter, boolean copy) {
-
-		if (source instanceof Class && isFiltered((Class<?>) source, context, classFilter)) {
-			return NO_ANNOTATIONS;
-		}
-		if (source instanceof Method && isFiltered(((Method) source).getDeclaringClass(), context, classFilter)) {
-			return NO_ANNOTATIONS;
-		}
-		return getDeclaredAnnotations(source, copy);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -522,22 +474,18 @@ abstract class AnnotationsScanner {
 		return annotations.clone();
 	}
 
-	private static <C> boolean isFiltered(
-			Class<?> sourceClass, C context, @Nullable BiPredicate<C, Class<?>> classFilter) {
-
-		return (classFilter != null && classFilter.test(context, sourceClass));
-	}
-
 	private static boolean isIgnorable(Class<?> annotationType) {
 		return AnnotationFilter.PLAIN.matches(annotationType);
 	}
 
-	static boolean isKnownEmpty(AnnotatedElement source, SearchStrategy searchStrategy) {
+	static boolean isKnownEmpty(AnnotatedElement source, SearchStrategy searchStrategy,
+			Predicate<Class<?>> searchEnclosingClass) {
+
 		if (hasPlainJavaAnnotationsOnly(source)) {
 			return true;
 		}
-		if (searchStrategy == SearchStrategy.DIRECT || isWithoutHierarchy(source, searchStrategy)) {
-			if (source instanceof Method && ((Method) source).isBridge()) {
+		if (searchStrategy == SearchStrategy.DIRECT || isWithoutHierarchy(source, searchStrategy, searchEnclosingClass)) {
+			if (source instanceof Method method && method.isBridge()) {
 				return false;
 			}
 			return getDeclaredAnnotations(source, false).length == 0;
@@ -546,11 +494,11 @@ abstract class AnnotationsScanner {
 	}
 
 	static boolean hasPlainJavaAnnotationsOnly(@Nullable Object annotatedElement) {
-		if (annotatedElement instanceof Class) {
-			return hasPlainJavaAnnotationsOnly((Class<?>) annotatedElement);
+		if (annotatedElement instanceof Class<?> clazz) {
+			return hasPlainJavaAnnotationsOnly(clazz);
 		}
-		else if (annotatedElement instanceof Member) {
-			return hasPlainJavaAnnotationsOnly(((Member) annotatedElement).getDeclaringClass());
+		else if (annotatedElement instanceof Member member) {
+			return hasPlainJavaAnnotationsOnly(member.getDeclaringClass());
 		}
 		else {
 			return false;
@@ -561,21 +509,22 @@ abstract class AnnotationsScanner {
 		return (type.getName().startsWith("java.") || type == Ordered.class);
 	}
 
-	private static boolean isWithoutHierarchy(AnnotatedElement source, SearchStrategy searchStrategy) {
+	@SuppressWarnings("deprecation")
+	private static boolean isWithoutHierarchy(AnnotatedElement source, SearchStrategy searchStrategy,
+			Predicate<Class<?>> searchEnclosingClass) {
+
 		if (source == Object.class) {
 			return true;
 		}
-		if (source instanceof Class) {
-			Class<?> sourceClass = (Class<?>) source;
+		if (source instanceof Class<?> sourceClass) {
 			boolean noSuperTypes = (sourceClass.getSuperclass() == Object.class &&
 					sourceClass.getInterfaces().length == 0);
-			return (searchStrategy == SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES ? noSuperTypes &&
+			return (searchEnclosingClass.test(sourceClass) ? noSuperTypes &&
 					sourceClass.getEnclosingClass() == null : noSuperTypes);
 		}
-		if (source instanceof Method) {
-			Method sourceMethod = (Method) source;
+		if (source instanceof Method sourceMethod) {
 			return (Modifier.isPrivate(sourceMethod.getModifiers()) ||
-					isWithoutHierarchy(sourceMethod.getDeclaringClass(), searchStrategy));
+					isWithoutHierarchy(sourceMethod.getDeclaringClass(), searchStrategy, searchEnclosingClass));
 		}
 		return true;
 	}

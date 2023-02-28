@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  * connection pool, implementing the same standard interface, but creating new
  * Connections on every call.
  *
- * <p>In a Java EE container, it is recommended to use a JNDI DataSource provided by
+ * <p>In a Jakarta EE container, it is recommended to use a JNDI DataSource provided by
  * the container. Such a DataSource can be exposed as a DataSource bean in a Spring
  * ApplicationContext via {@link org.springframework.jndi.JndiObjectFactoryBean},
  * for seamless switching to and from a local DataSource bean like this class.
@@ -136,8 +136,8 @@ public class SimpleDriverDataSource extends AbstractDriverBasedDataSource {
 	@Override
 	protected Connection getConnectionFromDriver(Properties props) throws SQLException {
 		Driver driver = getDriver();
+		Assert.state(driver != null, "Driver has not been set");
 		String url = getUrl();
-		Assert.notNull(driver, "Driver must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Creating new JDBC Driver Connection to [" + url + "]");
 		}

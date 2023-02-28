@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 
 /**
  * Base class for {@link WebSocketHandlerRegistration WebSocketHandlerRegistrations} that gathers all the configuration
- * options but allows sub-classes to put together the actual HTTP request mappings.
+ * options but allows subclasses to put together the actual HTTP request mappings.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -53,6 +53,8 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private final List<String> allowedOrigins = new ArrayList<>();
+
+	private final List<String> allowedOriginPatterns = new ArrayList<>();
 
 	@Nullable
 	private SockJsServiceRegistration sockJsServiceRegistration;
@@ -95,6 +97,15 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 	}
 
 	@Override
+	public WebSocketHandlerRegistration setAllowedOriginPatterns(String... allowedOriginPatterns) {
+		this.allowedOriginPatterns.clear();
+		if (!ObjectUtils.isEmpty(allowedOriginPatterns)) {
+			this.allowedOriginPatterns.addAll(Arrays.asList(allowedOriginPatterns));
+		}
+		return this;
+	}
+
+	@Override
 	public SockJsServiceRegistration withSockJS() {
 		this.sockJsServiceRegistration = new SockJsServiceRegistration();
 		HandshakeInterceptor[] interceptors = getInterceptors();
@@ -108,13 +119,21 @@ public abstract class AbstractWebSocketHandlerRegistration<M> implements WebSock
 		if (!this.allowedOrigins.isEmpty()) {
 			this.sockJsServiceRegistration.setAllowedOrigins(StringUtils.toStringArray(this.allowedOrigins));
 		}
+		if (!this.allowedOriginPatterns.isEmpty()) {
+			this.sockJsServiceRegistration.setAllowedOriginPatterns(
+					StringUtils.toStringArray(this.allowedOriginPatterns));
+		}
 		return this.sockJsServiceRegistration;
 	}
 
 	protected HandshakeInterceptor[] getInterceptors() {
 		List<HandshakeInterceptor> interceptors = new ArrayList<>(this.interceptors.size() + 1);
 		interceptors.addAll(this.interceptors);
-		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
+		OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(this.allowedOrigins);
+		if (!ObjectUtils.isEmpty(this.allowedOriginPatterns)) {
+			interceptor.setAllowedOriginPatterns(this.allowedOriginPatterns);
+		}
+		interceptors.add(interceptor);
 		return interceptors.toArray(new HandshakeInterceptor[0]);
 	}
 

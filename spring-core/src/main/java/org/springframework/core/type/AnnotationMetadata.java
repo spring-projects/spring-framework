@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,14 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	 * the annotation type.
 	 */
 	Set<MethodMetadata> getAnnotatedMethods(String annotationName);
+
+	/**
+	 * Retrieve the method metadata for all user-declared methods on the
+	 * underlying class, preserving declaration order as far as possible.
+	 * @return a set of {@link MethodMetadata}
+	 * @since 6.0
+	 */
+	Set<MethodMetadata> getDeclaredMethods();
 
 
 	/**

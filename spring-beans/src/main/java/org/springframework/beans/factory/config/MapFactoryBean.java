@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.beans.factory.config;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
 import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Simple factory for shared Map instances. Allows for central setup
@@ -85,7 +85,7 @@ public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 			result = BeanUtils.instantiateClass(this.targetMapClass);
 		}
 		else {
-			result = new LinkedHashMap<>(this.sourceMap.size());
+			result = CollectionUtils.newLinkedHashMap(this.sourceMap.size());
 		}
 		Class<?> keyType = null;
 		Class<?> valueType = null;

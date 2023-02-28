@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
 
@@ -46,11 +46,12 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 
 
 	@Override
-	public HttpStatus getStatusCode() throws IOException {
+	public HttpStatusCode getStatusCode() throws IOException {
 		return this.response.getStatusCode();
 	}
 
 	@Override
+	@Deprecated
 	public int getRawStatusCode() throws IOException {
 		return this.response.getRawStatusCode();
 	}

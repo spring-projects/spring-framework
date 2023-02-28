@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import org.springframework.lang.Nullable;
 /**
  * Callback interface used to process annotations.
  *
- * @param <C> the context type
- * @param <R> the result type
  * @author Phillip Webb
  * @since 5.2
+ * @param <C> the context type
+ * @param <R> the result type
  * @see AnnotationsScanner
  * @see TypeMappedAnnotations
  */
@@ -36,7 +36,7 @@ interface AnnotationsProcessor<C, R> {
 	/**
 	 * Called when an aggregate is about to be processed. This method may return
 	 * a {@code non-null} result to short-circuit any further processing.
-	 * @param context context information relevant to the processor
+	 * @param context the context information relevant to the processor
 	 * @param aggregateIndex the aggregate index about to be processed
 	 * @return a {@code non-null} result if no further processing is required
 	 */
@@ -48,7 +48,7 @@ interface AnnotationsProcessor<C, R> {
 	/**
 	 * Called when an array of annotations can be processed. This method may
 	 * return a {@code non-null} result to short-circuit any further processing.
-	 * @param context context information relevant to the processor
+	 * @param context the context information relevant to the processor
 	 * @param aggregateIndex the aggregate index of the provided annotations
 	 * @param source the original source of the annotations, if known
 	 * @param annotations the annotations to process (this array may contain

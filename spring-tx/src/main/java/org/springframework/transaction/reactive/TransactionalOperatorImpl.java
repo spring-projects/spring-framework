@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 	 */
 	TransactionalOperatorImpl(ReactiveTransactionManager transactionManager, TransactionDefinition transactionDefinition) {
 		Assert.notNull(transactionManager, "ReactiveTransactionManager must not be null");
-		Assert.notNull(transactionManager, "TransactionDefinition must not be null");
+		Assert.notNull(transactionDefinition, "TransactionDefinition must not be null");
 		this.transactionManager = transactionManager;
 		this.transactionDefinition = transactionDefinition;
 	}
@@ -79,11 +79,11 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 			// Need re-wrapping of ReactiveTransaction until we get hold of the exception
 			// through usingWhen.
 			return status.flatMap(it -> Mono.usingWhen(Mono.just(it), ignore -> mono,
-					this.transactionManager::commit, (res, err) -> Mono.empty(), this.transactionManager::commit)
+					this.transactionManager::commit, (res, err) -> Mono.empty(), this.transactionManager::rollback)
 					.onErrorResume(ex -> rollbackOnException(it, ex).then(Mono.error(ex))));
 		})
-		.subscriberContext(TransactionContextManager.getOrCreateContext())
-		.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
+		.contextWrite(TransactionContextManager.getOrCreateContext())
+		.contextWrite(TransactionContextManager.getOrCreateContextHolder());
 	}
 
 	@Override
@@ -100,12 +100,12 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 							action::doInTransaction,
 							this.transactionManager::commit,
 							(tx, ex) -> Mono.empty(),
-							this.transactionManager::commit)
+							this.transactionManager::rollback)
 					.onErrorResume(ex ->
 							rollbackOnException(it, ex).then(Mono.error(ex))));
 		})
-		.subscriberContext(TransactionContextManager.getOrCreateContext())
-		.subscriberContext(TransactionContextManager.getOrCreateContextHolder());
+		.contextWrite(TransactionContextManager.getOrCreateContext())
+		.contextWrite(TransactionContextManager.getOrCreateContextHolder());
 	}
 
 	/**

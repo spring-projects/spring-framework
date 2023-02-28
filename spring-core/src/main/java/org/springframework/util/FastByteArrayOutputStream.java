@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 import org.springframework.lang.Nullable;
 
@@ -31,11 +32,11 @@ import org.springframework.lang.Nullable;
  * its sibling {@link ResizableByteArrayOutputStream}.
  *
  * <p>Unlike {@link java.io.ByteArrayOutputStream}, this implementation is backed
- * by a {@link java.util.LinkedList} of {@code byte[]} instead of 1 constantly
+ * by a {@link java.util.ArrayDeque} of {@code byte[]} instead of 1 constantly
  * resizing {@code byte[]}. It does not copy buffers when it gets expanded.
  *
  * <p>The initial buffer is only created when the stream is first written.
- * There is also no copying of the internal buffer if its contents is extracted
+ * There is also no copying of the internal buffer if its content is extracted
  * with the {@link #writeTo(OutputStream)} method.
  *
  * @author Craig Andrews
@@ -50,7 +51,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 
 	// The buffers used to store the content bytes
-	private final LinkedList<byte[]> buffers = new LinkedList<>();
+	private final Deque<byte[]> buffers = new ArrayDeque<>();
 
 	// The size, in bytes, to use when allocating the first byte[]
 	private final int initialBlockSize;
@@ -149,7 +150,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 	/**
 	 * Convert the buffer's contents into a string decoding bytes using the
-	 * platform's default character set. The length of the new <tt>String</tt>
+	 * platform's default character set. The length of the new {@code String}
 	 * is a function of the character set, and hence may not be equal to the
 	 * size of the buffer.
 	 * <p>This method always replaces malformed-input and unmappable-character
@@ -176,10 +177,11 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 	/**
 	 * Convert the stream's data to a byte array and return the byte array.
-	 * <p>Also replaces the internal structures with the byte array to conserve memory:
-	 * if the byte array is being made anyways, mind as well as use it. This approach
-	 * also means that if this method is called twice without any writes in between,
-	 * the second call is a no-op.
+	 * <p>Also replaces the internal structures with the byte array to
+	 * conserve memory: if the byte array is being created anyway, we might
+	 * as well as use it. This approach also means that if this method is
+	 * called twice without any writes in the interim, the second call is
+	 * a no-op.
 	 * <p>This method is "unsafe" as it returns the internal buffer.
 	 * Callers should not modify the returned buffer.
 	 * @return the current contents of this output stream, as a byte array.
@@ -196,11 +198,10 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Creates a newly allocated byte array.
-	 * <p>Its size is the current
-	 * size of this output stream and the valid contents of the buffer
-	 * have been copied into it.</p>
-	 * @return the current contents of this output stream, as a byte array.
+	 * Create a newly allocated byte array.
+	 * <p>Its size is the current size of this output stream, and it will
+	 * contain the valid contents of the internal buffer.
+	 * @return the current contents of this output stream, as a byte array
 	 * @see #size()
 	 * @see #toByteArrayUnsafe()
 	 */
@@ -289,7 +290,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
-	 * Create a new buffer and store it in the LinkedList
+	 * Create a new buffer and store it in the ArrayDeque.
 	 * <p>Adds a new buffer that can store at least {@code minCapacity} bytes.
 	 */
 	private void addBuffer(int minCapacity) {
