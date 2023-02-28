@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,11 +114,11 @@ public class PersistenceExceptionTranslationInterceptor
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (this.persistenceExceptionTranslator == null) {
 			// No explicit exception translator specified - perform autodetection.
-			if (!(beanFactory instanceof ListableBeanFactory)) {
+			if (!(beanFactory instanceof ListableBeanFactory lbf)) {
 				throw new IllegalArgumentException(
 						"Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");
 			}
-			this.beanFactory = (ListableBeanFactory) beanFactory;
+			this.beanFactory = lbf;
 		}
 	}
 

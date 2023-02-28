@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,8 @@ public abstract class TransactionSynchronizationUtils {
 		Assert.notNull(resource, "Resource must not be null");
 		Object resourceRef = resource;
 		// unwrap infrastructure proxy
-		if (resourceRef instanceof InfrastructureProxy infrasProxy) {
-			resourceRef = infrasProxy.getWrappedObject();
+		if (resourceRef instanceof InfrastructureProxy infrastructureProxy) {
+			resourceRef = infrastructureProxy.getWrappedObject();
 		}
 		if (aopAvailable) {
 			// now unwrap scoped proxy
