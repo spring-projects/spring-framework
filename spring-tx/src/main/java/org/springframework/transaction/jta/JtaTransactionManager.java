@@ -547,8 +547,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @return a corresponding UserTransaction handle
 	 */
 	protected UserTransaction buildUserTransaction(TransactionManager transactionManager) {
-		if (transactionManager instanceof UserTransaction userTransaction) {
-			return userTransaction;
+		if (transactionManager instanceof UserTransaction ut) {
+			return ut;
 		}
 		else {
 			return new UserTransactionAdapter(transactionManager);
@@ -702,11 +702,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	@Nullable
 	protected TransactionManager findTransactionManager(@Nullable UserTransaction ut) {
-		if (ut instanceof TransactionManager transactionManager) {
+		if (ut instanceof TransactionManager tm) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("JTA UserTransaction object [" + ut + "] implements TransactionManager");
 			}
-			return transactionManager;
+			return tm;
 		}
 
 		// Check fallback JNDI locations.
