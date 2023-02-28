@@ -63,6 +63,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.ChildBeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.GenericTypeAwareAutowireCandidateResolver;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
@@ -2661,6 +2662,32 @@ class DefaultListableBeanFactoryTests {
 		assertThat(holder.getNonPublicEnum()).isEqualTo(NonPublicEnum.VALUE_1);
 	}
 
+	@Test
+	void testFactoryAwareOrderSourceProviderWithHierarchicalBeanFactoryStructural() {
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setParentBeanFactory(parent);
+		bf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		bf.registerSingleton("no_bean_definition", new TestBean());
+
+		RootBeanDefinition bd1 = new RootBeanDefinition(PriorityTestBeanFactory.class);
+		bd1.setFactoryMethodName("lowPriorityTestBean");
+		bf.registerBeanDefinition("test_bean_in_child_factory", bd1);
+
+		RootBeanDefinition bd2 = new RootBeanDefinition(PriorityTestBeanFactory.class);
+		bd2.setFactoryMethodName("highPriorityTestBean");
+		parent.registerBeanDefinition("test_bean_in_parent_factory", bd2);
+
+		ObjectProvider<TestBean> testBeanProvider = bf.getBeanProvider(ResolvableType.forClass(TestBean.class));
+		List<TestBean> resolved = testBeanProvider.orderedStream().collect(Collectors.toList());
+		assertThat(resolved.size()).isEqualTo(3);
+		assertThat(resolved.get(0)).isSameAs(bf.getBean("test_bean_in_parent_factory"));
+		assertThat(resolved.get(1)).isSameAs(bf.getBean("test_bean_in_child_factory"));
+		assertThat(resolved.get(2)).isSameAs(bf.getBean("no_bean_definition"));
+	}
+
 
 	@SuppressWarnings("deprecation")
 	private int registerBeanDefinitions(Properties p) {
@@ -3009,6 +3036,16 @@ class DefaultListableBeanFactoryTests {
 
 		public TestBean createTestBeanNonStatic() {
 			return new TestBean();
+		}
+	}
+
+	public static class PriorityTestBeanFactory {
+		public static LowPriorityTestBean lowPriorityTestBean() {
+			return new LowPriorityTestBean();
+		}
+
+		public static HighPriorityTestBean highPriorityTestBean() {
+			return new HighPriorityTestBean();
 		}
 	}
 
