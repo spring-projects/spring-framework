@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.testfixture.stereotype.Component;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -236,11 +235,13 @@ class AutowiredConfigurationTests {
 
 	@Test
 	void testValueInjectionWithRecord() {
-		System.setProperty("recordBeanName", "recordBean");
-		GenericApplicationContext context = new AnnotationConfigApplicationContext(RecordBean.class);
-		context.refresh();
-		RecordBean recordBean = context.getBean(RecordBean.class);
-		assertThat(recordBean.name()).isEqualTo("recordBean");
+		System.setProperty("recordBeanName", "enigma");
+		try (GenericApplicationContext context = new AnnotationConfigApplicationContext(RecordBean.class)) {
+			assertThat(context.getBean(RecordBean.class).name()).isEqualTo("enigma");
+		}
+		finally {
+			System.clearProperty("recordBeanName");
+		}
 	}
 
 	private int contentLength() throws IOException {
@@ -517,7 +518,7 @@ class AutowiredConfigurationTests {
 	}
 
 
-	@Component
-	static record RecordBean(@Value("recordBeanName") String name) {
+	record RecordBean(@Value("${recordBeanName}") String name) {
 	}
+
 }
