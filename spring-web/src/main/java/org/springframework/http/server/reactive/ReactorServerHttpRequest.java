@@ -27,6 +27,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.util.NetUtil;
 import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
 import reactor.netty.ChannelOperationsId;
@@ -74,45 +75,21 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
 		Assert.notNull(request, "HttpServerRequest must not be null");
-		return new URI(resolveBaseUrl(request) + resolveRequestUri(request));
+		return new URI(request.scheme() + "://" + resolveHost(request) + resolveRequestUri(request));
 	}
 
-	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
-		String scheme = getScheme(request);
-
+	private static String resolveHost(HttpServerRequest request) {
 		InetSocketAddress hostAddress = request.hostAddress();
 		if (hostAddress != null) {
-			return new URI(scheme, null, hostAddress.getHostString(), hostAddress.getPort(), null, null, null);
+			return NetUtil.toSocketAddressString(hostAddress);
 		}
 
 		String header = request.requestHeaders().get(HttpHeaderNames.HOST);
 		if (header != null) {
-			final int portIndex;
-			if (header.startsWith("[")) {
-				portIndex = header.indexOf(':', header.indexOf(']'));
-			}
-			else {
-				portIndex = header.indexOf(':');
-			}
-			if (portIndex != -1) {
-				try {
-					return new URI(scheme, null, header.substring(0, portIndex),
-							Integer.parseInt(header, portIndex + 1, header.length(), 10), null, null, null);
-				}
-				catch (NumberFormatException ex) {
-					throw new URISyntaxException(header, "Unable to parse port", portIndex);
-				}
-			}
-			else {
-				return new URI(scheme, header, null, null);
-			}
+			return header;
 		}
 
 		throw new IllegalStateException("Neither local hostAddress nor HOST header available");
-	}
-
-	private static String getScheme(HttpServerRequest request) {
-		return request.scheme();
 	}
 
 	private static String resolveRequestUri(HttpServerRequest request) {
