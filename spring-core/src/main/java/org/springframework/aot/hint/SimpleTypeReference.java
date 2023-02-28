@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  * A {@link TypeReference} based on fully qualified name.
  *
  * @author Stephane Nicoll
+ * @since 6.0
  */
 final class SimpleTypeReference extends AbstractTypeReference {
 
@@ -41,14 +42,14 @@ final class SimpleTypeReference extends AbstractTypeReference {
 	}
 
 	static SimpleTypeReference of(String className) {
-		Assert.notNull(className, "ClassName must not be null");
+		Assert.notNull(className, "'className' must not be null");
 		if (!isValidClassName(className)) {
 			throw new IllegalStateException("Invalid class name '" + className + "'");
 		}
 		if (!className.contains("$")) {
 			return createTypeReference(className);
 		}
-		String[] elements = className.split("\\$");
+		String[] elements = className.split("(?<!\\$)\\$(?!\\$)");
 		SimpleTypeReference typeReference = createTypeReference(elements[0]);
 		for (int i = 1; i < elements.length; i++) {
 			typeReference = new SimpleTypeReference(typeReference.getPackageName(), elements[i], typeReference);

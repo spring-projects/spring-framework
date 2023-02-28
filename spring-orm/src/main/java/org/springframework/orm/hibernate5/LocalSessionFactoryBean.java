@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.lang.Nullable;
  * way to set up a shared Hibernate SessionFactory in a Spring application context; the
  * SessionFactory can then be passed to data access objects via dependency injection.
  *
- * <p>Compatible with Hibernate 5.5/5.6, as of Spring 6.0.
+ * <p>Compatible with Hibernate ORM 5.5/5.6, as of Spring Framework 6.0.
  * This Hibernate-specific {@code LocalSessionFactoryBean} can be an immediate alternative
  * to {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean} for
  * common JPA purposes: The Hibernate {@code SessionFactory} will natively expose the JPA

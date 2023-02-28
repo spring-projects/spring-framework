@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ public class HandlerMappingIntrospector
 			HttpServletRequest request, boolean ignoreException,
 			BiFunction<HandlerMapping, HandlerExecutionChain, T> matchHandler) throws Exception {
 
-		Assert.notNull(this.handlerMappings, "Handler mappings not initialized");
+		Assert.state(this.handlerMappings != null, "Handler mappings not initialized");
 
 		boolean parseRequestPath = !this.pathPatternHandlerMappings.isEmpty();
 		RequestPath previousPath = null;

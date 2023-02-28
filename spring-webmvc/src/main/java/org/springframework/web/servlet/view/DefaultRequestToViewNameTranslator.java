@@ -98,7 +98,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set whether or not leading slashes should be stripped from the URI when
+	 * Set whether leading slashes should be stripped from the URI when
 	 * generating the view name. Default is "true".
 	 */
 	public void setStripLeadingSlash(boolean stripLeadingSlash) {
@@ -106,7 +106,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set whether or not trailing slashes should be stripped from the URI when
+	 * Set whether trailing slashes should be stripped from the URI when
 	 * generating the view name. Default is "true".
 	 */
 	public void setStripTrailingSlash(boolean stripTrailingSlash) {
@@ -114,7 +114,7 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set whether or not file extensions should be stripped from the URI when
+	 * Set whether file extensions should be stripped from the URI when
 	 * generating the view name. Default is "true".
 	 */
 	public void setStripExtension(boolean stripExtension) {

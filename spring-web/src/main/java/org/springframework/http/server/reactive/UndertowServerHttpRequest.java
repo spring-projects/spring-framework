@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 class UndertowServerHttpRequest extends AbstractServerHttpRequest {
@@ -83,20 +84,11 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.exchange.getRequestMethod().toString();
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
 	protected MultiValueMap<String, HttpCookie> initCookies() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		// getRequestCookies() is deprecated in Undertow 2.2
-		for (String name : this.exchange.getRequestCookies().keySet()) {
-			Cookie cookie = this.exchange.getRequestCookies().get(name);
-			HttpCookie httpCookie = new HttpCookie(name, cookie.getValue());
-			cookies.add(name, httpCookie);
+		for (Cookie cookie : this.exchange.requestCookies()) {
+			HttpCookie httpCookie = new HttpCookie(cookie.getName(), cookie.getValue());
+			cookies.add(cookie.getName(), httpCookie);
 		}
 		return cookies;
 	}

@@ -35,7 +35,7 @@ public class MapConnectionFactoryLookupUnitTests {
 	private static final String CONNECTION_FACTORY_NAME = "connectionFactory";
 
 	@Test
-	public void getConnectionFactorysReturnsUnmodifiableMap() {
+	public void getConnectionFactoriesReturnsUnmodifiableMap() {
 		MapConnectionFactoryLookup lookup = new MapConnectionFactoryLookup();
 		Map<String, ConnectionFactory> connectionFactories = lookup.getConnectionFactories();
 

@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  *
  * <p>Specifically a base class for reading from the HTTP request body with
  * Servlet non-blocking I/O and Undertow XNIO as well as handling incoming
- * WebSocket messages with standard Java WebSocket (JSR-356), Jetty, and
+ * WebSocket messages with standard Jakarta WebSocket (JSR-356), Jetty, and
  * Undertow.
  *
  * @author Arjen Poutsma
@@ -123,7 +123,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 	/**
-	 * Sub-classes can call this method to delegate a contain notification when
+	 * Subclasses can call this method to delegate a contain notification when
 	 * all data has been read.
 	 */
 	public void onAllDataRead() {
@@ -135,7 +135,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 	}
 
 	/**
-	 * Sub-classes can call this to delegate container error notifications.
+	 * Subclasses can call this to delegate container error notifications.
 	 */
 	public final void onError(Throwable ex) {
 		State state = this.state.get();
@@ -173,7 +173,7 @@ public abstract class AbstractListenerReadPublisher<T> implements Publisher<T> {
 
 	/**
 	 * Invoked after an I/O read error from the underlying server or after a
-	 * cancellation signal from the downstream consumer to allow sub-classes
+	 * cancellation signal from the downstream consumer to allow subclasses
 	 * to discard any current cached data they might have.
 	 * @since 5.0.11
 	 */

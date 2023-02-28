@@ -84,8 +84,8 @@ class WebClientDataBufferAllocatingTests extends AbstractDataBufferAllocatingTes
 	private ReactorClientHttpConnector initConnector() {
 		assertThat(super.bufferFactory).isNotNull();
 
-		if (super.bufferFactory instanceof NettyDataBufferFactory) {
-			ByteBufAllocator allocator = ((NettyDataBufferFactory) super.bufferFactory).getByteBufAllocator();
+		if (super.bufferFactory instanceof NettyDataBufferFactory nettyDataBufferFactory) {
+			ByteBufAllocator allocator = nettyDataBufferFactory.getByteBufAllocator();
 			return new ReactorClientHttpConnector(this.factory,
 					client -> client.option(ChannelOption.ALLOCATOR, allocator));
 		}

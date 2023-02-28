@@ -134,7 +134,7 @@ public interface Rendering {
 		B headers(HttpHeaders headers);
 
 		/**
-		 * Builder the {@link Rendering} instance.
+		 * Build the {@link Rendering} instance.
 		 */
 		Rendering build();
 	}

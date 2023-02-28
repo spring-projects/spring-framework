@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,22 +139,22 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		if (obj == null) {
 			throw new IllegalArgumentException("Parent bean cannot be set to a null runtime bean reference!");
 		}
-		if (obj instanceof String) {
-			this.parentName = (String) obj;
+		if (obj instanceof String name) {
+			this.parentName = name;
 		}
-		else if (obj instanceof RuntimeBeanReference) {
-			this.parentName = ((RuntimeBeanReference) obj).getBeanName();
+		else if (obj instanceof RuntimeBeanReference runtimeBeanReference) {
+			this.parentName = runtimeBeanReference.getBeanName();
 		}
-		else if (obj instanceof GroovyBeanDefinitionWrapper) {
-			this.parentName = ((GroovyBeanDefinitionWrapper) obj).getBeanName();
+		else if (obj instanceof GroovyBeanDefinitionWrapper wrapper) {
+			this.parentName = wrapper.getBeanName();
 		}
 		getBeanDefinition().setParentName(this.parentName);
 		getBeanDefinition().setAbstract(false);
 	}
 
 	public GroovyBeanDefinitionWrapper addProperty(String propertyName, Object propertyValue) {
-		if (propertyValue instanceof GroovyBeanDefinitionWrapper) {
-			propertyValue = ((GroovyBeanDefinitionWrapper) propertyValue).getBeanDefinition();
+		if (propertyValue instanceof GroovyBeanDefinitionWrapper wrapper) {
+			propertyValue = wrapper.getBeanDefinition();
 		}
 		getBeanDefinition().getPropertyValues().add(propertyName, propertyValue);
 		return this;

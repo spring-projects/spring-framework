@@ -1,0 +1,2 @@
+org.springframework.beans.factory.aot.AotServicesTests$TestService=\
+org.springframework.beans.factory.aot.AotServicesTests$TestServiceImpl

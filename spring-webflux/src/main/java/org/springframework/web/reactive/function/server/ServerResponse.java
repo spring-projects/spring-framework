@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2CodecSupport;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.result.view.ViewResolver;
@@ -71,7 +72,7 @@ public interface ServerResponse {
 	 * @since 5.2
 	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	int rawStatusCode();
 
 	/**
@@ -102,6 +103,18 @@ public interface ServerResponse {
 	 */
 	static BodyBuilder from(ServerResponse other) {
 		return new DefaultServerResponseBuilder(other);
+	}
+
+	/**
+	 * Create a {@code ServerResponse} from the given {@link ErrorResponse}.
+	 * @param response the {@link ErrorResponse} to initialize from
+	 * @return {@code Mono} with the built response
+	 * @since 6.0
+	 */
+	static Mono<ServerResponse> from(ErrorResponse response) {
+		return status(response.getStatusCode())
+				.headers(headers -> headers.putAll(response.getHeaders()))
+				.bodyValue(response.getBody());
 	}
 
 	/**

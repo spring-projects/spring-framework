@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -203,7 +202,7 @@ public abstract class BodyExtractors {
 				.orElseGet(() -> {
 					List<MediaType> mediaTypes = context.messageReaders().stream()
 							.flatMap(reader -> reader.getReadableMediaTypes(elementType).stream())
-							.collect(Collectors.toList());
+							.toList();
 					return errorFunction.apply(
 							new UnsupportedMediaTypeException(contentType, mediaTypes, elementType));
 				});
@@ -230,7 +229,7 @@ public abstract class BodyExtractors {
 
 		Flux<T> result;
 		if (message.getHeaders().getContentType() == null) {
-			// Maybe it's okay there is no content type, if there is no content..
+			// Maybe it's okay there is no content type, if there is no content.
 			result = message.getBody().map(buffer -> {
 				DataBufferUtils.release(buffer);
 				throw ex;

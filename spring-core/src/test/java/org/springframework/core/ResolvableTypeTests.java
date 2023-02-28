@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,11 +146,9 @@ class ResolvableTypeTests {
 		assertThat(typeVariable.isAssignableFrom(raw)).isTrue();
 	}
 
-	@Test
-	void forInstanceMustNotBeNull() throws Exception {
-		assertThatIllegalArgumentException()
-			.isThrownBy(() -> ResolvableType.forInstance(null))
-			.withMessage("Instance must not be null");
+	@Test  // gh-28776
+	void forInstanceNull() throws Exception {
+		assertThat(ResolvableType.forInstance(null)).isEqualTo(ResolvableType.NONE);
 	}
 
 	@Test
@@ -537,7 +535,7 @@ class ResolvableTypeTests {
 	void getGenericsFromParameterizedType() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class, ExtendsList.class);
 		ResolvableType[] generics = type.getGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0].resolve()).isEqualTo(CharSequence.class);
 	}
 
@@ -545,7 +543,7 @@ class ResolvableTypeTests {
 	void getGenericsFromClass() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class);
 		ResolvableType[] generics = type.getGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0].getType().toString()).isEqualTo("E");
 	}
 
@@ -560,7 +558,7 @@ class ResolvableTypeTests {
 	void getResolvedGenerics() throws Exception {
 		ResolvableType type = ResolvableType.forClass(List.class, ExtendsList.class);
 		Class<?>[] generics = type.resolveGenerics();
-		assertThat(generics.length).isEqualTo(1);
+		assertThat(generics).hasSize(1);
 		assertThat(generics[0]).isEqualTo(CharSequence.class);
 	}
 
@@ -871,7 +869,7 @@ class ResolvableTypeTests {
 
 	@Test
 	void resolveTypeWithCustomVariableResolver() throws Exception {
-		VariableResolver variableResolver = mock(VariableResolver.class);
+		VariableResolver variableResolver = mock();
 		given(variableResolver.getSource()).willReturn(this);
 		ResolvableType longType = ResolvableType.forClass(Long.class);
 		given(variableResolver.resolveVariable(any())).willReturn(longType);
@@ -1309,7 +1307,7 @@ class ResolvableTypeTests {
 		Type type = resolvableType.getType();
 		assertThat(type).isInstanceOf(ParameterizedType.class);
 		assertThat(((ParameterizedType) type).getRawType()).isEqualTo(Callable.class);
-		assertThat(((ParameterizedType) type).getActualTypeArguments().length).isEqualTo(1);
+		assertThat(((ParameterizedType) type).getActualTypeArguments()).hasSize(1);
 		assertThat(((ParameterizedType) type).getActualTypeArguments()[0]).isEqualTo(String.class);
 	}
 

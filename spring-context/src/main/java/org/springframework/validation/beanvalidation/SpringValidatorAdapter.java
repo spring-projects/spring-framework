@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.validation.beanvalidation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,13 +65,8 @@ import org.springframework.validation.SmartValidator;
  */
 public class SpringValidatorAdapter implements SmartValidator, jakarta.validation.Validator {
 
-	private static final Set<String> internalAnnotationAttributes = new HashSet<>(4);
+	private static final Set<String> internalAnnotationAttributes = Set.of("message", "groups", "payload");
 
-	static {
-		internalAnnotationAttributes.add("message");
-		internalAnnotationAttributes.add("groups");
-		internalAnnotationAttributes.add("payload");
-	}
 
 	@Nullable
 	private jakarta.validation.Validator targetValidator;

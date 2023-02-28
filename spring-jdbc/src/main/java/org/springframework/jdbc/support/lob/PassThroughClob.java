@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.sql.SQLException;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StreamUtils;
 
 /**
  * Simple JDBC {@link Clob} adapter that exposes a given String or character stream.
@@ -84,7 +83,7 @@ class PassThroughClob implements Clob {
 		}
 		else {
 			return new InputStreamReader(
-					(this.asciiStream != null ? this.asciiStream : StreamUtils.emptyInput()),
+					(this.asciiStream != null ? this.asciiStream : InputStream.nullInputStream()),
 					StandardCharsets.US_ASCII);
 		}
 	}
@@ -100,7 +99,7 @@ class PassThroughClob implements Clob {
 				return new ByteArrayInputStream(tempContent.getBytes(StandardCharsets.US_ASCII));
 			}
 			else {
-				return (this.asciiStream != null ? this.asciiStream : StreamUtils.emptyInput());
+				return (this.asciiStream != null ? this.asciiStream : InputStream.nullInputStream());
 			}
 		}
 		catch (IOException ex) {

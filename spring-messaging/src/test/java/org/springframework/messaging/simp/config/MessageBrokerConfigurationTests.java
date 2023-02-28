@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.messaging.converter.ByteArrayMessageConverter;
 import org.springframework.messaging.converter.CompositeMessageConverter;
 import org.springframework.messaging.converter.ContentTypeResolver;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
+import org.springframework.messaging.converter.KotlinSerializationJsonMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
@@ -96,7 +97,7 @@ public class MessageBrokerConfigurationTests {
 		TestChannel channel = context.getBean("clientInboundChannel", TestChannel.class);
 		Set<MessageHandler> handlers = channel.getSubscribers();
 
-		assertThat(handlers.size()).isEqualTo(3);
+		assertThat(handlers).hasSize(3);
 		assertThat(handlers.contains(context.getBean(SimpAnnotationMethodMessageHandler.class))).isTrue();
 		assertThat(handlers.contains(context.getBean(UserDestinationMessageHandler.class))).isTrue();
 		assertThat(handlers.contains(context.getBean(SimpleBrokerMessageHandler.class))).isTrue();
@@ -109,7 +110,7 @@ public class MessageBrokerConfigurationTests {
 		TestChannel channel = context.getBean("clientInboundChannel", TestChannel.class);
 		Set<MessageHandler> handlers = channel.getSubscribers();
 
-		assertThat(handlers.size()).isEqualTo(3);
+		assertThat(handlers).hasSize(3);
 		assertThat(handlers.contains(context.getBean(SimpAnnotationMethodMessageHandler.class))).isTrue();
 		assertThat(handlers.contains(context.getBean(UserDestinationMessageHandler.class))).isTrue();
 		assertThat(handlers.contains(context.getBean(StompBrokerRelayMessageHandler.class))).isTrue();
@@ -121,7 +122,7 @@ public class MessageBrokerConfigurationTests {
 
 		AbstractSubscribableChannel channel = context.getBean(
 				"clientInboundChannel", AbstractSubscribableChannel.class);
-		assertThat(channel.getInterceptors().size()).isEqualTo(3);
+		assertThat(channel.getInterceptors()).hasSize(3);
 
 		CustomThreadPoolTaskExecutor taskExecutor = context.getBean(
 				"clientInboundChannelExecutor", CustomThreadPoolTaskExecutor.class);
@@ -195,7 +196,7 @@ public class MessageBrokerConfigurationTests {
 		AbstractSubscribableChannel channel = context.getBean(
 				"clientOutboundChannel", AbstractSubscribableChannel.class);
 
-		assertThat(channel.getInterceptors().size()).isEqualTo(4);
+		assertThat(channel.getInterceptors()).hasSize(4);
 
 		ThreadPoolTaskExecutor taskExecutor = context.getBean(
 				"clientOutboundChannelExecutor", ThreadPoolTaskExecutor.class);
@@ -216,7 +217,7 @@ public class MessageBrokerConfigurationTests {
 		TestChannel channel = context.getBean("brokerChannel", TestChannel.class);
 		Set<MessageHandler> handlers = channel.getSubscribers();
 
-		assertThat(handlers.size()).isEqualTo(2);
+		assertThat(handlers).hasSize(2);
 		assertThat(handlers.contains(context.getBean(UserDestinationMessageHandler.class))).isTrue();
 		assertThat(handlers.contains(context.getBean(SimpleBrokerMessageHandler.class))).isTrue();
 
@@ -230,7 +231,7 @@ public class MessageBrokerConfigurationTests {
 		TestChannel channel = context.getBean("brokerChannel", TestChannel.class);
 		Set<MessageHandler> handlers = channel.getSubscribers();
 
-		assertThat(handlers.size()).isEqualTo(2);
+		assertThat(handlers).hasSize(2);
 		assertThat(handlers.contains(context.getBean(UserDestinationMessageHandler.class))).isTrue();
 		assertThat(handlers.contains(context.getBean(StompBrokerRelayMessageHandler.class))).isTrue();
 	}
@@ -266,7 +267,7 @@ public class MessageBrokerConfigurationTests {
 		AbstractSubscribableChannel channel = context.getBean(
 				"brokerChannel", AbstractSubscribableChannel.class);
 
-		assertThat(channel.getInterceptors().size()).isEqualTo(4);
+		assertThat(channel.getInterceptors()).hasSize(4);
 
 		ThreadPoolTaskExecutor taskExecutor = context.getBean(
 				"brokerChannelExecutor", ThreadPoolTaskExecutor.class);
@@ -282,12 +283,13 @@ public class MessageBrokerConfigurationTests {
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
 		List<MessageConverter> converters = compositeConverter.getConverters();
-		assertThat(converters).hasSize(3);
+		assertThat(converters).hasSize(4);
 		assertThat(converters.get(0)).isInstanceOf(StringMessageConverter.class);
 		assertThat(converters.get(1)).isInstanceOf(ByteArrayMessageConverter.class);
-		assertThat(converters.get(2)).isInstanceOf(MappingJackson2MessageConverter.class);
+		assertThat(converters.get(2)).isInstanceOf(KotlinSerializationJsonMessageConverter.class);
+		assertThat(converters.get(3)).isInstanceOf(MappingJackson2MessageConverter.class);
 
-		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(2)).getContentTypeResolver();
+		ContentTypeResolver resolver = ((MappingJackson2MessageConverter) converters.get(3)).getContentTypeResolver();
 		assertThat(((DefaultContentTypeResolver) resolver).getDefaultMimeType()).isEqualTo(MimeTypeUtils.APPLICATION_JSON);
 	}
 
@@ -312,7 +314,7 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void configureMessageConvertersCustom() {
-		final MessageConverter testConverter = mock(MessageConverter.class);
+		final MessageConverter testConverter = mock();
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
 			protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
@@ -329,7 +331,7 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void configureMessageConvertersCustomAndDefault() {
-		final MessageConverter testConverter = mock(MessageConverter.class);
+		final MessageConverter testConverter = mock();
 
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
@@ -340,11 +342,12 @@ public class MessageBrokerConfigurationTests {
 		};
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
-		assertThat(compositeConverter.getConverters()).hasSize(4);
+		assertThat(compositeConverter.getConverters()).hasSize(5);
 		Iterator<MessageConverter> iterator = compositeConverter.getConverters().iterator();
 		assertThat(iterator.next()).isEqualTo(testConverter);
 		assertThat(iterator.next()).isInstanceOf(StringMessageConverter.class);
 		assertThat(iterator.next()).isInstanceOf(ByteArrayMessageConverter.class);
+		assertThat(iterator.next()).isInstanceOf(KotlinSerializationJsonMessageConverter.class);
 		assertThat(iterator.next()).isInstanceOf(MappingJackson2MessageConverter.class);
 	}
 
@@ -356,11 +359,11 @@ public class MessageBrokerConfigurationTests {
 				context.getBean(SimpAnnotationMethodMessageHandler.class);
 
 		List<HandlerMethodArgumentResolver> customResolvers = handler.getCustomArgumentResolvers();
-		assertThat(customResolvers.size()).isEqualTo(1);
+		assertThat(customResolvers).hasSize(1);
 		assertThat(handler.getArgumentResolvers().contains(customResolvers.get(0))).isTrue();
 
 		List<HandlerMethodReturnValueHandler> customHandlers = handler.getCustomReturnValueHandlers();
-		assertThat(customHandlers.size()).isEqualTo(1);
+		assertThat(customHandlers).hasSize(1);
 		assertThat(handler.getReturnValueHandlers().contains(customHandlers.get(0))).isTrue();
 	}
 
@@ -375,7 +378,7 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void simpValidatorCustom() {
-		final Validator validator = mock(Validator.class);
+		final Validator validator = mock();
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
 			public Validator getValidator() {
@@ -458,7 +461,7 @@ public class MessageBrokerConfigurationTests {
 
 		StompBrokerRelayMessageHandler relay = context.getBean(StompBrokerRelayMessageHandler.class);
 		assertThat(relay.getSystemSubscriptions()).isNotNull();
-		assertThat(relay.getSystemSubscriptions().size()).isEqualTo(2);
+		assertThat(relay.getSystemSubscriptions()).hasSize(2);
 		assertThat(relay.getSystemSubscriptions().get("/topic/unresolved-user-destination")).isSameAs(handler1);
 		assertThat(relay.getSystemSubscriptions().get("/topic/simp-user-registry")).isSameAs(handler2);
 	}
@@ -514,7 +517,7 @@ public class MessageBrokerConfigurationTests {
 		message = MessageBuilder.createMessage("123".getBytes(), headers.getMessageHeaders());
 		inChannel.send(message);
 
-		assertThat(outChannel.messages.size()).isEqualTo(2);
+		assertThat(outChannel.messages).hasSize(2);
 		Message<?> outputMessage = outChannel.messages.remove(1);
 		headers = StompHeaderAccessor.wrap(outputMessage);
 
@@ -531,7 +534,7 @@ public class MessageBrokerConfigurationTests {
 		accessor.setSessionId("sess1");
 		template.convertAndSendToUser("sess1", "queue.q1", "456".getBytes(), accessor.getMessageHeaders());
 
-		assertThat(outChannel.messages.size()).isEqualTo(1);
+		assertThat(outChannel.messages).hasSize(1);
 		outputMessage = outChannel.messages.remove(0);
 		headers = StompHeaderAccessor.wrap(outputMessage);
 
@@ -651,12 +654,12 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-			argumentResolvers.add(mock(HandlerMethodArgumentResolver.class));
+			argumentResolvers.add(mock());
 		}
 
 		@Override
 		protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-			returnValueHandlers.add(mock(HandlerMethodReturnValueHandler.class));
+			returnValueHandlers.add(mock());
 		}
 
 		@Override

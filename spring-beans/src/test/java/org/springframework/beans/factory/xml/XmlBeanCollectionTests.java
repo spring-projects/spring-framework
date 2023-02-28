@@ -332,9 +332,9 @@ public class XmlBeanCollectionTests {
 	public void testIntegerArray() throws Exception {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("integerArray");
 		assertThat(hasMap.getIntegerArray().length == 3).isTrue();
-		assertThat(hasMap.getIntegerArray()[0].intValue() == 0).isTrue();
-		assertThat(hasMap.getIntegerArray()[1].intValue() == 1).isTrue();
-		assertThat(hasMap.getIntegerArray()[2].intValue() == 2).isTrue();
+		assertThat(hasMap.getIntegerArray()[0] == 0).isTrue();
+		assertThat(hasMap.getIntegerArray()[1] == 1).isTrue();
+		assertThat(hasMap.getIntegerArray()[2] == 2).isTrue();
 	}
 
 	@Test
@@ -356,12 +356,12 @@ public class XmlBeanCollectionTests {
 	@Test
 	public void testProps() throws Exception {
 		HasMap hasMap = (HasMap) this.beanFactory.getBean("props");
-		assertThat(hasMap.getProps().size()).isEqualTo(2);
+		assertThat(hasMap.getProps()).hasSize(2);
 		assertThat(hasMap.getProps().getProperty("foo")).isEqualTo("bar");
 		assertThat(hasMap.getProps().getProperty("2")).isEqualTo("TWO");
 
 		HasMap hasMap2 = (HasMap) this.beanFactory.getBean("propsViaMap");
-		assertThat(hasMap2.getProps().size()).isEqualTo(2);
+		assertThat(hasMap2.getProps()).hasSize(2);
 		assertThat(hasMap2.getProps().getProperty("foo")).isEqualTo("bar");
 		assertThat(hasMap2.getProps().getProperty("2")).isEqualTo("TWO");
 	}
@@ -432,7 +432,7 @@ public class XmlBeanCollectionTests {
 		boolean condition = sam.getObject() instanceof Map;
 		assertThat(condition).as("Didn't choose constructor with Map argument").isTrue();
 		Map map = (Map) sam.getObject();
-		assertThat(map.size()).isEqualTo(3);
+		assertThat(map).hasSize(3);
 		assertThat(map.get("key1")).isEqualTo("val1");
 		assertThat(map.get("key2")).isEqualTo("val2");
 		assertThat(map.get("key3")).isEqualTo("val3");

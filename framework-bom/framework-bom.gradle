@@ -7,7 +7,7 @@ group = "org.springframework"
 
 dependencies {
 	constraints {
-		parent.moduleProjects.findAll{ it.name != 'spring-core-test' }.sort{ "$it.name" }.each {
+		parent.moduleProjects.sort { "$it.name" }.each {
 			api it
 		}
 	}

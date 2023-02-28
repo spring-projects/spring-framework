@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		AsyncListener requestListener;
 		String logPrefix;
 		try {
-			httpRequest = createRequest(((HttpServletRequest) request), asyncContext);
+			httpRequest = createRequest((HttpServletRequest) request, asyncContext);
 			requestListener = httpRequest.getAsyncListener();
 			logPrefix = httpRequest.getLogPrefix();
 		}
@@ -182,8 +182,10 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			return;
 		}
 
-		ServerHttpResponse httpResponse = createResponse(((HttpServletResponse) response), asyncContext, httpRequest);
-		AsyncListener responseListener = ((ServletServerHttpResponse) httpResponse).getAsyncListener();
+		ServletServerHttpResponse wrappedResponse =
+				createResponse((HttpServletResponse) response, asyncContext, httpRequest);
+		ServerHttpResponse httpResponse = wrappedResponse;
+		AsyncListener responseListener = wrappedResponse.getAsyncListener();
 		if (httpRequest.getMethod() == HttpMethod.HEAD) {
 			httpResponse = new HttpHeadResponseDecorator(httpResponse);
 		}
@@ -200,7 +202,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
 			throws IOException, URISyntaxException {
 
-		Assert.notNull(this.servletPath, "Servlet path is not initialized");
+		Assert.state(this.servletPath != null, "Servlet path is not initialized");
 		return new ServletServerHttpRequest(
 				request, context, this.servletPath, getDataBufferFactory(), getBufferSize());
 	}
@@ -263,9 +265,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 
 		private final String logPrefix;
 
-
-		public HttpHandlerAsyncListener(
-				AsyncListener requestAsyncListener, AsyncListener responseAsyncListener,
+		public HttpHandlerAsyncListener(AsyncListener requestAsyncListener, AsyncListener responseAsyncListener,
 				Runnable handlerDisposeTask, AtomicBoolean completionFlag, String logPrefix) {
 
 			this.requestAsyncListener = requestAsyncListener;
@@ -274,7 +274,6 @@ public class ServletHttpHandlerAdapter implements Servlet {
 			this.completionFlag = completionFlag;
 			this.logPrefix = logPrefix;
 		}
-
 
 		@Override
 		public void onTimeout(AsyncEvent event) {
@@ -361,9 +360,7 @@ public class ServletHttpHandlerAdapter implements Servlet {
 		@Nullable
 		private volatile Subscription subscription;
 
-		public HandlerResultSubscriber(
-				AsyncContext asyncContext, AtomicBoolean completionFlag, String logPrefix) {
-
+		public HandlerResultSubscriber(AsyncContext asyncContext, AtomicBoolean completionFlag, String logPrefix) {
 			this.asyncContext = asyncContext;
 			this.completionFlag = completionFlag;
 			this.logPrefix = logPrefix;

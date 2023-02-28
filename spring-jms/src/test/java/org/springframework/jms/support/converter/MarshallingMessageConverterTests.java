@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import javax.xml.transform.Source;
 import jakarta.jms.BytesMessage;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.oxm.Marshaller;
@@ -40,27 +39,18 @@ import static org.mockito.Mockito.verify;
  */
 public class MarshallingMessageConverterTests {
 
-	private MarshallingMessageConverter converter;
+	private Marshaller marshallerMock = mock();
 
-	private Marshaller marshallerMock;
+	private Unmarshaller unmarshallerMock = mock();
 
-	private Unmarshaller unmarshallerMock;
+	private Session sessionMock = mock();
 
-	private Session sessionMock;
-
-
-	@BeforeEach
-	public void setup() throws Exception {
-		marshallerMock = mock(Marshaller.class);
-		unmarshallerMock = mock(Unmarshaller.class);
-		sessionMock = mock(Session.class);
-		converter = new MarshallingMessageConverter(marshallerMock, unmarshallerMock);
-	}
+	private MarshallingMessageConverter converter = new MarshallingMessageConverter(marshallerMock, unmarshallerMock);
 
 
 	@Test
 	public void toBytesMessage() throws Exception {
-		BytesMessage bytesMessageMock = mock(BytesMessage.class);
+		BytesMessage bytesMessageMock = mock();
 		Object toBeMarshalled = new Object();
 		given(sessionMock.createBytesMessage()).willReturn(bytesMessageMock);
 
@@ -72,7 +62,7 @@ public class MarshallingMessageConverterTests {
 
 	@Test
 	public void fromBytesMessage() throws Exception {
-		BytesMessage bytesMessageMock = mock(BytesMessage.class);
+		BytesMessage bytesMessageMock = mock();
 		Object unmarshalled = new Object();
 
 		given(bytesMessageMock.getBodyLength()).willReturn(10L);
@@ -86,7 +76,7 @@ public class MarshallingMessageConverterTests {
 	@Test
 	public void toTextMessage() throws Exception {
 		converter.setTargetType(MessageType.TEXT);
-		TextMessage textMessageMock = mock(TextMessage.class);
+		TextMessage textMessageMock = mock();
 		Object toBeMarshalled = new Object();
 
 		given(sessionMock.createTextMessage(isA(String.class))).willReturn(textMessageMock);
@@ -98,7 +88,7 @@ public class MarshallingMessageConverterTests {
 
 	@Test
 	public void fromTextMessage() throws Exception {
-		TextMessage textMessageMock = mock(TextMessage.class);
+		TextMessage textMessageMock = mock();
 		Object unmarshalled = new Object();
 
 		String text = "foo";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -653,7 +653,7 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 	fun filter(filterFunction: (ServerRequest, (ServerRequest) -> Mono<ServerResponse>) -> Mono<ServerResponse>) {
 		builder.filter { request, next ->
 			filterFunction(request) {
-				next.handle(request)
+				next.handle(it)
 			}
 		}
 	}
@@ -700,6 +700,30 @@ class RouterFunctionDsl internal constructor (private val init: RouterFunctionDs
 	 */
 	inline fun <reified E : Throwable> onError(noinline responseProvider: (Throwable, ServerRequest) -> Mono<ServerResponse>) {
 		builder.onError({it is E}, responseProvider)
+	}
+
+	/**
+	 * Add an attribute with the given name and value to the last route built with this builder.
+	 * @param name the attribute name
+	 * @param value the attribute value
+	 * @since 6.0
+	 */
+	fun withAttribute(name: String, value: Any) {
+		builder.withAttribute(name, value)
+	}
+
+	/**
+	 * Manipulate the attributes of the last route built with the given consumer.
+	 *
+	 * The map provided to the consumer is "live", so that the consumer can be used
+	 * to [overwrite][MutableMap.put] existing attributes,
+	 * [remove][MutableMap.remove] attributes, or use any of the other
+	 * [MutableMap] methods.
+	 * @param attributesConsumer a function that consumes the attributes map
+	 * @since 6.0
+	 */
+	fun withAttributes(attributesConsumer: (MutableMap<String, Any>) -> Unit) {
+		builder.withAttributes(attributesConsumer)
 	}
 
 	/**

@@ -44,8 +44,8 @@ class DeclarationOrderIndependenceTests {
 	@BeforeEach
 	void setup() {
 		this.ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		aspect = (TopsyTurvyAspect) ctx.getBean("topsyTurvyAspect");
-		target = (TopsyTurvyTarget) ctx.getBean("topsyTurvyTarget");
+		aspect = ctx.getBean(TopsyTurvyAspect.class);
+		target = ctx.getBean(TopsyTurvyTarget.class);
 	}
 
 	@AfterEach
@@ -55,19 +55,17 @@ class DeclarationOrderIndependenceTests {
 
 
 	@Test
-	void testTargetIsSerializable() {
-		boolean condition = this.target instanceof Serializable;
-		assertThat(condition).as("target bean is serializable").isTrue();
+	void targetIsSerializable() {
+		assertThat(this.target).isInstanceOf(Serializable.class);
 	}
 
 	@Test
-	void testTargetIsBeanNameAware() {
-		boolean condition = this.target instanceof BeanNameAware;
-		assertThat(condition).as("target bean is bean name aware").isTrue();
+	void targetIsBeanNameAware() {
+		assertThat(this.target).isInstanceOf(BeanNameAware.class);
 	}
 
 	@Test
-	void testBeforeAdviceFiringOk() {
+	void beforeAdviceFiringOk() {
 		AspectCollaborator collab = new AspectCollaborator();
 		this.aspect.setCollaborator(collab);
 		this.target.doSomething();
@@ -75,7 +73,7 @@ class DeclarationOrderIndependenceTests {
 	}
 
 	@Test
-	void testAroundAdviceFiringOk() {
+	void aroundAdviceFiringOk() {
 		AspectCollaborator collab = new AspectCollaborator();
 		this.aspect.setCollaborator(collab);
 		this.target.getX();
@@ -83,7 +81,7 @@ class DeclarationOrderIndependenceTests {
 	}
 
 	@Test
-	void testAfterReturningFiringOk() {
+	void afterReturningFiringOk() {
 		AspectCollaborator collab = new AspectCollaborator();
 		this.aspect.setCollaborator(collab);
 		this.target.getX();

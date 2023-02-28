@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,15 +120,16 @@ public abstract class AbstractRowMapperTests {
 
 	protected static class Mock {
 
-		private Connection connection;
+		private Connection connection = mock();
 
-		private ResultSetMetaData resultSetMetaData;
+		private ResultSetMetaData resultSetMetaData = mock();
 
-		private ResultSet resultSet;
+		private ResultSet resultSet = mock();
 
-		private Statement statement;
+		private Statement statement = mock();
 
 		private JdbcTemplate jdbcTemplate;
+
 
 		public Mock() throws Exception {
 			this(MockType.ONE);
@@ -136,11 +137,6 @@ public abstract class AbstractRowMapperTests {
 
 		@SuppressWarnings("unchecked")
 		public Mock(MockType type) throws Exception {
-			connection = mock(Connection.class);
-			statement = mock(Statement.class);
-			resultSet = mock(ResultSet.class);
-			resultSetMetaData = mock(ResultSetMetaData.class);
-
 			given(connection.createStatement()).willReturn(statement);
 			given(statement.executeQuery(anyString())).willReturn(resultSet);
 			given(resultSet.getMetaData()).willReturn(resultSetMetaData);

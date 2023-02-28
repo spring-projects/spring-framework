@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,10 @@ import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * Integration tests for LocalContainerEntityManagerFactoryBean.
@@ -92,7 +94,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	public void testBogusQuery() {
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> {
+		assertThatRuntimeException().isThrownBy(() -> {
 			Query query = sharedEntityManager.createQuery("It's raining toads");
 			// required in OpenJPA case
 			query.executeUpdate();
@@ -101,7 +103,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 
 	@Test
 	public void testGetReferenceWhenNoRow() {
-		assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+		assertThatException().isThrownBy(() -> {
 				Person notThere = sharedEntityManager.getReference(Person.class, 666);
 				// We may get here (as with Hibernate). Either behaviour is valid:
 				// throw exception on first access or on getReference itself.
@@ -147,7 +149,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
 
-		assertThat(people.size()).isEqualTo(1);
+		assertThat(people).hasSize(1);
 		assertThat(people.get(0).getFirstName()).isEqualTo(firstName);
 	}
 
@@ -184,9 +186,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(0);
-		assertThatExceptionOfType(NoResultException.class).isThrownBy(
-				q::getSingleResult);
+		assertThat(people).isEmpty();
+		assertThatExceptionOfType(NoResultException.class).isThrownBy(q::getSingleResult);
 	}
 
 	@Test
@@ -197,9 +198,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		EntityManager em = entityManagerFactory.createEntityManager();
 		Query q = em.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(0);
-		assertThatExceptionOfType(NoResultException.class).isThrownBy(
-				q::getSingleResult);
+		assertThat(people).isEmpty();
+		assertThatExceptionOfType(NoResultException.class).isThrownBy(q::getSingleResult);
 	}
 
 	@Test
@@ -208,9 +208,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = this.sharedEntityManager.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(0);
-		assertThatExceptionOfType(NoResultException.class).isThrownBy(
-				q::getSingleResult);
+		assertThat(people).isEmpty();
+		assertThatExceptionOfType(NoResultException.class).isThrownBy(q::getSingleResult);
 	}
 
 	@Test
@@ -222,16 +221,16 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		Query q = em.createQuery("select p from Person as p");
 		q.setFlushMode(FlushModeType.AUTO);
 		List<Person> people = q.getResultList();
-		assertThat(people.size()).isEqualTo(0);
-		assertThatExceptionOfType(Exception.class).isThrownBy(q::getSingleResult)
+		assertThat(people).isEmpty();
+		assertThatException()
+			.isThrownBy(q::getSingleResult)
 			.withMessageContaining("closed");
 		// We would typically expect an IllegalStateException, but Hibernate throws a
 		// PersistenceException. So we assert the contents of the exception message instead.
 
 		Query q2 = em.createQuery("select p from Person as p");
 		q2.setFlushMode(FlushModeType.AUTO);
-		assertThatExceptionOfType(NoResultException.class).isThrownBy(
-				q2::getSingleResult);
+		assertThatExceptionOfType(NoResultException.class).isThrownBy(q2::getSingleResult);
 	}
 
 	@Test

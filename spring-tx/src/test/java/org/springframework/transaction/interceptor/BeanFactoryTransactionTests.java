@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ public class BeanFactoryTransactionTests {
 
 	private void doTestGetsAreNotTransactional(final ITestBean testBean) {
 		// Install facade
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = mock();
 		PlatformTransactionManagerFacade.delegate = ptm;
 
 		assertThat(testBean.getAge() == 666).as("Age should not be " + testBean.getAge()).isTrue();
@@ -151,7 +151,7 @@ public class BeanFactoryTransactionTests {
 		verifyNoInteractions(ptm);
 
 		// Install facade expecting a call
-		final TransactionStatus ts = mock(TransactionStatus.class);
+		final TransactionStatus ts = mock();
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
 			@Override

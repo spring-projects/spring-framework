@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,23 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import io.micrometer.context.ContextRegistry;
+import io.micrometer.context.ContextSnapshot;
+import io.micrometer.context.ContextSnapshot.Scope;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -51,33 +56,26 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.web.testfixture.method.ResolvableMethod.on;
 
 /**
- * Unit tests for ResponseBodyEmitterReturnValueHandler.
+ * Unit tests for {@link ResponseBodyEmitterReturnValueHandler}.
+ *
  * @author Rossen Stoyanchev
  */
-public class ResponseBodyEmitterReturnValueHandlerTests {
+class ResponseBodyEmitterReturnValueHandlerTests {
 
-	private ResponseBodyEmitterReturnValueHandler handler;
+	private ResponseBodyEmitterReturnValueHandler handler =
+			new ResponseBodyEmitterReturnValueHandler(List.of(new MappingJackson2HttpMessageConverter()));
 
-	private MockHttpServletRequest request;
+	private MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private MockHttpServletResponse response;
+	private MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private NativeWebRequest webRequest;
+	private NativeWebRequest webRequest = new ServletWebRequest(this.request, this.response);
 
 	private final ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
 
 	@BeforeEach
-	public void setup() throws Exception {
-
-		List<HttpMessageConverter<?>> converters =
-				Collections.singletonList(new MappingJackson2HttpMessageConverter());
-
-		this.handler = new ResponseBodyEmitterReturnValueHandler(converters);
-		this.request = new MockHttpServletRequest();
-		this.response = new MockHttpServletResponse();
-		this.webRequest = new ServletWebRequest(this.request, this.response);
-
+	void setup() throws Exception {
 		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
 		WebAsyncUtils.getAsyncManager(this.webRequest).setAsyncWebRequest(asyncWebRequest);
 		this.request.setAsyncSupported(true);
@@ -85,8 +83,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 
 	@Test
-	public void supportsReturnTypes() throws Exception {
-
+	void supportsReturnTypes() {
 		assertThat(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(ResponseBodyEmitter.class))).isTrue();
 
@@ -105,8 +102,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
-	public void doesNotSupportReturnTypes() throws Exception {
-
+	void doesNotSupportReturnTypes() {
 		assertThat(this.handler.supportsReturnType(
 				on(TestController.class).resolveReturnType(ResponseEntity.class, String.class))).isFalse();
 
@@ -119,7 +115,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
-	public void responseBodyEmitter() throws Exception {
+	void responseBodyEmitter() throws Exception {
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseBodyEmitter.class);
 		ResponseBodyEmitter emitter = new ResponseBodyEmitter();
 		this.handler.handleReturnValue(emitter, type, this.mavContainer, this.webRequest);
@@ -142,9 +138,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		bean.setName("Jason");
 		emitter.send(bean);
 
-		assertThat(this.response.getContentAsString()).isEqualTo(("{\"id\":1,\"name\":\"Joe\"}\n" +
-						"{\"id\":2,\"name\":\"John\"}\n" +
-						"{\"id\":3,\"name\":\"Jason\"}"));
+		assertThat(this.response.getContentAsString()).isEqualTo(("""
+				{"id":1,"name":"Joe"}
+				{"id":2,"name":"John"}
+				{"id":3,"name":"Jason"}"""));
 
 		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
 		assertThat(asyncContext.getDispatchedPath()).isNull();
@@ -154,14 +151,13 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
-	public void responseBodyEmitterWithTimeoutValue() throws Exception {
-
-		AsyncWebRequest asyncWebRequest = mock(AsyncWebRequest.class);
+	void responseBodyEmitterWithTimeoutValue() throws Exception {
+		AsyncWebRequest asyncWebRequest = mock();
 		WebAsyncUtils.getAsyncManager(this.request).setAsyncWebRequest(asyncWebRequest);
 
 		ResponseBodyEmitter emitter = new ResponseBodyEmitter(19000L);
-		emitter.onTimeout(mock(Runnable.class));
-		emitter.onCompletion(mock(Runnable.class));
+		emitter.onTimeout(mock());
+		emitter.onCompletion(mock());
 
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseBodyEmitter.class);
 		this.handler.handleReturnValue(emitter, type, this.mavContainer, this.webRequest);
@@ -172,16 +168,15 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		verify(asyncWebRequest).startAsync();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void responseBodyEmitterWithErrorValue() throws Exception {
-
-		AsyncWebRequest asyncWebRequest = mock(AsyncWebRequest.class);
+	@SuppressWarnings("unchecked")
+	void responseBodyEmitterWithErrorValue() throws Exception {
+		AsyncWebRequest asyncWebRequest = mock();
 		WebAsyncUtils.getAsyncManager(this.request).setAsyncWebRequest(asyncWebRequest);
 
 		ResponseBodyEmitter emitter = new ResponseBodyEmitter(19000L);
-		emitter.onError(mock(Consumer.class));
-		emitter.onCompletion(mock(Runnable.class));
+		emitter.onError(mock());
+		emitter.onCompletion(mock());
 
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseBodyEmitter.class);
 		this.handler.handleReturnValue(emitter, type, this.mavContainer, this.webRequest);
@@ -192,7 +187,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
-	public void sseEmitter() throws Exception {
+	void sseEmitter() throws Exception {
 		MethodParameter type = on(TestController.class).resolveReturnType(SseEmitter.class);
 		SseEmitter emitter = new SseEmitter();
 		this.handler.handleReturnValue(emitter, type, this.mavContainer, this.webRequest);
@@ -212,50 +207,79 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 				comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
 
 		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
-		assertThat(this.response.getContentAsString()).isEqualTo((":a test\n" +
-						"event:update\n" +
-						"id:1\n" +
-						"retry:5000\n" +
-						"data:{\"id\":1,\"name\":\"Joe\"}\n" +
-						"data:{\"id\":2,\"name\":\"John\"}\n" +
-						"\n"));
+		assertThat(this.response.getContentAsString()).isEqualTo(("""
+				:a test
+				event:update
+				id:1
+				retry:5000
+				data:{"id":1,"name":"Joe"}
+				data:{"id":2,"name":"John"}
+
+				"""));
 	}
 
 	@Test
-	public void responseBodyFlux() throws Exception {
-
+	void responseBodyFlux() throws Exception {
 		this.request.addHeader("Accept", "text/event-stream");
 
 		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
-		this.handler.handleReturnValue(sink.asFlux(), type, this.mavContainer, this.webRequest);
+		this.handler.handleReturnValue(Flux.just("foo", "bar", "baz"), type, this.mavContainer, this.webRequest);
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
-
-		sink.tryEmitNext("foo");
-		sink.tryEmitNext("bar");
-		sink.tryEmitNext("baz");
-		sink.tryEmitComplete();
 
 		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
 		assertThat(this.response.getContentAsString()).isEqualTo("data:foo\n\ndata:bar\n\ndata:baz\n\n");
 	}
 
-	@Test // gh-21972
-	public void responseBodyFluxWithError() throws Exception {
-
+	@Test
+	@SuppressWarnings({"try","unused"})
+	void responseBodyFluxWithThreadLocal() throws Exception {
 		this.request.addHeader("Accept", "text/event-stream");
 
-		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
-		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
-		this.handler.handleReturnValue(sink.asFlux(), type, this.mavContainer, this.webRequest);
+		ThreadLocal<String> threadLocal = new ThreadLocal<>();
+		ContextRegistry.getInstance().registerThreadLocalAccessor("key", threadLocal);
+
+		CountDownLatch latch = new CountDownLatch(1);
+
+		Flux<String> flux = Flux.just("foo", "bar", "baz")
+				.publishOn(Schedulers.boundedElastic())
+				.transformDeferredContextual((theFlux, contextView) ->
+						theFlux.map(s -> {
+							try (Scope scope = ContextSnapshot.setThreadLocalsFrom(contextView, "key")) {
+								return s + threadLocal.get();
+							}
+						}))
+				.doOnTerminate(latch::countDown);
+
+		try {
+			threadLocal.set("123");
+			this.handler.handleReturnValue(flux,
+					on(TestController.class).resolveReturnType(Flux.class, String.class),
+					this.mavContainer, this.webRequest);
+		}
+		finally {
+			threadLocal.remove();
+		}
+
+		latch.await(5, TimeUnit.SECONDS);
 
 		assertThat(this.request.isAsyncStarted()).isTrue();
+		assertThat(this.response.getStatus()).isEqualTo(200);
+
+		assertThat(this.response.getContentType()).isEqualTo("text/event-stream");
+		assertThat(this.response.getContentAsString()).isEqualTo("data:foo123\n\ndata:bar123\n\ndata:baz123\n\n");
+	}
+
+	@Test // gh-21972
+	void responseBodyFluxWithError() throws Exception {
+		this.request.addHeader("Accept", "text/event-stream");
 
 		IllegalStateException ex = new IllegalStateException("wah wah");
-		sink.tryEmitError(ex);
-		sink.tryEmitComplete();
+		MethodParameter type = on(TestController.class).resolveReturnType(Flux.class, String.class);
+		this.handler.handleReturnValue(Flux.error(ex), type, this.mavContainer, this.webRequest);
+
+		assertThat(this.request.isAsyncStarted()).isTrue();
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.webRequest);
 		assertThat(asyncManager.getConcurrentResult()).isSameAs(ex);
@@ -263,7 +287,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
-	public void responseEntitySse() throws Exception {
+	void responseEntitySse() throws Exception {
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, SseEmitter.class);
 		SseEmitter emitter = new SseEmitter();
 		ResponseEntity<SseEmitter> entity = ResponseEntity.ok().header("foo", "bar").body(emitter);
@@ -277,7 +301,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
-	public void responseEntitySseNoContent() throws Exception {
+	void responseEntitySseNoContent() throws Exception {
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, SseEmitter.class);
 		ResponseEntity<?> entity = ResponseEntity.noContent().header("foo", "bar").build();
 		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);
@@ -288,10 +312,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
-	public void responseEntityFlux() throws Exception {
-
-		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
-		ResponseEntity<Flux<String>> entity = ResponseEntity.ok().body(sink.asFlux());
+	void responseEntityFlux() throws Exception {
+		ResponseEntity<Flux<String>> entity = ResponseEntity.ok().body(Flux.just("foo", "bar", "baz"));
 		ResolvableType bodyType = forClassWithGenerics(Flux.class, String.class);
 		MethodParameter type = on(TestController.class).resolveReturnType(ResponseEntity.class, bodyType);
 		this.handler.handleReturnValue(entity, type, this.mavContainer, this.webRequest);
@@ -299,18 +321,12 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertThat(this.request.isAsyncStarted()).isTrue();
 		assertThat(this.response.getStatus()).isEqualTo(200);
 
-		sink.tryEmitNext("foo");
-		sink.tryEmitNext("bar");
-		sink.tryEmitNext("baz");
-		sink.tryEmitComplete();
-
 		assertThat(this.response.getContentType()).isEqualTo("text/plain");
 		assertThat(this.response.getContentAsString()).isEqualTo("foobarbaz");
 	}
 
 	@Test // SPR-17076
-	public void responseEntityFluxWithCustomHeader() throws Exception {
-
+	void responseEntityFluxWithCustomHeader() throws Exception {
 		Sinks.Many<SimpleBean> sink = Sinks.many().unicast().onBackpressureBuffer();
 		ResponseEntity<Flux<SimpleBean>> entity = ResponseEntity.ok().header("x-foo", "bar").body(sink.asFlux());
 		ResolvableType bodyType = forClassWithGenerics(Flux.class, SimpleBean.class);
@@ -324,7 +340,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "ConstantConditions"})
 	private static class TestController {
 
 		private ResponseBodyEmitter h1() { return null; }

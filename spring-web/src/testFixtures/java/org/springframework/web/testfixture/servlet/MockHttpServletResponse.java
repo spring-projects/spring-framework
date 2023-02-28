@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link jakarta.servlet.http.HttpServletResponse} interface.
  *
- * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
+ * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -413,6 +413,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		doAddHeaderValue(HttpHeaders.SET_COOKIE, getCookieHeader(cookie), false);
 	}
 
+	@SuppressWarnings("removal")
 	private String getCookieHeader(Cookie cookie) {
 		StringBuilder buf = new StringBuilder();
 		buf.append(cookie.getName()).append('=').append(cookie.getValue() == null ? "" : cookie.getValue());
@@ -423,7 +424,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			buf.append("; Domain=").append(cookie.getDomain());
 		}
 		int maxAge = cookie.getMaxAge();
-		ZonedDateTime expires = (cookie instanceof MockCookie ? ((MockCookie) cookie).getExpires() : null);
+		ZonedDateTime expires = (cookie instanceof MockCookie mockCookie ? mockCookie.getExpires() : null);
 		if (maxAge >= 0) {
 			buf.append("; Max-Age=").append(maxAge);
 			buf.append("; Expires=");
@@ -451,6 +452,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			if (StringUtils.hasText(mockCookie.getSameSite())) {
 				buf.append("; SameSite=").append(mockCookie.getSameSite());
 			}
+		}
+		if (StringUtils.hasText(cookie.getComment())) {
+			buf.append("; Comment=").append(cookie.getComment());
 		}
 		return buf.toString();
 	}
@@ -487,12 +491,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return the primary value for the given header as a String, if any.
-	 * Will return the first value in case of multiple values.
-	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
-	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
-	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
+	 * <p>Will return the first value in case of multiple values.
+	 * <p>Returns a stringified value for Servlet 3.0 compatibility. Consider
+	 * using {@link #getHeaderValue(String)} for raw Object access.
 	 * @param name the name of the header
 	 * @return the associated header value, or {@code null} if none
+	 * @see HttpServletResponse#getHeader(String)
 	 */
 	@Override
 	@Nullable
@@ -503,11 +507,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return all values for the given header as a List of Strings.
-	 * <p>As of Servlet 3.0, this method is also defined in {@link HttpServletResponse}.
-	 * As of Spring 3.1, it returns a List of stringified values for Servlet 3.0 compatibility.
+	 * <p>Returns a List of stringified values for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValues(String)} for raw Object access.
 	 * @param name the name of the header
 	 * @return the associated header values, or an empty List if none
+	 * @see HttpServletResponse#getHeaders(String)
 	 */
 	@Override
 	public List<String> getHeaders(String name) {
@@ -567,18 +571,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public String encodeRedirectURL(String url) {
 		return encodeURL(url);
-	}
-
-	@Override
-	@Deprecated
-	public String encodeUrl(String url) {
-		return encodeURL(url);
-	}
-
-	@Override
-	@Deprecated
-	public String encodeRedirectUrl(String url) {
-		return encodeRedirectURL(url);
 	}
 
 	@Override
@@ -692,7 +684,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			return true;
 		}
 		else if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(name)) {
-			setContentLength(value instanceof Number ? ((Number) value).intValue() :
+			setContentLength(value instanceof Number number ? number.intValue() :
 					Integer.parseInt(value.toString()));
 			return true;
 		}
@@ -752,15 +744,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	public void setStatus(int status) {
 		if (!this.isCommitted()) {
 			this.status = status;
-		}
-	}
-
-	@Override
-	@Deprecated
-	public void setStatus(int status, String errorMessage) {
-		if (!this.isCommitted()) {
-			this.status = status;
-			this.errorMessage = errorMessage;
 		}
 	}
 

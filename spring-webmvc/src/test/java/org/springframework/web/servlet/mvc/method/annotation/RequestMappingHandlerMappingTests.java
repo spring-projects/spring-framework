@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,11 +69,12 @@ public class RequestMappingHandlerMappingTests {
 	static Stream<Arguments> pathPatternsArguments() {
 		RequestMappingHandlerMapping mapping1 = new RequestMappingHandlerMapping();
 		StaticWebApplicationContext wac1 = new StaticWebApplicationContext();
-		mapping1.setPatternParser(new PathPatternParser());
 		mapping1.setApplicationContext(wac1);
 
-		RequestMappingHandlerMapping mapping2 = new RequestMappingHandlerMapping();
 		StaticWebApplicationContext wac2 = new StaticWebApplicationContext();
+
+		RequestMappingHandlerMapping mapping2 = new RequestMappingHandlerMapping();
+		mapping2.setPatternParser(null);
 		mapping2.setApplicationContext(wac2);
 
 		return Stream.of(Arguments.of(mapping1, wac1), Arguments.of(mapping2, wac2));
@@ -298,11 +299,11 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(info).isNotNull();
 
 		Set<String> paths = info.getPatternValues();
-		assertThat(paths.size()).isEqualTo(1);
+		assertThat(paths).hasSize(1);
 		assertThat(paths.iterator().next()).isEqualTo(path);
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
-		assertThat(methods.size()).isEqualTo(1);
+		assertThat(methods).hasSize(1);
 		assertThat(methods.iterator().next()).isEqualTo(requestMethod);
 
 		return info;
@@ -362,7 +363,7 @@ public class RequestMappingHandlerMappingTests {
 
 		@GetMapping("/{id}")
 		public Principal getUser() {
-			return mock(Principal.class);
+			return mock();
 		}
 	}
 

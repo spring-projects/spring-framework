@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.util.ReflectionUtils;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.only;
@@ -130,9 +130,9 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 	@Test
 	public void beforeTestMethodAnnotationWithFailingEventListener() throws Exception {
 		Method method = ReflectionUtils.findMethod(ExampleTestCase.class, "testWithFailingEventListener");
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-						testContextManager.beforeTestMethod(testInstance, method))
-				.withMessageContaining("Boom!");
+		assertThatRuntimeException()
+			.isThrownBy(() -> testContextManager.beforeTestMethod(testInstance, method))
+			.withMessageContaining("Boom!");
 		verify(listener, only()).beforeTestMethod(testContext);
 	}
 
@@ -232,7 +232,7 @@ public class EventPublishingTestExecutionListenerIntegrationTests {
 
 		@Bean
 		public TestExecutionListener listener() {
-			return mock(TestExecutionListener.class);
+			return mock();
 		}
 
 		/**

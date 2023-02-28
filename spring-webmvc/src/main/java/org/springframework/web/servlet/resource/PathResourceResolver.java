@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 
 
 	/**
-	 * By default when a Resource is found, the path of the resolved resource is
+	 * By default, when a Resource is found, the path of the resolved resource is
 	 * compared to ensure it's under the input location where it was found.
 	 * However sometimes that may not be the case, e.g. when
 	 * {@link org.springframework.web.servlet.resource.CssLinkResourceTransformer}
@@ -203,9 +203,9 @@ public class PathResourceResolver extends AbstractResourceResolver {
 
 	/**
 	 * Perform additional checks on a resolved resource beyond checking whether the
-	 * resources exists and is readable. The default implementation also verifies
+	 * resource exists and is readable. The default implementation also verifies
 	 * the resource is either under the location relative to which it was found or
-	 * is under one of the {@link #setAllowedLocations allowed locations}.
+	 * is under one of the {@linkplain #setAllowedLocations allowed locations}.
 	 * @param resource the resource to check
 	 * @param location the location relative to which the resource was found
 	 * @return "true" if resource is in a valid location, "false" otherwise.
@@ -259,36 +259,47 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	}
 
 	private String encodeOrDecodeIfNecessary(String path, @Nullable HttpServletRequest request, Resource location) {
-		if (shouldDecodeRelativePath(location, request)) {
-			return UriUtils.decode(path, StandardCharsets.UTF_8);
-		}
-		else if (shouldEncodeRelativePath(location) && request != null) {
-			Charset charset = this.locationCharsets.getOrDefault(location, StandardCharsets.UTF_8);
-			StringBuilder sb = new StringBuilder();
-			StringTokenizer tokenizer = new StringTokenizer(path, "/");
-			while (tokenizer.hasMoreTokens()) {
-				String value = UriUtils.encode(tokenizer.nextToken(), charset);
-				sb.append(value);
-				sb.append('/');
+		if (request != null) {
+			boolean usesPathPattern = (
+					ServletRequestPathUtils.hasCachedPath(request) &&
+					ServletRequestPathUtils.getCachedPath(request) instanceof PathContainer);
+
+			if (shouldDecodeRelativePath(location, usesPathPattern)) {
+				return UriUtils.decode(path, StandardCharsets.UTF_8);
 			}
-			if (!path.endsWith("/")) {
-				sb.setLength(sb.length() - 1);
+			else if (shouldEncodeRelativePath(location, usesPathPattern)) {
+				Charset charset = this.locationCharsets.getOrDefault(location, StandardCharsets.UTF_8);
+				StringBuilder sb = new StringBuilder();
+				StringTokenizer tokenizer = new StringTokenizer(path, "/");
+				while (tokenizer.hasMoreTokens()) {
+					String value = UriUtils.encode(tokenizer.nextToken(), charset);
+					sb.append(value);
+					sb.append('/');
+				}
+				if (!path.endsWith("/")) {
+					sb.setLength(sb.length() - 1);
+				}
+				return sb.toString();
 			}
-			return sb.toString();
 		}
-		else {
-			return path;
-		}
+		return path;
 	}
 
-	private boolean shouldDecodeRelativePath(Resource location, @Nullable HttpServletRequest request) {
-		return  (!(location instanceof UrlResource) && request != null &&
-				ServletRequestPathUtils.hasCachedPath(request) &&
-				ServletRequestPathUtils.getCachedPath(request) instanceof PathContainer);
+	/**
+	 * When the {@code HandlerMapping} is set to not decode the URL path, the
+	 * path needs to be decoded for non-{@code UrlResource} locations.
+	 */
+	private boolean shouldDecodeRelativePath(Resource location, boolean usesPathPattern) {
+		return (!(location instanceof UrlResource) &&
+				(usesPathPattern || (this.urlPathHelper != null && !this.urlPathHelper.isUrlDecode())));
 	}
 
-	private boolean shouldEncodeRelativePath(Resource location) {
-		return (location instanceof UrlResource &&
+	/**
+	 * When the {@code HandlerMapping} is set to decode the URL path, the path
+	 * needs to be encoded for {@code UrlResource} locations.
+	 */
+	private boolean shouldEncodeRelativePath(Resource location, boolean usesPathPattern) {
+		return (location instanceof UrlResource && !usesPathPattern &&
 				this.urlPathHelper != null && this.urlPathHelper.isUrlDecode());
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,10 @@ class HandlerMappingTests {
 
 	@PathPatternsParameterizedTest
 	void orderedInterceptors(Function<String, MockHttpServletRequest> requestFactory, TestHandlerMapping mapping) throws Exception {
-
 		MappedInterceptor i1 = new MappedInterceptor(new String[] {"/**"}, mock(HandlerInterceptor.class));
-		HandlerInterceptor i2 = mock(HandlerInterceptor.class);
+		HandlerInterceptor i2 = mock();
 		MappedInterceptor i3 = new MappedInterceptor(new String[] {"/**"}, mock(HandlerInterceptor.class));
-		HandlerInterceptor i4 = mock(HandlerInterceptor.class);
+		HandlerInterceptor i4 = mock();
 
 		mapping.setInterceptors(i1, i2, i3, i4);
 		mapping.setApplicationContext(new StaticWebApplicationContext());

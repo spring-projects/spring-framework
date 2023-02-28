@@ -24,13 +24,15 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import org.springframework.aot.hint.ResourceHints;
+import org.springframework.aot.hint.TypeReference;
 
 /**
  * Tests for {@link ResourceHintsWriter}.
  *
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  */
-public class ResourceHintsWriterTests {
+class ResourceHintsWriterTests {
 
 	@Test
 	void empty() throws JSONException {
@@ -48,6 +50,9 @@ public class ResourceHintsWriterTests {
 					"resources": {
 						"includes": [
 							{ "pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{ "pattern": "\\\\Q/\\\\E" },
+							{ "pattern": "\\\\Qcom\\\\E"},
+							{ "pattern": "\\\\Qcom/example\\\\E"},
 							{ "pattern": "\\\\Qcom/example/another.properties\\\\E"}
 						]
 					}
@@ -55,14 +60,48 @@ public class ResourceHintsWriterTests {
 	}
 
 	@Test
-	void registerPattern() throws JSONException {
+	void registerWildcardAtTheBeginningPattern() throws JSONException {
+		ResourceHints hints = new ResourceHints();
+		hints.registerPattern("*.properties");
+		assertEquals("""
+				{
+					"resources": {
+						"includes": [
+							{ "pattern": ".*\\\\Q.properties\\\\E"},
+							{ "pattern": "\\\\Q\\/\\\\E"}
+						]
+					}
+				}""", hints);
+	}
+
+	@Test
+	void registerWildcardInTheMiddlePattern() throws JSONException {
 		ResourceHints hints = new ResourceHints();
 		hints.registerPattern("com/example/*.properties");
 		assertEquals("""
 				{
 					"resources": {
 						"includes": [
-							{ "pattern": "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"}
+							{ "pattern": "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"},
+							{ "pattern": "\\\\Q/\\\\E" },
+							{ "pattern": "\\\\Qcom\\\\E"},
+							{ "pattern": "\\\\Qcom/example\\\\E"}
+						]
+					}
+				}""", hints);
+	}
+
+	@Test
+	void registerWildcardAtTheEndPattern() throws JSONException {
+		ResourceHints hints = new ResourceHints();
+		hints.registerPattern("static/*");
+		assertEquals("""
+				{
+					"resources": {
+						"includes": [
+							{ "pattern": "\\\\Qstatic/\\\\E.*"},
+							{ "pattern": "\\\\Q/\\\\E" },
+							{ "pattern": "\\\\Qstatic\\\\E"}
 						]
 					}
 				}""", hints);
@@ -71,18 +110,40 @@ public class ResourceHintsWriterTests {
 	@Test
 	void registerPatternWithIncludesAndExcludes() throws JSONException {
 		ResourceHints hints = new ResourceHints();
-		hints.registerPattern("com/example/*.properties", hint -> hint.excludes("com/example/to-ignore.properties"));
-		hints.registerPattern("org/example/*.properties", hint -> hint.excludes("org/example/to-ignore.properties"));
+		hints.registerPattern(hint -> hint.includes("com/example/*.properties").excludes("com/example/to-ignore.properties"));
+		hints.registerPattern(hint -> hint.includes("org/other/*.properties").excludes("org/other/to-ignore.properties"));
 		assertEquals("""
 				{
 					"resources": {
 						"includes": [
 							{ "pattern": "\\\\Qcom/example/\\\\E.*\\\\Q.properties\\\\E"},
-							{ "pattern": "\\\\Qorg/example/\\\\E.*\\\\Q.properties\\\\E"}
+							{ "pattern": "\\\\Q/\\\\E"},
+							{ "pattern": "\\\\Qcom\\\\E"},
+							{ "pattern": "\\\\Qcom/example\\\\E"},
+							{ "pattern": "\\\\Qorg/other/\\\\E.*\\\\Q.properties\\\\E"},
+							{ "pattern": "\\\\Qorg\\\\E"},
+							{ "pattern": "\\\\Qorg/other\\\\E"}
 						],
 						"excludes": [
 							{ "pattern": "\\\\Qcom/example/to-ignore.properties\\\\E"},
-							{ "pattern": "\\\\Qorg/example/to-ignore.properties\\\\E"}
+							{ "pattern": "\\\\Qorg/other/to-ignore.properties\\\\E"}
+						]
+					}
+				}""", hints);
+	}
+
+	@Test
+	void registerWithReachableTypeCondition() throws JSONException {
+		ResourceHints hints = new ResourceHints();
+		hints.registerPattern(builder -> builder.includes(TypeReference.of("com.example.Test"), "com/example/test.properties"));
+		assertEquals("""
+				{
+					"resources": {
+						"includes": [
+							{ "condition": { "typeReachable": "com.example.Test"}, "pattern": "\\\\Qcom/example/test.properties\\\\E"},
+							{ "condition": { "typeReachable": "com.example.Test"}, "pattern": "\\\\Q/\\\\E"},
+							{ "condition": { "typeReachable": "com.example.Test"}, "pattern": "\\\\Qcom\\\\E"},
+							{ "condition": { "typeReachable": "com.example.Test"}, "pattern": "\\\\Qcom/example\\\\E"}
 						]
 					}
 				}""", hints);
@@ -96,7 +157,10 @@ public class ResourceHintsWriterTests {
 				{
 					"resources": {
 						"includes": [
-							{ "pattern": "\\\\Qjava/lang/String.class\\\\E"}
+							{ "pattern": "\\\\Qjava/lang/String.class\\\\E" },
+							{ "pattern": "\\\\Q/\\\\E" },
+							{ "pattern": "\\\\Qjava\\\\E" },
+							{ "pattern": "\\\\Qjava/lang\\\\E" }
 						]
 					}
 				}""", hints);

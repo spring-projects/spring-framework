@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	private final String subtype;
 
+	@SuppressWarnings("serial")
 	private final Map<String, String> parameters;
 
 	@Nullable
@@ -707,7 +708,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param <T> the type of mime types that may be compared by this comparator
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static class SpecificityComparator<T extends MimeType> implements Comparator<T> {
 
 		@Override

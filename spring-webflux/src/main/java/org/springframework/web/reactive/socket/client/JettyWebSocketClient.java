@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 /**
  * A {@link WebSocketClient} implementation for use with Jetty
  * {@link org.eclipse.jetty.websocket.client.WebSocketClient}.
+ * Only supported on Jetty 11, superseded by {@link StandardWebSocketClient}.
  *
  * <p><strong>Note: </strong> the Jetty {@code WebSocketClient} requires
  * lifecycle management and must be started and stopped. This is automatically
@@ -49,7 +50,9 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 5.0
+ * @deprecated as of 6.0.3, in favor of {@link StandardWebSocketClient}
  */
+@Deprecated(since = "6.0.3", forRemoval = true)
 public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 	private static final Log logger = LogFactory.getLog(JettyWebSocketClient.class);
@@ -164,7 +167,7 @@ public class JettyWebSocketClient implements WebSocketClient, Lifecycle {
 
 	private HandshakeInfo createHandshakeInfo(URI url, Session jettySession) {
 		HttpHeaders headers = new HttpHeaders();
-		jettySession.getUpgradeResponse().getHeaders().forEach(headers::put);
+		headers.putAll(jettySession.getUpgradeResponse().getHeaders());
 		String protocol = headers.getFirst("Sec-WebSocket-Protocol");
 		return new HandshakeInfo(url, headers, Mono.empty(), protocol);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.jmx.support;
 import java.beans.PropertyDescriptor;
 
 import javax.management.DynamicMBean;
+import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
@@ -30,6 +31,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.TestDynamicMBean;
+import org.springframework.util.MBeanTestUtils;
 import org.springframework.util.ObjectUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 class JmxUtilsTests {
 
@@ -122,6 +125,20 @@ class JmxUtilsTests {
 		assertThat(uniqueName.getDomain()).as("Domain of transformed name is incorrect").isEqualTo(objectName.getDomain());
 		assertThat(uniqueName.getKeyProperty("type")).as("Type key is incorrect").isEqualTo(objectName.getKeyProperty(typeProperty));
 		assertThat(uniqueName.getKeyProperty(JmxUtils.IDENTITY_OBJECT_NAME_KEY)).as("Identity key is incorrect").isEqualTo(ObjectUtils.getIdentityHexString(managedResource));
+	}
+
+	@Test
+	void locatePlatformMBeanServer() {
+		MBeanServer server = null;
+		try {
+			server = JmxUtils.locateMBeanServer();
+			assertThat(server).isNotNull();
+		}
+		finally {
+			if (server != null) {
+				MBeanTestUtils.releaseMBeanServer(server);
+			}
+		}
 	}
 
 

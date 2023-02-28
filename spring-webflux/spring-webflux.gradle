@@ -11,18 +11,22 @@ dependencies {
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("jakarta.servlet:jakarta.servlet-api")
 	optional("jakarta.websocket:jakarta.websocket-api")
+	optional("jakarta.websocket:jakarta.websocket-client-api")
 	optional("org.webjars:webjars-locator-core")
 	optional("org.freemarker:freemarker")
 	optional("com.fasterxml.jackson.core:jackson-databind")
 	optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile")
 	optional("io.projectreactor.netty:reactor-netty-http")
-	optional("org.apache.tomcat:tomcat-websocket")
+	optional("io.projectreactor.netty:reactor-netty5-http")
+	optional("org.apache.tomcat:tomcat-websocket") {
+		exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
+		exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
+	}
 	optional("org.eclipse.jetty.websocket:websocket-jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
 	optional("org.eclipse.jetty.websocket:websocket-jetty-client")
-	optional("io.undertow:undertow-websockets-jsr-jakarta")
-	optional("org.apache.httpcomponents:httpclient")
+	optional("io.undertow:undertow-websockets-jsr")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("com.google.protobuf:protobuf-java-util")
@@ -36,6 +40,7 @@ dependencies {
 	testImplementation("jakarta.validation:jakarta.validation-api")
 	testImplementation("io.reactivex.rxjava3:rxjava")
 	testImplementation("io.projectreactor:reactor-test")
+	testImplementation("io.micrometer:micrometer-observation-test")
 	testImplementation("io.undertow:undertow-core")
 	testImplementation("org.apache.tomcat.embed:tomcat-embed-core")
 	testImplementation("org.apache.tomcat:tomcat-util")
@@ -54,6 +59,7 @@ dependencies {
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("com.sun.activation:jakarta.activation")
+	testRuntimeOnly("io.netty:netty5-buffer")
 }
 
 test {

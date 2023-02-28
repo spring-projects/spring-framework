@@ -10,13 +10,16 @@ dependencies {
 	api(project(":spring-expression"))
 	api(project(":spring-web"))
 	compileOnly("jakarta.servlet:jakarta.servlet-api")
-	compileOnly("com.google.code.findbugs:findbugs")  // for groovy-templates
+	compileOnly("com.google.code.findbugs:findbugs") {  // for groovy-templates
+		exclude group: "dom4j", module: "dom4j"
+	}
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional(project(":spring-oxm"))
 	optional("jakarta.servlet.jsp:jakarta.servlet.jsp-api")
 	optional("jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api")
 	optional("jakarta.el:jakarta.el-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
+	optional('io.micrometer:context-propagation')
 	optional("org.webjars:webjars-locator-core")
 	optional("com.rometools:rome")
 	optional("com.github.librepdf:openpdf")
@@ -29,6 +32,9 @@ dependencies {
 	optional("org.apache.groovy:groovy-templates")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.jetbrains.kotlinx:kotlinx-serialization-cbor")
+	optional("org.jetbrains.kotlinx:kotlinx-serialization-json")
+	optional("org.jetbrains.kotlinx:kotlinx-serialization-protobuf")
 	optional("org.reactivestreams:reactive-streams")
 	optional("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	testImplementation(testFixtures(project(":spring-beans")))
@@ -42,18 +48,25 @@ dependencies {
 	testImplementation("org.eclipse.jetty:jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	testImplementation("org.apache.httpcomponents:httpclient")
 	testImplementation("commons-io:commons-io")
 	testImplementation("org.mozilla:rhino")
-	testImplementation("org.dom4j:dom4j")
-	testImplementation("jaxen:jaxen")
-	testImplementation("org.xmlunit:xmlunit-assertj")
-	testImplementation("org.xmlunit:xmlunit-matchers")
-	testImplementation("org.hibernate:hibernate-validator")
-	testImplementation("jakarta.validation:jakarta.validation-api")
+	testImplementation("org.dom4j:dom4j") {
+		exclude group: "javax.xml.bind", module: "jaxb-api"
+		exclude group: "jaxen", module: "jaxen"
+		exclude group: "net.java.dev.msv", module: "xsdlib"
+		exclude group: "pull-parser", module: "pull-parser"
+		exclude group: "xpp3", module: "xpp3"
+	}
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("io.reactivex.rxjava3:rxjava")
+	testImplementation("jakarta.validation:jakarta.validation-api")
+	testImplementation("jaxen:jaxen")
+	testImplementation("org.hibernate:hibernate-validator")
 	testImplementation("org.jetbrains.kotlin:kotlin-script-runtime")
+	testImplementation("org.skyscreamer:jsonassert")
+	testImplementation("org.xmlunit:xmlunit-assertj")
+	testImplementation("org.xmlunit:xmlunit-matchers")
+	testRuntimeOnly("org.apache.httpcomponents.client5:httpclient5")
 	testRuntimeOnly("org.jetbrains.kotlin:kotlin-scripting-jsr223")
 	testRuntimeOnly("org.jruby:jruby")
 	testRuntimeOnly("org.python:jython-standalone")

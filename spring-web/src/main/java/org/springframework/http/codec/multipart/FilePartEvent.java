@@ -125,7 +125,7 @@ public interface FilePartEvent extends PartEvent {
 		Assert.notNull(path, "Path must not be null");
 
 		return Flux.defer(() -> {
-			String pathName = path.toString();
+			String pathName = StringUtils.cleanPath(path.toString());
 			MediaType contentType = MediaTypeFactory.getMediaType(pathName)
 					.orElse(MediaType.APPLICATION_OCTET_STREAM);
 			String filename = StringUtils.getFilename(pathName);

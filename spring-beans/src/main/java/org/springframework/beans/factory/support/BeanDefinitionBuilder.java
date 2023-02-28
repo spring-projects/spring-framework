@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,8 +125,7 @@ public final class BeanDefinitionBuilder {
 	 * @since 5.3.9
 	 */
 	public static <T> BeanDefinitionBuilder rootBeanDefinition(ResolvableType beanType, Supplier<T> instanceSupplier) {
-		RootBeanDefinition beanDefinition = new RootBeanDefinition();
-		beanDefinition.setTargetType(beanType);
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(beanType);
 		beanDefinition.setInstanceSupplier(instanceSupplier);
 		return new BeanDefinitionBuilder(beanDefinition);
 	}
@@ -293,7 +292,7 @@ public final class BeanDefinitionBuilder {
 	}
 
 	/**
-	 * Set whether or not this definition is abstract.
+	 * Set whether this definition is abstract.
 	 */
 	public BeanDefinitionBuilder setAbstract(boolean flag) {
 		this.beanDefinition.setAbstract(flag);

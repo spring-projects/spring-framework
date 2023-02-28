@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class MergedAnnotationCollectorsTests {
 				MergedAnnotationCollectors.toAnnotationSet());
 		assertThat(set).isInstanceOf(LinkedHashSet.class).flatExtracting(
 				TestAnnotation::value).containsExactly("a", "b", "c");
-		assertThat(set).allMatch(SynthesizedAnnotation.class::isInstance);
+		assertThat(set).allMatch(AnnotationUtils::isSynthesizedAnnotation);
 	}
 
 	@Test
@@ -55,7 +55,7 @@ class MergedAnnotationCollectorsTests {
 		assertThat(Arrays.stream(array).map(
 				annotation -> ((TestAnnotation) annotation).value())).containsExactly("a",
 						"b", "c");
-		assertThat(array).allMatch(SynthesizedAnnotation.class::isInstance);
+		assertThat(array).allMatch(AnnotationUtils::isSynthesizedAnnotation);
 	}
 
 	@Test
@@ -64,7 +64,7 @@ class MergedAnnotationCollectorsTests {
 				MergedAnnotationCollectors.toAnnotationArray(TestAnnotation[]::new));
 		assertThat(Arrays.stream(array).map(TestAnnotation::value)).containsExactly("a",
 				"b", "c");
-		assertThat(array).allMatch(SynthesizedAnnotation.class::isInstance);
+		assertThat(array).allMatch(AnnotationUtils::isSynthesizedAnnotation);
 	}
 
 	@Test

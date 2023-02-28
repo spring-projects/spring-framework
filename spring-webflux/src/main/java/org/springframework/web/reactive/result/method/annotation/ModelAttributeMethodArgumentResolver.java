@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.i18n.LocaleContext;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
@@ -121,7 +123,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 			return (bindingDisabled(parameter) ? Mono.empty() : bindRequestParameters(binder, exchange))
 					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {
-						validateIfApplicable(binder, parameter);
+						validateIfApplicable(binder, parameter, exchange);
 						BindingResult bindingResult = binder.getBindingResult();
 						model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResult);
 						model.put(name, value);
@@ -247,7 +249,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						}
 					}
 				}
-				value = (value instanceof List ? ((List<?>) value).toArray() : value);
+				value = (value instanceof List<?> list ? list.toArray() : value);
 				MethodParameter methodParam = new MethodParameter(ctor, i);
 				if (value == null && methodParam.isOptional()) {
 					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
@@ -278,11 +280,23 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		return (paramTypes.length > i + 1 && Errors.class.isAssignableFrom(paramTypes[i + 1]));
 	}
 
-	private void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter) {
-		for (Annotation ann : parameter.getParameterAnnotations()) {
-			Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
-			if (validationHints != null) {
-				binder.validate(validationHints);
+	private void validateIfApplicable(WebExchangeDataBinder binder, MethodParameter parameter, ServerWebExchange exchange) {
+		LocaleContext localeContext = null;
+		try {
+			for (Annotation ann : parameter.getParameterAnnotations()) {
+				Object[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
+				if (validationHints != null) {
+					if (localeContext == null) {
+						localeContext = exchange.getLocaleContext();
+						LocaleContextHolder.setLocaleContext(localeContext);
+					}
+					binder.validate(validationHints);
+				}
+			}
+		}
+		finally {
+			if (localeContext != null) {
+				LocaleContextHolder.resetLocaleContext();
 			}
 		}
 	}

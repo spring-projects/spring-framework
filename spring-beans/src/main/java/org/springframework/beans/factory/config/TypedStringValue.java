@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,10 +115,10 @@ public class TypedStringValue implements BeanMetadataElement {
 	 */
 	public Class<?> getTargetType() {
 		Object targetTypeValue = this.targetType;
-		if (!(targetTypeValue instanceof Class)) {
+		if (!(targetTypeValue instanceof Class<?> clazz)) {
 			throw new IllegalStateException("Typed String value does not carry a resolved target type");
 		}
-		return (Class<?>) targetTypeValue;
+		return clazz;
 	}
 
 	/**
@@ -134,8 +134,8 @@ public class TypedStringValue implements BeanMetadataElement {
 	@Nullable
 	public String getTargetTypeName() {
 		Object targetTypeValue = this.targetType;
-		if (targetTypeValue instanceof Class) {
-			return ((Class<?>) targetTypeValue).getName();
+		if (targetTypeValue instanceof Class<?> clazz) {
+			return clazz.getName();
 		}
 		else {
 			return (String) targetTypeValue;
@@ -143,7 +143,7 @@ public class TypedStringValue implements BeanMetadataElement {
 	}
 
 	/**
-	 * Return whether this typed String value carries a target type .
+	 * Return whether this typed String value carries a target type.
 	 */
 	public boolean hasTargetType() {
 		return (this.targetType instanceof Class);

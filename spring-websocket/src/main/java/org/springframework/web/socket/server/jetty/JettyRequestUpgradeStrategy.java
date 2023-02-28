@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
-	private static final String[] SUPPORTED_VERSIONS = new String[] { String.valueOf(13) };
+	private static final String[] SUPPORTED_VERSIONS = new String[] {"13"};
 
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package org.springframework.web.context.request;
 import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,7 +51,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
 
-	private static final List<String> SAFE_METHODS = Arrays.asList("GET", "HEAD");
+	private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD");
 
 	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match".
@@ -206,45 +205,116 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@Override
-	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
+	public boolean checkNotModified(@Nullable String eTag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (this.notModified || (response != null && HttpStatus.OK.value() != response.getStatus())) {
 			return this.notModified;
 		}
-
 		// Evaluate conditions in order of precedence.
-		// See https://tools.ietf.org/html/rfc7232#section-6
-
-		if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
-			if (this.notModified && response != null) {
-				response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
-			}
+		// See https://datatracker.ietf.org/doc/html/rfc9110#section-13.2.2
+		if (validateIfMatch(eTag)) {
+			updateResponseStateChanging(eTag, lastModifiedTimestamp);
 			return this.notModified;
 		}
-
-		boolean validated = validateIfNoneMatch(etag);
-		if (!validated) {
+		// 2) If-Unmodified-Since
+		else if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
+			updateResponseStateChanging(eTag, lastModifiedTimestamp);
+			return this.notModified;
+		}
+		// 3) If-None-Match
+		if (!validateIfNoneMatch(eTag)) {
+			// 4) If-Modified-Since
 			validateIfModifiedSince(lastModifiedTimestamp);
 		}
+		updateResponseIdempotent(eTag, lastModifiedTimestamp);
+		return this.notModified;
+	}
 
-		// Update response
-		if (response != null) {
-			boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
-			if (this.notModified) {
-				response.setStatus(isHttpGetOrHead ?
-						HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
-			}
-			if (isHttpGetOrHead) {
-				if (lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
-					response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
+	private boolean validateIfMatch(@Nullable String eTag) {
+		if (SAFE_METHODS.contains(getRequest().getMethod())) {
+			return false;
+		}
+		Enumeration<String> ifMatchHeaders = getRequest().getHeaders(HttpHeaders.IF_MATCH);
+		if (!ifMatchHeaders.hasMoreElements()) {
+			return false;
+		}
+		this.notModified = matchRequestedETags(ifMatchHeaders, eTag, false);
+		return true;
+	}
+
+	private boolean validateIfNoneMatch(@Nullable String eTag) {
+		Enumeration<String> ifNoneMatchHeaders = getRequest().getHeaders(HttpHeaders.IF_NONE_MATCH);
+		if (!ifNoneMatchHeaders.hasMoreElements()) {
+			return false;
+		}
+		this.notModified = !matchRequestedETags(ifNoneMatchHeaders, eTag, true);
+		return true;
+	}
+
+	private boolean matchRequestedETags(Enumeration<String> requestedETags, @Nullable String eTag, boolean weakCompare) {
+		eTag = padEtagIfNecessary(eTag);
+		while (requestedETags.hasMoreElements()) {
+			// Compare weak/strong ETags as per https://datatracker.ietf.org/doc/html/rfc9110#section-8.8.3
+			Matcher eTagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(requestedETags.nextElement());
+			while (eTagMatcher.find()) {
+				// only consider "lost updates" checks for unsafe HTTP methods
+				if ("*".equals(eTagMatcher.group()) && StringUtils.hasLength(eTag)
+						&& !SAFE_METHODS.contains(getRequest().getMethod())) {
+					return false;
 				}
-				if (StringUtils.hasLength(etag) && response.getHeader(HttpHeaders.ETAG) == null) {
-					response.setHeader(HttpHeaders.ETAG, padEtagIfNecessary(etag));
+				if (weakCompare) {
+					if (eTagWeakMatch(eTag, eTagMatcher.group(1))) {
+						return false;
+					}
+				}
+				else {
+					if (eTagStrongMatch(eTag, eTagMatcher.group(1))) {
+						return false;
+					}
 				}
 			}
 		}
+		return true;
+	}
 
-		return this.notModified;
+	@Nullable
+	private String padEtagIfNecessary(@Nullable String etag) {
+		if (!StringUtils.hasLength(etag)) {
+			return etag;
+		}
+		if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
+			return etag;
+		}
+		return "\"" + etag + "\"";
+	}
+
+	private boolean eTagStrongMatch(@Nullable String first, @Nullable String second) {
+		if (!StringUtils.hasLength(first) || first.startsWith("W/")) {
+			return false;
+		}
+		return first.equals(second);
+	}
+
+	private boolean eTagWeakMatch(@Nullable String first, @Nullable String second) {
+		if (!StringUtils.hasLength(first) || !StringUtils.hasLength(second)) {
+			return false;
+		}
+		if (first.startsWith("W/")) {
+			first = first.substring(2);
+		}
+		if (second.startsWith("W/")) {
+			second = second.substring(2);
+		}
+		return first.equals(second);
+	}
+
+	private void updateResponseStateChanging(@Nullable String eTag, long lastModifiedTimestamp) {
+		if (this.notModified && getResponse() != null) {
+			getResponse().setStatus(HttpStatus.PRECONDITION_FAILED.value());
+		}
+		else {
+			addCachingResponseHeaders(eTag, lastModifiedTimestamp);
+		}
 	}
 
 	private boolean validateIfUnmodifiedSince(long lastModifiedTimestamp) {
@@ -255,68 +325,41 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (ifUnmodifiedSince == -1) {
 			return false;
 		}
-		// We will perform this validation...
 		this.notModified = (ifUnmodifiedSince < (lastModifiedTimestamp / 1000 * 1000));
 		return true;
 	}
 
-	private boolean validateIfNoneMatch(@Nullable String etag) {
-		if (!StringUtils.hasLength(etag)) {
-			return false;
-		}
-
-		Enumeration<String> ifNoneMatch;
-		try {
-			ifNoneMatch = getRequest().getHeaders(HttpHeaders.IF_NONE_MATCH);
-		}
-		catch (IllegalArgumentException ex) {
-			return false;
-		}
-		if (!ifNoneMatch.hasMoreElements()) {
-			return false;
-		}
-
-		// We will perform this validation...
-		etag = padEtagIfNecessary(etag);
-		if (etag.startsWith("W/")) {
-			etag = etag.substring(2);
-		}
-		while (ifNoneMatch.hasMoreElements()) {
-			String clientETags = ifNoneMatch.nextElement();
-			Matcher etagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
-			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			while (etagMatcher.find()) {
-				if (StringUtils.hasLength(etagMatcher.group()) && etag.equals(etagMatcher.group(3))) {
-					this.notModified = true;
-					break;
-				}
-			}
-		}
-
-		return true;
-	}
-
-	private String padEtagIfNecessary(String etag) {
-		if (!StringUtils.hasLength(etag)) {
-			return etag;
-		}
-		if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
-			return etag;
-		}
-		return "\"" + etag + "\"";
-	}
-
-	private boolean validateIfModifiedSince(long lastModifiedTimestamp) {
+	private void validateIfModifiedSince(long lastModifiedTimestamp) {
 		if (lastModifiedTimestamp < 0) {
-			return false;
+			return;
 		}
 		long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);
-		if (ifModifiedSince == -1) {
-			return false;
+		if (ifModifiedSince != -1) {
+			// We will perform this validation...
+			this.notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
 		}
-		// We will perform this validation...
-		this.notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
-		return true;
+	}
+
+	private void updateResponseIdempotent(@Nullable String eTag, long lastModifiedTimestamp) {
+		if (getResponse() != null) {
+			boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
+			if (this.notModified) {
+				getResponse().setStatus(isHttpGetOrHead ?
+						HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
+			}
+			addCachingResponseHeaders(eTag, lastModifiedTimestamp);
+		}
+	}
+
+	private void addCachingResponseHeaders(@Nullable String eTag, long lastModifiedTimestamp) {
+		if (SAFE_METHODS.contains(getRequest().getMethod())) {
+			if (lastModifiedTimestamp > 0 && parseDateValue(getResponse().getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
+				getResponse().setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
+			}
+			if (StringUtils.hasLength(eTag) && getResponse().getHeader(HttpHeaders.ETAG) == null) {
+				getResponse().setHeader(HttpHeaders.ETAG, padEtagIfNecessary(eTag));
+			}
+		}
 	}
 
 	public boolean isNotModified() {

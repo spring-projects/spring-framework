@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,14 +87,14 @@ class MockMultipartHttpServletRequestTests {
 		while (fileIter.hasNext()) {
 			fileNames.add(fileIter.next());
 		}
-		assertThat(fileNames.size()).isEqualTo(2);
+		assertThat(fileNames).hasSize(2);
 		assertThat(fileNames.contains("file1")).isTrue();
 		assertThat(fileNames.contains("file2")).isTrue();
 		MultipartFile file1 = request.getFile("file1");
 		MultipartFile file2 = request.getFile("file2");
 		Map<String, MultipartFile> fileMap = request.getFileMap();
 		List<String> fileMapKeys = new ArrayList<>(fileMap.keySet());
-		assertThat(fileMapKeys.size()).isEqualTo(2);
+		assertThat(fileMapKeys).hasSize(2);
 		assertThat(fileMap.get("file1")).isEqualTo(file1);
 		assertThat(fileMap.get("file2")).isEqualTo(file2);
 

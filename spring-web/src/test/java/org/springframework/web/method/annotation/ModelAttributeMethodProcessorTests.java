@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,7 @@ public class ModelAttributeMethodProcessorTests {
 	@Test
 	public void resolveArgumentViaDefaultConstructor() throws Exception {
 		WebDataBinder dataBinder = new WebRequestDataBinder(null);
-		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory factory = mock();
 		given(factory.createBinder(any(), notNull(), eq("attrName"))).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
@@ -175,7 +175,7 @@ public class ModelAttributeMethodProcessorTests {
 		this.container.addAttribute(name, target);
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
-		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory factory = mock();
 		given(factory.createBinder(this.request, target, name)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
@@ -194,7 +194,7 @@ public class ModelAttributeMethodProcessorTests {
 		this.container.setBindingDisabled(name);
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
-		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory factory = mock();
 		given(factory.createBinder(this.request, target, name)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
@@ -210,7 +210,7 @@ public class ModelAttributeMethodProcessorTests {
 		this.container.addAttribute(name, target);
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
-		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory factory = mock();
 		given(factory.createBinder(this.request, target, name)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramBindingDisabledAttr, this.container, this.request, factory);
@@ -227,7 +227,7 @@ public class ModelAttributeMethodProcessorTests {
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
 		dataBinder.getBindingResult().reject("error");
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.request, target, name)).willReturn(dataBinder);
 
 		assertThatExceptionOfType(BindException.class).isThrownBy(() ->
@@ -246,7 +246,7 @@ public class ModelAttributeMethodProcessorTests {
 		this.container.addAttribute("anotherTestBean", anotherTestBean);
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(testBean, name);
-		WebDataBinderFactory binderFactory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory binderFactory = mock();
 		given(binderFactory.createBinder(this.request, testBean, name)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramModelAttr, this.container, this.request, binderFactory);
@@ -275,7 +275,7 @@ public class ModelAttributeMethodProcessorTests {
 		mockRequest.addParameter("listOfStrings", "1,2");
 		ServletWebRequest requestWithParam = new ServletWebRequest(mockRequest);
 
-		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory factory = mock();
 		given(factory.createBinder(any(), any(), eq("testBeanWithConstructorArgs")))
 				.willAnswer(invocation -> {
 					WebRequestDataBinder binder = new WebRequestDataBinder(invocation.getArgument(1));
@@ -294,7 +294,7 @@ public class ModelAttributeMethodProcessorTests {
 		this.container.addAttribute(expectedAttrName, target);
 
 		WebDataBinder dataBinder = new WebRequestDataBinder(target);
-		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		WebDataBinderFactory factory = mock();
 		given(factory.createBinder(this.request, target, expectedAttrName)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(param, this.container, this.request, factory);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import io.vavr.control.Try;
 import kotlin.coroutines.Continuation;
+import kotlin.coroutines.CoroutineContext;
+import kotlinx.coroutines.Job;
 import kotlinx.coroutines.reactive.AwaitKt;
 import kotlinx.coroutines.reactive.ReactiveFlowKt;
 import org.apache.commons.logging.Log;
@@ -363,7 +365,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 			InvocationCallback callback = invocation;
 			if (corInv != null) {
-				callback = () -> CoroutinesUtils.invokeSuspendingFunction(method, corInv.getTarget(), corInv.getArguments());
+				callback = () -> KotlinDelegate.invokeSuspendingFunction(method, corInv);
 			}
 			Object result = txSupport.invokeWithinTransaction(method, targetClass, callback, txAttr, (ReactiveTransactionManager) tm);
 			if (corInv != null) {
@@ -570,7 +572,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @param txAttr the TransactionAttribute (may be {@code null})
 	 * @param joinpointIdentification the fully qualified method name
 	 * (used for monitoring and logging purposes)
-	 * @return a TransactionInfo object, whether or not a transaction was created.
+	 * @return a TransactionInfo object, whether a transaction was created.
 	 * The {@code hasTransaction()} method on TransactionInfo can be used to
 	 * tell if there was a transaction created.
 	 * @see #getTransactionAttributeSource()
@@ -883,6 +885,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		private static Object awaitSingleOrNull(Publisher<?> publisher, Object continuation) {
 			return AwaitKt.awaitSingleOrNull(publisher, (Continuation<Object>) continuation);
 		}
+
+		public static Publisher<?> invokeSuspendingFunction(Method method, CoroutinesInvocationCallback callback) {
+			CoroutineContext coroutineContext = ((Continuation<?>) callback.getContinuation()).getContext().minusKey(Job.Key);
+			return CoroutinesUtils.invokeSuspendingFunction(coroutineContext, method, callback.getTarget(), callback.getArguments());
+		}
+
 	}
 
 

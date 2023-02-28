@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.WebUtils;
 
 /**
- * A sub-class of {@code DispatcherServlet} that saves the result in an
+ * A subclass of {@code DispatcherServlet} that saves the result in an
  * {@link MvcResult}. The {@code MvcResult} instance is expected to be available
  * as the request attribute {@link MockMvc#MVC_RESULT_ATTRIBUTE}.
  *
@@ -73,8 +73,8 @@ final class TestDispatcherServlet extends DispatcherServlet {
 
 		if (request.getAsyncContext() != null) {
 			MockAsyncContext asyncContext;
-			if (request.getAsyncContext() instanceof MockAsyncContext) {
-				asyncContext = (MockAsyncContext) request.getAsyncContext();
+			if (request.getAsyncContext() instanceof MockAsyncContext mockAsyncContext) {
+				asyncContext = mockAsyncContext;
 			}
 			else {
 				MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);

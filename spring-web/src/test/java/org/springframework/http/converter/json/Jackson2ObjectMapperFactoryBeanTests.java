@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,10 +59,10 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.FatalBeanException;
+import org.springframework.http.ProblemDetail;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Test cases for {@link Jackson2ObjectMapperFactoryBean}.
@@ -85,8 +85,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	@Test
 	public void unknownFeature() {
 		this.factory.setFeaturesToEnable(Boolean.TRUE);
-		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(
-				this.factory::afterPropertiesSet);
+		assertThatIllegalArgumentException().isThrownBy(this.factory::afterPropertiesSet);
 	}
 
 	@Test
@@ -241,10 +240,11 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		this.factory.setModules(Collections.emptyList());
 		this.factory.setMixIns(mixIns);
 		this.factory.afterPropertiesSet();
-		ObjectMapper objectMapper = this.factory.getObject();
+		ObjectMapper mapper = this.factory.getObject();
 
-		assertThat(objectMapper.mixInCount()).isEqualTo(1);
-		assertThat(objectMapper.findMixInClassFor(target)).isSameAs(mixinSource);
+		assertThat(mapper.mixInCount()).isEqualTo(2);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonXmlMixin.class);
+		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixinSource);
 	}
 
 	@Test

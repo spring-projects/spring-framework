@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * View that redirects to an absolute, context relative, or current request
  * relative URL. The URL may be a URI template in which case the URI template
- * variables will be replaced with values available in the model. By default
+ * variables will be replaced with values available in the model. By default,
  * all primitive model attributes (or collections thereof) are exposed as HTTP
  * query parameters (assuming they've not been used as URI template variables),
  * but this behavior can be changed by overriding the
@@ -160,7 +160,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @param contextRelative whether to interpret the given URL as
 	 * relative to the current ServletContext
 	 * @param http10Compatible whether to stay compatible with HTTP 1.0 clients
-	 * @param exposeModelAttributes whether or not model attributes should be
+	 * @param exposeModelAttributes whether model attributes should be
 	 * exposed as query parameters
 	 */
 	public RedirectView(String url, boolean contextRelative, boolean http10Compatible, boolean exposeModelAttributes) {
@@ -202,7 +202,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	/**
 	 * Set the {@code exposeModelAttributes} flag which denotes whether
-	 * or not model attributes should be exposed as HTTP query parameters.
+	 * model attributes should be exposed as HTTP query parameters.
 	 * <p>Defaults to {@code true}.
 	 */
 	public void setExposeModelAttributes(final boolean exposeModelAttributes) {
@@ -537,8 +537,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			}
 			return true;
 		}
-		if (value instanceof Collection) {
-			Collection<?> coll = (Collection<?>) value;
+		if (value instanceof Collection<?> coll) {
 			if (coll.isEmpty()) {
 				return false;
 			}
@@ -638,11 +637,11 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	/**
 	 * Whether the given targetUrl has a host that is a "foreign" system in which
 	 * case {@link HttpServletResponse#encodeRedirectURL} will not be applied.
-	 * This method returns {@code true} if the {@link #setHosts(String[])}
+	 * <p>This method returns {@code true} if the {@link #setHosts(String[])}
 	 * property is configured and the target URL has a host that does not match.
 	 * @param targetUrl the target redirect URL
-	 * @return {@code true} the target URL has a remote host, {@code false} if it
-	 * the URL does not have a host or the "host" property is not configured.
+	 * @return {@code true} if the target URL has a remote host, {@code false} if
+	 * the URL does not have a host or the "host" property is not configured
 	 * @since 4.3
 	 */
 	protected boolean isRemoteHost(String targetUrl) {

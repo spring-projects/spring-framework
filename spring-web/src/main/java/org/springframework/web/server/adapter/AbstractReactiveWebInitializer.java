@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.WebApplicationInitializer;
 
 /**
@@ -55,10 +57,10 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		String servletName = getServletName();
-		Assert.hasLength(servletName, "getServletName() must not return null or empty");
+		Assert.state(StringUtils.hasLength(servletName), "getServletName() must not return null or empty");
 
 		ApplicationContext applicationContext = createApplicationContext();
-		Assert.notNull(applicationContext, "createApplicationContext() must not return null");
+		Assert.state(applicationContext != null, "createApplicationContext() must not return null");
 
 		refreshApplicationContext(applicationContext);
 		registerCloseListener(servletContext, applicationContext);
@@ -92,7 +94,7 @@ public abstract class AbstractReactiveWebInitializer implements WebApplicationIn
 	protected ApplicationContext createApplicationContext() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		Class<?>[] configClasses = getConfigClasses();
-		Assert.notEmpty(configClasses, "No Spring configuration provided through getConfigClasses()");
+		Assert.state(!ObjectUtils.isEmpty(configClasses), "No Spring configuration provided through getConfigClasses()");
 		context.register(configClasses);
 		return context;
 	}

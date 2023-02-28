@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,20 @@
 
 package org.springframework.core.io.support;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.UncheckedIOException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
@@ -33,8 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * If this test case fails, uncomment diagnostics in the
- * {@link #assertProtocolAndFilenames} method.
+ * Tests for {@link PathMatchingResourcePatternResolver}.
+ *
+ * <p>If tests fail, uncomment the diagnostics in {@link #assertFilenames(String, boolean, String...)}.
  *
  * @author Oliver Hutchison
  * @author Juergen Hoeller
@@ -44,124 +49,281 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 class PathMatchingResourcePatternResolverTests {
 
-	private static final String[] CLASSES_IN_CORE_IO_SUPPORT =
-			new String[] {"EncodedResource.class", "LocalizedResourceHelper.class",
-					"PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
-					"PropertiesLoaderUtils.class", "ResourceArrayPropertyEditor.class",
-					"ResourcePatternResolver.class", "ResourcePatternUtils.class"};
+	private static final String[] CLASSES_IN_CORE_IO_SUPPORT = { "EncodedResource.class",
+			"LocalizedResourceHelper.class", "PathMatchingResourcePatternResolver.class", "PropertiesLoaderSupport.class",
+			"PropertiesLoaderUtils.class", "ResourceArrayPropertyEditor.class", "ResourcePatternResolver.class",
+			"ResourcePatternUtils.class", "SpringFactoriesLoader.class" };
 
-	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT =
-			new String[] {"PathMatchingResourcePatternResolverTests.class"};
+	private static final String[] TEST_CLASSES_IN_CORE_IO_SUPPORT = { "PathMatchingResourcePatternResolverTests.class" };
 
-	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATIONS =
-			new String[] {"NonNull.class", "NonNullApi.class", "Nullable.class"};
-
-	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATION = { "NonNull.class", "NonNullApi.class", "Nullable.class" };
 
 
-	@Test
-	void invalidPrefixWithPatternElementInIt() throws IOException {
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() ->
-				resolver.getResources("xx**:**/*.xy"));
+	private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+
+	@Nested
+	class InvalidPatterns {
+
+		@Test
+		void invalidPrefixWithPatternElementInItThrowsException() {
+			assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(() -> resolver.getResources("xx**:**/*.xy"));
+		}
 	}
 
-	@Test
-	void singleResourceOnFileSystem() throws IOException {
-		Resource[] resources =
-				resolver.getResources("org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class");
-		assertThat(resources.length).isEqualTo(1);
-		assertProtocolAndFilenames(resources, "file", "PathMatchingResourcePatternResolverTests.class");
-	}
 
-	@Test
-	void singleResourceInJar() throws IOException {
-		Resource[] resources = resolver.getResources("org/reactivestreams/Publisher.class");
-		assertThat(resources.length).isEqualTo(1);
-		assertProtocolAndFilenames(resources, "jar", "Publisher.class");
-	}
+	@Nested
+	class FileSystemResources {
 
-	@Disabled
-	@Test
-	void classpathStarWithPatternOnFileSystem() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");
-		// Have to exclude Clover-generated class files here,
-		// as we might be running as part of a Clover test run.
-		List<Resource> noCloverResources = new ArrayList<>();
-		for (Resource resource : resources) {
-			if (!resource.getFilename().contains("$__CLOVER_")) {
-				noCloverResources.add(resource);
+		@Test
+		void singleResourceOnFileSystem() {
+			String pattern = "org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class";
+			assertExactFilenames(pattern, "PathMatchingResourcePatternResolverTests.class");
+		}
+
+		@Test
+		void classpathStarWithPatternOnFileSystem() {
+			String pattern = "classpath*:org/springframework/core/io/sup*/*.class";
+			String[] expectedFilenames = StringUtils.concatenateStringArrays(CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT);
+			assertFilenames(pattern, expectedFilenames);
+		}
+
+		@Nested
+		class WithHashtagsInTheirFileNames {
+
+			@Test
+			void usingClasspathStarProtocol() {
+				String pattern = "classpath*:org/springframework/core/io/**/resource#test*.txt";
+				String pathPrefix = ".+org/springframework/core/io/";
+
+				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+				assertExactSubPaths(pattern, pathPrefix, "support/resource#test1.txt", "support/resource#test2.txt");
+			}
+
+			@Test
+			void usingClasspathStarProtocolWithWildcardInPatternAndNotEndingInSlash() throws Exception {
+				String pattern = "classpath*:org/springframework/core/io/sup*";
+				String pathPrefix = ".+org/springframework/core/io/";
+
+				List<String> actualSubPaths = getSubPathsIgnoringClassFilesEtc(pattern, pathPrefix);
+
+				// We DO find "support" if the pattern does NOT end with a slash.
+				assertThat(actualSubPaths).containsExactly("support");
+			}
+
+			@Test
+			void usingFileProtocolWithWildcardInPatternAndNotEndingInSlash() throws Exception {
+				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
+				String pattern = String.format("file:%s/org/springframework/core/io/sup*", testResourcesDir);
+				String pathPrefix = ".+org/springframework/core/io/";
+
+				List<String> actualSubPaths = getSubPathsIgnoringClassFilesEtc(pattern, pathPrefix);
+
+				// We DO find "support" if the pattern does NOT end with a slash.
+				assertThat(actualSubPaths).containsExactly("support");
+			}
+
+			@Test
+			void usingClasspathStarProtocolWithWildcardInPatternAndEndingInSlash() throws Exception {
+				String pattern = "classpath*:org/springframework/core/io/sup*/";
+				String pathPrefix = ".+org/springframework/core/io/";
+
+				List<String> actualSubPaths = getSubPathsIgnoringClassFilesEtc(pattern, pathPrefix);
+
+				URL url = getClass().getClassLoader().getResource("org/springframework/core/io/support/EncodedResource.class");
+				if (!url.getProtocol().equals("jar")) {
+					// We do NOT find "support" if the pattern ENDS with a slash if org/springframework/core/io/support
+					// is in the local file system.
+					assertThat(actualSubPaths).isEmpty();
+				}
+				else {
+					// But we do find "support/" if org/springframework/core/io/support is found in a JAR on the classpath.
+					assertThat(actualSubPaths).containsExactly("support/");
+				}
+			}
+
+			@Test
+			void usingFileProtocolWithWildcardInPatternAndEndingInSlash() throws Exception {
+				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
+				String pattern = String.format("file:%s/org/springframework/core/io/sup*/", testResourcesDir);
+				String pathPrefix = ".+org/springframework/core/io/";
+
+				List<String> actualSubPaths = getSubPathsIgnoringClassFilesEtc(pattern, pathPrefix);
+
+				// We do NOT find "support" if the pattern ENDS with a slash.
+				assertThat(actualSubPaths).isEmpty();
+			}
+
+			@Test
+			void usingClasspathStarProtocolWithWildcardInPatternAndEndingWithSuffixPattern() throws Exception {
+				String pattern = "classpath*:org/springframework/core/io/sup*/*.txt";
+				String pathPrefix = ".+org/springframework/core/io/";
+
+				List<String> actualSubPaths = getSubPathsIgnoringClassFilesEtc(pattern, pathPrefix);
+
+				assertThat(actualSubPaths)
+						.containsExactlyInAnyOrder("support/resource#test1.txt", "support/resource#test2.txt");
+			}
+
+			private List<String> getSubPathsIgnoringClassFilesEtc(String pattern, String pathPrefix) throws IOException {
+				return Arrays.stream(resolver.getResources(pattern))
+						.map(resource -> getPath(resource).replaceFirst(pathPrefix, ""))
+						.filter(name -> !name.endsWith(".class"))
+						.filter(name -> !name.endsWith(".kt"))
+						.filter(name -> !name.endsWith(".factories"))
+						.distinct()
+						.sorted()
+						.collect(Collectors.toList());
+			}
+
+			@Test
+			void usingFileProtocolWithoutWildcardInPatternAndEndingInSlashStarStar()  {
+				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
+				String pattern = String.format("file:%s/scanned-resources/**", testResourcesDir);
+				String pathPrefix = ".+?resources/";
+
+				// We do NOT find "scanned-resources" if the pattern ENDS with "/**" AND does NOT otherwise contain a wildcard.
+				assertExactFilenames(pattern, "resource#test1.txt", "resource#test2.txt");
+				assertExactSubPaths(pattern, pathPrefix, "scanned-resources/resource#test1.txt",
+						"scanned-resources/resource#test2.txt");
+			}
+
+			@Test
+			void usingFileProtocolWithWildcardInPatternAndEndingInSlashStarStar() {
+				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
+				String pattern = String.format("file:%s/scanned*resources/**", testResourcesDir);
+				String pathPrefix = ".+?resources/";
+
+				// We DO find "scanned-resources" if the pattern ENDS with "/**" AND DOES otherwise contain a wildcard.
+				assertExactFilenames(pattern, "scanned-resources", "resource#test1.txt", "resource#test2.txt");
+				assertExactSubPaths(pattern, pathPrefix, "scanned-resources", "scanned-resources/resource#test1.txt",
+						"scanned-resources/resource#test2.txt");
+			}
+
+			@Test
+			void usingFileProtocolAndAssertingUrlAndUriSyntax() throws Exception {
+				Path testResourcesDir = Paths.get("src/test/resources").toAbsolutePath();
+				String pattern = "file:%s/scanned-resources/**/resource#test1.txt".formatted(testResourcesDir);
+				Resource[] resources = resolver.getResources(pattern);
+				assertThat(resources).hasSize(1);
+				Resource resource = resources[0];
+				assertThat(resource.getFilename()).isEqualTo("resource#test1.txt");
+				// The following assertions serve as regression tests for the lack of the
+				// "authority component" (//) in the returned URI/URL. For example, we are
+				// expecting file:/my/path (or file:/C:/My/Path) instead of file:///my/path.
+				assertThat(resource.getURL().toString()).matches("^file:\\/[^\\/].+test1\\.txt$");
+				assertThat(resource.getURI().toString()).matches("^file:\\/[^\\/].+test1\\.txt$");
 			}
 		}
-		resources = noCloverResources.toArray(new Resource[0]);
-		assertProtocolAndFilenames(resources, "file",
-				StringUtils.concatenateStringArrays(CLASSES_IN_CORE_IO_SUPPORT, TEST_CLASSES_IN_CORE_IO_SUPPORT));
 	}
 
-	@Test
-	void getResourcesOnFileSystemContainingHashtagsInTheirFileNames() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/**/resource#test*.txt");
-		assertThat(resources).extracting(Resource::getFile).extracting(File::getName)
-			.containsExactlyInAnyOrder("resource#test1.txt", "resource#test2.txt");
+
+	@Nested
+	class JarResources {
+
+		@Test
+		void singleResourceInJar() {
+			String pattern = "org/reactivestreams/Publisher.class";
+			assertExactFilenames(pattern, "Publisher.class");
+		}
+
+		@Test
+		void singleResourceInRootOfJar() {
+			String pattern = "aspectj_1_5_0.dtd";
+			assertExactFilenames(pattern, "aspectj_1_5_0.dtd");
+		}
+
+		@Test
+		void classpathWithPatternInJar() {
+			String pattern = "classpath:reactor/util/annotation/*.class";
+			assertExactFilenames(pattern, CLASSES_IN_REACTOR_UTIL_ANNOTATION);
+		}
+
+		@Test
+		void classpathStarWithPatternInJar() {
+			String pattern = "classpath*:reactor/util/annotation/*.class";
+			assertExactFilenames(pattern, CLASSES_IN_REACTOR_UTIL_ANNOTATION);
+		}
+
+		// Fails in a native image -- https://github.com/oracle/graal/issues/5020
+		@Test
+		void rootPatternRetrievalInJarFiles() throws IOException {
+			assertThat(resolver.getResources("classpath*:aspectj*.dtd")).extracting(Resource::getFilename)
+				.as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar")
+				.containsExactly("aspectj_1_5_0.dtd");
+		}
 	}
 
-	@Test
-	void classpathWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath:reactor/util/annotation/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTOR_UTIL_ANNOTATIONS);
+
+	private void assertFilenames(String pattern, String... filenames) {
+		assertFilenames(pattern, false, filenames);
 	}
 
-	@Test
-	void classpathStarWithPatternInJar() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:reactor/util/annotation/*.class");
-		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTOR_UTIL_ANNOTATIONS);
+	private void assertExactFilenames(String pattern, String... filenames) {
+		assertFilenames(pattern, true, filenames);
 	}
 
-	@Test
-	void rootPatternRetrievalInJarFiles() throws IOException {
-		Resource[] resources = resolver.getResources("classpath*:*.dtd");
-		boolean found = false;
-		for (Resource resource : resources) {
-			if (resource.getFilename().equals("aspectj_1_5_0.dtd")) {
-				found = true;
-				break;
+	private void assertFilenames(String pattern, boolean exactly, String... filenames) {
+		try {
+			Resource[] resources = resolver.getResources(pattern);
+			List<String> actualNames = Arrays.stream(resources)
+					.peek(resource -> assertThat(resource.exists()).as(resource + " exists").isTrue())
+					.map(Resource::getFilename)
+					.sorted()
+					.toList();
+
+			// Uncomment the following if you encounter problems with matching against the file system.
+			// List<String> expectedNames = Arrays.stream(filenames).sorted().toList();
+			// System.out.println("----------------------------------------------------------------------");
+			// System.out.println("Expected: " + expectedNames);
+			// System.out.println("Actual: " + actualNames);
+			// Arrays.stream(resources).forEach(System.out::println);
+
+			if (exactly) {
+				assertThat(actualNames).as("subset of files found").containsExactlyInAnyOrder(filenames);
+			}
+			else {
+				assertThat(actualNames).as("subset of files found").contains(filenames);
 			}
 		}
-		assertThat(found).as("Could not find aspectj_1_5_0.dtd in the root of the aspectjweaver jar").isTrue();
-	}
-
-
-	private void assertProtocolAndFilenames(Resource[] resources, String protocol, String... filenames)
-			throws IOException {
-
-		// Uncomment the following if you encounter problems with matching against the file system
-		// It shows file locations.
-//		String[] actualNames = new String[resources.length];
-//		for (int i = 0; i < resources.length; i++) {
-//			actualNames[i] = resources[i].getFilename();
-//		}
-//		List sortedActualNames = new LinkedList(Arrays.asList(actualNames));
-//		List expectedNames = new LinkedList(Arrays.asList(fileNames));
-//		Collections.sort(sortedActualNames);
-//		Collections.sort(expectedNames);
-//
-//		System.out.println("-----------");
-//		System.out.println("Expected: " + StringUtils.collectionToCommaDelimitedString(expectedNames));
-//		System.out.println("Actual: " + StringUtils.collectionToCommaDelimitedString(sortedActualNames));
-//		for (int i = 0; i < resources.length; i++) {
-//			System.out.println(resources[i]);
-//		}
-
-		assertThat(resources.length).as("Correct number of files found").isEqualTo(filenames.length);
-		for (Resource resource : resources) {
-			String actualProtocol = resource.getURL().getProtocol();
-			assertThat(actualProtocol).isEqualTo(protocol);
-			assertFilenameIn(resource, filenames);
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
 		}
 	}
 
-	private void assertFilenameIn(Resource resource, String... filenames) {
-		String filename = resource.getFilename();
-		assertThat(Arrays.stream(filenames).anyMatch(filename::endsWith)).as(resource + " does not have a filename that matches any of the specified names").isTrue();
+	private void assertExactSubPaths(String pattern, String pathPrefix, String... subPaths) {
+		try {
+			Resource[] resources = resolver.getResources(pattern);
+			List<String> actualSubPaths = Arrays.stream(resources)
+					.map(resource -> getPath(resource).replaceFirst(pathPrefix, ""))
+					.sorted()
+					.toList();
+			assertThat(actualSubPaths).containsExactlyInAnyOrder(subPaths);
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
+	}
+
+	private String getPath(Resource resource) {
+		// Tests fail if we use resouce.getURL().getPath(). They would also fail on Mac OS when
+		// using resouce.getURI().getPath() if the resource paths are not Unicode normalized.
+		//
+		// On the JVM, all tests should pass when using resouce.getFile().getPath(); however,
+		// we use FileSystemResource#getPath since this test class is sometimes run within a
+		// GraalVM native image which cannot support Path#toFile.
+		//
+		// See: https://github.com/spring-projects/spring-framework/issues/29243
+		if (resource instanceof FileSystemResource fileSystemResource) {
+			return fileSystemResource.getPath();
+		}
+		try {
+			// Fall back to URL in case the resource came from a JAR
+			return resource.getURL().getPath();
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
 	}
 
 }

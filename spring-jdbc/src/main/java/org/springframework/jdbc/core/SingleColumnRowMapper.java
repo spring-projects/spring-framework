@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,9 +193,9 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 			return value.toString();
 		}
 		else if (Number.class.isAssignableFrom(requiredType)) {
-			if (value instanceof Number) {
+			if (value instanceof Number number) {
 				// Convert original Number to target Number class.
-				return NumberUtils.convertNumberToTargetClass(((Number) value), (Class<Number>) requiredType);
+				return NumberUtils.convertNumberToTargetClass(number, (Class<Number>) requiredType);
 			}
 			else {
 				// Convert stringified value to target Number class.

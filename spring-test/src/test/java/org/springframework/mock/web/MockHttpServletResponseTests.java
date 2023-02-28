@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.web.util.WebUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.type;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.http.HttpHeaders.CONTENT_LANGUAGE;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
@@ -251,13 +252,13 @@ class MockHttpServletResponseTests {
 		response.addHeader(headerName, "value1");
 		Collection<String> responseHeaders = response.getHeaderNames();
 		assertThat(responseHeaders).isNotNull();
-		assertThat(responseHeaders.size()).isEqualTo(1);
+		assertThat(responseHeaders).hasSize(1);
 		assertThat(responseHeaders.iterator().next()).as("HTTP header casing not being preserved").isEqualTo(headerName);
 	}
 
 	@Test
 	void cookies() {
-		Cookie cookie = new Cookie("foo", "bar");
+		Cookie cookie = new MockCookie("foo", "bar");
 		cookie.setPath("/path");
 		cookie.setDomain("example.com");
 		cookie.setMaxAge(0);
@@ -279,7 +280,7 @@ class MockHttpServletResponseTests {
 		int size = response.getBufferSize();
 		response.getOutputStream().write(new byte[size]);
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo((size + 1));
+		assertThat(response.getContentAsByteArray()).hasSize((size + 1));
 	}
 
 	@Test
@@ -289,7 +290,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCommitted()).isFalse();
 		response.flushBuffer();
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
+		assertThat(response.getContentAsByteArray()).hasSize(1);
 	}
 
 	@Test
@@ -302,7 +303,7 @@ class MockHttpServletResponseTests {
 		Arrays.fill(data, 'p');
 		response.getWriter().write(data);
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo((size + 1));
+		assertThat(response.getContentAsByteArray()).hasSize((size + 1));
 	}
 
 	@Test
@@ -312,7 +313,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCommitted()).isFalse();
 		response.getOutputStream().flush();
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
+		assertThat(response.getContentAsByteArray()).hasSize(1);
 	}
 
 	@Test
@@ -322,7 +323,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCommitted()).isFalse();
 		response.getWriter().flush();
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
+		assertThat(response.getContentAsByteArray()).hasSize(1);
 	}
 
 	@Test // SPR-16683
@@ -332,7 +333,7 @@ class MockHttpServletResponseTests {
 		assertThat(response.isCommitted()).isFalse();
 		response.getWriter().close();
 		assertThat(response.isCommitted()).isTrue();
-		assertThat(response.getContentAsByteArray().length).isEqualTo(1);
+		assertThat(response.getContentAsByteArray()).hasSize(1);
 	}
 
 	@Test  // gh-23219
@@ -420,10 +421,9 @@ class MockHttpServletResponseTests {
 	}
 
 	@Test  // SPR-10414
-	@SuppressWarnings("deprecation")
 	void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error");
+		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
 	}
 
@@ -567,15 +567,19 @@ class MockHttpServletResponseTests {
 		assertThat(response.getCookies()).extracting(Cookie::getValue).containsExactly(expected);
 	}
 
+	@SuppressWarnings("removal")
 	private void assertPrimarySessionCookie(String expectedValue) {
 		Cookie cookie = this.response.getCookie("SESSION");
-		assertThat(cookie).isInstanceOf(MockCookie.class);
-		assertThat(cookie.getName()).isEqualTo("SESSION");
-		assertThat(cookie.getValue()).isEqualTo(expectedValue);
-		assertThat(cookie.getPath()).isEqualTo("/");
-		assertThat(cookie.getSecure()).isTrue();
-		assertThat(cookie.isHttpOnly()).isTrue();
-		assertThat(((MockCookie) cookie).getSameSite()).isEqualTo("Lax");
+		assertThat(cookie).asInstanceOf(type(MockCookie.class)).satisfies(mockCookie -> {
+			assertThat(mockCookie.getName()).isEqualTo("SESSION");
+			assertThat(mockCookie.getValue()).isEqualTo(expectedValue);
+			assertThat(mockCookie.getPath()).isEqualTo("/");
+			assertThat(mockCookie.getSecure()).isTrue();
+			assertThat(mockCookie.isHttpOnly()).isTrue();
+			assertThat(mockCookie.getComment()).isNull();
+			assertThat(mockCookie.getExpires()).isNull();
+			assertThat(mockCookie.getSameSite()).isEqualTo("Lax");
+		});
 	}
 
 	@Test  // gh-25501

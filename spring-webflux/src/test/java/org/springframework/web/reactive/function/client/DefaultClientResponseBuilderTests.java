@@ -88,10 +88,10 @@ class DefaultClientResponseBuilderTests {
 
 
 		assertThat(result.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-		assertThat(result.headers().asHttpHeaders().size()).isEqualTo(3);
+		assertThat(result.headers().asHttpHeaders()).hasSize(3);
 		assertThat(result.headers().asHttpHeaders().getFirst("foo")).isEqualTo("baar");
 		assertThat(result.headers().asHttpHeaders().getFirst("bar")).isEqualTo("baz");
-		assertThat(result.cookies().size()).isEqualTo(1);
+		assertThat(result.cookies()).hasSize(1);
 		assertThat(result.cookies().getFirst("baz").getValue()).isEqualTo("quux");
 		assertThat(result.logPrefix()).isEqualTo("my-prefix");
 
@@ -106,7 +106,7 @@ class DefaultClientResponseBuilderTests {
 		ClientResponse other = ClientResponse.create(499, ExchangeStrategies.withDefaults()).build();
 		ClientResponse result = other.mutate().build();
 
-		assertThat(result.rawStatusCode()).isEqualTo(499);
+		assertThat(result.statusCode().value()).isEqualTo(499);
 		assertThat(result.statusCode()).isEqualTo(HttpStatusCode.valueOf(499));
 	}
 

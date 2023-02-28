@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class IndexedBindMarkersUnitTests {
 
 	@Test
 	void shouldCreateNewBindMarkersWithOffset() {
-		BindTarget bindTarget = mock(BindTarget.class);
+		BindTarget bindTarget = mock();
 
 		BindMarkers bindMarkers = BindMarkersFactory.indexed("$", 1).create();
 
@@ -77,7 +77,7 @@ class IndexedBindMarkersUnitTests {
 	@Test
 	void bindValueShouldBindByIndex() {
 
-		BindTarget bindTarget = mock(BindTarget.class);
+		BindTarget bindTarget = mock();
 
 		BindMarkers bindMarkers = BindMarkersFactory.indexed("$", 0).create();
 
@@ -90,7 +90,7 @@ class IndexedBindMarkersUnitTests {
 
 	@Test
 	void bindNullShouldBindByIndex() {
-		BindTarget bindTarget = mock(BindTarget.class);
+		BindTarget bindTarget = mock();
 
 		BindMarkers bindMarkers = BindMarkersFactory.indexed("$", 0).create();
 

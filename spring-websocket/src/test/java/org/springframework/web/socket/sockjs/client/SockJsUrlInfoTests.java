@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SockJsUrlInfoTests {
 
 	@Test
-	void serverId() throws Exception {
-		SockJsUrlInfo info = new SockJsUrlInfo(new URI("https://example.com"));
+	void serverId() {
+		SockJsUrlInfo info = new SockJsUrlInfo(URI.create("https://example.com"));
 		int serverId = Integer.parseInt(info.getServerId());
 		assertThat(serverId).isGreaterThanOrEqualTo(0).isLessThan(1000);
 	}
 
 	@Test
-	void sessionId() throws Exception {
-		SockJsUrlInfo info = new SockJsUrlInfo(new URI("https://example.com"));
+	void sessionId() {
+		SockJsUrlInfo info = new SockJsUrlInfo(URI.create("https://example.com"));
 		assertThat(info.getSessionId()).as("Invalid sessionId: " + info.getSessionId()).hasSize(32);
 	}
 
@@ -54,9 +54,9 @@ class SockJsUrlInfoTests {
 		ws, http
 		wss, https
 	""")
-	void infoUrl(String scheme, String expectedScheme) throws Exception {
-		SockJsUrlInfo info = new SockJsUrlInfo(new URI(scheme + "://example.com"));
-		assertThat(info.getInfoUrl()).isEqualTo(new URI(expectedScheme + "://example.com/info"));
+	void infoUrl(String scheme, String expectedScheme) {
+		SockJsUrlInfo info = new SockJsUrlInfo(URI.create(scheme + "://example.com"));
+		assertThat(info.getInfoUrl()).isEqualTo(URI.create(expectedScheme + "://example.com/info"));
 	}
 
 	@ParameterizedTest
@@ -70,12 +70,12 @@ class SockJsUrlInfoTests {
 		wss, https, XHR_STREAMING
 		wss, wss, WEBSOCKET
 	""")
-	void transportUrl(String scheme, String expectedScheme, TransportType transportType) throws Exception {
-		SockJsUrlInfo info = new SockJsUrlInfo(new URI(scheme + "://example.com"));
+	void transportUrl(String scheme, String expectedScheme, TransportType transportType) {
+		SockJsUrlInfo info = new SockJsUrlInfo(URI.create(scheme + "://example.com"));
 		String serverId = info.getServerId();
 		String sessionId = info.getSessionId();
 		String transport = transportType.toString().toLowerCase();
-		URI expected = new URI(expectedScheme + "://example.com/" + serverId + "/" + sessionId + "/" + transport);
+		URI expected = URI.create(expectedScheme + "://example.com/" + serverId + "/" + sessionId + "/" + transport);
 		assertThat(info.getTransportUrl(transportType)).isEqualTo(expected);
 	}
 

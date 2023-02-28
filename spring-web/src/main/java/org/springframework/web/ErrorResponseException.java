@@ -18,23 +18,21 @@ package org.springframework.web;
 
 import java.net.URI;
 
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
 
-
 /**
  * {@link RuntimeException} that implements {@link ErrorResponse} to expose
- * an HTTP status, response headers, and a body formatted as an RFC 7808
+ * an HTTP status, response headers, and a body formatted as an RFC 7807
  * {@link ProblemDetail}.
  *
  * <p>The exception can be used as is, or it can be extended as a more specific
  * exception that populates the {@link ProblemDetail#setType(URI) type} or
  * {@link ProblemDetail#setDetail(String) detail} fields, or potentially adds
- * other non-standard fields.
+ * other non-standard properties.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
@@ -48,16 +46,21 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 
 	private final ProblemDetail body;
 
+	private final String messageDetailCode;
+
+	@Nullable
+	private final Object[] messageDetailArguments;
+
 
 	/**
-	 * Constructor with a {@link HttpStatusCode}.
+	 * Constructor with an {@link HttpStatusCode}.
 	 */
 	public ErrorResponseException(HttpStatusCode status) {
 		this(status, null);
 	}
 
 	/**
-	 * Constructor with a {@link HttpStatusCode} and an optional cause.
+	 * Constructor with an {@link HttpStatusCode} and an optional cause.
 	 */
 	public ErrorResponseException(HttpStatusCode status, @Nullable Throwable cause) {
 		this(status, ProblemDetail.forStatus(status), cause);
@@ -68,10 +71,31 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	 * subclass of {@code ProblemDetail} with extended fields.
 	 */
 	public ErrorResponseException(HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause) {
+		this(status, body, cause, null, null);
+	}
+
+	/**
+	 * Constructor with a given {@link ProblemDetail}, and a
+	 * {@link org.springframework.context.MessageSource} code and arguments to
+	 * resolve the detail message with.
+	 * @since 6.0
+	 */
+	public ErrorResponseException(
+			HttpStatusCode status, ProblemDetail body, @Nullable Throwable cause,
+			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+
 		super(null, cause);
 		this.status = status;
 		this.body = body;
+		this.messageDetailCode = initMessageDetailCode(messageDetailCode);
+		this.messageDetailArguments = messageDetailArguments;
 	}
+
+	private String initMessageDetailCode(@Nullable String messageDetailCode) {
+		return (messageDetailCode != null ?
+				messageDetailCode : ErrorResponse.getDefaultDetailMessageCode(getClass(), null));
+	}
+
 
 	@Override
 	public HttpStatusCode getStatusCode() {
@@ -136,9 +160,18 @@ public class ErrorResponseException extends NestedRuntimeException implements Er
 	}
 
 	@Override
+	public String getDetailMessageCode() {
+		return this.messageDetailCode;
+	}
+
+	@Override
+	public Object[] getDetailMessageArguments() {
+		return this.messageDetailArguments;
+	}
+
+	@Override
 	public String getMessage() {
-		String message = this.status + (!this.headers.isEmpty() ? ", headers=" + this.headers : "") + ", " + this.body;
-		return NestedExceptionUtils.buildMessage(message, getCause());
+		return this.status + (!this.headers.isEmpty() ? ", headers=" + this.headers : "") + ", " + this.body;
 	}
 
 }

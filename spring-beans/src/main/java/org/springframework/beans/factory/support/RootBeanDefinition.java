@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setPropertyValues
 	 */
 	public RootBeanDefinition() {
-		super();
 	}
 
 	/**
@@ -148,8 +147,17 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setBeanClass
 	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass) {
-		super();
 		setBeanClass(beanClass);
+	}
+
+	/**
+	 * Create a new RootBeanDefinition for a singleton.
+	 * @param beanType the type of bean to instantiate
+	 * @since 6.0
+	 * @see #setTargetType(ResolvableType)
+	 */
+	public RootBeanDefinition(@Nullable ResolvableType beanType) {
+		setTargetType(beanType);
 	}
 
 	/**
@@ -162,7 +170,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setInstanceSupplier
 	 */
 	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, @Nullable Supplier<T> instanceSupplier) {
-		super();
 		setBeanClass(beanClass);
 		setInstanceSupplier(instanceSupplier);
 	}
@@ -178,7 +185,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @see #setInstanceSupplier
 	 */
 	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, String scope, @Nullable Supplier<T> instanceSupplier) {
-		super();
 		setBeanClass(beanClass);
 		setScope(scope);
 		setInstanceSupplier(instanceSupplier);
@@ -193,7 +199,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * (not applicable to autowiring a constructor, thus ignored there)
 	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
-		super();
 		setBeanClass(beanClass);
 		setAutowireMode(autowireMode);
 		if (dependencyCheck && getResolvedAutowireMode() != AUTOWIRE_CONSTRUCTOR) {
@@ -315,7 +320,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Specify a generics-containing target type of this bean definition, if known in advance.
 	 * @since 4.3.3
 	 */
-	public void setTargetType(ResolvableType targetType) {
+	public void setTargetType(@Nullable ResolvableType targetType) {
 		this.targetType = targetType;
 	}
 
@@ -413,6 +418,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public void setResolvedFactoryMethod(@Nullable Method method) {
 		this.factoryMethodToIntrospect = method;
+		if (method != null) {
+			setUniqueFactoryMethodName(method.getName());
+		}
 	}
 
 	/**
@@ -422,6 +430,27 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	public Method getResolvedFactoryMethod() {
 		return this.factoryMethodToIntrospect;
+	}
+
+	@Override
+	public void setInstanceSupplier(@Nullable Supplier<?> supplier) {
+		super.setInstanceSupplier(supplier);
+		Method factoryMethod = (supplier instanceof InstanceSupplier<?> instanceSupplier ?
+				instanceSupplier.getFactoryMethod() : null);
+		if (factoryMethod != null) {
+			setResolvedFactoryMethod(factoryMethod);
+		}
+	}
+
+	/**
+	 * Mark this bean definition as post-processed,
+	 * i.e. processed by {@link MergedBeanDefinitionPostProcessor}.
+	 * @since 6.0
+	 */
+	public void markAsPostProcessed() {
+		synchronized (this.postProcessingLock) {
+			this.postProcessed = true;
+		}
 	}
 
 	/**
@@ -533,6 +562,15 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 					Collections.unmodifiableSet(new LinkedHashSet<>(this.externallyManagedInitMethods)) :
 					Collections.emptySet());
 		}
+	}
+
+	/**
+	 * Resolve the inferred destroy method if necessary.
+	 * @since 6.0
+	 */
+	public void resolveDestroyMethodIfNecessary() {
+		setDestroyMethodNames(DisposableBeanAdapter
+				.inferDestroyMethodsIfNecessary(getResolvableType().toClass(), this));
 	}
 
 	/**

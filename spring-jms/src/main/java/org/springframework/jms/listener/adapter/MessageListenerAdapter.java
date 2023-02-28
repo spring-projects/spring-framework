@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.ObjectUtils;
  * Message listener adapter that delegates the handling of messages to target
  * listener methods via reflection, with flexible message type conversion.
  * Allows listener methods to operate on message content types, completely
- * independent from the JMS API.
+ * independent of the JMS API.
  *
  * <p>By default, the content of incoming JMS messages gets extracted before
  * being passed into the target listener method, to let the target method
@@ -208,8 +208,8 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 				((SessionAwareMessageListener<Message>) delegate).onMessage(message, session);
 				return;
 			}
-			if (delegate instanceof MessageListener) {
-				((MessageListener) delegate).onMessage(message);
+			if (delegate instanceof MessageListener listener) {
+				listener.onMessage(message);
 				return;
 			}
 		}
@@ -232,8 +232,8 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	@Override
 	public String getSubscriptionName() {
 		Object delegate = getDelegate();
-		if (delegate != this && delegate instanceof SubscriptionNameProvider) {
-			return ((SubscriptionNameProvider) delegate).getSubscriptionName();
+		if (delegate != this && delegate instanceof SubscriptionNameProvider provider) {
+			return provider.getSubscriptionName();
 		}
 		else {
 			return delegate.getClass().getName();
@@ -296,8 +296,8 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
-			if (targetEx instanceof JMSException) {
-				throw (JMSException) targetEx;
+			if (targetEx instanceof JMSException jmsException) {
+				throw jmsException;
 			}
 			else {
 				throw new ListenerExecutionFailedException(

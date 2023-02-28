@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,11 +65,11 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 				if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(actualClass)) {
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
 					boolean match;
-					if (mm instanceof IntroductionAwareMethodMatcher) {
+					if (mm instanceof IntroductionAwareMethodMatcher iamm) {
 						if (hasIntroductions == null) {
 							hasIntroductions = hasMatchingIntroductions(advisors, actualClass);
 						}
-						match = ((IntroductionAwareMethodMatcher) mm).matches(method, actualClass, hasIntroductions);
+						match = iamm.matches(method, actualClass, hasIntroductions);
 					}
 					else {
 						match = mm.matches(method, actualClass);
@@ -109,10 +109,8 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 	 */
 	private static boolean hasMatchingIntroductions(Advisor[] advisors, Class<?> actualClass) {
 		for (Advisor advisor : advisors) {
-			if (advisor instanceof IntroductionAdvisor ia) {
-				if (ia.getClassFilter().matches(actualClass)) {
-					return true;
-				}
+			if (advisor instanceof IntroductionAdvisor ia && ia.getClassFilter().matches(actualClass)) {
+				return true;
 			}
 		}
 		return false;

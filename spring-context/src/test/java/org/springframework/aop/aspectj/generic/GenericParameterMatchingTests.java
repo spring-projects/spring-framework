@@ -79,7 +79,7 @@ class GenericParameterMatchingTests {
 	}
 
 
-	static interface GenericInterface<T> {
+	interface GenericInterface<T> {
 
 		void save(T bean);
 

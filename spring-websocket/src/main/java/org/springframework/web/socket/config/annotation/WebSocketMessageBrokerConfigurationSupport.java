@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -129,17 +130,19 @@ public abstract class WebSocketMessageBrokerConfigurationSupport extends Abstrac
 	@Bean
 	public WebSocketMessageBrokerStats webSocketMessageBrokerStats(
 			@Nullable AbstractBrokerMessageHandler stompBrokerRelayMessageHandler,
-			WebSocketHandler subProtocolWebSocketHandler, TaskExecutor clientInboundChannelExecutor,
-			TaskExecutor clientOutboundChannelExecutor, TaskScheduler messageBrokerTaskScheduler) {
+			WebSocketHandler subProtocolWebSocketHandler,
+			@Qualifier("clientInboundChannelExecutor") TaskExecutor inboundExecutor,
+			@Qualifier("clientOutboundChannelExecutor") TaskExecutor outboundExecutor,
+			@Qualifier("messageBrokerTaskScheduler") TaskScheduler scheduler) {
 
 		WebSocketMessageBrokerStats stats = new WebSocketMessageBrokerStats();
 		stats.setSubProtocolWebSocketHandler((SubProtocolWebSocketHandler) subProtocolWebSocketHandler);
 		if (stompBrokerRelayMessageHandler instanceof StompBrokerRelayMessageHandler) {
 			stats.setStompBrokerRelay((StompBrokerRelayMessageHandler) stompBrokerRelayMessageHandler);
 		}
-		stats.setInboundChannelExecutor(clientInboundChannelExecutor);
-		stats.setOutboundChannelExecutor(clientOutboundChannelExecutor);
-		stats.setSockJsTaskScheduler(messageBrokerTaskScheduler);
+		stats.setInboundChannelExecutor(inboundExecutor);
+		stats.setOutboundChannelExecutor(outboundExecutor);
+		stats.setSockJsTaskScheduler(scheduler);
 		return stats;
 	}
 

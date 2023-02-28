@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class CustomScopeConfigurerTests {
 
 	@Test
 	public void testSunnyDayWithBonaFideScopeInstance() {
-		Scope scope = mock(Scope.class);
+		Scope scope = mock();
 		factory.registerScope(FOO_SCOPE, scope);
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, scope);

@@ -7,8 +7,8 @@ pluginManagement {
 }
 
 plugins {
-	id "com.gradle.enterprise" version "3.9"
-	id "io.spring.ge.conventions" version "0.0.9"
+	id "com.gradle.enterprise" version "3.12.3"
+	id "io.spring.ge.conventions" version "0.0.13"
 }
 
 include "spring-aop"
@@ -35,6 +35,8 @@ include "spring-webflux"
 include "spring-webmvc"
 include "spring-websocket"
 include "framework-bom"
+include "framework-docs"
+include "framework-platform"
 include "integration-tests"
 
 rootProject.name = "spring"

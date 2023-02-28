@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,8 +100,8 @@ class ExtendedBeanInfo implements BeanInfo {
 		this.delegate = delegate;
 		for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
 			try {
-				this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ?
-						new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor) pd) :
+				this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor indexedPd ?
+						new SimpleIndexedPropertyDescriptor(indexedPd) :
 						new SimplePropertyDescriptor(pd));
 			}
 			catch (IntrospectionException ex) {
@@ -137,8 +137,9 @@ class ExtendedBeanInfo implements BeanInfo {
 			}
 		}
 		// Sort non-void returning write methods to guard against the ill effects of
-		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
-		// under JDK 7. See https://bugs.java.com/view_bug.do?bug_id=7023180
+		// non-deterministic sorting of methods returned from Class#getMethods.
+		// For historical reasons, the natural sort order is reversed.
+		// See https://github.com/spring-projects/spring-framework/issues/14744.
 		matches.sort(Comparator.comparing(Method::toString).reversed());
 		return matches;
 	}
@@ -169,8 +170,8 @@ class ExtendedBeanInfo implements BeanInfo {
 				this.propertyDescriptors.add(
 						new SimpleIndexedPropertyDescriptor(propertyName, null, null, null, method));
 			}
-			else if (existingPd instanceof IndexedPropertyDescriptor) {
-				((IndexedPropertyDescriptor) existingPd).setIndexedWriteMethod(method);
+			else if (existingPd instanceof IndexedPropertyDescriptor indexedPd) {
+				indexedPd.setIndexedWriteMethod(method);
 			}
 			else {
 				this.propertyDescriptors.remove(existingPd);
@@ -188,8 +189,8 @@ class ExtendedBeanInfo implements BeanInfo {
 		for (PropertyDescriptor pd : this.propertyDescriptors) {
 			final Class<?> candidateType;
 			final String candidateName = pd.getName();
-			if (pd instanceof IndexedPropertyDescriptor ipd) {
-				candidateType = ipd.getIndexedPropertyType();
+			if (pd instanceof IndexedPropertyDescriptor indexedPd) {
+				candidateType = indexedPd.getIndexedPropertyType();
 				if (candidateName.equals(propertyName) &&
 						(candidateType.equals(propertyType) || candidateType.equals(propertyType.getComponentType()))) {
 					return pd;
@@ -337,9 +338,9 @@ class ExtendedBeanInfo implements BeanInfo {
 		}
 
 		@Override
-		public boolean equals(@Nullable Object other) {
-			return (this == other || (other instanceof PropertyDescriptor &&
-					PropertyDescriptorUtils.equals(this, (PropertyDescriptor) other)));
+		public boolean equals(@Nullable Object obj) {
+			return (this == obj || (obj instanceof PropertyDescriptor that &&
+					PropertyDescriptorUtils.equals(this, that)));
 		}
 
 		@Override

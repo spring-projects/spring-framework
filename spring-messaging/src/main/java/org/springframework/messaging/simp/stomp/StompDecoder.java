@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,9 +91,9 @@ public class StompDecoder {
 	 * Decodes one or more STOMP frames from the given {@code buffer} and returns
 	 * a list of {@link Message Messages}.
 	 * <p>If the given ByteBuffer contains only partial STOMP frame content and no
-	 * complete STOMP frames, an empty list is returned, and the buffer is reset to
+	 * complete STOMP frames, an empty list is returned, and the buffer is reset
 	 * to where it was.
-	 * <p>If the buffer contains one ore more STOMP frames, those are returned and
+	 * <p>If the buffer contains one or more STOMP frames, those are returned and
 	 * the buffer reset to point to the beginning of the unused partial content.
 	 * <p>The output partialMessageHeaders map is used to store successfully parsed
 	 * headers in case of partial content. The caller can then check if a
@@ -264,9 +264,12 @@ public class StompDecoder {
 	 * <a href="https://stomp.github.io/stomp-specification-1.2.html#Value_Encoding">"Value Encoding"</a>.
 	 */
 	private String unescape(String inString) {
+		int index = inString.indexOf('\\');
+		if (index == -1) {
+			return inString;
+		}
 		StringBuilder sb = new StringBuilder(inString.length());
 		int pos = 0;  // position in the old string
-		int index = inString.indexOf('\\');
 
 		while (index >= 0) {
 			sb.append(inString, pos, index);

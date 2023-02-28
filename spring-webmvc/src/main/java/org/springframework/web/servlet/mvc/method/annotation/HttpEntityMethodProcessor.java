@@ -185,7 +185,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
 		}
 		else if (returnValue instanceof ProblemDetail detail) {
-			httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
+			httpEntity = ResponseEntity.of(detail).build();
 		}
 		else {
 			Assert.isInstanceOf(HttpEntity.class, returnValue);
@@ -196,6 +196,13 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			if (detail.getInstance() == null) {
 				URI path = URI.create(inputMessage.getServletRequest().getRequestURI());
 				detail.setInstance(path);
+			}
+			if (logger.isWarnEnabled() && httpEntity instanceof ResponseEntity<?> responseEntity) {
+				if (responseEntity.getStatusCode().value() != detail.getStatus()) {
+					logger.warn(returnType.getExecutable().toGenericString() +
+							" returned ResponseEntity: " + responseEntity + ", but its status" +
+							" doesn't match the ProblemDetail status: " + detail.getStatus());
+				}
 			}
 		}
 

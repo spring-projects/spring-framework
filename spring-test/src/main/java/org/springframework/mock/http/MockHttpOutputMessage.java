@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,31 +34,23 @@ import org.springframework.util.StreamUtils;
  */
 public class MockHttpOutputMessage implements HttpOutputMessage {
 
-	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
 	private final HttpHeaders headers = new HttpHeaders();
 
 	private final ByteArrayOutputStream body = new ByteArrayOutputStream(1024);
 
 
-	/**
-	 * Return the headers.
-	 */
 	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
 
-	/**
-	 * Return the body content.
-	 */
 	@Override
 	public OutputStream getBody() throws IOException {
 		return this.body;
 	}
 
 	/**
-	 * Return body content as a byte array.
+	 * Return the body content as a byte array.
 	 */
 	public byte[] getBodyAsBytes() {
 		return this.body.toByteArray();
@@ -68,12 +60,12 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	 * Return the body content interpreted as a UTF-8 string.
 	 */
 	public String getBodyAsString() {
-		return getBodyAsString(DEFAULT_CHARSET);
+		return getBodyAsString(StandardCharsets.UTF_8);
 	}
 
 	/**
-	 * Return the body content as a string.
-	 * @param charset the charset to use to turn the body content to a String
+	 * Return the body content interpreted as a string using the supplied character set.
+	 * @param charset the charset to use to turn the body content into a String
 	 */
 	public String getBodyAsString(Charset charset) {
 		return StreamUtils.copyToString(this.body, charset);

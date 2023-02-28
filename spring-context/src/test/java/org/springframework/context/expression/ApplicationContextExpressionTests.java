@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class ApplicationContextExpressionTests {
 		ac.registerBeanDefinition("tb1", bd1);
 
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
-		bd2.setBeanClassName("#{tb1.class.name}");
+		bd2.setBeanClassName("#{tb1.class}");
 		bd2.setScope("myScope");
 		bd2.getPropertyValues().add("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
 		bd2.getPropertyValues().add("age", "#{mySpecialAttr}");

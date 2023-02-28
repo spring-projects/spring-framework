@@ -35,9 +35,9 @@ import org.springframework.util.Assert;
  *
  * Each part in a multipart HTTP message produces at least one
  * {@code PartEvent} containing both {@link #headers() headers} and a
- * {@linkplain PartEvent#content() buffer} with content of the part.
+ * {@linkplain PartEvent#content() buffer} with the contents of the part.
  * <ul>
- * <li>Form field will produce a <em>single</em> {@link FormPartEvent},
+ * <li>Form fields will produce a <em>single</em> {@link FormPartEvent},
  * containing the {@linkplain FormPartEvent#value() value} of the field.</li>
  * <li>File uploads will produce <em>one or more</em> {@link FilePartEvent}s,
  * containing the {@linkplain FilePartEvent#filename() filename} used when
@@ -65,12 +65,12 @@ import org.springframework.util.Assert;
  *               // handle form field
  *           }
  *           else if (event instanceof FilePartEvent fileEvent) {
- *               String filename filename = fileEvent.filename();
+ *               String filename = fileEvent.filename();
  *               Flux&lt;DataBuffer&gt; contents = partEvents.map(PartEvent::content);
  *               // handle file upload
  *           }
  *           else {
- *               return Mono.error("Unexpected event: " + event);
+ *               return Mono.error(new RuntimeException("Unexpected event: " + event));
  *           }
  *       }
  *       else {
@@ -103,7 +103,7 @@ import org.springframework.util.Assert;
  *   .post()
  *   .uri("https://example.com")
  *   .body(Flux.concat(
- *     FormEventPart.create("field", "field value"),
+ *     FormPartEvent.create("field", "field value"),
  *     FilePartEvent.create("file", resource)
  *   ), PartEvent.class)
  *   .retrieve()

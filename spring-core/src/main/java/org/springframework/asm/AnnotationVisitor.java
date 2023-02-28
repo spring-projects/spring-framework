@@ -55,7 +55,7 @@ public abstract class AnnotationVisitor {
    * @param api the ASM API version implemented by this visitor. Must be one of the {@code
    *     ASM}<i>x</i> values in {@link Opcodes}.
    */
-  public AnnotationVisitor(final int api) {
+  protected AnnotationVisitor(final int api) {
     this(api, null);
   }
 
@@ -67,7 +67,7 @@ public abstract class AnnotationVisitor {
    * @param annotationVisitor the annotation visitor to which this visitor must delegate method
    *     calls. May be {@literal null}.
    */
-  public AnnotationVisitor(final int api, final AnnotationVisitor annotationVisitor) {
+  protected AnnotationVisitor(final int api, final AnnotationVisitor annotationVisitor) {
     if (api != Opcodes.ASM9
         && api != Opcodes.ASM8
         && api != Opcodes.ASM7
@@ -80,6 +80,17 @@ public abstract class AnnotationVisitor {
     // SPRING PATCH: no preview mode check for ASM experimental
     this.api = api;
     this.av = annotationVisitor;
+  }
+
+  /**
+   * The annotation visitor to which this visitor must delegate method calls. May be {@literal
+   * null}.
+   *
+   * @return the annotation visitor to which this visitor must delegate method calls, or {@literal
+   *     null}.
+   */
+  public AnnotationVisitor getDelegate() {
+    return av;
   }
 
   /**

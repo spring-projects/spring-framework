@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,9 +161,9 @@ public abstract class ScriptUtils {
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from
-	 * @param continueOnError whether or not to continue without throwing an exception
+	 * @param continueOnError whether to continue without throwing an exception
 	 * in the event of an error
-	 * @param ignoreFailedDrops whether or not to continue in the event of specifically
+	 * @param ignoreFailedDrops whether to continue in the event of specifically
 	 * an error on a {@code DROP} statement
 	 * @param commentPrefix the prefix that identifies single-line comments in the
 	 * SQL script (typically "--")
@@ -200,9 +200,9 @@ public abstract class ScriptUtils {
 	 * configured and ready to use
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from
-	 * @param continueOnError whether or not to continue without throwing an exception
+	 * @param continueOnError whether to continue without throwing an exception
 	 * in the event of an error
-	 * @param ignoreFailedDrops whether or not to continue in the event of specifically
+	 * @param ignoreFailedDrops whether to continue in the event of specifically
 	 * an error on a {@code DROP} statement
 	 * @param commentPrefixes the prefixes that identify single-line comments in the
 	 * SQL script (typically "--")
@@ -299,8 +299,8 @@ public abstract class ScriptUtils {
 			}
 		}
 		catch (Exception ex) {
-			if (ex instanceof ScriptException) {
-				throw (ScriptException) ex;
+			if (ex instanceof ScriptException scriptException) {
+				throw scriptException;
 			}
 			throw new UncategorizedScriptException(
 				"Failed to execute database script from resource [" + resource + "]", ex);

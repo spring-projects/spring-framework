@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,11 +78,11 @@ public class MockRequestDispatcher implements RequestDispatcher {
 	 * {@link HttpServletResponseWrapper} decorators if necessary.
 	 */
 	protected MockHttpServletResponse getMockHttpServletResponse(ServletResponse response) {
-		if (response instanceof MockHttpServletResponse) {
-			return (MockHttpServletResponse) response;
+		if (response instanceof MockHttpServletResponse mockResponse) {
+			return mockResponse;
 		}
-		if (response instanceof HttpServletResponseWrapper) {
-			return getMockHttpServletResponse(((HttpServletResponseWrapper) response).getResponse());
+		if (response instanceof HttpServletResponseWrapper wrapper) {
+			return getMockHttpServletResponse(wrapper.getResponse());
 		}
 		throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
 	}

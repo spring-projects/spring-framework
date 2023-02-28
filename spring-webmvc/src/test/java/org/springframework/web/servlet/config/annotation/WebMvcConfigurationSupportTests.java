@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
-import org.springframework.web.servlet.ThemeResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
@@ -85,7 +84,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -165,7 +163,7 @@ public class WebMvcConfigurationSupportTests {
 		assertThat(chain).isNotNull();
 		HandlerInterceptor[] interceptors = chain.getInterceptors();
 		assertThat(interceptors).isNotNull();
-		assertThat(interceptors.length).isEqualTo(3);
+		assertThat(interceptors).hasSize(3);
 		assertThat(interceptors[1].getClass()).isEqualTo(ConversionServiceExposingInterceptor.class);
 		assertThat(interceptors[2].getClass()).isEqualTo(ResourceUrlProviderExposingInterceptor.class);
 	}
@@ -175,7 +173,7 @@ public class WebMvcConfigurationSupportTests {
 		ApplicationContext context = initContext(WebConfig.class);
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertThat(converters.size()).isEqualTo(12);
+		assertThat(converters).hasSizeGreaterThanOrEqualTo(14);
 		converters.stream()
 				.filter(converter -> converter instanceof AbstractJackson2HttpMessageConverter)
 				.forEach(converter -> {
@@ -205,7 +203,7 @@ public class WebMvcConfigurationSupportTests {
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 		@SuppressWarnings("unchecked")
 		List<Object> bodyAdvice = (List<Object>) fieldAccessor.getPropertyValue("requestResponseBodyAdvice");
-		assertThat(bodyAdvice.size()).isEqualTo(2);
+		assertThat(bodyAdvice).hasSize(2);
 		assertThat(bodyAdvice.get(0).getClass()).isEqualTo(JsonViewRequestBodyAdvice.class);
 		assertThat(bodyAdvice.get(1).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
 	}
@@ -239,7 +237,7 @@ public class WebMvcConfigurationSupportTests {
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(eher);
 		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("responseBodyAdvice");
-		assertThat(interceptors.size()).isEqualTo(1);
+		assertThat(interceptors).hasSize(1);
 		assertThat(interceptors.get(0).getClass()).isEqualTo(JsonViewResponseBodyAdvice.class);
 
 		LocaleContextHolder.setLocale(Locale.ENGLISH);
@@ -262,21 +260,21 @@ public class WebMvcConfigurationSupportTests {
 		HandlerExceptionResolverComposite composite = context.getBean(HandlerExceptionResolverComposite.class);
 
 		assertThat(adapter).isNotNull();
-		assertThat(adapter.getCustomArgumentResolvers().size()).isEqualTo(1);
+		assertThat(adapter.getCustomArgumentResolvers()).hasSize(1);
 		assertThat(adapter.getCustomArgumentResolvers().get(0).getClass()).isEqualTo(TestArgumentResolver.class);
-		assertThat(adapter.getCustomReturnValueHandlers().size()).isEqualTo(1);
+		assertThat(adapter.getCustomReturnValueHandlers()).hasSize(1);
 		assertThat(adapter.getCustomReturnValueHandlers().get(0).getClass()).isEqualTo(TestReturnValueHandler.class);
 
 		assertThat(composite).isNotNull();
-		assertThat(composite.getExceptionResolvers().size()).isEqualTo(3);
+		assertThat(composite.getExceptionResolvers()).hasSize(3);
 		assertThat(composite.getExceptionResolvers().get(0).getClass()).isEqualTo(ExceptionHandlerExceptionResolver.class);
 
 		ExceptionHandlerExceptionResolver resolver =
 				(ExceptionHandlerExceptionResolver) composite.getExceptionResolvers().get(0);
 
-		assertThat(resolver.getCustomArgumentResolvers().size()).isEqualTo(1);
+		assertThat(resolver.getCustomArgumentResolvers()).hasSize(1);
 		assertThat(resolver.getCustomArgumentResolvers().get(0).getClass()).isEqualTo(TestArgumentResolver.class);
-		assertThat(resolver.getCustomReturnValueHandlers().size()).isEqualTo(1);
+		assertThat(resolver.getCustomReturnValueHandlers()).hasSize(1);
 		assertThat(resolver.getCustomReturnValueHandlers().get(0).getClass()).isEqualTo(TestReturnValueHandler.class);
 	}
 
@@ -287,7 +285,7 @@ public class WebMvcConfigurationSupportTests {
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
 
 		assertThat(resolver).isNotNull();
-		assertThat(resolver.getViewResolvers().size()).isEqualTo(1);
+		assertThat(resolver.getViewResolvers()).hasSize(1);
 		assertThat(resolver.getViewResolvers().get(0).getClass()).isEqualTo(InternalResourceViewResolver.class);
 		assertThat(resolver.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 	}
@@ -298,7 +296,7 @@ public class WebMvcConfigurationSupportTests {
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
 
 		assertThat(resolver).isNotNull();
-		assertThat(resolver.getViewResolvers().size()).isEqualTo(0);
+		assertThat(resolver.getViewResolvers()).isEmpty();
 		assertThat(resolver.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 		assertThat(resolver.resolveViewName("anyViewName", Locale.ENGLISH)).isNull();
 	}
@@ -309,7 +307,7 @@ public class WebMvcConfigurationSupportTests {
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
 
 		assertThat(resolver).isNotNull();
-		assertThat(resolver.getViewResolvers().size()).isEqualTo(1);
+		assertThat(resolver.getViewResolvers()).hasSize(1);
 		assertThat(resolver.getViewResolvers().get(0).getClass()).isEqualTo(InternalResourceViewResolver.class);
 		assertThat(resolver.getOrder()).isEqualTo(123);
 	}
@@ -335,12 +333,14 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
-	public void defaultThemeResolverfiguration() {
+	@SuppressWarnings("deprecation")
+	public void defaultThemeResolverConfiguration() {
 		ApplicationContext context = initContext(WebConfig.class);
-		ThemeResolver themeResolver = context.getBean(THEME_RESOLVER_BEAN_NAME, ThemeResolver.class);
+		org.springframework.web.servlet.ThemeResolver themeResolver =
+				context.getBean(THEME_RESOLVER_BEAN_NAME, org.springframework.web.servlet.ThemeResolver.class);
 
 		assertThat(themeResolver).isNotNull();
-		assertThat(themeResolver).isInstanceOf(FixedThemeResolver.class);
+		assertThat(themeResolver).isInstanceOf(org.springframework.web.servlet.theme.FixedThemeResolver.class);
 	}
 
 	@Test

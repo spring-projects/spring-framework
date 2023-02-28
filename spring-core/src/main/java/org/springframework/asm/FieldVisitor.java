@@ -51,7 +51,7 @@ public abstract class FieldVisitor {
    * @param api the ASM API version implemented by this visitor. Must be one of the {@code
    *     ASM}<i>x</i> values in {@link Opcodes}.
    */
-  public FieldVisitor(final int api) {
+  protected FieldVisitor(final int api) {
     this(api, null);
   }
 
@@ -63,7 +63,7 @@ public abstract class FieldVisitor {
    * @param fieldVisitor the field visitor to which this visitor must delegate method calls. May be
    *     null.
    */
-  public FieldVisitor(final int api, final FieldVisitor fieldVisitor) {
+  protected FieldVisitor(final int api, final FieldVisitor fieldVisitor) {
     if (api != Opcodes.ASM9
         && api != Opcodes.ASM8
         && api != Opcodes.ASM7
@@ -76,6 +76,15 @@ public abstract class FieldVisitor {
     // SPRING PATCH: no preview mode check for ASM experimental
     this.api = api;
     this.fv = fieldVisitor;
+  }
+
+  /**
+   * The field visitor to which this visitor must delegate method calls. May be {@literal null}.
+   *
+   * @return the field visitor to which this visitor must delegate method calls, or {@literal null}.
+   */
+  public FieldVisitor getDelegate() {
+    return fv;
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.client.reactive;
 
 import java.net.HttpCookie;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -33,7 +34,6 @@ import reactor.core.publisher.MonoSink;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -95,15 +95,14 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 					.as(chunks -> ReactiveRequest.Content.fromPublisher(chunks, getContentType()));
 			this.builder.content(content);
 			sink.success();
-		})
-				.then(doCommit());
+		}).then(doCommit());
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
 		return writeWith(Flux.from(body)
 				.flatMap(Function.identity())
-				.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+				.doOnDiscard(DataBuffer.class, DataBufferUtils::release));
 	}
 
 	private String getContentType() {
@@ -111,15 +110,17 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 		return contentType != null ? contentType.toString() : MediaType.APPLICATION_OCTET_STREAM_VALUE;
 	}
 
-	private ContentChunk toContentChunk(DataBuffer buffer, MonoSink<Void> sink) {
-		return new ContentChunk(buffer.asByteBuffer(), new Callback() {
+	private ContentChunk toContentChunk(DataBuffer dataBuffer, MonoSink<Void> sink) {
+		ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+		dataBuffer.toByteBuffer(byteBuffer);
+		return new ContentChunk(byteBuffer, new Callback() {
 			@Override
 			public void succeeded() {
-				DataBufferUtils.release(buffer);
+				DataBufferUtils.release(dataBuffer);
 			}
 			@Override
 			public void failed(Throwable t) {
-				DataBufferUtils.release(buffer);
+				DataBufferUtils.release(dataBuffer);
 				sink.error(t);
 			}
 		});

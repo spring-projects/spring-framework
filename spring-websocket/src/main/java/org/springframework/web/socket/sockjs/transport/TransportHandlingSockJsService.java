@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.transport;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -275,12 +276,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			SockJsSession session = this.sessions.get(sessionId);
 			boolean isNewSession = false;
 			if (session == null) {
-				if (transportHandler instanceof SockJsSessionFactory) {
+				if (transportHandler instanceof SockJsSessionFactory sessionFactory) {
 					Map<String, Object> attributes = new HashMap<>();
 					if (!chain.applyBeforeHandshake(request, response, attributes)) {
 						return;
 					}
-					SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
 					session = createSockJsSession(sessionId, sessionFactory, handler, attributes);
 					isNewSession = true;
 				}
@@ -380,6 +380,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (this.sessionCleanupTask != null) {
 				return;
 			}
+			Duration disconnectDelay = Duration.ofMillis(getDisconnectDelay());
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(() -> {
 				List<String> removedIds = new ArrayList<>();
 				for (SockJsSession session : this.sessions.values()) {
@@ -398,7 +399,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 				if (logger.isDebugEnabled() && !removedIds.isEmpty()) {
 					logger.debug("Closed " + removedIds.size() + " sessions: " + removedIds);
 				}
-			}, getDisconnectDelay());
+			}, disconnectDelay);
 		}
 	}
 

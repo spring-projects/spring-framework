@@ -29,17 +29,19 @@ import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.TypeHint;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.lang.Nullable;
 
 /**
  * Write {@link ReflectionHints} to the JSON output expected by the GraalVM
- * {@code native-image} compiler, typically named {@code reflect-config.json}.
+ * {@code native-image} compiler, typically named {@code reflect-config.json}
+ * or {@code jni-config.json}.
  *
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
+ * @author Janne Valkealahti
  * @since 6.0
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/Reflection/">Reflection Use in Native Images</a>
+ * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/JNI/">Java Native Interface (JNI) in Native Image</a>
  * @see <a href="https://www.graalvm.org/22.0/reference-manual/native-image/BuildConfiguration/">Native Image Build Configuration</a>
  */
 class ReflectionHintsWriter {
@@ -75,28 +77,22 @@ class ReflectionHintsWriter {
 	private Map<String, Object> toAttributes(FieldHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		attributes.put("name", hint.getName());
-		if (hint.isAllowWrite()) {
-			attributes.put("allowWrite", hint.isAllowWrite());
-		}
-		if (hint.isAllowUnsafeAccess()) {
-			attributes.put("allowUnsafeAccess", hint.isAllowUnsafeAccess());
-		}
 		return attributes;
 	}
 
 	private void handleExecutables(Map<String, Object> attributes, List<ExecutableHint> hints) {
 		addIfNotEmpty(attributes, "methods", hints.stream()
-				.filter(h -> h.getModes().contains(ExecutableMode.INVOKE) || h.getModes().isEmpty())
+				.filter(h -> h.getMode().equals(ExecutableMode.INVOKE))
 				.map(this::toAttributes).toList());
 		addIfNotEmpty(attributes, "queriedMethods", hints.stream()
-				.filter(h -> h.getModes().contains(ExecutableMode.INTROSPECT))
+				.filter(h -> h.getMode().equals(ExecutableMode.INTROSPECT))
 				.map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(ExecutableHint hint) {
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		attributes.put("name", hint.getName());
-		attributes.put("parameterTypes", hint.getParameterTypes().stream().map(TypeReference::getCanonicalName).toList());
+		attributes.put("parameterTypes", hint.getParameterTypes());
 		return attributes;
 	}
 
@@ -105,14 +101,21 @@ class ReflectionHintsWriter {
 					switch (category) {
 						case PUBLIC_FIELDS -> attributes.put("allPublicFields", true);
 						case DECLARED_FIELDS -> attributes.put("allDeclaredFields", true);
-						case INTROSPECT_PUBLIC_CONSTRUCTORS -> attributes.put("queryAllPublicConstructors", true);
-						case INTROSPECT_DECLARED_CONSTRUCTORS -> attributes.put("queryAllDeclaredConstructors", true);
-						case INVOKE_PUBLIC_CONSTRUCTORS -> attributes.put("allPublicConstructors", true);
-						case INVOKE_DECLARED_CONSTRUCTORS -> attributes.put("allDeclaredConstructors", true);
-						case INTROSPECT_PUBLIC_METHODS -> attributes.put("queryAllPublicMethods", true);
-						case INTROSPECT_DECLARED_METHODS -> attributes.put("queryAllDeclaredMethods", true);
+						case INTROSPECT_PUBLIC_CONSTRUCTORS ->
+								attributes.put("queryAllPublicConstructors", true);
+						case INTROSPECT_DECLARED_CONSTRUCTORS ->
+								attributes.put("queryAllDeclaredConstructors", true);
+						case INVOKE_PUBLIC_CONSTRUCTORS ->
+								attributes.put("allPublicConstructors", true);
+						case INVOKE_DECLARED_CONSTRUCTORS ->
+								attributes.put("allDeclaredConstructors", true);
+						case INTROSPECT_PUBLIC_METHODS ->
+								attributes.put("queryAllPublicMethods", true);
+						case INTROSPECT_DECLARED_METHODS ->
+								attributes.put("queryAllDeclaredMethods", true);
 						case INVOKE_PUBLIC_METHODS -> attributes.put("allPublicMethods", true);
-						case INVOKE_DECLARED_METHODS -> attributes.put("allDeclaredMethods", true);
+						case INVOKE_DECLARED_METHODS ->
+								attributes.put("allDeclaredMethods", true);
 						case PUBLIC_CLASSES -> attributes.put("allPublicClasses", true);
 						case DECLARED_CLASSES -> attributes.put("allDeclaredClasses", true);
 					}

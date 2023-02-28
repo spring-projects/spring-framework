@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public abstract class DataSourceUtils {
 			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection", ex);
 		}
 		catch (IllegalStateException ex) {
-			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection: " + ex.getMessage());
+			throw new CannotGetJdbcConnectionException("Failed to obtain JDBC Connection", ex);
 		}
 	}
 
@@ -402,7 +402,7 @@ public abstract class DataSourceUtils {
 	 * @see SmartDataSource#shouldClose(Connection)
 	 */
 	public static void doCloseConnection(Connection con, @Nullable DataSource dataSource) throws SQLException {
-		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {
+		if (!(dataSource instanceof SmartDataSource smartDataSource) || smartDataSource.shouldClose(con)) {
 			con.close();
 		}
 	}
@@ -438,8 +438,8 @@ public abstract class DataSourceUtils {
 	 */
 	public static Connection getTargetConnection(Connection con) {
 		Connection conToUse = con;
-		while (conToUse instanceof ConnectionProxy) {
-			conToUse = ((ConnectionProxy) conToUse).getTargetConnection();
+		while (conToUse instanceof ConnectionProxy connectionProxy) {
+			conToUse = connectionProxy.getTargetConnection();
 		}
 		return conToUse;
 	}
@@ -455,9 +455,9 @@ public abstract class DataSourceUtils {
 	private static int getConnectionSynchronizationOrder(DataSource dataSource) {
 		int order = CONNECTION_SYNCHRONIZATION_ORDER;
 		DataSource currDs = dataSource;
-		while (currDs instanceof DelegatingDataSource) {
+		while (currDs instanceof DelegatingDataSource delegatingDataSource) {
 			order--;
-			currDs = ((DelegatingDataSource) currDs).getTargetDataSource();
+			currDs = delegatingDataSource.getTargetDataSource();
 		}
 		return order;
 	}

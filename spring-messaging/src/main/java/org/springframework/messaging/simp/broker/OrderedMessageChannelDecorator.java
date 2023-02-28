@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
 /**
  * Decorator for an {@link ExecutorSubscribableChannel} that ensures messages
  * are processed in the order they were published to the channel. Messages are
- * sent one at a time with the next one released when the prevoius has been
+ * sent one at a time with the next one released when the previous has been
  * processed. This decorator is intended to be applied per session.
  *
  * @author Rossen Stoyanchev
@@ -148,7 +148,7 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 	public static void configureInterceptor(MessageChannel channel, boolean preserveOrder) {
 		if (preserveOrder) {
 			Assert.isInstanceOf(ExecutorSubscribableChannel.class, channel,
-					"An ExecutorSubscribableChannel is required for `preservePublishOrder`");
+					"An ExecutorSubscribableChannel is required for 'preservePublishOrder'");
 			ExecutorSubscribableChannel execChannel = (ExecutorSubscribableChannel) channel;
 			if (execChannel.getInterceptors().stream().noneMatch(i -> i instanceof CallbackInterceptor)) {
 				execChannel.addInterceptor(0, new CallbackInterceptor());

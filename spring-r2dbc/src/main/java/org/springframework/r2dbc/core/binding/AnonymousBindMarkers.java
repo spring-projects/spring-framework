@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * the placeholder. This implementation creates indexed bind markers using
  * an anonymous placeholder that correlates with an index.
  *
- * <p>Note: Anonymous bind markers are problematic because the have to appear
+ * <p>Note: Anonymous bind markers are problematic because they have to appear
  * in generated SQL in the same order they get generated. This might cause
  * challenges in the future with complex generate statements. For example those
  * containing subselects which limit the freedom of arranging bind markers.
@@ -42,7 +42,7 @@ class AnonymousBindMarkers implements BindMarkers {
 
 	// access via COUNTER_INCREMENTER
 	@SuppressWarnings("unused")
-	private volatile int counter = 0;
+	private volatile int counter;
 
 
 	/**

@@ -218,10 +218,10 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	}
 
 	/**
-	 * Allow Map access to the JPA properties to be passed to the persistence
+	 * Allow {@code Map} access to the JPA properties to be passed to the persistence
 	 * provider, with the option to add or override specific entries.
 	 * <p>Useful for specifying entries directly, for example via
-	 * "jpaPropertyMap[myKey]".
+	 * {@code jpaPropertyMap[myKey]}.
 	 */
 	public Map<String, Object> getJpaPropertyMap() {
 		return this.jpaPropertyMap;

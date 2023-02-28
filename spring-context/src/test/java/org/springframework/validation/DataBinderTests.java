@@ -1724,7 +1724,7 @@ class DataBinderTests {
 		pvs.add("stringArray", new String[] {"a1", "b2"});
 		binder.bind(pvs);
 		assertThat(binder.getBindingResult().hasErrors()).isFalse();
-		assertThat(tb.getStringArray().length).isEqualTo(2);
+		assertThat(tb.getStringArray()).hasSize(2);
 		assertThat(tb.getStringArray()[0]).isEqualTo("Xa1");
 		assertThat(tb.getStringArray()[1]).isEqualTo("Xb2");
 	}
@@ -1926,7 +1926,7 @@ class DataBinderTests {
 		List<Object> list = (List<Object>) form.getF().get("list");
 		assertThat(list.get(0)).isEqualTo("firstValue");
 		assertThat(list.get(1)).isEqualTo("secondValue");
-		assertThat(list.size()).isEqualTo(2);
+		assertThat(list).hasSize(2);
 	}
 
 	@Test
@@ -1959,7 +1959,7 @@ class DataBinderTests {
 		pvs.add("integerList[256]", "1");
 
 		binder.bind(pvs);
-		assertThat(tb.getIntegerList().size()).isEqualTo(257);
+		assertThat(tb.getIntegerList()).hasSize(257);
 		assertThat(tb.getIntegerList().get(256)).isEqualTo(Integer.valueOf(1));
 		assertThat(binder.getBindingResult().getFieldValue("integerList[256]")).isEqualTo(1);
 	}

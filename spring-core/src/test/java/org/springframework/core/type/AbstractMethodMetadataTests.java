@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,9 +181,8 @@ public abstract class AbstractMethodMetadataTests {
 
 	@Test
 	public void getAllAnnotationAttributesReturnsAllAttributes() {
-		MultiValueMap<String, Object> attributes = getTagged(
-				WithMetaAnnotationAttributes.class).getAllAnnotationAttributes(
-						AnnotationAttributes.class.getName());
+		MultiValueMap<String, Object> attributes = getTagged(WithMetaAnnotationAttributes.class)
+				.getAllAnnotationAttributes(AnnotationAttributes.class.getName());
 		assertThat(attributes).containsOnlyKeys("name", "size");
 		assertThat(attributes.get("name")).containsExactlyInAnyOrder("m1", "m2");
 		assertThat(attributes.get("size")).containsExactlyInAnyOrder(1, 2);
@@ -206,8 +205,7 @@ public abstract class AbstractMethodMetadataTests {
 	protected abstract AnnotationMetadata get(Class<?> source);
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface Tag {
-
+	@interface Tag {
 	}
 
 	public static class WithMethod {
@@ -288,14 +286,12 @@ public abstract class AbstractMethodMetadataTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface DirectAnnotation {
-
+	@interface DirectAnnotation {
 	}
 
 	@DirectAnnotation
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface MetaAnnotation {
-
+	@interface MetaAnnotation {
 	}
 
 	public static abstract class WithAnnotationAttributes {
@@ -317,18 +313,16 @@ public abstract class AbstractMethodMetadataTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@AnnotationAttributes(name = "m1", size = 1)
-	public static @interface MetaAnnotationAttributes1 {
-
+	@interface MetaAnnotationAttributes1 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@AnnotationAttributes(name = "m2", size = 2)
-	public static @interface MetaAnnotationAttributes2 {
-
+	@interface MetaAnnotationAttributes2 {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface AnnotationAttributes {
+	@interface AnnotationAttributes {
 
 		String name();
 

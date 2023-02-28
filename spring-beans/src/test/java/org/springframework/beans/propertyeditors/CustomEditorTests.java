@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -502,7 +502,7 @@ class CustomEditorTests {
 		CharBean cb = new CharBean();
 		BeanWrapper bw = new BeanWrapperImpl(cb);
 
-		bw.setPropertyValue("myChar", Character.valueOf('c'));
+		bw.setPropertyValue("myChar", 'c');
 		assertThat(cb.getMyChar()).isEqualTo('c');
 
 		bw.setPropertyValue("myChar", "c");
@@ -722,7 +722,7 @@ class CustomEditorTests {
 
 	@Test
 	void testCustomDateEditor() {
-		CustomDateEditor editor = new CustomDateEditor(null, false);
+		CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("MM/dd/yyyy"), false);
 		editor.setValue(null);
 		assertThat(editor.getValue()).isNull();
 		assertThat(editor.getAsText()).isEmpty();
@@ -730,7 +730,7 @@ class CustomEditorTests {
 
 	@Test
 	void testCustomDateEditorWithEmptyAsNull() {
-		CustomDateEditor editor = new CustomDateEditor(null, true);
+		CustomDateEditor editor = new CustomDateEditor(new SimpleDateFormat("MM/dd/yyyy"), true);
 		editor.setValue(null);
 		assertThat(editor.getValue()).isNull();
 		assertThat(editor.getAsText()).isEmpty();
@@ -1357,12 +1357,12 @@ class CustomEditorTests {
 		bw.registerCustomEditor(Hashtable.class, new CustomMapEditor(Hashtable.class));
 
 		bw.setPropertyValue("vector", new String[] {"a", "b"});
-		assertThat(tb.getVector().size()).isEqualTo(2);
+		assertThat(tb.getVector()).hasSize(2);
 		assertThat(tb.getVector().get(0)).isEqualTo("a");
 		assertThat(tb.getVector().get(1)).isEqualTo("b");
 
 		bw.setPropertyValue("hashtable", Collections.singletonMap("foo", "bar"));
-		assertThat(tb.getHashtable().size()).isEqualTo(1);
+		assertThat(tb.getHashtable()).hasSize(1);
 		assertThat(tb.getHashtable().get("foo")).isEqualTo("bar");
 	}
 
@@ -1393,7 +1393,7 @@ class CustomEditorTests {
 			}
 		});
 		bw.setPropertyValue("array", new String[] {"a", "b"});
-		assertThat(tb.getArray().length).isEqualTo(2);
+		assertThat(tb.getArray()).hasSize(2);
 		assertThat(tb.getArray()[0].getName()).isEqualTo("a");
 		assertThat(tb.getArray()[1].getName()).isEqualTo("b");
 	}

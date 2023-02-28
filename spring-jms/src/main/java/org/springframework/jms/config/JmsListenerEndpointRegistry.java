@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	/**
 	 * Create a message listener container for the given {@link JmsListenerEndpoint}.
 	 * <p>This create the necessary infrastructure to honor that endpoint
-	 * with regards to its configuration.
+	 * with regard to its configuration.
 	 * <p>The {@code startImmediately} flag determines if the container should be
 	 * started immediately.
 	 * @param endpoint the endpoint to add
@@ -153,7 +153,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	/**
 	 * Create a message listener container for the given {@link JmsListenerEndpoint}.
 	 * <p>This create the necessary infrastructure to honor that endpoint
-	 * with regards to its configuration.
+	 * with regard to its configuration.
 	 * @param endpoint the endpoint to add
 	 * @param factory the listener factory to use
 	 * @see #registerListenerContainer(JmsListenerEndpoint, JmsListenerContainerFactory, boolean)
@@ -170,9 +170,9 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 
 		MessageListenerContainer listenerContainer = factory.createListenerContainer(endpoint);
 
-		if (listenerContainer instanceof InitializingBean) {
+		if (listenerContainer instanceof InitializingBean initializingBean) {
 			try {
-				((InitializingBean) listenerContainer).afterPropertiesSet();
+				initializingBean.afterPropertiesSet();
 			}
 			catch (Exception ex) {
 				throw new BeanInitializationException("Failed to initialize message listener container", ex);
@@ -246,9 +246,9 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	@Override
 	public void destroy() {
 		for (MessageListenerContainer listenerContainer : getListenerContainers()) {
-			if (listenerContainer instanceof DisposableBean) {
+			if (listenerContainer instanceof DisposableBean disposableBean) {
 				try {
-					((DisposableBean) listenerContainer).destroy();
+					disposableBean.destroy();
 				}
 				catch (Throwable ex) {
 					logger.warn("Failed to destroy message listener container", ex);

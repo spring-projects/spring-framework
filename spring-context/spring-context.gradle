@@ -1,3 +1,7 @@
+plugins {
+	id 'org.springframework.build.runtimehints-agent'
+}
+
 description = "Spring Context"
 
 apply plugin: "kotlin"
@@ -22,16 +26,17 @@ dependencies {
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
 	optional("org.reactivestreams:reactive-streams")
+	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-aop")))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-core")))
-	testImplementation(project(":spring-core-test"))
 	testImplementation("io.projectreactor:reactor-core")
 	testImplementation("org.apache.groovy:groovy-jsr223")
 	testImplementation("org.apache.groovy:groovy-xml")
 	testImplementation("org.apache.commons:commons-pool2")
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("jakarta.inject:jakarta.inject-tck")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	testRuntimeOnly("jakarta.xml.bind:jakarta.xml.bind-api")
 	testRuntimeOnly("org.glassfish:jakarta.el")
 	// Substitute for javax.management:jmxremote_optional:1.0.1_04 (not available on Maven Central)

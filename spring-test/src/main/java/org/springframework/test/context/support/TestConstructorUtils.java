@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public abstract class TestConstructorUtils {
 	public static boolean isAutowirableConstructor(Executable executable, Class<?> testClass,
 			@Nullable PropertyProvider fallbackPropertyProvider) {
 
-		return (executable instanceof Constructor &&
-				isAutowirableConstructor((Constructor<?>) executable, testClass, fallbackPropertyProvider));
+		return (executable instanceof Constructor<?> constructor &&
+				isAutowirableConstructor(constructor, testClass, fallbackPropertyProvider));
 	}
 
 	/**

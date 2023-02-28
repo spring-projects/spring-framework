@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
  * connection pool, implementing the same standard interface, but creating new
  * Connections on every call.
  *
- * <p>Useful for test or standalone environments outside of a Jakarta EE container, either
+ * <p>Useful for test or standalone environments outside a Jakarta EE container, either
  * as a DataSource bean in a corresponding ApplicationContext or in conjunction with
  * a simple JNDI environment. Pool-assuming {@code Connection.close()} calls will
  * simply close the Connection, so any DataSource-aware persistence code should work.

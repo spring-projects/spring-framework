@@ -107,8 +107,8 @@ public abstract class AopUtils {
 	public static Class<?> getTargetClass(Object candidate) {
 		Assert.notNull(candidate, "Candidate object must not be null");
 		Class<?> result = null;
-		if (candidate instanceof TargetClassAware) {
-			result = ((TargetClassAware) candidate).getTargetClass();
+		if (candidate instanceof TargetClassAware targetClassAware) {
+			result = targetClassAware.getTargetClass();
 		}
 		if (result == null) {
 			result = (isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
@@ -217,7 +217,7 @@ public abstract class AopUtils {
 	 * out a pointcut for a class.
 	 * @param pc the static or dynamic pointcut to check
 	 * @param targetClass the class to test
-	 * @param hasIntroductions whether or not the advisor chain
+	 * @param hasIntroductions whether the advisor chain
 	 * for this bean includes any introductions
 	 * @return whether the pointcut can apply on any method
 	 */
@@ -234,8 +234,8 @@ public abstract class AopUtils {
 		}
 
 		IntroductionAwareMethodMatcher introductionAwareMethodMatcher = null;
-		if (methodMatcher instanceof IntroductionAwareMethodMatcher) {
-			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
+		if (methodMatcher instanceof IntroductionAwareMethodMatcher iamm) {
+			introductionAwareMethodMatcher = iamm;
 		}
 
 		Set<Class<?>> classes = new LinkedHashSet<>();
@@ -261,7 +261,7 @@ public abstract class AopUtils {
 	/**
 	 * Can the given advisor apply at all on the given class?
 	 * This is an important test as it can be used to optimize
-	 * out a advisor for a class.
+	 * out an advisor for a class.
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
 	 * @return whether the pointcut can apply on any method
@@ -272,17 +272,17 @@ public abstract class AopUtils {
 
 	/**
 	 * Can the given advisor apply at all on the given class?
-	 * <p>This is an important test as it can be used to optimize out a advisor for a class.
+	 * <p>This is an important test as it can be used to optimize out an advisor for a class.
 	 * This version also takes into account introductions (for IntroductionAwareMethodMatchers).
 	 * @param advisor the advisor to check
 	 * @param targetClass class we're testing
-	 * @param hasIntroductions whether or not the advisor chain for this bean includes
+	 * @param hasIntroductions whether the advisor chain for this bean includes
 	 * any introductions
 	 * @return whether the pointcut can apply on any method
 	 */
 	public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
-		if (advisor instanceof IntroductionAdvisor) {
-			return ((IntroductionAdvisor) advisor).getClassFilter().matches(targetClass);
+		if (advisor instanceof IntroductionAdvisor ia) {
+			return ia.getClassFilter().matches(targetClass);
 		}
 		else if (advisor instanceof PointcutAdvisor pca) {
 			return canApply(pca.getPointcut(), targetClass, hasIntroductions);

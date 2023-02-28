@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class StreamingSimpleClientHttpRequestFactoryTests extends AbstractHttpRe
 
 		ClientHttpResponse response = null;
 		try {
-			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/echo"), HttpMethod.GET);
+			ClientHttpRequest request = factory.createRequest(URI.create(baseUrl + "/echo"), HttpMethod.GET);
 			response = request.execute();
 			assertThat(response.getStatusCode()).as("Invalid response status").isEqualTo(HttpStatus.OK);
 			HttpHeaders responseHeaders = response.getHeaders();
@@ -74,7 +74,7 @@ public class StreamingSimpleClientHttpRequestFactoryTests extends AbstractHttpRe
 		Random rnd = new Random();
 		ClientHttpResponse response = null;
 		try {
-			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/post"), HttpMethod.POST);
+			ClientHttpRequest request = factory.createRequest(URI.create(baseUrl + "/methods/post"), HttpMethod.POST);
 			final int BUF_SIZE = 4096;
 			final int ITERATIONS = Integer.MAX_VALUE / BUF_SIZE;
 			// final int contentLength = ITERATIONS * BUF_SIZE;

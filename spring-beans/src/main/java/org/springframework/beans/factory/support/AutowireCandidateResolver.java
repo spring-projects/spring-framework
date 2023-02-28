@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,20 @@ public interface AutowireCandidateResolver {
 	 */
 	@Nullable
 	default Object getLazyResolutionProxyIfNecessary(DependencyDescriptor descriptor, @Nullable String beanName) {
+		return null;
+	}
+
+	/**
+	 * Determine the proxy class for lazy resolution of the dependency target,
+	 * if demanded by the injection point.
+	 * <p>The default implementation simply returns {@code null}.
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @param beanName the name of the bean that contains the injection point
+	 * @return the lazy resolution proxy class for the dependency target, if any
+	 * @since 6.0
+	 */
+	@Nullable
+	default Class<?> getLazyResolutionProxyClass(DependencyDescriptor descriptor, @Nullable String beanName) {
 		return null;
 	}
 

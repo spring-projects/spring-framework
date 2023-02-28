@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ final class DefaultRenderingResponseBuilder implements RenderingResponse.Builder
 	@Override
 	public RenderingResponse.Builder modelAttribute(Object attribute) {
 		Assert.notNull(attribute, "Attribute must not be null");
-		if (attribute instanceof Collection && ((Collection<?>) attribute).isEmpty()) {
+		if (attribute instanceof Collection<?> collection && collection.isEmpty()) {
 			return this;
 		}
 		return modelAttribute(Conventions.getVariableName(attribute), attribute);

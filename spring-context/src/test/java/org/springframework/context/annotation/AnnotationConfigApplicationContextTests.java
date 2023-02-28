@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,10 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
+import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
+import org.springframework.context.testfixture.context.annotation.LambdaBeanConfiguration;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.ObjectUtils;
 
@@ -148,25 +154,51 @@ class AnnotationConfigApplicationContextTests {
 	void nullReturningBeanPostProcessor() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(AutowiredConfig.class);
+		// 1st BPP always gets invoked
+		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				if (bean instanceof TestBean testBean) {
+					testBean.name = testBean.name + "-before";
+				}
+				return bean;
+			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				if (bean instanceof TestBean testBean) {
+					testBean.name = testBean.name + "-after";
+				}
+				return bean;
+			}
+		});
+		// 2nd BPP always returns null for a TestBean
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return (bean instanceof TestBean ? null : bean);
 			}
+			@Override
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				return (bean instanceof TestBean ? null : bean);
+			}
 		});
+		// 3rd BPP never gets invoked with a TestBean
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
 			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
+				assertThat(bean).isNotInstanceOf(TestBean.class);
 				return bean;
 			}
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
-				bean.getClass().getName();
+				assertThat(bean).isNotInstanceOf(TestBean.class);
 				return bean;
 			}
 		});
 		context.refresh();
+		TestBean testBean = context.getBean(TestBean.class);
+		assertThat(testBean).isNotNull();
+		assertThat(testBean.name).isEqualTo("foo-before-after");
 	}
 
 	@Test
@@ -340,8 +372,8 @@ class AnnotationConfigApplicationContextTests {
 		context.registerBean("fb", NonInstantiatedFactoryBean.class, NonInstantiatedFactoryBean::new, bd -> bd.setLazyInit(true));
 		context.refresh();
 
-		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getType("&fb")).isEqualTo(NonInstantiatedFactoryBean.class);
+		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
 		assertThat(context.getBeanNamesForType(NonInstantiatedFactoryBean.class)).hasSize(1);
 	}
@@ -356,25 +388,77 @@ class AnnotationConfigApplicationContextTests {
 		context.registerBeanDefinition("fb", bd);
 		context.refresh();
 
-		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getType("&fb")).isEqualTo(FactoryBean.class);
+		assertThat(context.getType("fb")).isEqualTo(String.class);
 		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
 		assertThat(context.getBeanNamesForType(NonInstantiatedFactoryBean.class)).isEmpty();
 	}
 
 	@Test
-	void individualBeanWithFactoryBeanObjectTypeAsTargetType() {
+	void individualBeanWithFactoryBeanTypeAsTargetType() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		RootBeanDefinition bd = new RootBeanDefinition();
-		bd.setBeanClass(TypedFactoryBean.class);
-		bd.setTargetType(String.class);
-		context.registerBeanDefinition("fb", bd);
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setBeanClass(GenericHolderFactoryBean.class);
+		bd1.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, ResolvableType.forClassWithGenerics(GenericHolder.class, String.class)));
+		bd1.setLazyInit(true);
+		context.registerBeanDefinition("fb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setBeanClass(UntypedFactoryBean.class);
+		bd2.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, ResolvableType.forClassWithGenerics(GenericHolder.class, Integer.class)));
+		bd2.setLazyInit(true);
+		context.registerBeanDefinition("fb2", bd2);
+		context.registerBeanDefinition("ip", new RootBeanDefinition(FactoryBeanInjectionPoints.class));
 		context.refresh();
 
-		assertThat(context.getType("&fb")).isEqualTo(TypedFactoryBean.class);
-		assertThat(context.getType("fb")).isEqualTo(String.class);
-		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(1);
-		assertThat(context.getBeanNamesForType(TypedFactoryBean.class)).hasSize(1);
+		assertThat(context.getType("&fb1")).isEqualTo(GenericHolderFactoryBean.class);
+		assertThat(context.getType("fb1")).isEqualTo(GenericHolder.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(2);
+		assertThat(context.getBeanNamesForType(GenericHolderFactoryBean.class)).hasSize(1);
+		assertThat(context.getBean("ip", FactoryBeanInjectionPoints.class).factoryBean).isSameAs(context.getBean("&fb1"));
+		assertThat(context.getBean("ip", FactoryBeanInjectionPoints.class).factoryResult).isSameAs(context.getBean("fb1"));
+	}
+
+	@Test
+	void individualBeanWithUnresolvedFactoryBeanTypeAsTargetType() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setBeanClass(GenericHolderFactoryBean.class);
+		bd1.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, ResolvableType.forClassWithGenerics(GenericHolder.class, Object.class)));
+		bd1.setLazyInit(true);
+		context.registerBeanDefinition("fb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setBeanClass(UntypedFactoryBean.class);
+		bd2.setTargetType(ResolvableType.forClassWithGenerics(FactoryBean.class, ResolvableType.forClassWithGenerics(GenericHolder.class, Integer.class)));
+		bd2.setLazyInit(true);
+		context.registerBeanDefinition("fb2", bd2);
+		context.registerBeanDefinition("ip", new RootBeanDefinition(FactoryResultInjectionPoint.class));
+		context.refresh();
+
+		assertThat(context.getType("&fb1")).isEqualTo(GenericHolderFactoryBean.class);
+		assertThat(context.getType("fb1")).isEqualTo(GenericHolder.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(2);
+		assertThat(context.getBean("ip", FactoryResultInjectionPoint.class).factoryResult).isSameAs(context.getBean("fb1"));
+	}
+
+	@Test
+	void individualBeanWithFactoryBeanObjectTypeAsTargetType() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		RootBeanDefinition bd1 = new RootBeanDefinition();
+		bd1.setBeanClass(GenericHolderFactoryBean.class);
+		bd1.setTargetType(ResolvableType.forClassWithGenerics(GenericHolder.class, String.class));
+		context.registerBeanDefinition("fb1", bd1);
+		RootBeanDefinition bd2 = new RootBeanDefinition();
+		bd2.setBeanClass(UntypedFactoryBean.class);
+		bd2.setTargetType(ResolvableType.forClassWithGenerics(GenericHolder.class, Integer.class));
+		context.registerBeanDefinition("fb2", bd2);
+		context.registerBeanDefinition("ip", new RootBeanDefinition(FactoryResultInjectionPoint.class));
+		context.refresh();
+
+		assertThat(context.getType("&fb1")).isEqualTo(GenericHolderFactoryBean.class);
+		assertThat(context.getType("fb1")).isEqualTo(GenericHolder.class);
+		assertThat(context.getBeanNamesForType(FactoryBean.class)).hasSize(2);
+		assertThat(context.getBeanNamesForType(GenericHolderFactoryBean.class)).hasSize(1);
+		assertThat(context.getBean("ip", FactoryResultInjectionPoint.class).factoryResult).isSameAs(context.getBean("fb1"));
 	}
 
 	@Test
@@ -400,9 +484,63 @@ class AnnotationConfigApplicationContextTests {
 	void refreshForAotProcessingWithConfiguration() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(Config.class);
-		context.refreshForAotProcessing();
+		context.refreshForAotProcessing(new RuntimeHints());
 		assertThat(context.getBeanFactory().getBeanDefinitionNames()).contains(
 				"annotationConfigApplicationContextTests.Config", "testBean");
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanD.class);
+		context.refreshForAotProcessing(new RuntimeHints());
+		BeanD bean = context.getBean(BeanD.class);
+		assertThat(bean.applicationContext).isSameAs(context);
+	}
+
+	@Test
+	void refreshForAotCanInstantiateBeanWithFieldAutowiredApplicationContext() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(BeanB.class);
+		context.refreshForAotProcessing(new RuntimeHints());
+		BeanB bean = context.getBean(BeanB.class);
+		assertThat(bean.applicationContext).isSameAs(context);
+	}
+
+	@Test
+	void refreshForAotRegisterHintsForCglibProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(CglibConfiguration.class);
+		RuntimeHints runtimeHints = new RuntimeHints();
+		context.refreshForAotProcessing(runtimeHints);
+		TypeReference cglibType = TypeReference.of(CglibConfiguration.class.getName() + "$$SpringCGLIB$$0");
+		assertThat(RuntimeHintsPredicates.reflection().onType(cglibType)
+				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS))
+				.accepts(runtimeHints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(CglibConfiguration.class)
+				.withMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS))
+				.accepts(runtimeHints);
+	}
+
+	@Test
+	void refreshForAotRegisterHintsForTargetOfCglibProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(CglibConfiguration.class);
+		RuntimeHints runtimeHints = new RuntimeHints();
+		context.refreshForAotProcessing(runtimeHints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of(CglibConfiguration.class))
+				.withMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS))
+				.accepts(runtimeHints);
+	}
+
+	@Test
+	void refreshForAotRegisterDoesNotConsiderLambdaBeanAsCglibProxy() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(LambdaBeanConfiguration.class);
+		RuntimeHints runtimeHints = new RuntimeHints();
+		context.refreshForAotProcessing(runtimeHints);
+		assertThat(runtimeHints.reflection().typeHints()).isEmpty();
 	}
 
 
@@ -480,6 +618,16 @@ class AnnotationConfigApplicationContextTests {
 
 	static class BeanC {}
 
+	static class BeanD {
+
+		private final ApplicationContext applicationContext;
+
+		public BeanD(ApplicationContext applicationContext) {
+			this.applicationContext = applicationContext;
+		}
+
+	}
+
 	static class NonInstantiatedFactoryBean implements FactoryBean<String> {
 
 		NonInstantiatedFactoryBean() {
@@ -536,6 +684,38 @@ class AnnotationConfigApplicationContextTests {
 		public boolean isSingleton() {
 			return false;
 		}
+	}
+
+	static class GenericHolder<T> {}
+
+	static class GenericHolderFactoryBean implements FactoryBean<GenericHolder<?>> {
+
+		@Override
+		public GenericHolder<?> getObject() {
+			return new GenericHolder<>();
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return GenericHolder.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+	}
+
+	static class FactoryResultInjectionPoint {
+
+		@Autowired
+		GenericHolder<String> factoryResult;
+	}
+
+	static class FactoryBeanInjectionPoints extends FactoryResultInjectionPoint {
+
+		@Autowired
+		FactoryBean<GenericHolder<String>> factoryBean;
 	}
 }
 

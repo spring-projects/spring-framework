@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,12 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * <p>Typically there is one such strategy for every {@link ServerHttpRequest}
  * and {@link ServerHttpResponse} type except in the case of Servlet containers
- * for which the standard Java WebSocket API JSR-356 does not define a way to
+ * for which the standard Jakarta WebSocket API (JSR-356) does not define a way to
  * upgrade a request so a custom strategy is needed for every Servlet container.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see org.springframework.web.reactive.socket.server.upgrade.StandardWebSocketUpgradeStrategy
  */
 public interface RequestUpgradeStrategy {
 

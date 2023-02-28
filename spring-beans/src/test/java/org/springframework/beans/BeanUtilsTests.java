@@ -28,7 +28,6 @@ import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -227,8 +226,8 @@ class BeanUtilsTests {
 		IntegerListHolder2 integerListHolder2 = new IntegerListHolder2();
 
 		BeanUtils.copyProperties(integerListHolder1, integerListHolder2);
-		assertThat(integerListHolder1.getList()).containsOnly(42);
-		assertThat(integerListHolder2.getList()).containsOnly(42);
+		assertThat(integerListHolder1.getList()).containsExactly(42);
+		assertThat(integerListHolder2.getList()).containsExactly(42);
 	}
 
 	/**
@@ -236,7 +235,7 @@ class BeanUtilsTests {
 	 */
 	@Test
 	void copyPropertiesHonorsGenericTypeMatchesFromWildcardToWildcard() {
-		List<?> list = Arrays.asList("foo", 42);
+		List<?> list = List.of("foo", 42);
 		WildcardListHolder1 wildcardListHolder1 = new WildcardListHolder1();
 		wildcardListHolder1.setList(list);
 		WildcardListHolder2 wildcardListHolder2 = new WildcardListHolder2();
@@ -257,8 +256,8 @@ class BeanUtilsTests {
 		WildcardListHolder2 wildcardListHolder2 = new WildcardListHolder2();
 
 		BeanUtils.copyProperties(integerListHolder1, wildcardListHolder2);
-		assertThat(integerListHolder1.getList()).containsOnly(42);
-		assertThat(wildcardListHolder2.getList()).isEqualTo(Arrays.asList(42));
+		assertThat(integerListHolder1.getList()).containsExactly(42);
+		assertThat(wildcardListHolder2.getList()).isEqualTo(List.of(42));
 	}
 
 	/**
@@ -271,18 +270,17 @@ class BeanUtilsTests {
 		NumberUpperBoundedWildcardListHolder numberListHolder = new NumberUpperBoundedWildcardListHolder();
 
 		BeanUtils.copyProperties(integerListHolder1, numberListHolder);
-		assertThat(integerListHolder1.getList()).containsOnly(42);
-		assertThat(numberListHolder.getList()).hasSize(1);
-		assertThat(numberListHolder.getList().contains(Integer.valueOf(42))).isTrue();
+		assertThat(integerListHolder1.getList()).containsExactly(42);
+		assertThat(numberListHolder.getList()).isEqualTo(List.of(42));
 	}
 
 	/**
 	 * {@code Number} can NOT be copied to {@code Integer}.
 	 */
 	@Test
-	void copyPropertiesDoesNotCopyeFromSuperTypeToSubType() {
+	void copyPropertiesDoesNotCopyFromSuperTypeToSubType() {
 		NumberHolder numberHolder = new NumberHolder();
-		numberHolder.setNumber(Integer.valueOf(42));
+		numberHolder.setNumber(42);
 		IntegerHolder integerHolder = new IntegerHolder();
 
 		BeanUtils.copyProperties(numberHolder, integerHolder);
@@ -300,7 +298,7 @@ class BeanUtilsTests {
 		LongListHolder longListHolder = new LongListHolder();
 
 		BeanUtils.copyProperties(integerListHolder, longListHolder);
-		assertThat(integerListHolder.getList()).containsOnly(42);
+		assertThat(integerListHolder.getList()).containsExactly(42);
 		assertThat(longListHolder.getList()).isEmpty();
 	}
 
@@ -314,13 +312,13 @@ class BeanUtilsTests {
 		NumberListHolder numberListHolder = new NumberListHolder();
 
 		BeanUtils.copyProperties(integerListHolder, numberListHolder);
-		assertThat(integerListHolder.getList()).containsOnly(42);
+		assertThat(integerListHolder.getList()).containsExactly(42);
 		assertThat(numberListHolder.getList()).isEmpty();
 	}
 
 	@Test  // gh-26531
 	void copyPropertiesIgnoresGenericsIfSourceOrTargetHasUnresolvableGenerics() throws Exception {
-		Order original = new Order("test", Arrays.asList("foo", "bar"));
+		Order original = new Order("test", List.of("foo", "bar"));
 
 		// Create a Proxy that loses the generic type information for the getLineItems() method.
 		OrderSummary proxy = proxyOrder(original);

@@ -38,6 +38,7 @@ import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ProxyProcessorSupport;
 import org.springframework.aop.framework.adapter.AdvisorAdapterRegistry;
 import org.springframework.aop.framework.adapter.GlobalAdvisorAdapterRegistry;
+import org.springframework.aop.target.EmptyTargetSource;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -119,7 +120,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
-	 * Indicates whether or not the proxy should be frozen. Overridden from super
+	 * Indicates whether the proxy should be frozen. Overridden from super
 	 * to prevent the configuration from becoming frozen too early.
 	 */
 	private boolean freezeProxy = false;
@@ -145,9 +146,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 
 	/**
-	 * Set whether or not the proxy should be frozen, preventing advice
+	 * Set whether the proxy should be frozen, preventing advice
 	 * from being added to it once it is created.
-	 * <p>Overridden from the super class to prevent the proxy configuration
+	 * <p>Overridden from the superclass to prevent the proxy configuration
 	 * from being frozen before the proxy is created.
 	 */
 	@Override
@@ -229,6 +230,30 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		}
 		Object cacheKey = getCacheKey(beanClass, beanName);
 		return this.proxyTypes.get(cacheKey);
+	}
+
+	@Override
+	public Class<?> determineBeanType(Class<?> beanClass, String beanName) {
+		Object cacheKey = getCacheKey(beanClass, beanName);
+		Class<?> proxyType = this.proxyTypes.get(cacheKey);
+		if (proxyType == null) {
+			TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
+			if (targetSource != null) {
+				if (StringUtils.hasLength(beanName)) {
+					this.targetSourcedBeans.add(beanName);
+				}
+			}
+			else {
+				targetSource = EmptyTargetSource.forClass(beanClass);
+			}
+			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
+			if (specificInterceptors != DO_NOT_PROXY) {
+				this.advisedBeans.put(cacheKey, Boolean.TRUE);
+				proxyType = createProxyClass(beanClass, beanName, specificInterceptors, targetSource);
+				this.proxyTypes.put(cacheKey, proxyType);
+			}
+		}
+		return (proxyType != null ? proxyType : beanClass);
 	}
 
 	@Override
@@ -436,8 +461,20 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	protected Object createProxy(Class<?> beanClass, @Nullable String beanName,
 			@Nullable Object[] specificInterceptors, TargetSource targetSource) {
 
-		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
-			AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
+		return buildProxy(beanClass, beanName, specificInterceptors, targetSource, false);
+	}
+
+	private Class<?> createProxyClass(Class<?> beanClass, @Nullable String beanName,
+			@Nullable Object[] specificInterceptors, TargetSource targetSource) {
+
+		return (Class<?>) buildProxy(beanClass, beanName, specificInterceptors, targetSource, true);
+	}
+
+	private Object buildProxy(Class<?> beanClass, @Nullable String beanName,
+			@Nullable Object[] specificInterceptors, TargetSource targetSource, boolean classOnly) {
+
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory clbf) {
+			AutoProxyUtils.exposeTargetClass(clbf, beanName, beanClass);
 		}
 
 		ProxyFactory proxyFactory = new ProxyFactory();
@@ -474,10 +511,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 		// Use original ClassLoader if bean class not locally loaded in overriding class loader
 		ClassLoader classLoader = getProxyClassLoader();
-		if (classLoader instanceof SmartClassLoader && classLoader != beanClass.getClassLoader()) {
-			classLoader = ((SmartClassLoader) classLoader).getOriginalClassLoader();
+		if (classLoader instanceof SmartClassLoader smartClassLoader && classLoader != beanClass.getClassLoader()) {
+			classLoader = smartClassLoader.getOriginalClassLoader();
 		}
-		return proxyFactory.getProxy(classLoader);
+		return (classOnly ? proxyFactory.getProxyClass(classLoader) : proxyFactory.getProxy(classLoader));
 	}
 
 	/**
@@ -490,8 +527,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @see AutoProxyUtils#shouldProxyTargetClass
 	 */
 	protected boolean shouldProxyTargetClass(Class<?> beanClass, @Nullable String beanName) {
-		return (this.beanFactory instanceof ConfigurableListableBeanFactory &&
-				AutoProxyUtils.shouldProxyTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName));
+		return (this.beanFactory instanceof ConfigurableListableBeanFactory clbf &&
+				AutoProxyUtils.shouldProxyTargetClass(clbf, beanName));
 	}
 
 	/**
@@ -555,7 +592,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	private Advisor[] resolveInterceptorNames() {
 		BeanFactory bf = this.beanFactory;
-		ConfigurableBeanFactory cbf = (bf instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) bf : null);
+		ConfigurableBeanFactory cbf = (bf instanceof ConfigurableBeanFactory _cbf ? _cbf : null);
 		List<Advisor> advisors = new ArrayList<>();
 		for (String beanName : this.interceptorNames) {
 			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {

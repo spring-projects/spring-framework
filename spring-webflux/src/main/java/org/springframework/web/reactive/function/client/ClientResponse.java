@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,8 +63,10 @@ public interface ClientResponse {
 	 * @since 5.1
 	 * @deprecated as of 6.0, in favor of {@link #statusCode()}
 	 */
-	@Deprecated
-	int rawStatusCode();
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int rawStatusCode() {
+		return statusCode().value();
+	}
 
 	/**
 	 * Return the headers of this response.

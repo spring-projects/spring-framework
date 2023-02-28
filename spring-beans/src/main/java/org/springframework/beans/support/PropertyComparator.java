@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,9 +76,9 @@ public class PropertyComparator<T> implements Comparator<T> {
 	public int compare(T o1, T o2) {
 		Object v1 = getPropertyValue(o1);
 		Object v2 = getPropertyValue(o2);
-		if (this.sortDefinition.isIgnoreCase() && (v1 instanceof String) && (v2 instanceof String)) {
-			v1 = ((String) v1).toLowerCase();
-			v2 = ((String) v2).toLowerCase();
+		if (this.sortDefinition.isIgnoreCase() && (v1 instanceof String text1) && (v2 instanceof String text2)) {
+			v1 = text1.toLowerCase();
+			v2 = text2.toLowerCase();
 		}
 
 		int result;

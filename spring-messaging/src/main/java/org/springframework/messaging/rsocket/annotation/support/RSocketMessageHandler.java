@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 	 * likewise when this property is set the {@code RSocketStrategies} are
 	 * mutated to change the extractor in it.
 	 * <p>By default this is set to the
-	 * {@link org.springframework.messaging.rsocket.RSocketStrategies.Builder#metadataExtractor(MetadataExtractor)} defaults}
+	 * {@link org.springframework.messaging.rsocket.RSocketStrategies.Builder#metadataExtractor(MetadataExtractor) defaults}
 	 * from {@code RSocketStrategies}.
 	 * @param extractor the extractor to use
 	 */
@@ -421,7 +421,7 @@ public class RSocketMessageHandler extends MessageMappingMessageHandler {
 		String str = setupPayload.dataMimeType();
 		MimeType dataMimeType = StringUtils.hasText(str) ? MimeTypeUtils.parseMimeType(str) : this.defaultDataMimeType;
 		Assert.notNull(dataMimeType, "No `dataMimeType` in ConnectionSetupPayload and no default value");
-		Assert.isTrue(isDataMimeTypeSupported(dataMimeType), "Data MimeType '" + dataMimeType + "' not supported");
+		Assert.isTrue(isDataMimeTypeSupported(dataMimeType), () -> "Data MimeType '" + dataMimeType + "' not supported");
 
 		str = setupPayload.metadataMimeType();
 		MimeType metaMimeType = StringUtils.hasText(str) ? MimeTypeUtils.parseMimeType(str) : this.defaultMetadataMimeType;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import javax.naming.Context;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.DeliveryMode;
-import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.MessageConsumer;
@@ -78,15 +77,15 @@ import static org.mockito.Mockito.verify;
  */
 class JmsTemplateTests {
 
-	private Context jndiContext;
+	private Context jndiContext = mock();
 
-	private ConnectionFactory connectionFactory;
+	private ConnectionFactory connectionFactory = mock();
 
-	protected Connection connection;
+	protected Connection connection = mock();
 
-	private Session session;
+	private Session session = mock();
 
-	private Destination queue;
+	private Queue queue = mock();
 
 	private QosSettings qosSettings = new QosSettings(DeliveryMode.PERSISTENT, 9, 10000);
 
@@ -96,12 +95,6 @@ class JmsTemplateTests {
 	 */
 	@BeforeEach
 	void setupMocks() throws Exception {
-		this.jndiContext = mock(Context.class);
-		this.connectionFactory = mock(ConnectionFactory.class);
-		this.connection = mock(Connection.class);
-		this.session = mock(Session.class);
-		this.queue = mock(Queue.class);
-
 		given(this.connectionFactory.createConnection()).willReturn(this.connection);
 		given(this.connection.createSession(useTransactedTemplate(), Session.AUTO_ACKNOWLEDGE)).willReturn(this.session);
 		given(this.session.getTransacted()).willReturn(useTransactedSession());
@@ -153,7 +146,7 @@ class JmsTemplateTests {
 		JmsTemplate template = createTemplate();
 		template.setConnectionFactory(this.connectionFactory);
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
+		MessageProducer messageProducer = mock();
 		given(this.session.createProducer(null)).willReturn(messageProducer);
 		given(messageProducer.getPriority()).willReturn(4);
 
@@ -175,7 +168,7 @@ class JmsTemplateTests {
 		template.setMessageIdEnabled(false);
 		template.setMessageTimestampEnabled(false);
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
+		MessageProducer messageProducer = mock();
 		given(this.session.createProducer(null)).willReturn(messageProducer);
 		given(messageProducer.getPriority()).willReturn(4);
 
@@ -237,7 +230,7 @@ class JmsTemplateTests {
 			tac.close();
 
 			List<TransactionSynchronization> synchs = TransactionSynchronizationManager.getSynchronizations();
-			assertThat(synchs.size()).isEqualTo(1);
+			assertThat(synchs).hasSize(1);
 			TransactionSynchronization synch = synchs.get(0);
 			synch.beforeCommit(false);
 			synch.beforeCompletion();
@@ -270,7 +263,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator)
+	 * {@code send(String d, MessageCreator messageCreator)}
 	 */
 	@Test
 	void testSendDestinationName() throws Exception {
@@ -279,7 +272,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(Destination d, MessageCreator messageCreator) using QOS parameters.
+	 * {@code send(Destination d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
 	void testSendDestinationWithQOS() throws Exception {
@@ -288,7 +281,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator) using QOS parameters.
+	 * {@code send(String d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
 	void testSendDestinationNameWithQOS() throws Exception {
@@ -354,8 +347,8 @@ class JmsTemplateTests {
 			template.setMessageTimestampEnabled(false);
 		}
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
-		TextMessage textMessage = mock(TextMessage.class);
+		MessageProducer messageProducer = mock();
+		TextMessage textMessage = mock();
 
 		given(this.session.createProducer(this.queue)).willReturn(messageProducer);
 		given(this.session.createTextMessage("just testing")).willReturn(textMessage);
@@ -404,8 +397,8 @@ class JmsTemplateTests {
 		template.setMessageConverter(new SimpleMessageConverter());
 		String s = "Hello world";
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
-		TextMessage textMessage = mock(TextMessage.class);
+		MessageProducer messageProducer = mock();
+		TextMessage textMessage = mock();
 
 		given(this.session.createProducer(this.queue)).willReturn(messageProducer);
 		given(this.session.createTextMessage("Hello world")).willReturn(textMessage);
@@ -529,7 +522,7 @@ class JmsTemplateTests {
 		}
 		template.setReceiveTimeout(timeout);
 
-		MessageConsumer messageConsumer = mock(MessageConsumer.class);
+		MessageConsumer messageConsumer = mock();
 
 		String selectorString = "selector";
 		given(this.session.createConsumer(this.queue,
@@ -541,7 +534,7 @@ class JmsTemplateTests {
 							: Session.AUTO_ACKNOWLEDGE);
 		}
 
-		TextMessage textMessage = mock(TextMessage.class);
+		TextMessage textMessage = mock();
 
 		if (testConverter) {
 			given(textMessage.getText()).willReturn("Hello World!");
@@ -650,20 +643,20 @@ class JmsTemplateTests {
 		template.setReceiveTimeout(timeout);
 
 		Session localSession = getLocalSession();
-		TemporaryQueue replyDestination = mock(TemporaryQueue.class);
-		MessageProducer messageProducer = mock(MessageProducer.class);
+		TemporaryQueue replyDestination = mock();
+		MessageProducer messageProducer = mock();
 		given(localSession.createProducer(this.queue)).willReturn(messageProducer);
 		given(localSession.createTemporaryQueue()).willReturn(replyDestination);
 
-		MessageConsumer messageConsumer = mock(MessageConsumer.class);
+		MessageConsumer messageConsumer = mock();
 		given(localSession.createConsumer(replyDestination)).willReturn(messageConsumer);
 
 
-		TextMessage request = mock(TextMessage.class);
-		MessageCreator messageCreator = mock(MessageCreator.class);
+		TextMessage request = mock();
+		MessageCreator messageCreator = mock();
 		given(messageCreator.createMessage(localSession)).willReturn(request);
 
-		TextMessage reply = mock(TextMessage.class);
+		TextMessage reply = mock();
 		if (timeout == JmsTemplate.RECEIVE_TIMEOUT_NO_WAIT) {
 			given(messageConsumer.receiveNoWait()).willReturn(reply);
 		}
@@ -766,8 +759,8 @@ class JmsTemplateTests {
 		template.setMessageConverter(new SimpleMessageConverter());
 		String s = "Hello world";
 
-		MessageProducer messageProducer = mock(MessageProducer.class);
-		TextMessage textMessage = mock(TextMessage.class);
+		MessageProducer messageProducer = mock();
+		TextMessage textMessage = mock();
 
 		reset(this.session);
 		given(this.session.createProducer(this.queue)).willReturn(messageProducer);

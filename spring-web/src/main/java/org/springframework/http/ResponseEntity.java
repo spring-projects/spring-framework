@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 3.0.2
  * @param <T> the body type
  * @see #getStatusCode()
@@ -157,7 +158,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * @since 4.3
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public int getStatusCodeValue() {
 		if (this.status instanceof HttpStatusCode statusCode) {
 			return statusCode.value();
@@ -263,12 +264,13 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	}
 
 	/**
-	 * Create a builder for a {@code ResponseEntity} with the given
-	 * {@link ProblemDetail} as the body, also matching to its
-	 * {@link ProblemDetail#getStatus() status}. An {@code @ExceptionHandler}
-	 * method can use to add response headers, or otherwise it can return
-	 * {@code ProblemDetail}.
-	 * @param body the details for an HTTP error response
+	 * Create a new {@link HeadersBuilder} with its status set to
+	 * {@link ProblemDetail#getStatus()} and its body is set to
+	 * {@link ProblemDetail}.
+	 * <p><strong>Note:</strong> If there are no headers to add, there is usually
+	 * no need to create a {@link ResponseEntity} since {@code ProblemDetail}
+	 * is also supported as a return value from controller methods.
+	 * @param body the problem detail to use
 	 * @return the created builder
 	 * @since 6.0
 	 */
@@ -281,6 +283,21 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 				return (ResponseEntity<T>) body(body);
 			}
 		};
+	}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body
+	 * and the {@linkplain HttpStatus#OK OK} status, or an empty body and a
+	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of a
+	 * {@code null} parameter.
+	 * @return the created {@code ResponseEntity}
+	 * @since 6.0.5
+	 */
+	public static <T> ResponseEntity<T> ofNullable(@Nullable T body) {
+		if (body == null) {
+			return notFound().build();
+		}
+		return ResponseEntity.ok(body);
 	}
 
 	/**
@@ -403,7 +420,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
 		 */
-		B eTag(String etag);
+		B eTag(@Nullable String etag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the
@@ -561,12 +578,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		}
 
 		@Override
-		public BodyBuilder eTag(String etag) {
-			if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
-				etag = "\"" + etag;
-			}
-			if (!etag.endsWith("\"")) {
-				etag = etag + "\"";
+		public BodyBuilder eTag(@Nullable String etag) {
+			if (etag != null) {
+				if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
+					etag = "\"" + etag;
+				}
+				if (!etag.endsWith("\"")) {
+					etag = etag + "\"";
+				}
 			}
 			this.headers.setETag(etag);
 			return this;

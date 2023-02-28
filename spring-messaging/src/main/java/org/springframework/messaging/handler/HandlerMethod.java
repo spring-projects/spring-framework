@@ -286,9 +286,8 @@ public class HandlerMethod {
 	 */
 	public HandlerMethod createWithResolvedBean() {
 		Object handler = this.bean;
-		if (this.bean instanceof String) {
+		if (this.bean instanceof String beanName) {
 			Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
-			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
 		return new HandlerMethod(this, handler);

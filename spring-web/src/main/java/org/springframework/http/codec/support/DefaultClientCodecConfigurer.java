@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,7 @@
 
 package org.springframework.http.codec.support;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.http.codec.HttpMessageWriter;
 
 /**
  * Default implementation of {@link ClientCodecConfigurer}.
@@ -33,12 +29,10 @@ public class DefaultClientCodecConfigurer extends BaseCodecConfigurer implements
 
 	public DefaultClientCodecConfigurer() {
 		super(new ClientDefaultCodecsImpl());
-		((ClientDefaultCodecsImpl) defaultCodecs()).setPartWritersSupplier(this::getPartWriters);
 	}
 
 	private DefaultClientCodecConfigurer(DefaultClientCodecConfigurer other) {
 		super(other);
-		((ClientDefaultCodecsImpl) defaultCodecs()).setPartWritersSupplier(this::getPartWriters);
 	}
 
 
@@ -57,14 +51,5 @@ public class DefaultClientCodecConfigurer extends BaseCodecConfigurer implements
 		return new ClientDefaultCodecsImpl((ClientDefaultCodecsImpl) defaultCodecs());
 	}
 
-	private List<HttpMessageWriter<?>> getPartWriters() {
-		List<HttpMessageWriter<?>> result = new ArrayList<>();
-		result.addAll(this.customCodecs.getTypedWriters().keySet());
-		result.addAll(this.defaultCodecs.getBaseTypedWriters());
-		result.addAll(this.customCodecs.getObjectWriters().keySet());
-		result.addAll(this.defaultCodecs.getBaseObjectWriters());
-		result.addAll(this.defaultCodecs.getCatchAllWriters());
-		return result;
-	}
 
 }

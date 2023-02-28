@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.aot.hint.annotation.Reflective;
 import org.springframework.core.annotation.AliasFor;
 
 /**
@@ -72,6 +73,7 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Mapping
+@Reflective(ControllerMappingReflectiveProcessor.class)
 public @interface RequestMapping {
 
 	/**
@@ -169,7 +171,12 @@ public @interface RequestMapping {
 	 * consumes = {"text/plain", "application/*"}
 	 * consumes = MediaType.TEXT_PLAIN_VALUE
 	 * </pre>
-	 * Expressions can be negated by using the "!" operator, as in
+	 * <p>If a declared media type contains a parameter, and if the
+	 * {@code "content-type"} from the request also has that parameter, then
+	 * the parameter values must match. Otherwise, if the media type from the
+	 * request {@code "content-type"} does not contain the parameter, then the
+	 * parameter is ignored for matching purposes.
+	 * <p>Expressions can be negated by using the "!" operator, as in
 	 * "!text/plain", which matches all requests with a {@code Content-Type}
 	 * other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
@@ -194,7 +201,7 @@ public @interface RequestMapping {
 	 * </pre>
 	 * <p>If a declared media type contains a parameter (e.g. "charset=UTF-8",
 	 * "type=feed", "type=entry") and if a compatible media type from the request
-	 * has that parameter too, then the parameter values must match. Otherwise
+	 * has that parameter too, then the parameter values must match. Otherwise,
 	 * if the media type from the request does not contain the parameter, it is
 	 * assumed the client accepts any value.
 	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain",

@@ -957,7 +957,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Specify whether or not the configured initializer method is the default.
+	 * Specify whether the configured initializer method is the default.
 	 * <p>The default value is {@code true} for a locally specified init method
 	 * but switched to {@code false} for a shared setting in a defaults section
 	 * (e.g. {@code bean init-method} versus {@code beans default-init-method}
@@ -1016,7 +1016,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Specify whether or not the configured destroy method is the default.
+	 * Specify whether the configured destroy method is the default.
 	 * <p>The default value is {@code true} for a locally specified destroy method
 	 * but switched to {@code false} for a shared setting in a defaults section
 	 * (e.g. {@code bean destroy-method} versus {@code beans default-destroy-method}
@@ -1281,8 +1281,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		sb.append("; primary=").append(this.primary);
 		sb.append("; factoryBeanName=").append(this.factoryBeanName);
 		sb.append("; factoryMethodName=").append(this.factoryMethodName);
-		sb.append("; initMethodNames=").append(this.initMethodNames);
-		sb.append("; destroyMethodNames=").append(this.destroyMethodNames);
+		sb.append("; initMethodNames=").append(Arrays.toString(this.initMethodNames));
+		sb.append("; destroyMethodNames=").append(Arrays.toString(this.destroyMethodNames));
 		if (this.resource != null) {
 			sb.append("; defined in ").append(this.resource.getDescription());
 		}

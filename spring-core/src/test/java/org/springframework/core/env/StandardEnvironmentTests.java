@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,12 +113,12 @@ public class StandardEnvironmentTests {
 
 	@Test
 	void activeProfilesIsEmptyByDefault() {
-		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
+		assertThat(environment.getActiveProfiles()).isEmpty();
 	}
 
 	@Test
 	void defaultProfilesContainsDefaultProfileByDefault() {
-		assertThat(environment.getDefaultProfiles().length).isEqualTo(1);
+		assertThat(environment.getDefaultProfiles()).hasSize(1);
 		assertThat(environment.getDefaultProfiles()[0]).isEqualTo("default");
 	}
 
@@ -127,7 +127,7 @@ public class StandardEnvironmentTests {
 		environment.setActiveProfiles("local", "embedded");
 		String[] activeProfiles = environment.getActiveProfiles();
 		assertThat(activeProfiles).contains("local", "embedded");
-		assertThat(activeProfiles.length).isEqualTo(2);
+		assertThat(activeProfiles).hasSize(2);
 	}
 
 	@Test
@@ -172,17 +172,17 @@ public class StandardEnvironmentTests {
 
 	@Test
 	void addActiveProfile() {
-		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
+		assertThat(environment.getActiveProfiles()).isEmpty();
 		environment.setActiveProfiles("local", "embedded");
 		assertThat(environment.getActiveProfiles()).contains("local", "embedded");
-		assertThat(environment.getActiveProfiles().length).isEqualTo(2);
+		assertThat(environment.getActiveProfiles()).hasSize(2);
 		environment.addActiveProfile("p1");
 		assertThat(environment.getActiveProfiles()).contains("p1");
-		assertThat(environment.getActiveProfiles().length).isEqualTo(3);
+		assertThat(environment.getActiveProfiles()).hasSize(3);
 		environment.addActiveProfile("p2");
 		environment.addActiveProfile("p3");
 		assertThat(environment.getActiveProfiles()).contains("p2", "p3");
-		assertThat(environment.getActiveProfiles().length).isEqualTo(5);
+		assertThat(environment.getActiveProfiles()).hasSize(5);
 	}
 
 	@Test
@@ -218,9 +218,9 @@ public class StandardEnvironmentTests {
 
 	@Test
 	void getActiveProfiles_systemPropertiesEmpty() {
-		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
+		assertThat(environment.getActiveProfiles()).isEmpty();
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, "");
-		assertThat(environment.getActiveProfiles().length).isEqualTo(0);
+		assertThat(environment.getActiveProfiles()).isEmpty();
 		System.clearProperty(ACTIVE_PROFILES_PROPERTY_NAME);
 	}
 
@@ -239,7 +239,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
-	void getActiveProfiles_fromSystemProperties_withMulitpleProfiles_withWhitespace() {
+	void getActiveProfiles_fromSystemProperties_withMultipleProfiles_withWhitespace() {
 		System.setProperty(ACTIVE_PROFILES_PROPERTY_NAME, " bar , baz "); // notice whitespace
 		assertThat(environment.getActiveProfiles()).contains("bar", "baz");
 		System.clearProperty(ACTIVE_PROFILES_PROPERTY_NAME);
@@ -249,14 +249,14 @@ public class StandardEnvironmentTests {
 	void getDefaultProfiles() {
 		assertThat(environment.getDefaultProfiles()).isEqualTo(new String[] {RESERVED_DEFAULT_PROFILE_NAME});
 		environment.getPropertySources().addFirst(new MockPropertySource().withProperty(DEFAULT_PROFILES_PROPERTY_NAME, "pd1"));
-		assertThat(environment.getDefaultProfiles().length).isEqualTo(1);
+		assertThat(environment.getDefaultProfiles()).hasSize(1);
 		assertThat(Arrays.asList(environment.getDefaultProfiles())).contains("pd1");
 	}
 
 	@Test
 	void setDefaultProfiles() {
 		environment.setDefaultProfiles();
-		assertThat(environment.getDefaultProfiles().length).isEqualTo(0);
+		assertThat(environment.getDefaultProfiles()).isEmpty();
 		environment.setDefaultProfiles("pd1");
 		assertThat(Arrays.asList(environment.getDefaultProfiles())).contains("pd1");
 		environment.setDefaultProfiles("pd2", "pd3");

@@ -24,22 +24,24 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.springframework.aot.hint.ResourcePatternHint.Builder;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
 /**
  * Gather the need for resources available at runtime.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public class ResourceHints {
 
 	private final Set<TypeReference> types;
 
-	private final List<Builder> resourcePatternHints;
+	private final List<ResourcePatternHints> resourcePatternHints;
 
-	private final Set<String> resourceBundleHints;
+	private final Set<ResourceBundleHint> resourceBundleHints;
 
 
 	public ResourceHints() {
@@ -50,10 +52,10 @@ public class ResourceHints {
 
 	/**
 	 * Return the resources that should be made available at runtime.
-	 * @return a stream of {@link ResourcePatternHint}
+	 * @return a stream of {@link ResourcePatternHints}
 	 */
-	public Stream<ResourcePatternHint> resourcePatterns() {
-		Stream<ResourcePatternHint> patterns = this.resourcePatternHints.stream().map(Builder::build);
+	public Stream<ResourcePatternHints> resourcePatternHints() {
+		Stream<ResourcePatternHints> patterns = this.resourcePatternHints.stream();
 		return (this.types.isEmpty() ? patterns
 				: Stream.concat(Stream.of(typesPatternResourceHint()), patterns));
 	}
@@ -62,34 +64,69 @@ public class ResourceHints {
 	 * Return the resource bundles that should be made available at runtime.
 	 * @return a stream of {@link ResourceBundleHint}
 	 */
-	public Stream<ResourceBundleHint> resourceBundles() {
-		return this.resourceBundleHints.stream().map(ResourceBundleHint::new);
+	public Stream<ResourceBundleHint> resourceBundleHints() {
+		return this.resourceBundleHints.stream();
 	}
 
 	/**
-	 * Register that the resources matching the specified pattern should be
-	 * made available at runtime.
-	 * @param include a pattern of the resources to include
-	 * @param resourceHint a builder to further customize the resource pattern
+	 * Register a pattern if the given {@code location} is available on the
+	 * classpath. This delegates to {@link ClassLoader#getResource(String)}
+	 * which validates directories as well. The location is not included in
+	 * the hint.
+	 * @param classLoader the classloader to use
+	 * @param location a '/'-separated path name that should exist
+	 * @param resourceHint a builder to customize the resource pattern
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ResourceHints registerPattern(String include, @Nullable Consumer<Builder> resourceHint) {
-		Builder builder = new Builder().includes(include);
-		if (resourceHint != null) {
-			resourceHint.accept(builder);
+	public ResourceHints registerPatternIfPresent(@Nullable ClassLoader classLoader, String location,
+			Consumer<ResourcePatternHints.Builder> resourceHint) {
+		ClassLoader classLoaderToUse = (classLoader != null) ? classLoader : getClass().getClassLoader();
+		if (classLoaderToUse.getResource(location) != null) {
+			registerPattern(resourceHint);
 		}
-		this.resourcePatternHints.add(builder);
 		return this;
 	}
 
 	/**
 	 * Register that the resources matching the specified pattern should be
 	 * made available at runtime.
-	 * @param include a pattern of the resources to include
+	 * @param resourceHint a builder to further customize the resource pattern
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ResourceHints registerPattern(@Nullable Consumer<ResourcePatternHints.Builder> resourceHint) {
+		ResourcePatternHints.Builder builder = new ResourcePatternHints.Builder();
+		if (resourceHint != null) {
+			resourceHint.accept(builder);
+		}
+		this.resourcePatternHints.add(builder.build());
+		return this;
+	}
+
+	/**
+	 * Register that the resources matching the specified pattern should be
+	 * made available at runtime.
+	 * @param include a pattern of the resources to include (see {@link ResourcePatternHint} documentation)
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ResourceHints registerPattern(String include) {
-		return registerPattern(include, null);
+		return registerPattern(builder -> builder.includes(include));
+	}
+
+	/**
+	 * Register that the supplied resource should be made available at runtime.
+	 * @param resource the resource to register
+	 * @throws IllegalArgumentException if the supplied resource is not a
+	 * {@link ClassPathResource} or does not {@linkplain Resource#exists() exist}
+	 * @see #registerPattern(String)
+	 * @see ClassPathResource#getPath()
+	 */
+	public void registerResource(Resource resource) {
+		if (resource instanceof ClassPathResource classPathResource && classPathResource.exists()) {
+			registerPattern(classPathResource.getPath());
+		}
+		else {
+			throw new IllegalArgumentException("Resource must be a ClassPathResource that exists: " + resource);
+		}
 	}
 
 	/**
@@ -117,15 +154,30 @@ public class ResourceHints {
 	 * Register that the resource bundle with the specified base name should
 	 * be made available at runtime.
 	 * @param baseName the base name of the resource bundle
+	 * @param resourceHint a builder to further customize the resource bundle
 	 * @return {@code this}, to facilitate method chaining
 	 */
-	public ResourceHints registerResourceBundle(String baseName) {
-		this.resourceBundleHints.add(baseName);
+	public ResourceHints registerResourceBundle(String baseName, @Nullable Consumer<ResourceBundleHint.Builder> resourceHint) {
+		ResourceBundleHint.Builder builder = new ResourceBundleHint.Builder(baseName);
+		if (resourceHint != null) {
+			resourceHint.accept(builder);
+		}
+		this.resourceBundleHints.add(builder.build());
 		return this;
 	}
 
-	private ResourcePatternHint typesPatternResourceHint() {
-		Builder builder = new Builder();
+	/**
+	 * Register that the resource bundle with the specified base name should
+	 * be made available at runtime.
+	 * @param baseName the base name of the resource bundle
+	 * @return {@code this}, to facilitate method chaining
+	 */
+	public ResourceHints registerResourceBundle(String baseName) {
+		return registerResourceBundle(baseName, null);
+	}
+
+	private ResourcePatternHints typesPatternResourceHint() {
+		ResourcePatternHints.Builder builder = new ResourcePatternHints.Builder();
 		this.types.forEach(type -> builder.includes(toIncludePattern(type)));
 		return builder.build();
 	}

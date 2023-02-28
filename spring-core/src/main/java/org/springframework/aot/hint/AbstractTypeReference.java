@@ -47,9 +47,8 @@ public abstract class AbstractTypeReference implements TypeReference {
 	public String getName() {
 		TypeReference enclosingType = getEnclosingType();
 		String simpleName = getSimpleName();
-		return (enclosingType != null
-				? (enclosingType.getName() + '$' + simpleName)
-				: addPackageIfNecessary(simpleName));
+		return (enclosingType != null ? (enclosingType.getName() + '$' + simpleName) :
+				addPackageIfNecessary(simpleName));
 	}
 
 	@Override

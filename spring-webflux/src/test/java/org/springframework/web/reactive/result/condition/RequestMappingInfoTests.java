@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class RequestMappingInfoTests {
 
 		PathPattern emptyPattern = (new PathPatternParser()).parse("");
 		assertThat(info.getPatternsCondition().getPatterns()).isEqualTo(Collections.singleton(emptyPattern));
-		assertThat(info.getMethodsCondition().getMethods().size()).isEqualTo(0);
+		assertThat(info.getMethodsCondition().getMethods()).isEmpty();
 		assertThat(info.getConsumesCondition().isEmpty()).isTrue();
 		assertThat(info.getProducesCondition().isEmpty()).isTrue();
 		assertThat(info.getParamsCondition()).isNotNull();
@@ -73,7 +73,7 @@ public class RequestMappingInfoTests {
 		assertThat(info.getCustomCondition()).isSameAs(anotherInfo.getCustomCondition());
 
 		RequestMappingInfo result = info.combine(anotherInfo);
-		assertThat(info.getPatternsCondition()).isSameAs(result.getPatternsCondition());
+		assertThat(result.getPatternsCondition().toString()).isEqualTo("[/ || ]");
 		assertThat(info.getMethodsCondition()).isSameAs(result.getMethodsCondition());
 		assertThat(info.getParamsCondition()).isSameAs(result.getParamsCondition());
 		assertThat(info.getHeadersCondition()).isSameAs(result.getHeadersCondition());
@@ -93,7 +93,7 @@ public class RequestMappingInfoTests {
 	public void prependPatternWithSlash() {
 		RequestMappingInfo actual = paths("foo").build();
 		List<PathPattern> patterns = new ArrayList<>(actual.getPatternsCondition().getPatterns());
-		assertThat(patterns.size()).isEqualTo(1);
+		assertThat(patterns).hasSize(1);
 		assertThat(patterns.get(0).getPatternString()).isEqualTo("/foo");
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,17 +67,15 @@ public interface ServerRequest {
 
 	/**
 	 * Get the HTTP method.
-	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
-	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
 	HttpMethod method();
 
 	/**
 	 * Get the name of the HTTP method.
 	 * @return the HTTP method as a String
-	 * @deprecated in favor of {@link #method()}
+	 * @deprecated as of 6.0, in favor of {@link #method()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	String methodName();
 
 	/**
@@ -318,7 +316,7 @@ public interface ServerRequest {
 	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@code #checkNotModified(Instant)} method; or
-	 * {@link #checkNotModified(String)}. If you want enforce both
+	 * {@link #checkNotModified(String)}. If you want to enforce both
 	 * a strong entity tag and a Last-Modified value,
 	 * as recommended by the HTTP specification,
 	 * then you should use {@link #checkNotModified(Instant, String)}.
@@ -352,13 +350,14 @@ public interface ServerRequest {
 	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@link #checkNotModified(Instant)} method; or
-	 * {@code #checkNotModified(String)}. If you want enforce both
+	 * {@code #checkNotModified(String)}. If you want to enforce both
 	 * a strong entity tag and a Last-Modified value,
 	 * as recommended by the HTTP specification,
 	 * then you should use {@link #checkNotModified(Instant, String)}.
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
-	 * with quotes (") if necessary.
+	 * with quotes (") if necessary. Use an empty string {@code ""}
+	 * for no value.
 	 * @return a corresponding response if the request qualifies as not
 	 * modified, or an empty result otherwise
 	 * @since 5.2.5
@@ -391,7 +390,8 @@ public interface ServerRequest {
 	 * application determined for the underlying resource
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
-	 * with quotes (") if necessary.
+	 * with quotes (") if necessary. Use an empty string {@code ""}
+	 * for no value.
 	 * @return a corresponding response if the request qualifies as not
 	 * modified, or an empty result otherwise.
 	 * @since 5.2.5
@@ -525,6 +525,14 @@ public interface ServerRequest {
 		 * @return this builder
 		 */
 		Builder uri(URI uri);
+
+		/**
+		 * Set the context path of the request.
+		 * @param contextPath the new context path
+		 * @return this builder
+		 * @since 5.3.23
+		 */
+		Builder contextPath(@Nullable String contextPath);
 
 		/**
 		 * Add the given header value(s) under the given name.

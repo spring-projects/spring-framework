@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,27 +137,34 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 		return returnValueMono.flatMap(returnValue -> {
 			HttpEntity<?> httpEntity;
-			if (returnValue instanceof HttpEntity) {
-				httpEntity = (HttpEntity<?>) returnValue;
+			if (returnValue instanceof HttpEntity<?> he) {
+				httpEntity = he;
 			}
 			else if (returnValue instanceof ErrorResponse response) {
 				httpEntity = new ResponseEntity<>(response.getBody(), response.getHeaders(), response.getStatusCode());
 			}
 			else if (returnValue instanceof ProblemDetail detail) {
-				httpEntity = new ResponseEntity<>(returnValue, HttpHeaders.EMPTY, detail.getStatus());
+				httpEntity = ResponseEntity.of(detail).build();
 			}
-			else if (returnValue instanceof HttpHeaders) {
-				httpEntity = new ResponseEntity<>((HttpHeaders) returnValue, HttpStatus.OK);
+			else if (returnValue instanceof HttpHeaders headers) {
+				httpEntity = new ResponseEntity<>(headers, HttpStatus.OK);
 			}
 			else {
-				throw new IllegalArgumentException(
-						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass());
+				return Mono.error(() -> new IllegalArgumentException(
+						"HttpEntity or HttpHeaders expected but got: " + returnValue.getClass()));
 			}
 
 			if (httpEntity.getBody() instanceof ProblemDetail detail) {
 				if (detail.getInstance() == null) {
 					URI path = URI.create(exchange.getRequest().getPath().value());
 					detail.setInstance(path);
+				}
+				if (logger.isWarnEnabled() && httpEntity instanceof ResponseEntity<?> responseEntity) {
+					if (responseEntity.getStatusCode().value() != detail.getStatus()) {
+						logger.warn(actualParameter.getExecutable().toGenericString() +
+								" returned ResponseEntity: " + responseEntity + ", but its status" +
+								" doesn't match the ProblemDetail status: " + detail.getStatus());
+					}
 				}
 			}
 
@@ -168,8 +175,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			HttpHeaders entityHeaders = httpEntity.getHeaders();
 			HttpHeaders responseHeaders = exchange.getResponse().getHeaders();
 			if (!entityHeaders.isEmpty()) {
-				entityHeaders.entrySet().stream()
-						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
+				responseHeaders.putAll(entityHeaders);
 			}
 
 			if (httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
@@ -179,11 +185,9 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			String etag = entityHeaders.getETag();
 			Instant lastModified = Instant.ofEpochMilli(entityHeaders.getLastModified());
 			HttpMethod httpMethod = exchange.getRequest().getMethod();
-			if (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) {
-				return exchange.getResponse().setComplete();
-			}
-
-			return writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange);
+			return ((SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) ?
+					exchange.getResponse().setComplete() :
+					writeBody(httpEntity.getBody(), bodyParameter, actualParameter, exchange));
 		});
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	/**
-	 * Return destination prefixes prefixes to use to filter messages to forward
+	 * Return destination prefixes to use to filter messages to forward
 	 * to the broker. Messages that have a destination and where the destination
 	 * doesn't match are ignored.
 	 * <p>By default this is not set.
@@ -247,7 +247,7 @@ public abstract class AbstractBrokerMessageHandler
 	 * Check whether this message handler is currently running.
 	 * <p>Note that even when this message handler is running the
 	 * {@link #isBrokerAvailable()} flag may still independently alternate between
-	 * being on and off depending on the concrete sub-class implementation.
+	 * being on and off depending on the concrete subclass implementation.
 	 */
 	@Override
 	public final boolean isRunning() {
@@ -260,9 +260,9 @@ public abstract class AbstractBrokerMessageHandler
 	 * indicates whether this message handler is running. In other words the message
 	 * handler must first be running and then the {@code #isBrokerAvailable()} flag
 	 * may still independently alternate between being on and off depending on the
-	 * concrete sub-class implementation.
+	 * concrete subclass implementation.
 	 * <p>Application components may implement
-	 * {@code org.springframework.context.ApplicationListener&lt;BrokerAvailabilityEvent&gt;}
+	 * {@code org.springframework.context.ApplicationListener<BrokerAvailabilityEvent>}
 	 * to receive notifications when broker becomes available and unavailable.
 	 */
 	public boolean isBrokerAvailable() {

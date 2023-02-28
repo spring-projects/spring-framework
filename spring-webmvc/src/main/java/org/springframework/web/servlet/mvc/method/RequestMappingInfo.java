@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -876,7 +876,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		@Nullable
 		private PathMatcher pathMatcher;
 
-		private boolean trailingSlashMatch = true;
+		private boolean trailingSlashMatch = false;
 
 		private boolean suffixPatternMatch = false;
 
@@ -949,15 +949,21 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		/**
 		 * Set whether to apply trailing slash matching in PatternsRequestCondition.
-		 * <p>By default this is set to 'true'.
+		 * <p>The default was changed in 6.0 from {@code true} to {@code false} in
+		 * order to support the deprecation of the property.
+		 * @deprecated as of 6.0, see
+		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 		 */
+		@Deprecated(since = "6.0")
 		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
 			this.trailingSlashMatch = trailingSlashMatch;
 		}
 
 		/**
 		 * Return whether to apply trailing slash matching in PatternsRequestCondition.
+		 * @deprecated as of 6.0 together with {@link #setTrailingSlashMatch(boolean)}
 		 */
+		@Deprecated(since = "6.0")
 		public boolean useTrailingSlashMatch() {
 			return this.trailingSlashMatch;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
  * <p>A default {@link Model} is automatically created at instantiation.
  * An alternate model instance may be provided via {@link #setRedirectModel}
  * for use in a redirect scenario. When {@link #setRedirectModelScenario} is set
- * to {@code true} signalling a redirect scenario, the {@link #getModel()}
+ * to {@code true} signaling a redirect scenario, the {@link #getModel()}
  * returns the redirect model instead of the default model.
  *
  * @author Rossen Stoyanchev
@@ -49,7 +49,7 @@ import org.springframework.web.bind.support.SimpleSessionStatus;
  */
 public class ModelAndViewContainer {
 
-	private boolean ignoreDefaultModelOnRedirect = false;
+	private boolean ignoreDefaultModelOnRedirect = true;
 
 	@Nullable
 	private Object view;
@@ -74,7 +74,7 @@ public class ModelAndViewContainer {
 
 
 	/**
-	 * By default the content of the "default" model is used both during
+	 * By default, the content of the "default" model is used both during
 	 * rendering and redirect scenarios. Alternatively controller methods
 	 * can declare an argument of type {@code RedirectAttributes} and use
 	 * it to provide attributes to prepare the redirect URL.
@@ -83,8 +83,11 @@ public class ModelAndViewContainer {
 	 * is not declared. Setting it to {@code false} means the "default" model
 	 * may be used in a redirect if the controller method doesn't declare a
 	 * RedirectAttributes argument.
-	 * <p>The default setting is {@code false}.
+	 * <p>As of 6.0, this property is set to {@code true} by default.
+	 * @deprecated as of 6.0 without a replacement; once removed, the default
+	 * model will always be ignored on redirect
 	 */
+	@Deprecated(since = "6.0")
 	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
 		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
@@ -103,7 +106,7 @@ public class ModelAndViewContainer {
 	 */
 	@Nullable
 	public String getViewName() {
-		return (this.view instanceof String ? (String) this.view : null);
+		return (this.view instanceof String viewName ? viewName : null);
 	}
 
 	/**
@@ -115,7 +118,7 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Return the View object, or {@code null} if we using a view name
+	 * Return the View object, or {@code null} if we are using a view name
 	 * to be resolved by the DispatcherServlet via a ViewResolver.
 	 */
 	@Nullable

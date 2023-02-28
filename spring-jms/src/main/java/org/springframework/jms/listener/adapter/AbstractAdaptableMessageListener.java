@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,8 +303,8 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #setMessageConverter
 	 */
 	protected Message buildMessage(Session session, Object result) throws JMSException {
-		Object content = preProcessResponse(result instanceof JmsResponse
-				? ((JmsResponse<?>) result).getResponse() : result);
+		Object content = preProcessResponse(result instanceof JmsResponse<?> jmsResponse ?
+				jmsResponse.getResponse() : result);
 
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {
@@ -316,11 +316,11 @@ public abstract class AbstractAdaptableMessageListener
 			}
 		}
 
-		if (!(content instanceof Message)) {
+		if (!(content instanceof Message message)) {
 			throw new MessageConversionException(
 					"No MessageConverter specified - cannot handle message [" + content + "]");
 		}
-		return (Message) content;
+		return message;
 	}
 
 	/**
@@ -355,8 +355,7 @@ public abstract class AbstractAdaptableMessageListener
 	private Destination getResponseDestination(Message request, Message response, Session session, Object result)
 			throws JMSException {
 
-		if (result instanceof JmsResponse) {
-			JmsResponse<?> jmsResponse = (JmsResponse<?>) result;
+		if (result instanceof JmsResponse<?> jmsResponse) {
 			Destination destination = jmsResponse.resolveDestination(getDestinationResolver(), session);
 			if (destination != null) {
 				return destination;
@@ -408,8 +407,8 @@ public abstract class AbstractAdaptableMessageListener
 	 */
 	@Nullable
 	protected Destination resolveDefaultResponseDestination(Session session) throws JMSException {
-		if (this.defaultResponseDestination instanceof Destination) {
-			return (Destination) this.defaultResponseDestination;
+		if (this.defaultResponseDestination instanceof Destination destination) {
+			return destination;
 		}
 		if (this.defaultResponseDestination instanceof DestinationNameHolder nameHolder) {
 			return getDestinationResolver().resolveDestinationName(session, nameHolder.name, nameHolder.isTopic);
@@ -471,11 +470,11 @@ public abstract class AbstractAdaptableMessageListener
 		@Override
 		protected Object extractPayload(Message message) throws JMSException {
 			Object payload = extractMessage(message);
-			if (message instanceof BytesMessage) {
+			if (message instanceof BytesMessage bytesMessage) {
 				try {
 					// In case the BytesMessage is going to be received as a user argument:
 					// reset it, otherwise it would appear empty to such processing code...
-					((BytesMessage) message).reset();
+					bytesMessage.reset();
 				}
 				catch (JMSException ex) {
 					// Continue since the BytesMessage typically won't be used any further.
@@ -493,8 +492,8 @@ public abstract class AbstractAdaptableMessageListener
 			if (converter == null) {
 				throw new IllegalStateException("No message converter, cannot handle '" + payload + "'");
 			}
-			if (converter instanceof SmartMessageConverter) {
-				return ((SmartMessageConverter) converter).toMessage(payload, session, conversionHint);
+			if (converter instanceof SmartMessageConverter smartMessageConverter) {
+				return smartMessageConverter.toMessage(payload, session, conversionHint);
 
 			}
 			return converter.toMessage(payload, session);
@@ -538,8 +537,8 @@ public abstract class AbstractAdaptableMessageListener
 			@SuppressWarnings("rawtypes")
 			private Object unwrapPayload() throws JMSException {
 				Object payload = extractPayload(this.message);
-				if (payload instanceof org.springframework.messaging.Message) {
-					return ((org.springframework.messaging.Message) payload).getPayload();
+				if (payload instanceof org.springframework.messaging.Message springMessage) {
+					return springMessage.getPayload();
 				}
 				return payload;
 			}

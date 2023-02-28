@@ -20,8 +20,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -35,10 +35,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
@@ -57,17 +55,15 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  */
 public abstract class AbstractWebSocketIntegrationTests {
 
-	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<>();
+	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = Map.of(
+			JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class, //
+			TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class, //
+			UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 
-	static {
-		upgradeStrategyConfigTypes.put(JettyWebSocketTestServer.class, JettyUpgradeStrategyConfig.class);
-		upgradeStrategyConfigTypes.put(TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class);
-		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
-	}
-
+	@SuppressWarnings("removal")
 	static Stream<Arguments> argumentsFactory() {
 		return Stream.of(
-				arguments(named("Jetty", new JettyWebSocketTestServer()), named("Jetty", new JettyWebSocketClient())),
+				arguments(named("Jetty", new JettyWebSocketTestServer()), named("Jetty", new org.springframework.web.socket.client.jetty.JettyWebSocketClient())),
 				arguments(named("Tomcat", new TomcatWebSocketTestServer()), named("Standard", new StandardWebSocketClient())),
 				arguments(named("Undertow", new UndertowTestServer()), named("Standard", new StandardWebSocketClient())));
 	}
@@ -150,8 +146,8 @@ public abstract class AbstractWebSocketIntegrationTests {
 		return "ws://localhost:" + this.server.getPort();
 	}
 
-	protected ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler clientHandler, String endpointPath) {
-		return this.webSocketClient.doHandshake(clientHandler, getWsBaseUrl() + endpointPath);
+	protected CompletableFuture<WebSocketSession> execute(WebSocketHandler clientHandler, String endpointPath) {
+		return this.webSocketClient.execute(clientHandler, getWsBaseUrl() + endpointPath);
 	}
 
 
@@ -166,7 +162,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class JettyUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
 		@Override
@@ -177,7 +173,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class TomcatUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
 		@Override
@@ -188,7 +184,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 	}
 
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class UndertowUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
 		@Override

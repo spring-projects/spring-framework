@@ -34,8 +34,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-import org.springframework.asm.Attribute;
 import org.springframework.asm.Type;
 
 /**
@@ -59,7 +60,11 @@ public class ReflectUtils {
 
 	private static final ProtectionDomain PROTECTION_DOMAIN;
 
-	private static final List<Method> OBJECT_METHODS = new ArrayList<Method>();
+	private static final List<Method> OBJECT_METHODS = new ArrayList<>();
+
+	private static BiConsumer<String, byte[]> generatedClassHandler;
+
+	private static Consumer<Class<?>> loadedClassHandler;
 
 	// SPRING PATCH BEGIN
 	static {
@@ -120,11 +125,11 @@ public class ReflectUtils {
 	}
 
 	public static Type[] getExceptionTypes(Member member) {
-		if (member instanceof Method) {
-			return TypeUtils.getTypes(((Method) member).getExceptionTypes());
+		if (member instanceof Method method) {
+			return TypeUtils.getTypes(method.getExceptionTypes());
 		}
-		else if (member instanceof Constructor) {
-			return TypeUtils.getTypes(((Constructor) member).getExceptionTypes());
+		else if (member instanceof Constructor<?> constructor) {
+			return TypeUtils.getTypes(constructor.getExceptionTypes());
 		}
 		else {
 			throw new IllegalArgumentException("Cannot get exception types of a field");
@@ -132,14 +137,13 @@ public class ReflectUtils {
 	}
 
 	public static Signature getSignature(Member member) {
-		if (member instanceof Method) {
-			return new Signature(member.getName(), Type.getMethodDescriptor((Method) member));
+		if (member instanceof Method method) {
+			return new Signature(member.getName(), Type.getMethodDescriptor(method));
 		}
-		else if (member instanceof Constructor) {
-			Type[] types = TypeUtils.getTypes(((Constructor) member).getParameterTypes());
+		else if (member instanceof Constructor<?> constructor) {
+			Type[] types = TypeUtils.getTypes(constructor.getParameterTypes());
 			return new Signature(Constants.CONSTRUCTOR_NAME,
 					Type.getMethodDescriptor(Type.VOID_TYPE, types));
-
 		}
 		else {
 			throw new IllegalArgumentException("Cannot get signature of a field");
@@ -225,9 +229,9 @@ public class ReflectUtils {
 		}
 		catch (ClassNotFoundException ignore) {
 		}
-		for (int i = 0; i < packages.length; i++) {
+		for (String pkg : packages) {
 			try {
-				return Class.forName(prefix + packages[i] + '.' + className + suffix, false, loader);
+				return Class.forName(prefix + pkg + '.' + className + suffix, false, loader);
 			}
 			catch (ClassNotFoundException ignore) {
 			}
@@ -269,10 +273,7 @@ public class ReflectUtils {
 			Object result = cstruct.newInstance(args);
 			return result;
 		}
-		catch (InstantiationException e) {
-			throw new CodeGenerationException(e);
-		}
-		catch (IllegalAccessException e) {
+		catch (InstantiationException | IllegalAccessException e) {
 			throw new CodeGenerationException(e);
 		}
 		catch (InvocationTargetException e) {
@@ -297,8 +298,9 @@ public class ReflectUtils {
 	}
 
 	public static String[] getNames(Class[] classes) {
-		if (classes == null)
+		if (classes == null) {
 			return null;
+		}
 		String[] names = new String[classes.length];
 		for (int i = 0; i < names.length; i++) {
 			names[i] = classes[i].getName();
@@ -324,8 +326,7 @@ public class ReflectUtils {
 
 	public static Method[] getPropertyMethods(PropertyDescriptor[] properties, boolean read, boolean write) {
 		Set methods = new HashSet();
-		for (int i = 0; i < properties.length; i++) {
-			PropertyDescriptor pd = properties[i];
+		for (PropertyDescriptor pd : properties) {
 			if (read) {
 				methods.add(pd.getReadMethod());
 			}
@@ -357,8 +358,7 @@ public class ReflectUtils {
 				return all;
 			}
 			List properties = new ArrayList(all.length);
-			for (int i = 0; i < all.length; i++) {
-				PropertyDescriptor pd = all[i];
+			for (PropertyDescriptor pd : all) {
 				if ((read && pd.getReadMethod() != null) ||
 						(write && pd.getWriteMethod() != null)) {
 					properties.add(pd);
@@ -391,16 +391,17 @@ public class ReflectUtils {
 		if (type == Object.class) {
 			list.addAll(OBJECT_METHODS);
 		}
-		else
+		else {
 			list.addAll(java.util.Arrays.asList(type.getDeclaredMethods()));
+		}
 
 		Class superclass = type.getSuperclass();
 		if (superclass != null) {
 			addAllMethods(superclass, list);
 		}
 		Class[] interfaces = type.getInterfaces();
-		for (int i = 0; i < interfaces.length; i++) {
-			addAllMethods(interfaces[i], list);
+		for (Class element : interfaces) {
+			addAllMethods(element, list);
 		}
 
 		return list;
@@ -428,6 +429,10 @@ public class ReflectUtils {
 	}
 
 	// SPRING PATCH BEGIN
+	public static void setGeneratedClassHandler(BiConsumer<String, byte[]> handler) {
+		generatedClassHandler = handler;
+	}
+
 	public static Class defineClass(String className, byte[] b, ClassLoader loader) throws Exception {
 		return defineClass(className, b, loader, null, null);
 	}
@@ -438,12 +443,17 @@ public class ReflectUtils {
 		return defineClass(className, b, loader, protectionDomain, null);
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({"deprecation", "serial"})
 	public static Class defineClass(String className, byte[] b, ClassLoader loader,
 			ProtectionDomain protectionDomain, Class<?> contextClass) throws Exception {
 
 		Class c = null;
 		Throwable t = THROWABLE;
+
+		BiConsumer<String, byte[]> handlerToUse = generatedClassHandler;
+		if (handlerToUse != null) {
+			handlerToUse.accept(className, b);
+		}
 
 		// Preferred option: JDK 9+ Lookup.defineClass API if ClassLoader matches
 		if (contextClass != null && contextClass.getClassLoader() == loader) {
@@ -515,6 +525,16 @@ public class ReflectUtils {
 				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(contextClass, MethodHandles.lookup());
 				c = lookup.defineClass(b);
 			}
+			catch (IllegalAccessException ex) {
+				throw new CodeGenerationException(ex) {
+					@Override
+					public String getMessage() {
+						return "ClassLoader mismatch for [" + contextClass.getName() +
+								"]: JVM should be started with --add-opens=java.base/java.lang=ALL-UNNAMED " +
+								"for ClassLoader.defineClass to be accessible on " + loader.getClass().getName();
+					}
+				};
+			}
 			catch (Throwable ex) {
 				throw new CodeGenerationException(ex);
 			}
@@ -529,6 +549,21 @@ public class ReflectUtils {
 		Class.forName(className, true, loader);
 		return c;
 	}
+
+	public static void setLoadedClassHandler(Consumer<Class<?>> loadedClassHandler) {
+		ReflectUtils.loadedClassHandler = loadedClassHandler;
+	}
+
+	public static Class<?> loadClass(String className, ClassLoader classLoader) throws ClassNotFoundException {
+		// Force static initializers to run.
+		Class<?> clazz = Class.forName(className, true, classLoader);
+		Consumer<Class<?>> handlerToUse = loadedClassHandler;
+		if (handlerToUse != null) {
+			handlerToUse.accept(clazz);
+		}
+		return clazz;
+	}
+
 	// SPRING PATCH END
 
 	public static int findPackageProtected(Class[] classes) {
@@ -545,26 +580,27 @@ public class ReflectUtils {
 		return new MethodInfo() {
 			private ClassInfo ci;
 
+			@Override
 			public ClassInfo getClassInfo() {
-				if (ci == null)
+				if (ci == null) {
 					ci = ReflectUtils.getClassInfo(member.getDeclaringClass());
+				}
 				return ci;
 			}
 
+			@Override
 			public int getModifiers() {
 				return modifiers;
 			}
 
+			@Override
 			public Signature getSignature() {
 				return sig;
 			}
 
+			@Override
 			public Type[] getExceptionTypes() {
 				return ReflectUtils.getExceptionTypes(member);
-			}
-
-			public Attribute getAttribute() {
-				return null;
 			}
 		};
 	}
@@ -577,15 +613,19 @@ public class ReflectUtils {
 		final Type type = Type.getType(clazz);
 		final Type sc = (clazz.getSuperclass() == null) ? null : Type.getType(clazz.getSuperclass());
 		return new ClassInfo() {
+			@Override
 			public Type getType() {
 				return type;
 			}
+			@Override
 			public Type getSuperType() {
 				return sc;
 			}
+			@Override
 			public Type[] getInterfaces() {
 				return TypeUtils.getTypes(clazz.getInterfaces());
 			}
+			@Override
 			public int getModifiers() {
 				return clazz.getModifiers();
 			}
@@ -595,8 +635,7 @@ public class ReflectUtils {
 	// used by MethodInterceptorGenerated generated code
 	public static Method[] findMethods(String[] namesAndDescriptors, Method[] methods) {
 		Map map = new HashMap();
-		for (int i = 0; i < methods.length; i++) {
-			Method method = methods[i];
+		for (Method method : methods) {
 			map.put(method.getName() + Type.getMethodDescriptor(method), method);
 		}
 		Method[] result = new Method[namesAndDescriptors.length / 2];

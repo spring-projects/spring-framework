@@ -28,6 +28,7 @@ package org.springframework.aot.hint;
  * recorded as well.
  *
  * @author Stephane Nicoll
+ * @author Janne Valkealahti
  * @since 6.0
  */
 public class RuntimeHints {
@@ -36,9 +37,11 @@ public class RuntimeHints {
 
 	private final ResourceHints resources = new ResourceHints();
 
-	private final JavaSerializationHints javaSerialization = new JavaSerializationHints();
+	private final SerializationHints serialization = new SerializationHints();
 
 	private final ProxyHints proxies = new ProxyHints();
+
+	private final ReflectionHints jni = new ReflectionHints();
 
 
 	/**
@@ -59,10 +62,10 @@ public class RuntimeHints {
 
 	/**
 	 * Provide access to serialization-based hints.
-	 * @return java serialization hints
+	 * @return serialization hints
 	 */
-	public JavaSerializationHints javaSerialization() {
-		return this.javaSerialization;
+	public SerializationHints serialization() {
+		return this.serialization;
 	}
 
 	/**
@@ -71,6 +74,14 @@ public class RuntimeHints {
 	 */
 	public ProxyHints proxies() {
 		return this.proxies;
+	}
+
+	/**
+	 * Provide access to jni-based hints.
+	 * @return jni hints
+	 */
+	public ReflectionHints jni() {
+		return this.jni;
 	}
 
 }

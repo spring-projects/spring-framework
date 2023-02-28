@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,14 +103,14 @@ public class BeanFactoryUtilsTests {
 	public void testHierarchicalNamesWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, NoOp.class));
-		assertThat(names.size()).isEqualTo(0);
+		assertThat(names).isEmpty();
 	}
 
 	@Test
 	public void testHierarchicalNamesWithMatchOnlyInRoot() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
-		assertThat(names.size()).isEqualTo(1);
+		assertThat(names).hasSize(1);
 		assertThat(names.contains("indexedBean")).isTrue();
 		// Distinguish from default ListableBeanFactory behavior
 		assertThat(listableBeanFactory.getBeanNamesForType(IndexedTestBean.class).length == 0).isTrue();
@@ -121,7 +121,7 @@ public class BeanFactoryUtilsTests {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class));
 		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
-		assertThat(names.size()).isEqualTo(4);
+		assertThat(names).hasSize(4);
 		assertThat(names.contains("test")).isTrue();
 		assertThat(names.contains("test3")).isTrue();
 		assertThat(names.contains("testFactory1")).isTrue();
@@ -150,7 +150,7 @@ public class BeanFactoryUtilsTests {
 		lbf.addBean("t4", t4);
 
 		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, true);
-		assertThat(beans.size()).isEqualTo(4);
+		assertThat(beans).hasSize(4);
 		assertThat(beans.get("t1")).isEqualTo(t1);
 		assertThat(beans.get("t2")).isEqualTo(t2);
 		assertThat(beans.get("t3")).isEqualTo(t3.getObject());
@@ -158,12 +158,12 @@ public class BeanFactoryUtilsTests {
 		assertThat(condition).isTrue();
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, DummyFactory.class, true, true);
-		assertThat(beans.size()).isEqualTo(2);
+		assertThat(beans).hasSize(2);
 		assertThat(beans.get("&t3")).isEqualTo(t3);
 		assertThat(beans.get("&t4")).isEqualTo(t4);
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, FactoryBean.class, true, true);
-		assertThat(beans.size()).isEqualTo(2);
+		assertThat(beans).hasSize(2);
 		assertThat(beans.get("&t3")).isEqualTo(t3);
 		assertThat(beans.get("&t4")).isEqualTo(t4);
 	}
@@ -185,7 +185,7 @@ public class BeanFactoryUtilsTests {
 
 		Map<String, ?> beans =
 				BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, false);
-		assertThat(beans.size()).isEqualTo(6);
+		assertThat(beans).hasSize(6);
 		assertThat(beans.get("test3")).isEqualTo(test3);
 		assertThat(beans.get("test")).isEqualTo(test);
 		assertThat(beans.get("t1")).isEqualTo(t1);
@@ -199,7 +199,7 @@ public class BeanFactoryUtilsTests {
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, true);
 		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
-		assertThat(beans.size()).isEqualTo(5);
+		assertThat(beans).hasSize(5);
 		assertThat(beans.get("test")).isEqualTo(test);
 		assertThat(beans.get("testFactory1")).isEqualTo(testFactory1);
 		assertThat(beans.get("t1")).isEqualTo(t1);
@@ -207,7 +207,7 @@ public class BeanFactoryUtilsTests {
 		assertThat(beans.get("t3")).isEqualTo(t3.getObject());
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, true);
-		assertThat(beans.size()).isEqualTo(8);
+		assertThat(beans).hasSize(8);
 		assertThat(beans.get("test3")).isEqualTo(test3);
 		assertThat(beans.get("test")).isEqualTo(test);
 		assertThat(beans.get("testFactory1")).isEqualTo(testFactory1);
@@ -220,14 +220,14 @@ public class BeanFactoryUtilsTests {
 		assertThat(condition).isTrue();
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, DummyFactory.class, true, true);
-		assertThat(beans.size()).isEqualTo(4);
+		assertThat(beans).hasSize(4);
 		assertThat(beans.get("&testFactory1")).isEqualTo(this.listableBeanFactory.getBean("&testFactory1"));
 		assertThat(beans.get("&testFactory2")).isEqualTo(this.listableBeanFactory.getBean("&testFactory2"));
 		assertThat(beans.get("&t3")).isEqualTo(t3);
 		assertThat(beans.get("&t4")).isEqualTo(t4);
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, FactoryBean.class, true, true);
-		assertThat(beans.size()).isEqualTo(4);
+		assertThat(beans).hasSize(4);
 		assertThat(beans.get("&testFactory1")).isEqualTo(this.listableBeanFactory.getBean("&testFactory1"));
 		assertThat(beans.get("&testFactory2")).isEqualTo(this.listableBeanFactory.getBean("&testFactory2"));
 		assertThat(beans.get("&t3")).isEqualTo(t3);
@@ -241,22 +241,22 @@ public class BeanFactoryUtilsTests {
 
 		Map<String, ?> beans =
 				BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, false);
-		assertThat(beans.size()).isEqualTo(2);
+		assertThat(beans).hasSize(2);
 		assertThat(beans.get("test3")).isEqualTo(test3);
 		assertThat(beans.get("test")).isEqualTo(test);
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, false);
-		assertThat(beans.size()).isEqualTo(1);
+		assertThat(beans).hasSize(1);
 		assertThat(beans.get("test")).isEqualTo(test);
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, true);
 		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
-		assertThat(beans.size()).isEqualTo(2);
+		assertThat(beans).hasSize(2);
 		assertThat(beans.get("test")).isEqualTo(test);
 		assertThat(beans.get("testFactory1")).isEqualTo(testFactory1);
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, true);
-		assertThat(beans.size()).isEqualTo(4);
+		assertThat(beans).hasSize(4);
 		assertThat(beans.get("test3")).isEqualTo(test3);
 		assertThat(beans.get("test")).isEqualTo(test);
 		assertThat(beans.get("testFactory1")).isEqualTo(testFactory1);
@@ -264,12 +264,12 @@ public class BeanFactoryUtilsTests {
 		assertThat(condition).isTrue();
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, DummyFactory.class, true, true);
-		assertThat(beans.size()).isEqualTo(2);
+		assertThat(beans).hasSize(2);
 		assertThat(beans.get("&testFactory1")).isEqualTo(this.listableBeanFactory.getBean("&testFactory1"));
 		assertThat(beans.get("&testFactory2")).isEqualTo(this.listableBeanFactory.getBean("&testFactory2"));
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, FactoryBean.class, true, true);
-		assertThat(beans.size()).isEqualTo(2);
+		assertThat(beans).hasSize(2);
 		assertThat(beans.get("&testFactory1")).isEqualTo(this.listableBeanFactory.getBean("&testFactory1"));
 		assertThat(beans.get("&testFactory2")).isEqualTo(this.listableBeanFactory.getBean("&testFactory2"));
 	}
@@ -278,14 +278,14 @@ public class BeanFactoryUtilsTests {
 	public void testHierarchicalNamesForAnnotationWithNoMatch() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, Override.class));
-		assertThat(names.size()).isEqualTo(0);
+		assertThat(names).isEmpty();
 	}
 
 	@Test
 	public void testHierarchicalNamesForAnnotationWithMatchOnlyInRoot() {
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
-		assertThat(names.size()).isEqualTo(1);
+		assertThat(names).hasSize(1);
 		assertThat(names.contains("annotatedBean")).isTrue();
 		// Distinguish from default ListableBeanFactory behavior
 		assertThat(listableBeanFactory.getBeanNamesForAnnotation(TestAnnotation.class).length == 0).isTrue();
@@ -297,7 +297,7 @@ public class BeanFactoryUtilsTests {
 		this.listableBeanFactory.registerSingleton("anotherAnnotatedBean", annotatedBean);
 		List<String> names = Arrays.asList(
 				BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(this.listableBeanFactory, TestAnnotation.class));
-		assertThat(names.size()).isEqualTo(2);
+		assertThat(names).hasSize(2);
 		assertThat(names.contains("annotatedBean")).isTrue();
 		assertThat(names.contains("anotherAnnotatedBean")).isTrue();
 	}

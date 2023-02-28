@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,7 @@ public class PathPatternTests {
 		assertThat(pp.matches(toPathContainer(path))).isFalse();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void optionalTrailingSeparators() {
 		PathPattern pp;
@@ -300,6 +301,7 @@ public class PathPatternTests {
 		checkCapture("{var:f o}","f%20o","var","f o"); // constraint is expressed in non encoded form
 		checkCapture("{var:f.o}","f%20o","var","f o");
 		checkCapture("{var:f\\|o}","f%7co","var","f|o");
+		checkCapture("{var:.*}","x\ny","var","x\ny");
 	}
 
 	@Test
@@ -319,6 +321,8 @@ public class PathPatternTests {
 		checkCapture("/{var1}_ _{var2}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
 		checkCapture("/{var1}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
 		checkCapture("/{var1:f o}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1:f o}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1}_{var2}","/f\noo_foo","var1","f\noo","var2","foo");
 	}
 
 	@Test
@@ -438,6 +442,7 @@ public class PathPatternTests {
 		checkCapture("///{foo}///bar", "///one///bar", "foo", "one");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void wildcards() {
 		checkMatches("/*/bar", "/foo/bar");
@@ -572,7 +577,7 @@ public class PathPatternTests {
 		pri = getPathRemaining(pp, "/aaa/bbb");
 		assertThat(pri.getPathRemaining().value()).isEqualTo("");
 		assertThat(pri.getPathMatched().value()).isEqualTo("/aaa/bbb");
-		assertThat(pri.getUriVariables().size()).isEqualTo(0);
+		assertThat(pri.getUriVariables()).isEmpty();
 
 		pp = parse("/*/{foo}/b*");
 		pri = getPathRemaining(pp, "/foo");
@@ -681,6 +686,7 @@ public class PathPatternTests {
 		checkExtractPathWithinPattern("/docs/commit.html", "/docs/commit.html", "");
 		checkExtractPathWithinPattern("/docs/*", "/docs/cvs/commit", "cvs/commit");
 		checkExtractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit.html", "commit.html");
+		checkExtractPathWithinPattern("/docs/cvs/file.*.html", "/docs/cvs/file.sha.html", "file.sha.html");
 		checkExtractPathWithinPattern("/docs/**", "/docs/cvs/commit", "cvs/commit");
 		checkExtractPathWithinPattern("/doo/{*foobar}", "/doo/customer.html", "customer.html");
 		checkExtractPathWithinPattern("/doo/{*foobar}", "/doo/daa/customer.html", "daa/customer.html");
@@ -725,6 +731,7 @@ public class PathPatternTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void extractUriTemplateVariables_spr15264() {
 		PathPattern pp;
 		pp = new PathPatternParser().parse("/{foo}");
@@ -801,7 +808,7 @@ public class PathPatternTests {
 		assertThat((Object) checkCapture("/{one}/", "//")).isNull();
 		assertThat((Object) checkCapture("", "/abc")).isNull();
 
-		assertThat(checkCapture("", "").getUriVariables().size()).isEqualTo(0);
+		assertThat(checkCapture("", "").getUriVariables()).isEmpty();
 		checkCapture("{id}", "99", "id", "99");
 		checkCapture("/customer/{customerId}", "/customer/78", "customerId", "78");
 		checkCapture("/customer/{customerId}/banana", "/customer/42/banana", "customerId",
@@ -811,7 +818,7 @@ public class PathPatternTests {
 				"apple");
 		checkCapture("/{bla}.*", "/testing.html", "bla", "testing");
 		PathPattern.PathMatchInfo extracted = checkCapture("/abc", "/abc");
-		assertThat(extracted.getUriVariables().size()).isEqualTo(0);
+		assertThat(extracted.getUriVariables()).isEmpty();
 		checkCapture("/{bla}/foo","/a/foo");
 	}
 
@@ -1145,6 +1152,7 @@ public class PathPatternTests {
 		return parse(pattern).matchAndExtract(PathPatternTests.toPathContainer(path));
 	}
 
+	@SuppressWarnings("deprecation")
 	private PathPattern parse(String path) {
 		PathPatternParser pp = new PathPatternParser();
 		pp.setMatchOptionalTrailingSeparator(true);
@@ -1158,6 +1166,7 @@ public class PathPatternTests {
 		return PathContainer.parsePath(path);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void checkMatches(String uriTemplate, String path) {
 		PathPatternParser parser = new PathPatternParser();
 		parser.setMatchOptionalTrailingSeparator(true);

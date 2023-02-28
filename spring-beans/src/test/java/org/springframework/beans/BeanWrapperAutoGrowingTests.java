@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowArray() {
 		assertNotNull(wrapper.getPropertyValue("array[0]"));
-		assertThat(bean.getArray().length).isEqualTo(1);
+		assertThat(bean.getArray()).hasSize(1);
 		assertThat(bean.getArray()[0]).isInstanceOf(Bean.class);
 	}
 
@@ -76,7 +76,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowArrayBySeveralElements() {
 		assertNotNull(wrapper.getPropertyValue("array[4]"));
-		assertThat(bean.getArray().length).isEqualTo(5);
+		assertThat(bean.getArray()).hasSize(5);
 		assertThat(bean.getArray()[0]).isInstanceOf(Bean.class);
 		assertThat(bean.getArray()[1]).isInstanceOf(Bean.class);
 		assertThat(bean.getArray()[2]).isInstanceOf(Bean.class);
@@ -91,7 +91,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrow2dArray() {
 		assertNotNull(wrapper.getPropertyValue("multiArray[0][0]"));
-		assertThat(bean.getMultiArray()[0].length).isEqualTo(1);
+		assertThat(bean.getMultiArray()[0]).hasSize(1);
 		assertThat(bean.getMultiArray()[0][0]).isInstanceOf(Bean.class);
 	}
 
@@ -125,7 +125,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowList() {
 		assertNotNull(wrapper.getPropertyValue("list[0]"));
-		assertThat(bean.getList().size()).isEqualTo(1);
+		assertThat(bean.getList()).hasSize(1);
 		assertThat(bean.getList().get(0)).isInstanceOf(Bean.class);
 	}
 
@@ -138,7 +138,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowListBySeveralElements() {
 		assertNotNull(wrapper.getPropertyValue("list[4]"));
-		assertThat(bean.getList().size()).isEqualTo(5);
+		assertThat(bean.getList()).hasSize(5);
 		assertThat(bean.getList().get(0)).isInstanceOf(Bean.class);
 		assertThat(bean.getList().get(1)).isInstanceOf(Bean.class);
 		assertThat(bean.getList().get(2)).isInstanceOf(Bean.class);
@@ -161,7 +161,7 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowMultiDimensionalList() {
 		assertNotNull(wrapper.getPropertyValue("multiList[0][0]"));
-		assertThat(bean.getMultiList().get(0).size()).isEqualTo(1);
+		assertThat(bean.getMultiList().get(0)).hasSize(1);
 		assertThat(bean.getMultiList().get(0).get(0)).isInstanceOf(Bean.class);
 	}
 

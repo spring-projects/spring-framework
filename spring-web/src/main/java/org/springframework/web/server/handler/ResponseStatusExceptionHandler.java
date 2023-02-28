@@ -95,8 +95,8 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 		int code = (statusCode != null ? statusCode.value() : determineRawStatusCode(ex));
 		if (code != -1) {
 			if (response.setStatusCode(statusCode)) {
-				if (ex instanceof ResponseStatusException) {
-					((ResponseStatusException) ex).getHeaders().forEach((name, values) ->
+				if (ex instanceof ResponseStatusException responseStatusException) {
+					responseStatusException.getHeaders().forEach((name, values) ->
 							values.forEach(value -> response.getHeaders().add(name, value)));
 				}
 				result = true;
@@ -134,7 +134,7 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 	 * @since 5.3
 	 * @deprecated as of 6.0, in favor of {@link #determineStatus(Throwable)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	protected int determineRawStatusCode(Throwable ex) {
 		if (ex instanceof ResponseStatusException responseStatusException) {
 			return responseStatusException.getStatusCode().value();

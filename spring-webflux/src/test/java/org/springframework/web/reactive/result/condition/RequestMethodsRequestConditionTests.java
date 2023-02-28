@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.condition;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -43,8 +42,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
  * @author Rossen Stoyanchev
  */
 public class RequestMethodsRequestConditionTests {
-
-	// TODO: custom method, CORS pre-flight (see @Disabledd)
 
 	@Test
 	public void getMatchingCondition() throws Exception {
@@ -73,7 +70,6 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
-	@Disabled
 	public void getMatchingConditionWithCustomMethod() throws Exception {
 		ServerWebExchange exchange = getExchange("PROPFIND");
 		assertThat(new RequestMethodsRequestCondition().getMatchingCondition(exchange)).isNotNull();
@@ -81,11 +77,12 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
-	@Disabled
-	public void getMatchingConditionWithCorsPreFlight() throws Exception {
-		ServerWebExchange exchange = getExchange("OPTIONS");
-		exchange.getRequest().getHeaders().add("Origin", "https://example.com");
-		exchange.getRequest().getHeaders().add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT");
+	public void getMatchingConditionWithCorsPreFlight() {
+		MockServerHttpRequest request = MockServerHttpRequest.method(HttpMethod.valueOf("OPTIONS"), "/")
+				.header("Origin", "https://example.com")
+				.header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT")
+				.build();
+		ServerWebExchange exchange = MockServerWebExchange.from(request);
 
 		assertThat(new RequestMethodsRequestCondition().getMatchingCondition(exchange)).isNotNull();
 		assertThat(new RequestMethodsRequestCondition(PUT).getMatchingCondition(exchange)).isNotNull();
@@ -119,7 +116,7 @@ public class RequestMethodsRequestConditionTests {
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(POST);
 
 		RequestMethodsRequestCondition result = condition1.combine(condition2);
-		assertThat(result.getContent().size()).isEqualTo(2);
+		assertThat(result.getContent()).hasSize(2);
 	}
 
 

@@ -135,7 +135,6 @@ public class RequestMappingHandlerAdapterTests {
 
 		this.handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver, modelResolver));
 		this.handlerAdapter.setReturnValueHandlers(Collections.singletonList(viewHandler));
-		this.handlerAdapter.setIgnoreDefaultModelOnRedirect(true);
 		this.handlerAdapter.afterPropertiesSet();
 
 		this.request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
@@ -278,9 +277,9 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	private void assertMethodProcessorCount(int resolverCount, int initBinderResolverCount, int handlerCount) {
-		assertThat(this.handlerAdapter.getArgumentResolvers().size()).isEqualTo(resolverCount);
-		assertThat(this.handlerAdapter.getInitBinderArgumentResolvers().size()).isEqualTo(initBinderResolverCount);
-		assertThat(this.handlerAdapter.getReturnValueHandlers().size()).isEqualTo(handlerCount);
+		assertThat(this.handlerAdapter.getArgumentResolvers()).hasSize(resolverCount);
+		assertThat(this.handlerAdapter.getInitBinderArgumentResolvers()).hasSize(initBinderResolverCount);
+		assertThat(this.handlerAdapter.getReturnValueHandlers()).hasSize(handlerCount);
 	}
 
 

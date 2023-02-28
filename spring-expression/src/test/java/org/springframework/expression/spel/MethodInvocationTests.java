@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
@@ -121,7 +122,8 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// Now cause it to throw an exception:
 		eContext.setVariable("bar", 1);
-		assertThatExceptionOfType(Exception.class).isThrownBy(() -> expr.getValue(eContext))
+		assertThatException()
+			.isThrownBy(() -> expr.getValue(eContext))
 			.isNotInstanceOf(SpelEvaluationException.class);
 
 		// If counter is 4 then the method got called twice!
@@ -149,7 +151,7 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 2);
-		assertThatExceptionOfType(Exception.class)
+		assertThatException()
 			.isThrownBy(() -> expr.getValue(context))
 			.isNotInstanceOf(SpelEvaluationException.class);
 	}
@@ -166,7 +168,8 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 		Expression expr = parser.parseExpression("throwException(#bar)");
 
 		context.setVariable("bar", 4);
-		assertThatExceptionOfType(ExpressionInvocationTargetException.class).isThrownBy(() -> expr.getValue(context))
+		assertThatExceptionOfType(ExpressionInvocationTargetException.class)
+			.isThrownBy(() -> expr.getValue(context))
 			.satisfies(ex -> assertThat(ex.getCause().getClass().getName()).isEqualTo(
 					"org.springframework.expression.spel.testresources.Inventor$TestException"));
 	}
@@ -217,19 +220,19 @@ public class MethodInvocationTests extends AbstractExpressionTests {
 
 		// reflective method accessor is the only one by default
 		List<MethodResolver> methodResolvers = ctx.getMethodResolvers();
-		assertThat(methodResolvers.size()).isEqualTo(1);
+		assertThat(methodResolvers).hasSize(1);
 
 		MethodResolver dummy = new DummyMethodResolver();
 		ctx.addMethodResolver(dummy);
-		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
+		assertThat(ctx.getMethodResolvers()).hasSize(2);
 
 		List<MethodResolver> copy = new ArrayList<>(ctx.getMethodResolvers());
 		assertThat(ctx.removeMethodResolver(dummy)).isTrue();
 		assertThat(ctx.removeMethodResolver(dummy)).isFalse();
-		assertThat(ctx.getMethodResolvers().size()).isEqualTo(1);
+		assertThat(ctx.getMethodResolvers()).hasSize(1);
 
 		ctx.setMethodResolvers(copy);
-		assertThat(ctx.getMethodResolvers().size()).isEqualTo(2);
+		assertThat(ctx.getMethodResolvers()).hasSize(2);
 	}
 
 	@Test

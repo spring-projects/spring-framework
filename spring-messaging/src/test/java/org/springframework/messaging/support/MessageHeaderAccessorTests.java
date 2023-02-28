@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class MessageHeaderAccessorTests {
 	@Test
 	public void newEmptyHeaders() {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor();
-		assertThat(accessor.toMap().size()).isEqualTo(0);
+		assertThat(accessor.toMap()).isEmpty();
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class MessageHeaderAccessorTests {
 		MessageHeaderAccessor accessor = new MessageHeaderAccessor(message);
 		MessageHeaders actual = accessor.getMessageHeaders();
 
-		assertThat(actual.size()).isEqualTo(3);
+		assertThat(actual).hasSize(3);
 		assertThat(actual.get("foo")).isEqualTo("bar");
 		assertThat(actual.get("bar")).isEqualTo("baz");
 	}
@@ -75,7 +75,7 @@ public class MessageHeaderAccessorTests {
 		accessor.setHeader("foo", "BAR");
 		MessageHeaders actual = accessor.getMessageHeaders();
 
-		assertThat(actual.size()).isEqualTo(3);
+		assertThat(actual).hasSize(3);
 		assertThat(actual.getId()).isNotEqualTo(message.getHeaders().getId());
 		assertThat(actual.get("foo")).isEqualTo("BAR");
 		assertThat(actual.get("bar")).isEqualTo("baz");
@@ -110,7 +110,7 @@ public class MessageHeaderAccessorTests {
 		accessor.removeHeaders("fo*");
 
 		MessageHeaders actual = accessor.getMessageHeaders();
-		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual).hasSize(2);
 		assertThat(actual.get("foo")).isNull();
 		assertThat(actual.get("bar")).isEqualTo("baz");
 	}
@@ -128,7 +128,7 @@ public class MessageHeaderAccessorTests {
 		accessor.copyHeaders(map2);
 
 		MessageHeaders actual = accessor.getMessageHeaders();
-		assertThat(actual.size()).isEqualTo(3);
+		assertThat(actual).hasSize(3);
 		assertThat(actual.get("foo")).isEqualTo("BAR");
 		assertThat(actual.get("bar")).isEqualTo("baz");
 	}
@@ -146,7 +146,7 @@ public class MessageHeaderAccessorTests {
 		accessor.copyHeadersIfAbsent(map2);
 
 		MessageHeaders actual = accessor.getMessageHeaders();
-		assertThat(actual.size()).isEqualTo(3);
+		assertThat(actual).hasSize(3);
 		assertThat(actual.get("foo")).isEqualTo("bar");
 		assertThat(actual.get("bar")).isEqualTo("baz");
 	}
@@ -157,7 +157,7 @@ public class MessageHeaderAccessorTests {
 		headers.copyHeaders(null);
 		headers.copyHeadersIfAbsent(null);
 
-		assertThat(headers.getMessageHeaders().size()).isEqualTo(1);
+		assertThat(headers.getMessageHeaders()).hasSize(1);
 		assertThat(headers.getMessageHeaders().keySet()).isEqualTo(Collections.singleton("id"));
 	}
 
@@ -174,9 +174,9 @@ public class MessageHeaderAccessorTests {
 		accessor.setHeader("foo", "bar3");
 		Map<String, Object> map3 = accessor.toMap();
 
-		assertThat(map1.size()).isEqualTo(1);
-		assertThat(map2.size()).isEqualTo(1);
-		assertThat(map3.size()).isEqualTo(1);
+		assertThat(map1).hasSize(1);
+		assertThat(map2).hasSize(1);
+		assertThat(map3).hasSize(1);
 
 		assertThat(map1.get("foo")).isEqualTo("bar1");
 		assertThat(map2.get("foo")).isEqualTo("bar2");
@@ -319,9 +319,7 @@ public class MessageHeaderAccessorTests {
 		})).isEqualTo(expected);
 
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 80; i++) {
-			sb.append('a');
-		}
+		sb.append("a".repeat(80));
 		final String payload = sb.toString() + " > 80";
 
 		String actual = accessor.getShortLogMessage(payload);
@@ -355,10 +353,8 @@ public class MessageHeaderAccessorTests {
 		})).isEqualTo(expected);
 
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 80; i++) {
-			sb.append('a');
-		}
-		final String payload = sb.toString() + " > 80";
+		sb.append("a".repeat(80));
+		final String payload = sb + " > 80";
 
 		String actual = accessor.getDetailedLogMessage(payload);
 		assertThat(actual).isEqualTo("headers={contentType=text/plain} payload=" + sb + " > 80");

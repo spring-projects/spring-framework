@@ -146,15 +146,13 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test  // SPR-14045
 	public void handleRedirectWithIgnoreDefaultModel() throws Exception {
-		mavContainer.setIgnoreDefaultModelOnRedirect(true);
-
 		RedirectView redirectView = new RedirectView();
 		ModelAndView mav = new ModelAndView(redirectView, "name", "value");
 		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
 
 		ModelMap model = mavContainer.getModel();
 		assertThat(mavContainer.getView()).isSameAs(redirectView);
-		assertThat(model.size()).isEqualTo(1);
+		assertThat(model).hasSize(1);
 		assertThat(model.get("name")).isEqualTo("value");
 	}
 

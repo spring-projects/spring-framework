@@ -16,89 +16,103 @@
 
 package org.springframework.aot.hint;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A hint that describes resources that should be made available at runtime.
  *
- * <p>The patterns may be a simple path which has a one-to-one mapping to a
+ * <p>Each pattern may be a simple path which has a one-to-one mapping to a
  * resource on the classpath, or alternatively may contain the special
- * {@code *} character to indicate a wildcard search.
+ * {@code *} character to indicate a wildcard match. For example:
+ * <ul>
+ *     <li>{@code file.properties}: matches just the {@code file.properties}
+ *         file at the root of the classpath.</li>
+ *     <li>{@code com/example/file.properties}: matches just the
+ *         {@code file.properties} file in {@code com/example/}.</li>
+ *     <li>{@code *.properties}: matches all the files with a {@code .properties}
+ *         extension anywhere in the classpath.</li>
+ *     <li>{@code com/example/*.properties}: matches all the files with a {@code .properties}
+ *         extension in {@code com/example/} and its child directories at any depth.</li>
+ *     <li>{@code com/example/*}: matches all the files in {@code com/example/}
+ *         and its child directories at any depth.</li>
+ * </ul>
+ *
+ * <p>A resource pattern must not start with a slash ({@code /}) unless it is the
+ * root directory.
  *
  * @author Stephane Nicoll
+ * @author Brian Clozel
+ * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 6.0
  */
-public final class ResourcePatternHint {
+public final class ResourcePatternHint implements ConditionalHint {
 
-	private final List<String> includes;
+	private final String pattern;
 
-	private final List<String> excludes;
+	@Nullable
+	private final TypeReference reachableType;
 
 
-	private ResourcePatternHint(Builder builder) {
-		this.includes = new ArrayList<>(builder.includes);
-		this.excludes = new ArrayList<>(builder.excludes);
-	}
-
-	/**
-	 * Return the include patterns to use to identify the resources to match.
-	 * @return the include patterns
-	 */
-	public List<String> getIncludes() {
-		return this.includes;
-	}
-
-	/**
-	 * Return the exclude patterns to use to identify the resources to match.
-	 * @return the exclude patterns
-	 */
-	public List<String> getExcludes() {
-		return this.excludes;
+	ResourcePatternHint(String pattern, @Nullable TypeReference reachableType) {
+		Assert.isTrue(("/".equals(pattern) || !pattern.startsWith("/")),
+				() -> "Resource pattern [%s] must not start with a '/' unless it is the root directory"
+						.formatted(pattern));
+		this.pattern = pattern;
+		this.reachableType = reachableType;
 	}
 
 
 	/**
-	 * Builder for {@link ResourcePatternHint}.
+	 * Return the pattern to use for identifying the resources to match.
+	 * @return the pattern
 	 */
-	public static class Builder {
-
-		private final Set<String> includes = new LinkedHashSet<>();
-
-		private final Set<String> excludes = new LinkedHashSet<>();
-
-
-		/**
-		 * Includes the resources matching the specified pattern.
-		 * @param includes the include patterns
-		 * @return {@code this}, to facilitate method chaining
-		 */
-		public Builder includes(String... includes) {
-			this.includes.addAll(Arrays.asList(includes));
-			return this;
-		}
-
-		/**
-		 * Exclude resources matching the specified pattern.
-		 * @param excludes the excludes pattern
-		 * @return {@code this}, to facilitate method chaining
-		 */
-		public Builder excludes(String... excludes) {
-			this.excludes.addAll(Arrays.asList(excludes));
-			return this;
-		}
-
-		/**
-		 * Creates a {@link ResourcePatternHint} based on the state of this
-		 * builder.
-		 * @return a resource pattern hint
-		 */
-		ResourcePatternHint build() {
-			return new ResourcePatternHint(this);
-		}
-
+	public String getPattern() {
+		return this.pattern;
 	}
+
+	/**
+	 * Return the regex {@link Pattern} to use for identifying the resources to match.
+	 * @return the regex pattern
+	 */
+	public Pattern toRegex() {
+		String prefix = (this.pattern.startsWith("*") ? ".*" : "");
+		String suffix = (this.pattern.endsWith("*") ? ".*" : "");
+		String regex = Arrays.stream(this.pattern.split("\\*"))
+				.filter(s -> !s.isEmpty())
+				.map(Pattern::quote)
+				.collect(Collectors.joining(".*", prefix, suffix));
+		return Pattern.compile(regex);
+	}
+
+	@Nullable
+	@Override
+	public TypeReference getReachableType() {
+		return this.reachableType;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ResourcePatternHint that = (ResourcePatternHint) o;
+		return this.pattern.equals(that.pattern)
+				&& Objects.equals(this.reachableType, that.reachableType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.pattern, this.reachableType);
+	}
+
 }

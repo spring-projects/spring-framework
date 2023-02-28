@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.filter;
+
+import java.io.IOException;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
@@ -44,9 +46,11 @@ final class RelativeRedirectResponseWrapper extends HttpServletResponseWrapper {
 
 
 	@Override
-	public void sendRedirect(String location) {
+	public void sendRedirect(String location) throws IOException {
+		resetBuffer();
 		setStatus(this.redirectStatus.value());
 		setHeader(HttpHeaders.LOCATION, location);
+		flushBuffer();
 	}
 
 

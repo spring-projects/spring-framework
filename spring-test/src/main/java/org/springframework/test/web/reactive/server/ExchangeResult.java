@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,12 +44,13 @@ import org.springframework.util.MultiValueMap;
  * {@link WebTestClient}.
  *
  * <p>Note that a decoded response body is not exposed at this level since the
- * body may not have been decoded and consumed yet. Sub-types
+ * body may not have been decoded and consumed yet. Subtypes
  * {@link EntityExchangeResult} and {@link FluxExchangeResult} provide access
  * to a decoded response entity and a decoded (but not consumed) response body
  * respectively.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  * @see EntityExchangeResult
  * @see FluxExchangeResult
@@ -59,8 +59,8 @@ public class ExchangeResult {
 
 	private static final Log logger = LogFactory.getLog(ExchangeResult.class);
 
-	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = Arrays.asList(
-			MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML,
+	private static final List<MediaType> PRINTABLE_MEDIA_TYPES = List.of(
+			MediaType.parseMediaType("application/*+json"), MediaType.APPLICATION_XML,
 			MediaType.parseMediaType("text/*"), MediaType.APPLICATION_FORM_URLENCODED);
 
 
@@ -162,13 +162,12 @@ public class ExchangeResult {
 	 * Return the raw request body content written through the request.
 	 * <p><strong>Note:</strong> If the request content has not been consumed
 	 * for any reason yet, use of this method will trigger consumption.
-	 * @throws IllegalStateException if the request body is not been fully written.
+	 * @throws IllegalStateException if the request body has not been fully written.
 	 */
 	@Nullable
 	public byte[] getRequestBodyContent() {
 		return this.requestBody.block(this.timeout);
 	}
-
 
 	/**
 	 * Return the HTTP status code as an {@link HttpStatusCode} value.
@@ -182,9 +181,9 @@ public class ExchangeResult {
 	 * @since 5.1.10
 	 * @deprecated as of 6.0, in favor of {@link #getStatus()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0", forRemoval = true)
 	public int getRawStatusCode() {
-		return this.response.getRawStatusCode();
+		return getStatus().value();
 	}
 
 	/**
@@ -205,7 +204,7 @@ public class ExchangeResult {
 	 * Return the raw request body content written to the response.
 	 * <p><strong>Note:</strong> If the response content has not been consumed
 	 * yet, use of this method will trigger consumption.
-	 * @throws IllegalStateException if the response is not been fully read.
+	 * @throws IllegalStateException if the response has not been fully read.
 	 */
 	@Nullable
 	public byte[] getResponseBodyContent() {
@@ -250,20 +249,19 @@ public class ExchangeResult {
 				"\n" +
 				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
 				"\n" +
-				"< " + getStatus() + " " + getReasonPhrase(getStatus()) + "\n" +
+				"< " + formatStatus(getStatus()) + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), this.responseBody) +"\n" +
 				formatMockServerResult();
 	}
 
-	private static String getReasonPhrase(HttpStatusCode statusCode) {
+	private String formatStatus(HttpStatusCode statusCode) {
+		String result = statusCode.toString();
 		if (statusCode instanceof HttpStatus status) {
-			return status.getReasonPhrase();
+			result += " " + status.getReasonPhrase();
 		}
-		else {
-			return "";
-		}
+		return result;
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {

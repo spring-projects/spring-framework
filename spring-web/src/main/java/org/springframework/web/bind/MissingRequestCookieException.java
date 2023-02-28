@@ -54,7 +54,7 @@ public class MissingRequestCookieException extends MissingRequestValueException 
 	public MissingRequestCookieException(
 			String cookieName, MethodParameter parameter, boolean missingAfterConversion) {
 
-		super("", missingAfterConversion);
+		super("", missingAfterConversion, null, new Object[] {cookieName});
 		this.cookieName = cookieName;
 		this.parameter = parameter;
 		getBody().setDetail("Required cookie '" + this.cookieName + "' is not present.");

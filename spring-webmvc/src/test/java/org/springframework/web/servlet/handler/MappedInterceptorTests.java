@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
@@ -109,30 +108,27 @@ class MappedInterceptorTests {
 
 	@Test
 	void preHandle() throws Exception {
-		HandlerInterceptor delegate = mock(HandlerInterceptor.class);
+		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).preHandle(
-				mock(HttpServletRequest.class), mock(HttpServletResponse.class), null);
+		new MappedInterceptor(null, delegate).preHandle(mock(), mock(), null);
 
 		then(delegate).should().preHandle(any(HttpServletRequest.class), any(HttpServletResponse.class), any());
 	}
 
 	@Test
 	void postHandle() throws Exception {
-		HandlerInterceptor delegate = mock(HandlerInterceptor.class);
+		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).postHandle(
-				mock(HttpServletRequest.class), mock(HttpServletResponse.class), null, mock(ModelAndView.class));
+		new MappedInterceptor(null, delegate).postHandle(mock(), mock(), null, mock());
 
 		then(delegate).should().postHandle(any(), any(), any(), any());
 	}
 
 	@Test
 	void afterCompletion() throws Exception {
-		HandlerInterceptor delegate = mock(HandlerInterceptor.class);
+		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).afterCompletion(
-				mock(HttpServletRequest.class), mock(HttpServletResponse.class), null, mock(Exception.class));
+		new MappedInterceptor(null, delegate).afterCompletion(mock(), mock(), null, mock());
 
 		then(delegate).should().afterCompletion(any(), any(), any(), any());
 	}

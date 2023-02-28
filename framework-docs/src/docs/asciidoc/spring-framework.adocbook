@@ -1,0 +1,26 @@
+:noheader:
+:toc:
+:toclevels: 4
+:tabsize: 4
+include::attributes.adoc[]
+= Spring Framework Documentation
+Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch; Brian Clozel; Stephane Nicoll; Sebastien Deleuze; Jay Bryant; Mark Paluch
+
+NOTE: This documentation is also available in {docs-spring-framework}/reference/html/index.html[HTML] format.
+
+[[legal]]
+== Legal
+
+Copyright © 2002 - 2023 VMware, Inc. All Rights Reserved.
+
+Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.
+
+include::overview.adoc[leveloffset=+1]
+include::core.adoc[leveloffset=+1]
+include::testing.adoc[leveloffset=+1]
+include::data-access.adoc[leveloffset=+1]
+include::web.adoc[leveloffset=+1]
+include::web-reactive.adoc[leveloffset=+1]
+include::integration.adoc[leveloffset=+1]
+include::languages.adoc[leveloffset=+1]
+include::appendix.adoc[leveloffset=+1]

@@ -16,17 +16,26 @@
 
 package org.springframework.web.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -49,6 +58,20 @@ import org.springframework.util.ObjectUtils;
  * @see RestTemplate#setErrorHandler
  */
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
+
+	@Nullable
+	private List<HttpMessageConverter<?>> messageConverters;
+
+
+	/**
+	 * For internal use from the RestTemplate, to pass the message converters
+	 * to use to decode error content.
+	 * @since 6.0
+	 */
+	void setMessageConverters(List<HttpMessageConverter<?>> converters) {
+		this.messageConverters = Collections.unmodifiableList(converters);
+	}
+
 
 	/**
 	 * Delegates to {@link #hasError(HttpStatusCode)} with the response status code.
@@ -155,15 +178,48 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 		Charset charset = getCharset(response);
 		String message = getErrorMessage(statusCode.value(), statusText, body, charset);
 
+		RestClientResponseException ex;
 		if (statusCode.is4xxClientError()) {
-			throw HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
+			ex = HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
 		}
 		else if (statusCode.is5xxServerError()) {
-			throw HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
+			ex = HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
 		}
 		else {
-			throw new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
+			ex = new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
 		}
+
+		if (!CollectionUtils.isEmpty(this.messageConverters)) {
+			ex.setBodyConvertFunction(initBodyConvertFunction(response, body));
+		}
+
+		throw ex;
+	}
+
+	/**
+	 * Return a function for decoding the error content. This can be passed to
+	 * {@link RestClientResponseException#setBodyConvertFunction(Function)}.
+	 * @since 6.0
+	 */
+	protected Function<ResolvableType, ?> initBodyConvertFunction(ClientHttpResponse response, byte[] body) {
+		Assert.state(!CollectionUtils.isEmpty(this.messageConverters), "Expected message converters");
+		return resolvableType -> {
+			try {
+				HttpMessageConverterExtractor<?> extractor =
+						new HttpMessageConverterExtractor<>(resolvableType.getType(), this.messageConverters);
+
+				return extractor.extractData(new ClientHttpResponseDecorator(response) {
+					@Override
+					public InputStream getBody() {
+						return new ByteArrayInputStream(body);
+					}
+				});
+			}
+			catch (IOException ex) {
+				throw new RestClientException(
+						"Error while extracting response for type [" + resolvableType + "]", ex);
+			}
+		};
 	}
 
 	/**

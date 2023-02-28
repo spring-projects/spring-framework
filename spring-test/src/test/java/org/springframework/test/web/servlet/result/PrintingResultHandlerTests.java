@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -42,7 +40,10 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.ModelAndView;
 
+import static java.nio.charset.StandardCharsets.UTF_16;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link PrintingResultHandler}.
@@ -51,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @see org.springframework.test.web.servlet.samples.standalone.resulthandlers.PrintingResultHandlerSmokeTests
  */
-public class PrintingResultHandlerTests {
+class PrintingResultHandlerTests {
 
 	private final TestPrintingResultHandler handler = new TestPrintingResultHandler();
 
@@ -69,12 +70,12 @@ public class PrintingResultHandlerTests {
 
 
 	@Test
-	public void printRequest() throws Exception {
+	void printRequest() throws Exception {
 		this.request.addParameter("param", "paramValue");
 		this.request.addHeader("header", "headerValue");
 		this.request.setCharacterEncoding("UTF-16");
 		String palindrome = "ablE was I ere I saw Elba";
-		byte[] bytes = palindrome.getBytes("UTF-16");
+		byte[] bytes = palindrome.getBytes(UTF_16);
 		this.request.setContent(bytes);
 		this.request.getSession().setAttribute("foo", "bar");
 
@@ -95,12 +96,12 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void printRequestWithoutSession() throws Exception {
+	void printRequestWithoutSession() throws Exception {
 		this.request.addParameter("param", "paramValue");
 		this.request.addHeader("header", "headerValue");
 		this.request.setCharacterEncoding("UTF-16");
 		String palindrome = "ablE was I ere I saw Elba";
-		byte[] bytes = palindrome.getBytes("UTF-16");
+		byte[] bytes = palindrome.getBytes(UTF_16);
 		this.request.setContent(bytes);
 
 		this.handler.handle(this.mvcResult);
@@ -119,14 +120,14 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void printRequestWithEmptySessionMock() throws Exception {
+	void printRequestWithEmptySessionMock() throws Exception {
 		this.request.addParameter("param", "paramValue");
 		this.request.addHeader("header", "headerValue");
 		this.request.setCharacterEncoding("UTF-16");
 		String palindrome = "ablE was I ere I saw Elba";
-		byte[] bytes = palindrome.getBytes("UTF-16");
+		byte[] bytes = palindrome.getBytes(UTF_16);
 		this.request.setContent(bytes);
-		this.request.setSession(Mockito.mock(HttpSession.class));
+		this.request.setSession(mock());
 
 		this.handler.handle(this.mvcResult);
 
@@ -144,17 +145,16 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	public void printResponse() throws Exception {
+	@SuppressWarnings("removal")
+	void printResponse() throws Exception {
 		Cookie enigmaCookie = new Cookie("enigma", "42");
-		enigmaCookie.setComment("This is a comment");
 		enigmaCookie.setHttpOnly(true);
 		enigmaCookie.setMaxAge(1234);
 		enigmaCookie.setDomain(".example.com");
 		enigmaCookie.setPath("/crumbs");
 		enigmaCookie.setSecure(true);
 
-		this.response.setStatus(400, "error");
+		this.response.setStatus(400);
 		this.response.addHeader("header", "headerValue");
 		this.response.setContentType("text/plain");
 		this.response.getWriter().print("content");
@@ -167,7 +167,7 @@ public class PrintingResultHandlerTests {
 
 		// Manually validate cookie values since maxAge changes...
 		List<String> cookieValues = this.response.getHeaders("Set-Cookie");
-		assertThat(cookieValues.size()).isEqualTo(2);
+		assertThat(cookieValues).hasSize(2);
 		assertThat(cookieValues.get(0)).isEqualTo("cookie=cookieValue");
 		assertThat(cookieValues.get(1).startsWith(
 				"enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires=")).as("Actual: " + cookieValues.get(1)).isTrue();
@@ -175,7 +175,7 @@ public class PrintingResultHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
 		headers.setContentType(MediaType.TEXT_PLAIN);
-		headers.setLocation(new URI("/redirectFoo"));
+		headers.setLocation(URI.create("/redirectFoo"));
 		headers.put("Set-Cookie", cookieValues);
 
 		String heading = "MockHttpServletResponse";
@@ -189,7 +189,7 @@ public class PrintingResultHandlerTests {
 
 		Map<String, Map<String, Object>> printedValues = this.handler.getPrinter().printedValues;
 		String[] cookies = (String[]) printedValues.get(heading).get("Cookies");
-		assertThat(cookies.length).isEqualTo(2);
+		assertThat(cookies).hasSize(2);
 		String cookie1 = cookies[0];
 		String cookie2 = cookies[1];
 		assertThat(cookie1.startsWith("[" + Cookie.class.getSimpleName())).isTrue();
@@ -197,15 +197,15 @@ public class PrintingResultHandlerTests {
 		assertThat(cookie1.endsWith("]")).isTrue();
 		assertThat(cookie2.startsWith("[" + Cookie.class.getSimpleName())).isTrue();
 		assertThat(cookie2.contains("name = 'enigma', value = '42', " +
-				"comment = 'This is a comment', domain = '.example.com', maxAge = 1234, " +
+				"comment = [null], domain = '.example.com', maxAge = 1234, " +
 				"path = '/crumbs', secure = true, version = 0, httpOnly = true")).isTrue();
 		assertThat(cookie2.endsWith("]")).isTrue();
 	}
 
 	@Test
-	public void printRequestWithCharacterEncoding() throws Exception {
+	void printRequestWithCharacterEncoding() throws Exception {
 		this.request.setCharacterEncoding("UTF-8");
-		this.request.setContent("text".getBytes("UTF-8"));
+		this.request.setContent("text".getBytes(UTF_8));
 
 		this.handler.handle(this.mvcResult);
 
@@ -213,14 +213,14 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void printRequestWithoutCharacterEncoding() throws Exception {
+	void printRequestWithoutCharacterEncoding() throws Exception {
 		this.handler.handle(this.mvcResult);
 
 		assertValue("MockHttpServletRequest", "Body", "<no character encoding set>");
 	}
 
 	@Test
-	public void printResponseWithCharacterEncoding() throws Exception {
+	void printResponseWithCharacterEncoding() throws Exception {
 		this.response.setCharacterEncoding("UTF-8");
 		this.response.getWriter().print("text");
 
@@ -229,7 +229,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void printResponseWithDefaultCharacterEncoding() throws Exception {
+	void printResponseWithDefaultCharacterEncoding() throws Exception {
 		this.response.getWriter().print("text");
 
 		this.handler.handle(this.mvcResult);
@@ -238,7 +238,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void printHandlerNull() throws Exception {
+	void printHandlerNull() throws Exception {
 		StubMvcResult mvcResult = new StubMvcResult(this.request, null, null, null, null, null, this.response);
 		this.handler.handle(mvcResult);
 
@@ -246,7 +246,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void printHandler() throws Exception {
+	void printHandler() throws Exception {
 		this.mvcResult.setHandler(new Object());
 		this.handler.handle(this.mvcResult);
 
@@ -254,7 +254,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void printHandlerMethod() throws Exception {
+	void printHandlerMethod() throws Exception {
 		HandlerMethod handlerMethod = new HandlerMethod(this, "handle");
 		this.mvcResult.setHandler(handlerMethod);
 		this.handler.handle(mvcResult);
@@ -264,14 +264,14 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void resolvedExceptionNull() throws Exception {
+	void resolvedExceptionNull() throws Exception {
 		this.handler.handle(this.mvcResult);
 
 		assertValue("Resolved Exception", "Type", null);
 	}
 
 	@Test
-	public void resolvedException() throws Exception {
+	void resolvedException() throws Exception {
 		this.mvcResult.setResolvedException(new Exception());
 		this.handler.handle(this.mvcResult);
 
@@ -279,7 +279,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void modelAndViewNull() throws Exception {
+	void modelAndViewNull() throws Exception {
 		this.handler.handle(this.mvcResult);
 
 		assertValue("ModelAndView", "View name", null);
@@ -288,7 +288,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void modelAndView() throws Exception {
+	void modelAndView() throws Exception {
 		BindException bindException = new BindException(new Object(), "target");
 		bindException.reject("errorCode");
 
@@ -307,14 +307,14 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void flashMapNull() throws Exception {
+	void flashMapNull() throws Exception {
 		this.handler.handle(mvcResult);
 
 		assertValue("FlashMap", "Type", null);
 	}
 
 	@Test
-	public void flashMap() throws Exception {
+	void flashMap() throws Exception {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("attrName", "attrValue");
 		this.request.setAttribute(DispatcherServlet.class.getName() + ".OUTPUT_FLASH_MAP", flashMap);

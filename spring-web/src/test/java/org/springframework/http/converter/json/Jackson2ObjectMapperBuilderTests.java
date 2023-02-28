@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,11 +81,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kotlin.ranges.IntRange;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.FatalBeanException;
+import org.springframework.http.ProblemDetail;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
@@ -104,7 +103,7 @@ class Jackson2ObjectMapperBuilderTests {
 
 	@Test
 	void unknownFeature() {
-		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+		assertThatIllegalArgumentException().isThrownBy(() ->
 				Jackson2ObjectMapperBuilder.json().featuresToEnable(Boolean.TRUE).build());
 	}
 
@@ -240,6 +239,16 @@ class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
+	void modulesWithConsumer() {
+		NumberSerializer serializer1 = new NumberSerializer(Integer.class);
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(Integer.class, serializer1);
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modules(list -> list.add(module) ).build();
+		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
+		assertThat(serializers.findSerializer(null, SimpleType.construct(Integer.class), null)).isSameAs(serializer1);
+	}
+
+	@Test
 	void modulesToInstallByClass() {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.modulesToInstall(CustomIntegerModule.class)
@@ -252,6 +261,15 @@ class Jackson2ObjectMapperBuilderTests {
 	void modulesToInstallByInstance() {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.modulesToInstall(new CustomIntegerModule())
+				.build();
+		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
+		assertThat(serializers.findSerializer(null, SimpleType.construct(Integer.class), null).getClass()).isSameAs(CustomIntegerSerializer.class);
+	}
+
+	@Test
+	void modulesToInstallWithConsumer() {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+				.modulesToInstall(list -> list.add(new CustomIntegerModule()))
 				.build();
 		Serializers serializers = getSerializerFactoryConfig(objectMapper).serializers().iterator().next();
 		assertThat(serializers.findSerializer(null, SimpleType.construct(Integer.class), null).getClass()).isSameAs(CustomIntegerSerializer.class);
@@ -348,12 +366,13 @@ class Jackson2ObjectMapperBuilderTests {
 		Class<?> target = String.class;
 		Class<?> mixInSource = Object.class;
 
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
 				.modules().mixIn(target, mixInSource)
 				.build();
 
-		assertThat(objectMapper.mixInCount()).isEqualTo(1);
-		assertThat(objectMapper.findMixInClassFor(target)).isSameAs(mixInSource);
+		assertThat(mapper.mixInCount()).isEqualTo(2);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonXmlMixin.class);
+		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
 	@Test
@@ -363,12 +382,13 @@ class Jackson2ObjectMapperBuilderTests {
 		Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 		mixIns.put(target, mixInSource);
 
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
+		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
 				.modules().mixIns(mixIns)
 				.build();
 
-		assertThat(objectMapper.mixInCount()).isEqualTo(1);
-		assertThat(objectMapper.findMixInClassFor(target)).isSameAs(mixInSource);
+		assertThat(mapper.mixInCount()).isEqualTo(2);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonXmlMixin.class);
+		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
 	@Test

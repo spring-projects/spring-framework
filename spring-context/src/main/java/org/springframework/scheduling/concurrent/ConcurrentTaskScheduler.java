@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.scheduling.concurrent;
 
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -32,7 +34,7 @@ import org.springframework.core.task.TaskRejectedException;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.support.SimpleTriggerContext;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -58,6 +60,7 @@ import org.springframework.util.ErrorHandler;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Arjen Poutsma
  * @since 3.0
  * @see java.util.concurrent.ScheduledExecutorService
  * @see java.util.concurrent.ScheduledThreadPoolExecutor
@@ -206,10 +209,10 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
-		long initialDelay = startTime.getTime() - this.clock.millis();
+	public ScheduledFuture<?> schedule(Runnable task, Instant startTime) {
+		Duration initialDelay = Duration.between(this.clock.instant(), startTime);
 		try {
-			return this.scheduledExecutor.schedule(decorateTask(task, false), initialDelay, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.schedule(decorateTask(task, false), initialDelay.toMillis(), TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -217,10 +220,10 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
-		long initialDelay = startTime.getTime() - this.clock.millis();
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
+		Duration initialDelay = Duration.between(this.clock.instant(), startTime);
 		try {
-			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), initialDelay, period, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), initialDelay.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -228,9 +231,9 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period) {
 		try {
-			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), 0, period, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), 0, period.toMillis(), TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -238,10 +241,10 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
-		long initialDelay = startTime.getTime() - this.clock.millis();
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
+		Duration initialDelay = Duration.between(this.clock.instant(), startTime);
 		try {
-			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), initialDelay, delay, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), initialDelay.toMillis(), delay.toMillis(), TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -249,9 +252,9 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
-	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
 		try {
-			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), 0, delay, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), 0, delay.toMillis(), TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
@@ -273,22 +276,66 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	private class EnterpriseConcurrentTriggerScheduler {
 
-		public ScheduledFuture<?> schedule(Runnable task, final Trigger trigger) {
+		public ScheduledFuture<?> schedule(Runnable task, Trigger trigger) {
 			ManagedScheduledExecutorService executor = (ManagedScheduledExecutorService) scheduledExecutor;
-			return executor.schedule(task, new jakarta.enterprise.concurrent.Trigger() {
-				@Override
-				@Nullable
-				public Date getNextRunTime(@Nullable LastExecution le, Date taskScheduledTime) {
-					return (trigger.nextExecutionTime(le != null ?
-							new SimpleTriggerContext(le.getScheduledStart(), le.getRunStart(), le.getRunEnd()) :
-							new SimpleTriggerContext()));
-				}
-				@Override
-				public boolean skipRun(LastExecution lastExecution, Date scheduledRunTime) {
-					return false;
-				}
-			});
+			return executor.schedule(task, new TriggerAdapter(trigger));
 		}
+
+		private static class TriggerAdapter implements jakarta.enterprise.concurrent.Trigger {
+
+			private final Trigger adaptee;
+
+
+			public TriggerAdapter(Trigger adaptee) {
+				this.adaptee = adaptee;
+			}
+
+			@Override
+			@Nullable
+			public Date getNextRunTime(@Nullable LastExecution le, Date taskScheduledTime) {
+				Instant instant = this.adaptee.nextExecution(new LastExecutionAdapter(le));
+				return instant != null ? Date.from(instant) : null;
+			}
+
+			@Nullable
+			private static Instant toInstant(@Nullable Date date) {
+				return date != null ? date.toInstant() : null;
+			}
+
+
+			@Override
+			public boolean skipRun(LastExecution lastExecutionInfo, Date scheduledRunTime) {
+				return false;
+			}
+
+			private static class LastExecutionAdapter implements TriggerContext {
+
+				@Nullable
+				private final LastExecution le;
+
+
+				public LastExecutionAdapter(@Nullable LastExecution le) {
+					this.le = le;
+				}
+
+				@Override
+				public Instant lastScheduledExecution() {
+					return (this.le != null) ? toInstant(this.le.getScheduledStart()) : null;
+				}
+
+				@Override
+				public Instant lastActualExecution() {
+					return (this.le != null) ? toInstant(this.le.getRunStart()) : null;
+				}
+
+				@Override
+				public Instant lastCompletion() {
+					return (this.le != null) ? toInstant(this.le.getRunEnd()) : null;
+				}
+			}
+		}
+
+
 	}
 
 }

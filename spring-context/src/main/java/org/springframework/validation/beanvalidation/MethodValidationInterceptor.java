@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -28,6 +29,9 @@ import jakarta.validation.executable.ExecutableValidator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
+import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.BridgeMethodResolver;
@@ -35,6 +39,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -60,14 +65,14 @@ import org.springframework.validation.annotation.Validated;
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private final Validator validator;
+	private final Supplier<Validator> validator;
 
 
 	/**
 	 * Create a new MethodValidationInterceptor using a default JSR-303 validator underneath.
 	 */
 	public MethodValidationInterceptor() {
-		this(Validation.buildDefaultValidatorFactory());
+		this.validator = SingletonSupplier.of(() -> Validation.buildDefaultValidatorFactory().getValidator());
 	}
 
 	/**
@@ -75,7 +80,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validatorFactory the JSR-303 ValidatorFactory to use
 	 */
 	public MethodValidationInterceptor(ValidatorFactory validatorFactory) {
-		this(validatorFactory.getValidator());
+		this.validator = SingletonSupplier.of(validatorFactory::getValidator);
 	}
 
 	/**
@@ -83,6 +88,16 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validator the JSR-303 Validator to use
 	 */
 	public MethodValidationInterceptor(Validator validator) {
+		this.validator = () -> validator;
+	}
+
+	/**
+	 * Create a new MethodValidationInterceptor for the supplied
+	 * (potentially lazily initialized) Validator.
+	 * @param validator a Supplier for the Validator to use
+	 * @since 6.0
+	 */
+	public MethodValidationInterceptor(Supplier<Validator> validator) {
 		this.validator = validator;
 	}
 
@@ -98,11 +113,15 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Class<?>[] groups = determineValidationGroups(invocation);
 
 		// Standard Bean Validation 1.1 API
-		ExecutableValidator execVal = this.validator.forExecutables();
+		ExecutableValidator execVal = this.validator.get().forExecutables();
 		Method methodToValidate = invocation.getMethod();
 		Set<ConstraintViolation<Object>> result;
 
 		Object target = invocation.getThis();
+		if (target == null && invocation instanceof ProxyMethodInvocation methodInvocation) {
+			// Allow validation for AOP proxy without a target
+			target = methodInvocation.getProxy();
+		}
 		Assert.state(target != null, "Target must not be null");
 
 		try {
@@ -153,7 +172,8 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	/**
 	 * Determine the validation groups to validate against for the given method invocation.
 	 * <p>Default are the validation groups as specified in the {@link Validated} annotation
-	 * on the containing target class of the method.
+	 * on the method, or on the containing target class of the method, or for an AOP proxy
+	 * without a target (with all behavior in advisors), also check on proxied interfaces.
 	 * @param invocation the current MethodInvocation
 	 * @return the applicable validation groups as a Class array
 	 */
@@ -161,8 +181,20 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Validated validatedAnn = AnnotationUtils.findAnnotation(invocation.getMethod(), Validated.class);
 		if (validatedAnn == null) {
 			Object target = invocation.getThis();
-			Assert.state(target != null, "Target must not be null");
-			validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
+			if (target != null) {
+				validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
+			}
+			else if (invocation instanceof ProxyMethodInvocation methodInvocation) {
+				Object proxy = methodInvocation.getProxy();
+				if (AopUtils.isAopProxy(proxy)) {
+					for (Class<?> type : AopProxyUtils.proxiedUserInterfaces(proxy)) {
+						validatedAnn = AnnotationUtils.findAnnotation(type, Validated.class);
+						if (validatedAnn != null) {
+							break;
+						}
+					}
+				}
+			}
 		}
 		return (validatedAnn != null ? validatedAnn.value() : new Class<?>[0]);
 	}

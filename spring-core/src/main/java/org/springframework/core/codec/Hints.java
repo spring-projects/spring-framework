@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Constants and convenience methods for working with hints.
@@ -111,43 +112,41 @@ public abstract class Hints {
 	 * @param hints2 2nd map of hints
 	 * @return a single map with hints from both
 	 */
-	public static Map<String, Object> merge(Map<String, Object> hints1, Map<String, Object> hints2) {
-		if (hints1.isEmpty() && hints2.isEmpty()) {
+	public static Map<String, Object> merge(
+			@Nullable Map<String, Object> hints1, @Nullable Map<String, Object> hints2) {
+
+		if (ObjectUtils.isEmpty(hints1) && ObjectUtils.isEmpty(hints2)) {
 			return Collections.emptyMap();
 		}
-		else if (hints2.isEmpty()) {
-			return hints1;
+		else if (ObjectUtils.isEmpty(hints2)) {
+			return (hints1 != null ? hints1 : Collections.emptyMap());
 		}
-		else if (hints1.isEmpty()) {
+		else if (ObjectUtils.isEmpty(hints1)) {
 			return hints2;
 		}
-		else {
-			Map<String, Object> result = CollectionUtils.newHashMap(hints1.size() + hints2.size());
-			result.putAll(hints1);
-			result.putAll(hints2);
-			return result;
-		}
+		Map<String, Object> result = CollectionUtils.newHashMap(hints1.size() + hints2.size());
+		result.putAll(hints1);
+		result.putAll(hints2);
+		return result;
 	}
 
 	/**
 	 * Merge a single hint into a map of hints, possibly creating and copying
 	 * all hints into a new map, or otherwise if the map of hints is empty,
 	 * creating a new single entry map.
-	 * @param hints a map of hints to be merge
+	 * @param hints a map of hints to be merged
 	 * @param hintName the hint name to merge
 	 * @param hintValue the hint value to merge
 	 * @return a single map with all hints
 	 */
-	public static Map<String, Object> merge(Map<String, Object> hints, String hintName, Object hintValue) {
-		if (hints.isEmpty()) {
+	public static Map<String, Object> merge(@Nullable Map<String, Object> hints, String hintName, Object hintValue) {
+		if (ObjectUtils.isEmpty(hints)) {
 			return Collections.singletonMap(hintName, hintValue);
 		}
-		else {
-			Map<String, Object> result = CollectionUtils.newHashMap(hints.size() + 1);
-			result.putAll(hints);
-			result.put(hintName, hintValue);
-			return result;
-		}
+		Map<String, Object> result = CollectionUtils.newHashMap(hints.size() + 1);
+		result.putAll(hints);
+		result.put(hintName, hintValue);
+		return result;
 	}
 
 	/**

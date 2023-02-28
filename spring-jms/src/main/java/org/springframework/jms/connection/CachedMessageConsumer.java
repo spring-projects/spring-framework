@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,18 +52,18 @@ class CachedMessageConsumer implements MessageConsumer, QueueReceiver, TopicSubs
 	@Override
 	@Nullable
 	public Queue getQueue() throws JMSException {
-		return (this.target instanceof QueueReceiver ? ((QueueReceiver) this.target).getQueue() : null);
+		return (this.target instanceof QueueReceiver receiver ? receiver.getQueue() : null);
 	}
 
 	@Override
 	@Nullable
 	public Topic getTopic() throws JMSException {
-		return (this.target instanceof TopicSubscriber ? ((TopicSubscriber) this.target).getTopic() : null);
+		return (this.target instanceof TopicSubscriber subscriber ? subscriber.getTopic() : null);
 	}
 
 	@Override
 	public boolean getNoLocal() throws JMSException {
-		return (this.target instanceof TopicSubscriber && ((TopicSubscriber) this.target).getNoLocal());
+		return (this.target instanceof TopicSubscriber subscriber && subscriber.getNoLocal());
 	}
 
 	@Override

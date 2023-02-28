@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,13 +96,23 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 
 		Set<Class<? extends Annotation>> asyncAnnotationTypes = new LinkedHashSet<>(2);
 		asyncAnnotationTypes.add(Async.class);
+
+		ClassLoader classLoader = AsyncAnnotationAdvisor.class.getClassLoader();
 		try {
 			asyncAnnotationTypes.add((Class<? extends Annotation>)
-					ClassUtils.forName("jakarta.ejb.Asynchronous", AsyncAnnotationAdvisor.class.getClassLoader()));
+					ClassUtils.forName("jakarta.ejb.Asynchronous", classLoader));
 		}
 		catch (ClassNotFoundException ex) {
-			// If EJB 3.1 API not present, simply ignore.
+			// If EJB API not present, simply ignore.
 		}
+		try {
+			asyncAnnotationTypes.add((Class<? extends Annotation>)
+					ClassUtils.forName("jakarta.enterprise.concurrent.Asynchronous", classLoader));
+		}
+		catch (ClassNotFoundException ex) {
+			// If Jakarta Concurrent API not present, simply ignore.
+		}
+
 		this.advice = buildAdvice(executor, exceptionHandler);
 		this.pointcut = buildPointcut(asyncAnnotationTypes);
 	}

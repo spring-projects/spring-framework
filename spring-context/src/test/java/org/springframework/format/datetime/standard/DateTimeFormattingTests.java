@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,15 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
+	void testBindLocalDateWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDate", "2009-10-31");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("localDate")).isEqualTo("10/31/09");
+	}
+
+	@Test
 	void testBindLocalDateWithSpecificStyle() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setDateStyle(FormatStyle.LONG);
@@ -208,6 +217,15 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
+	void testBindLocalTimeWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localTime", "12:00:00");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		assertThat(binder.getBindingResult().getFieldValue("localTime")).isEqualTo("12:00 PM");
+	}
+
+	@Test
 	void testBindLocalTimeWithSpecificStyle() {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setTimeStyle(FormatStyle.MEDIUM);
@@ -253,6 +271,17 @@ class DateTimeFormattingTests {
 	void testBindLocalDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("localDateTime", LocalDateTime.of(2009, 10, 31, 12, 0));
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
+		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
+		assertThat(value.startsWith("10/31/09")).isTrue();
+		assertThat(value.endsWith("12:00 PM")).isTrue();
+	}
+
+	@Test
+	void testBindLocalDateTimeWithISO() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateTime", "2009-10-31T12:00:00");
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
@@ -333,11 +362,11 @@ class DateTimeFormattingTests {
 		FieldError fieldError = bindingResult.getFieldError(propertyName);
 		assertThat(fieldError.unwrap(TypeMismatchException.class))
 			.hasMessageContaining("for property 'isoLocalDate'")
-			.hasCauseInstanceOf(ConversionFailedException.class).getCause()
+			.hasCauseInstanceOf(ConversionFailedException.class).cause()
 				.hasMessageContaining("for value '2009-31-10'")
-				.hasCauseInstanceOf(IllegalArgumentException.class).getCause()
+				.hasCauseInstanceOf(IllegalArgumentException.class).cause()
 					.hasMessageContaining("Parse attempt failed for value [2009-31-10]")
-					.hasCauseInstanceOf(DateTimeParseException.class).getCause()
+					.hasCauseInstanceOf(DateTimeParseException.class).cause()
 						// Unable to parse date time value "2009-31-10" using configuration from
 						// @org.springframework.format.annotation.DateTimeFormat(pattern=, style=SS, iso=DATE, fallbackPatterns=[])
 						// We do not check "fallbackPatterns=[]", since the array representation in the toString()
@@ -345,9 +374,9 @@ class DateTimeFormattingTests {
 						.hasMessageContainingAll(
 							"Unable to parse date time value \"2009-31-10\" using configuration from",
 							"@org.springframework.format.annotation.DateTimeFormat", "iso=DATE")
-						.hasCauseInstanceOf(DateTimeParseException.class).getCause()
+						.hasCauseInstanceOf(DateTimeParseException.class).cause()
 							.hasMessageStartingWith("Text '2009-31-10'")
-							.hasCauseInstanceOf(DateTimeException.class).getCause()
+							.hasCauseInstanceOf(DateTimeException.class).cause()
 								.hasMessageContaining("Invalid value for MonthOfYear (valid values 1 - 12): 31")
 								.hasNoCause();
 	}
@@ -569,11 +598,11 @@ class DateTimeFormattingTests {
 			FieldError fieldError = bindingResult.getFieldError(propertyName);
 			assertThat(fieldError.unwrap(TypeMismatchException.class))
 				.hasMessageContaining("for property 'patternLocalDateWithFallbackPatterns'")
-				.hasCauseInstanceOf(ConversionFailedException.class).getCause()
+				.hasCauseInstanceOf(ConversionFailedException.class).cause()
 					.hasMessageContaining("for value '210302'")
-					.hasCauseInstanceOf(IllegalArgumentException.class).getCause()
+					.hasCauseInstanceOf(IllegalArgumentException.class).cause()
 						.hasMessageContaining("Parse attempt failed for value [210302]")
-						.hasCauseInstanceOf(DateTimeParseException.class).getCause()
+						.hasCauseInstanceOf(DateTimeParseException.class).cause()
 							// Unable to parse date time value "210302" using configuration from
 							// @org.springframework.format.annotation.DateTimeFormat(
 							// pattern=yyyy-MM-dd, style=SS, iso=NONE, fallbackPatterns=[M/d/yy, yyyyMMdd, yyyy.MM.dd])
@@ -581,7 +610,7 @@ class DateTimeFormattingTests {
 								"Unable to parse date time value \"210302\" using configuration from",
 								"@org.springframework.format.annotation.DateTimeFormat",
 								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd")
-							.hasCauseInstanceOf(DateTimeParseException.class).getCause()
+							.hasCauseInstanceOf(DateTimeParseException.class).cause()
 								.hasMessageStartingWith("Text '210302'")
 								.hasNoCause();
 		}

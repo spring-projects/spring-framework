@@ -72,13 +72,15 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * {@link org.springframework.scheduling.concurrent.ConcurrentTaskExecutor} adapter.
  *
  * @author Juergen Hoeller
+ * @author Rémy Guihard
+ * @author Sam Brannen
  * @since 2.0
  * @see org.springframework.core.task.TaskExecutor
  * @see java.util.concurrent.ThreadPoolExecutor
  * @see ThreadPoolExecutorFactoryBean
  * @see ConcurrentTaskExecutor
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial", "deprecation"})
 public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		implements AsyncListenableTaskExecutor, SchedulingTaskExecutor {
 
@@ -155,7 +157,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	/**
 	 * Set the ThreadPoolExecutor's keep-alive seconds.
-	 * Default is 60.
+	 * <p>Default is 60.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setKeepAliveSeconds(int keepAliveSeconds) {
@@ -178,7 +180,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 
 	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-	 * Default is {@code Integer.MAX_VALUE}.
+	 * <p>Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
 	 * any other value will lead to a SynchronousQueue instance.
 	 * @see java.util.concurrent.LinkedBlockingQueue
@@ -186,6 +188,15 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	public void setQueueCapacity(int queueCapacity) {
 		this.queueCapacity = queueCapacity;
+	}
+
+	/**
+	 * Return the capacity for the ThreadPoolExecutor's BlockingQueue.
+	 * @since 5.3.21
+	 * @see #setQueueCapacity(int)
+	 */
+	public int getQueueCapacity() {
+		return this.queueCapacity;
 	}
 
 	/**
@@ -314,6 +325,19 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 			return this.corePoolSize;
 		}
 		return this.threadPoolExecutor.getPoolSize();
+	}
+
+	/**
+	 * Return the current queue size.
+	 * @since 5.3.21
+	 * @see java.util.concurrent.ThreadPoolExecutor#getQueue()
+	 */
+	public int getQueueSize() {
+		if (this.threadPoolExecutor == null) {
+			// Not initialized yet: assume no queued tasks.
+			return 0;
+		}
+		return this.threadPoolExecutor.getQueue().size();
 	}
 
 	/**

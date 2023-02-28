@@ -16,21 +16,29 @@
 
 package org.springframework.aot.hint;
 
+import java.util.Objects;
 import java.util.ResourceBundle;
 
+import org.springframework.lang.Nullable;
+
 /**
- * A hint that describes the need to access to a {@link ResourceBundle}.
+ * A hint that describes the need to access a {@link ResourceBundle}.
  *
  * @author Stephane Nicoll
+ * @author Brian Clozel
  * @since 6.0
  */
-public class ResourceBundleHint {
+public final class ResourceBundleHint implements ConditionalHint {
 
 	private final String baseName;
 
+	@Nullable
+	private final TypeReference reachableType;
 
-	ResourceBundleHint(String baseName) {
-		this.baseName = baseName;
+
+	ResourceBundleHint(Builder builder) {
+		this.baseName = builder.baseName;
+		this.reachableType = builder.reachableType;
 	}
 
 	/**
@@ -39,6 +47,76 @@ public class ResourceBundleHint {
 	 */
 	public String getBaseName() {
 		return this.baseName;
+	}
+
+	@Nullable
+	@Override
+	public TypeReference getReachableType() {
+		return this.reachableType;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ResourceBundleHint that = (ResourceBundleHint) o;
+		return this.baseName.equals(that.baseName)
+				&& Objects.equals(this.reachableType, that.reachableType);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.baseName, this.reachableType);
+	}
+
+	/**
+	 * Builder for {@link ResourceBundleHint}.
+	 */
+	public static class Builder {
+
+		private String baseName;
+
+		@Nullable
+		private TypeReference reachableType;
+
+		Builder(String baseName) {
+			this.baseName = baseName;
+		}
+
+		/**
+		 * Make this hint conditional on the fact that the specified type
+		 * can be resolved.
+		 * @param reachableType the type that should be reachable for this
+		 * hint to apply
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder onReachableType(TypeReference reachableType) {
+			this.reachableType = reachableType;
+			return this;
+		}
+
+		/**
+		 * Use the {@code baseName} of the resource bundle.
+		 * @return {@code this}, to facilitate method chaining
+		 */
+		public Builder baseName(String baseName) {
+			this.baseName = baseName;
+			return this;
+		}
+
+		/**
+		 * Creates a {@link ResourceBundleHint} based on the state of this
+		 * builder.
+		 * @return a resource bundle hint
+		 */
+		ResourceBundleHint build() {
+			return new ResourceBundleHint(this);
+		}
+
 	}
 
 }

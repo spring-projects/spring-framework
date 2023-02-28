@@ -19,7 +19,6 @@ package org.springframework.web.bind.support;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
@@ -84,8 +83,8 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	}
 
 	/**
-	 * Protected method to obtain the values for data binding. By default this
-	 * method delegates to {@link #extractValuesToBind(ServerWebExchange)}.
+	 * Obtain the values for data binding. By default, this delegates to
+	 * {@link #extractValuesToBind(ServerWebExchange)}.
 	 * @param exchange the current exchange
 	 * @return a map of bind values
 	 * @since 5.3
@@ -123,8 +122,8 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	protected static void addBindValue(Map<String, Object> params, String key, List<?> values) {
 		if (!CollectionUtils.isEmpty(values)) {
 			values = values.stream()
-					.map(value -> value instanceof FormFieldPart ? ((FormFieldPart) value).value() : value)
-					.collect(Collectors.toList());
+					.map(value -> value instanceof FormFieldPart formFieldPart ? formFieldPart.value() : value)
+					.toList();
 			params.put(key, values.size() == 1 ? values.get(0) : values);
 		}
 	}

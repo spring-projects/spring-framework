@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,11 +43,11 @@ class UnmodifiableMultiValueMapTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void delegation() {
-		MultiValueMap<String, String> mock = mock(MultiValueMap.class);
+		MultiValueMap<String, String> mock = mock();
 		UnmodifiableMultiValueMap<String, String> map = new UnmodifiableMultiValueMap<>(mock);
 
 		given(mock.size()).willReturn(1);
-		assertThat(map.size()).isEqualTo(1);
+		assertThat(map).hasSize(1);
 
 		given(mock.isEmpty()).willReturn(false);
 		assertThat(map.isEmpty()).isFalse();
@@ -101,18 +101,18 @@ class UnmodifiableMultiValueMapTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void entrySetDelegation() {
-		MultiValueMap<String, String> mockMap = mock(MultiValueMap.class);
-		Set<Map.Entry<String, List<String>>> mockSet = mock(Set.class);
+		MultiValueMap<String, String> mockMap = mock();
+		Set<Map.Entry<String, List<String>>> mockSet = mock();
 		given(mockMap.entrySet()).willReturn(mockSet);
 		Set<Map.Entry<String, List<String>>> set = new UnmodifiableMultiValueMap<>(mockMap).entrySet();
 
 		given(mockSet.size()).willReturn(1);
-		assertThat(set.size()).isEqualTo(1);
+		assertThat(set).hasSize(1);
 
 		given(mockSet.isEmpty()).willReturn(false);
 		assertThat(set.isEmpty()).isFalse();
 
-		Map.Entry<String, List<String>> mockedEntry = mock(Map.Entry.class);
+		Map.Entry<String, List<String>> mockedEntry = mock();
 		given(mockSet.contains(mockedEntry)).willReturn(true);
 		assertThat(set.contains(mockedEntry)).isTrue();
 
@@ -120,7 +120,7 @@ class UnmodifiableMultiValueMapTests {
 		given(mockSet.containsAll(mockEntries)).willReturn(true);
 		assertThat(set.containsAll(mockEntries)).isTrue();
 
-		Iterator<Map.Entry<String, List<String>>> mockIterator = mock(Iterator.class);
+		Iterator<Map.Entry<String, List<String>>> mockIterator = mock();
 		given(mockSet.iterator()).willReturn(mockIterator);
 		given(mockIterator.hasNext()).willReturn(false);
 		assertThat(set.iterator()).isExhausted();
@@ -143,13 +143,13 @@ class UnmodifiableMultiValueMapTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void valuesDelegation() {
-		MultiValueMap<String, String> mockMap = mock(MultiValueMap.class);
-		Collection<List<String>> mockValues = mock(Collection.class);
+		MultiValueMap<String, String> mockMap = mock();
+		Collection<List<String>> mockValues = mock();
 		given(mockMap.values()).willReturn(mockValues);
 		Collection<List<String>> values = new UnmodifiableMultiValueMap<>(mockMap).values();
 
 		given(mockValues.size()).willReturn(1);
-		assertThat(values.size()).isEqualTo(1);
+		assertThat(values).hasSize(1);
 
 		given(mockValues.isEmpty()).willReturn(false);
 		assertThat(values.isEmpty()).isFalse();

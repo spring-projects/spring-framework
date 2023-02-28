@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import jakarta.servlet.ServletContextListener;
  * Bootstrap listener to start up and shut down Spring's root {@link WebApplicationContext}.
  * Simply delegates to {@link ContextLoader} as well as to {@link ContextCleanupListener}.
  *
- * <p>As of Spring 3.1, {@code ContextLoaderListener} supports injecting the root web
- * application context via the {@link #ContextLoaderListener(WebApplicationContext)}
+ * <p>{@code ContextLoaderListener} supports injecting the root web application
+ * context via the {@link #ContextLoaderListener(WebApplicationContext)}
  * constructor, allowing for programmatic configuration in Servlet initializers.
  * See {@link org.springframework.web.WebApplicationInitializer} for usage examples.
  *

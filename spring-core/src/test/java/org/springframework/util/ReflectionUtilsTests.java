@@ -305,13 +305,13 @@ class ReflectionUtilsTests {
 		class Parent {
 			@SuppressWarnings("unused")
 			public Number m1() {
-				return Integer.valueOf(42);
+				return 42;
 			}
 		}
 		class Leaf extends Parent {
 			@Override
 			public Integer m1() {
-				return Integer.valueOf(42);
+				return 42;
 			}
 		}
 		Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(Leaf.class);

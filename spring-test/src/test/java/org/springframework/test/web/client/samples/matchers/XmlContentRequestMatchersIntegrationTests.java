@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.test.web.client.samples.matchers;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +47,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @see ContentRequestMatchersIntegrationTests
  * @see XpathRequestMatchersIntegrationTests
  */
-public class XmlContentRequestMatchersIntegrationTests {
+class XmlContentRequestMatchersIntegrationTests {
 
 	private static final String PEOPLE_XML =
 			"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
@@ -68,7 +67,7 @@ public class XmlContentRequestMatchersIntegrationTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		List<Person> composers = Arrays.asList(
 				new Person("Johann Sebastian Bach").setSomeDouble(21),
 				new Person("Johannes Brahms").setSomeDouble(.0025),
@@ -87,7 +86,7 @@ public class XmlContentRequestMatchersIntegrationTests {
 	}
 
 	@Test
-	public void testXmlEqualTo() throws Exception {
+	void testXmlEqualTo() {
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/xml"))
 			.andExpect(content().xml(PEOPLE_XML))
@@ -97,7 +96,7 @@ public class XmlContentRequestMatchersIntegrationTests {
 	}
 
 	@Test
-	public void testHamcrestNodeMatcher() throws Exception {
+	void testHamcrestNodeMatcher() {
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/xml"))
 			.andExpect(content().node(hasXPath("/people/composers/composer[1]")))
@@ -106,8 +105,8 @@ public class XmlContentRequestMatchersIntegrationTests {
 		executeAndVerify();
 	}
 
-	private void executeAndVerify() throws URISyntaxException {
-		this.restTemplate.put(new URI("/composers"), this.people);
+	private void executeAndVerify() {
+		this.restTemplate.put(URI.create("/composers"), this.people);
 		this.mockServer.verify();
 	}
 

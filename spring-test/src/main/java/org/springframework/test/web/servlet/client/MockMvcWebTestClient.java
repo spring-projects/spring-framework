@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
-import org.springframework.util.Assert;
 import org.springframework.validation.Validator;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.WebApplicationContext;
@@ -140,22 +139,25 @@ public interface MockMvcWebTestClient {
 	 */
 	static ResultActions resultActionsFor(ExchangeResult exchangeResult) {
 		Object serverResult = exchangeResult.getMockServerResult();
-		Assert.notNull(serverResult, "No MvcResult");
-		Assert.isInstanceOf(MvcResult.class, serverResult);
+		if (!(serverResult instanceof MvcResult mvcResult)) {
+			throw new IllegalArgumentException(
+					"Result from mock server exchange must be an instance of MvcResult instead of " +
+							(serverResult != null ? serverResult.getClass().getName() : "null"));
+		}
 		return new ResultActions() {
 			@Override
 			public ResultActions andExpect(ResultMatcher matcher) throws Exception {
-				matcher.match((MvcResult) serverResult);
+				matcher.match(mvcResult);
 				return this;
 			}
 			@Override
 			public ResultActions andDo(ResultHandler handler) throws Exception {
-				handler.handle((MvcResult) serverResult);
+				handler.handle(mvcResult);
 				return this;
 			}
 			@Override
 			public MvcResult andReturn() {
-				return (MvcResult) serverResult;
+				return mvcResult;
 			}
 		};
 	}
@@ -358,7 +360,10 @@ public interface MockMvcWebTestClient {
 		 * Whether to match trailing slashes.
 		 * <p>This is delegated to
 		 * {@link StandaloneMockMvcBuilder#setUseTrailingSlashPatternMatch(boolean)}.
+		 * @deprecated as of 6.0, see
+		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 		 */
+		@Deprecated(since = "6.0")
 		ControllerSpec useTrailingSlashPatternMatch(boolean useTrailingSlashPatternMatch);
 
 		/**

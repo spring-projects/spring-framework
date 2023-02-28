@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -50,19 +51,25 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-@SuppressWarnings("resource")
-public class AsyncExecutionTests {
+@SuppressWarnings({ "resource", "deprecation" })
+class AsyncExecutionTests {
 
 	private static String originalThreadName;
 
-	private static int listenerCalled = 0;
+	private static volatile int listenerCalled = 0;
 
 	private static int listenerConstructed = 0;
 
 
-	@Test
-	public void asyncMethods() throws Exception {
+	@BeforeEach
+	void setUp() {
 		originalThreadName = Thread.currentThread().getName();
+		listenerCalled = 0;
+		listenerConstructed = 0;
+	}
+
+	@Test
+	void asyncMethods() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodBean.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -101,8 +108,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncMethodsThroughInterface() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncMethodsThroughInterface() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(SimpleAsyncMethodBean.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -117,8 +123,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncMethodsWithQualifier() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncMethodsWithQualifier() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodWithQualifierBean.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -138,8 +143,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncMethodsWithQualifierThroughInterface() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncMethodsWithQualifierThroughInterface() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(SimpleAsyncMethodWithQualifierBean.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -159,8 +163,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncClass() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncClass() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassBean.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -190,8 +193,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncClassWithPostProcessor() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncClassWithPostProcessor() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
@@ -204,8 +206,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncClassWithInterface() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncClassWithInterface() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassBeanWithInterface.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -219,8 +220,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncClassWithInterfaceAndPostProcessor() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncClassWithInterfaceAndPostProcessor() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassBeanWithInterface.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
@@ -233,8 +233,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncInterface() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncInterface() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncInterfaceBean.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -248,8 +247,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncInterfaceWithPostProcessor() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncInterfaceWithPostProcessor() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncInterfaceBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
@@ -262,8 +260,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void dynamicAsyncInterface() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void dynamicAsyncInterface() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(DynamicAsyncInterfaceBean.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -277,8 +274,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void dynamicAsyncInterfaceWithPostProcessor() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void dynamicAsyncInterfaceWithPostProcessor() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(DynamicAsyncInterfaceBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
@@ -291,8 +287,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncMethodsInInterface() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncMethodsInInterface() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodsInterfaceBean.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -307,8 +302,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncMethodsInInterfaceWithPostProcessor() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void asyncMethodsInInterfaceWithPostProcessor() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodsInterfaceBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
@@ -322,8 +316,7 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void dynamicAsyncMethodsInInterfaceWithPostProcessor() throws Exception {
-		originalThreadName = Thread.currentThread().getName();
+	void dynamicAsyncMethodsInInterfaceWithPostProcessor() throws Exception {
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(DynamicAsyncMethodsInterfaceBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
@@ -336,10 +329,8 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncMethodListener() throws Exception {
+	void asyncMethodListener() throws Exception {
 		// Arrange
-		originalThreadName = Thread.currentThread().getName();
-		listenerCalled = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodListener.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -355,11 +346,8 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncClassListener() throws Exception {
+	void asyncClassListener() throws Exception {
 		// Arrange
-		originalThreadName = Thread.currentThread().getName();
-		listenerCalled = 0;
-		listenerConstructed = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassListener.class));
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
@@ -376,11 +364,8 @@ public class AsyncExecutionTests {
 	}
 
 	@Test
-	public void asyncPrototypeClassListener() throws Exception {
+	void asyncPrototypeClassListener() throws Exception {
 		// Arrange
-		originalThreadName = Thread.currentThread().getName();
-		listenerCalled = 0;
-		listenerConstructed = 0;
 		GenericApplicationContext context = new GenericApplicationContext();
 		RootBeanDefinition listenerDef = new RootBeanDefinition(AsyncClassListener.class);
 		listenerDef.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -414,19 +399,17 @@ public class AsyncExecutionTests {
 	public static class AsyncMethodBean {
 
 		public void doNothing(int i) {
-			assertThat(Thread.currentThread().getName().equals(originalThreadName)).isTrue();
+			assertThat(Thread.currentThread().getName()).isEqualTo(originalThreadName);
 		}
 
 		@Async
 		public void doSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 		}
 
 		@Async
 		public Future<String> returnSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -438,8 +421,7 @@ public class AsyncExecutionTests {
 
 		@Async
 		public ListenableFuture<String> returnSomethingListenable(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -451,8 +433,7 @@ public class AsyncExecutionTests {
 
 		@Async
 		public CompletableFuture<String> returnSomethingCompletable(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -474,28 +455,25 @@ public class AsyncExecutionTests {
 	public static class AsyncMethodWithQualifierBean {
 
 		public void doNothing(int i) {
-			assertThat(Thread.currentThread().getName().equals(originalThreadName)).isTrue();
+			assertThat(Thread.currentThread().getName()).isEqualTo(originalThreadName);
 		}
 
 		@Async("e1")
 		public void doSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
-			assertThat(Thread.currentThread().getName().startsWith("e1-")).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
+			assertThat(Thread.currentThread().getName()).startsWith("e1-");
 		}
 
 		@MyAsync
 		public Future<String> returnSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
-			assertThat(Thread.currentThread().getName().startsWith("e2-")).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
+			assertThat(Thread.currentThread().getName()).startsWith("e2-");
 			return new AsyncResult<>(Integer.toString(i));
 		}
 
 		public Future<String> returnSomething2(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
-			assertThat(Thread.currentThread().getName().startsWith("e0-")).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
+			assertThat(Thread.currentThread().getName()).startsWith("e0-");
 			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
@@ -516,13 +494,11 @@ public class AsyncExecutionTests {
 	public static class AsyncClassBean implements Serializable, DisposableBean {
 
 		public void doSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 		}
 
 		public Future<String> returnSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -530,8 +506,7 @@ public class AsyncExecutionTests {
 		}
 
 		public ListenableFuture<String> returnSomethingListenable(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -540,8 +515,7 @@ public class AsyncExecutionTests {
 
 		@Async
 		public CompletableFuture<String> returnSomethingCompletable(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			if (i == 0) {
 				throw new IllegalArgumentException();
 			}
@@ -567,14 +541,12 @@ public class AsyncExecutionTests {
 
 		@Override
 		public void doSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 		}
 
 		@Override
 		public Future<String> returnSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
@@ -593,14 +565,12 @@ public class AsyncExecutionTests {
 
 		@Override
 		public void doSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 		}
 
 		@Override
 		public Future<String> returnSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
@@ -613,8 +583,7 @@ public class AsyncExecutionTests {
 		public DynamicAsyncInterfaceBean() {
 			ProxyFactory pf = new ProxyFactory(new HashMap<>());
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor((MethodInterceptor) invocation -> {
-				boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-				assertThat(condition).isTrue();
+				assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 				if (Future.class.equals(invocation.getMethod().getReturnType())) {
 					return new AsyncResult<>(invocation.getArguments()[0].toString());
 				}
@@ -658,19 +627,17 @@ public class AsyncExecutionTests {
 
 		@Override
 		public void doNothing(int i) {
-			assertThat(Thread.currentThread().getName().equals(originalThreadName)).isTrue();
+			assertThat(Thread.currentThread().getName()).isEqualTo(originalThreadName);
 		}
 
 		@Override
 		public void doSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 		}
 
 		@Override
 		public Future<String> returnSomething(int i) {
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 			return new AsyncResult<>(Integer.toString(i));
 		}
 	}
@@ -683,8 +650,7 @@ public class AsyncExecutionTests {
 		public DynamicAsyncMethodsInterfaceBean() {
 			ProxyFactory pf = new ProxyFactory(new HashMap<>());
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor((MethodInterceptor) invocation -> {
-				boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-				assertThat(condition).isTrue();
+				assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 				if (Future.class.equals(invocation.getMethod().getReturnType())) {
 					return new AsyncResult<>(invocation.getArguments()[0].toString());
 				}
@@ -718,8 +684,7 @@ public class AsyncExecutionTests {
 		@Async
 		public void onApplicationEvent(ApplicationEvent event) {
 			listenerCalled++;
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 		}
 	}
 
@@ -734,8 +699,7 @@ public class AsyncExecutionTests {
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			listenerCalled++;
-			boolean condition = !Thread.currentThread().getName().equals(originalThreadName);
-			assertThat(condition).isTrue();
+			assertThat(Thread.currentThread().getName()).isNotEqualTo(originalThreadName);
 		}
 	}
 

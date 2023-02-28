@@ -632,7 +632,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 			}
 			else if (!synchronizations.isEmpty()) {
 				// Existing transaction that we participate in, controlled outside
-				// of the scope of this Spring transaction manager -> try to register
+				// the scope of this Spring transaction manager -> try to register
 				// an afterCompletion callback with the existing (JTA) transaction.
 				return registerAfterCompletionWithExistingTransaction(
 						synchronizationManager, status.getTransaction(), synchronizations);

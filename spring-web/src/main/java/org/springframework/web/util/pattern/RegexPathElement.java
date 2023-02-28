@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A regex path element. Used to represent any complicated element of the path.
- * For example in '<tt>/foo/&ast;_&ast;/&ast;_{foobar}</tt>' both <tt>*_*</tt> and <tt>*_{foobar}</tt>
- * are {@link RegexPathElement} path elements. Derived from the general
- * {@link org.springframework.util.AntPathMatcher} approach.
+ *
+ * <p>For example in '<code>/foo/&#42;_&#42;/&#42;_{foobar}</code>' both {@code *_*}
+ * and <code>*_{foobar}</code> are {@link RegexPathElement regex path elements}.
+ *
+ * <p>Derived from the general {@link org.springframework.util.AntPathMatcher} approach.
  *
  * @author Andy Clement
  * @since 5.0
@@ -108,12 +110,8 @@ class RegexPathElement extends PathElement {
 		}
 
 		patternBuilder.append(quote(text, end, text.length()));
-		if (this.caseSensitive) {
-			return Pattern.compile(patternBuilder.toString());
-		}
-		else {
-			return Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE);
-		}
+		return Pattern.compile(patternBuilder.toString(),
+				Pattern.DOTALL | (this.caseSensitive ? 0 : Pattern.CASE_INSENSITIVE));
 	}
 
 	public List<String> getVariableNames() {

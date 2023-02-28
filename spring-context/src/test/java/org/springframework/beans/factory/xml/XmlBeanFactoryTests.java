@@ -22,8 +22,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -173,7 +171,7 @@ class XmlBeanFactoryTests {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
 
 		reader.setValidationMode(XmlBeanDefinitionReader.VALIDATION_NONE);
-		try (InputStream inputStream = getClass().getResourceAsStream(REFTYPES_CONTEXT.getPath())) {
+		try (InputStream inputStream = REFTYPES_CONTEXT.getInputStream()) {
 			reader.loadBeanDefinitions(new InputSource(inputStream));
 		}
 
@@ -192,7 +190,7 @@ class XmlBeanFactoryTests {
 
 		assertThat(hasInnerBeans.getFriends()).isNotNull();
 		Object[] friends = hasInnerBeans.getFriends().toArray();
-		assertThat(friends.length).isEqualTo(3);
+		assertThat(friends).hasSize(3);
 		DerivedTestBean inner2 = (DerivedTestBean) friends[0];
 		assertThat(inner2.getName()).isEqualTo("inner2");
 		assertThat(inner2.getBeanName().startsWith(DerivedTestBean.class.getName())).isTrue();
@@ -205,7 +203,7 @@ class XmlBeanFactoryTests {
 		assertThat(inner5.getBeanName()).isEqualTo("innerBean#2");
 
 		assertThat(hasInnerBeans.getSomeMap()).isNotNull();
-		assertThat(hasInnerBeans.getSomeMap().size()).isEqualTo(2);
+		assertThat(hasInnerBeans.getSomeMap()).hasSize(2);
 		TestBean inner3 = (TestBean) hasInnerBeans.getSomeMap().get("someKey");
 		assertThat(inner3.getName()).isEqualTo("Jenny");
 		assertThat(inner3.getAge()).isEqualTo(30);
@@ -263,7 +261,7 @@ class XmlBeanFactoryTests {
 
 		assertThat(hasInnerBeans.getFriends()).isNotNull();
 		Object[] friends = hasInnerBeans.getFriends().toArray();
-		assertThat(friends.length).isEqualTo(3);
+		assertThat(friends).hasSize(3);
 		DerivedTestBean inner2 = (DerivedTestBean) friends[0];
 		assertThat(inner2.getName()).isEqualTo("inner2");
 		assertThat(inner2.getBeanName().startsWith(DerivedTestBean.class.getName())).isTrue();
@@ -412,7 +410,7 @@ class XmlBeanFactoryTests {
 
 		// abstract beans should not match
 		Map<?, ?> tbs = parent.getBeansOfType(TestBean.class);
-		assertThat(tbs.size()).isEqualTo(2);
+		assertThat(tbs).hasSize(2);
 		assertThat(tbs.containsKey("inheritedTestBeanPrototype")).isTrue();
 		assertThat(tbs.containsKey("inheritedTestBeanSingleton")).isTrue();
 
@@ -429,13 +427,13 @@ class XmlBeanFactoryTests {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(DEP_MATERIALIZE_CONTEXT);
 
-		assertThat(xbf.getBeansOfType(DummyBo.class, true, false).size()).isEqualTo(2);
-		assertThat(xbf.getBeansOfType(DummyBo.class, true, true).size()).isEqualTo(3);
-		assertThat(xbf.getBeansOfType(DummyBo.class, true, false).size()).isEqualTo(3);
-		assertThat(xbf.getBeansOfType(DummyBo.class).size()).isEqualTo(3);
-		assertThat(xbf.getBeansOfType(DummyBoImpl.class, true, true).size()).isEqualTo(2);
-		assertThat(xbf.getBeansOfType(DummyBoImpl.class, false, true).size()).isEqualTo(1);
-		assertThat(xbf.getBeansOfType(DummyBoImpl.class).size()).isEqualTo(2);
+		assertThat(xbf.getBeansOfType(DummyBo.class, true, false)).hasSize(2);
+		assertThat(xbf.getBeansOfType(DummyBo.class, true, true)).hasSize(3);
+		assertThat(xbf.getBeansOfType(DummyBo.class, true, false)).hasSize(3);
+		assertThat(xbf.getBeansOfType(DummyBo.class)).hasSize(3);
+		assertThat(xbf.getBeansOfType(DummyBoImpl.class, true, true)).hasSize(2);
+		assertThat(xbf.getBeansOfType(DummyBoImpl.class, false, true)).hasSize(1);
+		assertThat(xbf.getBeansOfType(DummyBoImpl.class)).hasSize(2);
 
 		DummyBoImpl bos = (DummyBoImpl) xbf.getBean("boSingleton");
 		DummyBoImpl bop = (DummyBoImpl) xbf.getBean("boPrototype");
@@ -944,8 +942,8 @@ class XmlBeanFactoryTests {
 			xbf.getBean("rod2Accessor");
 		}
 		catch (BeanCreationException ex) {
-			assertThat(ex.toString().contains("touchy")).isTrue();
 			ex.printStackTrace();
+			assertThat(ex.toString().contains("touchy")).isTrue();
 			assertThat((Object) ex.getRelatedCauses()).isNull();
 		}
 	}
@@ -1172,10 +1170,9 @@ class XmlBeanFactoryTests {
 	}
 
 	@Test
-	void urlResourceWithImport() {
-		URL url = getClass().getResource(RESOURCE_CONTEXT.getPath());
+	void urlResourceWithImport() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new UrlResource(url));
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new UrlResource(RESOURCE_CONTEXT.getURL()));
 		// comes from "resourceImport.xml"
 		xbf.getBean("resource1", ResourceTestBean.class);
 		// comes from "resource.xml"
@@ -1183,10 +1180,9 @@ class XmlBeanFactoryTests {
 	}
 
 	@Test
-	void fileSystemResourceWithImport() throws URISyntaxException {
-		String file = getClass().getResource(RESOURCE_CONTEXT.getPath()).toURI().getPath();
+	void fileSystemResourceWithImport() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new FileSystemResource(file));
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new FileSystemResource(RESOURCE_CONTEXT.getFile()));
 		// comes from "resourceImport.xml"
 		xbf.getBean("resource1", ResourceTestBean.class);
 		// comes from "resource.xml"
@@ -1370,7 +1366,7 @@ class XmlBeanFactoryTests {
 		reader.loadBeanDefinitions(INVALID_NO_SUCH_METHOD_CONTEXT);
 		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(() ->
 				xbf.getBean("constructorOverrides"))
-			.withMessageContaining("bogusMethod");
+			.satisfies(ex -> ex.getCause().getMessage().contains("bogusMethod"));
 	}
 
 	@Test
@@ -1393,12 +1389,12 @@ class XmlBeanFactoryTests {
 		reader.loadBeanDefinitions(OVERRIDES_CONTEXT);
 
 		TestBean jenny1 = (TestBean) xbf.getBean("jennyChild");
-		assertThat(jenny1.getFriends().size()).isEqualTo(1);
+		assertThat(jenny1.getFriends()).hasSize(1);
 		Object friend1 = jenny1.getFriends().iterator().next();
 		assertThat(friend1 instanceof TestBean).isTrue();
 
 		TestBean jenny2 = (TestBean) xbf.getBean("jennyChild");
-		assertThat(jenny2.getFriends().size()).isEqualTo(1);
+		assertThat(jenny2.getFriends()).hasSize(1);
 		Object friend2 = jenny2.getFriends().iterator().next();
 		assertThat(friend2 instanceof TestBean).isTrue();
 
@@ -1514,7 +1510,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArray");
 		assertThat(bean.array instanceof int[]).isTrue();
-		assertThat(((int[]) bean.array).length).isEqualTo(1);
+		assertThat(((int[]) bean.array)).hasSize(1);
 		assertThat(((int[]) bean.array)[0]).isEqualTo(1);
 	}
 
@@ -1524,7 +1520,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("indexedConstructorArray");
 		assertThat(bean.array instanceof int[]).isTrue();
-		assertThat(((int[]) bean.array).length).isEqualTo(1);
+		assertThat(((int[]) bean.array)).hasSize(1);
 		assertThat(((int[]) bean.array)[0]).isEqualTo(1);
 	}
 
@@ -1534,7 +1530,7 @@ class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertThat(bean.array instanceof String[]).isTrue();
-		assertThat(((String[]) bean.array).length).isEqualTo(0);
+		assertThat(((String[]) bean.array)).isEmpty();
 	}
 
 	@Test
@@ -1545,7 +1541,7 @@ class XmlBeanFactoryTests {
 		bd.setLenientConstructorResolution(false);
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertThat(bean.array instanceof String[]).isTrue();
-		assertThat(((String[]) bean.array).length).isEqualTo(0);
+		assertThat(((String[]) bean.array)).isEmpty();
 	}
 
 	@Test
@@ -1600,7 +1596,7 @@ class XmlBeanFactoryTests {
 
 		@Override
 		public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
-			assertThat(args.length).isEqualTo(1);
+			assertThat(args).hasSize(1);
 			assertThat(method.getName()).isEqualTo("doSomething");
 			lastArg = args[0];
 			return null;

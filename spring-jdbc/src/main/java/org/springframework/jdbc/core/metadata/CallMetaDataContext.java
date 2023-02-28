@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -478,7 +478,7 @@ public class CallMetaDataContext {
 	 */
 	public Map<String, Object> matchInParameterValuesWithCallParameters(SqlParameterSource parameterSource) {
 		// For parameter source lookups we need to provide case-insensitive lookup support
-		// since the database meta-data is not necessarily providing case sensitive parameter names.
+		// since the database meta-data is not necessarily providing case-sensitive parameter names.
 		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
 
@@ -569,8 +569,8 @@ public class CallMetaDataContext {
 			if (callParameterName == null) {
 				if (logger.isDebugEnabled()) {
 					Object value = parameterValue;
-					if (value instanceof SqlParameterValue) {
-						value = ((SqlParameterValue) value).getValue();
+					if (value instanceof SqlParameterValue sqlParameterValue) {
+						value = sqlParameterValue.getValue();
 					}
 					if (value != null) {
 						logger.debug("Unable to locate the corresponding IN or IN-OUT parameter for \"" +

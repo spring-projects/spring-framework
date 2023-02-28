@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,20 +61,19 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
  */
 class DefaultClientResponseTests {
 
-	private ClientHttpResponse mockResponse;
+	private ClientHttpResponse mockResponse = mock();
 
 	private final HttpHeaders httpHeaders = new HttpHeaders();
 
-	private ExchangeStrategies mockExchangeStrategies;
+	private ExchangeStrategies mockExchangeStrategies = mock();
 
 	private DefaultClientResponse defaultClientResponse;
 
 
 	@BeforeEach
-	void createMocks() {
-		mockResponse = mock(ClientHttpResponse.class);
+	void configureMocks() {
 		given(mockResponse.getHeaders()).willReturn(this.httpHeaders);
-		mockExchangeStrategies = mock(ExchangeStrategies.class);
+
 		defaultClientResponse = new DefaultClientResponse(mockResponse, mockExchangeStrategies, "", "", () -> null);
 	}
 
@@ -85,15 +84,6 @@ class DefaultClientResponseTests {
 		given(mockResponse.getStatusCode()).willReturn(status);
 
 		assertThat(defaultClientResponse.statusCode()).isEqualTo(status);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	void rawStatusCode() {
-		int status = 999;
-		given(mockResponse.getRawStatusCode()).willReturn(status);
-
-		assertThat(defaultClientResponse.rawStatusCode()).isEqualTo(status);
 	}
 
 	@Test
@@ -342,7 +332,6 @@ class DefaultClientResponseTests {
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
-		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(mockResponse.getBody()).willReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
@@ -366,7 +355,6 @@ class DefaultClientResponseTests {
 		Flux<DataBuffer> body = Flux.just(dataBuffer);
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.NOT_FOUND);
-		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.NOT_FOUND.value());
 		given(mockResponse.getBody()).willReturn(body);
 
 		List<HttpMessageReader<?>> messageReaders = Collections.singletonList(
@@ -393,7 +381,6 @@ class DefaultClientResponseTests {
 	private void mockTextPlainResponse(Flux<DataBuffer> body) {
 		httpHeaders.setContentType(MediaType.TEXT_PLAIN);
 		given(mockResponse.getStatusCode()).willReturn(HttpStatus.OK);
-		given(mockResponse.getRawStatusCode()).willReturn(HttpStatus.OK.value());
 		given(mockResponse.getBody()).willReturn(body);
 	}
 

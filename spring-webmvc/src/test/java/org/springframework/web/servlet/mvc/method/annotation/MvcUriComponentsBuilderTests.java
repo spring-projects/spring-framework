@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpEntity;
@@ -233,10 +234,17 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodNameNotMapped() {
-		UriComponents uriComponents = fromMethodName(UnmappedController.class, "unmappedMethod").build();
+	public void fromMethodNameInUnmappedController() {
+		UriComponents uriComponents = fromMethodName(UnmappedController.class, "requestMappingMethod").build();
 
 		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/");
+	}
+
+	@Test // gh-29897
+	public void fromMethodNameInUnmappedControllerMethod() {
+		UriComponents uriComponents = fromMethodName(UnmappedControllerMethod.class, "getMethod").build();
+
+		assertThat(uriComponents.toUriString()).isEqualTo("http://localhost/path");
 	}
 
 	@Test
@@ -534,7 +542,16 @@ public class MvcUriComponentsBuilderTests {
 	private class UnmappedController {
 
 		@RequestMapping
-		public void unmappedMethod() {
+		public void requestMappingMethod() {
+		}
+	}
+
+
+	@RequestMapping("/path")
+	private class UnmappedControllerMethod {
+
+		@GetMapping
+		public void getMethod() {
 		}
 	}
 
@@ -635,6 +652,7 @@ public class MvcUriComponentsBuilderTests {
 	@Documented
 	private @interface PostJson {
 
+		@AliasFor(annotation = RequestMapping.class)
 		String[] path() default {};
 	}
 

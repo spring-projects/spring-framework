@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -47,8 +49,23 @@ public class WebClientRequestException extends WebClientException {
 
 		this.method = method;
 		this.uri = uri;
-		this.headers = headers;
+		this.headers = copy(headers);
 	}
+
+	/**
+	 * Not all {@code HttpHeaders} implementations are serializable, so we
+	 * make a copy to ensure that {@code WebClientRequestException} is.
+	 */
+	private static HttpHeaders copy(HttpHeaders headers) {
+		HttpHeaders result = new HttpHeaders();
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			for (String value : entry.getValue()) {
+				result.add(entry.getKey(), value);
+			}
+		}
+		return result;
+	}
+
 
 	/**
 	 * Return the HTTP request method.

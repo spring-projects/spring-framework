@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean4", tbd);
 
 		bf.registerResolvableDependency(BeanFactory.class, bf);
-		bf.registerResolvableDependency(INestedTestBean.class, (ObjectFactory<Object>) () -> new NestedTestBean());
+		bf.registerResolvableDependency(INestedTestBean.class, (ObjectFactory<Object>) NestedTestBean::new);
 
 		@SuppressWarnings("deprecation")
 		org.springframework.beans.factory.config.PropertyPlaceholderConfigurer ppc = new org.springframework.beans.factory.config.PropertyPlaceholderConfigurer();
@@ -232,7 +232,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertThat(tb).isNotSameAs(anotherBean.getTestBean6());
 
 		String[] depBeans = bf.getDependenciesForBean("annotatedBean");
-		assertThat(depBeans.length).isEqualTo(1);
+		assertThat(depBeans).hasSize(1);
 		assertThat(depBeans[0]).isEqualTo("testBean4");
 	}
 

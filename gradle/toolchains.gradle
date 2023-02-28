@@ -5,10 +5,10 @@
  * One can choose the toolchain to use for compiling the MAIN sources and/or compiling
  * and running the TEST sources. These options apply to Java, Kotlin and Groovy sources
  * when available.
- * {@code "./gradlew check -PmainToolchain=17 -PtestToolchain=18"} will use:
+ * {@code "./gradlew check -PmainToolchain=17 -PtestToolchain=19"} will use:
  * <ul>
  *     <li>a JDK17 toolchain for compiling the main SourceSet
- *     <li>a JDK18 toolchain for compiling and running the test SourceSet
+ *     <li>a JDK19 toolchain for compiling and running the test SourceSet
  * </ul>
  *
  * By default, the build will fall back to using the current JDK and 17 language level for all sourceSets.
@@ -23,9 +23,9 @@
  * {@code
  * $ echo JDK17
  * /opt/openjdk/java17
- * $ echo JDK18
+ * $ echo JDK19
  * /opt/openjdk/java18
- * $ ./gradlew -Porg.gradle.java.installations.fromEnv=JDK17,JDK18 check
+ * $ ./gradlew -Porg.gradle.java.installations.fromEnv=JDK17,JDK19 check
  * }
  *
  * @author Brian Clozel

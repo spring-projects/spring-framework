@@ -278,7 +278,7 @@ public class PasswordInputTag extends InputTag {
 	}
 
 	/**
-	 * The {@link PasswordInputTag} only writes it's value if the
+	 * The {@link PasswordInputTag} only writes its value if the
 	 * {@link #setShowPassword(boolean) 'showPassword'} property value is
 	 * {@link Boolean#TRUE true}.
 	 */

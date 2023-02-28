@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +191,7 @@ class TestPropertySourceUtilsTests {
 	@Test
 	void addPropertiesFilesToEnvironmentWithNullEnvironment() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(ResourceLoader.class), FOO_LOCATIONS))
+			.isThrownBy(() -> addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(), FOO_LOCATIONS))
 			.withMessageContaining("'environment' must not be null");
 	}
 
@@ -205,7 +205,7 @@ class TestPropertySourceUtilsTests {
 	@Test
 	void addPropertiesFilesToEnvironmentWithEnvironmentAndNullLocations() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> addPropertiesFilesToEnvironment(new MockEnvironment(), mock(ResourceLoader.class), (String[]) null))
+			.isThrownBy(() -> addPropertiesFilesToEnvironment(new MockEnvironment(), mock(), (String[]) null))
 			.withMessageContaining("'locations' must not be null");
 	}
 
@@ -215,15 +215,15 @@ class TestPropertySourceUtilsTests {
 
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertThat(propertySources.size()).isEqualTo(0);
+		assertThat(propertySources).isEmpty();
 
 		String pair = "key = value";
 		ByteArrayResource resource = new ByteArrayResource(pair.getBytes(), "from inlined property: " + pair);
-		ResourceLoader resourceLoader = mock(ResourceLoader.class);
+		ResourceLoader resourceLoader = mock();
 		given(resourceLoader.getResource(anyString())).willReturn(resource);
 
 		addPropertiesFilesToEnvironment(environment, resourceLoader, FOO_LOCATIONS);
-		assertThat(propertySources.size()).isEqualTo(1);
+		assertThat(propertySources).hasSize(1);
 		assertThat(environment.getProperty("key")).isEqualTo("value");
 	}
 
@@ -275,10 +275,10 @@ class TestPropertySourceUtilsTests {
 		ConfigurableEnvironment environment = new MockEnvironment();
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
-		assertThat(propertySources.size()).isEqualTo(0);
+		assertThat(propertySources).isEmpty();
 		addInlinedPropertiesToEnvironment(environment, asArray("  "));
-		assertThat(propertySources.size()).isEqualTo(1);
-		assertThat(((Map) propertySources.iterator().next().getSource()).size()).isEqualTo(0);
+		assertThat(propertySources).hasSize(1);
+		assertThat(((Map<?, ?>) propertySources.iterator().next().getSource())).isEmpty();
 	}
 
 	@Test

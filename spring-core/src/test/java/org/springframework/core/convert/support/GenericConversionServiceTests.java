@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -104,7 +103,7 @@ class GenericConversionServiceTests {
 	@Test
 	void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertThat(conversionService.convert("3", Integer.class)).isEqualTo((int) Integer.valueOf(3));
+		assertThat(conversionService.convert("3", Integer.class)).isEqualTo(3);
 	}
 
 	@Test
@@ -192,7 +191,7 @@ class GenericConversionServiceTests {
 	void convertSuperSourceType() {
 		conversionService.addConverter(CharSequence.class, Integer.class, source -> Integer.valueOf(source.toString()));
 		Integer result = conversionService.convert("3", Integer.class);
-		assertThat((int) result).isEqualTo((int) Integer.valueOf(3));
+		assertThat(result).isEqualTo(3);
 	}
 
 	// SPR-8718
@@ -221,7 +220,7 @@ class GenericConversionServiceTests {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertThat(conversionService.canConvert(String.class, int.class)).isTrue();
 		Integer three = conversionService.convert("3", int.class);
-		assertThat(three.intValue()).isEqualTo(3);
+		assertThat(three).isEqualTo(3);
 	}
 
 	@Test
@@ -234,26 +233,21 @@ class GenericConversionServiceTests {
 
 	@Test
 	void listToIterableConversion() {
-		List<Object> raw = new ArrayList<>();
-		raw.add("one");
-		raw.add("two");
+		List<Object> raw = List.of("one", "two");
 		Object converted = conversionService.convert(raw, Iterable.class);
 		assertThat(converted).isSameAs(raw);
 	}
 
 	@Test
 	void listToObjectConversion() {
-		List<Object> raw = new ArrayList<>();
-		raw.add("one");
-		raw.add("two");
+		List<Object> raw = List.of("one", "two");
 		Object converted = conversionService.convert(raw, Object.class);
 		assertThat(converted).isSameAs(raw);
 	}
 
 	@Test
 	void mapToObjectConversion() {
-		Map<Object, Object> raw = new HashMap<>();
-		raw.put("key", "value");
+		Map<Object, Object> raw = Map.of("key", "value");
 		Object converted = conversionService.convert(raw, Object.class);
 		assertThat(converted).isSameAs(raw);
 	}
@@ -341,7 +335,7 @@ class GenericConversionServiceTests {
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = TypeDescriptor.valueOf(String[].class);
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
-		assertThat(((String[]) conversionService.convert(list, sourceType, targetType)).length).isEqualTo(0);
+		assertThat(((String[]) conversionService.convert(list, sourceType, targetType))).isEmpty();
 	}
 
 	@Test
@@ -748,7 +742,7 @@ class GenericConversionServiceTests {
 		}
 	}
 
-	private static interface MyEnumBaseInterface {
+	private interface MyEnumBaseInterface {
 		String getBaseCode();
 	}
 

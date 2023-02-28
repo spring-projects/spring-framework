@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public class UserCredentialsConnectionFactoryAdapter
 
 
 	/**
-	 * Set user credententials for this proxy and the current thread.
+	 * Set user credentials for this proxy and the current thread.
 	 * The given username and password will be applied to all subsequent
 	 * {@code createConnection()} calls on this ConnectionFactory proxy.
 	 * <p>This will override any statically specified user credentials,
@@ -283,14 +283,14 @@ public class UserCredentialsConnectionFactoryAdapter
 			@Nullable String username, @Nullable String password) throws JMSException {
 
 		ConnectionFactory target = obtainTargetConnectionFactory();
-		if (!(target instanceof TopicConnectionFactory queueFactory)) {
+		if (!(target instanceof TopicConnectionFactory topicFactory)) {
 			throw new jakarta.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");
 		}
 		if (StringUtils.hasLength(username)) {
-			return queueFactory.createTopicConnection(username, password);
+			return topicFactory.createTopicConnection(username, password);
 		}
 		else {
-			return queueFactory.createTopicConnection();
+			return topicFactory.createTopicConnection();
 		}
 	}
 

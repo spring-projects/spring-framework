@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
  * e.g. {@code UTF-8}, {@code ISO-8859-16}, etc.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 2.5.4
  * @see Charset
  */
@@ -37,7 +38,7 @@ public class CharsetEditor extends PropertyEditorSupport {
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
 		if (StringUtils.hasText(text)) {
-			setValue(Charset.forName(text));
+			setValue(Charset.forName(text.trim()));
 		}
 		else {
 			setValue(null);

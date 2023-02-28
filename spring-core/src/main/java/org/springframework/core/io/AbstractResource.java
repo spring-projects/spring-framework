@@ -50,7 +50,7 @@ public abstract class AbstractResource implements Resource {
 	/**
 	 * This implementation checks whether a File can be opened,
 	 * falling back to whether an InputStream can be opened.
-	 * This will cover both directories and content resources.
+	 * <p>This will cover both directories and content resources.
 	 */
 	@Override
 	public boolean exists() {
@@ -145,7 +145,7 @@ public abstract class AbstractResource implements Resource {
 
 	/**
 	 * This method reads the entire InputStream to determine the content length.
-	 * <p>For a custom sub-class of {@code InputStreamResource}, we strongly
+	 * <p>For a custom subclass of {@code InputStreamResource}, we strongly
 	 * recommend overriding this method with a more optimal implementation, e.g.
 	 * checking File length, or possibly simply returning -1 if the stream can
 	 * only be read once.

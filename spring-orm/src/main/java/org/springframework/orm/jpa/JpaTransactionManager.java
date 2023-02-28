@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,9 +229,9 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 	/**
-	 * Allow Map access to the JPA properties to be passed to the persistence
+	 * Allow {@code Map} access to the JPA properties to be passed to the persistence
 	 * provider, with the option to add or override specific entries.
-	 * <p>Useful for specifying entries directly, for example via "jpaPropertyMap[myKey]".
+	 * <p>Useful for specifying entries directly, for example via {@code jpaPropertyMap[myKey]}.
 	 */
 	public Map<String, Object> getJpaPropertyMap() {
 		return this.jpaPropertyMap;
@@ -344,8 +344,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		if (getEntityManagerFactory() == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
 		}
-		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) getEntityManagerFactory();
+		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo emfInfo) {
 			DataSource dataSource = emfInfo.getDataSource();
 			if (dataSource != null) {
 				setDataSource(dataSource);

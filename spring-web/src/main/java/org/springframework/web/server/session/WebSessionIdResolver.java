@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.util.List;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Contract for session id resolution strategies. Allows for session id
- * resolution through the request and for sending the session id or expiring
+ * Contract for session ID resolution strategies. Allows for session ID
+ * resolution through the request and for sending the session ID or expiring
  * the session through the response.
  *
  * @author Rossen Stoyanchev
@@ -32,16 +32,16 @@ import org.springframework.web.server.ServerWebExchange;
 public interface WebSessionIdResolver {
 
 	/**
-	 * Resolve the session id's associated with the request.
+	 * Resolve the session IDs associated with the request.
 	 * @param exchange the current exchange
-	 * @return the session id's or an empty list
+	 * @return the session IDs or an empty list
 	 */
 	List<String> resolveSessionIds(ServerWebExchange exchange);
 
 	/**
-	 * Send the given session id to the client.
+	 * Send the given session ID to the client.
 	 * @param exchange the current exchange
-	 * @param sessionId the session id
+	 * @param sessionId the session ID
 	 */
 	void setSessionId(ServerWebExchange exchange, String sessionId);
 

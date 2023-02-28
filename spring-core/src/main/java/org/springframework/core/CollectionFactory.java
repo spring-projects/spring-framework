@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,34 +55,31 @@ import org.springframework.util.ReflectionUtils;
  */
 public final class CollectionFactory {
 
-	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>();
+	private static final Set<Class<?>> approximableCollectionTypes = Set.of(
+			// Standard collection interfaces
+			Collection.class,
+			List.class,
+			Set.class,
+			SortedSet.class,
+			NavigableSet.class,
+			// Common concrete collection classes
+			ArrayList.class,
+			LinkedList.class,
+			HashSet.class,
+			LinkedHashSet.class,
+			TreeSet.class,
+			EnumSet.class);
 
-	private static final Set<Class<?>> approximableMapTypes = new HashSet<>();
-
-
-	static {
-		// Standard collection interfaces
-		approximableCollectionTypes.add(Collection.class);
-		approximableCollectionTypes.add(List.class);
-		approximableCollectionTypes.add(Set.class);
-		approximableCollectionTypes.add(SortedSet.class);
-		approximableCollectionTypes.add(NavigableSet.class);
-		approximableMapTypes.add(Map.class);
-		approximableMapTypes.add(SortedMap.class);
-		approximableMapTypes.add(NavigableMap.class);
-
-		// Common concrete collection classes
-		approximableCollectionTypes.add(ArrayList.class);
-		approximableCollectionTypes.add(LinkedList.class);
-		approximableCollectionTypes.add(HashSet.class);
-		approximableCollectionTypes.add(LinkedHashSet.class);
-		approximableCollectionTypes.add(TreeSet.class);
-		approximableCollectionTypes.add(EnumSet.class);
-		approximableMapTypes.add(HashMap.class);
-		approximableMapTypes.add(LinkedHashMap.class);
-		approximableMapTypes.add(TreeMap.class);
-		approximableMapTypes.add(EnumMap.class);
-	}
+	private static final Set<Class<?>> approximableMapTypes = Set.of(
+			// Standard map interfaces
+			Map.class,
+			SortedMap.class,
+			NavigableMap.class,
+			// Common concrete map classes
+			HashMap.class,
+			LinkedHashMap.class,
+			TreeMap.class,
+			EnumMap.class);
 
 
 	private CollectionFactory() {
@@ -180,26 +177,26 @@ public final class CollectionFactory {
 	@SuppressWarnings("unchecked")
 	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
-		if (collectionType.isInterface()) {
-			if (Set.class == collectionType || Collection.class == collectionType) {
-				return new LinkedHashSet<>(capacity);
-			}
-			else if (List.class == collectionType) {
-				return new ArrayList<>(capacity);
-			}
-			else if (SortedSet.class == collectionType || NavigableSet.class == collectionType) {
-				return new TreeSet<>();
-			}
-			else {
-				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
-			}
+		if (LinkedHashSet.class == collectionType || HashSet.class == collectionType ||
+				Set.class == collectionType || Collection.class == collectionType) {
+			return new LinkedHashSet<>(capacity);
+		}
+		else if (ArrayList.class == collectionType || List.class == collectionType) {
+			return new ArrayList<>(capacity);
+		}
+		else if (LinkedList.class == collectionType) {
+			return new LinkedList<>();
+		}
+		else if (TreeSet.class == collectionType || NavigableSet.class == collectionType
+				|| SortedSet.class == collectionType) {
+			return new TreeSet<>();
 		}
 		else if (EnumSet.class.isAssignableFrom(collectionType)) {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
 			return EnumSet.noneOf(asEnumType(elementType));
 		}
 		else {
-			if (!Collection.class.isAssignableFrom(collectionType)) {
+			if (collectionType.isInterface() || !Collection.class.isAssignableFrom(collectionType)) {
 				throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
 			}
 			try {

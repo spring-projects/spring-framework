@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class RequestMappingHandlerMappingTests {
+class RequestMappingHandlerMappingTests {
 
 	private final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 
@@ -65,13 +65,13 @@ public class RequestMappingHandlerMappingTests {
 
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.handlerMapping.setApplicationContext(wac);
 	}
 
 
 	@Test
-	public void resolveEmbeddedValuesInPatterns() {
+	void resolveEmbeddedValuesInPatterns() {
 		this.handlerMapping.setEmbeddedValueResolver(value -> "/${pattern}/bar".equals(value) ? "/foo/bar" : value);
 
 		String[] patterns = new String[] { "/foo", "/${pattern}/bar" };
@@ -81,7 +81,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void pathPrefix() throws Exception {
+	void pathPrefix() throws Exception {
 		this.handlerMapping.setEmbeddedValueResolver(value -> "/${prefix}".equals(value) ? "/api" : value);
 		this.handlerMapping.setPathPrefixes(Collections.singletonMap(
 				"/${prefix}", HandlerTypePredicate.forAnnotation(RestController.class)));
@@ -94,7 +94,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void resolveRequestMappingViaComposedAnnotation() throws Exception {
+	void resolveRequestMappingViaComposedAnnotation() throws Exception {
 		RequestMappingInfo info = assertComposedAnnotationMapping("postJson", "/postJson", RequestMethod.POST);
 
 		assertThat(info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString()).isEqualTo(MediaType.APPLICATION_JSON_VALUE);
@@ -102,7 +102,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test // SPR-14988
-	public void getMappingOverridesConsumesFromTypeLevelAnnotation() throws Exception {
+	void getMappingOverridesConsumesFromTypeLevelAnnotation() throws Exception {
 		RequestMappingInfo requestMappingInfo = assertComposedAnnotationMapping(RequestMethod.POST);
 
 		ConsumesRequestCondition condition = requestMappingInfo.getConsumesCondition();
@@ -110,7 +110,7 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test // gh-22010
-	public void consumesWithOptionalRequestBody() {
+	void consumesWithOptionalRequestBody() {
 		this.wac.registerSingleton("testController", ComposedAnnotationController.class);
 		this.wac.refresh();
 		this.handlerMapping.afterPropertiesSet();
@@ -126,27 +126,27 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void getMapping() throws Exception {
+	void getMapping() throws Exception {
 		assertComposedAnnotationMapping(RequestMethod.GET);
 	}
 
 	@Test
-	public void postMapping() throws Exception {
+	void postMapping() throws Exception {
 		assertComposedAnnotationMapping(RequestMethod.POST);
 	}
 
 	@Test
-	public void putMapping() throws Exception {
+	void putMapping() throws Exception {
 		assertComposedAnnotationMapping(RequestMethod.PUT);
 	}
 
 	@Test
-	public void deleteMapping() throws Exception {
+	void deleteMapping() throws Exception {
 		assertComposedAnnotationMapping(RequestMethod.DELETE);
 	}
 
 	@Test
-	public void patchMapping() throws Exception {
+	void patchMapping() throws Exception {
 		assertComposedAnnotationMapping(RequestMethod.PATCH);
 	}
 
@@ -168,11 +168,11 @@ public class RequestMappingHandlerMappingTests {
 		assertThat(info).isNotNull();
 
 		Set<PathPattern> paths = info.getPatternsCondition().getPatterns();
-		assertThat(paths.size()).isEqualTo(1);
+		assertThat(paths).hasSize(1);
 		assertThat(paths.iterator().next().getPatternString()).isEqualTo(path);
 
 		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
-		assertThat(methods.size()).isEqualTo(1);
+		assertThat(methods).hasSize(1);
 		assertThat(methods.iterator().next()).isEqualTo(requestMethod);
 
 		return info;
@@ -234,7 +234,7 @@ public class RequestMappingHandlerMappingTests {
 
 		@GetMapping("/{id}")
 		public Principal getUser() {
-			return mock(Principal.class);
+			return mock();
 		}
 	}
 
