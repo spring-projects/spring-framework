@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * Tests for {@link ReflectionHints}.
  *
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  */
 class ReflectionHintsTests {
 
@@ -130,6 +131,16 @@ class ReflectionHintsTests {
 		this.reflectionHints.registerField(field);
 		assertTestTypeFieldHint(fieldHint ->
 				assertThat(fieldHint.getName()).isEqualTo("field"));
+	}
+
+	@Test
+	void registerTypeIgnoresLambda() {
+		Runnable lambda = () -> { };
+		Consumer<TypeHint.Builder> hintBuilder = mock();
+		this.reflectionHints.registerType(lambda.getClass());
+		this.reflectionHints.registerType(lambda.getClass(), hintBuilder);
+		assertThat(this.reflectionHints.typeHints()).isEmpty();
+		verifyNoInteractions(hintBuilder);
 	}
 
 	private void assertTestTypeFieldHint(Consumer<FieldHint> fieldHint) {

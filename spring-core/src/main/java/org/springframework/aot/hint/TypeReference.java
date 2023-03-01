@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable;
  * a {@link Class} yet.
  *
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 6.0
  */
 public interface TypeReference {
@@ -68,6 +69,7 @@ public interface TypeReference {
 	 * Create an instance based on the specified type.
 	 * @param type the type to wrap
 	 * @return a type reference for the specified type
+	 * @throws IllegalArgumentException if the specified type {@linkplain Class#getCanonicalName() canonical name} is {@code null}
 	 */
 	static TypeReference of(Class<?> type) {
 		return ReflectionTypeReference.of(type);
