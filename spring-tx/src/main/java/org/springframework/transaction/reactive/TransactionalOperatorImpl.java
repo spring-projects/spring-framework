@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,8 +118,8 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 		logger.debug("Initiating transaction rollback on application exception", ex);
 		return this.transactionManager.rollback(status).onErrorMap(ex2 -> {
 					logger.error("Application exception overridden by rollback exception", ex);
-					if (ex2 instanceof TransactionSystemException) {
-						((TransactionSystemException) ex2).initApplicationException(ex);
+					if (ex2 instanceof TransactionSystemException tse) {
+						tse.initApplicationException(ex);
 					}
 					return ex2;
 				}
@@ -129,8 +129,8 @@ final class TransactionalOperatorImpl implements TransactionalOperator {
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		return (this == other || (super.equals(other) && (!(other instanceof TransactionalOperatorImpl) ||
-				getTransactionManager() == ((TransactionalOperatorImpl) other).getTransactionManager())));
+		return (this == other || (super.equals(other) && (!(other instanceof TransactionalOperatorImpl toi) ||
+				getTransactionManager() == toi.getTransactionManager())));
 	}
 
 	@Override

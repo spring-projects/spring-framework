@@ -92,8 +92,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 					}
 					catch (BeanCreationException ex) {
 						Throwable rootCause = ex.getMostSpecificCause();
-						if (rootCause instanceof BeanCurrentlyInCreationException) {
-							BeanCreationException bce = (BeanCreationException) rootCause;
+						if (rootCause instanceof BeanCurrentlyInCreationException bce) {
 							String bceBeanName = bce.getBeanName();
 							if (bceBeanName != null && this.beanFactory.isCurrentlyInCreation(bceBeanName)) {
 								if (logger.isTraceEnabled()) {
