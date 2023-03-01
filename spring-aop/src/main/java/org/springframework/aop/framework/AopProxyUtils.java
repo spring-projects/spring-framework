@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -257,23 +257,21 @@ public abstract class AopProxyUtils {
 		if (ObjectUtils.isEmpty(arguments)) {
 			return new Object[0];
 		}
-		if (method.isVarArgs()) {
-			if (method.getParameterCount() == arguments.length) {
-				Class<?>[] paramTypes = method.getParameterTypes();
-				int varargIndex = paramTypes.length - 1;
-				Class<?> varargType = paramTypes[varargIndex];
-				if (varargType.isArray()) {
-					Object varargArray = arguments[varargIndex];
-					if (varargArray instanceof Object[] && !varargType.isInstance(varargArray)) {
-						Object[] newArguments = new Object[arguments.length];
-						System.arraycopy(arguments, 0, newArguments, 0, varargIndex);
-						Class<?> targetElementType = varargType.getComponentType();
-						int varargLength = Array.getLength(varargArray);
-						Object newVarargArray = Array.newInstance(targetElementType, varargLength);
-						System.arraycopy(varargArray, 0, newVarargArray, 0, varargLength);
-						newArguments[varargIndex] = newVarargArray;
-						return newArguments;
-					}
+		if (method.isVarArgs() && (method.getParameterCount() == arguments.length)) {
+			Class<?>[] paramTypes = method.getParameterTypes();
+			int varargIndex = paramTypes.length - 1;
+			Class<?> varargType = paramTypes[varargIndex];
+			if (varargType.isArray()) {
+				Object varargArray = arguments[varargIndex];
+				if (varargArray instanceof Object[] && !varargType.isInstance(varargArray)) {
+					Object[] newArguments = new Object[arguments.length];
+					System.arraycopy(arguments, 0, newArguments, 0, varargIndex);
+					Class<?> targetElementType = varargType.getComponentType();
+					int varargLength = Array.getLength(varargArray);
+					Object newVarargArray = Array.newInstance(targetElementType, varargLength);
+					System.arraycopy(varargArray, 0, newVarargArray, 0, varargLength);
+					newArguments[varargIndex] = newVarargArray;
+					return newArguments;
 				}
 			}
 		}

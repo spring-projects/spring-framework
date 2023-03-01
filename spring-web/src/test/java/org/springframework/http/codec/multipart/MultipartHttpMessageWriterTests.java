@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class MultipartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 				this.bufferFactory.wrap("Bb".getBytes(StandardCharsets.UTF_8)),
 				this.bufferFactory.wrap("Cc".getBytes(StandardCharsets.UTF_8))
 		);
-		FilePart mockPart = mock(FilePart.class);
+		FilePart mockPart = mock();
 		HttpHeaders partHeaders = new HttpHeaders();
 		partHeaders.setContentType(MediaType.TEXT_PLAIN);
 		partHeaders.setContentDispositionFormData("foo", "file.txt");

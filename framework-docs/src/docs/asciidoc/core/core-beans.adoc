@@ -524,15 +524,13 @@ container that hosts the bean. A bean usually has only one identifier. However, 
 requires more than one, the extra ones can be considered aliases.
 
 In XML-based configuration metadata, you use the `id` attribute, the `name` attribute, or
-both to specify the bean identifiers. The `id` attribute lets you specify
-exactly one id. Conventionally, these names are alphanumeric ('myBean',
-'someService', etc.), but they can contain special characters as well. If you want to
-introduce other aliases for the bean, you can also specify them in the `name`
-attribute, separated by a comma (`,`), semicolon (`;`), or white space. As a
-historical note, in versions prior to Spring 3.1, the `id` attribute was
-defined as an `xsd:ID` type, which constrained possible characters. As of 3.1,
-it is defined as an `xsd:string` type. Note that bean `id` uniqueness is still
-enforced by the container, though no longer by XML parsers.
+both to specify bean identifiers. The `id` attribute lets you specify exactly one `id`.
+Conventionally, these names are alphanumeric ('myBean', 'someService', etc.), but they
+can contain special characters as well. If you want to introduce other aliases for the
+bean, you can also specify them in the `name` attribute, separated by a comma (`,`),
+semicolon (`;`), or white space. Although the `id` attribute is defined as an
+`xsd:string` type, bean `id` uniqueness is enforced by the container, though not by XML
+parsers.
 
 You are not required to supply a `name` or an `id` for a bean. If you do not supply a
 `name` or `id` explicitly, the container generates a unique name for that bean. However,
@@ -951,7 +949,7 @@ order in which the constructor arguments are defined in a bean definition is the
 in which those arguments are supplied to the appropriate constructor when the bean is
 being instantiated. Consider the following class:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package x.y;
@@ -963,7 +961,7 @@ being instantiated. Consider the following class:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package x.y
@@ -995,7 +993,7 @@ case with the preceding example). When a simple type is used, such as
 `<value>true</value>`, Spring cannot determine the type of the value, and so cannot match
 by type without help. Consider the following class:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package examples;
@@ -1014,7 +1012,7 @@ by type without help. Consider the following class:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package examples
@@ -1079,7 +1077,7 @@ https://download.oracle.com/javase/8/docs/api/java/beans/ConstructorProperties.h
 JDK annotation to explicitly name your constructor arguments. The sample class would
 then have to look as follows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package examples;
@@ -1095,7 +1093,7 @@ then have to look as follows:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package examples
@@ -2278,10 +2276,9 @@ and by <<beans-factory-client,making a `getBean("B")` call to the container>> as
 typically new) bean B instance every time bean A needs it. The following example
 shows this approach:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages",fold="none"]
 .Java
 ----
-	// a class that uses a stateful Command-style class to perform some processing
 	package fiona.apple;
 
 	// Spring-API imports
@@ -2289,6 +2286,10 @@ shows this approach:
 	import org.springframework.context.ApplicationContext;
 	import org.springframework.context.ApplicationContextAware;
 
+	/**
+	 * A class that uses a stateful Command-style class to perform
+	 * some processing.
+	 */
 	public class CommandManager implements ApplicationContextAware {
 
 		private ApplicationContext applicationContext;
@@ -2312,16 +2313,17 @@ shows this approach:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages",fold="none"]
 .Kotlin
 ----
-	// a class that uses a stateful Command-style class to perform some processing
 	package fiona.apple
 
 	// Spring-API imports
 	import org.springframework.context.ApplicationContext
 	import org.springframework.context.ApplicationContextAware
 
+	// A class that uses a stateful Command-style class to perform
+	// some processing.
 	class CommandManager : ApplicationContextAware {
 
 		private lateinit var applicationContext: ApplicationContext
@@ -2384,7 +2386,7 @@ Spring container dynamically overrides the implementation of the `createCommand(
 method. The `CommandManager` class does not have any Spring dependencies, as
 the reworked example shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages",fold="none"]
 .Java
 ----
 	package fiona.apple;
@@ -2405,7 +2407,7 @@ the reworked example shows:
 		protected abstract Command createCommand();
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages",fold="none"]
 .Kotlin
 ----
 	package fiona.apple
@@ -2704,8 +2706,8 @@ The following table describes the supported scopes:
   the context of a web-aware Spring `ApplicationContext`.
 |===
 
-NOTE: As of Spring 3.0, a thread scope is available but is not registered by default. For
-more information, see the documentation for
+NOTE: A thread scope is available but is not registered by default. For more information,
+see the documentation for
 {api-spring-framework}/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
 For instructions on how to register this or any other custom scope, see
 <<beans-factory-scopes-custom-using>>.
@@ -4216,7 +4218,7 @@ it is created by the container and prints the resulting string to the system con
 
 The following listing shows the custom `BeanPostProcessor` implementation class definition:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package scripting;
@@ -4236,9 +4238,11 @@ The following listing shows the custom `BeanPostProcessor` implementation class 
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
+	package scripting
+
 	import org.springframework.beans.factory.config.BeanPostProcessor
 
 	class InstantiationTracingBeanPostProcessor : BeanPostProcessor {
@@ -4590,26 +4594,24 @@ configuration becomes decentralized and harder to control.
 
 No matter the choice, Spring can accommodate both styles and even mix them together.
 It is worth pointing out that through its <<beans-java, JavaConfig>> option, Spring lets
-annotations be used in a non-invasive way, without touching the target components
-source code and that, in terms of tooling, all configuration styles are supported by the
-https://spring.io/tools[Spring Tools for Eclipse].
+annotations be used in a non-invasive way, without touching the target components'
+source code and that, in terms of tooling, all configuration styles are supported by
+https://spring.io/tools[Spring Tools] for Eclipse, Visual Studio Code, and Theia.
 ****
 
 An alternative to XML setup is provided by annotation-based configuration, which relies
-on the bytecode metadata for wiring up components instead of angle-bracket declarations.
-Instead of using XML to describe a bean wiring, the developer moves the configuration
-into the component class itself by using annotations on the relevant class, method, or
-field declaration. As mentioned in <<beans-factory-extension-bpp-examples-aabpp>>, using
-a `BeanPostProcessor` in conjunction with annotations is a common means of extending the
-Spring IoC container. For example, Spring 2.5 introduced an annotation-based approach to
-drive Spring's dependency injection. Essentially, the <<beans-autowired-annotation,
-`@Autowired`>> annotation provides the same capabilities as described in
-<<beans-factory-autowire>> but with more fine-grained control and wider applicability.
-Spring 2.5 also added support for JSR-250 annotations, such as `@PostConstruct` and
-`@PreDestroy`. Spring 3.0 added support for JSR-330 (Dependency Injection for Java)
-annotations contained in the `jakarta.inject` package such as `@Inject` and `@Named`.
-Details about those annotations can be found in the <<beans-standard-annotations,
-relevant section>>.
+on bytecode metadata for wiring up components instead of XML declarations. Instead of
+using XML to describe a bean wiring, the developer moves the configuration into the
+component class itself by using annotations on the relevant class, method, or field
+declaration. As mentioned in <<beans-factory-extension-bpp-examples-aabpp>>, using a
+`BeanPostProcessor` in conjunction with annotations is a common means of extending the
+Spring IoC container. For example, the <<beans-autowired-annotation, `@Autowired`>>
+annotation provides the same capabilities as described in <<beans-factory-autowire>> but
+with more fine-grained control and wider applicability. In addition, Spring provides
+support for JSR-250 annotations, such as `@PostConstruct` and `@PreDestroy`, as well as
+support for JSR-330 (Dependency Injection for Java) annotations contained in the
+`jakarta.inject` package such as `@Inject` and `@Named`. Details about those annotations
+can be found in the <<beans-standard-annotations, relevant section>>.
 
 [NOTE]
 ====
@@ -6237,7 +6239,7 @@ simply to be added to the application's classpath like any other library.
 Most examples in this chapter use XML to specify the configuration metadata that produces
 each `BeanDefinition` within the Spring container. The previous section
 (<<beans-annotation-config>>) demonstrates how to provide a lot of the configuration
-metadata through source-level annotations. Even in those examples, however, the "`base`"
+metadata through source-level annotations. Even in those examples, however, the "base"
 bean definitions are explicitly defined in the XML file, while the annotations drive only
 the dependency injection. This section describes an option for implicitly detecting the
 candidate components by scanning the classpath. Candidate components are classes that
@@ -6249,10 +6251,9 @@ the container.
 
 [NOTE]
 ====
-Starting with Spring 3.0, many features provided by the Spring JavaConfig project are
-part of the core Spring Framework. This allows you to define beans using Java rather
-than using the traditional XML files. Take a look at the `@Configuration`, `@Bean`,
-`@Import`, and `@DependsOn` annotations for examples of how to use these new features.
+You can define beans using Java rather than using XML files. Take a look at the
+`@Configuration`, `@Bean`, `@Import`, and `@DependsOn` annotations for examples of how to
+use these features.
 ====
 
 
@@ -7172,15 +7173,15 @@ arrangement (as though no index were present at all) by setting `spring.index.ig
 [[beans-standard-annotations]]
 == Using JSR 330 Standard Annotations
 
-Starting with Spring 3.0, Spring offers support for JSR-330 standard annotations
-(Dependency Injection). Those annotations are scanned in the same way as the Spring
-annotations. To use them, you need to have the relevant jars in your classpath.
+Spring offers support for JSR-330 standard annotations (Dependency Injection). Those
+annotations are scanned in the same way as the Spring annotations. To use them, you need
+to have the relevant jars in your classpath.
 
 [NOTE]
 =====
 If you use Maven, the `jakarta.inject` artifact is available in the standard Maven
 repository (
-https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/[https://repo1.maven.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/]).
+https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/[https://repo.maven.apache.org/maven2/jakarta/inject/jakarta.inject-api/2.0.0/]).
 You can add the following dependency to your file pom.xml:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -7562,7 +7563,7 @@ The simplest possible `@Configuration` class reads as follows:
 	public class AppConfig {
 
 		@Bean
-		public MyService myService() {
+		public MyServiceImpl myService() {
 			return new MyServiceImpl();
 		}
 	}
@@ -7574,7 +7575,7 @@ The simplest possible `@Configuration` class reads as follows:
 	class AppConfig {
 
 		@Bean
-		fun myService(): MyService {
+		fun myService(): MyServiceImpl {
 			return MyServiceImpl()
 		}
 	}
@@ -8611,22 +8612,24 @@ about singletons here.
 
 [NOTE]
 ====
-As of Spring 3.2, it is no longer necessary to add CGLIB to your classpath because CGLIB
-classes have been repackaged under `org.springframework.cglib` and included directly
-within the spring-core JAR.
+It is not necessary to add CGLIB to your classpath because CGLIB classes are repackaged
+under the `org.springframework.cglib` package and included directly within the
+`spring-core` JAR.
 ====
 
 [TIP]
 ====
 There are a few restrictions due to the fact that CGLIB dynamically adds features at
-startup-time. In particular, configuration classes must not be final. However, as
-of 4.3, any constructors are allowed on configuration classes, including the use of
-`@Autowired` or a single non-default constructor declaration for default injection.
+startup-time. In particular, configuration classes must not be final. However, any
+constructors are allowed on configuration classes, including the use of `@Autowired` or a
+single non-default constructor declaration for default injection.
 
 If you prefer to avoid any CGLIB-imposed limitations, consider declaring your `@Bean`
-methods on non-`@Configuration` classes (for example, on plain `@Component` classes instead).
-Cross-method calls between `@Bean` methods are not then intercepted, so you have
-to exclusively rely on dependency injection at the constructor or method level there.
+methods on non-`@Configuration` classes (for example, on plain `@Component` classes
+instead) or by annotating your configuration class with
+`@Configuration(proxyBeanMethods = false)`. Cross-method calls between `@Bean` methods
+are then not intercepted, so you have to exclusively rely on dependency injection at the
+constructor or method level there.
 ====
 
 

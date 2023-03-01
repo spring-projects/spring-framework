@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.client;
 
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -48,10 +49,24 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
 
+	/**
+	 * Constructor with the client to use and a handler to handle messages with.
+	 */
 	public WebSocketConnectionManager(WebSocketClient client,
 			WebSocketHandler webSocketHandler, String uriTemplate, Object... uriVariables) {
 
 		super(uriTemplate, uriVariables);
+		this.client = client;
+		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
+	}
+
+	/**
+	 * Variant of {@link #WebSocketConnectionManager(WebSocketClient, WebSocketHandler, String, Object...)}
+	 * with a prepared {@link URI}.
+	 * @since 6.0.5
+	 */
+	public WebSocketConnectionManager(WebSocketClient client, WebSocketHandler webSocketHandler, URI uri) {
+		super(uri);
 		this.client = client;
 		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
 	}

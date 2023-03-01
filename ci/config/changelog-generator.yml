@@ -17,4 +17,4 @@ changelog:
         - "type: dependency-upgrade"
   contributors:
     exclude:
-      names: ["bclozel", "jhoeller", "poutsma", "rstoyanchev", "sbrannen", "sdeleuze", "snicoll"]
+      names: ["bclozel", "jhoeller", "poutsma", "rstoyanchev", "sbrannen", "sdeleuze", "snicoll", "simonbasle"]

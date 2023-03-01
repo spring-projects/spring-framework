@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,14 +70,15 @@ import java.lang.annotation.Target;
  * class ExampleIntegrationTests {
  *
  *     &#064;Container
- *     static RedisContainer redis = new RedisContainer();
+ *     static GenericContainer redis =
+ *         new GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379);
  *
  *     // ...
  *
  *     &#064;DynamicPropertySource
  *     static void redisProperties(DynamicPropertyRegistry registry) {
  *         registry.add("redis.host", redis::getHost);
- *         registry.add("redis.port", redis::getMappedPort);
+ *         registry.add("redis.port", redis::getFirstMappedPort);
  *     }
  *
  * }</pre>

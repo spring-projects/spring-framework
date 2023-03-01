@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.io.buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.NoSuchElementException;
 import java.util.function.IntPredicate;
 
 import io.netty.buffer.ByteBuf;
@@ -182,19 +183,20 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	public NettyDataBuffer write(DataBuffer... buffers) {
-		if (!ObjectUtils.isEmpty(buffers)) {
-			if (hasNettyDataBuffers(buffers)) {
-				ByteBuf[] nativeBuffers = new ByteBuf[buffers.length];
-				for (int i = 0; i < buffers.length; i++) {
-					nativeBuffers[i] = ((NettyDataBuffer) buffers[i]).getNativeBuffer();
+	public NettyDataBuffer write(DataBuffer... dataBuffers) {
+		if (!ObjectUtils.isEmpty(dataBuffers)) {
+			if (hasNettyDataBuffers(dataBuffers)) {
+				ByteBuf[] nativeBuffers = new ByteBuf[dataBuffers.length];
+				for (int i = 0; i < dataBuffers.length; i++) {
+					nativeBuffers[i] = ((NettyDataBuffer) dataBuffers[i]).getNativeBuffer();
 				}
 				write(nativeBuffers);
 			}
 			else {
-				ByteBuffer[] byteBuffers = new ByteBuffer[buffers.length];
-				for (int i = 0; i < buffers.length; i++) {
-					byteBuffers[i] = buffers[i].toByteBuffer();
+				ByteBuffer[] byteBuffers = new ByteBuffer[dataBuffers.length];
+				for (int i = 0; i < dataBuffers.length; i++) {
+					byteBuffers[i] = ByteBuffer.allocate(dataBuffers[i].readableByteCount());
+					dataBuffers[i].toByteBuffer(byteBuffers[i]);
 				}
 				write(byteBuffers);
 			}
@@ -295,6 +297,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	@Deprecated
 	public ByteBuffer toByteBuffer(int index, int length) {
 		ByteBuffer result = this.byteBuf.isDirect() ?
 				ByteBuffer.allocateDirect(length) :
@@ -303,6 +306,26 @@ public class NettyDataBuffer implements PooledDataBuffer {
 		this.byteBuf.getBytes(index, result);
 
 		return result.flip();
+	}
+
+	@Override
+	public void toByteBuffer(int srcPos, ByteBuffer dest, int destPos, int length) {
+		Assert.notNull(dest, "Dest must not be null");
+
+		dest = dest.duplicate().clear();
+		dest.put(destPos, this.byteBuf.nioBuffer(), srcPos, length);
+	}
+
+	@Override
+	public DataBuffer.ByteBufferIterator readableByteBuffers() {
+		ByteBuffer[] readable = this.byteBuf.nioBuffers(this.byteBuf.readerIndex(), this.byteBuf.readableBytes());
+		return new ByteBufferIterator(readable, true);
+	}
+
+	@Override
+	public DataBuffer.ByteBufferIterator writableByteBuffers() {
+		ByteBuffer[] writable = this.byteBuf.nioBuffers(this.byteBuf.writerIndex(), this.byteBuf.writableBytes());
+		return new ByteBufferIterator(writable, false);
 	}
 
 	@Override
@@ -353,6 +376,44 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	@Override
 	public String toString() {
 		return this.byteBuf.toString();
+	}
+
+
+	private static final class ByteBufferIterator implements DataBuffer.ByteBufferIterator {
+
+		private final ByteBuffer[] byteBuffers;
+
+		private final boolean readOnly;
+
+		private int cursor = 0;
+
+
+		public ByteBufferIterator(ByteBuffer[] byteBuffers, boolean readOnly) {
+			this.byteBuffers = byteBuffers;
+			this.readOnly = readOnly;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.cursor < this.byteBuffers.length;
+		}
+
+		@Override
+		public ByteBuffer next() {
+			int index = this.cursor;
+			if (index < this.byteBuffers.length) {
+				this.cursor = index + 1;
+				ByteBuffer next = this.byteBuffers[index];
+				return this.readOnly ? next.asReadOnlyBuffer() : next;
+			}
+			else {
+				throw new NoSuchElementException();
+			}
+		}
+
+		@Override
+		public void close() {
+		}
 	}
 
 }

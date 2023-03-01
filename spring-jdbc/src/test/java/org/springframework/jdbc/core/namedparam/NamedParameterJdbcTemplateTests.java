@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,29 +83,23 @@ public class NamedParameterJdbcTemplateTests {
 	private static final String[] COLUMN_NAMES = new String[] {"id", "forename"};
 
 
-	private Connection connection;
+	private Connection connection = mock();
 
-	private DataSource dataSource;
+	private DataSource dataSource = mock();
 
-	private PreparedStatement preparedStatement;
+	private PreparedStatement preparedStatement = mock();
 
-	private ResultSet resultSet;
+	private ResultSet resultSet = mock();
 
-	private DatabaseMetaData databaseMetaData;
+	private DatabaseMetaData databaseMetaData = mock();
+
+	private NamedParameterJdbcTemplate namedParameterTemplate = new NamedParameterJdbcTemplate(dataSource);
 
 	private Map<String, Object> params = new HashMap<>();
-
-	private NamedParameterJdbcTemplate namedParameterTemplate;
 
 
 	@BeforeEach
 	public void setup() throws Exception {
-		connection = mock(Connection.class);
-		dataSource = mock(DataSource.class);
-		preparedStatement =	mock(PreparedStatement.class);
-		resultSet = mock(ResultSet.class);
-		namedParameterTemplate = new NamedParameterJdbcTemplate(dataSource);
-		databaseMetaData = mock(DatabaseMetaData.class);
 		given(dataSource.getConnection()).willReturn(connection);
 		given(connection.prepareStatement(anyString())).willReturn(preparedStatement);
 		given(preparedStatement.getConnection()).willReturn(connection);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.fail
+import kotlinx.coroutines.withContext
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.ProxyFactory
 import org.springframework.transaction.interceptor.TransactionInterceptor
 import org.springframework.transaction.testfixture.ReactiveCallCountingTransactionManager
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 /**
  * @author Sebastien Deleuze
@@ -55,11 +58,9 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(TestWithCoroutines())
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
-		runBlocking {
-			try {
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
 				proxy.suspendingNoValueFailure()
-			}
-			catch (ex: IllegalStateException) {
 			}
 		}
 		assertReactiveGetTransactionAndRollbackCount(1)
@@ -83,12 +84,9 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(TestWithCoroutines())
 		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
 		val proxy = proxyFactory.proxy as TestWithCoroutines
-		runBlocking {
-			try {
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
 				proxy.suspendingValueFailure()
-				fail("No exception thrown as expected")
-			}
-			catch (ex: IllegalStateException) {
 			}
 		}
 		assertReactiveGetTransactionAndRollbackCount(1)
@@ -116,6 +114,36 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 			assertThat(proxy.flowSuccess().toList()).containsExactly("foo", "foo")
 		}
 		assertReactiveGetTransactionAndCommitCount(1)
+	}
+
+	@Test
+	fun suspendingValueSuccessWithContext() {
+		val proxyFactory = ProxyFactory()
+		proxyFactory.setTarget(TestWithCoroutines())
+		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
+		val proxy = proxyFactory.proxy as TestWithCoroutines
+		assertThat(runBlocking {
+			withExampleContext("context") {
+				proxy.suspendingValueSuccessWithContext()
+			}
+		}).isEqualTo("context")
+		assertReactiveGetTransactionAndCommitCount(1)
+	}
+
+	@Test
+	fun suspendingValueFailureWithContext() {
+		val proxyFactory = ProxyFactory()
+		proxyFactory.setTarget(TestWithCoroutines())
+		proxyFactory.addAdvice(TransactionInterceptor(rtm, source))
+		val proxy = proxyFactory.proxy as TestWithCoroutines
+		assertThatIllegalStateException().isThrownBy {
+			runBlocking {
+				withExampleContext("context") {
+					proxy.suspendingValueFailureWithContext()
+				}
+			}
+		}.withMessage("context")
+		assertReactiveGetTransactionAndRollbackCount(1)
 	}
 
 	private fun assertReactiveGetTransactionAndCommitCount(expectedCount: Int) {
@@ -166,5 +194,27 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 				emit("foo")
 			}
 		}
+
+		open suspend fun suspendingValueSuccessWithContext(): String {
+			delay(10)
+			return coroutineContext[ExampleContext.Key].toString()
+		}
+
+		open suspend fun suspendingValueFailureWithContext(): String {
+			delay(10)
+			throw IllegalStateException(coroutineContext[ExampleContext.Key].toString())
+		}
 	}
 }
+
+data class ExampleContext(val value: String) : AbstractCoroutineContextElement(ExampleContext) {
+
+	companion object Key : CoroutineContext.Key<ExampleContext>
+
+	override fun toString(): String = value
+}
+
+private suspend fun withExampleContext(inputValue: String, f: suspend () -> String) =
+	withContext(ExampleContext(inputValue)) {
+		f()
+	}

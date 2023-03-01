@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,7 +256,7 @@ public abstract class ConnectionFactoryUtils {
 	static boolean indicatesDuplicateKey(@Nullable String sqlState, int errorCode) {
 		return ("23505".equals(sqlState) ||
 				("23000".equals(sqlState) &&
-						(errorCode == 1 || errorCode == 1062 || errorCode == 2627)));
+						(errorCode == 1 || errorCode == 1062 || errorCode == 2601 || errorCode == 2627)));
 	}
 
 	/**

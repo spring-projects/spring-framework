@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,7 +210,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	@Nullable
 	public Destination getDestination() {
-		return (this.destination instanceof Destination ? (Destination) this.destination : null);
+		return (this.destination instanceof Destination _destination ? _destination : null);
 	}
 
 	/**
@@ -236,7 +236,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	@Nullable
 	public String getDestinationName() {
-		return (this.destination instanceof String ? (String) this.destination : null);
+		return (this.destination instanceof String name ? name : null);
 	}
 
 	/**
@@ -326,8 +326,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @see SubscriptionNameProvider
 	 */
 	protected String getDefaultSubscriptionName(Object messageListener) {
-		if (messageListener instanceof SubscriptionNameProvider) {
-			return ((SubscriptionNameProvider) messageListener).getSubscriptionName();
+		if (messageListener instanceof SubscriptionNameProvider subscriptionNameProvider) {
+			return subscriptionNameProvider.getSubscriptionName();
 		}
 		else {
 			return messageListener.getClass().getName();
@@ -692,11 +692,11 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	protected void invokeListener(Session session, Message message) throws JMSException {
 		Object listener = getMessageListener();
 
-		if (listener instanceof SessionAwareMessageListener) {
-			doInvokeListener((SessionAwareMessageListener) listener, session, message);
+		if (listener instanceof SessionAwareMessageListener sessionAwareMessageListener) {
+			doInvokeListener(sessionAwareMessageListener, session, message);
 		}
-		else if (listener instanceof MessageListener) {
-			doInvokeListener((MessageListener) listener, message);
+		else if (listener instanceof MessageListener msgListener) {
+			doInvokeListener(msgListener, message);
 		}
 		else if (listener != null) {
 			throw new IllegalArgumentException(
@@ -853,15 +853,15 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 * @throws jakarta.jms.JMSException if thrown by JMS API methods
 	 */
 	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
-		if (isPubSubDomain() && destination instanceof Topic) {
+		if (isPubSubDomain() && destination instanceof Topic topic) {
 			if (isSubscriptionShared()) {
 				return (isSubscriptionDurable() ?
-						session.createSharedDurableConsumer((Topic) destination, getSubscriptionName(), getMessageSelector()) :
-						session.createSharedConsumer((Topic) destination, getSubscriptionName(), getMessageSelector()));
+						session.createSharedDurableConsumer(topic, getSubscriptionName(), getMessageSelector()) :
+						session.createSharedConsumer(topic, getSubscriptionName(), getMessageSelector()));
 			}
 			else if (isSubscriptionDurable()) {
 				return session.createDurableSubscriber(
-						(Topic) destination, getSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
+						topic, getSubscriptionName(), getMessageSelector(), isPubSubNoLocal());
 			}
 			else {
 				// Only pass in the NoLocal flag in case of a Topic (pub-sub mode):
@@ -888,8 +888,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 			// Internal exception - has been handled before.
 			return;
 		}
-		if (ex instanceof JMSException) {
-			invokeExceptionListener((JMSException) ex);
+		if (ex instanceof JMSException jmsException) {
+			invokeExceptionListener(jmsException);
 		}
 		if (isActive()) {
 			// Regular case: failed while active.

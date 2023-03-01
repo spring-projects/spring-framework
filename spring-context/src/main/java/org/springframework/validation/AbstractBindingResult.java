@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,8 +169,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	public List<FieldError> getFieldErrors() {
 		List<FieldError> result = new ArrayList<>();
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError) {
-				result.add((FieldError) objectError);
+			if (objectError instanceof FieldError fieldError) {
+				result.add(fieldError);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -180,8 +180,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	@Nullable
 	public FieldError getFieldError() {
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError) {
-				return (FieldError) objectError;
+			if (objectError instanceof FieldError fieldError) {
+				return fieldError;
 			}
 		}
 		return null;
@@ -192,8 +192,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 		List<FieldError> result = new ArrayList<>();
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError && isMatchingFieldError(fixedField, (FieldError) objectError)) {
-				result.add((FieldError) objectError);
+			if (objectError instanceof FieldError fieldError && isMatchingFieldError(fixedField, fieldError)) {
+				result.add(fieldError);
 			}
 		}
 		return Collections.unmodifiableList(result);
@@ -204,10 +204,8 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	public FieldError getFieldError(String field) {
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
-			if (objectError instanceof FieldError fieldError) {
-				if (isMatchingFieldError(fixedField, fieldError)) {
-					return fieldError;
-				}
+			if (objectError instanceof FieldError fieldError && isMatchingFieldError(fixedField, fieldError)) {
+				return fieldError;
 			}
 		}
 		return null;

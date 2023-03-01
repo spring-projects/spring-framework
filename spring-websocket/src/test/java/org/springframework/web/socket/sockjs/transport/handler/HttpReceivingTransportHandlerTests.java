@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 
 	@Test
 	void readMessagesNoSession() throws Exception {
-		WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
+		WebSocketHandler webSocketHandler = mock();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new XhrReceivingTransportHandler().handleRequest(this.request, this.response, webSocketHandler, null));
 	}
@@ -72,7 +72,7 @@ class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 		StubSockJsServiceConfig sockJsConfig = new StubSockJsServiceConfig();
 		this.servletRequest.setContent("[\"x\"]".getBytes(UTF_8));
 
-		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+		WebSocketHandler wsHandler = mock();
 		TestHttpSockJsSession session = new TestHttpSockJsSession("1", sockJsConfig, wsHandler, null);
 		session.delegateConnectionEstablished();
 
@@ -87,7 +87,7 @@ class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 
 
 	private void handleRequest(AbstractHttpReceivingTransportHandler transportHandler) throws Exception {
-		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+		WebSocketHandler wsHandler = mock();
 		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler, null);
 
 		transportHandler.initialize(new StubSockJsServiceConfig());
@@ -100,7 +100,7 @@ class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 	private void handleRequestAndExpectFailure() throws Exception {
 		resetResponse();
 
-		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
+		WebSocketHandler wsHandler = mock();
 		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler, null);
 
 		new XhrReceivingTransportHandler().handleRequest(this.request, this.response, wsHandler, session);

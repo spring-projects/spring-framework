@@ -367,11 +367,12 @@ class Frame {
             typeValue = REFERENCE_KIND | symbolTable.addType(internalName);
             break;
           default:
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                "Invalid descriptor fragment: " + buffer.substring(elementDescriptorOffset));
         }
         return ((elementDescriptorOffset - offset) << DIM_SHIFT) | typeValue;
       default:
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("Invalid descriptor: " + buffer.substring(offset));
     }
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,20 +36,20 @@ import static org.mockito.Mockito.verify;
  */
 public class DelegatingDataSourceTests {
 
-	private final DataSource delegate = mock(DataSource.class);
+	private final DataSource delegate = mock();
 
 	private DelegatingDataSource dataSource = new DelegatingDataSource(delegate);
 
 	@Test
 	public void shouldDelegateGetConnection() throws Exception {
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		given(delegate.getConnection()).willReturn(connection);
 		assertThat(dataSource.getConnection()).isEqualTo(connection);
 	}
 
 	@Test
 	public void shouldDelegateGetConnectionWithUsernameAndPassword() throws Exception {
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		String username = "username";
 		String password = "password";
 		given(delegate.getConnection(username, password)).willReturn(connection);
@@ -86,7 +86,7 @@ public class DelegatingDataSourceTests {
 
 	@Test
 	public void shouldDelegateUnwrapWithoutImplementing() throws Exception {
-		ExampleWrapper wrapper = mock(ExampleWrapper.class);
+		ExampleWrapper wrapper = mock();
 		given(delegate.unwrap(ExampleWrapper.class)).willReturn(wrapper);
 		assertThat(dataSource.unwrap(ExampleWrapper.class)).isEqualTo(wrapper);
 	}

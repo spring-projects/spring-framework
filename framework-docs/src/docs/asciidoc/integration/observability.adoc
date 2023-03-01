@@ -67,6 +67,12 @@ HTTP server exchanges observations are created with the name `"http.server.reque
 Applications need to configure the `org.springframework.web.filter.ServerHttpObservationFilter` Servlet filter in their application.
 It is using the `org.springframework.http.server.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
+This will only record an observation as an error if the `Exception` has not been handled by the web Framework and has bubbled up to the Servlet filter.
+Typically, all exceptions handled by Spring MVC's `@ExceptionHandler` and <<web.adoc#mvc-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
+You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
+
+include::code:UserController[]
+
 By default, the following `KeyValues` are created:
 
 .Low cardinality Keys
@@ -93,6 +99,12 @@ By default, the following `KeyValues` are created:
 
 Applications need to configure the `org.springframework.web.filter.reactive.ServerHttpObservationFilter` reactive `WebFilter` in their application.
 It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
+
+This will only record an observation as an error if the `Exception` has not been handled by the web Framework and has bubbled up to the `WebFilter`.
+Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and <<web.adoc#webflux-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
+You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
+
+include::code:UserController[]
 
 By default, the following `KeyValues` are created:
 
@@ -125,24 +137,27 @@ Unlike their server counterparts, the instrumentation is implemented directly in
 [[integration.observability.http-client.resttemplate]]
 === RestTemplate
 
+Applications must configure an `ObservationRegistry` on `RestTemplate` instances to enable the instrumentation; without that, observations are "no-ops".
+Spring Boot will auto-configure `RestTemplateBuilder` beans with the observation registry already set.
+
 Instrumentation is using the `org.springframework.http.client.observation.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
 
 .Low cardinality Keys
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
-|`outcome` _(required)_|Outcome of the HTTP client exchange.
+|`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
+|`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
-|`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided.
+|`outcome` _(required)_|Outcome of the HTTP client exchange.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |===
 
 .High cardinality Keys
 [cols="a,a"]
 |===
 |Name | Description
-|`client.name` _(required)_|Client name derived from the request URI host.
 |`http.url` _(required)_|HTTP request URI.
 |===
 
@@ -151,24 +166,27 @@ Instrumentation is using the `org.springframework.http.client.observation.Client
 [[integration.observability.http-client.webclient]]
 === WebClient
 
+Applications must configure an `ObservationRegistry` on the `WebClient` builder to enable the instrumentation; without that, observations are "no-ops".
+Spring Boot will auto-configure `WebClient.Builder` beans with the observation registry already set.
+
 Instrumentation is using the `org.springframework.web.reactive.function.client.ClientRequestObservationConvention` by default, backed by the `ClientRequestObservationContext`.
 
 .Low cardinality Keys
 [cols="a,a"]
 |===
 |Name | Description
-|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |`method` _(required)_|Name of HTTP request method or `"none"` if the request could not be created.
-|`outcome` _(required)_|Outcome of the HTTP client exchange.
+|`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided. Only the path part of the URI is considered.
+|`client.name` _(required)_|Client name derived from the request URI host.
 |`status` _(required)_|HTTP response raw status code, or `"IO_ERROR"` in case of `IOException`, or `"CLIENT_ERROR"` if no response was received.
-|`uri` _(required)_|URI template used for HTTP request, or `"none"` if none was provided.
+|`outcome` _(required)_|Outcome of the HTTP client exchange.
+|`exception` _(required)_|Name of the exception thrown during the exchange, or `"none"` if no exception happened.
 |===
 
 .High cardinality Keys
 [cols="a,a"]
 |===
 |Name | Description
-|`client.name` _(required)_|Client name derived from the request URI host.
 |`http.url` _(required)_|HTTP request URI.
 |===
 

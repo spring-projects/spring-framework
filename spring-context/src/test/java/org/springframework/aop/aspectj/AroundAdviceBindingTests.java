@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
  */
 public class AroundAdviceBindingTests {
 
-	private AroundAdviceBindingCollaborator mockCollaborator;
+	private AroundAdviceBindingCollaborator mockCollaborator = mock();
 
 	private ITestBean testBeanProxy;
 
@@ -48,11 +48,12 @@ public class AroundAdviceBindingTests {
 
 	protected ApplicationContext ctx;
 
+
 	@BeforeEach
 	public void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
-		AroundAdviceBindingTestAspect  aroundAdviceAspect = ((AroundAdviceBindingTestAspect) ctx.getBean("testAspect"));
+		AroundAdviceBindingTestAspect aroundAdviceAspect = (AroundAdviceBindingTestAspect) ctx.getBean("testAspect");
 
 		ITestBean injectedTestBean = (ITestBean) ctx.getBean("testBean");
 		assertThat(AopUtils.isAopProxy(injectedTestBean)).isTrue();
@@ -62,7 +63,6 @@ public class AroundAdviceBindingTests {
 
 		this.testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
 
-		mockCollaborator = mock(AroundAdviceBindingCollaborator.class);
 		aroundAdviceAspect.setCollaborator(mockCollaborator);
 	}
 

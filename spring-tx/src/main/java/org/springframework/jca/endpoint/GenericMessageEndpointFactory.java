@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,11 +84,12 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	@Override
 	public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
 		GenericMessageEndpoint endpoint = (GenericMessageEndpoint) super.createEndpoint(xaResource);
-		ProxyFactory proxyFactory = new ProxyFactory(getMessageListener());
+		Object target = getMessageListener();
+		ProxyFactory proxyFactory = new ProxyFactory(target);
 		DelegatingIntroductionInterceptor introduction = new DelegatingIntroductionInterceptor(endpoint);
 		introduction.suppressInterface(MethodInterceptor.class);
 		proxyFactory.addAdvice(introduction);
-		return (MessageEndpoint) proxyFactory.getProxy();
+		return (MessageEndpoint) proxyFactory.getProxy(target.getClass().getClassLoader());
 	}
 
 	/**

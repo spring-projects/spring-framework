@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package org.springframework.format.datetime;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -47,10 +49,16 @@ public class DateFormatter implements Formatter<Date> {
 
 	private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-	private static final Map<ISO, String> ISO_PATTERNS = Map.of(
-			ISO.DATE, "yyyy-MM-dd",
-			ISO.TIME, "HH:mm:ss.SSSXXX",
-			ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+	// We use an EnumMap instead of Map.of(...) since the former provides better performance.
+	private static final Map<ISO, String> ISO_PATTERNS;
+
+	static {
+		Map<ISO, String> formats = new EnumMap<>(ISO.class);
+		formats.put(ISO.DATE, "yyyy-MM-dd");
+		formats.put(ISO.TIME, "HH:mm:ss.SSSXXX");
+		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+		ISO_PATTERNS = Collections.unmodifiableMap(formats);
+	}
 
 
 	@Nullable

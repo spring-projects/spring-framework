@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,24 +143,25 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
+		Class<?> contextClass = parameter.getContainingClass();
+		Class<T> targetClass = (targetType instanceof Class ? (Class<T>) targetType : null);
+		if (targetClass == null) {
+			ResolvableType resolvableType = ResolvableType.forMethodParameter(parameter);
+			targetClass = (Class<T>) resolvableType.resolve();
+		}
+
 		MediaType contentType;
 		boolean noContentType = false;
 		try {
 			contentType = inputMessage.getHeaders().getContentType();
 		}
 		catch (InvalidMediaTypeException ex) {
-			throw new HttpMediaTypeNotSupportedException(ex.getMessage());
+			throw new HttpMediaTypeNotSupportedException(
+					ex.getMessage(), getSupportedMediaTypes(targetClass != null ? targetClass : Object.class));
 		}
 		if (contentType == null) {
 			noContentType = true;
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
-		}
-
-		Class<?> contextClass = parameter.getContainingClass();
-		Class<T> targetClass = (targetType instanceof Class ? (Class<T>) targetType : null);
-		if (targetClass == null) {
-			ResolvableType resolvableType = ResolvableType.forMethodParameter(parameter);
-			targetClass = (Class<T>) resolvableType.resolve();
 		}
 
 		HttpMethod httpMethod = (inputMessage instanceof HttpRequest ? ((HttpRequest) inputMessage).getMethod() : null);

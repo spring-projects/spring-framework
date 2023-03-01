@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,8 +134,8 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 
 	@Override
 	public void setupListenerContainer(MessageListenerContainer listenerContainer) {
-		if (listenerContainer instanceof AbstractMessageListenerContainer) {
-			setupJmsListenerContainer((AbstractMessageListenerContainer) listenerContainer);
+		if (listenerContainer instanceof AbstractMessageListenerContainer abstractContainer) {
+			setupJmsListenerContainer(abstractContainer);
 		}
 		else {
 			new JcaEndpointConfigurer().configureEndpoint(listenerContainer);
@@ -194,8 +194,8 @@ public abstract class AbstractJmsListenerEndpoint implements JmsListenerEndpoint
 	private class JcaEndpointConfigurer {
 
 		public void configureEndpoint(Object listenerContainer) {
-			if (listenerContainer instanceof JmsMessageEndpointManager) {
-				setupJcaMessageContainer((JmsMessageEndpointManager) listenerContainer);
+			if (listenerContainer instanceof JmsMessageEndpointManager endpointManager) {
+				setupJcaMessageContainer(endpointManager);
 			}
 			else {
 				throw new IllegalArgumentException("Could not configure endpoint with the specified container '" +

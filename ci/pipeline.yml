@@ -23,11 +23,6 @@ anchors:
   docker-resource-source: &docker-resource-source
     username: ((docker-hub-username))
     password: ((docker-hub-password))
-    tag: ((milestone))
-  registry-mirror-vars: &registry-mirror-vars
-    registry-mirror-host: ((registry-mirror-host))
-    registry-mirror-username: ((registry-mirror-username))
-    registry-mirror-password: ((registry-mirror-password))
   slack-fail-params: &slack-fail-params
     text: >
       :concourse-failed: <https://ci.spring.io/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}|${BUILD_PIPELINE_NAME} ${BUILD_JOB_NAME} failed!>
@@ -48,31 +43,37 @@ resource_types:
 - name: registry-image
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: concourse/registry-image-resource
     tag: 1.5.0
 - name: artifactory-resource
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: springio/artifactory-resource
-    tag: 0.0.17
+    tag: 0.0.18
 - name: github-release
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: concourse/github-release-resource
     tag: 1.5.5
 - name: github-status-resource
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: dpb587/github-status-resource
     tag: master
 - name: pull-request
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: teliaoss/github-pr-resource
     tag: v0.23.0
 - name: slack-notification
   type: registry-image
   source:
+    <<: *docker-resource-source
     repository: cfcommunity/slack-notification-resource
     tag: latest
 resources:
@@ -94,6 +95,7 @@ resources:
   source:
     <<: *docker-resource-source
     repository: ((docker-hub-organization))/spring-framework-ci
+    tag: ((milestone))
 - name: every-morning
   type: time
   icon: alarm
@@ -125,14 +127,6 @@ resources:
     access_token: ((github-ci-status-token))
     branch: ((branch))
     context: build
-- name: repo-status-jdk18-build
-  type: github-status-resource
-  icon: eye-check-outline
-  source:
-    repository: ((github-repo-name))
-    access_token: ((github-ci-status-token))
-    branch: ((branch))
-    context: jdk18-build
 - name: repo-status-jdk19-build
   type: github-status-resource
   icon: eye-check-outline
@@ -176,7 +170,7 @@ jobs:
         image: ci-image
       vars:
         ci-image-name: ci-image
-        <<: *registry-mirror-vars
+        <<: *docker-resource-source
     - put: ci-image
       params:
         image: ci-image/image.tar
@@ -237,34 +231,6 @@ jobs:
           "zip.type": "schema"
     get_params:
       threads: 8
-- name: jdk18-build
-  serial: true
-  public: true
-  plan:
-    - get: ci-image
-    - get: git-repo
-    - get: every-morning
-      trigger: true
-    - put: repo-status-jdk18-build
-      params: { state: "pending", commit: "git-repo" }
-    - do:
-        - task: check-project
-          image: ci-image
-          file: git-repo/ci/tasks/check-project.yml
-          privileged: true
-          timeout: ((task-timeout))
-          params:
-            TEST_TOOLCHAIN: 18
-            <<: *build-project-task-params
-      on_failure:
-        do:
-          - put: repo-status-jdk18-build
-            params: { state: "failure", commit: "git-repo" }
-          - put: slack-alert
-            params:
-              <<: *slack-fail-params
-    - put: repo-status-jdk18-build
-      params: { state: "success", commit: "git-repo" }
 - name: jdk19-build
   serial: true
   public: true
@@ -365,6 +331,7 @@ jobs:
       params:
         RELEASE_TYPE: M
         <<: *github-task-params
+        <<: *docker-resource-source
     - put: github-pre-release
       params:
         <<: *changelog-task-params
@@ -403,6 +370,7 @@ jobs:
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RC
+        <<: *docker-resource-source
         <<: *artifactory-task-params
     - task: generate-changelog
       file: git-repo/ci/tasks/generate-changelog.yml
@@ -447,6 +415,7 @@ jobs:
       file: git-repo/ci/tasks/promote-version.yml
       params:
         RELEASE_TYPE: RELEASE
+        <<: *docker-resource-source
         <<: *artifactory-task-params
         <<: *sonatype-task-params
 - name: create-github-release
@@ -464,6 +433,7 @@ jobs:
       file: git-repo/ci/tasks/generate-changelog.yml
       params:
         RELEASE_TYPE: RELEASE
+        <<: *docker-resource-source
         <<: *github-task-params
     - put: github-release
       params:
@@ -471,7 +441,7 @@ jobs:
 
 groups:
 - name: "builds"
-  jobs: ["build", "jdk18-build", "jdk19-build"]
+  jobs: ["build", "jdk19-build"]
 - name: "releases"
   jobs: ["stage-milestone", "stage-rc", "stage-release", "promote-milestone", "promote-rc", "promote-release", "create-github-release"]
 - name: "ci-images"

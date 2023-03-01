@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ package org.springframework.core.io.buffer;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.util.NoSuchElementException;
 import java.util.function.IntPredicate;
 
 import io.netty5.buffer.Buffer;
-import io.netty5.util.AsciiString;
+import io.netty5.buffer.BufferComponent;
+import io.netty5.buffer.ComponentIterator;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -188,20 +189,20 @@ public final class Netty5DataBuffer implements CloseableDataBuffer, TouchableDat
 	}
 
 	@Override
-	public Netty5DataBuffer write(DataBuffer... buffers) {
-		if (!ObjectUtils.isEmpty(buffers)) {
-			if (hasNetty5DataBuffers(buffers)) {
-				Buffer[] nativeBuffers = new Buffer[buffers.length];
-				for (int i = 0; i < buffers.length; i++) {
-					nativeBuffers[i] = ((Netty5DataBuffer) buffers[i]).getNativeBuffer();
+	public Netty5DataBuffer write(DataBuffer... dataBuffers) {
+		if (!ObjectUtils.isEmpty(dataBuffers)) {
+			if (hasNetty5DataBuffers(dataBuffers)) {
+				Buffer[] nativeBuffers = new Buffer[dataBuffers.length];
+				for (int i = 0; i < dataBuffers.length; i++) {
+					nativeBuffers[i] = ((Netty5DataBuffer) dataBuffers[i]).getNativeBuffer();
 				}
 				return write(nativeBuffers);
 			}
 			else {
-				ByteBuffer[] byteBuffers = new ByteBuffer[buffers.length];
-				for (int i = 0; i < buffers.length; i++) {
-					byteBuffers[i] = buffers[i].toByteBuffer();
-
+				ByteBuffer[] byteBuffers = new ByteBuffer[dataBuffers.length];
+				for (int i = 0; i < dataBuffers.length; i++) {
+					byteBuffers[i] = ByteBuffer.allocate(dataBuffers[i].readableByteCount());
+					dataBuffers[i].toByteBuffer(byteBuffers[i]);
 				}
 				return write(byteBuffers);
 			}
@@ -248,13 +249,7 @@ public final class Netty5DataBuffer implements CloseableDataBuffer, TouchableDat
 		Assert.notNull(charSequence, "CharSequence must not be null");
 		Assert.notNull(charset, "Charset must not be null");
 
-		if (StandardCharsets.US_ASCII.equals(charset) && charSequence instanceof AsciiString asciiString) {
-			this.buffer.writeBytes(asciiString.array(), asciiString.arrayOffset(), asciiString.length());
-		}
-		else {
-			byte[] bytes = charSequence.toString().getBytes(charset);
-			this.buffer.writeBytes(bytes);
-		}
+		this.buffer.writeCharSequence(charSequence, charset);
 		return this;
 	}
 
@@ -301,6 +296,21 @@ public final class Netty5DataBuffer implements CloseableDataBuffer, TouchableDat
 	}
 
 	@Override
+	public void toByteBuffer(int srcPos, ByteBuffer dest, int destPos, int length) {
+		this.buffer.copyInto(srcPos, dest, destPos, length);
+	}
+
+	@Override
+	public ByteBufferIterator readableByteBuffers() {
+		return new BufferComponentIterator<>(this.buffer.forEachComponent(), true);
+	}
+
+	@Override
+	public ByteBufferIterator writableByteBuffers() {
+		return new BufferComponentIterator<>(this.buffer.forEachComponent(), false);
+	}
+
+	@Override
 	public String toString(Charset charset) {
 		Assert.notNull(charset, "Charset must not be null");
 		return this.buffer.toString(charset);
@@ -340,6 +350,55 @@ public final class Netty5DataBuffer implements CloseableDataBuffer, TouchableDat
 	@Override
 	public String toString() {
 		return this.buffer.toString();
+	}
+
+
+	private static final class BufferComponentIterator<T extends BufferComponent & ComponentIterator.Next>
+			implements ByteBufferIterator {
+
+		private final ComponentIterator<T> delegate;
+
+		private final boolean readable;
+
+		@Nullable
+		private T next;
+
+
+		public BufferComponentIterator(ComponentIterator<T> delegate, boolean readable) {
+			Assert.notNull(delegate, "Delegate must not be null");
+			this.delegate = delegate;
+			this.readable = readable;
+			this.next = readable ? this.delegate.firstReadable() : this.delegate.firstWritable();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.next != null;
+		}
+
+		@Override
+		public ByteBuffer next() {
+			if (this.next != null) {
+				ByteBuffer result;
+				if (this.readable) {
+					result = this.next.readableBuffer();
+					this.next = this.next.nextReadable();
+				}
+				else {
+					result = this.next.writableBuffer();
+					this.next = this.next.nextWritable();
+				}
+				return result;
+			}
+			else {
+				throw new NoSuchElementException();
+			}
+		}
+
+		@Override
+		public void close() {
+			this.delegate.close();
+		}
 	}
 
 }

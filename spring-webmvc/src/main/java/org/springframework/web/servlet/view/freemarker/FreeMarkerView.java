@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -59,6 +61,9 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * of this approach.
  *
  * <p>Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
+ * As of Spring Framework 6.0, FreeMarker templates are rendered in a minimal
+ * fashion without JSP support, just exposing request attributes in addition
+ * to the MVC-provided model map for alignment with common Servlet resources.
  *
  * @author Darren Davison
  * @author Juergen Hoeller
@@ -235,9 +240,6 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * bean property, retrieved via {@code getTemplate}. It delegates to the
 	 * {@code processTemplate} method to merge the template instance with
 	 * the given template model.
-	 * <p>Adds the standard Freemarker hash models to the model: request parameters,
-	 * request, session and application (ServletContext), as well as the JSP tag
-	 * library hash model.
 	 * <p>Can be overridden to customize the behavior, for example to render
 	 * multiple templates into a single view.
 	 * @param model the model to use for rendering
@@ -256,7 +258,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 		// Expose model to JSP tags (as request attributes).
 		exposeModelAsRequestAttributes(model, request);
-		// Expose all standard FreeMarker hash models.
+		// Expose FreeMarker hash model.
 		SimpleHash fmModel = buildTemplateModel(model, request, response);
 
 		// Grab the locale-specific version of the template.
@@ -266,7 +268,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 
 	/**
 	 * Build a FreeMarker template model for the given model Map.
-	 * <p>The default implementation builds a {@link SimpleHash}.
+	 * <p>The default implementation builds a {@link SimpleHash} for the
+	 * given MVC model with an additional fallback to request attributes.
 	 * @param model the model to use for rendering
 	 * @param request current HTTP request
 	 * @param response current servlet response
@@ -275,7 +278,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	protected SimpleHash buildTemplateModel(Map<String, Object> model, HttpServletRequest request,
 			HttpServletResponse response) {
 
-		SimpleHash fmModel = new SimpleHash(getObjectWrapper());
+		SimpleHash fmModel = new RequestHashModel(getObjectWrapper(), request);
 		fmModel.putAll(model);
 		return fmModel;
 	}
@@ -327,6 +330,36 @@ public class FreeMarkerView extends AbstractTemplateView {
 			throws IOException, TemplateException {
 
 		template.process(model, response.getWriter());
+	}
+
+
+	/**
+	 * Extension of FreeMarker {@link SimpleHash}, adding a fallback to request attributes.
+	 * Similar to the formerly used {@link freemarker.ext.servlet.AllHttpScopesHashModel},
+	 * just limited to common request attribute exposure.
+	 */
+	@SuppressWarnings("serial")
+	private static class RequestHashModel extends SimpleHash {
+
+		private final HttpServletRequest request;
+
+		public RequestHashModel(ObjectWrapper wrapper, HttpServletRequest request) {
+			super(wrapper);
+			this.request = request;
+		}
+
+		@Override
+		public TemplateModel get(String key) throws TemplateModelException {
+			TemplateModel model = super.get(key);
+			if (model != null) {
+				return model;
+			}
+			Object obj = this.request.getAttribute(key);
+			if (obj != null) {
+				return wrap(obj);
+			}
+			return wrap(null);
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Paluch
  * @author Mingyuan Wu
  * @author Bogdan Ilchyshyn
+ * @author Simon Baslé
  * @since 5.3
  */
 class DefaultDatabaseClient implements DatabaseClient {
@@ -165,7 +166,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 	 * closed
 	 */
 	private Publisher<Void> closeConnection(Connection connection) {
-
 		return ConnectionFactoryUtils.currentConnectionFactory(
 				obtainConnectionFactory()).then().onErrorResume(Exception.class,
 						e -> Mono.from(connection.close()));
@@ -191,8 +191,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 				new CloseSuppressingInvocationHandler(con));
 	}
 
-	private static Mono<Long> sumRowsUpdated(
-			Function<Connection, Flux<Result>> resultFunction, Connection it) {
+	private static Mono<Long> sumRowsUpdated(Function<Connection, Flux<Result>> resultFunction, Connection it) {
 		return resultFunction.apply(it)
 				.flatMap(Result::getRowsUpdated)
 				.cast(Number.class)
@@ -245,8 +244,8 @@ class DefaultDatabaseClient implements DatabaseClient {
 			this.filterFunction = filterFunction;
 		}
 
-		@Override
 		@SuppressWarnings("deprecation")
+		@Override
 		public DefaultGenericExecuteSpec bind(int index, Object value) {
 			assertNotPreparedOperation();
 			Assert.notNull(value, () -> String.format(
@@ -276,8 +275,8 @@ class DefaultDatabaseClient implements DatabaseClient {
 			return new DefaultGenericExecuteSpec(byIndex, this.byName, this.sqlSupplier, this.filterFunction);
 		}
 
-		@Override
 		@SuppressWarnings("deprecation")
+		@Override
 		public DefaultGenericExecuteSpec bind(String name, Object value) {
 			assertNotPreparedOperation();
 
@@ -346,8 +345,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 		}
 
 		private ResultFunction getResultFunction(Supplier<String> sqlSupplier) {
-			String sql = getRequiredSql(sqlSupplier);
-			Function<Connection, Statement> statementFunction = connection -> {
+			BiFunction<Connection, String, Statement> statementFunction = (connection, sql) -> {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing SQL statement [" + sql + "]");
 				}
@@ -393,28 +391,22 @@ class DefaultDatabaseClient implements DatabaseClient {
 				return statement;
 			};
 
-			Function<Connection, Flux<Result>> resultFunction = connection -> {
-				Statement statement = statementFunction.apply(connection);
-				return Flux.from(this.filterFunction.filter(statement, DefaultDatabaseClient.this.executeFunction))
-						.cast(Result.class).checkpoint("SQL \"" + sql + "\" [DatabaseClient]");
-			};
-
-			return new ResultFunction(resultFunction, sql);
+			return new ResultFunction(sqlSupplier, statementFunction, this.filterFunction, DefaultDatabaseClient.this.executeFunction);
 		}
 
 		private <T> FetchSpec<T> execute(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> resultAdapter) {
 			ResultFunction resultHandler = getResultFunction(sqlSupplier);
 
 			return new DefaultFetchSpec<>(
-					DefaultDatabaseClient.this, resultHandler.sql(),
-					new ConnectionFunction<>(resultHandler.sql(), resultHandler.function()),
-					new ConnectionFunction<>(resultHandler.sql(), connection -> sumRowsUpdated(resultHandler.function(), connection)),
+					DefaultDatabaseClient.this,
+					resultHandler,
+					connection -> sumRowsUpdated(resultHandler, connection),
 					resultAdapter);
 		}
 
 		private <T> Flux<T> flatMap(Supplier<String> sqlSupplier, Function<Result, Publisher<T>> mappingFunction) {
 			ResultFunction resultHandler = getResultFunction(sqlSupplier);
-			ConnectionFunction<Flux<T>> connectionFunction = new ConnectionFunction<>(resultHandler.sql(), cx -> resultHandler.function()
+			ConnectionFunction<Flux<T>> connectionFunction = new DelegateConnectionFunction<>(resultHandler, cx -> resultHandler
 					.apply(cx)
 					.flatMap(mappingFunction));
 			return inConnectionMany(connectionFunction);
@@ -473,8 +465,6 @@ class DefaultDatabaseClient implements DatabaseClient {
 			Assert.state(StringUtils.hasText(sql), "SQL returned by supplier must not be empty");
 			return sql;
 		}
-
-		record ResultFunction(Function<Connection, Flux<Result>> function, String sql){}
 	}
 
 
@@ -532,8 +522,7 @@ class DefaultDatabaseClient implements DatabaseClient {
 
 		final transient Function<Connection, Publisher<Void>> closeFunction;
 
-		ConnectionCloseHolder(Connection connection,
-				Function<Connection, Publisher<Void>> closeFunction) {
+		ConnectionCloseHolder(Connection connection, Function<Connection, Publisher<Void>> closeFunction) {
 			this.connection = connection;
 			this.closeFunction = closeFunction;
 		}

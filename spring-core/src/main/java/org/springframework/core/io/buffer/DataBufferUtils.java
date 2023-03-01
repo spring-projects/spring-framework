@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -906,13 +906,16 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public void accept(SynchronousSink<DataBuffer> sink) {
-			ByteBuffer byteBuffer = this.dataBufferFactory.isDirect() ?
-					ByteBuffer.allocateDirect(this.bufferSize) :
-					ByteBuffer.allocate(this.bufferSize);
+			int read = -1;
+			DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(this.bufferSize);
 			try {
-				if (this.channel.read(byteBuffer) >= 0) {
-					byteBuffer.flip();
-					DataBuffer dataBuffer = this.dataBufferFactory.wrap(byteBuffer);
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers()) {
+					Assert.state(iterator.hasNext(), "No ByteBuffer available");
+					ByteBuffer byteBuffer = iterator.next();
+					read = this.channel.read(byteBuffer);
+				}
+				if (read >= 0) {
+					dataBuffer.writePosition(read);
 					sink.next(dataBuffer);
 				}
 				else {
@@ -922,11 +925,16 @@ public abstract class DataBufferUtils {
 			catch (IOException ex) {
 				sink.error(ex);
 			}
+			finally {
+				if (read == -1) {
+					release(dataBuffer);
+				}
+			}
 		}
 	}
 
 
-	private static class ReadCompletionHandler implements CompletionHandler<Integer, ByteBuffer> {
+	private static class ReadCompletionHandler implements CompletionHandler<Integer, ReadCompletionHandler.Attachment> {
 
 		private final AsynchronousFileChannel channel;
 
@@ -978,20 +986,27 @@ public abstract class DataBufferUtils {
 		}
 
 		private void read() {
-			ByteBuffer byteBuffer = this.dataBufferFactory.isDirect() ?
-					ByteBuffer.allocateDirect(this.bufferSize) :
-					ByteBuffer.allocate(this.bufferSize);
-			this.channel.read(byteBuffer, this.position.get(), byteBuffer, this);
+			DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(this.bufferSize);
+			DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers();
+			Assert.state(iterator.hasNext(), "No ByteBuffer available");
+			ByteBuffer byteBuffer = iterator.next();
+			Attachment attachment = new Attachment(dataBuffer,  iterator);
+			this.channel.read(byteBuffer, this.position.get(), attachment, this);
 		}
 
 		@Override
-		public void completed(Integer read, ByteBuffer byteBuffer) {
+		public void completed(Integer read, Attachment attachment) {
+			attachment.iterator().close();
+			DataBuffer dataBuffer = attachment.dataBuffer();
+
 			if (this.state.get().equals(State.DISPOSED)) {
+				release(dataBuffer);
 				closeChannel(this.channel);
 				return;
 			}
 
 			if (read == -1) {
+				release(dataBuffer);
 				closeChannel(this.channel);
 				this.state.set(State.DISPOSED);
 				this.sink.complete();
@@ -999,9 +1014,7 @@ public abstract class DataBufferUtils {
 			}
 
 			this.position.addAndGet(read);
-
-			byteBuffer.flip();
-			DataBuffer dataBuffer = this.dataBufferFactory.wrap(byteBuffer);
+			dataBuffer.writePosition(read);
 			this.sink.next(dataBuffer);
 
 			// Stay in READING mode if there is demand
@@ -1017,7 +1030,10 @@ public abstract class DataBufferUtils {
 		}
 
 		@Override
-		public void failed(Throwable exc, ByteBuffer byteBuffer) {
+		public void failed(Throwable exc, Attachment attachment) {
+			attachment.iterator().close();
+			release(attachment.dataBuffer());
+
 			closeChannel(this.channel);
 			this.state.set(State.DISPOSED);
 			this.sink.error(exc);
@@ -1026,6 +1042,8 @@ public abstract class DataBufferUtils {
 		private enum State {
 			IDLE, READING, DISPOSED
 		}
+
+		private record Attachment(DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {}
 	}
 
 
@@ -1048,9 +1066,11 @@ public abstract class DataBufferUtils {
 		@Override
 		protected void hookOnNext(DataBuffer dataBuffer) {
 			try {
-				ByteBuffer byteBuffer = dataBuffer.toByteBuffer();
-				while (byteBuffer.hasRemaining()) {
-					this.channel.write(byteBuffer);
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+					ByteBuffer byteBuffer = iterator.next();
+					while (byteBuffer.hasRemaining()) {
+						this.channel.write(byteBuffer);
+					}
 				}
 				this.sink.next(dataBuffer);
 				request(1);
@@ -1080,19 +1100,19 @@ public abstract class DataBufferUtils {
 
 
 	private static class WriteCompletionHandler extends BaseSubscriber<DataBuffer>
-			implements CompletionHandler<Integer, ByteBuffer> {
+			implements CompletionHandler<Integer, WriteCompletionHandler.Attachment> {
 
 		private final FluxSink<DataBuffer> sink;
 
 		private final AsynchronousFileChannel channel;
+
+		private final AtomicBoolean writing = new AtomicBoolean();
 
 		private final AtomicBoolean completed = new AtomicBoolean();
 
 		private final AtomicReference<Throwable> error = new AtomicReference<>();
 
 		private final AtomicLong position;
-
-		private final AtomicReference<DataBuffer> dataBuffer = new AtomicReference<>();
 
 		public WriteCompletionHandler(
 				FluxSink<DataBuffer> sink, AsynchronousFileChannel channel, long position) {
@@ -1108,19 +1128,22 @@ public abstract class DataBufferUtils {
 		}
 
 		@Override
-		protected void hookOnNext(DataBuffer value) {
-			if (!this.dataBuffer.compareAndSet(null, value)) {
-				throw new IllegalStateException();
+		protected void hookOnNext(DataBuffer dataBuffer) {
+			DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers();
+			if (iterator.hasNext()) {
+				ByteBuffer byteBuffer = iterator.next();
+				long pos = this.position.get();
+				Attachment attachment = new Attachment(byteBuffer, dataBuffer, iterator);
+				this.writing.set(true);
+				this.channel.write(byteBuffer, pos, attachment, this);
 			}
-			ByteBuffer byteBuffer = value.toByteBuffer();
-			this.channel.write(byteBuffer, this.position.get(), byteBuffer, this);
 		}
 
 		@Override
 		protected void hookOnError(Throwable throwable) {
 			this.error.set(throwable);
 
-			if (this.dataBuffer.get() == null) {
+			if (!this.writing.get()) {
 				this.sink.error(throwable);
 			}
 		}
@@ -1129,43 +1152,51 @@ public abstract class DataBufferUtils {
 		protected void hookOnComplete() {
 			this.completed.set(true);
 
-			if (this.dataBuffer.get() == null) {
+			if (!this.writing.get()) {
 				this.sink.complete();
 			}
 		}
 
 		@Override
-		public void completed(Integer written, ByteBuffer byteBuffer) {
-			long pos = this.position.addAndGet(written);
-			if (byteBuffer.hasRemaining()) {
-				this.channel.write(byteBuffer, pos, byteBuffer, this);
-				return;
-			}
-			sinkDataBuffer();
+		public void completed(Integer written, Attachment attachment) {
+			DataBuffer.ByteBufferIterator iterator = attachment.iterator();
+			iterator.close();
 
-			Throwable throwable = this.error.get();
-			if (throwable != null) {
-				this.sink.error(throwable);
+			long pos = this.position.addAndGet(written);
+			ByteBuffer byteBuffer = attachment.byteBuffer();
+
+			if (byteBuffer.hasRemaining()) {
+				this.channel.write(byteBuffer, pos, attachment, this);
 			}
-			else if (this.completed.get()) {
-				this.sink.complete();
+			else if (iterator.hasNext()) {
+				ByteBuffer next = iterator.next();
+				this.channel.write(next, pos, attachment, this);
 			}
 			else {
-				request(1);
+				this.sink.next(attachment.dataBuffer());
+				this.writing.set(false);
+
+				Throwable throwable = this.error.get();
+				if (throwable != null) {
+					this.sink.error(throwable);
+				}
+				else if (this.completed.get()) {
+					this.sink.complete();
+				}
+				else {
+					request(1);
+				}
 			}
 		}
 
 		@Override
-		public void failed(Throwable exc, ByteBuffer byteBuffer) {
-			sinkDataBuffer();
-			this.sink.error(exc);
-		}
+		public void failed(Throwable exc, Attachment attachment) {
+			attachment.iterator().close();
 
-		private void sinkDataBuffer() {
-			DataBuffer dataBuffer = this.dataBuffer.get();
-			Assert.state(dataBuffer != null, "DataBuffer should not be null");
-			this.sink.next(dataBuffer);
-			this.dataBuffer.set(null);
+			this.sink.next(attachment.dataBuffer());
+			this.writing.set(false);
+
+			this.sink.error(exc);
 		}
 
 		@Override
@@ -1173,6 +1204,10 @@ public abstract class DataBufferUtils {
 			return Context.of(this.sink.contextView());
 		}
 
+		private record Attachment(ByteBuffer byteBuffer, DataBuffer dataBuffer, DataBuffer.ByteBufferIterator iterator) {}
+
+
 	}
+
 
 }

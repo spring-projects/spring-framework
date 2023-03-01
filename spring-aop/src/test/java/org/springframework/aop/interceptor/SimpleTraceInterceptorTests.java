@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ public class SimpleTraceInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.getThis()).willReturn(this);
 
-		Log log = mock(Log.class);
+		Log log = mock();
 
 		SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
 		interceptor.invokeUnderTrace(mi, log);
@@ -52,13 +52,13 @@ public class SimpleTraceInterceptorTests {
 
 	@Test
 	public void testExceptionPathStillLogsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString"));
 		given(mi.getThis()).willReturn(this);
 		IllegalArgumentException exception = new IllegalArgumentException();
 		given(mi.proceed()).willThrow(exception);
 
-		Log log = mock(Log.class);
+		Log log = mock();
 
 		final SimpleTraceInterceptor interceptor = new SimpleTraceInterceptor(true);
 		assertThatIllegalArgumentException().isThrownBy(() ->

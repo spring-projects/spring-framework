@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,14 +62,14 @@ public class PartHttpMessageWriterTests extends AbstractLeakCheckingTests {
 	void write() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
-		Part textPart = mock(Part.class);
+		Part textPart = mock();
 		given(textPart.name()).willReturn("text part");
 		given(textPart.headers()).willReturn(headers);
 		given(textPart.content()).willReturn(Flux.just(
 				this.bufferFactory.wrap("text1".getBytes(StandardCharsets.UTF_8)),
 				this.bufferFactory.wrap("text2".getBytes(StandardCharsets.UTF_8))));
 
-		FilePart filePart = mock(FilePart.class);
+		FilePart filePart = mock();
 		given(filePart.name()).willReturn("file part");
 		given(filePart.headers()).willReturn(new HttpHeaders());
 		given(filePart.filename()).willReturn("file.txt");

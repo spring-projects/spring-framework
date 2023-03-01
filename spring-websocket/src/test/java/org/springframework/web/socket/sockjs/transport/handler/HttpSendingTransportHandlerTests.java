@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,22 +42,18 @@ import static org.mockito.Mockito.verify;
  */
 class HttpSendingTransportHandlerTests extends AbstractHttpRequestTests {
 
-	private WebSocketHandler webSocketHandler;
+	private WebSocketHandler webSocketHandler = mock();
 
-	private StubSockJsServiceConfig sockJsConfig;
+	private TaskScheduler taskScheduler = mock();
 
-	private TaskScheduler taskScheduler;
+	private StubSockJsServiceConfig sockJsConfig = new StubSockJsServiceConfig();
 
 
-	@Override
 	@BeforeEach
+	@Override
 	protected void setup() {
 		super.setup();
 
-		this.webSocketHandler = mock(WebSocketHandler.class);
-		this.taskScheduler = mock(TaskScheduler.class);
-
-		this.sockJsConfig = new StubSockJsServiceConfig();
 		this.sockJsConfig.setTaskScheduler(this.taskScheduler);
 
 		setRequest("POST", "/");

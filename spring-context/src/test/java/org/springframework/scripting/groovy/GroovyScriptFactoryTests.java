@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,7 +284,7 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testScriptedClassThatDoesNotHaveANoArgCtor() throws Exception {
-		ScriptSource script = mock(ScriptSource.class);
+		ScriptSource script = mock();
 		String badScript = "class Foo { public Foo(String foo) {}}";
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.suggestedClassName()).willReturn("someName");
@@ -297,7 +297,7 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testScriptedClassThatHasNoPublicNoArgCtor() throws Exception {
-		ScriptSource script = mock(ScriptSource.class);
+		ScriptSource script = mock();
 		String badScript = "class Foo { protected Foo() {} \n String toString() { 'X' }}";
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.suggestedClassName()).willReturn("someName");
@@ -352,7 +352,7 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testGetScriptedObjectDoesNotChokeOnNullInterfacesBeingPassedIn() throws Exception {
-		ScriptSource script = mock(ScriptSource.class);
+		ScriptSource script = mock();
 		given(script.getScriptAsString()).willReturn("class Bar {}");
 		given(script.suggestedClassName()).willReturn("someName");
 

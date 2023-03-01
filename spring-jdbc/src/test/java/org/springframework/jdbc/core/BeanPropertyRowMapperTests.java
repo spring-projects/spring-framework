@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.jdbc.core;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,12 +42,15 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
  */
 class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
+	private static final String SELECT_NULL_AS_AGE = "select null as age from people";
+
+
 	@Test
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	void overridingDifferentClassDefinedForMapping() {
 		BeanPropertyRowMapper mapper = new BeanPropertyRowMapper(Person.class);
-		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
-				mapper.setMappedClass(Long.class));
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+			.isThrownBy(() -> mapper.setMappedClass(Long.class));
 	}
 
 	@Test
@@ -61,104 +62,106 @@ class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 	@Test
 	void staticQueryWithRowMapper() throws Exception {
 		Mock mock = new Mock();
-		List<Person> result = mock.getJdbcTemplate().query(
+		Person person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(Person.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 		mock.verifyClosed();
 	}
 
 	@Test
 	void mappingWithInheritance() throws Exception {
 		Mock mock = new Mock();
-		List<ConcretePerson> result = mock.getJdbcTemplate().query(
+		ConcretePerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(ConcretePerson.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 		mock.verifyClosed();
 	}
 
 	@Test
 	void mappingWithNoUnpopulatedFieldsFound() throws Exception {
 		Mock mock = new Mock();
-		List<ConcretePerson> result = mock.getJdbcTemplate().query(
+		ConcretePerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(ConcretePerson.class, true));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 		mock.verifyClosed();
 	}
 
 	@Test
 	void mappingWithUnpopulatedFieldsNotChecked() throws Exception {
 		Mock mock = new Mock();
-		List<ExtendedPerson> result = mock.getJdbcTemplate().query(
+		ExtendedPerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(ExtendedPerson.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 		mock.verifyClosed();
 	}
 
 	@Test
 	void mappingWithUnpopulatedFieldsNotAccepted() throws Exception {
+		BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(ExtendedPerson.class, true);
 		Mock mock = new Mock();
-		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(() ->
-				mock.getJdbcTemplate().query("select name, age, birth_date, balance from people",
-						new BeanPropertyRowMapper<>(ExtendedPerson.class, true)));
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+			.isThrownBy(() -> mock.getJdbcTemplate().query("select name, age, birth_date, balance from people", mapper));
 	}
 
 	@Test
 	void mappingNullValue() throws Exception {
 		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 		Mock mock = new Mock(MockType.TWO);
-		assertThatExceptionOfType(TypeMismatchException.class).isThrownBy(() ->
-				mock.getJdbcTemplate().query("select name, null as age, birth_date, balance from people", mapper));
+		assertThatExceptionOfType(TypeMismatchException.class)
+			.isThrownBy(() -> mock.getJdbcTemplate().query(SELECT_NULL_AS_AGE, mapper));
+	}
+
+	@Test
+	void mappingNullValueWithPrimitivesDefaultedForNullValue() throws Exception {
+		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
+		mapper.setPrimitivesDefaultedForNullValue(true);
+		Mock mock = new Mock(MockType.TWO);
+		Person person = mock.getJdbcTemplate().queryForObject(SELECT_NULL_AS_AGE, mapper);
+		assertThat(person).extracting(Person::getAge).isEqualTo(42L);
+		mock.verifyClosed();
 	}
 
 	@Test
 	void queryWithSpaceInColumnNameAndLocalDateTime() throws Exception {
 		Mock mock = new Mock(MockType.THREE);
-		List<SpacePerson> result = mock.getJdbcTemplate().query(
+		SpacePerson person = mock.getJdbcTemplate().queryForObject(
 				"select last_name as \"Last Name\", age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(SpacePerson.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 		mock.verifyClosed();
 	}
 
 	@Test
 	void queryWithSpaceInColumnNameAndLocalDate() throws Exception {
 		Mock mock = new Mock(MockType.THREE);
-		List<DatePerson> result = mock.getJdbcTemplate().query(
+		DatePerson person = mock.getJdbcTemplate().queryForObject(
 				"select last_name as \"Last Name\", age, birth_date, balance from people",
 				new BeanPropertyRowMapper<>(DatePerson.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 		mock.verifyClosed();
 	}
 
 	@Test
 	void queryWithDirectNameMatchOnBirthDate() throws Exception {
 		Mock mock = new Mock(MockType.FOUR);
-		List<ConcretePerson> result = mock.getJdbcTemplate().query(
+		ConcretePerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birthdate, balance from people",
 				new BeanPropertyRowMapper<>(ConcretePerson.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 		mock.verifyClosed();
 	}
 
 	@Test
 	void queryWithUnderscoreInColumnNameAndPersonWithMultipleAdjacentUppercaseLettersInPropertyName() throws Exception {
 		Mock mock = new Mock();
-		List<EmailPerson> result = mock.getJdbcTemplate().query(
+		EmailPerson person = mock.getJdbcTemplate().queryForObject(
 				"select name, age, birth_date, balance, e_mail from people",
 				new BeanPropertyRowMapper<>(EmailPerson.class));
-		assertThat(result).hasSize(1);
-		verifyPerson(result.get(0));
+		verifyPerson(person);
 		mock.verifyClosed();
 	}
 

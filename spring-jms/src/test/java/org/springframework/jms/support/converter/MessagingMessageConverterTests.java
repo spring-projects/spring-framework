@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,14 +45,14 @@ public class MessagingMessageConverterTests {
 	@Test
 	public void onlyHandlesMessage() throws JMSException {
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				this.converter.toMessage(new Object(), mock(Session.class)));
+				this.converter.toMessage(new Object(), mock()));
 	}
 
 	@Test
 	public void simpleObject() throws Exception {
-		Session session = mock(Session.class);
-		Serializable payload = mock(Serializable.class);
-		ObjectMessage jmsMessage = mock(ObjectMessage.class);
+		Session session = mock();
+		Serializable payload = mock();
+		ObjectMessage jmsMessage = mock();
 		given(session.createObjectMessage(payload)).willReturn(jmsMessage);
 
 		this.converter.toMessage(MessageBuilder.withPayload(payload).build(), session);

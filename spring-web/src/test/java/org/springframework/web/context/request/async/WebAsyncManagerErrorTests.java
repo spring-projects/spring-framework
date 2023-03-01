@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class WebAsyncManagerErrorTests {
 		this.servletResponse = new MockHttpServletResponse();
 		this.asyncWebRequest = new StandardServletAsyncWebRequest(servletRequest, servletResponse);
 
-		AsyncTaskExecutor executor = mock(AsyncTaskExecutor.class);
+		AsyncTaskExecutor executor = mock();
 
 		this.asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 		this.asyncManager.setTaskExecutor(executor);
@@ -71,7 +71,7 @@ public class WebAsyncManagerErrorTests {
 	public void startCallableProcessingErrorAndComplete() throws Exception {
 		StubCallable callable = new StubCallable();
 
-		CallableProcessingInterceptor interceptor = mock(CallableProcessingInterceptor.class);
+		CallableProcessingInterceptor interceptor = mock();
 		Exception e = new Exception();
 		given(interceptor.handleError(this.asyncWebRequest, callable, e)).willReturn(RESULT_NONE);
 
@@ -112,7 +112,7 @@ public class WebAsyncManagerErrorTests {
 
 		StubCallable callable = new StubCallable();
 
-		CallableProcessingInterceptor interceptor = mock(CallableProcessingInterceptor.class);
+		CallableProcessingInterceptor interceptor = mock();
 		Exception e = new Exception();
 		given(interceptor.handleError(this.asyncWebRequest, callable, e)).willReturn(22);
 
@@ -135,7 +135,7 @@ public class WebAsyncManagerErrorTests {
 		StubCallable callable = new StubCallable();
 		Exception exception = new Exception();
 
-		CallableProcessingInterceptor interceptor = mock(CallableProcessingInterceptor.class);
+		CallableProcessingInterceptor interceptor = mock();
 		Exception e = new Exception();
 		given(interceptor.handleError(this.asyncWebRequest, callable, e)).willThrow(exception);
 
@@ -157,7 +157,7 @@ public class WebAsyncManagerErrorTests {
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 
-		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
+		DeferredResultProcessingInterceptor interceptor = mock();
 		Exception e = new Exception();
 		given(interceptor.handleError(this.asyncWebRequest, deferredResult, e)).willReturn(true);
 

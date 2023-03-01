@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -622,7 +622,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Specify a Spring 3.0 ConversionService to use for converting
+	 * Specify a {@link ConversionService} to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 */
 	public void setConversionService(@Nullable ConversionService conversionService) {
@@ -760,8 +760,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #doBind(org.springframework.beans.MutablePropertyValues)
 	 */
 	public void bind(PropertyValues pvs) {
-		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues ?
-				(MutablePropertyValues) pvs : new MutablePropertyValues(pvs));
+		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues mutablePropertyValues ?
+				mutablePropertyValues : new MutablePropertyValues(pvs));
 		doBind(mpvs);
 	}
 
@@ -849,11 +849,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				PropertyValue pv = propertyValues.get(field);
 				boolean empty = (pv == null || pv.getValue() == null);
 				if (!empty) {
-					if (pv.getValue() instanceof String) {
-						empty = !StringUtils.hasText((String) pv.getValue());
+					if (pv.getValue() instanceof String text) {
+						empty = !StringUtils.hasText(text);
 					}
-					else if (pv.getValue() instanceof String[]) {
-						String[] values = (String[]) pv.getValue();
+					else if (pv.getValue() instanceof String[] values) {
 						empty = (values.length == 0 || !StringUtils.hasText(values[0]));
 					}
 				}
@@ -926,8 +925,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		BindingResult bindingResult = getBindingResult();
 		// Call each validator with the same binding result
 		for (Validator validator : getValidators()) {
-			if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
-				((SmartValidator) validator).validate(target, bindingResult, validationHints);
+			if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator smartValidator) {
+				smartValidator.validate(target, bindingResult, validationHints);
 			}
 			else if (validator != null) {
 				validator.validate(target, bindingResult);

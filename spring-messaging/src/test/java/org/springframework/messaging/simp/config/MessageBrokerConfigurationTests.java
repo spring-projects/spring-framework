@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -314,7 +314,7 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void configureMessageConvertersCustom() {
-		final MessageConverter testConverter = mock(MessageConverter.class);
+		final MessageConverter testConverter = mock();
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
 			protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
@@ -331,7 +331,7 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void configureMessageConvertersCustomAndDefault() {
-		final MessageConverter testConverter = mock(MessageConverter.class);
+		final MessageConverter testConverter = mock();
 
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
@@ -378,7 +378,7 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void simpValidatorCustom() {
-		final Validator validator = mock(Validator.class);
+		final Validator validator = mock();
 		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
 			public Validator getValidator() {
@@ -654,12 +654,12 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-			argumentResolvers.add(mock(HandlerMethodArgumentResolver.class));
+			argumentResolvers.add(mock());
 		}
 
 		@Override
 		protected void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-			returnValueHandlers.add(mock(HandlerMethodReturnValueHandler.class));
+			returnValueHandlers.add(mock());
 		}
 
 		@Override

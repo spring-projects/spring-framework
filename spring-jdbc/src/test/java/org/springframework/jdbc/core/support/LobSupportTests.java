@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ public class LobSupportTests {
 
 	@Test
 	public void testCreatingPreparedStatementCallback() throws SQLException {
-		LobHandler handler = mock(LobHandler.class);
-		LobCreator creator = mock(LobCreator.class);
-		PreparedStatement ps = mock(PreparedStatement.class);
+		LobHandler handler = mock();
+		LobCreator creator = mock();
+		PreparedStatement ps = mock();
 
 		given(handler.getLobCreator()).willReturn(creator);
 		given(ps.executeUpdate()).willReturn(3);
@@ -73,7 +73,7 @@ public class LobSupportTests {
 
 	@Test
 	public void testAbstractLobStreamingResultSetExtractorNoRows() throws SQLException {
-		ResultSet rset = mock(ResultSet.class);
+		ResultSet rset = mock();
 		AbstractLobStreamingResultSetExtractor<Void> lobRse = getResultSetExtractor(false);
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
 				lobRse.extractData(rset));
@@ -82,7 +82,7 @@ public class LobSupportTests {
 
 	@Test
 	public void testAbstractLobStreamingResultSetExtractorOneRow() throws SQLException {
-		ResultSet rset = mock(ResultSet.class);
+		ResultSet rset = mock();
 		given(rset.next()).willReturn(true, false);
 		AbstractLobStreamingResultSetExtractor<Void> lobRse = getResultSetExtractor(false);
 		lobRse.extractData(rset);
@@ -92,7 +92,7 @@ public class LobSupportTests {
 	@Test
 	public void testAbstractLobStreamingResultSetExtractorMultipleRows()
 			throws SQLException {
-		ResultSet rset = mock(ResultSet.class);
+		ResultSet rset = mock();
 		given(rset.next()).willReturn(true, true, false);
 		AbstractLobStreamingResultSetExtractor<Void> lobRse = getResultSetExtractor(false);
 		assertThatExceptionOfType(IncorrectResultSizeDataAccessException.class).isThrownBy(() ->
@@ -103,7 +103,7 @@ public class LobSupportTests {
 	@Test
 	public void testAbstractLobStreamingResultSetExtractorCorrectException()
 			throws SQLException {
-		ResultSet rset = mock(ResultSet.class);
+		ResultSet rset = mock();
 		given(rset.next()).willReturn(true);
 		AbstractLobStreamingResultSetExtractor<Void> lobRse = getResultSetExtractor(true);
 		assertThatExceptionOfType(LobRetrievalFailureException.class).isThrownBy(() ->

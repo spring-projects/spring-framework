@@ -2022,12 +2022,13 @@ properties.
 	class ExampleIntegrationTests {
 
 		@Container
-		static RedisContainer redis = new RedisContainer();
+		static GenericContainer redis =
+			new GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379);
 
 		@DynamicPropertySource
 		static void redisProperties(DynamicPropertyRegistry registry) {
 			registry.add("redis.host", redis::getHost);
-			registry.add("redis.port", redis::getMappedPort);
+			registry.add("redis.port", redis::getFirstMappedPort);
 		}
 
 		// tests ...
@@ -2045,13 +2046,14 @@ properties.
 
 			@Container
 			@JvmStatic
-			val redis: RedisContainer = RedisContainer()
+			val redis: GenericContainer =
+				GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379)
 
 			@DynamicPropertySource
 			@JvmStatic
 			fun redisProperties(registry: DynamicPropertyRegistry) {
 				registry.add("redis.host", redis::getHost)
-				registry.add("redis.port", redis::getMappedPort)
+				registry.add("redis.port", redis::getFirstMappedPort)
 			}
 		}
 

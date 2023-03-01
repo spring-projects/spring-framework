@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,11 @@ class HttpComponentsClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
 		return doCommit(() -> {
-			this.byteBufferFlux = Flux.from(body).map(DataBuffer::toByteBuffer);
+			this.byteBufferFlux = Flux.from(body).map(dataBuffer -> {
+				ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
+				dataBuffer.toByteBuffer(byteBuffer);
+				return byteBuffer;
+			});
 			return Mono.empty();
 		});
 	}

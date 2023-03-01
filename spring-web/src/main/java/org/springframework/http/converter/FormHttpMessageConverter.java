@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,6 +176,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		this.supportedMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED);
 		this.supportedMediaTypes.add(MediaType.MULTIPART_FORM_DATA);
 		this.supportedMediaTypes.add(MediaType.MULTIPART_MIXED);
+		this.supportedMediaTypes.add(MediaType.MULTIPART_RELATED);
 
 		this.partConverters.add(new ByteArrayHttpMessageConverter());
 		this.partConverters.add(new StringHttpMessageConverter());

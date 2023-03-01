@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -425,7 +425,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.MULTI_ARGS)
 	void resolveArgumentsWithMultiArgsConstructor(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
-		Environment environment = mock(Environment.class);
+		Environment environment = mock();
 		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
 				resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
@@ -442,7 +442,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.MIXED_ARGS)
 	void resolveArgumentsWithMixedArgsConstructorWithUserValue(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
-		Environment environment = mock(Environment.class);
+		Environment environment = mock();
 		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
 				resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);
@@ -463,7 +463,7 @@ class BeanInstanceSupplierTests {
 	@ParameterizedResolverTest(Sources.MIXED_ARGS)
 	void resolveArgumentsWithMixedArgsConstructorWithUserBeanReference(Source source) {
 		ResourceLoader resourceLoader = new DefaultResourceLoader();
-		Environment environment = mock(Environment.class);
+		Environment environment = mock();
 		this.beanFactory.registerResolvableDependency(ResourceLoader.class,
 				resourceLoader);
 		this.beanFactory.registerSingleton("environment", environment);

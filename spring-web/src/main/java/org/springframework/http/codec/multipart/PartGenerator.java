@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -747,9 +747,13 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 		@SuppressWarnings("BlockingMethodInNonBlockingContext")
 		private Mono<Void> writeInternal(DataBuffer dataBuffer) {
 			try {
-				ByteBuffer byteBuffer = dataBuffer.toByteBuffer();
-				while (byteBuffer.hasRemaining()) {
-					this.channel.write(byteBuffer);
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+					while (iterator.hasNext()) {
+						ByteBuffer byteBuffer = iterator.next();
+						while (byteBuffer.hasRemaining()) {
+							this.channel.write(byteBuffer);
+						}
+					}
 				}
 				return Mono.empty();
 			}

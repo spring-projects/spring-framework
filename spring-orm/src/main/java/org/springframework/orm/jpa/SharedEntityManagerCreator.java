@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Rod Johnson
  * @author Oliver Gierke
  * @author Mark Paluch
+ * @author Sam Brannen
  * @since 2.0
  * @see jakarta.persistence.PersistenceContext
  * @see jakarta.persistence.PersistenceContextType#TRANSACTION
@@ -81,12 +82,15 @@ public abstract class SharedEntityManagerCreator {
 			"refresh");
 
 	private static final Set<String> queryTerminatingMethods = Set.of(
-			"execute",  // JPA 2.1 StoredProcedureQuery
-			"executeUpdate",
-			"getSingleResult",
-			"getResultStream",
-			"getResultList",
-			"list"  // Hibernate Query.list() method
+			"execute",  // jakarta.persistence.StoredProcedureQuery.execute()
+			"executeUpdate", // jakarta.persistence.Query.executeUpdate()
+			"getSingleResult",  // jakarta.persistence.Query.getSingleResult()
+			"getResultStream",  // jakarta.persistence.Query.getResultStream()
+			"getResultList",  // jakarta.persistence.Query.getResultList()
+			"list",  // org.hibernate.query.Query.list()
+			"stream",  // org.hibernate.query.Query.stream()
+			"uniqueResult",  // org.hibernate.query.Query.uniqueResult()
+			"uniqueResultOptional"  // org.hibernate.query.Query.uniqueResultOptional()
 		);
 
 

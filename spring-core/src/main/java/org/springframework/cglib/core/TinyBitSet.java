@@ -17,7 +17,7 @@ package org.springframework.cglib.core;
 
 @Deprecated
 public class TinyBitSet {
-    private static int[] T = new int[256];
+    private static final int[] T = new int[256];
     private int value = 0;
 
     private static int gcount(int x) {

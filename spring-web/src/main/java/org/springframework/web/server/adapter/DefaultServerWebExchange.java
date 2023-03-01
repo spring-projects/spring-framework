@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,48 +135,68 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.applicationContext = applicationContext;
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request,
 			ServerCodecConfigurer configurer, String logPrefix) {
 
-		try {
-			MediaType contentType = request.getHeaders().getContentType();
-			if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
-				return ((HttpMessageReader<MultiValueMap<String, String>>) configurer.getReaders().stream()
-						.filter(reader -> reader.canRead(FORM_DATA_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
-						.findFirst()
-						.orElseThrow(() -> new IllegalStateException("No form data HttpMessageReader.")))
-						.readMono(FORM_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
-						.switchIfEmpty(EMPTY_FORM_DATA)
-						.cache();
-			}
+		MediaType contentType = getContentType(request);
+		if (contentType == null || !contentType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
+			return EMPTY_FORM_DATA;
 		}
-		catch (InvalidMediaTypeException ex) {
-			// Ignore
+
+		HttpMessageReader<MultiValueMap<String, String>> reader = getReader(configurer, contentType, FORM_DATA_TYPE);
+		if (reader == null) {
+			return Mono.error(new IllegalStateException("No HttpMessageReader for " + contentType));
 		}
-		return EMPTY_FORM_DATA;
+
+		return reader
+				.readMono(FORM_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+				.switchIfEmpty(EMPTY_FORM_DATA)
+				.cache();
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
 			ServerCodecConfigurer configurer, String logPrefix) {
 
+		MediaType contentType = getContentType(request);
+		if (contentType == null || !contentType.getType().equalsIgnoreCase("multipart")) {
+			return EMPTY_MULTIPART_DATA;
+		}
+
+		HttpMessageReader<MultiValueMap<String, Part>> reader = getReader(configurer, contentType, MULTIPART_DATA_TYPE);
+		if (reader == null) {
+			return Mono.error(new IllegalStateException("No HttpMessageReader for " + contentType));
+		}
+
+		return reader
+				.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+				.switchIfEmpty(EMPTY_MULTIPART_DATA)
+				.cache();
+	}
+
+	@Nullable
+	private static MediaType getContentType(ServerHttpRequest request) {
+		MediaType contentType = null;
 		try {
-			MediaType contentType = request.getHeaders().getContentType();
-			if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
-				return ((HttpMessageReader<MultiValueMap<String, Part>>) configurer.getReaders().stream()
-						.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
-						.findFirst()
-						.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
-						.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
-						.switchIfEmpty(EMPTY_MULTIPART_DATA)
-						.cache();
-			}
+			contentType = request.getHeaders().getContentType();
 		}
 		catch (InvalidMediaTypeException ex) {
-			// Ignore
+			// ignore
 		}
-		return EMPTY_MULTIPART_DATA;
+		return contentType;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private static <E> HttpMessageReader<E> getReader(
+			ServerCodecConfigurer configurer, MediaType contentType, ResolvableType targetType) {
+
+		HttpMessageReader<E> result = null;
+		for (HttpMessageReader<?> reader : configurer.getReaders()) {
+			if (reader.canRead(targetType, contentType)) {
+				result = (HttpMessageReader<E>) reader;
+			}
+		}
+		return result;
 	}
 
 

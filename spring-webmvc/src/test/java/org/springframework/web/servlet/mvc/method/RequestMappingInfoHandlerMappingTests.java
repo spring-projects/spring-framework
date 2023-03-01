@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,6 +174,15 @@ class RequestMappingInfoHandlerMappingTests {
 	void getHandlerMediaTypeNotSupported(TestRequestMappingInfoHandlerMapping mapping) {
 		testHttpMediaTypeNotSupportedException(mapping, "/person/1");
 		testHttpMediaTypeNotSupportedException(mapping, "/person/1.json");
+	}
+
+	@PathPatternsParameterizedTest // gh-28062
+	void getHandlerMediaTypeNotSupportedWithParseError(TestRequestMappingInfoHandlerMapping mapping) {
+		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/person/1");
+		request.setContentType("This string");
+		assertThatExceptionOfType(HttpMediaTypeNotSupportedException.class)
+				.isThrownBy(() -> mapping.getHandler(request))
+				.satisfies(ex -> assertThat(ex.getSupportedMediaTypes()).containsExactly(MediaType.APPLICATION_XML));
 	}
 
 	@PathPatternsParameterizedTest

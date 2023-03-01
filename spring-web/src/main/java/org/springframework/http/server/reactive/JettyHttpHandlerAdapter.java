@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
@@ -158,11 +157,15 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			OutputStream output = getOutputStream();
-			if (output instanceof HttpOutput httpOutput) {
-				ByteBuffer input = dataBuffer.toByteBuffer();
-				int len = input.remaining();
-				httpOutput.write(input);
+			if (getOutputStream() instanceof HttpOutput httpOutput) {
+				int len = 0;
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+					while (iterator.hasNext() && httpOutput.isReady()) {
+						ByteBuffer byteBuffer = iterator.next();
+						len += byteBuffer.remaining();
+						httpOutput.write(byteBuffer);
+					}
+				}
 				return len;
 			}
 			return super.writeToOutputStream(dataBuffer);

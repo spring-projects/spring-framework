@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,11 +188,11 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @throws BeansException if the given bean cannot be exposed as a FactoryBean
 	 */
 	protected FactoryBean<?> getFactoryBean(String beanName, Object beanInstance) throws BeansException {
-		if (!(beanInstance instanceof FactoryBean)) {
+		if (!(beanInstance instanceof FactoryBean<?> factoryBean)) {
 			throw new BeanCreationException(beanName,
 					"Bean instance of type [" + beanInstance.getClass() + "] is not a FactoryBean");
 		}
-		return (FactoryBean<?>) beanInstance;
+		return factoryBean;
 	}
 
 	/**

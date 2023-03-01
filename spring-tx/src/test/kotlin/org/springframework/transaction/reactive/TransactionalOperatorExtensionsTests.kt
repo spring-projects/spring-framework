@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,27 @@
 
 package org.springframework.transaction.reactive
 
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 import org.springframework.transaction.support.DefaultTransactionDefinition
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 
 class TransactionalOperatorExtensionsTests {
 
 	private val tm = ReactiveTestTransactionManager(false, true)
 
 	@Test
+	@Suppress("UNUSED_VARIABLE")
 	fun commitWithSuspendingFunction() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		runBlocking {
-			operator.executeAndAwait {
+			val returnValue: Boolean = operator.executeAndAwait {
 				delay(1)
 				true
 			}
@@ -43,10 +46,11 @@ class TransactionalOperatorExtensionsTests {
 	}
 
 	@Test
+	@Suppress("UNUSED_VARIABLE")
 	fun commitWithEmptySuspendingFunction() {
 		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
 		runBlocking {
-			operator.executeAndAwait {
+			val returnValue: Boolean? = operator.executeAndAwait {
 				delay(1)
 				null
 			}
@@ -69,7 +73,6 @@ class TransactionalOperatorExtensionsTests {
 				assertThat(tm.rollback).isTrue()
 				return@runBlocking
 			}
-			fail("")
 		}
 	}
 
@@ -106,5 +109,51 @@ class TransactionalOperatorExtensionsTests {
 				return@runBlocking
 			}
 		}
+	}
+
+	@Test
+	fun coroutineContextWithSuspendingFunction() {
+		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
+		runBlocking(User(role = "admin")) {
+			try {
+				operator.executeAndAwait {
+					delay(1)
+					val currentUser = currentCoroutineContext()[User]
+					assertThat(currentUser).isNotNull()
+					assertThat(currentUser!!.role).isEqualTo("admin")
+					throw IllegalStateException()
+				}
+			} catch (e: IllegalStateException) {
+				assertThat(tm.commit).isFalse()
+				assertThat(tm.rollback).isTrue()
+				return@runBlocking
+			}
+		}
+	}
+
+	@Test
+	fun coroutineContextWithFlow() {
+		val operator = TransactionalOperator.create(tm, DefaultTransactionDefinition())
+		val flow = flow<Int> {
+			delay(1)
+			val currentUser = currentCoroutineContext()[User]
+			assertThat(currentUser).isNotNull()
+			assertThat(currentUser!!.role).isEqualTo("admin")
+			throw IllegalStateException()
+		}
+		runBlocking(User(role = "admin")) {
+			try {
+				flow.transactional(operator, coroutineContext).toList()
+			} catch (e: IllegalStateException) {
+				assertThat(tm.commit).isFalse()
+				assertThat(tm.rollback).isTrue()
+				return@runBlocking
+			}
+		}
+	}
+
+
+	private data class User(val role: String) : AbstractCoroutineContextElement(User) {
+		companion object Key : CoroutineContext.Key<User>
 	}
 }

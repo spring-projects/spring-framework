@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ class RestTemplateXhrTransportTests {
 
 	private static final Jackson2SockJsMessageCodec CODEC = new Jackson2SockJsMessageCodec();
 
-	private final WebSocketHandler webSocketHandler = mock(WebSocketHandler.class);
+	private final WebSocketHandler webSocketHandler = mock();
 
 
 	@Test
@@ -132,7 +132,7 @@ class RestTemplateXhrTransportTests {
 	@SuppressWarnings("deprecation")
 	void connectFailure() {
 		final HttpServerErrorException expected = new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
-		RestOperations restTemplate = mock(RestOperations.class);
+		RestOperations restTemplate = mock();
 		given(restTemplate.execute((URI) any(), eq(HttpMethod.POST), any(), any())).willThrow(expected);
 
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -201,7 +201,7 @@ class RestTemplateXhrTransportTests {
 	}
 
 	private ClientHttpResponse response(HttpStatus status, String body) throws IOException {
-		ClientHttpResponse response = mock(ClientHttpResponse.class);
+		ClientHttpResponse response = mock();
 		InputStream inputStream = getInputStream(body);
 		given(response.getStatusCode()).willReturn(status);
 		given(response.getBody()).willReturn(inputStream);

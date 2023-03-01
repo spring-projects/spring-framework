@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  * @since 3.0.2
  * @param <T> the body type
  * @see #getStatusCode()
@@ -282,6 +283,21 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 				return (ResponseEntity<T>) body(body);
 			}
 		};
+	}
+
+	/**
+	 * A shortcut for creating a {@code ResponseEntity} with the given body
+	 * and the {@linkplain HttpStatus#OK OK} status, or an empty body and a
+	 * {@linkplain HttpStatus#NOT_FOUND NOT FOUND} status in case of a
+	 * {@code null} parameter.
+	 * @return the created {@code ResponseEntity}
+	 * @since 6.0.5
+	 */
+	public static <T> ResponseEntity<T> ofNullable(@Nullable T body) {
+		if (body == null) {
+			return notFound().build();
+		}
+		return ResponseEntity.ok(body);
 	}
 
 	/**

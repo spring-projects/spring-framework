@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.apache.coyote.Response;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
@@ -125,26 +126,38 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected DataBuffer readFromInputStream() throws IOException {
-			if (!(getInputStream() instanceof CoyoteInputStream coyoteInputStream)) {
+			if (getInputStream() instanceof CoyoteInputStream coyoteInputStream) {
+				DataBuffer dataBuffer = this.factory.allocateBuffer(this.bufferSize);
+				int read = -1;
+				try {
+					try (DataBuffer.ByteBufferIterator iterator = dataBuffer.writableByteBuffers()) {
+						Assert.state(iterator.hasNext(), "No ByteBuffer available");
+						ByteBuffer byteBuffer = iterator.next();
+						read = coyoteInputStream.read(byteBuffer);
+					}
+					logBytesRead(read);
+					if (read > 0) {
+						dataBuffer.writePosition(read);
+						return dataBuffer;
+					}
+					else if (read == -1) {
+						return EOF_BUFFER;
+					}
+					else {
+						return AbstractListenerReadPublisher.EMPTY_BUFFER;
+					}
+				}
+				finally {
+					if (read <= 0) {
+						DataBufferUtils.release(dataBuffer);
+					}
+				}
+			}
+			else {
 				// It's possible InputStream can be wrapped, preventing use of CoyoteInputStream
 				return super.readFromInputStream();
 			}
 
-			ByteBuffer byteBuffer = this.factory.isDirect() ?
-					ByteBuffer.allocateDirect(this.bufferSize) :
-					ByteBuffer.allocate(this.bufferSize);
-
-			int read = coyoteInputStream.read(byteBuffer);
-			logBytesRead(read);
-			if (read > 0) {
-				return this.factory.wrap(byteBuffer);
-			}
-			else if (read == -1) {
-				return EOF_BUFFER;
-			}
-			else {
-				return AbstractListenerReadPublisher.EMPTY_BUFFER;
-			}
 		}
 	}
 
@@ -197,14 +210,20 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			if (!(getOutputStream() instanceof CoyoteOutputStream coyoteOutputStream)) {
+			if (getOutputStream() instanceof CoyoteOutputStream coyoteOutputStream) {
+				int len = 0;
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+					while (iterator.hasNext() && coyoteOutputStream.isReady()) {
+						ByteBuffer byteBuffer = iterator.next();
+						len += byteBuffer.remaining();
+						coyoteOutputStream.write(byteBuffer);
+					}
+				}
+				return len;
+			}
+			else {
 				return super.writeToOutputStream(dataBuffer);
 			}
-
-			ByteBuffer input = dataBuffer.toByteBuffer();
-			int len = input.remaining();
-			coyoteOutputStream.write(input);
-			return len;
 		}
 	}
 

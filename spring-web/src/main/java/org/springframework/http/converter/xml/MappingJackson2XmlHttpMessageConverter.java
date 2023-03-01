@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.http.converter.xml;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -41,6 +43,10 @@ import org.springframework.util.Assert;
  * @since 4.1
  */
 public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2HttpMessageConverter {
+
+	private static final List<MediaType> problemDetailMediaTypes =
+			Collections.singletonList(MediaType.APPLICATION_PROBLEM_XML);
+
 
 	/**
 	 * Construct a new {@code MappingJackson2XmlHttpMessageConverter} using default configuration
@@ -72,6 +78,11 @@ public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2Http
 	public void setObjectMapper(ObjectMapper objectMapper) {
 		Assert.isInstanceOf(XmlMapper.class, objectMapper, "XmlMapper required");
 		super.setObjectMapper(objectMapper);
+	}
+
+	@Override
+	protected List<MediaType> getMediaTypesForProblemDetail() {
+		return problemDetailMediaTypes;
 	}
 
 }

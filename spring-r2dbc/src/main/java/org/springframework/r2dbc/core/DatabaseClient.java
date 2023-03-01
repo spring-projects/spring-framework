@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,10 @@ public interface DatabaseClient extends ConnectionAccessor {
 	 * the execution. The SQL string can contain either native parameter
 	 * bind markers or named parameters (e.g. {@literal :foo, :bar}) when
 	 * {@link NamedParameterExpander} is enabled.
-	 * <p>Accepts {@link PreparedOperation} as SQL and binding {@link Supplier}
+	 * <p>Accepts {@link PreparedOperation} as SQL and binding {@link Supplier}.
+	 * <p>{@code DatabaseClient} implementations should defer the resolution of
+	 * the SQL string as much as possible, ideally up to the point where a
+	 * {@code Subscription} happens. This is the case for the default implementation.
 	 * @param sqlSupplier a supplier for the SQL statement
 	 * @return a new {@link GenericExecuteSpec}
 	 * @see NamedParameterExpander

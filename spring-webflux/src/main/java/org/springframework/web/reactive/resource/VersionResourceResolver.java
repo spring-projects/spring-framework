@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -283,9 +285,23 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
-		@Nullable
-		public String getFilename() {
-			return this.original.getFilename();
+		public InputStream getInputStream() throws IOException {
+			return this.original.getInputStream();
+		}
+
+		@Override
+		public ReadableByteChannel readableChannel() throws IOException {
+			return this.original.readableChannel();
+		}
+
+		@Override
+		public byte[] getContentAsByteArray() throws IOException {
+			return this.original.getContentAsByteArray();
+		}
+
+		@Override
+		public String getContentAsString(Charset charset) throws IOException {
+			return this.original.getContentAsString(charset);
 		}
 
 		@Override
@@ -304,13 +320,14 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
-		public String getDescription() {
-			return this.original.getDescription();
+		@Nullable
+		public String getFilename() {
+			return this.original.getFilename();
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
-			return this.original.getInputStream();
+		public String getDescription() {
+			return this.original.getDescription();
 		}
 
 		@Override

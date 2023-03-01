@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,9 +93,15 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 
 		if (bean instanceof Advised advised) {
 			if (!advised.isFrozen() && isEligible(AopUtils.getTargetClass(bean))) {
-				// Add our local Advisor to the existing proxy's Advisor chain...
+				// Add our local Advisor to the existing proxy's Advisor chain.
 				if (this.beforeExistingAdvisors) {
 					advised.addAdvisor(0, this.advisor);
+				}
+				else if (advised.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE &&
+						advised.getAdvisorCount() > 0) {
+					// No target, leave last Advisor in place and add new Advisor right before.
+					advised.addAdvisor(advised.getAdvisorCount() - 1, this.advisor);
+					return bean;
 				}
 				else {
 					advised.addAdvisor(this.advisor);

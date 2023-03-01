@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -926,13 +926,12 @@ class MergedAnnotationsTests {
 		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
 				Order.class).getDistance()).isEqualTo(0);
-		boolean runningInEclipse = Arrays.stream(
-				new Exception().getStackTrace()).anyMatch(
-						element -> element.getClassName().startsWith("org.eclipse.jdt"));
+		boolean runningInEclipse = StackWalker.getInstance().walk(stream ->
+				stream.anyMatch(stackFrame -> stackFrame.getClassName().startsWith("org.eclipse.jdt")));
 		// As of JDK 8, invoking getAnnotation() on a bridge method actually finds an
 		// annotation on its 'bridged' method [1]; however, the Eclipse compiler
-		// will not support this until Eclipse 4.9 [2]. Thus, we effectively ignore the
-		// following assertion if the test is currently executing within the Eclipse IDE.
+		// does not support this [2]. Thus, we effectively ignore the following
+		// assertion if the test is currently executing within the Eclipse IDE.
 		// [1] https://bugs.openjdk.java.net/browse/JDK-6695379
 		// [2] https://bugs.eclipse.org/bugs/show_bug.cgi?id=495396
 		if (!runningInEclipse) {

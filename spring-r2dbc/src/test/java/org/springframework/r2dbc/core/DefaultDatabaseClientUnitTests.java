@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.r2dbc.core;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
@@ -63,6 +65,7 @@ import static org.mockito.BDDMockito.when;
  * @author Mark Paluch
  * @author Ferdinand Jacobs
  * @author Jens Schauder
+ * @author Simon Baslé
  */
 @MockitoSettings(strictness = Strictness.LENIENT)
 class DefaultDatabaseClientUnitTests {
@@ -76,7 +79,7 @@ class DefaultDatabaseClientUnitTests {
 	@BeforeEach
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void before() {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 
 		when(connectionFactory.create()).thenReturn((Publisher) Mono.just(connection));
 		when(connection.close()).thenReturn(Mono.empty());
@@ -88,7 +91,7 @@ class DefaultDatabaseClientUnitTests {
 
 	@Test
 	void connectionFactoryIsExposed() {
-		ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+		ConnectionFactory connectionFactory = mock();
 		DatabaseClient databaseClient = DatabaseClient.builder()
 				.connectionFactory(connectionFactory)
 				.bindMarkers(BindMarkersFactory.anonymous("?")).build();
@@ -224,7 +227,7 @@ class DefaultDatabaseClientUnitTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void rowsUpdatedShouldEmitSingleValue() {
-		Result result = mock(Result.class);
+		Result result = mock();
 		when(result.getRowsUpdated()).thenReturn(Mono.empty(), Mono.just(2L), Flux.just(1L, 2L, 3L));
 		mockStatementFor("DROP TABLE tab;", result);
 
@@ -385,6 +388,47 @@ class DefaultDatabaseClientUnitTests {
 		inOrder.verifyNoMoreInteractions();
 	}
 
+	@Test
+	void sqlSupplierInvocationIsDeferredUntilSubscription() {
+		// We'll have either 2 or 3 rows, depending on the subscription and the generated SQL
+		MockRowMetadata metadata = MockRowMetadata.builder().columnMetadata(
+				MockColumnMetadata.builder().name("id").javaType(Integer.class).build()).build();
+		final MockRow row1 = MockRow.builder().metadata(metadata)
+				.identified("id", Integer.class, 1).build();
+		final MockRow row2 = MockRow.builder().metadata(metadata)
+				.identified("id", Integer.class, 2).build();
+		final MockRow row3 = MockRow.builder().metadata(metadata)
+				.identified("id", Integer.class, 3).build();
+		// Set up 2 mock statements
+		mockStatementFor("SELECT id FROM test WHERE id < '3'", MockResult.builder()
+				.row(row1, row2).build());
+		mockStatementFor("SELECT id FROM test WHERE id < '4'", MockResult.builder()
+				.row(row1, row2, row3).build());
+		// Create the client
+		DatabaseClient databaseClient = this.databaseClientBuilder.build();
+
+		AtomicInteger invoked = new AtomicInteger();
+		// Assemble a publisher, but don't subscribe yet
+		Mono<List<Integer>> operation = databaseClient
+				.sql(() -> {
+					int idMax = 2 + invoked.incrementAndGet();
+					return String.format("SELECT id FROM test WHERE id < '%s'", idMax);
+				})
+				.map(r -> r.get("id", Integer.class))
+				.all()
+				.collectList();
+
+		assertThat(invoked).as("invoked (before subscription)").hasValue(0);
+
+		List<Integer> rows = operation.block();
+		assertThat(invoked).as("invoked (after 1st subscription)").hasValue(1);
+		assertThat(rows).containsExactly(1, 2);
+
+		rows = operation.block();
+		assertThat(invoked).as("invoked (after 2nd subscription)").hasValue(2);
+		assertThat(rows).containsExactly(1, 2, 3);
+	}
+
 
 	private Statement mockStatement() {
 		return mockStatementFor(null, null);
@@ -399,7 +443,7 @@ class DefaultDatabaseClientUnitTests {
 	}
 
 	private Statement mockStatementFor(@Nullable String sql, @Nullable Result result) {
-		Statement statement = mock(Statement.class);
+		Statement statement = mock();
 		when(connection.createStatement(sql == null ? anyString() : eq(sql))).thenReturn(statement);
 		when(statement.returnGeneratedValues(anyString())).thenReturn(statement);
 		when(statement.returnGeneratedValues()).thenReturn(statement);

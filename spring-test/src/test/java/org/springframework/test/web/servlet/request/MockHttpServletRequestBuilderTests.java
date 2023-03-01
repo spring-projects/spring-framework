@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,15 +167,15 @@ class MockHttpServletRequestBuilderTests {
 		assertThat(request.getPathInfo()).isNull();
 	}
 
-	@Test // gh-28823
+	@Test // gh-28823, gh-29933
 	void emptyPath() {
 		this.builder = new MockHttpServletRequestBuilder(GET, "");
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertThat(request.getRequestURI()).isEqualTo("");
+		assertThat(request.getRequestURI()).isEqualTo("/");
 		assertThat(request.getContextPath()).isEqualTo("");
 		assertThat(request.getServletPath()).isEqualTo("");
-		assertThat(request.getPathInfo()).isNull();
+		assertThat(request.getPathInfo()).isEqualTo("/");
 	}
 
 	@Test // SPR-16453

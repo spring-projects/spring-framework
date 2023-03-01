@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,6 +49,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.test.StepVerifier;
@@ -726,8 +726,8 @@ class WebClientIntegrationTests {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			try {
 				request.getBody().copyTo(bos);
-				String actual = bos.toString("UTF-8");
-				String expected = new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
+				String actual = bos.toString(StandardCharsets.UTF_8);
+				String expected = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
 				assertThat(actual).isEqualTo(expected);
 			}
 			catch (IOException ex) {
@@ -1091,24 +1091,6 @@ class WebClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest  // SPR-15782
-	void exchangeWithRelativeUrl(ClientHttpConnector connector) {
-		startServer(connector);
-
-		String uri = "/api/v4/groups/1";
-		Mono<ResponseEntity<Void>> responseMono = WebClient.builder().build().get().uri(uri)
-				.retrieve().toBodilessEntity();
-
-		StepVerifier.create(responseMono)
-				.expectErrorSatisfies(throwable -> {
-					assertThat(throwable).isInstanceOf(WebClientRequestException.class);
-					WebClientRequestException ex = (WebClientRequestException) throwable;
-					assertThat(ex.getMethod()).isEqualTo(HttpMethod.GET);
-					assertThat(ex.getUri()).isEqualTo(URI.create(uri));
-				})
-				.verify(Duration.ofSeconds(5));
-	}
-
 	@ParameterizedWebClientTest
 	void filter(ClientHttpConnector connector) {
 		startServer(connector);
@@ -1281,12 +1263,13 @@ class WebClientIntegrationTests {
 	private <T> Mono<T> doMalformedChunkedResponseTest(
 			ClientHttpConnector connector, Function<ResponseSpec, Mono<T>> handler) {
 
-		AtomicInteger port = new AtomicInteger();
+		Sinks.One<Integer> portSink = Sinks.one();
 
 		Thread serverThread = new Thread(() -> {
 			// No way to simulate a malformed chunked response through MockWebServer.
 			try (ServerSocket serverSocket = new ServerSocket(0)) {
-				port.set(serverSocket.getLocalPort());
+				Sinks.EmitResult result = portSink.tryEmitValue(serverSocket.getLocalPort());
+				assertThat(result).isEqualTo(Sinks.EmitResult.OK);
 				Socket socket = serverSocket.accept();
 				InputStream is = socket.getInputStream();
 
@@ -1310,12 +1293,13 @@ class WebClientIntegrationTests {
 
 		serverThread.start();
 
-		WebClient client = WebClient.builder()
-				.clientConnector(connector)
-				.baseUrl("http://localhost:" + port)
-				.build();
-
-		return handler.apply(client.post().retrieve());
+		return portSink.asMono().flatMap(port -> {
+			WebClient client = WebClient.builder()
+					.clientConnector(connector)
+					.baseUrl("http://localhost:" + port)
+					.build();
+			return handler.apply(client.post().retrieve());
+		});
 	}
 
 	private void prepareResponse(Consumer<MockResponse> consumer) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  *
  * <p>If Lazy is present on a {@link Configuration @Configuration} class, this
  * indicates that all {@code @Bean} methods within that {@code @Configuration}
- * should be lazily initialized. If {@code @Lazy} is present and false on a {@code @Bean}
+ * should be lazily initialized. If {@code @Lazy} is present and {@code false} on a {@code @Bean}
  * method within a {@code @Lazy}-annotated {@code @Configuration} class, this indicates
  * overriding the 'default lazy' behavior and that the bean should be eagerly initialized.
  *

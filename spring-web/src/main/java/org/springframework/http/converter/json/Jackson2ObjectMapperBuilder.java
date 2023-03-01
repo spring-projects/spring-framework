@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.KotlinDetector;
 import org.springframework.http.ProblemDetail;
@@ -99,6 +98,10 @@ import org.springframework.util.xml.StaxUtils;
  * @see Jackson2ObjectMapperFactoryBean
  */
 public class Jackson2ObjectMapperBuilder {
+
+	private static final boolean jackson2XmlPresent = ClassUtils.isPresent(
+			"com.fasterxml.jackson.dataformat.xml.XmlMapper", Jackson2ObjectMapperBuilder.class.getClassLoader());
+
 
 	private final Map<Class<?>, Class<?>> mixIns = new LinkedHashMap<>();
 
@@ -756,7 +759,12 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.setFilterProvider(this.filters);
 		}
 
-		objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class);
+		if (jackson2XmlPresent) {
+			objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonXmlMixin.class);
+		}
+		else {
+			objectMapper.addMixIn(ProblemDetail.class, ProblemDetailJacksonMixin.class);
+		}
 		this.mixIns.forEach(objectMapper::addMixIn);
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
@@ -835,7 +843,7 @@ public class Jackson2ObjectMapperBuilder {
 			objectMapper.configure(mapperFeature, enabled);
 		}
 		else {
-			throw new FatalBeanException("Unknown feature class: " + feature.getClass().getName());
+			throw new IllegalArgumentException("Unknown feature class: " + feature.getClass().getName());
 		}
 	}
 

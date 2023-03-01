@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -93,8 +92,11 @@ final class Jackson2Tokenizer {
 		try {
 			int bufferSize = dataBuffer.readableByteCount();
 			if (this.inputFeeder instanceof ByteBufferFeeder byteBufferFeeder) {
-				ByteBuffer byteBuffer = dataBuffer.toByteBuffer();
-				byteBufferFeeder.feedInput(byteBuffer);
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+					while (iterator.hasNext()) {
+						byteBufferFeeder.feedInput(iterator.next());
+					}
+				}
 			}
 			else if (this.inputFeeder instanceof ByteArrayFeeder byteArrayFeeder) {
 				byte[] bytes = new byte[bufferSize];

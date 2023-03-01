@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,14 +108,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		List<Element> childElts = DomUtils.getChildElements(element);
 		for (Element elt: childElts) {
 			String localName = parserContext.getDelegate().getLocalName(elt);
-			if (POINTCUT.equals(localName)) {
-				parsePointcut(elt, parserContext);
-			}
-			else if (ADVISOR.equals(localName)) {
-				parseAdvisor(elt, parserContext);
-			}
-			else if (ASPECT.equals(localName)) {
-				parseAspect(elt, parserContext);
+			switch (localName) {
+				case POINTCUT -> parsePointcut(elt, parserContext);
+				case ADVISOR -> parseAdvisor(elt, parserContext);
+				case ASPECT -> parseAspect(elt, parserContext);
 			}
 		}
 

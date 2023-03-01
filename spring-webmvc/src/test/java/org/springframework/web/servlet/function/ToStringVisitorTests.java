@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ import static org.springframework.web.servlet.function.RouterFunctions.route;
 /**
  * @author Arjen Poutsma
  */
-public class ToStringVisitorTests {
+class ToStringVisitorTests {
 
 	@Test
-	public void nested() {
+	void nested() {
 		HandlerFunction<ServerResponse> handler = new SimpleHandlerFunction();
 		RouterFunction<ServerResponse> routerFunction = route()
 				.path("/foo", builder ->
@@ -52,16 +52,17 @@ public class ToStringVisitorTests {
 		routerFunction.accept(visitor);
 		String result = visitor.toString();
 
-		String expected = "/foo => {\n" +
-				" /bar => {\n" +
-				"  (GET && /baz) -> \n" +
-				" }\n" +
-				"}";
+		String expected = """
+				/foo => {
+					/bar => {
+						(GET && /baz) ->\s
+					}
+				}""".replace('\t', ' ');
 		assertThat(result).isEqualTo(expected);
 	}
 
 	@Test
-	public void predicates() {
+	void predicates() {
 		testPredicate(methods(HttpMethod.GET), "GET");
 		testPredicate(methods(HttpMethod.GET, HttpMethod.POST), "[GET, POST]");
 
@@ -94,9 +95,7 @@ public class ToStringVisitorTests {
 	private void testPredicate(RequestPredicate predicate, String expected) {
 		ToStringVisitor visitor = new ToStringVisitor();
 		predicate.accept(visitor);
-		String result = visitor.toString();
-
-		assertThat(result).isEqualTo(expected);
+		assertThat(visitor).asString().isEqualTo(expected);
 	}
 
 

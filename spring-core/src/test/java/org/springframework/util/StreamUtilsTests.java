@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ class StreamUtilsTests {
 
 	@Test
 	void nonClosingInputStream() throws Exception {
-		InputStream source = mock(InputStream.class);
+		InputStream source = mock();
 		InputStream nonClosing = StreamUtils.nonClosing(source);
 		nonClosing.read();
 		nonClosing.read(bytes);
@@ -115,7 +115,7 @@ class StreamUtilsTests {
 
 	@Test
 	void nonClosingOutputStream() throws Exception {
-		OutputStream source = mock(OutputStream.class);
+		OutputStream source = mock();
 		OutputStream nonClosing = StreamUtils.nonClosing(source);
 		nonClosing.write(1);
 		nonClosing.write(bytes);

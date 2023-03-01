@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,28 +50,28 @@ class ScheduledTaskRegistrarTests {
 
 	@Test
 	void getTriggerTasks() {
-		TriggerTask mockTriggerTask = mock(TriggerTask.class);
+		TriggerTask mockTriggerTask = mock();
 		this.taskRegistrar.setTriggerTasksList(Collections.singletonList(mockTriggerTask));
 		assertThat(this.taskRegistrar.getTriggerTaskList()).containsExactly(mockTriggerTask);
 	}
 
 	@Test
 	void getCronTasks() {
-		CronTask mockCronTask = mock(CronTask.class);
+		CronTask mockCronTask = mock();
 		this.taskRegistrar.setCronTasksList(Collections.singletonList(mockCronTask));
 		assertThat(this.taskRegistrar.getCronTaskList()).containsExactly(mockCronTask);
 	}
 
 	@Test
 	void getFixedRateTasks() {
-		IntervalTask mockFixedRateTask = mock(IntervalTask.class);
+		IntervalTask mockFixedRateTask = mock();
 		this.taskRegistrar.setFixedRateTasksList(Collections.singletonList(mockFixedRateTask));
 		assertThat(this.taskRegistrar.getFixedRateTaskList()).containsExactly(mockFixedRateTask);
 	}
 
 	@Test
 	void getFixedDelayTasks() {
-		IntervalTask mockFixedDelayTask = mock(IntervalTask.class);
+		IntervalTask mockFixedDelayTask = mock();
 		this.taskRegistrar.setFixedDelayTasksList(Collections.singletonList(mockFixedDelayTask));
 		assertThat(this.taskRegistrar.getFixedDelayTaskList()).containsExactly(mockFixedDelayTask);
 	}

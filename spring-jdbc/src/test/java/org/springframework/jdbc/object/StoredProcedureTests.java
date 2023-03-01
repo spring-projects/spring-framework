@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,17 +66,17 @@ import static org.mockito.Mockito.verify;
  */
 public class StoredProcedureTests {
 
-	private DataSource dataSource;
-	private Connection connection;
-	private CallableStatement callableStatement;
+	private Connection connection = mock();
+
+	private DataSource dataSource = mock();
+
+	private CallableStatement callableStatement = mock();
 
 	private boolean verifyClosedAfter = true;
 
+
 	@BeforeEach
 	public void setup() throws Exception {
-		dataSource = mock(DataSource.class);
-		connection = mock(Connection.class);
-		callableStatement = mock(CallableStatement.class);
 		given(dataSource.getConnection()).willReturn(connection);
 		given(callableStatement.getConnection()).willReturn(connection);
 	}
@@ -251,7 +251,7 @@ public class StoredProcedureTests {
 
 	@Test
 	public void testStoredProcedureWithResultSet() throws Exception {
-		ResultSet resultSet = mock(ResultSet.class);
+		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(true, true, false);
 		given(callableStatement.execute()).willReturn(true);
 		given(callableStatement.getUpdateCount()).willReturn(-1);
@@ -267,7 +267,7 @@ public class StoredProcedureTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testStoredProcedureWithResultSetMapped() throws Exception {
-		ResultSet resultSet = mock(ResultSet.class);
+		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(2)).willReturn("Foo", "Bar");
 		given(callableStatement.execute()).willReturn(true);
@@ -286,16 +286,16 @@ public class StoredProcedureTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testStoredProcedureWithUndeclaredResults() throws Exception {
-		ResultSet resultSet1 = mock(ResultSet.class);
+		ResultSet resultSet1 = mock();
 		given(resultSet1.next()).willReturn(true, true, false);
 		given(resultSet1.getString(2)).willReturn("Foo", "Bar");
 
-		ResultSetMetaData resultSetMetaData = mock(ResultSetMetaData.class);
+		ResultSetMetaData resultSetMetaData = mock();
 		given(resultSetMetaData.getColumnCount()).willReturn(2);
 		given(resultSetMetaData.getColumnLabel(1)).willReturn("spam");
 		given(resultSetMetaData.getColumnLabel(2)).willReturn("eggs");
 
-		ResultSet resultSet2 = mock(ResultSet.class);
+		ResultSet resultSet2 = mock();
 		given(resultSet2.getMetaData()).willReturn(resultSetMetaData);
 		given(resultSet2.next()).willReturn(true, false);
 		given(resultSet2.getObject(1)).willReturn("Spam");
@@ -345,7 +345,7 @@ public class StoredProcedureTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testStoredProcedureSkippingUndeclaredResults() throws Exception {
-		ResultSet resultSet = mock(ResultSet.class);
+		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(2)).willReturn("Foo", "Bar");
 		given(callableStatement.execute()).willReturn(true);

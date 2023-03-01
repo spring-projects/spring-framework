@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,17 @@ class MockHttpServletRequestTests {
 		request.setContent(bytes);
 		assertThat(request.getContentLength()).isEqualTo(bytes.length);
 		assertThat(StreamUtils.copyToString(request.getInputStream(), Charset.defaultCharset())).isEqualTo("body");
+	}
+
+	@Test
+	void readEmptyInputStreamWorksAcrossRequests() throws IOException {
+		MockHttpServletRequest firstRequest = new MockHttpServletRequest();
+		firstRequest.getInputStream().readAllBytes();
+		firstRequest.getInputStream().close();
+
+		MockHttpServletRequest secondRequest = new MockHttpServletRequest();
+		secondRequest.getInputStream().readAllBytes();
+		secondRequest.getInputStream().close();
 	}
 
 	@Test
@@ -172,6 +183,15 @@ class MockHttpServletRequestTests {
 		assertThat(request.getContentType()).isEqualTo(contentType);
 		assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType);
 		assertThat(request.getCharacterEncoding()).isEqualTo("UTF-8");
+	}
+
+	@Test // gh-29255
+	void setContentTypeInvalidWithNonAsciiCharacterAndCharset() {
+		String contentType = "İcharset=";
+		request.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
+		assertThat(request.getContentType()).isEqualTo(contentType);
+		assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(contentType);
+		assertThat(request.getCharacterEncoding()).isEqualTo("");
 	}
 
 	@Test

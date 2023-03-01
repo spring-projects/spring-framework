@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,12 +82,11 @@ public class PersistenceExceptionTranslationPostProcessor extends AbstractBeanFa
 	public void setBeanFactory(BeanFactory beanFactory) {
 		super.setBeanFactory(beanFactory);
 
-		if (!(beanFactory instanceof ListableBeanFactory)) {
+		if (!(beanFactory instanceof ListableBeanFactory lbf)) {
 			throw new IllegalArgumentException(
 					"Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");
 		}
-		this.advisor = new PersistenceExceptionTranslationAdvisor(
-				(ListableBeanFactory) beanFactory, this.repositoryAnnotationType);
+		this.advisor = new PersistenceExceptionTranslationAdvisor(lbf, this.repositoryAnnotationType);
 	}
 
 }

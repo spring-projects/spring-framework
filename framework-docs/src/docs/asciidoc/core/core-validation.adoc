@@ -2,7 +2,7 @@
 = Validation, Data Binding, and Type Conversion
 
 There are pros and cons for considering validation as business logic, and Spring offers
-a design for validation (and data binding) that does not exclude either one of them.
+a design for validation and data binding that does not exclude either one of them.
 Specifically, validation should not be tied to the web tier and should be easy to localize,
 and it should be possible to plug in any available validator. Considering these concerns,
 Spring provides a `Validator` contract that is both basic and eminently usable
@@ -15,18 +15,18 @@ provides the aptly named `DataBinder` to do exactly that. The `Validator` and th
 limited to the web layer.
 
 The `BeanWrapper` is a fundamental concept in the Spring Framework and is used in a lot
-of places. However, you probably do not need to use the `BeanWrapper`
-directly. Because this is reference documentation, however, we felt that some explanation
-might be in order. We explain the `BeanWrapper` in this chapter, since, if you are
-going to use it at all, you are most likely do so when trying to bind data to objects.
+of places. However, you probably do not need to use the `BeanWrapper` directly. Because
+this is reference documentation, however, we feel that some explanation might be in
+order. We explain the `BeanWrapper` in this chapter, since, if you are going to use it at
+all, you are most likely do so when trying to bind data to objects.
 
 Spring's `DataBinder` and the lower-level `BeanWrapper` both use `PropertyEditorSupport`
 implementations to parse and format property values. The `PropertyEditor` and
 `PropertyEditorSupport` types are part of the JavaBeans specification and are also
-explained in this chapter. Spring 3 introduced a `core.convert` package that provides a
-general type conversion facility, as well as a higher-level "`format`" package for
-formatting UI field values. You can use these packages as simpler alternatives to
-`PropertyEditorSupport` implementations. They are also discussed in this chapter.
+explained in this chapter. Spring's `core.convert` package provides a general type
+conversion facility, as well as a higher-level `format` package for formatting UI field
+values. You can use these packages as simpler alternatives to `PropertyEditorSupport`
+implementations. They are also discussed in this chapter.
 
 Spring supports Java Bean Validation through setup infrastructure and an adaptor to
 Spring's own `Validator` contract. Applications can enable Bean Validation once globally,
@@ -640,7 +640,7 @@ support for additional `PropertyEditor` instances to an `ApplicationContext`.
 Consider the following example, which defines a user class called `ExoticType` and
 another class called `DependsOnExoticType`, which needs `ExoticType` set as a property:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package example;
@@ -663,7 +663,7 @@ another class called `DependsOnExoticType`, which needs `ExoticType` set as a pr
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package example
@@ -689,12 +689,14 @@ string, which a `PropertyEditor` converts into an actual
 
 The `PropertyEditor` implementation could look similar to the following:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
-	// converts string representation to ExoticType object
 	package example;
 
+	import java.beans.PropertyEditorSupport;
+
+	// converts string representation to ExoticType object
 	public class ExoticTypeEditor extends PropertyEditorSupport {
 
 		public void setAsText(String text) {
@@ -702,14 +704,14 @@ The `PropertyEditor` implementation could look similar to the following:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
-	// converts string representation to ExoticType object
 	package example
 
 	import java.beans.PropertyEditorSupport
 
+	// converts string representation to ExoticType object
 	class ExoticTypeEditor : PropertyEditorSupport() {
 
 		override fun setAsText(text: String) {
@@ -752,7 +754,7 @@ instances for each bean creation attempt.
 
 The following example shows how to create your own `PropertyEditorRegistrar` implementation:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package com.foo.editors.spring;
@@ -768,7 +770,7 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package com.foo.editors.spring
@@ -861,12 +863,12 @@ as needed.
 [[core-convert]]
 == Spring Type Conversion
 
-Spring 3 introduced a `core.convert` package that provides a general type conversion
-system. The system defines an SPI to implement type conversion logic and an API
-to perform type conversions at runtime. Within a Spring container, you can use this system
-as an alternative to `PropertyEditor` implementations to convert externalized bean property value
-strings to the required property types. You can also use the public API anywhere in your
-application where type conversion is needed.
+The `core.convert` package provides a general type conversion system. The system defines
+an SPI to implement type conversion logic and an API to perform type conversions at
+runtime. Within a Spring container, you can use this system as an alternative to
+`PropertyEditor` implementations to convert externalized bean property value strings to
+the required property types. You can also use the public API anywhere in your application
+where type conversion is needed.
 
 
 
@@ -876,7 +878,7 @@ application where type conversion is needed.
 The SPI to implement type conversion logic is simple and strongly typed, as the following
 interface definition shows:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.core.convert.converter;
 
@@ -901,7 +903,7 @@ Several converter implementations are provided in the `core.convert.support` pac
 a convenience. These include converters from strings to numbers and other common types.
 The following listing shows the `StringToInteger` class, which is a typical `Converter` implementation:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.core.convert.support;
 
@@ -922,7 +924,7 @@ When you need to centralize the conversion logic for an entire class hierarchy
 (for example, when converting from `String` to `Enum` objects), you can implement
 `ConverterFactory`, as the following example shows:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.core.convert.converter;
 
@@ -938,7 +940,7 @@ where T is a subclass of R.
 
 Consider the `StringToEnumConverterFactory` as an example:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.core.convert.support;
 
@@ -975,7 +977,7 @@ context that you can use when you implement your conversion logic. Such context 
 type conversion be driven by a field annotation or by generic information declared on a
 field signature. The following listing shows the interface definition of `GenericConverter`:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.core.convert.converter;
 
@@ -1039,7 +1041,7 @@ might match only if the target entity type declares a static finder method (for 
 `ConversionService` defines a unified API for executing type conversion logic at
 runtime. Converters are often run behind the following facade interface:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.core.convert;
 
@@ -1205,8 +1207,9 @@ web or desktop application. In such environments, you typically convert from `St
 to support the client postback process, as well as back to `String` to support the
 view rendering process. In addition, you often need to localize `String` values. The more
 general `core.convert` `Converter` SPI does not address such formatting requirements
-directly. To directly address them, Spring 3 introduced a convenient `Formatter` SPI that
-provides a simple and robust alternative to `PropertyEditor` implementations for client environments.
+directly. To directly address them, Spring provides a convenient `Formatter` SPI that
+provides a simple and robust alternative to `PropertyEditor` implementations for client
+environments.
 
 In general, you can use the `Converter` SPI when you need to implement general-purpose type
 conversion logic -- for example, for converting between a `java.util.Date` and a `Long`.
@@ -1222,7 +1225,7 @@ provides a unified type conversion API for both SPIs.
 The `Formatter` SPI to implement field formatting logic is simple and strongly typed. The
 following listing shows the `Formatter` interface definition:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.format;
 
@@ -1267,7 +1270,7 @@ a `java.text.DateFormat`.
 
 The following `DateFormatter` is an example `Formatter` implementation:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package org.springframework.format.datetime;
@@ -1301,7 +1304,7 @@ The following `DateFormatter` is an example `Formatter` implementation:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	class DateFormatter(private val pattern: String) : Formatter<Date> {
@@ -1333,7 +1336,7 @@ Field formatting can be configured by field type or annotation. To bind
 an annotation to a `Formatter`, implement `AnnotationFormatterFactory`. The following
 listing shows the definition of the `AnnotationFormatterFactory` interface:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.format;
 
@@ -1349,15 +1352,14 @@ listing shows the definition of the `AnnotationFormatterFactory` interface:
 
 To create an implementation:
 
-. Parameterize A to be the field `annotationType` with which you wish to associate
+. Parameterize `A` to be the field `annotationType` with which you wish to associate
 formatting  logic -- for example `org.springframework.format.annotation.DateTimeFormat`.
 . Have `getFieldTypes()` return the types of fields on which the annotation can be used.
 . Have `getPrinter()` return a `Printer` to print the value of an annotated field.
 . Have `getParser()` return a `Parser` to parse a `clientValue` for an annotated field.
 
 The following example `AnnotationFormatterFactory` implementation binds the `@NumberFormat`
-annotation to a formatter to let a number style or pattern be
-specified:
+annotation to a formatter to let a number style or pattern be specified:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -1365,10 +1367,12 @@ specified:
 	public final class NumberFormatAnnotationFormatterFactory
 			implements AnnotationFormatterFactory<NumberFormat> {
 
+		private static final Set<Class<?>> FIELD_TYPES = Set.of(Short.class,
+				Integer.class, Long.class, Float.class, Double.class,
+				BigDecimal.class, BigInteger.class);
+
 		public Set<Class<?>> getFieldTypes() {
-			return new HashSet<Class<?>>(asList(new Class<?>[] {
-				Short.class, Integer.class, Long.class, Float.class,
-				Double.class, BigDecimal.class, BigInteger.class }));
+			return FIELD_TYPES;
 		}
 
 		public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
@@ -1382,16 +1386,13 @@ specified:
 		private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
 			if (!annotation.pattern().isEmpty()) {
 				return new NumberStyleFormatter(annotation.pattern());
-			} else {
-				Style style = annotation.style();
-				if (style == Style.PERCENT) {
-					return new PercentStyleFormatter();
-				} else if (style == Style.CURRENCY) {
-					return new CurrencyStyleFormatter();
-				} else {
-					return new NumberStyleFormatter();
-				}
 			}
+			// else
+			return switch(annotation.style()) {
+				case Style.PERCENT -> new PercentStyleFormatter();
+				case Style.CURRENCY -> new CurrencyStyleFormatter();
+				default -> new NumberStyleFormatter();
+			};
 		}
 	}
 ----
@@ -1427,7 +1428,7 @@ specified:
 	}
 ----
 
-To trigger formatting, you can annotate fields with @NumberFormat, as the following
+To trigger formatting, you can annotate fields with `@NumberFormat`, as the following
 example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -1489,7 +1490,7 @@ for use with Spring's `DataBinder` and the Spring Expression Language (SpEL).
 
 The following listing shows the `FormatterRegistry` SPI:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.format;
 
@@ -1525,7 +1526,7 @@ these rules once, and they are applied whenever formatting is needed.
 `FormatterRegistrar` is an SPI for registering formatters and converters through the
 FormatterRegistry. The following listing shows its interface definition:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.format;
 
@@ -1577,20 +1578,22 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 		public FormattingConversionService conversionService() {
 
 			// Use the DefaultFormattingConversionService but do not register defaults
-			DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService(false);
+			DefaultFormattingConversionService conversionService =
+				new DefaultFormattingConversionService(false);
 
 			// Ensure @NumberFormat is still supported
-			conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+			conversionService.addFormatterForFieldAnnotation(
+				new NumberFormatAnnotationFormatterFactory());
 
 			// Register JSR-310 date conversion with a specific global format
-			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
-			registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
-			registrar.registerFormatters(conversionService);
+			DateTimeFormatterRegistrar dateTimeRegistrar = new DateTimeFormatterRegistrar();
+			dateTimeRegistrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			dateTimeRegistrar.registerFormatters(conversionService);
 
 			// Register date conversion with a specific global format
-			DateFormatterRegistrar registrar = new DateFormatterRegistrar();
-			registrar.setFormatter(new DateFormatter("yyyyMMdd"));
-			registrar.registerFormatters(conversionService);
+			DateFormatterRegistrar dateRegistrar = new DateFormatterRegistrar();
+			dateRegistrar.setFormatter(new DateFormatter("yyyyMMdd"));
+			dateRegistrar.registerFormatters(conversionService);
 
 			return conversionService;
 		}
@@ -1611,14 +1614,14 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 				addFormatterForFieldAnnotation(NumberFormatAnnotationFormatterFactory())
 
 				// Register JSR-310 date conversion with a specific global format
-				val registrar = DateTimeFormatterRegistrar()
-				registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"))
-				registrar.registerFormatters(this)
+				val dateTimeRegistrar = DateTimeFormatterRegistrar()
+				dateTimeRegistrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"))
+				dateTimeRegistrar.registerFormatters(this)
 
 				// Register date conversion with a specific global format
-				val registrar = DateFormatterRegistrar()
-				registrar.setFormatter(DateFormatter("yyyyMMdd"))
-				registrar.registerFormatters(this)
+				val dateRegistrar = DateFormatterRegistrar()
+				dateRegistrar.setFormatter(DateFormatter("yyyyMMdd"))
+				dateRegistrar.registerFormatters(this)
 			}
 		}
 	}
@@ -1956,9 +1959,9 @@ javadoc for more information on these options.
 [[validation-binder]]
 === Configuring a `DataBinder`
 
-Since Spring 3, you can configure a `DataBinder` instance with a `Validator`. Once
-configured, you can invoke the `Validator` by calling `binder.validate()`. Any validation
-`Errors` are automatically added to the binder's `BindingResult`.
+You can configure a `DataBinder` instance with a `Validator`. Once configured, you can
+invoke the `Validator` by calling `binder.validate()`. Any validation `Errors` are
+automatically added to the binder's `BindingResult`.
 
 The following example shows how to use a `DataBinder` programmatically to invoke validation
 logic after binding to a target object:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,20 +55,23 @@ class MultipartHttpHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 	}
 
 	@ParameterizedHttpServerTest
-	void getFormParts(HttpServer httpServer) throws Exception {
-		startServer(httpServer);
-
-		@SuppressWarnings("resource")
-		RestTemplate restTemplate = new RestTemplate();
-		RequestEntity<MultiValueMap<String, Object>> request = RequestEntity
-				.post(URI.create("http://localhost:" + port + "/form-parts"))
-				.contentType(MediaType.MULTIPART_FORM_DATA)
-				.body(generateBody());
-		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+	void getMultipartFormData(HttpServer httpServer) throws Exception {
+		testMultipart(httpServer, MediaType.MULTIPART_FORM_DATA);
 	}
 
-	private MultiValueMap<String, Object> generateBody() {
+	@ParameterizedHttpServerTest
+	void getMultipartMixed(HttpServer httpServer) throws Exception {
+		testMultipart(httpServer, MediaType.MULTIPART_MIXED);
+	}
+
+	@ParameterizedHttpServerTest
+	void getMultipartRelated(HttpServer httpServer) throws Exception {
+		testMultipart(httpServer, MediaType.MULTIPART_RELATED);
+	}
+
+	private void testMultipart(HttpServer httpServer, MediaType mediaType) throws Exception {
+		startServer(httpServer);
+
 		HttpHeaders fooHeaders = new HttpHeaders();
 		fooHeaders.setContentType(MediaType.TEXT_PLAIN);
 		ClassPathResource fooResource = new ClassPathResource("org/springframework/http/codec/multipart/foo.txt");
@@ -77,7 +80,12 @@ class MultipartHttpHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("fooPart", fooPart);
 		parts.add("barPart", barPart);
-		return parts;
+
+		URI url = URI.create("http://localhost:" + port + "/form-parts");
+		ResponseEntity<Void> response = new RestTemplate().exchange(
+				RequestEntity.post(url).contentType(mediaType).body(parts), Void.class);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
 

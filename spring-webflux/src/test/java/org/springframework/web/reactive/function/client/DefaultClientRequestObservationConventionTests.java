@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,22 +58,23 @@ class DefaultClientRequestObservationConventionTests {
 	@Test
 	void shouldAddKeyValuesForNullExchange() {
 		ClientRequestObservationContext context = new ClientRequestObservationContext();
-		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(5)
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(6)
 				.contains(KeyValue.of("method", "none"), KeyValue.of("uri", "none"), KeyValue.of("status", "CLIENT_ERROR"),
+						KeyValue.of("client.name", "none"),
 						KeyValue.of("exception", "none"), KeyValue.of("outcome", "UNKNOWN"));
-		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2)
-				.contains(KeyValue.of("client.name", "none"), KeyValue.of("http.url", "none"));
+		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(1)
+				.contains(KeyValue.of("http.url", "none"));
 	}
 
 	@Test
 	void shouldAddKeyValuesForExchangeWithException() {
 		ClientRequestObservationContext context = new ClientRequestObservationContext();
 		context.setError(new IllegalStateException("Could not create client request"));
-		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(5)
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).hasSize(6)
 				.contains(KeyValue.of("method", "none"), KeyValue.of("uri", "none"), KeyValue.of("status", "CLIENT_ERROR"),
-						KeyValue.of("exception", "IllegalStateException"), KeyValue.of("outcome", "UNKNOWN"));
-		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2)
-				.contains(KeyValue.of("client.name", "none"), KeyValue.of("http.url", "none"));
+						KeyValue.of("client.name", "none"), KeyValue.of("exception", "IllegalStateException"), KeyValue.of("outcome", "UNKNOWN"));
+		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(1)
+				.contains(KeyValue.of("http.url", "none"));
 	}
 
 	@Test
@@ -85,9 +86,9 @@ class DefaultClientRequestObservationConventionTests {
 		context.setRequest(context.getCarrier().build());
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("exception", "none"), KeyValue.of("method", "GET"), KeyValue.of("uri", "/resource/{id}"),
-						KeyValue.of("status", "200"), KeyValue.of("outcome", "SUCCESS"));
-		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2)
-				.contains(KeyValue.of("client.name", "none"), KeyValue.of("http.url", "/resource/42"));
+						KeyValue.of("status", "200"), KeyValue.of("client.name", "none"), KeyValue.of("outcome", "SUCCESS"));
+		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(1)
+				.contains(KeyValue.of("http.url", "/resource/42"));
 	}
 
 	@Test
@@ -96,14 +97,29 @@ class DefaultClientRequestObservationConventionTests {
 		context.setRequest(context.getCarrier().build());
 		assertThat(this.observationConvention.getLowCardinalityKeyValues(context))
 				.contains(KeyValue.of("method", "GET"), KeyValue.of("uri", "none"));
-		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(2).contains(KeyValue.of("http.url", "/resource/42"));
+		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).hasSize(1).contains(KeyValue.of("http.url", "/resource/42"));
 	}
 
 	@Test
 	void shouldAddClientNameKeyValueForRequestWithHost() {
 		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://localhost:8080/resource/42")));
 		context.setRequest(context.getCarrier().build());
-		assertThat(this.observationConvention.getHighCardinalityKeyValues(context)).contains(KeyValue.of("client.name", "localhost"));
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("client.name", "localhost"));
+	}
+
+	@Test
+	void shouldAddRootUriEvenIfTemplateMissing() {
+		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://example.org/")));
+		context.setRequest(context.getCarrier().build());
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("uri", "/"));
+	}
+
+	@Test
+	void shouldOnlyConsiderPathForUriKeyValue() {
+		ClientRequestObservationContext context = createContext(ClientRequest.create(HttpMethod.GET, URI.create("https://example.org/resource/42")));
+		context.setUriTemplate("https://example.org/resource/{id}");
+		context.setRequest(context.getCarrier().build());
+		assertThat(this.observationConvention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("uri", "/resource/{id}"));
 	}
 
 	private ClientRequestObservationContext createContext(ClientRequest.Builder request) {

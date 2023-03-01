@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,19 @@
 
 package org.springframework.messaging.handler.annotation;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.Principal;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.ReflectionHints;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,13 +42,13 @@ public class MessageMappingReflectiveProcessorTests {
 
 	private final MessageMappingReflectiveProcessor processor = new MessageMappingReflectiveProcessor();
 
-	private final ReflectionHints hints = new ReflectionHints();
+	private final RuntimeHints hints = new RuntimeHints();
 
 	@Test
 	void registerReflectiveHintsForMethodWithReturnValue() throws NoSuchMethodException {
 		Method method = SampleController.class.getDeclaredMethod("returnValue");
-		processor.registerReflectionHints(hints, method);
-		assertThat(hints.typeHints()).satisfiesExactlyInAnyOrder(
+		processor.registerReflectionHints(hints.reflection(), method);
+		assertThat(hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)),
 				typeHint -> {
 					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(OutgoingMessage.class));
@@ -62,8 +65,8 @@ public class MessageMappingReflectiveProcessorTests {
 	@Test
 	void registerReflectiveHintsForMethodWithExplicitPayload() throws NoSuchMethodException {
 		Method method = SampleController.class.getDeclaredMethod("explicitPayload", IncomingMessage.class);
-		processor.registerReflectionHints(hints, method);
-		assertThat(hints.typeHints()).satisfiesExactlyInAnyOrder(
+		processor.registerReflectionHints(hints.reflection(), method);
+		assertThat(hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)),
 				typeHint -> {
 					assertThat(typeHint.getType()).isEqualTo(TypeReference.of(IncomingMessage.class));
@@ -80,8 +83,8 @@ public class MessageMappingReflectiveProcessorTests {
 	@Test
 	void registerReflectiveHintsForMethodWithImplicitPayload() throws NoSuchMethodException {
 		Method method = SampleController.class.getDeclaredMethod("implicitPayload", IncomingMessage.class);
-		processor.registerReflectionHints(hints, method);
-		assertThat(hints.typeHints()).satisfiesExactlyInAnyOrder(
+		processor.registerReflectionHints(hints.reflection(), method);
+		assertThat(hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)),
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(IncomingMessage.class)),
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(String.class)));
@@ -90,8 +93,8 @@ public class MessageMappingReflectiveProcessorTests {
 	@Test
 	void registerReflectiveHintsForMethodWithMessage() throws NoSuchMethodException {
 		Method method = SampleController.class.getDeclaredMethod("message", Message.class);
-		processor.registerReflectionHints(hints, method);
-		assertThat(hints.typeHints()).satisfiesExactlyInAnyOrder(
+		processor.registerReflectionHints(hints.reflection(), method);
+		assertThat(hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)),
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(IncomingMessage.class)),
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(String.class)));
@@ -102,8 +105,8 @@ public class MessageMappingReflectiveProcessorTests {
 		Method method = SampleController.class.getDeclaredMethod("implicitPayloadWithIgnoredAnnotations",
 				IncomingMessage.class, Ignored.class, Ignored.class, Ignored.class, MessageHeaders.class,
 				MessageHeaderAccessor.class, Principal.class);
-		processor.registerReflectionHints(hints, method);
-		assertThat(hints.typeHints()).satisfiesExactlyInAnyOrder(
+		processor.registerReflectionHints(hints.reflection(), method);
+		assertThat(hints.reflection().typeHints()).satisfiesExactlyInAnyOrder(
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleController.class)),
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(IncomingMessage.class)),
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(String.class)));
@@ -111,9 +114,24 @@ public class MessageMappingReflectiveProcessorTests {
 
 	@Test
 	void registerReflectiveHintsForClass() {
-		processor.registerReflectionHints(hints, SampleAnnotatedController.class);
-		assertThat(hints.typeHints()).singleElement().satisfies(
+		processor.registerReflectionHints(hints.reflection(), SampleAnnotatedController.class);
+		assertThat(hints.reflection().typeHints()).singleElement().satisfies(
 				typeHint -> assertThat(typeHint.getType()).isEqualTo(TypeReference.of(SampleAnnotatedController.class)));
+	}
+
+	@Test
+	void registerReflectiveHintsForMethodWithSubscribeMapping() throws NoSuchMethodException {
+		Method method = SampleController.class.getDeclaredMethod("handleSubscribe");
+		processor.registerReflectionHints(hints.reflection(), method);
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleController.class, "handleSubscribe")).accepts(hints);
+	}
+
+	@Test
+	void registerReflectiveHintsForMethodWithMessageExceptionHandler() throws NoSuchMethodException {
+		Method method = SampleController.class.getDeclaredMethod("handleIOException");
+		processor.registerReflectionHints(hints.reflection(), method);
+		assertThat(RuntimeHintsPredicates.reflection().onMethod(SampleController.class, "handleIOException")).accepts(hints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(IOException.class)).accepts(hints);
 	}
 
 
@@ -145,6 +163,16 @@ public class MessageMappingReflectiveProcessorTests {
 				MessageHeaderAccessor messageHeaderAccessor,
 				Principal principal) {
 		}
+
+		@SubscribeMapping("/foo")
+		public String handleSubscribe() {
+			return "bar";
+		}
+
+		@MessageExceptionHandler(IOException.class)
+		public void handleIOException() {
+		}
+
 	}
 
 	@MessageMapping

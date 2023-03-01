@@ -33,7 +33,7 @@ implement. Note that this interface is defined in plain Java. Dependent objects 
 are injected with a reference to the `Messenger` do not know that the underlying
 implementation is a Groovy script. The following listing shows the `Messenger` interface:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.scripting;
 
@@ -45,7 +45,7 @@ implementation is a Groovy script. The following listing shows the `Messenger` i
 
 The following example defines a class that has a dependency on the `Messenger` interface:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.scripting;
 
@@ -65,15 +65,14 @@ The following example defines a class that has a dependency on the `Messenger` i
 
 The following example implements the `Messenger` interface in Groovy:
 
-[source,groovy,indent=0,subs="verbatim,quotes"]
+[source,groovy,indent=0,subs="verbatim,quotes",chomp="-packages",fold="none"]
 ----
-	// from the file 'Messenger.groovy'
-	package org.springframework.scripting.groovy;
+	package org.springframework.scripting.groovy
 
-	// import the Messenger interface (written in Java) that is to be implemented
+	// Import the Messenger interface (written in Java) that is to be implemented
 	import org.springframework.scripting.Messenger
 
-	// define the implementation in Groovy
+	// Define the implementation in Groovy in file 'Messenger.groovy'
 	class GroovyMessenger implements Messenger {
 
 		String message
@@ -276,7 +275,7 @@ surrounded by quotation marks. The following listing shows the changes that you
 (the developer) should make to the `Messenger.groovy` source file when the
 execution of the program is paused:
 
-[source,groovy,indent=0,subs="verbatim,quotes"]
+[source,groovy,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.scripting
 
@@ -331,13 +330,13 @@ feature works:
 	<lang:groovy id="messenger">
 		<lang:inline-script>
 
-	package org.springframework.scripting.groovy;
+			package org.springframework.scripting.groovy
 
-	import org.springframework.scripting.Messenger
+			import org.springframework.scripting.Messenger
 
-	class GroovyMessenger implements Messenger {
-		String message
-	}
+			class GroovyMessenger implements Messenger {
+				String message
+			}
 
 		</lang:inline-script>
 		<lang:property name="message" value="I Can Do The Frug" />
@@ -363,13 +362,13 @@ constructors and properties 100% clear, the following mixture of code and config
 does not work:
 
 .An approach that cannot work
-[source,groovy,indent=0,subs="verbatim,quotes"]
+[source,groovy,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
-	// from the file 'Messenger.groovy'
-	package org.springframework.scripting.groovy;
+	package org.springframework.scripting.groovy
 
 	import org.springframework.scripting.Messenger
 
+	// from the file 'Messenger.groovy'
 	class GroovyMessenger implements Messenger {
 
 		GroovyMessenger() {}
@@ -420,7 +419,7 @@ If you have read this chapter straight from the top, you have already
 <<dynamic-language-a-first-example, seen an example>> of a Groovy-dynamic-language-backed
 bean. Now consider another example (again using an example from the Spring test suite):
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.scripting;
 
@@ -432,11 +431,11 @@ bean. Now consider another example (again using an example from the Spring test 
 
 The following example implements the `Calculator` interface in Groovy:
 
-[source,groovy,indent=0,subs="verbatim,quotes"]
+[source,groovy,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
-	// from the file 'calculator.groovy'
 	package org.springframework.scripting.groovy
 
+	// from the file 'calculator.groovy'
 	class GroovyCalculator implements Calculator {
 
 		int add(int x, int y) {
@@ -457,7 +456,7 @@ The following bean definition uses the calculator defined in Groovy:
 
 Finally, the following small application exercises the preceding configuration:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.scripting;
 
@@ -596,7 +595,7 @@ Now we can show a fully working example of using a BeanShell-based bean that imp
 the `Messenger` interface that was defined earlier in this chapter. We again show the
 definition of the `Messenger` interface:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.scripting;
 
@@ -676,9 +675,8 @@ beans, you have to enable the "`refreshable beans`" functionality. See
 The following example shows an `org.springframework.web.servlet.mvc.Controller` implemented
 by using the Groovy dynamic language:
 
-[source,groovy,indent=0,subs="verbatim,quotes"]
+[source,groovy,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
-	// from the file '/WEB-INF/groovy/FortuneController.groovy'
 	package org.springframework.showcase.fortune.web
 
 	import org.springframework.showcase.fortune.service.FortuneService
@@ -689,6 +687,7 @@ by using the Groovy dynamic language:
 	import jakarta.servlet.http.HttpServletRequest
 	import jakarta.servlet.http.HttpServletResponse
 
+	// from the file '/WEB-INF/groovy/FortuneController.groovy'
 	class FortuneController implements Controller {
 
 		@Property FortuneService fortuneService
