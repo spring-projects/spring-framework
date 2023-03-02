@@ -130,10 +130,10 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>Note: This is intended for creating a fresh instance, populating annotated
 	 * fields and methods as well as applying all standard bean initialization callbacks.
-	 * Constructor resolution is done via {@link #AUTOWIRE_CONSTRUCTOR}, also influenced
-	 * by {@link SmartInstantiationAwareBeanPostProcessor#determineCandidateConstructors}.
-	 * It does <i>not</i> imply traditional by-name or by-type autowiring of properties;
-	 * use {@link #createBean(Class, int, boolean)} for those purposes.
+	 * Constructor resolution is based on Kotlin primary / single public / single non-public,
+	 * with a fallback to the default constructor in ambiguous scenarios, also influenced
+	 * by {@link SmartInstantiationAwareBeanPostProcessor#determineCandidateConstructors}
+	 * (e.g. for annotation-driven constructor selection).
 	 * @param beanClass the class of the bean to create
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed

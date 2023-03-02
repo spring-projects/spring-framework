@@ -2127,6 +2127,23 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void createBeanWithNonDefaultConstructor() {
+		lbf.registerBeanDefinition("otherTestBean", new RootBeanDefinition(TestBean.class));
+		TestBeanRecipient tb = lbf.createBean(TestBeanRecipient.class);
+		assertThat(lbf.containsSingleton("otherTestBean")).isTrue();
+		assertThat(tb.testBean).isEqualTo(lbf.getBean("otherTestBean"));
+		lbf.destroyBean(tb);
+	}
+
+	@Test
+	void createBeanWithPreferredDefaultConstructor() {
+		lbf.registerBeanDefinition("otherTestBean", new RootBeanDefinition(TestBean.class));
+		TestBean tb = lbf.createBean(TestBean.class);
+		assertThat(lbf.containsSingleton("otherTestBean")).isFalse();
+		lbf.destroyBean(tb);
+	}
+
+	@Test
 	void configureBean() {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("age", "99");
