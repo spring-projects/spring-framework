@@ -76,17 +76,15 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return new URI(resolveBaseUrl(request) + resolveRequestUri(request));
 	}
 
-	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
-		String scheme = getScheme(request);
+	private static String resolveBaseUrl(HttpServerRequest request) {
+		String scheme = request.scheme();
 		int port = request.hostPort();
-		return ((scheme.equals("http") || scheme.equals("ws")) && (port != 80)) ||
-				((scheme.equals("https") || scheme.equals("wss")) && (port != 443)) ?
-				new URI(scheme, null, request.hostName(), port, null, null, null) :
-				new URI(scheme, request.hostName(), null, null);
+		return scheme + "://" + request.hostName() + (usePort(scheme, port) ? ":" + port : "");
 	}
 
-	private static String getScheme(HttpServerRequest request) {
-		return request.scheme();
+	private static boolean usePort(String scheme, int port) {
+		return ((scheme.equals("http") || scheme.equals("ws")) && (port != 80)) ||
+				((scheme.equals("https") || scheme.equals("wss")) && (port != 443));
 	}
 
 	private static String resolveRequestUri(HttpServerRequest request) {
