@@ -30,13 +30,12 @@ import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 
 /**
  * {@link ReflectiveProcessor} implementation for types annotated
  * with {@link MessageMapping @MessageMapping},
- * {@link SubscribeMapping @SubscribeMapping}
+ * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping}
  * and {@link MessageExceptionHandler @MessageExceptionHandler}.
  * In addition to registering reflection hints for invoking
  * the annotated method, this implementation handles:
