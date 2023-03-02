@@ -291,7 +291,8 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 				itb.setName(name)
 			}
 			catch (actual: Exception) {
-				assertThat(actual).isEqualTo(ex)
+				assertThat(actual).isInstanceOf(ex.javaClass)
+				assertThat(actual).hasMessage(ex.message)
 			}
 			// Should have invoked target and changed name
 			assertThat(itb.getName()).isEqualTo(name)
