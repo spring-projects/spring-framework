@@ -808,7 +808,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		Set<Resource> result = new LinkedHashSet<>();
 		try (Stream<Path> files = Files.walk(rootPath)) {
-			files.filter(isMatchingFile).sorted().forEach(file -> result.add(new FileSystemResource(file)));
+			files.filter(isMatchingFile).sorted().map(FileSystemResource::new).forEach(result::add);
 		}
 		catch (Exception ex) {
 			if (logger.isWarnEnabled()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,9 +130,9 @@ public class VfsResource extends AbstractResource {
 	}
 
 	@Override
-	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof VfsResource &&
-				this.resource.equals(((VfsResource) other).resource)));
+	public boolean equals(@Nullable Object obj) {
+		return (this == obj || (obj instanceof VfsResource that &&
+				this.resource.equals(that.resource)));
 	}
 
 	@Override

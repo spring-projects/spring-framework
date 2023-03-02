@@ -298,9 +298,8 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * This implementation compares the underlying Path references.
 	 */
 	@Override
-	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof PathResource &&
-				this.path.equals(((PathResource) other).path)));
+	public boolean equals(@Nullable Object obj) {
+		return (this == obj || (obj instanceof PathResource that && this.path.equals(that.path)));
 	}
 
 	/**
