@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.net.ssl.SSLSession;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
 import org.apache.commons.logging.Log;
@@ -80,7 +79,8 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
 		String scheme = getScheme(request);
 		int port = request.hostPort();
-		return (scheme.equals("http") && (port != 80)) || (scheme.equals("https") && (port != 443)) ?
+		return ((scheme.equals("http") || scheme.equals("ws")) && (port != 80)) ||
+				((scheme.equals("https") || scheme.equals("wss")) && (port != 443)) ?
 				new URI(scheme, null, request.hostName(), port, null, null, null) :
 				new URI(scheme, request.hostName(), null, null);
 	}
