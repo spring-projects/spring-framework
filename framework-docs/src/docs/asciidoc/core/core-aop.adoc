@@ -1535,31 +1535,31 @@ AspectJ APIs refer to parameter names as argument names.
 Spring AOP uses the following `ParameterNameDiscoverer` implementations to determine
 parameter names. Each discoverer will be given a chance to discover parameter names, and
 the first successful discoverer wins. If none of the registered discoverers is capable
-of determining parameter names, an `IllegalArgumentException` is thrown.
+of determining parameter names, an exception will be thrown.
 
-
-`KotlinReflectionParameterNameDiscoverer` :: Uses Kotlin reflection APIs if such APIs are
-  present on the classpath.
-`StandardReflectionParameterNameDiscoverer` :: Uses the `java.lang.reflect.Parameter` API
-  available since Java 8. Requires that code be compiled with the `-parameters` flag for
-  `javac`. Recommended approach on Java 8+.
-`LocalVariableTableParameterNameDiscoverer` :: Analyzes the local variable table available
-  in the byte code to determine parameter names from debug information. Requires that
-  code be compiled with debug symbols (`-g:vars` at a minimum). Deprecated as of Spring
-  Framework 6.0 for removal in Spring Framework 6.1 in favor of compiling code with
-  `-parameters`. Not supported in a GraalVM native image.
-`AspectJAdviceParameterNameDiscoverer` :: Uses parameter names that have been explicitly
+`AspectJAnnotationParameterNameDiscoverer` :: Uses parameter names that have been explicitly
   specified by the user via the `argNames` attribute in the corresponding advice or
-  pointcut annotation. See the following section for details.
+  pointcut annotation. See <<aop-ataspectj-advice-params-names-explicit>> for details.
+`KotlinReflectionParameterNameDiscoverer` :: Uses Kotlin reflection APIs to determine
+  parameter names. This discoverer is only used if such APIs are present on the classpath.
+`StandardReflectionParameterNameDiscoverer` :: Uses the standard `java.lang.reflect.Parameter`
+  API to determine parameter names. Requires that code be compiled with the `-parameters`
+  flag for `javac`. Recommended approach on Java 8+.
+`LocalVariableTableParameterNameDiscoverer` :: Analyzes the local variable table available
+  in the byte code of the advice class to determine parameter names from debug information.
+  Requires that code be compiled with debug symbols (`-g:vars` at a minimum). Deprecated
+  as of Spring Framework 6.0 for removal in Spring Framework 6.1 in favor of compiling
+  code with `-parameters`. Not supported in a GraalVM native image.
+`AspectJAdviceParameterNameDiscoverer` :: Deduces parameter names from the pointcut
+  expression, `returning`, and `throwing` clauses. See the
+  {api-spring-framework}/aop/aspectj/AspectJAdviceParameterNameDiscoverer.html[javadoc]
+  for details on the algorithm used.
 
 [[aop-ataspectj-advice-params-names-explicit]]
 ===== Explicit Argument Names
 
 @AspectJ advice and pointcut annotations have an optional `argNames` attribute that you
-can use to specify the argument names of the annotated method. Note, however, that
-explicit `argNames` will only be used by Spring as a fallback if none of the other
-`ParameterNameDiscoverer` implementations is able to determine parameter names (see the
-previous section for details).
+can use to specify the argument names of the annotated method.
 
 [TIP]
 ====
@@ -1579,26 +1579,28 @@ The following example shows how to use the `argNames` attribute:
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
-		argNames = "bean,auditable")
+		argNames = "bean,auditable") // <2>
 	public void audit(Object bean, Auditable auditable) {
 		AuditCode code = auditable.value();
 		// ... use code and bean
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<2> Declares `bean` and `auditable` as the argument names.
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
-		argNames = "bean,auditable")
+		argNames = "bean,auditable") // <2>
 	fun audit(bean: Any, auditable: Auditable) {
 		val code = auditable.value()
 		// ... use code and bean
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<2> Declares `bean` and `auditable` as the argument names.
 
 If the first parameter is of type `JoinPoint`, `ProceedingJoinPoint`, or
 `JoinPoint.StaticPart`, you can omit the name of the parameter from the value of the
@@ -1610,32 +1612,34 @@ point object, the `argNames` attribute does not need to include it:
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
-		argNames = "bean,auditable")
+		argNames = "bean,auditable") // <2>
 	public void audit(JoinPoint jp, Object bean, Auditable auditable) {
 		AuditCode code = auditable.value();
 		// ... use code, bean, and jp
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<2> Declares `bean` and `auditable` as the argument names.
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
-		argNames = "bean,auditable")
+		argNames = "bean,auditable") // <2>
 	fun audit(jp: JoinPoint, bean: Any, auditable: Auditable) {
 		val code = auditable.value()
 		// ... use code, bean, and jp
 	}
 ----
 <1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<2> Declares `bean` and `auditable` as the argument names.
 
-The special treatment given to the first parameter of the `JoinPoint`,
-`ProceedingJoinPoint`, and `JoinPoint.StaticPart` types is particularly convenient for
-advice instances that do not collect any other join point context. In such situations,
-you may omit the `argNames` attribute. For example, the following advice does not need to
-declare the `argNames` attribute:
+The special treatment given to the first parameter of type `JoinPoint`,
+`ProceedingJoinPoint`, or `JoinPoint.StaticPart` is particularly convenient for advice
+methods that do not collect any other join point context. In such situations, you may
+omit the `argNames` attribute. For example, the following advice does not need to declare
+the `argNames` attribute:
 
 [source,java,indent=0,subs="verbatim",role="primary"]
 .Java
