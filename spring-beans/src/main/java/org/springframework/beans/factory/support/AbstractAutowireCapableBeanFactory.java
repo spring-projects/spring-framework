@@ -315,8 +315,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@SuppressWarnings("unchecked")
 	public <T> T createBean(Class<T> beanClass) throws BeansException {
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
-		RootBeanDefinition bd = new RootBeanDefinition(beanClass);
-		bd.setAutowireMode(AUTOWIRE_CONSTRUCTOR);
+		RootBeanDefinition bd = new CreateFromClassBeanDefinition(beanClass);
 		bd.setScope(SCOPE_PROTOTYPE);
 		bd.allowCaching = ClassUtils.isCacheSafe(beanClass, getBeanClassLoader());
 		return (T) createBean(beanClass.getName(), bd, null);
@@ -1910,6 +1909,36 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
+	 * {@link RootBeanDefinition} subclass for {@code #createBean} calls with
+	 * flexible selection of a Kotlin primary / single public / single non-public
+	 * constructor candidate in addition to the default constructor.
+	 * @see BeanUtils#getResolvableConstructor(Class)
+	 */
+	@SuppressWarnings("serial")
+	private static class CreateFromClassBeanDefinition extends RootBeanDefinition {
+
+		public CreateFromClassBeanDefinition(Class<?> beanClass) {
+			super(beanClass);
+		}
+
+		public CreateFromClassBeanDefinition(CreateFromClassBeanDefinition original) {
+			super(original);
+		}
+
+		@Override
+		@Nullable
+		public Constructor<?>[] getPreferredConstructors() {
+			return ConstructorResolver.determinePreferredConstructors(getBeanClass());
+		}
+
+		@Override
+		public RootBeanDefinition cloneBeanDefinition() {
+			return new CreateFromClassBeanDefinition(this);
+		}
+	}
+
+
+	/**
 	 * Special DependencyDescriptor variant for Spring's good old autowire="byType" mode.
 	 * Always optional; never considering the parameter name for choosing a primary candidate.
 	 */
@@ -1941,7 +1970,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		@Override
-		public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+		public void doWith(Method method) throws IllegalArgumentException {
 			if (isFactoryBeanMethod(method)) {
 				ResolvableType returnType = ResolvableType.forMethodReturnType(method);
 				ResolvableType candidate = returnType.as(FactoryBean.class).getGeneric();
