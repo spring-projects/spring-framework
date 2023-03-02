@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,6 @@
 package org.springframework.http;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -88,9 +84,6 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 
 	private static final HttpMethod[] values = new HttpMethod[] { GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE };
 
-	private static final Map<String, HttpMethod> mappings = Arrays.stream(values)
-			.collect(Collectors.toUnmodifiableMap(HttpMethod::name, Function.identity()));
-
 
 	private final String name;
 
@@ -121,13 +114,17 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	 */
 	public static HttpMethod valueOf(String method) {
 		Assert.notNull(method, "Method must not be null");
-		HttpMethod result = mappings.get(method);
-		if (result != null) {
-			return result;
-		}
-		else {
-			return new HttpMethod(method);
-		}
+		return switch (method) {
+			case "GET" -> GET;
+			case "HEAD" -> HEAD;
+			case "POST" -> POST;
+			case "PUT" -> PUT;
+			case "PATCH" -> PATCH;
+			case "DELETE" -> DELETE;
+			case "OPTIONS" -> OPTIONS;
+			case "TRACE" -> TRACE;
+			default -> new HttpMethod(method);
+		};
 	}
 
 	/**

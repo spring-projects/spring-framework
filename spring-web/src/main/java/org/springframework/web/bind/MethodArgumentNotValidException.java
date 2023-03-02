@@ -74,6 +74,7 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	 * Constructor for {@link MethodArgumentNotValidException}.
 	 * @param executable the executable that failed validation
 	 * @param bindingResult the results of the validation
+	 * @since 6.0.5
 	 */
 	public MethodArgumentNotValidException(Executable executable, BindingResult bindingResult) {
 		super(bindingResult);

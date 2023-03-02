@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package org.springframework.aot.hint;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A {@link TypeReference} based on a {@link Class}.
  *
  * @author Stephane Nicoll
+ * @author Sebastien Deleuze
  * @since 6.0
  */
 final class ReflectionTypeReference extends AbstractTypeReference {
@@ -41,6 +43,8 @@ final class ReflectionTypeReference extends AbstractTypeReference {
 	}
 
 	static ReflectionTypeReference of(Class<?> type) {
+		Assert.notNull(type, "'type' must not be null");
+		Assert.notNull(type.getCanonicalName(), "'type.getCanonicalName()' must not be null");
 		return new ReflectionTypeReference(type);
 	}
 

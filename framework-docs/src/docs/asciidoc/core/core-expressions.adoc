@@ -1978,7 +1978,7 @@ The definition of `TemplateParserContext` follows:
 
 This section lists the classes used in the examples throughout this chapter.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Inventor.Java
 ----
 	package org.spring.samples.spel.inventor;
@@ -2051,18 +2051,20 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Inventor.kt
 ----
-class Inventor(
-	var name: String,
-	var nationality: String,
-	var inventions: Array<String>? = null,
-	var birthdate: Date =  GregorianCalendar().time,
-	var placeOfBirth: PlaceOfBirth? = null)
+	package org.spring.samples.spel.inventor
+
+	class Inventor(
+		var name: String,
+		var nationality: String,
+		var inventions: Array<String>? = null,
+		var birthdate: Date =  GregorianCalendar().time,
+		var placeOfBirth: PlaceOfBirth? = null)
 ----
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .PlaceOfBirth.java
 ----
 	package org.spring.samples.spel.inventor;
@@ -2098,13 +2100,15 @@ class Inventor(
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .PlaceOfBirth.kt
 ----
+	package org.spring.samples.spel.inventor
+
 	class PlaceOfBirth(var city: String, var country: String? = null) {
 ----
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Society.java
 ----
 	package org.spring.samples.spel.inventor;
@@ -2147,7 +2151,7 @@ class Inventor(
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Society.kt
 ----
 	package org.spring.samples.spel.inventor

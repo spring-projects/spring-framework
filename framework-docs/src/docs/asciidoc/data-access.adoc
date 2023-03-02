@@ -622,7 +622,7 @@ transactions being created and then rolled back in response to the
 `UnsupportedOperationException` instance. The following listing shows the `FooService`
 interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	// the service interface that we want to make transactional
@@ -641,7 +641,7 @@ interface:
 
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	// the service interface that we want to make transactional
@@ -662,7 +662,7 @@ interface:
 
 The following example shows an implementation of the preceding interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package x.y.service;
@@ -690,7 +690,7 @@ The following example shows an implementation of the preceding interface:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package x.y.service
@@ -893,7 +893,7 @@ return type is reactive.
 The following listing shows a modified version of the previously used `FooService`, but
 this time the code uses reactive types:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	// the reactive service interface that we want to make transactional
@@ -912,7 +912,7 @@ this time the code uses reactive types:
 
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	// the reactive service interface that we want to make transactional
@@ -933,7 +933,7 @@ this time the code uses reactive types:
 
 The following example shows an implementation of the preceding interface:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package x.y.service;
@@ -961,7 +961,7 @@ The following example shows an implementation of the preceding interface:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package x.y.service
@@ -2028,7 +2028,7 @@ configuration and AOP in general.
 
 The following code shows the simple profiling aspect discussed earlier:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package x.y;
@@ -2065,9 +2065,15 @@ The following code shows the simple profiling aspect discussed earlier:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
 .Kotlin
 ----
+	package x.y
+
+	import org.aspectj.lang.ProceedingJoinPoint
+	import org.springframework.util.StopWatch
+	import org.springframework.core.Ordered
+
 	class SimpleProfiler : Ordered {
 
 		private var order: Int = 0

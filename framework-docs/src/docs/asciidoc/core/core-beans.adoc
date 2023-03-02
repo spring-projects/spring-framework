@@ -949,7 +949,7 @@ order in which the constructor arguments are defined in a bean definition is the
 in which those arguments are supplied to the appropriate constructor when the bean is
 being instantiated. Consider the following class:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package x.y;
@@ -961,7 +961,7 @@ being instantiated. Consider the following class:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package x.y
@@ -993,7 +993,7 @@ case with the preceding example). When a simple type is used, such as
 `<value>true</value>`, Spring cannot determine the type of the value, and so cannot match
 by type without help. Consider the following class:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package examples;
@@ -1012,7 +1012,7 @@ by type without help. Consider the following class:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package examples
@@ -1077,7 +1077,7 @@ https://download.oracle.com/javase/8/docs/api/java/beans/ConstructorProperties.h
 JDK annotation to explicitly name your constructor arguments. The sample class would
 then have to look as follows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package examples;
@@ -1093,7 +1093,7 @@ then have to look as follows:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
 	package examples
@@ -2276,10 +2276,9 @@ and by <<beans-factory-client,making a `getBean("B")` call to the container>> as
 typically new) bean B instance every time bean A needs it. The following example
 shows this approach:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages",fold="none"]
 .Java
 ----
-	// a class that uses a stateful Command-style class to perform some processing
 	package fiona.apple;
 
 	// Spring-API imports
@@ -2287,6 +2286,10 @@ shows this approach:
 	import org.springframework.context.ApplicationContext;
 	import org.springframework.context.ApplicationContextAware;
 
+	/**
+	 * A class that uses a stateful Command-style class to perform
+	 * some processing.
+	 */
 	public class CommandManager implements ApplicationContextAware {
 
 		private ApplicationContext applicationContext;
@@ -2310,16 +2313,17 @@ shows this approach:
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages",fold="none"]
 .Kotlin
 ----
-	// a class that uses a stateful Command-style class to perform some processing
 	package fiona.apple
 
 	// Spring-API imports
 	import org.springframework.context.ApplicationContext
 	import org.springframework.context.ApplicationContextAware
 
+	// A class that uses a stateful Command-style class to perform
+	// some processing.
 	class CommandManager : ApplicationContextAware {
 
 		private lateinit var applicationContext: ApplicationContext
@@ -2382,7 +2386,7 @@ Spring container dynamically overrides the implementation of the `createCommand(
 method. The `CommandManager` class does not have any Spring dependencies, as
 the reworked example shows:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages",fold="none"]
 .Java
 ----
 	package fiona.apple;
@@ -2403,7 +2407,7 @@ the reworked example shows:
 		protected abstract Command createCommand();
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages",fold="none"]
 .Kotlin
 ----
 	package fiona.apple
@@ -4214,7 +4218,7 @@ it is created by the container and prints the resulting string to the system con
 
 The following listing shows the custom `BeanPostProcessor` implementation class definition:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
 .Java
 ----
 	package scripting;
@@ -4234,9 +4238,11 @@ The following listing shows the custom `BeanPostProcessor` implementation class 
 		}
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
 .Kotlin
 ----
+	package scripting
+
 	import org.springframework.beans.factory.config.BeanPostProcessor
 
 	class InstantiationTracingBeanPostProcessor : BeanPostProcessor {

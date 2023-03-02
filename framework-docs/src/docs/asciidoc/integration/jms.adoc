@@ -582,7 +582,7 @@ a similar contract to the JMS `MessageListener` interface but also gives the mes
 method access to the JMS `Session` from which the `Message` was received.
 The following listing shows the definition of the `SessionAwareMessageListener` interface:
 
-[source,java,indent=0,subs="verbatim,quotes"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package org.springframework.jms.listener;
 

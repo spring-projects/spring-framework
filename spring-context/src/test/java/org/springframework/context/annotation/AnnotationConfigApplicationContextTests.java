@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -517,6 +517,9 @@ class AnnotationConfigApplicationContextTests {
 		assertThat(RuntimeHintsPredicates.reflection().onType(cglibType)
 				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
 						MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.DECLARED_FIELDS))
+				.accepts(runtimeHints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(CglibConfiguration.class)
+				.withMemberCategories(MemberCategory.INVOKE_PUBLIC_METHODS, MemberCategory.INVOKE_DECLARED_METHODS))
 				.accepts(runtimeHints);
 	}
 

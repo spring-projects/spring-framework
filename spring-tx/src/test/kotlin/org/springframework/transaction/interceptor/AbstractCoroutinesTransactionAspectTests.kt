@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.BDDMockito
+import org.mockito.BDDMockito.*
 import org.mockito.Mockito
 import org.springframework.transaction.*
 import org.springframework.transaction.reactive.TransactionContext
@@ -83,8 +83,8 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		val status = Mockito.mock(ReactiveTransaction::class.java)
 		val rtm = Mockito.mock(ReactiveTransactionManager::class.java)
 		// expect a transaction
-		BDDMockito.given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
-		BDDMockito.given(rtm.commit(status)).willReturn(Mono.empty())
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
+		given(rtm.commit(status)).willReturn(Mono.empty())
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, tas) as TestBean
 		runBlocking {
@@ -106,8 +106,8 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		val status = Mockito.mock(ReactiveTransaction::class.java)
 		val rtm = Mockito.mock(ReactiveTransactionManager::class.java)
 		// expect a transaction
-		BDDMockito.given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
-		BDDMockito.given(rtm.commit(status)).willReturn(Mono.empty())
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
+		given(rtm.commit(status)).willReturn(Mono.empty())
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, arrayOf(tas1, tas2)) as TestBean
 		runBlocking {
@@ -128,8 +128,8 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		val status = Mockito.mock(ReactiveTransaction::class.java)
 		val rtm = Mockito.mock(ReactiveTransactionManager::class.java)
 		// expect a transaction
-		BDDMockito.given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
-		BDDMockito.given(rtm.commit(status)).willReturn(Mono.empty())
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
+		given(rtm.commit(status)).willReturn(Mono.empty())
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, tas) as TestBean
 		runBlocking {
@@ -198,17 +198,17 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		val status = Mockito.mock(ReactiveTransaction::class.java)
 		val rtm = Mockito.mock(ReactiveTransactionManager::class.java)
 		// Gets additional call(s) from TransactionControl
-		BDDMockito.given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
 		val tex = TransactionSystemException("system exception")
 		if (rollbackException) {
 			if (shouldRollback) {
-				BDDMockito.given(rtm.rollback(status)).willReturn(Mono.error(tex))
+				given(rtm.rollback(status)).willReturn(Mono.error(tex))
 			} else {
-				BDDMockito.given(rtm.commit(status)).willReturn(Mono.error(tex))
+				given(rtm.commit(status)).willReturn(Mono.error(tex))
 			}
 		} else {
-			BDDMockito.given(rtm.commit(status)).willReturn(Mono.empty())
-			BDDMockito.given(rtm.rollback(status)).willReturn(Mono.empty())
+			given(rtm.commit(status)).willReturn(Mono.empty())
+			given(rtm.rollback(status)).willReturn(Mono.empty())
 		}
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, tas) as TestBean
@@ -246,7 +246,7 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		val rtm = Mockito.mock(ReactiveTransactionManager::class.java)
 		// Expect a transaction
 		val ex = CannotCreateTransactionException("foobar")
-		BDDMockito.given(rtm.getReactiveTransaction(txatt)).willThrow(ex)
+		given(rtm.getReactiveTransaction(txatt)).willThrow(ex)
 		val tb: DefaultTestBean = object : DefaultTestBean() {
 			override suspend fun getName(): String? {
 				throw UnsupportedOperationException(
@@ -279,10 +279,10 @@ abstract class AbstractCoroutinesTransactionAspectTests {
 		// No attributes for m2
 		val rtm = Mockito.mock(ReactiveTransactionManager::class.java)
 		val status = Mockito.mock(ReactiveTransaction::class.java)
-		BDDMockito.given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
+		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status))
 		val ex = UnexpectedRollbackException("foobar")
-		BDDMockito.given(rtm.commit(status)).willReturn(Mono.error(ex))
-		BDDMockito.given(rtm.rollback(status)).willReturn(Mono.empty())
+		given(rtm.commit(status)).willReturn(Mono.error(ex))
+		given(rtm.rollback(status)).willReturn(Mono.empty())
 		val tb = DefaultTestBean()
 		val itb = advised(tb, rtm, tas) as TestBean
 		val name = "new name"

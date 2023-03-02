@@ -25,4 +25,4 @@ import kotlin.reflect.KClass
  * @since 6.0.5
  */
 fun JdkProxyHint.Builder.proxiedInterfaces(vararg proxiedInterfaces: KClass<*>) =
-	proxiedInterfaces(*proxiedInterfaces.map { it::class.java }.toTypedArray())
+	proxiedInterfaces(*proxiedInterfaces.map { it.java }.toTypedArray())

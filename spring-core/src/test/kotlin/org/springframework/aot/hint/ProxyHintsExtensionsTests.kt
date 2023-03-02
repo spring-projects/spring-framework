@@ -34,7 +34,7 @@ class ProxyHintsExtensionsTests {
 	fun `registerJdkProxy extension`() {
 		every { proxyHints.registerJdkProxy(*anyVararg<Class<*>>()) } returns proxyHints
 		proxyHints.registerJdkProxy(String::class, Int::class)
-		verify { proxyHints.registerJdkProxy(*anyVararg<Class<*>>()) }
+		verify { proxyHints.registerJdkProxy(String::class.java, Int::class.java) }
 	}
 
 }

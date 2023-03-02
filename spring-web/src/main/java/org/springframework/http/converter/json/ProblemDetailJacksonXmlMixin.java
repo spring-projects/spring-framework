@@ -30,15 +30,14 @@ import org.springframework.lang.Nullable;
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
 /**
- * Provides the same declarations as {@link ProblemDetailJacksonMixin}, and
- * some additional ones to support XML serialization when
- * jackson-dataformat-xml is on the classpath. Customizes the XML root element
- * name and adds namespace information.
+ * Provides the same declarations as {@link ProblemDetailJacksonMixin} and some
+ * additional ones to support XML serialization when {@code jackson-dataformat-xml}
+ * is on the classpath. Customizes the XML root element name and adds namespace
+ * information.
  *
- * <p>Note that we can't use {@code JsonRootName} to specify the namespace
- * since that is not inherited by fields of the class. This is why we need a
- * dedicated mixin for use when jackson-dataformat-xml is on the classpath.
- * For more details, see
+ * <p>Note that we cannot use {@code @JsonRootName} to specify the namespace since that
+ * is not inherited by fields of the class. This is why we need a dedicated "mix-in"
+ * when {@code jackson-dataformat-xml} is on the classpath. For more details, see
  * <a href="https://github.com/FasterXML/jackson-dataformat-xml/issues/355">FasterXML/jackson-dataformat-xml#355</a>.
  *
  * @author Rossen Stoyanchev

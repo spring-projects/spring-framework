@@ -816,8 +816,7 @@ its properties from the job data mapped to properties of the job instance. So, i
 the `ExampleJob` contains a bean property named `timeout`, and the `JobDetail`
 has it applied automatically:
 
-[source,java,indent=0]
-[subs="verbatim"]
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
 ----
 	package example;
 
@@ -827,7 +826,7 @@ has it applied automatically:
 
 		/**
 		 * Setter called after the ExampleJob is instantiated
-		 * with the value from the JobDetailFactoryBean (5)
+		 * with the value from the JobDetailFactoryBean.
 		 */
 		public void setTimeout(int timeout) {
 			this.timeout = timeout;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,6 +231,17 @@ class AutowiredConfigurationTests {
 		assertThat(testBean.getName()).isEqualTo("localhost");
 		assertThat(testBean.getAge()).isEqualTo(contentLength());
 		context.close();
+	}
+
+	@Test
+	void testValueInjectionWithRecord() {
+		System.setProperty("recordBeanName", "enigma");
+		try (GenericApplicationContext context = new AnnotationConfigApplicationContext(RecordBean.class)) {
+			assertThat(context.getBean(RecordBean.class).name()).isEqualTo("enigma");
+		}
+		finally {
+			System.clearProperty("recordBeanName");
+		}
 	}
 
 	private int contentLength() throws IOException {
@@ -504,6 +515,10 @@ class AutowiredConfigurationTests {
 		public TestBean testBean() throws IOException {
 			return new TestBean(hostname, (int) resource.contentLength());
 		}
+	}
+
+
+	record RecordBean(@Value("${recordBeanName}") String name) {
 	}
 
 }

@@ -405,8 +405,19 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #doFindPathMatchingFileResources
 	 */
 	protected Resource convertClassLoaderURL(URL url) {
-		return (ResourceUtils.URL_PROTOCOL_FILE.equals(url.getProtocol()) ?
-				new FileSystemResource(url.getPath()) : new UrlResource(url));
+		if (ResourceUtils.URL_PROTOCOL_FILE.equals(url.getProtocol())) {
+			try {
+				// URI decoding for special characters such as spaces.
+				return new FileSystemResource(ResourceUtils.toURI(url).getSchemeSpecificPart());
+			}
+			catch (URISyntaxException ex) {
+				// Fallback for URLs that are not valid URIs (should hardly ever happen).
+				return new FileSystemResource(url.getFile());
+			}
+		}
+		else {
+			return new UrlResource(url);
+		}
 	}
 
 	/**
@@ -748,8 +759,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			rootDirUri = rootDirResource.getURI();
 		}
 		catch (Exception ex) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Failed to resolve %s as URI: %s".formatted(rootDirResource, ex));
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to resolve directory [%s] as URI: %s".formatted(rootDirResource, ex));
 			}
 			return Collections.emptySet();
 		}
@@ -797,21 +808,11 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		Set<Resource> result = new LinkedHashSet<>();
 		try (Stream<Path> files = Files.walk(rootPath)) {
-			files.filter(isMatchingFile).sorted().forEach(file -> {
-				try {
-					result.add(new FileSystemResource(file));
-				}
-				catch (Exception ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Failed to convert file %s to an org.springframework.core.io.Resource: %s"
-								.formatted(file, ex));
-					}
-				}
-			});
+			files.filter(isMatchingFile).sorted().forEach(file -> result.add(new FileSystemResource(file)));
 		}
 		catch (Exception ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to complete search in directory [%s] for files matching pattern [%s]: %s"
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to search in directory [%s] for files matching pattern [%s]: %s"
 						.formatted(rootPath.toAbsolutePath(), subPattern, ex));
 			}
 		}

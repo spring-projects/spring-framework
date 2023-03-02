@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import org.springframework.aot.hint.TypeHint.Builder;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -36,6 +37,7 @@ import org.springframework.util.ClassUtils;
  * @author Stephane Nicoll
  * @author Phillip Webb
  * @author Andy Wilkinson
+ * @author Sebastien Deleuze
  * @since 6.0
  */
 public class ReflectionHints {
@@ -106,7 +108,11 @@ public class ReflectionHints {
 	 * @see #registerType(Class, MemberCategory...)
 	 */
 	public ReflectionHints registerType(Class<?> type, Consumer<TypeHint.Builder> typeHint) {
-		return registerType(TypeReference.of(type), typeHint);
+		Assert.notNull(type, "'type' must not be null");
+		if (type.getCanonicalName() != null) {
+			registerType(TypeReference.of(type), typeHint);
+		}
+		return this;
 	}
 
 	/**
@@ -117,7 +123,11 @@ public class ReflectionHints {
 	 * @return {@code this}, to facilitate method chaining
 	 */
 	public ReflectionHints registerType(Class<?> type, MemberCategory... memberCategories) {
-		return registerType(TypeReference.of(type), memberCategories);
+		Assert.notNull(type, "'type' must not be null");
+		if (type.getCanonicalName() != null) {
+			registerType(TypeReference.of(type), memberCategories);
+		}
+		return this;
 	}
 
 	/**

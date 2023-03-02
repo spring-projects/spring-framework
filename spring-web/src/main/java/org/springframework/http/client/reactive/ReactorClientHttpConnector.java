@@ -105,9 +105,12 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 
 		AtomicReference<ReactorClientHttpResponse> responseRef = new AtomicReference<>();
 
-		return this.httpClient
-				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()))
-				.uri(uri)
+		HttpClient.RequestSender requestSender = this.httpClient
+				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()));
+
+		requestSender = (uri.isAbsolute() ? requestSender.uri(uri) : requestSender.uri(uri.toString()));
+
+		return requestSender
 				.send((request, outbound) -> requestCallback.apply(adaptRequest(method, uri, request, outbound)))
 				.responseConnection((response, connection) -> {
 					responseRef.set(new ReactorClientHttpResponse(response, connection));

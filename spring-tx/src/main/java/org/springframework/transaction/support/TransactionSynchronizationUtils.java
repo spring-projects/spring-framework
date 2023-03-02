@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,8 @@ public abstract class TransactionSynchronizationUtils {
 		Assert.notNull(resource, "Resource must not be null");
 		Object resourceRef = resource;
 		// unwrap infrastructure proxy
-		if (resourceRef instanceof InfrastructureProxy) {
-			resourceRef = ((InfrastructureProxy) resourceRef).getWrappedObject();
+		if (resourceRef instanceof InfrastructureProxy infrastructureProxy) {
+			resourceRef = infrastructureProxy.getWrappedObject();
 		}
 		if (aopAvailable) {
 			// now unwrap scoped proxy
@@ -185,8 +185,8 @@ public abstract class TransactionSynchronizationUtils {
 	private static class ScopedProxyUnwrapper {
 
 		public static Object unwrapIfNecessary(Object resource) {
-			if (resource instanceof ScopedObject) {
-				return ((ScopedObject) resource).getTargetObject();
+			if (resource instanceof ScopedObject scopedObject) {
+				return scopedObject.getTargetObject();
 			}
 			else {
 				return resource;

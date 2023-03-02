@@ -593,7 +593,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
-			List<HttpMethod> result = new ArrayList<>();
+			List<HttpMethod> result = new ArrayList<>(tokens.length);
 			for (String token : tokens) {
 				HttpMethod method = HttpMethod.valueOf(token);
 				result.add(method);

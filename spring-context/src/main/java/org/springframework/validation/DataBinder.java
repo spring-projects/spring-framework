@@ -760,8 +760,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @see #doBind(org.springframework.beans.MutablePropertyValues)
 	 */
 	public void bind(PropertyValues pvs) {
-		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues ?
-				(MutablePropertyValues) pvs : new MutablePropertyValues(pvs));
+		MutablePropertyValues mpvs = (pvs instanceof MutablePropertyValues mutablePropertyValues ?
+				mutablePropertyValues : new MutablePropertyValues(pvs));
 		doBind(mpvs);
 	}
 
@@ -849,8 +849,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 				PropertyValue pv = propertyValues.get(field);
 				boolean empty = (pv == null || pv.getValue() == null);
 				if (!empty) {
-					if (pv.getValue() instanceof String) {
-						empty = !StringUtils.hasText((String) pv.getValue());
+					if (pv.getValue() instanceof String text) {
+						empty = !StringUtils.hasText(text);
 					}
 					else if (pv.getValue() instanceof String[] values) {
 						empty = (values.length == 0 || !StringUtils.hasText(values[0]));
@@ -925,8 +925,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		BindingResult bindingResult = getBindingResult();
 		// Call each validator with the same binding result
 		for (Validator validator : getValidators()) {
-			if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator) {
-				((SmartValidator) validator).validate(target, bindingResult, validationHints);
+			if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator smartValidator) {
+				smartValidator.validate(target, bindingResult, validationHints);
 			}
 			else if (validator != null) {
 				validator.validate(target, bindingResult);

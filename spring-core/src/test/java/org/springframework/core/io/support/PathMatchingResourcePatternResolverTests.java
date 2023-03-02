@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
@@ -59,7 +61,7 @@ class PathMatchingResourcePatternResolverTests {
 	private static final String[] CLASSES_IN_REACTOR_UTIL_ANNOTATION = { "NonNull.class", "NonNullApi.class", "Nullable.class" };
 
 
-	private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 
 	@Nested
@@ -88,8 +90,16 @@ class PathMatchingResourcePatternResolverTests {
 			assertFilenames(pattern, expectedFilenames);
 		}
 
+		@Test
+		void encodedHashtagInPath() throws IOException {
+			Path rootDir = Paths.get("src/test/resources/custom%23root").toAbsolutePath();
+			URL root = new URL("file:" + rootDir + "/");
+			resolver = new PathMatchingResourcePatternResolver(new DefaultResourceLoader(new URLClassLoader(new URL[] {root})));
+			assertExactFilenames("classpath*:scanned/*.txt", "resource#test1.txt", "resource#test2.txt");
+		}
+
 		@Nested
-		class WithHashtagsInTheirFileNames {
+		class WithHashtagsInTheirFilenames {
 
 			@Test
 			void usingClasspathStarProtocol() {

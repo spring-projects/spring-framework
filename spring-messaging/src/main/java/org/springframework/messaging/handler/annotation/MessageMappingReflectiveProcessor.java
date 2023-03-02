@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,20 +33,24 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 
 /**
- * {@link ReflectiveProcessor} implementation for {@link MessageMapping}
- * annotated types. In addition to registering reflection hints for invoking
+ * {@link ReflectiveProcessor} implementation for types annotated
+ * with {@link MessageMapping @MessageMapping},
+ * {@link org.springframework.messaging.simp.annotation.SubscribeMapping @SubscribeMapping}
+ * and {@link MessageExceptionHandler @MessageExceptionHandler}.
+ * In addition to registering reflection hints for invoking
  * the annotated method, this implementation handles:
  *
  * <ul>
  *     <li>Return types</li>
  *     <li>Parameters identified as potential payloads</li>
  *     <li>{@link Message} parameters</li>
+ *     <li>Exception classes specified via {@link MessageExceptionHandler @MessageExceptionHandler}</li>
  * </ul>
  *
  * @author Sebastien Deleuze
  * @since 6.0
  */
-class MessageMappingReflectiveProcessor implements ReflectiveProcessor {
+public class MessageMappingReflectiveProcessor implements ReflectiveProcessor {
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
 
@@ -58,6 +62,9 @@ class MessageMappingReflectiveProcessor implements ReflectiveProcessor {
 		}
 		else if (element instanceof Method method) {
 			registerMethodHints(hints, method);
+			if (element.isAnnotationPresent(MessageExceptionHandler.class)) {
+				registerMessageExceptionHandlerHints(hints, element.getAnnotation(MessageExceptionHandler.class));
+			}
 		}
 	}
 
@@ -81,6 +88,12 @@ class MessageMappingReflectiveProcessor implements ReflectiveProcessor {
 			else if (couldBePayload(methodParameter)) {
 				this.bindingRegistrar.registerReflectionHints(hints, methodParameter.getGenericParameterType());
 			}
+		}
+	}
+
+	protected void registerMessageExceptionHandlerHints(ReflectionHints hints, MessageExceptionHandler annotation) {
+		for (Class<?> exceptionClass : annotation.value()) {
+			hints.registerType(exceptionClass);
 		}
 	}
 

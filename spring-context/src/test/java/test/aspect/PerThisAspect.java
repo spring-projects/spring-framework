@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 
-@Aspect("perthis(execution(* getAge()))")
+@Aspect("perthis(test.aspect.CommonPointcuts.getAgeExecution())")
 public class PerThisAspect {
 
 	private int invocations = 0;
@@ -29,9 +29,9 @@ public class PerThisAspect {
 		return this.invocations;
 	}
 
-	@Around("execution(* getAge())")
-	public int changeAge(ProceedingJoinPoint pjp) throws Throwable {
-		return invocations++;
+	@Around("test.aspect.CommonPointcuts.getAgeExecution()")
+	public int changeAge(ProceedingJoinPoint pjp) {
+		return this.invocations++;
 	}
 
 }
