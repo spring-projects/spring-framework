@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertTotalEventsCount(1);
 
 		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
-				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().contains("TestEvent"));
+				l instanceof SmartApplicationListener sal && sal.getListenerId().contains("TestEvent"));
 		this.eventCollector.clear();
 		this.context.publishEvent(event);
 		this.eventCollector.assertNoEventReceived(listener);
@@ -132,7 +132,7 @@ class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertTotalEventsCount(1);
 
 		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
-				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().contains("TestEvent"));
+				l instanceof SmartApplicationListener sal && sal.getListenerId().contains("TestEvent"));
 		this.eventCollector.clear();
 		this.context.publishEvent(event);
 		this.eventCollector.assertNoEventReceived(listener);
@@ -150,7 +150,7 @@ class AnnotationDrivenEventListenerTests {
 		this.eventCollector.assertTotalEventsCount(1);
 
 		context.getBean(ApplicationEventMulticaster.class).removeApplicationListeners(l ->
-				l instanceof SmartApplicationListener && ((SmartApplicationListener) l).getListenerId().equals("foo"));
+				l instanceof SmartApplicationListener sal && sal.getListenerId().equals("foo"));
 		this.eventCollector.clear();
 		this.context.publishEvent(event);
 		this.eventCollector.assertNoEventReceived(bean);

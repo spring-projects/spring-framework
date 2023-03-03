@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 		parent.registerPrototype("rod", TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
 		parent.registerPrototype("father", TestBean.class, new MutablePropertyValues(m));
-		parent.registerSingleton(StaticApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME,
+		parent.registerSingleton(AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME,
 				TestApplicationEventMulticaster.class, null);
 		parent.refresh();
 		parent.addApplicationListener(parentListener) ;
