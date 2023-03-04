@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
@@ -52,10 +53,8 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	private static final boolean jetty11Present = ClassUtils.isPresent(
 			"org.eclipse.jetty.server.HttpOutput", JettyHttpHandlerAdapter.class.getClassLoader());
 
-	/* Jetty 12: see spring-web.gradle
 	private static final boolean jetty12Present = ClassUtils.isPresent(
 			"org.eclipse.jetty.ee10.servlet.HttpOutput", JettyHttpHandlerAdapter.class.getClassLoader());
-	*/
 
 
 	public JettyHttpHandlerAdapter(HttpHandler httpHandler) {
@@ -85,12 +84,10 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 			return new Jetty11ServerHttpResponse(
 					response, context, getDataBufferFactory(), getBufferSize(), request);
 		}
-		/* Jetty 12: see spring-web.gradle
 		else if (jetty12Present) {
 			return new Jetty12ServerHttpResponse(
 					response, context, getDataBufferFactory(), getBufferSize(), request);
 		}
-		*/
 		else {
 			return super.createResponse(response, context, request);
 		}
@@ -178,7 +175,6 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	}
 
 
-	/* Jetty 12: see spring-web.gradle
 	private static final class Jetty12ServerHttpResponse extends ServletServerHttpResponse {
 
 		Jetty12ServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
@@ -192,14 +188,18 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
 			OutputStream output = getOutputStream();
 			if (output instanceof org.eclipse.jetty.ee10.servlet.HttpOutput httpOutput) {
-				ByteBuffer input = dataBuffer.toByteBuffer();
-				int len = input.remaining();
-				httpOutput.write(input);
+				int len = 0;
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+					while (iterator.hasNext() && httpOutput.isReady()) {
+						ByteBuffer byteBuffer = iterator.next();
+						len += byteBuffer.remaining();
+						httpOutput.write(byteBuffer);
+					}
+				}
 				return len;
 			}
 			return super.writeToOutputStream(dataBuffer);
 		}
 	}
-	*/
 
 }
