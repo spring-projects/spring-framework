@@ -93,7 +93,6 @@ public class DynamicClassLoader extends ClassLoader {
 	}
 
 
-
 	private Class<?> defineClass(String name, byte[] bytes) {
 		if (this.defineClassMethod != null) {
 			return (Class<?>) ReflectionUtils.invokeMethod(this.defineClassMethod,

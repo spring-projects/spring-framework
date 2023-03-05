@@ -36,10 +36,12 @@ public final class ClassFile {
 
 	private final byte[] content;
 
+
 	private ClassFile(String name, byte[] content) {
 		this.name = name;
 		this.content = content;
 	}
+
 
 	/**
 	 * Return the fully qualified name of the class.

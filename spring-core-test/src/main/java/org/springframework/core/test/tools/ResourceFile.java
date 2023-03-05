@@ -33,7 +33,6 @@ import org.springframework.util.FileCopyUtils;
  */
 public final class ResourceFile extends DynamicFile implements AssertProvider<ResourceFileAssert> {
 
-
 	private ResourceFile(String path, String content) {
 		super(path, content);
 	}

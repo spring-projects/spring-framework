@@ -32,7 +32,6 @@ import org.springframework.util.Assert;
  */
 public abstract sealed class DynamicFile permits SourceFile, ResourceFile {
 
-
 	private final String path;
 
 	private final String content;

@@ -39,6 +39,7 @@ public class DynamicFileAssert<A extends DynamicFileAssert<A, F>, F extends Dyna
 		super(actual, selfType);
 	}
 
+
 	/**
 	 * Verify that the actual content is equal to the given one.
 	 * @param content the expected content of the file

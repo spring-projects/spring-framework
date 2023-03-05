@@ -63,6 +63,7 @@ class DynamicJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> 
 		this.classLoader = classLoader;
 	}
 
+
 	@Override
 	public ClassLoader getClassLoader(Location location) {
 		return this.classLoader;

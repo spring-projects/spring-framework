@@ -61,6 +61,7 @@ public final class SourceFile extends DynamicFile implements AssertProvider<Sour
 		this.className = className;
 	}
 
+
 	/**
 	 * Factory method to create a new {@link SourceFile} by looking up source
 	 * for the given test {@code Class}.
@@ -226,7 +227,5 @@ public final class SourceFile extends DynamicFile implements AssertProvider<Sour
 	public SourceFileAssert assertThat() {
 		return new SourceFileAssert(this);
 	}
-
-
 
 }

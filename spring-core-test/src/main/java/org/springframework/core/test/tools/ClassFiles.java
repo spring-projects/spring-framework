@@ -35,6 +35,7 @@ public final class ClassFiles implements Iterable<ClassFile> {
 
 	private static final ClassFiles NONE = new ClassFiles(Collections.emptyMap());
 
+
 	private final Map<String, ClassFile> files;
 
 	private ClassFiles(Map<String, ClassFile> files) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,13 +176,13 @@ public final class RecordedInvocation {
 
 	@Override
 	public String toString() {
-		if(isStatic()) {
-			return String.format("<%s> invocation of <%s> with arguments %s",
+		if (isStatic()) {
+			return "<%s> invocation of <%s> with arguments %s".formatted(
 					getHintType().hintClassName(), getMethodReference(), getArguments());
 		}
 		else {
 			Class<?> instanceType = (getInstance() instanceof  Class<?>) ? getInstance() : getInstance().getClass();
-			return String.format("<%s> invocation of <%s> on type <%s> with arguments %s",
+			return "<%s> invocation of <%s> on type <%s> with arguments %s".formatted(
 					getHintType().hintClassName(), getMethodReference(), instanceType.getCanonicalName(), getArguments());
 		}
 	}

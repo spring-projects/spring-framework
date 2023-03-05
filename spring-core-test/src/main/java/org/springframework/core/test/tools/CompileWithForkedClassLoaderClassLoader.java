@@ -45,6 +45,7 @@ final class CompileWithForkedClassLoaderClassLoader extends ClassLoader {
 		this.testClassLoader = testClassLoader;
 	}
 
+
 	// Invoked reflectively by DynamicClassLoader
 	@SuppressWarnings("unused")
 	void setClassResourceLookup(Function<String, byte[]> classResourceLookup) {
