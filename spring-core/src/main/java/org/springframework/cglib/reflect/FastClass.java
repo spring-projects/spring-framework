@@ -154,10 +154,10 @@ abstract public class FastClass
 
     @Override
 	public boolean equals(Object o) {
-        if (o == null || !(o instanceof FastClass)) {
+        if (o == null || !(o instanceof FastClass that)) {
             return false;
         }
-        return type.equals(((FastClass)o).type);
+        return type.equals(that.type);
     }
 
     /**

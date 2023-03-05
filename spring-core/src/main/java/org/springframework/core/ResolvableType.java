@@ -215,7 +215,7 @@ public class ResolvableType implements Serializable {
 		if (rawType instanceof ParameterizedType parameterizedType) {
 			rawType = parameterizedType.getRawType();
 		}
-		return (rawType instanceof Class ? (Class<?>) rawType : null);
+		return (rawType instanceof Class<?> rawClass ? rawClass : null);
 	}
 
 	/**
@@ -376,7 +376,7 @@ public class ResolvableType implements Serializable {
 		if (this == NONE) {
 			return false;
 		}
-		return ((this.type instanceof Class && ((Class<?>) this.type).isArray()) ||
+		return ((this.type instanceof Class<?> clazz && clazz.isArray()) ||
 				this.type instanceof GenericArrayType || resolveType().isArray());
 	}
 
@@ -1647,13 +1647,12 @@ public class ResolvableType implements Serializable {
 		@Nullable
 		public static WildcardBounds get(ResolvableType type) {
 			ResolvableType resolveToWildcard = type;
-			while (!(resolveToWildcard.getType() instanceof WildcardType)) {
+			while (!(resolveToWildcard.getType() instanceof WildcardType wildcardType)) {
 				if (resolveToWildcard == NONE) {
 					return null;
 				}
 				resolveToWildcard = resolveToWildcard.resolveType();
 			}
-			WildcardType wildcardType = (WildcardType) resolveToWildcard.type;
 			Kind boundsType = (wildcardType.getLowerBounds().length > 0 ? Kind.LOWER : Kind.UPPER);
 			Type[] bounds = (boundsType == Kind.UPPER ? wildcardType.getUpperBounds() : wildcardType.getLowerBounds());
 			ResolvableType[] resolvableBounds = new ResolvableType[bounds.length];

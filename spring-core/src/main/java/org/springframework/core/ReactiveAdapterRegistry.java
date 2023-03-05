@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class ReactiveAdapterRegistry {
 			return null;
 		}
 
-		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
+		Object sourceToUse = (source instanceof Optional<?> optional ? optional.orElse(null) : source);
 		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);
 		if (clazz == null) {
 			return null;

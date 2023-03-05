@@ -139,7 +139,7 @@ public class BeanGenerator extends AbstractClassGenerator
 
     @Override
 	protected Object nextInstance(Object instance) {
-        Class protoclass = (instance instanceof Class) ? (Class)instance : instance.getClass();
+        Class protoclass = (instance instanceof Class<?> clazz) ? clazz : instance.getClass();
         if (classOnly) {
             return protoclass;
         } else {

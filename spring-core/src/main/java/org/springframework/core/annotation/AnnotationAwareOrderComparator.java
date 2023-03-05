@@ -70,7 +70,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 
 	@Nullable
 	private Integer findOrderFromAnnotation(Object obj) {
-		AnnotatedElement element = (obj instanceof AnnotatedElement ? (AnnotatedElement) obj : obj.getClass());
+		AnnotatedElement element = (obj instanceof AnnotatedElement ae ? ae : obj.getClass());
 		MergedAnnotations annotations = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY);
 		Integer order = OrderUtils.getOrderFromAnnotations(element, annotations);
 		if (order == null && obj instanceof DecoratingProxy decoratingProxy) {

@@ -107,7 +107,7 @@ public interface Decoder<T> {
 		catch (InterruptedException ex) {
 			failure = ex;
 		}
-		throw (failure instanceof CodecException ? (CodecException) failure :
+		throw (failure instanceof CodecException codecException ? codecException :
 				new DecodingException("Failed to decode: " + failure.getMessage(), failure));
 	}
 

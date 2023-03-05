@@ -69,8 +69,8 @@ public class LoadingCache<K, KK, V> {
             throw new IllegalStateException("Interrupted while loading cache item", e);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException) {
-                throw ((RuntimeException) cause);
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
             }
             throw new IllegalStateException("Unable to load cache item", cause);
         }
