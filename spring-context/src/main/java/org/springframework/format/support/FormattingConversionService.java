@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,9 +117,8 @@ public class FormattingConversionService extends GenericConversionService
 
 	private static <T> Class<?> getFieldType(T instance, Class<T> genericInterface) {
 		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(instance.getClass(), genericInterface);
-		if (fieldType == null && instance instanceof DecoratingProxy) {
-			fieldType = GenericTypeResolver.resolveTypeArgument(
-					((DecoratingProxy) instance).getDecoratedClass(), genericInterface);
+		if (fieldType == null && instance instanceof DecoratingProxy decoratingProxy) {
+			fieldType = GenericTypeResolver.resolveTypeArgument(decoratingProxy.getDecoratedClass(), genericInterface);
 		}
 		Assert.notNull(fieldType, () -> "Unable to extract the parameterized field type from " +
 					ClassUtils.getShortName(genericInterface) + " [" + instance.getClass().getName() +

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,22 +88,22 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	private Collection<CacheOperation> parseCacheAnnotations(
 			DefaultCacheConfig cachingConfig, AnnotatedElement ae, boolean localOnly) {
 
-		Collection<? extends Annotation> anns = (localOnly ?
+		Collection<? extends Annotation> annotations = (localOnly ?
 				AnnotatedElementUtils.getAllMergedAnnotations(ae, CACHE_OPERATION_ANNOTATIONS) :
 				AnnotatedElementUtils.findAllMergedAnnotations(ae, CACHE_OPERATION_ANNOTATIONS));
-		if (anns.isEmpty()) {
+		if (annotations.isEmpty()) {
 			return null;
 		}
 
-		final Collection<CacheOperation> ops = new ArrayList<>(1);
-		anns.stream().filter(ann -> ann instanceof Cacheable).forEach(
-				ann -> ops.add(parseCacheableAnnotation(ae, cachingConfig, (Cacheable) ann)));
-		anns.stream().filter(ann -> ann instanceof CacheEvict).forEach(
-				ann -> ops.add(parseEvictAnnotation(ae, cachingConfig, (CacheEvict) ann)));
-		anns.stream().filter(ann -> ann instanceof CachePut).forEach(
-				ann -> ops.add(parsePutAnnotation(ae, cachingConfig, (CachePut) ann)));
-		anns.stream().filter(ann -> ann instanceof Caching).forEach(
-				ann -> parseCachingAnnotation(ae, cachingConfig, (Caching) ann, ops));
+		Collection<CacheOperation> ops = new ArrayList<>(1);
+		annotations.stream().filter(Cacheable.class::isInstance).map(Cacheable.class::cast).forEach(
+				cacheable -> ops.add(parseCacheableAnnotation(ae, cachingConfig, cacheable)));
+		annotations.stream().filter(CacheEvict.class::isInstance).map(CacheEvict.class::cast).forEach(
+				cacheEvict -> ops.add(parseEvictAnnotation(ae, cachingConfig, cacheEvict)));
+		annotations.stream().filter(CachePut.class::isInstance).map(CachePut.class::cast).forEach(
+				cachePut -> ops.add(parsePutAnnotation(ae, cachingConfig, cachePut)));
+		annotations.stream().filter(Caching.class::isInstance).map(Caching.class::cast).forEach(
+				caching -> parseCachingAnnotation(ae, cachingConfig, caching, ops));
 		return ops;
 	}
 

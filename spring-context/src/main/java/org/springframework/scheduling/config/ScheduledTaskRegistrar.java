@@ -111,11 +111,11 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 		if (scheduler == null) {
 			this.taskScheduler = null;
 		}
-		else if (scheduler instanceof TaskScheduler) {
-			this.taskScheduler = (TaskScheduler) scheduler;
+		else if (scheduler instanceof TaskScheduler ts) {
+			this.taskScheduler = ts;
 		}
-		else if (scheduler instanceof ScheduledExecutorService) {
-			this.taskScheduler = new ConcurrentTaskScheduler(((ScheduledExecutorService) scheduler));
+		else if (scheduler instanceof ScheduledExecutorService ses) {
+			this.taskScheduler = new ConcurrentTaskScheduler(ses);
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported scheduler type: " + scheduler.getClass());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ public class SourceFilteringListener implements GenericApplicationListener {
 	 */
 	public SourceFilteringListener(Object source, ApplicationListener<?> delegate) {
 		this.source = source;
-		this.delegate = (delegate instanceof GenericApplicationListener ?
-				(GenericApplicationListener) delegate : new GenericApplicationListenerAdapter(delegate));
+		this.delegate = (delegate instanceof GenericApplicationListener gal ? gal :
+				new GenericApplicationListenerAdapter(delegate));
 	}
 
 	/**

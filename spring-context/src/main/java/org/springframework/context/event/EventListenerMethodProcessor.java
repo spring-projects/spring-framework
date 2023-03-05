@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,8 +184,8 @@ public class EventListenerMethodProcessor
 							Method methodToUse = AopUtils.selectInvocableMethod(method, context.getType(beanName));
 							ApplicationListener<?> applicationListener =
 									factory.createApplicationListener(beanName, targetType, methodToUse);
-							if (applicationListener instanceof ApplicationListenerMethodAdapter) {
-								((ApplicationListenerMethodAdapter) applicationListener).init(context, this.evaluator);
+							if (applicationListener instanceof ApplicationListenerMethodAdapter alma) {
+								alma.init(context, this.evaluator);
 							}
 							context.addApplicationListener(applicationListener);
 							break;

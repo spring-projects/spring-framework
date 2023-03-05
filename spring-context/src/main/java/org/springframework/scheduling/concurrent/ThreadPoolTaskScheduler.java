@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,8 +91,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 */
 	public void setPoolSize(int poolSize) {
 		Assert.isTrue(poolSize > 0, "'poolSize' must be 1 or higher");
-		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
-			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setCorePoolSize(poolSize);
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor threadPoolExecutor) {
+			threadPoolExecutor.setCorePoolSize(poolSize);
 		}
 		this.poolSize = poolSize;
 	}
@@ -105,8 +105,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * @see ScheduledThreadPoolExecutor#setRemoveOnCancelPolicy
 	 */
 	public void setRemoveOnCancelPolicy(boolean flag) {
-		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
-			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setRemoveOnCancelPolicy(flag);
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor threadPoolExecutor) {
+			threadPoolExecutor.setRemoveOnCancelPolicy(flag);
 		}
 		this.removeOnCancelPolicy = flag;
 	}
@@ -120,8 +120,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * @see ScheduledThreadPoolExecutor#setContinueExistingPeriodicTasksAfterShutdownPolicy
 	 */
 	public void setContinueExistingPeriodicTasksAfterShutdownPolicy(boolean flag) {
-		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
-			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setContinueExistingPeriodicTasksAfterShutdownPolicy(flag);
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor threadPoolExecutor) {
+			threadPoolExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(flag);
 		}
 		this.continueExistingPeriodicTasksAfterShutdownPolicy = flag;
 	}
@@ -135,8 +135,8 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	 * @see ScheduledThreadPoolExecutor#setExecuteExistingDelayedTasksAfterShutdownPolicy
 	 */
 	public void setExecuteExistingDelayedTasksAfterShutdownPolicy(boolean flag) {
-		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor) {
-			((ScheduledThreadPoolExecutor) this.scheduledExecutor).setExecuteExistingDelayedTasksAfterShutdownPolicy(flag);
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor threadPoolExecutor) {
+			threadPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(flag);
 		}
 		this.executeExistingDelayedTasksAfterShutdownPolicy = flag;
 	}
@@ -170,15 +170,15 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 		this.scheduledExecutor = createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
 
-		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor scheduledPoolExecutor) {
+		if (this.scheduledExecutor instanceof ScheduledThreadPoolExecutor threadPoolExecutor) {
 			if (this.removeOnCancelPolicy) {
-				scheduledPoolExecutor.setRemoveOnCancelPolicy(true);
+				threadPoolExecutor.setRemoveOnCancelPolicy(true);
 			}
 			if (this.continueExistingPeriodicTasksAfterShutdownPolicy) {
-				scheduledPoolExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(true);
+				threadPoolExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(true);
 			}
 			if (!this.executeExistingDelayedTasksAfterShutdownPolicy) {
-				scheduledPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+				threadPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
 			}
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -244,9 +244,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			this.registrar.setScheduler(this.scheduler);
 		}
 
-		if (this.beanFactory instanceof ListableBeanFactory) {
-			Map<String, SchedulingConfigurer> beans =
-					((ListableBeanFactory) this.beanFactory).getBeansOfType(SchedulingConfigurer.class);
+		if (this.beanFactory instanceof ListableBeanFactory lbf) {
+			Map<String, SchedulingConfigurer> beans = lbf.getBeansOfType(SchedulingConfigurer.class);
 			List<SchedulingConfigurer> configurers = new ArrayList<>(beans.values());
 			AnnotationAwareOrderComparator.sort(configurers);
 			for (SchedulingConfigurer configurer : configurers) {
@@ -322,16 +321,15 @@ public class ScheduledAnnotationBeanPostProcessor
 	private <T> T resolveSchedulerBean(BeanFactory beanFactory, Class<T> schedulerType, boolean byName) {
 		if (byName) {
 			T scheduler = beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
-			if (this.beanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
-				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
-						DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
+			if (this.beanName != null && this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+				cbf.registerDependentBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
 			}
 			return scheduler;
 		}
-		else if (beanFactory instanceof AutowireCapableBeanFactory) {
-			NamedBeanHolder<T> holder = ((AutowireCapableBeanFactory) beanFactory).resolveNamedBean(schedulerType);
-			if (this.beanName != null && beanFactory instanceof ConfigurableBeanFactory) {
-				((ConfigurableBeanFactory) beanFactory).registerDependentBean(holder.getBeanName(), this.beanName);
+		else if (beanFactory instanceof AutowireCapableBeanFactory acbf) {
+			NamedBeanHolder<T> holder = acbf.resolveNamedBean(schedulerType);
+			if (this.beanName != null && beanFactory instanceof ConfigurableBeanFactory cbf) {
+				cbf.registerDependentBean(holder.getBeanName(), this.beanName);
 			}
 			return holder.getBeanInstance();
 		}

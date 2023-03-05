@@ -178,8 +178,8 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		catch (ClassCastException ex) {
 			String msg = ex.getMessage();
 			if (msg == null || matchesClassCastMessage(msg, event.getClass()) ||
-					(event instanceof PayloadApplicationEvent &&
-							matchesClassCastMessage(msg, ((PayloadApplicationEvent) event).getPayload().getClass()))) {
+					(event instanceof PayloadApplicationEvent payloadEvent &&
+							matchesClassCastMessage(msg, payloadEvent.getPayload().getClass()))) {
 				// Possibly a lambda-defined listener which we could not resolve the generic event type for
 				// -> let's suppress the exception.
 				Log loggerToUse = this.lazyLogger;

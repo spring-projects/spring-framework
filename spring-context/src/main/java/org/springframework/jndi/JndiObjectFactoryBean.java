@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,10 +178,10 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ConfigurableBeanFactory) {
+		if (beanFactory instanceof ConfigurableBeanFactory cbf) {
 			// Just optional - for getting a specifically configured TypeConverter if needed.
 			// We'll simply fall back to a SimpleTypeConverter if no specific one available.
-			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+			this.beanFactory = cbf;
 		}
 	}
 

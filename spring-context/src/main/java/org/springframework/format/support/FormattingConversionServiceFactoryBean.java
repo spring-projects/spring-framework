@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,12 +145,12 @@ public class FormattingConversionServiceFactoryBean
 
 	private void registerFormatters(FormattingConversionService conversionService) {
 		if (this.formatters != null) {
-			for (Object formatter : this.formatters) {
-				if (formatter instanceof Formatter<?>) {
-					conversionService.addFormatter((Formatter<?>) formatter);
+			for (Object candidate : this.formatters) {
+				if (candidate instanceof Formatter<?> formatter) {
+					conversionService.addFormatter(formatter);
 				}
-				else if (formatter instanceof AnnotationFormatterFactory<?>) {
-					conversionService.addFormatterForFieldAnnotation((AnnotationFormatterFactory<?>) formatter);
+				else if (candidate instanceof AnnotationFormatterFactory<?> factory) {
+					conversionService.addFormatterForFieldAnnotation(factory);
 				}
 				else {
 					throw new IllegalArgumentException(

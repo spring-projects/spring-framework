@@ -402,8 +402,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (beanFactory instanceof ListableBeanFactory) {
-			this.beanFactory = (ListableBeanFactory) beanFactory;
+		if (beanFactory instanceof ListableBeanFactory lbf) {
+			this.beanFactory = lbf;
 		}
 		else {
 			logger.debug("MBeanExporter not running in a ListableBeanFactory: autodetection of MBeans not available.");
@@ -543,8 +543,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 			}
 			// Allow the assembler a chance to vote for bean inclusion.
 			if ((mode == AUTODETECT_ASSEMBLER || mode == AUTODETECT_ALL) &&
-					this.assembler instanceof AutodetectCapableMBeanInfoAssembler) {
-				autodetect(this.beans, ((AutodetectCapableMBeanInfoAssembler) this.assembler)::includeBean);
+					this.assembler instanceof AutodetectCapableMBeanInfoAssembler autodetectCapableAssembler) {
+				autodetect(this.beans, autodetectCapableAssembler::includeBean);
 			}
 		}
 
@@ -561,8 +561,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * @see org.springframework.beans.factory.config.BeanDefinition#isLazyInit
 	 */
 	protected boolean isBeanDefinitionLazyInit(ListableBeanFactory beanFactory, String beanName) {
-		return (beanFactory instanceof ConfigurableListableBeanFactory && beanFactory.containsBeanDefinition(beanName) &&
-				((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(beanName).isLazyInit());
+		return (beanFactory instanceof ConfigurableListableBeanFactory clbf && beanFactory.containsBeanDefinition(beanName) &&
+				clbf.getBeanDefinition(beanName).isLazyInit());
 	}
 
 	/**
@@ -748,8 +748,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * if the retrieved {@code ObjectName} is malformed
 	 */
 	protected ObjectName getObjectName(Object bean, @Nullable String beanKey) throws MalformedObjectNameException {
-		if (bean instanceof SelfNaming) {
-			return ((SelfNaming) bean).getObjectName();
+		if (bean instanceof SelfNaming selfNaming) {
+			return selfNaming.getObjectName();
 		}
 		else {
 			return this.namingStrategy.getObjectName(bean, beanKey);
@@ -869,8 +869,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 		Assert.state(this.beanFactory != null, "No BeanFactory set");
 		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
 		Collections.addAll(beanNames, this.beanFactory.getBeanDefinitionNames());
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			Collections.addAll(beanNames, ((ConfigurableBeanFactory) this.beanFactory).getSingletonNames());
+		if (this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+			Collections.addAll(beanNames, cbf.getSingletonNames());
 		}
 
 		for (String beanName : beanNames) {
@@ -925,8 +925,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Return whether the specified bean definition should be considered as abstract.
 	 */
 	private boolean isBeanDefinitionAbstract(ListableBeanFactory beanFactory, String beanName) {
-		return (beanFactory instanceof ConfigurableListableBeanFactory && beanFactory.containsBeanDefinition(beanName) &&
-				((ConfigurableListableBeanFactory) beanFactory).getBeanDefinition(beanName).isAbstract());
+		return (beanFactory instanceof ConfigurableListableBeanFactory clbf && beanFactory.containsBeanDefinition(beanName) &&
+				clbf.getBeanDefinition(beanName).isAbstract());
 	}
 
 
@@ -941,9 +941,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private void injectNotificationPublisherIfNecessary(
 			Object managedResource, @Nullable ModelMBean modelMBean, @Nullable ObjectName objectName) {
 
-		if (managedResource instanceof NotificationPublisherAware && modelMBean != null && objectName != null) {
-			((NotificationPublisherAware) managedResource).setNotificationPublisher(
-					new ModelMBeanNotificationPublisher(modelMBean, objectName, managedResource));
+		if (managedResource instanceof NotificationPublisherAware npa && modelMBean != null && objectName != null) {
+			npa.setNotificationPublisher(new ModelMBeanNotificationPublisher(modelMBean, objectName, managedResource));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,8 +96,8 @@ public class DateTimeContext {
 		}
 		else {
 			LocaleContext localeContext = LocaleContextHolder.getLocaleContext();
-			if (localeContext instanceof TimeZoneAwareLocaleContext) {
-				TimeZone timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAware) {
+				TimeZone timeZone = timeZoneAware.getTimeZone();
 				if (timeZone != null) {
 					formatter = formatter.withZone(timeZone.toZoneId());
 				}

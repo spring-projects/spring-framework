@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -772,11 +772,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		protected boolean canPutToCache(@Nullable Object value) {
 			String unless = "";
-			if (this.metadata.operation instanceof CacheableOperation) {
-				unless = ((CacheableOperation) this.metadata.operation).getUnless();
+			if (this.metadata.operation instanceof CacheableOperation cacheableOperation) {
+				unless = cacheableOperation.getUnless();
 			}
-			else if (this.metadata.operation instanceof CachePutOperation) {
-				unless = ((CachePutOperation) this.metadata.operation).getUnless();
+			else if (this.metadata.operation instanceof CachePutOperation cachePutOperation) {
+				unless = cachePutOperation.getUnless();
 			}
 			if (StringUtils.hasText(unless)) {
 				EvaluationContext evaluationContext = createEvaluationContext(value);

@@ -122,8 +122,8 @@ public abstract class BshScriptUtils {
 			interpreter.setClassLoader(classLoader);
 		}
 		Object result = interpreter.eval(scriptSource);
-		if (result instanceof Class) {
-			return (Class<?>) result;
+		if (result instanceof Class<?> clazz) {
+			return clazz;
 		}
 		else if (result != null) {
 			return result.getClass();
@@ -199,8 +199,8 @@ public abstract class BshScriptUtils {
 				if (result == Primitive.NULL || result == Primitive.VOID) {
 					return null;
 				}
-				if (result instanceof Primitive) {
-					return ((Primitive) result).getValue();
+				if (result instanceof Primitive primitive) {
+					return primitive.getValue();
 				}
 				return result;
 			}
@@ -209,13 +209,12 @@ public abstract class BshScriptUtils {
 			}
 		}
 
-		private boolean isProxyForSameBshObject(Object other) {
-			if (!Proxy.isProxyClass(other.getClass())) {
+		private boolean isProxyForSameBshObject(Object obj) {
+			if (!Proxy.isProxyClass(obj.getClass())) {
 				return false;
 			}
-			InvocationHandler ih = Proxy.getInvocationHandler(other);
-			return (ih instanceof BshObjectInvocationHandler &&
-					this.xt.equals(((BshObjectInvocationHandler) ih).xt));
+			InvocationHandler ih = Proxy.getInvocationHandler(obj);
+			return (ih instanceof BshObjectInvocationHandler that && this.xt.equals(that.xt));
 		}
 	}
 
