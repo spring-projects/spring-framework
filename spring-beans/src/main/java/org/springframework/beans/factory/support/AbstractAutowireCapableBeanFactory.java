@@ -1224,8 +1224,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (supplier instanceof InstanceSupplier<?> instanceSupplier) {
 				return instanceSupplier.get(RegisteredBean.of((ConfigurableListableBeanFactory) this, beanName));
 			}
-			if (supplier instanceof ThrowingSupplier<?> throwableSupplier) {
-				return throwableSupplier.getWithException();
+			if (supplier instanceof ThrowingSupplier<?> throwingSupplier) {
+				return throwingSupplier.getWithException();
 			}
 			return supplier.get();
 		}

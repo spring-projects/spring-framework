@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,8 +163,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		catch (InvocationTargetException ex) {
 			String msg = "Factory method '" + factoryMethod.getName() + "' threw exception with message: " +
 					ex.getTargetException().getMessage();
-			if (bd.getFactoryBeanName() != null && owner instanceof ConfigurableBeanFactory &&
-					((ConfigurableBeanFactory) owner).isCurrentlyInCreation(bd.getFactoryBeanName())) {
+			if (bd.getFactoryBeanName() != null && owner instanceof ConfigurableBeanFactory cbf &&
+					cbf.isCurrentlyInCreation(bd.getFactoryBeanName())) {
 				msg = "Circular reference involving containing bean '" + bd.getFactoryBeanName() + "' - consider " +
 						"declaring the factory method as static for independence from its containing instance. " + msg;
 			}
