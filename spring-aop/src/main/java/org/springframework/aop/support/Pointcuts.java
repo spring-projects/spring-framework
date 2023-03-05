@@ -126,8 +126,8 @@ public abstract class Pointcuts {
 		@Override
 		public boolean matches(Method method, Class<?> targetClass) {
 			return (method.getName().startsWith("get") &&
-					method.getParameterCount() == 0 &&
-				    method.getReturnType() != Void.TYPE);
+					method.getParameterCount() == 0 && 
+					method.getReturnType() != Void.TYPE);
 		}
 
 		private Object readResolve() {
