@@ -181,7 +181,7 @@ public final class RecordedInvocation {
 					getHintType().hintClassName(), getMethodReference(), getArguments());
 		}
 		else {
-			Class<?> instanceType = (getInstance() instanceof  Class<?>) ? getInstance() : getInstance().getClass();
+			Class<?> instanceType = (getInstance() instanceof Class<?> clazz) ? clazz : getInstance().getClass();
 			return "<%s> invocation of <%s> on type <%s> with arguments %s".formatted(
 					getHintType().hintClassName(), getMethodReference(), instanceType.getCanonicalName(), getArguments());
 		}

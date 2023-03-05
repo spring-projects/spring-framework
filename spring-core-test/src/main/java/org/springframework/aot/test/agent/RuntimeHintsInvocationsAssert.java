@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class RuntimeHintsInvocationsAssert extends AbstractAssert<RuntimeHintsIn
 					invocation.getArguments(), formatStackTrace(invocation.getStackFrames()));
 		}
 		else {
-			Class<?> instanceType = (invocation.getInstance() instanceof  Class<?>) ? invocation.getInstance() : invocation.getInstance().getClass();
+			Class<?> instanceType = (invocation.getInstance() instanceof Class<?> clazz) ? clazz : invocation.getInstance().getClass();
 			return new BasicErrorMessageFactory("%nMissing <%s> for invocation <%s> on type <%s> %nwith arguments %s.%nStacktrace:%n<%s>",
 					invocation.getHintType().hintClassName(), invocation.getMethodReference(),
 					instanceType, invocation.getArguments(),
