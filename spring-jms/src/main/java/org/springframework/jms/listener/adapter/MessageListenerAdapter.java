@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,15 +197,15 @@ public class MessageListenerAdapter extends AbstractAdaptableMessageListener imp
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void onMessage(Message message, @Nullable Session session) throws JMSException {
 		// Check whether the delegate is a MessageListener impl itself.
 		// In that case, the adapter will simply act as a pass-through.
 		Object delegate = getDelegate();
 		if (delegate != this) {
-			if (delegate instanceof SessionAwareMessageListener) {
+			if (delegate instanceof SessionAwareMessageListener samListener) {
 				Assert.state(session != null, "Session is required for SessionAwareMessageListener");
-				((SessionAwareMessageListener<Message>) delegate).onMessage(message, session);
+				samListener.onMessage(message, session);
 				return;
 			}
 			if (delegate instanceof MessageListener listener) {

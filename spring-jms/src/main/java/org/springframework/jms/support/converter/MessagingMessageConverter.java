@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,14 +112,13 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 		return reply;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Object fromMessage(jakarta.jms.Message message) throws JMSException, MessageConversionException {
 		Map<String, Object> mappedHeaders = extractHeaders(message);
 		Object convertedObject = extractPayload(message);
-		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message ?
-				MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>) convertedObject) :
-				MessageBuilder.withPayload(convertedObject));
+		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message springMessage ?
+				MessageBuilder.fromMessage(springMessage) : MessageBuilder.withPayload(convertedObject));
 		return builder.copyHeadersIfAbsent(mappedHeaders).build();
 	}
 

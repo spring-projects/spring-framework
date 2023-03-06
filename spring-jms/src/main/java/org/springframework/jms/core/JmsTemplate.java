@@ -179,11 +179,14 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	@Nullable
 	private Queue getDefaultQueue() {
 		Destination defaultDestination = getDefaultDestination();
-		if (defaultDestination != null && !(defaultDestination instanceof Queue)) {
+		if (defaultDestination == null) {
+			return null;
+		}
+		if (!(defaultDestination instanceof Queue queue)) {
 			throw new IllegalStateException(
 					"'defaultDestination' does not correspond to a Queue. Check configuration of JmsTemplate.");
 		}
-		return (Queue) defaultDestination;
+		return queue;
 	}
 
 	/**
