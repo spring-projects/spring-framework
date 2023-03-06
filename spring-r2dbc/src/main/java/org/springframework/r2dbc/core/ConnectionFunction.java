@@ -20,7 +20,6 @@ import java.util.function.Function;
 
 import io.r2dbc.spi.Connection;
 
-
 /**
  * Union type combining {@link Function} and {@link SqlProvider} to expose the SQL
  * that is related to the underlying action. The {@code SqlProvider} can support
