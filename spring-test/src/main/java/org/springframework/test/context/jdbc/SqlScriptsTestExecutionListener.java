@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -340,8 +340,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		try {
 			Method getDataSourceMethod = transactionManager.getClass().getMethod("getDataSource");
 			Object obj = ReflectionUtils.invokeMethod(getDataSourceMethod, transactionManager);
-			if (obj instanceof DataSource) {
-				return (DataSource) obj;
+			if (obj instanceof DataSource dataSource) {
+				return dataSource;
 			}
 		}
 		catch (Exception ex) {
