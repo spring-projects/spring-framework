@@ -342,10 +342,10 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 		this.persistenceUnitInfo = determinePersistenceUnitInfo(managerToUse);
 		JpaVendorAdapter jpaVendorAdapter = getJpaVendorAdapter();
-		if (jpaVendorAdapter != null && this.persistenceUnitInfo instanceof SmartPersistenceUnitInfo) {
+		if (jpaVendorAdapter != null && this.persistenceUnitInfo instanceof SmartPersistenceUnitInfo smartInfo) {
 			String rootPackage = jpaVendorAdapter.getPersistenceProviderRootPackage();
 			if (rootPackage != null) {
-				((SmartPersistenceUnitInfo) this.persistenceUnitInfo).setPersistenceProviderPackageName(rootPackage);
+				smartInfo.setPersistenceProviderPackageName(rootPackage);
 			}
 		}
 

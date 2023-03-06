@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 	@SuppressWarnings("rawtypes")
 	public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map properties) {
 		final List<String> mergedClassesAndPackages = new ArrayList<>(info.getManagedClassNames());
-		if (info instanceof SmartPersistenceUnitInfo) {
-			mergedClassesAndPackages.addAll(((SmartPersistenceUnitInfo) info).getManagedPackages());
+		if (info instanceof SmartPersistenceUnitInfo smartInfo) {
+			mergedClassesAndPackages.addAll(smartInfo.getManagedPackages());
 		}
 		return new EntityManagerFactoryBuilderImpl(
 				new PersistenceUnitInfoDescriptor(info) {

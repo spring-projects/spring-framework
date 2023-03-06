@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -186,26 +186,25 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	public LocalSessionFactoryBuilder setJtaTransactionManager(Object jtaTransactionManager) {
 		Assert.notNull(jtaTransactionManager, "Transaction manager reference must not be null");
 
-		if (jtaTransactionManager instanceof JtaTransactionManager) {
+		if (jtaTransactionManager instanceof JtaTransactionManager springJtaTm) {
 			boolean webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager", getClass().getClassLoader());
 			if (webspherePresent) {
 				getProperties().put(AvailableSettings.JTA_PLATFORM,
 						"org.hibernate.engine.transaction.jta.platform.internal.WebSphereExtendedJtaPlatform");
 			}
 			else {
-				JtaTransactionManager jtaTm = (JtaTransactionManager) jtaTransactionManager;
-				if (jtaTm.getTransactionManager() == null) {
+				if (springJtaTm.getTransactionManager() == null) {
 					throw new IllegalArgumentException(
 							"Can only apply JtaTransactionManager which has a TransactionManager reference set");
 				}
 				getProperties().put(AvailableSettings.JTA_PLATFORM,
-						new ConfigurableJtaPlatform(jtaTm.getTransactionManager(), jtaTm.getUserTransaction(),
-								jtaTm.getTransactionSynchronizationRegistry()));
+						new ConfigurableJtaPlatform(springJtaTm.getTransactionManager(), springJtaTm.getUserTransaction(),
+								springJtaTm.getTransactionSynchronizationRegistry()));
 			}
 		}
-		else if (jtaTransactionManager instanceof TransactionManager) {
+		else if (jtaTransactionManager instanceof TransactionManager jtaTm) {
 			getProperties().put(AvailableSettings.JTA_PLATFORM,
-					new ConfigurableJtaPlatform((TransactionManager) jtaTransactionManager, null, null));
+					new ConfigurableJtaPlatform(jtaTm, null, null));
 		}
 		else {
 			throw new IllegalArgumentException(
@@ -447,9 +446,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			}
 			catch (ExecutionException ex) {
 				Throwable cause = ex.getCause();
-				if (cause instanceof HibernateException) {
+				if (cause instanceof HibernateException hibernateException) {
 					// Rethrow a provider configuration exception (possibly with a nested cause) directly
-					throw (HibernateException) cause;
+					throw hibernateException;
 				}
 				throw new IllegalStateException("Failed to asynchronously initialize Hibernate SessionFactory: " +
 						ex.getMessage(), cause);
