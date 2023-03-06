@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,17 +234,17 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 */
 	@Override
 	public final void marshal(Object graph, Result result) throws IOException, XmlMappingException {
-		if (result instanceof DOMResult) {
-			marshalDomResult(graph, (DOMResult) result);
+		if (result instanceof DOMResult domResult) {
+			marshalDomResult(graph, domResult);
 		}
 		else if (StaxUtils.isStaxResult(result)) {
 			marshalStaxResult(graph, result);
 		}
-		else if (result instanceof SAXResult) {
-			marshalSaxResult(graph, (SAXResult) result);
+		else if (result instanceof SAXResult saxResult) {
+			marshalSaxResult(graph, saxResult);
 		}
-		else if (result instanceof StreamResult) {
-			marshalStreamResult(graph, (StreamResult) result);
+		else if (result instanceof StreamResult streamResult) {
+			marshalStreamResult(graph, streamResult);
 		}
 		else {
 			throw new IllegalArgumentException("Unknown Result type: " + result.getClass());
@@ -353,17 +353,17 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 */
 	@Override
 	public final Object unmarshal(Source source) throws IOException, XmlMappingException {
-		if (source instanceof DOMSource) {
-			return unmarshalDomSource((DOMSource) source);
+		if (source instanceof DOMSource domSource) {
+			return unmarshalDomSource(domSource);
 		}
 		else if (StaxUtils.isStaxSource(source)) {
 			return unmarshalStaxSource(source);
 		}
-		else if (source instanceof SAXSource) {
-			return unmarshalSaxSource((SAXSource) source);
+		else if (source instanceof SAXSource saxSource) {
+			return unmarshalSaxSource(saxSource);
 		}
-		else if (source instanceof StreamSource) {
-			return unmarshalStreamSource((StreamSource) source);
+		else if (source instanceof StreamSource streamSource) {
+			return unmarshalStreamSource(streamSource);
 		}
 		else {
 			throw new IllegalArgumentException("Unknown Source type: " + source.getClass());
