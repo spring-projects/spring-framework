@@ -18,6 +18,8 @@ package org.springframework.web.filter;
 
 import java.io.IOException;
 
+import jakarta.servlet.AsyncEvent;
+import jakarta.servlet.AsyncListener;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -100,11 +102,16 @@ public class RequestContextFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 		}
 		finally {
+			if (request.isAsyncStarted()) {
+				request.getAsyncContext().addListener(new RequestCompleteListener(attributes));
+			}
+			else {
+				attributes.requestCompleted();
+			}
 			resetContextHolders();
 			if (logger.isTraceEnabled()) {
 				logger.trace("Cleared thread-bound request context: " + request);
 			}
-			attributes.requestCompleted();
 		}
 	}
 
@@ -121,4 +128,31 @@ public class RequestContextFilter extends OncePerRequestFilter {
 		RequestContextHolder.resetRequestAttributes();
 	}
 
+	class RequestCompleteListener implements AsyncListener {
+		private final ServletRequestAttributes attributes;
+
+		RequestCompleteListener(final ServletRequestAttributes attributes) {
+			this.attributes = attributes;
+		}
+
+		@Override
+		public void onComplete(final AsyncEvent event) throws IOException {
+			resetContextHolders();
+			this.attributes.requestCompleted();
+		}
+
+		@Override
+		public void onTimeout(final AsyncEvent event) throws IOException {
+			onComplete(event);
+		}
+
+		@Override
+		public void onError(final AsyncEvent event) throws IOException {
+			onComplete(event);
+		}
+
+		@Override
+		public void onStartAsync(final AsyncEvent event) throws IOException {
+		}
+	}
 }
