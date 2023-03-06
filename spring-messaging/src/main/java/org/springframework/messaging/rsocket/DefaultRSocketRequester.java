@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,8 +196,8 @@ final class DefaultRSocketRequester implements RSocketRequester {
 		private void createPayload(Object input, ResolvableType elementType) {
 			ReactiveAdapter adapter = getAdapter(input.getClass());
 			Publisher<?> publisher;
-			if (input instanceof Publisher) {
-				publisher = (Publisher<?>) input;
+			if (input instanceof Publisher<?> _publisher) {
+				publisher = _publisher;
 			}
 			else if (adapter != null) {
 				publisher = adapter.toPublisher(input);

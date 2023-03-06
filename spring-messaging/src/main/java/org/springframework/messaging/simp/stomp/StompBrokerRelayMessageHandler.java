@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -534,7 +534,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return;
 		}
 
-		StompHeaderAccessor stompAccessor;
+		StompHeaderAccessor stompHeaderAccessor;
 		StompCommand command;
 
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
@@ -542,15 +542,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			throw new IllegalStateException(
 					"No header accessor (not using the SimpMessagingTemplate?): " + message);
 		}
-		else if (accessor instanceof StompHeaderAccessor) {
-			stompAccessor = (StompHeaderAccessor) accessor;
-			command = stompAccessor.getCommand();
+		else if (accessor instanceof StompHeaderAccessor _stompHeaderAccessor) {
+			stompHeaderAccessor = _stompHeaderAccessor;
+			command = stompHeaderAccessor.getCommand();
 		}
 		else if (accessor instanceof SimpMessageHeaderAccessor) {
-			stompAccessor = StompHeaderAccessor.wrap(message);
-			command = stompAccessor.getCommand();
+			stompHeaderAccessor = StompHeaderAccessor.wrap(message);
+			command = stompHeaderAccessor.getCommand();
 			if (command == null) {
-				command = stompAccessor.updateStompCommandAsClientMessage();
+				command = stompHeaderAccessor.updateStompCommandAsClientMessage();
 			}
 		}
 		else {
@@ -559,14 +559,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		if (sessionId == null) {
-			if (!SimpMessageType.MESSAGE.equals(stompAccessor.getMessageType())) {
+			if (!SimpMessageType.MESSAGE.equals(stompHeaderAccessor.getMessageType())) {
 				if (logger.isErrorEnabled()) {
 					logger.error("Only STOMP SEND supported from within the server side. Ignoring " + message);
 				}
 				return;
 			}
 			sessionId = SYSTEM_SESSION_ID;
-			stompAccessor.setSessionId(sessionId);
+			stompHeaderAccessor.setSessionId(sessionId);
 		}
 
 		if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
@@ -577,15 +577,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug(stompAccessor.getShortLogMessage(EMPTY_PAYLOAD));
+				logger.debug(stompHeaderAccessor.getShortLogMessage(EMPTY_PAYLOAD));
 			}
-			stompAccessor = (stompAccessor.isMutable() ? stompAccessor : StompHeaderAccessor.wrap(message));
-			stompAccessor.setLogin(this.clientLogin);
-			stompAccessor.setPasscode(this.clientPasscode);
+			stompHeaderAccessor = (stompHeaderAccessor.isMutable() ? stompHeaderAccessor : StompHeaderAccessor.wrap(message));
+			stompHeaderAccessor.setLogin(this.clientLogin);
+			stompHeaderAccessor.setPasscode(this.clientPasscode);
 			if (getVirtualHost() != null) {
-				stompAccessor.setHost(getVirtualHost());
+				stompHeaderAccessor.setHost(getVirtualHost());
 			}
-			RelayConnectionHandler handler = new RelayConnectionHandler(sessionId, stompAccessor);
+			RelayConnectionHandler handler = new RelayConnectionHandler(sessionId, stompHeaderAccessor);
 			this.connectionHandlers.put(sessionId, handler);
 			this.stats.incrementConnectCount();
 			Assert.state(this.tcpClient != null, "No TCP client available");
@@ -600,7 +600,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 			this.stats.incrementDisconnectCount();
-			handler.forward(message, stompAccessor);
+			handler.forward(message, stompHeaderAccessor);
 		}
 		else {
 			RelayConnectionHandler handler = this.connectionHandlers.get(sessionId);
@@ -611,7 +611,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 
-			String destination = stompAccessor.getDestination();
+			String destination = stompHeaderAccessor.getDestination();
 			if (command != null && command.requiresDestination() && !checkDestinationPrefix(destination)) {
 				// Not a broker destination but send a heartbeat to keep the connection
 				if (handler.shouldSendHeartbeatForIgnoredMessage()) {
@@ -620,7 +620,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 
-			handler.forward(message, stompAccessor);
+			handler.forward(message, stompHeaderAccessor);
 		}
 	}
 

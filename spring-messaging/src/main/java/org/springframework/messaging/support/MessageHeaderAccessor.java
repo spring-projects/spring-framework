@@ -416,7 +416,7 @@ public class MessageHeaderAccessor {
 		if (value == null) {
 			return null;
 		}
-		return (value instanceof UUID ? (UUID) value : UUID.fromString(value.toString()));
+		return (value instanceof UUID uuid ? uuid : UUID.fromString(value.toString()));
 	}
 
 	@Nullable
@@ -425,7 +425,7 @@ public class MessageHeaderAccessor {
 		if (value == null) {
 			return null;
 		}
-		return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
+		return (value instanceof Long num ? num : Long.parseLong(value.toString()));
 	}
 
 	public void setContentType(MimeType contentType) {
@@ -438,7 +438,7 @@ public class MessageHeaderAccessor {
 		if (value == null) {
 			return null;
 		}
-		return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
+		return (value instanceof MimeType mimeType ? mimeType : MimeType.valueOf(value.toString()));
 	}
 
 	private Charset getCharset() {

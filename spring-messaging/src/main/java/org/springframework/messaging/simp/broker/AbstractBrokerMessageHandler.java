@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,8 +205,8 @@ public abstract class AbstractBrokerMessageHandler
 			logger.info("Starting...");
 			this.clientInboundChannel.subscribe(this);
 			this.brokerChannel.subscribe(this);
-			if (this.clientInboundChannel instanceof InterceptableChannel) {
-				((InterceptableChannel) this.clientInboundChannel).addInterceptor(0, this.unsentDisconnectInterceptor);
+			if (this.clientInboundChannel instanceof InterceptableChannel ic) {
+				ic.addInterceptor(0, this.unsentDisconnectInterceptor);
 			}
 			startInternal();
 			this.running = true;
@@ -224,8 +224,8 @@ public abstract class AbstractBrokerMessageHandler
 			stopInternal();
 			this.clientInboundChannel.unsubscribe(this);
 			this.brokerChannel.unsubscribe(this);
-			if (this.clientInboundChannel instanceof InterceptableChannel) {
-				((InterceptableChannel) this.clientInboundChannel).removeInterceptor(this.unsentDisconnectInterceptor);
+			if (this.clientInboundChannel instanceof InterceptableChannel ic) {
+				ic.removeInterceptor(this.unsentDisconnectInterceptor);
 			}
 			this.running = false;
 			logger.info("Stopped.");

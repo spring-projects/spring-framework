@@ -299,10 +299,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected final void detectHandlerMethods(final Object handler) {
 		Class<?> handlerType;
-		if (handler instanceof String) {
+		if (handler instanceof String beanName) {
 			ApplicationContext context = getApplicationContext();
 			Assert.state(context != null, "ApplicationContext is required for resolving handler bean names");
-			handlerType = context.getType((String) handler);
+			handlerType = context.getType(beanName);
 		}
 		else {
 			handlerType = handler.getClass();
@@ -730,8 +730,9 @@ public abstract class AbstractMethodMessageHandler<T>
 			}
 		}
 
-		private void handleFailure(Throwable ex) {
-			Exception cause = (ex instanceof Exception ? (Exception) ex : new IllegalStateException(ex));
+		private void handleFailure(Throwable throwable) {
+			Exception cause = (throwable instanceof Exception exception ? exception :
+					new IllegalStateException(throwable));
 			processHandlerMethodException(this.handlerMethod, cause, this.message);
 		}
 	}

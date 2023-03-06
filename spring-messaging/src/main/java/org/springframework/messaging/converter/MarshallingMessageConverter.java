@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 		this();
 		Assert.notNull(marshaller, "Marshaller must not be null");
 		this.marshaller = marshaller;
-		if (marshaller instanceof Unmarshaller) {
-			this.unmarshaller = (Unmarshaller) marshaller;
+		if (marshaller instanceof Unmarshaller _unmarshaller) {
+			this.unmarshaller = _unmarshaller;
 		}
 	}
 
@@ -159,8 +159,8 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	private Source getSource(Object payload) {
-		if (payload instanceof byte[]) {
-			return new StreamSource(new ByteArrayInputStream((byte[]) payload));
+		if (payload instanceof byte[] bytes) {
+			return new StreamSource(new ByteArrayInputStream(bytes));
 		}
 		else {
 			return new StreamSource(new StringReader(payload.toString()));

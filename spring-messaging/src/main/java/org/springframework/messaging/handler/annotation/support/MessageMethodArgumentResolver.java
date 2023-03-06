@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,11 +121,11 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 		if (payload == null) {
 			return true;
 		}
-		else if (payload instanceof byte[]) {
-			return ((byte[]) payload).length == 0;
+		else if (payload instanceof byte[] bytes) {
+			return bytes.length == 0;
 		}
-		else if (payload instanceof String) {
-			return !StringUtils.hasText((String) payload);
+		else if (payload instanceof String text) {
+			return !StringUtils.hasText(text);
 		}
 		else {
 			return false;

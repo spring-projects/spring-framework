@@ -50,9 +50,9 @@ public abstract class PayloadUtils {
 	 */
 	public static DataBuffer retainDataAndReleasePayload(Payload payload, DataBufferFactory bufferFactory) {
 		try {
-			if (bufferFactory instanceof NettyDataBufferFactory) {
+			if (bufferFactory instanceof NettyDataBufferFactory nettyBufferFactory) {
 				ByteBuf byteBuf = payload.sliceData().retain();
-				return ((NettyDataBufferFactory) bufferFactory).wrap(byteBuf);
+				return nettyBufferFactory.wrap(byteBuf);
 			}
 			else {
 				return bufferFactory.wrap(payload.getData());

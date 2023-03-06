@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -213,12 +213,12 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			if (ClassUtils.isAssignableValue(targetClass, payload)) {
 				return payload;
 			}
-			else if (payload instanceof byte[]) {
+			else if (payload instanceof byte[] bytes) {
 				if (view != null) {
-					return this.objectMapper.readerWithView(view).forType(javaType).readValue((byte[]) payload);
+					return this.objectMapper.readerWithView(view).forType(javaType).readValue(bytes);
 				}
 				else {
-					return this.objectMapper.readValue((byte[]) payload, javaType);
+					return this.objectMapper.readValue(bytes, javaType);
 				}
 			}
 			else {
@@ -290,11 +290,11 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 				return extractViewClass(annotation, conversionHint);
 			}
 		}
-		else if (conversionHint instanceof JsonView) {
-			return extractViewClass((JsonView) conversionHint, conversionHint);
+		else if (conversionHint instanceof JsonView jsonView) {
+			return extractViewClass(jsonView, conversionHint);
 		}
-		else if (conversionHint instanceof Class) {
-			return (Class<?>) conversionHint;
+		else if (conversionHint instanceof Class<?> clazz) {
+			return clazz;
 		}
 
 		// No JSON view specified...
