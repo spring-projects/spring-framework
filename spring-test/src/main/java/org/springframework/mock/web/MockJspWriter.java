@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspWriter;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspWriter;
 
 import org.springframework.lang.Nullable;
 
 /**
- * Mock implementation of the {@link javax.servlet.jsp.JspWriter} class.
+ * Mock implementation of the {@link jakarta.servlet.jsp.JspWriter} class.
  * Only necessary for testing applications when testing custom JSP tags.
  *
  * @author Juergen Hoeller
@@ -65,8 +65,8 @@ public class MockJspWriter extends JspWriter {
 	public MockJspWriter(@Nullable HttpServletResponse response, @Nullable Writer targetWriter) {
 		super(DEFAULT_BUFFER, true);
 		this.response = (response != null ? response : new MockHttpServletResponse());
-		if (targetWriter instanceof PrintWriter) {
-			this.targetWriter = (PrintWriter) targetWriter;
+		if (targetWriter instanceof PrintWriter printWriter) {
+			this.targetWriter = printWriter;
 		}
 		else if (targetWriter != null) {
 			this.targetWriter = new PrintWriter(targetWriter);

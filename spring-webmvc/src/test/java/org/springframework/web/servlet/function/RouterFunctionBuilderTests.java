@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.function;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -26,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
@@ -53,7 +56,7 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest getFooRequest = initRequest("GET", "/foo");
 
-		Optional<HttpStatus> responseStatus = route.route(getFooRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(getFooRequest)
 				.map(handlerFunction -> handle(handlerFunction, getFooRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.OK);
@@ -102,7 +105,7 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest resourceRequest = initRequest("GET", "/resources/response.txt");
 
-		Optional<HttpStatus> responseStatus = route.route(resourceRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(resourceRequest)
 				.map(handlerFunction -> handle(handlerFunction, resourceRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.OK);
@@ -127,7 +130,7 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest fooRequest = initRequest("GET", "/foo/bar/baz");
 
-		Optional<HttpStatus> responseStatus = route.route(fooRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(fooRequest)
 				.map(handlerFunction -> handle(handlerFunction, fooRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.OK);
@@ -175,7 +178,7 @@ class RouterFunctionBuilderTests {
 
 		ServerRequest barRequest = initRequest("GET", "/bar");
 
-		Optional<HttpStatus> responseStatus = route.route(barRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(barRequest)
 				.map(handlerFunction -> handle(handlerFunction, barRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -194,7 +197,7 @@ class RouterFunctionBuilderTests {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/error");
 		ServerRequest serverRequest = new DefaultServerRequest(servletRequest, emptyList());
 
-		Optional<HttpStatus> responseStatus = route.route(serverRequest)
+		Optional<HttpStatusCode> responseStatus = route.route(serverRequest)
 				.map(handlerFunction -> handle(handlerFunction, serverRequest))
 				.map(ServerResponse::statusCode);
 		assertThat(responseStatus).contains(HttpStatus.OK);
@@ -225,12 +228,28 @@ class RouterFunctionBuilderTests {
 					atts.put("foo", "bar");
 					atts.put("baz", "qux");
 				})
+				.path("/atts", b1 -> b1
+						.GET("/3", request -> ServerResponse.ok().build())
+						.withAttribute("foo", "bar")
+						.GET("/4", request -> ServerResponse.ok().build())
+						.withAttribute("baz", "qux")
+						.path("/5", b2 -> b2
+							.GET(request -> ServerResponse.ok().build())
+							.withAttribute("foo", "n3"))
+						.withAttribute("foo", "n2")
+					)
+					.withAttribute("foo", "n1")
 				.build();
 
 		AttributesTestVisitor visitor = new AttributesTestVisitor();
 		route.accept(visitor);
-		assertThat(visitor.visitCount()).isEqualTo(2);
+		assertThat(visitor.routerFunctionsAttributes()).containsExactly(
+				List.of(Map.of("foo", "bar", "baz", "qux")),
+				List.of(Map.of("foo", "bar", "baz", "qux")),
+				List.of(Map.of("foo", "bar"), Map.of("foo", "n1")),
+				List.of(Map.of("baz", "qux"), Map.of("foo", "n1")),
+				List.of(Map.of("foo", "n3"), Map.of("foo", "n2"), Map.of("foo", "n1"))
+		);
+		assertThat(visitor.visitCount()).isEqualTo(7);
 	}
-
-
 }

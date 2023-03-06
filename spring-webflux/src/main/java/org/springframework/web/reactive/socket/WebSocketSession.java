@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.socket;
 
 import java.util.Map;
@@ -66,7 +67,6 @@ public interface WebSocketSession {
 	 * is closed. In a typical {@link WebSocketHandler} implementation this
 	 * stream is composed into the overall processing flow, so that when the
 	 * connection is closed, handling will end.
-	 *
 	 * <p>See the class-level doc of {@link WebSocketHandler} and the reference
 	 * for more details and examples of how to handle the session.
 	 */
@@ -76,11 +76,16 @@ public interface WebSocketSession {
 	 * Give a source of outgoing messages, write the messages and return a
 	 * {@code Mono<Void>} that completes when the source completes and writing
 	 * is done.
-	 *
 	 * <p>See the class-level doc of {@link WebSocketHandler} and the reference
 	 * for more details and examples of how to handle the session.
 	 */
 	Mono<Void> send(Publisher<WebSocketMessage> messages);
+
+	/**
+	 * Whether the underlying connection is open.
+	 * @since 5.3.1
+	 */
+	boolean isOpen();
 
 	/**
 	 * Close the WebSocket session with {@link CloseStatus#NORMAL}.

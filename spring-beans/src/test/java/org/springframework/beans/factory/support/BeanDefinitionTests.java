@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,16 @@ public class BeanDefinitionTests {
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
 		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+
+		bd.getPropertyValues();
+		assertThat(bd.equals(otherBd)).isTrue();
+		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+
+		bd.getConstructorArgumentValues();
+		assertThat(bd.equals(otherBd)).isTrue();
+		assertThat(otherBd.equals(bd)).isTrue();
+		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
 	}
 
 	@Test
@@ -171,7 +181,7 @@ public class BeanDefinitionTests {
 		RootBeanDefinition mergedBd = new RootBeanDefinition(bd);
 		mergedBd.overrideFrom(childBd);
 		assertThat(mergedBd.getConstructorArgumentValues().getArgumentCount()).isEqualTo(2);
-		assertThat(mergedBd.getPropertyValues().size()).isEqualTo(2);
+		assertThat(mergedBd.getPropertyValues()).hasSize(2);
 		assertThat(mergedBd).isEqualTo(bd);
 
 		mergedBd.getConstructorArgumentValues().getArgumentValue(1, null).setValue(9);

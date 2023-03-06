@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,10 +128,9 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ControlFlowPointcut)) {
+		if (!(other instanceof ControlFlowPointcut that)) {
 			return false;
 		}
-		ControlFlowPointcut that = (ControlFlowPointcut) other;
 		return (this.clazz.equals(that.clazz)) && ObjectUtils.nullSafeEquals(this.methodName, that.methodName);
 	}
 
@@ -146,7 +145,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	@Override
 	public String toString() {
-		return getClass().getName() + ": class = " + this.clazz.getName() + "; methodName = " + methodName;
+		return getClass().getName() + ": class = " + this.clazz.getName() + "; methodName = " + this.methodName;
 	}
 
 }

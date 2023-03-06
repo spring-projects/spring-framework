@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.io.buffer;
 
 import java.nio.charset.StandardCharsets;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link LimitedDataBufferList}.
@@ -29,8 +32,10 @@ public class LimitedDataBufferListTests {
 
 	@Test
 	void limitEnforced() {
-		Assertions.assertThatThrownBy(() -> new LimitedDataBufferList(5).add(toDataBuffer("123456")))
-				.isInstanceOf(DataBufferLimitException.class);
+		LimitedDataBufferList list = new LimitedDataBufferList(5);
+
+		assertThatThrownBy(() -> list.add(toDataBuffer("123456"))).isInstanceOf(DataBufferLimitException.class);
+		assertThat(list).isEmpty();
 	}
 
 	@Test

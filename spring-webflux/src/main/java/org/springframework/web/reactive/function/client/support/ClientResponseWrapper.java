@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -74,13 +74,8 @@ public class ClientResponseWrapper implements ClientResponse {
 	}
 
 	@Override
-	public HttpStatus statusCode() {
+	public HttpStatusCode statusCode() {
 		return this.delegate.statusCode();
-	}
-
-	@Override
-	public int rawStatusCode() {
-		return this.delegate.rawStatusCode();
 	}
 
 	@Override
@@ -151,6 +146,11 @@ public class ClientResponseWrapper implements ClientResponse {
 	@Override
 	public Mono<WebClientResponseException> createException() {
 		return this.delegate.createException();
+	}
+
+	@Override
+	public <T> Mono<T> createError() {
+		return this.delegate.createError();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.context.annotation.componentscan.simple.ClassWithNest
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.testfixture.SimpleMapScope;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
@@ -274,6 +275,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Target(ElementType.TYPE)
 	public @interface ComposedConfiguration {
 
+		@AliasFor(annotation = ComponentScan.class)
 		String[] basePackages() default {};
 	}
 

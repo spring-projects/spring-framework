@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -66,7 +66,7 @@ import org.springframework.web.context.request.WebRequest;
 public abstract class WebApplicationContextUtils {
 
 	private static final boolean jsfPresent =
-			ClassUtils.isPresent("javax.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
+			ClassUtils.isPresent("jakarta.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
 
 
 	/**
@@ -114,19 +114,19 @@ public abstract class WebApplicationContextUtils {
 		if (attr == null) {
 			return null;
 		}
-		if (attr instanceof RuntimeException) {
-			throw (RuntimeException) attr;
+		if (attr instanceof RuntimeException runtimeException) {
+			throw runtimeException;
 		}
-		if (attr instanceof Error) {
-			throw (Error) attr;
+		if (attr instanceof Error error) {
+			throw error;
 		}
-		if (attr instanceof Exception) {
-			throw new IllegalStateException((Exception) attr);
+		if (attr instanceof Exception exception) {
+			throw new IllegalStateException(exception);
 		}
-		if (!(attr instanceof WebApplicationContext)) {
+		if (!(attr instanceof WebApplicationContext wac)) {
 			throw new IllegalStateException("Context attribute is not of type WebApplicationContext: " + attr);
 		}
-		return (WebApplicationContext) attr;
+		return wac;
 	}
 
 	/**
@@ -152,12 +152,12 @@ public abstract class WebApplicationContextUtils {
 			while (attrNames.hasMoreElements()) {
 				String attrName = attrNames.nextElement();
 				Object attrValue = sc.getAttribute(attrName);
-				if (attrValue instanceof WebApplicationContext) {
+				if (attrValue instanceof WebApplicationContext currentWac) {
 					if (wac != null) {
 						throw new IllegalStateException("No unique WebApplicationContext found: more than one " +
 								"DispatcherServlet registered with publishContext=true?");
 					}
-					wac = (WebApplicationContext) attrValue;
+					wac = currentWac;
 				}
 			}
 		}
@@ -311,10 +311,10 @@ public abstract class WebApplicationContextUtils {
 	 */
 	private static ServletRequestAttributes currentRequestAttributes() {
 		RequestAttributes requestAttr = RequestContextHolder.currentRequestAttributes();
-		if (!(requestAttr instanceof ServletRequestAttributes)) {
+		if (!(requestAttr instanceof ServletRequestAttributes servletRequestAttributes)) {
 			throw new IllegalStateException("Current request is not a servlet request");
 		}
-		return (ServletRequestAttributes) requestAttr;
+		return servletRequestAttributes;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,8 +121,8 @@ public class CustomNumberEditor extends PropertyEditorSupport {
 	 */
 	@Override
 	public void setValue(@Nullable Object value) {
-		if (value instanceof Number) {
-			super.setValue(NumberUtils.convertNumberToTargetClass((Number) value, this.numberClass));
+		if (value instanceof Number num) {
+			super.setValue(NumberUtils.convertNumberToTargetClass(num, this.numberClass));
 		}
 		else {
 			super.setValue(value);

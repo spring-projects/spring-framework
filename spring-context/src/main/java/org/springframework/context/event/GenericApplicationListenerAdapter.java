@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @since 3.0
  * @see org.springframework.context.ApplicationListener#onApplicationEvent
  */
-public class GenericApplicationListenerAdapter implements GenericApplicationListener, SmartApplicationListener {
+public class GenericApplicationListenerAdapter implements GenericApplicationListener {
 
 	private static final Map<Class<?>, ResolvableType> eventTypeCache = new ConcurrentReferenceHashMap<>();
 
@@ -67,9 +67,12 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean supportsEventType(ResolvableType eventType) {
-		if (this.delegate instanceof SmartApplicationListener) {
+		if (this.delegate instanceof GenericApplicationListener gal) {
+			return gal.supportsEventType(eventType);
+		}
+		else if (this.delegate instanceof SmartApplicationListener sal) {
 			Class<? extends ApplicationEvent> eventClass = (Class<? extends ApplicationEvent>) eventType.resolve();
-			return (eventClass != null && ((SmartApplicationListener) this.delegate).supportsEventType(eventClass));
+			return (eventClass != null && sal.supportsEventType(eventClass));
 		}
 		else {
 			return (this.declaredEventType == null || this.declaredEventType.isAssignableFrom(eventType));
@@ -77,19 +80,18 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	}
 
 	@Override
-	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-		return supportsEventType(ResolvableType.forClass(eventType));
-	}
-
-	@Override
 	public boolean supportsSourceType(@Nullable Class<?> sourceType) {
-		return !(this.delegate instanceof SmartApplicationListener) ||
-				((SmartApplicationListener) this.delegate).supportsSourceType(sourceType);
+		return (!(this.delegate instanceof SmartApplicationListener sal) || sal.supportsSourceType(sourceType));
 	}
 
 	@Override
 	public int getOrder() {
-		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
+		return (this.delegate instanceof Ordered ordered ? ordered.getOrder() : Ordered.LOWEST_PRECEDENCE);
+	}
+
+	@Override
+	public String getListenerId() {
+		return (this.delegate instanceof SmartApplicationListener sal ? sal.getListenerId() : "");
 	}
 
 

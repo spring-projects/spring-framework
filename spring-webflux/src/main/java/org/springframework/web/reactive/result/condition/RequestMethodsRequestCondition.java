@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 
 	static {
 		requestMethodConditionCache = CollectionUtils.newHashMap(RequestMethod.values().length);
-		for (RequestMethod method : RequestMethod.values()) {
-			requestMethodConditionCache.put(
-					HttpMethod.valueOf(method.name()), new RequestMethodsRequestCondition(method));
+		for (RequestMethod requestMethod : RequestMethod.values()) {
+			requestMethodConditionCache.put(requestMethod.asHttpMethod(),
+					new RequestMethodsRequestCondition(requestMethod));
 		}
 	}
 
@@ -127,7 +127,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 			return matchPreFlight(exchange.getRequest());
 		}
 		if (getMethods().isEmpty()) {
-			if (RequestMethod.OPTIONS.name().equals(exchange.getRequest().getMethodValue())) {
+			if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
 				return null; // We handle OPTIONS transparently, so don't match if no explicit declarations
 			}
 			return this;
@@ -150,16 +150,15 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	}
 
 	@Nullable
-	private RequestMethodsRequestCondition matchRequestMethod(@Nullable HttpMethod httpMethod) {
-		if (httpMethod == null) {
-			return null;
-		}
-		RequestMethod requestMethod = RequestMethod.valueOf(httpMethod.name());
-		if (getMethods().contains(requestMethod)) {
-			return requestMethodConditionCache.get(httpMethod);
-		}
-		if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
-			return requestMethodConditionCache.get(HttpMethod.GET);
+	private RequestMethodsRequestCondition matchRequestMethod(HttpMethod httpMethod) {
+		RequestMethod requestMethod = RequestMethod.resolve(httpMethod);
+		if (requestMethod != null) {
+			if (getMethods().contains(requestMethod)) {
+				return requestMethodConditionCache.get(httpMethod);
+			}
+			if (requestMethod.equals(RequestMethod.HEAD) && getMethods().contains(RequestMethod.GET)) {
+				return requestMethodConditionCache.get(HttpMethod.GET);
+			}
 		}
 		return null;
 	}

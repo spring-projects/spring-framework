@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,10 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class HandshakeWebSocketServiceTests {
+class HandshakeWebSocketServiceTests {
 
 	@Test
-	public void sessionAttributePredicate() {
+	void sessionAttributePredicate() {
 		MockWebSession session = new MockWebSession();
 		session.getAttributes().put("a1", "v1");
 		session.getAttributes().put("a2", "v2");
@@ -58,7 +58,7 @@ public class HandshakeWebSocketServiceTests {
 		HandshakeWebSocketService service = new HandshakeWebSocketService(upgradeStrategy);
 		service.setSessionAttributePredicate(name -> Arrays.asList("a1", "a3", "a5").contains(name));
 
-		service.handleRequest(exchange, mock(WebSocketHandler.class)).block();
+		service.handleRequest(exchange, mock()).block();
 
 		HandshakeInfo info = upgradeStrategy.handshakeInfo;
 		assertThat(info).isNotNull();

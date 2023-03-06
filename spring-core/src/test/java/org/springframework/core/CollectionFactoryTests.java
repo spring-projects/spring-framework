@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.LinkedMultiValueMap;
@@ -156,7 +155,7 @@ class CollectionFactoryTests {
 	@Test
 	void createApproximateCollectionFromEmptyHashSet() {
 		Collection<String> set = createApproximateCollection(new HashSet<String>(), 2);
-		Assertions.assertThat(set).isEmpty();
+		assertThat(set).isEmpty();
 	}
 
 	@Test

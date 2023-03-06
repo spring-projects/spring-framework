@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,17 +42,17 @@ class JdbcBeanDefinitionReaderTests {
 	void readBeanDefinitionFromMockedDataSource() throws Exception {
 		String sql = "SELECT NAME AS NAME, PROPERTY AS PROPERTY, VALUE AS VALUE FROM T";
 
-		Connection connection = mock(Connection.class);
-		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock();
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 
-		ResultSet resultSet = mock(ResultSet.class);
+		ResultSet resultSet = mock();
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(1)).willReturn("one", "one");
 		given(resultSet.getString(2)).willReturn("(class)", "age");
 		given(resultSet.getString(3)).willReturn("org.springframework.beans.testfixture.beans.TestBean", "53");
 
-		Statement statement = mock(Statement.class);
+		Statement statement = mock();
 		given(statement.executeQuery(sql)).willReturn(resultSet);
 		given(connection.createStatement()).willReturn(statement);
 

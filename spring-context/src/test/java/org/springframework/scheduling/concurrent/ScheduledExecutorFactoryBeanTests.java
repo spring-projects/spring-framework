@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ class ScheduledExecutorFactoryBeanTests {
 	@Test
 	@SuppressWarnings("serial")
 	void shutdownNowIsPropagatedToTheExecutorOnDestroy() throws Exception {
-		final ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
+		final ScheduledExecutorService executor = mock();
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			@Override
@@ -67,7 +67,7 @@ class ScheduledExecutorFactoryBeanTests {
 	@Test
 	@SuppressWarnings("serial")
 	void shutdownIsPropagatedToTheExecutorOnDestroy() throws Exception {
-		final ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
+		final ScheduledExecutorService executor = mock();
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			@Override
@@ -86,7 +86,7 @@ class ScheduledExecutorFactoryBeanTests {
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
 	void oneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
 		factory.setScheduledExecutorTasks(new ScheduledExecutorTask(runnable));
@@ -100,7 +100,7 @@ class ScheduledExecutorFactoryBeanTests {
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
 	void fixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
 		task.setPeriod(500);
@@ -118,7 +118,7 @@ class ScheduledExecutorFactoryBeanTests {
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
 	void fixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 		willThrow(new IllegalStateException()).given(runnable).run();
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
@@ -138,7 +138,7 @@ class ScheduledExecutorFactoryBeanTests {
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
 	void withInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
 		task.setPeriod(500);
@@ -158,7 +158,7 @@ class ScheduledExecutorFactoryBeanTests {
 	@Test
 	@EnabledForTestGroups(LONG_RUNNING)
 	void withInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
-		Runnable runnable = mock(Runnable.class);
+		Runnable runnable = mock();
 		willThrow(new IllegalStateException()).given(runnable).run();
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);

@@ -36,7 +36,7 @@ import org.reactivestreams.Publisher;
  * For example:
  * <p><pre class="code">
  * DatabaseClient.builder()
- *		.executeFunction(statement -> statement.execute())
+ *		.executeFunction(statement -&gt; statement.execute())
  * 		.build();
  * </pre>
  *

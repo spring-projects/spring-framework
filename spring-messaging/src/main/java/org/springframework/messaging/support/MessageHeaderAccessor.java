@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,12 @@ import org.springframework.util.StringUtils;
  * strongly typed accessors for specific headers, the ability to leave headers
  * in a {@link Message} mutable, and the option to suppress automatic generation
  * of {@link MessageHeaders#ID id} and {@link MessageHeaders#TIMESTAMP
- * timesteamp} headers. Sub-classes such as {@link NativeMessageHeaderAccessor}
+ * timestamp} headers. Subclasses such as {@link NativeMessageHeaderAccessor}
  * and others provide support for managing processing vs external source headers
  * as well as protocol specific headers.
  *
  * <p>Below is a workflow to initialize headers via {@code MessageHeaderAccessor},
- * or one of its sub-classes, then create a {@link Message}, and then re-obtain
+ * or one of its subclasses, then create a {@link Message}, and then re-obtain
  * the accessor possibly from a different component:
  * <pre class="code">
  * // Create a message with headers
@@ -153,7 +153,7 @@ public class MessageHeaderAccessor {
 	// Configuration properties
 
 	/**
-	 * By default when {@link #getMessageHeaders()} is called, {@code "this"}
+	 * By default, when {@link #getMessageHeaders()} is called, {@code "this"}
 	 * {@code MessageHeaderAccessor} instance can no longer be used to modify the
 	 * underlying message headers and the returned {@code MessageHeaders} is immutable.
 	 * <p>However when this is set to {@code true}, the returned (underlying)
@@ -173,7 +173,7 @@ public class MessageHeaderAccessor {
 	}
 
 	/**
-	 * By default when {@link #getMessageHeaders()} is called, {@code "this"}
+	 * By default, when {@link #getMessageHeaders()} is called, {@code "this"}
 	 * {@code MessageHeaderAccessor} instance can no longer be used to modify the
 	 * underlying message headers. However if {@link #setLeaveMutable(boolean)}
 	 * is used, this method is necessary to indicate explicitly when the
@@ -378,13 +378,14 @@ public class MessageHeaderAccessor {
 	 * {@link #copyHeadersIfAbsent(Map)} to avoid overwriting values.
 	 */
 	public void copyHeaders(@Nullable Map<String, ?> headersToCopy) {
-		if (headersToCopy != null) {
-			headersToCopy.forEach((key, value) -> {
-				if (!isReadOnly(key)) {
-					setHeader(key, value);
-				}
-			});
+		if (headersToCopy == null || this.headers == headersToCopy) {
+			return;
 		}
+		headersToCopy.forEach((key, value) -> {
+			if (!isReadOnly(key)) {
+				setHeader(key, value);
+			}
+		});
 	}
 
 	/**
@@ -392,13 +393,14 @@ public class MessageHeaderAccessor {
 	 * <p>This operation will <em>not</em> overwrite any existing values.
 	 */
 	public void copyHeadersIfAbsent(@Nullable Map<String, ?> headersToCopy) {
-		if (headersToCopy != null) {
-			headersToCopy.forEach((key, value) -> {
-				if (!isReadOnly(key)) {
-					setHeaderIfAbsent(key, value);
-				}
-			});
+		if (headersToCopy == null || this.headers == headersToCopy) {
+			return;
 		}
+		headersToCopy.forEach((key, value) -> {
+			if (!isReadOnly(key)) {
+				setHeaderIfAbsent(key, value);
+			}
+		});
 	}
 
 	protected boolean isReadOnly(String headerName) {
@@ -414,7 +416,7 @@ public class MessageHeaderAccessor {
 		if (value == null) {
 			return null;
 		}
-		return (value instanceof UUID ? (UUID) value : UUID.fromString(value.toString()));
+		return (value instanceof UUID uuid ? uuid : UUID.fromString(value.toString()));
 	}
 
 	@Nullable
@@ -423,7 +425,7 @@ public class MessageHeaderAccessor {
 		if (value == null) {
 			return null;
 		}
-		return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
+		return (value instanceof Long num ? num : Long.parseLong(value.toString()));
 	}
 
 	public void setContentType(MimeType contentType) {
@@ -436,7 +438,7 @@ public class MessageHeaderAccessor {
 		if (value == null) {
 			return null;
 		}
-		return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
+		return (value instanceof MimeType mimeType ? mimeType : MimeType.valueOf(value.toString()));
 	}
 
 	private Charset getCharset() {
@@ -493,14 +495,12 @@ public class MessageHeaderAccessor {
 	}
 
 	protected String getShortPayloadLogMessage(Object payload) {
-		if (payload instanceof String) {
-			String payloadText = (String) payload;
+		if (payload instanceof String payloadText) {
 			return (payloadText.length() < 80) ?
 				" payload=" + payloadText :
 				" payload=" + payloadText.substring(0, 80) + "...(truncated)";
 		}
-		else if (payload instanceof byte[]) {
-			byte[] bytes = (byte[]) payload;
+		else if (payload instanceof byte[] bytes) {
 			if (isReadableContentType()) {
 				return (bytes.length < 80) ?
 						" payload=" + new String(bytes, getCharset()) :
@@ -522,8 +522,7 @@ public class MessageHeaderAccessor {
 		if (payload instanceof String) {
 			return " payload=" + payload;
 		}
-		else if (payload instanceof byte[]) {
-			byte[] bytes = (byte[]) payload;
+		else if (payload instanceof byte[] bytes) {
 			if (isReadableContentType()) {
 				return " payload=" + new String(bytes, getCharset());
 			}
@@ -599,8 +598,7 @@ public class MessageHeaderAccessor {
 	public static <T extends MessageHeaderAccessor> T getAccessor(
 			MessageHeaders messageHeaders, @Nullable Class<T> requiredType) {
 
-		if (messageHeaders instanceof MutableMessageHeaders) {
-			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
+		if (messageHeaders instanceof MutableMessageHeaders mutableHeaders) {
 			MessageHeaderAccessor headerAccessor = mutableHeaders.getAccessor();
 			if (requiredType == null || requiredType.isInstance(headerAccessor))  {
 				return (T) headerAccessor;
@@ -619,8 +617,7 @@ public class MessageHeaderAccessor {
 	 * @since 4.1
 	 */
 	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
-		if (message.getHeaders() instanceof MutableMessageHeaders) {
-			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) message.getHeaders();
+		if (message.getHeaders() instanceof MutableMessageHeaders mutableHeaders) {
 			MessageHeaderAccessor accessor = mutableHeaders.getAccessor();
 			return (accessor.isMutable() ? accessor : accessor.createAccessor(message));
 		}

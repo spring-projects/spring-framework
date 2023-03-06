@@ -19,8 +19,8 @@ package org.springframework.transaction.annotation;
 import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -81,7 +81,7 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 
 		rbta.setReadOnly(attributes.getBoolean("readOnly"));
 		rbta.setQualifier(attributes.getString("value"));
-		rbta.setLabels(Arrays.asList(attributes.getStringArray("label")));
+		rbta.setLabels(Set.of(attributes.getStringArray("label")));
 
 		List<RollbackRuleAttribute> rollbackRules = new ArrayList<>();
 		for (Class<?> rbRule : attributes.getClassArray("rollbackFor")) {

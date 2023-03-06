@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.transaction.interceptor.BeanFactoryTransactionAttribu
 import org.springframework.transaction.testfixture.CallCountingTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatException;
 
 /**
  * Integration tests for the @EnableTransactionManagement annotation.
@@ -97,8 +97,8 @@ class EnableTransactionManagementIntegrationTests {
 		ctx.register(Config.class, AspectJTxConfig.class);
 		// this test is a bit fragile, but gets the job done, proving that an
 		// attempt was made to look up the AJ aspect. It's due to classpath issues
-		// in .integration-tests that it's not found.
-		assertThatExceptionOfType(Exception.class)
+		// in integration-tests that it's not found.
+		assertThatException()
 			.isThrownBy(ctx::refresh)
 			.withMessageContaining("AspectJJtaTransactionManagementConfiguration");
 	}

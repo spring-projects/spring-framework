@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,11 @@ import java.lang.annotation.Target;
  * is resolved. Typically, method references are used to supply values, as in the
  * example below.
  *
+ * <p>As of Spring Framework 5.3.2, dynamic properties from methods annotated with
+ * {@code @DynamicPropertySource} will be <em>inherited</em> from enclosing test
+ * classes, analogous to inheritance from superclasses and interfaces. See
+ * {@link NestedTestConfiguration @NestedTestConfiguration} for details.
+ *
  * <p><strong>NOTE</strong>: if you use {@code @DynamicPropertySource} in a base
  * class and discover that tests in subclasses fail because the dynamic properties
  * change between subclasses, you may need to annotate your base class with
@@ -65,14 +70,15 @@ import java.lang.annotation.Target;
  * class ExampleIntegrationTests {
  *
  *     &#064;Container
- *     static RedisContainer redis = new RedisContainer();
+ *     static GenericContainer redis =
+ *         new GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379);
  *
  *     // ...
  *
  *     &#064;DynamicPropertySource
  *     static void redisProperties(DynamicPropertyRegistry registry) {
- *         registry.add("redis.host", redis::getContainerIpAddress);
- *         registry.add("redis.port", redis::getMappedPort);
+ *         registry.add("redis.host", redis::getHost);
+ *         registry.add("redis.port", redis::getFirstMappedPort);
  *     }
  *
  * }</pre>

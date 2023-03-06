@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
@@ -36,18 +36,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Dave Syer
  */
-public class Spr11202Tests {
+class Spr11202Tests {
 
 	@Test
-	public void testWithImporter() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(Wrapper.class);
+	void withImporter() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Wrapper.class);
 		assertThat(context.getBean("value")).isEqualTo("foo");
+		context.close();
 	}
 
 	@Test
-	public void testWithoutImporter() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+	void withoutImporter() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		assertThat(context.getBean("value")).isEqualTo("foo");
+		context.close();
 	}
 
 

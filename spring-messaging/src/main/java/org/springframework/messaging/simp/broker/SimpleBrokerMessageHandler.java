@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.simp.broker;
 
 import java.security.Principal;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -129,8 +130,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initPathMatcherToUse() {
-		if (this.pathMatcher != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setPathMatcher(this.pathMatcher);
+		if (this.pathMatcher != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setPathMatcher(this.pathMatcher);
 		}
 	}
 
@@ -150,8 +151,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initCacheLimitToUse() {
-		if (this.cacheLimit != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setCacheLimit(this.cacheLimit);
+		if (this.cacheLimit != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setCacheLimit(this.cacheLimit);
 		}
 	}
 
@@ -177,8 +178,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initSelectorHeaderNameToUse() {
-		if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setSelectorHeaderName(this.selectorHeaderName);
+		if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setSelectorHeaderName(this.selectorHeaderName);
 		}
 	}
 
@@ -254,8 +255,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	public void startInternal() {
 		publishBrokerAvailableEvent();
 		if (this.taskScheduler != null) {
-			long interval = initHeartbeatTaskDelay();
-			if (interval > 0) {
+			Duration interval = initHeartbeatTaskDelay();
+			if (interval.toMillis() > 0) {
 				this.heartbeatFuture = this.taskScheduler.scheduleWithFixedDelay(new HeartbeatTask(), interval);
 			}
 		}
@@ -266,15 +267,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
-	private long initHeartbeatTaskDelay() {
+	private Duration initHeartbeatTaskDelay() {
 		if (getHeartbeatValue() == null) {
-			return 0;
+			return Duration.ZERO;
 		}
 		else if (getHeartbeatValue()[0] > 0 && getHeartbeatValue()[1] > 0) {
-			return Math.min(getHeartbeatValue()[0], getHeartbeatValue()[1]);
+			return Duration.ofMillis(Math.min(getHeartbeatValue()[0], getHeartbeatValue()[1]));
 		}
 		else {
-			return (getHeartbeatValue()[0] > 0 ? getHeartbeatValue()[0] : getHeartbeatValue()[1]);
+			return Duration.ofMillis(getHeartbeatValue()[0] > 0 ? getHeartbeatValue()[0] : getHeartbeatValue()[1]);
 		}
 	}
 
@@ -306,6 +307,12 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		else if (SimpMessageType.CONNECT.equals(messageType)) {
 			logMessage(message);
 			if (sessionId != null) {
+				if (this.sessions.get(sessionId) != null) {
+					if (logger.isWarnEnabled()) {
+						logger.warn("Ignoring CONNECT in session " + sessionId + ". Already connected.");
+					}
+					return;
+				}
 				long[] heartbeatIn = SimpMessageHeaderAccessor.getHeartbeat(headers);
 				long[] heartbeatOut = getHeartbeatValue();
 				Principal user = SimpMessageHeaderAccessor.getUser(headers);

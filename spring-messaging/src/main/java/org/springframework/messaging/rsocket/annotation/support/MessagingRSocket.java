@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ class MessagingRSocket implements RSocket {
 	 */
 	public Mono<Void> handleConnectionSetupPayload(ConnectionSetupPayload payload) {
 		// frameDecoder does not apply to connectionSetupPayload
-		// so retain here since handle expects it..
+		// so retain here since handle expects it.
 		payload.retain();
 		return handle(payload, FrameType.SETUP);
 	}
@@ -156,8 +156,8 @@ class MessagingRSocket implements RSocket {
 	}
 
 	private int refCount(DataBuffer dataBuffer) {
-		return dataBuffer instanceof NettyDataBuffer ?
-				((NettyDataBuffer) dataBuffer).getNativeBuffer().refCnt() : 1;
+		return dataBuffer instanceof NettyDataBuffer nettyDataBuffer ?
+				nettyDataBuffer.getNativeBuffer().refCnt() : 1;
 	}
 
 	@SuppressWarnings("deprecation")

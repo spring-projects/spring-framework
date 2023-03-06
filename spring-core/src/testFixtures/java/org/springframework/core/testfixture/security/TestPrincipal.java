@@ -41,10 +41,9 @@ public class TestPrincipal implements Principal {
 		if (obj == this) {
 			return true;
 		}
-		if (!(obj instanceof TestPrincipal)) {
+		if (!(obj instanceof TestPrincipal p)) {
 			return false;
 		}
-		TestPrincipal p = (TestPrincipal) obj;
 		return this.name.equals(p.name);
 	}
 

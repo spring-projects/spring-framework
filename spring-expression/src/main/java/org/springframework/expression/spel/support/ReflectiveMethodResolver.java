@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,14 +114,14 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
-			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
+			Class<?> type = (targetObject instanceof Class<?> clazz ? clazz : targetObject.getClass());
 			ArrayList<Method> methods = new ArrayList<>(getMethods(type, targetObject));
 
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
 			if (filter != null) {
 				List<Method> filtered = filter.filter(methods);
-				methods = (filtered instanceof ArrayList ? (ArrayList<Method>) filtered : new ArrayList<>(filtered));
+				methods = (filtered instanceof ArrayList<Method> arrayList ? arrayList : new ArrayList<>(filtered));
 			}
 
 			// Sort methods into a sensible order
@@ -176,7 +176,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 					}
 					if (matchInfo != null) {
 						if (matchInfo.isExactMatch()) {
-							return new ReflectiveMethodExecutor(method);
+							return new ReflectiveMethodExecutor(method, type);
 						}
 						else if (matchInfo.isCloseMatch()) {
 							if (this.useDistance) {
@@ -204,13 +204,13 @@ public class ReflectiveMethodResolver implements MethodResolver {
 				}
 			}
 			if (closeMatch != null) {
-				return new ReflectiveMethodExecutor(closeMatch);
+				return new ReflectiveMethodExecutor(closeMatch, type);
 			}
 			else if (matchRequiringConversion != null) {
 				if (multipleOptions) {
 					throw new SpelEvaluationException(SpelMessage.MULTIPLE_POSSIBLE_METHODS, name);
 				}
-				return new ReflectiveMethodExecutor(matchRequiringConversion);
+				return new ReflectiveMethodExecutor(matchRequiringConversion, type);
 			}
 			else {
 				return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,11 @@ public interface HandlerMapping {
 
 	/**
 	 * Return a handler for this request.
+	 * <p>Before returning a handler, an implementing method should check for
+	 * CORS configuration associated with the handler, apply validation checks
+	 * based on it, and update the response accordingly. For pre-flight requests,
+	 * the same should be done based on the handler matching to the expected
+	 * actual request.
 	 * @param exchange current server exchange
 	 * @return a {@link Mono} that emits one value or none in case the request
 	 * cannot be resolved to a handler

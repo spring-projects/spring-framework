@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,17 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -44,313 +49,282 @@ class ServletWebRequestHttpMethodsTests {
 
 	private static final String CURRENT_TIME = "Wed, 9 Apr 2014 09:57:42 GMT";
 
+	private static final Instant NOW = Instant.now();
+
 	private final MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 
 	private final MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 
 	private final ServletWebRequest request = new ServletWebRequest(servletRequest, servletResponse);
 
-	private final Date currentDate = new Date();
 
-
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedNon2xxStatus(String method) {
-		setUpRequest(method);
-
-		long epochTime = currentDate.getTime();
-		servletRequest.addHeader("If-Modified-Since", epochTime);
-		servletResponse.setStatus(304);
-
-		assertThat(request.checkNotModified(epochTime)).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("Last-Modified")).isNull();
+	@Test
+	void ifMatchWildcardShouldMatchWhenETagPresent() {
+		setUpRequest("PUT");
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "*");
+		assertThat(request.checkNotModified("\"SomeETag\"")).isFalse();
 	}
 
-	@ParameterizedHttpMethodTest  // SPR-13516
-	void checkNotModifiedInvalidStatus(String method) {
-		setUpRequest(method);
-
-		long epochTime = currentDate.getTime();
-		servletRequest.addHeader("If-Modified-Since", epochTime);
-		servletResponse.setStatus(0);
-
-		assertThat(request.checkNotModified(epochTime)).isFalse();
+	@Test
+	void ifMatchWildcardShouldMatchETagMissing() {
+		setUpRequest("PUT");
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "*");
+		assertThat(request.checkNotModified("")).isTrue();
+		assertPreconditionFailed();
 	}
 
-	@ParameterizedHttpMethodTest  // SPR-14559
-	void checkNotModifiedInvalidIfNoneMatchHeader(String method) {
-		setUpRequest(method);
+	@Test
+	void ifMatchValueShouldMatchWhenETagMatches() {
+		setUpRequest("PUT");
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "\"first\"");
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "\"second\"");
+		assertThat(request.checkNotModified("\"second\"")).isFalse();
+	}
 
+	@Test
+	void ifMatchValueShouldRejectWhenETagDoesNotMatch() {
+		setUpRequest("PUT");
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "\"first\"");
+		assertThat(request.checkNotModified("\"second\"")).isTrue();
+		assertPreconditionFailed();
+	}
+
+	@Test
+	void ifMatchValueShouldUseStrongComparison() {
+		setUpRequest("PUT");
+		String eTag = "\"spring\"";
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "W/" + eTag);
+		assertThat(request.checkNotModified(eTag)).isTrue();
+		assertPreconditionFailed();
+	}
+
+	@SafeHttpMethodsTest
+	void ifMatchShouldOnlyBeConsideredForUnsafeMethods(String method) {
+		setUpRequest(method);
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "*");
+		assertThat(request.checkNotModified("\"spring\"")).isFalse();
+	}
+
+	@Test
+	void ifUnModifiedSinceShouldMatchValueWhenLater() {
+		setUpRequest("PUT");
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, now.toEpochMilli());
+		assertThat(request.checkNotModified(oneMinuteAgo.toEpochMilli())).isFalse();
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
+		assertThat(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)).isNull();
+	}
+
+	@Test
+	void ifUnModifiedSinceShouldNotMatchValueWhenEarlier() {
+		setUpRequest("PUT");
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, oneMinuteAgo.toEpochMilli());
+		assertThat(request.checkNotModified(now.toEpochMilli())).isTrue();
+		assertPreconditionFailed();
+	}
+
+	@SafeHttpMethodsTest
+	void ifUnModifiedSinceShouldSetHeadersWithSafeMethod(String method) {
+		setUpRequest(method);
+		Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+		Instant oneMinuteAgo = now.minus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, now.toEpochMilli());
+		assertThat(request.checkNotModified(oneMinuteAgo.toEpochMilli())).isFalse();
+		assertOkWithLastModified(oneMinuteAgo);
+	}
+
+	@SafeHttpMethodsTest
+	void ifNoneMatchShouldMatchIdenticalETagValue(String method) {
+		setUpRequest(method);
+		String etag = "\"spring\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
+		assertThat(request.checkNotModified(etag)).isTrue();
+		assertNotModified(etag, null);
+	}
+
+	@SafeHttpMethodsTest
+	void ifNoneMatchShouldMatchETagWithSeparatorChar(String method) {
+		setUpRequest(method);
+		String etag = "\"spring,framework\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
+		assertThat(request.checkNotModified(etag)).isTrue();
+		assertNotModified(etag, null);
+	}
+
+	@SafeHttpMethodsTest
+	void ifNoneMatchShouldNotMatchDifferentETag(String method) {
+		setUpRequest(method);
+		String etag = "\"framework\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "\"spring\"");
+		assertThat(request.checkNotModified(etag)).isFalse();
+		assertOkWithETag(etag);
+	}
+
+	@SafeHttpMethodsTest
+		// SPR-14559
+	void ifNoneMatchShouldNotFailForUnquotedETag(String method) {
+		setUpRequest(method);
 		String etag = "\"etagvalue\"";
-		servletRequest.addHeader("If-None-Match", "missingquotes");
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "missingquotes");
 		assertThat(request.checkNotModified(etag)).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
+		assertOkWithETag(etag);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedHeaderAlreadySet(String method) {
+	@SafeHttpMethodsTest
+	void ifNoneMatchShouldMatchPaddedETag(String method) {
 		setUpRequest(method);
-
-		long epochTime = currentDate.getTime();
-		servletRequest.addHeader("If-Modified-Since", epochTime);
-		servletResponse.addHeader("Last-Modified", CURRENT_TIME);
-
-		assertThat(request.checkNotModified(epochTime)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeaders("Last-Modified").size()).isEqualTo(1);
-		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(CURRENT_TIME);
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedTimestamp(String method) {
-		setUpRequest(method);
-
-		long epochTime = currentDate.getTime();
-		servletRequest.addHeader("If-Modified-Since", epochTime);
-
-		assertThat(request.checkNotModified(epochTime)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkModifiedTimestamp(String method) {
-		setUpRequest(method);
-
-		long oneMinuteAgo = currentDate.getTime() - (1000 * 60);
-		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
-
-		assertThat(request.checkNotModified(currentDate.getTime())).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedETag(String method) {
-		setUpRequest(method);
-
-		String etag = "\"Foo\"";
-		servletRequest.addHeader("If-None-Match", etag);
-
+		String etag = "spring";
+		String paddedEtag = String.format("\"%s\"", etag);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, paddedEtag);
 		assertThat(request.checkNotModified(etag)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
+		assertNotModified(paddedEtag, null);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedETagWithSeparatorChars(String method) {
+	@SafeHttpMethodsTest
+	void ifNoneMatchShouldIgnoreWildcard(String method) {
 		setUpRequest(method);
-
-		String etag = "\"Foo, Bar\"";
-		servletRequest.addHeader("If-None-Match", etag);
-
-		assertThat(request.checkNotModified(etag)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
-	}
-
-
-	@ParameterizedHttpMethodTest
-	void checkModifiedETag(String method) {
-		setUpRequest(method);
-
-		String currentETag = "\"Foo\"";
-		String oldETag = "Bar";
-		servletRequest.addHeader("If-None-Match", oldETag);
-
-		assertThat(request.checkNotModified(currentETag)).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(currentETag);
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedUnpaddedETag(String method) {
-		setUpRequest(method);
-
-		String etag = "Foo";
-		String paddedETag = String.format("\"%s\"", etag);
-		servletRequest.addHeader("If-None-Match", paddedETag);
-
-		assertThat(request.checkNotModified(etag)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(paddedETag);
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkModifiedUnpaddedETag(String method) {
-		setUpRequest(method);
-
-		String currentETag = "Foo";
-		String oldETag = "Bar";
-		servletRequest.addHeader("If-None-Match", oldETag);
-
-		assertThat(request.checkNotModified(currentETag)).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(String.format("\"%s\"", currentETag));
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedWildcardIsIgnored(String method) {
-		setUpRequest(method);
-
-		String etag = "\"Foo\"";
-		servletRequest.addHeader("If-None-Match", "*");
-
+		String etag = "\"spring\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "*");
 		assertThat(request.checkNotModified(etag)).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
+		assertOkWithETag(etag);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedETagAndTimestamp(String method) {
-		setUpRequest(method);
-
-		String etag = "\"Foo\"";
-		servletRequest.addHeader("If-None-Match", etag);
-		servletRequest.addHeader("If-Modified-Since", currentDate.getTime());
-
-		assertThat(request.checkNotModified(etag, currentDate.getTime())).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
-		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
+	@Test
+	void ifNoneMatchShouldRejectWildcardForUnsafeMethods() {
+		setUpRequest("PUT");
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "*");
+		assertThat(request.checkNotModified("\"spring\"")).isTrue();
+		assertPreconditionFailed();
 	}
 
-	@ParameterizedHttpMethodTest  // SPR-14224
-	void checkNotModifiedETagAndModifiedTimestamp(String method) {
+	@SafeHttpMethodsTest
+	void ifNoneMatchValueShouldUseWeakComparison(String method) {
 		setUpRequest(method);
-
-		String etag = "\"Foo\"";
-		servletRequest.addHeader("If-None-Match", etag);
-		long currentEpoch = currentDate.getTime();
-		long oneMinuteAgo = currentEpoch - (1000 * 60);
-		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
-
-		assertThat(request.checkNotModified(etag, currentEpoch)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
-		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkModifiedETagAndNotModifiedTimestamp(String method) {
-		setUpRequest(method);
-
-		String currentETag = "\"Foo\"";
-		String oldETag = "\"Bar\"";
-		servletRequest.addHeader("If-None-Match", oldETag);
-		long epochTime = currentDate.getTime();
-		servletRequest.addHeader("If-Modified-Since", epochTime);
-
-		assertThat(request.checkNotModified(currentETag, epochTime)).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(currentETag);
-		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(currentDate.getTime() / 1000);
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedETagWeakStrong(String method) {
-		setUpRequest(method);
-
-		String etag = "\"Foo\"";
-		String weakETag = String.format("W/%s", etag);
-		servletRequest.addHeader("If-None-Match", etag);
-
-		assertThat(request.checkNotModified(weakETag)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(weakETag);
-	}
-
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedETagStrongWeak(String method) {
-		setUpRequest(method);
-
-		String etag = "\"Foo\"";
-		servletRequest.addHeader("If-None-Match", String.format("W/%s", etag));
-
+		String etag = "\"spring\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "W/" + etag);
 		assertThat(request.checkNotModified(etag)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
+		assertNotModified(etag, null);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedMultipleETags(String method) {
+	@SafeHttpMethodsTest
+	void ifModifiedSinceShouldMatchIfDatesEqual(String method) {
 		setUpRequest(method);
-
-		String etag = "\"Bar\"";
-		String multipleETags = String.format("\"Foo\", %s", etag);
-		servletRequest.addHeader("If-None-Match", multipleETags);
-
-		assertThat(request.checkNotModified(etag)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, NOW.toEpochMilli());
+		assertThat(request.checkNotModified(NOW.toEpochMilli())).isTrue();
+		assertNotModified(null, NOW);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedTimestampWithLengthPart(String method) {
+	@SafeHttpMethodsTest
+	void ifModifiedSinceShouldNotMatchIfDateAfter(String method) {
 		setUpRequest(method);
+		Instant oneMinuteLater = NOW.plus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, NOW.toEpochMilli());
+		assertThat(request.checkNotModified(oneMinuteLater.toEpochMilli())).isFalse();
+		assertOkWithLastModified(oneMinuteLater);
+	}
 
+	@SafeHttpMethodsTest
+	void ifModifiedSinceShouldNotOverrideResponseStatus(String method) {
+		setUpRequest(method);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, NOW.toEpochMilli());
+		servletResponse.setStatus(304);
+		assertThat(request.checkNotModified(NOW.toEpochMilli())).isFalse();
+		assertNotModified(null, null);
+	}
+
+	@SafeHttpMethodsTest
+		// SPR-13516
+	void ifModifiedSinceShouldNotFailForInvalidResponseStatus(String method) {
+		setUpRequest(method);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, NOW.toEpochMilli());
+		servletResponse.setStatus(0);
+		assertThat(request.checkNotModified(NOW.toEpochMilli())).isFalse();
+	}
+
+	@SafeHttpMethodsTest
+	void ifModifiedSinceShouldNotFailForTimestampWithLengthPart(String method) {
+		setUpRequest(method);
 		long epochTime = ZonedDateTime.parse(CURRENT_TIME, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
-		servletRequest.setMethod("GET");
-		servletRequest.addHeader("If-Modified-Since", "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
 
 		assertThat(request.checkNotModified(epochTime)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(304);
-		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(epochTime / 1000);
+		assertNotModified(null, Instant.ofEpochMilli(epochTime));
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkModifiedTimestampWithLengthPart(String method) {
+	@SafeHttpMethodsTest
+	void IfNoneMatchAndIfNotModifiedSinceShouldMatchWhenSameETagAndDate(String method) {
 		setUpRequest(method);
-
-		long epochTime = ZonedDateTime.parse(CURRENT_TIME, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
-		servletRequest.setMethod("GET");
-		servletRequest.addHeader("If-Modified-Since", "Wed, 08 Apr 2014 09:57:42 GMT; length=13774");
-
-		assertThat(request.checkNotModified(epochTime)).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(epochTime / 1000);
+		String etag = "\"spring\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, NOW.toEpochMilli());
+		assertThat(request.checkNotModified(etag, NOW.toEpochMilli())).isTrue();
+		assertNotModified(etag, NOW);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedTimestampConditionalPut(String method) {
+	@SafeHttpMethodsTest
+	void IfNoneMatchAndIfNotModifiedSinceShouldMatchWhenSameETagAndLaterDate(String method) {
 		setUpRequest(method);
-
-		long currentEpoch = currentDate.getTime();
-		long oneMinuteAgo = currentEpoch - (1000 * 60);
-		servletRequest.setMethod("PUT");
-		servletRequest.addHeader("If-UnModified-Since", currentEpoch);
-
-		assertThat(request.checkNotModified(oneMinuteAgo)).isFalse();
-		assertThat(servletResponse.getStatus()).isEqualTo(200);
-		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(null);
+		String etag = "\"spring\"";
+		Instant oneMinuteLater = NOW.plus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etag);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, oneMinuteLater.toEpochMilli());
+		assertThat(request.checkNotModified(etag, NOW.toEpochMilli())).isTrue();
+		assertNotModified(etag, NOW);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedTimestampConditionalPutConflict(String method) {
+	@SafeHttpMethodsTest
+	void IfNoneMatchAndIfNotModifiedSinceShouldNotMatchWhenDifferentETag(String method) {
 		setUpRequest(method);
-
-		long currentEpoch = currentDate.getTime();
-		long oneMinuteAgo = currentEpoch - (1000 * 60);
-		servletRequest.setMethod("PUT");
-		servletRequest.addHeader("If-UnModified-Since", oneMinuteAgo);
-
-		assertThat(request.checkNotModified(currentEpoch)).isTrue();
-		assertThat(servletResponse.getStatus()).isEqualTo(412);
-		assertThat(servletResponse.getHeader("Last-Modified")).isEqualTo(null);
+		String etag = "\"framework\"";
+		Instant oneMinuteLater = NOW.plus(1, ChronoUnit.MINUTES);
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "\"spring\"");
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, oneMinuteLater.toEpochMilli());
+		assertThat(request.checkNotModified(etag, NOW.toEpochMilli())).isFalse();
+		assertOkWithETag(etag);
+		assertOkWithLastModified(NOW);
 	}
+
 
 	private void setUpRequest(String method) {
 		this.servletRequest.setMethod(method);
 		this.servletRequest.setRequestURI("https://example.org");
 	}
 
+	private void assertPreconditionFailed() {
+		assertThat(this.servletResponse.getStatus()).isEqualTo(HttpStatus.PRECONDITION_FAILED.value());
+	}
+
+	private void assertNotModified(@Nullable String eTag, @Nullable Instant lastModified) {
+		assertThat(this.servletResponse.getStatus()).isEqualTo(HttpStatus.NOT_MODIFIED.value());
+		if (eTag != null) {
+			assertThat(servletResponse.getHeader(HttpHeaders.ETAG)).isEqualTo(eTag);
+		}
+		if (lastModified != null) {
+			assertThat(servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000)
+					.isEqualTo(lastModified.toEpochMilli() / 1000);
+		}
+	}
+
+	private void assertOkWithETag(String eTag) {
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
+		assertThat(servletResponse.getHeader(HttpHeaders.ETAG)).isEqualTo(eTag);
+	}
+
+	private void assertOkWithLastModified(Instant lastModified) {
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
+		assertThat(servletResponse.getDateHeader(HttpHeaders.LAST_MODIFIED) / 1000)
+				.isEqualTo(lastModified.toEpochMilli() / 1000);
+	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@ParameterizedTest(name = "[{index}] {0}")
-	@ValueSource(strings = { "GET", "HEAD" })
-	@interface ParameterizedHttpMethodTest {
+	@ValueSource(strings = {"GET", "HEAD"})
+	@interface SafeHttpMethodsTest {
 	}
 
 }

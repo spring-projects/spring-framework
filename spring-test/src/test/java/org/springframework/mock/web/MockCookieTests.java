@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ class MockCookieTests {
 		assertCookie(cookie, "SESSION", "123");
 	}
 
+	@SuppressWarnings("removal")
 	@Test
 	void parseHeaderWithAttributes() {
 		MockCookie cookie = MockCookie.parse("SESSION=123; Domain=example.com; Max-Age=60; " +
@@ -79,6 +80,7 @@ class MockCookieTests {
 		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
 				DateTimeFormatter.RFC_1123_DATE_TIME));
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
+		assertThat(cookie.getComment()).isNull();
 	}
 
 	@ParameterizedTest

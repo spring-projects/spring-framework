@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,17 @@
 
 package org.springframework.mock.web;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 
 /**
- * Mock implementation of the {@link javax.servlet.RequestDispatcher} interface.
+ * Mock implementation of the {@link jakarta.servlet.RequestDispatcher} interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -79,11 +78,11 @@ public class MockRequestDispatcher implements RequestDispatcher {
 	 * {@link HttpServletResponseWrapper} decorators if necessary.
 	 */
 	protected MockHttpServletResponse getMockHttpServletResponse(ServletResponse response) {
-		if (response instanceof MockHttpServletResponse) {
-			return (MockHttpServletResponse) response;
+		if (response instanceof MockHttpServletResponse mockResponse) {
+			return mockResponse;
 		}
-		if (response instanceof HttpServletResponseWrapper) {
-			return getMockHttpServletResponse(((HttpServletResponseWrapper) response).getResponse());
+		if (response instanceof HttpServletResponseWrapper wrapper) {
+			return getMockHttpServletResponse(wrapper.getResponse());
 		}
 		throw new IllegalArgumentException("MockRequestDispatcher requires MockHttpServletResponse");
 	}

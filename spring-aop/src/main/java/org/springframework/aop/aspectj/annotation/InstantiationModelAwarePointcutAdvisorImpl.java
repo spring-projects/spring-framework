@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Internal implementation of AspectJPointcutAdvisor.
- * Note that there will be one instance of this advisor for each target method.
+ *
+ * <p>Note that there will be one instance of this advisor for each target method.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -212,7 +213,7 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 	 * creation of the advice.
 	 */
 	private void determineAdviceType() {
-		AspectJAnnotation<?> aspectJAnnotation =
+		AspectJAnnotation aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(this.aspectJAdviceMethod);
 		if (aspectJAnnotation == null) {
 			this.isBeforeAdvice = false;
@@ -220,21 +221,18 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		else {
 			switch (aspectJAnnotation.getAnnotationType()) {
-				case AtPointcut:
-				case AtAround:
+				case AtPointcut, AtAround -> {
 					this.isBeforeAdvice = false;
 					this.isAfterAdvice = false;
-					break;
-				case AtBefore:
+				}
+				case AtBefore -> {
 					this.isBeforeAdvice = true;
 					this.isAfterAdvice = false;
-					break;
-				case AtAfter:
-				case AtAfterReturning:
-				case AtAfterThrowing:
+				}
+				case AtAfter, AtAfterReturning, AtAfterThrowing -> {
 					this.isBeforeAdvice = false;
 					this.isAfterAdvice = true;
-					break;
+				}
 			}
 		}
 	}
@@ -277,8 +275,8 @@ final class InstantiationModelAwarePointcutAdvisorImpl
 
 			this.declaredPointcut = declaredPointcut;
 			this.preInstantiationPointcut = preInstantiationPointcut;
-			if (aspectInstanceFactory instanceof LazySingletonAspectInstanceFactoryDecorator) {
-				this.aspectInstanceFactory = (LazySingletonAspectInstanceFactoryDecorator) aspectInstanceFactory;
+			if (aspectInstanceFactory instanceof LazySingletonAspectInstanceFactoryDecorator lazyFactory) {
+				this.aspectInstanceFactory = lazyFactory;
 			}
 		}
 

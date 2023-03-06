@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
@@ -33,14 +32,13 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
-import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
  * Integration tests for view resolution with {@code @EnableWebMvc}.
@@ -57,12 +55,6 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@Test
-	public void tiles() throws Exception {
-		MockHttpServletResponse response = runTest(TilesWebConfig.class);
-		assertThat(response.getForwardedUrl()).isEqualTo("/WEB-INF/index.jsp");
-	}
-
-	@Test
 	public void groovyMarkup() throws Exception {
 		MockHttpServletResponse response = runTest(GroovyMarkupWebConfig.class);
 		assertThat(response.getContentAsString()).isEqualTo("<html><body>Hello World!</body></html>");
@@ -70,22 +62,15 @@ public class ViewResolutionIntegrationTests {
 
 	@Test
 	public void freemarkerInvalidConfig() throws Exception {
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				runTest(InvalidFreeMarkerWebConfig.class))
+		assertThatRuntimeException()
+			.isThrownBy(() -> runTest(InvalidFreeMarkerWebConfig.class))
 			.withMessageContaining("In addition to a FreeMarker view resolver ");
 	}
 
 	@Test
-	public void tilesInvalidConfig() throws Exception {
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				runTest(InvalidTilesWebConfig.class))
-			.withMessageContaining("In addition to a Tiles view resolver ");
-	}
-
-	@Test
 	public void groovyMarkupInvalidConfig() throws Exception {
-		assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-				runTest(InvalidGroovyMarkupWebConfig.class))
+		assertThatRuntimeException()
+			.isThrownBy(() -> runTest(InvalidGroovyMarkupWebConfig.class))
 			.withMessageContaining("In addition to a Groovy markup view resolver ");
 	}
 
@@ -152,22 +137,6 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@Configuration
-	static class TilesWebConfig extends AbstractWebConfig {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.tiles();
-		}
-
-		@Bean
-		public TilesConfigurer tilesConfigurer() {
-			TilesConfigurer configurer = new TilesConfigurer();
-			configurer.setDefinitions("/WEB-INF/tiles.xml");
-			return configurer;
-		}
-	}
-
-	@Configuration
 	static class GroovyMarkupWebConfig extends AbstractWebConfig {
 
 		@Override
@@ -189,15 +158,6 @@ public class ViewResolutionIntegrationTests {
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
-		}
-	}
-
-	@Configuration
-	static class InvalidTilesWebConfig extends WebMvcConfigurationSupport {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.tiles();
 		}
 	}
 

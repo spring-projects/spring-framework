@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -78,8 +78,8 @@ public class ViewResolverComposite implements ViewResolver, Ordered, Initializin
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		for (ViewResolver viewResolver : this.viewResolvers) {
-			if (viewResolver instanceof ApplicationContextAware) {
-				((ApplicationContextAware)viewResolver).setApplicationContext(applicationContext);
+			if (viewResolver instanceof ApplicationContextAware applicationContextAware) {
+				applicationContextAware.setApplicationContext(applicationContext);
 			}
 		}
 	}
@@ -87,8 +87,8 @@ public class ViewResolverComposite implements ViewResolver, Ordered, Initializin
 	@Override
 	public void setServletContext(ServletContext servletContext) {
 		for (ViewResolver viewResolver : this.viewResolvers) {
-			if (viewResolver instanceof ServletContextAware) {
-				((ServletContextAware)viewResolver).setServletContext(servletContext);
+			if (viewResolver instanceof ServletContextAware servletContextAware) {
+				servletContextAware.setServletContext(servletContext);
 			}
 		}
 	}
@@ -96,8 +96,8 @@ public class ViewResolverComposite implements ViewResolver, Ordered, Initializin
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		for (ViewResolver viewResolver : this.viewResolvers) {
-			if (viewResolver instanceof InitializingBean) {
-				((InitializingBean) viewResolver).afterPropertiesSet();
+			if (viewResolver instanceof InitializingBean initializingBean) {
+				initializingBean.afterPropertiesSet();
 			}
 		}
 	}

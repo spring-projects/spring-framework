@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ public class XmlBeanDefinitionStoreException extends BeanDefinitionStoreExceptio
 	 */
 	public int getLineNumber() {
 		Throwable cause = getCause();
-		if (cause instanceof SAXParseException) {
-			return ((SAXParseException) cause).getLineNumber();
+		if (cause instanceof SAXParseException parseEx) {
+			return parseEx.getLineNumber();
 		}
 		return -1;
 	}

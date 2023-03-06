@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.cors.reactive.CorsUtils;
+import org.springframework.web.cors.reactive.PreFlightRequestHandler;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
@@ -50,9 +53,10 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  *
  * <p>{@code DispatcherHandler} is also designed to be a Spring bean itself and
  * implements {@link ApplicationContextAware} for access to the context it runs
- * in. If {@code DispatcherHandler} is declared with the bean name "webHandler"
- * it is discovered by {@link WebHttpHandlerBuilder#applicationContext} which
- * creates a processing chain together with {@code WebFilter},
+ * in. If {@code DispatcherHandler} is declared as a bean with the name
+ * "webHandler", it is discovered by
+ * {@link WebHttpHandlerBuilder#applicationContext(ApplicationContext)} which
+ * puts together a processing chain together with {@code WebFilter},
  * {@code WebExceptionHandler} and others.
  *
  * <p>A {@code DispatcherHandler} bean declaration is included in
@@ -65,7 +69,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * @since 5.0
  * @see WebHttpHandlerBuilder#applicationContext(ApplicationContext)
  */
-public class DispatcherHandler implements WebHandler, ApplicationContextAware {
+public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, ApplicationContextAware {
 
 	@Nullable
 	private List<HandlerMapping> handlerMappings;
@@ -139,26 +143,45 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 		if (this.handlerMappings == null) {
 			return createNotFoundError();
 		}
+		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			return handlePreFlight(exchange);
+		}
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
 				.switchIfEmpty(createNotFoundError())
-				.flatMap(handler -> invokeHandler(exchange, handler))
-				.flatMap(result -> handleResult(exchange, result));
+				.onErrorResume(ex -> handleDispatchError(exchange, ex))
+				.flatMap(handler -> handleRequestWith(exchange, handler));
 	}
 
 	private <R> Mono<R> createNotFoundError() {
 		return Mono.defer(() -> {
-			Exception ex = new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
+			Exception ex = new ResponseStatusException(HttpStatus.NOT_FOUND);
 			return Mono.error(ex);
 		});
 	}
 
-	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
+	private Mono<Void> handleDispatchError(ServerWebExchange exchange, Throwable ex) {
+		Mono<HandlerResult> resultMono = Mono.error(ex);
 		if (this.handlerAdapters != null) {
-			for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
-				if (handlerAdapter.supports(handler)) {
-					return handlerAdapter.handle(exchange, handler);
+			for (HandlerAdapter adapter : this.handlerAdapters) {
+				if (adapter instanceof DispatchExceptionHandler exceptionHandler) {
+					resultMono = resultMono.onErrorResume(ex2 -> exceptionHandler.handleError(exchange, ex2));
+				}
+			}
+		}
+		return resultMono.flatMap(result -> handleResult(exchange, result));
+	}
+
+	private Mono<Void> handleRequestWith(ServerWebExchange exchange, Object handler) {
+		if (ObjectUtils.nullSafeEquals(exchange.getResponse().getStatusCode(), HttpStatus.FORBIDDEN)) {
+			return Mono.empty();  // CORS rejection
+		}
+		if (this.handlerAdapters != null) {
+			for (HandlerAdapter adapter : this.handlerAdapters) {
+				if (adapter.supports(handler)) {
+					return adapter.handle(exchange, handler)
+							.flatMap(result -> handleResult(exchange, result));
 				}
 			}
 		}
@@ -166,25 +189,38 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	}
 
 	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		return getResultHandler(result).handleResult(exchange, result)
-				.checkpoint("Handler " + result.getHandler() + " [DispatcherHandler]")
-				.onErrorResume(ex ->
-						result.applyExceptionHandler(ex).flatMap(exResult -> {
-							String text = "Exception handler " + exResult.getHandler() +
-									", error=\"" + ex.getMessage() + "\" [DispatcherHandler]";
-							return getResultHandler(exResult).handleResult(exchange, exResult).checkpoint(text);
-						}));
+		Mono<Void> resultMono = doHandleResult(exchange, result, "Handler " + result.getHandler());
+		if (result.getExceptionHandler() != null) {
+			resultMono = resultMono.onErrorResume(ex ->
+					result.getExceptionHandler().handleError(exchange, ex).flatMap(result2 ->
+							doHandleResult(exchange, result2, "Exception handler " +
+									result2.getHandler() + ", error=\"" + ex.getMessage() + "\"")));
+		}
+		return resultMono;
 	}
 
-	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
+	private Mono<Void> doHandleResult(
+			ServerWebExchange exchange, HandlerResult handlerResult, String description) {
+
 		if (this.resultHandlers != null) {
 			for (HandlerResultHandler resultHandler : this.resultHandlers) {
 				if (resultHandler.supports(handlerResult)) {
-					return resultHandler;
+					description += " [DispatcherHandler]";
+					return resultHandler.handleResult(exchange, handlerResult).checkpoint(description);
 				}
 			}
 		}
-		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
+		return Mono.error(new IllegalStateException(
+				"No HandlerResultHandler for " + handlerResult.getReturnValue()));
+	}
+
+	@Override
+	public Mono<Void> handlePreFlight(ServerWebExchange exchange) {
+		return Flux.fromIterable(this.handlerMappings != null ? this.handlerMappings : Collections.emptyList())
+				.concatMap(mapping -> mapping.getHandler(exchange))
+				.switchIfEmpty(Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN)))
+				.next()
+				.then();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class ParserStrategyUtilsTests {
 
 	@BeforeEach
 	void setup() {
-		MockitoAnnotations.initMocks(this);
+		MockitoAnnotations.openMocks(this);
 		given(this.resourceLoader.getClassLoader()).willReturn(this.beanClassLoader);
 	}
 
@@ -75,7 +75,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasSingleContructorInjectsParams() {
+	public void instantiateClassWhenHasSingleConstructorInjectsParams() {
 		ArgsConstructor instance = instantiateClass(ArgsConstructor.class);
 		assertThat(instance.environment).isSameAs(this.environment);
 		assertThat(instance.beanFactory).isSameAs(this.registry);
@@ -84,7 +84,7 @@ public class ParserStrategyUtilsTests {
 	}
 
 	@Test
-	public void instantiateClassWhenHasSingleContructorAndAwareInjectsParamsAndCallsAware() {
+	public void instantiateClassWhenHasSingleConstructorAndAwareInjectsParamsAndCallsAware() {
 		ArgsConstructorAndAware instance = instantiateClass(ArgsConstructorAndAware.class);
 		assertThat(instance.environment).isSameAs(this.environment);
 		assertThat(instance.setEnvironment).isSameAs(this.environment);
@@ -98,13 +98,13 @@ public class ParserStrategyUtilsTests {
 
 	@Test
 	public void instantiateClassWhenHasMultipleConstructorsUsesNoArgsConstructor() {
-		// Remain back-compatible by using the default constructor if there's more then one
+		// Remain back-compatible by using the default constructor if there's more than one
 		MultipleConstructors instance = instantiateClass(MultipleConstructors.class);
 		assertThat(instance.usedDefaultConstructor).isTrue();
 	}
 
 	@Test
-	public void instantiateClassWhenHasMutlipleConstructorsAndNotDefaultThrowsException() {
+	public void instantiateClassWhenHasMultipleConstructorsAndNotDefaultThrowsException() {
 		assertThatExceptionOfType(BeanInstantiationException.class).isThrownBy(() ->
 				instantiateClass(MultipleConstructorsWithNoDefault.class));
 	}

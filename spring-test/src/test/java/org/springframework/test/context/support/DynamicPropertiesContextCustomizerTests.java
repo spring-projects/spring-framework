@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -63,7 +62,7 @@ class DynamicPropertiesContextCustomizerTests {
 		DynamicPropertiesContextCustomizer customizer = customizerFor("nullName");
 		ConfigurableApplicationContext context = new StaticApplicationContext();
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> customizer.customizeContext(context, mock(MergedContextConfiguration.class)))
+			.isThrownBy(() -> customizer.customizeContext(context, mock()))
 			.withMessage("'name' must not be null or blank");
 	}
 
@@ -72,7 +71,7 @@ class DynamicPropertiesContextCustomizerTests {
 		DynamicPropertiesContextCustomizer customizer = customizerFor("emptyName");
 		ConfigurableApplicationContext context = new StaticApplicationContext();
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> customizer.customizeContext(context, mock(MergedContextConfiguration.class)))
+			.isThrownBy(() -> customizer.customizeContext(context, mock()))
 			.withMessage("'name' must not be null or blank");
 	}
 
@@ -81,7 +80,7 @@ class DynamicPropertiesContextCustomizerTests {
 		DynamicPropertiesContextCustomizer customizer = customizerFor("nullValueSupplier");
 		ConfigurableApplicationContext context = new StaticApplicationContext();
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> customizer.customizeContext(context, mock(MergedContextConfiguration.class)))
+			.isThrownBy(() -> customizer.customizeContext(context, mock()))
 			.withMessage("'valueSupplier' must not be null");
 	}
 
@@ -89,7 +88,7 @@ class DynamicPropertiesContextCustomizerTests {
 	void customizeContextAddsPropertySource() throws Exception {
 		ConfigurableApplicationContext context = new StaticApplicationContext();
 		DynamicPropertiesContextCustomizer customizer = customizerFor("valid1", "valid2");
-		customizer.customizeContext(context, mock(MergedContextConfiguration.class));
+		customizer.customizeContext(context, mock());
 		ConfigurableEnvironment environment = context.getEnvironment();
 		assertThat(environment.getRequiredProperty("p1a")).isEqualTo("v1a");
 		assertThat(environment.getRequiredProperty("p1b")).isEqualTo("v1b");

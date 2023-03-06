@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,15 @@ package org.springframework.core.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.FileCopyUtils;
 
 /**
  * Interface for a resource descriptor that abstracts from the actual
@@ -35,6 +38,7 @@ import org.springframework.lang.Nullable;
  * certain resources. The actual behavior is implementation-specific.
  *
  * @author Juergen Hoeller
+ * @author Arjen Poutsma
  * @since 28.12.2003
  * @see #getInputStream()
  * @see #getURL()
@@ -86,7 +90,7 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Determine whether this resource represents a file in a file system.
-	 * A value of {@code true} strongly suggests (but does not guarantee)
+	 * <p>A value of {@code true} strongly suggests (but does not guarantee)
 	 * that a {@link #getFile()} call will succeed.
 	 * <p>This is conservatively {@code false} by default.
 	 * @since 5.0
@@ -99,14 +103,14 @@ public interface Resource extends InputStreamSource {
 	/**
 	 * Return a URL handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URL,
-	 * i.e. if the resource is not available as descriptor
+	 * i.e. if the resource is not available as a descriptor
 	 */
 	URL getURL() throws IOException;
 
 	/**
 	 * Return a URI handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URI,
-	 * i.e. if the resource is not available as descriptor
+	 * i.e. if the resource is not available as a descriptor
 	 * @since 2.5
 	 */
 	URI getURI() throws IOException;
@@ -136,6 +140,32 @@ public interface Resource extends InputStreamSource {
 	}
 
 	/**
+	 * Return the contents of this resource as a byte array.
+	 * @return the contents of this resource as byte array
+	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
+	 * absolute file path, i.e. if the resource is not available in a file system
+	 * @throws IOException in case of general resolution/reading failures
+	 * @since 6.0.5
+	 */
+	default byte[] getContentAsByteArray() throws IOException {
+		return FileCopyUtils.copyToByteArray(getInputStream());
+	}
+
+	/**
+	 * Returns the contents of this resource as a string, using the specified
+	 * charset.
+	 * @param charset the charset to use for decoding
+	 * @return the contents of this resource as a {@code String}
+	 * @throws java.io.FileNotFoundException if the resource cannot be resolved as
+	 * absolute file path, i.e. if the resource is not available in a file system
+	 * @throws IOException in case of general resolution/reading failures
+	 * @since 6.0.5
+	 */
+	default String getContentAsString(Charset charset) throws IOException {
+		return FileCopyUtils.copyToString(new InputStreamReader(getInputStream(), charset));
+	}
+
+	/**
 	 * Determine the content length for this resource.
 	 * @throws IOException if the resource cannot be resolved
 	 * (in the file system or as some other known physical resource type)
@@ -158,10 +188,11 @@ public interface Resource extends InputStreamSource {
 	Resource createRelative(String relativePath) throws IOException;
 
 	/**
-	 * Determine a filename for this resource, i.e. typically the last
-	 * part of the path: for example, "myfile.txt".
+	 * Determine the filename for this resource &mdash; typically the last
+	 * part of the path &mdash; for example, {@code "myfile.txt"}.
 	 * <p>Returns {@code null} if this type of resource does not
 	 * have a filename.
+	 * <p>Implementations are encouraged to return the filename unencoded.
 	 */
 	@Nullable
 	String getFilename();

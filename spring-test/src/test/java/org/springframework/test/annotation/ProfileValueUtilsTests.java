@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,12 +239,12 @@ class ProfileValueUtilsTests {
 
 	@IfProfileValue(name = NAME, value = VALUE)
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaEnabled {
+	private @interface MetaEnabled {
 	}
 
 	@IfProfileValue(name = NAME, value = VALUE + "X")
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaDisabled {
+	private @interface MetaDisabled {
 	}
 
 	@MetaEnabled
@@ -298,13 +298,13 @@ class ProfileValueUtilsTests {
 	@ProfileValueSourceConfiguration(HardCodedProfileValueSource.class)
 	@IfProfileValue(name = NAME, value = "42")
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaEnabledWithCustomProfileValueSource {
+	private @interface MetaEnabledWithCustomProfileValueSource {
 	}
 
 	@ProfileValueSourceConfiguration(HardCodedProfileValueSource.class)
 	@IfProfileValue(name = NAME, value = "13")
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaDisabledWithCustomProfileValueSource {
+	private @interface MetaDisabledWithCustomProfileValueSource {
 	}
 
 	@MetaEnabledWithCustomProfileValueSource

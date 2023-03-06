@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,9 @@ import org.springframework.ui.context.ThemeSource;
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
  * @since 17.06.2003
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
+@Deprecated(since = "6.0")
 public abstract class UiApplicationContextUtils {
 
 	/**
@@ -57,12 +59,11 @@ public abstract class UiApplicationContextUtils {
 		if (context.containsLocalBean(THEME_SOURCE_BEAN_NAME)) {
 			ThemeSource themeSource = context.getBean(THEME_SOURCE_BEAN_NAME, ThemeSource.class);
 			// Make ThemeSource aware of parent ThemeSource.
-			if (context.getParent() instanceof ThemeSource && themeSource instanceof HierarchicalThemeSource) {
-				HierarchicalThemeSource hts = (HierarchicalThemeSource) themeSource;
+			if (context.getParent() instanceof ThemeSource pts && themeSource instanceof HierarchicalThemeSource hts) {
 				if (hts.getParentThemeSource() == null) {
 					// Only set parent context as parent ThemeSource if no parent ThemeSource
 					// registered already.
-					hts.setParentThemeSource((ThemeSource) context.getParent());
+					hts.setParentThemeSource(pts);
 				}
 			}
 			if (logger.isDebugEnabled()) {
@@ -74,9 +75,9 @@ public abstract class UiApplicationContextUtils {
 			// Use default ThemeSource to be able to accept getTheme calls, either
 			// delegating to parent context's default or to local ResourceBundleThemeSource.
 			HierarchicalThemeSource themeSource = null;
-			if (context.getParent() instanceof ThemeSource) {
+			if (context.getParent() instanceof ThemeSource pts) {
 				themeSource = new DelegatingThemeSource();
-				themeSource.setParentThemeSource((ThemeSource) context.getParent());
+				themeSource.setParentThemeSource(pts);
 			}
 			else {
 				themeSource = new ResourceBundleThemeSource();

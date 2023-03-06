@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,11 @@ import java.time.ZoneId;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.PushBuilder;
-
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.PushBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
@@ -49,6 +47,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockHttpSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Arjen Poutsma
@@ -243,7 +242,7 @@ public class ServletRequestMethodArgumentResolverTests {
 
 	@Test
 	public void pushBuilder() throws Exception {
-		final PushBuilder pushBuilder = Mockito.mock(PushBuilder.class);
+		final PushBuilder pushBuilder = mock();
 		servletRequest = new MockHttpServletRequest("GET", "") {
 			@Override
 			public PushBuilder newPushBuilder() {

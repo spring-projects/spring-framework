@@ -42,15 +42,15 @@ public interface ClientHttpRequestInterceptor {
 	 * request and response to the next entity in the chain.
 	 * <p>A typical implementation of this method would follow the following pattern:
 	 * <ol>
-	 * <li>Examine the {@linkplain HttpRequest request} and body</li>
+	 * <li>Examine the {@linkplain HttpRequest request} and body.</li>
 	 * <li>Optionally {@linkplain org.springframework.http.client.support.HttpRequestWrapper
 	 * wrap} the request to filter HTTP attributes.</li>
 	 * <li>Optionally modify the body of the request.</li>
-	 * <li><strong>Either</strong>
 	 * <ul>
+	 * <li><strong>Either</strong>
 	 * <li>execute the request using
 	 * {@link ClientHttpRequestExecution#execute(org.springframework.http.HttpRequest, byte[])},</li>
-	 * <strong>or</strong>
+	 * <li><strong>or</strong></li>
 	 * <li>do not execute the request to block the execution altogether.</li>
 	 * </ul>
 	 * <li>Optionally wrap the response to filter HTTP attributes.</li>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.rsocket;
 
 import java.util.ArrayList;
@@ -77,8 +78,8 @@ final class MetadataEncoder {
 		this.strategies = strategies;
 		this.isComposite = this.metadataMimeType.toString().equals(
 				WellKnownMimeType.MESSAGE_RSOCKET_COMPOSITE_METADATA.getString());
-		this.allocator = bufferFactory() instanceof NettyDataBufferFactory ?
-				((NettyDataBufferFactory) bufferFactory()).getByteBufAllocator() : ByteBufAllocator.DEFAULT;
+		this.allocator = bufferFactory() instanceof NettyDataBufferFactory nettyDBF ?
+				nettyDBF.getByteBufAllocator() : ByteBufAllocator.DEFAULT;
 	}
 
 
@@ -101,7 +102,7 @@ final class MetadataEncoder {
 		if (ObjectUtils.isEmpty(routeVars)) {
 			return route;
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int index = 0;
 		Matcher matcher = VARS_PATTERN.matcher(route);
 		while (matcher.find()) {
@@ -140,7 +141,8 @@ final class MetadataEncoder {
 		}
 		ReactiveAdapter adapter = this.strategies.reactiveAdapterRegistry().getAdapter(metadata.getClass());
 		if (adapter != null) {
-			Assert.isTrue(!adapter.isMultiValue(), "Expected single value: " + metadata);
+			Object originalMetadata = metadata;
+			Assert.isTrue(!adapter.isMultiValue(), () -> "Expected single value: " + originalMetadata);
 			metadata = Mono.from(adapter.toPublisher(metadata)).defaultIfEmpty(NO_VALUE);
 			this.hasAsyncValues = true;
 		}
@@ -191,7 +193,7 @@ final class MetadataEncoder {
 					Object value = entry.value();
 					io.rsocket.metadata.CompositeMetadataCodec.encodeAndAddMetadata(
 							composite, this.allocator, entry.mimeType().toString(),
-							value instanceof ByteBuf ? (ByteBuf) value : PayloadUtils.asByteBuf(encodeEntry(entry)));
+							value instanceof ByteBuf byteBuf ? byteBuf : PayloadUtils.asByteBuf(encodeEntry(entry)));
 				});
 				return asDataBuffer(composite);
 				}
@@ -230,8 +232,8 @@ final class MetadataEncoder {
 
 	@SuppressWarnings("unchecked")
 	private <T> DataBuffer encodeEntry(Object value, MimeType mimeType) {
-		if (value instanceof ByteBuf) {
-			return asDataBuffer((ByteBuf) value);
+		if (value instanceof ByteBuf byteBuf) {
+			return asDataBuffer(byteBuf);
 		}
 		ResolvableType type = ResolvableType.forInstance(value);
 		Encoder<T> encoder = this.strategies.encoder(type, mimeType);
@@ -240,8 +242,8 @@ final class MetadataEncoder {
 	}
 
 	private DataBuffer asDataBuffer(ByteBuf byteBuf) {
-		if (bufferFactory() instanceof NettyDataBufferFactory) {
-			return ((NettyDataBufferFactory) bufferFactory()).wrap(byteBuf);
+		if (bufferFactory() instanceof NettyDataBufferFactory nettyDBF) {
+			return nettyDBF.wrap(byteBuf);
 		}
 		else {
 			DataBuffer buffer = bufferFactory().wrap(byteBuf.nioBuffer());
@@ -255,7 +257,7 @@ final class MetadataEncoder {
 		List<Mono<?>> valueMonos = new ArrayList<>();
 		this.metadataEntries.forEach(entry -> {
 			Object v = entry.value();
-			valueMonos.add(v instanceof Mono ? (Mono<?>) v : Mono.just(v));
+			valueMonos.add(v instanceof Mono<?> mono ? mono : Mono.just(v));
 		});
 		return Mono.zip(valueMonos, values -> {
 			List<MetadataEntry> result = new ArrayList<>(values.length);

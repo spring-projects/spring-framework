@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentR
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /**
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
@@ -73,7 +74,8 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 				((ConfigurableWebBindingInitializer) initializer).getMessageCodesResolver();
 		assertThat(resolver).isNotNull();
 		assertThat(resolver.getClass()).isEqualTo(TestMessageCodesResolver.class);
-		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect")).isEqualTo(false);
+		assertThat(new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"))
+				.asInstanceOf(BOOLEAN).isTrue();
 	}
 
 	@Test
@@ -121,7 +123,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(value instanceof List).isTrue();
 		@SuppressWarnings("unchecked")
 		List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
-		assertThat(resolvers.size()).isEqualTo(3);
+		assertThat(resolvers).hasSize(3);
 		assertThat(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter).isTrue();
 		assertThat(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver).isTrue();
 		assertThat(resolvers.get(2) instanceof TestHandlerMethodArgumentResolver).isTrue();
@@ -142,7 +144,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(value instanceof List).isTrue();
 		@SuppressWarnings("unchecked")
 		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>) value;
-		assertThat(handlers.size()).isEqualTo(2);
+		assertThat(handlers).hasSize(2);
 		assertThat(handlers.get(0).getClass()).isEqualTo(TestHandlerMethodReturnValueHandler.class);
 		assertThat(handlers.get(1).getClass()).isEqualTo(TestHandlerMethodReturnValueHandler.class);
 		assertThat(handlers.get(1)).isNotSameAs(handlers.get(0));

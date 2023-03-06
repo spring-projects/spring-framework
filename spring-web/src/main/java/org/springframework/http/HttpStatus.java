@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.lang.Nullable;
  * @see <a href="https://www.iana.org/assignments/http-status-codes">HTTP Status Code Registry</a>
  * @see <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">List of HTTP status codes - Wikipedia</a>
  */
-public enum HttpStatus {
+public enum HttpStatus implements HttpStatusCode {
 
 	// 1xx Informational
 
@@ -51,10 +51,18 @@ public enum HttpStatus {
 	 */
 	PROCESSING(102, Series.INFORMATIONAL, "Processing"),
 	/**
+	 * {@code 103 Early Hints}.
+	 * @see <a href="https://tools.ietf.org/html/rfc8297">An HTTP Status Code for Indicating Hints</a>
+	 * @since 6.0.5
+	 */
+	EARLY_HINTS(103, Series.INFORMATIONAL, "Early Hints"),
+	/**
 	 * {@code 103 Checkpoint}.
 	 * @see <a href="https://code.google.com/p/gears/wiki/ResumableHttpRequestsProposal">A proposal for supporting
 	 * resumable POST/PUT HTTP requests in HTTP/1.0</a>
+	 * @deprecated in favor of {@link #EARLY_HINTS} which will be returned from {@code HttpStatus.valueOf(103)}
 	 */
+	@Deprecated(since = "6.0.5")
 	CHECKPOINT(103, Series.INFORMATIONAL, "Checkpoint"),
 
 	// 2xx Success
@@ -285,21 +293,21 @@ public enum HttpStatus {
 	I_AM_A_TEAPOT(418, Series.CLIENT_ERROR, "I'm a teapot"),
 	/**
 	 * @deprecated See
-	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	INSUFFICIENT_SPACE_ON_RESOURCE(419, Series.CLIENT_ERROR, "Insufficient Space On Resource"),
 	/**
 	 * @deprecated See
-	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
 	METHOD_FAILURE(420, Series.CLIENT_ERROR, "Method Failure"),
 	/**
 	 * @deprecated
-	 * See <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">
+	 * See <a href="https://tools.ietf.org/rfcdiff?difftype=--hwdiff&amp;url2=draft-ietf-webdav-protocol-06.txt">
 	 *     WebDAV Draft Changes</a>
 	 */
 	@Deprecated
@@ -416,6 +424,13 @@ public enum HttpStatus {
 	NETWORK_AUTHENTICATION_REQUIRED(511, Series.SERVER_ERROR, "Network Authentication Required");
 
 
+	private static final HttpStatus[] VALUES;
+
+	static {
+		VALUES = values();
+	}
+
+
 	private final int value;
 
 	private final Series series;
@@ -429,9 +444,7 @@ public enum HttpStatus {
 	}
 
 
-	/**
-	 * Return the integer value of this status code.
-	 */
+	@Override
 	public int value() {
 		return this.value;
 	}
@@ -451,70 +464,32 @@ public enum HttpStatus {
 		return this.reasonPhrase;
 	}
 
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#INFORMATIONAL}.
-	 * <p>This is a shortcut for checking the value of {@link #series()}.
-	 * @since 4.0
-	 * @see #series()
-	 */
+	@Override
 	public boolean is1xxInformational() {
 		return (series() == Series.INFORMATIONAL);
 	}
 
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#SUCCESSFUL}.
-	 * <p>This is a shortcut for checking the value of {@link #series()}.
-	 * @since 4.0
-	 * @see #series()
-	 */
+	@Override
 	public boolean is2xxSuccessful() {
 		return (series() == Series.SUCCESSFUL);
 	}
 
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#REDIRECTION}.
-	 * <p>This is a shortcut for checking the value of {@link #series()}.
-	 * @since 4.0
-	 * @see #series()
-	 */
+	@Override
 	public boolean is3xxRedirection() {
 		return (series() == Series.REDIRECTION);
 	}
 
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR}.
-	 * <p>This is a shortcut for checking the value of {@link #series()}.
-	 * @since 4.0
-	 * @see #series()
-	 */
+	@Override
 	public boolean is4xxClientError() {
 		return (series() == Series.CLIENT_ERROR);
 	}
 
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
-	 * <p>This is a shortcut for checking the value of {@link #series()}.
-	 * @since 4.0
-	 * @see #series()
-	 */
+	@Override
 	public boolean is5xxServerError() {
 		return (series() == Series.SERVER_ERROR);
 	}
 
-	/**
-	 * Whether this status code is in the HTTP series
-	 * {@link org.springframework.http.HttpStatus.Series#CLIENT_ERROR} or
-	 * {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR}.
-	 * <p>This is a shortcut for checking the value of {@link #series()}.
-	 * @since 5.0
-	 * @see #is4xxClientError()
-	 * @see #is5xxServerError()
-	 */
+	@Override
 	public boolean isError() {
 		return (is4xxClientError() || is5xxServerError());
 	}
@@ -550,7 +525,8 @@ public enum HttpStatus {
 	 */
 	@Nullable
 	public static HttpStatus resolve(int statusCode) {
-		for (HttpStatus status : values()) {
+		// Use cached VALUES instead of values() to prevent array allocation.
+		for (HttpStatus status : VALUES) {
 			if (status.value == statusCode) {
 				return status;
 			}

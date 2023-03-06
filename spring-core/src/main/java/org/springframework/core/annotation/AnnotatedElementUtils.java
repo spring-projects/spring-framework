@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,6 +433,16 @@ public abstract class AnnotatedElementUtils {
 	 * single annotation and within annotation hierarchies.
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * <p><strong>WARNING</strong>: if the supplied {@code containerType} is not
+	 * {@code null}, the search will be restricted to supporting only repeatable
+	 * annotations whose container is the supplied {@code containerType}. This
+	 * prevents the search from finding repeatable annotations declared as
+	 * meta-annotations on other types of repeatable annotations. If you need to
+	 * support such a use case, favor {@link #getMergedRepeatableAnnotations(AnnotatedElement, Class)}
+	 * over this method or alternatively use the {@link MergedAnnotations} API
+	 * directly in conjunction with {@link RepeatableContainers} that are
+	 * {@linkplain RepeatableContainers#and(Class, Class) composed} to support
+	 * multiple repeatable annotation types.
 	 * @param element the annotated element (never {@code null})
 	 * @param annotationType the annotation type to find (never {@code null})
 	 * @param containerType the type of the container that holds the annotations;
@@ -725,6 +735,16 @@ public abstract class AnnotatedElementUtils {
 	 * single annotation and within annotation hierarchies.
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * <p><strong>WARNING</strong>: if the supplied {@code containerType} is not
+	 * {@code null}, the search will be restricted to supporting only repeatable
+	 * annotations whose container is the supplied {@code containerType}. This
+	 * prevents the search from finding repeatable annotations declared as
+	 * meta-annotations on other types of repeatable annotations. If you need to
+	 * support such a use case, favor {@link #findMergedRepeatableAnnotations(AnnotatedElement, Class)}
+	 * over this method or alternatively use the {@link MergedAnnotations} API
+	 * directly in conjunction with {@link RepeatableContainers} that are
+	 * {@linkplain RepeatableContainers#and(Class, Class) composed} to support
+	 * multiple repeatable annotation types.
 	 * @param element the annotated element (never {@code null})
 	 * @param annotationType the annotation type to find (never {@code null})
 	 * @param containerType the type of the container that holds the annotations;
@@ -756,7 +776,23 @@ public abstract class AnnotatedElementUtils {
 	private static MergedAnnotations getRepeatableAnnotations(AnnotatedElement element,
 			@Nullable Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
-		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
+		RepeatableContainers repeatableContainers;
+		if (containerType == null) {
+			// Invoke RepeatableContainers.of() in order to adhere to the contract of
+			// getMergedRepeatableAnnotations() which states that an IllegalArgumentException
+			// will be thrown if the container cannot be resolved.
+			//
+			// In any case, we use standardRepeatables() in order to support repeatable
+			// annotations on other types of repeatable annotations (i.e., nested repeatable
+			// annotation types).
+			//
+			// See https://github.com/spring-projects/spring-framework/issues/20279
+			RepeatableContainers.of(annotationType, null);
+			repeatableContainers = RepeatableContainers.standardRepeatables();
+		}
+		else {
+			repeatableContainers = RepeatableContainers.of(annotationType, containerType);
+		}
 		return MergedAnnotations.from(element, SearchStrategy.INHERITED_ANNOTATIONS, repeatableContainers);
 	}
 
@@ -767,7 +803,23 @@ public abstract class AnnotatedElementUtils {
 	private static MergedAnnotations findRepeatableAnnotations(AnnotatedElement element,
 			@Nullable Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType) {
 
-		RepeatableContainers repeatableContainers = RepeatableContainers.of(annotationType, containerType);
+		RepeatableContainers repeatableContainers;
+		if (containerType == null) {
+			// Invoke RepeatableContainers.of() in order to adhere to the contract of
+			// findMergedRepeatableAnnotations() which states that an IllegalArgumentException
+			// will be thrown if the container cannot be resolved.
+			//
+			// In any case, we use standardRepeatables() in order to support repeatable
+			// annotations on other types of repeatable annotations (i.e., nested repeatable
+			// annotation types).
+			//
+			// See https://github.com/spring-projects/spring-framework/issues/20279
+			RepeatableContainers.of(annotationType, null);
+			repeatableContainers = RepeatableContainers.standardRepeatables();
+		}
+		else {
+			repeatableContainers = RepeatableContainers.of(annotationType, containerType);
+		}
 		return MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY, repeatableContainers);
 	}
 
@@ -777,8 +829,7 @@ public abstract class AnnotatedElementUtils {
 	}
 
 	private static <A extends Annotation> Comparator<MergedAnnotation<A>> highAggregateIndexesFirst() {
-		return Comparator.<MergedAnnotation<A>> comparingInt(
-				MergedAnnotation::getAggregateIndex).reversed();
+		return Comparator.<MergedAnnotation<A>> comparingInt(MergedAnnotation::getAggregateIndex).reversed();
 	}
 
 	@Nullable
@@ -788,13 +839,12 @@ public abstract class AnnotatedElementUtils {
 		if (!annotation.isPresent()) {
 			return null;
 		}
-		return annotation.asAnnotationAttributes(
-				Adapt.values(classValuesAsString, nestedAnnotationsAsMap));
+		return annotation.asAnnotationAttributes(Adapt.values(classValuesAsString, nestedAnnotationsAsMap));
 	}
 
 
 	/**
-	 * Adapted {@link AnnotatedElement} that hold specific annotations.
+	 * Adapted {@link AnnotatedElement} that holds specific annotations.
 	 */
 	private static class AnnotatedElementForAnnotations implements AnnotatedElement {
 

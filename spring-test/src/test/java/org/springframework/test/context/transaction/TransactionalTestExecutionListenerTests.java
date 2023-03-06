@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRED;
  */
 class TransactionalTestExecutionListenerTests {
 
-	private final PlatformTransactionManager tm = mock(PlatformTransactionManager.class);
+	private final PlatformTransactionManager tm = mock();
 
 	private final TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
 		@Override
@@ -58,7 +58,7 @@ class TransactionalTestExecutionListenerTests {
 		}
 	};
 
-	private final TestContext testContext = mock(TestContext.class);
+	private final TestContext testContext = mock();
 
 
 	@AfterEach
@@ -285,11 +285,12 @@ class TransactionalTestExecutionListenerTests {
 
 	@Transactional
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTxWithOverride {
+	private @interface MetaTxWithOverride {
 
-		@AliasFor(annotation = Transactional.class, attribute = "value")
+		@AliasFor(annotation = Transactional.class)
 		String transactionManager() default "";
 
+		@AliasFor(annotation = Transactional.class)
 		Propagation propagation() default REQUIRED;
 	}
 

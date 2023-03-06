@@ -18,7 +18,7 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.util.Map;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ServerHttpRequest;

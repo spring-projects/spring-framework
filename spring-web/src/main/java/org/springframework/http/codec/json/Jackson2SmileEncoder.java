@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from an {@code Object} stream to a byte stream of Smile objects using Jackson 2.9.
+ * Encode from an {@code Object} stream to a byte stream of Smile objects using Jackson 2.x.
  * For non-streaming use cases, {@link Flux} elements are collected into a {@link List}
  * before serialization for performance reason.
  *
@@ -43,9 +43,6 @@ public class Jackson2SmileEncoder extends AbstractJackson2Encoder {
 	private static final MimeType[] DEFAULT_SMILE_MIME_TYPES = new MimeType[] {
 			new MimeType("application", "x-jackson-smile"),
 			new MimeType("application", "*+x-jackson-smile")};
-
-	private static final MimeType STREAM_MIME_TYPE =
-			MediaType.parseMediaType("application/stream+x-jackson-smile");
 
 	private static final byte[] STREAM_SEPARATOR = new byte[0];
 

@@ -45,7 +45,7 @@ public interface ConnectionAccessor {
 	 * Execute a callback {@link Function} within a {@link Connection} scope.
 	 * The function is responsible for creating a {@link Mono}. The connection
 	 * is released after the {@link Mono} terminates (or the subscription
-	 * is cancelled). Connection resources must not be passed outside of the
+	 * is cancelled). Connection resources must not be passed outside the
 	 * {@link Function} closure, otherwise resources may get defunct.
 	 * @param action the callback object that specifies the connection action
 	 * @return the resulting {@link Mono}
@@ -56,7 +56,7 @@ public interface ConnectionAccessor {
 	 * Execute a callback {@link Function} within a {@link Connection} scope.
 	 * The function is responsible for creating a {@link Flux}. The connection
 	 * is released after the {@link Flux} terminates (or the subscription
-	 * is cancelled). Connection resources must not be passed outside of the
+	 * is cancelled). Connection resources must not be passed outside the
 	 * {@link Function} closure, otherwise resources may get defunct.
 	 * @param action the callback object that specifies the connection action
 	 * @return the resulting {@link Flux}

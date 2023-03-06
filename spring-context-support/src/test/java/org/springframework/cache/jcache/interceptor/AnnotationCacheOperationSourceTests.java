@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 	@Test
 	public void defaultCacheNameWithDefaults() {
 		Method method = ReflectionUtils.findMethod(Object.class, "toString");
-		CacheDefaults mock = mock(CacheDefaults.class);
+		CacheDefaults mock = mock();
 		given(mock.cacheName()).willReturn("");
 		assertThat(source.determineCacheName(method, mock, "")).isEqualTo("java.lang.Object.toString()");
 	}
@@ -202,7 +202,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 	private JCacheOperation<?> getCacheOperation(Class<?> targetType, String methodName, Class<?>... parameterTypes) {
 		Method method = ReflectionUtils.findMethod(targetType, methodName, parameterTypes);
-		Assert.notNull(method, "requested method '" + methodName + "'does not exist");
+		Assert.notNull(method, () -> "requested method '" + methodName + "'does not exist");
 		return source.getCacheOperation(method, targetType);
 	}
 

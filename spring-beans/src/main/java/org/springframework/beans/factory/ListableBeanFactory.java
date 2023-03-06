@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.beans.factory;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
@@ -322,7 +323,8 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * (at class, interface or factory method level of the specified bean)
 	 * @return the names of all matching beans
 	 * @since 4.0
-	 * @see #findAnnotationOnBean
+	 * @see #getBeansWithAnnotation(Class)
+	 * @see #findAnnotationOnBean(String, Class)
 	 */
 	String[] getBeanNamesForAnnotation(Class<? extends Annotation> annotationType);
 
@@ -337,13 +339,15 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if a bean could not be created
 	 * @since 3.0
-	 * @see #findAnnotationOnBean
+	 * @see #findAnnotationOnBean(String, Class)
+	 * @see #findAnnotationOnBean(String, Class, boolean)
+	 * @see #findAllAnnotationsOnBean(String, Class, boolean)
 	 */
 	Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) throws BeansException;
 
 	/**
 	 * Find an {@link Annotation} of {@code annotationType} on the specified bean,
-	 * traversing its interfaces and super classes if no annotation can be found on
+	 * traversing its interfaces and superclasses if no annotation can be found on
 	 * the given class itself, as well as checking the bean's factory method (if any).
 	 * @param beanName the name of the bean to look for annotations on
 	 * @param annotationType the type of annotation to look for
@@ -351,11 +355,57 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * @return the annotation of the given type if found, or {@code null} otherwise
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 3.0
-	 * @see #getBeanNamesForAnnotation
-	 * @see #getBeansWithAnnotation
+	 * @see #findAnnotationOnBean(String, Class, boolean)
+	 * @see #findAllAnnotationsOnBean(String, Class, boolean)
+	 * @see #getBeanNamesForAnnotation(Class)
+	 * @see #getBeansWithAnnotation(Class)
+	 * @see #getType(String)
 	 */
 	@Nullable
 	<A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType)
+			throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Find an {@link Annotation} of {@code annotationType} on the specified bean,
+	 * traversing its interfaces and superclasses if no annotation can be found on
+	 * the given class itself, as well as checking the bean's factory method (if any).
+	 * @param beanName the name of the bean to look for annotations on
+	 * @param annotationType the type of annotation to look for
+	 * (at class, interface or factory method level of the specified bean)
+	 * @param allowFactoryBeanInit whether a {@code FactoryBean} may get initialized
+	 * just for the purpose of determining its object type
+	 * @return the annotation of the given type if found, or {@code null} otherwise
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 5.3.14
+	 * @see #findAnnotationOnBean(String, Class)
+	 * @see #findAllAnnotationsOnBean(String, Class, boolean)
+	 * @see #getBeanNamesForAnnotation(Class)
+	 * @see #getBeansWithAnnotation(Class)
+	 * @see #getType(String, boolean)
+	 */
+	@Nullable
+	<A extends Annotation> A findAnnotationOnBean(
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
+			throws NoSuchBeanDefinitionException;
+
+	/**
+	 * Find all {@link Annotation} instances of {@code annotationType} on the specified
+	 * bean, traversing its interfaces and superclasses if no annotation can be found on
+	 * the given class itself, as well as checking the bean's factory method (if any).
+	 * @param beanName the name of the bean to look for annotations on
+	 * @param annotationType the type of annotation to look for
+	 * (at class, interface or factory method level of the specified bean)
+	 * @param allowFactoryBeanInit whether a {@code FactoryBean} may get initialized
+	 * just for the purpose of determining its object type
+	 * @return the set of annotations of the given type found (potentially empty)
+	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
+	 * @since 6.0
+	 * @see #getBeanNamesForAnnotation(Class)
+	 * @see #findAnnotationOnBean(String, Class, boolean)
+	 * @see #getType(String, boolean)
+	 */
+	<A extends Annotation> Set<A> findAllAnnotationsOnBean(
+			String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)
 			throws NoSuchBeanDefinitionException;
 
 }

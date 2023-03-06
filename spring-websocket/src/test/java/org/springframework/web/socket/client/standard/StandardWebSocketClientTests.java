@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.Endpoint;
-import javax.websocket.WebSocketContainer;
-
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.websocket.ClientEndpointConfig;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.WebSocketContainer;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -47,30 +45,21 @@ import static org.mockito.Mockito.verify;
  *
  * @author Rossen Stoyanchev
  */
-public class StandardWebSocketClientTests {
+class StandardWebSocketClientTests {
 
-	private StandardWebSocketClient wsClient;
+	private final WebSocketHandler wsHandler = new AbstractWebSocketHandler() {};
 
-	private WebSocketContainer wsContainer;
+	private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
-	private WebSocketHandler wsHandler;
+	private final WebSocketContainer wsContainer = mock();
 
-	private WebSocketHttpHeaders headers;
-
-
-	@BeforeEach
-	public void setup() {
-		this.headers = new WebSocketHttpHeaders();
-		this.wsHandler = new AbstractWebSocketHandler() {
-		};
-		this.wsContainer = mock(WebSocketContainer.class);
-		this.wsClient = new StandardWebSocketClient(this.wsContainer);
-	}
+	private final StandardWebSocketClient wsClient = new StandardWebSocketClient(this.wsContainer);
 
 
 	@Test
-	public void testGetLocalAddress() throws Exception {
-		URI uri = new URI("ws://localhost/abc");
+	@SuppressWarnings("deprecation")
+	void getLocalAddress() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getLocalAddress()).isNotNull();
@@ -78,8 +67,9 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
-	public void testGetLocalAddressWss() throws Exception {
-		URI uri = new URI("wss://localhost/abc");
+	@SuppressWarnings("deprecation")
+	void getLocalAddressWss() throws Exception {
+		URI uri = URI.create("wss://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getLocalAddress()).isNotNull();
@@ -87,15 +77,17 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
-	public void testGetLocalAddressNoScheme() throws Exception {
-		URI uri = new URI("localhost/abc");
+	@SuppressWarnings("deprecation")
+	void getLocalAddressNoScheme() {
+		URI uri = URI.create("localhost/abc");
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				this.wsClient.doHandshake(this.wsHandler, this.headers, uri));
 	}
 
 	@Test
-	public void testGetRemoteAddress() throws Exception {
-		URI uri = new URI("wss://localhost/abc");
+	@SuppressWarnings("deprecation")
+	void getRemoteAddress() throws Exception {
+		URI uri = URI.create("wss://localhost/abc");
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
 		assertThat(session.getRemoteAddress()).isNotNull();
@@ -104,23 +96,23 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
-	public void handshakeHeaders() throws Exception {
-
-		URI uri = new URI("ws://localhost/abc");
+	@SuppressWarnings("deprecation")
+	void handshakeHeaders() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
 		this.headers.add("foo", "bar");
 
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
-		assertThat(session.getHandshakeHeaders().size()).isEqualTo(1);
+		assertThat(session.getHandshakeHeaders()).hasSize(1);
 		assertThat(session.getHandshakeHeaders().getFirst("foo")).isEqualTo("bar");
 	}
 
 	@Test
-	public void clientEndpointConfig() throws Exception {
-
-		URI uri = new URI("ws://localhost/abc");
+	@SuppressWarnings("deprecation")
+	void clientEndpointConfig() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		List<String> protocols = Collections.singletonList("abc");
 		this.headers.setSecWebSocketProtocol(protocols);
 
@@ -134,11 +126,11 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
-	public void clientEndpointConfigWithUserProperties() throws Exception {
-
+	@SuppressWarnings("deprecation")
+	void clientEndpointConfigWithUserProperties() throws Exception {
 		Map<String,Object> userProperties = Collections.singletonMap("foo", "bar");
 
-		URI uri = new URI("ws://localhost/abc");
+		URI uri = URI.create("ws://localhost/abc");
 		this.wsClient.setUserProperties(userProperties);
 		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 
@@ -150,9 +142,9 @@ public class StandardWebSocketClientTests {
 	}
 
 	@Test
-	public void standardWebSocketClientConfiguratorInsertsHandshakeHeaders() throws Exception {
-
-		URI uri = new URI("ws://localhost/abc");
+	@SuppressWarnings("deprecation")
+	void standardWebSocketClientConfiguratorInsertsHandshakeHeaders() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		this.headers.add("foo", "bar");
 
 		this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
@@ -163,13 +155,13 @@ public class StandardWebSocketClientTests {
 
 		Map<String, List<String>> headers = new HashMap<>();
 		endpointConfig.getConfigurator().beforeRequest(headers);
-		assertThat(headers.size()).isEqualTo(1);
+		assertThat(headers).hasSize(1);
 	}
 
 	@Test
-	public void taskExecutor() throws Exception {
-
-		URI uri = new URI("ws://localhost/abc");
+	@SuppressWarnings("deprecation")
+	void taskExecutor() throws Exception {
+		URI uri = URI.create("ws://localhost/abc");
 		this.wsClient.setTaskExecutor(new SimpleAsyncTaskExecutor());
 		WebSocketSession session = this.wsClient.doHandshake(this.wsHandler, this.headers, uri).get();
 

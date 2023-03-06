@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,17 +56,17 @@ class ConstantsTests {
 		Constants c = new Constants(A.class);
 
 		Set<?> names = c.getNames("");
-		assertThat(names.size()).isEqualTo(c.getSize());
+		assertThat(names).hasSize(c.getSize());
 		assertThat(names.contains("DOG")).isTrue();
 		assertThat(names.contains("CAT")).isTrue();
 		assertThat(names.contains("S1")).isTrue();
 
 		names = c.getNames("D");
-		assertThat(names.size()).isEqualTo(1);
+		assertThat(names).hasSize(1);
 		assertThat(names.contains("DOG")).isTrue();
 
 		names = c.getNames("d");
-		assertThat(names.size()).isEqualTo(1);
+		assertThat(names).hasSize(1);
 		assertThat(names.contains("DOG")).isTrue();
 	}
 
@@ -75,24 +75,24 @@ class ConstantsTests {
 		Constants c = new Constants(A.class);
 
 		Set<?> values = c.getValues("");
-		assertThat(values.size()).isEqualTo(7);
-		assertThat(values.contains(Integer.valueOf(0))).isTrue();
-		assertThat(values.contains(Integer.valueOf(66))).isTrue();
+		assertThat(values).hasSize(7);
+		assertThat(values.contains(0)).isTrue();
+		assertThat(values.contains(66)).isTrue();
 		assertThat(values.contains("")).isTrue();
 
 		values = c.getValues("D");
-		assertThat(values.size()).isEqualTo(1);
-		assertThat(values.contains(Integer.valueOf(0))).isTrue();
+		assertThat(values).hasSize(1);
+		assertThat(values.contains(0)).isTrue();
 
 		values = c.getValues("prefix");
-		assertThat(values.size()).isEqualTo(2);
-		assertThat(values.contains(Integer.valueOf(1))).isTrue();
-		assertThat(values.contains(Integer.valueOf(2))).isTrue();
+		assertThat(values).hasSize(2);
+		assertThat(values.contains(1)).isTrue();
+		assertThat(values.contains(2)).isTrue();
 
 		values = c.getValuesForProperty("myProperty");
-		assertThat(values.size()).isEqualTo(2);
-		assertThat(values.contains(Integer.valueOf(1))).isTrue();
-		assertThat(values.contains(Integer.valueOf(2))).isTrue();
+		assertThat(values).hasSize(2);
+		assertThat(values.contains(1)).isTrue();
+		assertThat(values.contains(2)).isTrue();
 	}
 
 	@Test
@@ -103,24 +103,24 @@ class ConstantsTests {
 			Constants c = new Constants(A.class);
 
 			Set<?> values = c.getValues("");
-			assertThat(values.size()).isEqualTo(7);
-			assertThat(values.contains(Integer.valueOf(0))).isTrue();
-			assertThat(values.contains(Integer.valueOf(66))).isTrue();
+			assertThat(values).hasSize(7);
+			assertThat(values.contains(0)).isTrue();
+			assertThat(values.contains(66)).isTrue();
 			assertThat(values.contains("")).isTrue();
 
 			values = c.getValues("D");
-			assertThat(values.size()).isEqualTo(1);
-			assertThat(values.contains(Integer.valueOf(0))).isTrue();
+			assertThat(values).hasSize(1);
+			assertThat(values.contains(0)).isTrue();
 
 			values = c.getValues("prefix");
-			assertThat(values.size()).isEqualTo(2);
-			assertThat(values.contains(Integer.valueOf(1))).isTrue();
-			assertThat(values.contains(Integer.valueOf(2))).isTrue();
+			assertThat(values).hasSize(2);
+			assertThat(values.contains(1)).isTrue();
+			assertThat(values.contains(2)).isTrue();
 
 			values = c.getValuesForProperty("myProperty");
-			assertThat(values.size()).isEqualTo(2);
-			assertThat(values.contains(Integer.valueOf(1))).isTrue();
-			assertThat(values.contains(Integer.valueOf(2))).isTrue();
+			assertThat(values).hasSize(2);
+			assertThat(values.contains(1)).isTrue();
+			assertThat(values.contains(2)).isTrue();
 		}
 		finally {
 			Locale.setDefault(oldLocale);
@@ -132,30 +132,30 @@ class ConstantsTests {
 		Constants c = new Constants(A.class);
 
 		Set<?> names = c.getNamesForSuffix("_PROPERTY");
-		assertThat(names.size()).isEqualTo(2);
+		assertThat(names).hasSize(2);
 		assertThat(names.contains("NO_PROPERTY")).isTrue();
 		assertThat(names.contains("YES_PROPERTY")).isTrue();
 
 		Set<?> values = c.getValuesForSuffix("_PROPERTY");
-		assertThat(values.size()).isEqualTo(2);
-		assertThat(values.contains(Integer.valueOf(3))).isTrue();
-		assertThat(values.contains(Integer.valueOf(4))).isTrue();
+		assertThat(values).hasSize(2);
+		assertThat(values.contains(3)).isTrue();
+		assertThat(values.contains(4)).isTrue();
 	}
 
 	@Test
 	void toCode() {
 		Constants c = new Constants(A.class);
 
-		assertThat(c.toCode(Integer.valueOf(0), "")).isEqualTo("DOG");
-		assertThat(c.toCode(Integer.valueOf(0), "D")).isEqualTo("DOG");
-		assertThat(c.toCode(Integer.valueOf(0), "DO")).isEqualTo("DOG");
-		assertThat(c.toCode(Integer.valueOf(0), "DoG")).isEqualTo("DOG");
-		assertThat(c.toCode(Integer.valueOf(0), null)).isEqualTo("DOG");
-		assertThat(c.toCode(Integer.valueOf(66), "")).isEqualTo("CAT");
-		assertThat(c.toCode(Integer.valueOf(66), "C")).isEqualTo("CAT");
-		assertThat(c.toCode(Integer.valueOf(66), "ca")).isEqualTo("CAT");
-		assertThat(c.toCode(Integer.valueOf(66), "cAt")).isEqualTo("CAT");
-		assertThat(c.toCode(Integer.valueOf(66), null)).isEqualTo("CAT");
+		assertThat(c.toCode(0, "")).isEqualTo("DOG");
+		assertThat(c.toCode(0, "D")).isEqualTo("DOG");
+		assertThat(c.toCode(0, "DO")).isEqualTo("DOG");
+		assertThat(c.toCode(0, "DoG")).isEqualTo("DOG");
+		assertThat(c.toCode(0, null)).isEqualTo("DOG");
+		assertThat(c.toCode(66, "")).isEqualTo("CAT");
+		assertThat(c.toCode(66, "C")).isEqualTo("CAT");
+		assertThat(c.toCode(66, "ca")).isEqualTo("CAT");
+		assertThat(c.toCode(66, "cAt")).isEqualTo("CAT");
+		assertThat(c.toCode(66, null)).isEqualTo("CAT");
 		assertThat(c.toCode("", "")).isEqualTo("S1");
 		assertThat(c.toCode("", "s")).isEqualTo("S1");
 		assertThat(c.toCode("", "s1")).isEqualTo("S1");
@@ -165,21 +165,21 @@ class ConstantsTests {
 		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
 				c.toCode("bogus", null));
 
-		assertThat(c.toCodeForProperty(Integer.valueOf(1), "myProperty")).isEqualTo("MY_PROPERTY_NO");
-		assertThat(c.toCodeForProperty(Integer.valueOf(2), "myProperty")).isEqualTo("MY_PROPERTY_YES");
+		assertThat(c.toCodeForProperty(1, "myProperty")).isEqualTo("MY_PROPERTY_NO");
+		assertThat(c.toCodeForProperty(2, "myProperty")).isEqualTo("MY_PROPERTY_YES");
 		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
 				c.toCodeForProperty("bogus", "bogus"));
 
-		assertThat(c.toCodeForSuffix(Integer.valueOf(0), "")).isEqualTo("DOG");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(0), "G")).isEqualTo("DOG");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(0), "OG")).isEqualTo("DOG");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(0), "DoG")).isEqualTo("DOG");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(0), null)).isEqualTo("DOG");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(66), "")).isEqualTo("CAT");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(66), "T")).isEqualTo("CAT");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(66), "at")).isEqualTo("CAT");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(66), "cAt")).isEqualTo("CAT");
-		assertThat(c.toCodeForSuffix(Integer.valueOf(66), null)).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(0, "")).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(0, "G")).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(0, "OG")).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(0, "DoG")).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(0, null)).isEqualTo("DOG");
+		assertThat(c.toCodeForSuffix(66, "")).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(66, "T")).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(66, "at")).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(66, "cAt")).isEqualTo("CAT");
+		assertThat(c.toCodeForSuffix(66, null)).isEqualTo("CAT");
 		assertThat(c.toCodeForSuffix("", "")).isEqualTo("S1");
 		assertThat(c.toCodeForSuffix("", "1")).isEqualTo("S1");
 		assertThat(c.toCodeForSuffix("", "s1")).isEqualTo("S1");
@@ -217,7 +217,7 @@ class ConstantsTests {
 		assertThat(c.getSize()).isEqualTo(0);
 		final Set<?> values = c.getValues("");
 		assertThat(values).isNotNull();
-		assertThat(values.size()).isEqualTo(0);
+		assertThat(values).isEmpty();
 	}
 
 	@Test

@@ -27,8 +27,6 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.core.CoroutinesUtils;
-import org.springframework.core.KotlinDetector;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
@@ -118,20 +116,21 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
 
 		// Adapt to TransactionAspectSupport's invokeWithinTransaction...
-		if (KotlinDetector.isSuspendingFunction(invocation.getMethod())) {
-			InvocationCallback callback = new CoroutinesInvocationCallback() {
-				@Override
-				public Object proceedWithInvocation() {
-					return CoroutinesUtils.invokeSuspendingFunction(invocation.getMethod(), invocation.getThis(), invocation.getArguments());
-				}
-				@Override
-				public Object getContinuation() {
-					return invocation.getArguments()[invocation.getArguments().length - 1];
-				}
-			};
-			return invokeWithinTransaction(invocation.getMethod(), targetClass, callback);
-		}
-		return invokeWithinTransaction(invocation.getMethod(), targetClass, invocation::proceed);
+		return invokeWithinTransaction(invocation.getMethod(), targetClass, new CoroutinesInvocationCallback() {
+			@Override
+			@Nullable
+			public Object proceedWithInvocation() throws Throwable {
+				return invocation.proceed();
+			}
+			@Override
+			public Object getTarget() {
+				return invocation.getThis();
+			}
+			@Override
+			public Object[] getArguments() {
+				return invocation.getArguments();
+			}
+		});
 	}
 
 

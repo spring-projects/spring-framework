@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,14 +68,10 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 */
 	@Override
 	public String[] selectImports(AdviceMode adviceMode) {
-		switch (adviceMode) {
-			case PROXY:
-				return getProxyImports();
-			case ASPECTJ:
-				return getAspectJImports();
-			default:
-				return null;
-		}
+		return switch (adviceMode) {
+			case PROXY -> getProxyImports();
+			case ASPECTJ -> getAspectJImports();
+		};
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +87,7 @@ public class Selection extends SpelNodeImpl {
 		Object operand = op.getValue();
 		SpelNodeImpl selectionCriteria = this.children[0];
 
-		if (operand instanceof Map) {
-			Map<?, ?> mapdata = (Map<?, ?>) operand;
+		if (operand instanceof Map<?, ?> mapdata) {
 			// TODO don't lose generic info for the new map
 			Map<Object, Object> result = new HashMap<>();
 			Object lastKey = null;
@@ -99,8 +98,8 @@ public class Selection extends SpelNodeImpl {
 					state.pushActiveContextObject(kvPair);
 					state.enterScope();
 					Object val = selectionCriteria.getValueInternal(state).getValue();
-					if (val instanceof Boolean) {
-						if ((Boolean) val) {
+					if (val instanceof Boolean b) {
+						if (b) {
 							if (this.variant == FIRST) {
 								result.put(entry.getKey(), entry.getValue());
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);
@@ -135,8 +134,8 @@ public class Selection extends SpelNodeImpl {
 		}
 
 		if (operand instanceof Iterable || ObjectUtils.isArray(operand)) {
-			Iterable<?> data = (operand instanceof Iterable ?
-					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
+			Iterable<?> data = (operand instanceof Iterable<?> iterable ?
+					iterable : Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
 			List<Object> result = new ArrayList<>();
 			int index = 0;
@@ -145,8 +144,8 @@ public class Selection extends SpelNodeImpl {
 					state.pushActiveContextObject(new TypedValue(element));
 					state.enterScope("index", index);
 					Object val = selectionCriteria.getValueInternal(state).getValue();
-					if (val instanceof Boolean) {
-						if ((Boolean) val) {
+					if (val instanceof Boolean b) {
+						if (b) {
 							if (this.variant == FIRST) {
 								return new ValueRef.TypedValueHolderValueRef(new TypedValue(element), this);
 							}
@@ -209,12 +208,12 @@ public class Selection extends SpelNodeImpl {
 	}
 
 	private String prefix() {
-		switch (this.variant) {
-			case ALL:   return "?[";
-			case FIRST: return "^[";
-			case LAST:  return "$[";
-		}
-		return "";
+		return switch (this.variant) {
+			case ALL -> "?[";
+			case FIRST -> "^[";
+			case LAST -> "$[";
+			default -> "";
+		};
 	}
 
 }

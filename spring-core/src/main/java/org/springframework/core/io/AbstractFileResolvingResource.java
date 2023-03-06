@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.JarURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
@@ -27,6 +28,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.StandardOpenOption;
+import java.util.jar.JarEntry;
 
 import org.springframework.util.ResourceUtils;
 
@@ -54,9 +56,9 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				// Try a URL connection content-length header
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
-				HttpURLConnection httpCon =
-						(con instanceof HttpURLConnection ? (HttpURLConnection) con : null);
+				HttpURLConnection httpCon = (con instanceof HttpURLConnection huc ? huc : null);
 				if (httpCon != null) {
+					httpCon.setRequestMethod("HEAD");
 					int code = httpCon.getResponseCode();
 					if (code == HttpURLConnection.HTTP_OK) {
 						return true;
@@ -88,7 +90,15 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	@Override
 	public boolean isReadable() {
 		try {
-			URL url = getURL();
+			return checkReadable(getURL());
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+
+	boolean checkReadable(URL url) {
+		try {
 			if (ResourceUtils.isFileURL(url)) {
 				// Proceed with file system resolution
 				File file = getFile();
@@ -98,12 +108,21 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 				// Try InputStream resolution for jar resources
 				URLConnection con = url.openConnection();
 				customizeConnection(con);
-				if (con instanceof HttpURLConnection) {
-					HttpURLConnection httpCon = (HttpURLConnection) con;
+				if (con instanceof HttpURLConnection httpCon) {
+					httpCon.setRequestMethod("HEAD");
 					int code = httpCon.getResponseCode();
 					if (code != HttpURLConnection.HTTP_OK) {
 						httpCon.disconnect();
 						return false;
+					}
+				}
+				else if (con instanceof JarURLConnection jarCon) {
+					JarEntry jarEntry = jarCon.getJarEntry();
+					if (jarEntry == null) {
+						return false;
+					}
+					else {
+						return !jarEntry.isDirectory();
 					}
 				}
 				long contentLength = con.getContentLengthLong();
@@ -174,8 +193,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	}
 
 	/**
-	 * This implementation returns a File reference for the given URI-identified
-	 * resource, provided that it refers to a file in the file system.
+	 * Determine whether the given {@link URI} represents a file in a file system.
 	 * @since 5.0
 	 * @see #getFile(URI)
 	 */
@@ -238,6 +256,9 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			// Try a URL connection content-length header
 			URLConnection con = url.openConnection();
 			customizeConnection(con);
+			if (con instanceof HttpURLConnection httpCon) {
+				httpCon.setRequestMethod("HEAD");
+			}
 			return con.getContentLengthLong();
 		}
 	}
@@ -263,6 +284,9 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 		// Try a URL connection last-modified header
 		URLConnection con = url.openConnection();
 		customizeConnection(con);
+		if (con instanceof HttpURLConnection httpCon) {
+			httpCon.setRequestMethod("HEAD");
+		}
 		long lastModified = con.getLastModified();
 		if (fileCheck && lastModified == 0 && con.getContentLengthLong() <= 0) {
 			throw new FileNotFoundException(getDescription() +
@@ -272,8 +296,7 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	}
 
 	/**
-	 * Customize the given {@link URLConnection}, obtained in the course of an
-	 * {@link #exists()}, {@link #contentLength()} or {@link #lastModified()} call.
+	 * Customize the given {@link URLConnection} before fetching the resource.
 	 * <p>Calls {@link ResourceUtils#useCachesIfNecessary(URLConnection)} and
 	 * delegates to {@link #customizeConnection(HttpURLConnection)} if possible.
 	 * Can be overridden in subclasses.
@@ -282,20 +305,18 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	 */
 	protected void customizeConnection(URLConnection con) throws IOException {
 		ResourceUtils.useCachesIfNecessary(con);
-		if (con instanceof HttpURLConnection) {
-			customizeConnection((HttpURLConnection) con);
+		if (con instanceof HttpURLConnection httpConn) {
+			customizeConnection(httpConn);
 		}
 	}
 
 	/**
-	 * Customize the given {@link HttpURLConnection}, obtained in the course of an
-	 * {@link #exists()}, {@link #contentLength()} or {@link #lastModified()} call.
-	 * <p>Sets request method "HEAD" by default. Can be overridden in subclasses.
+	 * Customize the given {@link HttpURLConnection} before fetching the resource.
+	 * <p>Can be overridden in subclasses for configuring request headers and timeouts.
 	 * @param con the HttpURLConnection to customize
 	 * @throws IOException if thrown from HttpURLConnection methods
 	 */
 	protected void customizeConnection(HttpURLConnection con) throws IOException {
-		con.setRequestMethod("HEAD");
 	}
 
 

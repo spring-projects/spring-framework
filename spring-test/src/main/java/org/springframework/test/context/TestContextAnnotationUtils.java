@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration;
@@ -79,6 +81,25 @@ public abstract class TestContextAnnotationUtils {
 
 
 	/**
+	 * Determine if an annotation of the specified {@code annotationType} is
+	 * present or meta-present on the supplied {@link Class} according to the
+	 * search algorithm used in {@link #findMergedAnnotation(Class, Class)}.
+	 * <p>If this method returns {@code true}, then {@code findMergedAnnotation(...)}
+	 * will return a non-null value.
+	 * @param clazz the class to look for annotations on
+	 * @param annotationType the type of annotation to look for
+	 * @return {@code true} if a matching annotation is present
+	 * @since 5.3.3
+	 * @see #findMergedAnnotation(Class, Class)
+	 */
+	public static boolean hasAnnotation(Class<?> clazz, Class<? extends Annotation> annotationType) {
+		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+				.withEnclosingClasses(TestContextAnnotationUtils::searchEnclosingClass)
+				.from(clazz)
+				.isPresent(annotationType);
+	}
+
+	/**
 	 * Find the first annotation of the specified {@code annotationType} within
 	 * the annotation hierarchy <em>above</em> the supplied class, merge that
 	 * annotation's attributes with <em>matching</em> attributes from annotations
@@ -109,9 +130,11 @@ public abstract class TestContextAnnotationUtils {
 	private static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType,
 			Predicate<Class<?>> searchEnclosingClass) {
 
-		AnnotationDescriptor<T> descriptor =
-				findAnnotationDescriptor(clazz, annotationType, searchEnclosingClass, new HashSet<>());
-		return (descriptor != null ? descriptor.getAnnotation() : null);
+		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+				.withEnclosingClasses(searchEnclosingClass)
+				.from(clazz)
+				.get(annotationType)
+				.synthesize(MergedAnnotation::isPresent).orElse(null);
 	}
 
 	/**
@@ -492,10 +515,11 @@ public abstract class TestContextAnnotationUtils {
 			Assert.notNull(annotation, "Annotation must not be null");
 			this.rootDeclaringClass = rootDeclaringClass;
 			this.declaringClass = declaringClass;
-			this.annotation = (T) AnnotatedElementUtils.findMergedAnnotation(
+			T mergedAnnotation = (T) AnnotatedElementUtils.findMergedAnnotation(
 					rootDeclaringClass, annotation.annotationType());
-			Assert.state(this.annotation != null,
+			Assert.state(mergedAnnotation != null,
 					() -> "Failed to find merged annotation for " + annotation);
+			this.annotation = mergedAnnotation;
 		}
 
 		public Class<?> getRootDeclaringClass() {
@@ -545,15 +569,13 @@ public abstract class TestContextAnnotationUtils {
 		/**
 		 * Find <strong>all</strong> annotations of the specified annotation type
 		 * that are present or meta-present on the {@linkplain #getRootDeclaringClass()
-		 * root declaring class} of this descriptor.
+		 * root declaring class} of this descriptor or on any interfaces that the
+		 * root declaring class implements.
 		 * @return the set of all merged, synthesized {@code Annotations} found,
 		 * or an empty set if none were found
 		 */
 		public Set<T> findAllLocalMergedAnnotations() {
-			SearchStrategy searchStrategy =
-					(getEnclosingConfiguration(getRootDeclaringClass()) == EnclosingConfiguration.INHERIT ?
-							SearchStrategy.TYPE_HIERARCHY_AND_ENCLOSING_CLASSES :
-							SearchStrategy.TYPE_HIERARCHY);
+			SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
 			return MergedAnnotations.from(getRootDeclaringClass(), searchStrategy, RepeatableContainers.none())
 					.stream(getAnnotationType())
 					.filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
@@ -565,9 +587,9 @@ public abstract class TestContextAnnotationUtils {
 		 */
 		@Override
 		public String toString() {
-			return new ToStringCreator(this)
-					.append("rootDeclaringClass", this.rootDeclaringClass.getName())
-					.append("declaringClass", this.declaringClass.getName())
+			return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
+					.append("rootDeclaringClass", this.rootDeclaringClass)
+					.append("declaringClass", this.declaringClass)
 					.append("annotation", this.annotation)
 					.toString();
 		}

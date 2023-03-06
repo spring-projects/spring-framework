@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("int");
 		assertThat(desc.toString()).isEqualTo("int");
 		assertThat(desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isMap()).isFalse();
 	}
@@ -78,7 +78,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.lang.String");
 		assertThat(desc.toString()).isEqualTo("java.lang.String");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isFalse();
@@ -93,7 +93,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.List");
 		assertThat(desc.toString()).isEqualTo("java.util.List<java.util.List<java.util.Map<java.lang.Integer, java.lang.Enum<?>>>>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isTrue();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.getElementTypeDescriptor().getType()).isEqualTo(List.class);
@@ -114,7 +114,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.List");
 		assertThat(desc.toString()).isEqualTo("java.util.List<?>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isTrue();
 		assertThat(desc.isArray()).isFalse();
 		assertThat((Object) desc.getElementTypeDescriptor()).isNull();
@@ -130,7 +130,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.lang.Integer[]");
 		assertThat(desc.toString()).isEqualTo("java.lang.Integer[]");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isTrue();
 		assertThat(desc.getElementTypeDescriptor().getType()).isEqualTo(Integer.class);
@@ -147,7 +147,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.Map");
 		assertThat(desc.toString()).isEqualTo("java.util.Map<java.lang.Integer, java.util.List<java.lang.String>>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isTrue();
@@ -162,7 +162,7 @@ class TypeDescriptorTests {
 	void parameterAnnotated() throws Exception {
 		TypeDescriptor t1 = new TypeDescriptor(new MethodParameter(getClass().getMethod("testAnnotatedMethod", String.class), 0));
 		assertThat(t1.getType()).isEqualTo(String.class);
-		assertThat(t1.getAnnotations().length).isEqualTo(1);
+		assertThat(t1.getAnnotations()).hasSize(1);
 		assertThat(t1.getAnnotation(ParameterAnnotation.class)).isNotNull();
 		assertThat(t1.hasAnnotation(ParameterAnnotation.class)).isTrue();
 		assertThat(t1.getAnnotation(ParameterAnnotation.class).value()).isEqualTo(123);
@@ -335,7 +335,7 @@ class TypeDescriptorTests {
 	@Test
 	void fieldAnnotated() throws Exception {
 		TypeDescriptor typeDescriptor = new TypeDescriptor(getClass().getField("fieldAnnotated"));
-		assertThat(typeDescriptor.getAnnotations().length).isEqualTo(1);
+		assertThat(typeDescriptor.getAnnotations()).hasSize(1);
 		assertThat(typeDescriptor.getAnnotation(FieldAnnotation.class)).isNotNull();
 	}
 
@@ -463,7 +463,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.List");
 		assertThat(desc.toString()).isEqualTo("java.util.List<java.lang.Integer>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isTrue();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.getElementTypeDescriptor().getType()).isEqualTo(Integer.class);
@@ -479,7 +479,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.List");
 		assertThat(desc.toString()).isEqualTo("java.util.List<java.util.List<java.lang.Integer>>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isTrue();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.getElementTypeDescriptor().getType()).isEqualTo(List.class);
@@ -495,7 +495,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.Map");
 		assertThat(desc.toString()).isEqualTo("java.util.Map<java.lang.String, java.lang.Integer>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isTrue();
@@ -512,7 +512,7 @@ class TypeDescriptorTests {
 		assertThat(desc.getName()).isEqualTo("java.util.Map");
 		assertThat(desc.toString()).isEqualTo("java.util.Map<java.lang.String, java.util.Map<java.lang.String, java.lang.Integer>>");
 		assertThat(!desc.isPrimitive()).isTrue();
-		assertThat(desc.getAnnotations().length).isEqualTo(0);
+		assertThat(desc.getAnnotations()).isEmpty();
 		assertThat(desc.isCollection()).isFalse();
 		assertThat(desc.isArray()).isFalse();
 		assertThat(desc.isMap()).isTrue();
@@ -524,7 +524,7 @@ class TypeDescriptorTests {
 	@Test
 	void narrow() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Number.class);
-		Integer value = Integer.valueOf(3);
+		Integer value = 3;
 		desc = desc.narrow(value);
 		assertThat(desc.getType()).isEqualTo(Integer.class);
 	}
@@ -532,7 +532,7 @@ class TypeDescriptorTests {
 	@Test
 	void elementType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(List.class);
-		Integer value = Integer.valueOf(3);
+		Integer value = 3;
 		desc = desc.elementTypeDescriptor(value);
 		assertThat(desc.getType()).isEqualTo(Integer.class);
 	}
@@ -550,7 +550,7 @@ class TypeDescriptorTests {
 	@Test
 	void mapKeyType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
-		Integer value = Integer.valueOf(3);
+		Integer value = 3;
 		desc = desc.getMapKeyTypeDescriptor(value);
 		assertThat(desc.getType()).isEqualTo(Integer.class);
 	}
@@ -568,7 +568,7 @@ class TypeDescriptorTests {
 	@Test
 	void mapValueType() {
 		TypeDescriptor desc = TypeDescriptor.valueOf(Map.class);
-		Integer value = Integer.valueOf(3);
+		Integer value = 3;
 		desc = desc.getMapValueTypeDescriptor(value);
 		assertThat(desc.getType()).isEqualTo(Integer.class);
 	}

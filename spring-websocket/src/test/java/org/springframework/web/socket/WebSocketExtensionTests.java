@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package org.springframework.web.socket;
 
 import java.util.List;
 
+import org.glassfish.tyrus.core.TyrusExtension;
 import org.junit.jupiter.api.Test;
+
+import org.springframework.web.socket.adapter.standard.StandardToWebSocketExtensionAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,21 +33,32 @@ public class WebSocketExtensionTests {
 
 	@Test
 	public void parseHeaderSingle() {
-		List<WebSocketExtension> extensions = WebSocketExtension.parseExtensions("x-test-extension ; foo=bar ; bar=baz");
+		List<WebSocketExtension> extensions =
+				WebSocketExtension.parseExtensions("x-test-extension ; foo=bar ; bar=baz");
+
 		assertThat(extensions).hasSize(1);
 		WebSocketExtension extension = extensions.get(0);
 
 		assertThat(extension.getName()).isEqualTo("x-test-extension");
-		assertThat(extension.getParameters().size()).isEqualTo(2);
+		assertThat(extension.getParameters()).hasSize(2);
 		assertThat(extension.getParameters().get("foo")).isEqualTo("bar");
 		assertThat(extension.getParameters().get("bar")).isEqualTo("baz");
 	}
 
 	@Test
 	public void parseHeaderMultiple() {
-		List<WebSocketExtension> extensions = WebSocketExtension.parseExtensions("x-foo-extension, x-bar-extension");
+		List<WebSocketExtension> extensions =
+				WebSocketExtension.parseExtensions("x-foo-extension, x-bar-extension");
+
 		assertThat(extensions.stream().map(WebSocketExtension::getName))
 				.containsExactly("x-foo-extension", "x-bar-extension");
 	}
 
+	@Test // gh-26449
+	public void equality() {
+		WebSocketExtension ext1 = new WebSocketExtension("myExtension");
+		WebSocketExtension ext2 = new StandardToWebSocketExtensionAdapter(new TyrusExtension("myExtension"));
+
+		assertThat(ext1).isEqualTo(ext2);
+	}
 }

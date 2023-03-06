@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.codec.multipart;
 
 import java.nio.charset.Charset;
@@ -23,15 +24,15 @@ import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.LoggingCodecSupport;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.FastByteArrayOutputStream;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.MultiValueMap;
 
 /**
  * Support class for multipart HTTP message writers.
@@ -44,9 +45,9 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 	/** THe default charset used by the writer. */
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	protected final List<MediaType> supportedMediaTypes;
+	private final List<MediaType> supportedMediaTypes;
 
-	protected Charset charset = DEFAULT_CHARSET;
+	private Charset charset = DEFAULT_CHARSET;
 
 
 	/**
@@ -64,23 +65,20 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 		return this.charset;
 	}
 
-	public List<MediaType> getWritableMediaTypes() {
-		return this.supportedMediaTypes;
+	/**
+	 * Set the character set to use for part headers such as
+	 * "Content-Disposition" (and its filename parameter).
+	 * <p>By default this is set to "UTF-8". If changed from this default,
+	 * the "Content-Type" header will have a "charset" parameter that specifies
+	 * the character set used.
+	 */
+	public void setCharset(Charset charset) {
+		Assert.notNull(charset, "Charset must not be null");
+		this.charset = charset;
 	}
 
-
-	public boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType) {
-		if (MultiValueMap.class.isAssignableFrom(elementType.toClass())) {
-			if (mediaType == null) {
-				return true;
-			}
-			for (MediaType supportedMediaType : this.supportedMediaTypes) {
-				if (supportedMediaType.isCompatibleWith(mediaType)) {
-					return true;
-				}
-			}
-		}
-		return false;
+	public List<MediaType> getWritableMediaTypes() {
+		return this.supportedMediaTypes;
 	}
 
 	/**
@@ -93,7 +91,7 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 
 	/**
 	 * Prepare the {@code MediaType} to use by adding "boundary" and "charset"
-	 * parameters to the given {@code mediaType} or "mulitpart/form-data"
+	 * parameters to the given {@code mediaType} or "multipart/form-data"
 	 * otherwise by default.
 	 */
 	protected MediaType getMultipartMediaType(@Nullable MediaType mediaType, byte[] boundary) {
@@ -102,7 +100,11 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 			params.putAll(mediaType.getParameters());
 		}
 		params.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
-		params.put("charset", getCharset().name());
+		Charset charset = getCharset();
+		if (!charset.equals(StandardCharsets.UTF_8) &&
+				!charset.equals(StandardCharsets.US_ASCII) ) {
+			params.put("charset", charset.name());
+		}
 
 		mediaType = (mediaType != null ? mediaType : MediaType.MULTIPART_FORM_DATA);
 		mediaType = new MediaType(mediaType, params);
@@ -146,22 +148,25 @@ public class MultipartWriterSupport extends LoggingCodecSupport {
 
 	protected Mono<DataBuffer> generatePartHeaders(HttpHeaders headers, DataBufferFactory bufferFactory) {
 		return Mono.fromCallable(() -> {
-			DataBuffer buffer = bufferFactory.allocateBuffer();
+			@SuppressWarnings("resource")
+			FastByteArrayOutputStream bos = new FastByteArrayOutputStream();
 			for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 				byte[] headerName = entry.getKey().getBytes(getCharset());
 				for (String headerValueString : entry.getValue()) {
 					byte[] headerValue = headerValueString.getBytes(getCharset());
-					buffer.write(headerName);
-					buffer.write((byte)':');
-					buffer.write((byte)' ');
-					buffer.write(headerValue);
-					buffer.write((byte)'\r');
-					buffer.write((byte)'\n');
+					bos.write(headerName);
+					bos.write((byte)':');
+					bos.write((byte)' ');
+					bos.write(headerValue);
+					bos.write((byte)'\r');
+					bos.write((byte)'\n');
 				}
 			}
-			buffer.write((byte)'\r');
-			buffer.write((byte)'\n');
-			return buffer;
+			bos.write((byte)'\r');
+			bos.write((byte)'\n');
+
+			byte[] bytes = bos.toByteArrayUnsafe();
+			return bufferFactory.wrap(bytes);
 		});
 	}
 

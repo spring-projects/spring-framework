@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,13 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.log.LogFormatUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -59,7 +58,7 @@ import org.springframework.web.util.WebUtils;
  * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
  * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
  *
- * By default, only same origin requests are allowed. Use {@link #setAllowedOrigins}
+ * <p>By default, only same origin requests are allowed. Use {@link #setAllowedOrigins}
  * to specify a list of allowed origins (a list containing "*" will allow all origins).
  *
  * @author Rossen Stoyanchev
@@ -97,7 +96,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private boolean suppressCors = false;
 
-	protected final Set<String> allowedOrigins = new LinkedHashSet<>();
+	protected final CorsConfiguration corsConfiguration;
 
 	private final SockJsRequestHandler infoHandler = new InfoHandler();
 
@@ -107,6 +106,18 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	public AbstractSockJsService(TaskScheduler scheduler) {
 		Assert.notNull(scheduler, "TaskScheduler must not be null");
 		this.taskScheduler = scheduler;
+		this.corsConfiguration = initCorsConfiguration();
+	}
+
+	private static CorsConfiguration initCorsConfiguration() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.addAllowedMethod("*");
+		config.setAllowedOrigins(Collections.emptyList());
+		config.setAllowedOriginPatterns(Collections.emptyList());
+		config.setAllowCredentials(true);
+		config.setMaxAge(ONE_YEAR);
+		config.addAllowedHeader("*");
+		return config;
 	}
 
 
@@ -134,18 +145,19 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	/**
 	 * Transports with no native cross-domain communication (e.g. "eventsource",
 	 * "htmlfile") must get a simple page from the "foreign" domain in an invisible
-	 * iframe so that code in the iframe can run from  a domain local to the SockJS
-	 * server. Since the iframe needs to load the SockJS javascript client library,
-	 * this property allows specifying where to load it from.
+	 * {@code iframe} so that code in the {@code iframe} can run from a domain
+	 * local to the SockJS server. Since the {@code iframe} needs to load the
+	 * SockJS JavaScript client library, this property allows specifying where to
+	 * load it from.
 	 * <p>By default this is set to point to
-	 * "https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js".
+	 * <a href="https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js">"https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"</a>.
 	 * However, it can also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
-	 * must be relative to the iframe URL. For example assuming a SockJS endpoint
-	 * mapped to "/sockjs", and resulting iframe URL "/sockjs/iframe.html", then the
+	 * must be relative to the {@code iframe} URL. For example assuming a SockJS endpoint
+	 * mapped to "/sockjs", and resulting {@code iframe} URL "/sockjs/iframe.html", then
 	 * the relative URL must start with "../../" to traverse up to the location
 	 * above the SockJS mapping. In case of a prefix-based Servlet mapping one more
-	 * traversal may be needed.
+	 * traversals may be needed.
 	 */
 	public void setSockJsClientLibraryUrl(String clientLibraryUrl) {
 		this.clientLibraryUrl = clientLibraryUrl;
@@ -299,33 +311,60 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
-	 * Configure allowed {@code Origin} header values. This check is mostly
-	 * designed for browsers. There is nothing preventing other types of client
-	 * to modify the {@code Origin} header value.
-	 * <p>When SockJS is enabled and origins are restricted, transport types
-	 * that do not allow to check request origin (Iframe based transports)
-	 * are disabled. As a consequence, IE 6 to 9 are not supported when origins
-	 * are restricted.
-	 * <p>Each provided allowed origin must have a scheme, and optionally a port
-	 * (e.g. "https://example.org", "https://example.org:9090"). An allowed origin
-	 * string may also be "*" in which case all origins are allowed.
+	 * Set the origins for which cross-origin requests are allowed from a browser.
+	 * Please, refer to {@link CorsConfiguration#setAllowedOrigins(List)} for
+	 * format details and considerations, and keep in mind that the CORS spec
+	 * does not allow use of {@code "*"} with {@code allowCredentials=true}.
+	 * For more flexible origin patterns use {@link #setAllowedOriginPatterns}
+	 * instead.
+	 *
+	 * <p>By default, no origins are allowed. When
+	 * {@link #setAllowedOriginPatterns(Collection) allowedOriginPatterns} is also
+	 * set, then that takes precedence over this property.
+	 *
+	 * <p>Note when SockJS is enabled and origins are restricted, transport types
+	 * that do not allow to check request origin (Iframe based transports) are
+	 * disabled. As a consequence, IE 6 to 9 are not supported when origins are
+	 * restricted.
 	 * @since 4.1.2
+	 * @see #setAllowedOriginPatterns(Collection)
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
 	 */
 	public void setAllowedOrigins(Collection<String> allowedOrigins) {
 		Assert.notNull(allowedOrigins, "Allowed origins Collection must not be null");
-		this.allowedOrigins.clear();
-		this.allowedOrigins.addAll(allowedOrigins);
+		this.corsConfiguration.setAllowedOrigins(new ArrayList<>(allowedOrigins));
 	}
 
 	/**
-	 * Return configure allowed {@code Origin} header values.
+	 * Return the {@link #setAllowedOrigins(Collection) configured} allowed origins.
 	 * @since 4.1.2
-	 * @see #setAllowedOrigins
 	 */
+	@SuppressWarnings("ConstantConditions")
 	public Collection<String> getAllowedOrigins() {
-		return Collections.unmodifiableSet(this.allowedOrigins);
+		return this.corsConfiguration.getAllowedOrigins();
+	}
+	/**
+	 * Alternative to {@link #setAllowedOrigins(Collection)} that supports more
+	 * flexible patterns for specifying the origins for which cross-origin
+	 * requests are allowed from a browser. Please, refer to
+	 * {@link CorsConfiguration#setAllowedOriginPatterns(List)} for format
+	 * details and other considerations.
+	 * <p>By default this is not set.
+	 * @since 5.2.3
+	 */
+	public void setAllowedOriginPatterns(Collection<String> allowedOriginPatterns) {
+		Assert.notNull(allowedOriginPatterns, "Allowed origin patterns Collection must not be null");
+		this.corsConfiguration.setAllowedOriginPatterns(new ArrayList<>(allowedOriginPatterns));
+	}
+
+	/**
+	 * Return {@link #setAllowedOriginPatterns(Collection) configured} origin patterns.
+	 * @since 5.3.2
+	 */
+	@SuppressWarnings("ConstantConditions")
+	public Collection<String> getAllowedOriginPatterns() {
+		return this.corsConfiguration.getAllowedOriginPatterns();
 	}
 
 
@@ -339,7 +378,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		if (sockJsPath == null) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Expected SockJS path. Failing request: " + request.getURI());
+				logger.warn(LogFormatUtils.formatValue(
+						"Expected SockJS path. Failing request: " + request.getURI(), -1, true));
 			}
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -359,6 +399,10 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				if (requestInfo != null) {
 					logger.debug("Processing transport request: " + requestInfo);
 				}
+				if ("websocket".equalsIgnoreCase(request.getHeaders().getUpgrade())) {
+					response.setStatusCode(HttpStatus.BAD_REQUEST);
+					return;
+				}
 				response.getHeaders().setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 				response.getBody().write("Welcome to SockJS!\n".getBytes(StandardCharsets.UTF_8));
 			}
@@ -371,7 +415,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			}
 
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
-				if (!this.allowedOrigins.isEmpty() && !this.allowedOrigins.contains("*")) {
+				if (!getAllowedOrigins().isEmpty() && !getAllowedOrigins().contains("*") ||
+						!getAllowedOriginPatterns().isEmpty()) {
 					if (requestInfo != null) {
 						logger.debug("Iframe support is disabled when an origin check is required. " +
 								"Ignoring transport request: " + requestInfo);
@@ -379,7 +424,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
-				if (this.allowedOrigins.isEmpty()) {
+				if (getAllowedOrigins().isEmpty()) {
 					response.getHeaders().add(XFRAME_OPTIONS_HEADER, "SAMEORIGIN");
 				}
 				if (requestInfo != null) {
@@ -404,7 +449,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
 					if (logger.isWarnEnabled()) {
-						logger.warn("Invalid SockJS path '" + sockJsPath + "' - required to have 3 path segments");
+						logger.warn(LogFormatUtils.formatValue("Invalid SockJS path '" + sockJsPath + "' - " +
+								"required to have 3 path segments", -1, true));
 					}
 					if (requestInfo != null) {
 						logger.debug("Ignoring transport request: " + requestInfo);
@@ -481,7 +527,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			return true;
 		}
 
-		if (!WebUtils.isValidOrigin(request, this.allowedOrigins)) {
+		if (this.corsConfiguration.checkOrigin(request.getHeaders().getOrigin()) == null) {
 			if (logger.isWarnEnabled()) {
 				logger.warn("Origin header value '" + request.getHeaders().getOrigin() + "' not allowed.");
 			}
@@ -496,13 +542,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	@Nullable
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		if (!this.suppressCors && (request.getHeader(HttpHeaders.ORIGIN) != null)) {
-			CorsConfiguration config = new CorsConfiguration();
-			config.setAllowedOrigins(new ArrayList<>(this.allowedOrigins));
-			config.addAllowedMethod("*");
-			config.setAllowCredentials(true);
-			config.setMaxAge(ONE_YEAR);
-			config.addAllowedHeader("*");
-			return config;
+			return this.corsConfiguration;
 		}
 		return null;
 	}
@@ -574,23 +614,24 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private class IframeHandler implements SockJsRequestHandler {
 
-		private static final String IFRAME_CONTENT =
-				"<!DOCTYPE html>\n" +
-				"<html>\n" +
-				"<head>\n" +
-				"  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" +
-				"  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
-				"  <script>\n" +
-				"    document.domain = document.domain;\n" +
-				"    _sockjs_onload = function(){SockJS.bootstrap_iframe();};\n" +
-				"  </script>\n" +
-				"  <script src=\"%s\"></script>\n" +
-				"</head>\n" +
-				"<body>\n" +
-				"  <h2>Don't panic!</h2>\n" +
-				"  <p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>\n" +
-				"</body>\n" +
-				"</html>";
+		private static final String IFRAME_CONTENT = """
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+					<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+					<title>SockJS iframe</title>
+					<script>
+						document.domain = document.domain;
+						_sockjs_onload = function(){SockJS.bootstrap_iframe();};
+					</script>
+					<script src="%s"></script>
+				</head>
+				<body>
+					<h2>Don't panic!</h2>
+					<p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>
+				</body>
+				</html>""";
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {

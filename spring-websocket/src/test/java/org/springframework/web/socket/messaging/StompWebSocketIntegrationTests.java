@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.annotation.SendToUser;
@@ -59,6 +60,7 @@ import static org.springframework.web.socket.messaging.StompTextMessageBuilder.c
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  */
 class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
@@ -77,7 +79,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
 
-		try (WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get()) {
+		try (WebSocketSession session = execute(new TestClientWebSocketHandler(0, message), "/ws").get()) {
 			assertThat(session).isNotNull();
 			SimpleController controller = this.wac.getBean(SimpleController.class);
 			assertThat(controller.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
@@ -96,7 +98,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 		}
@@ -112,7 +114,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 
@@ -131,7 +133,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
@@ -151,7 +153,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
@@ -173,7 +175,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
-		try (WebSocketSession session = doHandshake(clientHandler, "/ws").get()) {
+		try (WebSocketSession session = execute(clientHandler, "/ws").get()) {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
@@ -331,13 +333,13 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientInboundChannel() {
+		public AbstractSubscribableChannel clientInboundChannel(TaskExecutor clientInboundChannelExecutor) {
 			return new ExecutorSubscribableChannel();  // synchronous
 		}
 
 		@Override
 		@Bean
-		public AbstractSubscribableChannel clientOutboundChannel() {
+		public AbstractSubscribableChannel clientOutboundChannel(TaskExecutor clientOutboundChannelExecutor) {
 			return new ExecutorSubscribableChannel();  // synchronous
 		}
 	}

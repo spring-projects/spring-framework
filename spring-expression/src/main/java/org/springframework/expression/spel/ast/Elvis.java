@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents the elvis operator ?:. For an expression "a?:b" if a is not null, the value
- * of the expression is "a", if a is null then the value of the expression is "b".
+ * Represents the elvis operator <code>?:</code>. For an expression <code>a?:b</code> if <code>a</code> is not null,
+ * the value of the expression is <code>a</code>, if <code>a</code> is null then the value of the expression is
+ * <code>b</code>.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class Elvis extends SpelNodeImpl {
@@ -63,7 +65,7 @@ public class Elvis extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		return getChild(0).toStringAST() + " ?: " + getChild(1).toStringAST();
+		return "(" + getChild(0).toStringAST() + " ?: " + getChild(1).toStringAST() + ")";
 	}
 
 	@Override
@@ -117,7 +119,7 @@ public class Elvis extends SpelNodeImpl {
 				this.exitTypeDescriptor = conditionDescriptor;
 			}
 			else {
-				// Use the easiest to compute common super type
+				// Use the easiest to compute common supertype
 				this.exitTypeDescriptor = "Ljava/lang/Object";
 			}
 		}

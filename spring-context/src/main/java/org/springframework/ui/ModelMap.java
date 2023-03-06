@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class ModelMap extends LinkedHashMap<String, Object> {
 	 */
 	public ModelMap addAttribute(Object attributeValue) {
 		Assert.notNull(attributeValue, "Model object must not be null");
-		if (attributeValue instanceof Collection && ((Collection<?>) attributeValue).isEmpty()) {
+		if (attributeValue instanceof Collection<?> collection && collection.isEmpty()) {
 			return this;
 		}
 		return addAttribute(Conventions.getVariableName(attributeValue), attributeValue);

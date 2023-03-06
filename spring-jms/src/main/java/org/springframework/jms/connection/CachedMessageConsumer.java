@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.Queue;
-import javax.jms.QueueReceiver;
-import javax.jms.Topic;
-import javax.jms.TopicSubscriber;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageConsumer;
+import jakarta.jms.MessageListener;
+import jakarta.jms.Queue;
+import jakarta.jms.QueueReceiver;
+import jakarta.jms.Topic;
+import jakarta.jms.TopicSubscriber;
 
 import org.springframework.lang.Nullable;
 
@@ -52,18 +52,18 @@ class CachedMessageConsumer implements MessageConsumer, QueueReceiver, TopicSubs
 	@Override
 	@Nullable
 	public Queue getQueue() throws JMSException {
-		return (this.target instanceof QueueReceiver ? ((QueueReceiver) this.target).getQueue() : null);
+		return (this.target instanceof QueueReceiver receiver ? receiver.getQueue() : null);
 	}
 
 	@Override
 	@Nullable
 	public Topic getTopic() throws JMSException {
-		return (this.target instanceof TopicSubscriber ? ((TopicSubscriber) this.target).getTopic() : null);
+		return (this.target instanceof TopicSubscriber subscriber ? subscriber.getTopic() : null);
 	}
 
 	@Override
 	public boolean getNoLocal() throws JMSException {
-		return (this.target instanceof TopicSubscriber && ((TopicSubscriber) this.target).getNoLocal());
+		return (this.target instanceof TopicSubscriber subscriber && subscriber.getNoLocal());
 	}
 
 	@Override

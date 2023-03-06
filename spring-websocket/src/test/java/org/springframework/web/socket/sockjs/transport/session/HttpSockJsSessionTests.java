@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,17 +44,17 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstractHttpSockJsSession> {
+class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstractHttpSockJsSession> {
 
-	protected ServerHttpRequest request;
+	protected MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 
-	protected ServerHttpResponse response;
+	protected MockHttpServletResponse servletResponse = new MockHttpServletResponse();
 
-	protected MockHttpServletRequest servletRequest;
+	protected ServerHttpRequest request = new ServletServerHttpRequest(this.servletRequest);
 
-	protected MockHttpServletResponse servletResponse;
+	protected ServerHttpResponse response = new ServletServerHttpResponse(this.servletResponse);
 
-	private SockJsFrameFormat frameFormat;
+	private SockJsFrameFormat frameFormat = new DefaultSockJsFrameFormat("%s");
 
 
 	@Override
@@ -63,23 +63,14 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 	}
 
 	@BeforeEach
-	public void setup() {
-
+	@Override
+	protected void setUp() {
 		super.setUp();
-
-		this.frameFormat = new DefaultSockJsFrameFormat("%s");
-
-		this.servletResponse = new MockHttpServletResponse();
-		this.response = new ServletServerHttpResponse(this.servletResponse);
-
-		this.servletRequest = new MockHttpServletRequest();
 		this.servletRequest.setAsyncSupported(true);
-		this.request = new ServletServerHttpRequest(this.servletRequest);
 	}
 
 	@Test
-	public void handleInitialRequest() throws Exception {
-
+	void handleInitialRequest() throws Exception {
 		this.session.handleInitialRequest(this.request, this.response, this.frameFormat);
 
 		assertThat(this.servletResponse.getContentAsString()).isEqualTo("hhh\no");
@@ -89,8 +80,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 	}
 
 	@Test
-	public void handleSuccessiveRequest() throws Exception {
-
+	void handleSuccessiveRequest() throws Exception {
 		this.session.getMessageCache().add("x");
 		this.session.handleSuccessiveRequest(this.request, this.response, this.frameFormat);
 
@@ -112,7 +102,7 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 		private boolean heartbeatScheduled;
 
 
-		public TestAbstractHttpSockJsSession(SockJsServiceConfig config, WebSocketHandler handler,
+		TestAbstractHttpSockJsSession(SockJsServiceConfig config, WebSocketHandler handler,
 				Map<String, Object> attributes) {
 
 			super("1", config, handler, attributes);
@@ -123,15 +113,15 @@ public class HttpSockJsSessionTests extends AbstractSockJsSessionTests<TestAbstr
 			return "hhh\n".getBytes();
 		}
 
-		public boolean wasCacheFlushed() {
+		boolean wasCacheFlushed() {
 			return this.cacheFlushed;
 		}
 
-		public boolean wasHeartbeatScheduled() {
+		boolean wasHeartbeatScheduled() {
 			return this.heartbeatScheduled;
 		}
 
-		public void setExceptionOnWriteFrame(IOException exceptionOnWriteFrame) {
+		void setExceptionOnWriteFrame(IOException exceptionOnWriteFrame) {
 			this.exceptionOnWriteFrame = exceptionOnWriteFrame;
 		}
 

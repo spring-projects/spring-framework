@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,38 +21,50 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
 
 /**
- * {@link LocaleResolver} implementation that simply uses the primary locale
- * specified in the "accept-language" header of the HTTP request (that is,
- * the locale sent by the client browser, normally that of the client's OS).
+ * {@link LocaleResolver} implementation that looks for a match between locales
+ * in the {@code Accept-Language} header and a list of configured supported
+ * locales.
  *
- * <p>Note: Does not support {@code setLocale}, since the accept header
- * can only be changed through changing the client's locale settings.
+ * <p>See {@link #setSupportedLocales(List)} for further details on how
+ * supported and requested locales are matched.
+ *
+ * <p>Note: This implementation does not support {@link #setLocale} since the
+ * {@code Accept-Language} header can only be changed by changing the client's
+ * locale settings.
  *
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 27.02.2003
- * @see javax.servlet.http.HttpServletRequest#getLocale()
+ * @see jakarta.servlet.http.HttpServletRequest#getLocale()
  */
-public class AcceptHeaderLocaleResolver implements LocaleResolver {
+public class AcceptHeaderLocaleResolver extends AbstractLocaleResolver {
 
 	private final List<Locale> supportedLocales = new ArrayList<>(4);
 
-	@Nullable
-	private Locale defaultLocale;
-
 
 	/**
-	 * Configure supported locales to check against the requested locales
-	 * determined via {@link HttpServletRequest#getLocales()}. If this is not
-	 * configured then {@link HttpServletRequest#getLocale()} is used instead.
+	 * Configure the list of supported locales to compare and match against
+	 * {@link HttpServletRequest#getLocales() requested locales}.
+	 * <p>In order for a supported locale to be considered a match, it must match
+	 * on both country and language. If you want to support a language-only match
+	 * as a fallback, you must configure the language explicitly as a supported
+	 * locale.
+	 * <p>For example, if the supported locales are {@code ["de-DE","en-US"]},
+	 * then a request for {@code "en-GB"} will not match, and neither will a
+	 * request for {@code "en"}. If you want to support additional locales for a
+	 * given language such as {@code "en"}, then you must add it to the list of
+	 * supported locales.
+	 * <p>If there is no match, then the {@link #setDefaultLocale(Locale)
+	 * defaultLocale} is used, if configured, or otherwise falling back on
+	 * {@link HttpServletRequest#getLocale()}.
 	 * @param locales the supported locales
 	 * @since 4.3
 	 */
@@ -62,34 +74,11 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	}
 
 	/**
-	 * Return the configured list of supported locales.
+	 * Get the configured list of supported locales.
 	 * @since 4.3
 	 */
 	public List<Locale> getSupportedLocales() {
 		return this.supportedLocales;
-	}
-
-	/**
-	 * Configure a fixed default locale to fall back on if the request does not
-	 * have an "Accept-Language" header.
-	 * <p>By default this is not set in which case when there is "Accept-Language"
-	 * header, the default locale for the server is used as defined in
-	 * {@link HttpServletRequest#getLocale()}.
-	 * @param defaultLocale the default locale to use
-	 * @since 4.3
-	 */
-	public void setDefaultLocale(@Nullable Locale defaultLocale) {
-		this.defaultLocale = defaultLocale;
-	}
-
-	/**
-	 * The configured default locale, if any.
-	 * <p>This method may be overridden in subclasses.
-	 * @since 4.3
-	 */
-	@Nullable
-	public Locale getDefaultLocale() {
-		return this.defaultLocale;
 	}
 
 
@@ -125,10 +114,10 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 			}
 			else if (languageMatch == null) {
 				// Let's try to find a language-only match as a fallback
-				for (Locale candidate : supportedLocales) {
-					if (!StringUtils.hasLength(candidate.getCountry()) &&
-							candidate.getLanguage().equals(locale.getLanguage())) {
-						languageMatch = candidate;
+				for (Locale supportedLocale : supportedLocales) {
+					if (!StringUtils.hasLength(supportedLocale.getCountry()) &&
+							supportedLocale.getLanguage().equals(locale.getLanguage())) {
+						languageMatch = supportedLocale;
 						break;
 					}
 				}
@@ -140,7 +129,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	@Override
 	public void setLocale(HttpServletRequest request, @Nullable HttpServletResponse response, @Nullable Locale locale) {
 		throw new UnsupportedOperationException(
-				"Cannot change HTTP accept header - use a different locale resolution strategy");
+				"Cannot change HTTP Accept-Language header - use a different locale resolution strategy");
 	}
 
 }

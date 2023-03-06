@@ -28,16 +28,16 @@ import org.springframework.lang.Nullable;
 
 /**
  * JNDI-based variant of {@link ConcurrentTaskScheduler}, performing a default lookup for
- * JSR-236's "java:comp/DefaultManagedScheduledExecutorService" in a Java EE 7 environment.
+ * JSR-236's "java:comp/DefaultManagedScheduledExecutorService" in a Jakarta EE environment.
  *
  * <p>Note: This class is not strictly JSR-236 based; it can work with any regular
  * {@link java.util.concurrent.ScheduledExecutorService} that can be found in JNDI.
- * The actual adapting to {@link javax.enterprise.concurrent.ManagedScheduledExecutorService}
+ * The actual adapting to {@link jakarta.enterprise.concurrent.ManagedScheduledExecutorService}
  * happens in the base class {@link ConcurrentTaskScheduler} itself.
  *
  * @author Juergen Hoeller
  * @since 4.0
- * @see javax.enterprise.concurrent.ManagedScheduledExecutorService
+ * @see jakarta.enterprise.concurrent.ManagedScheduledExecutorService
  */
 public class DefaultManagedTaskScheduler extends ConcurrentTaskScheduler implements InitializingBean {
 
@@ -64,7 +64,7 @@ public class DefaultManagedTaskScheduler extends ConcurrentTaskScheduler impleme
 	}
 
 	/**
-	 * Set whether the lookup occurs in a Java EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a Jakarta EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. PersistenceAnnotationBeanPostProcessor's default is "true".
 	 * @see org.springframework.jndi.JndiLocatorSupport#setResourceRef

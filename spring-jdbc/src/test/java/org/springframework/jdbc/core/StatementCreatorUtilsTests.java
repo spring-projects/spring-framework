@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.GregorianCalendar;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.mockito.BDDMockito.given;
@@ -38,13 +37,7 @@ import static org.mockito.Mockito.verify;
  */
 public class StatementCreatorUtilsTests {
 
-	private PreparedStatement preparedStatement;
-
-
-	@BeforeEach
-	public void setUp() {
-		preparedStatement = mock(PreparedStatement.class);
-	}
+	private PreparedStatement preparedStatement = mock();
 
 
 	@Test
@@ -62,8 +55,8 @@ public class StatementCreatorUtilsTests {
 	@Test
 	public void testSetParameterValueWithNullAndUnknownType() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(dbmd.getDriverName()).willReturn("Oracle Driver");
@@ -76,8 +69,8 @@ public class StatementCreatorUtilsTests {
 	@Test
 	public void testSetParameterValueWithNullAndUnknownTypeOnInformix() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(con.getMetaData()).willReturn(dbmd);
 		given(dbmd.getDatabaseProductName()).willReturn("Informix Dynamic Server");
@@ -92,8 +85,8 @@ public class StatementCreatorUtilsTests {
 	@Test
 	public void testSetParameterValueWithNullAndUnknownTypeOnDerbyEmbedded() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(con.getMetaData()).willReturn(dbmd);
 		given(dbmd.getDatabaseProductName()).willReturn("Apache Derby");
@@ -107,7 +100,7 @@ public class StatementCreatorUtilsTests {
 
 	@Test
 	public void testSetParameterValueWithNullAndGetParameterTypeWorking() throws SQLException {
-		ParameterMetaData pmd = mock(ParameterMetaData.class);
+		ParameterMetaData pmd = mock();
 		given(preparedStatement.getParameterMetaData()).willReturn(pmd);
 		given(pmd.getParameterType(1)).willReturn(Types.SMALLINT);
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, null);
@@ -212,8 +205,8 @@ public class StatementCreatorUtilsTests {
 
 	@Test  // SPR-8571
 	public void testSetParameterValueWithStringAndVendorSpecificType() throws SQLException {
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(con.getMetaData()).willReturn(dbmd);
@@ -224,8 +217,8 @@ public class StatementCreatorUtilsTests {
 	@Test  // SPR-8571
 	public void testSetParameterValueWithNullAndVendorSpecificType() throws SQLException {
 		StatementCreatorUtils.shouldIgnoreGetParameterType = true;
-		Connection con = mock(Connection.class);
-		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con = mock();
+		DatabaseMetaData dbmd = mock();
 		given(preparedStatement.getConnection()).willReturn(con);
 		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
 		given(dbmd.getDriverName()).willReturn("Oracle Driver");

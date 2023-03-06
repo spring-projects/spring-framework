@@ -143,8 +143,8 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 		}
 		catch (Exception ex) {
 			chain.triggerAfterSendCompletion(messageToUse, this, sent, ex);
-			if (ex instanceof MessagingException) {
-				throw (MessagingException) ex;
+			if (ex instanceof MessagingException messagingException) {
+				throw messagingException;
 			}
 			throw new MessageDeliveryException(messageToUse,"Failed to send message to " + this, ex);
 		}

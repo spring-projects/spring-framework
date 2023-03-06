@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.core.testfixture.codec.AbstractDecoderTests;
 import org.springframework.http.MediaType;
 import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
-import org.springframework.util.MimeType;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,8 +46,6 @@ import static org.springframework.core.io.buffer.DataBufferUtils.release;
  * @author Sebastien Deleuze
  */
 public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
-
-	private final static MimeType PROTOBUF_MIME_TYPE = new MimeType("application", "x-protobuf");
 
 	private final SecondMsg secondMsg = SecondMsg.newBuilder().setBlah(123).build();
 
@@ -65,22 +62,21 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 
 	@Test
 	public void extensionRegistryNull() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new ProtobufDecoder(null));
+		assertThatIllegalArgumentException().isThrownBy(() -> new ProtobufDecoder(null));
 	}
 
-	@Override
 	@Test
+	@Override
 	public void canDecode() {
 		assertThat(this.decoder.canDecode(forClass(Msg.class), null)).isTrue();
-		assertThat(this.decoder.canDecode(forClass(Msg.class), PROTOBUF_MIME_TYPE)).isTrue();
+		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_PROTOBUF)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_OCTET_STREAM)).isTrue();
 		assertThat(this.decoder.canDecode(forClass(Msg.class), MediaType.APPLICATION_JSON)).isFalse();
-		assertThat(this.decoder.canDecode(forClass(Object.class), PROTOBUF_MIME_TYPE)).isFalse();
+		assertThat(this.decoder.canDecode(forClass(Object.class), MediaType.APPLICATION_PROTOBUF)).isFalse();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void decodeToMono() {
 		Mono<DataBuffer> input = dataBuffer(this.testMsg1);
 
@@ -107,8 +103,9 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 				.verifyComplete());
 	}
 
-	@Override
 	@Test
+	@Override
+	@SuppressWarnings("deprecation")
 	public void decode() {
 		Flux<DataBuffer> input = Flux.just(this.testMsg1, this.testMsg2)
 				.flatMap(msg -> Mono.defer(() -> {
@@ -130,9 +127,8 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void decodeSplitChunks() {
-
-
 		Flux<DataBuffer> input = Flux.just(this.testMsg1, this.testMsg2)
 				.flatMap(msg -> Mono.defer(() -> {
 					DataBuffer buffer = this.bufferFactory.allocateBuffer();
@@ -163,6 +159,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	}
 
 	@Test  // SPR-17429
+	@SuppressWarnings("deprecation")
 	public void decodeSplitMessageSize() {
 		this.decoder.setMaxMessageSize(100009);
 		StringBuilder builder = new StringBuilder();
@@ -201,6 +198,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void decodeMergedChunks() throws IOException {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer();
 		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
@@ -220,8 +218,7 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 		this.decoder.setMaxMessageSize(1);
 		Mono<DataBuffer> input = dataBuffer(this.testMsg1);
 
-		testDecode(input, Msg.class, step -> step
-				.verifyError(DecodingException.class));
+		testDecode(input, Msg.class, step -> step.verifyError(DecodingException.class));
 	}
 
 	private Mono<DataBuffer> dataBuffer(Msg msg) {
@@ -232,6 +229,5 @@ public class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> 
 			return buffer;
 		});
 	}
-
 
 }

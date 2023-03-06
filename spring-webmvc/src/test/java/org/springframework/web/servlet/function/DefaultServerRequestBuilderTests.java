@@ -21,9 +21,8 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;

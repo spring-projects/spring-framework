@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,39 @@ import java.sql.SQLException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
  * {@link RowMapper} implementation that converts a row into a new instance
  * of the specified mapped target class. The mapped target class must be a
- * top-level class and may either expose a data class constructor with named
- * parameters corresponding to column names or classic bean property setters
- * (or even a combination of both).
+ * top-level class or {@code static} nested class, and it may expose either a
+ * <em>data class</em> constructor with named parameters corresponding to column
+ * names or classic bean property setter methods with property names corresponding
+ * to column names (or even a combination of both).
+ *
+ * <p>The term "data class" applies to Java <em>records</em>, Kotlin <em>data
+ * classes</em>, and any class which has a constructor with named parameters
+ * that are intended to be mapped to corresponding column names.
+ *
+ * <p>When combining a data class constructor with setter methods, any property
+ * mapped successfully via a constructor argument will not be mapped additionally
+ * via a corresponding setter method. This means that constructor arguments take
+ * precedence over property setter methods.
  *
  * <p>Note that this class extends {@link BeanPropertyRowMapper} and can
  * therefore serve as a common choice for any mapped target class, flexibly
  * adapting to constructor style versus setter methods in the mapped class.
  *
+ * <p>Please note that this class is designed to provide convenience rather than
+ * high performance. For best performance, consider using a custom {@code RowMapper}
+ * implementation.
+ *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.3
  * @param <T> the result type
  */
@@ -50,7 +67,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	private String[] constructorParameterNames;
 
 	@Nullable
-	private Class<?>[] constructorParameterTypes;
+	private TypeDescriptor[] constructorParameterTypes;
 
 
 	/**
@@ -75,9 +92,16 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		super.initialize(mappedClass);
 
 		this.mappedConstructor = BeanUtils.getResolvableConstructor(mappedClass);
-		if (this.mappedConstructor.getParameterCount() > 0) {
+		int paramCount = this.mappedConstructor.getParameterCount();
+		if (paramCount > 0) {
 			this.constructorParameterNames = BeanUtils.getParameterNames(this.mappedConstructor);
-			this.constructorParameterTypes = this.mappedConstructor.getParameterTypes();
+			for (String name : this.constructorParameterNames) {
+				suppressProperty(name);
+			}
+			this.constructorParameterTypes = new TypeDescriptor[paramCount];
+			for (int i = 0; i < paramCount; i++) {
+				this.constructorParameterTypes[i] = new TypeDescriptor(new MethodParameter(this.mappedConstructor, i));
+			}
 		}
 	}
 
@@ -89,9 +113,19 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		if (this.constructorParameterNames != null && this.constructorParameterTypes != null) {
 			args = new Object[this.constructorParameterNames.length];
 			for (int i = 0; i < args.length; i++) {
-				String name = underscoreName(this.constructorParameterNames[i]);
-				Class<?> type = this.constructorParameterTypes[i];
-				args[i] = tc.convertIfNecessary(getColumnValue(rs, rs.findColumn(name), type), type);
+				String name = this.constructorParameterNames[i];
+				int index;
+				try {
+					// Try direct name match first
+					index = rs.findColumn(lowerCaseName(name));
+				}
+				catch (SQLException ex) {
+					// Try underscored name match instead
+					index = rs.findColumn(underscoreName(name));
+				}
+				TypeDescriptor td = this.constructorParameterTypes[i];
+				Object value = getColumnValue(rs, index, td.getType());
+				args[i] = tc.convertIfNecessary(value, td.getType(), td);
 			}
 		}
 		else {

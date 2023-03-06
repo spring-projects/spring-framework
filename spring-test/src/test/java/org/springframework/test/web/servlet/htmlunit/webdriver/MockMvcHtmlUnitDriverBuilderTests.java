@@ -18,9 +18,8 @@ package org.springframework.test.web.servlet.htmlunit.webdriver;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.gargoylesoftware.htmlunit.util.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 

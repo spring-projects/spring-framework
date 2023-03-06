@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public interface SockJsServiceConfig {
 	 * property since even streaming transports recycle HTTP requests periodically.
 	 * <p>The amount of time between HTTP requests should be relatively brief and will not
 	 * exceed the allows disconnect delay (see
-	 * {@link org.springframework.web.socket.sockjs.support.AbstractSockJsService#setDisconnectDelay(long)},
+	 * {@link org.springframework.web.socket.sockjs.support.AbstractSockJsService#setDisconnectDelay(long)}),
 	 * 5 seconds by default.
 	 * <p>The default size is 100.
 	 */

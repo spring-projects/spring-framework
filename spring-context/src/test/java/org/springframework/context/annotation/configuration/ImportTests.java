@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Beams
  * @author Juergen Hoeller
  */
-public class ImportTests {
+class ImportTests {
 
 	private DefaultListableBeanFactory processConfigurationClasses(Class<?>... classes) {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -60,7 +60,7 @@ public class ImportTests {
 	}
 
 	@Test
-	public void testProcessImportsWithAsm() {
+	void testProcessImportsWithAsm() {
 		int configClasses = 2;
 		int beansInClasses = 2;
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -71,21 +71,21 @@ public class ImportTests {
 	}
 
 	@Test
-	public void testProcessImportsWithDoubleImports() {
+	void testProcessImportsWithDoubleImports() {
 		int configClasses = 3;
 		int beansInClasses = 3;
 		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class, OtherConfigurationWithImportAnnotation.class);
 	}
 
 	@Test
-	public void testProcessImportsWithExplicitOverridingBefore() {
+	void testProcessImportsWithExplicitOverridingBefore() {
 		int configClasses = 2;
 		int beansInClasses = 2;
 		assertBeanDefinitionCount((configClasses + beansInClasses), OtherConfiguration.class, ConfigurationWithImportAnnotation.class);
 	}
 
 	@Test
-	public void testProcessImportsWithExplicitOverridingAfter() {
+	void testProcessImportsWithExplicitOverridingAfter() {
 		int configClasses = 2;
 		int beansInClasses = 2;
 		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class, OtherConfiguration.class);
@@ -95,7 +95,7 @@ public class ImportTests {
 	@Import(OtherConfiguration.class)
 	static class ConfigurationWithImportAnnotation {
 		@Bean
-		public ITestBean one() {
+		ITestBean one() {
 			return new TestBean();
 		}
 	}
@@ -104,7 +104,7 @@ public class ImportTests {
 	@Import(OtherConfiguration.class)
 	static class OtherConfigurationWithImportAnnotation {
 		@Bean
-		public ITestBean two() {
+		ITestBean two() {
 			return new TestBean();
 		}
 	}
@@ -112,7 +112,7 @@ public class ImportTests {
 	@Configuration
 	static class OtherConfiguration {
 		@Bean
-		public ITestBean three() {
+		ITestBean three() {
 			return new TestBean();
 		}
 	}
@@ -120,7 +120,7 @@ public class ImportTests {
 	// ------------------------------------------------------------------------
 
 	@Test
-	public void testImportAnnotationWithTwoLevelRecursion() {
+	void testImportAnnotationWithTwoLevelRecursion() {
 		int configClasses = 2;
 		int beansInClasses = 3;
 		assertBeanDefinitionCount((configClasses + beansInClasses), AppConfig.class);
@@ -131,12 +131,12 @@ public class ImportTests {
 	static class AppConfig {
 
 		@Bean
-		public ITestBean transferService() {
+		ITestBean transferService() {
 			return new TestBean(accountRepository());
 		}
 
 		@Bean
-		public ITestBean accountRepository() {
+		ITestBean accountRepository() {
 			return new TestBean();
 		}
 	}
@@ -144,7 +144,7 @@ public class ImportTests {
 	@Configuration
 	static class DataSourceConfig {
 		@Bean
-		public ITestBean dataSourceA() {
+		ITestBean dataSourceA() {
 			return new TestBean();
 		}
 	}
@@ -152,7 +152,7 @@ public class ImportTests {
 	// ------------------------------------------------------------------------
 
 	@Test
-	public void testImportAnnotationWithThreeLevelRecursion() {
+	void testImportAnnotationWithThreeLevelRecursion() {
 		int configClasses = 4;
 		int beansInClasses = 5;
 		assertBeanDefinitionCount(configClasses + beansInClasses, FirstLevel.class);
@@ -161,7 +161,7 @@ public class ImportTests {
 	// ------------------------------------------------------------------------
 
 	@Test
-	public void testImportAnnotationWithMultipleArguments() {
+	void testImportAnnotationWithMultipleArguments() {
 		int configClasses = 3;
 		int beansInClasses = 3;
 		assertBeanDefinitionCount((configClasses + beansInClasses), WithMultipleArgumentsToImportAnnotation.class);
@@ -169,7 +169,7 @@ public class ImportTests {
 
 
 	@Test
-	public void testImportAnnotationWithMultipleArgumentsResultingInOverriddenBeanDefinition() {
+	void testImportAnnotationWithMultipleArgumentsResultingInOverriddenBeanDefinition() {
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(
 				WithMultipleArgumentsThatWillCauseDuplication.class));
@@ -187,7 +187,7 @@ public class ImportTests {
 	@Configuration
 	static class Foo1 {
 		@Bean
-		public ITestBean foo() {
+		ITestBean foo() {
 			return new TestBean("foo1");
 		}
 	}
@@ -195,7 +195,7 @@ public class ImportTests {
 	@Configuration
 	static class Foo2 {
 		@Bean
-		public ITestBean foo() {
+		ITestBean foo() {
 			return new TestBean("foo2");
 		}
 	}
@@ -203,7 +203,7 @@ public class ImportTests {
 	// ------------------------------------------------------------------------
 
 	@Test
-	public void testImportAnnotationOnInnerClasses() {
+	void testImportAnnotationOnInnerClasses() {
 		int configClasses = 2;
 		int beansInClasses = 2;
 		assertBeanDefinitionCount((configClasses + beansInClasses), OuterConfig.InnerConfig.class);
@@ -220,7 +220,7 @@ public class ImportTests {
 		@Import(ExternalConfig.class)
 		static class InnerConfig {
 			@Bean
-			public ITestBean innerBean() {
+			ITestBean innerBean() {
 				return new TestBean();
 			}
 		}
@@ -229,7 +229,7 @@ public class ImportTests {
 	@Configuration
 	static class ExternalConfig {
 		@Bean
-		public ITestBean extBean() {
+		ITestBean extBean() {
 			return new TestBean();
 		}
 	}
@@ -240,7 +240,7 @@ public class ImportTests {
 	@Import(SecondLevel.class)
 	static class FirstLevel {
 		@Bean
-		public TestBean m() {
+		TestBean m() {
 			return new TestBean();
 		}
 	}
@@ -249,7 +249,7 @@ public class ImportTests {
 	@Import({ThirdLevel.class, InitBean.class})
 	static class SecondLevel {
 		@Bean
-		public TestBean n() {
+		TestBean n() {
 			return new TestBean();
 		}
 	}
@@ -257,22 +257,22 @@ public class ImportTests {
 	@Configuration
 	@DependsOn("org.springframework.context.annotation.configuration.ImportTests$InitBean")
 	static class ThirdLevel {
-		public ThirdLevel() {
+		ThirdLevel() {
 			assertThat(InitBean.initialized).isTrue();
 		}
 
 		@Bean
-		public ITestBean thirdLevelA() {
+		ITestBean thirdLevelA() {
 			return new TestBean();
 		}
 
 		@Bean
-		public ITestBean thirdLevelB() {
+		ITestBean thirdLevelB() {
 			return new TestBean();
 		}
 
 		@Bean
-		public ITestBean thirdLevelC() {
+		ITestBean thirdLevelC() {
 			return new TestBean();
 		}
 	}
@@ -280,7 +280,7 @@ public class ImportTests {
 	static class InitBean {
 		public static boolean initialized = false;
 
-		public InitBean() {
+		InitBean() {
 			initialized = true;
 		}
 	}
@@ -289,7 +289,7 @@ public class ImportTests {
 	@Import({LeftConfig.class, RightConfig.class})
 	static class WithMultipleArgumentsToImportAnnotation {
 		@Bean
-		public TestBean m() {
+		TestBean m() {
 			return new TestBean();
 		}
 	}
@@ -297,7 +297,7 @@ public class ImportTests {
 	@Configuration
 	static class LeftConfig {
 		@Bean
-		public ITestBean left() {
+		ITestBean left() {
 			return new TestBean();
 		}
 	}
@@ -305,7 +305,7 @@ public class ImportTests {
 	@Configuration
 	static class RightConfig {
 		@Bean
-		public ITestBean right() {
+		ITestBean right() {
 			return new TestBean();
 		}
 	}
@@ -313,7 +313,7 @@ public class ImportTests {
 	// ------------------------------------------------------------------------
 
 	@Test
-	public void testImportNonConfigurationAnnotationClass() {
+	void testImportNonConfigurationAnnotationClass() {
 		int configClasses = 2;
 		int beansInClasses = 0;
 		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigAnnotated.class);
@@ -333,13 +333,13 @@ public class ImportTests {
 	 * or in the case of automatic registration via nesting
 	 */
 	@Test
-	public void reproSpr9023() {
+	void reproSpr9023() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(B.class);
 		ctx.refresh();
-		System.out.println(ctx.getBeanFactory());
 		assertThat(ctx.getBeanNamesForType(B.class)[0]).isEqualTo("config-b");
 		assertThat(ctx.getBeanNamesForType(A.class)[0]).isEqualTo("config-a");
+		ctx.close();
 	}
 
 	@Configuration("config-a")
@@ -350,7 +350,7 @@ public class ImportTests {
 	static class B { }
 
 	@Test
-	public void testProcessImports() {
+	void testProcessImports() {
 		int configClasses = 2;
 		int beansInClasses = 2;
 		assertBeanDefinitionCount((configClasses + beansInClasses), ConfigurationWithImportAnnotation.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,21 @@
 
 package org.springframework.web.filter;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link ShallowEtagHeaderFilter}.
  * @author Arjen Poutsma
  * @author Brian Clozel
  * @author Juergen Hoeller
@@ -45,18 +45,18 @@ public class ShallowEtagHeaderFilterTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		assertThat(filter.isEligibleForEtag(request, response, 200, StreamUtils.emptyInput())).isTrue();
-		assertThat(filter.isEligibleForEtag(request, response, 300, StreamUtils.emptyInput())).isFalse();
+		assertThat(filter.isEligibleForEtag(request, response, 200, InputStream.nullInputStream())).isTrue();
+		assertThat(filter.isEligibleForEtag(request, response, 300, InputStream.nullInputStream())).isFalse();
 
 		request = new MockHttpServletRequest("HEAD", "/hotels");
-		assertThat(filter.isEligibleForEtag(request, response, 200, StreamUtils.emptyInput())).isFalse();
+		assertThat(filter.isEligibleForEtag(request, response, 200, InputStream.nullInputStream())).isFalse();
 
 		request = new MockHttpServletRequest("POST", "/hotels");
-		assertThat(filter.isEligibleForEtag(request, response, 200, StreamUtils.emptyInput())).isFalse();
+		assertThat(filter.isEligibleForEtag(request, response, 200, InputStream.nullInputStream())).isFalse();
 
 		request = new MockHttpServletRequest("POST", "/hotels");
 		request.addHeader("Cache-Control","must-revalidate, no-store");
-		assertThat(filter.isEligibleForEtag(request, response, 200, StreamUtils.emptyInput())).isFalse();
+		assertThat(filter.isEligibleForEtag(request, response, 200, InputStream.nullInputStream())).isFalse();
 	}
 
 	@Test

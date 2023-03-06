@@ -100,7 +100,7 @@ public class MutablePropertySources implements PropertySources {
 
 
 	/**
-	 * Add the given property source object with highest precedence.
+	 * Add the given property source object with the highest precedence.
 	 */
 	public void addFirst(PropertySource<?> propertySource) {
 		synchronized (this.propertySourceList) {
@@ -110,7 +110,7 @@ public class MutablePropertySources implements PropertySources {
 	}
 
 	/**
-	 * Add the given property source object with lowest precedence.
+	 * Add the given property source object with the lowest precedence.
 	 */
 	public void addLast(PropertySource<?> propertySource) {
 		synchronized (this.propertySourceList) {

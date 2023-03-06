@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,12 @@ public abstract class SqlParameterSourceUtils {
 	 * @see BeanPropertySqlParameterSource
 	 * @see NamedParameterJdbcTemplate#batchUpdate(String, SqlParameterSource[])
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static SqlParameterSource[] createBatch(Collection<?> candidates) {
 		SqlParameterSource[] batch = new SqlParameterSource[candidates.size()];
 		int i = 0;
 		for (Object candidate : candidates) {
-			batch[i] = (candidate instanceof Map ? new MapSqlParameterSource((Map<String, ?>) candidate) :
+			batch[i] = (candidate instanceof Map map ? new MapSqlParameterSource(map) :
 					new BeanPropertySqlParameterSource(candidate));
 			i++;
 		}
@@ -92,17 +92,13 @@ public abstract class SqlParameterSourceUtils {
 	 * @param source the source of parameter values and type information
 	 * @param parameterName the name of the parameter
 	 * @return the value object
+	 * @see SqlParameterValue
 	 */
 	@Nullable
 	public static Object getTypedValue(SqlParameterSource source, String parameterName) {
 		int sqlType = source.getSqlType(parameterName);
 		if (sqlType != SqlParameterSource.TYPE_UNKNOWN) {
-			if (source.getTypeName(parameterName) != null) {
-				return new SqlParameterValue(sqlType, source.getTypeName(parameterName), source.getValue(parameterName));
-			}
-			else {
-				return new SqlParameterValue(sqlType, source.getValue(parameterName));
-			}
+			return new SqlParameterValue(sqlType, source.getTypeName(parameterName), source.getValue(parameterName));
 		}
 		else {
 			return source.getValue(parameterName);
@@ -110,9 +106,9 @@ public abstract class SqlParameterSourceUtils {
 	}
 
 	/**
-	 * Create a Map of case insensitive parameter names together with the original name.
+	 * Create a Map of case-insensitive parameter names together with the original name.
 	 * @param parameterSource the source of parameter names
-	 * @return the Map that can be used for case insensitive matching of parameter names
+	 * @return the Map that can be used for case-insensitive matching of parameter names
 	 */
 	public static Map<String, String> extractCaseInsensitiveParameterNames(SqlParameterSource parameterSource) {
 		Map<String, String> caseInsensitiveParameterNames = new HashMap<>();

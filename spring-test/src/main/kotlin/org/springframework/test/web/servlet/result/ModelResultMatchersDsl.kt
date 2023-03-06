@@ -60,7 +60,7 @@ class ModelResultMatchersDsl internal constructor (private val actions: ResultAc
 	/**
 	 * @see ModelResultMatchers.attributeErrorCount
 	 */
-	fun <T> attributeErrorCount(name: String, expectedCount: Int) {
+	fun attributeErrorCount(name: String, expectedCount: Int) {
 		actions.andExpect(matchers.attributeErrorCount(name, expectedCount))
 	}
 

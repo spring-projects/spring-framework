@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,12 @@ import javax.management.remote.JMXServiceURL;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.core.testfixture.net.TestSocketUtils;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
 import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.AbstractReflectiveMBeanInfoAssembler;
-import org.springframework.util.SocketUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -177,7 +177,8 @@ class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 	void lazyConnectionToRemote() throws Exception {
 		assumeTrue(runTests);
 
-		final int port = SocketUtils.findAvailableTcpPort();
+		@SuppressWarnings("deprecation")
+		final int port = TestSocketUtils.findAvailableTcpPort();
 
 		JMXServiceURL url = new JMXServiceURL("service:jmx:jmxmp://localhost:" + port);
 		JMXConnectorServer connector = JMXConnectorServerFactory.newJMXConnectorServer(url, null, getServer());

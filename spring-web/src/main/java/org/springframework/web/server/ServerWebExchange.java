@@ -202,7 +202,7 @@ public interface ServerWebExchange {
 	/**
 	 * Transform the given url according to the registered transformation function(s).
 	 * By default, this method returns the given {@code url}, though additional
-	 * transformation functions can by registered with {@link #addUrlTransformer}
+	 * transformation functions can be registered with {@link #addUrlTransformer}
 	 * @param url the URL to transform
 	 * @return the transformed URL
 	 */
@@ -248,7 +248,7 @@ public interface ServerWebExchange {
 		 * Configure a consumer to modify the current request using a builder.
 		 * <p>Effectively this:
 		 * <pre>
-		 * exchange.mutate().request(builder-> builder.method(HttpMethod.PUT));
+		 * exchange.mutate().request(builder -&gt; builder.method(HttpMethod.PUT));
 		 *
 		 * // vs...
 		 *

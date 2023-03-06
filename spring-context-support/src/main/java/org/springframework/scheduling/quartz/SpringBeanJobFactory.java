@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory
 	@Override
 	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
 		Object job = (this.applicationContext != null ?
+				// to be replaced with createBean(Class) in 6.1
 				this.applicationContext.getAutowireCapableBeanFactory().createBean(
 						bundle.getJobDetail().getJobClass(), AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false) :
 				super.createJobInstance(bundle));

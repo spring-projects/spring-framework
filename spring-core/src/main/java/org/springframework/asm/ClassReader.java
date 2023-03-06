@@ -88,6 +88,9 @@ public class ClassReader {
    */
   static final int EXPAND_ASM_INSNS = 256;
 
+  /** The maximum size of array to allocate. */
+  private static final int MAX_BUFFER_SIZE = 1024 * 1024;
+
   /** The size of the temporary byte array used to read class input streams chunk by chunk. */
   private static final int INPUT_STREAM_DATA_CHUNK_SIZE = 4096;
 
@@ -100,8 +103,10 @@ public class ClassReader {
   @Deprecated
   // DontCheck(MemberName): can't be renamed (for backward binary compatibility).
   public final byte[] b;
+
   /** The offset in bytes of the ClassFile's access_flags field. */
   public final int header;
+
   /**
    * A byte array containing the JVMS ClassFile structure to be parsed. <i>The content of this array
    * must not be modified. This field is intended for {@link Attribute} sub classes, and is normally
@@ -112,6 +117,7 @@ public class ClassReader {
    * ClassFile element offsets within this byte array.
    */
   final byte[] classFileBuffer;
+
   /**
    * The offset in bytes, in {@link #classFileBuffer}, of each cp_info entry of the ClassFile's
    * constant_pool array, <i>plus one</i>. In other words, the offset of constant pool entry i is
@@ -119,16 +125,19 @@ public class ClassReader {
    * 1].
    */
   private final int[] cpInfoOffsets;
+
   /**
    * The String objects corresponding to the CONSTANT_Utf8 constant pool items. This cache avoids
    * multiple parsing of a given CONSTANT_Utf8 constant pool item.
    */
   private final String[] constantUtf8Values;
+
   /**
    * The ConstantDynamic objects corresponding to the CONSTANT_Dynamic constant pool items. This
    * cache avoids multiple parsing of a given CONSTANT_Dynamic constant pool item.
    */
   private final ConstantDynamic[] constantDynamicValues;
+
   /**
    * The start offsets in {@link #classFileBuffer} of each element of the bootstrap_methods array
    * (in the BootstrapMethods attribute).
@@ -137,6 +146,7 @@ public class ClassReader {
    *     4.7.23</a>
    */
   private final int[] bootstrapMethodOffsets;
+
   /**
    * A conservative estimate of the maximum length of the strings contained in the constant pool of
    * the class.
@@ -184,7 +194,7 @@ public class ClassReader {
     this.b = classFileBuffer;
     // Check the class' major_version. This field is after the magic and minor_version fields, which
     // use 4 and 2 bytes respectively.
-    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V16) {
+    if (checkClassVersion && readShort(classFileOffset + 6) > Opcodes.V21) {
       throw new IllegalArgumentException(
           "Unsupported class file major version " + readShort(classFileOffset + 6));
     }
@@ -298,24 +308,46 @@ public class ClassReader {
    * @return the content of the given input stream.
    * @throws IOException if a problem occurs during reading.
    */
+  @SuppressWarnings("PMD.UseTryWithResources")
   private static byte[] readStream(final InputStream inputStream, final boolean close)
       throws IOException {
     if (inputStream == null) {
       throw new IOException("Class not found");
     }
+    int bufferSize = computeBufferSize(inputStream);
     try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-      byte[] data = new byte[INPUT_STREAM_DATA_CHUNK_SIZE];
+      byte[] data = new byte[bufferSize];
       int bytesRead;
-      while ((bytesRead = inputStream.read(data, 0, data.length)) != -1) {
+      int readCount = 0;
+      while ((bytesRead = inputStream.read(data, 0, bufferSize)) != -1) {
         outputStream.write(data, 0, bytesRead);
+        readCount++;
       }
       outputStream.flush();
+      if (readCount == 1) {
+        // SPRING PATCH: some misbehaving InputStreams return -1 but still write to buffer (gh-27429)
+        // return data;
+        // END OF PATCH
+      }
       return outputStream.toByteArray();
     } finally {
       if (close) {
         inputStream.close();
       }
     }
+  }
+
+  private static int computeBufferSize(final InputStream inputStream) throws IOException {
+    int expectedLength = inputStream.available();
+    /*
+     * Some implementations can return 0 while holding available data (e.g. new
+     * FileInputStream("/proc/a_file")). Also in some pathological cases a very small number might
+     * be returned, and in this case we use a default size.
+     */
+    if (expectedLength < 256) {
+      return INPUT_STREAM_DATA_CHUNK_SIZE;
+    }
+    return Math.min(expectedLength, MAX_BUFFER_SIZE);
   }
 
   // -----------------------------------------------------------------------------------------------
@@ -345,7 +377,7 @@ public class ClassReader {
   }
 
   /**
-   * Returns the internal of name of the super class (see {@link Type#getInternalName()}). For
+   * Returns the internal name of the super class (see {@link Type#getInternalName()}). For
    * interfaces, the super class is {@link Object}.
    *
    * @return the internal name of the super class, or {@literal null} for {@link Object} class.
@@ -499,6 +531,9 @@ public class ClassReader {
       } else if (Constants.SYNTHETIC.equals(attributeName)) {
         accessFlags |= Opcodes.ACC_SYNTHETIC;
       } else if (Constants.SOURCE_DEBUG_EXTENSION.equals(attributeName)) {
+        if (attributeLength > classFileBuffer.length - currentAttributeOffset) {
+          throw new IllegalArgumentException();
+        }
         sourceDebugExtension =
             readUtf(currentAttributeOffset, attributeLength, new char[attributeLength]);
       } else if (Constants.RUNTIME_INVISIBLE_ANNOTATIONS.equals(attributeName)) {
@@ -826,7 +861,7 @@ public class ClassReader {
       currentOffset += 2;
     }
 
-    // Read the  'provides_count' and 'provides' fields.
+    // Read the 'provides_count' and 'provides' fields.
     int providesCount = readUnsignedShort(currentOffset);
     currentOffset += 2;
     while (providesCount-- > 0) {
@@ -1509,6 +1544,9 @@ public class ClassReader {
     final int maxLocals = readUnsignedShort(currentOffset + 2);
     final int codeLength = readInt(currentOffset + 4);
     currentOffset += 8;
+    if (codeLength > classFileBuffer.length - currentOffset) {
+      throw new IllegalArgumentException();
+    }
 
     // Read the bytecode 'code' array to create a label for each referenced instruction.
     final int bytecodeStartOffset = currentOffset;
@@ -2965,7 +3003,7 @@ public class ClassReader {
       // Parse the array_value array.
       while (numElementValuePairs-- > 0) {
         currentOffset =
-            readElementValue(annotationVisitor, currentOffset, /* elementName = */ null, charBuffer);
+            readElementValue(annotationVisitor, currentOffset, /* elementName= */ null, charBuffer);
       }
     }
     if (annotationVisitor != null) {
@@ -3443,7 +3481,6 @@ public class ClassReader {
   private int[] readBootstrapMethodsAttribute(final int maxStringLength) {
     char[] charBuffer = new char[maxStringLength];
     int currentAttributeOffset = getFirstAttributeOffset();
-    int[] currentBootstrapMethodOffsets = null;
     for (int i = readUnsignedShort(currentAttributeOffset - 2); i > 0; --i) {
       // Read the attribute_info's attribute_name and attribute_length fields.
       String attributeName = readUTF8(currentAttributeOffset, charBuffer);
@@ -3451,17 +3488,17 @@ public class ClassReader {
       currentAttributeOffset += 6;
       if (Constants.BOOTSTRAP_METHODS.equals(attributeName)) {
         // Read the num_bootstrap_methods field and create an array of this size.
-        currentBootstrapMethodOffsets = new int[readUnsignedShort(currentAttributeOffset)];
+        int[] result = new int[readUnsignedShort(currentAttributeOffset)];
         // Compute and store the offset of each 'bootstrap_methods' array field entry.
         int currentBootstrapMethodOffset = currentAttributeOffset + 2;
-        for (int j = 0; j < currentBootstrapMethodOffsets.length; ++j) {
-          currentBootstrapMethodOffsets[j] = currentBootstrapMethodOffset;
+        for (int j = 0; j < result.length; ++j) {
+          result[j] = currentBootstrapMethodOffset;
           // Skip the bootstrap_method_ref and num_bootstrap_arguments fields (2 bytes each),
           // as well as the bootstrap_arguments array field (of size num_bootstrap_arguments * 2).
           currentBootstrapMethodOffset +=
               4 + readUnsignedShort(currentBootstrapMethodOffset + 2) * 2;
         }
-        return currentBootstrapMethodOffsets;
+        return result;
       }
       currentAttributeOffset += attributeLength;
     }

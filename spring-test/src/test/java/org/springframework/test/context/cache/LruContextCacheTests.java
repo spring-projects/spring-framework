@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.mock;
@@ -50,10 +49,10 @@ class LruContextCacheTests {
 	private static final MergedContextConfiguration bazConfig = config(Baz.class);
 
 
-	private final ConfigurableApplicationContext abcContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext fooContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext barContext = mock(ConfigurableApplicationContext.class);
-	private final ConfigurableApplicationContext bazContext = mock(ConfigurableApplicationContext.class);
+	private final ConfigurableApplicationContext abcContext = mock();
+	private final ConfigurableApplicationContext fooContext = mock();
+	private final ConfigurableApplicationContext barContext = mock();
+	private final ConfigurableApplicationContext bazContext = mock();
 
 
 	@Test
@@ -166,7 +165,7 @@ class LruContextCacheTests {
 		List<String> actualNames = contextMap.keySet().stream()
 			.map(cfg -> cfg.getClasses()[0])
 			.map(Class::getSimpleName)
-			.collect(toList());
+			.toList();
 		// @formatter:on
 
 		assertThat(actualNames).isEqualTo(asList(expectedNames));

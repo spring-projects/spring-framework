@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConvertingComparator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.util.StringUtils;
 import org.springframework.util.comparator.InstanceComparator;
 
@@ -70,7 +71,11 @@ import org.springframework.util.comparator.InstanceComparator;
 @SuppressWarnings("serial")
 public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFactory implements Serializable {
 
-	private static final Comparator<Method> METHOD_COMPARATOR;
+	// Exclude @Pointcut methods
+	private static final MethodFilter adviceMethodFilter = ReflectionUtils.USER_DECLARED_METHODS
+			.and(method -> (AnnotationUtils.getAnnotation(method, Pointcut.class) == null));
+
+	private static final Comparator<Method> adviceMethodComparator;
 
 	static {
 		// Note: although @After is ordered before @AfterReturning and @AfterThrowing,
@@ -82,11 +87,11 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				new InstanceComparator<>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
 				(Converter<Method, Annotation>) method -> {
-					AspectJAnnotation<?> ann = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
+					AspectJAnnotation ann = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
 					return (ann != null ? ann.getAnnotation() : null);
 				});
 		Comparator<Method> methodNameComparator = new ConvertingComparator<>(Method::getName);
-		METHOD_COMPARATOR = adviceKindComparator.thenComparing(methodNameComparator);
+		adviceMethodComparator = adviceKindComparator.thenComparing(methodNameComparator);
 	}
 
 
@@ -160,15 +165,10 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
-		final List<Method> methods = new ArrayList<>();
-		ReflectionUtils.doWithMethods(aspectClass, method -> {
-			// Exclude pointcuts
-			if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
-				methods.add(method);
-			}
-		}, ReflectionUtils.USER_DECLARED_METHODS);
+		List<Method> methods = new ArrayList<>();
+		ReflectionUtils.doWithMethods(aspectClass, methods::add, adviceMethodFilter);
 		if (methods.size() > 1) {
-			methods.sort(METHOD_COMPARATOR);
+			methods.sort(adviceMethodComparator);
 		}
 		return methods;
 	}
@@ -216,7 +216,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	@Nullable
 	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
-		AspectJAnnotation<?> aspectJAnnotation =
+		AspectJAnnotation aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
 		if (aspectJAnnotation == null) {
 			return null;
@@ -240,7 +240,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		Class<?> candidateAspectClass = aspectInstanceFactory.getAspectMetadata().getAspectClass();
 		validate(candidateAspectClass);
 
-		AspectJAnnotation<?> aspectJAnnotation =
+		AspectJAnnotation aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
 		if (aspectJAnnotation == null) {
 			return null;
@@ -261,42 +261,36 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		AbstractAspectJAdvice springAdvice;
 
 		switch (aspectJAnnotation.getAnnotationType()) {
-			case AtPointcut:
+			case AtPointcut -> {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Processing pointcut '" + candidateAdviceMethod.getName() + "'");
 				}
 				return null;
-			case AtAround:
-				springAdvice = new AspectJAroundAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
-				break;
-			case AtBefore:
-				springAdvice = new AspectJMethodBeforeAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
-				break;
-			case AtAfter:
-				springAdvice = new AspectJAfterAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
-				break;
-			case AtAfterReturning:
+			}
+			case AtAround -> springAdvice = new AspectJAroundAdvice(
+					candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+			case AtBefore -> springAdvice = new AspectJMethodBeforeAdvice(
+					candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+			case AtAfter -> springAdvice = new AspectJAfterAdvice(
+					candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+			case AtAfterReturning -> {
 				springAdvice = new AspectJAfterReturningAdvice(
 						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				AfterReturning afterReturningAnnotation = (AfterReturning) aspectJAnnotation.getAnnotation();
 				if (StringUtils.hasText(afterReturningAnnotation.returning())) {
 					springAdvice.setReturningName(afterReturningAnnotation.returning());
 				}
-				break;
-			case AtAfterThrowing:
+			}
+			case AtAfterThrowing -> {
 				springAdvice = new AspectJAfterThrowingAdvice(
 						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				AfterThrowing afterThrowingAnnotation = (AfterThrowing) aspectJAnnotation.getAnnotation();
 				if (StringUtils.hasText(afterThrowingAnnotation.throwing())) {
 					springAdvice.setThrowingName(afterThrowingAnnotation.throwing());
 				}
-				break;
-			default:
-				throw new UnsupportedOperationException(
-						"Unsupported advice type on method: " + candidateAdviceMethod);
+			}
+			default -> throw new UnsupportedOperationException(
+					"Unsupported advice type on method: " + candidateAdviceMethod);
 		}
 
 		// Now to configure the advice...

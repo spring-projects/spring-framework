@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.servlet.handler.PathPatternsTestUtils;
+import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -40,7 +41,7 @@ public class RouterFunctionsTests {
 	public void routeMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.test(request)).willReturn(true);
 
 		RouterFunction<ServerResponse>
@@ -56,7 +57,7 @@ public class RouterFunctionsTests {
 	public void routeNoMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.test(request)).willReturn(false);
 
 		RouterFunction<ServerResponse> result = RouterFunctions.route(requestPredicate, handlerFunction);
@@ -71,7 +72,7 @@ public class RouterFunctionsTests {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.nest(request)).willReturn(Optional.of(request));
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
@@ -87,7 +88,7 @@ public class RouterFunctionsTests {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.nest(request)).willReturn(Optional.empty());
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
@@ -95,6 +96,22 @@ public class RouterFunctionsTests {
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
 		assertThat(resultHandlerFunction.isPresent()).isFalse();
+	}
+
+	@Test
+	public void nestPathVariable() {
+		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
+		RequestPredicate requestPredicate = request -> request.pathVariable("foo").equals("bar");
+		RouterFunction<ServerResponse> nestedFunction = RouterFunctions.route(requestPredicate, handlerFunction);
+
+		RouterFunction<ServerResponse> result = RouterFunctions.nest(RequestPredicates.path("/{foo}"), nestedFunction);
+		assertThat(result).isNotNull();
+
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/bar");
+		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
+		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
+		assertThat(resultHandlerFunction.isPresent()).isTrue();
+		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
 	}
 
 }

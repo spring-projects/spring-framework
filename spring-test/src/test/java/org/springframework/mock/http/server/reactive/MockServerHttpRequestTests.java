@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.mock.http.server.reactive;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -31,6 +31,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.junit.jupiter.api.Named.named;
 
 /**
  * Unit tests for {@link MockServerHttpRequest}.
@@ -63,21 +65,24 @@ class MockServerHttpRequestTests {
 		assertThat(request.getURI().toString()).isEqualTo("/foo%20bar?a=b&name%20A=value%20A1&name%20A=value%20A2&name%20B=value%20B1");
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource
-	void httpMethodNotNullOrEmpty(Executable executable) {
-		Exception ex = Assertions.assertThrows(IllegalArgumentException.class, executable);
-		assertThat(ex.getMessage()).contains("HTTP method is required.");
+	void httpMethodNotNullOrEmpty(ThrowingCallable callable) {
+		assertThatIllegalArgumentException()
+			.isThrownBy(callable)
+			.withMessageContaining("HTTP method is required.");
 	}
 
-	static Stream<Executable> httpMethodNotNullOrEmpty() {
+	@SuppressWarnings("deprecation")
+	static Stream<Named<ThrowingCallable>> httpMethodNotNullOrEmpty() {
 		String uriTemplate = "/foo bar?a=b";
 		return Stream.of(
-				() -> MockServerHttpRequest.method(null, UriComponentsBuilder.fromUriString(uriTemplate).build("")).build(),
-				() -> MockServerHttpRequest.method((HttpMethod) null, uriTemplate).build(),
-				() -> MockServerHttpRequest.method((String) null, uriTemplate).build(),
-				() -> MockServerHttpRequest.method("", uriTemplate).build(),
-				() -> MockServerHttpRequest.method("   ", uriTemplate).build()
+				named("null HttpMethod, URI", () -> MockServerHttpRequest.method(null, UriComponentsBuilder.fromUriString(uriTemplate).build("")).build()),
+				named("null HttpMethod, uriTemplate", () -> MockServerHttpRequest.method((HttpMethod) null, uriTemplate).build()),
+				named("null String, uriTemplate", () -> MockServerHttpRequest.method((String) null, uriTemplate).build()),
+				named("empty String, uriTemplate", () -> MockServerHttpRequest.method("", uriTemplate).build()),
+				named("blank String, uriTemplate", () -> MockServerHttpRequest.method("   ", uriTemplate).build())
 		);
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.web.reactive.result.method.annotation.ContinuationHan
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.lang.reflect.Method
+import java.time.Duration
 import kotlin.reflect.jvm.javaMethod
 
 class KotlinInvocableHandlerMethodTests {
@@ -89,12 +90,22 @@ class KotlinInvocableHandlerMethodTests {
 		val response = this.exchange.response
 		this.resolvers.add(stubResolver(response))
 		val method = CoroutinesController::response.javaMethod!!
-		val result = invoke(CoroutinesController(), method)
+		val result = invokeForResult(CoroutinesController(), method, response)
 
-		StepVerifier.create(result)
-				.consumeNextWith { StepVerifier.create(it.returnValue as Mono<*>).verifyComplete() }
-				.verifyComplete()
+		assertThat(result).`as`("Expected no result (i.e. fully handled)").isNull()
 		assertThat(this.exchange.response.headers.getFirst("foo")).isEqualTo("bar")
+	}
+
+	@Test
+	fun privateController() {
+		this.resolvers.add(stubResolver("foo"))
+		val method = PrivateCoroutinesController::singleArg.javaMethod!!
+		val result = invoke(PrivateCoroutinesController(), method,"foo")
+		assertHandlerResultValue(result, "success:foo")
+	}
+
+	private fun invokeForResult(handler: Any, method: Method, vararg providedArgs: Any): HandlerResult? {
+		return invoke(handler, method, *providedArgs).block(Duration.ofSeconds(5))
 	}
 
 	private fun invoke(handler: Any, method: Method, vararg providedArgs: Any?): Mono<HandlerResult> {
@@ -146,7 +157,13 @@ class KotlinInvocableHandlerMethodTests {
 			delay(10)
 			response.headers.add("foo", "bar")
 		}
+	}
 
+	private class PrivateCoroutinesController {
 
+		suspend fun singleArg(q: String?): String {
+			delay(10)
+			return "success:$q"
+		}
 	}
 }

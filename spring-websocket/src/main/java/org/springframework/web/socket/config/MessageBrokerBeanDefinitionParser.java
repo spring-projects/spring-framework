@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.socket.WebSocketHandler;
@@ -126,8 +127,8 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		jackson2Present = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 				ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 		gsonPresent = ClassUtils.isPresent("com.google.gson.Gson", classLoader);
-		jsonbPresent = ClassUtils.isPresent("javax.json.bind.Jsonb", classLoader);
-		javaxValidationPresent = ClassUtils.isPresent("javax.validation.Validator", classLoader);
+		jsonbPresent = ClassUtils.isPresent("jakarta.json.bind.Jsonb", classLoader);
+		javaxValidationPresent = ClassUtils.isPresent("jakarta.validation.Validator", classLoader);
 	}
 
 
@@ -358,7 +359,13 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			ManagedList<Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptElem, ctx);
 			String allowedOrigins = element.getAttribute("allowed-origins");
 			List<String> origins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOrigins, ","));
-			interceptors.add(new OriginHandshakeInterceptor(origins));
+			String allowedOriginPatterns = element.getAttribute("allowed-origin-patterns");
+			List<String> originPatterns = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginPatterns, ","));
+			OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor(origins);
+			if (!ObjectUtils.isEmpty(originPatterns)) {
+				interceptor.setAllowedOriginPatterns(originPatterns);
+			}
+			interceptors.add(interceptor);
 			ConstructorArgumentValues cargs = new ConstructorArgumentValues();
 			cargs.addIndexedArgumentValue(0, subProtoHandler);
 			cargs.addIndexedArgumentValue(1, handler);
@@ -618,10 +625,6 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.getConstructorArgumentValues().addIndexedArgumentValue(0, userRegistry);
 		if (brokerElem.hasAttribute("user-destination-prefix")) {
 			beanDef.getPropertyValues().add("userDestinationPrefix", brokerElem.getAttribute("user-destination-prefix"));
-		}
-		if (brokerElem.hasAttribute("path-matcher")) {
-			String pathMatcherRef = brokerElem.getAttribute("path-matcher");
-			beanDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 		}
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}

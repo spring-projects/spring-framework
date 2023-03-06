@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.springframework.jms.listener.adapter;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.jms.listener.SubscriptionNameProvider;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.lang.Nullable;
@@ -31,24 +32,30 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
 /**
- * A {@link javax.jms.MessageListener} adapter that invokes a configurable
+ * A {@link jakarta.jms.MessageListener} adapter that invokes a configurable
  * {@link InvocableHandlerMethod}.
  *
- * <p>Wraps the incoming {@link javax.jms.Message} to Spring's {@link Message}
+ * <p>Wraps the incoming {@link jakarta.jms.Message} in Spring's {@link Message}
  * abstraction, copying the JMS standard headers using a configurable
  * {@link JmsHeaderMapper}.
  *
- * <p>The original {@link javax.jms.Message} and the {@link javax.jms.Session}
+ * <p>The original {@link jakarta.jms.Message} and the {@link jakarta.jms.Session}
  * are provided as additional arguments so that these can be injected as
  * method arguments if necessary.
  *
+ * <p>As of Spring Framework 5.3.26, {@code MessagingMessageListenerAdapter} implements
+ * {@link SubscriptionNameProvider} in order to provide a meaningful default
+ * subscription name. See {@link #getSubscriptionName()} for details.
+ *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.1
  * @see Message
  * @see JmsHeaderMapper
  * @see InvocableHandlerMethod
  */
-public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageListener {
+public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageListener
+		implements SubscriptionNameProvider {
 
 	@Nullable
 	private InvocableHandlerMethod handlerMethod;
@@ -56,7 +63,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 
 	/**
 	 * Set the {@link InvocableHandlerMethod} to use to invoke the method
-	 * processing an incoming {@link javax.jms.Message}.
+	 * processing an incoming {@link jakarta.jms.Message}.
 	 */
 	public void setHandlerMethod(InvocableHandlerMethod handlerMethod) {
 		this.handlerMethod = handlerMethod;
@@ -69,7 +76,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 
 
 	@Override
-	public void onMessage(javax.jms.Message jmsMessage, @Nullable Session session) throws JMSException {
+	public void onMessage(jakarta.jms.Message jmsMessage, @Nullable Session session) throws JMSException {
 		Message<?> message = toMessagingMessage(jmsMessage);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Processing [" + message + "]");
@@ -83,18 +90,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 		}
 	}
 
-	@Override
-	protected Object preProcessResponse(Object result) {
-		MethodParameter returnType = getHandlerMethod().getReturnType();
-		if (result instanceof Message) {
-			return MessageBuilder.fromMessage((Message<?>) result)
-					.setHeader(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType).build();
-		}
-		return MessageBuilder.withPayload(result).setHeader(
-				AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType).build();
-	}
-
-	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) {
+	protected Message<?> toMessagingMessage(jakarta.jms.Message jmsMessage) {
 		try {
 			return (Message<?>) getMessagingMessageConverter().fromMessage(jmsMessage);
 		}
@@ -104,11 +100,11 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 	}
 
 	/**
-	 * Invoke the handler, wrapping any exception to a {@link ListenerExecutionFailedException}
+	 * Invoke the handler, wrapping any exception in a {@link ListenerExecutionFailedException}
 	 * with a dedicated error message.
 	 */
 	@Nullable
-	private Object invokeHandler(javax.jms.Message jmsMessage, @Nullable Session session, Message<?> message) {
+	private Object invokeHandler(jakarta.jms.Message jmsMessage, @Nullable Session session, Message<?> message) {
 		InvocableHandlerMethod handlerMethod = getHandlerMethod();
 		try {
 			return handlerMethod.invoke(message, jmsMessage, session);
@@ -125,11 +121,46 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 
 	private String createMessagingErrorMessage(String description) {
 		InvocableHandlerMethod handlerMethod = getHandlerMethod();
-		StringBuilder sb = new StringBuilder(description).append("\n")
+		StringBuilder sb = new StringBuilder(description).append('\n')
 				.append("Endpoint handler details:\n")
 				.append("Method [").append(handlerMethod.getMethod()).append("]\n")
 				.append("Bean [").append(handlerMethod.getBean()).append("]\n");
 		return sb.toString();
+	}
+
+	@Override
+	protected Object preProcessResponse(Object result) {
+		MethodParameter returnType = getHandlerMethod().getReturnType();
+		MessageBuilder<?> messageBuilder = (result instanceof Message<?> message ?
+				MessageBuilder.fromMessage(message) :
+				MessageBuilder.withPayload(result));
+		return messageBuilder
+				.setHeader(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType)
+				.build();
+	}
+
+	/**
+	 * Generate a subscription name for this {@code MessageListener} adapter based
+	 * on the following rules.
+	 * <ul>
+	 * <li>If the {@link #setHandlerMethod(InvocableHandlerMethod) handlerMethod}
+	 * has been set, the generated subscription name takes the form of
+	 * {@code handlerMethod.getBeanType().getName() + "." + handlerMethod.getMethod().getName()}.</li>
+	 * <li>Otherwise, the generated subscription name is the result of invoking
+	 * {@code getClass().getName()}, which aligns with the default behavior of
+	 * {@link org.springframework.jms.listener.AbstractMessageListenerContainer}.</li>
+	 * </ul>
+	 * @since 5.3.26
+	 * @see SubscriptionNameProvider#getSubscriptionName()
+	 */
+	@Override
+	public String getSubscriptionName() {
+		if (this.handlerMethod != null) {
+			return this.handlerMethod.getBeanType().getName() + "." + this.handlerMethod.getMethod().getName();
+		}
+		else {
+			return getClass().getName();
+		}
 	}
 
 }

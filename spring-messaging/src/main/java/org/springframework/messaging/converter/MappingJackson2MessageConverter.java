@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,6 @@ import org.springframework.util.MimeType;
  * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.9 to 2.12, as of Spring 5.3.
- *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
@@ -72,7 +70,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * the {@code application/json} MIME type with {@code UTF-8} character set.
 	 */
 	public MappingJackson2MessageConverter() {
-		super(new MimeType("application", "json"));
+		super(new MimeType("application", "json"), new MimeType("application", "*+json"));
 		this.objectMapper = initObjectMapper();
 	}
 
@@ -88,6 +86,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 
+	@SuppressWarnings("deprecation")  // on Jackson 2.13: configure(MapperFeature, boolean)
 	private ObjectMapper initObjectMapper() {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false);
@@ -214,12 +213,12 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			if (ClassUtils.isAssignableValue(targetClass, payload)) {
 				return payload;
 			}
-			else if (payload instanceof byte[]) {
+			else if (payload instanceof byte[] bytes) {
 				if (view != null) {
-					return this.objectMapper.readerWithView(view).forType(javaType).readValue((byte[]) payload);
+					return this.objectMapper.readerWithView(view).forType(javaType).readValue(bytes);
 				}
 				else {
-					return this.objectMapper.readValue((byte[]) payload, javaType);
+					return this.objectMapper.readValue(bytes, javaType);
 				}
 			}
 			else {
@@ -284,19 +283,18 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 */
 	@Nullable
 	protected Class<?> getSerializationView(@Nullable Object conversionHint) {
-		if (conversionHint instanceof MethodParameter) {
-			MethodParameter param = (MethodParameter) conversionHint;
+		if (conversionHint instanceof MethodParameter param) {
 			JsonView annotation = (param.getParameterIndex() >= 0 ?
 					param.getParameterAnnotation(JsonView.class) : param.getMethodAnnotation(JsonView.class));
 			if (annotation != null) {
 				return extractViewClass(annotation, conversionHint);
 			}
 		}
-		else if (conversionHint instanceof JsonView) {
-			return extractViewClass((JsonView) conversionHint, conversionHint);
+		else if (conversionHint instanceof JsonView jsonView) {
+			return extractViewClass(jsonView, conversionHint);
 		}
-		else if (conversionHint instanceof Class) {
-			return (Class<?>) conversionHint;
+		else if (conversionHint instanceof Class<?> clazz) {
+			return clazz;
 		}
 
 		// No JSON view specified...

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.lang.Nullable;
@@ -28,6 +28,15 @@ import org.springframework.web.servlet.HandlerMapping;
 /**
  * Subclass of {@link ServletRequestDataBinder} that adds URI template variables
  * to the values used for data binding.
+ *
+ * <p><strong>WARNING</strong>: Data binding can lead to security issues by exposing
+ * parts of the object graph that are not meant to be accessed or modified by
+ * external clients. Therefore the design and use of data binding should be considered
+ * carefully with regard to security. For more details, please refer to the dedicated
+ * sections on data binding for
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-initbinder-model-design">Spring Web MVC</a> and
+ * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web-reactive.html#webflux-ann-initbinder-model-design">Spring WebFlux</a>
+ * in the reference manual.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -69,9 +78,8 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 		if (uriVars != null) {
 			uriVars.forEach((name, value) -> {
 				if (mpvs.contains(name)) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Skipping URI variable '" + name +
-								"' because request contains bind value with same name.");
+					if (logger.isDebugEnabled()) {
+						logger.debug("URI variable '" + name + "' overridden by request bind value.");
 					}
 				}
 				else {

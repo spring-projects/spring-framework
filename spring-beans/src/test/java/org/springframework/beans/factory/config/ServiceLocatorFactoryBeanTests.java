@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -252,7 +252,7 @@ public class ServiceLocatorFactoryBeanTests {
 
 	@Test
 	public void testRequiresListableBeanFactoryAndChokesOnAnythingElse() throws Exception {
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 		try {
 			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 			factory.setBeanFactory(beanFactory);
@@ -278,19 +278,19 @@ public class ServiceLocatorFactoryBeanTests {
 	}
 
 
-	public static interface TestServiceLocator {
+	public interface TestServiceLocator {
 
 		TestService getTestService();
 	}
 
 
-	public static interface TestServiceLocator2 {
+	public interface TestServiceLocator2 {
 
 		TestService getTestService(String id) throws CustomServiceLocatorException2;
 	}
 
 
-	public static interface TestServiceLocator3 {
+	public interface TestServiceLocator3 {
 
 		TestService getTestService();
 
@@ -302,13 +302,13 @@ public class ServiceLocatorFactoryBeanTests {
 	}
 
 
-	public static interface TestService2Locator {
+	public interface TestService2Locator {
 
 		TestService2 getTestService() throws CustomServiceLocatorException3;
 	}
 
 
-	public static interface ServiceLocatorInterfaceWithExtraNonCompliantMethod {
+	public interface ServiceLocatorInterfaceWithExtraNonCompliantMethod {
 
 		TestService2 getTestService();
 

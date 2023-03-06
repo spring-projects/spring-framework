@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.http.client.reactive;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CancellationException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -48,7 +51,7 @@ import org.springframework.util.Assert;
  * @since 5.3
  * @see <a href="https://hc.apache.org/index.html">Apache HttpComponents</a>
  */
-public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
+public class HttpComponentsClientHttpConnector implements ClientHttpConnector, Closeable {
 
 	private final CloseableHttpAsyncClient client;
 
@@ -120,14 +123,21 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 		return Mono.create(sink -> {
 			ReactiveResponseConsumer reactiveResponseConsumer =
-					new ReactiveResponseConsumer(new MonoFutureCallbackAdapter(sink, this.dataBufferFactory, context));
+					new ReactiveResponseConsumer(new ResponseCallback(sink, this.dataBufferFactory, context));
 
-			this.client.execute(requestProducer, reactiveResponseConsumer, context, null);
+			this.client.execute(requestProducer, reactiveResponseConsumer, context, new ResultCallback(sink));
 		});
 	}
 
+	@Override
+	public void close() throws IOException {
+		this.client.close();
+	}
 
-	private static class MonoFutureCallbackAdapter
+	/**
+	 * Callback that invoked when a response is received.
+	 */
+	private static class ResponseCallback
 			implements FutureCallback<Message<HttpResponse, Publisher<ByteBuffer>>> {
 
 		private final MonoSink<ClientHttpResponse> sink;
@@ -136,7 +146,8 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 		private final HttpClientContext context;
 
-		public MonoFutureCallbackAdapter(MonoSink<ClientHttpResponse> sink,
+
+		public ResponseCallback(MonoSink<ClientHttpResponse> sink,
 				DataBufferFactory dataBufferFactory, HttpClientContext context) {
 			this.sink = sink;
 			this.dataBufferFactory = dataBufferFactory;
@@ -152,16 +163,43 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector {
 
 		@Override
 		public void failed(Exception ex) {
-			Throwable t = ex;
-			if (t instanceof HttpStreamResetException) {
-				HttpStreamResetException httpStreamResetException = (HttpStreamResetException) ex;
-				t = httpStreamResetException.getCause();
-			}
+			Throwable t = (ex instanceof HttpStreamResetException hsre ? hsre.getCause() : ex);
 			this.sink.error(t);
 		}
 
 		@Override
 		public void cancelled() {
+			this.sink.error(new CancellationException());
+		}
+	}
+
+
+	/**
+	 * Callback that invoked when a request is executed.
+	 */
+	private static class ResultCallback implements FutureCallback<Void> {
+
+		private final MonoSink<?> sink;
+
+
+		public ResultCallback(MonoSink<?> sink) {
+			this.sink = sink;
+		}
+
+		@Override
+		public void completed(Void result) {
+			this.sink.success();
+		}
+
+		@Override
+		public void failed(Exception ex) {
+			Throwable t = (ex instanceof HttpStreamResetException hsre ? hsre.getCause() : ex);
+			this.sink.error(t);
+		}
+
+		@Override
+		public void cancelled() {
+			this.sink.error(new CancellationException());
 		}
 	}
 

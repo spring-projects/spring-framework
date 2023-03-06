@@ -37,7 +37,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * An "RDBMS operation" is a multi-threaded, reusable object representing a query,
+ * An "RDBMS operation" is a multithreaded, reusable object representing a query,
  * update, or stored procedure call. An RDBMS operation is <b>not</b> a command,
  * as a command is not reusable. However, execute methods may take commands as
  * arguments. Subclasses should be JavaBeans, allowing easy configuration.

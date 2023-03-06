@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -389,32 +389,32 @@ class ResourceBundleMessageSourceTests {
 		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
 
 		List<String> filenames = ms.calculateFilenamesForLocale("messages", Locale.ENGLISH);
-		assertThat(filenames.size()).isEqualTo(1);
+		assertThat(filenames).hasSize(1);
 		assertThat(filenames.get(0)).isEqualTo("messages_en");
 
 		filenames = ms.calculateFilenamesForLocale("messages", Locale.UK);
-		assertThat(filenames.size()).isEqualTo(2);
+		assertThat(filenames).hasSize(2);
 		assertThat(filenames.get(1)).isEqualTo("messages_en");
 		assertThat(filenames.get(0)).isEqualTo("messages_en_GB");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("en", "GB", "POSIX"));
-		assertThat(filenames.size()).isEqualTo(3);
+		assertThat(filenames).hasSize(3);
 		assertThat(filenames.get(2)).isEqualTo("messages_en");
 		assertThat(filenames.get(1)).isEqualTo("messages_en_GB");
 		assertThat(filenames.get(0)).isEqualTo("messages_en_GB_POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("en", "", "POSIX"));
-		assertThat(filenames.size()).isEqualTo(2);
+		assertThat(filenames).hasSize(2);
 		assertThat(filenames.get(1)).isEqualTo("messages_en");
 		assertThat(filenames.get(0)).isEqualTo("messages_en__POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "UK", "POSIX"));
-		assertThat(filenames.size()).isEqualTo(2);
+		assertThat(filenames).hasSize(2);
 		assertThat(filenames.get(1)).isEqualTo("messages__UK");
 		assertThat(filenames.get(0)).isEqualTo("messages__UK_POSIX");
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
-		assertThat(filenames.size()).isEqualTo(0);
+		assertThat(filenames).isEmpty();
 	}
 
 	@Test

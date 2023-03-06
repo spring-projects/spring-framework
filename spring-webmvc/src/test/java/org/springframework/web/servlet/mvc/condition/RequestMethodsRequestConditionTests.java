@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collections;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -124,7 +123,7 @@ public class RequestMethodsRequestConditionTests {
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(POST);
 
 		RequestMethodsRequestCondition result = condition1.combine(condition2);
-		assertThat(result.getContent().size()).isEqualTo(2);
+		assertThat(result.getContent()).hasSize(2);
 	}
 
 

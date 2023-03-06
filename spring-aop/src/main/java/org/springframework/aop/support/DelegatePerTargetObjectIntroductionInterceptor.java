@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,9 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	 */
 	private final Map<Object, Object> delegateMap = new WeakHashMap<>();
 
-	private Class<?> defaultImplType;
+	private final Class<?> defaultImplType;
 
-	private Class<?> interfaceType;
+	private final Class<?> interfaceType;
 
 
 	public DelegatePerTargetObjectIntroductionInterceptor(Class<?> defaultImplType, Class<?> interfaceType) {
@@ -98,8 +98,8 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
-			if (retVal == delegate && mi instanceof ProxyMethodInvocation) {
-				retVal = ((ProxyMethodInvocation) mi).getProxy();
+			if (retVal == delegate && mi instanceof ProxyMethodInvocation pmi) {
+				retVal = pmi.getProxy();
 			}
 			return retVal;
 		}

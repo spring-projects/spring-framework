@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,6 @@ public class RequestMappingHandlerAdapterTests {
 
 		this.handlerAdapter.setArgumentResolvers(Arrays.asList(redirectAttributesResolver, modelResolver));
 		this.handlerAdapter.setReturnValueHandlers(Collections.singletonList(viewHandler));
-		this.handlerAdapter.setIgnoreDefaultModelOnRedirect(true);
 		this.handlerAdapter.afterPropertiesSet();
 
 		this.request.setAttribute(DispatcherServlet.OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
@@ -247,7 +246,7 @@ public class RequestMappingHandlerAdapterTests {
 
 		assertThat(mav.getModel().get("attr1")).isEqualTo("lAttr1");
 		assertThat(mav.getModel().get("attr2")).isEqualTo("gAttr2");
-		assertThat(mav.getModel().get("attr3")).isEqualTo(null);
+		assertThat(mav.getModel().get("attr3")).isNull();
 	}
 
 	// SPR-10859
@@ -278,9 +277,9 @@ public class RequestMappingHandlerAdapterTests {
 	}
 
 	private void assertMethodProcessorCount(int resolverCount, int initBinderResolverCount, int handlerCount) {
-		assertThat(this.handlerAdapter.getArgumentResolvers().size()).isEqualTo(resolverCount);
-		assertThat(this.handlerAdapter.getInitBinderArgumentResolvers().size()).isEqualTo(initBinderResolverCount);
-		assertThat(this.handlerAdapter.getReturnValueHandlers().size()).isEqualTo(handlerCount);
+		assertThat(this.handlerAdapter.getArgumentResolvers()).hasSize(resolverCount);
+		assertThat(this.handlerAdapter.getInitBinderArgumentResolvers()).hasSize(initBinderResolverCount);
+		assertThat(this.handlerAdapter.getReturnValueHandlers()).hasSize(handlerCount);
 	}
 
 

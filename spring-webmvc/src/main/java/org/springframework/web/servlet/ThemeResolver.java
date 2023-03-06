@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.lang.Nullable;
 
@@ -45,7 +45,9 @@ import org.springframework.lang.Nullable;
  * @since 17.06.2003
  * @see org.springframework.ui.context.Theme
  * @see org.springframework.ui.context.ThemeSource
+ * @deprecated as of 6.0 in favor of using CSS, without direct replacement
  */
+@Deprecated(since = "6.0")
 public interface ThemeResolver {
 
 	/**

@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.JmxTestBean;
-import org.springframework.jmx.export.naming.ObjectNamingStrategy;
 import org.springframework.jmx.support.ObjectNameManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,12 +73,7 @@ class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
-		exporter.setNamingStrategy(new ObjectNamingStrategy() {
-			@Override
-			public ObjectName getObjectName(Object managedBean, String beanKey) {
-				return objectNameTemplate;
-			}
-		});
+		exporter.setNamingStrategy((managedBean, beanKey) -> objectNameTemplate);
 
 		JmxTestBean bean1 = new JmxTestBean();
 		JmxTestBean bean2 = new JmxTestBean();
@@ -101,12 +95,7 @@ class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
 		exporter.setEnsureUniqueRuntimeObjectNames(false);
-		exporter.setNamingStrategy(new ObjectNamingStrategy() {
-			@Override
-			public ObjectName getObjectName(Object managedBean, String beanKey) {
-				return objectNameTemplate;
-			}
-		});
+		exporter.setNamingStrategy((managedBean, beanKey) -> objectNameTemplate);
 
 		JmxTestBean bean1 = new JmxTestBean();
 		JmxTestBean bean2 = new JmxTestBean();

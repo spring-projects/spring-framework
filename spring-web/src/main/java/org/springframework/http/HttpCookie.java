@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 
 /**
  * Represents an HTTP cookie as a name-value pair consistent with the content of
- * the "Cookie" request header. The {@link ResponseCookie} sub-class has the
+ * the "Cookie" request header. The {@link ResponseCookie} subclass has the
  * additional attributes expected in the "Set-Cookie" response header.
  *
  * @author Rossen Stoyanchev
@@ -66,10 +66,9 @@ public class HttpCookie {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof HttpCookie)) {
+		if (!(other instanceof HttpCookie otherCookie)) {
 			return false;
 		}
-		HttpCookie otherCookie = (HttpCookie) other;
 		return (this.name.equalsIgnoreCase(otherCookie.getName()));
 	}
 

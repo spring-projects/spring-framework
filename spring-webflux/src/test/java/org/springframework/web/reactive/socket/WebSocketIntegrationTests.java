@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.web.filter.reactive.ServerWebExchangeContextFilter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.socket.client.WebSocketClient;
@@ -49,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @author Brian Clozel
  */
-class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
+class WebSocketIntegrationTests extends AbstractReactiveWebSocketIntegrationTests {
 
 	private static final Log logger = LogFactory.getLog(WebSocketIntegrationTests.class);
 
@@ -216,8 +217,11 @@ class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 		@Override
 		public Mono<Void> handle(WebSocketSession session) {
-			// Use retain() for Reactor Netty
-			return session.send(session.receive().doOnNext(WebSocketMessage::retain));
+			return Mono.deferContextual(contextView -> {
+				String key = ServerWebExchangeContextFilter.EXCHANGE_CONTEXT_ATTRIBUTE;
+				assertThat(contextView.getOrEmpty(key).orElse(null)).isNotNull();
+				return session.send(session.receive().map(WebSocketMessage::retain));
+			});
 		}
 	}
 

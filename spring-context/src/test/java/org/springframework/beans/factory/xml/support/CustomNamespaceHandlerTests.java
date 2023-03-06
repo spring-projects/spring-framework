@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,21 +151,21 @@ public class CustomNamespaceHandlerTests {
 	public void testCustomElementNestedWithinUtilList() throws Exception {
 		List<?> things = (List<?>) this.beanFactory.getBean("list.of.things");
 		assertThat(things).isNotNull();
-		assertThat(things.size()).isEqualTo(2);
+		assertThat(things).hasSize(2);
 	}
 
 	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilSet() throws Exception {
 		Set<?> things = (Set<?>) this.beanFactory.getBean("set.of.things");
 		assertThat(things).isNotNull();
-		assertThat(things.size()).isEqualTo(2);
+		assertThat(things).hasSize(2);
 	}
 
 	@Test  // SPR-2728
 	public void testCustomElementNestedWithinUtilMap() throws Exception {
 		Map<?, ?> things = (Map<?, ?>) this.beanFactory.getBean("map.of.things");
 		assertThat(things).isNotNull();
-		assertThat(things.size()).isEqualTo(2);
+		assertThat(things).hasSize(2);
 	}
 
 

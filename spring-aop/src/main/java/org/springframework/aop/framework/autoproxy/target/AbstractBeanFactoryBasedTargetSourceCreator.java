@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,11 +67,11 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	@Override
 	public final void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
+		if (!(beanFactory instanceof ConfigurableBeanFactory clbf)) {
 			throw new IllegalStateException("Cannot do auto-TargetSource creation with a BeanFactory " +
 					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
-		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		this.beanFactory = clbf;
 	}
 
 	/**
@@ -125,12 +125,8 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 */
 	protected DefaultListableBeanFactory getInternalBeanFactoryForBean(String beanName) {
 		synchronized (this.internalBeanFactories) {
-			DefaultListableBeanFactory internalBeanFactory = this.internalBeanFactories.get(beanName);
-			if (internalBeanFactory == null) {
-				internalBeanFactory = buildInternalBeanFactory(this.beanFactory);
-				this.internalBeanFactories.put(beanName, internalBeanFactory);
-			}
-			return internalBeanFactory;
+			return this.internalBeanFactories.computeIfAbsent(beanName,
+					name -> buildInternalBeanFactory(this.beanFactory));
 		}
 	}
 

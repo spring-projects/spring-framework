@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,30 +33,14 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * <p>Typically there is one such strategy for every {@link ServerHttpRequest}
  * and {@link ServerHttpResponse} type except in the case of Servlet containers
- * for which the standard Java WebSocket API JSR-356 does not define a way to
+ * for which the standard Jakarta WebSocket API (JSR-356) does not define a way to
  * upgrade a request so a custom strategy is needed for every Servlet container.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
+ * @see org.springframework.web.reactive.socket.server.upgrade.StandardWebSocketUpgradeStrategy
  */
 public interface RequestUpgradeStrategy {
-
-	/**
-	 * Upgrade to a WebSocket session and handle it with the given handler.
-	 * @param exchange the current exchange
-	 * @param webSocketHandler handler for the WebSocket session
-	 * @param subProtocol the selected sub-protocol got the handler
-	 * @return completion {@code Mono<Void>} to indicate the outcome of the
-	 * WebSocket session handling.
-	 * @deprecated as of 5.1 in favor of
-	 * {@link #upgrade(ServerWebExchange, WebSocketHandler, String, Supplier)}
-	 */
-	@Deprecated
-	default Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
-			@Nullable String subProtocol) {
-
-		return Mono.error(new UnsupportedOperationException());
-	}
 
 	/**
 	 * Upgrade to a WebSocket session and handle it with the given handler.
@@ -68,10 +52,7 @@ public interface RequestUpgradeStrategy {
 	 * WebSocket session handling.
 	 * @since 5.1
 	 */
-	default Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
-			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory) {
-
-		return upgrade(exchange, webSocketHandler, subProtocol);
-	}
+	Mono<Void> upgrade(ServerWebExchange exchange, WebSocketHandler webSocketHandler,
+			@Nullable String subProtocol, Supplier<HandshakeInfo> handshakeInfoFactory);
 
 }

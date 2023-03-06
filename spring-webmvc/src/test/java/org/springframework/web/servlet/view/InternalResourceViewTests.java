@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.web.servlet.View;
@@ -54,7 +53,7 @@ public class InternalResourceViewTests {
 
 	private static final String url = "forward-to";
 
-	private final HttpServletRequest request = mock(HttpServletRequest.class);
+	private final HttpServletRequest request = mock();
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -65,14 +64,6 @@ import org.springframework.util.CollectionUtils;
 public class EventListenerMethodProcessor
 		implements SmartInitializingSingleton, ApplicationContextAware, BeanFactoryPostProcessor {
 
-	/**
-	 * Boolean flag controlled by a {@code spring.spel.ignore} system property that instructs Spring to
-	 * ignore SpEL, i.e. to not initialize the SpEL infrastructure.
-	 * <p>The default is "false".
-	 */
-	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");
-
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	@Nullable
@@ -91,12 +82,7 @@ public class EventListenerMethodProcessor
 
 
 	public EventListenerMethodProcessor() {
-		if (shouldIgnoreSpel) {
-			this.evaluator = null;
-		}
-		else {
-			this.evaluator = new EventExpressionEvaluator();
-		}
+		this.evaluator = new EventExpressionEvaluator();
 	}
 
 	@Override
@@ -155,7 +141,7 @@ public class EventListenerMethodProcessor
 					}
 					catch (Throwable ex) {
 						throw new BeanInitializationException("Failed to process @EventListener " +
-								"annotation on bean with name '" + beanName + "'", ex);
+								"annotation on bean with name '" + beanName + "': " + ex.getMessage(), ex);
 					}
 				}
 			}
@@ -198,8 +184,8 @@ public class EventListenerMethodProcessor
 							Method methodToUse = AopUtils.selectInvocableMethod(method, context.getType(beanName));
 							ApplicationListener<?> applicationListener =
 									factory.createApplicationListener(beanName, targetType, methodToUse);
-							if (applicationListener instanceof ApplicationListenerMethodAdapter) {
-								((ApplicationListenerMethodAdapter) applicationListener).init(context, this.evaluator);
+							if (applicationListener instanceof ApplicationListenerMethodAdapter alma) {
+								alma.init(context, this.evaluator);
 							}
 							context.addApplicationListener(applicationListener);
 							break;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Factory for assertions on the selected handler or handler method.
@@ -68,8 +67,8 @@ public class HandlerResultMatchers {
 			Object handler = result.getHandler();
 			assertNotNull("No handler", handler);
 			Class<?> actual = handler.getClass();
-			if (handler instanceof HandlerMethod) {
-				actual = ((HandlerMethod) handler).getBeanType();
+			if (handler instanceof HandlerMethod handlerMethod) {
+				actual = handlerMethod.getBeanType();
 			}
 			assertEquals("Handler type", type, ClassUtils.getUserClass(actual));
 		};
@@ -101,12 +100,12 @@ public class HandlerResultMatchers {
 	 */
 	public ResultMatcher methodCall(Object obj) {
 		return result -> {
-			if (!(obj instanceof MethodInvocationInfo)) {
-				fail(String.format("The supplied object [%s] is not an instance of %s. " +
-						"Ensure that you invoke the handler method via MvcUriComponentsBuilder.on().",
-						obj, MethodInvocationInfo.class.getName()));
+			if (!(obj instanceof MethodInvocationInfo invocationInfo)) {
+				throw new AssertionError("""
+						The supplied object [%s] is not an instance of %s. Ensure \
+						that you invoke the handler method via MvcUriComponentsBuilder.on()."""
+							.formatted(obj, MethodInvocationInfo.class.getName()));
 			}
-			MethodInvocationInfo invocationInfo = (MethodInvocationInfo) obj;
 			Method expected = invocationInfo.getControllerMethod();
 			Method actual = getHandlerMethod(result).getMethod();
 			assertEquals("Handler method", expected, actual);

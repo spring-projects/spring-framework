@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public final class ReactiveTypeDescriptor {
 
 	/**
 	 * Return an empty-value instance for the underlying reactive or async type.
-	 * Use of this type implies {@link #supportsEmpty()} is true.
+	 * <p>Use of this type implies {@link #supportsEmpty()} is {@code true}.
 	 */
 	public Object getEmptyValue() {
 		Assert.state(this.emptyValueSupplier != null, "Empty values not supported");

@@ -23,9 +23,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -35,11 +32,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 public class AsyncResultTests {
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void asyncResultWithCallbackAndValue() throws Exception {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
-		ListenableFuture<String> future = AsyncResult.forValue(value);
-		future.addCallback(new ListenableFutureCallback<String>() {
+		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forValue(value);
+		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<String>() {
 			@Override
 			public void onSuccess(String result) {
 				values.add(result);
@@ -56,11 +54,12 @@ public class AsyncResultTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void asyncResultWithCallbackAndException() throws Exception {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);
-		ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
-		future.addCallback(new ListenableFutureCallback<String>() {
+		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
+		future.addCallback(new org.springframework.util.concurrent.ListenableFutureCallback<String>() {
 			@Override
 			public void onSuccess(String result) {
 				throw new AssertionError("Success callback not expected: " + result);
@@ -71,19 +70,20 @@ public class AsyncResultTests {
 			}
 		});
 		assertThat(values.iterator().next()).isSameAs(ex);
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				future::get)
+		assertThatExceptionOfType(ExecutionException.class)
+			.isThrownBy(future::get)
 			.withCause(ex);
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				future.completable()::get)
+		assertThatExceptionOfType(ExecutionException.class)
+			.isThrownBy(future.completable()::get)
 			.withCause(ex);
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void asyncResultWithSeparateCallbacksAndValue() throws Exception {
 		String value = "val";
 		final Set<String> values = new HashSet<>(1);
-		ListenableFuture<String> future = AsyncResult.forValue(value);
+		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forValue(value);
 		future.addCallback(values::add, ex -> new AssertionError("Failure callback not expected: " + ex));
 		assertThat(values.iterator().next()).isSameAs(value);
 		assertThat(future.get()).isSameAs(value);
@@ -92,17 +92,18 @@ public class AsyncResultTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void asyncResultWithSeparateCallbacksAndException() throws Exception {
 		IOException ex = new IOException();
 		final Set<Throwable> values = new HashSet<>(1);
-		ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
+		org.springframework.util.concurrent.ListenableFuture<String> future = AsyncResult.forExecutionException(ex);
 		future.addCallback(result -> new AssertionError("Success callback not expected: " + result), values::add);
 		assertThat(values.iterator().next()).isSameAs(ex);
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				future::get)
+		assertThatExceptionOfType(ExecutionException.class)
+			.isThrownBy(future::get)
 			.withCause(ex);
-		assertThatExceptionOfType(ExecutionException.class).isThrownBy(
-				future.completable()::get)
+		assertThatExceptionOfType(ExecutionException.class)
+			.isThrownBy(future.completable()::get)
 			.withCause(ex);
 	}
 

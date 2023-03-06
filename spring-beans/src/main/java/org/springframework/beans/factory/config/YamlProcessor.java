@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 4.1
  */
 public abstract class YamlProcessor {
@@ -85,7 +86,7 @@ public abstract class YamlProcessor {
 	 * </pre>
 	 * when mapped with
 	 * <pre class="code">
-	 * setDocumentMatchers(properties ->
+	 * setDocumentMatchers(properties -&gt;
 	 *     ("prod".equals(properties.getProperty("environment")) ? MatchStatus.FOUND : MatchStatus.NOT_FOUND));
 	 * </pre>
 	 * would end up as
@@ -96,7 +97,7 @@ public abstract class YamlProcessor {
 	 * </pre>
 	 */
 	public void setDocumentMatchers(DocumentMatcher... matchers) {
-		this.documentMatchers = Arrays.asList(matchers);
+		this.documentMatchers = List.of(matchers);
 	}
 
 	/**
@@ -128,10 +129,11 @@ public abstract class YamlProcessor {
 
 	/**
 	 * Set the supported types that can be loaded from YAML documents.
-	 * <p>If no supported types are configured, all types encountered in YAML
-	 * documents will be supported. If an unsupported type is encountered, an
-	 * {@link IllegalStateException} will be thrown when the corresponding YAML
-	 * node is processed.
+	 * <p>If no supported types are configured, only Java standard classes
+	 * (as defined in {@link org.yaml.snakeyaml.constructor.SafeConstructor})
+	 * encountered in YAML documents will be supported.
+	 * If an unsupported type is encountered, an {@link IllegalStateException}
+	 * will be thrown when the corresponding YAML node is processed.
 	 * @param supportedTypes the supported types, or an empty array to clear the
 	 * supported types
 	 * @since 5.1.16
@@ -144,7 +146,7 @@ public abstract class YamlProcessor {
 		else {
 			Assert.noNullElements(supportedTypes, "'supportedTypes' must not contain null elements");
 			this.supportedTypes = Arrays.stream(supportedTypes).map(Class::getName)
-					.collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
+					.collect(Collectors.toUnmodifiableSet());
 		}
 	}
 
@@ -153,7 +155,7 @@ public abstract class YamlProcessor {
 	 * resources. Each resource is parsed in turn and the documents inside checked against
 	 * the {@link #setDocumentMatchers(DocumentMatcher...) matchers}. If a document
 	 * matches it is passed into the callback, along with its representation as Properties.
-	 * Depending on the {@link #setResolutionMethod(ResolutionMethod)} not all of the
+	 * Depending on the {@link #setResolutionMethod(ResolutionMethod)} not all the
 	 * documents will be parsed.
 	 * @param callback a callback to delegate to once matching documents are found
 	 * @see #createYaml()
@@ -182,12 +184,9 @@ public abstract class YamlProcessor {
 	protected Yaml createYaml() {
 		LoaderOptions loaderOptions = new LoaderOptions();
 		loaderOptions.setAllowDuplicateKeys(false);
-
-		if (!this.supportedTypes.isEmpty()) {
-			return new Yaml(new FilteringConstructor(loaderOptions), new Representer(),
-					new DumperOptions(), loaderOptions);
-		}
-		return new Yaml(loaderOptions);
+		DumperOptions dumperOptions = new DumperOptions();
+		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(dumperOptions),
+				dumperOptions, loaderOptions);
 	}
 
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
@@ -227,17 +226,16 @@ public abstract class YamlProcessor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Map<String, Object> asMap(Object object) {
 		// YAML can have numbers as keys
 		Map<String, Object> result = new LinkedHashMap<>();
-		if (!(object instanceof Map)) {
+		if (!(object instanceof Map map)) {
 			// A document can be a text literal
 			result.put("document", object);
 			return result;
 		}
 
-		Map<Object, Object> map = (Map<Object, Object>) object;
 		map.forEach((key, value) -> {
 			if (value instanceof Map) {
 				value = asMap(value);
@@ -307,6 +305,7 @@ public abstract class YamlProcessor {
 		return result;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path) {
 		source.forEach((key, value) -> {
 			if (StringUtils.hasText(path)) {
@@ -320,16 +319,12 @@ public abstract class YamlProcessor {
 			if (value instanceof String) {
 				result.put(key, value);
 			}
-			else if (value instanceof Map) {
+			else if (value instanceof Map map) {
 				// Need a compound key
-				@SuppressWarnings("unchecked")
-				Map<String, Object> map = (Map<String, Object>) value;
 				buildFlattenedMap(result, map, key);
 			}
-			else if (value instanceof Collection) {
+			else if (value instanceof Collection collection) {
 				// Need a compound key
-				@SuppressWarnings("unchecked")
-				Collection<Object> collection = (Collection<Object>) value;
 				if (collection.isEmpty()) {
 					result.put(key, "");
 				}

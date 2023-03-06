@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.websocket.Decoder;
-import javax.websocket.Encoder;
-import javax.websocket.Endpoint;
-import javax.websocket.Extension;
-import javax.websocket.HandshakeResponse;
-import javax.websocket.server.HandshakeRequest;
-import javax.websocket.server.ServerEndpointConfig;
+import jakarta.websocket.Decoder;
+import jakarta.websocket.Encoder;
+import jakarta.websocket.Endpoint;
+import jakarta.websocket.Extension;
+import jakarta.websocket.HandshakeResponse;
+import jakarta.websocket.server.HandshakeRequest;
+import jakarta.websocket.server.ServerEndpointConfig;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -36,17 +36,17 @@ import org.springframework.util.Assert;
 import org.springframework.web.socket.handler.BeanCreatingHandlerProvider;
 
 /**
- * An implementation of {@link javax.websocket.server.ServerEndpointConfig} for use in
+ * An implementation of {@link jakarta.websocket.server.ServerEndpointConfig} for use in
  * Spring-based applications. A {@link ServerEndpointRegistration} bean is detected by
- * {@link ServerEndpointExporter} and registered with a Java WebSocket runtime at startup.
+ * {@link ServerEndpointExporter} and registered with a Jakarta WebSocket runtime at startup.
  *
- * <p>Class constructors accept a singleton {@link javax.websocket.Endpoint} instance
+ * <p>Class constructors accept a singleton {@link jakarta.websocket.Endpoint} instance
  * or an Endpoint specified by type {@link Class}. When specified by type, the endpoint
  * will be instantiated and initialized through the Spring ApplicationContext before
  * each client WebSocket connection.
  *
  * <p>This class also extends
- * {@link javax.websocket.server.ServerEndpointConfig.Configurator} to make it easier
+ * {@link jakarta.websocket.server.ServerEndpointConfig.Configurator} to make it easier
  * to override methods for customizing the handshake process.
  *
  * @author Rossen Stoyanchev
@@ -78,7 +78,7 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	/**
 	 * Create a new {@link ServerEndpointRegistration} instance from an
-	 * {@code javax.websocket.Endpoint} instance.
+	 * {@code jakarta.websocket.Endpoint} instance.
 	 * @param path the endpoint path
 	 * @param endpoint the endpoint instance
 	 */
@@ -92,7 +92,7 @@ public class ServerEndpointRegistration extends ServerEndpointConfig.Configurato
 
 	/**
 	 * Create a new {@link ServerEndpointRegistration} instance from an
-	 * {@code javax.websocket.Endpoint} class.
+	 * {@code jakarta.websocket.Endpoint} class.
 	 * @param path the endpoint path
 	 * @param endpointClass the endpoint class
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,15 +63,28 @@ public final class LogDelegateFactory {
 	}
 
 	/**
-	 * Create a "hidden" logger whose name is intentionally prefixed with "_"
-	 * because its output is either too verbose or otherwise deemed as optional
-	 * or unnecessary to see at any log level by default under the normal package
-	 * based log hierarchy.
+	 * Create a "hidden" logger with a category name prefixed with "_", thus
+	 * precluding it from being enabled together with other log categories from
+	 * the same package. This is useful for specialized output that is either
+	 * too verbose or otherwise optional or unnecessary to see all the time.
 	 * @param clazz the class for which to create a logger
-	 * @return a logger for the hidden category ("_" + fully-qualified class name)
+	 * @return a Log with the category {@code "_" + fully-qualified class name}
 	 */
 	public static Log getHiddenLog(Class<?> clazz) {
-		return LogFactory.getLog("_" + clazz.getName());
+		return getHiddenLog(clazz.getName());
+	}
+
+	/**
+	 * Create a "hidden" logger with a category name prefixed with "_", thus
+	 * precluding it from being enabled together with other log categories from
+	 * the same package. This is useful for specialized output that is either
+	 * too verbose or otherwise optional or unnecessary to see all the time.
+	 * @param category the log category to use
+	 * @return a Log with the category {@code "_" + category}
+	 * @since 5.3.5
+	 */
+	public static Log getHiddenLog(String category) {
+		return LogFactory.getLog("_" + category);
 	}
 
 }

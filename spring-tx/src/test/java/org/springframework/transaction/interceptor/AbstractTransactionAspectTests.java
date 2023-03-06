@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public abstract class AbstractTransactionAspectTests {
 
 	@Test
 	public void noTransaction() throws Exception {
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = mock();
 
 		TestBean tb = new TestBean();
 		TransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -103,8 +103,8 @@ public abstract class AbstractTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(getNameMethod, txatt);
 
-		TransactionStatus status = mock(TransactionStatus.class);
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		TransactionStatus status = mock();
+		PlatformTransactionManager ptm = mock();
 		// expect a transaction
 		given(ptm.getTransaction(txatt)).willReturn(status);
 
@@ -175,8 +175,8 @@ public abstract class AbstractTransactionAspectTests {
 		MapTransactionAttributeSource tas2 = new MapTransactionAttributeSource();
 		tas2.register(setNameMethod, txatt);
 
-		TransactionStatus status = mock(TransactionStatus.class);
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		TransactionStatus status = mock();
+		PlatformTransactionManager ptm = mock();
 		// expect a transaction
 		given(ptm.getTransaction(txatt)).willReturn(status);
 
@@ -202,8 +202,8 @@ public abstract class AbstractTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(getNameMethod, txatt);
 
-		TransactionStatus status = mock(TransactionStatus.class);
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		TransactionStatus status = mock();
+		PlatformTransactionManager ptm = mock();
 		// expect a transaction
 		given(ptm.getTransaction(txatt)).willReturn(status);
 
@@ -225,8 +225,8 @@ public abstract class AbstractTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(exceptionalMethod, txatt);
 
-		TransactionStatus status = mock(TransactionStatus.class);
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		TransactionStatus status = mock();
+		PlatformTransactionManager ptm = mock();
 		// Expect a transaction
 		given(ptm.getTransaction(txatt)).willReturn(status);
 
@@ -275,10 +275,10 @@ public abstract class AbstractTransactionAspectTests {
 		tas.register(outerMethod, outerTxatt);
 		tas.register(innerMethod, innerTxatt);
 
-		TransactionStatus outerStatus = mock(TransactionStatus.class);
-		TransactionStatus innerStatus = mock(TransactionStatus.class);
+		TransactionStatus outerStatus = mock();
+		TransactionStatus innerStatus = mock();
 
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = mock();
 		// Expect a transaction
 		given(ptm.getTransaction(outerTxatt)).willReturn(outerStatus);
 		given(ptm.getTransaction(innerTxatt)).willReturn(innerStatus);
@@ -383,8 +383,8 @@ public abstract class AbstractTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = mock(TransactionStatus.class);
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		TransactionStatus status = mock();
+		PlatformTransactionManager ptm = mock();
 		// Gets additional call(s) from TransactionControl
 
 		given(ptm.getTransaction(txatt)).willReturn(status);
@@ -436,8 +436,8 @@ public abstract class AbstractTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		TransactionStatus status = mock(TransactionStatus.class);
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		TransactionStatus status = mock();
+		PlatformTransactionManager ptm = mock();
 
 		given(ptm.getTransaction(txatt)).willReturn(status);
 
@@ -471,7 +471,7 @@ public abstract class AbstractTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = mock();
 		// Expect a transaction
 		CannotCreateTransactionException ex = new CannotCreateTransactionException("foobar", null);
 		given(ptm.getTransaction(txatt)).willThrow(ex);
@@ -509,9 +509,9 @@ public abstract class AbstractTransactionAspectTests {
 		// Method m2 = getNameMethod;
 		// No attributes for m2
 
-		PlatformTransactionManager ptm = mock(PlatformTransactionManager.class);
+		PlatformTransactionManager ptm = mock();
 
-		TransactionStatus status = mock(TransactionStatus.class);
+		TransactionStatus status = mock();
 		given(ptm.getTransaction(txatt)).willReturn(status);
 		UnexpectedRollbackException ex = new UnexpectedRollbackException("foobar", null);
 		willThrow(ex).given(ptm).commit(status);

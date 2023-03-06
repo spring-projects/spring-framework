@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class StompHeaderAccessorTests {
 	}
 
 	@Test
-	public void createWithUnubscribeNativeHeaders() {
+	public void createWithUnsubscribeNativeHeaders() {
 		MultiValueMap<String, String> extHeaders = new LinkedMultiValueMap<>();
 		extHeaders.add(StompHeaderAccessor.STOMP_ID_HEADER, "s1");
 
@@ -123,7 +123,7 @@ public class StompHeaderAccessorTests {
 
 		Map<String, List<String>> actual = headers.toNativeHeaderMap();
 
-		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual).hasSize(2);
 		assertThat(actual.get(StompHeaderAccessor.STOMP_ID_HEADER).get(0)).isEqualTo("s1");
 		assertThat(actual.get(StompHeaderAccessor.STOMP_DESTINATION_HEADER).get(0)).isEqualTo("/d");
 	}
@@ -135,7 +135,7 @@ public class StompHeaderAccessorTests {
 
 		Map<String, List<String>> actual = headers.toNativeHeaderMap();
 
-		assertThat(actual.size()).isEqualTo(1);
+		assertThat(actual).hasSize(1);
 		assertThat(actual.get(StompHeaderAccessor.STOMP_ID_HEADER).get(0)).isEqualTo("s1");
 	}
 
@@ -193,7 +193,7 @@ public class StompHeaderAccessorTests {
 		headers.setNativeHeader("accountId", accountId.toLowerCase());
 
 		Map<String, List<String>> actual = headers.toNativeHeaderMap();
-		assertThat(actual.size()).isEqualTo(3);
+		assertThat(actual).hasSize(3);
 
 		assertThat(actual.get(StompHeaderAccessor.STOMP_ID_HEADER).get(0)).isEqualTo("s1");
 		assertThat(actual.get(StompHeaderAccessor.STOMP_DESTINATION_HEADER).get(0)).isEqualTo("/d");
@@ -241,7 +241,7 @@ public class StompHeaderAccessorTests {
 
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < 80; i++) {
-			sb.append("a");
+			sb.append('a');
 		}
 		final String payload = sb.toString() + " > 80";
 		actual = accessor.getShortLogMessage(payload.getBytes(StandardCharsets.UTF_8));

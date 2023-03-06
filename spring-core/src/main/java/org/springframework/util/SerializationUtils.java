@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import org.springframework.lang.Nullable;
 
 /**
- * Static utilities for serialization and deserialization.
+ * Static utilities for serialization and deserialization using
+ * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/serialization/"
+ * target="_blank">Java Object Serialization</a>.
+ *
+ * <p><strong>WARNING</strong>: These utilities should be used with caution. See
+ * <a href="https://www.oracle.com/java/technologies/javase/seccodeguide.html#8"
+ * target="_blank">Secure Coding Guidelines for the Java Programming Language</a>
+ * for details.
  *
  * @author Dave Syer
+ * @author Loïc Ledoyen
+ * @author Sam Brannen
  * @since 3.0.5
  */
 public abstract class SerializationUtils {
@@ -57,7 +67,13 @@ public abstract class SerializationUtils {
 	 * Deserialize the byte array into an object.
 	 * @param bytes a serialized object
 	 * @return the result of deserializing the bytes
+	 * @deprecated This utility uses Java Object Serialization, which allows
+	 * arbitrary code to be run and is known for being the source of many Remote
+	 * Code Execution (RCE) vulnerabilities.
+	 * <p>Prefer the use of an external tool (that serializes to JSON, XML, or
+	 * any other format) which is regularly checked and updated for not allowing RCE.
 	 */
+	@Deprecated
 	@Nullable
 	public static Object deserialize(@Nullable byte[] bytes) {
 		if (bytes == null) {
@@ -72,6 +88,18 @@ public abstract class SerializationUtils {
 		catch (ClassNotFoundException ex) {
 			throw new IllegalStateException("Failed to deserialize object type", ex);
 		}
+	}
+
+	/**
+	 * Clone the given object using Java Object Serialization.
+	 * @param object the object to clone
+	 * @param <T> the type of the object to clone
+	 * @return a clone (deep-copy) of the given object
+	 * @since 6.0
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Serializable> T clone(T object) {
+		return (T) SerializationUtils.deserialize(SerializationUtils.serialize(object));
 	}
 
 }

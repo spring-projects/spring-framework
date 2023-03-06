@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 	}
 
 	private void updateExecutorInterceptorsFor(ChannelInterceptor interceptor) {
-		if (interceptor instanceof ExecutorChannelInterceptor) {
-			this.executorInterceptors.add((ExecutorChannelInterceptor) interceptor);
+		if (interceptor instanceof ExecutorChannelInterceptor executorChannelInterceptor) {
+			this.executorInterceptors.add(executorChannelInterceptor);
 		}
 	}
 
@@ -146,8 +146,8 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 			}
 			catch (Exception ex) {
 				triggerAfterMessageHandled(message, ex);
-				if (ex instanceof MessagingException) {
-					throw (MessagingException) ex;
+				if (ex instanceof MessagingException messagingException) {
+					throw messagingException;
 				}
 				String description = "Failed to handle " + message + " to " + this + " in " + this.messageHandler;
 				throw new MessageDeliveryException(message, description, ex);

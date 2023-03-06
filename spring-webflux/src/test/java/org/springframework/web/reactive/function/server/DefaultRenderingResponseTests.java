@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -37,6 +38,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.result.view.AbstractView;
+import org.springframework.web.reactive.result.view.RedirectView;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.ViewResolverSupport;
@@ -47,8 +49,10 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Arjen Poutsma
@@ -137,15 +141,15 @@ public class DefaultRenderingResponseTests {
 		Mono<RenderingResponse> result = RenderingResponse.create("view").modelAttributes(model).build();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
-		ViewResolver viewResolver = mock(ViewResolver.class);
-		View view = mock(View.class);
+		ViewResolver viewResolver = mock();
+		View view = mock();
 		given(viewResolver.resolveViewName("view", Locale.ENGLISH)).willReturn(Mono.just(view));
 		given(view.render(model, null, exchange)).willReturn(Mono.empty());
 
 		List<ViewResolver> viewResolvers = new ArrayList<>();
 		viewResolvers.add(viewResolver);
 
-		HandlerStrategies mockConfig = mock(HandlerStrategies.class);
+		HandlerStrategies mockConfig = mock();
 		given(mockConfig.viewResolvers()).willReturn(viewResolvers);
 
 		StepVerifier.create(result)
@@ -156,18 +160,53 @@ public class DefaultRenderingResponseTests {
 	}
 
 	@Test
+	public void writeTo() {
+		Map<String, Object> model = Collections.singletonMap("foo", "bar");
+		RenderingResponse renderingResponse = RenderingResponse.create("view")
+				.status(HttpStatus.FOUND)
+				.modelAttributes(model)
+				.build().block(Duration.of(5, ChronoUnit.MILLIS));
+		assertThat(renderingResponse).isNotNull();
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
+		MediaType contentType = MediaType.APPLICATION_PDF;
+		exchange.getResponse().getHeaders().setContentType(contentType);
+
+		ViewResolver viewResolver = mock();
+		RedirectView view = mock();
+		given(viewResolver.resolveViewName(eq("view"), any())).willReturn(Mono.just(view));
+		given(view.render(model, contentType, exchange)).willReturn(Mono.empty());
+
+		List<ViewResolver> viewResolvers = new ArrayList<>();
+		viewResolvers.add(viewResolver);
+
+		HandlerStrategies mockConfig = mock();
+		given(mockConfig.viewResolvers()).willReturn(viewResolvers);
+
+		ServerResponse.Context context = mock();
+		given(context.viewResolvers()).willReturn(viewResolvers);
+
+		Mono<Void> result = renderingResponse.writeTo(exchange, context);
+		StepVerifier.create(result)
+				.expectComplete()
+				.verify();
+
+		verify(view).setStatusCode(HttpStatus.FOUND);
+	}
+
+	@Test
 	public void defaultContentType() {
 		Mono<RenderingResponse> result = RenderingResponse.create("view").build();
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("http://localhost"));
 		TestView view = new TestView();
-		ViewResolver viewResolver = mock(ViewResolver.class);
+		ViewResolver viewResolver = mock();
 		given(viewResolver.resolveViewName(any(), any())).willReturn(Mono.just(view));
 
 		List<ViewResolver> viewResolvers = new ArrayList<>();
 		viewResolvers.add(viewResolver);
 
-		ServerResponse.Context context = mock(ServerResponse.Context.class);
+		ServerResponse.Context context = mock();
 		given(context.viewResolvers()).willReturn(viewResolvers);
 
 		StepVerifier.create(result.flatMap(response -> response.writeTo(exchange, context)))

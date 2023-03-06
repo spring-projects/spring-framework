@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,14 +172,13 @@ public class BeanDefinitionVisitor {
 	@SuppressWarnings("rawtypes")
 	@Nullable
 	protected Object resolveValue(@Nullable Object value) {
-		if (value instanceof BeanDefinition) {
-			visitBeanDefinition((BeanDefinition) value);
+		if (value instanceof BeanDefinition beanDef) {
+			visitBeanDefinition(beanDef);
 		}
-		else if (value instanceof BeanDefinitionHolder) {
-			visitBeanDefinition(((BeanDefinitionHolder) value).getBeanDefinition());
+		else if (value instanceof BeanDefinitionHolder beanDefHolder) {
+			visitBeanDefinition(beanDefHolder.getBeanDefinition());
 		}
-		else if (value instanceof RuntimeBeanReference) {
-			RuntimeBeanReference ref = (RuntimeBeanReference) value;
+		else if (value instanceof RuntimeBeanReference ref) {
 			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (newBeanName == null) {
 				return null;
@@ -188,8 +187,7 @@ public class BeanDefinitionVisitor {
 				return new RuntimeBeanReference(newBeanName);
 			}
 		}
-		else if (value instanceof RuntimeBeanNameReference) {
-			RuntimeBeanNameReference ref = (RuntimeBeanNameReference) value;
+		else if (value instanceof RuntimeBeanNameReference ref) {
 			String newBeanName = resolveStringValue(ref.getBeanName());
 			if (newBeanName == null) {
 				return null;
@@ -198,28 +196,27 @@ public class BeanDefinitionVisitor {
 				return new RuntimeBeanNameReference(newBeanName);
 			}
 		}
-		else if (value instanceof Object[]) {
-			visitArray((Object[]) value);
+		else if (value instanceof Object[] array) {
+			visitArray(array);
 		}
-		else if (value instanceof List) {
-			visitList((List) value);
+		else if (value instanceof List list) {
+			visitList(list);
 		}
-		else if (value instanceof Set) {
-			visitSet((Set) value);
+		else if (value instanceof Set set) {
+			visitSet(set);
 		}
-		else if (value instanceof Map) {
-			visitMap((Map) value);
+		else if (value instanceof Map map) {
+			visitMap(map);
 		}
-		else if (value instanceof TypedStringValue) {
-			TypedStringValue typedStringValue = (TypedStringValue) value;
+		else if (value instanceof TypedStringValue typedStringValue) {
 			String stringValue = typedStringValue.getValue();
 			if (stringValue != null) {
 				String visitedString = resolveStringValue(stringValue);
 				typedStringValue.setValue(visitedString);
 			}
 		}
-		else if (value instanceof String) {
-			return resolveStringValue((String) value);
+		else if (value instanceof String strValue) {
+			return resolveStringValue(strValue);
 		}
 		return value;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public class PathVariableMethodArgumentResolverTests {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
 		assertThat(pathVars).isNotNull();
-		assertThat(pathVars.size()).isEqualTo(1);
+		assertThat(pathVars).hasSize(1);
 		assertThat(pathVars.get("name")).isEqualTo("value");
 	}
 
@@ -114,7 +114,7 @@ public class PathVariableMethodArgumentResolverTests {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
 		assertThat(pathVars).isNotNull();
-		assertThat(pathVars.size()).isEqualTo(1);
+		assertThat(pathVars).hasSize(1);
 		assertThat(pathVars.get("name")).isEqualTo("value");
 	}
 
@@ -136,7 +136,7 @@ public class PathVariableMethodArgumentResolverTests {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
 		assertThat(pathVars).isNotNull();
-		assertThat(pathVars.size()).isEqualTo(1);
+		assertThat(pathVars).hasSize(1);
 		assertThat(pathVars.get("name")).isEqualTo(Optional.of("value"));
 	}
 
@@ -155,7 +155,7 @@ public class PathVariableMethodArgumentResolverTests {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
 		assertThat(pathVars).isNotNull();
-		assertThat(pathVars.size()).isEqualTo(2);
+		assertThat(pathVars).hasSize(2);
 		assertThat(pathVars.get("name")).isEqualTo("value");
 		assertThat(pathVars.get("oldName")).isEqualTo("oldValue");
 	}

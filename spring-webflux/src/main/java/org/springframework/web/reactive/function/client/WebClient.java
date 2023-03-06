@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,21 +26,26 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.ObservationConvention;
+import io.micrometer.observation.ObservationRegistry;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -184,13 +189,6 @@ public interface WebClient {
 		Builder baseUrl(String baseUrl);
 
 		/**
-		 * Configure default URI variable values that will be used when expanding
-		 * URI templates using a {@link Map}.
-		 * @param defaultUriVariables the default values to use
-		 * @see #baseUrl(String)
-		 * @see #uriBuilderFactory(UriBuilderFactory)
-		 */
-		/**
 		 * Configure default URL variable values to use when expanding URI
 		 * templates with a {@link Map}. Effectively a shortcut for:
 		 * <p>
@@ -260,6 +258,20 @@ public interface WebClient {
 		Builder defaultRequest(Consumer<RequestHeadersSpec<?>> defaultRequest);
 
 		/**
+		 * Register a default
+		 * {@link ResponseSpec#onStatus(Predicate, Function) status handler} to
+		 * apply to every response. Such default handlers are applied in the
+		 * order in which they are registered, and after any others that are
+		 * registered for a specific response.
+		 * @param statusPredicate to match responses with
+		 * @param exceptionFunction to map the response to an error signal
+		 * @return this builder
+		 * @since 6.0
+		 */
+		Builder defaultStatusHandler(Predicate<HttpStatusCode> statusPredicate,
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
+
+		/**
 		 * Add the given filter to the end of the filter chain.
 		 * @param filter the filter to be added to the chain
 		 */
@@ -326,6 +338,23 @@ public interface WebClient {
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
 
 		/**
+		 * Provide an {@link ObservationRegistry} to use for recording
+		 * observations for HTTP client calls.
+		 * @param observationRegistry the observation registry to use
+		 * @since 6.0
+		 */
+		Builder observationRegistry(ObservationRegistry observationRegistry);
+
+		/**
+		 * Provide an {@link ObservationConvention} to use for collecting
+		 * metadata for the request observation. Will use {@link DefaultClientRequestObservationConvention}
+		 * if none provided.
+		 * @param observationConvention the observation convention to use
+		 * @since 6.0
+		 */
+		Builder observationConvention(ClientRequestObservationConvention observationConvention);
+
+		/**
 		 * Apply the given {@code Consumer} to this builder instance.
 		 * <p>This can be useful for applying pre-packaged customizations.
 		 * @param builderConsumer the consumer to apply
@@ -338,7 +367,7 @@ public interface WebClient {
 		Builder clone();
 
 		/**
-		 * Builder the {@link WebClient} instance.
+		 * Build the {@link WebClient} instance.
 		 */
 		WebClient build();
 	}
@@ -471,6 +500,17 @@ public interface WebClient {
 		S attributes(Consumer<Map<String, Object>> attributesConsumer);
 
 		/**
+		 * Provide a function to populate the Reactor {@code Context}.
+		 * @param contextModifier the function to modify the context with
+		 * @since 5.3.1
+		 * @deprecated in 5.3.2 to be removed soon after; this method cannot
+		 * provide context to downstream (nested or subsequent) requests and is
+		 * of limited value.
+		 */
+		@Deprecated
+		S context(Function<Context, Context> contextModifier);
+
+		/**
 		 * Callback for access to the {@link ClientHttpRequest} that in turn
 		 * provides access to the native request of the underlying HTTP library.
 		 * This could be useful for setting advanced, per-request options that
@@ -512,18 +552,15 @@ public interface WebClient {
 		 * scenarios, for example to decode the response differently depending
 		 * on the response status:
 		 * <p><pre>
-		 * Mono&lt;Object&gt; entityMono = client.get()
+		 * Mono&lt;Person&gt; entityMono = client.get()
 		 *     .uri("/persons/1")
 		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .exchangeToMono(response -> {
+		 *     .exchangeToMono(response -&gt; {
 		 *         if (response.statusCode().equals(HttpStatus.OK)) {
 		 *             return response.bodyToMono(Person.class);
 		 *         }
-		 *         else if (response.statusCode().is4xxClientError()) {
-		 *             return response.bodyToMono(ErrorContainer.class);
-		 *         }
 		 *         else {
-		 *             return Mono.error(response.createException());
+		 *             return response.createError();
 		 *         }
 		 *     });
 		 * </pre>
@@ -544,18 +581,15 @@ public interface WebClient {
 		 * scenarios, for example to decode the response differently depending
 		 * on the response status:
 		 * <p><pre>
-		 * Mono&lt;Object&gt; entityMono = client.get()
+		 * Flux&lt;Person&gt; entityMono = client.get()
 		 *     .uri("/persons")
 		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .exchangeToFlux(response -> {
+		 *     .exchangeToFlux(response -&gt; {
 		 *         if (response.statusCode().equals(HttpStatus.OK)) {
 		 *             return response.bodyToFlux(Person.class);
 		 *         }
-		 *         else if (response.statusCode().is4xxClientError()) {
-		 *             return response.bodyToMono(ErrorContainer.class).flux();
-		 *         }
 		 *         else {
-		 *             return Flux.error(response.createException());
+		 *             return response.createError().flux();
 		 *         }
 		 *     });
 		 * </pre>
@@ -744,7 +778,7 @@ public interface WebClient {
 		 * Provide a function to map specific error status codes to an error
 		 * signal to be propagated downstream instead of the response.
 		 * <p>By default, if there are no matching status handlers, responses
-		 * with status codes >= 400 are mapped to
+		 * with status codes &gt;= 400 are mapped to
 		 * {@link WebClientResponseException} which is created with
 		 * {@link ClientResponse#createException()}.
 		 * <p>To suppress the treatment of a status code as an error and process
@@ -759,14 +793,14 @@ public interface WebClient {
 		 *     .retrieve()
 		 *     .bodyToMono(Account.class)
 		 *     .onErrorResume(WebClientResponseException.class,
-		 *          ex -> ex.getRawStatusCode() == 404 ? Mono.empty() : Mono.error(ex));
+		 *          ex -&gt; ex.getRawStatusCode() == 404 ? Mono.empty() : Mono.error(ex));
 		 * </pre>
 		 * @param statusPredicate to match responses with
 		 * @param exceptionFunction to map the response to an error signal
 		 * @return this builder
 		 * @see ClientResponse#createException()
 		 */
-		ResponseSpec onStatus(Predicate<HttpStatus> statusPredicate,
+		ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate,
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**
@@ -781,103 +815,125 @@ public interface WebClient {
 				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction);
 
 		/**
-		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
-		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
-		 * with {@link #onStatus(Predicate, Function)}.
-		 * @param elementClass the expected response body element class
-		 * @param <T> response body type
-		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
-		 * status code is 4xx or 5xx
+		 * Decode the body to the given target type. For an error response (status
+		 * code of 4xx or 5xx), the {@code Mono} emits a {@link WebClientException}.
+		 * Use {@link #onStatus(Predicate, Function)} to customize error response
+		 * handling.
+		 * @param elementClass the type to decode to
+		 * @param <T> the target body type
+		 * @return the decoded body
 		 */
 		<T> Mono<T> bodyToMono(Class<T> elementClass);
 
 		/**
-		 * Extract the body to a {@code Mono}. By default, if the response has status code 4xx or
-		 * 5xx, the {@code Mono} will contain a {@link WebClientException}. This can be overridden
-		 * with {@link #onStatus(Predicate, Function)}.
-		 * @param elementTypeRef a type reference describing the expected response body element type
-		 * @param <T> response body type
-		 * @return a mono containing the body, or a {@link WebClientResponseException} if the
-		 * status code is 4xx or 5xx
+		 * Variant of {@link #bodyToMono(Class)} with a {@link ParameterizedTypeReference}.
+		 * @param elementTypeRef the type to decode to
+		 * @param <T> the target body type
+		 * @return the decoded body
 		 */
 		<T> Mono<T> bodyToMono(ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
-		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
-		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
-         * with {@link #onStatus(Predicate, Function)}.
-		 * @param elementClass the class of elements in the response
-		 * @param <T> the type of elements in the response
-		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
-		 * status code is 4xx or 5xx
+		 * Decode the body to a {@link Flux} with elements of the given type.
+		 * For an error response (status code of 4xx or 5xx), the {@code Mono}
+		 * emits a {@link WebClientException}. Use {@link #onStatus(Predicate, Function)}
+		 * to customize error response handling.
+		 * @param elementClass the type of element to decode to
+		 * @param <T> the body element type
+		 * @return the decoded body
 		 */
 		<T> Flux<T> bodyToFlux(Class<T> elementClass);
 
 		/**
-		 * Extract the body to a {@code Flux}. By default, if the response has status code 4xx or
-		 * 5xx, the {@code Flux} will contain a {@link WebClientException}. This can be overridden
-         * with {@link #onStatus(Predicate, Function)}.
-		 * @param elementTypeRef a type reference describing the expected response body element type
-		 * @param <T> the type of elements in the response
-		 * @return a flux containing the body, or a {@link WebClientResponseException} if the
-		 * status code is 4xx or 5xx
+		 * Variant of {@link #bodyToMono(Class)} with a {@link ParameterizedTypeReference}.
+		 * @param elementTypeRef the type of element to decode to
+		 * @param <T> the body element type
+		 * @return the decoded body
 		 */
 		<T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
-		 * Return the response as a delayed {@code ResponseEntity}. By default, if the response has
-		 * status code 4xx or 5xx, the {@code Mono} will contain a {@link WebClientException}. This
-		 * can be overridden with {@link #onStatus(Predicate, Function)}.
+		 * Return a {@code ResponseEntity} with the body decoded to an Object of
+		 * the given type. For an error response (status code of 4xx or 5xx), the
+		 * {@code Mono} emits a {@link WebClientException}. Use
+		 * {@link #onStatus(Predicate, Function)} to customize error response handling.
 		 * @param bodyClass the expected response body type
 		 * @param <T> response body type
-		 * @return {@code Mono} with the {@code ResponseEntity}
+		 * @return the {@code ResponseEntity} with the decoded body
 		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass);
 
 		/**
-		 * Return the response as a delayed {@code ResponseEntity}. By default, if the response has
-		 * status code 4xx or 5xx, the {@code Mono} will contain a {@link WebClientException}. This
-		 * can be overridden with {@link #onStatus(Predicate, Function)}.
-		 * @param bodyTypeReference a type reference describing the expected response body type
-		 * @param <T> response body type
-		 * @return {@code Mono} with the {@code ResponseEntity}
+		 * Variant of {@link #bodyToMono(Class)} with a {@link ParameterizedTypeReference}.
+		 * @param bodyTypeReference the expected response body type
+		 * @param <T> the response body type
+		 * @return the {@code ResponseEntity} with the decoded body
 		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference);
 
 		/**
-		 * Return the response as a delayed list of {@code ResponseEntity}s. By default, if the
-		 * response has status code 4xx or 5xx, the {@code Mono} will contain a
-		 * {@link WebClientException}. This can be overridden with
-		 * {@link #onStatus(Predicate, Function)}.
-		 * @param elementClass the expected response body list element class
-		 * @param <T> the type of elements in the list
-		 * @return {@code Mono} with the list of {@code ResponseEntity}s
+		 * Return a {@code ResponseEntity} with the body decoded to a {@code List}
+		 * of elements of the given type. For an error response (status code of
+		 * 4xx or 5xx), the {@code Mono} emits a {@link WebClientException}.
+		 * Use {@link #onStatus(Predicate, Function)} to customize error response
+		 * handling.
+		 * @param elementClass the type of element to decode the target Flux to
+		 * @param <T> the body element type
+		 * @return the {@code ResponseEntity}
 		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(Class<T> elementClass);
 
 		/**
-		 * Return the response as a delayed list of {@code ResponseEntity}s. By default, if the
-		 * response has status code 4xx or 5xx, the {@code Mono} will contain a
-		 * {@link WebClientException}. This can be overridden with
-		 * {@link #onStatus(Predicate, Function)}.
-		 * @param elementTypeRef the expected response body list element reference type
-		 * @param <T> the type of elements in the list
-		 * @return {@code Mono} with the list of {@code ResponseEntity}s
+		 * Variant of {@link #toEntity(Class)} with a {@link ParameterizedTypeReference}.
+		 * @param elementTypeRef the type of element to decode the target Flux to
+		 * @param <T> the body element type
+		 * @return the {@code ResponseEntity}
 		 * @since 5.2
 		 */
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
-		 * Return the response as a delayed {@code ResponseEntity} containing status and headers,
-		 * but no body.  By default, if the response has status code 4xx or 5xx, the {@code Mono}
-		 * will contain a {@link WebClientException}. This can be overridden with
-		 * {@link #onStatus(Predicate, Function)}.
-		 * Calling this method will {@linkplain ClientResponse#releaseBody() release} the body of
-		 * the response.
-		 * @return {@code Mono} with the bodiless {@code ResponseEntity}
+		 * Return a {@code ResponseEntity} with the body decoded to a {@code Flux}
+		 * of elements of the given type. For an error response (status code of
+		 * 4xx or 5xx), the {@code Mono} emits a {@link WebClientException}.
+		 * Use {@link #onStatus(Predicate, Function)} to customize error response
+		 * handling.
+		 * <p><strong>Note:</strong> The {@code Flux} representing the body must
+		 * be subscribed to or else associated resources will not be released.
+		 * @param elementType the type of element to decode the target Flux to
+		 * @param <T> the body element type
+		 * @return the {@code ResponseEntity}
+		 * @since 5.3.1
+		 */
+		<T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(Class<T> elementType);
+
+		/**
+		 * Variant of {@link #toEntityFlux(Class)} with a {@link ParameterizedTypeReference}.
+		 * @param elementTypeReference the type of element to decode the target Flux to
+		 * @param <T> the body element type
+		 * @return the {@code ResponseEntity}
+		 * @since 5.3.1
+		 */
+		<T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(ParameterizedTypeReference<T> elementTypeReference);
+
+		/**
+		 * Variant of {@link #toEntityFlux(Class)} with a {@link BodyExtractor}.
+		 * @param bodyExtractor the {@code BodyExtractor} that reads from the response
+		 * @param <T> the body element type
+		 * @return the {@code ResponseEntity}
+		 * @since 5.3.2
+		 */
+		<T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(BodyExtractor<Flux<T>, ? super ClientHttpResponse> bodyExtractor);
+
+		/**
+		 * Return a {@code ResponseEntity} without a body. For an error response
+		 * (status code of 4xx or 5xx), the {@code Mono} emits a
+		 * {@link WebClientException}. Use {@link #onStatus(Predicate, Function)}
+		 * to customize error response handling.
+		 * @return the {@code ResponseEntity}
 		 * @since 5.2
 		 */
 		Mono<ResponseEntity<Void>> toBodilessEntity();

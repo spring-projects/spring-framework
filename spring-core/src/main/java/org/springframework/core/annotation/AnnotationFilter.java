@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,10 +74,10 @@ public interface AnnotationFilter {
 	/**
 	 * {@link AnnotationFilter} that never matches and can be used when no
 	 * filtering is needed (allowing for any annotation types to be present).
+	 * @see #PLAIN
 	 * @deprecated as of 5.2.6 since the {@link MergedAnnotations} model
 	 * always ignores lang annotations according to the {@link #PLAIN} filter
 	 * (for efficiency reasons)
-	 * @see #PLAIN
 	 */
 	@Deprecated
 	AnnotationFilter NONE = new AnnotationFilter() {

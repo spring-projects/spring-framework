@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.config;
 
 import java.beans.PropertyEditor;
-import java.security.AccessControlContext;
 
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
@@ -148,7 +147,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	BeanExpressionResolver getBeanExpressionResolver();
 
 	/**
-	 * Specify a Spring 3.0 ConversionService to use for converting
+	 * Specify a {@link ConversionService} to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 * @since 3.0
 	 */
@@ -290,13 +289,6 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * @since 5.3
 	 */
 	ApplicationStartup getApplicationStartup();
-
-	/**
-	 * Provides a security access control context relevant to this factory.
-	 * @return the applicable AccessControlContext (never {@code null})
-	 * @since 3.0
-	 */
-	AccessControlContext getAccessControlContext();
 
 	/**
 	 * Copy all relevant configuration from the given other factory.

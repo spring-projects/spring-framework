@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors
+ * Copyright 2002-2021 the original author or authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,10 @@ inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<ou
  * @author Mario Arias
  * @since 5.0
  */
+@Suppress("DEPRECATION")
+// TODO Replace by the vararg variant in Spring Framework 6
 inline fun <reified T> JdbcOperations.queryForObject(sql: String, args: Array<out Any>): T? =
-		queryForObject(sql, T::class.java, args) as T
+		queryForObject(sql, args, T::class.java) as T
 
 /**
  * Extension for [JdbcOperations.queryForList] providing a `queryForList<Foo>("...")` variant.
@@ -86,8 +88,11 @@ inline fun <reified T> JdbcOperations.queryForList(sql: String, args: Array<out 
  * @author Mario Arias
  * @since 5.0
  */
+@Suppress("DEPRECATION")
+// TODO Replace by the vararg variant in Spring Framework 6
 inline fun <reified T> JdbcOperations.queryForList(sql: String, args: Array<out Any>): List<T> =
-		queryForList(sql, T::class.java, args)
+		queryForList(sql, args, T::class.java)
+
 
 /**
  * Extension for [JdbcOperations.query] providing a ResultSetExtractor-like function

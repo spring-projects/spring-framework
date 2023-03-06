@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class DelegatingWebFluxConfigurationTests {
 		boolean condition = initializer.getValidator() instanceof LocalValidatorFactoryBean;
 		assertThat(condition).isTrue();
 		assertThat(initializer.getConversionService()).isSameAs(formatterRegistry.getValue());
-		assertThat(codecsConfigurer.getValue().getReaders().size()).isEqualTo(14);
+		assertThat(codecsConfigurer.getValue().getReaders()).hasSize(16);
 	}
 
 	@Test
@@ -126,12 +126,13 @@ public class DelegatingWebFluxConfigurationTests {
 
 		delegatingConfig.resourceHandlerMapping(delegatingConfig.resourceUrlProvider());
 		verify(webFluxConfigurer).addResourceHandlers(any(ResourceHandlerRegistry.class));
+		verify(webFluxConfigurer).addCorsMappings(any(CorsRegistry.class));
 		verify(webFluxConfigurer).configurePathMatching(any(PathMatchConfigurer.class));
 	}
 
 	@Test
 	void webSocketService() {
-		WebSocketService service = mock(WebSocketService.class);
+		WebSocketService service = mock();
 		given(webFluxConfigurer.getWebSocketService()).willReturn(service);
 
 		delegatingConfig.setConfigurers(Collections.singletonList(webFluxConfigurer));

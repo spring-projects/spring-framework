@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.handler;
 
 import java.util.Comparator;
@@ -20,14 +21,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
@@ -46,7 +46,7 @@ class MappedInterceptorTests {
 
 
 	@SuppressWarnings("unused")
-	private static Stream<Function<String, MockHttpServletRequest>> pathPatternsArguments() {
+	private static Stream<Named<Function<String, MockHttpServletRequest>>> pathPatternsArguments() {
 		return PathPatternsTestUtils.requestArguments();
 	}
 
@@ -88,6 +88,15 @@ class MappedInterceptorTests {
 		assertThat(interceptor.matches(requestFactory.apply("/admin/foo"))).isFalse();
 	}
 
+	@PathPatternsParameterizedTest // gh-26690
+	void includePatternWithFallbackOnPathMatcher(Function<String, MockHttpServletRequest> requestFactory) {
+		MappedInterceptor interceptor = new MappedInterceptor(new String[] { "/path1/**/path2" }, null, delegate);
+
+		assertThat(interceptor.matches(requestFactory.apply("/path1/foo/bar/path2"))).isTrue();
+		assertThat(interceptor.matches(requestFactory.apply("/path1/foo/bar/path3"))).isFalse();
+		assertThat(interceptor.matches(requestFactory.apply("/path3/foo/bar/path2"))).isFalse();
+	}
+
 	@PathPatternsParameterizedTest
 	void customPathMatcher(Function<String, MockHttpServletRequest> requestFactory) {
 		MappedInterceptor interceptor = new MappedInterceptor(new String[] { "/foo/[0-9]*" }, null, delegate);
@@ -99,30 +108,27 @@ class MappedInterceptorTests {
 
 	@Test
 	void preHandle() throws Exception {
-		HandlerInterceptor delegate = mock(HandlerInterceptor.class);
+		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).preHandle(
-				mock(HttpServletRequest.class), mock(HttpServletResponse.class), null);
+		new MappedInterceptor(null, delegate).preHandle(mock(), mock(), null);
 
 		then(delegate).should().preHandle(any(HttpServletRequest.class), any(HttpServletResponse.class), any());
 	}
 
 	@Test
 	void postHandle() throws Exception {
-		HandlerInterceptor delegate = mock(HandlerInterceptor.class);
+		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).postHandle(
-				mock(HttpServletRequest.class), mock(HttpServletResponse.class), null, mock(ModelAndView.class));
+		new MappedInterceptor(null, delegate).postHandle(mock(), mock(), null, mock());
 
 		then(delegate).should().postHandle(any(), any(), any(), any());
 	}
 
 	@Test
 	void afterCompletion() throws Exception {
-		HandlerInterceptor delegate = mock(HandlerInterceptor.class);
+		HandlerInterceptor delegate = mock();
 
-		new MappedInterceptor(null, delegate).afterCompletion(
-				mock(HttpServletRequest.class), mock(HttpServletResponse.class), null, mock(Exception.class));
+		new MappedInterceptor(null, delegate).afterCompletion(mock(), mock(), null, mock());
 
 		then(delegate).should().afterCompletion(any(), any(), any(), any());
 	}

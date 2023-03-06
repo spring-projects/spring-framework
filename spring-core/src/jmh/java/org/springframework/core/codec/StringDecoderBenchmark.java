@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core.codec;
 
 import java.nio.charset.Charset;
@@ -77,11 +78,14 @@ public class StringDecoderBenchmark {
 
 		@Setup(Level.Trial)
 		public void setup() {
-			String eventTemplate = "id:$1\n" +
-					"event:some-event\n" +
-					":some-comment-$1-aa\n" +
-					":some-comment-$1-bb\n" +
-					"data:abcdefg-$1-hijklmnop-$1-qrstuvw-$1-xyz-$1\n\n";
+			String eventTemplate = """
+					id:$1
+					event:some-event
+					:some-comment-$1-aa
+					:some-comment-$1-bb
+					data:abcdefg-$1-hijklmnop-$1-qrstuvw-$1-xyz-$1
+
+					""";
 
 			int eventLength = String.format(eventTemplate, String.format("%05d", 1)).length();
 			int eventCount = this.totalSize / eventLength;

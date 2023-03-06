@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.messaging.handler.invocation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A HandlerMethodReturnValueHandler that wraps and delegates to others.
@@ -104,8 +104,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	@SuppressWarnings("ForLoopReplaceableByForEach")
 	@Nullable
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		for (int i = 0; i < this.returnValueHandlers.size(); i++) {
-			HandlerMethodReturnValueHandler handler = this.returnValueHandlers.get(i);
+		for (HandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
 			if (handler.supportsReturnType(returnType)) {
 				return handler;
 			}
@@ -130,16 +129,16 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	@Override
 	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		return (handler instanceof AsyncHandlerMethodReturnValueHandler &&
-				((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(returnValue, returnType));
+		return (handler instanceof AsyncHandlerMethodReturnValueHandler asyncHandler &&
+				asyncHandler.isAsyncReturnValue(returnValue, returnType));
 	}
 
 	@Override
 	@Nullable
-	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
+	public CompletableFuture<?> toCompletableFuture(Object returnValue, MethodParameter returnType) {
 		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
-		if (handler instanceof AsyncHandlerMethodReturnValueHandler) {
-			return ((AsyncHandlerMethodReturnValueHandler) handler).toListenableFuture(returnValue, returnType);
+		if (handler instanceof AsyncHandlerMethodReturnValueHandler asyncHandler) {
+			return asyncHandler.toCompletableFuture(returnValue, returnType);
 		}
 		return null;
 	}

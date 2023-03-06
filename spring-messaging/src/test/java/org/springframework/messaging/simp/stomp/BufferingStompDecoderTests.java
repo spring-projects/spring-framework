@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class BufferingStompDecoderTests {
 		String chunk = "SEND\na:alpha\n\nMessage body\0";
 
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 		assertThat(new String(messages.get(0).getPayload())).isEqualTo("Message body");
 
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(0);
@@ -62,7 +62,7 @@ public class BufferingStompDecoderTests {
 		assertThat(messages).isEqualTo(Collections.<Message<byte[]>>emptyList());
 
 		messages = stompDecoder.decode(toByteBuffer(chunk2));
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 		assertThat(new String(messages.get(0).getPayload())).isEqualTo("Message body");
 
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(0);
@@ -75,7 +75,7 @@ public class BufferingStompDecoderTests {
 		String chunk = "SEND\na:alpha\n\nPayload1\0" + "SEND\na:alpha\n\nPayload2\0";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
 
-		assertThat(messages.size()).isEqualTo(2);
+		assertThat(messages).hasSize(2);
 		assertThat(new String(messages.get(0).getPayload())).isEqualTo("Payload1");
 		assertThat(new String(messages.get(1).getPayload())).isEqualTo("Payload2");
 
@@ -90,7 +90,7 @@ public class BufferingStompDecoderTests {
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\ncontent-length:" + contentLength + "\n";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk1));
 
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 		assertThat(new String(messages.get(0).getPayload())).isEqualTo("Payload1");
 
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(23);
@@ -99,14 +99,14 @@ public class BufferingStompDecoderTests {
 		String chunk2 = "\nPayload2a";
 		messages = stompDecoder.decode(toByteBuffer(chunk2));
 
-		assertThat(messages.size()).isEqualTo(0);
+		assertThat(messages).isEmpty();
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(33);
 		assertThat((int) stompDecoder.getExpectedContentLength()).isEqualTo(contentLength);
 
 		String chunk3 = "-Payload2b\0";
 		messages = stompDecoder.decode(toByteBuffer(chunk3));
 
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 		assertThat(new String(messages.get(0).getPayload())).isEqualTo("Payload2a-Payload2b");
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(0);
 		assertThat(stompDecoder.getExpectedContentLength()).isNull();
@@ -118,7 +118,7 @@ public class BufferingStompDecoderTests {
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\na:alpha\n";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk1));
 
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 		assertThat(new String(messages.get(0).getPayload())).isEqualTo("Payload1");
 
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(13);
@@ -127,14 +127,14 @@ public class BufferingStompDecoderTests {
 		String chunk2 = "\nPayload2a";
 		messages = stompDecoder.decode(toByteBuffer(chunk2));
 
-		assertThat(messages.size()).isEqualTo(0);
+		assertThat(messages).isEmpty();
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(23);
 		assertThat(stompDecoder.getExpectedContentLength()).isNull();
 
 		String chunk3 = "-Payload2b\0";
 		messages = stompDecoder.decode(toByteBuffer(chunk3));
 
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 		assertThat(new String(messages.get(0).getPayload())).isEqualTo("Payload2a-Payload2b");
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(0);
 		assertThat(stompDecoder.getExpectedContentLength()).isNull();
@@ -171,7 +171,7 @@ public class BufferingStompDecoderTests {
 		String chunk = "MESSAG";
 
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
-		assertThat(messages.size()).isEqualTo(0);
+		assertThat(messages).isEmpty();
 	}
 
 	// SPR-13416
@@ -182,7 +182,7 @@ public class BufferingStompDecoderTests {
 		String chunk = "SEND\na:long\\";
 
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
-		assertThat(messages.size()).isEqualTo(0);
+		assertThat(messages).isEmpty();
 	}
 
 	@Test

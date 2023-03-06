@@ -49,7 +49,7 @@ import org.springframework.util.ClassUtils;
 public class InternalResourceViewResolver extends UrlBasedViewResolver {
 
 	private static final boolean jstlPresent = ClassUtils.isPresent(
-			"javax.servlet.jsp.jstl.core.Config", InternalResourceViewResolver.class.getClassLoader());
+			"jakarta.servlet.jsp.jstl.core.Config", InternalResourceViewResolver.class.getClassLoader());
 
 	@Nullable
 	private Boolean alwaysInclude;

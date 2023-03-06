@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.handler.invocation;
 
 import java.lang.reflect.Method;
@@ -23,7 +24,7 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Sub-class for {@link AbstractExceptionHandlerMethodResolver} for testing.
+ * Subclass for {@link AbstractExceptionHandlerMethodResolver} for testing.
  * @author Rossen Stoyanchev
  */
 public class TestExceptionResolver extends AbstractExceptionHandlerMethodResolver {

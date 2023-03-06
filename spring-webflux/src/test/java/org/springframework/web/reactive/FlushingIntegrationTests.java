@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,26 +125,20 @@ class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			String path = request.getURI().getPath();
-			switch (path) {
-				case "/write-and-flush":
-					return response.writeAndFlushWith(
-							testInterval(Duration.ofMillis(50), 2)
-									.map(longValue -> wrap("data" + longValue + "\n", response))
-									.map(Flux::just)
-									.mergeWith(Flux.never()));
-
-				case "/write-and-complete":
-					return response.writeWith(
-							chunks1K().take(64).map(s -> wrap(s, response)));
-
-				case "/write-and-never-complete":
+			return switch (path) {
+				case "/write-and-flush" -> response.writeAndFlushWith(
+						testInterval(Duration.ofMillis(50), 2)
+								.map(longValue -> wrap("data" + longValue + "\n", response))
+								.map(Flux::just)
+								.mergeWith(Flux.never()));
+				case "/write-and-complete" -> response.writeWith(
+						chunks1K().take(64).map(s -> wrap(s, response)));
+				case "/write-and-never-complete" ->
 					// Reactor requires at least 50 to flush, Tomcat/Undertow 8, Jetty 1
-					return response.writeWith(
-							chunks1K().take(64).map(s -> wrap(s, response)).mergeWith(Flux.never()));
-
-				default:
-					return response.writeWith(Flux.empty());
-			}
+						response.writeWith(
+								chunks1K().take(64).map(s -> wrap(s, response)).mergeWith(Flux.never()));
+				default -> response.writeWith(Flux.empty());
+			};
 		}
 
 		private Flux<String> chunks1K() {
@@ -154,7 +148,7 @@ class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 					for (char c : "0123456789".toCharArray()) {
 						sb.append(c);
 						if (sb.length() + 1 == 1024) {
-							sink.next(sb.append("\n").toString());
+							sink.next(sb.append('\n').toString());
 							return;
 						}
 					}

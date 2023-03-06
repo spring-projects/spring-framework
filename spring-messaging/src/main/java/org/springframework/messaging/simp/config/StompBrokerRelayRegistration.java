@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,9 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	@Nullable
 	private TcpOperations<byte[]> tcpClient;
 
+	@Nullable
+	private TaskScheduler taskScheduler;
+
 	private boolean autoStartup = true;
 
 	@Nullable
@@ -64,9 +67,13 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	@Nullable
 	private String userRegistryBroadcast;
 
-	@Nullable
-	private TaskScheduler taskScheduler;
 
+	/**
+	 * Create a new {@code StompBrokerRelayRegistration}.
+	 * @param clientInboundChannel the inbound channel
+	 * @param clientOutboundChannel the outbound channel
+	 * @param destinationPrefixes the destination prefixes
+	 */
 	public StompBrokerRelayRegistration(SubscribableChannel clientInboundChannel,
 			MessageChannel clientOutboundChannel, String[] destinationPrefixes) {
 
@@ -181,8 +188,27 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 	 * specified are effectively ignored.
 	 * @since 4.3.15
 	 */
-	public void setTcpClient(TcpOperations<byte[]> tcpClient) {
+	public StompBrokerRelayRegistration setTcpClient(TcpOperations<byte[]> tcpClient) {
 		this.tcpClient = tcpClient;
+		return this;
+	}
+
+	/**
+	 * Some STOMP clients (e.g. stomp-js) always send heartbeats at a fixed rate
+	 * but others (Spring STOMP client) do so only when no other messages are
+	 * sent. However messages with a non-broker {@link #getDestinationPrefixes()
+	 * destination prefix} aren't forwarded and as a result the broker may deem
+	 * the connection inactive.
+	 * <p>When this {@link TaskScheduler} is set, it is used to reset a count of
+	 * the number of messages sent from client to broker since the beginning of
+	 * the current heartbeat period. This is then used to decide whether to send
+	 * a heartbeat to the broker when ignoring a message with a non-broker
+	 * destination prefix.
+	 * @since 5.3
+	 */
+	public StompBrokerRelayRegistration setTaskScheduler(@Nullable TaskScheduler taskScheduler) {
+		this.taskScheduler = taskScheduler;
+		return this;
 	}
 
 	/**
@@ -228,26 +254,6 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 		return this;
 	}
 
-	/**
-	 * Some STOMP clients (e.g. stomp-js) always send heartbeats at a fixed rate
-	 * but others (Spring STOMP client) do so only when no other messages are
-	 * sent. However messages with a non-broker {@link #getDestinationPrefixes()
-	 * destination prefix} aren't forwarded and as a result the broker may deem
-	 * the connection inactive.
-	 *
-	 * <p>When this {@link TaskScheduler} is set, it is used to reset a count of
-	 * the number of messages sent from client to broker since the beginning of
-	 * the current heartbeat period. This is then used to decide whether to send
-	 * a heartbeat to the broker when ignoring a message with a non-broker
-	 * destination prefix.
-	 *
-	 * @param taskScheduler the scheduler to use
-	 * @since 5.3
-	 */
-	public void setTaskScheduler(@Nullable TaskScheduler taskScheduler) {
-		this.taskScheduler = taskScheduler;
-	}
-
 	@Nullable
 	protected String getUserRegistryBroadcast() {
 		return this.userRegistryBroadcast;
@@ -256,7 +262,6 @@ public class StompBrokerRelayRegistration extends AbstractBrokerRegistration {
 
 	@Override
 	protected StompBrokerRelayMessageHandler getMessageHandler(SubscribableChannel brokerChannel) {
-
 		StompBrokerRelayMessageHandler handler = new StompBrokerRelayMessageHandler(
 				getClientInboundChannel(), getClientOutboundChannel(),
 				brokerChannel, getDestinationPrefixes());

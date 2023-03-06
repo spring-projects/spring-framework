@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public class BenchmarkTests {
+class BenchmarkTests {
 
 	private static final Class<?> CLASS = BenchmarkTests.class;
 
@@ -54,42 +54,42 @@ public class BenchmarkTests {
 	private static final String SPRING_AOP_CONTEXT = CLASS.getSimpleName() + "-springAop.xml";
 
 	@Test
-	public void testRepeatedAroundAdviceInvocationsWithAspectJ() {
+	void repeatedAroundAdviceInvocationsWithAspectJ() {
 		testRepeatedAroundAdviceInvocations(ASPECTJ_CONTEXT, getCount(), "AspectJ");
 	}
 
 	@Test
-	public void testRepeatedAroundAdviceInvocationsWithSpringAop() {
+	void repeatedAroundAdviceInvocationsWithSpringAop() {
 		testRepeatedAroundAdviceInvocations(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 
 	@Test
-	public void testRepeatedBeforeAdviceInvocationsWithAspectJ() {
+	void repeatedBeforeAdviceInvocationsWithAspectJ() {
 		testBeforeAdviceWithoutJoinPoint(ASPECTJ_CONTEXT, getCount(), "AspectJ");
 	}
 
 	@Test
-	public void testRepeatedBeforeAdviceInvocationsWithSpringAop() {
+	void repeatedBeforeAdviceInvocationsWithSpringAop() {
 		testBeforeAdviceWithoutJoinPoint(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 
 	@Test
-	public void testRepeatedAfterReturningAdviceInvocationsWithAspectJ() {
+	void repeatedAfterReturningAdviceInvocationsWithAspectJ() {
 		testAfterReturningAdviceWithoutJoinPoint(ASPECTJ_CONTEXT, getCount(), "AspectJ");
 	}
 
 	@Test
-	public void testRepeatedAfterReturningAdviceInvocationsWithSpringAop() {
+	void repeatedAfterReturningAdviceInvocationsWithSpringAop() {
 		testAfterReturningAdviceWithoutJoinPoint(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 
 	@Test
-	public void testRepeatedMixWithAspectJ() {
+	void repeatedMixWithAspectJ() {
 		testMix(ASPECTJ_CONTEXT, getCount(), "AspectJ");
 	}
 
 	@Test
-	public void testRepeatedMixWithSpringAop() {
+	void repeatedMixWithSpringAop() {
 		testMix(SPRING_AOP_CONTEXT, getCount(), "Spring AOP");
 	}
 
@@ -101,11 +101,11 @@ public class BenchmarkTests {
 	}
 
 	private long testRepeatedAroundAdviceInvocations(String file, int howmany, String technology) {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file, CLASS);
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(file, CLASS);
 
 		StopWatch sw = new StopWatch();
 		sw.start(howmany + " repeated around advice invocations with " + technology);
-		ITestBean adrian = (ITestBean) bf.getBean("adrian");
+		ITestBean adrian = (ITestBean) ac.getBean("adrian");
 
 		assertThat(AopUtils.isAopProxy(adrian)).isTrue();
 		assertThat(adrian.getAge()).isEqualTo(68);
@@ -115,16 +115,17 @@ public class BenchmarkTests {
 		}
 
 		sw.stop();
-		System.out.println(sw.prettyPrint());
+		// System.out.println(sw.prettyPrint());
+		ac.close();
 		return sw.getLastTaskTimeMillis();
 	}
 
 	private long testBeforeAdviceWithoutJoinPoint(String file, int howmany, String technology) {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file, CLASS);
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(file, CLASS);
 
 		StopWatch sw = new StopWatch();
 		sw.start(howmany + " repeated before advice invocations with " + technology);
-		ITestBean adrian = (ITestBean) bf.getBean("adrian");
+		ITestBean adrian = (ITestBean) ac.getBean("adrian");
 
 		assertThat(AopUtils.isAopProxy(adrian)).isTrue();
 		Advised a = (Advised) adrian;
@@ -136,16 +137,17 @@ public class BenchmarkTests {
 		}
 
 		sw.stop();
-		System.out.println(sw.prettyPrint());
+		// System.out.println(sw.prettyPrint());
+		ac.close();
 		return sw.getLastTaskTimeMillis();
 	}
 
 	private long testAfterReturningAdviceWithoutJoinPoint(String file, int howmany, String technology) {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file, CLASS);
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(file, CLASS);
 
 		StopWatch sw = new StopWatch();
 		sw.start(howmany + " repeated after returning advice invocations with " + technology);
-		ITestBean adrian = (ITestBean) bf.getBean("adrian");
+		ITestBean adrian = (ITestBean) ac.getBean("adrian");
 
 		assertThat(AopUtils.isAopProxy(adrian)).isTrue();
 		Advised a = (Advised) adrian;
@@ -158,16 +160,17 @@ public class BenchmarkTests {
 		}
 
 		sw.stop();
-		System.out.println(sw.prettyPrint());
+		// System.out.println(sw.prettyPrint());
+		ac.close();
 		return sw.getLastTaskTimeMillis();
 	}
 
 	private long testMix(String file, int howmany, String technology) {
-		ClassPathXmlApplicationContext bf = new ClassPathXmlApplicationContext(file, CLASS);
+		ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(file, CLASS);
 
 		StopWatch sw = new StopWatch();
 		sw.start(howmany + " repeated mixed invocations with " + technology);
-		ITestBean adrian = (ITestBean) bf.getBean("adrian");
+		ITestBean adrian = (ITestBean) ac.getBean("adrian");
 
 		assertThat(AopUtils.isAopProxy(adrian)).isTrue();
 		Advised a = (Advised) adrian;
@@ -186,7 +189,8 @@ public class BenchmarkTests {
 		}
 
 		sw.stop();
-		System.out.println(sw.prettyPrint());
+		// System.out.println(sw.prettyPrint());
+		ac.close();
 		return sw.getLastTaskTimeMillis();
 	}
 

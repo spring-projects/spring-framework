@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.EnumSet;
 import java.util.Set;
 
 import org.springframework.core.io.Resource;
@@ -39,7 +38,7 @@ import org.springframework.lang.Nullable;
 class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 
 	private static final Set<HttpMethod> SUPPORTED_METHODS =
-			EnumSet.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
+			Set.of(HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS);
 
 
 	private final Resource resource;
@@ -53,17 +52,16 @@ class ResourceHandlerFunction implements HandlerFunction<ServerResponse> {
 	@Override
 	public ServerResponse handle(ServerRequest request) {
 		HttpMethod method = request.method();
-		if (method != null) {
-			switch (method) {
-				case GET:
-					return EntityResponse.fromObject(this.resource).build();
-				case HEAD:
-					Resource headResource = new HeadMethodResource(this.resource);
-					return EntityResponse.fromObject(headResource).build();
-				case OPTIONS:
-					return ServerResponse.ok()
-							.allow(SUPPORTED_METHODS).build();
-			}
+		if (HttpMethod.GET.equals(method)) {
+			return EntityResponse.fromObject(this.resource).build();
+		}
+		else if (HttpMethod.HEAD.equals(method)) {
+			Resource headResource = new HeadMethodResource(this.resource);
+			return EntityResponse.fromObject(headResource).build();
+		}
+		else if (HttpMethod.OPTIONS.equals(method)) {
+			return ServerResponse.ok()
+					.allow(SUPPORTED_METHODS).build();
 		}
 		return ServerResponse.status(HttpStatus.METHOD_NOT_ALLOWED)
 				.allow(SUPPORTED_METHODS).build();

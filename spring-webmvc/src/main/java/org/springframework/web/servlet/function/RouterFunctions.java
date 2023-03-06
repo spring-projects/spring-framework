@@ -582,7 +582,7 @@ public abstract class RouterFunctions {
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
 		 *   RouterFunctions.route()
-		 *     .nest(RequestPredicates.path("/user"), () ->
+		 *     .nest(RequestPredicates.path("/user"), () -&gt;
 		 *       RouterFunctions.route()
 		 *         .GET(this::listUsers)
 		 *         .POST(this::createUser)
@@ -607,7 +607,7 @@ public abstract class RouterFunctions {
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
 		 *   RouterFunctions.route()
-		 *     .nest(RequestPredicates.path("/user"), builder ->
+		 *     .nest(RequestPredicates.path("/user"), builder -&gt;
 		 *       builder.GET(this::listUsers)
 		 *              .POST(this::createUser))
 		 *     .build();
@@ -652,7 +652,7 @@ public abstract class RouterFunctions {
 		 * <pre class="code">
 		 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
 		 *   RouterFunctions.route()
-		 *     .path("/user", builder ->
+		 *     .path("/user", builder -&gt;
 		 *       builder.GET(this::listUsers)
 		 *              .POST(this::createUser))
 		 *     .build();
@@ -674,7 +674,7 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
-		 *     .filter((request, next) -> {
+		 *     .filter((request, next) -&gt; {
 		 *       // check for authentication headers
 		 *       if (isAuthenticated(request)) {
 		 *         return next.handle(request);
@@ -700,7 +700,7 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
-		 *     .before(request -> {
+		 *     .before(request -&gt; {
 		 *       log(request);
 		 *       return request;
 		 *     })
@@ -721,7 +721,7 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
-		 *     .after((request, response) -> {
+		 *     .after((request, response) -&gt; {
 		 *       log(response);
 		 *       return response;
 		 *     })
@@ -741,8 +741,8 @@ public abstract class RouterFunctions {
 		 * RouterFunction&lt;ServerResponse&gt; filteredRoute =
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
-		 *     .onError(e -> e instanceof IllegalStateException,
-		 *       (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+		 *     .onError(e -&gt; e instanceof IllegalStateException,
+		 *       (e, request) -&gt; ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
 		 *     .build();
 		 * </pre>
 		 * @param predicate the type of exception to filter
@@ -762,7 +762,7 @@ public abstract class RouterFunctions {
 		 *   RouterFunctions.route()
 		 *     .GET("/user", this::listUsers)
 		 *     .onError(IllegalStateException.class,
-		 *       (e, request) -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+		 *       (e, request) -&gt; ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
 		 *     .build();
 		 * </pre>
 		 * @param exceptionType the type of exception to filter

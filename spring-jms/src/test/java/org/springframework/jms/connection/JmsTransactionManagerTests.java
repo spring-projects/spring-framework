@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.jms.connection;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Session;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -60,9 +59,9 @@ public class JmsTransactionManagerTests {
 
 	@Test
 	public void testTransactionCommit() throws JMSException {
-		ConnectionFactory cf = mock(ConnectionFactory.class);
-		Connection con = mock(Connection.class);
-		final Session session = mock(Session.class);
+		ConnectionFactory cf = mock();
+		Connection con = mock();
+		final Session session = mock();
 
 		given(cf.createConnection()).willReturn(con);
 		given(con.createSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
@@ -83,9 +82,9 @@ public class JmsTransactionManagerTests {
 
 	@Test
 	public void testTransactionRollback() throws JMSException {
-		ConnectionFactory cf = mock(ConnectionFactory.class);
-		Connection con = mock(Connection.class);
-		final Session session = mock(Session.class);
+		ConnectionFactory cf = mock();
+		Connection con = mock();
+		final Session session = mock();
 
 		given(cf.createConnection()).willReturn(con);
 		given(con.createSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
@@ -106,9 +105,9 @@ public class JmsTransactionManagerTests {
 
 	@Test
 	public void testParticipatingTransactionWithCommit() throws JMSException {
-		ConnectionFactory cf = mock(ConnectionFactory.class);
-		Connection con = mock(Connection.class);
-		final Session session = mock(Session.class);
+		ConnectionFactory cf = mock();
+		Connection con = mock();
+		final Session session = mock();
 
 		given(cf.createConnection()).willReturn(con);
 		given(con.createSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
@@ -139,9 +138,9 @@ public class JmsTransactionManagerTests {
 
 	@Test
 	public void testParticipatingTransactionWithRollbackOnly() throws JMSException {
-		ConnectionFactory cf = mock(ConnectionFactory.class);
-		Connection con = mock(Connection.class);
-		final Session session = mock(Session.class);
+		ConnectionFactory cf = mock();
+		Connection con = mock();
+		final Session session = mock();
 
 		given(cf.createConnection()).willReturn(con);
 		given(con.createSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
@@ -174,10 +173,10 @@ public class JmsTransactionManagerTests {
 
 	@Test
 	public void testSuspendedTransaction() throws JMSException {
-		final ConnectionFactory cf = mock(ConnectionFactory.class);
-		Connection con = mock(Connection.class);
-		final Session session = mock(Session.class);
-		final Session session2 = mock(Session.class);
+		final ConnectionFactory cf = mock();
+		Connection con = mock();
+		final Session session = mock();
+		final Session session2 = mock();
 
 		given(cf.createConnection()).willReturn(con);
 		given(con.createSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
@@ -215,10 +214,10 @@ public class JmsTransactionManagerTests {
 
 	@Test
 	public void testTransactionSuspension() throws JMSException {
-		final ConnectionFactory cf = mock(ConnectionFactory.class);
-		Connection con = mock(Connection.class);
-		final Session session = mock(Session.class);
-		final Session session2 = mock(Session.class);
+		final ConnectionFactory cf = mock();
+		Connection con = mock();
+		final Session session = mock();
+		final Session session2 = mock();
 
 		given(cf.createConnection()).willReturn(con);
 		given(con.createSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session, session2);
@@ -258,11 +257,11 @@ public class JmsTransactionManagerTests {
 	public void testTransactionCommitWithMessageProducer() throws JMSException {
 		Destination dest = new StubQueue();
 
-		ConnectionFactory cf = mock(ConnectionFactory.class);
-		Connection con = mock(Connection.class);
-		Session session = mock(Session.class);
-		MessageProducer producer = mock(MessageProducer.class);
-		final Message message = mock(Message.class);
+		ConnectionFactory cf = mock();
+		Connection con = mock();
+		Session session = mock();
+		MessageProducer producer = mock();
+		final Message message = mock();
 
 		given(cf.createConnection()).willReturn(con);
 		given(con.createSession(true, Session.AUTO_ACKNOWLEDGE)).willReturn(session);
@@ -284,9 +283,9 @@ public class JmsTransactionManagerTests {
 
 	@Test
 	public void testLazyTransactionalSession() throws JMSException {
-		ConnectionFactory cf = mock(ConnectionFactory.class);
-		Connection con = mock(Connection.class);
-		final Session session = mock(Session.class);
+		ConnectionFactory cf = mock();
+		Connection con = mock();
+		final Session session = mock();
 
 		JmsTransactionManager tm = new JmsTransactionManager(cf);
 		tm.setLazyResourceRetrieval(true);
@@ -309,7 +308,7 @@ public class JmsTransactionManagerTests {
 
 	@Test
 	public void testLazyWithoutSessionAccess() {
-		ConnectionFactory cf = mock(ConnectionFactory.class);
+		ConnectionFactory cf = mock();
 
 		JmsTransactionManager tm = new JmsTransactionManager(cf);
 		tm.setLazyResourceRetrieval(true);

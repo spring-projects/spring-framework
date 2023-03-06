@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,20 +32,19 @@ import static org.mockito.BDDMockito.when;
  *
  * @author Mark Paluch
  */
-public class ConnectionFactoryInitializerUnitTests {
+class ConnectionFactoryInitializerUnitTests {
 
 	AtomicBoolean called = new AtomicBoolean();
 
-	DatabasePopulator populator = mock(DatabasePopulator.class);
+	DatabasePopulator populator = mock();
 
 	MockConnection connection = MockConnection.builder().build();
 
-	MockConnectionFactory connectionFactory = MockConnectionFactory.builder().connection(
-			connection).build();
+	MockConnectionFactory connectionFactory = MockConnectionFactory.builder().connection(connection).build();
 
 
 	@Test
-	public void shouldInitializeConnectionFactory() {
+	void shouldInitializeConnectionFactory() {
 		when(populator.populate(connectionFactory)).thenReturn(
 				Mono.<Void> empty().doOnSubscribe(subscription -> called.set(true)));
 
@@ -59,7 +58,7 @@ public class ConnectionFactoryInitializerUnitTests {
 	}
 
 	@Test
-	public void shouldCleanConnectionFactory() {
+	void shouldCleanConnectionFactory() {
 		when(populator.populate(connectionFactory)).thenReturn(
 				Mono.<Void> empty().doOnSubscribe(subscription -> called.set(true)));
 
@@ -67,7 +66,6 @@ public class ConnectionFactoryInitializerUnitTests {
 		initializer.setConnectionFactory(connectionFactory);
 		initializer.setDatabaseCleaner(populator);
 
-		initializer.afterPropertiesSet();
 		initializer.destroy();
 
 		assertThat(called).isTrue();

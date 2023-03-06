@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,8 @@ import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link GenericApplicationListener} adapter that delegates the processing of
@@ -55,9 +52,6 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 
 	private final TransactionPhase transactionPhase;
 
-	@Nullable
-	private volatile String listenerId;
-
 	private final List<SynchronizationCallback> callbacks = new CopyOnWriteArrayList<>();
 
 
@@ -82,31 +76,6 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 	@Override
 	public TransactionPhase getTransactionPhase() {
 		return this.transactionPhase;
-	}
-
-	@Override
-	public String getListenerId() {
-		String id = this.listenerId;
-		if (id == null) {
-			id = this.annotation.id();
-			if (id.isEmpty()) {
-				id = getDefaultListenerId();
-			}
-			this.listenerId = id;
-		}
-		return id;
-	}
-
-	/**
-	 * Determine the default id for the target listener, to be applied in case of
-	 * no {@link TransactionalEventListener#id() annotation-specified id value}.
-	 * <p>The default implementation builds a method name with parameter types.
-	 * @see #getListenerId()
-	 */
-	protected String getDefaultListenerId() {
-		Method method = getTargetMethod();
-		return ClassUtils.getQualifiedMethodName(method) +
-				"(" + StringUtils.arrayToDelimitedString(method.getParameterTypes(), ",") + ")";
 	}
 
 	@Override

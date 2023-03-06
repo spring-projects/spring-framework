@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.web.context.support;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -104,11 +104,11 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		if (getServletContext() != null && bean instanceof ServletContextAware) {
-			((ServletContextAware) bean).setServletContext(getServletContext());
+		if (getServletContext() != null && bean instanceof ServletContextAware servletContextAware) {
+			servletContextAware.setServletContext(getServletContext());
 		}
-		if (getServletConfig() != null && bean instanceof ServletConfigAware) {
-			((ServletConfigAware) bean).setServletConfig(getServletConfig());
+		if (getServletConfig() != null && bean instanceof ServletConfigAware servletConfigAware) {
+			servletConfigAware.setServletConfig(getServletConfig());
 		}
 		return bean;
 	}
