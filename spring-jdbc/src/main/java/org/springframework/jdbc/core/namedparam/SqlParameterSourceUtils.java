@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,12 +59,12 @@ public abstract class SqlParameterSourceUtils {
 	 * @see BeanPropertySqlParameterSource
 	 * @see NamedParameterJdbcTemplate#batchUpdate(String, SqlParameterSource[])
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static SqlParameterSource[] createBatch(Collection<?> candidates) {
 		SqlParameterSource[] batch = new SqlParameterSource[candidates.size()];
 		int i = 0;
 		for (Object candidate : candidates) {
-			batch[i] = (candidate instanceof Map ? new MapSqlParameterSource((Map<String, ?>) candidate) :
+			batch[i] = (candidate instanceof Map map ? new MapSqlParameterSource(map) :
 					new BeanPropertySqlParameterSource(candidate));
 			i++;
 		}
