@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
 			if (filter != null) {
 				List<Method> filtered = filter.filter(methods);
-				methods = (filtered instanceof ArrayList ? (ArrayList<Method>) filtered : new ArrayList<>(filtered));
+				methods = (filtered instanceof ArrayList<Method> arrayList ? arrayList : new ArrayList<>(filtered));
 			}
 
 			// Sort methods into a sensible order
