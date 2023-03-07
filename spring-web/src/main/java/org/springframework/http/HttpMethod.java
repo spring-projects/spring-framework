@@ -170,14 +170,8 @@ public final class HttpMethod implements Comparable<HttpMethod>, Serializable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		else if (o instanceof HttpMethod otherMethod) {
-			return this.name.equals(otherMethod.name);
-		}
-		return false;
+	public boolean equals(Object obj) {
+		return (this == obj) || (obj instanceof HttpMethod that && this.name.equals(that.name));
 	}
 
 	@Override

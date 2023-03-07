@@ -90,7 +90,7 @@ final class DefaultHttpStatusCode
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof HttpStatusCode other && this.value == other.value());
+		return (this == obj) || (obj instanceof HttpStatusCode that && this.value == that.value());
 	}
 
 	@Override

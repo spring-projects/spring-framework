@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.util.pattern;
 
-import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.PathContainer.Element;
 import org.springframework.http.server.PathContainer.PathSegment;
 import org.springframework.web.util.pattern.PathPattern.MatchingContext;
@@ -61,10 +60,10 @@ class LiteralPathElement extends PathElement {
 			return false;
 		}
 		Element element = matchingContext.pathElements.get(pathIndex);
-		if (!(element instanceof PathContainer.PathSegment)) {
+		if (!(element instanceof PathSegment pathSegment)) {
 			return false;
 		}
-		String value = ((PathSegment)element).valueToMatch();
+		String value = pathSegment.valueToMatch();
 		if (value.length() != this.len) {
 			// Not enough data to match this path element
 			return false;

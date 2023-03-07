@@ -251,9 +251,9 @@ final class Jackson2Tokenizer {
 				parser = jsonFactory.createNonBlockingByteBufferParser();
 			}
 			DeserializationContext context = objectMapper.getDeserializationContext();
-			if (context instanceof DefaultDeserializationContext) {
-				context = ((DefaultDeserializationContext) context).createInstance(
-						objectMapper.getDeserializationConfig(), parser, objectMapper.getInjectableValues());
+			if (context instanceof DefaultDeserializationContext ddc) {
+				context = ddc.createInstance(objectMapper.getDeserializationConfig(),
+						parser, objectMapper.getInjectableValues());
 			}
 			Jackson2Tokenizer tokenizer =
 					new Jackson2Tokenizer(parser, context, tokenizeArrays, forceUseOfBigDecimal, maxInMemorySize);

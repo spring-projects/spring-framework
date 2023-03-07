@@ -1006,7 +1006,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		private Stream<MediaType> getSupportedMediaTypes(Type type, HttpMessageConverter<?> converter) {
 			Type rawType = (type instanceof ParameterizedType parameterizedType ? parameterizedType.getRawType() : type);
-			Class<?> clazz = (rawType instanceof Class ? (Class<?>) rawType : null);
+			Class<?> clazz = (rawType instanceof Class<?> rawClass ? rawClass : null);
 			return (clazz != null ? converter.getSupportedMediaTypes(clazz) : converter.getSupportedMediaTypes())
 					.stream()
 					.map(mediaType -> {

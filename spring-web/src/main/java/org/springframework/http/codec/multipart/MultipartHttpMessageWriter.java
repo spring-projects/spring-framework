@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,20 +241,19 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 				.concatMap(value -> encodePart(boundary, name, value, bufferFactory));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private <T> Flux<DataBuffer> encodePart(byte[] boundary, String name, T value, DataBufferFactory factory) {
 		MultipartHttpOutputMessage message = new MultipartHttpOutputMessage(factory);
 		HttpHeaders headers = message.getHeaders();
 
 		T body;
 		ResolvableType resolvableType = null;
-		if (value instanceof HttpEntity) {
-			HttpEntity<T> httpEntity = (HttpEntity<T>) value;
+		if (value instanceof HttpEntity httpEntity) {
 			headers.putAll(httpEntity.getHeaders());
-			body = httpEntity.getBody();
+			body = (T) httpEntity.getBody();
 			Assert.state(body != null, "MultipartHttpMessageWriter only supports HttpEntity with body");
-			if (httpEntity instanceof ResolvableTypeProvider) {
-				resolvableType = ((ResolvableTypeProvider) httpEntity).getResolvableType();
+			if (httpEntity instanceof ResolvableTypeProvider resolvableTypeProvider) {
+				resolvableType = resolvableTypeProvider.getResolvableType();
 			}
 		}
 		else {
@@ -265,8 +264,8 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 		}
 
 		if (!headers.containsKey(HttpHeaders.CONTENT_DISPOSITION)) {
-			if (body instanceof Resource) {
-				headers.setContentDispositionFormData(name, ((Resource) body).getFilename());
+			if (body instanceof Resource resource) {
+				headers.setContentDispositionFormData(name, resource.getFilename());
 			}
 			else if (resolvableType.resolve() == Resource.class) {
 				body = (T) Mono.from((Publisher<?>) body).doOnNext(o -> headers
@@ -288,8 +287,7 @@ public class MultipartHttpMessageWriter extends MultipartWriterSupport
 			return Flux.error(new CodecException("No suitable writer found for part: " + name));
 		}
 
-		Publisher<T> bodyPublisher =
-				body instanceof Publisher ? (Publisher<T>) body : Mono.just(body);
+		Publisher<T> bodyPublisher = (body instanceof Publisher publisher ? publisher : Mono.just(body));
 
 		// The writer will call MultipartHttpOutputMessage#write which doesn't actually write
 		// but only stores the body Flux and returns Mono.empty().
