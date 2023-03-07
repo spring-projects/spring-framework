@@ -185,7 +185,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
-		Assert.notNull(attributesConsumer, 'AttributesConsumer must not be null");
+		Assert.notNull(attributesConsumer, "AttributesConsumer must not be null");
 		attributesConsumer.accept(this.attributes);
 		return this;
 	}
