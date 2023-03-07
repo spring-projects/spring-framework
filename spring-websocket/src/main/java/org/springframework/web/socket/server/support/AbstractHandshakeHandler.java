@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,8 +176,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	}
 
 	protected void doStart() {
-		if (this.requestUpgradeStrategy instanceof Lifecycle) {
-			((Lifecycle) this.requestUpgradeStrategy).start();
+		if (this.requestUpgradeStrategy instanceof Lifecycle lifecycle) {
+			lifecycle.start();
 		}
 	}
 
@@ -190,8 +190,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	}
 
 	protected void doStop() {
-		if (this.requestUpgradeStrategy instanceof Lifecycle) {
-			((Lifecycle) this.requestUpgradeStrategy).stop();
+		if (this.requestUpgradeStrategy instanceof Lifecycle lifecycle) {
+			lifecycle.stop();
 		}
 	}
 
@@ -349,8 +349,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	protected final List<String> determineHandlerSupportedProtocols(WebSocketHandler handler) {
 		WebSocketHandler handlerToCheck = WebSocketHandlerDecorator.unwrap(handler);
 		List<String> subProtocols = null;
-		if (handlerToCheck instanceof SubProtocolCapable) {
-			subProtocols = ((SubProtocolCapable) handlerToCheck).getSubProtocols();
+		if (handlerToCheck instanceof SubProtocolCapable subProtocolCapable) {
+			subProtocols = subProtocolCapable.getSubProtocols();
 		}
 		return (subProtocols != null ? subProtocols : Collections.emptyList());
 	}

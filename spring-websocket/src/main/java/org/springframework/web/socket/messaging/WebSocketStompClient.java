@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,8 +178,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	public void start() {
 		if (!isRunning()) {
 			this.running = true;
-			if (getWebSocketClient() instanceof Lifecycle) {
-				((Lifecycle) getWebSocketClient()).start();
+			if (getWebSocketClient() instanceof Lifecycle lifecycle) {
+				lifecycle.start();
 			}
 		}
 
@@ -189,8 +189,8 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	public void stop() {
 		if (isRunning()) {
 			this.running = false;
-			if (getWebSocketClient() instanceof Lifecycle) {
-				((Lifecycle) getWebSocketClient()).stop();
+			if (getWebSocketClient() instanceof Lifecycle lifecycle) {
+				lifecycle.stop();
 			}
 		}
 	}
@@ -554,11 +554,11 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		public List<Message<byte[]>> decode(WebSocketMessage<?> webSocketMessage) {
 			List<Message<byte[]>> result = Collections.emptyList();
 			ByteBuffer byteBuffer;
-			if (webSocketMessage instanceof TextMessage) {
-				byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
+			if (webSocketMessage instanceof TextMessage textMessage) {
+				byteBuffer = ByteBuffer.wrap(textMessage.asBytes());
 			}
-			else if (webSocketMessage instanceof BinaryMessage) {
-				byteBuffer = ((BinaryMessage) webSocketMessage).getPayload();
+			else if (webSocketMessage instanceof BinaryMessage binaryMessage) {
+				byteBuffer = binaryMessage.getPayload();
 			}
 			else {
 				return result;

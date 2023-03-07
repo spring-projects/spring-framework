@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 	@Override
 	protected void initServletContext(ServletContext servletContext) {
 		for (Object handler : getUrlMap().values()) {
-			if (handler instanceof ServletContextAware) {
-				((ServletContextAware) handler).setServletContext(servletContext);
+			if (handler instanceof ServletContextAware servletContextAware) {
+				servletContextAware.setServletContext(servletContext);
 			}
 		}
 	}
@@ -73,8 +73,8 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 		if (!isRunning()) {
 			this.running = true;
 			for (Object handler : getUrlMap().values()) {
-				if (handler instanceof Lifecycle) {
-					((Lifecycle) handler).start();
+				if (handler instanceof Lifecycle lifecycle) {
+					lifecycle.start();
 				}
 			}
 		}
@@ -85,8 +85,8 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 		if (isRunning()) {
 			this.running = false;
 			for (Object handler : getUrlMap().values()) {
-				if (handler instanceof Lifecycle) {
-					((Lifecycle) handler).stop();
+				if (handler instanceof Lifecycle lifecycle) {
+					lifecycle.stop();
 				}
 			}
 		}
@@ -106,8 +106,7 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 	}
 
 	private boolean matchWebSocketUpgrade(@Nullable Object handler, HttpServletRequest request) {
-		handler = (handler instanceof HandlerExecutionChain ?
-				((HandlerExecutionChain) handler).getHandler() : handler);
+		handler = (handler instanceof HandlerExecutionChain chain ? chain.getHandler() : handler);
 		if (this.webSocketUpgradeMatch && handler instanceof WebSocketHttpRequestHandler) {
 			String header = request.getHeader(HttpHeaders.UPGRADE);
 			return (request.getMethod().equals("GET") &&

@@ -230,11 +230,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		List<Message<byte[]>> messages;
 		try {
 			ByteBuffer byteBuffer;
-			if (webSocketMessage instanceof TextMessage) {
-				byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
+			if (webSocketMessage instanceof TextMessage textMessage) {
+				byteBuffer = ByteBuffer.wrap(textMessage.asBytes());
 			}
-			else if (webSocketMessage instanceof BinaryMessage) {
-				byteBuffer = ((BinaryMessage) webSocketMessage).getPayload();
+			else if (webSocketMessage instanceof BinaryMessage binaryMessage) {
+				byteBuffer = binaryMessage.getPayload();
 			}
 			else {
 				return;
@@ -398,8 +398,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			return this.immutableMessageInterceptorPresent;
 		}
 
-		if (channel instanceof AbstractMessageChannel) {
-			for (ChannelInterceptor interceptor : ((AbstractMessageChannel) channel).getInterceptors()) {
+		if (channel instanceof AbstractMessageChannel abstractMessageChannel) {
+			for (ChannelInterceptor interceptor : abstractMessageChannel.getInterceptors()) {
 				if (interceptor instanceof ImmutableMessageChannelInterceptor) {
 					this.immutableMessageInterceptorPresent = true;
 					return true;
@@ -520,8 +520,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private StompHeaderAccessor getStompHeaderAccessor(Message<?> message) {
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-		if (accessor instanceof StompHeaderAccessor) {
-			return (StompHeaderAccessor) accessor;
+		if (accessor instanceof StompHeaderAccessor stompHeaderAccessor) {
+			return stompHeaderAccessor;
 		}
 		else {
 			StompHeaderAccessor stompAccessor = StompHeaderAccessor.wrap(message);
@@ -614,8 +614,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		long[] heartbeat = accessor.getHeartbeat();
 		if (heartbeat[1] > 0) {
 			session = WebSocketSessionDecorator.unwrap(session);
-			if (session instanceof SockJsSession) {
-				((SockJsSession) session).disableHeartbeat();
+			if (session instanceof SockJsSession sockJsSession) {
+				sockJsSession.disableHeartbeat();
 			}
 		}
 

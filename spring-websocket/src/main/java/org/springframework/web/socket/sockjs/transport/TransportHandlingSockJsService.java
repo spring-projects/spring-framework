@@ -169,8 +169,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		if (!isRunning()) {
 			this.running = true;
 			for (TransportHandler handler : this.handlers.values()) {
-				if (handler instanceof Lifecycle) {
-					((Lifecycle) handler).start();
+				if (handler instanceof Lifecycle lifecycle) {
+					lifecycle.start();
 				}
 			}
 		}
@@ -181,8 +181,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		if (isRunning()) {
 			this.running = false;
 			for (TransportHandler handler : this.handlers.values()) {
-				if (handler instanceof Lifecycle) {
-					((Lifecycle) handler).stop();
+				if (handler instanceof Lifecycle lifecycle) {
+					lifecycle.stop();
 				}
 			}
 		}
@@ -199,7 +199,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			WebSocketHandler handler) throws IOException {
 
 		TransportHandler transportHandler = this.handlers.get(TransportType.WEBSOCKET);
-		if (!(transportHandler instanceof HandshakeHandler)) {
+		if (!(transportHandler instanceof HandshakeHandler handshakeHandler)) {
 			logger.error("No handler configured for raw WebSocket messages");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -213,7 +213,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;
 			}
-			((HandshakeHandler) transportHandler).doHandshake(request, response, handler, attributes);
+			handshakeHandler.doHandshake(request, response, handler, attributes);
 			chain.applyAfterHandshake(request, response, null);
 		}
 		catch (HandshakeFailureException ex) {

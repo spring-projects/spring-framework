@@ -155,14 +155,14 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	@Override
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
-		if (!(message instanceof TextMessage)) {
+		if (!(message instanceof TextMessage textMessage)) {
 			throw new IllegalArgumentException(this + " supports text messages only.");
 		}
 		if (this.state != State.OPEN) {
 			throw new IllegalStateException(this + " is not open: current state " + this.state);
 		}
 
-		String payload = ((TextMessage) message).getPayload();
+		String payload = textMessage.getPayload();
 		payload = getMessageCodec().encode(payload);
 		payload = payload.substring(1);  // the client-side doesn't need message framing (letter "a")
 
