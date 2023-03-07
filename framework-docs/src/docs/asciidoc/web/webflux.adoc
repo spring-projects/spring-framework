@@ -2504,7 +2504,7 @@ reactive type, as the following example shows:
 ----
 
 Note that use of `@ModelAttribute` is optional -- for example, to set its attributes.
-By default, any argument that is not a simple value type( as determined by
+By default, any argument that is not a simple value type (as determined by
 {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
 and is not resolved by any other argument resolver is treated as if it were annotated
 with `@ModelAttribute`.
