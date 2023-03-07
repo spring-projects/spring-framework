@@ -830,7 +830,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		private void generateGetEntityManagerMethod(MethodSpec.Builder method, PersistenceElement injectedElement) {
 			String unitName = injectedElement.unitName;
 			Properties properties = injectedElement.properties;
-			method.addJavadoc("Get the '$L' {@link $T}",
+			method.addJavadoc("Get the '$L' {@link $T}.",
 					(StringUtils.hasLength(unitName)) ? unitName : "default",
 					EntityManager.class);
 			method.addModifiers(javax.lang.model.element.Modifier.PUBLIC,

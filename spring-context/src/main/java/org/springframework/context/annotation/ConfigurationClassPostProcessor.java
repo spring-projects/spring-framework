@@ -594,7 +594,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		private void generateAddPostProcessorMethod(MethodSpec.Builder method, Map<String, String> mappings) {
-			method.addJavadoc("Add ImportAwareBeanPostProcessor to support ImportAware beans");
+			method.addJavadoc("Add ImportAwareBeanPostProcessor to support ImportAware beans.");
 			method.addModifiers(Modifier.PRIVATE);
 			method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_VARIABLE);
 			method.addCode(generateAddPostProcessorCode(mappings));

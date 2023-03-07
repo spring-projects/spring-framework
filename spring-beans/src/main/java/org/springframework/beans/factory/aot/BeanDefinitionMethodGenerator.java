@@ -138,7 +138,7 @@ class BeanDefinitionMethodGenerator {
 		ClassName topLevelClassName = target.topLevelClassName();
 		GeneratedClass generatedClass = generationContext.getGeneratedClasses()
 				.getOrAddForFeatureComponent("BeanDefinitions", topLevelClassName, type -> {
-					type.addJavadoc("Bean definitions for {@link $T}", topLevelClassName);
+					type.addJavadoc("Bean definitions for {@link $T}.", topLevelClassName);
 					type.addModifiers(Modifier.PUBLIC);
 				});
 
@@ -159,7 +159,7 @@ class BeanDefinitionMethodGenerator {
 
 	private static GeneratedClass createInnerClass(GeneratedClass generatedClass, String name, ClassName target) {
 		return generatedClass.getOrAdd(name, type -> {
-			type.addJavadoc("Bean definitions for {@link $T}", target);
+			type.addJavadoc("Bean definitions for {@link $T}.", target);
 			type.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 		});
 	}
@@ -186,7 +186,7 @@ class BeanDefinitionMethodGenerator {
 		this.aotContributions.forEach(aotContribution -> aotContribution.applyTo(generationContext, codeGenerator));
 
 		return generatedMethods.add("getBeanDefinition", method -> {
-			method.addJavadoc("Get the $L definition for '$L'",
+			method.addJavadoc("Get the $L definition for '$L'.",
 					(!this.registeredBean.isInnerBean()) ? "bean" : "inner-bean",
 					getName());
 			method.addModifiers(modifier, Modifier.STATIC);
