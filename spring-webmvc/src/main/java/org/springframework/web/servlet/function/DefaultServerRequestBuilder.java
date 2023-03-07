@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,11 +299,9 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			MediaType contentType = headers().contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter) {
-					GenericHttpMessageConverter<T> genericMessageConverter =
-							(GenericHttpMessageConverter<T>) messageConverter;
+				if (messageConverter instanceof GenericHttpMessageConverter<?> genericMessageConverter) {
 					if (genericMessageConverter.canRead(bodyType, bodyClass, contentType)) {
-						return genericMessageConverter.read(bodyType, bodyClass, inputMessage);
+						return (T) genericMessageConverter.read(bodyType, bodyClass, inputMessage);
 					}
 				}
 				if (messageConverter.canRead(bodyClass, contentType)) {

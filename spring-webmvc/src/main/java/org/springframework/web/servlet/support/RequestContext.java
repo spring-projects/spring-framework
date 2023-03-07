@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,11 +226,11 @@ public class RequestContext {
 
 		// Determine locale to use for this RequestContext.
 		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
-		if (localeResolver instanceof LocaleContextResolver) {
-			LocaleContext localeContext = ((LocaleContextResolver) localeResolver).resolveLocaleContext(request);
+		if (localeResolver instanceof LocaleContextResolver localeContextResolver) {
+			LocaleContext localeContext = localeContextResolver.resolveLocaleContext(request);
 			locale = localeContext.getLocale();
-			if (localeContext instanceof TimeZoneAwareLocaleContext) {
-				timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
+			if (localeContext instanceof TimeZoneAwareLocaleContext timeZoneAwareLocaleContext) {
+				timeZone = timeZoneAwareLocaleContext.getTimeZone();
 			}
 		}
 		else if (localeResolver != null) {
@@ -378,10 +378,10 @@ public class RequestContext {
 	 */
 	public void changeLocale(Locale locale, TimeZone timeZone) {
 		LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(this.request);
-		if (!(localeResolver instanceof LocaleContextResolver)) {
+		if (!(localeResolver instanceof LocaleContextResolver localeContextResolver)) {
 			throw new IllegalStateException("Cannot change locale context if no LocaleContextResolver configured");
 		}
-		((LocaleContextResolver) localeResolver).setLocaleContext(this.request, this.response,
+		localeContextResolver.setLocaleContext(this.request, this.response,
 				new SimpleTimeZoneAwareLocaleContext(locale, timeZone));
 		this.locale = locale;
 		this.timeZone = timeZone;
@@ -867,8 +867,8 @@ public class RequestContext {
 		if (errors == null) {
 			errors = (Errors) getModelObject(BindingResult.MODEL_KEY_PREFIX + name);
 			// Check old BindException prefix for backwards compatibility.
-			if (errors instanceof BindException) {
-				errors = ((BindException) errors).getBindingResult();
+			if (errors instanceof BindException bindException) {
+				errors = bindException.getBindingResult();
 			}
 			if (errors == null) {
 				return null;
@@ -879,8 +879,8 @@ public class RequestContext {
 			errors = new EscapedErrors(errors);
 			put = true;
 		}
-		else if (!htmlEscape && errors instanceof EscapedErrors) {
-			errors = ((EscapedErrors) errors).getSource();
+		else if (!htmlEscape && errors instanceof EscapedErrors escapedErrors) {
+			errors = escapedErrors.getSource();
 			put = true;
 		}
 		if (put) {
@@ -945,7 +945,7 @@ public class RequestContext {
 					localeObject = Config.get(servletContext, Config.FMT_LOCALE);
 				}
 			}
-			return (localeObject instanceof Locale ? (Locale) localeObject : null);
+			return (localeObject instanceof Locale locale ? locale : null);
 		}
 
 		@Nullable
@@ -960,7 +960,7 @@ public class RequestContext {
 					timeZoneObject = Config.get(servletContext, Config.FMT_TIME_ZONE);
 				}
 			}
-			return (timeZoneObject instanceof TimeZone ? (TimeZone) timeZoneObject : null);
+			return (timeZoneObject instanceof TimeZone timeZone ? timeZone : null);
 		}
 	}
 

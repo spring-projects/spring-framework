@@ -223,7 +223,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 				writeObjectEntry(tagWriter, valueProperty, labelProperty, item, i);
 			}
 		}
-		else if (itemsObject instanceof final Collection<?> optionCollection) {
+		else if (itemsObject instanceof Collection<?> optionCollection) {
 			int itemIndex = 0;
 			for (Iterator<?> it = optionCollection.iterator(); it.hasNext(); itemIndex++) {
 				Object item = it.next();
@@ -252,8 +252,8 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		if (valueProperty != null) {
 			renderValue = wrapper.getPropertyValue(valueProperty);
 		}
-		else if (item instanceof Enum) {
-			renderValue = ((Enum<?>) item).name();
+		else if (item instanceof Enum<?> enumValue) {
+			renderValue = enumValue.name();
 		}
 		else {
 			renderValue = item;

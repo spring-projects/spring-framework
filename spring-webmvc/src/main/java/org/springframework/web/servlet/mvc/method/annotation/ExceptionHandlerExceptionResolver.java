@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,8 +433,8 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			if (!mavContainer.isViewReference()) {
 				mav.setView((View) mavContainer.getView());
 			}
-			if (model instanceof RedirectAttributes) {
-				Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+			if (model instanceof RedirectAttributes redirectAttributes) {
+				Map<String, ?> flashAttributes = redirectAttributes.getFlashAttributes();
 				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
 			}
 			return mav;

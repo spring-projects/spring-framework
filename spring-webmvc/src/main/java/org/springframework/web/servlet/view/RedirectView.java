@@ -461,8 +461,8 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			if (rawValue != null && rawValue.getClass().isArray()) {
 				values = CollectionUtils.arrayToList(rawValue);
 			}
-			else if (rawValue instanceof Collection) {
-				values = ((Collection<?>) rawValue);
+			else if (rawValue instanceof Collection<?> collection) {
+				values = collection;
 			}
 			else {
 				values = Collections.singleton(rawValue);

@@ -141,8 +141,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		super.handleMatch(info, lookupPath, request);
 
 		RequestCondition<?> condition = info.getActivePatternsCondition();
-		if (condition instanceof PathPatternsRequestCondition) {
-			extractMatchDetails((PathPatternsRequestCondition) condition, lookupPath, request);
+		if (condition instanceof PathPatternsRequestCondition pprc) {
+			extractMatchDetails(pprc, lookupPath, request);
 		}
 		else {
 			extractMatchDetails((PatternsRequestCondition) condition, lookupPath, request);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,8 +76,8 @@ public class InterceptorRegistry {
 
 	private static final Comparator<Object> INTERCEPTOR_ORDER_COMPARATOR =
 			OrderComparator.INSTANCE.withSourceProvider(object -> {
-				if (object instanceof InterceptorRegistration) {
-					return (Ordered) ((InterceptorRegistration) object)::getOrder;
+				if (object instanceof InterceptorRegistration interceptorRegistration) {
+					return (Ordered) interceptorRegistration::getOrder;
 				}
 				return null;
 			});

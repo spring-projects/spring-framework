@@ -285,8 +285,8 @@ public class EncodedResourceResolver extends AbstractResourceResolver {
 		@Override
 		public HttpHeaders getResponseHeaders() {
 			HttpHeaders headers;
-			if (this.original instanceof HttpResource) {
-				headers = ((HttpResource) this.original).getResponseHeaders();
+			if (this.original instanceof HttpResource httpResource) {
+				headers = httpResource.getResponseHeaders();
 			}
 			else {
 				headers = new HttpHeaders();

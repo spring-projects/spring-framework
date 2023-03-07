@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class HandlerMappingIntrospector
 	public MatchableHandlerMapping getMatchableHandlerMapping(HttpServletRequest request) throws Exception {
 		HttpServletRequest wrappedRequest = new AttributesPreservingRequest(request);
 		return doWithMatchingMapping(wrappedRequest, false, (matchedMapping, executionChain) -> {
-			if (matchedMapping instanceof MatchableHandlerMapping) {
+			if (matchedMapping instanceof MatchableHandlerMapping matchableHandlerMapping) {
 				PathPatternMatchableHandlerMapping mapping = this.pathPatternHandlerMappings.get(matchedMapping);
 				if (mapping != null) {
 					RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(wrappedRequest);
@@ -129,7 +129,7 @@ public class HandlerMappingIntrospector
 				}
 				else {
 					String lookupPath = (String) wrappedRequest.getAttribute(UrlPathHelper.PATH_ATTRIBUTE);
-					return new PathSettingHandlerMapping((MatchableHandlerMapping) matchedMapping, lookupPath);
+					return new PathSettingHandlerMapping(matchableHandlerMapping, lookupPath);
 				}
 			}
 			throw new IllegalStateException("HandlerMapping is not a MatchableHandlerMapping");
@@ -142,12 +142,12 @@ public class HandlerMappingIntrospector
 		AttributesPreservingRequest wrappedRequest = new AttributesPreservingRequest(request);
 		return doWithMatchingMappingIgnoringException(wrappedRequest, (handlerMapping, executionChain) -> {
 			for (HandlerInterceptor interceptor : executionChain.getInterceptorList()) {
-				if (interceptor instanceof CorsConfigurationSource) {
-					return ((CorsConfigurationSource) interceptor).getCorsConfiguration(wrappedRequest);
+				if (interceptor instanceof CorsConfigurationSource ccs) {
+					return ccs.getCorsConfiguration(wrappedRequest);
 				}
 			}
-			if (executionChain.getHandler() instanceof CorsConfigurationSource) {
-				return ((CorsConfigurationSource) executionChain.getHandler()).getCorsConfiguration(wrappedRequest);
+			if (executionChain.getHandler() instanceof CorsConfigurationSource ccs) {
+				return ccs.getCorsConfiguration(wrappedRequest);
 			}
 			return null;
 		});
@@ -246,8 +246,8 @@ public class HandlerMappingIntrospector
 			List<HandlerMapping> mappings) {
 
 		return mappings.stream()
-				.filter(mapping -> mapping instanceof MatchableHandlerMapping)
-				.map(mapping -> (MatchableHandlerMapping) mapping)
+				.filter(MatchableHandlerMapping.class::isInstance)
+				.map(MatchableHandlerMapping.class::cast)
 				.filter(mapping -> mapping.getPatternParser() != null)
 				.collect(Collectors.toMap(mapping -> mapping, PathPatternMatchableHandlerMapping::new));
 	}

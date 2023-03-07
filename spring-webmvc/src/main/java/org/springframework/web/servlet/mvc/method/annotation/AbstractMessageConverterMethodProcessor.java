@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,8 +280,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
-				GenericHttpMessageConverter genericConverter = (converter instanceof GenericHttpMessageConverter ?
-						(GenericHttpMessageConverter<?>) converter : null);
+				GenericHttpMessageConverter genericConverter =
+						(converter instanceof GenericHttpMessageConverter ghmc ? ghmc : null);
 				if (genericConverter != null ?
 						((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType) :
 						converter.canWrite(valueType, selectedMediaType)) {
@@ -383,8 +383,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 		Set<MediaType> result = new LinkedHashSet<>();
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
-			if (converter instanceof GenericHttpMessageConverter && targetType != null) {
-				if (((GenericHttpMessageConverter<?>) converter).canWrite(targetType, valueClass, null)) {
+			if (converter instanceof GenericHttpMessageConverter<?> ghmc && targetType != null) {
+				if (ghmc.canWrite(targetType, valueClass, null)) {
 					result.addAll(converter.getSupportedMediaTypes(valueClass));
 				}
 			}

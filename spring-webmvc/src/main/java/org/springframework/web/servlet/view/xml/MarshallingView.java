@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,8 +166,8 @@ public class MarshallingView extends AbstractView {
 	protected boolean isEligibleForMarshalling(String modelKey, Object value) {
 		Assert.state(this.marshaller != null, "No Marshaller set");
 		Class<?> classToCheck = value.getClass();
-		if (value instanceof JAXBElement) {
-			classToCheck = ((JAXBElement<?>) value).getDeclaredType();
+		if (value instanceof JAXBElement<?> jaxbElement) {
+			classToCheck = jaxbElement.getDeclaredType();
 		}
 		return this.marshaller.supports(classToCheck);
 	}

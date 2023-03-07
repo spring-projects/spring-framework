@@ -140,14 +140,14 @@ public class HandlerFunctionAdapter implements HandlerAdapter, Ordered {
 			String formatted = LogFormatUtils.formatValue(result, !traceOn);
 			return "Resume with async result [" + formatted + "]";
 		});
-		if (result instanceof ServerResponse) {
-			return (ServerResponse) result;
+		if (result instanceof ServerResponse response) {
+			return response;
 		}
-		else if (result instanceof Exception) {
-			throw (Exception) result;
+		else if (result instanceof Exception exception) {
+			throw exception;
 		}
-		else if (result instanceof Throwable) {
-			throw new ServletException("Async processing failed", (Throwable) result);
+		else if (result instanceof Throwable throwable) {
+			throw new ServletException("Async processing failed", throwable);
 		}
 		else if (result == null) {
 			return null;

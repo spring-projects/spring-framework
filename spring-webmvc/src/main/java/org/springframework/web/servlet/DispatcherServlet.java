@@ -812,8 +812,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Deprecated
 	@Nullable
 	public final org.springframework.ui.context.ThemeSource getThemeSource() {
-		return (getWebApplicationContext() instanceof org.springframework.ui.context.ThemeSource ?
-				(org.springframework.ui.context.ThemeSource) getWebApplicationContext() : null);
+		return (getWebApplicationContext() instanceof org.springframework.ui.context.ThemeSource themeSource ?
+				themeSource : null);
 	}
 
 	/**
@@ -1143,9 +1143,9 @@ public class DispatcherServlet extends FrameworkServlet {
 		boolean errorView = false;
 
 		if (exception != null) {
-			if (exception instanceof ModelAndViewDefiningException) {
+			if (exception instanceof ModelAndViewDefiningException mavDefiningException) {
 				logger.debug("ModelAndViewDefiningException encountered", exception);
-				mv = ((ModelAndViewDefiningException) exception).getModelAndView();
+				mv = mavDefiningException.getModelAndView();
 			}
 			else {
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
@@ -1188,8 +1188,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Override
 	protected LocaleContext buildLocaleContext(final HttpServletRequest request) {
 		LocaleResolver lr = this.localeResolver;
-		if (lr instanceof LocaleContextResolver) {
-			return ((LocaleContextResolver) lr).resolveLocaleContext(request);
+		if (lr instanceof LocaleContextResolver localeContextResolver) {
+			return localeContextResolver.resolveLocaleContext(request);
 		}
 		else {
 			return () -> (lr != null ? lr.resolveLocale(request) : request.getLocale());
