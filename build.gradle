@@ -127,10 +127,8 @@ configure([rootProject] + javaProjects) { project ->
 			"https://hc.apache.org/httpcomponents-client-5.2.x/current/httpclient5/apidocs/",
 			"https://projectreactor.io/docs/test/release/api/",
 			"https://junit.org/junit4/javadoc/4.13.2/",
-			// TODO Uncomment link to JUnit 5 docs once we have sorted out
-			// the following warning in the build.
-			//
-			// warning: The code being documented uses packages in the unnamed module, but the packages defined in https://junit.org/junit5/docs/5.9.2/api/ are in named modules.
+			// TODO Uncomment link to JUnit 5 docs once we execute Gradle with Java 18+.
+			// See https://github.com/spring-projects/spring-framework/issues/27497
 			//
 			// "https://junit.org/junit5/docs/5.9.2/api/",
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
