@@ -147,30 +147,34 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder body(byte[] body) {
+		Assert.notNull(body, "body must not be null");
 		this.body = body;
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder body(String body) {
+		Assert.notNull(body, "body must not be null");
 		return body(body.getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Override
 	public ServerRequest.Builder attribute(String name, Object value) {
-		Assert.notNull(name, "'name' must not be null");
+		Assert.notNull(name, "name must not be null");
 		this.attributes.put(name, value);
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
+		Assert.notNull(attributesConsumer, "AttributesConsumer must not be null");
 		attributesConsumer.accept(this.attributes);
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder param(String name, String... values) {
+		Assert.notNull(name, "name must not be null");
 		for (String value : values) {
 			this.params.add(name, value);
 		}
@@ -179,12 +183,13 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder params(Consumer<MultiValueMap<String, String>> paramsConsumer) {
+		Assert.notNull(paramsConsumer, "paramsConsumer must not be null");
 		paramsConsumer.accept(this.params);
 		return this;
 	}
 
 	@Override
-	public ServerRequest.Builder remoteAddress(InetSocketAddress remoteAddress) {
+	public ServerRequest.Builder remoteAddress(@Nullable InetSocketAddress remoteAddress) {
 		this.remoteAddress = remoteAddress;
 		return this;
 	}
