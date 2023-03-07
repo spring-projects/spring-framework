@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.web.server.ServerWebExchange;
  * A WebSocket {@code RequestUpgradeStrategy} for Reactor Netty for Netty 5.
  *
  * <p>This class is based on {@link ReactorNettyRequestUpgradeStrategy}.
- *\
+ *
  * @author Violeta Georgieva
  * @since 6.0
  */
