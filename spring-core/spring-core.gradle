@@ -97,8 +97,6 @@ dependencies {
 }
 
 jar {
-	reproducibleFileOrder = true
-	preserveFileTimestamps = false  // maybe not necessary here, but good for reproducibility
 	manifest.attributes["Dependencies"] = "jdk.unsupported"  // for WildFly (-> Objenesis 3.2)
 
 	dependsOn javapoetRepackJar
