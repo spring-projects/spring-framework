@@ -239,6 +239,26 @@
 		<module name="io.spring.javaformat.checkstyle.check.SpringCatchCheck"/>
 		<module name="io.spring.javaformat.checkstyle.check.SpringJavadocCheck"/>
 		<module name="io.spring.javaformat.checkstyle.check.SpringJUnit5Check"/>
+		<!--package-info should contain null-safety annotations-->
+		<!--These two modules will fail to detect multiline annotations-->
+		<module name="RegexpSinglelineJavaCheck">
+			<property name="id" value="javaDocPackageNonNullFieldsAnnotation"/>
+			<property name="format" value="(@NonNullFields|@org\.springframework\.lang\.NonNullFields)"/>
+			<property name="minimum" value="1"/>
+			<property  name="maximum" value="1"/>
+			<property name="severity" value="warning"/>
+			<property name="message" value="package-info.java is missing required null-safety annotation @NonNullFields."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="RegexpSinglelineJavaCheck">
+			<property name="id" value="javaDocPackageNonNullApiAnnotation"/>
+			<property name="format" value="(@NonNullApi|@org\.springframework\.lang\.NonNullApi)"/>
+			<property name="minimum" value="1"/>
+			<property  name="maximum" value="1"/>
+			<property name="severity" value="warning"/>
+			<property name="message" value="package-info.java is missing required null-safety annotation @NonNullApi."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
  	</module>
 
 	<!--package-info checker -->

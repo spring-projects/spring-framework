@@ -130,7 +130,7 @@
 	<suppress files="sockjs[\\/]transport[\\/]TransportType" checks="JavadocVariable"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]reactive[\\/]protobuf[\\/].*" checks=".*"/>
 
-	<!-- Suppress JavadocPackage checks on packages outside of src/main-->
+	<!-- Suppress JavadocPackage checks and package null safety annotations on packages outside of src/main-->
 	<!-- And outside 'framework-docs' module-->
 	<!-- And outside 'spring-core/src/main/java/org/springframework/asm' package-->
 	<!-- And outside 'spring-core/src/main/java/org/springframework/cglib' package-->
@@ -138,5 +138,7 @@
 	<!-- And outside 'spring-core/src/main/java/org/springframework/javapoet' package-->
 	<!-- And outside 'spring-core/src/main/java/org/springframework/lang' package-->
 	<suppress checks="JavadocPackage" files="(^(?!.*src[\\/]main[\\/]).*)|(.*framework-docs.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/asm.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/cglib.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/objenesis.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/javapoet.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/lang.*)"/>
+	<suppress checks="RegexpSinglelineJava" files="^(?!.*(package-info.java))" id="javaDocPackageNonNullFieldsAnnotation"/>
+	<suppress checks="RegexpSinglelineJava" files="^(?!.*(package-info.java))" id="javaDocPackageNonNullApiAnnotation"/>
 
 </suppressions>
