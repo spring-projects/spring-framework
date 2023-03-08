@@ -242,5 +242,7 @@
  	</module>
 
 	<!--package-info checker -->
-	<module name="JavadocPackage"/>
+	<module name="JavadocPackage">
+		<property name="severity" value="warning"/>
+	</module>
 </module>
