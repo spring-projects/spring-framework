@@ -61,7 +61,6 @@ import org.springframework.beans.factory.config.AutowiredPropertyMarker;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -1154,7 +1153,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
 		if (instanceSupplier != null) {
-			return obtainFromSupplier(instanceSupplier, beanName);
+			return obtainFromSupplier(instanceSupplier, beanName, mbd);
 		}
 
 		if (mbd.getFactoryMethodName() != null) {
@@ -1203,38 +1202,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param supplier the configured supplier
 	 * @param beanName the corresponding bean name
 	 * @return a BeanWrapper for the new instance
-	 * @since 5.0
-	 * @see #getObjectForBeanInstance
 	 */
-	protected BeanWrapper obtainFromSupplier(Supplier<?> supplier, String beanName) {
-		Object instance = obtainInstanceFromSupplier(supplier, beanName);
-		if (instance == null) {
-			instance = new NullBean();
-		}
-		BeanWrapper bw = new BeanWrapperImpl(instance);
-		initBeanWrapper(bw);
-		return bw;
-	}
-
-	@Nullable
-	private Object obtainInstanceFromSupplier(Supplier<?> supplier, String beanName) {
+	private BeanWrapper obtainFromSupplier(Supplier<?> supplier, String beanName, RootBeanDefinition mbd) {
 		String outerBean = this.currentlyCreatedBean.get();
 		this.currentlyCreatedBean.set(beanName);
+		Object instance;
+
 		try {
-			if (supplier instanceof InstanceSupplier<?> instanceSupplier) {
-				return instanceSupplier.get(RegisteredBean.of((ConfigurableListableBeanFactory) this, beanName));
-			}
-			if (supplier instanceof ThrowingSupplier<?> throwingSupplier) {
-				return throwingSupplier.getWithException();
-			}
-			return supplier.get();
+			instance = obtainInstanceFromSupplier(supplier, beanName, mbd);
 		}
 		catch (Throwable ex) {
 			if (ex instanceof BeansException beansException) {
 				throw beansException;
 			}
-			throw new BeanCreationException(beanName,
-					"Instantiation of supplied bean failed", ex);
+			throw new BeanCreationException(beanName, "Instantiation of supplied bean failed", ex);
 		}
 		finally {
 			if (outerBean != null) {
@@ -1244,6 +1225,31 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				this.currentlyCreatedBean.remove();
 			}
 		}
+
+		if (instance == null) {
+			instance = new NullBean();
+		}
+		BeanWrapper bw = new BeanWrapperImpl(instance);
+		initBeanWrapper(bw);
+		return bw;
+	}
+
+	/**
+	 * Obtain a bean instance from the given supplier.
+	 * @param supplier the configured supplier
+	 * @param beanName the corresponding bean name
+	 * @param mbd the bean definition for the bean
+	 * @return the bean instance (possibly {@code null})
+	 * @since 6.0.7
+	 */
+	@Nullable
+	protected Object obtainInstanceFromSupplier(Supplier<?> supplier, String beanName, RootBeanDefinition mbd)
+			throws Exception {
+
+		if (supplier instanceof ThrowingSupplier<?> throwingSupplier) {
+			return throwingSupplier.getWithException();
+		}
+		return supplier.get();
 	}
 
 	/**

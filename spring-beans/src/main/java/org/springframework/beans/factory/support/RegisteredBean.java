@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,18 @@ public final class RegisteredBean {
 		return new RegisteredBean(beanFactory, () -> beanName, false,
 				() -> (RootBeanDefinition) beanFactory.getMergedBeanDefinition(beanName),
 				null);
+	}
+
+	/**
+	 * Create a new {@link RegisteredBean} instance for a regular bean.
+	 * @param beanFactory the source bean factory
+	 * @param beanName the bean name
+	 * @param mbd the pre-determined merged bean definition
+	 * @return a new {@link RegisteredBean} instance
+	 * @since 6.0.7
+	 */
+	static RegisteredBean of(ConfigurableListableBeanFactory beanFactory, String beanName, RootBeanDefinition mbd) {
+		return new RegisteredBean(beanFactory, () -> beanName, false, () -> mbd, null);
 	}
 
 	/**
@@ -220,45 +232,34 @@ public final class RegisteredBean {
 		@Nullable
 		private volatile String resolvedBeanName;
 
-
-		InnerBeanResolver(RegisteredBean parent, @Nullable String innerBeanName,
-				BeanDefinition innerBeanDefinition) {
-
-			Assert.isInstanceOf(AbstractAutowireCapableBeanFactory.class,
-					parent.getBeanFactory());
+		InnerBeanResolver(RegisteredBean parent, @Nullable String innerBeanName, BeanDefinition innerBeanDefinition) {
+			Assert.isInstanceOf(AbstractAutowireCapableBeanFactory.class, parent.getBeanFactory());
 			this.parent = parent;
 			this.innerBeanName = innerBeanName;
 			this.innerBeanDefinition = innerBeanDefinition;
 		}
-
 
 		String resolveBeanName() {
 			String resolvedBeanName = this.resolvedBeanName;
 			if (resolvedBeanName != null) {
 				return resolvedBeanName;
 			}
-			resolvedBeanName = resolveInnerBean(
-					(beanName, mergedBeanDefinition) -> beanName);
+			resolvedBeanName = resolveInnerBean((beanName, mergedBeanDefinition) -> beanName);
 			this.resolvedBeanName = resolvedBeanName;
 			return resolvedBeanName;
 		}
 
 		RootBeanDefinition resolveMergedBeanDefinition() {
-			return resolveInnerBean(
-					(beanName, mergedBeanDefinition) -> mergedBeanDefinition);
+			return resolveInnerBean((beanName, mergedBeanDefinition) -> mergedBeanDefinition);
 		}
 
-		private <T> T resolveInnerBean(
-				BiFunction<String, RootBeanDefinition, T> resolver) {
-
+		private <T> T resolveInnerBean(BiFunction<String, RootBeanDefinition, T> resolver) {
 			// Always use a fresh BeanDefinitionValueResolver in case the parent merged bean definition has changed.
 			BeanDefinitionValueResolver beanDefinitionValueResolver = new BeanDefinitionValueResolver(
 					(AbstractAutowireCapableBeanFactory) this.parent.getBeanFactory(),
 					this.parent.getBeanName(), this.parent.getMergedBeanDefinition());
-			return beanDefinitionValueResolver.resolveInnerBean(this.innerBeanName,
-					this.innerBeanDefinition, resolver);
+			return beanDefinitionValueResolver.resolveInnerBean(this.innerBeanName, this.innerBeanDefinition, resolver);
 		}
-
 	}
 
 }
