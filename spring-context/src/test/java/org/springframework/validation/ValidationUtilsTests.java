@@ -33,11 +33,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 public class ValidationUtilsTests {
 
-	Validator emptyValidator = Validator.of(TestBean.class)
-			.apply((testBean, errors) -> ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!"));
+	Validator emptyValidator = Validator.of(TestBean.class, (testBean, errors) -> ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!"));
 
-	Validator emptyOrWhitespaceValidator = Validator.of(TestBean.class)
-			.apply((testBean, errors) -> ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", "You must enter a name!"));
+	Validator emptyOrWhitespaceValidator = Validator.of(TestBean.class, (testBean, errors) -> ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", "You must enter a name!"));
 
 	@Test
 	public void testInvokeValidatorWithNullValidator() throws Exception {

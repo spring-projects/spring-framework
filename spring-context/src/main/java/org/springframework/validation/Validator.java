@@ -17,7 +17,6 @@
 package org.springframework.validation;
 
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 import org.springframework.util.Assert;
 
@@ -99,15 +98,14 @@ public interface Validator {
 	void validate(Object target, Errors errors);
 
 	/**
-	 * Returns the {@link Function} that takes the {@link BiConsumer} containing validation logic for the specific type
+	 * Takes the {@link BiConsumer} containing the validation logic for the specific type
 	 * <code>&lt;T&gt;</code> and returns the {@link Validator} instance.<br>
 	 * This validator implements the <i>typical</i> {@link #supports(Class)} method
 	 * for the given <code>&lt;T&gt;</code>.<br>
 	 *
-	 * By using this {@link #of(Class)} method, a {@link Validator}  can be implemented as follows:
+	 * By using this method, a {@link Validator}  can be implemented as follows:
 	 *
-	 * <pre class="code">Validator passwordEqualsValidator = Validator.of(PasswordResetForm.class)
-	 *     .apply((form, errors) -> {
+	 * <pre class="code">Validator passwordEqualsValidator = Validator.of(PasswordResetForm.class, (form, errors) -> {
 	 *       if (!Objects.equals(form.getPassword(), form.getConfirmPassword())) {
 	 *         errors.rejectValue("confirmPassword",
 	 *             "PasswordEqualsValidator.passwordResetForm.password",
@@ -115,13 +113,13 @@ public interface Validator {
 	 *       }
 	 *     });</pre>
 	 * @param targetClass  the class of the object that is to be validated
+	 * @param delegate the validation logic to delegate for the specific type <code>&lt;T&gt;</code>
 	 * @param <T> the type of the object that is to be validated
-	 * @return the {@link Function} that takes the {@link BiConsumer} containing the validation logic and
-	 * returns the {@link Validator} instance
+	 * @return the {@link Validator} instance
 	 */
-	static <T> Function<BiConsumer<T, Errors>, Validator> of(Class<T> targetClass) {
+	static <T> Validator of(Class<T> targetClass, BiConsumer<T, Errors> delegate) {
 		Assert.notNull(targetClass, "'targetClass' must not be null.");
-		return validator -> new Validator() {
+		return new Validator() {
 			@Override
 			public boolean supports(Class<?> clazz) {
 				return targetClass.isAssignableFrom(clazz);
@@ -129,7 +127,7 @@ public interface Validator {
 
 			@Override
 			public void validate(Object target, Errors errors) {
-				validator.accept(targetClass.cast(target), errors);
+				delegate.accept(targetClass.cast(target), errors);
 			}
 		};
 	}
