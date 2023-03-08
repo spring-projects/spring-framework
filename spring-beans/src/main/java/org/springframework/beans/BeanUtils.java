@@ -29,6 +29,7 @@ import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -791,11 +792,11 @@ public abstract class BeanUtils {
 			actualEditable = editable;
 		}
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
-		List<String> ignoreList = (ignoreProperties != null ? Arrays.asList(ignoreProperties) : null);
+		Set<String> ignoreSet = (ignoreProperties != null ? new HashSet<>(Arrays.asList(ignoreProperties)) : null);
 
 		for (PropertyDescriptor targetPd : targetPds) {
 			Method writeMethod = targetPd.getWriteMethod();
-			if (writeMethod != null && (ignoreList == null || !ignoreList.contains(targetPd.getName()))) {
+			if (writeMethod != null && (ignoreSet == null || !ignoreSet.contains(targetPd.getName()))) {
 				PropertyDescriptor sourcePd = getPropertyDescriptor(source.getClass(), targetPd.getName());
 				if (sourcePd != null) {
 					Method readMethod = sourcePd.getReadMethod();
