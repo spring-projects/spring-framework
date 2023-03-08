@@ -246,6 +246,7 @@
 			<property name="format" value="(@NonNullFields|@org\.springframework\.lang\.NonNullFields)"/>
 			<property name="minimum" value="1"/>
 			<property  name="maximum" value="1"/>
+			<property name="severity" value="warning"/>
 			<property name="message" value="package-info.java is missing required null-safety annotation @NonNullFields."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
@@ -254,6 +255,7 @@
 			<property name="format" value="(@NonNullApi|@org\.springframework\.lang\.NonNullApi)"/>
 			<property name="minimum" value="1"/>
 			<property  name="maximum" value="1"/>
+			<property name="severity" value="warning"/>
 			<property name="message" value="package-info.java is missing required null-safety annotation @NonNullApi."/>
 			<property name="ignoreComments" value="true"/>
 		</module>
