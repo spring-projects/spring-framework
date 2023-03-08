@@ -32,14 +32,14 @@ configure(allprojects) { project ->
 			mavenBom "io.projectreactor:reactor-bom:2020.0.27"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR13"
 			mavenBom "io.rsocket:rsocket-bom:1.1.3"
-			mavenBom "org.eclipse.jetty:jetty-bom:9.4.50.v20221201"
+			mavenBom "org.eclipse.jetty:jetty-bom:9.4.51.v20230217"
 			mavenBom "org.jetbrains.kotlin:kotlin-bom:1.5.32"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.5.2"
 			mavenBom "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.2.2"
 			mavenBom "org.junit:junit-bom:5.8.2"
 		}
 		dependencies {
-			dependencySet(group: 'org.apache.logging.log4j', version: '2.19.0') {
+			dependencySet(group: 'org.apache.logging.log4j', version: '2.20.0') {
 				entry 'log4j-api'
 				entry 'log4j-core'
 				entry 'log4j-jul'
@@ -128,18 +128,18 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.71') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.73') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.71') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.73') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.22.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.23.Final') {
 				entry 'undertow-core'
 				entry('undertow-servlet') {
 					exclude group: "org.jboss.spec.javax.servlet", name: "jboss-servlet-api_4.0_spec"
