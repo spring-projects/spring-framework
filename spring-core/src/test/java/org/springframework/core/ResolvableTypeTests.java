@@ -66,6 +66,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  */
 @SuppressWarnings("rawtypes")
 @ExtendWith(MockitoExtension.class)
@@ -1315,6 +1316,12 @@ class ResolvableTypeTests {
 	}
 
 	@Test
+	void hasUnresolvableGenericsWhenNested() throws Exception {
+		ResolvableType type = ResolvableType.forMethodReturnType(ListOfListSupplier.class.getMethod("get"));
+		assertThat(type.hasUnresolvableGenerics()).isTrue();
+	}
+
+	@Test
 	void spr11219() throws Exception {
 		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
 		assertThat(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class))).isTrue();
@@ -1616,6 +1623,12 @@ class ResolvableTypeTests {
 	interface ListOfGenericArray extends List<List<String>[]> {
 	}
 
+
+	public interface ListOfListSupplier<T> {
+
+		List<List<T>> get();
+
+	}
 
 	static class EnclosedInParameterizedType<T> {
 

@@ -39,6 +39,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Rob Harrop
  * @author Sam Brannen
  * @author Phillip Webb
+ * @author Yanming Zhou
  * @since 2.5.2
  */
 public final class GenericTypeResolver {
@@ -167,7 +168,7 @@ public final class GenericTypeResolver {
 			else if (genericType instanceof ParameterizedType parameterizedType) {
 				ResolvableType resolvedType = ResolvableType.forType(genericType);
 				if (resolvedType.hasUnresolvableGenerics()) {
-					Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
+					ResolvableType[] generics = new ResolvableType[parameterizedType.getActualTypeArguments().length];
 					Type[] typeArguments = parameterizedType.getActualTypeArguments();
 					ResolvableType contextType = ResolvableType.forClass(contextClass);
 					for (int i = 0; i < typeArguments.length; i++) {
@@ -175,14 +176,17 @@ public final class GenericTypeResolver {
 						if (typeArgument instanceof TypeVariable<?> typeVariable) {
 							ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
 							if (resolvedTypeArgument != ResolvableType.NONE) {
-								generics[i] = resolvedTypeArgument.resolve();
+								generics[i] = resolvedTypeArgument;
 							}
 							else {
-								generics[i] = ResolvableType.forType(typeArgument).resolve();
+								generics[i] = ResolvableType.forType(typeArgument);
 							}
 						}
+						else if (typeArgument instanceof ParameterizedType) {
+							generics[i] = ResolvableType.forType(resolveType(typeArgument, contextClass));
+						}
 						else {
-							generics[i] = ResolvableType.forType(typeArgument).resolve();
+							generics[i] = ResolvableType.forType(typeArgument);
 						}
 					}
 					Class<?> rawClass = resolvedType.getRawClass();
