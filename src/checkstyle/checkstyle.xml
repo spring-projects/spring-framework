@@ -240,4 +240,7 @@
 		<module name="io.spring.javaformat.checkstyle.check.SpringJavadocCheck"/>
 		<module name="io.spring.javaformat.checkstyle.check.SpringJUnit5Check"/>
  	</module>
+
+	<!--package-info checker -->
+	<module name="JavadocPackage"/>
 </module>
