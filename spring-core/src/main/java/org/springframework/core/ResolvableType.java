@@ -70,6 +70,7 @@ import org.springframework.util.StringUtils;
  * @author Phillip Webb
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  * @since 4.0
  * @see #forField(Field)
  * @see #forMethodParameter(Method, int)
@@ -572,7 +573,7 @@ public class ResolvableType implements Serializable {
 	private boolean determineUnresolvableGenerics() {
 		ResolvableType[] generics = getGenerics();
 		for (ResolvableType generic : generics) {
-			if (generic.isUnresolvableTypeVariable() || generic.isWildcardWithoutBounds()) {
+			if (generic.isUnresolvableTypeVariable() || generic.isWildcardWithoutBounds() || generic.hasUnresolvableGenerics()) {
 				return true;
 			}
 		}

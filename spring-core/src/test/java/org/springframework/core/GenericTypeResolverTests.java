@@ -39,6 +39,7 @@ import static org.springframework.util.ReflectionUtils.findMethod;
  * @author Sam Brannen
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 class GenericTypeResolverTests {
@@ -201,6 +202,13 @@ class GenericTypeResolverTests {
 		Type resolvedType = resolveType(methodParameter.getGenericParameterType(), WithMethodParameter.class);
 		ParameterizedTypeReference<List<Map<String, Integer>>> reference = new ParameterizedTypeReference<>() {};
 		assertThat(resolvedType).isEqualTo(reference.getType());
+	}
+
+	@Test
+	void resolveNestedTypeVariable() throws Exception {
+		Type resolved = resolveType(ListOfListSupplier.class.getMethod("get").getGenericReturnType(),
+				StringListOfListSupplier.class);
+		assertThat(ResolvableType.forType(resolved).getGeneric(0).getGeneric(0).resolve()).isEqualTo(String.class);
 	}
 
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
@@ -382,5 +390,14 @@ class GenericTypeResolverTests {
 		}
 	}
 
+	public interface ListOfListSupplier<T> {
+
+		List<List<T>> get();
+
+	}
+
+	public interface StringListOfListSupplier extends ListOfListSupplier<String> {
+
+	}
 
 }
