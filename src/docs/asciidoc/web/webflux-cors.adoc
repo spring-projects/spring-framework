@@ -246,7 +246,7 @@ By default global configuration enables the following:
 * `GET`, `HEAD`, and `POST` methods.
 
 `allowedCredentials` is not enabled by default, since that establishes a trust level
-that exposes sensitive user-specific information( such as cookies and CSRF tokens) and
+that exposes sensitive user-specific information (such as cookies and CSRF tokens) and
 should be used only where appropriate. When it is enabled either `allowOrigins` must be
 set to one or more specific domain (but not the special value `"*"`) or alternatively
 the `allowOriginPatterns` property may be used to match to a dynamic set of origins.
