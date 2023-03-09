@@ -370,8 +370,8 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private ClientRequest.Builder initRequestBuilder() {
 			ClientRequest.Builder builder = ClientRequest.create(this.httpMethod, initUri())
-					.headers(headers -> headers.addAll(initHeaders()))
-					.cookies(cookies -> cookies.addAll(initCookies()))
+					.headers(this::initHeaders)
+					.cookies(this::initCookies)
 					.attributes(attributes -> attributes.putAll(this.attributes));
 			if (this.httpRequestConsumer != null) {
 				builder.httpRequest(this.httpRequestConsumer);
@@ -383,28 +383,21 @@ class DefaultWebTestClient implements WebTestClient {
 			return (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
 		}
 
-		private HttpHeaders initHeaders() {
-			if (CollectionUtils.isEmpty(defaultHeaders)) {
-				return this.headers;
+		private void initHeaders(HttpHeaders out) {
+			if (!CollectionUtils.isEmpty(defaultHeaders)) {
+				out.putAll(defaultHeaders);
 			}
-			HttpHeaders result = new HttpHeaders();
-			result.putAll(defaultHeaders);
-			result.putAll(this.headers);
-			return result;
+			if (!CollectionUtils.isEmpty(this.headers)) {
+				out.putAll(this.headers);
+			}
 		}
 
-		private MultiValueMap<String, String> initCookies() {
-			if (CollectionUtils.isEmpty(this.cookies)) {
-				return (defaultCookies != null ? defaultCookies : new LinkedMultiValueMap<>());
+		private void initCookies(MultiValueMap<String, String> out) {
+			if (!CollectionUtils.isEmpty(defaultCookies)) {
+				out.putAll(defaultCookies);
 			}
-			else if (CollectionUtils.isEmpty(defaultCookies)) {
-				return this.cookies;
-			}
-			else {
-				MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
-				result.putAll(defaultCookies);
-				result.putAll(this.cookies);
-				return result;
+			if (!CollectionUtils.isEmpty(this.cookies)) {
+				out.putAll(this.cookies);
 			}
 		}
 	}
