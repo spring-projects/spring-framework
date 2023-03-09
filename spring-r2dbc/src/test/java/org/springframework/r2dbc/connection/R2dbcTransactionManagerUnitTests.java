@@ -270,6 +270,7 @@ class R2dbcTransactionManagerUnitTests {
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).createStatement("foo");
 		verify(connectionMock).commitTransaction();
+		verify(connectionMock).rollbackTransaction();
 		verify(connectionMock).close();
 		verifyNoMoreInteractions(connectionMock);
 	}
