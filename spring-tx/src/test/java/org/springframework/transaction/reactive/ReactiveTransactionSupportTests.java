@@ -203,6 +203,22 @@ public class ReactiveTransactionSupportTests {
 		assertHasCleanedUp(tm);
 	}
 
+	//gh-28968
+	@Test
+	void errorInCommitDoesInitiateRollbackAfterCommit() {
+		ReactiveTestTransactionManager tm = new ReactiveTestTransactionManager(false, true, true);
+		TransactionalOperator rxtx = TransactionalOperator.create(tm);
+
+		StepVerifier.create(rxtx.transactional(Mono.just("bar")))
+				.verifyErrorMessage("Forced failure on commit");
+
+		assertHasBegan(tm);
+		assertHasCommitted(tm);
+		assertHasRolledBack(tm);
+		assertHasNotSetRollbackOnly(tm);
+		assertHasCleanedUp(tm);
+	}
+
 	private void assertHasBegan(ReactiveTestTransactionManager actual) {
 		assertThat(actual.begin).as("Expected <ReactiveTransactionManager.begin()> but was <begin()> was not invoked").isTrue();
 	}
