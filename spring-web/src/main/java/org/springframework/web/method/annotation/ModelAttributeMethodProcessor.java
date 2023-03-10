@@ -335,8 +335,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			return BeanUtils.instantiateClass(ctor, args);
 		}
 		catch (BeanInstantiationException ex) {
-			Throwable cause = ex.getCause();
-			if (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) && cause instanceof NullPointerException) {
+			if (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) &&
+					ex.getCause() instanceof NullPointerException cause) {
 				BindingResult result = binder.getBindingResult();
 				ObjectError error = new ObjectError(ctor.getName(), cause.getMessage());
 				result.addError(error);

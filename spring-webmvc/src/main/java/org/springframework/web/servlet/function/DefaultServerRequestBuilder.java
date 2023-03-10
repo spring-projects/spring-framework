@@ -115,7 +115,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder header(String headerName, String... headerValues) {
-		Assert.notNull(headerName, "Header Name must not be null");
+		Assert.notNull(headerName, "Header name must not be null");
 		for (String headerValue : headerValues) {
 			this.headers.add(headerName, headerValue);
 		}
@@ -124,14 +124,14 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder headers(Consumer<HttpHeaders> headersConsumer) {
-		Assert.notNull(headersConsumer, "Header Consumer must not be null");
+		Assert.notNull(headersConsumer, "Headers consumer must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder cookie(String name, String... values) {
-		Assert.notNull(name, "Cookie Name must not be null");
+		Assert.notNull(name, "Cookie name must not be null");
 		for (String value : values) {
 			this.cookies.add(name, new Cookie(name, value));
 		}
@@ -140,41 +140,41 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder cookies(Consumer<MultiValueMap<String, Cookie>> cookiesConsumer) {
-		Assert.notNull(cookiesConsumer, "Cookie Consumer must not be null");
+		Assert.notNull(cookiesConsumer, "Cookies consumer must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder body(byte[] body) {
-		Assert.notNull(body, "body must not be null");
+		Assert.notNull(body, "Body must not be null");
 		this.body = body;
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder body(String body) {
-		Assert.notNull(body, "body must not be null");
+		Assert.notNull(body, "Body must not be null");
 		return body(body.getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Override
 	public ServerRequest.Builder attribute(String name, Object value) {
-		Assert.notNull(name, "name must not be null");
+		Assert.notNull(name, "Name must not be null");
 		this.attributes.put(name, value);
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder attributes(Consumer<Map<String, Object>> attributesConsumer) {
-		Assert.notNull(attributesConsumer, "AttributesConsumer must not be null");
+		Assert.notNull(attributesConsumer, "Attributes consumer must not be null");
 		attributesConsumer.accept(this.attributes);
 		return this;
 	}
 
 	@Override
 	public ServerRequest.Builder param(String name, String... values) {
-		Assert.notNull(name, "name must not be null");
+		Assert.notNull(name, "Name must not be null");
 		for (String value : values) {
 			this.params.add(name, value);
 		}
@@ -183,7 +183,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 	@Override
 	public ServerRequest.Builder params(Consumer<MultiValueMap<String, String>> paramsConsumer) {
-		Assert.notNull(paramsConsumer, "paramsConsumer must not be null");
+		Assert.notNull(paramsConsumer, "Parameters consumer must not be null");
 		paramsConsumer.accept(this.params);
 		return this;
 	}

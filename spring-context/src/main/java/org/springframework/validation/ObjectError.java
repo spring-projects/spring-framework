@@ -46,7 +46,7 @@ public class ObjectError extends DefaultMessageSourceResolvable {
 	 * @param objectName the name of the affected object
 	 * @param defaultMessage the default message to be used to resolve this message
 	 */
-	public ObjectError(String objectName, String defaultMessage) {
+	public ObjectError(String objectName, @Nullable String defaultMessage) {
 		this(objectName, null, null, defaultMessage);
 	}
 
