@@ -1,9 +1,9 @@
 /**
- * Test event support classes for the <em>Spring TestContext Framework</em>.
+ * AspectJ-based transaction management support.
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.test.context.event;
+package org.springframework.transaction.aspectj;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

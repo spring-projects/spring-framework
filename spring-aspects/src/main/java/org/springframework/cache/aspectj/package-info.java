@@ -1,9 +1,9 @@
 /**
- * Test event support classes for the <em>Spring TestContext Framework</em>.
+ * AspectJ-based caching support.
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.test.context.event;
+package org.springframework.cache.aspectj;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

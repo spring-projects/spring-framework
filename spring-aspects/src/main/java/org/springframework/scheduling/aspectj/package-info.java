@@ -1,9 +1,9 @@
 /**
- * Test event support classes for the <em>Spring TestContext Framework</em>.
+ * AspectJ-based scheduling support.
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.test.context.event;
+package org.springframework.scheduling.aspectj;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

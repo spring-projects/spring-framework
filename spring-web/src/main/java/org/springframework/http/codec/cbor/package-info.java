@@ -1,9 +1,9 @@
 /**
- * Test event support classes for the <em>Spring TestContext Framework</em>.
+ * CBOR encoder and decoder support.
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.test.context.event;
+package org.springframework.http.codec.cbor;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;

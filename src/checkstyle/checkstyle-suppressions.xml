@@ -2,12 +2,18 @@
 <!DOCTYPE suppressions PUBLIC "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN" "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 <suppressions>
 
-	<!-- global -->
+	<!-- Global: generated sources -->
+	<suppress files="[\\/]build[\\/]generated[\\/]sources[\\/]" checks=".*"/>
+
+	<!-- Global: package-info.java -->
+	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/]).*)|(.*framework-docs.*)" checks="JavadocPackage" />
+	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/].*package-info\.java))|(.*framework-docs.*)|(.*spring-(context-indexer|instrument|jcl).*)" checks="RegexpSinglelineJava" id="packageLevelNonNullApiAnnotation" />
+	<suppress files="(^(?!.+[\\/]src[\\/]main[\\/]java[\\/].*package-info\.java))|(.*framework-docs.*)|(.*spring-(context-indexer|instrument|jcl).*)" checks="RegexpSinglelineJava" id="packageLevelNonNullFieldsAnnotation" />
+
+	<!-- Global: tests and test fixtures -->
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="AnnotationLocation|AnnotationUseStyle|AtclauseOrder|AvoidNestedBlocks|FinalClass|HideUtilityClassConstructor|InnerTypeLast|JavadocStyle|JavadocType|JavadocVariable|LeftCurly|MultipleVariableDeclarations|NeedBraces|OneTopLevelClass|OuterTypeFilename|RequireThis|SpringCatch|SpringJavadoc|SpringNoThis"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]org[\\/]springframework[\\/].+(Tests|Suite)" checks="IllegalImport" id="bannedJUnitJupiterImports"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/]java[\\/]" checks="SpringJUnit5" message="should not be public"/>
-	<!-- generated sources -->
-	<suppress files="[\\/]build[\\/]generated[\\/]sources[\\/]" checks=".*"/>
 
 	<!-- JMH benchmarks -->
 	<suppress files="[\\/]src[\\/]jmh[\\/]java[\\/]org[\\/]springframework[\\/]" checks="JavadocVariable|JavadocStyle|InnerTypeLast"/>
@@ -17,6 +23,8 @@
 
 	<!-- spring-aop -->
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]aopalliance[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]aopalliance[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullApiAnnotation"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]aopalliance[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullFieldsAnnotation"/>
 
 	<!-- spring-beans -->
 	<suppress files="TypeMismatchException" checks="MutableException"/>
@@ -31,9 +39,10 @@
 	<suppress files="SpringAtInjectTckTests" checks="IllegalImportCheck" id="bannedJUnit3Imports"/>
 
 	<!-- spring-core -->
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]asm[\\/]" checks=".*"/>
-	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]cglib[\\/]" checks=".*"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/](asm|cglib|objenesis|javapoet)[\\/]" checks=".*"/>
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullApiAnnotation" />
+	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]lang[\\/]" checks="RegexpSinglelineJava" id="packageLevelNonNullFieldsAnnotation" />
 	<suppress files="[\\/]src[\\/]main[\\/]java[\\/]org[\\/]springframework[\\/]core[\\/]annotation[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
 	<suppress files="[\\/]src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]core[\\/]annotation[\\/]" checks="IllegalImport" id="bannedImports" message="javax"/>
 	<suppress files="ByteArrayEncoder" checks="SpringLambda"/>
@@ -129,16 +138,5 @@
 	<suppress files="sockjs[\\/]frame[\\/]SockJsFrameType" checks="JavadocVariable"/>
 	<suppress files="sockjs[\\/]transport[\\/]TransportType" checks="JavadocVariable"/>
 	<suppress files="src[\\/]test[\\/]java[\\/]org[\\/]springframework[\\/]web[\\/]reactive[\\/]protobuf[\\/].*" checks=".*"/>
-
-	<!-- Suppress JavadocPackage checks and package null safety annotations on packages outside of src/main-->
-	<!-- And outside 'framework-docs' module-->
-	<!-- And outside 'spring-core/src/main/java/org/springframework/asm' package-->
-	<!-- And outside 'spring-core/src/main/java/org/springframework/cglib' package-->
-	<!-- And outside 'spring-core/src/main/java/org/springframework/objenesis' package-->
-	<!-- And outside 'spring-core/src/main/java/org/springframework/javapoet' package-->
-	<!-- And outside 'spring-core/src/main/java/org/springframework/lang' package-->
-	<suppress checks="JavadocPackage" files="(^(?!.*src[\\/]main[\\/]).*)|(.*framework-docs.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/asm.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/cglib.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/objenesis.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/javapoet.*)|(.*spring-core\/src\/main\/java\/org\/springframework\/lang.*)"/>
-	<suppress checks="RegexpSinglelineJava" files="^(?!.*(package-info.java))" id="javaDocPackageNonNullFieldsAnnotation"/>
-	<suppress checks="RegexpSinglelineJava" files="^(?!.*(package-info.java))" id="javaDocPackageNonNullApiAnnotation"/>
 
 </suppressions>

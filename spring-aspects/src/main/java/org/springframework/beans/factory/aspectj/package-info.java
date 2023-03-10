@@ -1,9 +1,9 @@
 /**
- * Test event support classes for the <em>Spring TestContext Framework</em>.
+ * AspectJ-based dependency injection support.
  */
 @NonNullApi
 @NonNullFields
-package org.springframework.test.context.event;
+package org.springframework.beans.factory.aspectj;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;
