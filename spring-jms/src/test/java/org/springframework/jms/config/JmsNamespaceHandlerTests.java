@@ -81,10 +81,10 @@ public class JmsNamespaceHandlerTests {
 	@Test
 	public void testBeansCreated() {
 		Map<String, ?> containers = context.getBeansOfType(DefaultMessageListenerContainer.class);
-		assertThat(containers.size()).as("Context should contain 3 JMS listener containers").isEqualTo(3);
+		assertThat(containers).as("Context should contain 3 JMS listener containers").hasSize(3);
 
 		containers = context.getBeansOfType(GenericMessageEndpointManager.class);
-		assertThat(containers.size()).as("Context should contain 3 JCA endpoint containers").isEqualTo(3);
+		assertThat(containers).as("Context should contain 3 JCA endpoint containers").hasSize(3);
 
 		assertThat(context.getBeansOfType(JmsListenerContainerFactory.class))
 				.as("Context should contain 3 JmsListenerContainerFactory instances").hasSize(3);

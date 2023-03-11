@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -471,11 +471,11 @@ class OptionTagTests extends AbstractHtmlElementTagTests {
 
 
 	private void assertOptionTagOpened(String output) {
-		assertThat(output.startsWith("<option")).isTrue();
+		assertThat(output).startsWith("<option");
 	}
 
 	private void assertOptionTagClosed(String output) {
-		assertThat(output.endsWith("</option>")).isTrue();
+		assertThat(output).endsWith("</option>");
 	}
 
 	@Override

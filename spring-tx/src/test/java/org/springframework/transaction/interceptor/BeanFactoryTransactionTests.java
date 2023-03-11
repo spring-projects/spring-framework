@@ -145,7 +145,7 @@ public class BeanFactoryTransactionTests {
 		PlatformTransactionManager ptm = mock();
 		PlatformTransactionManagerFacade.delegate = ptm;
 
-		assertThat(testBean.getAge() == 666).as("Age should not be " + testBean.getAge()).isTrue();
+		assertThat(testBean.getAge()).as("Age should not be " + testBean.getAge()).isEqualTo(666);
 
 		// Expect no methods
 		verifyNoInteractions(ptm);
@@ -168,7 +168,7 @@ public class BeanFactoryTransactionTests {
 			}
 			@Override
 			public void commit(TransactionStatus status) throws TransactionException {
-				assertThat(status == ts).isTrue();
+				assertThat(status).isSameAs(ts);
 			}
 			@Override
 			public void rollback(TransactionStatus status) throws TransactionException {
@@ -180,7 +180,7 @@ public class BeanFactoryTransactionTests {
 		// TODO same as old age to avoid ordering effect for now
 		int age = 666;
 		testBean.setAge(age);
-		assertThat(testBean.getAge() == age).isTrue();
+		assertThat(testBean.getAge()).isEqualTo(age);
 	}
 
 	@Test

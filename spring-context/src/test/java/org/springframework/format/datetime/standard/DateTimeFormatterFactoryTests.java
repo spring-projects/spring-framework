@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,8 @@ public class DateTimeFormatterFactoryTests {
 	public void createDateTimeFormatterInOrderOfPropertyPriority() {
 		factory.setStylePattern("SS");
 		String value = applyLocale(factory.createDateTimeFormatter()).format(dateTime);
-		assertThat(value.startsWith("10/21/09")).isTrue();
-		assertThat(value.endsWith("12:10 PM")).isTrue();
+		assertThat(value).startsWith("10/21/09");
+		assertThat(value).endsWith("12:10 PM");
 
 		factory.setIso(ISO.DATE);
 		assertThat(applyLocale(factory.createDateTimeFormatter()).format(dateTime)).isEqualTo("2009-10-21");

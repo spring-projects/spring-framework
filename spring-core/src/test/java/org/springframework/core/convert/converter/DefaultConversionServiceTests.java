@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -401,7 +401,7 @@ class DefaultConversionServiceTests {
 	@Test
 	void convertEmptyArrayToString() {
 		String result = conversionService.convert(new String[0], String.class);
-		assertThat(result).isEqualTo("");
+		assertThat(result).isEmpty();
 	}
 
 	@Test
@@ -738,8 +738,8 @@ class DefaultConversionServiceTests {
 		foo.setProperty("1", "BAR");
 		foo.setProperty("2", "BAZ");
 		String result = conversionService.convert(foo, String.class);
-		assertThat(result.contains("1=BAR")).isTrue();
-		assertThat(result.contains("2=BAZ")).isTrue();
+		assertThat(result).contains("1=BAR");
+		assertThat(result).contains("2=BAZ");
 	}
 
 	@Test
@@ -748,7 +748,7 @@ class DefaultConversionServiceTests {
 		assertThat(result).hasSize(3);
 		assertThat(result.getProperty("a")).isEqualTo("b");
 		assertThat(result.getProperty("c")).isEqualTo("2");
-		assertThat(result.getProperty("d")).isEqualTo("");
+		assertThat(result.getProperty("d")).isEmpty();
 	}
 
 	@Test
@@ -810,7 +810,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void convertObjectToStringWithJavaTimeOfMethodPresent() {
-		assertThat(conversionService.convert(ZoneId.of("GMT+1"), String.class).startsWith("GMT+")).isTrue();
+		assertThat(conversionService.convert(ZoneId.of("GMT+1"), String.class)).startsWith("GMT+");
 	}
 
 	@Test
@@ -894,7 +894,7 @@ class DefaultConversionServiceTests {
 		TypeDescriptor descriptor = new TypeDescriptor(parameter);
 		Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
 		assertThat(actual.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional<List<Integer>>) actual).get()).isEqualTo(List.of(1, 2, 3));
+		assertThat(((Optional<List<Integer>>) actual)).contains(List.of(1, 2, 3));
 	}
 
 	@Test

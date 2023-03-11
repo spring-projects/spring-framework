@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,9 @@ class ProceedTests {
 	@Test
 	void testProceedWithArgsInSameAspect() {
 		this.testBean.setMyFloat(1.0F);
-		assertThat(this.testBean.getMyFloat() > 1.9F).as("value changed in around advice").isTrue();
-		assertThat(this.firstTestAspect.getLastBeforeFloatValue() > 1.9F).as("changed value visible to next advice in chain").isTrue();
+		assertThat(this.testBean.getMyFloat()).as("value changed in around advice").isGreaterThan(1.9F);
+		assertThat(this.firstTestAspect.getLastBeforeFloatValue()).as("changed value visible to next advice in chain")
+				.isGreaterThan(1.9F);
 	}
 
 	@Test

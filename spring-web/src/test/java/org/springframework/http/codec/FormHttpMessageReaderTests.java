@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,10 +79,10 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTests {
 		MockServerHttpRequest request = request(body);
 		MultiValueMap<String, String> result = this.reader.readMono(null, request, null).block();
 
-		assertThat(result.size()).as("Invalid result").isEqualTo(3);
+		assertThat(result).as("Invalid result").hasSize(3);
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
-		assertThat(values.size()).as("Invalid result").isEqualTo(2);
+		assertThat(values).as("Invalid result").hasSize(2);
 		assertThat(values.get(0)).as("Invalid result").isEqualTo("value 2+1");
 		assertThat(values.get(1)).as("Invalid result").isEqualTo("value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();
@@ -94,10 +94,10 @@ public class FormHttpMessageReaderTests extends AbstractLeakCheckingTests {
 		MockServerHttpRequest request = request(body);
 		MultiValueMap<String, String> result = this.reader.read(null, request, null).single().block();
 
-		assertThat(result.size()).as("Invalid result").isEqualTo(3);
+		assertThat(result).as("Invalid result").hasSize(3);
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
-		assertThat(values.size()).as("Invalid result").isEqualTo(2);
+		assertThat(values).as("Invalid result").hasSize(2);
 		assertThat(values.get(0)).as("Invalid result").isEqualTo("value 2+1");
 		assertThat(values.get(1)).as("Invalid result").isEqualTo("value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();

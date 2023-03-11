@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class GsonFactoryBeanTests {
 		StringBean bean = new StringBean();
 		bean.setName("Jason");
 		String result = gson.toJson(bean);
-		assertThat(result.contains("  \"name\": \"Jason\"")).isTrue();
+		assertThat(result).contains("  \"name\": \"Jason\"");
 	}
 
 	@Test
@@ -130,8 +130,8 @@ public class GsonFactoryBeanTests {
 		Date date = cal.getTime();
 		bean.setDate(date);
 		String result = gson.toJson(bean);
-		assertThat(result.startsWith("{\"date\":\"Jan 1, 2014")).isTrue();
-		assertThat(result.endsWith("12:00:00 AM\"}")).isTrue();
+		assertThat(result).startsWith("{\"date\":\"Jan 1, 2014");
+		assertThat(result).endsWith("12:00:00 AM\"}");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		assertThat(response.getStatus()).as("Invalid status").isEqualTo(200);
 		assertThat(response.getHeader("ETag")).as("Invalid ETag").isEqualTo("\"0b10a8db164e0754105b7a99be72e3fe5\"");
-		assertThat(response.getContentLength() > 0).as("Invalid Content-Length header").isTrue();
+		assertThat(response.getContentLength()).as("Invalid Content-Length header").isGreaterThan(0);
 		assertThat(response.getContentAsByteArray()).as("Invalid content").isEqualTo(responseBody);
 	}
 
@@ -94,7 +94,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		assertThat(response.getStatus()).as("Invalid status").isEqualTo(200);
 		assertThat(response.getHeader("ETag")).as("Invalid ETag").isEqualTo("W/\"0b10a8db164e0754105b7a99be72e3fe5\"");
-		assertThat(response.getContentLength() > 0).as("Invalid Content-Length header").isTrue();
+		assertThat(response.getContentLength()).as("Invalid Content-Length header").isGreaterThan(0);
 		assertThat(response.getContentAsByteArray()).as("Invalid content").isEqualTo(responseBody);
 	}
 
@@ -262,7 +262,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		assertThat(response.getStatus()).as("Invalid status").isEqualTo(200);
 		assertThat(response.getHeader("ETag")).as("Invalid ETag").isEqualTo("\"0b10a8db164e0754105b7a99be72e3fe5\"");
-		assertThat(response.getContentLength() > 0).as("Invalid Content-Length header").isTrue();
+		assertThat(response.getContentLength()).as("Invalid Content-Length header").isGreaterThan(0);
 		assertThat(response.getContentAsByteArray()).as("Invalid content").isEqualTo(responseBody);
 	}
 

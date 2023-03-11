@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -333,7 +333,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			assertThat(value).isEqualTo("def");
 			e =  parser.parseExpression("listOfStrings[2]");
 			value = e.getValue(ctx, String.class);
-			assertThat(value).isEqualTo("");
+			assertThat(value).isEmpty();
 
 			// Now turn off growing and reference off the end
 			StandardEvaluationContext failCtx = new StandardEvaluationContext(instance);

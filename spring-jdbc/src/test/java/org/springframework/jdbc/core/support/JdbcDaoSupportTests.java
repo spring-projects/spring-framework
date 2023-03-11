@@ -48,7 +48,7 @@ public class JdbcDaoSupportTests {
 		dao.afterPropertiesSet();
 		assertThat(dao.getDataSource()).as("Correct DataSource").isEqualTo(ds);
 		assertThat(dao.getJdbcTemplate().getDataSource()).as("Correct JdbcTemplate").isEqualTo(ds);
-		assertThat(test.size()).as("initDao called").isEqualTo(1);
+		assertThat(test).as("initDao called").hasSize(1);
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class JdbcDaoSupportTests {
 		dao.setJdbcTemplate(template);
 		dao.afterPropertiesSet();
 		assertThat(template).as("Correct JdbcTemplate").isEqualTo(dao.getJdbcTemplate());
-		assertThat(test.size()).as("initDao called").isEqualTo(1);
+		assertThat(test).as("initDao called").hasSize(1);
 	}
 
 }

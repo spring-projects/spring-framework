@@ -440,7 +440,7 @@ class ResourceWebHandlerTests {
 		assertThat(this.handler.processPath((char) 1 + " / " + (char) 127 + " // foo/bar")).isEqualTo("/foo/bar");
 
 		// root or empty path
-		assertThat(this.handler.processPath("   ")).isEqualTo("");
+		assertThat(this.handler.processPath("   ")).isEmpty();
 		assertThat(this.handler.processPath("/")).isEqualTo("/");
 		assertThat(this.handler.processPath("///")).isEqualTo("/");
 		assertThat(this.handler.processPath("/ /   / ")).isEqualTo("/");
@@ -677,8 +677,8 @@ class ResourceWebHandlerTests {
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
-		assertThat(exchange.getResponse().getHeaders().getContentType().toString()
-		.startsWith("multipart/byteranges;boundary=")).isTrue();
+		assertThat(exchange.getResponse().getHeaders().getContentType().toString()).startsWith(
+				"multipart/byteranges;boundary=");
 
 		String boundary = "--" + exchange.getResponse().getHeaders().getContentType().toString().substring(30);
 

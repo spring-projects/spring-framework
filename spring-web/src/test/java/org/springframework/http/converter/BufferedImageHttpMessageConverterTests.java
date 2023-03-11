@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ class BufferedImageHttpMessageConverterTests {
 		MediaType contentType = new MediaType("image", "png");
 		converter.write(body, contentType, outputMessage);
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content type").isEqualTo(contentType);
-		assertThat(outputMessage.getBodyAsBytes().length > 0).as("Invalid size").isTrue();
+		assertThat(outputMessage.getBodyAsBytes()).as("Invalid size").isNotEmpty();
 		BufferedImage result = ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));
 		assertThat(result.getHeight()).as("Invalid height").isEqualTo(500);
 		assertThat(result.getWidth()).as("Invalid width").isEqualTo(750);
@@ -89,7 +89,7 @@ class BufferedImageHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(body, new MediaType("*", "*"), outputMessage);
 		assertThat(outputMessage.getHeaders().getContentType()).as("Invalid content type").isEqualTo(contentType);
-		assertThat(outputMessage.getBodyAsBytes().length > 0).as("Invalid size").isTrue();
+		assertThat(outputMessage.getBodyAsBytes()).as("Invalid size").isNotEmpty();
 		BufferedImage result = ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));
 		assertThat(result.getHeight()).as("Invalid height").isEqualTo(500);
 		assertThat(result.getWidth()).as("Invalid width").isEqualTo(750);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public class BufferingStompDecoderTests {
 		String chunk1 = "SEND\na:alpha\n\nPayload1\0SEND\ncontent-length:129\n";
 		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk1));
 
-		assertThat(messages.size()).as("We should have gotten the 1st message").isEqualTo(1);
+		assertThat(messages).as("We should have gotten the 1st message").hasSize(1);
 		assertThat(new String(messages.get(0).getPayload())).isEqualTo("Payload1");
 
 		assertThat(stompDecoder.getBufferSize()).isEqualTo(24);

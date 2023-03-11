@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ class RegisterExtensionSpringExtensionTests {
 	@Test
 	void autowiredParameterAsJavaUtilOptional(@Autowired Optional<Dog> dog) {
 		assertThat(dog).as("Optional dog should have been @Autowired by Spring").isNotNull();
-		assertThat(dog.isPresent()).as("Value of Optional should be 'present'").isTrue();
+		assertThat(dog).as("Value of Optional should be 'present'").isPresent();
 		assertThat(dog.get().getName()).as("Dog's name").isEqualTo("Dogbert");
 	}
 

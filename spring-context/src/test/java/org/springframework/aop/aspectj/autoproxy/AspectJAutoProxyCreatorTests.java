@@ -258,7 +258,7 @@ class AspectJAutoProxyCreatorTests {
 		AdviceUsingThisJoinPoint aspectInstance = (AdviceUsingThisJoinPoint) bf.getBean("aspect");
 		//(AdviceUsingThisJoinPoint) Aspects.aspectOf(AdviceUsingThisJoinPoint.class);
 		//assertEquals("method-execution(int TestBean.getAge())",aspectInstance.getLastMethodEntered());
-		assertThat(aspectInstance.getLastMethodEntered().indexOf("TestBean.getAge())") != 0).isTrue();
+		assertThat(aspectInstance.getLastMethodEntered()).doesNotStartWith("TestBean.getAge())");
 	}
 
 	@Test

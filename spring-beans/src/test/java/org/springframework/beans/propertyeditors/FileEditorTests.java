@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class FileEditorTests {
 		boolean condition = value instanceof File;
 		assertThat(condition).isTrue();
 		File file = (File) value;
-		assertThat(file.exists()).isTrue();
+		assertThat(file).exists();
 	}
 
 	@Test
@@ -86,9 +86,9 @@ public class FileEditorTests {
 		boolean condition = value instanceof File;
 		assertThat(condition).isTrue();
 		File file = (File) value;
-		assertThat(file.exists()).isTrue();
+		assertThat(file).exists();
 		String absolutePath = file.getAbsolutePath().replace('\\', '/');
-		assertThat(absolutePath.endsWith(fileName)).isTrue();
+		assertThat(absolutePath).endsWith(fileName);
 	}
 
 	@Test
@@ -101,9 +101,9 @@ public class FileEditorTests {
 		boolean condition = value instanceof File;
 		assertThat(condition).isTrue();
 		File file = (File) value;
-		assertThat(file.exists()).isFalse();
+		assertThat(file).doesNotExist();
 		String absolutePath = file.getAbsolutePath().replace('\\', '/');
-		assertThat(absolutePath.endsWith(fileName)).isTrue();
+		assertThat(absolutePath).endsWith(fileName);
 	}
 
 }

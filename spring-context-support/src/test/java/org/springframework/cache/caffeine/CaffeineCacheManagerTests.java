@@ -93,11 +93,11 @@ public class CaffeineCacheManagerTests {
 		Cache cache1x = cm.getCache("c1");
 		boolean condition1 = cache1x instanceof CaffeineCache;
 		assertThat(condition1).isTrue();
-		assertThat(cache1x != cache1).isTrue();
+		assertThat(cache1x).isNotSameAs(cache1);
 		Cache cache2x = cm.getCache("c2");
 		boolean condition = cache2x instanceof CaffeineCache;
 		assertThat(condition).isTrue();
-		assertThat(cache2x != cache2).isTrue();
+		assertThat(cache2x).isNotSameAs(cache2);
 		Cache cache3x = cm.getCache("c3");
 		assertThat(cache3x).isNull();
 
@@ -123,7 +123,7 @@ public class CaffeineCacheManagerTests {
 		Caffeine<Object, Object> caffeine = Caffeine.newBuilder().maximumSize(10);
 		cm.setCaffeine(caffeine);
 		Cache cache1x = cm.getCache("c1");
-		assertThat(cache1x != cache1).isTrue();
+		assertThat(cache1x).isNotSameAs(cache1);
 
 		cm.setCaffeine(caffeine);  // Set same instance
 		Cache cache1xx = cm.getCache("c1");
@@ -137,7 +137,7 @@ public class CaffeineCacheManagerTests {
 
 		cm.setCaffeineSpec(CaffeineSpec.parse("maximumSize=10"));
 		Cache cache1x = cm.getCache("c1");
-		assertThat(cache1x != cache1).isTrue();
+		assertThat(cache1x).isNotSameAs(cache1);
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class CaffeineCacheManagerTests {
 
 		cm.setCacheSpecification("maximumSize=10");
 		Cache cache1x = cm.getCache("c1");
-		assertThat(cache1x != cache1).isTrue();
+		assertThat(cache1x).isNotSameAs(cache1);
 	}
 
 	@Test
@@ -160,7 +160,7 @@ public class CaffeineCacheManagerTests {
 
 		cm.setCacheLoader(loader);
 		Cache cache1x = cm.getCache("c1");
-		assertThat(cache1x != cache1).isTrue();
+		assertThat(cache1x).isNotSameAs(cache1);
 
 		cm.setCacheLoader(loader);  // Set same instance
 		Cache cache1xx = cm.getCache("c1");
@@ -201,11 +201,11 @@ public class CaffeineCacheManagerTests {
 
 		Cache cache1 = cm.getCache("c1");
 		Cache cache2 = cm.getCache("c2");
-		assertThat(nc == cache2.getNativeCache()).isTrue();
+		assertThat(nc).isSameAs(cache2.getNativeCache());
 
 		cm.setCaffeine(Caffeine.newBuilder().maximumSize(10));
-		assertThat(cm.getCache("c1") != cache1).isTrue();
-		assertThat(cm.getCache("c2") == cache2).isTrue();
+		assertThat(cm.getCache("c1")).isNotSameAs(cache1);
+		assertThat(cm.getCache("c2")).isSameAs(cache2);
 	}
 
 }

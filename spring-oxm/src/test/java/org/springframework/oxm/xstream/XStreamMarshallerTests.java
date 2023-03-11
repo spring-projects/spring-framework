@@ -339,7 +339,7 @@ class XStreamMarshallerTests {
 		marshaller.marshal(flight, new StreamResult(writer));
 		assertThat(writer.toString()).as("Invalid result").isEqualTo("{\"flight\":{\"flightNumber\":42}}");
 		Object o = marshaller.unmarshal(new StreamSource(new StringReader(writer.toString())));
-		assertThat(o instanceof Flight).as("Unmarshalled object is not Flights").isTrue();
+		assertThat(o).as("Unmarshalled object is not Flights").isInstanceOf(Flight.class);
 		Flight unflight = (Flight) o;
 		assertThat(unflight).as("Flight is null").isNotNull();
 		assertThat(unflight.getFlightNumber()).as("Number is invalid").isEqualTo(42L);
@@ -377,7 +377,7 @@ class XStreamMarshallerTests {
 	private static void assertXpathExists(String xPathExpression, String inXMLString){
 		Source source = Input.fromString(inXMLString).build();
 		Iterable<Node> nodes = new JAXPXPathEngine().selectNodes(xPathExpression, source);
-		assertThat(nodes).as("Expecting to find matches for Xpath " + xPathExpression).hasSizeGreaterThan(0);
+		assertThat(nodes).as("Expecting to find matches for Xpath " + xPathExpression).isNotEmpty();
 	}
 
 	private static void assertXpathDoesNotExist(String xPathExpression, String inXMLString){

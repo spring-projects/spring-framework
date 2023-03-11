@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public class PropertiesFactoryBeanTests {
 		assertThat(props.getProperty("tb.array[0].age")).isEqualTo("99");
 		assertThat(props.getProperty("key2")).isEqualTo("value2");
 		Properties newProps = pfb.getObject();
-		assertThat(props != newProps).isTrue();
+		assertThat(props).isNotSameAs(newProps);
 		assertThat(newProps.getProperty("tb.array[0].age")).isEqualTo("99");
 		assertThat(newProps.getProperty("key2")).isEqualTo("value2");
 	}

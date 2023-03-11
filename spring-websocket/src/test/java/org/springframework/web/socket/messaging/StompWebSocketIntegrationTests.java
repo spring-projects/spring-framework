@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 
 			String payload = clientHandler.actual.get(1).getPayload();
-			assertThat(payload.startsWith("MESSAGE\n")).as("Expected STOMP MESSAGE, got " + payload).isTrue();
+			assertThat(payload).as("Expected STOMP MESSAGE, got " + payload).startsWith("MESSAGE\n");
 		}
 	}
 
@@ -137,8 +137,8 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
-			assertThat(payload.contains(destHeader)).as("Expected STOMP destination=/app/number, got " + payload).isTrue();
-			assertThat(payload.contains("42")).as("Expected STOMP Payload=42, got " + payload).isTrue();
+			assertThat(payload).as("Expected STOMP destination=/app/number, got " + payload).contains(destHeader);
+			assertThat(payload).as("Expected STOMP Payload=42, got " + payload).contains("42");
 		}
 	}
 
@@ -157,9 +157,9 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
-			assertThat(payload.startsWith("MESSAGE\n")).isTrue();
-			assertThat(payload.contains("destination:/user/queue/error\n")).isTrue();
-			assertThat(payload.endsWith("Got error: Bad input\0")).isTrue();
+			assertThat(payload).startsWith("MESSAGE\n");
+			assertThat(payload).contains("destination:/user/queue/error\n");
+			assertThat(payload).endsWith("Got error: Bad input\0");
 		}
 	}
 
@@ -179,9 +179,9 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 			assertThat(session).isNotNull();
 			assertThat(clientHandler.latch.await(TIMEOUT, TimeUnit.SECONDS)).isTrue();
 			String payload = clientHandler.actual.get(1).getPayload();
-			assertThat(payload.startsWith("MESSAGE\n")).isTrue();
-			assertThat(payload.contains("destination:/topic/scopedBeanValue\n")).isTrue();
-			assertThat(payload.endsWith("55\0")).isTrue();
+			assertThat(payload).startsWith("MESSAGE\n");
+			assertThat(payload).contains("destination:/topic/scopedBeanValue\n");
+			assertThat(payload).endsWith("55\0");
 		}
 	}
 

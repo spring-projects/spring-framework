@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class BeanFactoryUtilsTests {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("t1", new TestBean());
 		lbf.addBean("t2", new TestBean());
-		assertThat(BeanFactoryUtils.countBeansIncludingAncestors(lbf) == 2).isTrue();
+		assertThat(BeanFactoryUtils.countBeansIncludingAncestors(lbf)).isEqualTo(2);
 	}
 
 	/**
@@ -94,9 +94,10 @@ public class BeanFactoryUtilsTests {
 	@Test
 	public void testHierarchicalCountBeansWithOverride() {
 		// Leaf count
-		assertThat(this.listableBeanFactory.getBeanDefinitionCount() == 1).isTrue();
+		assertThat(this.listableBeanFactory.getBeanDefinitionCount()).isEqualTo(1);
 		// Count minus duplicate
-		assertThat(BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 8).as("Should count 8 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory)).isTrue();
+		assertThat(BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory)).as("Should count 8 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory))
+				.isEqualTo(8);
 	}
 
 	@Test
@@ -113,7 +114,7 @@ public class BeanFactoryUtilsTests {
 		assertThat(names).hasSize(1);
 		assertThat(names.contains("indexedBean")).isTrue();
 		// Distinguish from default ListableBeanFactory behavior
-		assertThat(listableBeanFactory.getBeanNamesForType(IndexedTestBean.class).length == 0).isTrue();
+		assertThat(listableBeanFactory.getBeanNamesForType(IndexedTestBean.class)).isEmpty();
 	}
 
 	@Test
@@ -288,7 +289,7 @@ public class BeanFactoryUtilsTests {
 		assertThat(names).hasSize(1);
 		assertThat(names.contains("annotatedBean")).isTrue();
 		// Distinguish from default ListableBeanFactory behavior
-		assertThat(listableBeanFactory.getBeanNamesForAnnotation(TestAnnotation.class).length == 0).isTrue();
+		assertThat(listableBeanFactory.getBeanNamesForAnnotation(TestAnnotation.class)).isEmpty();
 	}
 
 	@Test

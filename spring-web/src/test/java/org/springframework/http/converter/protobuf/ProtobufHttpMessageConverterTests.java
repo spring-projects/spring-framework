@@ -95,7 +95,7 @@ class ProtobufHttpMessageConverterTests {
 		MediaType contentType = ProtobufHttpMessageConverter.PROTOBUF;
 		this.converter.write(this.testMsg, contentType, outputMessage);
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
-		assertThat(outputMessage.getBodyAsBytes().length > 0).isTrue();
+		assertThat(outputMessage.getBodyAsBytes().length).isGreaterThan(0);
 		Message result = Msg.parseFrom(outputMessage.getBodyAsBytes());
 		assertThat(result).isEqualTo(this.testMsg);
 
@@ -119,7 +119,7 @@ class ProtobufHttpMessageConverterTests {
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
 
 		final String body = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(body.isEmpty()).as("body is empty").isFalse();
+		assertThat(body).as("body is empty").isNotEmpty();
 
 		Msg.Builder builder = Msg.newBuilder();
 		JsonFormat.parser().merge(body, builder);
@@ -144,7 +144,7 @@ class ProtobufHttpMessageConverterTests {
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
 
 		String body = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(body.isEmpty()).as("body is empty").isFalse();
+		assertThat(body).as("body is empty").isNotEmpty();
 
 		Msg.Builder builder = Msg.newBuilder();
 		JsonFormat.parser().merge(body, builder);

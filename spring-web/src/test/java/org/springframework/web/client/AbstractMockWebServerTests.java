@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ abstract class AbstractMockWebServerTests {
 		assertThat(line).contains("name=\"" + name + "\"");
 		assertThat(buffer.readUtf8Line()).startsWith("Content-Type: " + contentType);
 		assertThat(buffer.readUtf8Line()).isEqualTo("Content-Length: " + value.length());
-		assertThat(buffer.readUtf8Line()).isEqualTo("");
+		assertThat(buffer.readUtf8Line()).isEmpty();
 		assertThat(buffer.readUtf8Line()).isEqualTo(value);
 	}
 
@@ -184,7 +184,7 @@ abstract class AbstractMockWebServerTests {
 		assertThat(line).contains("filename=\"" + filename + "\"");
 		assertThat(buffer.readUtf8Line()).startsWith("Content-Type: " + contentType);
 		assertThat(buffer.readUtf8Line()).startsWith("Content-Length: ");
-		assertThat(buffer.readUtf8Line()).isEqualTo("");
+		assertThat(buffer.readUtf8Line()).isEmpty();
 		assertThat(buffer.readUtf8Line()).isNotNull();
 	}
 

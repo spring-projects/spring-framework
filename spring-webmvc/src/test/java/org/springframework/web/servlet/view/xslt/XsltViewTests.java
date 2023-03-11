@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ public class XsltViewTests {
 
 		Source source = new StreamSource(getProductDataResource().getInputStream());
 		view.render(singletonMap("someKey", source), this.request, this.response);
-		assertThat(this.response.getContentType().startsWith("text/html")).isTrue();
+		assertThat(this.response.getContentType()).startsWith("text/html");
 		assertThat(this.response.getCharacterEncoding()).isEqualTo("UTF-8");
 	}
 
@@ -136,7 +136,7 @@ public class XsltViewTests {
 		model.put("someKey", getProductDataResource());
 		model.put("title", "Product List");
 		doTestWithModel(model);
-		assertThat(this.response.getContentAsString().contains("Product List")).isTrue();
+		assertThat(this.response.getContentAsString()).contains("Product List");
 	}
 
 	@Test
@@ -151,7 +151,7 @@ public class XsltViewTests {
 
 		view.render(model, this.request, this.response);
 		assertHtmlOutput(this.response.getContentAsString());
-		assertThat(this.response.getContentAsString().contains("Product List")).isTrue();
+		assertThat(this.response.getContentAsString()).contains("Product List");
 
 	}
 

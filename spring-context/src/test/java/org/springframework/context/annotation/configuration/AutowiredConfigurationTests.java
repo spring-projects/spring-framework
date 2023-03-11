@@ -92,7 +92,7 @@ class AutowiredConfigurationTests {
 				OptionalAutowiredMethodConfig.class);
 
 		assertThat(context.getBeansOfType(Colour.class).isEmpty()).isTrue();
-		assertThat(context.getBean(TestBean.class).getName()).isEqualTo("");
+		assertThat(context.getBean(TestBean.class).getName()).isEmpty();
 		context.close();
 	}
 

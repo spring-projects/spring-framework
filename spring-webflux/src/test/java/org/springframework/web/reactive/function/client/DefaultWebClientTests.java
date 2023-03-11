@@ -110,7 +110,7 @@ public class DefaultWebClientTests {
 
 		ClientRequest request = verifyAndGetRequest();
 		assertThat(request.url().toString()).isEqualTo("/base/path/identifier?q=12");
-		assertThat(request.attribute(WebClient.class.getName() + ".uriTemplate").get()).isEqualTo("/path/{id}");
+		assertThat(request.attribute(WebClient.class.getName() + ".uriTemplate")).contains("/path/{id}");
 	}
 
 	@Test
@@ -341,7 +341,7 @@ public class DefaultWebClientTests {
 		assertThat(actual.get("foo")).isEqualTo("bar");
 
 		ClientRequest request = verifyAndGetRequest();
-		assertThat(request.attribute("foo").get()).isEqualTo("bar");
+		assertThat(request.attribute("foo")).contains("bar");
 	}
 
 	@Test
@@ -360,7 +360,7 @@ public class DefaultWebClientTests {
 		assertThat(actual.get("foo")).isNull();
 
 		ClientRequest request = verifyAndGetRequest();
-		assertThat(request.attribute("foo").isPresent()).isFalse();
+		assertThat(request.attribute("foo")).isNotPresent();
 	}
 
 	@Test

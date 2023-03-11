@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ public class URIEditorTests {
 		assertThat(condition).isTrue();
 		URI uri = (URI) value;
 		assertThat(uriEditor.getAsText()).isEqualTo(uri.toString());
-		assertThat(uri.getScheme().startsWith("classpath")).isTrue();
+		assertThat(uri.getScheme()).startsWith("classpath");
 	}
 
 	@Test
@@ -107,13 +107,13 @@ public class URIEditorTests {
 		PropertyEditor uriEditor = new URIEditor();
 		uriEditor.setAsText(null);
 		assertThat(uriEditor.getValue()).isNull();
-		assertThat(uriEditor.getAsText()).isEqualTo("");
+		assertThat(uriEditor.getAsText()).isEmpty();
 	}
 
 	@Test
 	public void getAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
 		PropertyEditor uriEditor = new URIEditor();
-		assertThat(uriEditor.getAsText()).isEqualTo("");
+		assertThat(uriEditor.getAsText()).isEmpty();
 	}
 
 	@Test

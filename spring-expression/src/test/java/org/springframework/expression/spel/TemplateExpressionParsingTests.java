@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class TemplateExpressionParsingTests extends AbstractExpressionTests {
 
 		expr = parser.parseExpression("", DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		o = expr.getValue();
-		assertThat(o.toString()).isEqualTo("");
+		assertThat(o.toString()).isEmpty();
 
 		expr = parser.parseExpression("abc", DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		o = expr.getValue();

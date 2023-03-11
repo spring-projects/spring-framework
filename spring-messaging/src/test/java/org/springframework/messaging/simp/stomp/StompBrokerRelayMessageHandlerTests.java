@@ -312,7 +312,7 @@ class StompBrokerRelayMessageHandlerTests {
 		}
 
 		public StompHeaderAccessor getSentHeaders(int index) {
-			assertThat(getSentMessages().size() > index).as("Size: " + getSentMessages().size()).isTrue();
+			assertThat(getSentMessages().size()).as("Size: " + getSentMessages().size()).isGreaterThan(index);
 			Message<byte[]> message = getSentMessages().get(index);
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 			assertThat(accessor).isNotNull();

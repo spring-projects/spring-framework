@@ -218,7 +218,7 @@ public class BaseViewTests {
 	public void attributeCSVParsingValid() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("foo=[bar],king=[kong]");
-		assertThat(v.getStaticAttributes().size() == 2).isTrue();
+		assertThat(v.getStaticAttributes()).hasSize(2);
 		assertThat(v.getStaticAttributes().get("foo").equals("bar")).isTrue();
 		assertThat(v.getStaticAttributes().get("king").equals("kong")).isTrue();
 	}
@@ -230,7 +230,7 @@ public class BaseViewTests {
 		// Also tests empty value
 		String kingval = "";
 		v.setAttributesCSV("foo=(" + fooval + "),king={" + kingval + "},f1=[we]");
-		assertThat(v.getStaticAttributes().size() == 3).isTrue();
+		assertThat(v.getStaticAttributes()).hasSize(3);
 		assertThat(v.getStaticAttributes().get("foo").equals(fooval)).isTrue();
 		assertThat(v.getStaticAttributes().get("king").equals(kingval)).isTrue();
 	}
@@ -319,7 +319,7 @@ public class BaseViewTests {
 				throw new RuntimeException("Already initialized");
 			}
 			this.initialized = true;
-			assertThat(getApplicationContext() == wac).isTrue();
+			assertThat(getApplicationContext()).isSameAs(wac);
 		}
 	}
 

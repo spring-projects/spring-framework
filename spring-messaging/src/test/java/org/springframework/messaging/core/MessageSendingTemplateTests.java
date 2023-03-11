@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ public class MessageSendingTemplateTests {
 
 		assertThat(this.template.destination).isEqualTo("home");
 		assertThat(this.template.message).isNotNull();
-		assertThat(this.template.message.getHeaders().size()).as("expected 'id' and 'timestamp' headers only").isEqualTo(2);
+		assertThat(this.template.message.getHeaders()).as("expected 'id' and 'timestamp' headers only").hasSize(2);
 		assertThat(this.template.message.getPayload()).isEqualTo("payload");
 	}
 
@@ -118,7 +118,7 @@ public class MessageSendingTemplateTests {
 
 		assertThat(this.template.destination).isEqualTo("somewhere");
 		assertThat(this.template.message).isNotNull();
-		assertThat(this.template.message.getHeaders().size()).as("expected 'id' and 'timestamp' headers only").isEqualTo(2);
+		assertThat(this.template.message.getHeaders()).as("expected 'id' and 'timestamp' headers only").hasSize(2);
 		assertThat(this.template.message.getPayload()).isEqualTo("payload");
 	}
 
@@ -155,7 +155,7 @@ public class MessageSendingTemplateTests {
 
 		assertThat(this.template.destination).isEqualTo("home");
 		assertThat(this.template.message).isNotNull();
-		assertThat(this.template.message.getHeaders().size()).as("expected 'id' and 'timestamp' headers only").isEqualTo(2);
+		assertThat(this.template.message.getHeaders()).as("expected 'id' and 'timestamp' headers only").hasSize(2);
 		assertThat(this.template.message.getPayload()).isEqualTo("payload");
 
 		assertThat(this.postProcessor.getMessage()).isNotNull();
@@ -168,7 +168,7 @@ public class MessageSendingTemplateTests {
 
 		assertThat(this.template.destination).isEqualTo("somewhere");
 		assertThat(this.template.message).isNotNull();
-		assertThat(this.template.message.getHeaders().size()).as("expected 'id' and 'timestamp' headers only").isEqualTo(2);
+		assertThat(this.template.message.getHeaders()).as("expected 'id' and 'timestamp' headers only").hasSize(2);
 		assertThat(this.template.message.getPayload()).isEqualTo("payload");
 
 		assertThat(this.postProcessor.getMessage()).isNotNull();

@@ -55,11 +55,11 @@ public class DriverManagerDataSourceTests {
 		ds.setPassword(pwd);
 
 		Connection actualCon = ds.getConnection();
-		assertThat(actualCon == connection).isTrue();
+		assertThat(actualCon).isSameAs(connection);
 
-		assertThat(ds.getUrl().equals(jdbcUrl)).isTrue();
-		assertThat(ds.getPassword().equals(pwd)).isTrue();
-		assertThat(ds.getUsername().equals(uname)).isTrue();
+		assertThat(ds.getUrl()).isEqualTo(jdbcUrl);
+		assertThat(ds.getPassword()).isEqualTo(pwd);
+		assertThat(ds.getUsername()).isEqualTo(uname);
 	}
 
 	@Test
@@ -90,9 +90,9 @@ public class DriverManagerDataSourceTests {
 		ds.setConnectionProperties(connProps);
 
 		Connection actualCon = ds.getConnection();
-		assertThat(actualCon == connection).isTrue();
+		assertThat(actualCon).isSameAs(connection);
 
-		assertThat(ds.getUrl().equals(jdbcUrl)).isTrue();
+		assertThat(ds.getUrl()).isEqualTo(jdbcUrl);
 	}
 
 	@Test
@@ -127,11 +127,11 @@ public class DriverManagerDataSourceTests {
 		ds.setConnectionProperties(connProps);
 
 		Connection actualCon = ds.getConnection();
-		assertThat(actualCon == connection).isTrue();
+		assertThat(actualCon).isSameAs(connection);
 
-		assertThat(ds.getUrl().equals(jdbcUrl)).isTrue();
-		assertThat(ds.getPassword().equals(pwd)).isTrue();
-		assertThat(ds.getUsername().equals(uname)).isTrue();
+		assertThat(ds.getUrl()).isEqualTo(jdbcUrl);
+		assertThat(ds.getPassword()).isEqualTo(pwd);
+		assertThat(ds.getUsername()).isEqualTo(uname);
 	}
 
 	@Test

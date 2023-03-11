@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ public class PropertyComparatorTests {
 		dog2.setNickName("biscy");
 
 		PropertyComparator<Dog> c = new PropertyComparator<>("nickName", false, true);
-		assertThat(c.compare(dog, dog2) > 0).isTrue();
-		assertThat(c.compare(dog, dog) == 0).isTrue();
-		assertThat(c.compare(dog2, dog) < 0).isTrue();
+		assertThat(c.compare(dog, dog2)).isGreaterThan(0);
+		assertThat(c.compare(dog, dog)).isEqualTo(0);
+		assertThat(c.compare(dog2, dog)).isLessThan(0);
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class PropertyComparatorTests {
 		Dog dog = new Dog();
 		Dog dog2 = new Dog();
 		PropertyComparator<Dog> c = new PropertyComparator<>("nickName", false, true);
-		assertThat(c.compare(dog, dog2) == 0).isTrue();
+		assertThat(c.compare(dog, dog2)).isEqualTo(0);
 	}
 
 	@Test
@@ -64,13 +64,13 @@ public class PropertyComparatorTests {
 		dog2.setFirstName("biscuit");
 		dog2.setLastName("grayspots");
 
-		assertThat(c.compare(dog1, dog2) == 0).isTrue();
+		assertThat(c.compare(dog1, dog2)).isEqualTo(0);
 
 		c = c.thenComparing(new PropertyComparator<>("firstName", false, true));
-		assertThat(c.compare(dog1, dog2) > 0).isTrue();
+		assertThat(c.compare(dog1, dog2)).isGreaterThan(0);
 
 		dog2.setLastName("konikk dog");
-		assertThat(c.compare(dog2, dog1) > 0).isTrue();
+		assertThat(c.compare(dog2, dog1)).isGreaterThan(0);
 	}
 
 	@Test
@@ -86,9 +86,9 @@ public class PropertyComparatorTests {
 		dog2.setFirstName("biscuit");
 		dog2.setLastName("grayspots");
 
-		assertThat(c.compare(dog1, dog2) > 0).isTrue();
+		assertThat(c.compare(dog1, dog2)).isGreaterThan(0);
 		c = c.reversed();
-		assertThat(c.compare(dog1, dog2) < 0).isTrue();
+		assertThat(c.compare(dog1, dog2)).isLessThan(0);
 	}
 
 

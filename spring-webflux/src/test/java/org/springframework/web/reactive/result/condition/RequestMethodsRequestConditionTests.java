@@ -98,13 +98,13 @@ public class RequestMethodsRequestConditionTests {
 		ServerWebExchange exchange = getExchange("GET");
 
 		int result = c1.compareTo(c2, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = c2.compareTo(c1, exchange);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 
 		result = c2.compareTo(c3, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = c1.compareTo(c1, exchange);
 		assertThat(result).as("Invalid comparison result ").isEqualTo(0);

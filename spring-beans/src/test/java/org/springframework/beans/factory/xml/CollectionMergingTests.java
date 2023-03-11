@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class CollectionMergingTests {
 	public void mergeList() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithList");
 		List list = bean.getSomeList();
-		assertThat(list.size()).as("Incorrect size").isEqualTo(3);
+		assertThat(list).as("Incorrect size").hasSize(3);
 		assertThat(list.get(0)).isEqualTo("Rob Harrop");
 		assertThat(list.get(1)).isEqualTo("Rod Johnson");
 		assertThat(list.get(2)).isEqualTo("Juergen Hoeller");
@@ -75,7 +75,7 @@ public class CollectionMergingTests {
 	public void mergeSet() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithSet");
 		Set set = bean.getSomeSet();
-		assertThat(set.size()).as("Incorrect size").isEqualTo(2);
+		assertThat(set).as("Incorrect size").hasSize(2);
 		assertThat(set.contains("Rob Harrop")).isTrue();
 		assertThat(set.contains("Sally Greenwood")).isTrue();
 	}
@@ -99,7 +99,7 @@ public class CollectionMergingTests {
 	public void mergeMap() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithMap");
 		Map map = bean.getSomeMap();
-		assertThat(map.size()).as("Incorrect size").isEqualTo(3);
+		assertThat(map).as("Incorrect size").hasSize(3);
 		assertThat(map.get("Rob")).isEqualTo("Sally");
 		assertThat(map.get("Rod")).isEqualTo("Kerry");
 		assertThat(map.get("Juergen")).isEqualTo("Eva");
@@ -121,7 +121,7 @@ public class CollectionMergingTests {
 	public void mergeProperties() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithProps");
 		Properties props = bean.getSomeProperties();
-		assertThat(props.size()).as("Incorrect size").isEqualTo(3);
+		assertThat(props).as("Incorrect size").hasSize(3);
 		assertThat(props.getProperty("Rob")).isEqualTo("Sally");
 		assertThat(props.getProperty("Rod")).isEqualTo("Kerry");
 		assertThat(props.getProperty("Juergen")).isEqualTo("Eva");
@@ -131,7 +131,7 @@ public class CollectionMergingTests {
 	public void mergeListInConstructor() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithListInConstructor");
 		List list = bean.getSomeList();
-		assertThat(list.size()).as("Incorrect size").isEqualTo(3);
+		assertThat(list).as("Incorrect size").hasSize(3);
 		assertThat(list.get(0)).isEqualTo("Rob Harrop");
 		assertThat(list.get(1)).isEqualTo("Rod Johnson");
 		assertThat(list.get(2)).isEqualTo("Juergen Hoeller");
@@ -152,7 +152,7 @@ public class CollectionMergingTests {
 	public void mergeSetInConstructor() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithSetInConstructor");
 		Set set = bean.getSomeSet();
-		assertThat(set.size()).as("Incorrect size").isEqualTo(2);
+		assertThat(set).as("Incorrect size").hasSize(2);
 		assertThat(set.contains("Rob Harrop")).isTrue();
 		assertThat(set.contains("Sally Greenwood")).isTrue();
 	}
@@ -176,7 +176,7 @@ public class CollectionMergingTests {
 	public void mergeMapInConstructor() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithMapInConstructor");
 		Map map = bean.getSomeMap();
-		assertThat(map.size()).as("Incorrect size").isEqualTo(3);
+		assertThat(map).as("Incorrect size").hasSize(3);
 		assertThat(map.get("Rob")).isEqualTo("Sally");
 		assertThat(map.get("Rod")).isEqualTo("Kerry");
 		assertThat(map.get("Juergen")).isEqualTo("Eva");
@@ -198,7 +198,7 @@ public class CollectionMergingTests {
 	public void mergePropertiesInConstructor() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithPropsInConstructor");
 		Properties props = bean.getSomeProperties();
-		assertThat(props.size()).as("Incorrect size").isEqualTo(3);
+		assertThat(props).as("Incorrect size").hasSize(3);
 		assertThat(props.getProperty("Rob")).isEqualTo("Sally");
 		assertThat(props.getProperty("Rod")).isEqualTo("Kerry");
 		assertThat(props.getProperty("Juergen")).isEqualTo("Eva");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -455,7 +455,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 	void templating() throws Exception {
 		String randomPhrase =
 				parser.parseExpression("random number is ${T(java.lang.Math).random()}", new TemplatedParserContext()).getValue(String.class);
-		assertThat(randomPhrase.startsWith("random number")).isTrue();
+		assertThat(randomPhrase).startsWith("random number");
 	}
 
 	static class TemplatedParserContext implements ParserContext {

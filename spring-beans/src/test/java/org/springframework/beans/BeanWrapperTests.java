@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,16 +246,16 @@ class BeanWrapperTests extends AbstractPropertyAccessorTests {
 
 		accessor.setPropertyValue("object", tb);
 		assertThat(target.value).isSameAs(tb);
-		assertThat(target.getObject().get()).isSameAs(tb);
-		assertThat(((Optional<TestBean>) accessor.getPropertyValue("object")).get()).isSameAs(tb);
+		assertThat(target.getObject()).containsSame(tb);
+		assertThat(((Optional<TestBean>) accessor.getPropertyValue("object"))).containsSame(tb);
 		assertThat(target.value.getName()).isEqualTo("x");
 		assertThat(target.getObject().get().getName()).isEqualTo("x");
 		assertThat(accessor.getPropertyValue("object.name")).isEqualTo("x");
 
 		accessor.setPropertyValue("object.name", "y");
 		assertThat(target.value).isSameAs(tb);
-		assertThat(target.getObject().get()).isSameAs(tb);
-		assertThat(((Optional<TestBean>) accessor.getPropertyValue("object")).get()).isSameAs(tb);
+		assertThat(target.getObject()).containsSame(tb);
+		assertThat(((Optional<TestBean>) accessor.getPropertyValue("object"))).containsSame(tb);
 		assertThat(target.value.getName()).isEqualTo("y");
 		assertThat(target.getObject().get().getName()).isEqualTo("y");
 		assertThat(accessor.getPropertyValue("object.name")).isEqualTo("y");

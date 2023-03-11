@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ class CacheReproTests {
 
 		TestBean tb = new TestBean("tb1");
 		bean.insertItem(tb);
-		assertThat(bean.findById("tb1").get()).isSameAs(tb);
+		assertThat(bean.findById("tb1")).containsSame(tb);
 		assertThat(cache.get("tb1").get()).isSameAs(tb);
 
 		cache.clear();

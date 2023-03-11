@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class EvalTagTests extends AbstractTagTests {
 		assertThat(action).isEqualTo(Tag.EVAL_BODY_INCLUDE);
 		action = tag.doEndTag();
 		assertThat(action).isEqualTo(Tag.EVAL_PAGE);
-		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEqualTo("");
+		assertThat(((MockHttpServletResponse) context.getResponse()).getContentAsString()).isEmpty();
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,8 +135,8 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 		Object proxy = aop.getProxy();
 		assertThat(AopUtils.isCglibProxy(proxy)).isTrue();
-		assertThat(proxy instanceof ITestBean).isTrue();
-		assertThat(proxy instanceof TestBean).isTrue();
+		assertThat(proxy).isInstanceOf(ITestBean.class);
+		assertThat(proxy).isInstanceOf(TestBean.class);
 
 		TestBean tb = (TestBean) proxy;
 		assertThat(tb.getAge()).isEqualTo(32);
@@ -311,7 +311,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 		cglib = new CglibAopProxy(as);
 
 		ITestBean proxy2 = (ITestBean) cglib.getProxy();
-		assertThat(proxy2 instanceof Serializable).isTrue();
+		assertThat(proxy2).isInstanceOf(Serializable.class);
 	}
 
 	@Test
@@ -330,7 +330,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 			proxy.doTest();
 		}
 		catch (Exception ex) {
-			assertThat(ex instanceof ApplicationContextException).as("Invalid exception class").isTrue();
+			assertThat(ex).as("Invalid exception class").isInstanceOf(ApplicationContextException.class);
 		}
 
 		assertThat(proxy.isCatchInvoked()).as("Catch was not invoked").isTrue();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,8 +196,8 @@ public class DefaultCorsProcessorTests {
 		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
 		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isEqualTo("https://domain2.com");
 		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS)).isTrue();
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS).contains("header1")).isTrue();
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS).contains("header2")).isTrue();
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS)).contains("header1");
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS)).contains("header2");
 		assertThat(this.response.getHeaders(HttpHeaders.VARY)).contains(HttpHeaders.ORIGIN,
 				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
 		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
@@ -365,9 +365,9 @@ public class DefaultCorsProcessorTests {
 		this.processor.processRequest(this.conf, this.request, this.response);
 		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
 		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).isTrue();
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header1")).isTrue();
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header2")).isTrue();
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header3")).isFalse();
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).contains("Header1");
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).contains("Header2");
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).doesNotContain("Header3");
 		assertThat(this.response.getHeaders(HttpHeaders.VARY)).contains(HttpHeaders.ORIGIN,
 				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
 		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
@@ -385,9 +385,9 @@ public class DefaultCorsProcessorTests {
 		this.processor.processRequest(this.conf, this.request, this.response);
 		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).isTrue();
 		assertThat(this.response.containsHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).isTrue();
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header1")).isTrue();
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header2")).isTrue();
-		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("*")).isFalse();
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).contains("Header1");
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).contains("Header2");
+		assertThat(this.response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS)).doesNotContain("*");
 		assertThat(this.response.getHeaders(HttpHeaders.VARY)).contains(HttpHeaders.ORIGIN,
 				HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
 		assertThat(this.response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);

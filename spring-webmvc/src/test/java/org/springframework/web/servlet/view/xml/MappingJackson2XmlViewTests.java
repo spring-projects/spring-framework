@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class MappingJackson2XmlViewTests {
 		assertThat(mediaType.isCompatibleWith(MediaType.parseMediaType(MappingJackson2XmlView.DEFAULT_CONTENT_TYPE))).isTrue();
 
 		String jsonResult = response.getContentAsString();
-		assertThat(jsonResult.length() > 0).isTrue();
+		assertThat(jsonResult).isNotEmpty();
 		assertThat(response.getContentLength()).isEqualTo(jsonResult.length());
 
 		validateResult();
@@ -130,7 +130,7 @@ public class MappingJackson2XmlViewTests {
 		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
-		assertThat(response.getContentAsString().length() > 0).isTrue();
+		assertThat(response.getContentAsString()).isNotEmpty();
 		assertThat(response.getContentLength()).isEqualTo(response.getContentAsString().length());
 
 		validateResult();
@@ -144,8 +144,8 @@ public class MappingJackson2XmlViewTests {
 
 		view.render(model, request, response);
 
-		assertThat(response.getContentAsString().length() > 0).isTrue();
-		assertThat(response.getContentAsString().contains("<testBeanSimple>custom</testBeanSimple>")).isTrue();
+		assertThat(response.getContentAsString()).isNotEmpty();
+		assertThat(response.getContentAsString()).contains("<testBeanSimple>custom</testBeanSimple>");
 
 		validateResult();
 	}
@@ -164,8 +164,8 @@ public class MappingJackson2XmlViewTests {
 		view.render(model, request, response);
 
 		String result = response.getContentAsString();
-		assertThat(result.length() > 0).isTrue();
-		assertThat(result.contains("custom</testBeanSimple>")).isTrue();
+		assertThat(result).isNotEmpty();
+		assertThat(result).contains("custom</testBeanSimple>");
 
 		validateResult();
 	}
@@ -182,10 +182,10 @@ public class MappingJackson2XmlViewTests {
 		view.render(model, request, response);
 
 		String result = response.getContentAsString();
-		assertThat(result.length() > 0).isTrue();
-		assertThat(result.contains("foo")).isFalse();
-		assertThat(result.contains("bar")).isTrue();
-		assertThat(result.contains("baz")).isFalse();
+		assertThat(result).isNotEmpty();
+		assertThat(result).doesNotContain("foo");
+		assertThat(result).contains("bar");
+		assertThat(result).doesNotContain("baz");
 
 		validateResult();
 	}
@@ -212,11 +212,11 @@ public class MappingJackson2XmlViewTests {
 		view.render(model, request, response);
 
 		String content = response.getContentAsString();
-		assertThat(content.length() > 0).isTrue();
+		assertThat(content).isNotEmpty();
 		assertThat(response.getContentLength()).isEqualTo(content.length());
-		assertThat(content.contains("foo")).isTrue();
-		assertThat(content.contains("boo")).isFalse();
-		assertThat(content.contains(JsonView.class.getName())).isFalse();
+		assertThat(content).contains("foo");
+		assertThat(content).doesNotContain("boo");
+		assertThat(content).doesNotContain(JsonView.class.getName());
 	}
 
 	private void validateResult() throws Exception {

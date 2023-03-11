@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class PropertyPathFactoryBeanTests {
 		Object result2 = xbf.getBean("otb.spouse");
 		boolean condition = result1 instanceof TestBean;
 		assertThat(condition).isTrue();
-		assertThat(result1 == result2).isTrue();
+		assertThat(result1).isSameAs(result2);
 		assertThat(((TestBean) result1).getAge()).isEqualTo(99);
 	}
 
@@ -73,9 +73,9 @@ public class PropertyPathFactoryBeanTests {
 		assertThat(((TestBean) result1).getAge()).isEqualTo(11);
 		assertThat(((TestBean) result2).getAge()).isEqualTo(11);
 		assertThat(((TestBean) result3).getAge()).isEqualTo(11);
-		assertThat(result1 != result2).isTrue();
-		assertThat(result1 != result3).isTrue();
-		assertThat(result2 != result3).isTrue();
+		assertThat(result1).isNotSameAs(result2);
+		assertThat(result1).isNotSameAs(result3);
+		assertThat(result2).isNotSameAs(result3);
 	}
 
 	@Test

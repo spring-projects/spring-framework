@@ -43,8 +43,7 @@ public class PathPatternsRequestConditionTests {
 	@Test
 	void prependNonEmptyPatternsOnly() {
 		assertThat(createCondition("").getPatternValues().iterator().next())
-				.as("Do not prepend empty patterns (SPR-8255)")
-				.isEqualTo("");
+				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 
 	@Test

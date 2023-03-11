@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,8 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 //		  CompoundExpression  value:2
 //		    IntLiteral  value:2
 //		===> Expression '3+4+5+6+7-2' - AST end
-		assertThat(s.contains("===> Expression '3+4+5+6+7-2' - AST start")).isTrue();
-		assertThat(s.contains(" OpPlus  value:((((3 + 4) + 5) + 6) + 7)  #children:2")).isTrue();
+		assertThat(s).contains("===> Expression '3+4+5+6+7-2' - AST start");
+		assertThat(s).contains(" OpPlus  value:((((3 + 4) + 5) + 6) + 7)  #children:2");
 	}
 
 	@Test

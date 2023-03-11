@@ -169,8 +169,8 @@ class PrintingResultHandlerTests {
 		List<String> cookieValues = this.response.getHeaders("Set-Cookie");
 		assertThat(cookieValues).hasSize(2);
 		assertThat(cookieValues.get(0)).isEqualTo("cookie=cookieValue");
-		assertThat(cookieValues.get(1).startsWith(
-				"enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires=")).as("Actual: " + cookieValues.get(1)).isTrue();
+		assertThat(cookieValues.get(1)).as("Actual: " + cookieValues.get(1))
+				.startsWith("enigma=42; Path=/crumbs; Domain=.example.com; Max-Age=1234; Expires=");
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
@@ -192,14 +192,14 @@ class PrintingResultHandlerTests {
 		assertThat(cookies).hasSize(2);
 		String cookie1 = cookies[0];
 		String cookie2 = cookies[1];
-		assertThat(cookie1.startsWith("[" + Cookie.class.getSimpleName())).isTrue();
-		assertThat(cookie1.contains("name = 'cookie', value = 'cookieValue'")).isTrue();
-		assertThat(cookie1.endsWith("]")).isTrue();
-		assertThat(cookie2.startsWith("[" + Cookie.class.getSimpleName())).isTrue();
-		assertThat(cookie2.contains("name = 'enigma', value = '42', " +
+		assertThat(cookie1).startsWith("[" + Cookie.class.getSimpleName());
+		assertThat(cookie1).contains("name = 'cookie', value = 'cookieValue'");
+		assertThat(cookie1).endsWith("]");
+		assertThat(cookie2).startsWith("[" + Cookie.class.getSimpleName());
+		assertThat(cookie2).contains("name = 'enigma', value = '42', " +
 				"comment = [null], domain = '.example.com', maxAge = 1234, " +
-				"path = '/crumbs', secure = true, version = 0, httpOnly = true")).isTrue();
-		assertThat(cookie2.endsWith("]")).isTrue();
+				"path = '/crumbs', secure = true, version = 0, httpOnly = true");
+		assertThat(cookie2).endsWith("]");
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public class HtmlUnitRequestBuilderTests {
 		webRequest.setUrl(new URL("https://example.com/"));
 		String contextPath = requestBuilder.buildRequest(servletContext).getContextPath();
 
-		assertThat(contextPath).isEqualTo("");
+		assertThat(contextPath).isEmpty();
 	}
 
 	@Test
@@ -404,7 +404,7 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getParameterMap()).hasSize(1);
-		assertThat(actualRequest.getParameter("name")).isEqualTo("");
+		assertThat(actualRequest.getParameter("name")).isEmpty();
 	}
 
 	@Test
@@ -414,7 +414,7 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getParameterMap()).hasSize(1);
-		assertThat(actualRequest.getParameter("name")).isEqualTo("");
+		assertThat(actualRequest.getParameter("name")).isEmpty();
 	}
 
 	@Test

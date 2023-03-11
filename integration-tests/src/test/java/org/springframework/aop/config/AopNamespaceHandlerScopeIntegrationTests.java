@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ class AopNamespaceHandlerScopeIntegrationTests {
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(oldRequest));
 		assertThat(requestScoped.getName()).isEqualTo(bram);
 
-		assertThat(((Advised) requestScoped).getAdvisors().length > 0).as("Should have advisors").isTrue();
+		assertThat(((Advised) requestScoped).getAdvisors()).as("Should have advisors").isNotEmpty();
 	}
 
 	@Test
@@ -131,7 +131,7 @@ class AopNamespaceHandlerScopeIntegrationTests {
 		request.setSession(oldSession);
 		assertThat(sessionScoped.getName()).isEqualTo(bram);
 
-		assertThat(((Advised) sessionScoped).getAdvisors().length > 0).as("Should have advisors").isTrue();
+		assertThat(((Advised) sessionScoped).getAdvisors()).as("Should have advisors").isNotEmpty();
 	}
 
 }

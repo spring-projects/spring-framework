@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -401,7 +401,7 @@ class ReflectionTestUtilsTests {
 	void setFieldOnLegacyEntityWithSideEffectsInToString() {
 		String testCollaborator = "test collaborator";
 		setField(entity, "collaborator", testCollaborator, Object.class);
-		assertThat(entity.toString().contains(testCollaborator)).isTrue();
+		assertThat(entity.toString()).contains(testCollaborator);
 	}
 
 	@Test // SPR-14363
@@ -421,7 +421,7 @@ class ReflectionTestUtilsTests {
 	void invokeSetterMethodOnLegacyEntityWithSideEffectsInToString() {
 		String testCollaborator = "test collaborator";
 		invokeSetterMethod(entity, "collaborator", testCollaborator);
-		assertThat(entity.toString().contains(testCollaborator)).isTrue();
+		assertThat(entity.toString()).contains(testCollaborator);
 	}
 
 	@Test

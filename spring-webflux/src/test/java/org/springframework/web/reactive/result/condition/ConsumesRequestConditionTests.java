@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,10 +146,10 @@ public class ConsumesRequestConditionTests {
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*");
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = condition2.compareTo(condition1, exchange);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 	}
 
 	@Test
@@ -160,10 +160,10 @@ public class ConsumesRequestConditionTests {
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*", "text/plain;q=0.7");
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = condition2.compareTo(condition1, exchange);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 	}
 
 
@@ -209,7 +209,7 @@ public class ConsumesRequestConditionTests {
 
 	private void assertConditions(ConsumesRequestCondition condition, String... expected) {
 		Collection<ConsumeMediaTypeExpression> expressions = condition.getContent();
-		assertThat(expected.length).as("Invalid amount of conditions").isEqualTo(expressions.size());
+		assertThat(expected).as("Invalid amount of conditions").hasSameSizeAs(expressions);
 		for (String s : expected) {
 			boolean found = false;
 			for (ConsumeMediaTypeExpression expr : expressions) {

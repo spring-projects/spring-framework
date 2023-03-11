@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -334,7 +334,7 @@ class ClassUtilsTests {
 	void getAllInterfaces() {
 		DerivedTestObject testBean = new DerivedTestObject();
 		List<Class<?>> ifcs = Arrays.asList(ClassUtils.getAllInterfaces(testBean));
-		assertThat(ifcs.size()).as("Correct number of interfaces").isEqualTo(4);
+		assertThat(ifcs).as("Correct number of interfaces").hasSize(4);
 		assertThat(ifcs.contains(Serializable.class)).as("Contains Serializable").isTrue();
 		assertThat(ifcs.contains(ITestObject.class)).as("Contains ITestBean").isTrue();
 		assertThat(ifcs.contains(ITestInterface.class)).as("Contains IOther").isTrue();

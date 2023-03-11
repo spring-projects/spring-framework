@@ -888,7 +888,8 @@ public class JtaTransactionManagerTests {
 					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
-							assertThat(status == TransactionSynchronization.STATUS_ROLLED_BACK).as("Correct completion status").isTrue();
+							assertThat(status).as("Correct completion status")
+									.isEqualTo(TransactionSynchronization.STATUS_ROLLED_BACK);
 						}
 					});
 				}
@@ -932,7 +933,8 @@ public class JtaTransactionManagerTests {
 					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
-							assertThat(status == TransactionSynchronization.STATUS_ROLLED_BACK).as("Correct completion status").isTrue();
+							assertThat(status).as("Correct completion status")
+									.isEqualTo(TransactionSynchronization.STATUS_ROLLED_BACK);
 						}
 					});
 				}
@@ -1031,7 +1033,8 @@ public class JtaTransactionManagerTests {
 					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
-							assertThat(status == TransactionSynchronization.STATUS_UNKNOWN).as("Correct completion status").isTrue();
+							assertThat(status).as("Correct completion status")
+									.isEqualTo(TransactionSynchronization.STATUS_UNKNOWN);
 						}
 					});
 				}
@@ -1056,7 +1059,8 @@ public class JtaTransactionManagerTests {
 					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
-							assertThat(status == TransactionSynchronization.STATUS_UNKNOWN).as("Correct completion status").isTrue();
+							assertThat(status).as("Correct completion status")
+									.isEqualTo(TransactionSynchronization.STATUS_UNKNOWN);
 						}
 					});
 					status.setRollbackOnly();
@@ -1101,7 +1105,8 @@ public class JtaTransactionManagerTests {
 					TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 						@Override
 						public void afterCompletion(int status) {
-							assertThat(status == TransactionSynchronization.STATUS_UNKNOWN).as("Correct completion status").isTrue();
+							assertThat(status).as("Correct completion status")
+									.isEqualTo(TransactionSynchronization.STATUS_UNKNOWN);
 						}
 					});
 				}

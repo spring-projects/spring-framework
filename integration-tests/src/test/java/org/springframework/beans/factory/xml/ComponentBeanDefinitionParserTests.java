@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,25 +52,25 @@ class ComponentBeanDefinitionParserTests {
 	@Test
 	void testBionicBasic() {
 		Component cp = getBionicFamily();
-		assertThat("Bionic-1").isEqualTo(cp.getName());
+		assertThat(cp.getName()).isEqualTo("Bionic-1");
 	}
 
 	@Test
 	void testBionicFirstLevelChildren() {
 		Component cp = getBionicFamily();
 		List<Component> components = cp.getComponents();
-		assertThat(2).isEqualTo(components.size());
-		assertThat("Mother-1").isEqualTo(components.get(0).getName());
-		assertThat("Rock-1").isEqualTo(components.get(1).getName());
+		assertThat(components).hasSize(2);
+		assertThat(components.get(0).getName()).isEqualTo("Mother-1");
+		assertThat(components.get(1).getName()).isEqualTo("Rock-1");
 	}
 
 	@Test
 	void testBionicSecondLevelChildren() {
 		Component cp = getBionicFamily();
 		List<Component> components = cp.getComponents().get(0).getComponents();
-		assertThat(2).isEqualTo(components.size());
-		assertThat("Karate-1").isEqualTo(components.get(0).getName());
-		assertThat("Sport-1").isEqualTo(components.get(1).getName());
+		assertThat(components).hasSize(2);
+		assertThat(components.get(0).getName()).isEqualTo("Karate-1");
+		assertThat(components.get(1).getName()).isEqualTo("Sport-1");
 	}
 
 	private Component getBionicFamily() {

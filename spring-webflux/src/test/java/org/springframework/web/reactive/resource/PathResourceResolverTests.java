@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class PathResourceResolverTests {
 		Resource actual = this.resolver.resolveResource(null, path, locations, null).block(TIMEOUT);
 
 		assertThat(actual).isNotNull();
-		assertThat(actual.getFile().getName()).isEqualTo("foo foo.txt");
+		assertThat(actual.getFile()).hasName("foo foo.txt");
 	}
 
 	@Test
