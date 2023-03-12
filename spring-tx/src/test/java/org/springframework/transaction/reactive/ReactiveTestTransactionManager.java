@@ -89,7 +89,7 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 		return Mono.fromRunnable(() -> {
 			this.commit = true;
 			if (this.forceFailOnCommit) {
-				throw new IllegalArgumentException("Forced failure on commit");
+				throw new IllegalStateException("Forced failure on commit");
 			}
 		});
 	}
