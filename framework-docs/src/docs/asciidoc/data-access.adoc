@@ -1028,7 +1028,23 @@ the call stack and makes a determination whether to mark the transaction for rol
 In its default configuration, the Spring Framework's transaction infrastructure code
 marks a transaction for rollback only in the case of runtime, unchecked exceptions.
 That is, when the thrown exception is an instance or subclass of `RuntimeException`.
-(`Error` instances also, by default, result in a rollback). Checked exceptions that are
+(`Error` instances also, by default, result in a rollback).
+
+However, starting with Spring Framework 5.2.0 the default configuration also provides support for Vavr's `Try` method to trigger transaction rollbacks when it returns a 'Failure'. This allows you to handle functional-style errors using Try and have the transaction automatically rolled back in case of a failure.
+
+Here's an example of how to use Vavr's Try:
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+  @Transactional
+  public Try<String> myTransactionalMethod() {
+    // If transactionMethod throws an exception, it will be caught by the Try instance created with Try.of() and wrapped inside the Failure class, which can be checked using the isFailure() method on the Try instance.
+    return Try.of(serviceA::transactionalMethod);
+  }
+----
+For more information on Vavr's Try, refer to the [official Vavr documentation](https://www.vavr.io/vavr-docs/#_try).
+
+Checked exceptions that are
 thrown from a transactional method do not result in rollback in the default
 configuration.
 
