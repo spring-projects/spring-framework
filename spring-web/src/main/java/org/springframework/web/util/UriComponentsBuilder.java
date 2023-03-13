@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -827,8 +828,7 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	/**
 	 * Adapt this builder's scheme+host+port from the given headers, specifically
 	 * "Forwarded" (<a href="https://tools.ietf.org/html/rfc7239">RFC 7239</a>,
-	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
-	 * "Forwarded" is not found.
+	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto".
 	 * <p><strong>Note:</strong> this method uses values from forwarded headers,
 	 * if present, in order to reflect the client-originated protocol and address.
 	 * Consider using the {@code ForwardedHeaderFilter} in order to choose from a
@@ -840,41 +840,14 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 	 */
 	UriComponentsBuilder adaptFromForwardedHeaders(HttpHeaders headers) {
 		try {
-			String forwardedHeader = headers.getFirst("Forwarded");
-			if (StringUtils.hasText(forwardedHeader)) {
-				Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedHeader);
-				if (matcher.find()) {
-					scheme(matcher.group(1).trim());
-					port(null);
-				}
-				else if (isForwardedSslOn(headers)) {
-					scheme("https");
-					port(null);
-				}
-				matcher = FORWARDED_HOST_PATTERN.matcher(forwardedHeader);
-				if (matcher.find()) {
-					adaptForwardedHost(matcher.group(1).trim());
-				}
-			}
-			else {
-				String protocolHeader = headers.getFirst("X-Forwarded-Proto");
-				if (StringUtils.hasText(protocolHeader)) {
-					scheme(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
-					port(null);
-				}
-				else if (isForwardedSslOn(headers)) {
-					scheme("https");
-					port(null);
-				}
-				String hostHeader = headers.getFirst("X-Forwarded-Host");
-				if (StringUtils.hasText(hostHeader)) {
-					adaptForwardedHost(StringUtils.tokenizeToStringArray(hostHeader, ",")[0]);
-				}
-				String portHeader = headers.getFirst("X-Forwarded-Port");
-				if (StringUtils.hasText(portHeader)) {
-					port(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));
-				}
-			}
+			readForwardedProto(headers).ifPresent(proto -> {
+				scheme(proto);
+				port(null);
+			});
+
+			readForwardedHost(headers).ifPresent(this::adaptForwardedHost);
+			readForwardedPort(headers).ifPresent(this::port);
+
 		}
 		catch (NumberFormatException ex) {
 			throw new IllegalArgumentException("Failed to parse a port from \"forwarded\"-type headers. " +
@@ -891,9 +864,46 @@ public class UriComponentsBuilder implements UriBuilder, Cloneable {
 		return this;
 	}
 
-	private boolean isForwardedSslOn(HttpHeaders headers) {
+	private Optional<String> readForwardedProto(HttpHeaders headers) {
+		String forwardedHeader = headers.getFirst("Forwarded");
+		if (StringUtils.hasText(forwardedHeader)) {
+			Matcher matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedHeader);
+			if (matcher.find()) {
+				return Optional.of(matcher.group(1).trim());
+			}
+		}
+		String protocolHeader = headers.getFirst("X-Forwarded-Proto");
+		if (StringUtils.hasText(protocolHeader)) {
+			return Optional.of(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
+		}
 		String forwardedSsl = headers.getFirst("X-Forwarded-Ssl");
-		return StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on");
+		if (StringUtils.hasText(forwardedSsl) && forwardedSsl.equalsIgnoreCase("on")) {
+			return Optional.of("https");
+		}
+		return Optional.empty();
+	}
+
+	private Optional<String> readForwardedHost(HttpHeaders headers) {
+		String forwardedHeader = headers.getFirst("Forwarded");
+		if (StringUtils.hasText(forwardedHeader)) {
+			Matcher matcher = FORWARDED_HOST_PATTERN.matcher(forwardedHeader);
+			if (matcher.find()) {
+				return Optional.of(matcher.group(1).trim());
+			}
+		}
+		String hostHeader = headers.getFirst("X-Forwarded-Host");
+		if (StringUtils.hasText(hostHeader)) {
+			return Optional.of(StringUtils.tokenizeToStringArray(hostHeader, ",")[0]);
+		}
+		return Optional.empty();
+	}
+
+	private OptionalInt readForwardedPort(HttpHeaders headers) {
+		String portHeader = headers.getFirst("X-Forwarded-Port");
+		if (StringUtils.hasText(portHeader)) {
+			return OptionalInt.of(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));
+		}
+		return OptionalInt.empty();
 	}
 
 	private void adaptForwardedHost(String rawValue) {
