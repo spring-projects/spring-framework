@@ -190,7 +190,7 @@ public class XpathAssertions {
 
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		throw new AssertionError("Object#equals is disabled " +
 				"to avoid being used in error instead of XPathAssertions#isEqualTo(String).");
 	}

@@ -16,6 +16,8 @@
 
 package org.springframework.beans.testfixture.beans;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Simple nested test bean used for testing bean factories, AOP framework etc.
  *
@@ -43,7 +45,7 @@ public class NestedTestBean implements INestedTestBean {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (!(obj instanceof NestedTestBean ntb)) {
 			return false;
 		}

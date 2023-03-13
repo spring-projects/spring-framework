@@ -43,6 +43,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.tests.MockitoUtils;
 import org.springframework.tests.MockitoUtils.InvocationArgumentsAdapter;
 
@@ -261,7 +262,7 @@ abstract class AbstractStaxXMLReaderTests {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			Attributes other = ((PartialAttributes) obj).attributes;
 			if (this.attributes.getLength() != other.getLength()) {
 				return false;

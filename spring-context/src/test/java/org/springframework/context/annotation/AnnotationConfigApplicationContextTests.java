@@ -37,6 +37,7 @@ import org.springframework.context.annotation6.Jsr330NamedForScanning;
 import org.springframework.context.testfixture.context.annotation.CglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.LambdaBeanConfiguration;
 import org.springframework.core.ResolvableType;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 import static java.lang.String.format;
@@ -732,7 +733,7 @@ class TestBean {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (this == obj) {
 			return true;
 		}

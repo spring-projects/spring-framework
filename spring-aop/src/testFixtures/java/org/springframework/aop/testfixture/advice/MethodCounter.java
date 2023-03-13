@@ -21,6 +21,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Abstract superclass for counting advices etc.
  *
@@ -59,7 +61,7 @@ public class MethodCounter implements Serializable {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (other != null && other.getClass() == this.getClass());
 	}
 

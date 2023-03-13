@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.io.Serializable;
 
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 /**
  * Default implementation of {@link HttpStatusCode}.
@@ -89,7 +90,7 @@ final class DefaultHttpStatusCode
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return (this == obj) || (obj instanceof HttpStatusCode that && this.value == that.value());
 	}
 

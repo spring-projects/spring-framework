@@ -49,6 +49,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1045,7 +1046,7 @@ class DefaultConversionServiceTests {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (!(o instanceof SSN ssn)) {
 				return false;
 			}
@@ -1085,7 +1086,7 @@ class DefaultConversionServiceTests {
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (!(o instanceof ISBN isbn)) {
 				return false;
 			}

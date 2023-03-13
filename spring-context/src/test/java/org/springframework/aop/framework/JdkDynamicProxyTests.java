@@ -27,6 +27,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.testfixture.beans.IOther;
 import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -197,7 +198,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (this == o) {
 				return true;
 			}

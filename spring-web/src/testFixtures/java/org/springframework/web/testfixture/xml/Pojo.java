@@ -18,6 +18,8 @@ package org.springframework.web.testfixture.xml;
 
 import jakarta.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.lang.Nullable;
+
 /**
  * @author Sebastien Deleuze
  */
@@ -53,7 +55,7 @@ public class Pojo {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}

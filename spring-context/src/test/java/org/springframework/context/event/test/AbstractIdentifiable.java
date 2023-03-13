@@ -18,6 +18,8 @@ package org.springframework.context.event.test;
 
 import java.util.UUID;
 
+import org.springframework.lang.Nullable;
+
 /**
  * @author Stephane Nicoll
  */
@@ -35,7 +37,7 @@ public abstract class AbstractIdentifiable implements Identifiable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}

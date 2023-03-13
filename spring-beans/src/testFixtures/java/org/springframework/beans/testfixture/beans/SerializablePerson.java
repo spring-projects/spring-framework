@@ -18,6 +18,7 @@ package org.springframework.beans.testfixture.beans;
 
 import java.io.Serializable;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -63,7 +64,7 @@ public class SerializablePerson implements Person, Serializable {
 
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (!(other instanceof SerializablePerson p)) {
 			return false;
 		}

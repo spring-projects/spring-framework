@@ -102,7 +102,7 @@ final class DynamicFiles<F extends DynamicFile> implements Iterable<F> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (this == obj) {
 			return true;
 		}

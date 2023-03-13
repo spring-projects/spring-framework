@@ -16,6 +16,8 @@
 
 package org.springframework.beans.testfixture.beans;
 
+import org.springframework.lang.Nullable;
+
 /**
  * @author Rob Harrop
  * @since 2.0
@@ -38,7 +40,7 @@ public class Pet {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}

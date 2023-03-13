@@ -19,6 +19,8 @@ package org.springframework.messaging.simp.user;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
+
 /**
  * @author Rossen Stoyanchev
  */
@@ -64,8 +66,8 @@ public class TestSimpSession implements SimpSession {
 
 
 	@Override
-	public boolean equals(Object other) {
-		return (this == other || (other instanceof SimpSession && this.id.equals(((SimpSession) other).getId())));
+	public boolean equals(@Nullable Object obj) {
+		return (this == obj || (obj instanceof SimpSession that && this.id.equals(that.getId())));
 	}
 
 	@Override

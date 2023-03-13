@@ -19,6 +19,7 @@ package org.springframework.test.web;
 import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 @XmlRootElement
@@ -66,7 +67,7 @@ public class Person {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

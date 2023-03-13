@@ -16,6 +16,7 @@
 
 package org.springframework.context.testfixture.cache.beans;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -41,16 +42,11 @@ public class TestEntity {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (obj == this) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (obj instanceof TestEntity) {
-			return ObjectUtils.nullSafeEquals(this.id, ((TestEntity) obj).id);
-		}
-		return false;
+		return (obj instanceof TestEntity that && ObjectUtils.nullSafeEquals(this.id, that.id));
 	}
+
 }

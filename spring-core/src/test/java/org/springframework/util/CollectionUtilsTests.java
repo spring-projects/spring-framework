@@ -29,6 +29,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.lang.Nullable;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -219,7 +221,7 @@ class CollectionUtilsTests {
 		}
 
 		@Override
-		public boolean equals(Object rhs) {
+		public boolean equals(@Nullable Object rhs) {
 			if (this == rhs) {
 				return true;
 			}

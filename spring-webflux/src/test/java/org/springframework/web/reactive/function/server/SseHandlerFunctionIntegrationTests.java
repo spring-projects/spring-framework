@@ -25,6 +25,7 @@ import reactor.test.StepVerifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -166,7 +167,7 @@ class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIntegrati
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (this == o) {
 				return true;
 			}

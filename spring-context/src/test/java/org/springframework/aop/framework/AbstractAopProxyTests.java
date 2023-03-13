@@ -1651,7 +1651,7 @@ public abstract class AbstractAopProxyTests {
 	public static class AllInstancesAreEqual implements IOther {
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (other instanceof AllInstancesAreEqual);
 		}
 

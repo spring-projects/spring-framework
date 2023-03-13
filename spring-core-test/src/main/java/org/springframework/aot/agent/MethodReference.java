@@ -18,6 +18,8 @@ package org.springframework.aot.agent;
 
 import java.util.Objects;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Reference to a Java method, identified by its owner class and the method name.
  *
@@ -61,7 +63,7 @@ public final class MethodReference {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}

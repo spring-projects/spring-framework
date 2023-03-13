@@ -19,6 +19,7 @@ package org.springframework.aop.support;
 import java.io.Serializable;
 
 import org.springframework.aop.ClassFilter;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,7 +46,7 @@ public class RootClassFilter implements ClassFilter, Serializable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return (this == obj || (obj instanceof RootClassFilter that &&
 				this.clazz.equals(that.clazz)));
 	}

@@ -18,6 +18,8 @@ package org.springframework.core.testfixture.security;
 
 import java.security.Principal;
 
+import org.springframework.lang.Nullable;
+
 /**
  * An implementation of {@link Principal} for testing.
  *
@@ -37,7 +39,7 @@ public class TestPrincipal implements Principal {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (obj == this) {
 			return true;
 		}

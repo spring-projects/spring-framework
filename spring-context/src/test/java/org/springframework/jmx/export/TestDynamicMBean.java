@@ -25,6 +25,8 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanOperationInfo;
 
+import org.springframework.lang.Nullable;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -76,7 +78,7 @@ public class TestDynamicMBean implements DynamicMBean {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return (obj instanceof TestDynamicMBean);
 	}
 

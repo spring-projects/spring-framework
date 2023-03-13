@@ -117,7 +117,7 @@ public class TypePatternClassFilter implements ClassFilter {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return (this == obj || (obj instanceof TypePatternClassFilter that &&
 				ObjectUtils.nullSafeEquals(this.typePattern, that.typePattern)));
 	}

@@ -16,6 +16,8 @@
 
 package org.springframework.expression.spel.testresources;
 
+import org.springframework.lang.Nullable;
+
 ///CLOVER:OFF
 public class PlaceOfBirth {
 
@@ -51,7 +53,7 @@ public class PlaceOfBirth {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (!(o instanceof PlaceOfBirth otherPOB)) {
 			return false;
 		}

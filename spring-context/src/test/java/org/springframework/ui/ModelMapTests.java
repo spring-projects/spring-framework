@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -288,7 +289,7 @@ public class ModelMapTests {
 	public static class SomeInnerClass {
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			return (obj instanceof SomeInnerClass);
 		}
 
