@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.config.annotation;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,6 +87,24 @@ public class DefaultServletHandlerConfigurerTests {
 		String expected = "defaultServlet";
 		assertThat(servletContext.url).as("The ServletContext was not called with the default servlet name").isEqualTo(expected);
 		assertThat(response.getForwardedUrl()).as("The request was not forwarded").isEqualTo(expected);
+	}
+
+	@Test
+	public void handleIncludeRequest() throws Exception {
+		configurer.enable();
+		SimpleUrlHandlerMapping handlerMapping = configurer.buildHandlerMapping();
+		DefaultServletHttpRequestHandler handler = (DefaultServletHttpRequestHandler) handlerMapping.getUrlMap().get("/**");
+
+		assertThat(handler).isNotNull();
+		assertThat(handlerMapping.getOrder()).isEqualTo(Integer.MAX_VALUE);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setDispatcherType(DispatcherType.INCLUDE);
+		handler.handleRequest(request, response);
+
+		String expected = "default";
+		assertThat(servletContext.url).as("The ServletContext was not called with the default servlet name").isEqualTo(expected);
+		assertThat(response.getIncludedUrl()).as("The request was not included").isEqualTo(expected);
 	}
 
 
