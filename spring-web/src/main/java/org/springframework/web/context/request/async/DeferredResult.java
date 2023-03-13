@@ -80,7 +80,7 @@ public class DeferredResult<T> {
 	 * Create a DeferredResult.
 	 */
 	public DeferredResult() {
-		this(null, () -> RESULT_NONE);
+		this(null);
 	}
 
 	/**
@@ -101,8 +101,7 @@ public class DeferredResult<T> {
 	 * @param timeoutResult the result to use
 	 */
 	public DeferredResult(@Nullable Long timeoutValue, Object timeoutResult) {
-		this.timeoutValue = timeoutValue;
-		this.timeoutResult = () -> timeoutResult;
+		this(timeoutValue, () -> timeoutResult);
 	}
 
 	/**

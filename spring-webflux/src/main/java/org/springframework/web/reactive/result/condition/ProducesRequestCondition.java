@@ -57,7 +57,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 
 	private final List<ProduceMediaTypeExpression> mediaTypeAllList =
-			Collections.singletonList(new ProduceMediaTypeExpression(MediaType.ALL_VALUE));
+			List.of(new ProduceMediaTypeExpression(MediaType.ALL_VALUE));
 
 	private final List<ProduceMediaTypeExpression> expressions;
 

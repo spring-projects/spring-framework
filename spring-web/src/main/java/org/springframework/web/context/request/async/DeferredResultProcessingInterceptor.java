@@ -78,7 +78,7 @@ public interface DeferredResultProcessingInterceptor {
 	 * timeout result.
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
-	 * @param concurrentResult the result to which the {@code DeferredResult}
+	 * @param concurrentResult the concurrent result
 	 * @throws Exception in case of errors
 	 */
 	default <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult,

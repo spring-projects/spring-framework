@@ -88,6 +88,7 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 			String myNamespace = this.rootNamespace;
 			Map<String, String> myNamespaces = this.xmlNamespaces;
 
+			@SuppressWarnings("serial")
 			Closure<Object> callable = new Closure<>(this) {
 				@Override
 				public Object call(Object... arguments) {

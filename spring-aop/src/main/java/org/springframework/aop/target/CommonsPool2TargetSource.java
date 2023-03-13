@@ -181,7 +181,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	}
 
 	/**
-	 * Set whether the call should bock when the pool is exhausted.
+	 * Set whether the call should block when the pool is exhausted.
 	 */
 	public void setBlockWhenExhausted(boolean blockWhenExhausted) {
 		this.blockWhenExhausted = blockWhenExhausted;

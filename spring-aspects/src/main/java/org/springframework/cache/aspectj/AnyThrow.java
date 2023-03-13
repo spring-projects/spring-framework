@@ -17,8 +17,8 @@
 package org.springframework.cache.aspectj;
 
 /**
- * Utility to trick the compiler to throw a valid checked
- * exceptions within the interceptor.
+ * Utility to trick the compiler to throw valid checked exceptions masked as
+ * runtime exceptions within the interceptor.
  *
  * @author Stephane Nicoll
  */
@@ -36,4 +36,5 @@ final class AnyThrow {
 	private static <E extends Throwable> void throwAny(Throwable e) throws E {
 		throw (E) e;
 	}
+
 }

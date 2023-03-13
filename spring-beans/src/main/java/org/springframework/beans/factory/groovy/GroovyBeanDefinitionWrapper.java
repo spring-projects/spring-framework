@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.groovy;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import groovy.lang.GroovyObjectSupport;
 
@@ -51,18 +51,8 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	private static final String DESTROY_METHOD = "destroyMethod";
 	private static final String SINGLETON = "singleton";
 
-	private static final List<String> dynamicProperties = new ArrayList<>(8);
-
-	static {
-		dynamicProperties.add(PARENT);
-		dynamicProperties.add(AUTOWIRE);
-		dynamicProperties.add(CONSTRUCTOR_ARGS);
-		dynamicProperties.add(FACTORY_BEAN);
-		dynamicProperties.add(FACTORY_METHOD);
-		dynamicProperties.add(INIT_METHOD);
-		dynamicProperties.add(DESTROY_METHOD);
-		dynamicProperties.add(SINGLETON);
-	}
+	private static final Set<String> dynamicProperties = Set.of(PARENT, AUTOWIRE, CONSTRUCTOR_ARGS,
+			FACTORY_BEAN, FACTORY_METHOD, INIT_METHOD, DESTROY_METHOD, SINGLETON);
 
 
 	private String beanName;
@@ -98,11 +88,11 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return this.beanName;
 	}
 
-	public void setBeanDefinition(AbstractBeanDefinition definition) {
+	void setBeanDefinition(AbstractBeanDefinition definition) {
 		this.definition = definition;
 	}
 
-	public AbstractBeanDefinition getBeanDefinition() {
+	AbstractBeanDefinition getBeanDefinition() {
 		if (this.definition == null) {
 			this.definition = createBeanDefinition();
 		}
@@ -126,19 +116,17 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return bd;
 	}
 
-	public void setBeanDefinitionHolder(BeanDefinitionHolder holder) {
+	void setBeanDefinitionHolder(BeanDefinitionHolder holder) {
 		this.definition = (AbstractBeanDefinition) holder.getBeanDefinition();
 		this.beanName = holder.getBeanName();
 	}
 
-	public BeanDefinitionHolder getBeanDefinitionHolder() {
+	BeanDefinitionHolder getBeanDefinitionHolder() {
 		return new BeanDefinitionHolder(getBeanDefinition(), getBeanName());
 	}
 
-	public void setParent(Object obj) {
-		if (obj == null) {
-			throw new IllegalArgumentException("Parent bean cannot be set to a null runtime bean reference!");
-		}
+	void setParent(Object obj) {
+		Assert.notNull(obj, "Parent bean cannot be set to a null runtime bean reference.");
 		if (obj instanceof String name) {
 			this.parentName = name;
 		}
@@ -152,7 +140,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		getBeanDefinition().setAbstract(false);
 	}
 
-	public GroovyBeanDefinitionWrapper addProperty(String propertyName, Object propertyValue) {
+	GroovyBeanDefinitionWrapper addProperty(String propertyName, Object propertyValue) {
 		if (propertyValue instanceof GroovyBeanDefinitionWrapper wrapper) {
 			propertyValue = wrapper.getBeanDefinition();
 		}

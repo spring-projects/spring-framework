@@ -61,7 +61,7 @@ public class SimpleTimeZoneAwareLocaleContext extends SimpleLocaleContext implem
 
 	@Override
 	public String toString() {
-		return super.toString() + " " + (this.timeZone != null ? this.timeZone.toString() : "-");
+		return super.toString() + " " + (this.timeZone != null ? this.timeZone : "-");
 	}
 
 }
