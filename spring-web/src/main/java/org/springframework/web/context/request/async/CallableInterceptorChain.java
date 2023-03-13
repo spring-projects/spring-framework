@@ -23,6 +23,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -40,6 +41,7 @@ class CallableInterceptorChain {
 
 	private int preProcessIndex = -1;
 
+	@Nullable
 	private volatile Future<?> taskFuture;
 
 
@@ -66,7 +68,7 @@ class CallableInterceptorChain {
 		}
 	}
 
-	public Object applyPostProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
+	public Object applyPostProcess(NativeWebRequest request, Callable<?> task, @Nullable Object concurrentResult) {
 		Throwable exceptionResult = null;
 		for (int i = this.preProcessIndex; i >= 0; i--) {
 			try {

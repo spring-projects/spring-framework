@@ -879,10 +879,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Override
 	public MutablePropertyValues getPropertyValues() {
-		if (this.propertyValues == null) {
-			this.propertyValues = new MutablePropertyValues();
+		MutablePropertyValues pvs = this.propertyValues;
+		if (pvs == null) {
+			pvs = new MutablePropertyValues();
+			this.propertyValues = pvs;
 		}
-		return this.propertyValues;
+		return pvs;
 	}
 
 	/**

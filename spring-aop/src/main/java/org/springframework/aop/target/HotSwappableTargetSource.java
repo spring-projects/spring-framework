@@ -19,6 +19,7 @@ package org.springframework.aop.target;
 import java.io.Serializable;
 
 import org.springframework.aop.TargetSource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -100,7 +101,7 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	 * objects are equal.
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return (this == obj || (obj instanceof HotSwappableTargetSource that &&
 				this.target.equals(that.target)));
 	}

@@ -31,6 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
+import org.springframework.lang.Nullable;
 
 /**
  * Used by GroovyBeanDefinitionReader to read a Spring XML namespace expression
@@ -68,6 +69,7 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 
 
 	@Override
+	@Nullable
 	public Object invokeMethod(String name, Object obj) {
 		Object[] args = (Object[]) obj;
 		if (name.equals("doCall")) {

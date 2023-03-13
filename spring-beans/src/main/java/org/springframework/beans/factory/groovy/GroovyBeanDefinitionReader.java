@@ -53,6 +53,7 @@ import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -149,8 +150,10 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	private MetaClass metaClass = GroovySystem.getMetaClassRegistry().getMetaClass(getClass());
 
+	@Nullable
 	private Binding binding;
 
+	@Nullable
 	private GroovyBeanDefinitionWrapper currentBeanDefinition;
 
 
@@ -203,6 +206,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	/**
 	 * Return a specified binding for Groovy variables, if any.
 	 */
+	@Nullable
 	public Binding getBinding() {
 		return this.binding;
 	}

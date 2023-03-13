@@ -188,7 +188,7 @@ public class ConstructorArgumentValues {
 	 * rather than matched multiple times.
 	 * @param value the argument value
 	 */
-	public void addGenericArgumentValue(Object value) {
+	public void addGenericArgumentValue(@Nullable Object value) {
 		this.genericArgumentValues.add(new ValueHolder(value));
 	}
 

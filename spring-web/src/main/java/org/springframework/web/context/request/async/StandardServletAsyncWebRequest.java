@@ -28,6 +28,7 @@ import jakarta.servlet.AsyncListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -44,10 +45,6 @@ import org.springframework.web.context.request.ServletWebRequest;
  */
 public class StandardServletAsyncWebRequest extends ServletWebRequest implements AsyncWebRequest, AsyncListener {
 
-	private Long timeout;
-
-	private AsyncContext asyncContext;
-
 	private final AtomicBoolean asyncCompleted = new AtomicBoolean();
 
 	private final List<Runnable> timeoutHandlers = new ArrayList<>();
@@ -55,6 +52,12 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	private final List<Consumer<Throwable>> exceptionHandlers = new ArrayList<>();
 
 	private final List<Runnable> completionHandlers = new ArrayList<>();
+
+	@Nullable
+	private Long timeout;
+
+	@Nullable
+	private AsyncContext asyncContext;
 
 
 	/**

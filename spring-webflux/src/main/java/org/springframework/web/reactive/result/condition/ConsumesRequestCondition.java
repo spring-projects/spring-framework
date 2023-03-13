@@ -194,6 +194,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * or {@code null} if no expressions match.
 	 */
 	@Override
+	@Nullable
 	public ConsumesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		ServerHttpRequest request = exchange.getRequest();
 		if (CorsUtils.isPreFlightRequest(request)) {

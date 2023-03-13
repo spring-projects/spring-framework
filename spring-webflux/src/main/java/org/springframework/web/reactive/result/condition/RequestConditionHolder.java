@@ -99,6 +99,7 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * holder, return the same holder instance.
 	 */
 	@Override
+	@Nullable
 	public RequestConditionHolder getMatchingCondition(ServerWebExchange exchange) {
 		if (this.condition == null) {
 			return this;

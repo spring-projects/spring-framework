@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
@@ -104,6 +105,7 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * or {@code null} otherwise.
 	 */
 	@Override
+	@Nullable
 	public ParamsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
 		for (ParamExpression expression : this.expressions) {
 			if (!expression.match(exchange)) {

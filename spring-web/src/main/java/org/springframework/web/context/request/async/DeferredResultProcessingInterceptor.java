@@ -16,6 +16,7 @@
 
 package org.springframework.web.context.request.async;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -82,7 +83,7 @@ public interface DeferredResultProcessingInterceptor {
 	 * @throws Exception in case of errors
 	 */
 	default <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult,
-			Object concurrentResult) throws Exception {
+			@Nullable Object concurrentResult) throws Exception {
 	}
 
 	/**

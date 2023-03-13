@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -57,8 +58,9 @@ class DeferredResultInterceptorChain {
 		}
 	}
 
+	@Nullable
 	public Object applyPostProcess(NativeWebRequest request,  DeferredResult<?> deferredResult,
-			Object concurrentResult) {
+			@Nullable Object concurrentResult) {
 
 		try {
 			for (int i = this.preProcessingIndex; i >= 0; i--) {

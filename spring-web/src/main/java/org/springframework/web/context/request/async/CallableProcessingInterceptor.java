@@ -19,6 +19,7 @@ package org.springframework.web.context.request.async;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
@@ -104,7 +105,7 @@ public interface CallableProcessingInterceptor {
 	 * @throws Exception in case of errors
 	 */
 	default <T> void postProcess(NativeWebRequest request, Callable<T> task,
-			Object concurrentResult) throws Exception {
+			@Nullable Object concurrentResult) throws Exception {
 	}
 
 	/**

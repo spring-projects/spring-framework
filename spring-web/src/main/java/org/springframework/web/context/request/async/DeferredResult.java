@@ -48,6 +48,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 3.2
  * @param <T> the result type
  */
@@ -63,14 +64,19 @@ public class DeferredResult<T> {
 
 	private final Supplier<?> timeoutResult;
 
+	@Nullable
 	private Runnable timeoutCallback;
 
+	@Nullable
 	private Consumer<Throwable> errorCallback;
 
+	@Nullable
 	private Runnable completionCallback;
 
+	@Nullable
 	private DeferredResultHandler resultHandler;
 
+	@Nullable
 	private volatile Object result = RESULT_NONE;
 
 	private volatile boolean expired;
@@ -340,7 +346,7 @@ public class DeferredResult<T> {
 	@FunctionalInterface
 	public interface DeferredResultHandler {
 
-		void handleResult(Object result);
+		void handleResult(@Nullable Object result);
 	}
 
 }

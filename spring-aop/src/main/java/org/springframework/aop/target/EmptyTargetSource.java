@@ -131,7 +131,7 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (this == other) {
 			return true;
 		}

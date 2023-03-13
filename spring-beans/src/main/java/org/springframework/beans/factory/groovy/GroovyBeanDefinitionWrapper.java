@@ -30,6 +30,8 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -55,35 +57,41 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 			FACTORY_BEAN, FACTORY_METHOD, INIT_METHOD, DESTROY_METHOD, SINGLETON);
 
 
+	@Nullable
 	private String beanName;
 
-	private Class<?> clazz;
+	@Nullable
+	private final Class<?> clazz;
 
-	private Collection<?> constructorArgs;
+	@Nullable
+	private final Collection<?> constructorArgs;
 
+	@Nullable
 	private AbstractBeanDefinition definition;
 
+	@Nullable
 	private BeanWrapper definitionWrapper;
 
+	@Nullable
 	private String parentName;
 
 
-	public GroovyBeanDefinitionWrapper(String beanName) {
-		this.beanName = beanName;
+	GroovyBeanDefinitionWrapper(String beanName) {
+		this(beanName, null);
 	}
 
-	public GroovyBeanDefinitionWrapper(String beanName, Class<?> clazz) {
-		this.beanName = beanName;
-		this.clazz = clazz;
+	GroovyBeanDefinitionWrapper(@Nullable String beanName, @Nullable Class<?> clazz) {
+		this(beanName, clazz, null);
 	}
 
-	public GroovyBeanDefinitionWrapper(String beanName, Class<?> clazz, Collection<?> constructorArgs) {
+	GroovyBeanDefinitionWrapper(@Nullable String beanName, Class<?> clazz, @Nullable Collection<?> constructorArgs) {
 		this.beanName = beanName;
 		this.clazz = clazz;
 		this.constructorArgs = constructorArgs;
 	}
 
 
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}
@@ -151,6 +159,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 
 	@Override
 	public Object getProperty(String property) {
+		Assert.state(this.definitionWrapper != null, "BeanDefinition wrapper not initialized");
 		if (this.definitionWrapper.isReadableProperty(property)) {
 			return this.definitionWrapper.getPropertyValue(property);
 		}
@@ -167,6 +176,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		}
 		else {
 			AbstractBeanDefinition bd = getBeanDefinition();
+			Assert.state(this.definitionWrapper != null, "BeanDefinition wrapper not initialized");
 			if (AUTOWIRE.equals(property)) {
 				if ("byName".equals(newValue)) {
 					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);

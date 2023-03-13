@@ -58,6 +58,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConfigurableBeanFactory beanFactory;
 
 	/** Internally used DefaultListableBeanFactory instances, keyed by bean name. */
@@ -76,6 +77,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	/**
 	 * Return the BeanFactory that this TargetSourceCreators runs in.
 	 */
+	@Nullable
 	protected final BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}

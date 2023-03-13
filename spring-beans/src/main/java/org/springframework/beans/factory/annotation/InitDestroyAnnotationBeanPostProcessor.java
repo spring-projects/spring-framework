@@ -157,6 +157,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	}
 
 	@Override
+	@Nullable
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
 		beanDefinition.resolveDestroyMethodIfNecessary();
