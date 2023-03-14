@@ -19,7 +19,13 @@ package org.springframework.expression.spel.support;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
@@ -42,6 +48,7 @@ import org.springframework.lang.Nullable;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.0
  * @see StandardEvaluationContext#addMethodResolver(MethodResolver)
  */
@@ -238,6 +245,12 @@ public class ReflectiveMethodResolver implements MethodResolver {
 					}
 				}
 			}
+			// Ensure methods defined in java.lang.Object are exposed for JDK proxies.
+			for (Method method : getMethods(Object.class)) {
+				if (isCandidateForInvocation(method, type)) {
+					result.add(method);
+				}
+			}
 			return result;
 		}
 		else {
@@ -260,13 +273,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * @since 3.1.1
 	 */
 	protected Method[] getMethods(Class<?> type) {
-		Set<Method> methods=new HashSet<>();
-		methods.addAll(Arrays.asList(type.getMethods()));
-		//Add all methods of Object to have methods like toString on Proxy-Objects
-		methods.addAll(Arrays.asList(Object.class.getMethods()));
-
-		Method[] methods1 = methods.toArray(new Method[0]);
-		return methods1;
+		return type.getMethods();
 	}
 
 	/**
