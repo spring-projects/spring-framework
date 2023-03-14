@@ -174,7 +174,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				}
 				validateIfApplicable(binder, parameter);
 				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
-					throw new BindException(binder.getBindingResult());
+					throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
 				}
 			}
 			// Value type adaptation, also covering java.util.Optional
