@@ -35,6 +35,7 @@ import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
@@ -113,6 +114,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
 	 */
 	@Override
+	@SuppressWarnings("removal")
 	protected void handleMatch(RequestMappingInfo info, HandlerMethod handlerMethod,
 			ServerWebExchange exchange) {
 
@@ -142,6 +144,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handlerMethod);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 		ServerHttpObservationFilter.findObservationContext(exchange)
+				.ifPresent(context -> context.setPathPattern(bestPattern.toString()));
+		ServerRequestObservationContext.findCurrent(exchange)
 				.ifPresent(context -> context.setPathPattern(bestPattern.toString()));
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVariables);

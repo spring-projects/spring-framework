@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.reactive.ServerHttpObservationFilter;
@@ -161,7 +162,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "removal"})
 	private void setAttributes(
 			Map<String, Object> attributes, ServerRequest serverRequest, HandlerFunction<?> handlerFunction) {
 
@@ -172,6 +173,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		if (matchingPattern != null) {
 			attributes.put(BEST_MATCHING_PATTERN_ATTRIBUTE, matchingPattern);
 			ServerHttpObservationFilter.findObservationContext(serverRequest.exchange())
+					.ifPresent(context -> context.setPathPattern(matchingPattern.toString()));
+			ServerRequestObservationContext.findCurrent(serverRequest.exchange())
 					.ifPresent(context -> context.setPathPattern(matchingPattern.toString()));
 		}
 		Map<String, String> uriVariables =

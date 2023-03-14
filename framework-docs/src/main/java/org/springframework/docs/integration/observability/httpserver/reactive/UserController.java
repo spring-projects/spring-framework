@@ -17,9 +17,9 @@
 package org.springframework.docs.integration.observability.httpserver.reactive;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.filter.reactive.ServerHttpObservationFilter;
 import org.springframework.web.server.ServerWebExchange;
 
 @Controller
@@ -28,7 +28,7 @@ public class UserController {
 	@ExceptionHandler(MissingUserException.class)
 	ResponseEntity<Void> handleMissingUser(ServerWebExchange exchange, MissingUserException exception) {
 		// We want to record this exception with the observation
-		ServerHttpObservationFilter.findObservationContext(exchange)
+		ServerRequestObservationContext.findCurrent(exchange)
 				.ifPresent(context -> context.setError(exception));
 		return ResponseEntity.notFound().build();
 	}

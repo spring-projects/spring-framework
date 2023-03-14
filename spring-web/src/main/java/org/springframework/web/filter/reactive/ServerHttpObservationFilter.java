@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.http.server.reactive.observation.ServerRequestObserva
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 
 /**
@@ -47,7 +48,9 @@ import org.springframework.web.server.WebFilterChain;
  *
  * @author Brian Clozel
  * @since 6.0
+ * @deprecated since 6.1.0 in favor of {@link WebHttpHandlerBuilder}.
  */
+@Deprecated(since = "6.1.0", forRemoval = true)
 public class ServerHttpObservationFilter implements WebFilter {
 
 	/**

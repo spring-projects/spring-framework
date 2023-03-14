@@ -121,11 +121,15 @@ By default, the following `KeyValues` are created:
 [[observability.http-server.reactive]]
 === Reactive applications
 
-Applications need to configure the `org.springframework.web.filter.reactive.ServerHttpObservationFilter` reactive `WebFilter` in their application.
+Applications need to configure the `WebHttpHandlerBuilder` with a `MeterRegistry` to enable server instrumentation.
+This can be done on the `WebHttpHandlerBuilder`, as follows:
+
+include::code:HttpHandlerConfiguration[]
+
 It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
-This will only record an observation as an error if the `Exception` has not been handled by the web Framework and has bubbled up to the `WebFilter`.
-Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
+This will only record an observation as an error if the `Exception` has not been handled by an application Controller.
+Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and <<web.adoc#webflux-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
 include-code::./UserController[]

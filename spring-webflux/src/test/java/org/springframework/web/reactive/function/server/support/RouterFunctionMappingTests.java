@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.web.testfixture.server.MockServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.web.filter.reactive.ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE;
 
 /**
  * Tests for {@link RouterFunctionMapping}.
@@ -117,6 +116,7 @@ class RouterFunctionMappingTests {
 	}
 
 	@Test
+	@SuppressWarnings("removal")
 	void mappedRequestShouldHoldAttributes() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = RouterFunctions.route()
@@ -138,6 +138,8 @@ class RouterFunctionMappingTests {
 		assertThat(matchingPattern.getPatternString()).isEqualTo("/match");
 		assertThat(ServerHttpObservationFilter.findObservationContext(exchange))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
+		assertThat(ServerRequestObservationContext.findCurrent(exchange))
+				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
 
 		ServerRequest serverRequest = exchange.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
 		assertThat(serverRequest).isNotNull();
@@ -146,10 +148,12 @@ class RouterFunctionMappingTests {
 		assertThat(handler).isEqualTo(handlerFunction);
 	}
 
+	@SuppressWarnings("removal")
 	private ServerWebExchange createExchange(String urlTemplate) {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(urlTemplate));
 		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
-		exchange.getAttributes().put(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		exchange.getAttributes().put(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		exchange.getAttributes().put(ServerRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		return exchange;
 	}
 

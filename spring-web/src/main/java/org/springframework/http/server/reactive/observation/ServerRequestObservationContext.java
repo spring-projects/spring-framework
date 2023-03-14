@@ -18,12 +18,14 @@ package org.springframework.http.server.reactive.observation;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import io.micrometer.observation.transport.RequestReplyReceiverContext;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Context that holds information for metadata collection regarding
@@ -35,6 +37,12 @@ import org.springframework.lang.Nullable;
  * @since 6.0
  */
 public class ServerRequestObservationContext extends RequestReplyReceiverContext<ServerHttpRequest, ServerHttpResponse> {
+
+	/**
+	 * Name of the request attribute holding the {@link ServerRequestObservationContext context} for the current observation.
+	 * @since 6.1.0
+	 */
+	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ServerRequestObservationContext.class.getName() + ".context";
 
 	private final Map<String, Object> attributes;
 
@@ -48,6 +56,16 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 		setCarrier(request);
 		setResponse(response);
 		this.attributes = Collections.unmodifiableMap(attributes);
+	}
+
+	/**
+	 * Get the current {@link ServerRequestObservationContext observation context} from the given exchange, if available.
+	 * @param exchange the current exchange
+	 * @return the current observation context
+	 * @since 6.1.0
+	 */
+	public static Optional<ServerRequestObservationContext> findCurrent(ServerWebExchange exchange) {
+		return Optional.ofNullable(exchange.getAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
 	}
 
 	/**
