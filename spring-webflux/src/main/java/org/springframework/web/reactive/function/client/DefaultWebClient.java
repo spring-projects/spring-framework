@@ -30,7 +30,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -43,7 +42,6 @@ import reactor.util.context.Context;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -394,30 +392,7 @@ class DefaultWebClient implements WebClient {
 		@Override
 		public ResponseSpec retrieve() {
 			return new DefaultResponseSpec(
-					exchange(), this::createRequest, DefaultWebClient.this.defaultStatusHandlers);
-		}
-
-		private HttpRequest createRequest() {
-			return new HttpRequest() {
-				private final URI uri = initUri();
-
-				@Override
-				public HttpMethod getMethod() {
-					return httpMethod;
-				}
-
-				@Override
-				public URI getURI() {
-					return this.uri;
-				}
-
-				@Override
-				public HttpHeaders getHeaders() {
-					HttpHeaders headers = new HttpHeaders();
-					initHeaders(headers);
-					return headers;
-				}
-			};
+					this.httpMethod, initUri(), exchange(), DefaultWebClient.this.defaultStatusHandlers);
 		}
 
 		@Override
@@ -528,9 +503,12 @@ class DefaultWebClient implements WebClient {
 		private static final StatusHandler DEFAULT_STATUS_HANDLER =
 				new StatusHandler(STATUS_CODE_ERROR, ClientResponse::createException);
 
-		private final Mono<ClientResponse> responseMono;
 
-		private final Supplier<HttpRequest> requestSupplier;
+		private final HttpMethod httpMethod;
+
+		private final URI uri;
+
+		private final Mono<ClientResponse> responseMono;
 
 		private final List<StatusHandler> statusHandlers = new ArrayList<>(1);
 
@@ -538,11 +516,12 @@ class DefaultWebClient implements WebClient {
 
 
 		DefaultResponseSpec(
-				Mono<ClientResponse> responseMono, Supplier<HttpRequest> requestSupplier,
+				HttpMethod httpMethod, URI uri, Mono<ClientResponse> responseMono,
 				List<StatusHandler> defaultStatusHandlers) {
 
+			this.httpMethod = httpMethod;
+			this.uri = uri;
 			this.responseMono = responseMono;
-			this.requestSupplier = requestSupplier;
 			this.statusHandlers.addAll(defaultStatusHandlers);
 			this.statusHandlers.add(DEFAULT_STATUS_HANDLER);
 			this.defaultStatusHandlerCount = this.statusHandlers.size();
@@ -696,21 +675,14 @@ class DefaultWebClient implements WebClient {
 						exMono = releaseIfNotConsumed(response, ex2);
 					}
 					Mono<T> result = exMono.flatMap(Mono::error);
-					HttpRequest request = this.requestSupplier.get();
-					return insertCheckpoint(result, statusCode, request);
+					return result.checkpoint(statusCode + " from " +
+							this.httpMethod + " " + getUriToLog(this.uri) + " [DefaultWebClient]");
 				}
 			}
 			return null;
 		}
 
-		private <T> Mono<T> insertCheckpoint(Mono<T> result, HttpStatusCode statusCode, HttpRequest request) {
-			HttpMethod method = request.getMethod();
-			URI uri = getUriToLog(request);
-			return result.checkpoint(statusCode + " from " + method + " " + uri + " [DefaultWebClient]");
-		}
-
-		private static URI getUriToLog(HttpRequest request) {
-			URI uri = request.getURI();
+		private static URI getUriToLog(URI uri) {
 			if (StringUtils.hasText(uri.getQuery())) {
 				try {
 					uri = new URI(uri.getScheme(), uri.getHost(), uri.getPath(), null);
