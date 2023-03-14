@@ -169,6 +169,14 @@ class ContentDispositionTests {
 		assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\"; filename=\"bar\\\\\"");
 	}
 
+	@Test
+	void parseWindowsPath() {
+		ContentDisposition cd = ContentDisposition.parse("form-data; name=\"foo\"; filename=\"D:\\foo\\bar.txt\"");
+		assertThat(cd.getName()).isEqualTo("foo");
+		assertThat(cd.getFilename()).isEqualTo("D:\\foo\\bar.txt");
+		assertThat(cd.toString()).isEqualTo("form-data; name=\"foo\"; filename=\"D:\\\\foo\\\\bar.txt\"");
+	}
+
 
 	@SuppressWarnings("deprecation")
 	@Test
