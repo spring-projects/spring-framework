@@ -225,8 +225,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		if (targetObject instanceof Class) {
 			Set<Method> result = new LinkedHashSet<>();
 			// Add these so that static methods are invocable on the type: e.g. Float.valueOf(..)
-			Method[] methods = getMethods(type);
-			for (Method method : methods) {
+			for (Method method : getMethods(type)) {
 				if (Modifier.isStatic(method.getModifiers())) {
 					result.add(method);
 				}
@@ -239,8 +238,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			Set<Method> result = new LinkedHashSet<>();
 			// Expose interface methods (not proxy-declared overrides) for proper vararg introspection
 			for (Class<?> ifc : type.getInterfaces()) {
-				Method[] methods = getMethods(ifc);
-				for (Method method : methods) {
+				for (Method method : getMethods(ifc)) {
 					if (isCandidateForInvocation(method, type)) {
 						result.add(method);
 					}
@@ -250,8 +248,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		}
 		else {
 			Set<Method> result = new LinkedHashSet<>();
-			Method[] methods = getMethods(type);
-			for (Method method : methods) {
+			for (Method method : getMethods(type)) {
 				if (isCandidateForInvocation(method, type)) {
 					result.add(method);
 				}
@@ -276,7 +273,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * Determine whether the given {@code Method} is a candidate for method resolution
 	 * on an instance of the given target class.
 	 * <p>The default implementation considers any method as a candidate, even for
-	 * static methods sand non-user-declared methods on the {@link Object} base class.
+	 * static methods and non-user-declared methods on the {@link Object} base class.
 	 * @param method the Method to evaluate
 	 * @param targetClass the concrete target class that is being introspected
 	 * @since 4.3.15
