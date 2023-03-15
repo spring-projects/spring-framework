@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.github.benmanes.caffeine.cache.AsyncCacheLoader;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
@@ -62,9 +63,14 @@ public class CaffeineCacheManager implements CacheManager {
 	@Nullable
 	private CacheLoader<Object, Object> cacheLoader;
 
+	@Nullable
+	private AsyncCacheLoader<Object, Object> asyncCacheLoader;
+
 	private boolean allowNullValues = true;
 
 	private boolean dynamic = true;
+
+	private boolean async = false;
 
 	private final Map<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
@@ -155,6 +161,22 @@ public class CaffeineCacheManager implements CacheManager {
 	public void setCacheLoader(CacheLoader<Object, Object> cacheLoader) {
 		if (!ObjectUtils.nullSafeEquals(this.cacheLoader, cacheLoader)) {
 			this.cacheLoader = cacheLoader;
+			this.async = false;
+			refreshCommonCaches();
+		}
+	}
+
+	/**
+	 * Set the Caffeine CacheLoader to use for building each individual
+	 * {@link CaffeineCache} instance, turning it into a LoadingCache.
+	 * @see #createNativeCaffeineCache
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#build(CacheLoader)
+	 * @see com.github.benmanes.caffeine.cache.LoadingCache
+	 */
+	public void setAsyncCacheLoader(AsyncCacheLoader<Object, Object> asyncCacheLoader) {
+		if (!ObjectUtils.nullSafeEquals(this.asyncCacheLoader, asyncCacheLoader)) {
+			this.asyncCacheLoader = asyncCacheLoader;
+			this.async = true;
 			refreshCommonCaches();
 		}
 	}
@@ -257,7 +279,11 @@ public class CaffeineCacheManager implements CacheManager {
 	 * @see #createCaffeineCache
 	 */
 	protected com.github.benmanes.caffeine.cache.Cache<Object, Object> createNativeCaffeineCache(String name) {
-		return (this.cacheLoader != null ? this.cacheBuilder.build(this.cacheLoader) : this.cacheBuilder.build());
+		if (async) {
+			return (this.asyncCacheLoader != null ? this.cacheBuilder.buildAsync(this.asyncCacheLoader).synchronous() : this.cacheBuilder.build());
+		}else {
+			return (this.cacheLoader != null ? this.cacheBuilder.build(this.cacheLoader) : this.cacheBuilder.build());
+		}
 	}
 
 	/**
