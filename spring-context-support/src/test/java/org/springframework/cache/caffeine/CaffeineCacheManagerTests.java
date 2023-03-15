@@ -16,6 +16,11 @@
 
 package org.springframework.cache.caffeine;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
@@ -32,6 +37,7 @@ import static org.mockito.Mockito.mock;
  * @author Ben Manes
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Zhuozhi Ji
  */
 public class CaffeineCacheManagerTests {
 
@@ -113,6 +119,45 @@ public class CaffeineCacheManagerTests {
 		assertThat(cache1y.get("key3").get()).isNull();
 		cache1y.evict("key3");
 		assertThat(cache1y.get("key3")).isNull();
+	}
+
+	@Test
+	public void testAsyncMode() {
+		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+		CaffeineCacheManager cm = new CaffeineCacheManager();
+		cm.setAsyncCacheLoader((key, executor) -> {
+			CompletableFuture<Object> future = new CompletableFuture<>();
+			scheduler.schedule(() -> future.complete("async_" + key), 1, TimeUnit.SECONDS);
+			return future;
+		});
+
+		Cache cache1 = cm.getCache("c1");
+		boolean condition2 = cache1 instanceof CaffeineCache;
+		assertThat(condition2).isTrue();
+		Cache cache1again = cm.getCache("c1");
+		assertThat(cache1).isSameAs(cache1again);
+		Cache cache2 = cm.getCache("c2");
+		boolean condition1 = cache2 instanceof CaffeineCache;
+		assertThat(condition1).isTrue();
+		Cache cache2again = cm.getCache("c2");
+		assertThat(cache2).isSameAs(cache2again);
+		Cache cache3 = cm.getCache("c3");
+		boolean condition = cache3 instanceof CaffeineCache;
+		assertThat(condition).isTrue();
+		Cache cache3again = cm.getCache("c3");
+		assertThat(cache3).isSameAs(cache3again);
+
+		cache1.put("key1", "value1");
+		assertThat(cache1.get("key1").get()).isEqualTo("value1");
+		cache1.put("key2", 2);
+		assertThat(cache1.get("key2").get()).isEqualTo(2);
+		cache1.put("key3", null);
+		assertThat(cache1.get("key3").get()).isNull();
+		cache1.evict("key3");
+		long startMillis = System.currentTimeMillis();
+		assertThat(cache1.get("key3").get()).isEqualTo("async_key3");
+		assertThat(System.currentTimeMillis() - startMillis).isGreaterThanOrEqualTo(1000);
 	}
 
 	@Test
