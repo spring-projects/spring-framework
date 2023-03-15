@@ -93,13 +93,18 @@ public class RequestedContentTypeResolverBuilder {
 		return exchange -> {
 			for (RequestedContentTypeResolver resolver : resolvers) {
 				List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
-				if (mediaTypes.equals(RequestedContentTypeResolver.MEDIA_TYPE_ALL_LIST)) {
+				if (isMediaTypeAll(mediaTypes)) {
 					continue;
 				}
 				return mediaTypes;
 			}
 			return RequestedContentTypeResolver.MEDIA_TYPE_ALL_LIST;
 		};
+	}
+
+	private boolean isMediaTypeAll(List<MediaType> mediaTypes) {
+		return mediaTypes.size() == 1
+			&& mediaTypes.get(0).removeQualityValue().equals(MediaType.ALL);
 	}
 
 
