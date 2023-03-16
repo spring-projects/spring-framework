@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,39 +168,35 @@ public class EvaluationTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testRelOperatorsMatches01() {
-		evaluate("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'", "false", Boolean.class);
-	}
-
-	@Test
-	public void testRelOperatorsMatches02() {
+	void matchesTrue() {
 		evaluate("'5.00' matches '^-?\\d+(\\.\\d{2})?$'", "true", Boolean.class);
 	}
 
 	@Test
-	public void testRelOperatorsMatches03() {
+	void matchesFalse() {
+		evaluate("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'", "false", Boolean.class);
+	}
+
+	@Test
+	void matchesWithInputConversion() {
+		evaluate("27 matches '^.*2.*$'", true, Boolean.class);  // conversion int --> string
+	}
+
+	@Test
+	void matchesWithNullInput() {
 		evaluateAndCheckError("null matches '^.*$'", SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, 0, null);
 	}
 
 	@Test
-	public void testRelOperatorsMatches04() {
+	void matchesWithNullPattern() {
 		evaluateAndCheckError("'abc' matches null", SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, 14, null);
 	}
 
-	@Test
-	public void testRelOperatorsMatches05() {
-		evaluate("27 matches '^.*2.*$'", true, Boolean.class);  // conversion int>string
-	}
-
 	@Test  // SPR-16731
-	public void testMatchesWithPatternAccessThreshold() {
+	void matchesWithPatternAccessThreshold() {
 		String pattern = "^(?=[a-z0-9-]{1,47})([a-z0-9]+[-]{0,1}){1,47}[a-z0-9]{1}$";
-		String expression = "'abcde-fghijklmn-o42pasdfasdfasdf.qrstuvwxyz10x.xx.yyy.zasdfasfd' matches \'" + pattern + "\'";
-		Expression expr = parser.parseExpression(expression);
-		assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(
-				expr::getValue)
-			.withCauseInstanceOf(IllegalStateException.class)
-			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.FLAWED_PATTERN));
+		String expression = "'abcde-fghijklmn-o42pasdfasdfasdf.qrstuvwxyz10x.xx.yyy.zasdfasfd' matches '" + pattern + "'";
+		evaluateAndCheckError(expression, SpelMessage.FLAWED_PATTERN);
 	}
 
 	// mixing operators
