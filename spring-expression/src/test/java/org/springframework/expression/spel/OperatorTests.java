@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.expression.Expression;
 import org.springframework.expression.spel.ast.Operator;
 import org.springframework.expression.spel.standard.SpelExpression;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.expression.spel.SpelMessage.MAX_REPEATED_TEXT_SIZE_EXCEEDED;
 
 /**
  * Tests the evaluation of expressions using relational operators.
@@ -32,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Giovanni Dall'Oglio Risso
+ * @author Sam Brannen
  */
 public class OperatorTests extends AbstractExpressionTests {
 
@@ -325,11 +328,6 @@ public class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void testMultiplyStringInt() {
-		evaluate("'a' * 5", "aaaaa", String.class);
-	}
-
-	@Test
 	public void testMultiplyDoubleDoubleGivesDouble() {
 		evaluate("3.0d * 5.0d", 15.0d, Double.class);
 	}
@@ -574,6 +572,19 @@ public class OperatorTests extends AbstractExpressionTests {
 		evaluate("'abc' == 'def'", false, Boolean.class);
 		evaluate("'abc' != 'abc'", false, Boolean.class);
 		evaluate("'abc' != 'def'", true, Boolean.class);
+	}
+
+	@Test
+	void stringRepeat() {
+		evaluate("'abc' * 0", "", String.class);
+		evaluate("'abc' * 1", "abc", String.class);
+		evaluate("'abc' * 2", "abcabc", String.class);
+
+		Expression expr = parser.parseExpression("'a' * 256");
+		assertThat(expr.getValue(context, String.class)).hasSize(256);
+
+		// 4 is the position of the '*' (repeat operator)
+		evaluateAndCheckError("'a' * 257", String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 4);
 	}
 
 	@Test
