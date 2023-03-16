@@ -21,10 +21,12 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.expression.Expression;
 import org.springframework.expression.spel.ast.Operator;
 import org.springframework.expression.spel.standard.SpelExpression;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.expression.spel.SpelMessage.MAX_REPEATED_TEXT_SIZE_EXCEEDED;
 
 /**
  * Tests the evaluation of expressions using various operators.
@@ -327,11 +329,6 @@ class OperatorTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void multiplyStringInt() {
-		evaluate("'a' * 5", "aaaaa", String.class);
-	}
-
-	@Test
 	void multiplyDoubleDoubleGivesDouble() {
 		evaluate("3.0d * 5.0d", 15.0d, Double.class);
 	}
@@ -576,6 +573,19 @@ class OperatorTests extends AbstractExpressionTests {
 		evaluate("'abc' == 'def'", false, Boolean.class);
 		evaluate("'abc' != 'abc'", false, Boolean.class);
 		evaluate("'abc' != 'def'", true, Boolean.class);
+	}
+
+	@Test
+	void stringRepeat() {
+		evaluate("'abc' * 0", "", String.class);
+		evaluate("'abc' * 1", "abc", String.class);
+		evaluate("'abc' * 2", "abcabc", String.class);
+
+		Expression expr = parser.parseExpression("'a' * 256");
+		assertThat(expr.getValue(context, String.class)).hasSize(256);
+
+		// 4 is the position of the '*' (repeat operator)
+		evaluateAndCheckError("'a' * 257", String.class, MAX_REPEATED_TEXT_SIZE_EXCEEDED, 4);
 	}
 
 	@Test

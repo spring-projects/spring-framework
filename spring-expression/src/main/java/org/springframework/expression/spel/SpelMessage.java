@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,7 +264,11 @@ public enum SpelMessage {
 
 	/** @since 5.3.17 */
 	MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED(Kind.ERROR, 1075,
-			"Array declares too many elements, exceeding the threshold of ''{0}''");
+			"Array declares too many elements, exceeding the threshold of ''{0}''"),
+
+	/** @since 5.3.26 */
+	MAX_REPEATED_TEXT_SIZE_EXCEEDED(Kind.ERROR, 1076,
+			"Repeated text results in too many characters, exceeding the threshold of ''{0}''");
 
 
 	private final Kind kind;
