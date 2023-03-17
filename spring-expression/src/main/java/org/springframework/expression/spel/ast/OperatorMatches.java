@@ -43,6 +43,12 @@ public class OperatorMatches extends Operator {
 
 	private static final int PATTERN_ACCESS_THRESHOLD = 1000000;
 
+	/**
+	 * Maximum number of characters permitted in a regular expression.
+	 * @since 5.3.26
+	 */
+	private static final int MAX_REGEX_LENGTH = 256;
+
 	private final ConcurrentMap<String, Pattern> patternCache;
 
 
@@ -78,25 +84,27 @@ public class OperatorMatches extends Operator {
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
-		String left = leftOp.getValue(state, String.class);
-		Object right = getRightOperand().getValue(state);
 
-		if (left == null) {
+		String input = leftOp.getValue(state, String.class);
+		if (input == null) {
 			throw new SpelEvaluationException(leftOp.getStartPosition(),
 					SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, (Object) null);
 		}
-		if (!(right instanceof String rightString)) {
+
+		Object right = rightOp.getValue(state);
+		if (!(right instanceof String regex)) {
 			throw new SpelEvaluationException(rightOp.getStartPosition(),
 					SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, right);
 		}
 
 		try {
-			Pattern pattern = this.patternCache.get(rightString);
+			Pattern pattern = this.patternCache.get(regex);
 			if (pattern == null) {
-				pattern = Pattern.compile(rightString);
-				this.patternCache.putIfAbsent(rightString, pattern);
+				checkRegexLength(regex);
+				pattern = Pattern.compile(regex);
+				this.patternCache.putIfAbsent(regex, pattern);
 			}
-			Matcher matcher = pattern.matcher(new MatcherInput(left, new AccessCount()));
+			Matcher matcher = pattern.matcher(new MatcherInput(input, new AccessCount()));
 			return BooleanTypedValue.forValue(matcher.matches());
 		}
 		catch (PatternSyntaxException ex) {
@@ -106,6 +114,13 @@ public class OperatorMatches extends Operator {
 		catch (IllegalStateException ex) {
 			throw new SpelEvaluationException(
 					rightOp.getStartPosition(), ex, SpelMessage.FLAWED_PATTERN, right);
+		}
+	}
+
+	private void checkRegexLength(String regex) {
+		if (regex.length() > MAX_REGEX_LENGTH) {
+			throw new SpelEvaluationException(getStartPosition(),
+					SpelMessage.MAX_REGEX_LENGTH_EXCEEDED, MAX_REGEX_LENGTH);
 		}
 	}
 

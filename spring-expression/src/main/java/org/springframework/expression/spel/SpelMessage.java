@@ -268,7 +268,11 @@ public enum SpelMessage {
 
 	/** @since 5.3.26 */
 	MAX_REPEATED_TEXT_SIZE_EXCEEDED(Kind.ERROR, 1076,
-			"Repeated text results in too many characters, exceeding the threshold of ''{0}''");
+			"Repeated text results in too many characters, exceeding the threshold of ''{0}''"),
+
+	/** @since 5.3.26 */
+	MAX_REGEX_LENGTH_EXCEEDED(Kind.ERROR, 1077,
+			"Regular expression contains too many characters, exceeding the threshold of ''{0}''");
 
 
 	private final Kind kind;
