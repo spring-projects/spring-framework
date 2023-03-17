@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,19 +36,35 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class OperatorMatches extends Operator {
 
 	private static final int PATTERN_ACCESS_THRESHOLD = 1000000;
 
-	private final ConcurrentMap<String, Pattern> patternCache = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, Pattern> patternCache;
 
 
+	/**
+	 * Create a new {@link OperatorMatches} instance.
+	 * @deprecated as of Spring Framework 5.3.26 in favor of invoking
+	 * {@link #OperatorMatches(ConcurrentMap, int, int, SpelNodeImpl...)}
+	 * with a shared pattern cache instead
+	 */
+	@Deprecated
 	public OperatorMatches(int startPos, int endPos, SpelNodeImpl... operands) {
-		super("matches", startPos, endPos, operands);
+		this(new ConcurrentHashMap<>(), startPos, endPos, operands);
 	}
 
+	/**
+	 * Create a new {@link OperatorMatches} instance with a shared pattern cache.
+	 * @since 5.3.26
+	 */
+	public OperatorMatches(ConcurrentMap<String, Pattern> patternCache, int startPos, int endPos, SpelNodeImpl... operands) {
+		super("matches", startPos, endPos, operands);
+		this.patternCache = patternCache;
+	}
 
 	/**
 	 * Check the first operand matches the regex specified as the second operand.
@@ -63,7 +79,7 @@ public class OperatorMatches extends Operator {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
 		String left = leftOp.getValue(state, String.class);
-		Object right = getRightOperand().getValue(state);
+		Object right = rightOp.getValue(state);
 
 		if (left == null) {
 			throw new SpelEvaluationException(leftOp.getStartPosition(),
