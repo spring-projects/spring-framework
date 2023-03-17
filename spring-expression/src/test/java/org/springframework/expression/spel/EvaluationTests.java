@@ -1450,7 +1450,9 @@ class EvaluationTests extends AbstractExpressionTests {
 		private void expectFail(ExpressionParser parser, EvaluationContext eContext, String expressionString, SpelMessage messageCode) {
 			assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() -> {
 				Expression e = parser.parseExpression(expressionString);
-				SpelUtilities.printAbstractSyntaxTree(System.out, e);
+				if (DEBUG) {
+					SpelUtilities.printAbstractSyntaxTree(System.out, e);
+				}
 				e.getValue(eContext);
 			}).satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(messageCode));
 		}

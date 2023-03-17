@@ -1811,7 +1811,6 @@ class SpelReproTests extends AbstractExpressionTests {
 	static class CCC {
 
 		public boolean method(Object o) {
-			System.out.println(o);
 			return false;
 		}
 	}
@@ -1883,7 +1882,6 @@ class SpelReproTests extends AbstractExpressionTests {
 	static class Foo2 {
 
 		public void execute(String str) {
-			System.out.println("Value: " + str);
 		}
 	}
 
@@ -1958,7 +1956,6 @@ class SpelReproTests extends AbstractExpressionTests {
 	public static class ReflectionUtil<T extends Number> {
 
 		public Object methodToCall(T param) {
-			System.out.println(param + " " + param.getClass());
 			return "Object methodToCall(T param)";
 		}
 
