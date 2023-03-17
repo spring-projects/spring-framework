@@ -88,9 +88,9 @@ abstract class PropertyDescriptorUtils {
 			BasicPropertyDescriptor pd = pdMap.get(propertyName);
 			if (pd != null) {
 				if (setter) {
-					Method writedMethod = pd.getWriteMethod();
-					if (writedMethod == null ||
-							writedMethod.getParameterTypes()[0].isAssignableFrom(method.getParameterTypes()[0])) {
+					Method writeMethod = pd.getWriteMethod();
+					if (writeMethod == null ||
+							writeMethod.getParameterTypes()[0].isAssignableFrom(method.getParameterTypes()[0])) {
 						pd.setWriteMethod(method);
 					}
 					else {
