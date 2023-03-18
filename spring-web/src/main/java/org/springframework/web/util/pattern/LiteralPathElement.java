@@ -31,6 +31,8 @@ class LiteralPathElement extends PathElement {
 
 	private final char[] text;
 
+	private final String textString;
+
 	private final int len;
 
 	private final boolean caseSensitive;
@@ -50,6 +52,7 @@ class LiteralPathElement extends PathElement {
 				this.text[i] = Character.toLowerCase(literalText[i]);
 			}
 		}
+		this.textString = new String(this.text);
 	}
 
 
@@ -70,10 +73,9 @@ class LiteralPathElement extends PathElement {
 		}
 
 		if (this.caseSensitive) {
-			for (int i = 0; i < this.len; i++) {
-				if (value.charAt(i) != this.text[i]) {
-					return false;
-				}
+			// This typically uses a JVM intrinsic
+			if (!this.textString.equals(value)) {
+				return false;
 			}
 		}
 		else {
@@ -124,7 +126,7 @@ class LiteralPathElement extends PathElement {
 
 	@Override
 	public String toString() {
-		return "Literal(" + String.valueOf(this.text) + ")";
+		return "Literal(" + this.textString + ")";
 	}
 
 }
