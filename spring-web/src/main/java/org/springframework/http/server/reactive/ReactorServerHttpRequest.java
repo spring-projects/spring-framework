@@ -61,6 +61,8 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final NettyDataBufferFactory bufferFactory;
 
+	private final HttpMethod method;
+
 
 	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory)
 			throws URISyntaxException {
@@ -69,6 +71,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;
+		this.method = HttpMethod.valueOf(request.method().name());
 	}
 
 	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
@@ -111,7 +114,7 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.request.method().name());
+		return this.method;
 	}
 
 	@Override
