@@ -100,7 +100,8 @@ public class ForwardedHeaderTransformer implements Function<ServerHttpRequest, S
 		if (hasForwardedHeaders(request)) {
 			ServerHttpRequest.Builder builder = request.mutate();
 			if (!this.removeOnly) {
-				URI uri = UriComponentsBuilder.fromHttpRequest(request).build(true).toUri();
+				boolean isEncoded = request.getURI().toString().contains("%");
+				URI uri = UriComponentsBuilder.fromHttpRequest(request).build(isEncoded).toUri();
 				builder.uri(uri);
 				String prefix = getForwardedPrefix(request);
 				if (prefix != null) {

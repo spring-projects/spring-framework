@@ -134,6 +134,21 @@ class ForwardedHeaderTransformerTests {
 	}
 
 	@Test
+	void shouldHandleUnencodedUri() throws Exception {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Forwarded", "host=84.198.58.199;proto=https");
+			ServerHttpRequest request = MockServerHttpRequest
+							.method(HttpMethod.GET, URI.create("https://example.com/a?q=1+1=2"))
+							.headers(headers)
+							.build();
+
+			request = this.requestMutator.apply(request);
+
+			assertThat(request.getURI()).isEqualTo(URI.create("https://84.198.58.199/a?q=1+1=2"));
+			assertForwardedHeadersRemoved(request);
+	}
+
+	@Test
 	void shouldConcatenatePrefixes() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("X-Forwarded-Prefix", "/first,/second");
