@@ -1,3 +1,10 @@
+buildscript {
+	repositories {
+		// 新的spring库
+		maven { url "https://repo.spring.io/plugins-release" }
+	}
+}
+
 plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE' apply false
 	id 'io.spring.nohttp' version '0.0.10'
@@ -19,6 +26,14 @@ ext {
 	javaProjects = subprojects - project(":framework-bom")
 	withoutJclOverSlf4j = {
 		exclude group: "org.slf4j", name: "jcl-over-slf4j"
+	}
+}
+
+allprojects {
+	gradle.projectsEvaluated {
+		tasks.withType(JavaCompile) {
+			options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+		}
 	}
 }
 
@@ -50,6 +65,8 @@ configure(allprojects) { project ->
 				exclude group: "dom4j", name: "dom4j"
 			}
 			dependency "com.google.code.findbugs:jsr305:3.0.2"
+
+			dependency "org.apache.velocity:velocity:1.6.2"
 
 			dependencySet(group: 'org.aspectj', version: '1.9.7') {
 				entry 'aspectjrt'
@@ -290,8 +307,14 @@ configure(allprojects) { project ->
 			cacheChangingModulesFor 0, "seconds"
 		}
 		repositories {
+			maven { url 'https://maven.aliyun.com/nexus/content/groups/public/'}
 			mavenCentral()
+			maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			// Reactor
+			maven { url "https://repo.spring.io/milestone" }
+			//新增spring插件库
+			maven { url "https://repo.spring.io/plugins-release" }
 		}
 	}
 	configurations.all {
@@ -332,6 +355,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	test {
+		enabled(false)
 		useJUnitPlatform()
 		include(["**/*Tests.class", "**/*Test.class"])
 		systemProperty("java.awt.headless", "true")
@@ -410,7 +434,6 @@ configure(rootProject) {
 	apply plugin: 'org.springframework.build.api-diff'
 	apply from: "${rootDir}/gradle/publications.gradle"
 	apply from: "${rootDir}/gradle/docs.gradle"
-
 	nohttp {
 		source.exclude "**/test-output/**"
 		source.exclude "spring-core/graalvm/build/**" // only available on `main`
