@@ -154,4 +154,9 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAd
 		this.advisor = advisor;
 	}
 
+	@Override
+	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
+		return super.postProcessAfterInitialization(bean, beanName);
+	}
+
 }
