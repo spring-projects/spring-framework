@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,8 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	public UndertowServerHttpRequest(HttpServerExchange exchange, DataBufferFactory bufferFactory)
 			throws URISyntaxException {
 
-		super(initUri(exchange), "", new UndertowHeadersAdapter(exchange.getRequestHeaders()));
+		super(HttpMethod.valueOf(exchange.getRequestMethod().toString()), initUri(exchange), "",
+				new UndertowHeadersAdapter(exchange.getRequestHeaders()));
 		this.exchange = exchange;
 		this.body = new RequestBodyPublisher(exchange, bufferFactory);
 		this.body.registerListeners(exchange);
@@ -76,11 +77,6 @@ class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		String query = exchange.getQueryString();
 		String requestUriAndQuery = (StringUtils.hasLength(query) ? requestURL + "?" + query : requestURL);
 		return new URI(requestUriAndQuery);
-	}
-
-	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.exchange.getRequestMethod().toString());
 	}
 
 	@Override
