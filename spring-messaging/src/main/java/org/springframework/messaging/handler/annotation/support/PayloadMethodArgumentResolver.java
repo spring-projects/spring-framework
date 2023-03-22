@@ -136,11 +136,7 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 
 		Class<?> targetClass = resolveTargetClass(parameter, message);
 		Class<?> payloadClass = payload.getClass();
-		if (ClassUtils.isAssignable(targetClass, payloadClass)) {
-			validate(message, parameter, payload);
-			return (isOptionalTargetClass ? Optional.of(payload) : payload);
-		}
-		else {
+		if (!ClassUtils.isAssignable(targetClass, payloadClass)) {
 			if (this.converter instanceof SmartMessageConverter smartConverter) {
 				payload = smartConverter.fromMessage(message, targetClass, parameter);
 			}
@@ -151,9 +147,9 @@ public class PayloadMethodArgumentResolver implements HandlerMethodArgumentResol
 				throw new MessageConversionException(message, "Cannot convert from [" +
 						payloadClass.getName() + "] to [" + targetClass.getName() + "] for " + message);
 			}
-			validate(message, parameter, payload);
-			return (isOptionalTargetClass ? Optional.of(payload) : payload);
 		}
+		validate(message, parameter, payload);
+		return (isOptionalTargetClass ? Optional.of(payload) : payload);
 	}
 
 	private String getParameterName(MethodParameter param) {
