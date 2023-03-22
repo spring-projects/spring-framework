@@ -949,7 +949,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		public PathSegmentComponent(List<String> pathSegments) {
 			Assert.notNull(pathSegments, "List must not be null");
-			this.pathSegments = Collections.unmodifiableList(new ArrayList<>(pathSegments));
+			this.pathSegments = List.copyOf(pathSegments);
 		}
 
 		@Override
