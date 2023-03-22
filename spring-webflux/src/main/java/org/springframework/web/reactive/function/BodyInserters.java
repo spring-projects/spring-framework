@@ -375,7 +375,8 @@ public abstract class BodyInserters {
 		MediaType mediaType = outputMessage.getHeaders().getContentType();
 		for (HttpMessageWriter<?> messageWriter : context.messageWriters()) {
 			if (messageWriter.canWrite(bodyType, mediaType)) {
-				return write(publisher, bodyType, mediaType, outputMessage, context, cast(messageWriter));
+				HttpMessageWriter<Object> typedMessageWriter = cast(messageWriter);
+				return write(publisher, bodyType, mediaType, outputMessage, context, typedMessageWriter);
 			}
 		}
 		return Mono.error(unsupportedError(bodyType, context, mediaType));
