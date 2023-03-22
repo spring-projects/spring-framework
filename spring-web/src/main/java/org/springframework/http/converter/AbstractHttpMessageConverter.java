@@ -100,7 +100,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 */
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
 		Assert.notEmpty(supportedMediaTypes, "MediaType List must not be empty");
-		this.supportedMediaTypes = Collections.unmodifiableList(new ArrayList<>(supportedMediaTypes));
+		this.supportedMediaTypes = List.copyOf(supportedMediaTypes);
 	}
 
 	@Override
