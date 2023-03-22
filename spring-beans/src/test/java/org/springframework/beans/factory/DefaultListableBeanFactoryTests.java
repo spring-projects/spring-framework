@@ -791,6 +791,32 @@ class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	void hintAtPossibleDuplicateArgumentsInParentAndChildWhenMixingIndexAndNamed() {
+		final String EXPECTED_NAME = "Juergen";
+		final int EXPECTED_AGE = 41;
+
+		RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
+		parentDefinition.setAbstract(true);
+		parentDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, EXPECTED_NAME);
+
+		ChildBeanDefinition childDefinition = new ChildBeanDefinition("parent");
+		childDefinition.getConstructorArgumentValues().addGenericArgumentValue(new ConstructorArgumentValues.ValueHolder(EXPECTED_NAME, null, "name"));
+		childDefinition.getConstructorArgumentValues().addGenericArgumentValue(new ConstructorArgumentValues.ValueHolder(EXPECTED_AGE, null, "age"));
+
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		factory.registerBeanDefinition("parent", parentDefinition);
+		factory.registerBeanDefinition("child", childDefinition);
+
+		assertThatExceptionOfType(BeanCreationException.class)
+				.isThrownBy(() -> factory.getBean("child", TestBean.class))
+				.withMessage("Error creating bean with name 'child': Could not resolve matching constructor on bean class " +
+						"[org.springframework.beans.testfixture.beans.TestBean] (hint: specify index/type/name arguments " +
+						"for simple parameters to avoid type ambiguities. " +
+						"You should also check the consistency of arguments when mixing indexed and named arguments, " +
+						"especially in case of bean definition inheritance)");
+	}
+
+	@Test
 	void getTypeWorksAfterParentChildMerging() {
 		RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
 		ChildBeanDefinition childDefinition = new ChildBeanDefinition("parent", DerivedTestBean.class, null, null);
