@@ -194,18 +194,16 @@ public abstract class BodyExtractors {
 		MediaType contentType = Optional.ofNullable(message.getHeaders().getContentType())
 				.orElse(MediaType.APPLICATION_OCTET_STREAM);
 
-		return context.messageReaders().stream()
-				.filter(reader -> reader.canRead(elementType, contentType))
-				.findFirst()
-				.map(BodyExtractors::<T>cast)
-				.map(readerFunction)
-				.orElseGet(() -> {
-					List<MediaType> mediaTypes = context.messageReaders().stream()
-							.flatMap(reader -> reader.getReadableMediaTypes(elementType).stream())
-							.toList();
-					return errorFunction.apply(
-							new UnsupportedMediaTypeException(contentType, mediaTypes, elementType));
-				});
+		for (HttpMessageReader<?> messageReader : context.messageReaders()) {
+			if (messageReader.canRead(elementType, contentType)) {
+				return readerFunction.apply(cast(messageReader));
+			}
+		}
+		List<MediaType> mediaTypes = context.messageReaders().stream()
+				.flatMap(reader -> reader.getReadableMediaTypes(elementType).stream())
+				.toList();
+		return errorFunction.apply(
+				new UnsupportedMediaTypeException(contentType, mediaTypes, elementType));
 	}
 
 	private static <T> Mono<T> readToMono(ReactiveHttpInputMessage message, BodyExtractor.Context context,
@@ -245,12 +243,13 @@ public abstract class BodyExtractors {
 	private static <T> HttpMessageReader<T> findReader(
 			ResolvableType elementType, MediaType mediaType, BodyExtractor.Context context) {
 
-		return context.messageReaders().stream()
-				.filter(messageReader -> messageReader.canRead(elementType, mediaType))
-				.findFirst()
-				.map(BodyExtractors::<T>cast)
-				.orElseThrow(() -> new IllegalStateException(
-						"No HttpMessageReader for \"" + mediaType + "\" and \"" + elementType + "\""));
+		for (HttpMessageReader<?> messageReader : context.messageReaders()) {
+			if (messageReader.canRead(elementType, mediaType)) {
+				return cast(messageReader);
+			}
+		}
+		throw new IllegalStateException(
+						"No HttpMessageReader for \"" + mediaType + "\" and \"" + elementType + "\"");
 	}
 
 	@SuppressWarnings("unchecked")

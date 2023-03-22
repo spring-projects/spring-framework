@@ -147,8 +147,10 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 			this.commitActions.add(writeAction);
 		}
 
-		List<? extends Publisher<Void>> actions = this.commitActions.stream()
-				.map(Supplier::get).toList();
+		List<Publisher<Void>> actions = new ArrayList<>(this.commitActions.size());
+		for (Supplier<? extends Publisher<Void>> commitAction : this.commitActions) {
+			actions.add(commitAction.get());
+		}
 
 		return Flux.concat(actions).then();
 	}
