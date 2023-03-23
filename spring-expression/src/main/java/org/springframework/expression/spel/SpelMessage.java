@@ -266,11 +266,11 @@ public enum SpelMessage {
 	MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED(Kind.ERROR, 1075,
 			"Array declares too many elements, exceeding the threshold of ''{0}''"),
 
-	/** @since 5.3.26 */
+	/** @since 5.2.23 */
 	MAX_REPEATED_TEXT_SIZE_EXCEEDED(Kind.ERROR, 1076,
 			"Repeated text results in too many characters, exceeding the threshold of ''{0}''"),
 
-	/** @since 5.3.26 */
+	/** @since 5.2.23 */
 	MAX_REGEX_LENGTH_EXCEEDED(Kind.ERROR, 1077,
 			"Regular expression contains too many characters, exceeding the threshold of ''{0}''");
 
