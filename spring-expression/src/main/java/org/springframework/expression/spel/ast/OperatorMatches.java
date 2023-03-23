@@ -45,7 +45,7 @@ public class OperatorMatches extends Operator {
 
 	/**
 	 * Maximum number of characters permitted in a regular expression.
-	 * @since 5.3.26
+	 * @since 5.2.23
 	 */
 	private static final int MAX_REGEX_LENGTH = 256;
 
@@ -54,7 +54,7 @@ public class OperatorMatches extends Operator {
 
 	/**
 	 * Create a new {@link OperatorMatches} instance.
-	 * @deprecated as of Spring Framework 5.3.26 in favor of invoking
+	 * @deprecated as of Spring Framework 5.2.23 in favor of invoking
 	 * {@link #OperatorMatches(ConcurrentMap, int, int, SpelNodeImpl...)}
 	 * with a shared pattern cache instead
 	 */
@@ -65,7 +65,7 @@ public class OperatorMatches extends Operator {
 
 	/**
 	 * Create a new {@link OperatorMatches} instance with a shared pattern cache.
-	 * @since 5.3.26
+	 * @since 5.2.23
 	 */
 	public OperatorMatches(ConcurrentMap<String, Pattern> patternCache, int startPos, int endPos, SpelNodeImpl... operands) {
 		super("matches", startPos, endPos, operands);
