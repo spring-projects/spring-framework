@@ -16,12 +16,13 @@
 
 package org.springframework.http.codec.xml.jaxb;
 
-import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
 
 /**
  * @author Arjen Poutsma
  */
-@XmlRootElement(name = "name-type")
-public class XmlRootElementWithName {
+@jakarta.xml.bind.annotation.XmlType
+@XmlSeeAlso({XmlRootElementWithName.class, XmlRootElementWithNameAndNamespace.class})
+public class XmlTypeSeeAlso {
 
 }

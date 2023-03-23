@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), new MediaType("application", "foo+xml"))).isTrue();
 		assertThat(this.encoder.canEncode(forClass(Pojo.class), MediaType.APPLICATION_JSON)).isFalse();
 
-		assertThat(this.encoder.canEncode(forClass(Jaxb2XmlDecoderTests.TypePojo.class), MediaType.APPLICATION_XML)).isTrue();
+		assertThat(this.encoder.canEncode(forClass(TypePojo.class), MediaType.APPLICATION_XML)).isTrue();
 		assertThat(this.encoder.canEncode(forClass(getClass()), MediaType.APPLICATION_XML)).isFalse();
 
 		// SPR-15464
