@@ -50,7 +50,7 @@ class RepeatableSqlAnnotationSqlScriptsParentTests extends AbstractTransactional
 	@Sql("drop-schema.sql")
 	@Sql("schema.sql")
 	@Sql("data.sql")
-	@Sql("data-add-dogbert.sql")
+	@Sql("classpath*:/org/springframework/test/context/jdbc/*ata-add-dogbert.sql")
 	@Order(2)
 	void methodLevelScripts() {
 		assertUsers("Dilbert", "Dogbert");

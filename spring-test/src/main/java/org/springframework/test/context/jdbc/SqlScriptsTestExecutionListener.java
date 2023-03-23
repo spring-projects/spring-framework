@@ -16,7 +16,9 @@
 
 package org.springframework.test.context.jdbc;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -32,8 +34,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -149,10 +151,10 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	@Override
 	public void processAheadOfTime(RuntimeHints runtimeHints, Class<?> testClass, ClassLoader classLoader) {
 		getSqlAnnotationsFor(testClass).forEach(sql ->
-			registerClasspathResources(getScripts(sql, testClass, null, true), runtimeHints, classLoader));
+			registerClasspathResources(getScriptResourceList(sql, testClass, null, true), runtimeHints));
 		getSqlMethods(testClass).forEach(testMethod ->
 			getSqlAnnotationsFor(testMethod).forEach(sql ->
-				registerClasspathResources(getScripts(sql, testClass, testMethod, false), runtimeHints, classLoader)));
+				registerClasspathResources(getScriptResourceList(sql, testClass, testMethod, false), runtimeHints)));
 	}
 
 	/**
@@ -256,9 +258,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 					.formatted(executionPhase, testContext.getTestClass().getName()));
 		}
 
-		String[] scripts = getScripts(sql, testContext.getTestClass(), testContext.getTestMethod(), classLevel);
-		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
-				testContext.getApplicationContext(), scripts);
+		List<Resource> scriptResources = getScriptResourceList(sql, testContext.getTestClass(), testContext.getTestMethod(), classLevel);
 		for (String stmt : sql.statements()) {
 			if (StringUtils.hasText(stmt)) {
 				stmt = stmt.trim();
@@ -340,8 +340,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		try {
 			Method getDataSourceMethod = transactionManager.getClass().getMethod("getDataSource");
 			Object obj = ReflectionUtils.invokeMethod(getDataSourceMethod, transactionManager);
-			if (obj instanceof DataSource dataSource) {
-				return dataSource;
+			if (obj instanceof DataSource) {
+				return (DataSource) obj;
 			}
 		}
 		catch (Exception ex) {
@@ -350,12 +350,27 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		return null;
 	}
 
-	private String[] getScripts(Sql sql, Class<?> testClass, Method testMethod, boolean classLevel) {
+	private List<Resource> getScriptResourceList(Sql sql, Class<?> testClass, Method testMethod, boolean classLevel) {
 		String[] scripts = sql.scripts();
 		if (ObjectUtils.isEmpty(scripts) && ObjectUtils.isEmpty(sql.statements())) {
 			scripts = new String[] {detectDefaultScript(testClass, testMethod, classLevel)};
 		}
-		return TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts);
+		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testClass, scripts);
+		List<Resource> resourceList = new ArrayList<>();
+		for (String script : scripts) {
+			PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver =
+					new PathMatchingResourcePatternResolver(testClass.getClassLoader());
+			Resource[] resources;
+			try {
+				resources = pathMatchingResourcePatternResolver.getResources(script);
+				resourceList.addAll(List.of(resources));
+			}
+			catch (IOException ex) {
+				throw new IllegalStateException("Cloud not resolve resource : %s".formatted(script), ex);
+			}
+		}
+
+		return resourceList;
 	}
 
 	/**
@@ -395,12 +410,11 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(testClass, sqlMethodFilter));
 	}
 
-	private void registerClasspathResources(String[] paths, RuntimeHints runtimeHints, ClassLoader classLoader) {
-		DefaultResourceLoader resourceLoader = new DefaultResourceLoader(classLoader);
-		Arrays.stream(paths)
-				.filter(path -> path.startsWith(CLASSPATH_URL_PREFIX))
-				.map(resourceLoader::getResource)
+	private void registerClasspathResources(List<Resource> resources, RuntimeHints runtimeHints) {
+		resources.stream()
+				.filter(resource -> resource instanceof ClassPathResource classPathResource && classPathResource.exists())
 				.forEach(runtimeHints.resources()::registerResource);
+
 	}
 
 }

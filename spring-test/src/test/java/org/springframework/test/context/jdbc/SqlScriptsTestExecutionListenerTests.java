@@ -146,4 +146,11 @@ class SqlScriptsTestExecutionListenerTests {
 		}
 	}
 
+	static class TestPartten {
+
+		@Sql("classpath*:/org.springframework.test.context.jdbc/*.sql")
+		public void foo() {
+		}
+	}
+
 }
