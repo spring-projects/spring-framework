@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Sam Brannen
  * @since 5.2.4
  */
-@DisabledOnJre(value= {JRE.JAVA_18, JRE.JAVA_19}, disabledReason = "BlockHound is not compatible with Java 18+")
+@DisabledOnJre(value= {JRE.JAVA_18, JRE.JAVA_19, JRE.JAVA_20}, disabledReason = "BlockHound is not compatible with Java 18+")
 class SpringCoreBlockHoundIntegrationTests {
 
 	@BeforeAll

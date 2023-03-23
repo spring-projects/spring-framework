@@ -6,6 +6,6 @@ RUN ./setup.sh
 
 ENV JAVA_HOME /opt/openjdk/java17
 ENV JDK17 /opt/openjdk/java17
-ENV JDK19 /opt/openjdk/java19
+ENV JDK20 /opt/openjdk/java20
 
 ENV PATH $JAVA_HOME/bin:$PATH
