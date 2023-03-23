@@ -273,6 +273,18 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	}
 
 	/**
+	* Add a mapped property to the existing map of properties.
+	* @param propertyName the property name
+	* @param propertyDescriptor the property descriptor
+	*/
+	protected void addProperty(String propertyName, PropertyDescriptor propertyDescriptor) {
+		if (propertyDescriptor.getWriteMethod() != null) {
+			this.mappedProperties.put(propertyName, propertyDescriptor);
+			this.mappedPropertyNames.add(propertyDescriptor.getName());
+		}
+	}
+
+	/**
 	 * Convert the given name to lower case.
 	 * By default, conversions will happen within the US locale.
 	 * @param name the original name
