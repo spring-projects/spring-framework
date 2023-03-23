@@ -145,12 +145,4 @@ class SqlScriptsTestExecutionListenerTests {
 		public void foo() {
 		}
 	}
-
-	static class TestPartten {
-
-		@Sql("classpath*:/org.springframework.test.context.jdbc/*.sql")
-		public void foo() {
-		}
-	}
-
 }
