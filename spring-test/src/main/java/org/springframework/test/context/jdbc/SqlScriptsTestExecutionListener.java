@@ -360,9 +360,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		for (String script : scripts) {
 			PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver =
 					new PathMatchingResourcePatternResolver(testClass.getClassLoader());
-			Resource[] resources;
 			try {
-				resources = pathMatchingResourcePatternResolver.getResources(script);
+				Resource[] resources = pathMatchingResourcePatternResolver.getResources(script);
 				resourceList.addAll(List.of(resources));
 			}
 			catch (IOException ex) {
