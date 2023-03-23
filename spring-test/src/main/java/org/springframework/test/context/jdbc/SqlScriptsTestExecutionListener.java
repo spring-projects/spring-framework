@@ -340,8 +340,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		try {
 			Method getDataSourceMethod = transactionManager.getClass().getMethod("getDataSource");
 			Object obj = ReflectionUtils.invokeMethod(getDataSourceMethod, transactionManager);
-			if (obj instanceof DataSource) {
-				return (DataSource) obj;
+			if (obj instanceof DataSource dataSource) {
+				return dataSource;
 			}
 		}
 		catch (Exception ex) {
