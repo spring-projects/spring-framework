@@ -49,7 +49,7 @@ import org.springframework.context.annotation.Import;
  *         registry.addHandler(echoWebSocketHandler(), "/echo").withSockJS();
  * 	   }
  *
- *	   &#064;Override
+ *	   &#064;Bean
  *	   public WebSocketHandler echoWebSocketHandler() {
  *         return new EchoWebSocketHandler();
  *     }
