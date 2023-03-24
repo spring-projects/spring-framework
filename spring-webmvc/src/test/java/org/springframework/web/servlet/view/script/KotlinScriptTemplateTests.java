@@ -23,8 +23,7 @@ import java.util.Map;
 import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +35,7 @@ import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.condition.JRE.JAVA_19;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -44,7 +44,7 @@ import static org.mockito.Mockito.mock;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
-@DisabledOnJre(value = JRE.JAVA_19, disabledReason = "Kotlin doesn't support Java 19 yet")
+@DisabledForJreRange(min = JAVA_19, disabledReason = "Kotlin doesn't support Java 19+ yet")
 class KotlinScriptTemplateTests {
 
 	private WebApplicationContext webAppContext = mock();
