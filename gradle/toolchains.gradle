@@ -81,6 +81,7 @@ plugins.withType(JavaPlugin) {
 			javaLauncher = javaToolchains.launcherFor {
 				languageVersion = testLanguageVersion
 			}
+			jvmArgs += ['-Djava.locale.providers=COMPAT']
 		}
 	}
 }
