@@ -40,9 +40,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * Integration tests for the JSON Binding API, running against Apache Johnzon.
@@ -77,7 +74,7 @@ public class JsonbHttpMessageConverterTests {
 	public void readTyped() throws IOException {
 		String body = "{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
-		InputStream inputStream = spy(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+		InputStream inputStream = new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8));
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(inputStream);
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 		MyBean result = (MyBean) this.converter.read(MyBean.class, inputMessage);
@@ -89,7 +86,6 @@ public class JsonbHttpMessageConverterTests {
 		assertThat(result.getArray()).isEqualTo(new String[] {"Foo", "Bar"});
 		assertThat(result.isBool()).isTrue();
 		assertThat(result.getBytes()).isEqualTo(new byte[] {0x1, 0x2});
-		verify(inputStream, never()).close();
 	}
 
 	@Test
@@ -140,7 +136,6 @@ public class JsonbHttpMessageConverterTests {
 		assertThat(result.contains("\"bytes\":[1,2]")).isTrue();
 		assertThat(outputMessage.getHeaders().getContentType())
 				.as("Invalid content-type").isEqualTo(new MediaType("application", "json", utf8));
-		verify(outputMessage.getBody(), never()).close();
 	}
 
 	@Test

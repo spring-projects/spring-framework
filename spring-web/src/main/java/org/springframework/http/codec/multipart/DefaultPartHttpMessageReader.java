@@ -115,7 +115,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * Configure the maximum amount of disk space allowed for file parts.
 	 * <p>By default this is set to -1, meaning that there is no maximum.
 	 * <p>Note that this property is ignored when
-	 * {@linkplain #setStreaming(boolean) streaming} is enabled, , or when
+	 * {@linkplain #setStreaming(boolean) streaming} is enabled, or when
 	 * {@link #setMaxInMemorySize(int) maxInMemorySize} is set to -1.
 	 */
 	public void setMaxDiskUsagePerPart(long maxDiskUsagePerPart) {

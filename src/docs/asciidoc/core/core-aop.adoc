@@ -1516,18 +1516,57 @@ check the type of the elements.
 [[aop-ataspectj-advice-params-names]]
 ===== Determining Argument Names
 
-The parameter binding in advice invocations relies on matching names used in pointcut
-expressions to declared parameter names in advice and pointcut method signatures.
-Parameter names are not available through Java reflection, so Spring AOP uses the
-following strategy to determine parameter names:
+Parameter binding in advice invocations relies on matching the names used in pointcut
+expressions to the parameter names declared in advice and pointcut method signatures.
 
-* If the parameter names have been explicitly specified by the user, the specified
-  parameter names are used. Both the advice and the pointcut annotations have
-  an optional `argNames` attribute that you can use to specify the argument names of
-  the annotated method. These argument names are available at runtime. The following example
-  shows how to use the `argNames` attribute:
+NOTE: This section uses the terms _argument_ and _parameter_ interchangeably, since
+AspectJ APIs refer to parameter names as argument names.
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+Spring AOP uses the following `ParameterNameDiscoverer` implementations to determine
+parameter names. Each discoverer will be given a chance to discover parameter names, and
+the first successful discoverer wins. If none of the registered discoverers is capable
+of determining parameter names, an exception will be thrown.
+
+`AspectJAnnotationParameterNameDiscoverer` :: Uses parameter names that have been explicitly
+  specified by the user via the `argNames` attribute in the corresponding advice or
+  pointcut annotation. See <<aop-ataspectj-advice-params-names-explicit>> for details.
+`KotlinReflectionParameterNameDiscoverer` :: Uses Kotlin reflection APIs to determine
+  parameter names. This discoverer is only used if such APIs are present on the classpath.
+  Not supported in a GraalVM native image.
+`StandardReflectionParameterNameDiscoverer` :: Uses the standard `java.lang.reflect.Parameter`
+  API to determine parameter names. Requires that code be compiled with the `-parameters`
+  flag for `javac`. Recommended approach on Java 8+.
+`LocalVariableTableParameterNameDiscoverer` :: Analyzes the local variable table available
+  in the byte code of the advice class to determine parameter names from debug information.
+  Requires that code be compiled with debug symbols (`-g:vars` at a minimum). Deprecated
+  as of Spring Framework 6.0 for removal in Spring Framework 6.1 in favor of compiling
+  code with `-parameters`. Not supported in a GraalVM native image unless the corresponding
+  class files are present as resources within the image.
+`AspectJAdviceParameterNameDiscoverer` :: Deduces parameter names from the pointcut
+  expression, `returning`, and `throwing` clauses. See the
+  {api-spring-framework}/aop/aspectj/AspectJAdviceParameterNameDiscoverer.html[javadoc]
+  for details on the algorithm used.
+
+[[aop-ataspectj-advice-params-names-explicit]]
+===== Explicit Argument Names
+
+@AspectJ advice and pointcut annotations have an optional `argNames` attribute that you
+can use to specify the argument names of the annotated method.
+
+[TIP]
+====
+If an @AspectJ aspect has been compiled by the AspectJ compiler (`ajc`) even without
+debug information, you do not need to add the `argNames` attribute, since the compiler
+retains the needed information.
+
+Similarly, if an @AspectJ aspect has been compiled with `javac` using the `-parameters`
+flag, you do not need to add the `argNames` attribute, since the compiler retains the
+needed information.
+====
+
+The following example shows how to use the `argNames` attribute:
+
+[source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
 	@Before(value="com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)",
@@ -1537,7 +1576,7 @@ following strategy to determine parameter names:
 		// ... use code and bean
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	@Before(value = "com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)", argNames = "bean,auditable")
@@ -1546,14 +1585,12 @@ following strategy to determine parameter names:
 		// ... use code and bean
 	}
 ----
+If the first parameter is of type `JoinPoint`, `ProceedingJoinPoint`, or
+`JoinPoint.StaticPart`, you can omit the name of the parameter from the value of the
+`argNames` attribute. For example, if you modify the preceding advice to receive the join
+point object, the `argNames` attribute does not need to include it:
 
-
-If the first parameter is of the `JoinPoint`, `ProceedingJoinPoint`, or
-`JoinPoint.StaticPart` type, you can leave out the name of the parameter from the value
-of the `argNames` attribute. For example, if you modify the preceding advice to receive
-the join point object, the `argNames` attribute need not include it:
-
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
 	@Before(value="com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)",
@@ -1563,7 +1600,7 @@ the join point object, the `argNames` attribute need not include it:
 		// ... use code, bean, and jp
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	@Before(value = "com.xyz.lib.Pointcuts.anyPublicMethod() && target(bean) && @annotation(auditable)", argNames = "bean,auditable")
@@ -1573,13 +1610,13 @@ the join point object, the `argNames` attribute need not include it:
 	}
 ----
 
-The special treatment given to the first parameter of the `JoinPoint`,
-`ProceedingJoinPoint`, and `JoinPoint.StaticPart` types is particularly convenient for
-advice instances that do not collect any other join point context. In such situations, you may
-omit the `argNames` attribute. For example, the following advice need not declare
+The special treatment given to the first parameter of type `JoinPoint`,
+`ProceedingJoinPoint`, or `JoinPoint.StaticPart` is particularly convenient for advice
+methods that do not collect any other join point context. In such situations, you may
+omit the `argNames` attribute. For example, the following advice does not need to declare
 the `argNames` attribute:
 
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+[source,java,indent=0,subs="verbatim",role="primary"]
 .Java
 ----
 	@Before("com.xyz.lib.Pointcuts.anyPublicMethod()")
@@ -1587,7 +1624,7 @@ the `argNames` attribute:
 		// ... use jp
 	}
 ----
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
 ----
 	@Before("com.xyz.lib.Pointcuts.anyPublicMethod()")
@@ -1595,28 +1632,6 @@ the `argNames` attribute:
 		// ... use jp
 	}
 ----
-
-* Using the `argNames` attribute is a little clumsy, so if the `argNames` attribute
-  has not been specified,  Spring AOP looks at the debug information for the
-  class and tries to determine the parameter names from the local variable table. This
-  information is present as long as the classes have been compiled with debug
-  information (`-g:vars` at a minimum). The consequences of compiling with this flag
-  on are: (1) your code is slightly easier to understand (reverse engineer), (2)
-  the class file sizes are very slightly bigger (typically inconsequential), (3) the
-  optimization to remove unused local variables is not applied by your compiler. In
-  other words, you should encounter no difficulties by building with this flag on.
-+
-NOTE: If an @AspectJ aspect has been compiled by the AspectJ compiler (`ajc`) even
-without the debug information, you need not add the `argNames` attribute, as the compiler
-retain the needed information.
-
-* If the code has been compiled without the necessary debug information, Spring AOP
-  tries to deduce the pairing of binding variables to parameters (for example, if
-  only one variable is bound in the pointcut expression, and the advice method
-  takes only one parameter, the pairing is obvious). If the binding of variables is
-  ambiguous given the available information, an `AmbiguousBindingException` is
-  thrown.
-* If all of the above strategies fail, an `IllegalArgumentException` is thrown.
 
 [[aop-ataspectj-advice-proceeding-with-the-call]]
 ===== Proceeding with Arguments

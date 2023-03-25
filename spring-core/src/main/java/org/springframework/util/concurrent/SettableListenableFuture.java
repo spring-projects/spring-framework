@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,6 +114,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	 * {@link java.util.concurrent.CancellationException} if the future has been cancelled.
 	 * @return the value associated with this future
 	 */
+	@Nullable
 	@Override
 	public T get() throws InterruptedException, ExecutionException {
 		return this.settableTask.get();
@@ -129,6 +130,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	 * @param unit the unit of the timeout argument
 	 * @return the value associated with this future
 	 */
+	@Nullable
 	@Override
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		return this.settableTask.get(timeout, unit);

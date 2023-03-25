@@ -92,7 +92,7 @@ parties such as https://github.com/h-thurow/Simple-JNDI[Simple-JNDI].
 The `org.springframework.mock.web` package contains a comprehensive set of Servlet API
 mock objects that are useful for testing web contexts, controllers, and filters. These
 mock objects are targeted at usage with Spring's Web MVC framework and are generally more
-convenient to use than dynamic mock objects (such as http://easymock.org/[EasyMock])
+convenient to use than dynamic mock objects (such as https://easymock.org/[EasyMock])
 or alternative Servlet API mock objects (such as http://www.mockobjects.com[MockObjects]).
 
 TIP: Since Spring Framework 5.0, the mock objects in `org.springframework.mock.web` are
@@ -142,11 +142,20 @@ categories:
 The `org.springframework.test.util` package contains several general purpose utilities
 for use in unit and integration testing.
 
-`ReflectionTestUtils` is a collection of reflection-based utility methods. You can use
-these methods in testing scenarios where you need to change the value of a constant, set
-a non-`public` field, invoke a non-`public` setter method, or invoke a non-`public`
-configuration or lifecycle callback method when testing application code for use cases
-such as the following:
+{api-spring-framework}/test/util/AopTestUtils.html[`AopTestUtils`] is a collection of
+AOP-related utility methods. You can use these methods to obtain a reference to the
+underlying target object hidden behind one or more Spring proxies. For example, if you
+have configured a bean as a dynamic mock by using a library such as EasyMock or Mockito,
+and the mock is wrapped in a Spring proxy, you may need direct access to the underlying
+mock to configure expectations on it and perform verifications. For Spring's core AOP
+utilities, see {api-spring-framework}/aop/support/AopUtils.html[`AopUtils`] and
+{api-spring-framework}/aop/framework/AopProxyUtils.html[`AopProxyUtils`].
+
+{api-spring-framework}/test/util/ReflectionTestUtils.html[`ReflectionTestUtils`] is a
+collection of reflection-based utility methods. You can use these methods in testing
+scenarios where you need to change the value of a constant, set a non-`public` field,
+invoke a non-`public` setter method, or invoke a non-`public` configuration or lifecycle
+callback method when testing application code for use cases such as the following:
 
 * ORM frameworks (such as JPA and Hibernate) that condone `private` or `protected` field
   access as opposed to `public` setter methods for properties in a domain entity.
@@ -156,14 +165,20 @@ such as the following:
 * Use of annotations such as `@PostConstruct` and `@PreDestroy` for lifecycle callback
   methods.
 
-{api-spring-framework}/test/util/AopTestUtils.html[`AopTestUtils`] is a collection of
-AOP-related utility methods. You can use these methods to obtain a reference to the
-underlying target object hidden behind one or more Spring proxies. For example, if you
-have configured a bean as a dynamic mock by using a library such as EasyMock or Mockito,
-and the mock is wrapped in a Spring proxy, you may need direct access to the underlying
-mock to configure expectations on it and perform verifications. For Spring's core AOP
-utilities, see {api-spring-framework}/aop/support/AopUtils.html[`AopUtils`] and
-{api-spring-framework}/aop/framework/AopProxyUtils.html[`AopProxyUtils`].
+{api-spring-framework}/test/util/TestSocketUtils.html[`TestSocketUtils`] is a simple
+utility for finding available TCP ports on `localhost` for use in integration testing
+scenarios.
+
+[NOTE]
+====
+`TestSocketUtils` can be used in integration tests which start an external server on an
+available random port. However, these utilities make no guarantee about the subsequent
+availability of a given port and are therefore unreliable. Instead of using
+`TestSocketUtils` to find an available local port for a server, it is recommended that
+you rely on a server's ability to start on a random ephemeral port that it selects or is
+assigned by the operating system. To interact with that server, you should query the
+server for the port it is currently using.
+====
 
 
 [[unit-testing-spring-mvc]]
@@ -498,7 +513,7 @@ The following example shows such a case:
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
 ----
-	@ContextConfiguration(initializers = CustomContextIntializer.class) // <1>
+	@ContextConfiguration(initializers = CustomContextInitializer.class) // <1>
 	class ContextInitializerTests {
 		// class body...
 	}
@@ -508,7 +523,7 @@ The following example shows such a case:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	@ContextConfiguration(initializers = [CustomContextIntializer::class]) // <1>
+	@ContextConfiguration(initializers = [CustomContextInitializer::class]) // <1>
 	class ContextInitializerTests {
 		// class body...
 	}
@@ -1098,10 +1113,10 @@ javadoc.
 [[spring-testing-annotation-testexecutionlisteners]]
 ===== `@TestExecutionListeners`
 
-`@TestExecutionListeners` defines class-level metadata for configuring the
-`TestExecutionListener` implementations that should be registered with the
-`TestContextManager`. Typically, `@TestExecutionListeners` is used in conjunction with
-`@ContextConfiguration`.
+`@TestExecutionListeners` is used to register listeners for a particular test class, its
+subclasses, and its nested classes. If you wish to register a listener globally, you
+should register it via the automatic discovery mechanism described in
+<<testcontext-tel-config>>.
 
 The following example shows how to register two `TestExecutionListener` implementations:
 
@@ -1132,7 +1147,9 @@ By default, `@TestExecutionListeners` provides support for inheriting listeners 
 superclasses or enclosing classes. See
 <<testcontext-junit-jupiter-nested-test-configuration>> and the 
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`
-javadoc] for an example and further details.
+javadoc] for an example and further details. If you discover that you need to switch
+back to using the default `TestExecutionListener` implementations, see the note
+in <<testcontext-tel-config-registering-tels>>.
 
 [[spring-testing-annotation-recordapplicationevents]]
 ===== `@RecordApplicationEvents`
@@ -1871,7 +1888,7 @@ Spring test configuration annotations are processed within enclosing class hiera
 for inner test classes.
 
 If `@NestedTestConfiguration` is not present or meta-present on a test class, in its
-super type hierarchy, or in its enclosing class hierarchy, the default _enclosing
+supertype hierarchy, or in its enclosing class hierarchy, the default _enclosing
 configuration inheritance mode_ will be used. See the tip below for details on how to
 change the default mode.
 
@@ -2460,11 +2477,45 @@ by default, exactly in the following order:
 [[testcontext-tel-config-registering-tels]]
 ===== Registering `TestExecutionListener` Implementations
 
-You can register `TestExecutionListener` implementations for a test class and its
-subclasses by using the `@TestExecutionListeners` annotation. See
+You can register `TestExecutionListener` implementations explicitly for a test class, its
+subclasses, and its nested classes by using the `@TestExecutionListeners` annotation. See
 <<integration-testing-annotations, annotation support>> and the javadoc for
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`]
 for details and examples.
+
+.Switching to default `TestExecutionListener` implementations
+[NOTE]
+====
+If you extend a class that is annotated with `@TestExecutionListeners` and you need to
+switch to using the default set of listeners, you can annotate your class with the
+following.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	// Switch to default listeners
+	@TestExecutionListeners(
+		listeners = {},
+		inheritListeners = false,
+		mergeMode = MERGE_WITH_DEFAULTS)
+	class MyTest extends BaseTest {
+		// class body...
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	// Switch to default listeners
+	@TestExecutionListeners(
+		listeners = [],
+		inheritListeners = false,
+		mergeMode = MERGE_WITH_DEFAULTS)
+	class MyTest : BaseTest {
+		// class body...
+	}
+----
+====
 
 [[testcontext-tel-config-automatic-discovery]]
 ===== Automatic Discovery of Default `TestExecutionListener` Implementations
@@ -2523,7 +2574,7 @@ listeners. The following listing demonstrates this style of configuration:
 	}
 ----
 
-[source,java,indent=0,subs="verbatim,quotes",role="secondary"]
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
 	@ContextConfiguration
@@ -4291,12 +4342,13 @@ properties.
 	class ExampleIntegrationTests {
 
 		@Container
-		static RedisContainer redis = new RedisContainer();
+		static GenericContainer redis =
+			new GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379);
 
 		@DynamicPropertySource
 		static void redisProperties(DynamicPropertyRegistry registry) {
-			registry.add("redis.host", redis::getContainerIpAddress);
-			registry.add("redis.port", redis::getMappedPort);
+			registry.add("redis.host", redis::getHost);
+			registry.add("redis.port", redis::getFirstMappedPort);
 		}
 
 		// tests ...
@@ -4314,13 +4366,14 @@ properties.
 
 			@Container
 			@JvmStatic
-			val redis: RedisContainer = RedisContainer()
+			val redis: GenericContainer =
+				GenericContainer("redis:5.0.3-alpine").withExposedPorts(6379)
 
 			@DynamicPropertySource
 			@JvmStatic
 			fun redisProperties(registry: DynamicPropertyRegistry) {
-				registry.add("redis.host", redis::getContainerIpAddress)
-				registry.add("redis.port", redis::getMappedPort)
+				registry.add("redis.host", redis::getHost)
+				registry.add("redis.port", redis::getFirstMappedPort)
 			}
 		}
 
@@ -6964,7 +7017,7 @@ do they involve any of the supporting `@InitBinder`, `@ModelAttribute`, or
 
 The Spring MVC Test framework, also known as `MockMvc`, aims to provide more complete
 testing for Spring MVC controllers without a running server. It does that by invoking
-the `DispacherServlet` and passing
+the `DispatcherServlet` and passing
 <<mock-objects-servlet, "`mock`" implementations of the Servlet API>> from the
 `spring-test` module which replicates the full Spring MVC request handling without
 a running server.
@@ -7052,7 +7105,7 @@ To set up MockMvc through Spring configuration, use the following:
 
 		@BeforeEach
 		void setup(WebApplicationContext wac) {
-			this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+			this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 		}
 
 		// ...
@@ -7367,7 +7420,7 @@ no other expectations will be asserted.
 	import org.springframework.test.web.servlet.get
 
 	mockMvc.get("/accounts/1").andExpect {
-		status().isOk()
+		status { isOk() }
 	}
 ----
 
@@ -7415,7 +7468,7 @@ The following test asserts that binding or validation failed:
 	import org.springframework.test.web.servlet.post
 
 	mockMvc.post("/persons").andExpect {
-		status().isOk()
+		status { isOk() }
 		model {
 			attributeHasErrors("person")
 		}
@@ -7443,7 +7496,7 @@ request. You can do so as follows, where `print()` is a static import from
 	mockMvc.post("/persons").andDo {
 			print()
 		}.andExpect {
-			status().isOk()
+			status { isOk() }
 			model {
 				attributeHasErrors("person")
 			}
@@ -7473,7 +7526,7 @@ other expectations, as the following example shows:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	var mvcResult = mockMvc.post("/persons").andExpect { status().isOk() }.andReturn()
+	var mvcResult = mockMvc.post("/persons").andExpect { status { isOk() } }.andReturn()
 	// ...
 ----
 
@@ -7593,7 +7646,7 @@ or reactive type such as Reactor `Mono`:
 	@Test
 	fun test() {
 		var mvcResult = mockMvc.get("/path").andExpect {
-			status().isOk() // <1>
+			status { isOk() } // <1>
 			request { asyncStarted() } // <2>
 			// TODO Remove unused generic parameter
 			request { asyncResult<Nothing>("body") } // <3>
@@ -7602,7 +7655,7 @@ or reactive type such as Reactor `Mono`:
 
 		mockMvc.perform(asyncDispatch(mvcResult)) // <4>
 				.andExpect {
-					status().isOk() // <5>
+					status { isOk() } // <5>
 					content().string("body")
 				}
 	}
@@ -7729,13 +7782,13 @@ WebTestClient]. Browse these examples for further ideas.
 ==== HtmlUnit Integration
 
 Spring provides integration between <<spring-mvc-test-server, MockMvc>> and
-http://htmlunit.sourceforge.net/[HtmlUnit]. This simplifies performing end-to-end testing
+https://htmlunit.sourceforge.io/[HtmlUnit]. This simplifies performing end-to-end testing
 when using HTML-based views. This integration lets you:
 
 * Easily test HTML pages by using tools such as
-  http://htmlunit.sourceforge.net/[HtmlUnit],
+  https://htmlunit.sourceforge.io/[HtmlUnit],
   https://www.seleniumhq.org[WebDriver], and
-  http://www.gebish.org/manual/current/#spock-junit-testng[Geb] without the need to
+  https://www.gebish.org/manual/current/#spock-junit-testng[Geb] without the need to
   deploy to a Servlet container.
 * Test JavaScript within pages.
 * Optionally, test using mock services to speed up testing.
@@ -8062,11 +8115,11 @@ First, we no longer have to explicitly verify our form and then create a request
 looks like the form. Instead, we request the form, fill it out, and submit it, thereby
 significantly reducing the overhead.
 
-Another important factor is that http://htmlunit.sourceforge.net/javascript.html[HtmlUnit
+Another important factor is that https://htmlunit.sourceforge.io/javascript.html[HtmlUnit
 uses the Mozilla Rhino engine] to evaluate JavaScript. This means that we can also test
 the behavior of JavaScript within our pages.
 
-See the http://htmlunit.sourceforge.net/gettingStarted.html[HtmlUnit documentation] for
+See the https://htmlunit.sourceforge.io/gettingStarted.html[HtmlUnit documentation] for
 additional information about using HtmlUnit.
 
 [[spring-mvc-test-server-htmlunit-mah-advanced-builder]]
@@ -8673,7 +8726,7 @@ TIP: For additional information on creating a `MockMvc` instance, see
 ===== MockMvc and Geb
 
 In the previous section, we saw how to use MockMvc with WebDriver. In this section, we
-use http://www.gebish.org/[Geb] to make our tests even Groovy-er.
+use https://www.gebish.org/[Geb] to make our tests even Groovy-er.
 
 [[spring-mvc-test-server-htmlunit-geb-why]]
 ====== Why Geb and MockMvc?
@@ -8776,7 +8829,7 @@ if we were at the wrong page.
 
 Next, we create a `content` closure that specifies all the areas of interest within the
 page. We can use a
-http://www.gebish.org/manual/current/#the-jquery-ish-navigator-api[jQuery-ish Navigator
+https://www.gebish.org/manual/current/#the-jquery-ish-navigator-api[jQuery-ish Navigator
 API] to select the content in which we are interested.
 
 Finally, we can verify that a new message was created successfully, as follows:
@@ -8793,7 +8846,7 @@ message == expectedMessage
 ----
 
 For further details on how to get the most out of Geb, see
-http://www.gebish.org/manual/current/[The Book of Geb] user's manual.
+https://www.gebish.org/manual/current/[The Book of Geb] user's manual.
 
 
 [[spring-mvc-test-client]]

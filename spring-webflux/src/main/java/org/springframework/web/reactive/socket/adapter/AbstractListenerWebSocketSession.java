@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Base class for {@link WebSocketSession} implementations that bridge between
- * event-listener WebSocket APIs (e.g. Java WebSocket API JSR-356, Jetty,
+ * event-listener WebSocket APIs (e.g. Java WebSocket API (JSR-356), Jetty,
  * Undertow) and Reactive Streams.
  *
  * <p>Also implements {@code Subscriber<Void>} so it can be used to subscribe to
@@ -247,7 +247,13 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		if (this.handlerCompletionMono != null) {
 			this.handlerCompletionMono.onError(ex);
 		}
-		close(CloseStatus.SERVER_ERROR.withReason(ex.getMessage()));
+		if (logger.isDebugEnabled()) {
+			logger.debug("WebSocket session completed with error", ex);
+		}
+		else if (logger.isInfoEnabled()) {
+			logger.info("WebSocket session completed with error: " + ex.getMessage());
+		}
+		close(CloseStatus.SERVER_ERROR);
 	}
 
 	@Override
@@ -360,7 +366,7 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 		}
 
 		/**
-		 * Sub-classes can invoke this before sending a message (false) and
+		 * Subclasses can invoke this before sending a message (false) and
 		 * after receiving the async send callback (true) effective translating
 		 * async completion callback into simple flow control.
 		 */

@@ -209,7 +209,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		checkTemplateParsingError("abc${ } }", "No expression defined within delimiter '${}' at character 3");
 		checkTemplateParsingError("abc$[ } ]", DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT, "Found closing '}' at position 6 without an opening '{'");
 
-		checkTemplateParsing("abc ${\"def''g}hi\"} jkl", "abc def'g}hi jkl");
+		checkTemplateParsing("abc ${\"def''g}hi\"} jkl", "abc def''g}hi jkl");
 		checkTemplateParsing("abc ${'def''g}hi'} jkl", "abc def'g}hi jkl");
 		checkTemplateParsing("}", "}");
 		checkTemplateParsing("${'hello'} world", "hello world");
@@ -602,7 +602,7 @@ class SpelReproTests extends AbstractExpressionTests {
 	/**
 	 * Test whether {@link ReflectiveMethodResolver} follows Java Method Invocation
 	 * Conversion order. And more precisely that widening reference conversion is 'higher'
-	 * than a unboxing conversion.
+	 * than an unboxing conversion.
 	 */
 	@Test
 	void conversionPriority_SPR8224() throws Exception {

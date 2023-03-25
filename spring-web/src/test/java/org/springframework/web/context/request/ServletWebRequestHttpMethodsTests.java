@@ -23,6 +23,7 @@ import java.lang.annotation.Target;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -286,9 +287,9 @@ class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("ETag")).isEqualTo(etag);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedTimestampWithLengthPart(String method) {
-		setUpRequest(method);
+	@Test
+	void checkNotModifiedTimestampWithLengthPart() {
+		setUpRequest("GET");
 
 		long epochTime = ZonedDateTime.parse(CURRENT_TIME, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
 		servletRequest.setMethod("GET");
@@ -299,12 +300,11 @@ class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(epochTime / 1000);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkModifiedTimestampWithLengthPart(String method) {
-		setUpRequest(method);
+	@Test
+	void checkModifiedTimestampWithLengthPart() {
+		setUpRequest("GET");
 
 		long epochTime = ZonedDateTime.parse(CURRENT_TIME, RFC_1123_DATE_TIME).toInstant().toEpochMilli();
-		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", "Wed, 08 Apr 2014 09:57:42 GMT; length=13774");
 
 		assertThat(request.checkNotModified(epochTime)).isFalse();
@@ -312,13 +312,12 @@ class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(epochTime / 1000);
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedTimestampConditionalPut(String method) {
-		setUpRequest(method);
+	@Test
+	void checkNotModifiedTimestampConditionalPut() {
+		setUpRequest("PUT");
 
 		long currentEpoch = currentDate.getTime();
 		long oneMinuteAgo = currentEpoch - (1000 * 60);
-		servletRequest.setMethod("PUT");
 		servletRequest.addHeader("If-UnModified-Since", currentEpoch);
 
 		assertThat(request.checkNotModified(oneMinuteAgo)).isFalse();
@@ -326,19 +325,31 @@ class ServletWebRequestHttpMethodsTests {
 		assertThat(servletResponse.getHeader("Last-Modified")).isNull();
 	}
 
-	@ParameterizedHttpMethodTest
-	void checkNotModifiedTimestampConditionalPutConflict(String method) {
-		setUpRequest(method);
+	@Test
+	void checkNotModifiedTimestampConditionalPutConflict() {
+		setUpRequest("PUT");
 
 		long currentEpoch = currentDate.getTime();
 		long oneMinuteAgo = currentEpoch - (1000 * 60);
-		servletRequest.setMethod("PUT");
 		servletRequest.addHeader("If-UnModified-Since", oneMinuteAgo);
 
 		assertThat(request.checkNotModified(currentEpoch)).isTrue();
 		assertThat(servletResponse.getStatus()).isEqualTo(412);
 		assertThat(servletResponse.getHeader("Last-Modified")).isNull();
 	}
+
+	@ParameterizedHttpMethodTest
+	void checkNotModifiedConditionalGet(String method) {
+		setUpRequest(method);
+		long currentEpoch = currentDate.getTime();
+		long oneMinuteAgo = currentEpoch - (1000 * 60);
+		servletRequest.addHeader("If-UnModified-Since", currentEpoch);
+
+		assertThat(request.checkNotModified(oneMinuteAgo)).isFalse();
+		assertThat(servletResponse.getStatus()).isEqualTo(200);
+		assertThat(servletResponse.getDateHeader("Last-Modified") / 1000).isEqualTo(oneMinuteAgo / 1000);
+	}
+
 
 	private void setUpRequest(String method) {
 		this.servletRequest.setMethod(method);

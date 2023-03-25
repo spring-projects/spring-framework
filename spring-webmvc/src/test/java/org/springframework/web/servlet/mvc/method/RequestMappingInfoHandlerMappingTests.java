@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,7 +321,7 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(matrixVariables.getFirst("year")).isEqualTo("2012");
 		assertThat(uriVariables.get("cars")).isEqualTo("cars");
 
-		// URI var with regex for path variable, and URI var for matrix params..
+		// URI var with regex for path variable, and URI var for matrix params.
 		request = new MockHttpServletRequest("GET", "/cars;colors=red,blue,green;year=2012");
 		handleMatch(mapping, request, "/{cars:[^;]+}{params}", request.getRequestURI());
 
@@ -336,7 +336,7 @@ class RequestMappingInfoHandlerMappingTests {
 			assertThat(uriVariables.get("params")).isEqualTo(";colors=red,blue,green;year=2012");
 		}
 
-		// URI var with regex for path variable, and (empty) URI var for matrix params..
+		// URI var with regex for path variable, and (empty) URI var for matrix params.
 		request = new MockHttpServletRequest("GET", "/cars");
 		handleMatch(mapping, request, "/{cars:[^;]+}{params}", request.getRequestURI());
 
@@ -387,6 +387,18 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(matrixVariables).isNotNull();
 		assertThat(matrixVariables.get("mvar")).isEqualTo(Collections.singletonList("a/b"));
 		assertThat(uriVariables.get("cars")).isEqualTo("cars");
+	}
+
+	@PathPatternsParameterizedTest // gh-29611
+	void handleNoMatchWithoutPartialMatches(TestRequestMappingInfoHandlerMapping mapping) throws Exception {
+		String path = "/non-existent";
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", path);
+
+		HandlerMethod handlerMethod = mapping.handleNoMatch(new HashSet<>(), path, request);
+		assertThat(handlerMethod).isNull();
+
+		handlerMethod = mapping.handleNoMatch(null, path, request);
+		assertThat(handlerMethod).isNull();
 	}
 
 	private HandlerMethod getHandler(

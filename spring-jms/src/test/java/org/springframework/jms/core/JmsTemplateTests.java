@@ -270,7 +270,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator)
+	 * {@code send(String d, MessageCreator messageCreator)}
 	 */
 	@Test
 	void testSendDestinationName() throws Exception {
@@ -279,7 +279,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(Destination d, MessageCreator messageCreator) using QOS parameters.
+	 * {@code send(Destination d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
 	void testSendDestinationWithQOS() throws Exception {
@@ -288,7 +288,7 @@ class JmsTemplateTests {
 
 	/**
 	 * Test sending to a destination using the method
-	 * send(String d, MessageCreator messageCreator) using QOS parameters.
+	 * {@code send(String d, MessageCreator messageCreator)} using QOS parameters.
 	 */
 	@Test
 	void testSendDestinationNameWithQOS() throws Exception {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ClientHttpRequest} implementation for the Jetty ReactiveStreams HTTP client.
@@ -52,7 +53,6 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 	private final DataBufferFactory bufferFactory;
 
 	private final ReactiveRequest.Builder builder;
-
 
 
 	public JettyClientHttpRequest(Request jettyRequest, DataBufferFactory bufferFactory) {
@@ -96,8 +96,7 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 					.as(chunks -> ReactiveRequest.Content.fromPublisher(chunks, getContentType()));
 			this.builder.content(content);
 			sink.success();
-		})
-				.then(doCommit());
+		}).then(doCommit());
 	}
 
 	@Override
@@ -144,7 +143,11 @@ class JettyClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	protected HttpHeaders initReadOnlyHeaders() {
-		return HttpHeaders.readOnlyHttpHeaders(new JettyHeadersAdapter(this.jettyRequest.getHeaders()));
+		MultiValueMap<String, String> headers = (Jetty10HttpFieldsHelper.jetty10Present() ?
+				Jetty10HttpFieldsHelper.getHttpHeaders(this.jettyRequest) :
+				new JettyHeadersAdapter(this.jettyRequest.getHeaders()));
+
+		return HttpHeaders.readOnlyHttpHeaders(headers);
 	}
 
 	public ReactiveRequest toReactiveRequest() {

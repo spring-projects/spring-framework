@@ -96,7 +96,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * Create a new {@code DefaultNamespaceHandlerResolver} using the
 	 * supplied mapping file location.
 	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources
-	 * may be {@code null}, in which case the thread context ClassLoader will be used)
+	 * may be {@code null}, in which case the thread context ClassLoader will be used
 	 * @param handlerMappingsLocation the mapping file location
 	 */
 	public DefaultNamespaceHandlerResolver(@Nullable ClassLoader classLoader, String handlerMappingsLocation) {

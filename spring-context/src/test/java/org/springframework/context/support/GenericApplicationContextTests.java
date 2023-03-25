@@ -16,8 +16,11 @@
 
 package org.springframework.context.support;
 
+import java.nio.file.InvalidPathException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.OS;
 
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -232,27 +235,46 @@ class GenericApplicationContextTests {
 		assertGetResourceSemantics(new FileSystemResourceLoader(), FileSystemResource.class);
 	}
 
-	private void assertGetResourceSemantics(ResourceLoader resourceLoader, Class<? extends Resource> defaultResouceType) {
+	private void assertGetResourceSemantics(ResourceLoader resourceLoader, Class<? extends Resource> defaultResourceType) {
 		if (resourceLoader != null) {
 			context.setResourceLoader(resourceLoader);
 		}
 
-		String pingLocation = "ping:foo";
+		String relativePathLocation = "foo";
 		String fileLocation = "file:foo";
+		String pingLocation = "ping:foo";
 
-		Resource resource = context.getResource(pingLocation);
-		assertThat(resource).isInstanceOf(defaultResouceType);
+		Resource resource = context.getResource(relativePathLocation);
+		assertThat(resource).isInstanceOf(defaultResourceType);
 		resource = context.getResource(fileLocation);
 		assertThat(resource).isInstanceOf(FileUrlResource.class);
 
+		// If we are using a FileSystemResourceLoader on Windows, we expect an error
+		// similar to the following since "ping:foo" is not a valid file name in the
+		// Windows file system and since the PingPongProtocolResolver has not yet been
+		// registered.
+		//
+		// java.nio.file.InvalidPathException: Illegal char <:> at index 4: ping:foo
+		if (resourceLoader instanceof FileSystemResourceLoader && OS.WINDOWS.isCurrentOs()) {
+			assertThatExceptionOfType(InvalidPathException.class)
+				.isThrownBy(() -> context.getResource(pingLocation))
+				.withMessageContaining(pingLocation);
+		}
+		else {
+			resource = context.getResource(pingLocation);
+			assertThat(resource).isInstanceOf(defaultResourceType);
+		}
+
 		context.addProtocolResolver(new PingPongProtocolResolver());
 
+		resource = context.getResource(relativePathLocation);
+		assertThat(resource).isInstanceOf(defaultResourceType);
+		resource = context.getResource(fileLocation);
+		assertThat(resource).isInstanceOf(FileUrlResource.class);
 		resource = context.getResource(pingLocation);
 		assertThat(resource).asInstanceOf(type(ByteArrayResource.class))
 			.extracting(bar -> new String(bar.getByteArray(), UTF_8))
 			.isEqualTo("pong:foo");
-		resource = context.getResource(fileLocation);
-		assertThat(resource).isInstanceOf(FileUrlResource.class);
 	}
 
 

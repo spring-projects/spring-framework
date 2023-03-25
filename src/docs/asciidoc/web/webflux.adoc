@@ -34,7 +34,7 @@ The other part of the answer is functional programming. Much as the addition of 
 in Java 5 created opportunities (such as annotated REST controllers or unit tests), the addition
 of lambda expressions in Java 8 created opportunities for functional APIs in Java.
 This is a boon for non-blocking applications and continuation-style APIs (as popularized
-by `CompletableFuture` and http://reactivex.io/[ReactiveX]) that allow declarative
+by `CompletableFuture` and https://reactivex.io/[ReactiveX]) that allow declarative
 composition of asynchronous logic. At the programming-model level, Java 8 enabled Spring
 WebFlux to offer functional web endpoints alongside annotated controllers.
 
@@ -87,7 +87,7 @@ Spring WebFlux. It provides the
 https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html[`Mono`] and
 https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html[`Flux`] API types
 to work on data sequences of 0..1 (`Mono`) and 0..N (`Flux`) through a rich set of operators aligned with the
-ReactiveX http://reactivex.io/documentation/operators.html[vocabulary of operators].
+ReactiveX https://reactivex.io/documentation/operators.html[vocabulary of operators].
 Reactor is a Reactive Streams library and, therefore, all of its operators support non-blocking back pressure.
 Reactor has a strong focus on server-side Java. It is developed in close collaboration
 with Spring.
@@ -650,7 +650,7 @@ a proxy at the boundary of trust should be configured to remove untrusted forwar
 from the outside. You can also configure the `ForwardedHeaderTransformer` with
 `removeOnly=true`, in which case it removes but does not use the headers.
 
-NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superceded by
+NOTE: In 5.1 `ForwardedHeaderFilter` was deprecated and superseded by
 `ForwardedHeaderTransformer` so forwarded headers can be processed earlier, before the
 exchange is created. If the filter is configured anyway, it is taken out of the list of
 filters, and `ForwardedHeaderTransformer` is used instead.
@@ -1541,7 +1541,7 @@ extracts the name, version, and file extension:
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
 through `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
-other property sources. You ca use this to, for example, parameterize a base URL based on
+other property sources. You can use this to, for example, parameterize a base URL based on
 some external configuration.
 
 NOTE: Spring WebFlux uses `PathPattern` and the `PathPatternParser` for URI path matching support.
@@ -1851,8 +1851,8 @@ and others) and is equivalent to `required=false`.
 | For access to name-value pairs in URI path segments. See <<webflux-ann-matrix-variables>>.
 
 | `@RequestParam`
-| For access to Servlet request parameters. Parameter values are converted to the declared
-  method argument type. See <<webflux-ann-requestparam>>.
+| For access to query parameters. Parameter values are converted to the declared method argument
+  type. See <<webflux-ann-requestparam>>.
 
   Note that use of `@RequestParam` is optional -- for example, to set its attributes.
   See "`Any other argument`" later in this table.
@@ -1975,7 +1975,7 @@ generally supported for all return values.
   value) is considered to have fully handled the response if it also has a `ServerHttpResponse`,
   a `ServerWebExchange` argument, or an `@ResponseStatus` annotation. The same is also true
   if the controller has made a positive ETag or `lastModified` timestamp check.
-  // TODO: See <<webflux-caching-etag-lastmodified>> for details.
+  See <<webflux-caching-etag-lastmodified>> for details.
 
   If none of the above is true, a `void` return type can also indicate "`no response body`" for
   REST controllers or default view name selection for HTML controllers.
@@ -1985,10 +1985,9 @@ generally supported for all return values.
   to be written (however, `text/event-stream` must be requested or declared in the mapping
   through the `produces` attribute).
 
-| Any other return value
-| If a return value is not matched to any of the above, it is, by default, treated as a view
-  name, if it is `String` or `void` (default view name selection applies), or as a model
-  attribute to be added to the model, unless it is a simple type, as determined by
+| Other return values
+| If a return value remains unresolved in any other way, it is treated as a model
+  attribute, unless it is a simple type as determined by
   {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
   in which case it remains unresolved.
 |===
@@ -2256,7 +2255,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
-<1> Get the value of the `Accept-Encoging` header.
+<1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -2269,7 +2268,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
-<1> Get the value of the `Accept-Encoging` header.
+<1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
 Type conversion is applied automatically if the target method parameter type is not
@@ -2467,7 +2466,7 @@ reactive type, as the following example shows:
 ----
 
 Note that use of `@ModelAttribute` is optional -- for example, to set its attributes.
-By default, any argument that is not a simple value type( as determined by
+By default, any argument that is not a simple value type (as determined by
 {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
 and is not resolved by any other argument resolver is treated as if it were annotated
 with `@ModelAttribute`.
@@ -4161,7 +4160,7 @@ In the next example, given a request that starts with `/resources`, the relative
 used to find and serve static resources relative to `/static` on the classpath. Resources
 are served with a one-year future expiration to ensure maximum use of the browser cache
 and a reduction in HTTP requests made by the browser. The `Last-Modified` header is also
-evaluated and, if present, a `304` status code is returned. The following list shows
+evaluated and, if present, a `304` status code is returned. The following listing shows
 the example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -4195,7 +4194,7 @@ the example:
 	}
 ----
 
-// TODO: See also <<webflux-caching-static-resources, HTTP caching support for static resources>>.
+See also <<webflux-caching-static-resources, HTTP caching support for static resources>>.
 
 The resource handler also supports a chain of
 {api-spring-framework}/web/reactive/resource/ResourceResolver.html[`ResourceResolver`] implementations and
@@ -4256,12 +4255,18 @@ Note that, when using both `EncodedResourceResolver` (for example, Gzip, Brotli 
 `VersionedResourceResolver`, they must be registered in that order, to ensure content-based
 versions are always computed reliably based on the unencoded file.
 
-https://www.webjars.org/documentation[WebJars] are also supported through the
+For https://www.webjars.org/documentation[WebJars], versioned URLs like
+`/webjars/jquery/1.2.0/jquery.min.js` are the recommended and most efficient way to use them.
+The related resource location is configured out of the box with Spring Boot (or can be configured
+manually via `ResourceHandlerRegistry`) and does not require to add the
+`org.webjars:webjars-locator-core` dependency.
+
+Version-less URLs like `/webjars/jquery/jquery.min.js` are supported through the
 `WebJarsResourceResolver` which is automatically registered when the
-`org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
-re-write URLs to include the version of the jar and can also match against incoming URLs
-without versions -- for example, from `/jquery/jquery.min.js` to
-`/jquery/1.2.0/jquery.min.js`.
+`org.webjars:webjars-locator-core` library is present on the classpath, at the cost of a
+classpath scanning that could slow down application startup. The resolver can re-write URLs to
+include the version of the jar and can also match against incoming URLs without versions
+-- for example, from `/webjars/jquery/jquery.min.js` to `/webjars/jquery/1.2.0/jquery.min.js`.
 
 TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
 for fine-grained control, e.g. last-modified behavior and optimized resource resolution.

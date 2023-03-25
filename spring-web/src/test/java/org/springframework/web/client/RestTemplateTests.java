@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,8 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.KotlinSerializationJsonHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -101,6 +103,16 @@ class RestTemplateTests {
 	void setup() {
 		template.setRequestFactory(requestFactory);
 		template.setErrorHandler(errorHandler);
+	}
+
+	@Test // gh-29008
+	void defaultMessageConvertersWithKotlinSerialization() {
+		RestTemplate restTemplate = new RestTemplate();
+		List<HttpMessageConverter<?>> httpMessageConverters = restTemplate.getMessageConverters();
+		assertThat(httpMessageConverters).extracting("class").containsOnlyOnce(
+			KotlinSerializationJsonHttpMessageConverter.class,
+			MappingJackson2HttpMessageConverter.class
+		);
 	}
 
 	@Test

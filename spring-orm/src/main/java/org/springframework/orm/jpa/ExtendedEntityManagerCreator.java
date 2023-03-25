@@ -50,7 +50,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * Delegate for creating a variety of {@link javax.persistence.EntityManager}
  * proxies that follow the JPA spec's semantics for "extended" EntityManagers.
  *
- * <p>Supports several different variants of "extended" EntityManagers:
+ * <p>Supports several variants of "extended" EntityManagers:
  * in particular, an "application-managed extended EntityManager", as defined
  * by {@link javax.persistence.EntityManagerFactory#createEntityManager()},
  * as well as a "container-managed extended EntityManager", as defined by

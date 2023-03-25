@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 
 /**
- * A WebSocket connection manager that is given a URI, a {@link WebSocketClient}, and a
- * {@link WebSocketHandler}, connects to a WebSocket server through {@link #start()} and
- * {@link #stop()} methods. If {@link #setAutoStartup(boolean)} is set to {@code true}
- * this will be done automatically when the Spring ApplicationContext is refreshed.
+ * WebSocket {@link ConnectionManagerSupport connection manager} that connects
+ * to the server via {@link WebSocketClient} and handles the session with a
+ * {@link WebSocketHandler}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -46,7 +45,7 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	@Nullable
 	private WebSocketSession webSocketSession;
 
-	private WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+	private final WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
 
 	public WebSocketConnectionManager(WebSocketClient client,
@@ -57,14 +56,6 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 		this.webSocketHandler = decorateWebSocketHandler(webSocketHandler);
 	}
 
-
-	/**
-	 * Decorate the WebSocketHandler provided to the class constructor.
-	 * <p>By default {@link LoggingWebSocketHandlerDecorator} is added.
-	 */
-	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
-		return new LoggingWebSocketHandlerDecorator(handler);
-	}
 
 	/**
 	 * Set the sub-protocols to use. If configured, specified sub-protocols will be
@@ -131,6 +122,11 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 	}
 
 	@Override
+	public boolean isConnected() {
+		return (this.webSocketSession != null && this.webSocketSession.isOpen());
+	}
+
+	@Override
 	protected void openConnection() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Connecting to WebSocket at " + getUri());
@@ -159,9 +155,12 @@ public class WebSocketConnectionManager extends ConnectionManagerSupport {
 		}
 	}
 
-	@Override
-	protected boolean isConnected() {
-		return (this.webSocketSession != null && this.webSocketSession.isOpen());
+	/**
+	 * Decorate the WebSocketHandler provided to the class constructor.
+	 * <p>By default {@link LoggingWebSocketHandlerDecorator} is added.
+	 */
+	protected WebSocketHandler decorateWebSocketHandler(WebSocketHandler handler) {
+		return new LoggingWebSocketHandlerDecorator(handler);
 	}
 
 }

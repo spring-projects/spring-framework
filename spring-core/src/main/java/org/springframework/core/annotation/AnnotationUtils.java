@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -754,7 +755,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Check the declared attributes of the given annotation, in particular covering
 	 * Google App Engine's late arrival of {@code TypeNotPresentExceptionProxy} for
-	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}.
+	 * {@code Class} values (instead of early {@code Class.getAnnotations() failure}).
 	 * <p>This method not failing indicates that {@link #getAnnotationAttributes(Annotation)}
 	 * won't failure either (when attempted later on).
 	 * @param annotation the annotation to validate
@@ -1052,21 +1053,40 @@ public abstract class AnnotationUtils {
 		}
 		try {
 			Method method = annotation.annotationType().getDeclaredMethod(attributeName);
-			ReflectionUtils.makeAccessible(method);
-			return method.invoke(annotation);
+			return invokeAnnotationMethod(method, annotation);
 		}
 		catch (NoSuchMethodException ex) {
 			return null;
 		}
-		catch (InvocationTargetException ex) {
-			rethrowAnnotationConfigurationException(ex.getTargetException());
-			throw new IllegalStateException("Could not obtain value for annotation attribute '" +
-					attributeName + "' in " + annotation, ex);
-		}
 		catch (Throwable ex) {
+			rethrowAnnotationConfigurationException(ex);
 			handleIntrospectionFailure(annotation.getClass(), ex);
 			return null;
 		}
+	}
+
+	/**
+	 * Invoke the supplied annotation attribute {@link Method} on the supplied
+	 * {@link Annotation}.
+	 * <p>An attempt will first be made to invoke the method via the annotation's
+	 * {@link InvocationHandler} (if the annotation instance is a JDK dynamic proxy).
+	 * If that fails, an attempt will be made to invoke the method via reflection.
+	 * @param method the method to invoke
+	 * @param annotation the annotation on which to invoke the method
+	 * @return the value returned from the method invocation
+	 * @since 5.3.24
+	 */
+	static Object invokeAnnotationMethod(Method method, Object annotation) {
+		if (Proxy.isProxyClass(annotation.getClass())) {
+			try {
+				InvocationHandler handler = Proxy.getInvocationHandler(annotation);
+				return handler.invoke(annotation, method, null);
+			}
+			catch (Throwable ex) {
+				// ignore and fall back to reflection below
+			}
+		}
+		return ReflectionUtils.invokeMethod(method, annotation);
 	}
 
 	/**
@@ -1188,7 +1208,7 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A synthesizeAnnotation(
 			A annotation, @Nullable AnnotatedElement annotatedElement) {
 
-		if (annotation instanceof SynthesizedAnnotation || AnnotationFilter.PLAIN.matches(annotation)) {
+		if (isSynthesizedAnnotation(annotation) || AnnotationFilter.PLAIN.matches(annotation)) {
 			return annotation;
 		}
 		return MergedAnnotation.from(annotatedElement, annotation).synthesize();
@@ -1280,6 +1300,18 @@ public abstract class AnnotationUtils {
 			synthesized[i] = synthesizeAnnotation(annotations[i], annotatedElement);
 		}
 		return synthesized;
+	}
+
+	/**
+	 * Determine if the supplied {@link Annotation} has been <em>synthesized</em>
+	 * by Spring (i.e. wrapped in a dynamic proxy) with additional functionality
+	 * such as attribute alias handling.
+	 * @param annotation the annotation to check
+	 * @return {@code true} if the supplied annotation is a synthesized annotation
+	 * @since 5.3.23
+	 */
+	public static boolean isSynthesizedAnnotation(@Nullable Annotation annotation) {
+		return (annotation instanceof SynthesizedAnnotation);
 	}
 
 	/**

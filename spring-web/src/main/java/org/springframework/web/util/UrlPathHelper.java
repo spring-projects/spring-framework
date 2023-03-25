@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,12 +205,12 @@ public class UrlPathHelper {
 	 * Return a previously {@link #getLookupPathForRequest resolved} lookupPath.
 	 * @param request the current request
 	 * @return the previously resolved lookupPath
-	 * @throws IllegalArgumentException if the not found
+	 * @throws IllegalArgumentException if the lookup path is not found
 	 * @since 5.3
 	 */
 	public static String getResolvedLookupPath(ServletRequest request) {
 		String lookupPath = (String) request.getAttribute(PATH_ATTRIBUTE);
-		Assert.notNull(lookupPath, "Expected lookupPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
+		Assert.notNull(lookupPath, () -> "Expected lookupPath in request attribute \"" + PATH_ATTRIBUTE + "\".");
 		return lookupPath;
 	}
 

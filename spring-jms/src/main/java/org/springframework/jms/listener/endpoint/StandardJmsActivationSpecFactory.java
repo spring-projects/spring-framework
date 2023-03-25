@@ -192,8 +192,8 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * case of {@code CLIENT_ACKNOWLEDGE} or {@code SESSION_TRANSACTED}
 	 * having been requested.
 	 * @param bw the BeanWrapper wrapping the ActivationSpec object
-	 * @param ackMode the configured acknowledge mode
-	 * (according to the constants in {@link javax.jms.Session}
+	 * @param ackMode the configured acknowledgment mode
+	 * (according to the constants in {@link javax.jms.Session})
 	 * @see javax.jms.Session#AUTO_ACKNOWLEDGE
 	 * @see javax.jms.Session#DUPS_OK_ACKNOWLEDGE
 	 * @see javax.jms.Session#CLIENT_ACKNOWLEDGE

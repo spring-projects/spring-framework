@@ -298,7 +298,7 @@ public class CronSequenceGenerator {
 	}
 
 	/**
-	 * Replace the values in the comma-separated list (case insensitive)
+	 * Replace the values in the comma-separated list (case-insensitive)
 	 * with their index in the list.
 	 * @return a new String with the values from the list replaced
 	 */

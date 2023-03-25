@@ -56,8 +56,6 @@ import org.springframework.util.StringUtils;
  */
 public class ServletServerHttpRequest implements ServerHttpRequest {
 
-	protected static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
-
 	protected static final Charset FORM_CHARSET = StandardCharsets.UTF_8;
 
 
@@ -231,7 +229,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private static boolean isFormPost(HttpServletRequest request) {
 		String contentType = request.getContentType();
-		return (contentType != null && contentType.contains(FORM_CONTENT_TYPE) &&
+		return (contentType != null && contentType.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE) &&
 				HttpMethod.POST.matches(request.getMethod()));
 	}
 

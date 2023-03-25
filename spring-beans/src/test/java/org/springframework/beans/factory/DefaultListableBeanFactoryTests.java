@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -436,7 +436,6 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	void empty() {
-		ListableBeanFactory lbf = new DefaultListableBeanFactory();
 		assertThat(lbf.getBeanDefinitionNames() != null).as("No beans defined --> array != null").isTrue();
 		assertThat(lbf.getBeanDefinitionNames().length == 0).as("No beans defined after no arg constructor").isTrue();
 		assertThat(lbf.getBeanDefinitionCount() == 0).as("No beans defined after no arg constructor").isTrue();
@@ -776,21 +775,6 @@ class DefaultListableBeanFactoryTests {
 
 		assertThat(factory.getType("parent")).isEqualTo(TestBean.class);
 		assertThat(factory.getType("child")).isEqualTo(DerivedTestBean.class);
-	}
-
-	@Test
-	void nameAlreadyBound() {
-		Properties p = new Properties();
-		p.setProperty("kerry.(class)", TestBean.class.getName());
-		p.setProperty("kerry.age", "35");
-		registerBeanDefinitions(p);
-		try {
-			registerBeanDefinitions(p);
-		}
-		catch (BeanDefinitionStoreException ex) {
-			assertThat(ex.getBeanName()).isEqualTo("kerry");
-			// expected
-		}
 	}
 
 	private void singleTestBean(ListableBeanFactory lbf) {
@@ -1980,6 +1964,21 @@ class DefaultListableBeanFactoryTests {
 		DependenciesBean bean = (DependenciesBean)
 				lbf.autowire(DependenciesBean.class, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
 		assertThat(bean.getSpouse()).isEqualTo(lbf.getBean("spouse"));
+	}
+
+	@Test
+	void beanProviderWithParentBeanFactoryReuseOrder() {
+		DefaultListableBeanFactory parentBf = new DefaultListableBeanFactory();
+		parentBf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		parentBf.registerBeanDefinition("regular", new RootBeanDefinition(TestBean.class));
+		parentBf.registerBeanDefinition("test", new RootBeanDefinition(HighPriorityTestBean.class));
+		lbf.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
+		lbf.setParentBeanFactory(parentBf);
+		lbf.registerBeanDefinition("low", new RootBeanDefinition(LowPriorityTestBean.class));
+		List<Class<?>> orderedTypes = lbf.getBeanProvider(TestBean.class).orderedStream()
+				.map(Object::getClass).collect(Collectors.toList());
+		assertThat(orderedTypes).containsExactly(
+				HighPriorityTestBean.class, LowPriorityTestBean.class, TestBean.class);
 	}
 
 	@Test

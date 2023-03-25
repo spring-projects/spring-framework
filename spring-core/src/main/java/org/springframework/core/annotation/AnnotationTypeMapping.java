@@ -32,7 +32,6 @@ import java.util.Set;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -241,7 +240,7 @@ final class AnnotationTypeMapping {
 			mapping.claimedAliases.addAll(aliases);
 			if (mapping.annotation != null) {
 				int[] resolvedMirrors = mapping.mirrorSets.resolve(null,
-						mapping.annotation, ReflectionUtils::invokeMethod);
+						mapping.annotation, AnnotationUtils::invokeAnnotationMethod);
 				for (int i = 0; i < mapping.attributes.size(); i++) {
 					if (aliases.contains(mapping.attributes.get(i))) {
 						this.annotationValueMappings[attributeIndex] = resolvedMirrors[i];
@@ -271,10 +270,10 @@ final class AnnotationTypeMapping {
 		int[] mappings = this.conventionMappings;
 		for (int i = 0; i < mappings.length; i++) {
 			String name = this.attributes.get(i).getName();
-			MirrorSet mirrors = getMirrorSets().getAssigned(i);
 			int mapped = rootAttributes.indexOf(name);
 			if (!MergedAnnotation.VALUE.equals(name) && mapped != -1) {
 				mappings[i] = mapped;
+				MirrorSet mirrors = getMirrorSets().getAssigned(i);
 				if (mirrors != null) {
 					for (int j = 0; j < mirrors.size(); j++) {
 						mappings[mirrors.getAttributeIndex(j)] = mapped;
@@ -505,7 +504,7 @@ final class AnnotationTypeMapping {
 		if (source == this && metaAnnotationsOnly) {
 			return null;
 		}
-		return ReflectionUtils.invokeMethod(source.attributes.get(mappedIndex), source.annotation);
+		return AnnotationUtils.invokeAnnotationMethod(source.attributes.get(mappedIndex), source.annotation);
 	}
 
 	/**
@@ -518,7 +517,6 @@ final class AnnotationTypeMapping {
 	 * @return {@code true} if the value is equivalent to the default value
 	 */
 	boolean isEquivalentToDefaultValue(int attributeIndex, Object value, ValueExtractor valueExtractor) {
-
 		Method attribute = this.attributes.get(attributeIndex);
 		return isEquivalentToDefaultValue(attribute, value, valueExtractor);
 	}
@@ -595,7 +593,7 @@ final class AnnotationTypeMapping {
 		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		for (int i = 0; i < attributes.size(); i++) {
 			Method attribute = attributes.get(i);
-			Object value1 = ReflectionUtils.invokeMethod(attribute, annotation);
+			Object value1 = AnnotationUtils.invokeAnnotationMethod(attribute, annotation);
 			Object value2;
 			if (extractedValue instanceof TypeMappedAnnotation) {
 				value2 = ((TypeMappedAnnotation<?>) extractedValue).getValue(attribute.getName()).orElse(null);

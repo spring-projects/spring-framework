@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Configure the argument resolvers to use to use for resolving method
+	 * Configure the argument resolvers to use for resolving method
 	 * argument values against a {@code ServerWebExchange}.
 	 */
 	public void setArgumentResolvers(List<? extends HandlerMethodArgumentResolver> resolvers) {
@@ -129,15 +129,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param providedArgs optional list of argument values to match by type
 	 * @return a Mono with a {@link HandlerResult}
 	 */
-	@SuppressWarnings("KotlinInternalInJava")
+	@SuppressWarnings({"KotlinInternalInJava", "unchecked"})
 	public Mono<HandlerResult> invoke(
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
 			Object value;
+			Method method = getBridgedMethod();
+			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
 			try {
-				Method method = getBridgedMethod();
-				if (KotlinDetector.isSuspendingFunction(method)) {
+				if (isSuspendingFunction) {
 					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
 				}
 				else {
@@ -163,10 +164,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 
 			MethodParameter returnType = getReturnType();
-			ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(returnType.getParameterType());
-			boolean asyncVoid = isAsyncVoidReturnType(returnType, adapter);
-			if ((value == null || asyncVoid) && isResponseHandled(args, exchange)) {
-				return (asyncVoid ? Mono.from(adapter.toPublisher(value)) : Mono.empty());
+			if (isResponseHandled(args, exchange)) {
+				Class<?> parameterType = returnType.getParameterType();
+				ReactiveAdapter adapter = this.reactiveAdapterRegistry.getAdapter(parameterType);
+				boolean asyncVoid = isAsyncVoidReturnType(returnType, adapter);
+				if (value == null || asyncVoid) {
+					return (asyncVoid ? Mono.from(adapter.toPublisher(value)) : Mono.empty());
+				}
+				if (isSuspendingFunction && parameterType == void.class) {
+					return (Mono<HandlerResult>) value;
+				}
 			}
 
 			HandlerResult result = new HandlerResult(this, value, returnType, bindingContext);

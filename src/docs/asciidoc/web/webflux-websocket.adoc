@@ -353,7 +353,7 @@ into the attributes of the `WebSocketSession`.
 
 
 [[webflux-websocket-server-config]]
-=== Server Configation
+=== Server Configuration
 [.small]#<<web.adoc#websocket-server-runtime-configuration, Same as in the Servlet stack>>#
 
 The `RequestUpgradeStrategy` for each server exposes configuration specific to the

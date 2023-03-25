@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -347,8 +347,26 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			if (this.connection != null) {
 				closeConnection(this.connection);
 			}
-			this.connection = doCreateConnection();
-			prepareConnection(this.connection);
+			// Create new (method local) connection, which is later assigned to instance connection
+			//  - prevention to hold instance connection without exception listener, in case when
+			//    some subsequent methods (after creation of connection) throws JMSException
+			Connection con = doCreateConnection();
+			try {
+				prepareConnection(con);
+				this.connection = con;
+			}
+			catch (JMSException ex) {
+				// Attempt to close new (not used) connection to release possible resources
+				try {
+					con.close();
+				}
+				catch(Throwable th) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not close newly obtained JMS Connection that failed to prepare", th);
+					}
+				}
+				throw ex;
+			}
 			if (this.startedCount > 0) {
 				this.connection.start();
 			}

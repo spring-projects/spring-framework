@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
@@ -40,10 +41,11 @@ public class WebSocketConfigurationSupport {
 
 
 	@Bean
-	public HandlerMapping webSocketHandlerMapping(@Nullable TaskScheduler defaultSockJsTaskScheduler) {
+	public HandlerMapping webSocketHandlerMapping(
+			@Qualifier("defaultSockJsTaskScheduler") @Nullable TaskScheduler scheduler) {
+
 		ServletWebSocketHandlerRegistry registry = initHandlerRegistry();
 		if (registry.requiresTaskScheduler()) {
-			TaskScheduler scheduler = defaultSockJsTaskScheduler;
 			Assert.notNull(scheduler, "Expected default TaskScheduler bean");
 			registry.setTaskScheduler(scheduler);
 		}
@@ -82,12 +84,14 @@ public class WebSocketConfigurationSupport {
 	@Bean
 	@Nullable
 	public TaskScheduler defaultSockJsTaskScheduler() {
-		if (initHandlerRegistry().requiresTaskScheduler()) {
-			ThreadPoolTaskScheduler threadPoolScheduler = new ThreadPoolTaskScheduler();
-			threadPoolScheduler.setThreadNamePrefix("SockJS-");
-			threadPoolScheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
-			threadPoolScheduler.setRemoveOnCancelPolicy(true);
-			this.scheduler = threadPoolScheduler;
+		if (this.scheduler == null) {
+			if (initHandlerRegistry().requiresTaskScheduler()) {
+				ThreadPoolTaskScheduler threadPoolScheduler = new ThreadPoolTaskScheduler();
+				threadPoolScheduler.setThreadNamePrefix("SockJS-");
+				threadPoolScheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+				threadPoolScheduler.setRemoveOnCancelPolicy(true);
+				this.scheduler = threadPoolScheduler;
+			}
 		}
 		return this.scheduler;
 	}

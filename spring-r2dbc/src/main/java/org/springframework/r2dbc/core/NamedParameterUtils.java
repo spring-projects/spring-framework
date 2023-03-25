@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ import org.springframework.util.Assert;
 /**
  * Helper methods for named parameter parsing.
  *
- * <p>Only intended for internal use within Spring's R2DBC
- * framework.
+ * <p>Only intended for internal use within Spring's R2DBC framework.
  *
  * <p>References to the same parameter name are substituted with
  * the same bind marker placeholder if a {@link BindMarkersFactory} uses
@@ -293,7 +292,6 @@ abstract class NamedParameterUtils {
 			if (paramSource.hasValue(paramName)) {
 				Object value = paramSource.getValue(paramName);
 				if (value instanceof Collection) {
-
 					Iterator<?> entryIter = ((Collection<?>) value).iterator();
 					int k = 0;
 					int counter = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,7 +230,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	@Override
 	public WebTestClient.Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> entityResultConsumer) {
-		Assert.notNull(entityResultConsumer, "`entityResultConsumer` is required");
+		Assert.notNull(entityResultConsumer, "'entityResultConsumer' is required");
 		this.entityResultConsumer = this.entityResultConsumer.andThen(entityResultConsumer);
 		return this;
 	}

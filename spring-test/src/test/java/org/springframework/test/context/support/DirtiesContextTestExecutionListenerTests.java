@@ -248,7 +248,7 @@ class DirtiesContextTestExecutionListenerTests {
 
 		@Test
 		void declaredViaMetaAnnotationWithOverriddenAttributes() throws Exception {
-			assertAfterClass(DirtiesContextViaMetaAnnotationWithOverridenAttributes.class);
+			assertAfterClass(DirtiesContextViaMetaAnnotationWithOverriddenAttributes.class);
 		}
 	}
 
@@ -444,7 +444,7 @@ class DirtiesContextTestExecutionListenerTests {
 	}
 
 	@MetaDirtyWithOverrides(classMode = AFTER_CLASS, hierarchyMode = EXHAUSTIVE)
-	static class DirtiesContextViaMetaAnnotationWithOverridenAttributes {
+	static class DirtiesContextViaMetaAnnotationWithOverriddenAttributes {
 
 		void test() {
 		}

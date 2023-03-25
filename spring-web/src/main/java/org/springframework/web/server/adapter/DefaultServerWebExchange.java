@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.springframework.web.server.session.WebSessionManager;
  * Default implementation of {@link ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class DefaultServerWebExchange implements ServerWebExchange {
@@ -260,6 +261,12 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		if (validateIfUnmodifiedSince(lastModified)) {
 			if (this.notModified) {
 				getResponse().setStatusCode(HttpStatus.PRECONDITION_FAILED);
+			}
+			if (SAFE_METHODS.contains(getRequest().getMethod())) {
+				if (StringUtils.hasLength(etag) && getResponseHeaders().getETag() == null) {
+					getResponseHeaders().setETag(padEtagIfNecessary(etag));
+				}
+				getResponseHeaders().setLastModified(lastModified.toEpochMilli());
 			}
 			return this.notModified;
 		}

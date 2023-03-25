@@ -154,7 +154,7 @@ public abstract class PropertySource<T> {
 	 * PropertySource instance and every name/value property pair.
 	 * <p>This variable verbosity is useful as a property source such as system properties
 	 * or environment variables may contain an arbitrary number of property pairs,
-	 * potentially leading to difficult to read exception and log messages.
+	 * potentially leading to difficulties to read exception and log messages.
 	 * @see Log#isDebugEnabled()
 	 */
 	@Override

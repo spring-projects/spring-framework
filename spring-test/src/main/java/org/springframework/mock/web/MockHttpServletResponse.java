@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
  *
- * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
+ * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -449,6 +449,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			if (StringUtils.hasText(mockCookie.getSameSite())) {
 				buf.append("; SameSite=").append(mockCookie.getSameSite());
 			}
+		}
+		if (StringUtils.hasText(cookie.getComment())) {
+			buf.append("; Comment=").append(cookie.getComment());
 		}
 		return buf.toString();
 	}

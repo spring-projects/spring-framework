@@ -984,7 +984,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return the {@linkplain MediaType media type} of the body, as specified
 	 * by the {@code Content-Type} header.
-	 * <p>Returns {@code null} when the content-type is unknown.
+	 * <p>Returns {@code null} when the {@code Content-Type} header is not set.
+	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 */
 	@Nullable
 	public MediaType getContentType() {
@@ -1600,7 +1601,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Retrieve a combined result from the field values of multi-valued headers.
+	 * Retrieve a combined result from the field values of multivalued headers.
 	 * @param headerName the header name
 	 * @return the combined result
 	 * @since 4.3

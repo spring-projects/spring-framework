@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,6 +300,7 @@ public class PathPatternTests {
 		checkCapture("{var:f o}","f%20o","var","f o"); // constraint is expressed in non encoded form
 		checkCapture("{var:f.o}","f%20o","var","f o");
 		checkCapture("{var:f\\|o}","f%7co","var","f|o");
+		checkCapture("{var:.*}","x\ny","var","x\ny");
 	}
 
 	@Test
@@ -319,6 +320,8 @@ public class PathPatternTests {
 		checkCapture("/{var1}_ _{var2}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
 		checkCapture("/{var1}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
 		checkCapture("/{var1:f o}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1:f o}_ _{var2:f\\|o}","/f%20o_%20_f%7co","var1","f o","var2","f|o");
+		checkCapture("/{var1}_{var2}","/f\noo_foo","var1","f\noo","var2","foo");
 	}
 
 	@Test
@@ -681,6 +684,7 @@ public class PathPatternTests {
 		checkExtractPathWithinPattern("/docs/commit.html", "/docs/commit.html", "");
 		checkExtractPathWithinPattern("/docs/*", "/docs/cvs/commit", "cvs/commit");
 		checkExtractPathWithinPattern("/docs/cvs/*.html", "/docs/cvs/commit.html", "commit.html");
+		checkExtractPathWithinPattern("/docs/cvs/file.*.html", "/docs/cvs/file.sha.html", "file.sha.html");
 		checkExtractPathWithinPattern("/docs/**", "/docs/cvs/commit", "cvs/commit");
 		checkExtractPathWithinPattern("/doo/{*foobar}", "/doo/customer.html", "customer.html");
 		checkExtractPathWithinPattern("/doo/{*foobar}", "/doo/daa/customer.html", "daa/customer.html");

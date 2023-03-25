@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,6 +219,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
 			if (this.notModified && response != null) {
 				response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
+			}
+			if (SAFE_METHODS.contains(getRequest().getMethod())) {
+				if (StringUtils.hasLength(etag) && response.getHeader(HttpHeaders.ETAG) == null) {
+					response.setHeader(HttpHeaders.ETAG, padEtagIfNecessary(etag));
+				}
+				response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
 			}
 			return this.notModified;
 		}

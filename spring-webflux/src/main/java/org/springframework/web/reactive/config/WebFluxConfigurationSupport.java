@@ -155,7 +155,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override to plug a sub-class of {@link RequestMappingHandlerMapping}.
+	 * Override to plug a subclass of {@link RequestMappingHandlerMapping}.
 	 */
 	protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
 		return new RequestMappingHandlerMapping();
@@ -176,7 +176,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 
 	/**
 	 * Callback for building the global CORS configuration. This method is final.
-	 * Use {@link #addCorsMappings(CorsRegistry)} to customize the CORS conifg.
+	 * Use {@link #addCorsMappings(CorsRegistry)} to customize the CORS config.
 	 */
 	protected final Map<String, CorsConfiguration> getCorsConfigurations() {
 		if (this.corsConfigurations == null) {
@@ -188,7 +188,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override this method to configure cross origin requests processing.
+	 * Override this method to configure cross-origin requests processing.
 	 * @see CorsRegistry
 	 */
 	protected void addCorsMappings(CorsRegistry registry) {
@@ -222,7 +222,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override to plug a sub-class of {@link RouterFunctionMapping}.
+	 * Override to plug a subclass of {@link RouterFunctionMapping}.
 	 */
 	protected RouterFunctionMapping createRouterFunctionMapping() {
 		return new RouterFunctionMapping();
@@ -285,7 +285,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override to plug a sub-class of {@link RequestMappingHandlerAdapter}.
+	 * Override to plug a subclass of {@link RequestMappingHandlerAdapter}.
 	 */
 	protected RequestMappingHandlerAdapter createRequestMappingHandlerAdapter() {
 		return new RequestMappingHandlerAdapter();
@@ -310,7 +310,7 @@ public class WebFluxConfigurationSupport implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override to plug a sub-class of {@link LocaleContextResolver}.
+	 * Override to plug a subclass of {@link LocaleContextResolver}.
 	 */
 	protected LocaleContextResolver createLocaleContextResolver() {
 		return new AcceptHeaderLocaleContextResolver();

@@ -597,7 +597,7 @@ a key reason for having SockJS. This section covers important
 considerations about running in those browsers.
 
 The SockJS client supports Ajax/XHR streaming in IE 8 and 9 by using Microsoft's
-https://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[`XDomainRequest`].
+https://web.archive.org/web/20160219230343/https://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx[`XDomainRequest`].
 That works across domains but does not support sending cookies.
 Cookies are often essential for Java applications.
 However, since the SockJS client can be used with many server
@@ -924,7 +924,7 @@ destination:/topic/price.stock.MMM
 
 A server cannot send unsolicited messages. All messages
 from a server must be in response to a specific client subscription, and the
-`subscription-id` header of the server message must match the `id` header of the
+`subscription` header of the server message must match the `id` header of the
 client subscription.
 
 The preceding overview is intended to provide the most basic understanding of the
@@ -1347,7 +1347,7 @@ receipt if the server supports it (simple broker does not). For example, with th
 	headers.setDestination("/topic/...");
 	headers.setReceipt("r1");
 	FrameHandler handler = ...;
-	stompSession.subscribe(headers, handler).addReceiptTask(() -> {
+	stompSession.subscribe(headers, handler).addReceiptTask(receiptHeaders -> {
 		// Subscription ready...
 	});
 ----
@@ -1987,7 +1987,7 @@ Note that this incurs a small performance overhead, so you should enable it only
 
 
 
-[[websocket-stomp-appplication-context-events]]
+[[websocket-stomp-application-context-events]]
 === Events
 
 Several `ApplicationContext` events are published and can be
@@ -2030,7 +2030,7 @@ implement their own reconnecting logic.
 [[websocket-stomp-interceptors]]
 === Interception
 
-<<websocket-stomp-appplication-context-events>> provide notifications for the lifecycle
+<<websocket-stomp-application-context-events>> provide notifications for the lifecycle
 of a STOMP connection but not for every client message. Applications can also register a
 `ChannelInterceptor` to intercept any message and in any part of the processing chain.
 The following example shows how to intercept inbound messages from clients:
@@ -2424,7 +2424,7 @@ through any other application instances.
 === Monitoring
 
 When you use `@EnableWebSocketMessageBroker` or `<websocket:message-broker>`, key
-infrastructure components automatically gather statisticss and counters that provide
+infrastructure components automatically gather statistics and counters that provide
 important insight into the internal state of the application. The configuration
 also declares a bean of type `WebSocketMessageBrokerStats` that gathers all
 available information in one place and by default logs it at the `INFO` level once

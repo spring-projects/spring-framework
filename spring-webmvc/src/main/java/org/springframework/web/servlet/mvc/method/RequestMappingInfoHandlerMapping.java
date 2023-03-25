@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,9 +147,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			extractMatchDetails((PatternsRequestCondition) condition, lookupPath, request);
 		}
 
-		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
-			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
-			request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+		ProducesRequestCondition producesCondition = info.getProducesCondition();
+		if (!producesCondition.isEmpty()) {
+			Set<MediaType> mediaTypes = producesCondition.getProducibleMediaTypes();
+			if (!mediaTypes.isEmpty()) {
+				request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+			}
 		}
 	}
 
@@ -238,6 +241,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected HandlerMethod handleNoMatch(
 			Set<RequestMappingInfo> infos, String lookupPath, HttpServletRequest request) throws ServletException {
 
+		if (CollectionUtils.isEmpty(infos)) {
+			return null;
+		}
+
 		PartialMatchHelper helper = new PartialMatchHelper(infos, request);
 		if (helper.isEmpty()) {
 			return null;
@@ -288,7 +295,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		private final List<PartialMatch> partialMatches = new ArrayList<>();
 
-		public PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
+		PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
 			for (RequestMappingInfo info : infos) {
 				if (info.getActivePatternsCondition().getMatchingCondition(request) != null) {
 					this.partialMatches.add(new PartialMatch(info, request));
@@ -297,7 +304,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 
 		/**
-		 * Whether there any partial matches.
+		 * Whether there are any partial matches.
 		 */
 		public boolean isEmpty() {
 			return this.partialMatches.isEmpty();

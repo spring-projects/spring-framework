@@ -80,7 +80,7 @@ import org.springframework.web.util.UrlPathHelper;
  * <p>This request handler may also be configured with a
  * {@link #setResourceResolvers(List) resourcesResolver} and
  * {@link #setResourceTransformers(List) resourceTransformer} chains to support
- * arbitrary resolution and transformation of resources being served. By default
+ * arbitrary resolution and transformation of resources being served. By default,
  * a {@link PathResourceResolver} simply finds resources based on the configured
  * "locations". An application can configure additional resolvers and transformers
  * such as the {@link VersionResourceResolver} which can resolve and prepare URLs
@@ -525,7 +525,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	/**
 	 * Initialize the strategy to use to determine the media type for a resource.
 	 * @deprecated as of 5.2.4 this method returns {@code null}, and if a
-	 * sub-class returns an actual instance,the instance is used only as a
+	 * subclass returns an actual instance, the instance is used only as a
 	 * source of media type mappings, if it contains any. Please, use
 	 * {@link #setMediaTypes(Map)} instead, or if you need to change behavior,
 	 * you can override {@link #getMediaType(HttpServletRequest, Resource)}.
@@ -717,7 +717,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Identifies invalid resource paths. By default rejects:
+	 * Identifies invalid resource paths. By default, rejects:
 	 * <ul>
 	 * <li>Paths that contain "WEB-INF" or "META-INF"
 	 * <li>Paths that contain "../" after a call to

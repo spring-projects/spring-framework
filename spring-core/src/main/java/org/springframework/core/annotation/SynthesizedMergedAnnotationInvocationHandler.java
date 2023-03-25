@@ -111,7 +111,7 @@ final class SynthesizedMergedAnnotationInvocationHandler<A extends Annotation> i
 		for (int i = 0; i < this.attributes.size(); i++) {
 			Method attribute = this.attributes.get(i);
 			Object thisValue = getAttributeValue(attribute);
-			Object otherValue = ReflectionUtils.invokeMethod(attribute, other);
+			Object otherValue = AnnotationUtils.invokeAnnotationMethod(attribute, other);
 			if (!ObjectUtils.nullSafeEquals(thisValue, otherValue)) {
 				return false;
 			}

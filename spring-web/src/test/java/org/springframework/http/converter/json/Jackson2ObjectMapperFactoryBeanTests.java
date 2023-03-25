@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,10 +62,8 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.FatalBeanException;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Test cases for {@link Jackson2ObjectMapperFactoryBean}.
@@ -88,8 +86,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	@Test
 	public void unknownFeature() {
 		this.factory.setFeaturesToEnable(Boolean.TRUE);
-		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(
-				this.factory::afterPropertiesSet);
+		assertThatIllegalArgumentException().isThrownBy(this.factory::afterPropertiesSet);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,12 +65,12 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
 			throws IOException, URISyntaxException {
 
-		// TODO: need to compile against Jetty 10 to use HttpFields (class->interface)
 		if (jetty10Present) {
+			// No HttpFields optimization on Jetty 10 due to binary incompatibility
 			return super.createRequest(request, context);
 		}
 
-		Assert.notNull(getServletPath(), "Servlet path is not initialized");
+		Assert.state(getServletPath() != null, "Servlet path is not initialized");
 		return new JettyServerHttpRequest(
 				request, context, getServletPath(), getDataBufferFactory(), getBufferSize());
 	}
@@ -79,15 +79,14 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	protected ServletServerHttpResponse createResponse(HttpServletResponse response,
 			AsyncContext context, ServletServerHttpRequest request) throws IOException {
 
-		// TODO: need to compile against Jetty 10 to use HttpFields (class->interface)
 		if (jetty10Present) {
+			// No HttpFields optimization on Jetty 10 due to binary incompatibility
 			return new BaseJettyServerHttpResponse(
 					response, context, getDataBufferFactory(), getBufferSize(), request);
 		}
-		else {
-			return new JettyServerHttpResponse(
-					response, context, getDataBufferFactory(), getBufferSize(), request);
-		}
+
+		return new JettyServerHttpResponse(
+				response, context, getDataBufferFactory(), getBufferSize(), request);
 	}
 
 
@@ -120,8 +119,6 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 						"] to org.eclipse.jetty.server.Request");
 			}
 		}
-
-
 	}
 
 

@@ -349,7 +349,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Get a required enum attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @param type the enum type
-	 * @return the value as a enum
+	 * @return the value as an enum
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
 	<E extends Enum<E>> E getEnum(String attributeName, Class<E> type) throws NoSuchElementException;
@@ -358,7 +358,7 @@ public interface MergedAnnotation<A extends Annotation> {
 	 * Get a required enum array attribute value from the annotation.
 	 * @param attributeName the attribute name
 	 * @param type the enum type
-	 * @return the value as a enum array
+	 * @return the value as an enum array
 	 * @throws NoSuchElementException if there is no matching attribute
 	 */
 	<E extends Enum<E>> E[] getEnumArray(String attributeName, Class<E> type) throws NoSuchElementException;

@@ -59,7 +59,7 @@ import org.springframework.util.StringUtils;
  *
  * <p><strong>WARNING</strong>: Data binding can lead to security issues by exposing
  * parts of the object graph that are not meant to be accessed or modified by
- * external clients. Therefore the design and use of data binding should be considered
+ * external clients. Therefore, the design and use of data binding should be considered
  * carefully with regard to security. For more details, please refer to the dedicated
  * sections on data binding for
  * <a href="https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#mvc-ann-initbinder-model-design">Spring Web MVC</a> and
@@ -873,7 +873,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Apply given property values to the target object.
-	 * <p>Default implementation applies all of the supplied property
+	 * <p>Default implementation applies all the supplied property
 	 * values as bean property values. By default, unknown fields will
 	 * be ignored.
 	 * @param mpvs the property values to be bound (can be modified)

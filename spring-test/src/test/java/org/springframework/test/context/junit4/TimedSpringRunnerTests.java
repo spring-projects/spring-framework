@@ -112,12 +112,12 @@ public class TimedSpringRunnerTests {
 
 	@Timed(millis = 10)
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTimed {
+	private @interface MetaTimed {
 	}
 
 	@Timed(millis = 1000)
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTimedWithOverride {
+	private @interface MetaTimedWithOverride {
 		long millis() default 1000;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import org.springframework.web.util.WebUtils;
  * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
  * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
  *
- * By default, only same origin requests are allowed. Use {@link #setAllowedOrigins}
+ * <p>By default, only same origin requests are allowed. Use {@link #setAllowedOrigins}
  * to specify a list of allowed origins (a list containing "*" will allow all origins).
  *
  * @author Rossen Stoyanchev
@@ -620,6 +620,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				"<head>\n" +
 				"  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" +
 				"  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n" +
+				"  <title>SockJS iframe</title>\n" +
 				"  <script>\n" +
 				"    document.domain = document.domain;\n" +
 				"    _sockjs_onload = function(){SockJS.bootstrap_iframe();};\n" +

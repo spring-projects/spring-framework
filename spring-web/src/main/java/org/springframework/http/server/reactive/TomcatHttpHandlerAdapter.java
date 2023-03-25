@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,6 @@ import org.springframework.util.ReflectionUtils;
  */
 public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
-
 	public TomcatHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
 	}
@@ -68,7 +67,7 @@ public class TomcatHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext asyncContext)
 			throws IOException, URISyntaxException {
 
-		Assert.notNull(getServletPath(), "Servlet path is not initialized");
+		Assert.state(getServletPath() != null, "Servlet path is not initialized");
 		return new TomcatServerHttpRequest(
 				request, asyncContext, getServletPath(), getDataBufferFactory(), getBufferSize());
 	}

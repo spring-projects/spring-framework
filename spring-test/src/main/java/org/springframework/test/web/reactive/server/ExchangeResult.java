@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,13 @@ import org.springframework.util.MultiValueMap;
  * {@link WebTestClient}.
  *
  * <p>Note that a decoded response body is not exposed at this level since the
- * body may not have been decoded and consumed yet. Sub-types
+ * body may not have been decoded and consumed yet. Subtypes
  * {@link EntityExchangeResult} and {@link FluxExchangeResult} provide access
  * to a decoded response entity and a decoded (but not consumed) response body
  * respectively.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 5.0
  * @see EntityExchangeResult
  * @see FluxExchangeResult
@@ -161,7 +162,7 @@ public class ExchangeResult {
 	 * Return the raw request body content written through the request.
 	 * <p><strong>Note:</strong> If the request content has not been consumed
 	 * for any reason yet, use of this method will trigger consumption.
-	 * @throws IllegalStateException if the request body is not been fully written.
+	 * @throws IllegalStateException if the request body has not been fully written.
 	 */
 	@Nullable
 	public byte[] getRequestBodyContent() {
@@ -171,6 +172,8 @@ public class ExchangeResult {
 
 	/**
 	 * Return the HTTP status code as an {@link HttpStatus} enum value.
+	 * @throws IllegalArgumentException in case of an unknown HTTP status code
+	 * @see #getRawStatusCode()
 	 */
 	public HttpStatus getStatus() {
 		return this.response.getStatusCode();
@@ -203,7 +206,7 @@ public class ExchangeResult {
 	 * Return the raw request body content written to the response.
 	 * <p><strong>Note:</strong> If the response content has not been consumed
 	 * yet, use of this method will trigger consumption.
-	 * @throws IllegalStateException if the response is not been fully read.
+	 * @throws IllegalStateException if the response has not been fully read.
 	 */
 	@Nullable
 	public byte[] getResponseBodyContent() {
@@ -248,11 +251,20 @@ public class ExchangeResult {
 				"\n" +
 				formatBody(getRequestHeaders().getContentType(), this.requestBody) + "\n" +
 				"\n" +
-				"< " + getStatus() + " " + getStatus().getReasonPhrase() + "\n" +
+				"< " + formatStatus() + "\n" +
 				"< " + formatHeaders(getResponseHeaders(), "\n< ") + "\n" +
 				"\n" +
 				formatBody(getResponseHeaders().getContentType(), this.responseBody) +"\n" +
 				formatMockServerResult();
+	}
+
+	private String formatStatus() {
+		try {
+			return getStatus() + " " + getStatus().getReasonPhrase();
+		}
+		catch (Exception ex) {
+			return Integer.toString(getRawStatusCode());
+		}
 	}
 
 	private String formatHeaders(HttpHeaders headers, String delimiter) {

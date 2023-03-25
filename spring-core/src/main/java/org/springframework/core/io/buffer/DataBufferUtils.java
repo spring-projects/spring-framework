@@ -177,7 +177,7 @@ public abstract class DataBufferUtils {
 		if (options.length > 0) {
 			for (OpenOption option : options) {
 				Assert.isTrue(!(option == StandardOpenOption.APPEND || option == StandardOpenOption.WRITE),
-						"'" + option + "' not allowed");
+						() -> "'" + option + "' not allowed");
 			}
 		}
 
@@ -366,7 +366,8 @@ public abstract class DataBufferUtils {
 				sink.onDispose(() -> closeChannel(channel));
 				write(source, channel).subscribe(DataBufferUtils::release,
 						sink::error,
-						sink::success);
+						sink::success,
+						Context.of(sink.contextView()));
 			}
 			catch (IOException ex) {
 				sink.error(ex);
@@ -540,7 +541,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Return a new {@code DataBuffer} composed from joining together the given
+	 * Return a new {@code DataBuffer} composed of joining together the given
 	 * {@code dataBuffers} elements. Depending on the {@link DataBuffer} type,
 	 * the returned buffer may be a single buffer containing all data of the
 	 * provided buffers, or it may be a zero-copy, composite with references to
@@ -551,7 +552,7 @@ public abstract class DataBufferUtils {
 	 * <p>Note that the given data buffers do <strong>not</strong> have to be
 	 * released. They will be released as part of the returned composite.
 	 * @param dataBuffers the data buffers that are to be composed
-	 * @return a buffer that is composed from the {@code dataBuffers} argument
+	 * @return a buffer that is composed of the {@code dataBuffers} argument
 	 * @since 5.0.3
 	 */
 	public static Mono<DataBuffer> join(Publisher<? extends DataBuffer> dataBuffers) {
@@ -694,7 +695,7 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public byte[] delimiter() {
-			Assert.state(this.longestDelimiter != NO_DELIMITER, "Illegal state!");
+			Assert.state(this.longestDelimiter != NO_DELIMITER, "'delimiter' not set");
 			return this.longestDelimiter;
 		}
 

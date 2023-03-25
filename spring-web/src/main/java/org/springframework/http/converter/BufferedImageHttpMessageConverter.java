@@ -128,7 +128,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	 */
 	public void setCacheDir(File cacheDir) {
 		Assert.notNull(cacheDir, "'cacheDir' must not be null");
-		Assert.isTrue(cacheDir.isDirectory(), "'cacheDir' is not a directory");
+		Assert.isTrue(cacheDir.isDirectory(), () -> "'cacheDir' is not a directory: " + cacheDir);
 		this.cacheDir = cacheDir;
 	}
 

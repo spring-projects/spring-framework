@@ -121,7 +121,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	/**
 	 * Error signal from the upstream, write Publisher. This is also used by
-	 * sub-classes to delegate error notifications from the container.
+	 * subclasses to delegate error notifications from the container.
 	 */
 	@Override
 	public final void onError(Throwable ex) {
@@ -134,7 +134,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 
 	/**
 	 * Completion signal from the upstream, write Publisher. This is also used
-	 * by sub-classes to delegate completion notifications from the container.
+	 * by subclasses to delegate completion notifications from the container.
 	 */
 	@Override
 	public final void onComplete() {
@@ -269,7 +269,7 @@ public abstract class AbstractListenerWriteProcessor<T> implements Processor<T, 
 	}
 
 	/**
-	 * Invoked when an I/O error occurs during a write. Sub-classes may choose
+	 * Invoked when an I/O error occurs during a write. Subclasses may choose
 	 * to ignore this if they know the underlying API will provide an error
 	 * notification in a container thread.
 	 * <p>Defaults to no-op.

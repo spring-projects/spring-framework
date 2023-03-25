@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,8 @@ public class StandardServletEnvironment extends StandardEnvironment implements C
 	 * {@link StubPropertySource stubs} at this stage, and will be
 	 * {@linkplain #initPropertySources(ServletContext, ServletConfig) fully initialized}
 	 * once the actual {@link ServletContext} object becomes available.
+	 * <p>Addition of {@value #JNDI_PROPERTY_SOURCE_NAME} can be disabled with
+	 * {@link JndiLocatorDelegate#IGNORE_JNDI_PROPERTY_NAME}.
 	 * @see StandardEnvironment#customizePropertySources
 	 * @see org.springframework.core.env.AbstractEnvironment#customizePropertySources
 	 * @see ServletConfigPropertySource

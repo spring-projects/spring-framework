@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 
@@ -441,7 +441,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 					String receiptId = headers.getReceiptId();
 					ReceiptHandler handler = this.receiptHandlers.get(receiptId);
 					if (handler != null) {
-						handler.handleReceiptReceived();
+						handler.handleReceiptReceived(headers);
 					}
 					else if (logger.isDebugEnabled()) {
 						logger.debug("No matching receipt: " + accessor.getDetailedLogMessage(message.getPayload()));
@@ -546,7 +546,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		@Nullable
 		private final String receiptId;
 
-		private final List<Runnable> receiptCallbacks = new ArrayList<>(2);
+		private final List<Consumer<StompHeaders>> receiptCallbacks = new ArrayList<>(2);
 
 		private final List<Runnable> receiptLostCallbacks = new ArrayList<>(2);
 
@@ -555,6 +555,9 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		@Nullable
 		private Boolean result;
+
+		@Nullable
+		private StompHeaders receiptHeaders;
 
 		public ReceiptHandler(@Nullable String receiptId) {
 			this.receiptId = receiptId;
@@ -578,64 +581,80 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		@Override
 		public void addReceiptTask(Runnable task) {
-			addTask(task, true);
+			addReceiptTask(headers -> task.run());
+		}
+
+		@Override
+		public void addReceiptTask(Consumer<StompHeaders> task) {
+			Assert.notNull(this.receiptId, "Set autoReceiptEnabled to track receipts or add a 'receiptId' header");
+			synchronized (this) {
+				if (this.result != null) {
+					if (this.result) {
+						task.accept(this.receiptHeaders);
+					}
+				}
+				else {
+					this.receiptCallbacks.add(task);
+				}
+			}
 		}
 
 		@Override
 		public void addReceiptLostTask(Runnable task) {
-			addTask(task, false);
-		}
-
-		private void addTask(Runnable task, boolean successTask) {
-			Assert.notNull(this.receiptId,
-					"To track receipts, set autoReceiptEnabled=true or add 'receiptId' header");
 			synchronized (this) {
-				if (this.result != null && this.result == successTask) {
-					invoke(Collections.singletonList(task));
+				if (this.result != null) {
+					if (!this.result) {
+						task.run();
+					}
 				}
 				else {
-					if (successTask) {
-						this.receiptCallbacks.add(task);
-					}
-					else {
-						this.receiptLostCallbacks.add(task);
-					}
+					this.receiptLostCallbacks.add(task);
 				}
 			}
 		}
 
-		private void invoke(List<Runnable> callbacks) {
-			for (Runnable runnable : callbacks) {
-				try {
-					runnable.run();
-				}
-				catch (Throwable ex) {
-					// ignore
-				}
-			}
-		}
-
-		public void handleReceiptReceived() {
-			handleInternal(true);
+		public void handleReceiptReceived(StompHeaders receiptHeaders) {
+			handleInternal(true, receiptHeaders);
 		}
 
 		public void handleReceiptNotReceived() {
-			handleInternal(false);
+			handleInternal(false, null);
 		}
 
-		private void handleInternal(boolean result) {
+		private void handleInternal(boolean result, @Nullable StompHeaders receiptHeaders) {
 			synchronized (this) {
 				if (this.result != null) {
 					return;
 				}
 				this.result = result;
-				invoke(result ? this.receiptCallbacks : this.receiptLostCallbacks);
+				this.receiptHeaders = receiptHeaders;
+				if (result) {
+					this.receiptCallbacks.forEach(consumer -> {
+						try {
+							consumer.accept(this.receiptHeaders);
+						}
+						catch (Throwable ex) {
+							// ignore
+						}
+					});
+				}
+				else {
+					this.receiptLostCallbacks.forEach(task -> {
+						try {
+							task.run();
+						}
+						catch (Throwable ex) {
+							// ignore
+						}
+					});
+				}
 				DefaultStompSession.this.receiptHandlers.remove(this.receiptId);
 				if (this.future != null) {
 					this.future.cancel(true);
 				}
 			}
 		}
+
 	}
 
 

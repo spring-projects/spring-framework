@@ -990,6 +990,27 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		}
 	}
 
+	@ParameterizedDataBufferAllocatingTest
+	void propagateContextPath(DataBufferFactory bufferFactory) throws IOException {
+		Path path = Paths.get(this.resource.getURI());
+		Path out = Files.createTempFile("data-buffer-utils-tests", ".tmp");
+
+		Flux<Void> result = DataBufferUtils.read(path, bufferFactory, 1024, StandardOpenOption.READ)
+				.transformDeferredContextual((f, ctx) -> {
+					assertThat(ctx.getOrDefault("key", "EMPTY")).isEqualTo("TEST");
+					return f;
+				})
+				.transform(f -> DataBufferUtils.write(f, out))
+				.transformDeferredContextual((f, ctx) -> {
+					assertThat(ctx.getOrDefault("key", "EMPTY")).isEqualTo("TEST");
+					return f;
+				})
+				.contextWrite(Context.of("key", "TEST"));
+
+		StepVerifier.create(result)
+				.verifyComplete();
+	}
+
 	private static class ZeroDemandSubscriber extends BaseSubscriber<DataBuffer> {
 
 		@Override

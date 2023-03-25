@@ -512,7 +512,7 @@ public class TransactionalEventListenerTests {
 
 	@Transactional
 	@Component
-	static interface TransactionalComponentTestListenerInterface {
+	interface TransactionalComponentTestListenerInterface {
 
 		// Cannot use #data in condition due to dynamic proxy.
 		@TransactionalEventListener(condition = "!'SKIP'.equals(#p0)")

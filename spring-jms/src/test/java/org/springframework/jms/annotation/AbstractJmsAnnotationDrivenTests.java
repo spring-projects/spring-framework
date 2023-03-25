@@ -113,9 +113,9 @@ abstract class AbstractJmsAnnotationDrivenTests {
 	}
 
 	/**
-	 * Test for {@link CustomBean} and an manually endpoint registered
+	 * Test for {@link CustomBean} and an endpoint manually registered
 	 * with "myCustomEndpointId". The custom endpoint does not provide
-	 * any factory so it's registered with the default one
+	 * any factory, so it's registered with the default one
 	 */
 	protected void testCustomConfiguration(ApplicationContext context) {
 		JmsListenerContainerTestFactory defaultFactory =

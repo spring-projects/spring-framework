@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,9 +200,10 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * Factory method for creating the {@link GenericApplicationContext} used by
 	 * this {@code ContextLoader}.
 	 * <p>The default implementation creates a {@code GenericApplicationContext}
-	 * using the default constructor. This method may get overridden e.g. to use
-	 * a custom context subclass or to create a {@code GenericApplicationContext}
-	 * with a custom {@link DefaultListableBeanFactory} implementation.
+	 * using the default constructor. This method may be overridden &mdash; for
+	 * example, to use a custom context subclass or to create a
+	 * {@code GenericApplicationContext} with a custom
+	 * {@link DefaultListableBeanFactory} implementation.
 	 * @return a newly instantiated {@code GenericApplicationContext}
 	 * @since 5.2.9
 	 */

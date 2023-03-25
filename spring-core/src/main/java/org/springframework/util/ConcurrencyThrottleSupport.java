@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>Designed for use as a base class, with the subclass invoking
  * the {@link #beforeAccess()} and {@link #afterAccess()} methods at
  * appropriate points of its workflow. Note that {@code afterAccess}
- * should usually be called in a finally block!
+ * should usually be called in a {@code finally} block!
  *
  * <p>The default concurrency limit of this support class is -1
  * ("unbounded concurrency"). Subclasses may override this default;

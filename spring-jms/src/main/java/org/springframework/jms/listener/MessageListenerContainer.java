@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
 public interface MessageListenerContainer extends SmartLifecycle {
 
 	/**
-	 * Setup the message listener to use. Throws an {@link IllegalArgumentException}
+	 * Set up the message listener to use. Throws an {@link IllegalArgumentException}
 	 * if that message listener type is not supported.
 	 */
 	void setupMessageListener(Object messageListener);

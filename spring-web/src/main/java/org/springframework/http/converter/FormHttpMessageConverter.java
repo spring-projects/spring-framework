@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -436,7 +436,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		StringBuilder builder = new StringBuilder();
 		formData.forEach((name, values) -> {
 				if (name == null) {
-					Assert.isTrue(CollectionUtils.isEmpty(values), "Null name in form data: " + formData);
+					Assert.isTrue(CollectionUtils.isEmpty(values), () -> "Null name in form data: " + formData);
 					return;
 				}
 				values.forEach(value -> {

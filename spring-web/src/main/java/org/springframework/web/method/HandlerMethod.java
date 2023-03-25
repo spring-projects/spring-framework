@@ -108,7 +108,7 @@ public class HandlerMethod {
 
 	/**
 	 * Variant of {@link #HandlerMethod(Object, Method)} that
-	 * also accepts a {@link MessageSource} for use from sub-classes.
+	 * also accepts a {@link MessageSource} for use from subclasses.
 	 * @since 5.3.10
 	 */
 	protected HandlerMethod(Object bean, Method method, @Nullable MessageSource messageSource) {
@@ -277,7 +277,7 @@ public class HandlerMethod {
 
 	/**
 	 * If the bean method is a bridge method, this method returns the bridged
-	 * (user-defined) method. Otherwise it returns the same method as {@link #getMethod()}.
+	 * (user-defined) method. Otherwise, it returns the same method as {@link #getMethod()}.
 	 */
 	protected Method getBridgedMethod() {
 		return this.bridgedMethod;

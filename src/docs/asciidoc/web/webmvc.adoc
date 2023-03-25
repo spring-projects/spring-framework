@@ -3,15 +3,15 @@
 :doc-spring-security: {doc-root}/spring-security/reference
 
 Spring Web MVC is the original web framework built on the Servlet API and has been included
-in the Spring Framework from the very beginning. The formal name, "`Spring Web MVC,`"
+in the Spring Framework from the very beginning. The formal name, "Spring Web MVC,"
 comes from the name of its source module
 ({spring-framework-main-code}/spring-webmvc[`spring-webmvc`]),
-but it is more commonly known as "`Spring MVC`".
+but it is more commonly known as "Spring MVC".
 
 Parallel to Spring Web MVC, Spring Framework 5.0 introduced a reactive-stack web framework
-whose name, "`Spring WebFlux,`" is also based on its source module
+whose name, "Spring WebFlux," is also based on its source module
 ({spring-framework-main-code}/spring-webflux[`spring-webflux`]).
-This section covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next section>>
+This chapter covers Spring Web MVC. The <<web-reactive.adoc#spring-web-reactive, next chapter>>
 covers Spring WebFlux.
 
 For baseline information and compatibility with Servlet container and Java EE version
@@ -533,7 +533,7 @@ resolve exceptions thrown during request processing. Those exception resolvers a
 customizing the logic to address exceptions. See <<mvc-exceptionhandlers>> for more details.
 
 For HTTP caching support, handlers can use the `checkNotModified` methods of `WebRequest`,
-along with further options for annoated controllers as described in
+along with further options for annotated controllers as described in
 <<mvc-caching-etag-lastmodified,HTTP Caching for Controllers>>.
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
@@ -648,12 +648,13 @@ See <<mvc-config-interceptors>> in the section on MVC configuration for examples
 configure interceptors. You can also register them directly by using setters on individual
 `HandlerMapping` implementations.
 
-Note that `postHandle` is less useful with `@ResponseBody` and `ResponseEntity` methods for
+`postHandle` method is less useful with `@ResponseBody` and `ResponseEntity` methods for
 which the response is written and committed within the `HandlerAdapter` and before
 `postHandle`. That means it is too late to make any changes to the response, such as adding
 an extra header. For such scenarios, you can implement `ResponseBodyAdvice` and either
 declare it as an <<mvc-ann-controller-advice>> bean or configure it directly on
 `RequestMappingHandlerAdapter`.
+
 
 
 
@@ -691,7 +692,7 @@ The following table lists the available `HandlerExceptionResolver` implementatio
 |===
 
 
-[[mvc-excetionhandlers-handling]]
+[[mvc-exceptionhandlers-handling]]
 ==== Chain of Resolvers
 
 You can form an exception resolver chain by declaring multiple `HandlerExceptionResolver`
@@ -2175,7 +2176,7 @@ and others) and is equivalent to `required=false`.
 | Any other argument
 | If a method argument is not matched to any of the earlier values in this table and it is
   a simple type (as determined by
-	{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+	{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]),
   it is resolved as a `@RequestParam`. Otherwise, it is resolved as a `@ModelAttribute`.
 |===
 
@@ -2261,23 +2262,18 @@ supported for all return values.
 | Write to the response `OutputStream` asynchronously. Also supported as the body of a
   `ResponseEntity`. See <<mvc-ann-async>> and <<mvc-ann-async-http-streaming>>.
 
-| Reactive types -- Reactor, RxJava, or others through `ReactiveAdapterRegistry`
-| Alternative to `DeferredResult` with multi-value streams (for example, `Flux`, `Observable`)
-  collected to a `List`.
+| Reactor and other reactive types registered via `ReactiveAdapterRegistry`
+| A single value type, e.g. `Mono`, is comparable to returning `DeferredResult`.
+  A multi-value type, e.g. `Flux`, may be treated as a stream depending on the requested
+  media type, e.g. "text/event-stream", "application/json+stream", or otherwise is
+  collected to a List and rendered as a single value. See <<mvc-ann-async>> and
+  <<mvc-ann-async-reactive-types>>.
 
-  For streaming scenarios (for example, `text/event-stream`, `application/json+stream`),
-  `SseEmitter` and `ResponseBodyEmitter` are used instead, where `ServletOutputStream`
-  blocking I/O is performed on a Spring MVC-managed thread and back pressure is applied
-  against the completion of each write.
-
-  See <<mvc-ann-async>> and <<mvc-ann-async-reactive-types>>.
-
-| Any other return value
-| Any return value that does not match any of the earlier values in this table and that
-  is a `String` or `void` is treated as a view name (default view name selection through
-  `RequestToViewNameTranslator` applies), provided it is not a simple type, as determined by
-  {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty].
-  Values that are simple types remain unresolved.
+| Other return values
+| If a return value remains unresolved in any other way, it is treated as a model
+  attribute, unless it is a simple type as determined by
+  {api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty],
+  in which case it remains unresolved.
 |===
 
 
@@ -5362,7 +5358,6 @@ the following example shows:
 		public void addInterceptors(InterceptorRegistry registry) {
 			registry.addInterceptor(new LocaleChangeInterceptor());
 			registry.addInterceptor(new ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
-			registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
 		}
 	}
 ----
@@ -5376,7 +5371,6 @@ the following example shows:
 		override fun addInterceptors(registry: InterceptorRegistry) {
 			registry.addInterceptor(LocaleChangeInterceptor())
 			registry.addInterceptor(ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**")
-			registry.addInterceptor(SecurityInterceptor()).addPathPatterns("/secure/*")
 		}
 	}
 ----
@@ -5392,12 +5386,18 @@ The following example shows how to achieve the same configuration in XML:
 			<mvc:exclude-mapping path="/admin/**"/>
 			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
 		</mvc:interceptor>
-		<mvc:interceptor>
-			<mvc:mapping path="/secure/*"/>
-			<bean class="org.example.SecurityInterceptor"/>
-		</mvc:interceptor>
 	</mvc:interceptors>
 ----
+
+NOTE: Mapped interceptors are not ideally suited as a security layer due to the potential
+for a mismatch with annotated controller path matching, which can also match trailing
+slashes and path extensions transparently, along with other path matching options. Many
+of these options have been deprecated but the potential for a mismatch remains.
+Generally, we recommend using Spring Security which includes a dedicated
+https://docs.spring.io/spring-security/reference/servlet/integrations/mvc.html#mvc-requestmatcher[MvcRequestMatcher]
+to align with Spring MVC path matching and also has a security firewall that blocks many
+unwanted characters in URL paths.
+
 
 
 
@@ -5865,12 +5865,18 @@ Note that, when using both `EncodedResourceResolver` (for example, for serving g
 brotli-encoded resources) and `VersionResourceResolver`, you must register them in this order.
 That ensures content-based versions are always computed reliably, based on the unencoded file.
 
-https://www.webjars.org/documentation[WebJars] are also supported through the
+For https://www.webjars.org/documentation[WebJars], versioned URLs like
+`/webjars/jquery/1.2.0/jquery.min.js` are the recommended and most efficient way to use them.
+The related resource location is configured out of the box with Spring Boot (or can be configured
+manually via `ResourceHandlerRegistry`) and does not require to add the
+`org.webjars:webjars-locator-core` dependency.
+
+Version-less URLs like `/webjars/jquery/jquery.min.js` are supported through the
 `WebJarsResourceResolver` which is automatically registered when the
-`org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
-re-write URLs to include the version of the jar and can also match against incoming URLs
-without versions -- for example, from `/jquery/jquery.min.js` to
-`/jquery/1.2.0/jquery.min.js`.
+`org.webjars:webjars-locator-core` library is present on the classpath, at the cost of a
+classpath scanning that could slow down application startup. The resolver can re-write URLs to
+include the version of the jar and can also match against incoming URLs without versions
+-- for example, from `/webjars/jquery/jquery.min.js` to `/webjars/jquery/1.2.0/jquery.min.js`.
 
 TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
 for fine-grained control, e.g. last-modified behavior and optimized resource resolution.

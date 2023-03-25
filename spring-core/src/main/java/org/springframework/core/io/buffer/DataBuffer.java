@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import org.springframework.util.Assert;
  * the following invariant holds for the read and write positions, and the capacity:
  *
  * <blockquote>
- *     <tt>0</tt> <tt>&lt;=</tt>
- *     <i>readPosition</i> <tt>&lt;=</tt>
- *     <i>writePosition</i> <tt>&lt;=</tt>
+ *     {@code 0} {@code <=}
+ *     <i>readPosition</i> {@code <=}
+ *     <i>writePosition</i> {@code <=}
  *     <i>capacity</i>
  * </blockquote>
  *

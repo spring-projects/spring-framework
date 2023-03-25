@@ -76,7 +76,7 @@ public interface HttpMessageWriter<T> {
 	boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType);
 
 	/**
-	 * Write an given stream of object to the output message.
+	 * Write a given stream of object to the output message.
 	 * @param inputStream the objects to write
 	 * @param elementType the type of objects in the stream which must have been
 	 * previously checked via {@link #canWrite(ResolvableType, MediaType)}

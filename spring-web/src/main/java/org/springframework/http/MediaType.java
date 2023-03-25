@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -531,10 +531,10 @@ public class MediaType extends MimeType implements Serializable {
 	protected void checkParameters(String parameter, String value) {
 		super.checkParameters(parameter, value);
 		if (PARAM_QUALITY_FACTOR.equals(parameter)) {
-			value = unquote(value);
-			double d = Double.parseDouble(value);
+			String unquotedValue = unquote(value);
+			double d = Double.parseDouble(unquotedValue);
 			Assert.isTrue(d >= 0D && d <= 1D,
-					"Invalid quality value \"" + value + "\": should be between 0.0 and 1.0");
+					() -> "Invalid quality value \"" + unquotedValue + "\": should be between 0.0 and 1.0");
 		}
 	}
 

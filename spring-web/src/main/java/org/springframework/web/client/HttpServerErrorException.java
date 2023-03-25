@@ -67,7 +67,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	}
 
 	/**
-	 * Constructor with a status code and status text, headers, content, and an
+	 * Constructor with a status code and status text, headers, content, and a
 	 * prepared message.
 	 * @since 5.2.2
 	 */
@@ -78,7 +78,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	}
 
 	/**
-	 * Create an {@code HttpServerErrorException} or an HTTP status specific sub-class.
+	 * Create an {@code HttpServerErrorException} or an HTTP status specific subclass.
 	 * @since 5.1
 	 */
 	public static HttpServerErrorException create(HttpStatus statusCode,
@@ -163,7 +163,7 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 	}
 
 	/**
-	 * {@link HttpServerErrorException} for status HTTP HTTP 502 Bad Gateway.
+	 * {@link HttpServerErrorException} for HTTP status 502 Bad Gateway.
 	 * @since 5.1
 	 */
 	@SuppressWarnings("serial")

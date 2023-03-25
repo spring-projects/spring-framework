@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.annotation.ConfigurationCondition.ConfigurationPhase;
 import org.springframework.context.annotation.DeferredImportSelector.Group;
-import org.springframework.core.NestedIOException;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -680,6 +679,7 @@ class ConfigurationClassParser {
 	/**
 	 * Factory method to obtain a {@link SourceClass} from a class name.
 	 */
+	@SuppressWarnings("deprecation")
 	SourceClass asSourceClass(@Nullable String className, Predicate<String> filter) throws IOException {
 		if (className == null || filter.test(className)) {
 			return this.objectSourceClass;
@@ -690,7 +690,7 @@ class ConfigurationClassParser {
 				return new SourceClass(ClassUtils.forName(className, this.resourceLoader.getClassLoader()));
 			}
 			catch (ClassNotFoundException ex) {
-				throw new NestedIOException("Failed to load class [" + className + "]", ex);
+				throw new org.springframework.core.NestedIOException("Failed to load class [" + className + "]", ex);
 			}
 		}
 		return new SourceClass(this.metadataReaderFactory.getMetadataReader(className));
@@ -1073,6 +1073,7 @@ class ConfigurationClassParser {
 			return result;
 		}
 
+		@SuppressWarnings("deprecation")
 		private SourceClass getRelated(String className) throws IOException {
 			if (this.source instanceof Class) {
 				try {
@@ -1082,7 +1083,7 @@ class ConfigurationClassParser {
 				catch (ClassNotFoundException ex) {
 					// Ignore -> fall back to ASM next, except for core java types.
 					if (className.startsWith("java")) {
-						throw new NestedIOException("Failed to load class [" + className + "]", ex);
+						throw new org.springframework.core.NestedIOException("Failed to load class [" + className + "]", ex);
 					}
 					return new SourceClass(metadataReaderFactory.getMetadataReader(className));
 				}

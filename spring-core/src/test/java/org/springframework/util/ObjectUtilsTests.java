@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -251,32 +251,28 @@ class ObjectUtilsTests {
 	@Deprecated
 	void hashCodeWithDouble() {
 		double dbl = 9830.43;
-		int expected = (new Double(dbl)).hashCode();
-		assertThat(ObjectUtils.hashCode(dbl)).isEqualTo(expected);
+		assertThat(ObjectUtils.hashCode(dbl)).isEqualTo(Double.hashCode(dbl));
 	}
 
 	@Test
 	@Deprecated
 	void hashCodeWithFloat() {
 		float flt = 34.8f;
-		int expected = (Float.valueOf(flt)).hashCode();
-		assertThat(ObjectUtils.hashCode(flt)).isEqualTo(expected);
+		assertThat(ObjectUtils.hashCode(flt)).isEqualTo(Float.hashCode(flt));
 	}
 
 	@Test
 	@Deprecated
 	void hashCodeWithLong() {
 		long lng = 883L;
-		int expected = (Long.valueOf(lng)).hashCode();
-		assertThat(ObjectUtils.hashCode(lng)).isEqualTo(expected);
+		assertThat(ObjectUtils.hashCode(lng)).isEqualTo(Long.hashCode(lng));
 	}
 
 	@Test
 	void identityToString() {
 		Object obj = new Object();
 		String expected = obj.getClass().getName() + "@" + ObjectUtils.getIdentityHexString(obj);
-		String actual = ObjectUtils.identityToString(obj);
-		assertThat(actual).isEqualTo(expected);
+		assertThat(ObjectUtils.identityToString(obj)).isEqualTo(expected);
 	}
 
 	@Test
@@ -732,7 +728,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeToStringWithObjectArray() {
-		Object[] array = {"Han", Long.valueOf(43)};
+		Object[] array = {"Han", 43};
 		assertThat(ObjectUtils.nullSafeToString(array)).isEqualTo("{Han, 43}");
 	}
 

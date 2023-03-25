@@ -166,9 +166,9 @@ public abstract class ScriptUtils {
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from
 	 * @param dataBufferFactory the factory to create data buffers with
-	 * @param continueOnError whether or not to continue without throwing an exception
+	 * @param continueOnError whether to continue without throwing an exception
 	 * in the event of an error
-	 * @param ignoreFailedDrops whether or not to continue in the event of specifically
+	 * @param ignoreFailedDrops whether to continue in the event of specifically
 	 * an error on a {@code DROP} statement
 	 * @param commentPrefix the prefix that identifies single-line comments in the
 	 * SQL script (typically "--")
@@ -207,9 +207,9 @@ public abstract class ScriptUtils {
 	 * @param resource the resource (potentially associated with a specific encoding)
 	 * to load the SQL script from
 	 * @param dataBufferFactory the factory to create data buffers with
-	 * @param continueOnError whether or not to continue without throwing an exception
+	 * @param continueOnError whether to continue without throwing an exception
 	 * in the event of an error
-	 * @param ignoreFailedDrops whether or not to continue in the event of specifically
+	 * @param ignoreFailedDrops whether to continue in the event of specifically
 	 * an error on a {@code DROP} statement
 	 * @param commentPrefixes the prefixes that identify single-line comments in the
 	 * SQL script (typically "--")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.asm.ClassReader;
-import org.springframework.core.NestedIOException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
@@ -51,13 +50,14 @@ final class SimpleMetadataReader implements MetadataReader {
 		this.annotationMetadata = visitor.getMetadata();
 	}
 
+	@SuppressWarnings("deprecation")
 	private static ClassReader getClassReader(Resource resource) throws IOException {
 		try (InputStream is = resource.getInputStream()) {
 			try {
 				return new ClassReader(is);
 			}
 			catch (IllegalArgumentException ex) {
-				throw new NestedIOException("ASM ClassReader failed to parse class file - " +
+				throw new org.springframework.core.NestedIOException("ASM ClassReader failed to parse class file - " +
 						"probably due to a new Java class file version that isn't supported yet: " + resource, ex);
 			}
 		}

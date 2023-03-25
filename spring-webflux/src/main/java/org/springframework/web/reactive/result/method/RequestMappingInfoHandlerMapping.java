@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
@@ -141,9 +142,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriVariables);
 		exchange.getAttributes().put(MATRIX_VARIABLES_ATTRIBUTE, matrixVariables);
 
-		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
-			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
-			exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+		ProducesRequestCondition producesCondition = info.getProducesCondition();
+		if (!producesCondition.isEmpty()) {
+			Set<MediaType> mediaTypes = producesCondition.getProducibleMediaTypes();
+			if (!mediaTypes.isEmpty()) {
+				exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+			}
 		}
 	}
 
@@ -162,8 +166,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos,
 			ServerWebExchange exchange) throws Exception {
 
-		PartialMatchHelper helper = new PartialMatchHelper(infos, exchange);
+		if (CollectionUtils.isEmpty(infos)) {
+			return null;
+		}
 
+		PartialMatchHelper helper = new PartialMatchHelper(infos, exchange);
 		if (helper.isEmpty()) {
 			return null;
 		}
@@ -215,17 +222,16 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		private final List<PartialMatch> partialMatches = new ArrayList<>();
 
-
-		public PartialMatchHelper(Set<RequestMappingInfo> infos, ServerWebExchange exchange) {
-			this.partialMatches.addAll(infos.stream().
-					filter(info -> info.getPatternsCondition().getMatchingCondition(exchange) != null).
-					map(info -> new PartialMatch(info, exchange)).
-					collect(Collectors.toList()));
+		PartialMatchHelper(Set<RequestMappingInfo> infos, ServerWebExchange exchange) {
+			for (RequestMappingInfo info : infos) {
+				if (info.getPatternsCondition().getMatchingCondition(exchange) != null) {
+					this.partialMatches.add(new PartialMatch(info, exchange));
+				}
+			}
 		}
 
-
 		/**
-		 * Whether there any partial matches.
+		 * Whether there are any partial matches.
 		 */
 		public boolean isEmpty() {
 			return this.partialMatches.isEmpty();

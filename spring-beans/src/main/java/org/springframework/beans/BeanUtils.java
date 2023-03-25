@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  * <p>Mainly for internal use within the framework, but to some degree also
  * useful for application classes. Consider
  * <a href="https://commons.apache.org/proper/commons-beanutils/">Apache Commons BeanUtils</a>,
- * <a href="https://hotelsdotcom.github.io/bull/">BULL - Bean Utils Light Library</a>,
+ * <a href="https://github.com/ExpediaGroup/bull">BULL - Bean Utils Light Library</a>,
  * or similar third-party frameworks for more comprehensive bean utilities.
  *
  * @author Rod Johnson
@@ -247,7 +247,8 @@ public abstract class BeanUtils {
 			// A single public constructor
 			return (Constructor<T>) ctors[0];
 		}
-		else if (ctors.length == 0){
+		else if (ctors.length == 0) {
+			// No public constructors -> check non-public
 			ctors = clazz.getDeclaredConstructors();
 			if (ctors.length == 1) {
 				// A single non-public constructor, e.g. from a non-public record type

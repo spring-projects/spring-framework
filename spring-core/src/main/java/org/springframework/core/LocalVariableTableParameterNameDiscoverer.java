@@ -47,12 +47,18 @@ import org.springframework.util.ClassUtils;
  * caches the ASM discovered information for each introspected Class, in a thread-safe
  * manner. It is recommended to reuse ParameterNameDiscoverer instances as far as possible.
  *
+ * <p>This discoverer variant is effectively superseded by the Java 8 based
+ * {@link StandardReflectionParameterNameDiscoverer} but included as a fallback still
+ * (for code not compiled with the standard "-parameters" compiler flag).
+ *
  * @author Adrian Colyer
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
  * @since 2.0
+ * @see StandardReflectionParameterNameDiscoverer
+ * @see DefaultParameterNameDiscoverer
  */
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
 

@@ -205,7 +205,7 @@ public abstract class RouterFunctions {
 	 * for additional filter and exception handler registration through
 	 * {@link WebHttpHandlerBuilder}.
 	 * @param routerFunction the router function to convert
-	 * @return an http handler that handles HTTP request using the given router function
+	 * @return an HTTP handler that handles HTTP request using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
 		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
@@ -225,7 +225,7 @@ public abstract class RouterFunctions {
 	 * </ul>
 	 * @param routerFunction the router function to convert
 	 * @param strategies the strategies to use
-	 * @return an http handler that handles HTTP request using the given router function
+	 * @return an HTTP handler that handles HTTP request using the given router function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		WebHandler webHandler = toWebHandler(routerFunction, strategies);

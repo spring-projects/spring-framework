@@ -28,7 +28,6 @@ import java.net.URLConnection;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -183,7 +182,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Override
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
-		ResourceUtils.useCachesIfNecessary(con);
+		customizeConnection(con);
 		try {
 			return con.getInputStream();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.context.web.socket;
 
 import javax.websocket.server.ServerContainer;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,20 @@ class WebSocketServletServerContainerFactoryBeanTests {
 	@Test
 	void servletServerContainerFactoryBeanSupport(@Autowired ServerContainer serverContainer) {
 		assertThat(serverContainer.getDefaultMaxTextMessageBufferSize()).isEqualTo(42);
+	}
+
+	/*
+	 * @Nested test class to verify that the MockServerContainerContextCustomizerFactory
+	 * properly supports finding @WebAppConfiguration on an enclosing class.
+	 */
+	@Nested
+	class NestedTests {
+
+		@Test  // gh-29037
+		void servletServerContainerFactoryBeanSupport(@Autowired ServerContainer serverContainer) {
+			assertThat(serverContainer.getDefaultMaxTextMessageBufferSize()).isEqualTo(42);
+		}
+
 	}
 
 

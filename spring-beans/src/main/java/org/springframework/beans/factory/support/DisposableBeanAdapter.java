@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,12 +214,15 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				}
 			}
 			catch (Throwable ex) {
-				String msg = "Invocation of destroy method failed on bean with name '" + this.beanName + "'";
-				if (logger.isDebugEnabled()) {
-					logger.warn(msg, ex);
-				}
-				else {
-					logger.warn(msg + ": " + ex);
+				if (logger.isWarnEnabled()) {
+					String msg = "Invocation of destroy method failed on bean with name '" + this.beanName + "'";
+					if (logger.isDebugEnabled()) {
+						// Log at warn level like below but add the exception stacktrace only with debug level
+						logger.warn(msg, ex);
+					}
+					else {
+						logger.warn(msg + ": " + ex);
+					}
 				}
 			}
 		}
@@ -240,12 +243,15 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				}
 			}
 			catch (Throwable ex) {
-				String msg = "Invocation of close method failed on bean with name '" + this.beanName + "'";
-				if (logger.isDebugEnabled()) {
-					logger.warn(msg, ex);
-				}
-				else {
-					logger.warn(msg + ": " + ex);
+				if (logger.isWarnEnabled()) {
+					String msg = "Invocation of close method failed on bean with name '" + this.beanName + "'";
+					if (logger.isDebugEnabled()) {
+						// Log at warn level like below but add the exception stacktrace only with debug level
+						logger.warn(msg, ex);
+					}
+					else {
+						logger.warn(msg + ": " + ex);
+					}
 				}
 			}
 		}
@@ -320,18 +326,23 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		catch (InvocationTargetException ex) {
-			String msg = "Custom destroy method '" + this.destroyMethodName + "' on bean with name '" +
-					this.beanName + "' threw an exception";
-			if (logger.isDebugEnabled()) {
-				logger.warn(msg, ex.getTargetException());
-			}
-			else {
-				logger.warn(msg + ": " + ex.getTargetException());
+			if (logger.isWarnEnabled()) {
+				String msg = "Custom destroy method '" + this.destroyMethodName + "' on bean with name '" +
+						this.beanName + "' threw an exception";
+				if (logger.isDebugEnabled()) {
+					// Log at warn level like below but add the exception stacktrace only with debug level
+					logger.warn(msg, ex.getTargetException());
+				}
+				else {
+					logger.warn(msg + ": " + ex.getTargetException());
+				}
 			}
 		}
 		catch (Throwable ex) {
-			logger.warn("Failed to invoke custom destroy method '" + this.destroyMethodName +
-					"' on bean with name '" + this.beanName + "'", ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to invoke custom destroy method '" + this.destroyMethodName +
+						"' on bean with name '" + this.beanName + "'", ex);
+			}
 		}
 	}
 

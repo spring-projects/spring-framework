@@ -139,7 +139,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 
 		doInstantiateAndSave(em);
 		setComplete();
-		endTransaction();	// Should rollback
+		endTransaction();	// Should roll back
 		assertThat(countRowsInTable(em, "person")).as("Tx must have committed back").isEqualTo(1);
 
 		// Now clean up the database
@@ -150,7 +150,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 	public void testRollbackOccurs() {
 		EntityManager em = createContainerManagedEntityManager();
 		doInstantiateAndSave(em);
-		endTransaction();	// Should rollback
+		endTransaction();	// Should roll back
 		assertThat(countRowsInTable(em, "person")).as("Tx must have been rolled back").isEqualTo(0);
 	}
 
@@ -159,7 +159,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		EntityManager em = createContainerManagedEntityManager();
 		doInstantiateAndSave(em);
 		setComplete();
-		endTransaction();	// Should rollback
+		endTransaction();	// Should roll back
 		assertThat(countRowsInTable(em, "person")).as("Tx must have committed back").isEqualTo(1);
 
 		// Now clean up the database

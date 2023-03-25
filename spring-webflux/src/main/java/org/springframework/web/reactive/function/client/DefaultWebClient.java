@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.function.client;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -667,10 +669,22 @@ class DefaultWebClient implements WebClient {
 		}
 
 		private <T> Mono<T> insertCheckpoint(Mono<T> result, int statusCode, HttpRequest request) {
-			String httpMethod = request.getMethodValue();
+			String method = request.getMethodValue();
+			URI uri = getUriToLog(request);
+			return result.checkpoint(statusCode + " from " + method + " " + uri + " [DefaultWebClient]");
+		}
+
+		private static URI getUriToLog(HttpRequest request) {
 			URI uri = request.getURI();
-			String description = statusCode + " from " + httpMethod + " " + uri + " [DefaultWebClient]";
-			return result.checkpoint(description);
+			if (StringUtils.hasText(uri.getQuery())) {
+				try {
+					uri = new URI(uri.getScheme(), uri.getHost(), uri.getPath(), null);
+				}
+				catch (URISyntaxException ex) {
+					// ignore
+				}
+			}
+			return uri;
 		}
 
 

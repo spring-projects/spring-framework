@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,8 +133,8 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 
 	private void assertNumberOfConditions(CompositeRequestCondition other) {
 		Assert.isTrue(getLength() == other.getLength(),
-				"Cannot combine CompositeRequestConditions with a different number of conditions. " +
-				ObjectUtils.nullSafeToString(this.requestConditions) + " and  " +
+				() -> "Cannot combine CompositeRequestConditions with a different number of conditions. " +
+				ObjectUtils.nullSafeToString(this.requestConditions) + " and " +
 				ObjectUtils.nullSafeToString(other.requestConditions));
 	}
 

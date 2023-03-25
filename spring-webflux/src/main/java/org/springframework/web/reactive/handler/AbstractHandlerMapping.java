@@ -106,7 +106,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	/**
 	 * Return the {@link PathPatternParser} instance that is used for
 	 * {@link #setCorsConfigurations(Map) CORS configuration checks}.
-	 * Sub-classes can also use this pattern parser for their own request
+	 * Subclasses can also use this pattern parser for their own request
 	 * mapping purposes.
 	 */
 	public PathPatternParser getPathPatternParser() {
@@ -114,7 +114,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
-	 * Set the "global" CORS configurations based on URL patterns. By default the
+	 * Set the "global" CORS configurations based on URL patterns. By default, the
 	 * first matching URL pattern is combined with handler-level CORS configuration if any.
 	 * @see #setCorsConfigurationSource(CorsConfigurationSource)
 	 */
@@ -131,7 +131,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
-	 * Set the "global" CORS configuration source. By default the first matching URL
+	 * Set the "global" CORS configuration source. By default, the first matching URL
 	 * pattern is combined with the CORS configuration for the handler, if any.
 	 * @since 5.1
 	 * @see #setCorsConfigurations(Map)

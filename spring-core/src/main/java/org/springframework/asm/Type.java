@@ -245,7 +245,7 @@ public final class Type {
   /**
    * Returns the {@link Type} corresponding to the given internal name.
    *
-   * @param internalName an internal name.
+   * @param internalName an internal name (see {@link Type#getInternalName()}).
    * @return the {@link Type} corresponding to the given internal name.
    */
   public static Type getObjectType(final String internalName) {

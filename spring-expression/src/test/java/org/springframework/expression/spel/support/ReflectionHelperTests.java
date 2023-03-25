@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,17 @@ package org.springframework.expression.spel.support;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.MethodResolver;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
@@ -364,6 +368,20 @@ public class ReflectionHelperTests extends AbstractExpressionTests {
 				field.write(ctx, tester, "field", null));
 	}
 
+	@Test
+	void reflectiveMethodResolverForJdkProxies() throws Exception {
+		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { Runnable.class }, (p, m, args) -> null);
+
+		MethodResolver resolver = new ReflectiveMethodResolver();
+		StandardEvaluationContext evaluationContext = new StandardEvaluationContext();
+
+		MethodExecutor bogus = resolver.resolve(evaluationContext, proxy, "bogus", Collections.emptyList());
+		assertThat(bogus).as("MethodExecutor for bogus()").isNull();
+		MethodExecutor toString = resolver.resolve(evaluationContext, proxy, "toString", Collections.emptyList());
+		assertThat(toString).as("MethodExecutor for toString()").isNotNull();
+		MethodExecutor hashCode = resolver.resolve(evaluationContext, proxy, "hashCode", Collections.emptyList());
+		assertThat(hashCode).as("MethodExecutor for hashCode()").isNotNull();
+	}
 
 	/**
 	 * Used to validate the match returned from a compareArguments call.

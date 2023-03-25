@@ -221,9 +221,8 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Return the underlying source of the resolvable type. Will return a {@link Field},
 	 * {@link MethodParameter} or {@link Type} depending on how the {@link ResolvableType}
-	 * was constructed. With the exception of the {@link #NONE} constant, this method will
-	 * never return {@code null}. This method is primarily to provide access to additional
-	 * type information or meta-data that alternative JVM languages may provide.
+	 * was constructed. This method is primarily to provide access to additional type
+	 * information or meta-data that alternative JVM languages may provide.
 	 */
 	public Object getSource() {
 		Object source = (this.typeProvider != null ? this.typeProvider.getSource() : null);
@@ -1013,7 +1012,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Return a {@link ResolvableType} for the specified {@link Class},
 	 * doing assignability checks against the raw class only (analogous to
-	 * {@link Class#isAssignableFrom}, which this serves as a wrapper for.
+	 * {@link Class#isAssignableFrom}, which this serves as a wrapper for).
 	 * <p>For example: {@code ResolvableType.forRawClass(List.class)}.
 	 * @param clazz the class to introspect ({@code null} is semantically
 	 * equivalent to {@code Object.class} for typical use cases here)
@@ -1103,20 +1102,20 @@ public class ResolvableType implements Serializable {
 	 * convey generic information but if it implements {@link ResolvableTypeProvider} a
 	 * more precise {@link ResolvableType} can be used than the simple one based on
 	 * the {@link #forClass(Class) Class instance}.
-	 * @param instance the instance
-	 * @return a {@link ResolvableType} for the specified instance
+	 * @param instance the instance (possibly {@code null})
+	 * @return a {@link ResolvableType} for the specified instance,
+	 * or {@code NONE} for {@code null}
 	 * @since 4.2
 	 * @see ResolvableTypeProvider
 	 */
-	public static ResolvableType forInstance(Object instance) {
-		Assert.notNull(instance, "Instance must not be null");
+	public static ResolvableType forInstance(@Nullable Object instance) {
 		if (instance instanceof ResolvableTypeProvider) {
 			ResolvableType type = ((ResolvableTypeProvider) instance).getResolvableType();
 			if (type != null) {
 				return type;
 			}
 		}
-		return ResolvableType.forClass(instance.getClass());
+		return (instance != null ? forClass(instance.getClass()) : NONE);
 	}
 
 	/**
@@ -1344,7 +1343,7 @@ public class ResolvableType implements Serializable {
 	}
 
 	/**
-	 * Return a {@link ResolvableType} as a array of the specified {@code componentType}.
+	 * Return a {@link ResolvableType} as an array of the specified {@code componentType}.
 	 * @param componentType the component type
 	 * @return a {@link ResolvableType} as an array of the specified component type
 	 */

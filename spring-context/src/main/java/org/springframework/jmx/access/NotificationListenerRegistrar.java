@@ -88,10 +88,10 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	}
 
 	/**
-	 * Allow Map access to the environment to be set for the connector,
+	 * Allow {@code Map} access to the environment to be set for the connector,
 	 * with the option to add or override specific entries.
 	 * <p>Useful for specifying entries directly, for example via
-	 * "environment[myKey]". This is particularly useful for
+	 * {@code environment[myKey]}. This is particularly useful for
 	 * adding or overriding entries in child bean definitions.
 	 */
 	@Nullable
