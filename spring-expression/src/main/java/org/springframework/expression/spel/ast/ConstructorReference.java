@@ -38,7 +38,6 @@ import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
-import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.support.ReflectiveConstructorExecutor;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -60,6 +59,7 @@ import org.springframework.util.Assert;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author <a href="https://github.com/TAKETODAY">Harry Yang</a>
  * @since 3.0
  */
 public class ConstructorReference extends SpelNodeImpl {
@@ -332,39 +332,18 @@ public class ConstructorReference extends SpelNodeImpl {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.INITIALIZER_LENGTH_INCORRECT);
 				}
 			}
-			// Build the array and populate it
-			int arraySize = initializer.getChildCount();
-			newArray = Array.newInstance(componentType, arraySize);
-			if (arrayTypeCode == TypeCode.OBJECT) {
-				populateReferenceTypeArray(state, newArray, typeConverter, initializer, componentType);
-			}
-			else if (arrayTypeCode == TypeCode.BOOLEAN) {
-				populateBooleanArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.BYTE) {
-				populateByteArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.CHAR) {
-				populateCharArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.DOUBLE) {
-				populateDoubleArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.FLOAT) {
-				populateFloatArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.INT) {
-				populateIntArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.LONG) {
-				populateLongArray(state, newArray, typeConverter, initializer);
-			}
-			else if (arrayTypeCode == TypeCode.SHORT) {
-				populateShortArray(state, newArray, typeConverter, initializer);
-			}
-			else {
-				throw new IllegalStateException(arrayTypeCode.name());
-			}
+
+			newArray = switch (arrayTypeCode) {
+				case OBJECT -> createReferenceTypeArray(state, typeConverter, initializer.children, componentType);
+				case BOOLEAN -> createBooleanArray(state, typeConverter, initializer.children);
+				case BYTE -> createByteArray(state, typeConverter, initializer.children);
+				case CHAR -> createCharArray(state, typeConverter, initializer.children);
+				case DOUBLE -> createDoubleArray(state, typeConverter, initializer.children);
+				case FLOAT -> createFloatArray(state, typeConverter, initializer.children);
+				case INT -> createIntArray(state, typeConverter, initializer.children);
+				case LONG -> createLongArray(state, typeConverter, initializer.children);
+				case SHORT -> createShortArray(state, typeConverter, initializer.children);
+			};
 		}
 		return new TypedValue(newArray);
 	}
@@ -376,97 +355,88 @@ public class ConstructorReference extends SpelNodeImpl {
 		}
 	}
 
-	private void populateReferenceTypeArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer, Class<?> componentType) {
-
+	private Object createReferenceTypeArray(ExpressionState state,
+			TypeConverter typeConverter, SpelNodeImpl[] children, Class<?> componentType) {
+		Object[] newArray = (Object[]) Array.newInstance(componentType, children.length);
 		TypeDescriptor toTypeDescriptor = TypeDescriptor.valueOf(componentType);
-		Object[] newObjectArray = (Object[]) newArray;
-		for (int i = 0; i < newObjectArray.length; i++) {
-			SpelNode elementNode = initializer.getChild(i);
-			Object arrayEntry = elementNode.getValue(state);
-			newObjectArray[i] = typeConverter.convertValue(arrayEntry,
+		for (int i = 0; i < newArray.length; i++) {
+			Object arrayEntry = children[i].getValue(state);
+			newArray[i] = typeConverter.convertValue(arrayEntry,
 					TypeDescriptor.forObject(arrayEntry), toTypeDescriptor);
 		}
+		return newArray;
 	}
 
-	private void populateByteArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer) {
-
-		byte[] newByteArray = (byte[]) newArray;
-		for (int i = 0; i < newByteArray.length; i++) {
-			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
-			newByteArray[i] = ExpressionUtils.toByte(typeConverter, typedValue);
+	private byte[] createByteArray(ExpressionState state, TypeConverter converter, SpelNodeImpl[] children) {
+		byte[] byteArray = new byte[children.length];
+		for (int i = 0; i < byteArray.length; i++) {
+			TypedValue typedValue = children[i].getTypedValue(state);
+			byteArray[i] = ExpressionUtils.toByte(converter, typedValue);
 		}
+		return byteArray;
 	}
 
-	private void populateFloatArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer) {
-
-		float[] newFloatArray = (float[]) newArray;
-		for (int i = 0; i < newFloatArray.length; i++) {
-			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
-			newFloatArray[i] = ExpressionUtils.toFloat(typeConverter, typedValue);
+	private float[] createFloatArray(ExpressionState state, TypeConverter typeConverter, SpelNodeImpl[] children) {
+		float[] floatArray = new float[children.length];
+		for (int i = 0; i < floatArray.length; i++) {
+			TypedValue typedValue = children[i].getTypedValue(state);
+			floatArray[i] = ExpressionUtils.toFloat(typeConverter, typedValue);
 		}
+		return floatArray;
 	}
 
-	private void populateDoubleArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer) {
-
-		double[] newDoubleArray = (double[]) newArray;
-		for (int i = 0; i < newDoubleArray.length; i++) {
-			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
-			newDoubleArray[i] = ExpressionUtils.toDouble(typeConverter, typedValue);
+	private double[] createDoubleArray(ExpressionState state, TypeConverter typeConverter, SpelNodeImpl[] children) {
+		double[] doubleArray = new double[children.length];
+		for (int i = 0; i < doubleArray.length; i++) {
+			TypedValue typedValue = children[i].getTypedValue(state);
+			doubleArray[i] = ExpressionUtils.toDouble(typeConverter, typedValue);
 		}
+		return doubleArray;
 	}
 
-	private void populateShortArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer) {
-
-		short[] newShortArray = (short[]) newArray;
-		for (int i = 0; i < newShortArray.length; i++) {
-			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
-			newShortArray[i] = ExpressionUtils.toShort(typeConverter, typedValue);
+	private short[] createShortArray(ExpressionState state, TypeConverter typeConverter, SpelNodeImpl[] children) {
+		short[] shortArray = new short[children.length];
+		for (int i = 0; i < shortArray.length; i++) {
+			TypedValue typedValue = children[i].getTypedValue(state);
+			shortArray[i] = ExpressionUtils.toShort(typeConverter, typedValue);
 		}
+		return shortArray;
 	}
 
-	private void populateLongArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer) {
-
-		long[] newLongArray = (long[]) newArray;
-		for (int i = 0; i < newLongArray.length; i++) {
-			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
-			newLongArray[i] = ExpressionUtils.toLong(typeConverter, typedValue);
+	private long[] createLongArray(ExpressionState state, TypeConverter converter, SpelNodeImpl[] children) {
+		long[] longArray = new long[children.length];
+		for (int i = 0; i < longArray.length; i++) {
+			TypedValue typedValue = children[i].getTypedValue(state);
+			longArray[i] = ExpressionUtils.toLong(converter, typedValue);
 		}
+		return longArray;
 	}
 
-	private void populateCharArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer) {
-
-		char[] newCharArray = (char[]) newArray;
+	private char[] createCharArray(ExpressionState state, TypeConverter typeConverter, SpelNodeImpl[] children) {
+		char[] newCharArray = new char[children.length];
 		for (int i = 0; i < newCharArray.length; i++) {
-			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
+			TypedValue typedValue = children[i].getTypedValue(state);
 			newCharArray[i] = ExpressionUtils.toChar(typeConverter, typedValue);
 		}
+		return newCharArray;
 	}
 
-	private void populateBooleanArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer) {
-
-		boolean[] newBooleanArray = (boolean[]) newArray;
+	private boolean[] createBooleanArray(ExpressionState state, TypeConverter typeConverter, SpelNodeImpl[] children) {
+		boolean[] newBooleanArray = new boolean[children.length];
 		for (int i = 0; i < newBooleanArray.length; i++) {
-			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
+			TypedValue typedValue = children[i].getTypedValue(state);
 			newBooleanArray[i] = ExpressionUtils.toBoolean(typeConverter, typedValue);
 		}
+		return newBooleanArray;
 	}
 
-	private void populateIntArray(ExpressionState state, Object newArray, TypeConverter typeConverter,
-			InlineList initializer) {
-
-		int[] newIntArray = (int[]) newArray;
-		for (int i = 0; i < newIntArray.length; i++) {
-			TypedValue typedValue = initializer.getChild(i).getTypedValue(state);
-			newIntArray[i] = ExpressionUtils.toInt(typeConverter, typedValue);
+	private int[] createIntArray(ExpressionState state, TypeConverter typeConverter, SpelNodeImpl[] children) {
+		int[] intArray = new int[children.length];
+		for (int i = 0; i < intArray.length; i++) {
+			TypedValue typedValue = children[i].getTypedValue(state);
+			intArray[i] = ExpressionUtils.toInt(typeConverter, typedValue);
 		}
+		return intArray;
 	}
 
 	private boolean hasInitializer() {
