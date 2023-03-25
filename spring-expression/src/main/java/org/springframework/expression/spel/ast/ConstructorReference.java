@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,9 +148,9 @@ public class ConstructorReference extends SpelNodeImpl {
 				// To determine which situation it is, the AccessException will contain a cause.
 				// If the cause is an InvocationTargetException, a user exception was thrown inside the constructor.
 				// Otherwise, the constructor could not be invoked.
-				if (ex.getCause() instanceof InvocationTargetException) {
+				if (ex.getCause() instanceof InvocationTargetException cause) {
 					// User exception was the root cause - exit now
-					Throwable rootCause = ex.getCause().getCause();
+					Throwable rootCause = cause.getCause();
 					if (rootCause instanceof RuntimeException runtimeException) {
 						throw runtimeException;
 					}
@@ -475,23 +475,19 @@ public class ConstructorReference extends SpelNodeImpl {
 
 	@Override
 	public boolean isCompilable() {
-		if (!(this.cachedExecutor instanceof ReflectiveConstructorExecutor) ||
+		if (!(this.cachedExecutor instanceof ReflectiveConstructorExecutor executor) ||
 			this.exitTypeDescriptor == null) {
 			return false;
 		}
 
 		if (getChildCount() > 1) {
-			for (int c = 1, max = getChildCount();c < max; c++) {
+			for (int c = 1, max = getChildCount(); c < max; c++) {
 				if (!this.children[c].isCompilable()) {
 					return false;
 				}
 			}
 		}
 
-		ReflectiveConstructorExecutor executor = (ReflectiveConstructorExecutor) this.cachedExecutor;
-		if (executor == null) {
-			return false;
-		}
 		Constructor<?> constructor = executor.getConstructor();
 		return (Modifier.isPublic(constructor.getModifiers()) &&
 				Modifier.isPublic(constructor.getDeclaringClass().getModifiers()));
