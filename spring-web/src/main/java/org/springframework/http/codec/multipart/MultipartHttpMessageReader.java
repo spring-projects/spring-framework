@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,19 +81,21 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 		return MIME_TYPES;
 	}
 
-	@Override
-	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		if (MULTIPART_VALUE_TYPE.isAssignableFrom(elementType)) {
-			if (mediaType == null) {
+	private boolean supportsMediaType(@Nullable MediaType mediaType) {
+		if (mediaType == null) {
+			return true;
+		}
+		for (MediaType supportedMediaType : MIME_TYPES) {
+			if (supportedMediaType.isCompatibleWith(mediaType)) {
 				return true;
-			}
-			for (MediaType supportedMediaType : MIME_TYPES) {
-				if (supportedMediaType.isCompatibleWith(mediaType)) {
-					return true;
-				}
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
+		return supportsMediaType(mediaType) && MULTIPART_VALUE_TYPE.isAssignableFrom(elementType);
 	}
 
 
