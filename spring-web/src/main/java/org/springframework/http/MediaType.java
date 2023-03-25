@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -435,7 +435,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	static {
 		// Not using "valueOf' to avoid static init cost
-		ALL = new MediaType("*", "*");
+		ALL = new MediaType(MimeType.WILDCARD_TYPE, MimeType.WILDCARD_TYPE);
 		APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
 		APPLICATION_CBOR = new MediaType("application", "cbor");
 		APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
