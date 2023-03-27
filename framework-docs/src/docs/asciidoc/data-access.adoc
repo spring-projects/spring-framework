@@ -4528,7 +4528,7 @@ JDBC `?` placeholders:
 		}
 
 		public int[] batchUpdate(final List<Actor> actors) {
-			List<Object[]> batch = new ArrayList<Object[]>();
+			List<Object[]> batch = new ArrayList<>();
 			for (Actor actor : actors) {
 				Object[] values = new Object[] {
 						actor.getFirstName(), actor.getLastName(), actor.getId()};
@@ -4692,7 +4692,7 @@ example uses only one configuration method (we show examples of multiple methods
 		}
 
 		public void add(Actor actor) {
-			Map<String, Object> parameters = new HashMap<String, Object>(3);
+			Map<String, Object> parameters = new HashMap<>(3);
 			parameters.put("id", actor.getId());
 			parameters.put("first_name", actor.getFirstName());
 			parameters.put("last_name", actor.getLastName());
@@ -4750,7 +4750,7 @@ listing shows how it works:
 		}
 
 		public void add(Actor actor) {
-			Map<String, Object> parameters = new HashMap<String, Object>(2);
+			Map<String, Object> parameters = new HashMap<>(2);
 			parameters.put("first_name", actor.getFirstName());
 			parameters.put("last_name", actor.getLastName());
 			Number newId = insertActor.executeAndReturnKey(parameters);
@@ -4810,7 +4810,7 @@ You can limit the columns for an insert by specifying a list of column names wit
 		}
 
 		public void add(Actor actor) {
-			Map<String, Object> parameters = new HashMap<String, Object>(2);
+			Map<String, Object> parameters = new HashMap<>(2);
 			parameters.put("first_name", actor.getFirstName());
 			parameters.put("last_name", actor.getLastName());
 			Number newId = insertActor.executeAndReturnKey(parameters);

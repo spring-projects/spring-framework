@@ -293,7 +293,7 @@ being placed in it. The following example shows how to do so:
 .Java
 ----
 	class Simple {
-		public List<Boolean> booleanList = new ArrayList<Boolean>();
+		public List<Boolean> booleanList = new ArrayList<>();
 	}
 
 	Simple simple = new Simple();
@@ -1478,7 +1478,7 @@ show how to use the `#this` and `#root` variables:
 .Java
 ----
 	// create an array of integers
-	List<Integer> primes = new ArrayList<Integer>();
+	List<Integer> primes = new ArrayList<>();
 	primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
 
 	// create parser and set variable 'primes' as the array of integers
@@ -2122,7 +2122,7 @@ This section lists the classes used in the examples throughout this chapter.
 		public static String Advisors = "advisors";
 		public static String President = "president";
 
-		private List<Inventor> members = new ArrayList<Inventor>();
+		private List<Inventor> members = new ArrayList<>();
 		private Map officers = new HashMap();
 
 		public List getMembers() {
