@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,6 +190,16 @@ public abstract class SqlCall extends RdbmsOperation {
 	protected CallableStatementCreator newCallableStatementCreator(@Nullable Map<String, ?> inParams) {
 		Assert.state(this.callableStatementFactory != null, "No CallableStatementFactory available");
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
+	}
+
+	/**
+	 * Return a CallableStatementCreator to perform an operation
+	 * with these parameters.
+	 * @param inParams parameters. May be {@code null}.
+	 */
+	protected CallableStatementCreator newNamedCallableStatementCreator(@Nullable Map<String, ?> inParams) {
+		Assert.state(this.callableStatementFactory != null, "No CallableStatementFactory available");
+		return this.callableStatementFactory.newNamedCallableStatementCreator(inParams);
 	}
 
 	/**

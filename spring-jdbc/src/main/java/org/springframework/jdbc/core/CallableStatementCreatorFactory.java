@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,6 +117,14 @@ public class CallableStatementCreatorFactory {
 	}
 
 	/**
+	 * Return a new CallableStatementCreator instance given these parameters.
+	 * @param params list of parameters (may be {@code null})
+	 */
+	public CallableStatementCreator newNamedCallableStatementCreator(@Nullable Map<String, ?> params) {
+		return new NamedCallableStatementCreatorImpl(params != null ? params : new HashMap<>());
+	}
+
+	/**
 	 * Return a new CallableStatementCreator instance given this parameter mapper.
 	 * @param inParamMapper the ParameterMapper implementation that will return a Map of parameters
 	 */
@@ -209,6 +217,114 @@ public class CallableStatementCreatorFactory {
 						StatementCreatorUtils.setParameterValue(cs, sqlColIndx, declaredParam, inValue);
 					}
 					sqlColIndx++;
+				}
+			}
+
+			return cs;
+		}
+
+		@Override
+		public String getSql() {
+			return callString;
+		}
+
+		@Override
+		public void cleanupParameters() {
+			if (this.inParameters != null) {
+				StatementCreatorUtils.cleanupParameters(this.inParameters.values());
+			}
+		}
+
+		@Override
+		public String toString() {
+			return "CallableStatementCreator: sql=[" + callString + "]; parameters=" + this.inParameters;
+		}
+	}
+
+
+	/**
+	 * CallableStatementCreator implementation that binds by name.
+	 */
+	private class NamedCallableStatementCreatorImpl implements CallableStatementCreator, SqlProvider, ParameterDisposer {
+
+		@Nullable
+		private ParameterMapper inParameterMapper;
+
+		@Nullable
+		private Map<String, ?> inParameters;
+
+		/**
+		 * Create a new NamedCallableStatementCreatorImpl.
+		 * @param inParamMapper the ParameterMapper implementation for mapping input parameters
+		 */
+		public NamedCallableStatementCreatorImpl(ParameterMapper inParamMapper) {
+			this.inParameterMapper = inParamMapper;
+		}
+
+		/**
+		 * Create a new NamedCallableStatementCreatorImpl.
+		 * @param inParams list of SqlParameter objects
+		 */
+		public NamedCallableStatementCreatorImpl(Map<String, ?> inParams) {
+			this.inParameters = inParams;
+		}
+
+		@Override
+		public CallableStatement createCallableStatement(Connection con) throws SQLException {
+			// If we were given a ParameterMapper, we must let the mapper do its thing to create the Map.
+			if (this.inParameterMapper != null) {
+				this.inParameters = this.inParameterMapper.createMap(con);
+			}
+			else {
+				if (this.inParameters == null) {
+					throw new InvalidDataAccessApiUsageException(
+							"A ParameterMapper or a Map of parameters must be provided");
+				}
+			}
+
+			CallableStatement cs = null;
+			if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
+				cs = con.prepareCall(callString);
+			}
+			else {
+				cs = con.prepareCall(callString, resultSetType,
+						updatableResults ? ResultSet.CONCUR_UPDATABLE : ResultSet.CONCUR_READ_ONLY);
+			}
+
+			for (SqlParameter declaredParam : declaredParameters) {
+				if (!declaredParam.isResultsParameter()) {
+					// So, it's a call parameter - part of the call string.
+					// Get the value - it may still be null.
+					String parameterName = declaredParam.getName();
+					Object inValue = this.inParameters.get(parameterName);
+					if (declaredParam instanceof ResultSetSupportingSqlParameter) {
+						// It's an output parameter: SqlReturnResultSet parameters already excluded.
+						// It need not (but may be) supplied by the caller.
+						if (declaredParam instanceof SqlOutParameter) {
+							if (declaredParam.getTypeName() != null) {
+								cs.registerOutParameter(parameterName, declaredParam.getSqlType(), declaredParam.getTypeName());
+							}
+							else {
+								if (declaredParam.getScale() != null) {
+									cs.registerOutParameter(parameterName, declaredParam.getSqlType(), declaredParam.getScale());
+								}
+								else {
+									cs.registerOutParameter(parameterName, declaredParam.getSqlType());
+								}
+							}
+							if (declaredParam.isInputValueProvided()) {
+								StatementCreatorUtils.setParameterValue(cs, parameterName, declaredParam, inValue);
+							}
+						}
+					}
+					else {
+						// It's an input parameter; must be supplied by the caller.
+						if (!this.inParameters.containsKey(parameterName)) {
+							throw new InvalidDataAccessApiUsageException(
+									"Required input parameter '" + parameterName + "' is missing");
+						}
+						StatementCreatorUtils.setParameterValue(cs, parameterName, declaredParam, inValue);
+					}
 				}
 			}
 

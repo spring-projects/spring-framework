@@ -49,6 +49,7 @@ import org.springframework.jdbc.datasource.ConnectionHolder;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.eq;
@@ -123,9 +124,9 @@ public class StoredProcedureTests {
 		given(connection.prepareCall("{call " + AddInvoice.SQL + "(?, ?, ?)}")
 				).willReturn(callableStatement);
 		testAddInvoice(1106, 3);
-		verify(callableStatement).setObject(1, 1106, Types.INTEGER);
-		verify(callableStatement).setObject(2, 3, Types.INTEGER);
-		verify(callableStatement).registerOutParameter(3, Types.INTEGER);
+		verify(callableStatement).setObject("amount", 1106, Types.INTEGER);
+		verify(callableStatement).setObject("custid", 3, Types.INTEGER);
+		verify(callableStatement).registerOutParameter("newid", Types.INTEGER);
 	}
 
 	@Test
@@ -150,9 +151,9 @@ public class StoredProcedureTests {
 		TransactionSynchronizationManager.bindResource(dataSource, new ConnectionHolder(connection));
 		try {
 			testAddInvoice(1106, 3);
-			verify(callableStatement).setObject(1, 1106, Types.INTEGER);
-			verify(callableStatement).setObject(2, 3, Types.INTEGER);
-			verify(callableStatement).registerOutParameter(3, Types.INTEGER);
+			verify(callableStatement).setObject("amount", 1106, Types.INTEGER);
+			verify(callableStatement).setObject("custid", 3, Types.INTEGER);
+			verify(callableStatement).registerOutParameter("newid", Types.INTEGER);
 			verify(connection, never()).close();
 		}
 		finally {
@@ -194,8 +195,8 @@ public class StoredProcedureTests {
 		assertThat(sp.execute(11)).isEqualTo(5);
 		assertThat(t.calls).isEqualTo(1);
 
-		verify(callableStatement).setObject(1, 11, Types.INTEGER);
-		verify(callableStatement).registerOutParameter(2, Types.INTEGER);
+		verify(callableStatement).setObject("intIn", 11, Types.INTEGER);
+		verify(callableStatement).registerOutParameter("intOut", Types.INTEGER);
 	}
 
 	/**
@@ -210,6 +211,60 @@ public class StoredProcedureTests {
 		JdbcTemplate t = new JdbcTemplate();
 		t.setDataSource(dataSource);
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
+		assertThat(sp.execute(1106)).isEqualTo(4);
+		verify(callableStatement).setObject("intIn", 1106, Types.INTEGER);
+		verify(callableStatement).registerOutParameter("intOut", Types.INTEGER);
+	}
+
+	/**
+	 * Confirm no connection was used to get metadata. Does not use superclass replay
+	 * mechanism.
+	 */
+	@Test
+	public void testStoredProcedureConfiguredViaJdbcTemplateWithCustomExceptionTranslatorIndexed()
+			throws Exception {
+		given(callableStatement.execute()).willReturn(false);
+		given(callableStatement.getUpdateCount()).willReturn(-1);
+		given(callableStatement.getObject(2)).willReturn(5);
+		given(connection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}")).willReturn(callableStatement);
+
+		class TestJdbcTemplate extends JdbcTemplate {
+
+			int calls;
+
+			@Override
+			public Map<String, Object> call(CallableStatementCreator csc,
+					List<SqlParameter> declaredParameters) throws DataAccessException {
+				calls++;
+				return super.call(csc, declaredParameters);
+			}
+		}
+		TestJdbcTemplate t = new TestJdbcTemplate();
+		t.setDataSource(dataSource);
+		// Will fail without the following, because we're not able to get a connection
+		// from the DataSource here if we need to create an ExceptionTranslator
+		t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+		StoredProcedureConfiguredViaJdbcTemplateIndexed sp = new StoredProcedureConfiguredViaJdbcTemplateIndexed(t);
+
+		assertThat(sp.execute(11)).isEqualTo(5);
+		assertThat(t.calls).isEqualTo(1);
+
+		verify(callableStatement).setObject(1, 11, Types.INTEGER);
+		verify(callableStatement).registerOutParameter(2, Types.INTEGER);
+	}
+
+	/**
+	 * Confirm our JdbcTemplate is used
+	 */
+	@Test
+	public void testStoredProcedureConfiguredViaJdbcTemplateIndexed() throws Exception {
+		given(callableStatement.execute()).willReturn(false);
+		given(callableStatement.getUpdateCount()).willReturn(-1);
+		given(callableStatement.getObject(2)).willReturn(4);
+		given(connection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}")).willReturn(callableStatement);
+		JdbcTemplate t = new JdbcTemplate();
+		t.setDataSource(dataSource);
+		StoredProcedureConfiguredViaJdbcTemplateIndexed sp = new StoredProcedureConfiguredViaJdbcTemplateIndexed(t);
 		assertThat(sp.execute(1106)).isEqualTo(4);
 		verify(callableStatement).setObject(1, 1106, Types.INTEGER);
 		verify(callableStatement).registerOutParameter(2, Types.INTEGER);
@@ -407,7 +462,7 @@ public class StoredProcedureTests {
 		NumericWithScaleStoredProcedure nwssp = new NumericWithScaleStoredProcedure(dataSource);
 		Map<String, Object> out = nwssp.executeTest();
 		assertThat(out.get("out")).isEqualTo(new BigDecimal("12345.6789"));
-		verify(callableStatement).registerOutParameter(1, Types.DECIMAL, 4);
+		verify(callableStatement).registerOutParameter("out", Types.DECIMAL, 4);
 	}
 
 	private static class StoredProcedureConfiguredViaJdbcTemplate extends StoredProcedure {
@@ -430,6 +485,24 @@ public class StoredProcedureTests {
 		}
 	}
 
+	private static class StoredProcedureConfiguredViaJdbcTemplateIndexed extends StoredProcedure {
+
+		public static final String SQL = "configured_via_jt";
+
+		public StoredProcedureConfiguredViaJdbcTemplateIndexed(JdbcTemplate t) {
+			setJdbcTemplate(t);
+			setSql(SQL);
+			declareParameter(new SqlParameter("intIn", Types.INTEGER));
+			declareParameter(new SqlOutParameter("intOut", Types.INTEGER));
+			compile();
+		}
+
+		public int execute(int intIn) {
+			Map<String, Object> out = execute(new Object[] {intIn});
+			return ((Number) out.get("intOut")).intValue();
+		}
+	}
+
 	private static class AddInvoice extends StoredProcedure {
 
 		public static final String SQL = "add_invoice";
@@ -444,9 +517,9 @@ public class StoredProcedureTests {
 		}
 
 		public int execute(int amount, int custid) {
-			Map<String, Integer> in = new HashMap<>();
-			in.put("amount", amount);
-			in.put("custid", custid);
+			Map<String, Object> in = Map.ofEntries(
+					entry("amount", 1106),
+					entry("custid", 3));
 			Map<String, Object> out = execute(in);
 			return ((Number) out.get("newid")).intValue();
 		}
@@ -625,8 +698,7 @@ public class StoredProcedureTests {
 		}
 
 		public Map<String, Object> executeTest(final int[] inValue) {
-			Map<String, AbstractSqlTypeValue> in = new HashMap<>();
-			in.put("in", new AbstractSqlTypeValue() {
+			Object in = new AbstractSqlTypeValue() {
 				@Override
 				public Object createTypeValue(Connection con, int type, String typeName) {
 					// assertEquals(Connection.class, con.getClass());
@@ -634,7 +706,7 @@ public class StoredProcedureTests {
 					// assertEquals("NUMBER", typeName);
 					return inValue;
 				}
-			});
+			};
 			return execute(in);
 		}
 	}

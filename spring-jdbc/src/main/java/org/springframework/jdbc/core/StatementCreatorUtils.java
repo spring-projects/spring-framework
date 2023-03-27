@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Blob;
+import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -39,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.SpringProperties;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.SqlValue;
 import org.springframework.lang.Nullable;
 
@@ -155,6 +157,21 @@ public abstract class StatementCreatorUtils {
 	/**
 	 * Set the value for a parameter. The method used is based on the SQL type
 	 * of the parameter and we can handle complex types like arrays and LOBs.
+	 * @param cs the callable statement
+	 * @param paramName name of the parameter we are setting
+	 * @param param the parameter as it is declared including type
+	 * @param inValue the value to set
+	 * @throws SQLException if thrown by PreparedStatement methods
+	 */
+	public static void setParameterValue(CallableStatement cs, String paramName, SqlParameter param,
+			@Nullable Object inValue) throws SQLException {
+
+		setParameterValueInternal(cs, paramName, param.getSqlType(), param.getTypeName(), param.getScale(), inValue);
+	}
+
+	/**
+	 * Set the value for a parameter. The method used is based on the SQL type
+	 * of the parameter and we can handle complex types like arrays and LOBs.
 	 * @param ps the prepared statement or callable statement
 	 * @param paramIndex index of the parameter we are setting
 	 * @param sqlType the SQL type of the parameter
@@ -234,6 +251,57 @@ public abstract class StatementCreatorUtils {
 		}
 		else {
 			setValue(ps, paramIndex, sqlTypeToUse, typeNameToUse, scale, inValueToUse);
+		}
+	}
+
+	/**
+	 * Set the value for a parameter. The method used is based on the SQL type
+	 * of the parameter and we can handle complex types like arrays and LOBs.
+	 * @param cs the callable statement
+	 * @param paramName index of the parameter we are setting
+	 * @param sqlType the SQL type of the parameter
+	 * @param typeName the type name of the parameter
+	 * (optional, only used for SQL NULL and SqlTypeValue)
+	 * @param scale the number of digits after the decimal point
+	 * (for DECIMAL and NUMERIC types)
+	 * @param inValue the value to set (plain value or an SqlTypeValue)
+	 * @throws SQLException if thrown by PreparedStatement methods
+	 * @see SqlTypeValue
+	 */
+	private static void setParameterValueInternal(CallableStatement cs, String paramName, int sqlType,
+			@Nullable String typeName, @Nullable Integer scale, @Nullable Object inValue) throws SQLException {
+
+		String typeNameToUse = typeName;
+		int sqlTypeToUse = sqlType;
+		Object inValueToUse = inValue;
+
+		// override type info?
+		if (inValue instanceof SqlParameterValue parameterValue) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramName +
+						", SQL type " + parameterValue.getSqlType() + ", type name " + parameterValue.getTypeName());
+			}
+			if (parameterValue.getSqlType() != SqlTypeValue.TYPE_UNKNOWN) {
+				sqlTypeToUse = parameterValue.getSqlType();
+			}
+			if (parameterValue.getTypeName() != null) {
+				typeNameToUse = parameterValue.getTypeName();
+			}
+			inValueToUse = parameterValue.getValue();
+		}
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Setting SQL statement parameter value: column index " + paramName +
+					", parameter value [" + inValueToUse +
+					"], value class [" + (inValueToUse != null ? inValueToUse.getClass().getName() : "null") +
+					"], SQL type " + (sqlTypeToUse == SqlTypeValue.TYPE_UNKNOWN ? "unknown" : Integer.toString(sqlTypeToUse)));
+		}
+
+		if (inValueToUse == null) {
+			setNull(cs, paramName, sqlTypeToUse, typeNameToUse);
+		}
+		else {
+			setValue(cs, paramName, sqlTypeToUse, typeNameToUse, scale, inValueToUse);
 		}
 	}
 
@@ -413,6 +481,178 @@ public abstract class StatementCreatorUtils {
 		else {
 			// Fall back to generic setObject call with SQL type specified.
 			ps.setObject(paramIndex, inValue, sqlType);
+		}
+	}
+
+	/**
+	 * Set the specified PreparedStatement parameter to null,
+	 * respecting database-specific peculiarities.
+	 */
+	private static void setNull(CallableStatement cs, String paramName, int sqlType, @Nullable String typeName)
+			throws SQLException {
+
+		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER && typeName == null)) {
+			boolean useSetObject = false;
+			Integer sqlTypeToUse = null;
+			if (!shouldIgnoreGetParameterType) {
+				logger.debug("JDBC getParameterType call not supported for named binds - using fallback method instead");
+			}
+			if (sqlTypeToUse == null) {
+				// Proceed with database-specific checks
+				sqlTypeToUse = Types.NULL;
+				DatabaseMetaData dbmd = cs.getConnection().getMetaData();
+				String jdbcDriverName = dbmd.getDriverName();
+				String databaseProductName = dbmd.getDatabaseProductName();
+				if (databaseProductName.startsWith("Informix") ||
+						(jdbcDriverName.startsWith("Microsoft") && jdbcDriverName.contains("SQL Server"))) {
+					// "Microsoft SQL Server JDBC Driver 3.0" versus "Microsoft JDBC Driver 4.0 for SQL Server"
+					useSetObject = true;
+				}
+				else if (databaseProductName.startsWith("DB2") ||
+						jdbcDriverName.startsWith("jConnect") ||
+						jdbcDriverName.startsWith("SQLServer") ||
+						jdbcDriverName.startsWith("Apache Derby")) {
+					sqlTypeToUse = Types.VARCHAR;
+				}
+			}
+			if (useSetObject) {
+				cs.setObject(paramName, null);
+			}
+			else {
+				cs.setNull(paramName, sqlTypeToUse);
+			}
+		}
+		else if (typeName != null) {
+			cs.setNull(paramName, sqlType, typeName);
+		}
+		else {
+			cs.setNull(paramName, sqlType);
+		}
+	}
+
+	private static void setValue(CallableStatement cs, String paramName, int sqlType,
+			@Nullable String typeName, @Nullable Integer scale, Object inValue) throws SQLException {
+
+		if (inValue instanceof SqlTypeValue) {
+			throw new InvalidDataAccessApiUsageException("SqlTypeValue not supported for named builds");
+		}
+		else if (inValue instanceof SqlValue sqlValue) {
+			throw new InvalidDataAccessApiUsageException("SqlValue not supported for named builds");
+		}
+		else if (sqlType == Types.VARCHAR || sqlType == Types.LONGVARCHAR ) {
+			cs.setString(paramName, inValue.toString());
+		}
+		else if (sqlType == Types.NVARCHAR || sqlType == Types.LONGNVARCHAR) {
+			cs.setNString(paramName, inValue.toString());
+		}
+		else if ((sqlType == Types.CLOB || sqlType == Types.NCLOB) && isStringValue(inValue.getClass())) {
+			String strVal = inValue.toString();
+			if (strVal.length() > 4000) {
+				// Necessary for older Oracle drivers, in particular when running against an Oracle 10 database.
+				// Should also work fine against other drivers/databases since it uses standard JDBC 4.0 API.
+				if (sqlType == Types.NCLOB) {
+					cs.setNClob(paramName, new StringReader(strVal), strVal.length());
+				}
+				else {
+					cs.setClob(paramName, new StringReader(strVal), strVal.length());
+				}
+			}
+			else {
+				// Fallback: setString or setNString binding
+				if (sqlType == Types.NCLOB) {
+					cs.setNString(paramName, strVal);
+				}
+				else {
+					cs.setString(paramName, strVal);
+				}
+			}
+		}
+		else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
+			if (inValue instanceof BigDecimal bigDecimal) {
+				cs.setBigDecimal(paramName, bigDecimal);
+			}
+			else if (scale != null) {
+				cs.setObject(paramName, inValue, sqlType, scale);
+			}
+			else {
+				cs.setObject(paramName, inValue, sqlType);
+			}
+		}
+		else if (sqlType == Types.BOOLEAN) {
+			if (inValue instanceof Boolean flag) {
+				cs.setBoolean(paramName, flag);
+			}
+			else {
+				cs.setObject(paramName, inValue, Types.BOOLEAN);
+			}
+		}
+		else if (sqlType == Types.DATE) {
+			if (inValue instanceof java.util.Date date) {
+				if (inValue instanceof java.sql.Date sqlDate) {
+					cs.setDate(paramName, sqlDate);
+				}
+				else {
+					cs.setDate(paramName, new java.sql.Date(date.getTime()));
+				}
+			}
+			else if (inValue instanceof Calendar cal) {
+				cs.setDate(paramName, new java.sql.Date(cal.getTime().getTime()), cal);
+			}
+			else {
+				cs.setObject(paramName, inValue, Types.DATE);
+			}
+		}
+		else if (sqlType == Types.TIME) {
+			if (inValue instanceof java.util.Date date) {
+				if (inValue instanceof java.sql.Time time) {
+					cs.setTime(paramName, time);
+				}
+				else {
+					cs.setTime(paramName, new java.sql.Time(date.getTime()));
+				}
+			}
+			else if (inValue instanceof Calendar cal) {
+				cs.setTime(paramName, new java.sql.Time(cal.getTime().getTime()), cal);
+			}
+			else {
+				cs.setObject(paramName, inValue, Types.TIME);
+			}
+		}
+		else if (sqlType == Types.TIMESTAMP) {
+			if (inValue instanceof java.util.Date date) {
+				if (inValue instanceof java.sql.Timestamp timestamp) {
+					cs.setTimestamp(paramName, timestamp);
+				}
+				else {
+					cs.setTimestamp(paramName, new java.sql.Timestamp(date.getTime()));
+				}
+			}
+			else if (inValue instanceof Calendar cal) {
+				cs.setTimestamp(paramName, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+			}
+			else {
+				cs.setObject(paramName, inValue, Types.TIMESTAMP);
+			}
+		}
+		else if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER &&
+				"Oracle".equals(cs.getConnection().getMetaData().getDatabaseProductName()))) {
+			if (isStringValue(inValue.getClass())) {
+				cs.setString(paramName, inValue.toString());
+			}
+			else if (isDateValue(inValue.getClass())) {
+				cs.setTimestamp(paramName, new java.sql.Timestamp(((java.util.Date) inValue).getTime()));
+			}
+			else if (inValue instanceof Calendar cal) {
+				cs.setTimestamp(paramName, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+			}
+			else {
+				// Fall back to generic setObject call without SQL type specified.
+				cs.setObject(paramName, inValue);
+			}
+		}
+		else {
+			// Fall back to generic setObject call with SQL type specified.
+			cs.setObject(paramName, inValue, sqlType);
 		}
 	}
 
