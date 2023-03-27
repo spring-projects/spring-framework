@@ -743,7 +743,7 @@ or to render a JSON response, as the following example shows:
 
 		@RequestMapping(path = "/error")
 		public Map<String, Object> handle(HttpServletRequest request) {
-			Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, Object> map = new HashMap<>();
 			map.put("status", request.getAttribute("jakarta.servlet.error.status_code"));
 			map.put("reason", request.getAttribute("jakarta.servlet.error.message"));
 			return map;
@@ -4393,7 +4393,7 @@ return value with `DeferredResult`, as the following example shows:
 	@GetMapping("/quotes")
 	@ResponseBody
 	public DeferredResult<String> quotes() {
-		DeferredResult<String> deferredResult = new DeferredResult<String>();
+		DeferredResult<String> deferredResult = new DeferredResult<>();
 		// Save the deferredResult somewhere..
 		return deferredResult;
 	}
