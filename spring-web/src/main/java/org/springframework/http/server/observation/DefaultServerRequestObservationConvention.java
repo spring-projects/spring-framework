@@ -84,7 +84,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 	public String getContextualName(ServerRequestObservationContext context) {
 		String httpMethod = context.getCarrier().getMethod().toLowerCase();
 		if (context.getPathPattern() != null) {
-			return "http %s %s".formatted(httpMethod, context.getPathPattern());
+			return "http " + httpMethod + " " + context.getPathPattern();
 		}
 		return "http " + httpMethod;
 	}
