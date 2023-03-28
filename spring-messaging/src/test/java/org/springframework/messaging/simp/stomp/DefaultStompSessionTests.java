@@ -398,7 +398,7 @@ public class DefaultStompSessionTests {
 	@Test // gh-23358
 	public void sendByteArray() {
 		this.session.afterConnected(this.connection);
-		assertThat(this.session.isConnected());
+		assertThat(this.session.isConnected()).isTrue();
 
 		String destination = "/topic/foo";
 		String payload = "sample payload";

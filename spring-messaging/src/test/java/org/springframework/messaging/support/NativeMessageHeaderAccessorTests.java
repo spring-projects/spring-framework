@@ -236,7 +236,7 @@ public class NativeMessageHeaderAccessorTests {
 		Message<?> target = MessageBuilder.createMessage(source.getPayload(), targetAccessor.getMessageHeaders());
 
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(target);
-		assertThat(accessor.isMutable());
+		assertThat(accessor.isMutable()).isTrue();
 		((NativeMessageHeaderAccessor) accessor).addNativeHeader("foo", "baz");
 		assertThat(((NativeMessageHeaderAccessor) accessor).getNativeHeader("foo")).containsExactly("bar", "baz");
 	}
@@ -253,7 +253,7 @@ public class NativeMessageHeaderAccessorTests {
 		Message<?> target = MessageBuilder.createMessage(source.getPayload(), targetAccessor.getMessageHeaders());
 
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(target);
-		assertThat(accessor.isMutable());
+		assertThat(accessor.isMutable()).isTrue();
 		((NativeMessageHeaderAccessor) accessor).addNativeHeader("foo", "baz");
 		assertThat(((NativeMessageHeaderAccessor) accessor).getNativeHeader("foo")).containsExactly("bar", "baz");
 	}
