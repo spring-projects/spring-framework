@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.rsocket;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,7 +72,7 @@ public class DefaultMetadataExtractor implements MetadataExtractor, MetadataExtr
 	 * Constructor with list of decoders for de-serializing metadata entries.
 	 */
 	public DefaultMetadataExtractor(List<Decoder<?>> decoders) {
-		this.decoders = Collections.unmodifiableList(new ArrayList<>(decoders));
+		this.decoders = List.copyOf(decoders);
 	}
 
 
