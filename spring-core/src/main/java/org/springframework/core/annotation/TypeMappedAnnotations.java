@@ -602,7 +602,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 						this.requiredType != null ? IntrospectionFailureLogger.INFO : IntrospectionFailureLogger.DEBUG);
 				this.mappingCursors[annotationResult]++;
 				if (mergedAnnotation == null) {
-					return tryAdvance(aggregate, action);
+					return tryAdvance(aggregate, action, lowestDistance, annotationResult);
 				}
 				action.accept(mergedAnnotation);
 				return true;

@@ -249,7 +249,7 @@ final class MergedAnnotationsCollection implements MergedAnnotations {
 						annotationResult, this.mappingCursors[annotationResult]);
 				this.mappingCursors[annotationResult]++;
 				if (mergedAnnotation == null) {
-					return tryAdvance(action);
+					return tryAdvance(aggregate, action, lowestDistance, annotationResult);
 				}
 				action.accept(mergedAnnotation);
 				return true;
