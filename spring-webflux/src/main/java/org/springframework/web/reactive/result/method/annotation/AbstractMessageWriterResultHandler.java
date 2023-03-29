@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,8 +139,15 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
-			actualElementType = body != null ? ResolvableType.forInstance(body) : bodyType;
-			elementType = (bodyType.toClass() == Object.class && body != null ? actualElementType : bodyType);
+			ResolvableType bodyInstanceType = ResolvableType.forInstance(body);
+			if (bodyType.toClass() == Object.class && body != null) {
+				actualElementType = bodyInstanceType;
+				elementType = bodyInstanceType;
+			}
+			else {
+				actualElementType = (body == null || bodyInstanceType.hasUnresolvableGenerics()) ? bodyType : bodyInstanceType;
+				elementType = bodyType;
+			}
 		}
 
 		if (elementType.resolve() == void.class || elementType.resolve() == Void.class) {
