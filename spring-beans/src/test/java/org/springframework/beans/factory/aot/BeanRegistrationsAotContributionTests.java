@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
@@ -55,6 +57,7 @@ import static org.springframework.beans.factory.aot.BeanRegistrationsAotContribu
  * @author Phillip Webb
  * @author Sebastien Deleuze
  * @author Stephane Nicoll
+ * @author Brian Clozel
  */
 class BeanRegistrationsAotContributionTests {
 
@@ -153,6 +156,21 @@ class BeanRegistrationsAotContributionTests {
 		assertThat(actual.getMethods()).isNotNull();
 	}
 
+	@Test
+	void applyToRegisterReflectionHints() {
+		List<BeanRegistrationsCode> beanRegistrationsCodes = new ArrayList<>();
+		RegisteredBean registeredBean = registerBean(
+				new RootBeanDefinition(TestBean.class));
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
+				this.methodGeneratorFactory, registeredBean, null,
+				Collections.emptyList());
+		BeanRegistrationsAotContribution contribution = createContribution(generator);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		assertThat(RuntimeHintsPredicates.reflection().onType(TestBean.class)
+				.withMemberCategory(MemberCategory.INTROSPECT_DECLARED_METHODS))
+				.accepts(this.generationContext.getRuntimeHints());
+	}
+
 	private RegisteredBean registerBean(RootBeanDefinition rootBeanDefinition) {
 		String beanName = "testBean";
 		this.beanFactory.registerBeanDefinition(beanName, rootBeanDefinition);
@@ -186,7 +204,7 @@ class BeanRegistrationsAotContributionTests {
 
 	private BeanRegistrationsAotContribution createContribution(
 			BeanDefinitionMethodGenerator methodGenerator,String... aliases) {
-		return new BeanRegistrationsAotContribution(Map.of("testBean", new Registration(methodGenerator, aliases)));
+		return new BeanRegistrationsAotContribution(Map.of(new BeanRegistrationKey("testBean", TestBean.class), new Registration(methodGenerator, aliases)));
 	}
 
 }

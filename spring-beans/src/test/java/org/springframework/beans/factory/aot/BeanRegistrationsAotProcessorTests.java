@@ -51,7 +51,7 @@ class BeanRegistrationsAotProcessorTests {
 		BeanRegistrationsAotContribution contribution = processor
 				.processAheadOfTime(beanFactory);
 		assertThat(contribution).extracting("registrations")
-				.asInstanceOf(InstanceOfAssertFactories.MAP).containsKeys("b1", "b2");
+				.asInstanceOf(InstanceOfAssertFactories.MAP).hasSize(2);
 	}
 
 	@Test
@@ -63,7 +63,7 @@ class BeanRegistrationsAotProcessorTests {
 		BeanRegistrationsAotContribution contribution = processor
 				.processAheadOfTime(beanFactory);
 		assertThat(contribution).extracting("registrations").asInstanceOf(InstanceOfAssertFactories.MAP)
-				.hasEntrySatisfying("test", registration ->
+				.hasEntrySatisfying(new BeanRegistrationKey("test", TestBean.class), registration ->
 						assertThat(registration).extracting("aliases").asInstanceOf(InstanceOfAssertFactories.ARRAY)
 								.singleElement().isEqualTo("testAlias"));
 	}

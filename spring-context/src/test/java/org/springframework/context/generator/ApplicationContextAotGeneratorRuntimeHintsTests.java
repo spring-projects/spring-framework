@@ -18,7 +18,6 @@ package org.springframework.context.generator;
 
 import java.util.function.BiConsumer;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.RuntimeHints;
@@ -72,7 +71,6 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 	}
 
 	@Test
-	@Disabled("until gh-29246 is re-applied")
 	void generateApplicationContextWithMultipleInitDestroyMethods() {
 		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyComponent.class);
