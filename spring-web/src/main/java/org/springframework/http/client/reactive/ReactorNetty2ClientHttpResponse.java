@@ -137,10 +137,8 @@ class ReactorNetty2ClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String getSameSite(HttpSetCookie cookie) {
-		if (cookie instanceof DefaultHttpSetCookie defaultCookie) {
-			if (defaultCookie.sameSite() != null) {
-				return defaultCookie.sameSite().name();
-			}
+		if (cookie instanceof DefaultHttpSetCookie defaultCookie && defaultCookie.sameSite() != null) {
+			return defaultCookie.sameSite().name();
 		}
 		return null;
 	}

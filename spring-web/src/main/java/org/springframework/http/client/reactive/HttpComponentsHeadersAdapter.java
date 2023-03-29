@@ -53,6 +53,7 @@ class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
 
 
 	@Override
+	@Nullable
 	public String getFirst(String key) {
 		Header header = this.message.getFirstHeader(key);
 		return (header != null ? header.getValue() : null);

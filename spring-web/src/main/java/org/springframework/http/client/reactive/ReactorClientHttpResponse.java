@@ -153,10 +153,8 @@ class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String getSameSite(Cookie cookie) {
-		if (cookie instanceof DefaultCookie defaultCookie) {
-			if (defaultCookie.sameSite() != null) {
-				return defaultCookie.sameSite().name();
-			}
+		if (cookie instanceof DefaultCookie defaultCookie && defaultCookie.sameSite() != null) {
+			return defaultCookie.sameSite().name();
 		}
 		return null;
 	}

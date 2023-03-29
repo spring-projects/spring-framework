@@ -44,7 +44,7 @@ import org.springframework.util.MultiValueMap;
  */
 class JettyClientHttpResponse implements ClientHttpResponse {
 
-	private static final Pattern SAMESITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
+	private static final Pattern SAME_SITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
 
 
 	private final ReactiveResponse reactiveResponse;
@@ -90,7 +90,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String parseSameSite(String headerValue) {
-		Matcher matcher = SAMESITE_PATTERN.matcher(headerValue);
+		Matcher matcher = SAME_SITE_PATTERN.matcher(headerValue);
 		return (matcher.matches() ? matcher.group(1) : null);
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.http.client.reactive;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import reactor.core.publisher.Mono;
 import reactor.netty.NettyOutbound;
@@ -40,7 +41,7 @@ import org.springframework.util.Assert;
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
 
-	private final static Function<HttpClient, HttpClient> defaultInitializer = client -> client.compress(true);
+	private static final UnaryOperator<HttpClient> defaultInitializer = client -> client.compress(true);
 
 
 	private final HttpClient httpClient;
@@ -72,7 +73,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 * @param mapper a mapper for further initialization of the created client
 	 * @since 5.1
 	 */
-	public ReactorClientHttpConnector(ReactorResourceFactory factory, Function<HttpClient, HttpClient> mapper) {
+	public ReactorClientHttpConnector(ReactorResourceFactory factory, UnaryOperator<HttpClient> mapper) {
 		ConnectionProvider provider = factory.getConnectionProvider();
 		Assert.notNull(provider, "No ConnectionProvider: is ReactorResourceFactory not initialized yet?");
 		this.httpClient = defaultInitializer.andThen(mapper).andThen(applyLoopResources(factory))
