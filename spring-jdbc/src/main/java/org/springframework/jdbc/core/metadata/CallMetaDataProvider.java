@@ -180,4 +180,11 @@ public interface CallMetaDataProvider {
 	 */
 	boolean isSupportsSchemasInProcedureCalls();
 
+	/**
+	 * Returns the name of the named parameter to use for binding the given parameter name.
+	 * @param paramName the name of the parameter to bind
+	 * @return the name of the named parameter to use for binding the given parameter name,
+	 */
+	String namedParamBindingToUse(@Nullable String paramName);
+
 }

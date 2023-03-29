@@ -676,7 +676,9 @@ public class CallMetaDataContext {
 	 * @since 4.2
 	 */
 	protected String createParameterBinding(SqlParameter parameter) {
-		return (isNamedBinding() ? parameter.getName() + " => ?" : "?");
+		Assert.state(this.metaDataProvider != null, "No CallMetaDataProvider available");
+
+		return (isNamedBinding() ? this.metaDataProvider.namedParamBindingToUse(parameter.getName()) : "?");
 	}
 
 	private static String lowerCase(@Nullable String paramName) {

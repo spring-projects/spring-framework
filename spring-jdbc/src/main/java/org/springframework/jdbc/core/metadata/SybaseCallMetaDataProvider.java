@@ -60,4 +60,9 @@ public class SybaseCallMetaDataProvider extends GenericCallMetaDataProvider {
 				RETURN_VALUE_NAME.equals(parameterNameToUse(parameterName)));
 	}
 
+	@Override
+	public String namedParamBindingToUse(@Nullable String paramName) {
+		return paramName + " = ?";
+	}
+
 }

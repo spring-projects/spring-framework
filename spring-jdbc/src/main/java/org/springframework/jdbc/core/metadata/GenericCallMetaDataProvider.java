@@ -247,6 +247,16 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	/**
+	 * Returns the name of the named parameter to use for binding the given parameter name.
+	 * @param paramName the name of the parameter to bind
+	 * @return the name of the named parameter to use for binding the given parameter name,
+	 */
+	@Override
+	public String namedParamBindingToUse(@Nullable String paramName) {
+		return paramName + " => ?";
+	}
+
+	/**
 	 * Specify whether the database uses upper case for identifiers.
 	 */
 	protected void setStoresUpperCaseIdentifiers(boolean storesUpperCaseIdentifiers) {

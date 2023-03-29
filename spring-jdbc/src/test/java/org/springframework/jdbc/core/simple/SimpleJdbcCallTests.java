@@ -349,4 +349,17 @@ class SimpleJdbcCallTests {
 		verify(procedureColumnsResultSet).close();
 	}
 
+	@Test
+	void correctSybaseFunctionStatementNamed() throws Exception {
+		given(databaseMetaData.getDatabaseProductName()).willReturn("Sybase");
+		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource)
+				.withoutProcedureColumnMetaDataAccess()
+				.withNamedBinding()
+				.withProcedureName("ADD_INVOICE")
+				.declareParameters(new SqlParameter("@AMOUNT", Types.NUMERIC))
+				.declareParameters(new SqlParameter("@CUSTID", Types.NUMERIC));
+		adder.compile();
+		verifyStatement(adder, "{call ADD_INVOICE(@AMOUNT = ?, @CUSTID = ?)}");
+	}
+
 }
