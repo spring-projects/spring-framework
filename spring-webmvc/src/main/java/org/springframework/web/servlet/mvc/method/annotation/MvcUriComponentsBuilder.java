@@ -780,7 +780,9 @@ public class MvcUriComponentsBuilder {
 
 			else if (controllerType.isInterface()) {
 				ClassLoader classLoader = controllerType.getClassLoader();
-				if (classLoader == null) {  // JDK interface type from bootstrap loader
+				if (classLoader == null || classLoader.getParent() == null) {
+					// JDK interface type from bootstrap loader or platform loader ->
+					// use higher-level loader which can see Spring infrastructure classes
 					classLoader = MethodInvocationInfo.class.getClassLoader();
 				}
 				Class<?>[] ifcs = new Class<?>[] {controllerType, MethodInvocationInfo.class};

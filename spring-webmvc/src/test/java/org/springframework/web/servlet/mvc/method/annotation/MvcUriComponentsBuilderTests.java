@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.sql.Savepoint;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -385,14 +386,6 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test  // SPR-16710
-	public void fromMethodCallWithCharSequenceReturnType() {
-		UriComponents uriComponents = fromMethodCall(
-				on(BookingControllerWithCharSequence.class).getBooking(21L)).buildAndExpand(42);
-
-		assertThat(uriComponents.encode().toUri().toString()).isEqualTo("http://localhost/hotels/42/bookings/21");
-	}
-
-	@Test  // SPR-16710
 	public void fromMethodCallWithStringReturnType() {
 		assertThatIllegalStateException().isThrownBy(() -> {
 				UriComponents uriComponents = fromMethodCall(
@@ -405,6 +398,22 @@ public class MvcUriComponentsBuilderTests {
 	public void fromMethodNameWithStringReturnType() {
 		UriComponents uriComponents = fromMethodName(
 				BookingControllerWithString.class, "getBooking", 21L).buildAndExpand(42);
+
+		assertThat(uriComponents.encode().toUri().toString()).isEqualTo("http://localhost/hotels/42/bookings/21");
+	}
+
+	@Test  // gh-30210
+	public void fromMethodCallWithCharSequenceReturnType() {
+		UriComponents uriComponents = fromMethodCall(
+				on(BookingControllerWithCharSequence.class).getBooking(21L)).buildAndExpand(42);
+
+		assertThat(uriComponents.encode().toUri().toString()).isEqualTo("http://localhost/hotels/42/bookings/21");
+	}
+
+	@Test  // gh-30210
+	public void fromMethodCallWithJdbc30115ReturnType() {
+		UriComponents uriComponents = fromMethodCall(
+				on(BookingControllerWithJdbcSavepoint.class).getBooking(21L)).buildAndExpand(42);
 
 		assertThat(uriComponents.encode().toUri().toString()).isEqualTo("http://localhost/hotels/42/bookings/21");
 	}
@@ -718,6 +727,17 @@ public class MvcUriComponentsBuilderTests {
 
 	@Controller
 	@RequestMapping("/hotels/{hotel}")
+	static class BookingControllerWithString {
+
+		@GetMapping("/bookings/{booking}")
+		public String getBooking(@PathVariable Long booking) {
+			return "url";
+		}
+	}
+
+
+	@Controller
+	@RequestMapping("/hotels/{hotel}")
 	static class BookingControllerWithCharSequence {
 
 		@GetMapping("/bookings/{booking}")
@@ -729,11 +749,11 @@ public class MvcUriComponentsBuilderTests {
 
 	@Controller
 	@RequestMapping("/hotels/{hotel}")
-	static class BookingControllerWithString {
+	static class BookingControllerWithJdbcSavepoint {
 
 		@GetMapping("/bookings/{booking}")
-		public String getBooking(@PathVariable Long booking) {
-			return "url";
+		public Savepoint getBooking(@PathVariable Long booking) {
+			return null;
 		}
 	}
 
