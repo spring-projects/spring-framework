@@ -133,6 +133,19 @@ class WebClientObservationTests {
 			verifyAndGetRequest();
 	}
 
+	@Test
+	void recordsObservationWithResponseDetailsWhenFilterFunctionErrors() {
+		ExchangeFilterFunction errorFunction = (req, next) -> next.exchange(req).then(Mono.error(new IllegalStateException()));
+		WebClient client = this.builder.filter(errorFunction).build();
+		Mono<Void> responseMono = client.get().uri("/path").retrieve().bodyToMono(Void.class);
+		StepVerifier.create(responseMono)
+				.expectError(IllegalStateException.class)
+				.verify(Duration.ofSeconds(5));
+		assertThatHttpObservation()
+				.hasLowCardinalityKeyValue("exception", "IllegalStateException")
+				.hasLowCardinalityKeyValue("status", "200");
+	}
+
 	private TestObservationRegistryAssert.TestObservationRegistryAssertReturningObservationContextAssert assertThatHttpObservation() {
 		return TestObservationRegistryAssert.assertThat(this.observationRegistry)
 				.hasObservationWithNameEqualTo("http.client.requests").that();

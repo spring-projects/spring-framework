@@ -78,6 +78,9 @@ class DefaultWebClient implements WebClient {
 
 	private final ExchangeFunction exchangeFunction;
 
+	@Nullable
+	private final ExchangeFilterFunction filterFunctions;
+
 	private final UriBuilderFactory uriBuilderFactory;
 
 	@Nullable
@@ -93,19 +96,21 @@ class DefaultWebClient implements WebClient {
 
 	private final ObservationRegistry observationRegistry;
 
+	@Nullable
 	private final ClientRequestObservationConvention observationConvention;
 
 	private final DefaultWebClientBuilder builder;
 
 
-	DefaultWebClient(ExchangeFunction exchangeFunction, UriBuilderFactory uriBuilderFactory,
+	DefaultWebClient(ExchangeFunction exchangeFunction, @Nullable ExchangeFilterFunction filterFunctions, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders defaultHeaders, @Nullable MultiValueMap<String, String> defaultCookies,
 			@Nullable Consumer<RequestHeadersSpec<?>> defaultRequest,
 			@Nullable Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlerMap,
-			ObservationRegistry observationRegistry, ClientRequestObservationConvention observationConvention,
+			ObservationRegistry observationRegistry, @Nullable ClientRequestObservationConvention observationConvention,
 			DefaultWebClientBuilder builder) {
 
 		this.exchangeFunction = exchangeFunction;
+		this.filterFunctions = filterFunctions;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.defaultHeaders = defaultHeaders;
 		this.defaultCookies = defaultCookies;
@@ -438,16 +443,21 @@ class DefaultWebClient implements WebClient {
 				observation
 						.parentObservation(contextView.getOrDefault(ObservationThreadLocalAccessor.KEY, null))
 						.start();
+				ExchangeFilterFunction filterFunction = new ObservationFilterFunction(observationContext);
+				if (filterFunctions != null) {
+					filterFunction = filterFunctions.andThen(filterFunction);
+				}
 				ClientRequest request = requestBuilder.build();
 				observationContext.setUriTemplate((String) request.attribute(URI_TEMPLATE_ATTRIBUTE).orElse(null));
 				observationContext.setRequest(request);
-				Mono<ClientResponse> responseMono = exchangeFunction.exchange(request)
+				Mono<ClientResponse> responseMono = filterFunction.apply(exchangeFunction)
+						.exchange(request)
 						.checkpoint("Request to " + this.httpMethod.name() + " " + this.uri + " [DefaultWebClient]")
 						.switchIfEmpty(NO_HTTP_CLIENT_RESPONSE_ERROR);
 				if (this.contextModifier != null) {
 					responseMono = responseMono.contextWrite(this.contextModifier);
 				}
-				return responseMono.doOnNext(observationContext::setResponse)
+				return responseMono
 						.doOnError(observationContext::setError)
 						.doOnCancel(() -> {
 							observationContext.setAborted(true);
@@ -715,6 +725,21 @@ class DefaultWebClient implements WebClient {
 			public Mono<? extends Throwable> apply(ClientResponse response) {
 				return this.exceptionFunction.apply(response);
 			}
+		}
+	}
+
+	private static class ObservationFilterFunction implements ExchangeFilterFunction {
+
+		private final ClientRequestObservationContext observationContext;
+
+		public ObservationFilterFunction(ClientRequestObservationContext observationContext) {
+			this.observationContext = observationContext;
+		}
+
+		@Override
+		public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
+			return next.exchange(request)
+						.doOnNext(this.observationContext::setResponse);
 		}
 	}
 
