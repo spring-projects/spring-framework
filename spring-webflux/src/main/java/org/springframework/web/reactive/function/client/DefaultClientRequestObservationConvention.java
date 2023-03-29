@@ -94,7 +94,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(ClientRequestObservationContext context) {
-		return KeyValues.of(uri(context), method(context), status(context), clientName(context), exception(context), outcome(context));
+		return KeyValues.of(clientName(context), exception(context), method(context), outcome(context), status(context), uri(context));
 	}
 
 	protected KeyValue uri(ClientRequestObservationContext context) {

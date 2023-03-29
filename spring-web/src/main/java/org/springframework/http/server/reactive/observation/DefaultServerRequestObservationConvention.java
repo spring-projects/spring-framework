@@ -91,7 +91,7 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(ServerRequestObservationContext context) {
-		return KeyValues.of(method(context), uri(context), status(context), exception(context), outcome(context));
+		return KeyValues.of(exception(context), method(context), outcome(context), status(context), uri(context));
 	}
 
 	@Override
