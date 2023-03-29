@@ -94,6 +94,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(ClientRequestObservationContext context) {
+		// Make sure that KeyValues entries are already sorted by name for better performance
 		return KeyValues.of(clientName(context), exception(context), method(context), outcome(context), status(context), uri(context));
 	}
 
@@ -165,6 +166,7 @@ public class DefaultClientRequestObservationConvention implements ClientRequestO
 
 	@Override
 	public KeyValues getHighCardinalityKeyValues(ClientRequestObservationContext context) {
+		// Make sure that KeyValues entries are already sorted by name for better performance
 		return KeyValues.of(httpUrl(context));
 	}
 

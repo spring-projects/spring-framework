@@ -91,11 +91,13 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(ServerRequestObservationContext context) {
+		// Make sure that KeyValues entries are already sorted by name for better performance
 		return KeyValues.of(exception(context), method(context), outcome(context), status(context), uri(context));
 	}
 
 	@Override
 	public KeyValues getHighCardinalityKeyValues(ServerRequestObservationContext context) {
+		// Make sure that KeyValues entries are already sorted by name for better performance
 		return KeyValues.of(httpUrl(context));
 	}
 
