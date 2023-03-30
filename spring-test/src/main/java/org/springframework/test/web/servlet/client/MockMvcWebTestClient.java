@@ -39,7 +39,6 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.client.MockMvcWebTestClient.Builder;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
@@ -90,12 +89,12 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @since 5.3
  */
 public interface MockMvcWebTestClient extends WebTestClient {
-	
+
 	/**
 	 * Return a builder to mutate properties of this web test client.
 	 */
 	Builder mutate();
-	
+
 	/**
 	 * Mutate the {@link MockMvcWebTestClient}, apply the given requestPostProcessor, and build
 	 * a new instance. Essentially a shortcut for:
@@ -106,7 +105,7 @@ public interface MockMvcWebTestClient extends WebTestClient {
 	 * @return the mutated test client
 	 */
 	MockMvcWebTestClient mutateWith(RequestPostProcessor requestPostProcessor);
-	
+
 	/**
 	 * Mutate the {@link MockMvcWebTestClient}, apply the given configurer, and build
 	 * a new instance. Essentially a shortcut for:
@@ -117,80 +116,6 @@ public interface MockMvcWebTestClient extends WebTestClient {
 	 * @return the mutated test client
 	 */
 	MockMvcWebTestClient mutateWith(MockMvcWebTestClientConfigurer configurer);
-
-	
-	/**
-	 * Steps for customizing the {@link WebClient} used to test with,
-	 * internally delegating to a
-	 * {@link org.springframework.web.reactive.function.client.WebClient.Builder
-	 * WebClient.Builder}.
-	 */
-	interface Builder extends WebTestClient.Builder {
-		Builder mockMvc(MockMvc mockMvc);
-		
-		Builder requestPostProcessor(RequestPostProcessor requestPostProcessor);
-		
-		Builder requestPostProcessors(Consumer<List<RequestPostProcessor>> requestPostProcessorsConsumer);
-		
-		Builder requestBuilderCustomizer(Consumer<MockHttpServletRequestBuilder> requestBuilderCustomizer);
-		
-		Builder requestBuilderCustomizers(Consumer<List<Consumer<MockHttpServletRequestBuilder>>> requestBuilderCustomizersConsumer);
-		
-		Builder apply(MockMvcWebTestClientConfigurer configurer);
-		
-		/* Override methods to return covariant return type */
-		@Override
-		Builder baseUrl(String baseUrl);
-
-		@Override
-		Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
-
-		@Override
-		Builder defaultHeader(String headerName, String... headerValues);
-		
-		@Override
-		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
-
-		@Override
-		Builder defaultCookie(String cookieName, String... cookieValues);
-		
-		@Override
-		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
-		
-		@Override
-		Builder filter(ExchangeFilterFunction filter);
-		
-		@Override
-		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
-		
-		@Override
-		Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> consumer);
-		
-		@Override
-		Builder codecs(Consumer<ClientCodecConfigurer> configurer);
-		
-		@Override
-		Builder exchangeStrategies(ExchangeStrategies strategies);
-		
-		@Override
-		@SuppressWarnings("deprecation")
-		Builder exchangeStrategies(
-				Consumer<ExchangeStrategies.Builder> configurer);
-		
-		@Override
-		Builder responseTimeout(Duration timeout);
-		
-		@Override
-		Builder apply(WebTestClientConfigurer configurer);
-		
-		/**
-		 * Build the {@link WebTestClient} instance.
-		 */
-		@Override
-		MockMvcWebTestClient build();
-		
-	}
-	
 
 	/**
 	 * Begin creating a {@link WebTestClient} by providing the {@code @Controller}
@@ -214,7 +139,7 @@ public interface MockMvcWebTestClient extends WebTestClient {
 	static MockMvcServerSpec<?> bindToApplicationContext(WebApplicationContext context) {
 		return new ApplicationContextMockMvcSpec(context);
 	}
-	
+
 	/**
 	 * Begin creating a {@link WebTestClient} by providing an already
 	 * initialized {@link MockMvc} instance to use as the server.
@@ -504,4 +429,74 @@ public interface MockMvcWebTestClient extends WebTestClient {
 		ControllerSpec customHandlerMapping(Supplier<RequestMappingHandlerMapping> factory);
 	}
 
+	/**
+	 * Steps for customizing the {@link WebClient} used to test with,
+	 * internally delegating to a
+	 * {@link org.springframework.web.reactive.function.client.WebClient.Builder
+	 * WebClient.Builder}.
+	 */
+	interface Builder extends WebTestClient.Builder {
+		Builder mockMvc(MockMvc mockMvc);
+
+		Builder requestPostProcessor(RequestPostProcessor requestPostProcessor);
+
+		Builder requestPostProcessors(Consumer<List<RequestPostProcessor>> requestPostProcessorsConsumer);
+
+		Builder requestBuilderCustomizer(Consumer<MockHttpServletRequestBuilder> requestBuilderCustomizer);
+
+		Builder requestBuilderCustomizers(Consumer<List<Consumer<MockHttpServletRequestBuilder>>> requestBuilderCustomizersConsumer);
+
+		Builder apply(MockMvcWebTestClientConfigurer configurer);
+
+		/* Override methods to return covariant return type */
+		@Override
+		Builder baseUrl(String baseUrl);
+
+		@Override
+		Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
+
+		@Override
+		Builder defaultHeader(String headerName, String... headerValues);
+
+		@Override
+		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
+
+		@Override
+		Builder defaultCookie(String cookieName, String... cookieValues);
+
+		@Override
+		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+
+		@Override
+		Builder filter(ExchangeFilterFunction filter);
+
+		@Override
+		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
+
+		@Override
+		Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> consumer);
+
+		@Override
+		Builder codecs(Consumer<ClientCodecConfigurer> configurer);
+
+		@Override
+		Builder exchangeStrategies(ExchangeStrategies strategies);
+
+		@Override
+		@SuppressWarnings("deprecation")
+		Builder exchangeStrategies(
+				Consumer<ExchangeStrategies.Builder> configurer);
+
+		@Override
+		Builder responseTimeout(Duration timeout);
+
+		@Override
+		Builder apply(WebTestClientConfigurer configurer);
+
+		/**
+		 * Build the {@link WebTestClient} instance.
+		 */
+		@Override
+		MockMvcWebTestClient build();
+	}
 }

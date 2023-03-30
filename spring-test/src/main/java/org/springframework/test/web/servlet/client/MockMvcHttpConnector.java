@@ -82,7 +82,7 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 
 
 	private final MockMvc mockMvc;
-	
+
 	private final Consumer<MockHttpServletRequestBuilder> requestBuilderCustomizer;
 
 	public MockMvcHttpConnector(MockMvc mockMvc, Consumer<MockHttpServletRequestBuilder> requestBuilderCustomizer) {
@@ -149,8 +149,8 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 			if (!ObjectUtils.isEmpty(bytes)) {
 				requestBuilder.content(bytes);
 			}
-			if(requestBuilderCustomizer != null) {
-				requestBuilderCustomizer.accept(requestBuilder);
+			if(this.requestBuilderCustomizer != null) {
+				this.requestBuilderCustomizer.accept(requestBuilder);
 			}
 			return requestBuilder;
 		}
@@ -180,8 +180,8 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 								}))
 				.blockLast(TIMEOUT);
 
-		if(requestBuilderCustomizer != null) {
-			requestBuilderCustomizer.accept(requestBuilder);
+		if(this.requestBuilderCustomizer != null) {
+			this.requestBuilderCustomizer.accept(requestBuilder);
 		}
 		return requestBuilder;
 	}

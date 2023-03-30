@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2023 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.test.web.servlet.client;
 
 import java.time.Duration;
@@ -24,12 +40,17 @@ import org.springframework.web.reactive.function.client.ExchangeFunctions;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.util.UriBuilderFactory;
 
+/**
+ * Default implementation of {@link MockMvcWebTestClient.Builder}.
+ *
+ * @author Justin Tay
+ */
 public class DefaultMockMvcWebTestClientBuilder extends DefaultWebTestClientBuilder implements MockMvcWebTestClient.Builder {
-	
+
 	private MockMvc mockMvc;
-	private List<RequestPostProcessor> requestPostProcessors = new ArrayList<>(); 
+	private List<RequestPostProcessor> requestPostProcessors = new ArrayList<>();
 	private List<Consumer<MockHttpServletRequestBuilder>> requestBuilderCustomizers = new ArrayList<>();
-	
+
 	DefaultMockMvcWebTestClientBuilder(MockMvc mockMvc) {
 		this.mockMvc = mockMvc;
 	}
@@ -41,48 +62,48 @@ public class DefaultMockMvcWebTestClientBuilder extends DefaultWebTestClientBuil
 		this.requestPostProcessors = new ArrayList<>(other.requestPostProcessors);
 		this.requestBuilderCustomizers = new ArrayList<>(other.requestBuilderCustomizers);
 	}
-	
+
 	@Override
 	public Builder mockMvc(MockMvc mockMvc) {
 		this.mockMvc = mockMvc;
 		return this;
 	}
-	
+
 	@Override
 	public Builder requestPostProcessors(Consumer<List<RequestPostProcessor>> requestPostProcessorsConsumer) {
-		requestPostProcessorsConsumer.accept(requestPostProcessors);
+		requestPostProcessorsConsumer.accept(this.requestPostProcessors);
 		return this;
 	}
 
 	@Override
 	public Builder requestPostProcessor(RequestPostProcessor requestPostProcessor) {
-		requestPostProcessors.add(requestPostProcessor);
+		this.requestPostProcessors.add(requestPostProcessor);
 		return this;
 	}
-	
+
 	@Override
 	public Builder requestBuilderCustomizer(Consumer<MockHttpServletRequestBuilder> requestBuilderCustomizer) {
 		this.requestBuilderCustomizers.add(requestBuilderCustomizer);
 		return this;
 	}
-	
+
 	@Override
 	public Builder requestBuilderCustomizers(Consumer<List<Consumer<MockHttpServletRequestBuilder>>> requestBuilderCustomizersConsumer) {
-		requestBuilderCustomizersConsumer.accept(requestBuilderCustomizers);
+		requestBuilderCustomizersConsumer.accept(this.requestBuilderCustomizers);
 		return this;
 	}
-	
+
 	@Override
 	public Builder apply(MockMvcWebTestClientConfigurer configurer) {
 		configurer.afterConfigurerAdded(this, this.httpHandlerBuilder, this.connector);
 		return this;
 	}
-	
+
 	@Override
 	public MockMvcWebTestClient build() {
-		ClientHttpConnector connectorToUse = new MockMvcHttpConnector(mockMvc, customizer -> {
-			requestPostProcessors.forEach(customizer::with);
-			requestBuilderCustomizers.forEach(builderCustomizer -> builderCustomizer.accept(customizer));
+		ClientHttpConnector connectorToUse = new MockMvcHttpConnector(this.mockMvc, customizer -> {
+			this.requestPostProcessors.forEach(customizer::with);
+			this.requestBuilderCustomizers.forEach(builderCustomizer -> builderCustomizer.accept(customizer));
 		});
 		Function<ClientHttpConnector, ExchangeFunction> exchangeFactory = connector -> {
 			ExchangeFunction exchange = ExchangeFunctions.create(connector, initExchangeStrategies());
@@ -100,7 +121,7 @@ public class DefaultMockMvcWebTestClientBuilder extends DefaultWebTestClientBuil
 				this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null,
 				this.entityResultConsumer, this.responseTimeout, new DefaultMockMvcWebTestClientBuilder(this));
 	}
-	
+
 	/* Override methods to return covariant return type */
 	@Override
 	public Builder baseUrl(String baseUrl) {
