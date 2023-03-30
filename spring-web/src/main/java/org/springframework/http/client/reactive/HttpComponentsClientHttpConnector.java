@@ -107,14 +107,12 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
 		HttpClientContext context = this.contextProvider.apply(method, uri);
-
 		if (context.getCookieStore() == null) {
 			context.setCookieStore(new BasicCookieStore());
 		}
 
-		HttpComponentsClientHttpRequest request = new HttpComponentsClientHttpRequest(method, uri,
-				context, this.dataBufferFactory);
-
+		HttpComponentsClientHttpRequest request =
+				new HttpComponentsClientHttpRequest(method, uri, context, this.dataBufferFactory);
 		return requestCallback.apply(request).then(Mono.defer(() -> execute(request, context)));
 	}
 
@@ -124,7 +122,6 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 		return Mono.create(sink -> {
 			ReactiveResponseConsumer reactiveResponseConsumer =
 					new ReactiveResponseConsumer(new ResponseCallback(sink, this.dataBufferFactory, context));
-
 			this.client.execute(requestProducer, reactiveResponseConsumer, context, new ResultCallback(sink));
 		});
 	}
@@ -134,11 +131,11 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 		this.client.close();
 	}
 
+
 	/**
 	 * Callback that invoked when a response is received.
 	 */
-	private static class ResponseCallback
-			implements FutureCallback<Message<HttpResponse, Publisher<ByteBuffer>>> {
+	private static class ResponseCallback implements FutureCallback<Message<HttpResponse, Publisher<ByteBuffer>>> {
 
 		private final MonoSink<ClientHttpResponse> sink;
 
@@ -146,9 +143,9 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 
 		private final HttpClientContext context;
 
-
 		public ResponseCallback(MonoSink<ClientHttpResponse> sink,
 				DataBufferFactory dataBufferFactory, HttpClientContext context) {
+
 			this.sink = sink;
 			this.dataBufferFactory = dataBufferFactory;
 			this.context = context;
@@ -156,15 +153,12 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 
 		@Override
 		public void completed(Message<HttpResponse, Publisher<ByteBuffer>> result) {
-			HttpComponentsClientHttpResponse response =
-					new HttpComponentsClientHttpResponse(this.dataBufferFactory, result, this.context);
-			this.sink.success(response);
+			this.sink.success(new HttpComponentsClientHttpResponse(this.dataBufferFactory, result, this.context));
 		}
 
 		@Override
 		public void failed(Exception ex) {
-			Throwable t = (ex instanceof HttpStreamResetException hsre ? hsre.getCause() : ex);
-			this.sink.error(t);
+			this.sink.error(ex instanceof HttpStreamResetException && ex.getCause() != null ? ex.getCause() : ex);
 		}
 
 		@Override
@@ -181,7 +175,6 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 
 		private final MonoSink<?> sink;
 
-
 		public ResultCallback(MonoSink<?> sink) {
 			this.sink = sink;
 		}
@@ -193,8 +186,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 
 		@Override
 		public void failed(Exception ex) {
-			Throwable t = (ex instanceof HttpStreamResetException hsre ? hsre.getCause() : ex);
-			this.sink.error(t);
+			this.sink.error(ex instanceof HttpStreamResetException && ex.getCause() != null ? ex.getCause() : ex);
 		}
 
 		@Override
