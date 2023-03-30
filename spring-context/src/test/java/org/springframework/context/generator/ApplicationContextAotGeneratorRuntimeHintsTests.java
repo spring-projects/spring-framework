@@ -117,7 +117,7 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 	}
 
 	public static class InheritedDestroy implements Destroyable {
-		
+
 	}
 
 }
