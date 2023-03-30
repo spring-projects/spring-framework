@@ -16,16 +16,22 @@
 
 package org.springframework.test.web.servlet.client;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import jakarta.servlet.Filter;
 
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.ExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.reactive.server.WebTestClientConfigurer;
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -33,14 +39,21 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient.Builder;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -48,6 +61,7 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
@@ -57,7 +71,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * <p>Provides static factory methods and specs to initialize {@code MockMvc}
  * to which the {@code WebTestClient} connects to. For example:
  * <pre class="code">
- * WebTestClient client = MockMvcWebTestClient.bindToController(myController)
+ * MockMvcWebTestClient client = MockMvcWebTestClient.bindToController(myController)
  *         .controllerAdvice(myControllerAdvice)
  *         .validator(myValidator)
  *         .build()
@@ -65,7 +79,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * <p>The client itself can also be configured. For example:
  * <pre class="code">
- * WebTestClient client = MockMvcWebTestClient.bindToController(myController)
+ * MockMvcWebTestClient client = MockMvcWebTestClient.bindToController(myController)
  *         .validator(myValidator)
  *         .configureClient()
  *         .baseUrl("/path")
@@ -75,7 +89,108 @@ import org.springframework.web.util.pattern.PathPatternParser;
  * @author Rossen Stoyanchev
  * @since 5.3
  */
-public interface MockMvcWebTestClient {
+public interface MockMvcWebTestClient extends WebTestClient {
+	
+	/**
+	 * Return a builder to mutate properties of this web test client.
+	 */
+	Builder mutate();
+	
+	/**
+	 * Mutate the {@link MockMvcWebTestClient}, apply the given requestPostProcessor, and build
+	 * a new instance. Essentially a shortcut for:
+	 * <pre>
+	 * mutate().requestPostProcessor(requestPostProcessor).build();
+	 * </pre>
+	 * @param requestPostProcessor the requestPostProcessor to apply
+	 * @return the mutated test client
+	 */
+	MockMvcWebTestClient mutateWith(RequestPostProcessor requestPostProcessor);
+	
+	/**
+	 * Mutate the {@link MockMvcWebTestClient}, apply the given configurer, and build
+	 * a new instance. Essentially a shortcut for:
+	 * <pre>
+	 * mutate().apply(configurer).build();
+	 * </pre>
+	 * @param configurer the configurer to apply
+	 * @return the mutated test client
+	 */
+	MockMvcWebTestClient mutateWith(MockMvcWebTestClientConfigurer configurer);
+
+	
+	/**
+	 * Steps for customizing the {@link WebClient} used to test with,
+	 * internally delegating to a
+	 * {@link org.springframework.web.reactive.function.client.WebClient.Builder
+	 * WebClient.Builder}.
+	 */
+	interface Builder extends WebTestClient.Builder {
+		Builder mockMvc(MockMvc mockMvc);
+		
+		Builder requestPostProcessor(RequestPostProcessor requestPostProcessor);
+		
+		Builder requestPostProcessors(Consumer<List<RequestPostProcessor>> requestPostProcessorsConsumer);
+		
+		Builder requestBuilderCustomizer(Consumer<MockHttpServletRequestBuilder> requestBuilderCustomizer);
+		
+		Builder requestBuilderCustomizers(Consumer<List<Consumer<MockHttpServletRequestBuilder>>> requestBuilderCustomizersConsumer);
+		
+		Builder apply(MockMvcWebTestClientConfigurer configurer);
+		
+		/* Override methods to return covariant return type */
+		@Override
+		Builder baseUrl(String baseUrl);
+
+		@Override
+		Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory);
+
+		@Override
+		Builder defaultHeader(String headerName, String... headerValues);
+		
+		@Override
+		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
+
+		@Override
+		Builder defaultCookie(String cookieName, String... cookieValues);
+		
+		@Override
+		Builder defaultCookies(Consumer<MultiValueMap<String, String>> cookiesConsumer);
+		
+		@Override
+		Builder filter(ExchangeFilterFunction filter);
+		
+		@Override
+		Builder filters(Consumer<List<ExchangeFilterFunction>> filtersConsumer);
+		
+		@Override
+		Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> consumer);
+		
+		@Override
+		Builder codecs(Consumer<ClientCodecConfigurer> configurer);
+		
+		@Override
+		Builder exchangeStrategies(ExchangeStrategies strategies);
+		
+		@Override
+		@SuppressWarnings("deprecation")
+		Builder exchangeStrategies(
+				Consumer<ExchangeStrategies.Builder> configurer);
+		
+		@Override
+		Builder responseTimeout(Duration timeout);
+		
+		@Override
+		Builder apply(WebTestClientConfigurer configurer);
+		
+		/**
+		 * Build the {@link WebTestClient} instance.
+		 */
+		@Override
+		MockMvcWebTestClient build();
+		
+	}
+	
 
 	/**
 	 * Begin creating a {@link WebTestClient} by providing the {@code @Controller}
@@ -99,14 +214,22 @@ public interface MockMvcWebTestClient {
 	static MockMvcServerSpec<?> bindToApplicationContext(WebApplicationContext context) {
 		return new ApplicationContextMockMvcSpec(context);
 	}
+	
+	/**
+	 * Begin creating a {@link WebTestClient} by providing an already
+	 * initialized {@link MockMvc} instance to use as the server.
+	 */
+	@Deprecated // Changing the return type causes Spring Boot to throw in MockMvcAutoConfiguration
+	static WebTestClient.Builder bindTo(MockMvc mockMvc) {
+		return bindToMockMvc(mockMvc);
+	}
 
 	/**
 	 * Begin creating a {@link WebTestClient} by providing an already
 	 * initialized {@link MockMvc} instance to use as the server.
 	 */
-	static WebTestClient.Builder bindTo(MockMvc mockMvc) {
-		ClientHttpConnector connector = new MockMvcHttpConnector(mockMvc);
-		return WebTestClient.bindToServer(connector);
+	static MockMvcWebTestClient.Builder bindToMockMvc(MockMvc mockMvc) {
+		return new DefaultMockMvcWebTestClientBuilder(mockMvc);
 	}
 
 	/**
@@ -226,12 +349,12 @@ public interface MockMvcWebTestClient {
 		/**
 		 * Proceed to configure and build the test client.
 		 */
-		WebTestClient.Builder configureClient();
+		Builder configureClient();
 
 		/**
 		 * Shortcut to build the test client.
 		 */
-		WebTestClient build();
+		MockMvcWebTestClient build();
 	}
 
 

@@ -51,7 +51,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-class DefaultWebTestClientBuilder implements WebTestClient.Builder {
+public class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	private static final boolean reactorNettyClientPresent;
 
@@ -77,54 +77,54 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 
 	@Nullable
-	private final WebHttpHandlerBuilder httpHandlerBuilder;
+	protected final WebHttpHandlerBuilder httpHandlerBuilder;
 
 	@Nullable
-	private final ClientHttpConnector connector;
+	protected final ClientHttpConnector connector;
 
 	@Nullable
-	private String baseUrl;
+	protected String baseUrl;
 
 	@Nullable
-	private UriBuilderFactory uriBuilderFactory;
+	protected UriBuilderFactory uriBuilderFactory;
 
 	@Nullable
-	private HttpHeaders defaultHeaders;
+	protected HttpHeaders defaultHeaders;
 
 	@Nullable
-	private MultiValueMap<String, String> defaultCookies;
+	protected MultiValueMap<String, String> defaultCookies;
 
 	@Nullable
-	private List<ExchangeFilterFunction> filters;
+	protected List<ExchangeFilterFunction> filters;
 
-	private Consumer<EntityExchangeResult<?>> entityResultConsumer = result -> {};
-
-	@Nullable
-	private ExchangeStrategies strategies;
+	protected Consumer<EntityExchangeResult<?>> entityResultConsumer = result -> {};
 
 	@Nullable
-	private List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
+	protected ExchangeStrategies strategies;
 
 	@Nullable
-	private Duration responseTimeout;
+	protected List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
+
+	@Nullable
+	protected Duration responseTimeout;
 
 
 	/** Determine connector via classpath detection. */
-	DefaultWebTestClientBuilder() {
+	protected DefaultWebTestClientBuilder() {
 		this(null, null);
 	}
 
 	/** Use HttpHandlerConnector with mock server. */
-	DefaultWebTestClientBuilder(WebHttpHandlerBuilder httpHandlerBuilder) {
+	protected DefaultWebTestClientBuilder(WebHttpHandlerBuilder httpHandlerBuilder) {
 		this(httpHandlerBuilder, null);
 	}
 
 	/** Use given connector. */
-	DefaultWebTestClientBuilder(ClientHttpConnector connector) {
+	protected DefaultWebTestClientBuilder(ClientHttpConnector connector) {
 		this(null, connector);
 	}
 
-	DefaultWebTestClientBuilder(
+	protected DefaultWebTestClientBuilder(
 			@Nullable WebHttpHandlerBuilder httpHandlerBuilder, @Nullable ClientHttpConnector connector) {
 
 		Assert.isTrue(httpHandlerBuilder == null || connector == null,
@@ -139,7 +139,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 	/** Copy constructor. */
-	DefaultWebTestClientBuilder(DefaultWebTestClientBuilder other) {
+	protected DefaultWebTestClientBuilder(DefaultWebTestClientBuilder other) {
 		this.httpHandlerBuilder = (other.httpHandlerBuilder != null ? other.httpHandlerBuilder.clone() : null);
 		this.connector = other.connector;
 		this.responseTimeout = other.responseTimeout;
@@ -323,7 +323,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		}
 	}
 
-	private ExchangeStrategies initExchangeStrategies() {
+	protected ExchangeStrategies initExchangeStrategies() {
 		if (CollectionUtils.isEmpty(this.strategiesConfigurers)) {
 			return (this.strategies != null ? this.strategies : ExchangeStrategies.withDefaults());
 		}
@@ -333,7 +333,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		return builder.build();
 	}
 
-	private UriBuilderFactory initUriBuilderFactory() {
+	protected UriBuilderFactory initUriBuilderFactory() {
 		if (this.uriBuilderFactory != null) {
 			return this.uriBuilderFactory;
 		}

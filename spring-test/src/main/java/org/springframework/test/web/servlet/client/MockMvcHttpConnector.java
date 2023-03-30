@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import jakarta.servlet.http.Cookie;
@@ -81,12 +82,13 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 
 
 	private final MockMvc mockMvc;
+	
+	private final Consumer<MockHttpServletRequestBuilder> requestBuilderCustomizer;
 
-
-	public MockMvcHttpConnector(MockMvc mockMvc) {
+	public MockMvcHttpConnector(MockMvc mockMvc, Consumer<MockHttpServletRequestBuilder> requestBuilderCustomizer) {
 		this.mockMvc = mockMvc;
+		this.requestBuilderCustomizer = requestBuilderCustomizer;
 	}
-
 
 	@Override
 	public Mono<ClientHttpResponse> connect(
@@ -147,6 +149,9 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 			if (!ObjectUtils.isEmpty(bytes)) {
 				requestBuilder.content(bytes);
 			}
+			if(requestBuilderCustomizer != null) {
+				requestBuilderCustomizer.accept(requestBuilder);
+			}
 			return requestBuilder;
 		}
 
@@ -175,6 +180,9 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 								}))
 				.blockLast(TIMEOUT);
 
+		if(requestBuilderCustomizer != null) {
+			requestBuilderCustomizer.accept(requestBuilder);
+		}
 		return requestBuilder;
 	}
 

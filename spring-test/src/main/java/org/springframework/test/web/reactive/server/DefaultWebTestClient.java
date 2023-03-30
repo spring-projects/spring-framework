@@ -68,7 +68,7 @@ import org.springframework.web.util.UriBuilderFactory;
  * @author Michał Rowicki
  * @since 5.0
  */
-class DefaultWebTestClient implements WebTestClient {
+public class DefaultWebTestClient implements WebTestClient {
 
 	private final WiretapConnector wiretapConnector;
 
@@ -91,7 +91,7 @@ class DefaultWebTestClient implements WebTestClient {
 	private final AtomicLong requestIndex = new AtomicLong();
 
 
-	DefaultWebTestClient(ClientHttpConnector connector,
+	protected DefaultWebTestClient(ClientHttpConnector connector,
 			Function<ClientHttpConnector, ExchangeFunction> exchangeFactory, UriBuilderFactory uriBuilderFactory,
 			@Nullable HttpHeaders headers, @Nullable MultiValueMap<String, String> cookies,
 			Consumer<EntityExchangeResult<?>> entityResultConsumer,

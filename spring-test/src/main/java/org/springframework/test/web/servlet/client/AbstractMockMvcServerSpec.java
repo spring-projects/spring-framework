@@ -18,8 +18,6 @@ package org.springframework.test.web.servlet.client;
 
 import jakarta.servlet.Filter;
 
-import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.DispatcherServletCustomizer;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
@@ -93,14 +91,13 @@ abstract class AbstractMockMvcServerSpec<B extends MockMvcWebTestClient.MockMvcS
 	protected abstract ConfigurableMockMvcBuilder<?> getMockMvcBuilder();
 
 	@Override
-	public WebTestClient.Builder configureClient() {
+	public MockMvcWebTestClient.Builder configureClient() {
 		MockMvc mockMvc = getMockMvcBuilder().build();
-		ClientHttpConnector connector = new MockMvcHttpConnector(mockMvc);
-		return WebTestClient.bindToServer(connector);
+		return MockMvcWebTestClient.bindToMockMvc(mockMvc);
 	}
 
 	@Override
-	public WebTestClient build() {
+	public MockMvcWebTestClient build() {
 		return configureClient().build();
 	}
 
