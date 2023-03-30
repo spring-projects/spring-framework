@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,14 +106,12 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
 		HttpClientContext context = this.contextProvider.apply(method, uri);
-
 		if (context.getCookieStore() == null) {
 			context.setCookieStore(new BasicCookieStore());
 		}
 
-		HttpComponentsClientHttpRequest request = new HttpComponentsClientHttpRequest(method, uri,
-				context, this.dataBufferFactory);
-
+		HttpComponentsClientHttpRequest request =
+				new HttpComponentsClientHttpRequest(method, uri, context, this.dataBufferFactory);
 		return requestCallback.apply(request).then(Mono.defer(() -> execute(request, context)));
 	}
 
@@ -123,7 +121,6 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 		return Mono.create(sink -> {
 			ReactiveResponseConsumer reactiveResponseConsumer =
 					new ReactiveResponseConsumer(new MonoFutureCallbackAdapter(sink, this.dataBufferFactory, context));
-
 			this.client.execute(requestProducer, reactiveResponseConsumer, context, null);
 		});
 	}
@@ -132,6 +129,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 	public void close() throws IOException {
 		this.client.close();
 	}
+
 
 	private static class MonoFutureCallbackAdapter
 			implements FutureCallback<Message<HttpResponse, Publisher<ByteBuffer>>> {
@@ -144,6 +142,7 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 
 		public MonoFutureCallbackAdapter(MonoSink<ClientHttpResponse> sink,
 				DataBufferFactory dataBufferFactory, HttpClientContext context) {
+
 			this.sink = sink;
 			this.dataBufferFactory = dataBufferFactory;
 			this.context = context;
@@ -151,19 +150,12 @@ public class HttpComponentsClientHttpConnector implements ClientHttpConnector, C
 
 		@Override
 		public void completed(Message<HttpResponse, Publisher<ByteBuffer>> result) {
-			HttpComponentsClientHttpResponse response =
-					new HttpComponentsClientHttpResponse(this.dataBufferFactory, result, this.context);
-			this.sink.success(response);
+			this.sink.success(new HttpComponentsClientHttpResponse(this.dataBufferFactory, result, this.context));
 		}
 
 		@Override
 		public void failed(Exception ex) {
-			Throwable t = ex;
-			if (t instanceof HttpStreamResetException) {
-				HttpStreamResetException httpStreamResetException = (HttpStreamResetException) ex;
-				t = httpStreamResetException.getCause();
-			}
-			this.sink.error(t);
+			this.sink.error(ex instanceof HttpStreamResetException && ex.getCause() != null ? ex.getCause() : ex);
 		}
 
 		@Override
