@@ -263,6 +263,8 @@ public interface WebClient {
 		 * apply to every response. Such default handlers are applied in the
 		 * order in which they are registered, and after any others that are
 		 * registered for a specific response.
+		 * <p>The default status handlers are not applied to {@code exchangeTo*()}
+		 * methods, as those variants have direct access to the client response.
 		 * @param statusPredicate to match responses with
 		 * @param exceptionFunction to map the response to an error signal
 		 * @return this builder
