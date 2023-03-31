@@ -433,9 +433,7 @@ class DefaultWebClient implements WebClient {
 		@SuppressWarnings("deprecation")
 		public Mono<ClientResponse> exchange() {
 			ClientRequestObservationContext observationContext = new ClientRequestObservationContext();
-			ClientRequest.Builder requestBuilder = this.inserter != null ?
-					initRequestBuilder().body(this.inserter) :
-					initRequestBuilder();
+			ClientRequest.Builder requestBuilder = initRequestBuilder();
 			return Mono.deferContextual(contextView -> {
 				Observation observation = ClientHttpObservationDocumentation.HTTP_REACTIVE_CLIENT_EXCHANGES.observation(observationConvention,
 						DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, observationRegistry);
@@ -478,6 +476,9 @@ class DefaultWebClient implements WebClient {
 					.attributes(attributes -> attributes.putAll(this.attributes));
 			if (this.httpRequestConsumer != null) {
 				builder.httpRequest(this.httpRequestConsumer);
+			}
+			if (this.inserter != null) {
+				builder.body(this.inserter);
 			}
 			return builder;
 		}
