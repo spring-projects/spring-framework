@@ -18,6 +18,7 @@ package org.springframework.mock.web;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link MockCookie}.
@@ -136,4 +138,67 @@ class MockCookieTests {
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 	}
 
+	@Test
+	void setSameSiteShouldSetAttribute() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setSameSite("Strict");
+
+		assertThat(cookie.getAttribute("samesite")).isEqualTo("Strict");
+	}
+
+	@Test
+	void setExpiresShouldSetAttribute() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setExpires(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+				DateTimeFormatter.RFC_1123_DATE_TIME));
+
+		assertThat(cookie.getAttribute("expires")).isEqualTo("Tue, 8 Oct 2019 19:50:00 GMT");
+	}
+
+	@Test
+	void setSameSiteNullShouldClear() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setSameSite("Strict");
+		assertThat(cookie.getSameSite()).isEqualTo("Strict");
+
+		cookie.setSameSite(null);
+		assertThat(cookie.getSameSite()).isNull();
+		assertThat(cookie.getAttribute("samesite")).isNull();
+	}
+
+	@Test
+	void setExpiresNullShouldClear() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setExpires(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+				DateTimeFormatter.RFC_1123_DATE_TIME));
+		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+				DateTimeFormatter.RFC_1123_DATE_TIME));
+
+		cookie.setExpires(null);
+		assertThat(cookie.getExpires()).isNull();
+		assertThat(cookie.getAttribute("expires")).isNull();
+	}
+
+	@Test
+	void setAttributeSameSiteShouldSetSameSite() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setAttribute("samesite", "Lax");
+
+		assertThat(cookie.getSameSite()).isEqualTo("Lax");
+	}
+
+	@Test
+	void setAttributeExpiresShouldSetExpires() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setAttribute("expires", "Tue, 8 Oct 2019 19:50:00 GMT");
+
+		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+				DateTimeFormatter.RFC_1123_DATE_TIME));
+	}
+
+	@Test
+	void setInvalidAttributeExpiresShouldThrow() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		assertThatThrownBy(() -> cookie.setAttribute("expires", "12345")).isInstanceOf(DateTimeParseException.class);
+	}
 }
