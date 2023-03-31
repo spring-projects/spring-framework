@@ -52,8 +52,7 @@ class BeanRegistrationsAotContribution
 	private final Map<BeanRegistrationKey, Registration> registrations;
 
 
-	BeanRegistrationsAotContribution(
-			Map<BeanRegistrationKey, Registration> registrations) {
+	BeanRegistrationsAotContribution(Map<BeanRegistrationKey, Registration> registrations) {
 		this.registrations = registrations;
 	}
 
@@ -78,23 +77,19 @@ class BeanRegistrationsAotContribution
 	}
 
 	private void generateRegisterBeanDefinitionsMethod(MethodSpec.Builder method,
-			GenerationContext generationContext,
-			BeanRegistrationsCode beanRegistrationsCode) {
+			GenerationContext generationContext, BeanRegistrationsCode beanRegistrationsCode) {
 
 		method.addJavadoc("Register the bean definitions.");
 		method.addModifiers(Modifier.PUBLIC);
-		method.addParameter(DefaultListableBeanFactory.class,
-				BEAN_FACTORY_PARAMETER_NAME);
+		method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_PARAMETER_NAME);
 		CodeBlock.Builder code = CodeBlock.builder();
 		this.registrations.forEach((registeredBean, registration) -> {
 			MethodReference beanDefinitionMethod = registration.methodGenerator
-					.generateBeanDefinitionMethod(generationContext,
-							beanRegistrationsCode);
+					.generateBeanDefinitionMethod(generationContext, beanRegistrationsCode);
 			CodeBlock methodInvocation = beanDefinitionMethod.toInvokeCodeBlock(
 					ArgumentCodeGenerator.none(), beanRegistrationsCode.getClassName());
 			code.addStatement("$L.registerBeanDefinition($S, $L)",
-					BEAN_FACTORY_PARAMETER_NAME, registeredBean.beanName(),
-					methodInvocation);
+				BEAN_FACTORY_PARAMETER_NAME, registeredBean.beanName(), methodInvocation);
 		});
 		method.addCode(code.build());
 	}
@@ -102,13 +97,12 @@ class BeanRegistrationsAotContribution
 	private void generateRegisterAliasesMethod(MethodSpec.Builder method) {
 		method.addJavadoc("Register the aliases.");
 		method.addModifiers(Modifier.PUBLIC);
-		method.addParameter(DefaultListableBeanFactory.class,
-				BEAN_FACTORY_PARAMETER_NAME);
+		method.addParameter(DefaultListableBeanFactory.class, BEAN_FACTORY_PARAMETER_NAME);
 		CodeBlock.Builder code = CodeBlock.builder();
 		this.registrations.forEach((registeredBean, registration) -> {
 			for (String alias : registration.aliases) {
-				code.addStatement("$L.registerAlias($S, $S)",
-						BEAN_FACTORY_PARAMETER_NAME, registeredBean.beanName(), alias);
+				code.addStatement("$L.registerAlias($S, $S)", BEAN_FACTORY_PARAMETER_NAME,
+						registeredBean.beanName(), alias);
 			}
 		});
 		method.addCode(code.build());

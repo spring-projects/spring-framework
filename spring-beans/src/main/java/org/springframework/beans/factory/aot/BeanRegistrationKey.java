@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ package org.springframework.beans.factory.aot;
 
 /**
  * Record class holding key information for beans registered in a bean factory.
+ *
  * @param beanName the name of the registered bean
  * @param beanClass the type of the registered bean
  * @author Brian Clozel
- * @since 6.0
+ * @since 6.0.8
  */
 record BeanRegistrationKey(String beanName, Class<?> beanClass) {
 }
