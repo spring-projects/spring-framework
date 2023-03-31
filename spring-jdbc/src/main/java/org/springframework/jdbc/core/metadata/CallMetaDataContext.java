@@ -644,7 +644,8 @@ public class CallMetaDataContext {
 		else {
 			if(this.metaDataProvider instanceof PostgresCallMetaDataProvider) {
 				callString = new StringBuilder("call ");
-			}else {
+			}
+			else {
 				callString = new StringBuilder("{call ");
 			}
 		}
@@ -671,7 +672,8 @@ public class CallMetaDataContext {
 		}
 		if(this.metaDataProvider instanceof PostgresCallMetaDataProvider) {
 			callString.append(")");
-		}else {		
+		}
+		else {
 			callString.append(")}");
 		}
 
