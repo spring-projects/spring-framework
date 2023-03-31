@@ -136,4 +136,37 @@ class MockCookieTests {
 		assertThat(cookie.getSameSite()).isEqualTo("Lax");
 	}
 
+	@Test
+	void setSameSiteShouldSetAttribute() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setSameSite("Strict");
+
+		assertThat(cookie.getAttribute("samesite")).isEqualTo("Strict");
+	}
+
+	@Test
+	void setExpiresShouldSetAttribute() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setExpires(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+				DateTimeFormatter.RFC_1123_DATE_TIME));
+
+		assertThat(cookie.getAttribute("expires")).isEqualTo("Tue, 8 Oct 2019 19:50:00 GMT");
+	}
+
+	@Test
+	void setAttributeSameSiteShouldSetSameSite() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setAttribute("samesite", "Lax");
+
+		assertThat(cookie.getSameSite()).isEqualTo("Lax");
+	}
+
+	@Test
+	void setAttributeExpiresShouldSetExpires() {
+		MockCookie cookie = new MockCookie("SESSION", "123");
+		cookie.setAttribute("expires", "Tue, 8 Oct 2019 19:50:00 GMT");
+
+		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+				DateTimeFormatter.RFC_1123_DATE_TIME));
+	}
 }
