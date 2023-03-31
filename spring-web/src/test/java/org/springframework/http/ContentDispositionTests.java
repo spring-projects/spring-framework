@@ -325,4 +325,20 @@ class ContentDispositionTests {
 		assertThat(parsed.toString()).isEqualTo(cd.toString());
 	}
 
+	@Test // gh-30252
+	void parseFormattedWithQuestionMark() {
+		String filename = "filename with ?问号.txt";
+		ContentDisposition cd = ContentDisposition.attachment()
+				.filename(filename, StandardCharsets.UTF_8)
+				.build();
+		String[] parts = cd.toString().split("; ");
+
+		String quotedPrintableFilename = parts[0] + "; " + parts[1];
+		assertThat(ContentDisposition.parse(quotedPrintableFilename).getFilename())
+				.isEqualTo(filename);
+
+		String rfc5987Filename = parts[0] + "; " + parts[2];
+		assertThat(ContentDisposition.parse(rfc5987Filename).getFilename())
+				.isEqualTo(filename);
+	}
 }
