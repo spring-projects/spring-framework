@@ -117,6 +117,9 @@ public class MapTests extends AbstractExpressionTests {
 		checkConstantMap("{#root.name:true}",false);
 		checkConstantMap("{a:1,b:2,c:{d:true,e:false}}", true);
 		checkConstantMap("{a:1,b:2,c:{d:{1,2,3},e:{4,5,6},f:{'a','b','c'}}}", true);
+		// for nested InlineMap
+		checkConstantMap("{a:{k:#d}}", false);
+		checkConstantMap("{@bean:@bean}", false);
 	}
 
 	private void checkConstantMap(String expressionText, boolean expectedToBeConstant) {

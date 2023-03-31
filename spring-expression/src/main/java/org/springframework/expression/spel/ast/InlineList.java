@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,55 +35,57 @@ import org.springframework.util.Assert;
  *
  * @author Andy Clement
  * @author Sam Brannen
+ * @author Harry Yang
  * @since 3.0.4
  */
 public class InlineList extends SpelNodeImpl {
 
 	// If the list is purely literals, it is a constant value and can be computed and cached
 	@Nullable
-	private TypedValue constant;  // TODO must be immutable list
+	private final TypedValue constant;
 
 
 	public InlineList(int startPos, int endPos, SpelNodeImpl... args) {
 		super(startPos, endPos, args);
-		checkIfConstant();
+		this.constant = computeConstantValue();
 	}
 
 
 	/**
-	 * If all the components of the list are constants, or lists that themselves contain constants, then a constant list
-	 * can be built to represent this node. This will speed up later getValue calls and reduce the amount of garbage
+	 * If all the components of the list are constants, or lists
+	 * that themselves contain constants, then a constant list
+	 * can be built to represent this node. This will speed up
+	 * later getValue calls and reduce the amount of garbage
 	 * created.
 	 */
-	private void checkIfConstant() {
-		boolean isConstant = true;
+	@Nullable
+	private TypedValue computeConstantValue() {
 		for (int c = 0, max = getChildCount(); c < max; c++) {
 			SpelNode child = getChild(c);
 			if (!(child instanceof Literal)) {
 				if (child instanceof InlineList inlineList) {
 					if (!inlineList.isConstant()) {
-						isConstant = false;
+						return null;
 					}
 				}
 				else {
-					isConstant = false;
+					return null;
 				}
 			}
 		}
-		if (isConstant) {
-			List<Object> constantList = new ArrayList<>();
-			int childcount = getChildCount();
-			for (int c = 0; c < childcount; c++) {
-				SpelNode child = getChild(c);
-				if (child instanceof Literal literal) {
-					constantList.add(literal.getLiteralValue().getValue());
-				}
-				else if (child instanceof InlineList inlineList) {
-					constantList.add(inlineList.getConstantValue());
-				}
+
+		List<Object> constantList = new ArrayList<>();
+		int childcount = getChildCount();
+		for (int c = 0; c < childcount; c++) {
+			SpelNode child = getChild(c);
+			if (child instanceof Literal literal) {
+				constantList.add(literal.getLiteralValue().getValue());
 			}
-			this.constant = new TypedValue(Collections.unmodifiableList(constantList));
+			else if (child instanceof InlineList inlineList) {
+				constantList.add(inlineList.getConstantValue());
+			}
 		}
+		return new TypedValue(Collections.unmodifiableList(constantList));
 	}
 
 	@Override
