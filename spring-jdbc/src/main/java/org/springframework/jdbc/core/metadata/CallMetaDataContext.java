@@ -642,7 +642,11 @@ public class CallMetaDataContext {
 			parameterCount = -1;
 		}
 		else {
-			callString = new StringBuilder("{call ");
+			if(this.metaDataProvider instanceof PostgresCallMetaDataProvider) {
+				callString = new StringBuilder("call ");
+			}else {
+				callString = new StringBuilder("{call ");
+			}
 		}
 
 		if (StringUtils.hasLength(catalogNameToUse)) {
@@ -665,7 +669,11 @@ public class CallMetaDataContext {
 				parameterCount++;
 			}
 		}
-		callString.append(")}");
+		if(this.metaDataProvider instanceof PostgresCallMetaDataProvider) {
+			callString.append(")");
+		}else {		
+			callString.append(")}");
+		}
 
 		return callString.toString();
 	}
