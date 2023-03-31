@@ -599,7 +599,7 @@ public final class ContentDisposition {
 	}
 
 	private static boolean isPrintable(byte c) {
-		return (c >= '!' && c <= '<') || (c >= '>' && c <= '~');
+		return (c >= '!' && c <= '<') || (c >= '@' && c <= '~') || c == '>';
 	}
 
 	private static String encodeQuotedPairs(String filename) {
