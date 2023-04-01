@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-public class BindingReflectionHintsRegistrarTests {
+class BindingReflectionHintsRegistrarTests {
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
 
@@ -410,6 +410,7 @@ public class BindingReflectionHintsRegistrarTests {
 
 	}
 
+	@SuppressWarnings("serial")
 	static class CustomDeserializer1 extends StdDeserializer<LocalDate> {
 
 		public CustomDeserializer1() {
@@ -422,6 +423,7 @@ public class BindingReflectionHintsRegistrarTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	static class CustomDeserializer2 extends StdDeserializer<LocalDate> {
 
 		public CustomDeserializer2() {
