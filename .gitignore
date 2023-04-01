@@ -27,7 +27,7 @@ buildSrc/build
 /framework-docs/build
 /integration-tests/build
 /src/asciidoc/build
-target/
+
 /target/
 
 # Eclipse artifacts, including WTP generated manifests
