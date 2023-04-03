@@ -54,7 +54,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Jeremy Grelle
  * @author Dave Syer
- * @author Krzysztof Krason
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class SelectTagTests extends AbstractFormTagTests {

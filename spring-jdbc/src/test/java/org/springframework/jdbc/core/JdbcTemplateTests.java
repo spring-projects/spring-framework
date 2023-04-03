@@ -72,7 +72,6 @@ import static org.mockito.Mockito.verify;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Phillip Webb
- * @author Krzysztof Krason
  */
 public class JdbcTemplateTests {
 

@@ -61,7 +61,6 @@ import static org.assertj.core.api.Assertions.within;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
- * @author Krzysztof Krason
  */
 public class MappingJackson2HttpMessageConverterTests {
 

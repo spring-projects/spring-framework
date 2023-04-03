@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * Exercise matching of {@link PathPattern} objects.
  *
  * @author Andy Clement
- * @author Krzysztof Krason
  */
 public class PathPatternTests {
 

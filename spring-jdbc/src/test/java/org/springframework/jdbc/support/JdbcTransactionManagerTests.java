@@ -70,7 +70,6 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
 
 /**
  * @author Juergen Hoeller
- * @author Krzysztof Krason
  * @since 5.3
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManagerTests
  */

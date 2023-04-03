@@ -58,7 +58,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
  * @author Chris Beams
  * @author Sebastien Deleuze
  * @author Sam Brannen
- * @author Krzysztof Krason
  * @since 19.05.2003
  */
 class BeanUtilsTests {

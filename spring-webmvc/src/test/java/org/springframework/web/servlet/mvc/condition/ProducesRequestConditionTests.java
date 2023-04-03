@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
- * @author Krzysztof Krason
  */
 public class ProducesRequestConditionTests {
 

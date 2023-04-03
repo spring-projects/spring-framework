@@ -160,7 +160,6 @@ import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
  * @author Kazuki Shimizu
  * @author Sam Brannen
  * @author Marten Deinum
- * @author Krzysztof Krason
  */
 
 @SuppressWarnings("deprecation")

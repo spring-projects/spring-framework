@@ -49,7 +49,6 @@ import static org.mockito.Mockito.verify;
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Phillip Webb
- * @author Krzysztof Krason
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class JpaTransactionManagerTests {

@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
- * @author Krzysztof Krason
  * @since 3.1
  */
 class NestedConfigurationClassTests {

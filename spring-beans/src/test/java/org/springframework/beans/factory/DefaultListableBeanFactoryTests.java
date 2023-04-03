@@ -112,7 +112,6 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
- * @author Krzysztof Krason
  */
 class DefaultListableBeanFactoryTests {
 

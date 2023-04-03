@@ -41,7 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
- * @author Krzysztof Krason
  * @since 09.11.2003
  */
 @SuppressWarnings({"rawtypes", "unchecked"})

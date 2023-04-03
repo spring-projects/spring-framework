@@ -65,7 +65,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @author Sam Brannen
  * @author Kazuki Shimizu
- * @author Krzysztof Krason
  */
 class DateTimeFormattingTests {
 

@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Juergen Hoeller
- * @author Krzysztof Krason
  * @since 02.05.2003
  */
 public class EscapedErrorsTests {

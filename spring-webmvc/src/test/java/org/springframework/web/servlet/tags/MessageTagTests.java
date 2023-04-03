@@ -41,7 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @author Nicholas Williams
- * @author Krzysztof Krason
  */
 @SuppressWarnings("serial")
 class MessageTagTests extends AbstractTagTests {

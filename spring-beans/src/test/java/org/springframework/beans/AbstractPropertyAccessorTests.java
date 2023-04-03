@@ -67,7 +67,6 @@ import static org.assertj.core.api.Assertions.within;
  * @author Chris Beams
  * @author Dave Syer
  * @author Stephane Nicoll
- * @author Krzysztof Krason
  */
 abstract class AbstractPropertyAccessorTests {
 

@@ -80,7 +80,6 @@ import static org.mockito.Mockito.verify;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Sam Brannen
- * @author Krzysztof Krason
  */
 public class DispatcherServletTests {
 

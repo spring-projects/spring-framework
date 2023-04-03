@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Rob Harrop
- * @author Krzysztof Krason
  */
 class FileSystemUtilsTests {
 

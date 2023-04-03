@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @author Krzysztof Krason
  */
 public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 

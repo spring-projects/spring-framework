@@ -39,7 +39,6 @@ import static org.assertj.core.api.Assertions.within;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @author Krzysztof Krason
  */
 public class MediaTypeTests {
 

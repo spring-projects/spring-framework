@@ -48,7 +48,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Juergen Hoeller
  * @author Alef Arendsen
  * @author Mark Fisher
- * @author Krzysztof Krason
  */
 class BindTagTests extends AbstractTagTests {
 

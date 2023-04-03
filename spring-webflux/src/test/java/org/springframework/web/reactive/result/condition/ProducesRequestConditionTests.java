@@ -35,7 +35,6 @@ import static org.springframework.web.testfixture.http.server.reactive.MockServe
  * Unit tests for {@link ProducesRequestCondition}.
  *
  * @author Rossen Stoyanchev
- * @author Krzysztof Krason
  */
 public class ProducesRequestConditionTests {
 

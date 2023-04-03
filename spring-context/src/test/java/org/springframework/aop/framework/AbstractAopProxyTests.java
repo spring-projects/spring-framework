@@ -84,7 +84,6 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
- * @author Krzysztof Krason
  * @since 13.03.2003
  */
 public abstract class AbstractAopProxyTests {

@@ -41,7 +41,6 @@ import static org.mockito.Mockito.verify;
  * @author Thomas Risberg
  * @author Stephane Nicoll
  * @author Juergen Hoeller
- * @author Krzysztof Krason
  */
 public class SQLErrorCodesFactoryTests {
 

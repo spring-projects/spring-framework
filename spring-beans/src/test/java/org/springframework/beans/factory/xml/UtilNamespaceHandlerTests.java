@@ -44,7 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Mark Fisher
- * @author Krzysztof Krason
  */
 @SuppressWarnings("rawtypes")
 public class UtilNamespaceHandlerTests {

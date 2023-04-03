@@ -52,7 +52,6 @@ import static org.assertj.core.api.Assertions.assertThatRuntimeException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
- * @author Krzysztof Krason
  * @since 14.05.2003
  */
 public class ProxyFactoryTests {

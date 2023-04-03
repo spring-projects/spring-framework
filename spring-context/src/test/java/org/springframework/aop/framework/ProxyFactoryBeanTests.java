@@ -69,7 +69,6 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
- * @author Krzysztof Krason
  * @since 13.03.2003
  */
 public class ProxyFactoryBeanTests {

@@ -31,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Sam Brannen
- * @author Krzysztof Krason
  */
 class StringUtilsTests {
 

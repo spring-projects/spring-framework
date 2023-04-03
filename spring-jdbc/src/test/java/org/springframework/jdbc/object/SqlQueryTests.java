@@ -53,7 +53,6 @@ import static org.mockito.Mockito.verify;
  * @author Trevor Cook
  * @author Thomas Risberg
  * @author Juergen Hoeller
- * @author Krzysztof Krason
  */
 public class SqlQueryTests  {
 

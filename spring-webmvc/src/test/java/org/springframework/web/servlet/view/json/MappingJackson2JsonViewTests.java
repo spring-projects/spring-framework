@@ -60,7 +60,6 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Sam Brannen
- * @author Krzysztof Krason
  */
 public class MappingJackson2JsonViewTests {
 

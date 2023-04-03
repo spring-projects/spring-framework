@@ -29,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Juergen Hoeller
  * @author Jean-Pierre PAWLAK
  * @author Chris Beams
- * @author Krzysztof Krason
  * @since 20.05.2003
  */
 public class PagedListHolderTests {

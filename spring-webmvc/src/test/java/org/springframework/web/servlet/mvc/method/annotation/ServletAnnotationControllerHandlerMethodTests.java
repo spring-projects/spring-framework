@@ -168,7 +168,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sam Brannen
- * @author Krzysztof Krason
  */
 class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
 

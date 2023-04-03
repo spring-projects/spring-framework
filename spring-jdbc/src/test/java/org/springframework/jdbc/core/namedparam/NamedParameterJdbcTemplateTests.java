@@ -60,7 +60,6 @@ import static org.mockito.Mockito.verify;
  * @author Chris Beams
  * @author Nikita Khateev
  * @author Fedor Bobin
- * @author Krzysztof Krason
  */
 public class NamedParameterJdbcTemplateTests {
 

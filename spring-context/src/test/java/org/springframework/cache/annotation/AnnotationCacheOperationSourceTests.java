@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Costin Leau
  * @author Stephane Nicoll
  * @author Sam Brannen
- * @author Krzysztof Krason
  */
 public class AnnotationCacheOperationSourceTests {
 

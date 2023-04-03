@@ -36,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Andy Clement
  * @author Giovanni Dall'Oglio Risso
- * @author Krzysztof Krason
  */
 public class ComparatorTests {
 
