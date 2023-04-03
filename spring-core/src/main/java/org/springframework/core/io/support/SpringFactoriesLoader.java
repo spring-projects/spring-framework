@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -341,8 +341,9 @@ public class SpringFactoriesLoader {
 				UrlResource resource = new UrlResource(urls.nextElement());
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 				properties.forEach((name, value) -> {
-					List<String> implementations = result.computeIfAbsent(((String) name).trim(), key -> new ArrayList<>());
-					Arrays.stream(StringUtils.commaDelimitedListToStringArray((String) value))
+					String[] factoryImplementationNames= StringUtils.commaDelimitedListToStringArray((String) value);
+					List<String> implementations = result.computeIfAbsent(((String) name).trim(), key -> new ArrayList<>(factoryImplementationNames.length));
+					Arrays.stream(factoryImplementationNames)
 							.map(String::trim).forEach(implementations::add);
 				});
 			}
