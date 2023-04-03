@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represents a reference to a type, for example
- * {@code "T(String)" or "T(com.somewhere.Foo)"}.
+ * Represents a reference to a type, for example {@code "T(String)"} or
+ * {@code "T(com.example.Foo)"}.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  */
 public class TypeReference extends SpelNodeImpl {
 
@@ -74,22 +75,19 @@ public class TypeReference extends SpelNodeImpl {
 	}
 
 	private Class<?> makeArrayIfNecessary(Class<?> clazz) {
-		if (this.dimensions != 0) {
-			for (int i = 0; i < this.dimensions; i++) {
-				Object array = Array.newInstance(clazz, 0);
-				clazz = array.getClass();
-			}
+		if (this.dimensions < 1) {
+			return clazz;
 		}
-		return clazz;
+		int[] dims = new int[this.dimensions];
+		Object array = Array.newInstance(clazz, dims);
+		return array.getClass();
 	}
 
 	@Override
 	public String toStringAST() {
 		StringBuilder sb = new StringBuilder("T(");
 		sb.append(getChild(0).toStringAST());
-		for (int d = 0; d < this.dimensions; d++) {
-			sb.append("[]");
-		}
+		sb.append("[]".repeat(this.dimensions));
 		sb.append(')');
 		return sb.toString();
 	}
