@@ -341,8 +341,9 @@ public class SpringFactoriesLoader {
 				UrlResource resource = new UrlResource(urls.nextElement());
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 				properties.forEach((name, value) -> {
-					List<String> implementations = result.computeIfAbsent(((String) name).trim(), key -> new ArrayList<>());
-					Arrays.stream(StringUtils.commaDelimitedListToStringArray((String) value))
+					String[] factoryImplementationNames= StringUtils.commaDelimitedListToStringArray((String) value);
+					List<String> implementations = result.computeIfAbsent(((String) name).trim(), key -> new ArrayList<>(factoryImplementationNames.length));
+					Arrays.stream(factoryImplementationNames)
 							.map(String::trim).forEach(implementations::add);
 				});
 			}
