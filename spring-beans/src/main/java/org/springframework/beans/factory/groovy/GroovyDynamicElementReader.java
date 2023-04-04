@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
+import org.springframework.lang.Nullable;
 
 /**
  * Used by GroovyBeanDefinitionReader to read a Spring XML namespace expression
@@ -68,6 +69,7 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 
 
 	@Override
+	@Nullable
 	public Object invokeMethod(String name, Object obj) {
 		Object[] args = (Object[]) obj;
 		if (name.equals("doCall")) {
@@ -88,6 +90,7 @@ class GroovyDynamicElementReader extends GroovyObjectSupport {
 			String myNamespace = this.rootNamespace;
 			Map<String, String> myNamespaces = this.xmlNamespaces;
 
+			@SuppressWarnings("serial")
 			Closure<Object> callable = new Closure<>(this) {
 				@Override
 				public Object call(Object... arguments) {

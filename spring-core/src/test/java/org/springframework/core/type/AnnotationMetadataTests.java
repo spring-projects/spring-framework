@@ -188,8 +188,8 @@ class AnnotationMetadataTests {
 	 * 'true' as is done in the main test above.
 	 */
 	@Test
-	@Deprecated
 	void standardAnnotationMetadata_nestedAnnotationsAsMap_false() {
+		@SuppressWarnings("deprecation")
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponent.class);
 		AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(SpecialAttr.class.getName());
 		Annotation[] nestedAnnoArray = (Annotation[]) specialAttrs.get("nestedAnnoArray");
@@ -197,8 +197,8 @@ class AnnotationMetadataTests {
 	}
 
 	@Test
-	@Deprecated
 	void metaAnnotationOverridesUsingStandardAnnotationMetadata() {
+		@SuppressWarnings("deprecation")
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(ComposedConfigurationWithAttributeOverridesClass.class);
 		assertMetaAnnotationOverrides(metadata);
 	}

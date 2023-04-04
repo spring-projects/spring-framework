@@ -169,6 +169,7 @@ public class BindingReflectionHintsRegistrar {
 							if (sourceField != null) {
 								hints.registerField(sourceField);
 							}
+							registerHintsForClassAttributes(hints, annotation);
 						}));
 		ReflectionUtils.doWithMethods(clazz, method ->
 				forEachJacksonAnnotation(method, annotation -> {
@@ -176,12 +177,9 @@ public class BindingReflectionHintsRegistrar {
 							if (sourceMethod != null) {
 								hints.registerMethod(sourceMethod, ExecutableMode.INVOKE);
 							}
+							registerHintsForClassAttributes(hints, annotation);
 						}));
-		forEachJacksonAnnotation(clazz, annotation -> annotation.getRoot().asMap().values().forEach(value -> {
-			if (value instanceof Class<?> classValue) {
-				hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-			}
-		}));
+		forEachJacksonAnnotation(clazz, annotation -> registerHintsForClassAttributes(hints, annotation));
 	}
 
 	private void forEachJacksonAnnotation(AnnotatedElement element, Consumer<MergedAnnotation<Annotation>> action) {
@@ -190,6 +188,14 @@ public class BindingReflectionHintsRegistrar {
 				.stream(JACKSON_ANNOTATION)
 				.filter(MergedAnnotation::isMetaPresent)
 				.forEach(action::accept);
+	}
+
+	private void registerHintsForClassAttributes(ReflectionHints hints, MergedAnnotation<Annotation> annotation) {
+		annotation.getRoot().asMap().values().forEach(value -> {
+			if (value instanceof Class<?> classValue && value != Void.class) {
+				hints.registerType(classValue, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+			}
+		});
 	}
 
 	/**

@@ -1958,6 +1958,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		@Override
+		@Nullable
 		public String getDependencyName() {
 			return null;
 		}

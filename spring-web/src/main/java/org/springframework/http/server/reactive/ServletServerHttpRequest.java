@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			AsyncContext asyncContext, String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 			throws IOException, URISyntaxException {
 
-		super(initUri(request), request.getContextPath() + servletPath, initHeaders(headers, request));
+		super(HttpMethod.valueOf(request.getMethod()), initUri(request), request.getContextPath() + servletPath,
+				initHeaders(headers, request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be greater than 0");
@@ -160,11 +161,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 		return (headers != null ? headers : headerValues);
-	}
-
-	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.request.getMethod());
 	}
 
 	@Override

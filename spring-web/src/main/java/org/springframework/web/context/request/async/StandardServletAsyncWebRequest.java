@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import jakarta.servlet.AsyncListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -44,10 +45,6 @@ import org.springframework.web.context.request.ServletWebRequest;
  */
 public class StandardServletAsyncWebRequest extends ServletWebRequest implements AsyncWebRequest, AsyncListener {
 
-	private Long timeout;
-
-	private AsyncContext asyncContext;
-
 	private final AtomicBoolean asyncCompleted = new AtomicBoolean();
 
 	private final List<Runnable> timeoutHandlers = new ArrayList<>();
@@ -55,6 +52,12 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	private final List<Consumer<Throwable>> exceptionHandlers = new ArrayList<>();
 
 	private final List<Runnable> completionHandlers = new ArrayList<>();
+
+	@Nullable
+	private Long timeout;
+
+	@Nullable
+	private AsyncContext asyncContext;
 
 
 	/**

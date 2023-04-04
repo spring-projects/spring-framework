@@ -35,6 +35,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -214,7 +215,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 				return MethodMatcher.TRUE;
 			}
 			@Override
-			public boolean equals(Object obj) {
+			public boolean equals(@Nullable Object obj) {
 				return true;
 			}
 			@Override

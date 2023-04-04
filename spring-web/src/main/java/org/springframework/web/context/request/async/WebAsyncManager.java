@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.web.context.request.async.DeferredResult.DeferredResu
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.2
  * @see org.springframework.web.context.request.AsyncWebRequestInterceptor
  * @see org.springframework.web.servlet.AsyncHandlerInterceptor
@@ -76,12 +77,15 @@ public final class WebAsyncManager {
 	private static Boolean taskExecutorWarning = true;
 
 
+	@Nullable
 	private AsyncWebRequest asyncWebRequest;
 
 	private AsyncTaskExecutor taskExecutor = DEFAULT_TASK_EXECUTOR;
 
+	@Nullable
 	private volatile Object concurrentResult = RESULT_NONE;
 
+	@Nullable
 	private volatile Object[] concurrentResultContext;
 
 	/*
@@ -164,6 +168,7 @@ public final class WebAsyncManager {
 	 * concurrent handling.
 	 * @see #clearConcurrentResult()
 	 */
+	@Nullable
 	public Object[] getConcurrentResultContext() {
 		return this.concurrentResultContext;
 	}
@@ -377,7 +382,7 @@ public final class WebAsyncManager {
 		return request != null ? request.getRequestURI() : "servlet container";
 	}
 
-	private void setConcurrentResultAndDispatch(Object result) {
+	private void setConcurrentResultAndDispatch(@Nullable Object result) {
 		synchronized (WebAsyncManager.this) {
 			if (this.concurrentResult != RESULT_NONE) {
 				return;

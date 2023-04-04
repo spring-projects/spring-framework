@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -314,16 +314,17 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				ExchangeFunctions.create(connectorToUse, initExchangeStrategies()) :
 				this.exchangeFunction);
 
-		ExchangeFunction filteredExchange = (this.filters != null ? this.filters.stream()
+		ExchangeFilterFunction filterFunctions = (this.filters != null ? this.filters.stream()
 				.reduce(ExchangeFilterFunction::andThen)
-				.map(filter -> filter.apply(exchange))
-				.orElse(exchange) : exchange);
+				.orElse(null) : null);
 
 		HttpHeaders defaultHeaders = copyDefaultHeaders();
 
 		MultiValueMap<String, String> defaultCookies = copyDefaultCookies();
 
-		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
+		return new DefaultWebClient(exchange,
+				filterFunctions,
+				initUriBuilderFactory(),
 				defaultHeaders,
 				defaultCookies,
 				this.defaultRequest,

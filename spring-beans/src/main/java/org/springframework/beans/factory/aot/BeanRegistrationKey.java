@@ -14,27 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.aspectj;
+package org.springframework.beans.factory.aot;
 
 /**
- * Utility to trick the compiler to throw valid checked exceptions masked as
- * runtime exceptions within the interceptor.
+ * Record class holding key information for beans registered in a bean factory.
  *
- * @author Stephane Nicoll
+ * @param beanName the name of the registered bean
+ * @param beanClass the type of the registered bean
+ * @author Brian Clozel
+ * @since 6.0.8
  */
-final class AnyThrow {
-
-	private AnyThrow() {
-	}
-
-
-	static void throwUnchecked(Throwable e) {
-		AnyThrow.<RuntimeException>throwAny(e);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <E extends Throwable> void throwAny(Throwable e) throws E {
-		throw (E) e;
-	}
-
+record BeanRegistrationKey(String beanName, Class<?> beanClass) {
 }

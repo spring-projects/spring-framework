@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,9 @@ abstract class PropertyDescriptorUtils {
 			BasicPropertyDescriptor pd = pdMap.get(propertyName);
 			if (pd != null) {
 				if (setter) {
-					if (pd.getWriteMethod() == null ||
-							pd.getWriteMethod().getParameterTypes()[0].isAssignableFrom(method.getParameterTypes()[0])) {
+					Method writeMethod = pd.getWriteMethod();
+					if (writeMethod == null ||
+							writeMethod.getParameterTypes()[0].isAssignableFrom(method.getParameterTypes()[0])) {
 						pd.setWriteMethod(method);
 					}
 					else {
@@ -97,8 +98,9 @@ abstract class PropertyDescriptorUtils {
 					}
 				}
 				else {
-					if (pd.getReadMethod() == null ||
-							(pd.getReadMethod().getReturnType() == method.getReturnType() && method.getName().startsWith("is"))) {
+					Method readMethod = pd.getReadMethod();
+					if (readMethod == null ||
+							(readMethod.getReturnType() == method.getReturnType() && method.getName().startsWith("is"))) {
 						pd.setReadMethod(method);
 					}
 				}

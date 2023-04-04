@@ -869,7 +869,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		Expression expression = parser.parseExpression("parseInt('-FF', 16)");
 
 		Integer result = expression.getValue(context, "", Integer.class);
-		assertThat(result.intValue()).isEqualTo(-255);
+		assertThat(result).isEqualTo(-255);
 	}
 
 	@Test
@@ -880,25 +880,25 @@ class SpelReproTests extends AbstractExpressionTests {
 		Object result = null;
 
 		expression = parser.parseExpression("new java.lang.Long[0].class");
-		result = expression.getValue(context, "");
-		assertThat(result.toString()).as("Equal assertion failed: ").isEqualTo("class [Ljava.lang.Long;");
+		result = expression.getValue(context);
+		assertThat(result).asString().isEqualTo("class [Ljava.lang.Long;");
 
 		expression = parser.parseExpression("T(java.lang.Long[])");
-		result = expression.getValue(context, "");
-		assertThat(result.toString()).as("Equal assertion failed: ").isEqualTo("class [Ljava.lang.Long;");
+		result = expression.getValue(context);
+		assertThat(result).asString().isEqualTo("class [Ljava.lang.Long;");
 
 		expression = parser.parseExpression("T(java.lang.String[][][])");
-		result = expression.getValue(context, "");
-		assertThat(result.toString()).as("Equal assertion failed: ").isEqualTo("class [[[Ljava.lang.String;");
+		result = expression.getValue(context);
+		assertThat(result).asString().isEqualTo("class [[[Ljava.lang.String;");
 		assertThat(((SpelExpression) expression).toStringAST()).isEqualTo("T(java.lang.String[][][])");
 
 		expression = parser.parseExpression("new int[0].class");
-		result = expression.getValue(context, "");
-		assertThat(result.toString()).as("Equal assertion failed: ").isEqualTo("class [I");
+		result = expression.getValue(context);
+		assertThat(result).asString().isEqualTo("class [I");
 
 		expression = parser.parseExpression("T(int[][])");
-		result = expression.getValue(context, "");
-		assertThat(result.toString()).isEqualTo("class [[I");
+		result = expression.getValue(context);
+		assertThat(result).asString().isEqualTo("class [[I");
 	}
 
 	@Test
@@ -1587,12 +1587,12 @@ class SpelReproTests extends AbstractExpressionTests {
 		// #this should be the element from list1
 		Expression ex = parser.parseExpression("#list1.?[#list2.contains(#this)]");
 		Object result = ex.getValue(context);
-		assertThat(result.toString()).isEqualTo("[x]");
+		assertThat(result).asString().isEqualTo("[x]");
 
 		// toString() should be called on the element from list1
 		ex = parser.parseExpression("#list1.?[#list2.contains(toString())]");
 		result = ex.getValue(context);
-		assertThat(result.toString()).isEqualTo("[x]");
+		assertThat(result).asString().isEqualTo("[x]");
 
 		List list3 = new ArrayList();
 		list3.add(1);
@@ -1604,11 +1604,11 @@ class SpelReproTests extends AbstractExpressionTests {
 		context.setVariable("list3", list3);
 		ex = parser.parseExpression("#list3.?[#this > 2]");
 		result = ex.getValue(context);
-		assertThat(result.toString()).isEqualTo("[3, 4]");
+		assertThat(result).asString().isEqualTo("[3, 4]");
 
 		ex = parser.parseExpression("#list3.?[#this >= T(java.lang.Math).abs(T(java.lang.Math).abs(#this))]");
 		result = ex.getValue(context);
-		assertThat(result.toString()).isEqualTo("[1, 2, 3, 4]");
+		assertThat(result).asString().isEqualTo("[1, 2, 3, 4]");
 	}
 
 	@Test
@@ -1628,11 +1628,11 @@ class SpelReproTests extends AbstractExpressionTests {
 		// #this should be the element from list1
 		Expression ex = parser.parseExpression("#map1.?[#map2.containsKey(#this.getKey())]");
 		Object result = ex.getValue(context);
-		assertThat(result.toString()).isEqualTo("{X=66}");
+		assertThat(result).asString().isEqualTo("{X=66}");
 
 		ex = parser.parseExpression("#map1.?[#map2.containsKey(key)]");
 		result = ex.getValue(context);
-		assertThat(result.toString()).isEqualTo("{X=66}");
+		assertThat(result).asString().isEqualTo("{X=66}");
 	}
 
 	@Test
@@ -1811,7 +1811,6 @@ class SpelReproTests extends AbstractExpressionTests {
 	static class CCC {
 
 		public boolean method(Object o) {
-			System.out.println(o);
 			return false;
 		}
 	}
@@ -1883,7 +1882,6 @@ class SpelReproTests extends AbstractExpressionTests {
 	static class Foo2 {
 
 		public void execute(String str) {
-			System.out.println("Value: " + str);
 		}
 	}
 
@@ -1958,7 +1956,6 @@ class SpelReproTests extends AbstractExpressionTests {
 	public static class ReflectionUtil<T extends Number> {
 
 		public Object methodToCall(T param) {
-			System.out.println(param + " " + param.getClass());
 			return "Object methodToCall(T param)";
 		}
 
@@ -2251,7 +2248,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		}
 
 		@Override
-		public boolean equals(Object other) {
+		public boolean equals(@Nullable Object other) {
 			return (this == other || (other instanceof TestClass2 &&
 					this.string.equals(((TestClass2) other).string)));
 		}

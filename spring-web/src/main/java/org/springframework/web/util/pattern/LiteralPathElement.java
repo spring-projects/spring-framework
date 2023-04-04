@@ -29,7 +29,7 @@ import org.springframework.web.util.pattern.PathPattern.MatchingContext;
  */
 class LiteralPathElement extends PathElement {
 
-	private final char[] text;
+	private final String text;
 
 	private final int len;
 
@@ -40,16 +40,7 @@ class LiteralPathElement extends PathElement {
 		super(pos, separator);
 		this.len = literalText.length;
 		this.caseSensitive = caseSensitive;
-		if (caseSensitive) {
-			this.text = literalText;
-		}
-		else {
-			// Force all the text lower case to make matching faster
-			this.text = new char[literalText.length];
-			for (int i = 0; i < this.len; i++) {
-				this.text[i] = Character.toLowerCase(literalText[i]);
-			}
-		}
+		this.text = new String(literalText);
 	}
 
 
@@ -70,18 +61,13 @@ class LiteralPathElement extends PathElement {
 		}
 
 		if (this.caseSensitive) {
-			for (int i = 0; i < this.len; i++) {
-				if (value.charAt(i) != this.text[i]) {
-					return false;
-				}
+			if (!this.text.equals(value)) {
+				return false;
 			}
 		}
 		else {
-			for (int i = 0; i < this.len; i++) {
-				// TODO revisit performance if doing a lot of case-insensitive matching
-				if (Character.toLowerCase(value.charAt(i)) != this.text[i]) {
-					return false;
-				}
+			if (!this.text.equalsIgnoreCase(value)) {
+				return false;
 			}
 		}
 
@@ -114,7 +100,7 @@ class LiteralPathElement extends PathElement {
 
 	@Override
 	public char[] getChars() {
-		return this.text;
+		return this.text.toCharArray();
 	}
 
 	@Override
@@ -124,7 +110,7 @@ class LiteralPathElement extends PathElement {
 
 	@Override
 	public String toString() {
-		return "Literal(" + String.valueOf(this.text) + ")";
+		return "Literal(" + this.text + ")";
 	}
 
 }

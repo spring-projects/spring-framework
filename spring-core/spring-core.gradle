@@ -7,7 +7,7 @@ apply plugin: "kotlin"
 apply plugin: "kotlinx-serialization"
 
 def javapoetVersion = "1.13.0"
-def objenesisVersion = "3.2"
+def objenesisVersion = "3.3"
 
 configurations {
 	javapoet

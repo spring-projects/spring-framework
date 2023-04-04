@@ -16,15 +16,21 @@
 
 package org.springframework.aot.hint;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
@@ -37,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sebastien Deleuze
  */
-public class BindingReflectionHintsRegistrarTests {
+class BindingReflectionHintsRegistrarTests {
 
 	private final BindingReflectionHintsRegistrar bindingRegistrar = new BindingReflectionHintsRegistrar();
 
@@ -265,6 +271,15 @@ public class BindingReflectionHintsRegistrarTests {
 				.accepts(this.hints);
 	}
 
+	@Test
+	void registerTypeForAnnotationOnMethodAndField() {
+		bindingRegistrar.registerReflectionHints(this.hints.reflection(), SampleClassWithJsonProperty.class);
+		assertThat(RuntimeHintsPredicates.reflection().onType(CustomDeserializer1.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+				.accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection().onType(CustomDeserializer2.class).withMemberCategory(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+				.accepts(this.hints);
+	}
+
 
 	static class SampleEmptyClass {
 	}
@@ -359,9 +374,11 @@ public class BindingReflectionHintsRegistrarTests {
 	static class SampleClassWithJsonProperty {
 
 		@JsonProperty
+		@JsonDeserialize(using = CustomDeserializer1.class)
 		private String privateField = "";
 
 		@JsonProperty
+		@JsonDeserialize(using = CustomDeserializer2.class)
 		String packagePrivateMethod() {
 			return "";
 		}
@@ -391,6 +408,32 @@ public class BindingReflectionHintsRegistrarTests {
 			}
 		}
 
+	}
+
+	@SuppressWarnings("serial")
+	static class CustomDeserializer1 extends StdDeserializer<LocalDate> {
+
+		public CustomDeserializer1() {
+			super(CustomDeserializer1.class);
+		}
+
+		@Override
+		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+			return null;
+		}
+	}
+
+	@SuppressWarnings("serial")
+	static class CustomDeserializer2 extends StdDeserializer<LocalDate> {
+
+		public CustomDeserializer2() {
+			super(CustomDeserializer2.class);
+		}
+
+		@Override
+		public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+			return null;
+		}
 	}
 
 }

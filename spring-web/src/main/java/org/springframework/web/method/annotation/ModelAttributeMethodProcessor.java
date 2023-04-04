@@ -174,7 +174,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				}
 				validateIfApplicable(binder, parameter);
 				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
-					throw new BindException(binder.getBindingResult());
+					throw new MethodArgumentNotValidException(parameter, binder.getBindingResult());
 				}
 			}
 			// Value type adaptation, also covering java.util.Optional
@@ -335,8 +335,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			return BeanUtils.instantiateClass(ctor, args);
 		}
 		catch (BeanInstantiationException ex) {
-			Throwable cause = ex.getCause();
-			if (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) && cause instanceof NullPointerException) {
+			if (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) &&
+					ex.getCause() instanceof NullPointerException cause) {
 				BindingResult result = binder.getBindingResult();
 				ObjectError error = new ObjectError(ctor.getName(), cause.getMessage());
 				result.addError(error);

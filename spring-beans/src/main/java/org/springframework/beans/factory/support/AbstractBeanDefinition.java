@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -853,10 +853,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Override
 	public ConstructorArgumentValues getConstructorArgumentValues() {
-		if (this.constructorArgumentValues == null) {
-			this.constructorArgumentValues = new ConstructorArgumentValues();
+		ConstructorArgumentValues cav = this.constructorArgumentValues;
+		if (cav == null) {
+			cav = new ConstructorArgumentValues();
+			this.constructorArgumentValues = cav;
 		}
-		return this.constructorArgumentValues;
+		return cav;
 	}
 
 	/**
@@ -879,10 +881,12 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 */
 	@Override
 	public MutablePropertyValues getPropertyValues() {
-		if (this.propertyValues == null) {
-			this.propertyValues = new MutablePropertyValues();
+		MutablePropertyValues pvs = this.propertyValues;
+		if (pvs == null) {
+			pvs = new MutablePropertyValues();
+			this.propertyValues = pvs;
 		}
-		return this.propertyValues;
+		return pvs;
 	}
 
 	/**

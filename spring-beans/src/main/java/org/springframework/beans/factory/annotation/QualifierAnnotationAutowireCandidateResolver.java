@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -240,10 +241,11 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 				}
 			}
 			if (targetAnnotation == null) {
+				BeanFactory beanFactory = getBeanFactory();
 				// Look for matching annotation on the target class
-				if (getBeanFactory() != null) {
+				if (beanFactory != null) {
 					try {
-						Class<?> beanType = getBeanFactory().getType(bdHolder.getBeanName());
+						Class<?> beanType = beanFactory.getType(bdHolder.getBeanName());
 						if (beanType != null) {
 							targetAnnotation = AnnotationUtils.getAnnotation(ClassUtils.getUserClass(beanType), type);
 						}

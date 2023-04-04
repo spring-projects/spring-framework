@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTests {
@@ -90,8 +91,8 @@ class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTe
 	void stream(HttpServer httpServer) throws Exception {
 		startServer(httpServer);
 
-		String[] expected = {"0", "1", "2", "3", "4"};
-		assertThat(performGet("/stream", new HttpHeaders(), String[].class).getBody()).isEqualTo(expected);
+		int[] expected = {0, 1, 2, 3, 4};
+		assertThat(performGet("/stream", new HttpHeaders(), int[].class).getBody()).isEqualTo(expected);
 	}
 
 

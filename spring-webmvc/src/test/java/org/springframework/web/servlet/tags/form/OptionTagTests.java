@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.testfixture.beans.Colour;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
@@ -555,7 +556,7 @@ class OptionTagTests extends AbstractHtmlElementTagTests {
 		}
 
 		@Override
-		public boolean equals(Object obj) {
+		public boolean equals(@Nullable Object obj) {
 			if (obj instanceof RulesVariant other) {
 				return this.toId().equals(other.toId());
 			}

@@ -1,5 +1,10 @@
 # Security Policy
 
+## JAR signing
+
+Spring Framework JARs released on Maven Central are signed.
+You'll find more information about the key here: https://spring.io/GPG-KEY-spring.txt
+
 ## Supported Versions
 
 Please see the

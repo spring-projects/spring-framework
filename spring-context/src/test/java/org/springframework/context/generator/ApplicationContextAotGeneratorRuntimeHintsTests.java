@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.context.generator;
 
 import java.util.function.BiConsumer;
 
-import org.junit.jupiter.api.Disabled;
+import jakarta.annotation.PreDestroy;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.hint.RuntimeHints;
@@ -72,12 +72,19 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 	}
 
 	@Test
-	@Disabled("until gh-29246 is re-applied")
 	void generateApplicationContextWithMultipleInitDestroyMethods() {
 		GenericApplicationContext context = new AnnotationConfigApplicationContext();
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyComponent.class);
 		beanDefinition.setInitMethodName("customInit");
 		beanDefinition.setDestroyMethodName("customDestroy");
+		context.registerBeanDefinition("initDestroyComponent", beanDefinition);
+		compile(context, (hints, invocations) -> assertThat(invocations).match(hints));
+	}
+
+	@Test
+	void generateApplicationContextWithInheritedDestroyMethods() {
+		GenericApplicationContext context = new AnnotationConfigApplicationContext();
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(InheritedDestroy.class);
 		context.registerBeanDefinition("initDestroyComponent", beanDefinition);
 		compile(context, (hints, invocations) -> assertThat(invocations).match(hints));
 	}
@@ -98,6 +105,19 @@ class ApplicationContextAotGeneratorRuntimeHintsTests {
 			});
 			initializationResult.accept(generationContext.getRuntimeHints(), recordedInvocations);
 		});
+	}
+
+	public interface Destroyable {
+
+		@PreDestroy
+		default void destroy() {
+
+		}
+
+	}
+
+	public static class InheritedDestroy implements Destroyable {
+
 	}
 
 }

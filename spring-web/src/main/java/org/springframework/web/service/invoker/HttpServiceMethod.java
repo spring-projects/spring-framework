@@ -52,6 +52,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  * by delegating to an {@link HttpClientAdapter} to perform actual requests.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 6.0
  */
 final class HttpServiceMethod {
@@ -311,14 +312,15 @@ final class HttpServiceMethod {
 
 			MethodParameter returnParam = new MethodParameter(method, -1);
 			Class<?> returnType = returnParam.getParameterType();
-			if (KotlinDetector.isSuspendingFunction(method)) {
+			boolean isSuspending = KotlinDetector.isSuspendingFunction(method);
+			if (isSuspending) {
 				returnType = Mono.class;
 			}
 
 			ReactiveAdapter reactiveAdapter = reactiveRegistry.getAdapter(returnType);
 
 			MethodParameter actualParam = (reactiveAdapter != null ? returnParam.nested() : returnParam.nestedIfOptional());
-			Class<?> actualType = actualParam.getNestedParameterType();
+			Class<?> actualType = isSuspending ? actualParam.getParameterType() : actualParam.getNestedParameterType();
 
 			Function<HttpRequestValues, Publisher<?>> responseFunction;
 			if (actualType.equals(void.class) || actualType.equals(Void.class)) {
@@ -331,18 +333,18 @@ final class HttpServiceMethod {
 				responseFunction = client::requestToHeaders;
 			}
 			else if (actualType.equals(ResponseEntity.class)) {
-				MethodParameter bodyParam = actualParam.nested();
+				MethodParameter bodyParam = isSuspending ? actualParam : actualParam.nested();
 				Class<?> bodyType = bodyParam.getNestedParameterType();
 				if (bodyType.equals(Void.class)) {
 					responseFunction = client::requestToBodilessEntity;
 				}
 				else {
 					ReactiveAdapter bodyAdapter = reactiveRegistry.getAdapter(bodyType);
-					responseFunction = initResponseEntityFunction(client, bodyParam, bodyAdapter);
+					responseFunction = initResponseEntityFunction(client, bodyParam, bodyAdapter, isSuspending);
 				}
 			}
 			else {
-				responseFunction = initBodyFunction(client, actualParam, reactiveAdapter);
+				responseFunction = initBodyFunction(client, actualParam, reactiveAdapter, isSuspending);
 			}
 
 			boolean blockForOptional = returnType.equals(Optional.class);
@@ -350,8 +352,8 @@ final class HttpServiceMethod {
 		}
 
 		@SuppressWarnings("ConstantConditions")
-		private static Function<HttpRequestValues, Publisher<?>> initResponseEntityFunction(
-				HttpClientAdapter client, MethodParameter methodParam, @Nullable ReactiveAdapter reactiveAdapter) {
+		private static Function<HttpRequestValues, Publisher<?>> initResponseEntityFunction(HttpClientAdapter client,
+				MethodParameter methodParam, @Nullable ReactiveAdapter reactiveAdapter, boolean isSuspending) {
 
 			if (reactiveAdapter == null) {
 				return request -> client.requestToEntity(
@@ -362,7 +364,8 @@ final class HttpServiceMethod {
 					"ResponseEntity body must be a concrete value or a multi-value Publisher");
 
 			ParameterizedTypeReference<?> bodyType =
-					ParameterizedTypeReference.forType(methodParam.nested().getNestedGenericParameterType());
+					ParameterizedTypeReference.forType(isSuspending ? methodParam.nested().getGenericParameterType() :
+							methodParam.nested().getNestedGenericParameterType());
 
 			// Shortcut for Flux
 			if (reactiveAdapter.getReactiveType().equals(Flux.class)) {
@@ -376,11 +379,12 @@ final class HttpServiceMethod {
 					});
 		}
 
-		private static Function<HttpRequestValues, Publisher<?>> initBodyFunction(
-				HttpClientAdapter client, MethodParameter methodParam, @Nullable ReactiveAdapter reactiveAdapter) {
+		private static Function<HttpRequestValues, Publisher<?>> initBodyFunction(HttpClientAdapter client,
+				MethodParameter methodParam, @Nullable ReactiveAdapter reactiveAdapter, boolean isSuspending) {
 
 			ParameterizedTypeReference<?> bodyType =
-					ParameterizedTypeReference.forType(methodParam.getNestedGenericParameterType());
+					ParameterizedTypeReference.forType(isSuspending ? methodParam.getGenericParameterType() :
+							methodParam.getNestedGenericParameterType());
 
 			return (reactiveAdapter != null && reactiveAdapter.isMultiValue() ?
 					request -> client.requestToBodyFlux(request, bodyType) :

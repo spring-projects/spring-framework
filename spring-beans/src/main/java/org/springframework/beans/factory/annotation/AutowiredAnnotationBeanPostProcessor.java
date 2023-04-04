@@ -280,6 +280,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	@Override
+	@Nullable
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Class<?> beanClass = registeredBean.getBeanClass();
 		String beanName = registeredBean.getBeanName();
@@ -323,10 +324,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		checkLookupMethods(beanClass, beanName);
 
 		// Pick up subclass with fresh lookup method override from above
-		if (this.beanFactory instanceof AbstractAutowireCapableBeanFactory aacbf) {
+		if (this.beanFactory instanceof AbstractAutowireCapableBeanFactory aacBeanFactory) {
 			RootBeanDefinition mbd = (RootBeanDefinition) this.beanFactory.getMergedBeanDefinition(beanName);
 			if (mbd.getFactoryMethodName() == null && mbd.hasBeanClass()) {
-				return aacbf.getInstantiationStrategy().getActualBeanClass(mbd, beanName, this.beanFactory);
+				return aacBeanFactory.getInstantiationStrategy().getActualBeanClass(mbd, beanName, aacBeanFactory);
 			}
 		}
 		return beanClass;

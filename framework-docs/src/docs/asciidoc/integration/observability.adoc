@@ -9,6 +9,30 @@ Traces provide a holistic view of an entire system, crossing application boundar
 Spring Framework instruments various parts of its own codebase to publish observations if an `ObservationRegistry` is configured.
 You can learn more about {docs-spring-boot}/html/actuator.html#actuator.metrics[configuring the observability infrastructure in Spring Boot].
 
+
+[[integration.observability.list]]
+== List of produced Observations
+
+Spring Framework instruments various features for observability.
+As outlined <<integration.observability,at the beginning of this section>>, observations can generate timer Metrics and/or Traces depending on the configuration.
+
+.Observations produced by Spring Framework
+[%autowidth]
+|===
+|Observation name |Description
+
+|<<integration.observability.http-client,`"http.client.requests"`>>
+|Time spent for HTTP client exchanges
+
+|<<integration.observability.http-server,`"http.server.requests"`>>
+|Processing time for HTTP server exchanges at the Framework level
+|===
+
+NOTE: Observations are using Micrometer's official naming convention, but Metrics names will be automatically converted
+https://micrometer.io/docs/concepts#_naming_meters[to the format preferred by the monitoring system backend]
+(Prometheus, Atlas, Graphite, InfluxDB...).
+
+
 [[integration.observability.concepts]]
 == Micrometer Observation concepts
 

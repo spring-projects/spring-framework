@@ -26,8 +26,8 @@ import org.gradle.testretry.TestRetryTaskExtension;
  * Conventions that are applied in the presence of the {@link JavaBasePlugin}. When the
  * plugin is applied:
  * <ul>
- * <li>The {@link TestRetryPlugin Test Retry} plugins is applied so that flaky tests
- * are retried 3 times when running on the CI.
+ * <li>The {@link TestRetryPlugin Test Retry} plugin is applied so that flaky tests
+ * are retried 3 times when running on the CI server.
  * </ul>
  *
  * @author Brian Clozel
@@ -41,7 +41,7 @@ class TestConventions {
 
 	private void configureTestConventions(Project project) {
 		project.getTasks().withType(Test.class,
-				(test) -> project.getPlugins().withType(TestRetryPlugin.class, (testRetryPlugin) -> {
+				test -> project.getPlugins().withType(TestRetryPlugin.class, testRetryPlugin -> {
 					TestRetryTaskExtension testRetry = test.getExtensions().getByType(TestRetryTaskExtension.class);
 					testRetry.getFailOnPassedAfterRetry().set(true);
 					testRetry.getMaxRetries().set(isCi() ? 3 : 0);

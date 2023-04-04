@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,10 +281,10 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 			return executor.schedule(task, new TriggerAdapter(trigger));
 		}
 
+
 		private static class TriggerAdapter implements jakarta.enterprise.concurrent.Trigger {
 
 			private final Trigger adaptee;
-
 
 			public TriggerAdapter(Trigger adaptee) {
 				this.adaptee = adaptee;
@@ -294,25 +294,19 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 			@Nullable
 			public Date getNextRunTime(@Nullable LastExecution le, Date taskScheduledTime) {
 				Instant instant = this.adaptee.nextExecution(new LastExecutionAdapter(le));
-				return instant != null ? Date.from(instant) : null;
+				return (instant != null ? Date.from(instant) : null);
 			}
-
-			@Nullable
-			private static Instant toInstant(@Nullable Date date) {
-				return date != null ? date.toInstant() : null;
-			}
-
 
 			@Override
 			public boolean skipRun(LastExecution lastExecutionInfo, Date scheduledRunTime) {
 				return false;
 			}
 
+
 			private static class LastExecutionAdapter implements TriggerContext {
 
 				@Nullable
 				private final LastExecution le;
-
 
 				public LastExecutionAdapter(@Nullable LastExecution le) {
 					this.le = le;
@@ -320,22 +314,25 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 				@Override
 				public Instant lastScheduledExecution() {
-					return (this.le != null) ? toInstant(this.le.getScheduledStart()) : null;
+					return (this.le != null ? toInstant(this.le.getScheduledStart()) : null);
 				}
 
 				@Override
 				public Instant lastActualExecution() {
-					return (this.le != null) ? toInstant(this.le.getRunStart()) : null;
+					return (this.le != null ? toInstant(this.le.getRunStart()) : null);
 				}
 
 				@Override
 				public Instant lastCompletion() {
-					return (this.le != null) ? toInstant(this.le.getRunEnd()) : null;
+					return (this.le != null ? toInstant(this.le.getRunEnd()) : null);
+				}
+
+				@Nullable
+				private static Instant toInstant(@Nullable Date date) {
+					return (date != null ? date.toInstant() : null);
 				}
 			}
 		}
-
-
 	}
 
 }

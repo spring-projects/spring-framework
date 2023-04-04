@@ -1028,12 +1028,30 @@ the call stack and makes a determination whether to mark the transaction for rol
 In its default configuration, the Spring Framework's transaction infrastructure code
 marks a transaction for rollback only in the case of runtime, unchecked exceptions.
 That is, when the thrown exception is an instance or subclass of `RuntimeException`.
-(`Error` instances also, by default, result in a rollback). Checked exceptions that are
-thrown from a transactional method do not result in rollback in the default
-configuration.
+(`Error` instances also, by default, result in a rollback).
 
-You can configure exactly which `Exception` types mark a transaction for rollback,
-including checked exceptions by specifying _rollback rules_.
+As of Spring Framework 5.2, the default configuration also provides support for
+Vavr's `Try` method to trigger transaction rollbacks when it returns a 'Failure'.
+This allows you to handle functional-style errors using Try and have the transaction
+automatically rolled back in case of a failure. For more information on Vavr's Try,
+refer to the [official Vavr documentation](https://www.vavr.io/vavr-docs/#_try).
+
+Here's an example of how to use Vavr's Try with a transactional method:
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@Transactional
+	public Try<String> myTransactionalMethod() {
+		// If myDataAccessOperation throws an exception, it will be caught by the
+		// Try instance created with Try.of() and wrapped inside the Failure class
+		// which can be checked using the isFailure() method on the Try instance.
+		return Try.of(delegate::myDataAccessOperation);
+	}
+----
+
+Checked exceptions that are thrown from a transactional method do not result in a rollback
+in the default configuration. You can configure exactly which `Exception` types mark a
+transaction for rollback, including checked exceptions by specifying _rollback rules_.
 
 .Rollback rules
 [[transaction-declarative-rollback-rules]]
@@ -4528,7 +4546,7 @@ JDBC `?` placeholders:
 		}
 
 		public int[] batchUpdate(final List<Actor> actors) {
-			List<Object[]> batch = new ArrayList<Object[]>();
+			List<Object[]> batch = new ArrayList<>();
 			for (Actor actor : actors) {
 				Object[] values = new Object[] {
 						actor.getFirstName(), actor.getLastName(), actor.getId()};
@@ -4692,7 +4710,7 @@ example uses only one configuration method (we show examples of multiple methods
 		}
 
 		public void add(Actor actor) {
-			Map<String, Object> parameters = new HashMap<String, Object>(3);
+			Map<String, Object> parameters = new HashMap<>(3);
 			parameters.put("id", actor.getId());
 			parameters.put("first_name", actor.getFirstName());
 			parameters.put("last_name", actor.getLastName());
@@ -4750,7 +4768,7 @@ listing shows how it works:
 		}
 
 		public void add(Actor actor) {
-			Map<String, Object> parameters = new HashMap<String, Object>(2);
+			Map<String, Object> parameters = new HashMap<>(2);
 			parameters.put("first_name", actor.getFirstName());
 			parameters.put("last_name", actor.getLastName());
 			Number newId = insertActor.executeAndReturnKey(parameters);
@@ -4810,7 +4828,7 @@ You can limit the columns for an insert by specifying a list of column names wit
 		}
 
 		public void add(Actor actor) {
-			Map<String, Object> parameters = new HashMap<String, Object>(2);
+			Map<String, Object> parameters = new HashMap<>(2);
 			parameters.put("first_name", actor.getFirstName());
 			parameters.put("last_name", actor.getLastName());
 			Number newId = insertActor.executeAndReturnKey(parameters);

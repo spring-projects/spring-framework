@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 
-	private final HttpMethod httpMethod;
-
 	private final MultiValueMap<String, HttpCookie> cookies;
 
 	@Nullable
@@ -74,8 +72,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,
 			@Nullable SslInfo sslInfo, Publisher<? extends DataBuffer> body) {
 
-		super(uri, contextPath, headers);
-		this.httpMethod = httpMethod;
+		super(httpMethod, uri, contextPath, headers);
 		this.cookies = cookies;
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
@@ -83,11 +80,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		this.body = Flux.from(body);
 	}
 
-
-	@Override
-	public HttpMethod getMethod() {
-		return this.httpMethod;
-	}
 
 	@Override
 	@Nullable

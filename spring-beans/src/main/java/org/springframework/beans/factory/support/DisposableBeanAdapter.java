@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
  * @author Costin Leau
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 2.0
  * @see AbstractBeanFactory
  * @see org.springframework.beans.factory.DisposableBean
@@ -253,7 +254,18 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	@Nullable
 	private Method determineDestroyMethod(String name) {
 		try {
-			return findDestroyMethod(name);
+			Class<?> beanClass = this.bean.getClass();
+			Method destroyMethod = findDestroyMethod(beanClass, name);
+			if (destroyMethod != null) {
+				return destroyMethod;
+			}
+			for (Class<?> beanInterface : beanClass.getInterfaces()) {
+				destroyMethod = findDestroyMethod(beanInterface, name);
+				if (destroyMethod != null) {
+					return destroyMethod;
+				}
+			}
+			return null;
 		}
 		catch (IllegalArgumentException ex) {
 			throw new BeanDefinitionValidationException("Could not find unique destroy method on bean with name '" +
@@ -262,10 +274,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	}
 
 	@Nullable
-	private Method findDestroyMethod(String name) {
+	private Method findDestroyMethod(Class<?> clazz, String name) {
 		return (this.nonPublicAccessAllowed ?
-				BeanUtils.findMethodWithMinimalParameters(this.bean.getClass(), name) :
-				BeanUtils.findMethodWithMinimalParameters(this.bean.getClass().getMethods(), name));
+				BeanUtils.findMethodWithMinimalParameters(clazz, name) :
+				BeanUtils.findMethodWithMinimalParameters(clazz.getMethods(), name));
 	}
 
 	/**
