@@ -133,35 +133,17 @@ public abstract class TypeUtils {
 	}
 
 	private static boolean isAssignable(WildcardType lhsType, Type rhsType) {
-		Type[] lUpperBounds = lhsType.getUpperBounds();
+		Type[] lUpperBounds = getUpperBounds(lhsType);
 
-		// supply the implicit upper bound if none are specified
-		if (lUpperBounds.length == 0) {
-			lUpperBounds = new Type[] { Object.class };
-		}
-
-		Type[] lLowerBounds = lhsType.getLowerBounds();
-
-		// supply the implicit lower bound if none are specified
-		if (lLowerBounds.length == 0) {
-			lLowerBounds = new Type[] { null };
-		}
+		Type[] lLowerBounds = getLowerBounds(lhsType);
 
 		if (rhsType instanceof WildcardType rhsWcType) {
 			// both the upper and lower bounds of the right-hand side must be
 			// completely enclosed in the upper and lower bounds of the left-
 			// hand side.
-			Type[] rUpperBounds = rhsWcType.getUpperBounds();
+			Type[] rUpperBounds = getUpperBounds(rhsWcType);
 
-			if (rUpperBounds.length == 0) {
-				rUpperBounds = new Type[] { Object.class };
-			}
-
-			Type[] rLowerBounds = rhsWcType.getLowerBounds();
-
-			if (rLowerBounds.length == 0) {
-				rLowerBounds = new Type[] { null };
-			}
+			Type[] rLowerBounds = getLowerBounds(rhsWcType);
 
 			for (Type lBound : lUpperBounds) {
 				for (Type rBound : rUpperBounds) {
@@ -206,6 +188,26 @@ public abstract class TypeUtils {
 		}
 
 		return true;
+	}
+
+	private static Type[] getLowerBounds(WildcardType lhsType) {
+		Type[] lLowerBounds = lhsType.getLowerBounds();
+
+		// supply the implicit lower bound if none are specified
+		if (lLowerBounds.length == 0) {
+			lLowerBounds = new Type[] { null };
+		}
+		return lLowerBounds;
+	}
+
+	private static Type[] getUpperBounds(WildcardType lhsType) {
+		Type[] lUpperBounds = lhsType.getUpperBounds();
+
+		// supply the implicit upper bound if none are specified
+		if (lUpperBounds.length == 0) {
+			lUpperBounds = new Type[] { Object.class };
+		}
+		return lUpperBounds;
 	}
 
 	public static boolean isAssignableBound(@Nullable Type lhsType, @Nullable Type rhsType) {
