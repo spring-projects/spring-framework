@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class ConstantsTests {
 		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
 				c.asNumber("bogus"));
 
-		assertThat(c.asString("S1").equals(A.S1)).isTrue();
+		assertThat(c.asString("S1")).isEqualTo(A.S1);
 		assertThatExceptionOfType(Constants.ConstantException.class).as("wrong type").isThrownBy(() ->
 				c.asNumber("S1"));
 	}
@@ -194,21 +194,21 @@ class ConstantsTests {
 	void getValuesWithNullPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(null);
-		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
+		assertThat(values).as("Must have returned *all* public static final values").hasSize(7);
 	}
 
 	@Test
 	void getValuesWithEmptyStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<Object> values = c.getValues("");
-		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
+		assertThat(values).as("Must have returned *all* public static final values").hasSize(7);
 	}
 
 	@Test
 	void getValuesWithWhitespacedStringPrefix() throws Exception {
 		Constants c = new Constants(A.class);
 		Set<?> values = c.getValues(" ");
-		assertThat(values.size()).as("Must have returned *all* public static final values").isEqualTo(7);
+		assertThat(values).as("Must have returned *all* public static final values").hasSize(7);
 	}
 
 	@Test

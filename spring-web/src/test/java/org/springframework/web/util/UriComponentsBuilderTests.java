@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -953,7 +953,7 @@ class UriComponentsBuilderTests {
 	void queryParamWithoutValueWithEquals()  {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("https://example.com/foo?bar=").build();
 		assertThat(uriComponents.toUriString()).isEqualTo("https://example.com/foo?bar=");
-		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isEqualTo("");
+		assertThat(uriComponents.getQueryParams().get("bar").get(0)).isEmpty();
 	}
 
 	@Test
@@ -1026,7 +1026,7 @@ class UriComponentsBuilderTests {
 	@Test  // SPR-13257
 	void parsesEmptyUri() {
 		UriComponents components = UriComponentsBuilder.fromUriString("").build();
-		assertThat(components.toString()).isEqualTo("");
+		assertThat(components.toString()).isEmpty();
 	}
 
 	@Test  // gh-25243

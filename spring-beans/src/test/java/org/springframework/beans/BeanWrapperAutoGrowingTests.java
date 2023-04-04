@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,15 +90,15 @@ public class BeanWrapperAutoGrowingTests {
 
 	@Test
 	public void getPropertyValueAutoGrow2dArray() {
-		assertNotNull(wrapper.getPropertyValue("multiArray[0][0]"));
+		assertThat(wrapper.getPropertyValue("multiArray[0][0]")).isNotNull();
 		assertThat(bean.getMultiArray()[0]).hasSize(1);
 		assertThat(bean.getMultiArray()[0][0]).isInstanceOf(Bean.class);
 	}
 
 	@Test
 	public void getPropertyValueAutoGrow3dArray() {
-		assertNotNull(wrapper.getPropertyValue("threeDimensionalArray[1][2][3]"));
-		assertThat(bean.getThreeDimensionalArray()[1].length).isEqualTo(3);
+		assertThat(wrapper.getPropertyValue("threeDimensionalArray[1][2][3]")).isNotNull();
+		assertThat(bean.getThreeDimensionalArray()[1]).hasNumberOfRows(3);
 		assertThat(bean.getThreeDimensionalArray()[1][2][3]).isInstanceOf(Bean.class);
 	}
 

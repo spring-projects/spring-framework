@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,13 +120,13 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(bean).isNotNull();
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("customArgumentResolvers");
 		assertThat(value).isNotNull();
-		assertThat(value instanceof List).isTrue();
+		assertThat(value).isInstanceOf(List.class);
 		@SuppressWarnings("unchecked")
 		List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
 		assertThat(resolvers).hasSize(3);
-		assertThat(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter).isTrue();
-		assertThat(resolvers.get(1) instanceof TestHandlerMethodArgumentResolver).isTrue();
-		assertThat(resolvers.get(2) instanceof TestHandlerMethodArgumentResolver).isTrue();
+		assertThat(resolvers.get(0)).isInstanceOf(ServletWebArgumentResolverAdapter.class);
+		assertThat(resolvers.get(1)).isInstanceOf(TestHandlerMethodArgumentResolver.class);
+		assertThat(resolvers.get(2)).isInstanceOf(TestHandlerMethodArgumentResolver.class);
 		assertThat(resolvers.get(2)).isNotSameAs(resolvers.get(1));
 	}
 
@@ -141,7 +141,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(bean).isNotNull();
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("customReturnValueHandlers");
 		assertThat(value).isNotNull();
-		assertThat(value instanceof List).isTrue();
+		assertThat(value).isInstanceOf(List.class);
 		@SuppressWarnings("unchecked")
 		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>) value;
 		assertThat(handlers).hasSize(2);
@@ -170,16 +170,16 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(bean).isNotNull();
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("messageConverters");
 		assertThat(value).isNotNull();
-		assertThat(value instanceof List).isTrue();
+		assertThat(value).isInstanceOf(List.class);
 		List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) value;
 		if (hasDefaultRegistrations) {
-			assertThat(converters.size() > 2).as("Default and custom converter expected").isTrue();
+			assertThat(converters.size()).as("Default and custom converter expected").isGreaterThan(2);
 		}
 		else {
-			assertThat(converters.size() == 2).as("Only custom converters expected").isTrue();
+			assertThat(converters.size()).as("Only custom converters expected").isEqualTo(2);
 		}
-		assertThat(converters.get(0) instanceof StringHttpMessageConverter).isTrue();
-		assertThat(converters.get(1) instanceof ResourceHttpMessageConverter).isTrue();
+		assertThat(converters.get(0)).isInstanceOf(StringHttpMessageConverter.class);
+		assertThat(converters.get(1)).isInstanceOf(ResourceHttpMessageConverter.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -187,9 +187,9 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(bean).isNotNull();
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("responseBodyAdvice");
 		assertThat(value).isNotNull();
-		assertThat(value instanceof List).isTrue();
+		assertThat(value).isInstanceOf(List.class);
 		List<ResponseBodyAdvice<?>> converters = (List<ResponseBodyAdvice<?>>) value;
-		assertThat(converters.get(0) instanceof JsonViewResponseBodyAdvice).isTrue();
+		assertThat(converters.get(0)).isInstanceOf(JsonViewResponseBodyAdvice.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -197,7 +197,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertThat(bean).isNotNull();
 		Object value = new DirectFieldAccessor(bean).getPropertyValue("requestResponseBodyAdvice");
 		assertThat(value).isNotNull();
-		assertThat(value instanceof List).isTrue();
+		assertThat(value).isInstanceOf(List.class);
 		List<ResponseBodyAdvice<?>> converters = (List<ResponseBodyAdvice<?>>) value;
 		assertThat(converters.get(0) instanceof JsonViewRequestBodyAdvice).isTrue();
 		assertThat(converters.get(1) instanceof JsonViewResponseBodyAdvice).isTrue();

@@ -1736,7 +1736,7 @@ public class DataSourceTransactionManagerTests {
 		protected void doAfterCompletion(int status) {
 			assertThat(this.afterCompletionCalled).isFalse();
 			this.afterCompletionCalled = true;
-			assertThat(status == this.status).isTrue();
+			assertThat(status).isEqualTo(this.status);
 			assertThat(TransactionSynchronizationManager.hasResource(this.dataSource)).isTrue();
 		}
 	}

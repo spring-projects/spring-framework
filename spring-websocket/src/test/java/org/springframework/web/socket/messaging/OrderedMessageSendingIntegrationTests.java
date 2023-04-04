@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public class OrderedMessageSendingIntegrationTests {
 
 		latch.await(5, TimeUnit.SECONDS);
 
-		assertThat(concurrentSessionDecorator.getTimeSinceSendStarted() > 0).isTrue();
+		assertThat(concurrentSessionDecorator.getTimeSinceSendStarted()).isGreaterThan(0);
 		assertThat(concurrentSessionDecorator.getBufferSize()).isEqualTo((messageCount * MESSAGE_SIZE));
 		assertThat(handler.getSavedMessages()).containsExactlyElementsOf(expectedMessages);
 		assertThat(blockingSession.isOpen()).isTrue();

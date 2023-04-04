@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ class RequestMappingHandlerAdapterIntegrationTests {
 		bindingResult = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + conventionAttrName);
 		assertThat(bindingResult.getTarget()).isSameAs(modelAttrByConvention);
 
-		assertThat(model.get("customArg") instanceof Color).isTrue();
+		assertThat(model.get("customArg")).isInstanceOf(Color.class);
 		assertThat(model.get("user").getClass()).isEqualTo(User.class);
 		assertThat(model.get("otherUser").getClass()).isEqualTo(OtherUser.class);
 		assertThat(((Principal) model.get("customUser")).getName()).isEqualTo("Custom User");
@@ -294,7 +294,7 @@ class RequestMappingHandlerAdapterIntegrationTests {
 		bindingResult = (BindingResult) model.get(BindingResult.MODEL_KEY_PREFIX + conventionAttrName);
 		assertThat(bindingResult.getTarget()).isSameAs(modelAttrByConvention);
 
-		assertThat(model.get("customArg") instanceof Color).isTrue();
+		assertThat(model.get("customArg")).isInstanceOf(Color.class);
 		assertThat(model.get("user").getClass()).isEqualTo(User.class);
 		assertThat(model.get("otherUser").getClass()).isEqualTo(OtherUser.class);
 

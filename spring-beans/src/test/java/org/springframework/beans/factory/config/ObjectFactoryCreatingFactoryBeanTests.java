@@ -67,7 +67,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
-		assertThat(date1 != date2).isTrue();
+		assertThat(date1).isNotSameAs(date2);
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
-		assertThat(date1 != date2).isTrue();
+		assertThat(date1).isNotSameAs(date2);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();
-		assertThat(date1 != date2).isTrue();
+		assertThat(date1).isNotSameAs(date2);
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();
-		assertThat(date1 != date2).isTrue();
+		assertThat(date1).isNotSameAs(date2);
 	}
 
 	@Test

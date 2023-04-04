@@ -92,7 +92,7 @@ class ServerRequestWrapperTests {
 		String value = "bar";
 		given(mockRequest.attribute(name)).willReturn(Optional.of(value));
 
-		assertThat(wrapper.attribute(name)).isEqualTo(Optional.of(value));
+		assertThat(wrapper.attribute(name)).contains(value);
 	}
 
 	@Test
@@ -101,7 +101,7 @@ class ServerRequestWrapperTests {
 		String value = "bar";
 		given(mockRequest.queryParam(name)).willReturn(Optional.of(value));
 
-		assertThat(wrapper.queryParam(name)).isEqualTo(Optional.of(value));
+		assertThat(wrapper.queryParam(name)).contains(value);
 	}
 
 	@Test

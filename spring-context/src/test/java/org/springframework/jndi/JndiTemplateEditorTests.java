@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class JndiTemplateEditorTests {
 		JndiTemplateEditor je = new JndiTemplateEditor();
 		je.setAsText("");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
-		assertThat(jt.getEnvironment() == null).isTrue();
+		assertThat(jt.getEnvironment()).isNull();
 	}
 
 	@Test
@@ -49,9 +49,10 @@ public class JndiTemplateEditorTests {
 		// to look anything up
 		je.setAsText("jndiInitialSomethingOrOther=org.springframework.myjndi.CompleteRubbish\nfoo=bar");
 		JndiTemplate jt = (JndiTemplate) je.getValue();
-		assertThat(jt.getEnvironment().size() == 2).isTrue();
-		assertThat(jt.getEnvironment().getProperty("jndiInitialSomethingOrOther").equals("org.springframework.myjndi.CompleteRubbish")).isTrue();
-		assertThat(jt.getEnvironment().getProperty("foo").equals("bar")).isTrue();
+		assertThat(jt.getEnvironment()).hasSize(2);
+		assertThat(jt.getEnvironment().getProperty("jndiInitialSomethingOrOther")).isEqualTo(
+				"org.springframework.myjndi.CompleteRubbish");
+		assertThat(jt.getEnvironment().getProperty("foo")).isEqualTo("bar");
 	}
 
 }

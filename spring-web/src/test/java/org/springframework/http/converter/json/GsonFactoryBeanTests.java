@@ -63,7 +63,6 @@ class GsonFactoryBeanTests {
 		Gson gson = this.factory.getObject();
 		StringBean bean = new StringBean();
 		bean.setName("Jason");
-
 		assertThat(gson.toJson(bean)).contains("  \"name\": \"Jason\"");
 	}
 
@@ -129,7 +128,6 @@ class GsonFactoryBeanTests {
 		cal.set(Calendar.DATE, 1);
 		Date date = cal.getTime();
 		bean.setDate(date);
-
 		assertThat(gson.toJson(bean))
 				.startsWith("{\"date\":\"Jan 1, 2014")
 				.endsWith("12:00:00 AM\"}");

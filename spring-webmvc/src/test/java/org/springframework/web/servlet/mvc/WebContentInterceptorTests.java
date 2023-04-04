@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,8 @@ class WebContentInterceptorTests {
 		interceptor.setCacheSeconds(10);
 		interceptor.preHandle(requestFactory.apply("/"), response, handler);
 
-		assertThat(response.getHeader("Pragma")).isEqualTo("");
-		assertThat(response.getHeader("Expires")).isEqualTo("");
+		assertThat(response.getHeader("Pragma")).isEmpty();
+		assertThat(response.getHeader("Expires")).isEmpty();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -124,8 +124,8 @@ class WebContentInterceptorTests {
 		interceptor.setAlwaysMustRevalidate(true);
 		interceptor.preHandle(requestFactory.apply("/"), response, handler);
 
-		assertThat(response.getHeader("Pragma")).isEqualTo("");
-		assertThat(response.getHeader("Expires")).isEqualTo("");
+		assertThat(response.getHeader("Pragma")).isEmpty();
+		assertThat(response.getHeader("Expires")).isEmpty();
 	}
 
 	@SuppressWarnings("deprecation")

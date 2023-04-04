@@ -32,7 +32,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Consumer;
 
@@ -131,7 +130,7 @@ public class DefaultServerRequestTests {
 
 		DefaultServerRequest request = new DefaultServerRequest(exchange, messageReaders);
 
-		assertThat(request.attribute("foo")).isEqualTo(Optional.of("bar"));
+		assertThat(request.attribute("foo")).contains("bar");
 	}
 
 	@Test
@@ -140,7 +139,7 @@ public class DefaultServerRequestTests {
 				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo=bar")),
 				this.messageReaders);
 
-		assertThat(request.queryParam("foo")).isEqualTo(Optional.of("bar"));
+		assertThat(request.queryParam("foo")).contains("bar");
 	}
 
 	@Test
@@ -149,7 +148,7 @@ public class DefaultServerRequestTests {
 				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo")),
 				this.messageReaders);
 
-		assertThat(request.queryParam("foo")).isEqualTo(Optional.of(""));
+		assertThat(request.queryParam("foo")).contains("");
 	}
 
 	@Test
@@ -158,7 +157,7 @@ public class DefaultServerRequestTests {
 				MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "https://example.com?foo")),
 				this.messageReaders);
 
-		assertThat(request.queryParam("bar")).isEqualTo(Optional.empty());
+		assertThat(request.queryParam("bar")).isNotPresent();
 	}
 
 	@Test
@@ -223,7 +222,7 @@ public class DefaultServerRequestTests {
 		assertThat(headers.accept()).isEqualTo(accept);
 		assertThat(headers.acceptCharset()).isEqualTo(acceptCharset);
 		assertThat(headers.contentLength()).isEqualTo(OptionalLong.of(contentLength));
-		assertThat(headers.contentType()).isEqualTo(Optional.of(contentType));
+		assertThat(headers.contentType()).contains(contentType);
 		assertThat(headers.header(HttpHeaders.CONTENT_TYPE)).containsExactly(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(headers.firstHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(headers.asHttpHeaders()).isEqualTo(httpHeaders);

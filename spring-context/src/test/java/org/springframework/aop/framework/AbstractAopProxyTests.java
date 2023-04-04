@@ -195,14 +195,14 @@ public abstract class AbstractAopProxyTests {
 		Person p = (Person) createAopProxy(pf).getProxy();
 
 		p.echo(null);
-		assertThat(cta.getCalls()).isEqualTo(0);
+		assertThat(cta.getCalls()).isZero();
 		try {
 			p.echo(new IOException());
 		}
 		catch (IOException ex) {
 			/* expected */
 		}
-		assertThat(cta.getCalls()).isEqualTo(1);
+		assertThat(cta.getCalls()).isOne();
 
 		// Will throw exception if it fails
 		Person p2 = SerializationTestUtils.serializeAndDeserialize(p);
@@ -214,7 +214,7 @@ public abstract class AbstractAopProxyTests {
 		Advised a1 = (Advised) p;
 		Advised a2 = (Advised) p2;
 		// Check we can manipulate state of p2
-		assertThat(a2.getAdvisors()).hasSize(a1.getAdvisors().length);
+		assertThat(a2.getAdvisors()).hasSameSizeAs(a1.getAdvisors());
 
 		// This should work as SerializablePerson is equal
 		assertThat(p2).as("Proxies should be equal, even after one was serialized").isEqualTo(p);
@@ -590,7 +590,7 @@ public abstract class AbstractAopProxyTests {
 
 		t.setName(null);
 		// Null replacement magic should work
-		assertThat(t.getName()).isEqualTo("");
+		assertThat(t.getName()).isEmpty();
 	}
 
 	@Test
@@ -607,7 +607,7 @@ public abstract class AbstractAopProxyTests {
 		assertThat(di.getCount()).isEqualTo(2);
 
 		Advised advised = (Advised) t;
-		assertThat(advised.getAdvisors().length).as("Have 1 advisor").isEqualTo(1);
+		assertThat(advised.getAdvisors()).as("Have 1 advisor").hasSize(1);
 		assertThat(advised.getAdvisors()[0].getAdvice()).isEqualTo(di);
 		NopInterceptor di2 = new NopInterceptor();
 		advised.addAdvice(1, di2);
@@ -814,7 +814,7 @@ public abstract class AbstractAopProxyTests {
 		HashMap<ITestBean, Object> h = new HashMap<>();
 		Object value1 = "foo";
 		Object value2 = "bar";
-		assertThat(h.get(proxy1)).isNull();
+		assertThat(h).doesNotContainKey(proxy1);
 		h.put(proxy1, value1);
 		h.put(proxy2, value2);
 		assertThat(value1).isEqualTo(h.get(proxy1));
@@ -836,8 +836,8 @@ public abstract class AbstractAopProxyTests {
 		ITestBean proxied = (ITestBean) createProxy(pc);
 
 		String proxyConfigString = ((Advised) proxied).toProxyConfigString();
-		assertThat(proxyConfigString.contains(advisor.toString())).isTrue();
-		assertThat(proxyConfigString.contains("1 interface")).isTrue();
+		assertThat(proxyConfigString).contains(advisor.toString());
+		assertThat(proxyConfigString).contains("1 interface");
 	}
 
 	@Test
@@ -914,24 +914,24 @@ public abstract class AbstractAopProxyTests {
 		NopInterceptor nop = new NopInterceptor();
 		pc.addAdvice(nop);
 		ITestBean proxy = (ITestBean) createProxy(pc);
-		assertThat(0).isEqualTo(nop.getCount());
+		assertThat(nop.getCount()).isZero();
 		assertThat(proxy.getAge()).isEqualTo(tb1.getAge());
-		assertThat(1).isEqualTo(nop.getCount());
+		assertThat(nop.getCount()).isOne();
 		// Change to a new static target
 		pc.setTarget(tb2);
 		assertThat(proxy.getAge()).isEqualTo(tb2.getAge());
-		assertThat(2).isEqualTo(nop.getCount());
+		assertThat(nop.getCount()).isEqualTo(2);
 
 		// Change to a new dynamic target
 		HotSwappableTargetSource hts = new HotSwappableTargetSource(tb3);
 		pc.setTargetSource(hts);
 		assertThat(proxy.getAge()).isEqualTo(tb3.getAge());
-		assertThat(3).isEqualTo(nop.getCount());
+		assertThat(nop.getCount()).isEqualTo(3);
 		hts.swap(tb1);
 		assertThat(proxy.getAge()).isEqualTo(tb1.getAge());
 		tb1.setName("Colin");
 		assertThat(proxy.getName()).isEqualTo(tb1.getName());
-		assertThat(5).isEqualTo(nop.getCount());
+		assertThat(nop.getCount()).isEqualTo(5);
 
 		// Change back, relying on casting to Advised
 		Advised advised = (Advised) proxy;
@@ -993,12 +993,12 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvisor(sp);
 		pc.setTarget(tb);
 		ITestBean it = (ITestBean) createProxy(pc);
-		assertThat(0).isEqualTo(di.getCount());
+		assertThat(di.getCount()).isEqualTo(0);
 		it.getAge();
-		assertThat(1).isEqualTo(di.getCount());
+		assertThat(di.getCount()).isEqualTo(1);
 		it.setAge(11);
-		assertThat(11).isEqualTo(it.getAge());
-		assertThat(2).isEqualTo(di.getCount());
+		assertThat(it.getAge()).isEqualTo(11);
+		assertThat(di.getCount()).isEqualTo(2);
 	}
 
 	/**
@@ -1173,7 +1173,7 @@ public abstract class AbstractAopProxyTests {
 		IOther proxyA = (IOther) createProxy(pfa);
 		IOther proxyB = (IOther) createProxy(pfb);
 
-		assertThat(pfb.getAdvisors()).hasSize(pfa.getAdvisors().length);
+		assertThat(pfb.getAdvisors()).hasSameSizeAs(pfa.getAdvisors());
 		assertThat(b).isEqualTo(a);
 		assertThat(i2).isEqualTo(i1);
 		assertThat(proxyB).isEqualTo(proxyA);

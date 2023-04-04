@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ class ComparableComparatorTests {
 		Comparator<String> c = new ComparableComparator<>();
 		String s1 = "abc";
 		String s2 = "cde";
-		assertThat(c.compare(s1, s2) < 0).isTrue();
+		assertThat(c.compare(s1, s2)).isLessThan(0);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

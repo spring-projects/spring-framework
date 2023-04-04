@@ -188,9 +188,9 @@ public class DefaultHandlerExceptionResolverTests {
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
 		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
 		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(400);
-		assertThat(response.getErrorMessage().contains("part")).isTrue();
-		assertThat(response.getErrorMessage().contains("name")).isTrue();
-		assertThat(response.getErrorMessage().contains("not present")).isTrue();
+		assertThat(response.getErrorMessage()).contains("part");
+		assertThat(response.getErrorMessage()).contains("name");
+		assertThat(response.getErrorMessage()).contains("not present");
 	}
 
 	@Test

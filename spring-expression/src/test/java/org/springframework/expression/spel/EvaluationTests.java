@@ -322,7 +322,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			assertThat(value).isEqualTo("def");
 			e =  parser.parseExpression("listOfStrings[2]");
 			value = e.getValue(ctx, String.class);
-			assertThat(value).isEqualTo("");
+			assertThat(value).isEmpty();
 
 			// Now turn off growing and reference off the end
 			StandardEvaluationContext failCtx = new StandardEvaluationContext(instance);

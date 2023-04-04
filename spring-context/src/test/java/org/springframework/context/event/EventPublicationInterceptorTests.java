@@ -112,9 +112,9 @@ class EventPublicationInterceptorTests {
 		testBean.getAge();
 
 		// two events: ContextRefreshedEvent and TestEvent
-		assertThat(listener.getEventCount() == 2).as("Interceptor must have published 2 events").isTrue();
+		assertThat(listener.getEventCount()).as("Interceptor must have published 2 events").isEqualTo(2);
 		TestApplicationListener otherListener = (TestApplicationListener) ctx.getBean("&otherListener");
-		assertThat(otherListener.getEventCount() == 2).as("Interceptor must have published 2 events").isTrue();
+		assertThat(otherListener.getEventCount()).as("Interceptor must have published 2 events").isEqualTo(2);
 		ctx.close();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,18 +57,18 @@ public class TransactionSupportTests {
 		PlatformTransactionManager tm = new TestTransactionManager(true, true);
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
-		assertThat(status1.getTransaction() != null).as("Must have transaction").isTrue();
-		assertThat(!status1.isNewTransaction()).as("Must not be new transaction").isTrue();
+		assertThat(status1.getTransaction()).as("Must have transaction").isNotNull();
+		assertThat(status1.isNewTransaction()).as("Must not be new transaction").isFalse();
 
 		DefaultTransactionStatus status2 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
-		assertThat(status2.getTransaction() != null).as("Must have transaction").isTrue();
-		assertThat(!status2.isNewTransaction()).as("Must not be new transaction").isTrue();
+		assertThat(status2.getTransaction()).as("Must have transaction").isNotNull();
+		assertThat(status2.isNewTransaction()).as("Must not be new transaction").isFalse();
 
 		DefaultTransactionStatus status3 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_MANDATORY));
-		assertThat(status3.getTransaction() != null).as("Must have transaction").isTrue();
-		assertThat(!status3.isNewTransaction()).as("Must not be new transaction").isTrue();
+		assertThat(status3.getTransaction()).as("Must have transaction").isNotNull();
+		assertThat(status3.isNewTransaction()).as("Must not be new transaction").isFalse();
 	}
 
 	@Test
@@ -233,24 +233,28 @@ public class TransactionSupportTests {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate();
 		template.setTransactionManager(tm);
-		assertThat(template.getTransactionManager() == tm).as("correct transaction manager set").isTrue();
+		assertThat(template.getTransactionManager()).as("correct transaction manager set").isSameAs(tm);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> template.setPropagationBehaviorName("TIMEOUT_DEFAULT"));
 		template.setPropagationBehaviorName("PROPAGATION_SUPPORTS");
-		assertThat(template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_SUPPORTS).as("Correct propagation behavior set").isTrue();
+		assertThat(template.getPropagationBehavior()).as("Correct propagation behavior set")
+				.isEqualTo(TransactionDefinition.PROPAGATION_SUPPORTS);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> template.setPropagationBehavior(999));
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
-		assertThat(template.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY).as("Correct propagation behavior set").isTrue();
+		assertThat(template.getPropagationBehavior()).as("Correct propagation behavior set")
+				.isEqualTo(TransactionDefinition.PROPAGATION_MANDATORY);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> template.setIsolationLevelName("TIMEOUT_DEFAULT"));
 		template.setIsolationLevelName("ISOLATION_SERIALIZABLE");
-		assertThat(template.getIsolationLevel() == TransactionDefinition.ISOLATION_SERIALIZABLE).as("Correct isolation level set").isTrue();
+		assertThat(template.getIsolationLevel()).as("Correct isolation level set")
+				.isEqualTo(TransactionDefinition.ISOLATION_SERIALIZABLE);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> template.setIsolationLevel(999));
 
 		template.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
-		assertThat(template.getIsolationLevel() == TransactionDefinition.ISOLATION_REPEATABLE_READ).as("Correct isolation level set").isTrue();
+		assertThat(template.getIsolationLevel()).as("Correct isolation level set")
+				.isEqualTo(TransactionDefinition.ISOLATION_REPEATABLE_READ);
 	}
 
 	@Test
@@ -269,7 +273,7 @@ public class TransactionSupportTests {
 
 	@AfterEach
 	public void clear() {
-		assertThat(TransactionSynchronizationManager.getResourceMap().isEmpty()).isTrue();
+		assertThat(TransactionSynchronizationManager.getResourceMap()).isEmpty();
 		assertThat(TransactionSynchronizationManager.isSynchronizationActive()).isFalse();
 	}
 

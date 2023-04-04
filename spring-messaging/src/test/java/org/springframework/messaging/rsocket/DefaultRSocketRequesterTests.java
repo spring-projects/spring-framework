@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class DefaultRSocketRequesterTests {
 		if (Arrays.equals(new String[] {""}, expectedValues)) {
 			assertThat(payloads).hasSize(1);
 			assertThat(payloads.get(0).getMetadataUtf8()).isEqualTo("toA");
-			assertThat(payloads.get(0).getDataUtf8()).isEqualTo("");
+			assertThat(payloads.get(0).getDataUtf8()).isEmpty();
 		}
 		else {
 			assertThat(payloads.stream().map(Payload::getMetadataUtf8).toArray(String[]::new))
@@ -137,7 +137,7 @@ public class DefaultRSocketRequesterTests {
 
 		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("fireAndForget");
 		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("toA");
-		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEqualTo("");
+		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEmpty();
 	}
 
 	@Test
@@ -197,7 +197,7 @@ public class DefaultRSocketRequesterTests {
 
 		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestResponse");
 		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("toA");
-		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEqualTo("");
+		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEmpty();
 	}
 
 	@Test
@@ -228,7 +228,7 @@ public class DefaultRSocketRequesterTests {
 
 		assertThat(this.rsocket.getSavedMethodName()).isEqualTo("requestStream");
 		assertThat(this.rsocket.getSavedPayload().getMetadataUtf8()).isEqualTo("toA");
-		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEqualTo("");
+		assertThat(this.rsocket.getSavedPayload().getDataUtf8()).isEmpty();
 	}
 
 	@Test

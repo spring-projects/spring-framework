@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,11 +57,11 @@ public class BeanNameUrlHandlerMappingTests {
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/myapp/mypath/nonsense.html");
 		req.setContextPath("/myapp");
 		Object h = hm.getHandler(req);
-		assertThat(h == null).as("Handler is null").isTrue();
+		assertThat(h).as("Handler is null").isNull();
 
 		req = new MockHttpServletRequest("GET", "/foo/bar/baz.html");
 		h = hm.getHandler(req);
-		assertThat(h == null).as("Handler is null").isTrue();
+		assertThat(h).as("Handler is null").isNull();
 	}
 
 	@Test
@@ -170,7 +170,7 @@ public class BeanNameUrlHandlerMappingTests {
 
 		req = new MockHttpServletRequest("GET", "/mypath/tes");
 		hec = hm.getHandler(req);
-		assertThat(hec == null).as("Handler is correct bean").isTrue();
+		assertThat(hec).as("Handler is correct bean").isNull();
 	}
 
 	@Test
@@ -190,7 +190,7 @@ public class BeanNameUrlHandlerMappingTests {
 
 		req = new MockHttpServletRequest("GET", "/mypath/tes");
 		hec = hm.getHandler(req);
-		assertThat(hec == null).as("Handler is correct bean").isTrue();
+		assertThat(hec).as("Handler is correct bean").isNull();
 	}
 
 	@Test

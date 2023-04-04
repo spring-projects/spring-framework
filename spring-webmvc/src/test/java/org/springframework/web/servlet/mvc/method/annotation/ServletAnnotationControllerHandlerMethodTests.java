@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -350,12 +350,12 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(allowHeader).as("No Allow header").isNotNull();
 		Set<String> allowedMethods = new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
 		assertThat(allowedMethods.size()).as("Invalid amount of supported methods").isEqualTo(6);
-		assertThat(allowedMethods.contains("PUT")).as("PUT not allowed").isTrue();
-		assertThat(allowedMethods.contains("DELETE")).as("DELETE not allowed").isTrue();
-		assertThat(allowedMethods.contains("HEAD")).as("HEAD not allowed").isTrue();
-		assertThat(allowedMethods.contains("TRACE")).as("TRACE not allowed").isTrue();
-		assertThat(allowedMethods.contains("OPTIONS")).as("OPTIONS not allowed").isTrue();
-		assertThat(allowedMethods.contains("POST")).as("POST not allowed").isTrue();
+		assertThat(allowedMethods).as("PUT not allowed").contains("PUT");
+		assertThat(allowedMethods).as("DELETE not allowed").contains("DELETE");
+		assertThat(allowedMethods).as("HEAD not allowed").contains("HEAD");
+		assertThat(allowedMethods).as("TRACE not allowed").contains("TRACE");
+		assertThat(allowedMethods).as("OPTIONS not allowed").contains("OPTIONS");
+		assertThat(allowedMethods).as("POST not allowed").contains("POST");
 	}
 
 	@PathPatternsParameterizedTest
@@ -372,7 +372,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		EmptyParameterListHandlerMethodController.called = false;
 		getServlet().service(request, response);
 		assertThat(EmptyParameterListHandlerMethodController.called).isTrue();
-		assertThat(response.getContentAsString()).isEqualTo("");
+		assertThat(response.getContentAsString()).isEmpty();
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -389,20 +389,20 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(request.getAttribute("viewName")).isEqualTo("page1");
 		HttpSession session = request.getSession();
 		assertThat(session).isNotNull();
-		assertThat(session.getAttribute("object1") != null).isTrue();
-		assertThat(session.getAttribute("object2") != null).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object1")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object2")).isTrue();
+		assertThat(session.getAttribute("object1")).isNotNull();
+		assertThat(session.getAttribute("object2")).isNotNull();
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object1");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
 
 		request = new MockHttpServletRequest("POST", "/myPage");
 		request.setSession(session);
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(request.getAttribute("viewName")).isEqualTo("page2");
-		assertThat(session.getAttribute("object1") != null).isTrue();
-		assertThat(session.getAttribute("object2") != null).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object1")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object2")).isTrue();
+		assertThat(session.getAttribute("object1")).isNotNull();
+		assertThat(session.getAttribute("object2")).isNotNull();
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object1");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -422,20 +422,20 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(request.getAttribute("viewName")).isEqualTo("page1");
 		HttpSession session = request.getSession();
 		assertThat(session).isNotNull();
-		assertThat(session.getAttribute("object1") != null).isTrue();
-		assertThat(session.getAttribute("object2") != null).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object1")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object2")).isTrue();
+		assertThat(session.getAttribute("object1")).isNotNull();
+		assertThat(session.getAttribute("object2")).isNotNull();
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object1");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
 
 		request = new MockHttpServletRequest("POST", "/myPage");
 		request.setSession(session);
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(request.getAttribute("viewName")).isEqualTo("page2");
-		assertThat(session.getAttribute("object1") != null).isTrue();
-		assertThat(session.getAttribute("object2") != null).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object1")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object2")).isTrue();
+		assertThat(session.getAttribute("object1")).isNotNull();
+		assertThat(session.getAttribute("object2")).isNotNull();
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object1");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -452,22 +452,22 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(request.getAttribute("viewName")).isEqualTo("page1");
 		HttpSession session = request.getSession();
 		assertThat(session).isNotNull();
-		assertThat(session.getAttribute("object1") != null).isTrue();
-		assertThat(session.getAttribute("object2") != null).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object1")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object2")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("testBeanList")).isTrue();
+		assertThat(session.getAttribute("object1")).isNotNull();
+		assertThat(session.getAttribute("object2")).isNotNull();
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object1");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("testBeanList");
 
 		request = new MockHttpServletRequest("POST", "/myPage");
 		request.setSession(session);
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(request.getAttribute("viewName")).isEqualTo("page2");
-		assertThat(session.getAttribute("object1") != null).isTrue();
-		assertThat(session.getAttribute("object2") != null).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object1")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object2")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("testBeanList")).isTrue();
+		assertThat(session.getAttribute("object1")).isNotNull();
+		assertThat(session.getAttribute("object2")).isNotNull();
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object1");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("testBeanList");
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -484,22 +484,22 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(request.getAttribute("viewName")).isEqualTo("page1");
 		HttpSession session = request.getSession();
 		assertThat(session).isNotNull();
-		assertThat(session.getAttribute("object1") != null).isTrue();
-		assertThat(session.getAttribute("object2") != null).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object1")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object2")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("testBeanList")).isTrue();
+		assertThat(session.getAttribute("object1")).isNotNull();
+		assertThat(session.getAttribute("object2")).isNotNull();
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object1");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("testBeanList");
 
 		request = new MockHttpServletRequest("POST", "/myPage");
 		request.setSession(session);
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(request.getAttribute("viewName")).isEqualTo("page2");
-		assertThat(session.getAttribute("object1") != null).isTrue();
-		assertThat(session.getAttribute("object2") != null).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object1")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("object2")).isTrue();
-		assertThat(((Map) session.getAttribute("model")).containsKey("testBeanList")).isTrue();
+		assertThat(session.getAttribute("object1")).isNotNull();
+		assertThat(session.getAttribute("object2")).isNotNull();
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object1");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
+		assertThat(((Map) session.getAttribute("model"))).containsKey("testBeanList");
 	}
 
 	@PathPatternsParameterizedTest
@@ -1946,7 +1946,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getHeader("MyResponseHeader")).isEqualTo("MyValue");
 		assertThat(response.getContentLength()).isEqualTo(4);
-		assertThat(response.getContentAsByteArray().length == 0).isTrue();
+		assertThat(response.getContentAsByteArray().length).isEqualTo(0);
 
 		// Now repeat with GET
 		request = new MockHttpServletRequest("GET", "/baz");
@@ -1981,7 +1981,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getHeader("Allow")).isEqualTo("GET,HEAD,OPTIONS");
-		assertThat(response.getContentAsByteArray().length == 0).isTrue();
+		assertThat(response.getContentAsByteArray().length).isEqualTo(0);
 	}
 
 	@PathPatternsParameterizedTest
@@ -4112,7 +4112,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		public String handle(Optional<DataClass> optionalData, BindingResult result) {
 			if (result.hasErrors()) {
 				assertThat(optionalData).isNotNull();
-				assertThat(optionalData.isPresent()).isFalse();
+				assertThat(optionalData).isNotPresent();
 				return result.getFieldValue("param1") + "-" + result.getFieldValue("param2") + "-" +
 						result.getFieldValue("param3");
 			}

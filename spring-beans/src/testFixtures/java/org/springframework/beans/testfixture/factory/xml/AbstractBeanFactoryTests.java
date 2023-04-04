@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,11 +58,11 @@ public abstract class AbstractBeanFactoryTests {
 		assertThat(getBeanFactory().containsBean("roderick")).isTrue();
 		TestBean rod = (TestBean) getBeanFactory().getBean("rod");
 		TestBean roderick = (TestBean) getBeanFactory().getBean("roderick");
-		assertThat(rod != roderick).as("not == ").isTrue();
+		assertThat(rod).as("not == ").isNotSameAs(roderick);
 		assertThat(rod.getName().equals("Rod")).as("rod.name is Rod").isTrue();
-		assertThat(rod.getAge() == 31).as("rod.age is 31").isTrue();
+		assertThat(rod.getAge()).as("rod.age is 31").isEqualTo(31);
 		assertThat(roderick.getName().equals("Roderick")).as("roderick.name is Roderick").isTrue();
-		assertThat(roderick.getAge() == rod.getAge()).as("roderick.age was inherited").isTrue();
+		assertThat(roderick.getAge()).as("roderick.age was inherited").isEqualTo(rod.getAge());
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public abstract class AbstractBeanFactoryTests {
 		assertThat(condition).as("Rod bean is a TestBean").isTrue();
 		TestBean rod = (TestBean) o;
 		assertThat(rod.getName().equals("Rod")).as("rod.name is Rod").isTrue();
-		assertThat(rod.getAge() == 31).as("rod.age is 31").isTrue();
+		assertThat(rod.getAge()).as("rod.age is 31").isEqualTo(31);
 	}
 
 	@Test
@@ -158,19 +158,19 @@ public abstract class AbstractBeanFactoryTests {
 		Object o1 = getBeanFactory().getBean("rod");
 		boolean condition = o1 instanceof TestBean;
 		assertThat(condition).as("Rod bean2 is a TestBean").isTrue();
-		assertThat(o == o1).as("Object equals applies").isTrue();
+		assertThat(o).as("Object equals applies").isSameAs(o1);
 	}
 
 	@Test
 	public void prototypeInstancesAreIndependent() {
 		TestBean tb1 = (TestBean) getBeanFactory().getBean("kathy");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("kathy");
-		assertThat(tb1 != tb2).as("ref equal DOES NOT apply").isTrue();
+		assertThat(tb1).as("ref equal DOES NOT apply").isNotSameAs(tb2);
 		assertThat(tb1.equals(tb2)).as("object equal true").isTrue();
 		tb1.setAge(1);
 		tb2.setAge(2);
-		assertThat(tb1.getAge() == 1).as("1 age independent = 1").isTrue();
-		assertThat(tb2.getAge() == 2).as("2 age independent = 2").isTrue();
+		assertThat(tb1.getAge()).as("1 age independent = 1").isEqualTo(1);
+		assertThat(tb2.getAge()).as("2 age independent = 2").isEqualTo(2);
 		boolean condition = !tb1.equals(tb2);
 		assertThat(condition).as("object equal now false").isTrue();
 	}
@@ -212,8 +212,8 @@ public abstract class AbstractBeanFactoryTests {
 		assertThat(tb.getName().equals(DummyFactory.SINGLETON_NAME)).as("Singleton from factory has correct name, not " + tb.getName()).isTrue();
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("singletonFactory");
-		assertThat(tb == tb2).as("Singleton references ==").isTrue();
-		assertThat(factory.getBeanFactory() != null).as("FactoryBean is BeanFactoryAware").isTrue();
+		assertThat(tb).as("Singleton references ==").isSameAs(tb2);
+		assertThat(factory.getBeanFactory()).as("FactoryBean is BeanFactoryAware").isNotNull();
 	}
 
 	@Test
@@ -224,7 +224,7 @@ public abstract class AbstractBeanFactoryTests {
 		boolean condition = !tb.getName().equals(DummyFactory.SINGLETON_NAME);
 		assertThat(condition).isTrue();
 		TestBean tb2 = (TestBean) getBeanFactory().getBean("prototypeFactory");
-		assertThat(tb != tb2).as("Prototype references !=").isTrue();
+		assertThat(tb).as("Prototype references !=").isNotSameAs(tb2);
 	}
 
 	/**
@@ -274,7 +274,7 @@ public abstract class AbstractBeanFactoryTests {
 		cbf.registerAlias("rod", alias);
 		Object rod = getBeanFactory().getBean("rod");
 		Object aliasRod = getBeanFactory().getBean(alias);
-		assertThat(rod == aliasRod).isTrue();
+		assertThat(rod).isSameAs(aliasRod);
 	}
 
 

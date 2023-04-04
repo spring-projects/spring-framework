@@ -554,7 +554,7 @@ public class HttpHeadersTests {
 		headers.setBasicAuth(username, password);
 		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
 		assertThat(authorization).isNotNull();
-		assertThat(authorization.startsWith("Basic ")).isTrue();
+		assertThat(authorization).startsWith("Basic ");
 		byte[] result = Base64.getDecoder().decode(authorization.substring(6).getBytes(StandardCharsets.ISO_8859_1));
 		assertThat(new String(result, StandardCharsets.ISO_8859_1)).isEqualTo("foo:bar");
 	}

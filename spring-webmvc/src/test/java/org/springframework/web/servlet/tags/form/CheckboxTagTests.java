@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).as("Both tag and hidden element not rendered").isEqualTo(2);
+		assertThat(rootElement.elements()).as("Both tag and hidden element not rendered").hasSize(2);
 		Element checkboxElement = rootElement.elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("checkbox");
@@ -102,7 +102,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).as("Both tag and hidden element not rendered").isEqualTo(2);
+		assertThat(rootElement.elements()).as("Both tag and hidden element not rendered").hasSize(2);
 		Element checkboxElement = rootElement.elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("checkbox");
@@ -131,7 +131,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).as("Both tag and hidden element not rendered").isEqualTo(2);
+		assertThat(rootElement.elements()).as("Both tag and hidden element not rendered").hasSize(2);
 		Element checkboxElement = rootElement.elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("checkbox");
@@ -631,7 +631,7 @@ class CheckboxTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).as("Both tag and hidden element rendered incorrectly").isEqualTo(1);
+		assertThat(rootElement.elements()).as("Both tag and hidden element rendered incorrectly").hasSize(1);
 		Element checkboxElement = rootElement.elements().get(0);
 		assertThat(checkboxElement.getName()).isEqualTo("input");
 		assertThat(checkboxElement.attribute("type").getValue()).isEqualTo("checkbox");

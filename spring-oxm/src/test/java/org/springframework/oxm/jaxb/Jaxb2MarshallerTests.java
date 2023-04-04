@@ -287,7 +287,7 @@ class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 		BinaryObject object = new BinaryObject(bytes, dataHandler);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(object, new StreamResult(writer), mimeContainer);
-		assertThat(writer.toString().length() > 0).as("No XML written").isTrue();
+		assertThat(writer.toString()).as("No XML written").isNotEmpty();
 		verify(mimeContainer, times(3)).addAttachment(isA(String.class), isA(DataHandler.class));
 	}
 

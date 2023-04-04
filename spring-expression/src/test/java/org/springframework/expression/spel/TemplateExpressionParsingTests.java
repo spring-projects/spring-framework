@@ -75,7 +75,7 @@ class TemplateExpressionParsingTests extends AbstractExpressionTests {
 
 		expr = parser.parseExpression("", DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		o = expr.getValue();
-		assertThat(o.toString()).isEqualTo("");
+		assertThat(o.toString()).isEmpty();
 
 		expr = parser.parseExpression("abc", DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		o = expr.getValue();

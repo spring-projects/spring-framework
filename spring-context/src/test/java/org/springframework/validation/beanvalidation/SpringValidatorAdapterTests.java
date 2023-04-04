@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +200,7 @@ public class SpringValidatorAdapterTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(parent, "parent");
 		validatorAdapter.validate(parent, errors);
 
-		assertThat(errors.getErrorCount() > 0).isTrue();
+		assertThat(errors.getErrorCount()).isGreaterThan(0);
 	}
 
 	@Test  // SPR-16177
@@ -212,7 +212,7 @@ public class SpringValidatorAdapterTests {
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(parent, "parent");
 		validatorAdapter.validate(parent, errors);
 
-		assertThat(errors.getErrorCount() > 0).isTrue();
+		assertThat(errors.getErrorCount()).isGreaterThan(0);
 	}
 
 	private List<Child> createChildren(Parent parent) {

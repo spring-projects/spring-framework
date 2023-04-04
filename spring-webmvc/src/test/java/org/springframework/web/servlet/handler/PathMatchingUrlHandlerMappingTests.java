@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,15 +68,15 @@ public class PathMatchingUrlHandlerMappingTests {
 
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/welcome.html");
 		HandlerExecutionChain hec = getHandler(mapping, wac, req);
-		assertThat(hec.getHandler() == bean).isTrue();
+		assertThat(hec.getHandler()).isSameAs(bean);
 
 		req = new MockHttpServletRequest("GET", "/show.html");
 		hec = getHandler(mapping, wac, req);
-		assertThat(hec.getHandler() == bean).isTrue();
+		assertThat(hec.getHandler()).isSameAs(bean);
 
 		req = new MockHttpServletRequest("GET", "/bookseats.html");
 		hec = getHandler(mapping, wac, req);
-		assertThat(hec.getHandler() == bean).isTrue();
+		assertThat(hec.getHandler()).isSameAs(bean);
 	}
 
 	@PathPatternsParameterizedTest

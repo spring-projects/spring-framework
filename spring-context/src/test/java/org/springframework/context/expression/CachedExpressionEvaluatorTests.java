@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class CachedExpressionEvaluatorTests {
 		Expression expression = expressionEvaluator.getTestExpression("true", method, getClass());
 		hasParsedExpression("true");
 		assertThat(expression.getValue()).asInstanceOf(BOOLEAN).isTrue();
-		assertThat(expressionEvaluator.testCache.size()).as("Expression should be in cache").isEqualTo(1);
+		assertThat(expressionEvaluator.testCache).as("Expression should be in cache").hasSize(1);
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class CachedExpressionEvaluatorTests {
 		expressionEvaluator.getTestExpression("true", method, getClass());
 		expressionEvaluator.getTestExpression("true", method, getClass());
 		hasParsedExpression("true");
-		assertThat(expressionEvaluator.testCache.size()).as("Only one expression should be in cache").isEqualTo(1);
+		assertThat(expressionEvaluator.testCache).as("Only one expression should be in cache").hasSize(1);
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class CachedExpressionEvaluatorTests {
 		Method method = ReflectionUtils.findMethod(getClass(), "toString");
 		expressionEvaluator.getTestExpression("true", method, getClass());
 		expressionEvaluator.getTestExpression("true", method, Object.class);
-		assertThat(expressionEvaluator.testCache.size()).as("Cached expression should be based on type").isEqualTo(2);
+		assertThat(expressionEvaluator.testCache).as("Cached expression should be based on type").hasSize(2);
 	}
 
 	private void hasParsedExpression(String expression) {

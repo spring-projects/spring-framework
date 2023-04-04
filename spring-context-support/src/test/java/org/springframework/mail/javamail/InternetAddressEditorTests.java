@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,25 +37,25 @@ public class InternetAddressEditorTests {
 
 	@Test
 	public void uninitialized() {
-		assertThat(editor.getAsText()).as("Uninitialized editor did not return empty value string").isEqualTo(EMPTY);
+		assertThat(editor.getAsText()).as("Uninitialized editor did not return empty value string").isEmpty();
 	}
 
 	@Test
 	public void setNull() {
 		editor.setAsText(null);
-		assertThat(editor.getAsText()).as("Setting null did not result in empty value string").isEqualTo(EMPTY);
+		assertThat(editor.getAsText()).as("Setting null did not result in empty value string").isEmpty();
 	}
 
 	@Test
 	public void setEmpty() {
 		editor.setAsText(EMPTY);
-		assertThat(editor.getAsText()).as("Setting empty string did not result in empty value string").isEqualTo(EMPTY);
+		assertThat(editor.getAsText()).as("Setting empty string did not result in empty value string").isEmpty();
 	}
 
 	@Test
 	public void allWhitespace() {
 		editor.setAsText(" ");
-		assertThat(editor.getAsText()).as("All whitespace was not recognized").isEqualTo(EMPTY);
+		assertThat(editor.getAsText()).as("All whitespace was not recognized").isEmpty();
 	}
 
 	@Test

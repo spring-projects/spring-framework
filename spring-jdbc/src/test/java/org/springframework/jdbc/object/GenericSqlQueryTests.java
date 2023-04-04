@@ -107,10 +107,10 @@ public class GenericSqlQueryTests {
 			Object[] params = new Object[] {1, "UK"};
 			queryResults = query.execute(params);
 		}
-		assertThat(queryResults.size() == 1).as("Customer was returned correctly").isTrue();
+		assertThat(queryResults).as("Customer was returned correctly").hasSize(1);
 		Customer cust = (Customer) queryResults.get(0);
-		assertThat(cust.getId() == 1).as("Customer id was assigned correctly").isTrue();
-		assertThat(cust.getForename().equals("rod")).as("Customer forename was assigned correctly").isTrue();
+		assertThat(cust.getId()).as("Customer id was assigned correctly").isEqualTo(1);
+		assertThat(cust.getForename()).as("Customer forename was assigned correctly").isEqualTo("rod");
 
 		verify(resultSet).close();
 		verify(preparedStatement).setObject(1, 1, Types.INTEGER);

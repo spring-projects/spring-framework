@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ public class ProxyFactoryBeanTests {
 		assertThat(cba.getCalls()).isEqualTo(0);
 
 		ITestBean tb = (ITestBean) bf.getBean("directTarget");
-		assertThat(tb.getName().equals("Adam")).isTrue();
+		assertThat(tb.getName()).isEqualTo("Adam");
 		assertThat(cba.getCalls()).isEqualTo(1);
 
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&directTarget");
@@ -179,7 +179,7 @@ public class ProxyFactoryBeanTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource(TARGETSOURCE_CONTEXT, CLASS));
 		ITestBean tb = (ITestBean) bf.getBean("viaTargetSource");
-		assertThat(tb.getName().equals("Adam")).isTrue();
+		assertThat(tb.getName()).isEqualTo("Adam");
 		ProxyFactoryBean pfb = (ProxyFactoryBean) bf.getBean("&viaTargetSource");
 		assertThat(TestBean.class.isAssignableFrom(pfb.getObjectType())).as("Has correct object type").isTrue();
 	}
@@ -219,10 +219,10 @@ public class ProxyFactoryBeanTests {
 		pc1.addAdvice(1, di);
 		assertThat(pc2.getAdvisors()).isEqualTo(pc1.getAdvisors());
 		assertThat(pc2.getAdvisors().length).as("Now have one more advisor").isEqualTo((oldLength + 1));
-		assertThat(0).isEqualTo(di.getCount());
+		assertThat(di.getCount()).isEqualTo(0);
 		test1.setAge(5);
 		assertThat(test1.getAge()).isEqualTo(test1_1.getAge());
-		assertThat(3).isEqualTo(di.getCount());
+		assertThat(di.getCount()).isEqualTo(3);
 	}
 
 	@Test
@@ -230,8 +230,8 @@ public class ProxyFactoryBeanTests {
 		assertThat(ITestBean.class.isAssignableFrom(factory.getType("prototype"))).as("Has correct object type").isTrue();
 		ITestBean test2 = (ITestBean) factory.getBean("prototype");
 		ITestBean test2_1 = (ITestBean) factory.getBean("prototype");
-		assertThat(test2 != test2_1).as("Prototype instances !=").isTrue();
-		assertThat(test2.equals(test2_1)).as("Prototype instances equal").isTrue();
+		assertThat(test2).as("Prototype instances !=").isNotSameAs(test2_1);
+		assertThat(test2).as("Prototype instances equal").isEqualTo(test2_1);
 		assertThat(ITestBean.class.isAssignableFrom(factory.getType("prototype"))).as("Has correct object type").isTrue();
 	}
 
@@ -262,7 +262,7 @@ public class ProxyFactoryBeanTests {
 		assertThat(prototype2FirstInstance.getCount()).isEqualTo(INITIAL_COUNT + 1);
 
 		SideEffectBean prototype2SecondInstance = (SideEffectBean) bf.getBean(beanName);
-		assertThat(prototype2FirstInstance == prototype2SecondInstance).as("Prototypes are not ==").isFalse();
+		assertThat(prototype2FirstInstance).as("Prototypes are not ==").isNotSameAs(prototype2SecondInstance);
 		assertThat(prototype2SecondInstance.getCount()).isEqualTo(INITIAL_COUNT);
 		assertThat(prototype2FirstInstance.getCount()).isEqualTo(INITIAL_COUNT + 1);
 
@@ -285,7 +285,7 @@ public class ProxyFactoryBeanTests {
 		TestBean target = (TestBean) factory.getBean("test");
 		target.setName(name);
 		ITestBean autoInvoker = (ITestBean) factory.getBean("autoInvoker");
-		assertThat(autoInvoker.getName().equals(name)).isTrue();
+		assertThat(autoInvoker.getName()).isEqualTo(name);
 	}
 
 	@Test
@@ -308,7 +308,7 @@ public class ProxyFactoryBeanTests {
 		config.addAdvice(0, (MethodInterceptor) invocation -> {
 			throw ex;
 		});
-		assertThat(config.getAdvisors().length).as("Have correct advisor count").isEqualTo(2);
+		assertThat(config.getAdvisors()).as("Have correct advisor count").hasSize(2);
 
 		ITestBean tb1 = (ITestBean) factory.getBean("test1");
 		assertThatException()
@@ -348,31 +348,31 @@ public class ProxyFactoryBeanTests {
 		// Add to head of interceptor chain
 		int oldCount = config.getAdvisors().length;
 		config.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
-		assertThat(config.getAdvisors().length == oldCount + 1).isTrue();
+		assertThat(config.getAdvisors()).hasSize(oldCount + 1);
 
 		TimeStamped ts = (TimeStamped) factory.getBean("test2");
 		assertThat(ts.getTimeStamp()).isEqualTo(time);
 
 		// Can remove
 		config.removeAdvice(ti);
-		assertThat(config.getAdvisors().length == oldCount).isTrue();
+		assertThat(config.getAdvisors()).hasSize(oldCount);
 
 		// Check no change on existing object reference
-		assertThat(ts.getTimeStamp() == time).isTrue();
+		assertThat(ts.getTimeStamp()).isEqualTo(time);
 
 		assertThat(factory.getBean("test2")).as("Should no longer implement TimeStamped")
 				.isNotInstanceOf(TimeStamped.class);
 
 		// Now check non-effect of removing interceptor that isn't there
 		config.removeAdvice(new DebugInterceptor());
-		assertThat(config.getAdvisors().length == oldCount).isTrue();
+		assertThat(config.getAdvisors()).hasSize(oldCount);
 
 		ITestBean it = (ITestBean) ts;
 		DebugInterceptor debugInterceptor = new DebugInterceptor();
 		config.addAdvice(0, debugInterceptor);
 		it.getSpouse();
 		// Won't affect existing reference
-		assertThat(debugInterceptor.getCount() == 0).isTrue();
+		assertThat(debugInterceptor.getCount()).isEqualTo(0);
 		it = (ITestBean) factory.getBean("test2");
 		it.getSpouse();
 		assertThat(debugInterceptor.getCount()).isEqualTo(1);
@@ -412,16 +412,16 @@ public class ProxyFactoryBeanTests {
 	public void testMethodPointcuts() {
 		ITestBean tb = (ITestBean) factory.getBean("pointcuts");
 		PointcutForVoid.reset();
-		assertThat(PointcutForVoid.methodNames.isEmpty()).as("No methods intercepted").isTrue();
+		assertThat(PointcutForVoid.methodNames).as("No methods intercepted").isEmpty();
 		tb.getAge();
-		assertThat(PointcutForVoid.methodNames.isEmpty()).as("Not void: shouldn't have intercepted").isTrue();
+		assertThat(PointcutForVoid.methodNames).as("Not void: shouldn't have intercepted").isEmpty();
 		tb.setAge(1);
 		tb.getAge();
 		tb.setName("Tristan");
 		tb.toString();
-		assertThat(PointcutForVoid.methodNames.size()).as("Recorded wrong number of invocations").isEqualTo(2);
-		assertThat(PointcutForVoid.methodNames.get(0).equals("setAge")).isTrue();
-		assertThat(PointcutForVoid.methodNames.get(1).equals("setName")).isTrue();
+		assertThat(PointcutForVoid.methodNames).as("Recorded wrong number of invocations").hasSize(2);
+		assertThat(PointcutForVoid.methodNames.get(0)).isEqualTo("setAge");
+		assertThat(PointcutForVoid.methodNames.get(1)).isEqualTo("setName");
 	}
 
 	@Test
@@ -498,17 +498,17 @@ public class ProxyFactoryBeanTests {
 	@Test
 	public void testGlobalsCanAddAspectInterfaces() {
 		AddedGlobalInterface agi = (AddedGlobalInterface) factory.getBean("autoInvoker");
-		assertThat(agi.globalsAdded() == -1).isTrue();
+		assertThat(agi.globalsAdded()).isEqualTo(-1);
 
 		ProxyFactoryBean pfb = (ProxyFactoryBean) factory.getBean("&validGlobals");
 		// Trigger lazy initialization.
 		pfb.getObject();
 		// 2 globals + 2 explicit
-		assertThat(pfb.getAdvisors().length).as("Have 2 globals and 2 explicit advisors").isEqualTo(3);
+		assertThat(pfb.getAdvisors()).as("Have 2 globals and 2 explicit advisors").hasSize(3);
 
 		ApplicationListener<?> l = (ApplicationListener<?>) factory.getBean("validGlobals");
 		agi = (AddedGlobalInterface) l;
-		assertThat(agi.globalsAdded() == -1).isTrue();
+		assertThat(agi.globalsAdded()).isEqualTo(-1);
 
 		assertThat(factory.getBean("test1")).as("Aspect interface shouldn't be implemented without globals")
 				.isNotInstanceOf(AddedGlobalInterface.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		this.messageHandler.handleMessage(message);
 
 		assertThat(this.testController.method).isEqualTo("simpleBinding");
-		assertThat(this.testController.arguments.get("id") instanceof Long).as("should be bound to type long").isTrue();
+		assertThat(this.testController.arguments.get("id")).as("should be bound to type long").isInstanceOf(Long.class);
 		assertThat(this.testController.arguments.get("id")).isEqualTo(12L);
 	}
 

@@ -42,8 +42,7 @@ public class PatternsRequestConditionTests {
 	public void prependNonEmptyPatternsOnly() {
 		PatternsRequestCondition c = createPatternsCondition("");
 		assertThat(c.getPatterns().iterator().next().getPatternString())
-				.as("Do not prepend empty patterns (SPR-8255)")
-				.isEqualTo("");
+				.as("Do not prepend empty patterns (SPR-8255)").isEmpty();
 	}
 
 	@Test

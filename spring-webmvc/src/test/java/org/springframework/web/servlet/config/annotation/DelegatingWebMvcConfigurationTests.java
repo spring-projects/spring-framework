@@ -140,7 +140,7 @@ public class DelegatingWebMvcConfigurationTests {
 				this.webMvcConfig.mvcConversionService(),
 				this.webMvcConfig.mvcValidator());
 
-		assertThat(adapter.getMessageConverters().size()).as("One custom converter expected").isEqualTo(2);
+		assertThat(adapter.getMessageConverters()).as("One custom converter expected").hasSize(2);
 		assertThat(adapter.getMessageConverters().get(0)).isSameAs(customConverter);
 		assertThat(adapter.getMessageConverters().get(1)).isSameAs(stringConverter);
 	}
@@ -181,7 +181,7 @@ public class DelegatingWebMvcConfigurationTests {
 		assertThat(condition1).isTrue();
 		boolean condition = exceptionResolvers.getValue().get(2) instanceof DefaultHandlerExceptionResolver;
 		assertThat(condition).isTrue();
-		assertThat(converters.getValue().size() > 0).isTrue();
+		assertThat(converters.getValue()).isNotEmpty();
 	}
 
 	@Test
@@ -198,9 +198,8 @@ public class DelegatingWebMvcConfigurationTests {
 				(HandlerExceptionResolverComposite) webMvcConfig
 						.handlerExceptionResolver(webMvcConfig.mvcContentNegotiationManager());
 
-		assertThat(composite.getExceptionResolvers().size())
-				.as("Only one custom converter is expected")
-				.isEqualTo(1);
+		assertThat(composite.getExceptionResolvers())
+				.as("Only one custom converter is expected").hasSize(1);
 	}
 
 	@Test

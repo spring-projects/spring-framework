@@ -330,7 +330,7 @@ class AnnotationMetadataTests {
 			assertThat(specialAttrs.getEnum("state").equals(Thread.State.NEW)).isTrue();
 
 			AnnotationAttributes nestedAnno = specialAttrs.getAnnotation("nestedAnno");
-			assertThat("na").isEqualTo(nestedAnno.getString("value"));
+			assertThat(nestedAnno.getString("value")).isEqualTo("na");
 			assertThat(nestedAnno.getEnum("anEnum").equals(SomeEnum.LABEL1)).isTrue();
 			assertThat((Class<?>[]) nestedAnno.get("classArray")).isEqualTo(new Class<?>[] {String.class});
 

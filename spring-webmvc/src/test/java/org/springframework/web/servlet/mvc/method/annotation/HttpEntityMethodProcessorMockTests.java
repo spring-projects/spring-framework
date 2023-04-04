@@ -214,7 +214,7 @@ class HttpEntityMethodProcessorMockTests {
 
 		Object result = processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
 
-		assertThat(result instanceof HttpEntity).isTrue();
+		assertThat(result).isInstanceOf(HttpEntity.class);
 		assertThat(mavContainer.isRequestHandled()).as("The requestHandled flag shouldn't change").isFalse();
 		assertThat(((HttpEntity<?>) result).getBody()).as("Invalid argument").isEqualTo(body);
 	}
@@ -236,7 +236,7 @@ class HttpEntityMethodProcessorMockTests {
 
 		Object result = processor.resolveArgument(paramRequestEntity, mavContainer, webRequest, null);
 
-		assertThat(result instanceof RequestEntity).isTrue();
+		assertThat(result).isInstanceOf(RequestEntity.class);
 		assertThat(mavContainer.isRequestHandled()).as("The requestHandled flag shouldn't change").isFalse();
 		RequestEntity<?> requestEntity = (RequestEntity<?>) result;
 		assertThat(requestEntity.getMethod()).as("Invalid method").isEqualTo(HttpMethod.GET);

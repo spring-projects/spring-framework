@@ -47,7 +47,7 @@ class JmsGatewaySupportTests {
 		gateway.afterPropertiesSet();
 		assertThat(gateway.getConnectionFactory()).as("Correct ConnectionFactory").isEqualTo(mockConnectionFactory);
 		assertThat(gateway.getJmsTemplate().getConnectionFactory()).as("Correct JmsTemplate").isEqualTo(mockConnectionFactory);
-		assertThat(test.size()).as("initGateway called").isEqualTo(1);
+		assertThat(test).as("initGateway called").hasSize(1);
 	}
 
 	@Test
@@ -63,7 +63,7 @@ class JmsGatewaySupportTests {
 		gateway.setJmsTemplate(template);
 		gateway.afterPropertiesSet();
 		assertThat(gateway.getJmsTemplate()).as("Correct JmsTemplate").isEqualTo(template);
-		assertThat(test.size()).as("initGateway called").isEqualTo(1);
+		assertThat(test).as("initGateway called").hasSize(1);
 	}
 
 }

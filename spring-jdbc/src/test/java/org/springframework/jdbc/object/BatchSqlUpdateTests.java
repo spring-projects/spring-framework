@@ -88,16 +88,16 @@ public class BatchSqlUpdateTests {
 		assertThat(update.getQueueCount()).isEqualTo(0);
 
 		if (flushThroughBatchSize) {
-			assertThat(actualRowsAffected.length == 0).as("flush did not execute updates").isTrue();
+			assertThat(actualRowsAffected).as("flush did not execute updates").isEmpty();
 		}
 		else {
-			assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+			assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
 			assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
 			assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 		}
 
 		actualRowsAffected = update.getRowsAffected();
-		assertThat(actualRowsAffected.length == 2).as("executed 2 updates").isTrue();
+		assertThat(actualRowsAffected).as("executed 2 updates").hasSize(2);
 		assertThat(actualRowsAffected[0]).isEqualTo(rowsAffected[0]);
 		assertThat(actualRowsAffected[1]).isEqualTo(rowsAffected[1]);
 

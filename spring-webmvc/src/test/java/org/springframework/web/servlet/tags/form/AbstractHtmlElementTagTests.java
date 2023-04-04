@@ -124,9 +124,9 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 
 	protected final void assertContainsAttribute(String output, String attributeName, String attributeValue) {
 		String attributeString = attributeName + "=\"" + attributeValue + "\"";
-		assertThat(output.contains(attributeString)).as("Expected to find attribute '" + attributeName +
+		assertThat(output).as("Expected to find attribute '" + attributeName +
 				"' with value '" + attributeValue +
-				"' in output + '" + output + "'").isTrue();
+				"' in output + '" + output + "'").contains(attributeString);
 	}
 
 	protected final void assertAttributeNotPresent(String output, String attributeName) {
@@ -136,7 +136,8 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 
 	protected final void assertBlockTagContains(String output, String desiredContents) {
 		String contents = output.substring(output.indexOf(">") + 1, output.lastIndexOf('<'));
-		assertThat(contents.contains(desiredContents)).as("Expected to find '" + desiredContents + "' in the contents of block tag '" + output + "'").isTrue();
+		assertThat(contents).as("Expected to find '" + desiredContents + "' in the contents of block tag '" + output + "'")
+				.contains(desiredContents);
 	}
 
 }

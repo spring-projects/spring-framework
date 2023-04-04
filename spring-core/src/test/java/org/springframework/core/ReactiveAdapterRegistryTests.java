@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ class ReactiveAdapterRegistryTests {
 			List<Integer> sequence = Arrays.asList(1, 2, 3);
 			Publisher<Integer> source = io.reactivex.rxjava3.core.Flowable.fromIterable(sequence);
 			Object target = getAdapter(Flux.class).fromPublisher(source);
-			assertThat(target instanceof Flux).isTrue();
+			assertThat(target).isInstanceOf(Flux.class);
 			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
@@ -108,7 +108,7 @@ class ReactiveAdapterRegistryTests {
 		void toMono() {
 			Publisher<Integer> source = io.reactivex.rxjava3.core.Flowable.fromArray(1, 2, 3);
 			Object target = getAdapter(Mono.class).fromPublisher(source);
-			assertThat(target instanceof Mono).isTrue();
+			assertThat(target).isInstanceOf(Mono.class);
 			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 
@@ -116,7 +116,7 @@ class ReactiveAdapterRegistryTests {
 		void toCompletableFuture() throws Exception {
 			Publisher<Integer> source = Flux.fromArray(new Integer[] {1, 2, 3});
 			Object target = getAdapter(CompletableFuture.class).fromPublisher(source);
-			assertThat(target instanceof CompletableFuture).isTrue();
+			assertThat(target).isInstanceOf(CompletableFuture.class);
 			assertThat(((CompletableFuture<Integer>) target).get()).isEqualTo(Integer.valueOf(1));
 		}
 
@@ -125,7 +125,7 @@ class ReactiveAdapterRegistryTests {
 			CompletableFuture<Integer> future = new CompletableFuture<>();
 			future.complete(1);
 			Object target = getAdapter(CompletableFuture.class).toPublisher(future);
-			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
+			assertThat(target).as("Expected Mono Publisher: " + target.getClass().getName()).isInstanceOf(Mono.class);
 			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 	}
@@ -149,7 +149,7 @@ class ReactiveAdapterRegistryTests {
 			List<Integer> sequence = Arrays.asList(1, 2, 3);
 			Publisher<Integer> source = Flux.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Flowable.class).fromPublisher(source);
-			assertThat(target instanceof io.reactivex.rxjava3.core.Flowable).isTrue();
+			assertThat(target).isInstanceOf(io.reactivex.rxjava3.core.Flowable.class);
 			assertThat(((io.reactivex.rxjava3.core.Flowable<?>) target).toList().blockingGet()).isEqualTo(sequence);
 		}
 
@@ -158,7 +158,7 @@ class ReactiveAdapterRegistryTests {
 			List<Integer> sequence = Arrays.asList(1, 2, 3);
 			Publisher<Integer> source = Flux.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Observable.class).fromPublisher(source);
-			assertThat(target instanceof io.reactivex.rxjava3.core.Observable).isTrue();
+			assertThat(target).isInstanceOf(io.reactivex.rxjava3.core.Observable.class);
 			assertThat(((io.reactivex.rxjava3.core.Observable<?>) target).toList().blockingGet()).isEqualTo(sequence);
 		}
 
@@ -166,7 +166,7 @@ class ReactiveAdapterRegistryTests {
 		void toSingle() {
 			Publisher<Integer> source = Flux.fromArray(new Integer[] {1});
 			Object target = getAdapter(io.reactivex.rxjava3.core.Single.class).fromPublisher(source);
-			assertThat(target instanceof io.reactivex.rxjava3.core.Single).isTrue();
+			assertThat(target).isInstanceOf(io.reactivex.rxjava3.core.Single.class);
 			assertThat(((io.reactivex.rxjava3.core.Single<Integer>) target).blockingGet()).isEqualTo(Integer.valueOf(1));
 		}
 
@@ -174,7 +174,7 @@ class ReactiveAdapterRegistryTests {
 		void toCompletable() {
 			Publisher<Integer> source = Flux.fromArray(new Integer[] {1, 2, 3});
 			Object target = getAdapter(io.reactivex.rxjava3.core.Completable.class).fromPublisher(source);
-			assertThat(target instanceof io.reactivex.rxjava3.core.Completable).isTrue();
+			assertThat(target).isInstanceOf(io.reactivex.rxjava3.core.Completable.class);
 			((io.reactivex.rxjava3.core.Completable) target).blockingAwait();
 		}
 
@@ -183,7 +183,7 @@ class ReactiveAdapterRegistryTests {
 			List<Integer> sequence = Arrays.asList(1, 2, 3);
 			Object source = io.reactivex.rxjava3.core.Flowable.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Flowable.class).toPublisher(source);
-			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
+			assertThat(target).as("Expected Flux Publisher: " + target.getClass().getName()).isInstanceOf(Flux.class);
 			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
@@ -192,7 +192,7 @@ class ReactiveAdapterRegistryTests {
 			List<Integer> sequence = Arrays.asList(1, 2, 3);
 			Object source = io.reactivex.rxjava3.core.Observable.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Observable.class).toPublisher(source);
-			assertThat(target instanceof Flux).as("Expected Flux Publisher: " + target.getClass().getName()).isTrue();
+			assertThat(target).as("Expected Flux Publisher: " + target.getClass().getName()).isInstanceOf(Flux.class);
 			assertThat(((Flux<Integer>) target).collectList().block(ONE_SECOND)).isEqualTo(sequence);
 		}
 
@@ -200,7 +200,7 @@ class ReactiveAdapterRegistryTests {
 		void fromSingle() {
 			Object source = io.reactivex.rxjava3.core.Single.just(1);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Single.class).toPublisher(source);
-			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
+			assertThat(target).as("Expected Mono Publisher: " + target.getClass().getName()).isInstanceOf(Mono.class);
 			assertThat(((Mono<Integer>) target).block(ONE_SECOND)).isEqualTo(Integer.valueOf(1));
 		}
 
@@ -208,7 +208,7 @@ class ReactiveAdapterRegistryTests {
 		void fromCompletable() {
 			Object source = io.reactivex.rxjava3.core.Completable.complete();
 			Object target = getAdapter(io.reactivex.rxjava3.core.Completable.class).toPublisher(source);
-			assertThat(target instanceof Mono).as("Expected Mono Publisher: " + target.getClass().getName()).isTrue();
+			assertThat(target).as("Expected Mono Publisher: " + target.getClass().getName()).isInstanceOf(Mono.class);
 			((Mono<Void>) target).block(ONE_SECOND);
 		}
 	}

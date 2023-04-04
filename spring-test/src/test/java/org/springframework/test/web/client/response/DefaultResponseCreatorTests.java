@@ -180,7 +180,6 @@ class DefaultResponseCreatorTests {
 		HttpHeaders responseHeaders = createResponse(creator).getHeaders();
 
 		assertThat(responseHeaders.get(HttpHeaders.SET_COOKIE))
-				.isNotNull()
 				.containsExactly(
 						firstCookie.toString(),
 						secondCookie.toString(),
@@ -210,7 +209,6 @@ class DefaultResponseCreatorTests {
 		HttpHeaders responseHeaders = createResponse(creator).getHeaders();
 
 		assertThat(responseHeaders.get(HttpHeaders.SET_COOKIE))
-				.isNotNull()
 				.containsExactly(
 						firstCookie.toString(),
 						secondCookie.toString(),

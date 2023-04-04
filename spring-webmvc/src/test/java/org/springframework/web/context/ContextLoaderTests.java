@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,8 @@ class ContextLoaderTests {
 		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(contextAttr);
 		boolean condition1 = context instanceof XmlWebApplicationContext;
 		assertThat(condition1).as("Correct WebApplicationContext exposed in ServletContext").isTrue();
-		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(sc) instanceof XmlWebApplicationContext).isTrue();
+		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(sc)).isInstanceOf(
+				XmlWebApplicationContext.class);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");
 		assertThat(context.containsBean("father")).as("Has father").isTrue();
 		assertThat(context.containsBean("rod")).as("Has rod").isTrue();
@@ -308,8 +309,8 @@ class ContextLoaderTests {
 		assertThat(context.containsBean("father")).as("Has father").isTrue();
 		assertThat(context.containsBean("rod")).as("Has rod").isTrue();
 		assertThat(context.containsBean("kerry")).as("Hasn't kerry").isFalse();
-		assertThat(((TestBean) context.getBean("rod")).getSpouse() == null).as("Doesn't have spouse").isTrue();
-		assertThat("Roderick".equals(((TestBean) context.getBean("rod")).getName())).as("myinit not evaluated").isTrue();
+		assertThat(((TestBean) context.getBean("rod")).getSpouse()).as("Doesn't have spouse").isNull();
+		assertThat(((TestBean) context.getBean("rod")).getName()).as("myinit not evaluated").isEqualTo("Roderick");
 
 		context = new ClassPathXmlApplicationContext(new String[] {
 			"/org/springframework/web/context/WEB-INF/applicationContext.xml",

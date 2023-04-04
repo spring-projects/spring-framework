@@ -441,8 +441,8 @@ class SpelReproTests extends AbstractExpressionTests {
 		catch (SpelEvaluationException see) {
 			assertThat(see.getMessageCode()).isEqualTo(SpelMessage.EXCEPTION_DURING_BEAN_RESOLUTION);
 			assertThat(see.getInserts()[0]).isEqualTo("goo");
-			assertThat(see.getCause() instanceof AccessException).isTrue();
-			assertThat(see.getCause().getMessage().startsWith("DONT")).isTrue();
+			assertThat(see.getCause()).isInstanceOf(AccessException.class);
+			assertThat(see.getCause().getMessage()).startsWith("DONT");
 		}
 
 		// bean exists
@@ -807,7 +807,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		SpelExpression expression = parser.parseRaw("T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
 		Object value = expression.getValue(context);
-		assertThat(Reserver.CONST).isEqualTo(value);
+		assertThat(value).isEqualTo(Reserver.CONST);
 	}
 
 	/**
@@ -1373,7 +1373,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression("new java.util.ArrayList(#root)");
 		Object value = expr.getValue(coll);
-		assertThat(value instanceof ArrayList).isTrue();
+		assertThat(value).isInstanceOf(ArrayList.class);
 		@SuppressWarnings("rawtypes")
 		ArrayList list = (ArrayList) value;
 		assertThat(list.get(0)).isEqualTo("one");
@@ -1448,7 +1448,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(java.util.Arrays).asList('')");
 		Object value = expression.getValue();
-		assertThat(value instanceof List).isTrue();
+		assertThat(value).isInstanceOf(List.class);
 		assertThat(((List) value).isEmpty()).isTrue();
 	}
 
@@ -1458,7 +1458,7 @@ class SpelReproTests extends AbstractExpressionTests {
 		sec.setVariable("iterable", Collections.emptyList());
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.FooLists).newArrayList(#iterable)");
-		assertThat(expression.getValue(sec) instanceof ArrayList).isTrue();
+		assertThat(expression.getValue(sec)).isInstanceOf(ArrayList.class);
 	}
 
 	@Test
@@ -1467,13 +1467,13 @@ class SpelReproTests extends AbstractExpressionTests {
 		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.DistanceEnforcer).from(#no)");
 		StandardEvaluationContext sec = new StandardEvaluationContext();
 		sec.setVariable("no", 1);
-		assertThat(expression.getValue(sec).toString().startsWith("Integer")).isTrue();
+		assertThat(expression.getValue(sec).toString()).startsWith("Integer");
 		sec = new StandardEvaluationContext();
 		sec.setVariable("no", 1.0F);
-		assertThat(expression.getValue(sec).toString().startsWith("Number")).isTrue();
+		assertThat(expression.getValue(sec).toString()).startsWith("Number");
 		sec = new StandardEvaluationContext();
 		sec.setVariable("no", "1.0");
-		assertThat(expression.getValue(sec).toString().startsWith("Object")).isTrue();
+		assertThat(expression.getValue(sec).toString()).startsWith("Object");
 	}
 
 	@Test

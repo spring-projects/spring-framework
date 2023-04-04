@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,8 +131,8 @@ class GenericConversionServiceTests {
 
 	@Test
 	void convertAssignableSource() {
-		assertThat(conversionService.convert(false, boolean.class)).isEqualTo(Boolean.FALSE);
-		assertThat(conversionService.convert(false, Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(conversionService.convert(false, boolean.class)).isFalse();
+		assertThat(conversionService.convert(false, Boolean.class)).isFalse();
 	}
 
 	@Test
@@ -387,7 +387,7 @@ class GenericConversionServiceTests {
 		GenericConverter.ConvertiblePair pair = new GenericConverter.ConvertiblePair(Number.class, String.class);
 		GenericConverter.ConvertiblePair pairOpposite = new GenericConverter.ConvertiblePair(String.class, Number.class);
 		assertThat(pair.equals(pairOpposite)).isFalse();
-		assertThat(pair.hashCode() == pairOpposite.hashCode()).isFalse();
+		assertThat(pair.hashCode()).isNotEqualTo(pairOpposite.hashCode());
 	}
 
 	@Test
@@ -416,7 +416,7 @@ class GenericConversionServiceTests {
 		conversionService.addConverter(new ColorConverter());
 		conversionService.addConverter(converter);
 		assertThat(conversionService.convert("#000000", Color.class)).isEqualTo(Color.BLACK);
-		assertThat(converter.getMatchAttempts() > 0).isTrue();
+		assertThat(converter.getMatchAttempts()).isGreaterThan(0);
 	}
 
 	@Test
@@ -425,8 +425,8 @@ class GenericConversionServiceTests {
 		conversionService.addConverter(new ColorConverter());
 		conversionService.addConverterFactory(converter);
 		assertThat(conversionService.convert("#000000", Color.class)).isEqualTo(Color.BLACK);
-		assertThat(converter.getMatchAttempts() > 0).isTrue();
-		assertThat(converter.getNestedMatchAttempts() > 0).isTrue();
+		assertThat(converter.getMatchAttempts()).isGreaterThan(0);
+		assertThat(converter.getNestedMatchAttempts()).isGreaterThan(0);
 	}
 
 	@Test
@@ -457,7 +457,7 @@ class GenericConversionServiceTests {
 		MyConditionalGenericConverter converter = new MyConditionalGenericConverter();
 		conversionService.addConverter(converter);
 		assertThat(conversionService.convert(3, Integer.class)).isEqualTo(3);
-		assertThat(converter.getSourceTypes().size()).isGreaterThan(2);
+		assertThat(converter.getSourceTypes()).hasSizeGreaterThan(2);
 		assertThat(converter.getSourceTypes().stream().allMatch(td -> Integer.class.equals(td.getType()))).isTrue();
 	}
 

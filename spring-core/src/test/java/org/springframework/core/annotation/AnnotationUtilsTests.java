@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -563,7 +563,7 @@ class AnnotationUtilsTests {
 
 		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, null);
 		assertThat(annotations).isNotNull();
-		assertThat(annotations.size()).as("size if container type is omitted: ").isEqualTo(0);
+		assertThat(annotations).as("size if container type is omitted: ").isEmpty();
 
 		annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, Hierarchy.class);
 		assertThat(annotations).isNotNull();
@@ -855,8 +855,8 @@ class AnnotationUtilsTests {
 	void synthesizeAnnotationFromDefaultsWithAttributeAliases() throws Exception {
 		ContextConfig contextConfig = synthesizeAnnotation(ContextConfig.class);
 		assertThat(contextConfig).isNotNull();
-		assertThat(contextConfig.value()).as("value: ").isEqualTo("");
-		assertThat(contextConfig.location()).as("location: ").isEqualTo("");
+		assertThat(contextConfig.value()).as("value: ").isEmpty();
+		assertThat(contextConfig.location()).as("location: ").isEmpty();
 	}
 
 	@Test

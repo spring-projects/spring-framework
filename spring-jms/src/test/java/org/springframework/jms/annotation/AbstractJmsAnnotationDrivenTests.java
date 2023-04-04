@@ -128,8 +128,9 @@ abstract class AbstractJmsAnnotationDrivenTests {
 
 		JmsListenerEndpointRegistry customRegistry =
 				context.getBean("customRegistry", JmsListenerEndpointRegistry.class);
-		assertThat(customRegistry.getListenerContainerIds().size()).as("Wrong number of containers in the registry").isEqualTo(2);
-		assertThat(customRegistry.getListenerContainers().size()).as("Wrong number of containers in the registry").isEqualTo(2);
+		assertThat(customRegistry.getListenerContainerIds()).as("Wrong number of containers in the registry")
+				.hasSize(2);
+		assertThat(customRegistry.getListenerContainers()).as("Wrong number of containers in the registry").hasSize(2);
 		assertThat(customRegistry.getListenerContainer("listenerId")).as("Container with custom id on the annotation should be found").isNotNull();
 		assertThat(customRegistry.getListenerContainer("myCustomEndpointId")).as("Container created with custom id should be found").isNotNull();
 	}

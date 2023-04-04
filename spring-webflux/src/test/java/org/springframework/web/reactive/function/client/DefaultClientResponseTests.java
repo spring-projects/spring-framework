@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalLong;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -101,7 +100,7 @@ class DefaultClientResponseTests {
 
 		ClientResponse.Headers headers = defaultClientResponse.headers();
 		assertThat(headers.contentLength()).isEqualTo(OptionalLong.of(contentLength));
-		assertThat(headers.contentType()).isEqualTo(Optional.of(contentType));
+		assertThat(headers.contentType()).contains(contentType);
 		assertThat(headers.asHttpHeaders()).isEqualTo(httpHeaders);
 	}
 

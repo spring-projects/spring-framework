@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class MessageReceivingTemplateTests {
 			this.template.receiveAndConvert(Writer.class);
 		}
 		catch (MessageConversionException ex) {
-			assertThat(ex.getMessage().contains("payload")).as("Invalid exception message '" + ex.getMessage() + "'").isTrue();
+			assertThat(ex.getMessage()).as("Invalid exception message '" + ex.getMessage() + "'").contains("payload");
 			assertThat(ex.getFailedMessage()).isSameAs(expected);
 		}
 	}

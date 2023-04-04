@@ -49,8 +49,8 @@ public class RouterFunctionsTests {
 		assertThat(result).isNotNull();
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isTrue();
-		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
+		assertThat(resultHandlerFunction).isPresent();
+		assertThat(resultHandlerFunction).contains(handlerFunction);
 	}
 
 	@Test
@@ -64,7 +64,7 @@ public class RouterFunctionsTests {
 		assertThat(result).isNotNull();
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isFalse();
+		assertThat(resultHandlerFunction).isNotPresent();
 	}
 
 	@Test
@@ -79,8 +79,8 @@ public class RouterFunctionsTests {
 		assertThat(result).isNotNull();
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isTrue();
-		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
+		assertThat(resultHandlerFunction).isPresent();
+		assertThat(resultHandlerFunction).contains(handlerFunction);
 	}
 
 	@Test
@@ -95,7 +95,7 @@ public class RouterFunctionsTests {
 		assertThat(result).isNotNull();
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isFalse();
+		assertThat(resultHandlerFunction).isNotPresent();
 	}
 
 	@Test
@@ -110,8 +110,8 @@ public class RouterFunctionsTests {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/bar");
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isTrue();
-		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
+		assertThat(resultHandlerFunction).isPresent();
+		assertThat(resultHandlerFunction).contains(handlerFunction);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ class ObjectUtilsTests {
 	void toObjectArray() {
 		int[] a = new int[] {1, 2, 3, 4, 5};
 		Integer[] wrapper = (Integer[]) ObjectUtils.toObjectArray(a);
-		assertThat(wrapper.length == 5).isTrue();
+		assertThat(wrapper.length).isEqualTo(5);
 		for (int i = 0; i < wrapper.length; i++) {
 			assertThat(wrapper[i].intValue()).isEqualTo(a[i]);
 		}
@@ -794,7 +794,7 @@ class ObjectUtilsTests {
 	private void assertEqualHashCodes(int expected, Object array) {
 		int actual = ObjectUtils.nullSafeHashCode(array);
 		assertThat(actual).isEqualTo(expected);
-		assertThat(array.hashCode() != actual).isTrue();
+		assertThat(array.hashCode()).isNotEqualTo(actual);
 	}
 
 

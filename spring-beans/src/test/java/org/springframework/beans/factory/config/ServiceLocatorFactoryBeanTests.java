@@ -165,7 +165,7 @@ public class ServiceLocatorFactoryBeanTests {
 		assertThat(testBean4).isNotSameAs(testBean2);
 		assertThat(testBean4).isNotSameAs(testBean3);
 
-		assertThat(factory.toString().contains("TestServiceLocator3")).isTrue();
+		assertThat(factory.toString()).contains("TestServiceLocator3");
 	}
 
 	@Disabled @Test // worked when using an ApplicationContext (see commented), fails when using BeanFactory

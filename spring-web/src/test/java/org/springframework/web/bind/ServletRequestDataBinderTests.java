@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,7 +216,7 @@ public class ServletRequestDataBinderTests {
 	public void testNoParameters() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertThat(pvs.getPropertyValues().length == 0).as("Found no parameters").isTrue();
+		assertThat(pvs.getPropertyValues().length).as("Found no parameters").isEqualTo(0);
 	}
 
 	@Test
@@ -226,7 +226,7 @@ public class ServletRequestDataBinderTests {
 		request.addParameter("forname", original);
 
 		ServletRequestParameterPropertyValues pvs = new ServletRequestParameterPropertyValues(request);
-		assertThat(pvs.getPropertyValues().length == 1).as("Found 1 parameter").isTrue();
+		assertThat(pvs.getPropertyValues().length).as("Found 1 parameter").isEqualTo(1);
 		boolean condition = pvs.getPropertyValue("forname").getValue() instanceof String[];
 		assertThat(condition).as("Found array value").isTrue();
 		String[] values = (String[]) pvs.getPropertyValue("forname").getValue();
@@ -237,7 +237,7 @@ public class ServletRequestDataBinderTests {
 	 * Must contain: forname=Tony surname=Blair age=50
 	 */
 	protected void doTestTony(PropertyValues pvs) throws Exception {
-		assertThat(pvs.getPropertyValues().length == 3).as("Contains 3").isTrue();
+		assertThat(pvs.getPropertyValues().length).as("Contains 3").isEqualTo(3);
 		assertThat(pvs.contains("forname")).as("Contains forname").isTrue();
 		assertThat(pvs.contains("surname")).as("Contains surname").isTrue();
 		assertThat(pvs.contains("age")).as("Contains age").isTrue();
@@ -251,13 +251,13 @@ public class ServletRequestDataBinderTests {
 		m.put("age", "50");
 		for (PropertyValue element : ps) {
 			Object val = m.get(element.getName());
-			assertThat(val != null).as("Can't have unexpected value").isTrue();
+			assertThat(val).as("Can't have unexpected value").isNotNull();
 			boolean condition = val instanceof String;
 			assertThat(condition).as("Val i string").isTrue();
 			assertThat(val.equals(element.getValue())).as("val matches expected").isTrue();
 			m.remove(element.getName());
 		}
-		assertThat(m.size() == 0).as("Map size is 0").isTrue();
+		assertThat(m.size()).as("Map size is 0").isEqualTo(0);
 	}
 
 }
