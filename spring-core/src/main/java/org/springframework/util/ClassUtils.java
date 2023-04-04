@@ -531,8 +531,8 @@ public abstract class ClassUtils {
 	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 * @param lhsType the target type
-	 * @param rhsType the value type that should be assigned to the target type
+	 * @param lhsType the target type (left-hand side (LHS) type)
+	 * @param rhsType the value type (right-hand side (RHS) type) that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
 	 * @see TypeUtils#isAssignable(java.lang.reflect.Type, java.lang.reflect.Type)
 	 */
