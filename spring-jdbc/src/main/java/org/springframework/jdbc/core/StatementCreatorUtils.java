@@ -29,6 +29,8 @@ import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -104,6 +106,8 @@ public abstract class StatementCreatorUtils {
 		javaTypeToSqlTypeMap.put(LocalDate.class, Types.DATE);
 		javaTypeToSqlTypeMap.put(LocalTime.class, Types.TIME);
 		javaTypeToSqlTypeMap.put(LocalDateTime.class, Types.TIMESTAMP);
+		javaTypeToSqlTypeMap.put(OffsetDateTime.class, Types.TIMESTAMP_WITH_TIMEZONE);
+		javaTypeToSqlTypeMap.put(OffsetTime.class, Types.TIME_WITH_TIMEZONE);
 		javaTypeToSqlTypeMap.put(java.sql.Date.class, Types.DATE);
 		javaTypeToSqlTypeMap.put(java.sql.Time.class, Types.TIME);
 		javaTypeToSqlTypeMap.put(java.sql.Timestamp.class, Types.TIMESTAMP);

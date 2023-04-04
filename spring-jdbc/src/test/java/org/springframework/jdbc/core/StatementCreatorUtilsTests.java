@@ -22,10 +22,20 @@ import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.GregorianCalendar;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -201,6 +211,35 @@ public class StatementCreatorUtilsTests {
 		java.util.Calendar cal = new GregorianCalendar();
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, SqlTypeValue.TYPE_UNKNOWN, null, cal);
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
+	}
+
+
+	@ParameterizedTest
+	@MethodSource("javaTimeTypes")
+	public void testSetParameterValueWithJavaTimeTypes(Object o, int sqlType) throws SQLException {
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, sqlType, null, o);
+		verify(preparedStatement).setObject(1, o, sqlType);
+	}
+
+	@ParameterizedTest
+	@MethodSource("javaTimeTypes")
+	void javaTimeTypesToSqlParameterType(Object o, int expectedSqlType) {
+		assertThat(StatementCreatorUtils.javaTypeToSqlParameterType(o.getClass()))
+				.isEqualTo(expectedSqlType);
+	}
+
+	static Stream<Arguments> javaTimeTypes() {
+		ZoneOffset PLUS_NINE = ZoneOffset.ofHours(9);
+		final LocalDateTime now = LocalDateTime.now();
+		return Stream.of(
+				Arguments.of(named("LocalTime", LocalTime.NOON), named("TIME", Types.TIME)),
+				Arguments.of(named("LocalDate", LocalDate.EPOCH), named("DATE", Types.DATE)),
+				Arguments.of(named("LocalDateTime", now), named("TIMESTAMP", Types.TIMESTAMP)),
+				Arguments.of(named("OffsetTime", LocalTime.NOON.atOffset(PLUS_NINE)),
+						named("TIME_WITH_TIMEZONE", Types.TIME_WITH_TIMEZONE)),
+				Arguments.of(named("OffsetDateTime", now.atOffset(PLUS_NINE)),
+						named("TIMESTAMP_WITH_TIMEZONE", Types.TIMESTAMP_WITH_TIMEZONE))
+		);
 	}
 
 	@Test  // SPR-8571
