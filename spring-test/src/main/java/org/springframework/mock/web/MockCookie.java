@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,14 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("removal")
 public class MockCookie extends Cookie {
 
-	private static final long serialVersionUID = 1198809317225300389L;
+	private static final long serialVersionUID = 4312531139502726325L;
 
 	private static final String SAME_SITE = "SameSite";
 	private static final String EXPIRES = "Expires";
 
 	@Nullable
 	private ZonedDateTime expires;
+
 
 	/**
 	 * Construct a new {@link MockCookie} with the supplied name and value.
@@ -62,7 +63,7 @@ public class MockCookie extends Cookie {
 	 * @since 5.1.11
 	 */
 	public void setExpires(@Nullable ZonedDateTime expires) {
-		setAttribute(EXPIRES, expires != null ? expires.format(DateTimeFormatter.RFC_1123_DATE_TIME) : null);
+		setAttribute(EXPIRES, (expires != null ? expires.format(DateTimeFormatter.RFC_1123_DATE_TIME) : null));
 	}
 
 	/**
@@ -156,8 +157,8 @@ public class MockCookie extends Cookie {
 
 	@Override
 	public void setAttribute(String name, @Nullable String value) {
-		if(EXPIRES.equalsIgnoreCase(name)) {
-			this.expires = value != null ? ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME) : null;
+		if (EXPIRES.equalsIgnoreCase(name)) {
+			this.expires = (value != null ? ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME) : null);
 		}
 		super.setAttribute(name, value);
 	}
@@ -175,8 +176,7 @@ public class MockCookie extends Cookie {
 				.append("HttpOnly", isHttpOnly())
 				.append(SAME_SITE, getSameSite())
 				.append("Max-Age", getMaxAge())
-				.append(EXPIRES, (this.expires != null ?
-						DateTimeFormatter.RFC_1123_DATE_TIME.format(this.expires) : null))
+				.append(EXPIRES, getAttribute(EXPIRES))
 				.toString();
 	}
 

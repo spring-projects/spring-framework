@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,11 +148,11 @@ class MockCookieTests {
 
 	@Test
 	void setExpiresShouldSetAttribute() {
+		String expiresText = "Tue, 8 Oct 2019 19:50:00 GMT";
 		MockCookie cookie = new MockCookie("SESSION", "123");
-		cookie.setExpires(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
-				DateTimeFormatter.RFC_1123_DATE_TIME));
+		cookie.setExpires(ZonedDateTime.parse(expiresText, DateTimeFormatter.RFC_1123_DATE_TIME));
 
-		assertThat(cookie.getAttribute("expires")).isEqualTo("Tue, 8 Oct 2019 19:50:00 GMT");
+		assertThat(cookie.getAttribute("expires")).isEqualTo(expiresText);
 	}
 
 	@Test
@@ -168,11 +168,11 @@ class MockCookieTests {
 
 	@Test
 	void setExpiresNullShouldClear() {
+		ZonedDateTime expiresDateTime = ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
+			DateTimeFormatter.RFC_1123_DATE_TIME);
 		MockCookie cookie = new MockCookie("SESSION", "123");
-		cookie.setExpires(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
-				DateTimeFormatter.RFC_1123_DATE_TIME));
-		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
-				DateTimeFormatter.RFC_1123_DATE_TIME));
+		cookie.setExpires(expiresDateTime);
+		assertThat(cookie.getExpires()).isEqualTo(expiresDateTime);
 
 		cookie.setExpires(null);
 		assertThat(cookie.getExpires()).isNull();
@@ -189,11 +189,12 @@ class MockCookieTests {
 
 	@Test
 	void setAttributeExpiresShouldSetExpires() {
+		String expiresText = "Tue, 8 Oct 2019 19:50:00 GMT";
 		MockCookie cookie = new MockCookie("SESSION", "123");
-		cookie.setAttribute("expires", "Tue, 8 Oct 2019 19:50:00 GMT");
+		cookie.setAttribute("expires", expiresText);
 
-		assertThat(cookie.getExpires()).isEqualTo(ZonedDateTime.parse("Tue, 8 Oct 2019 19:50:00 GMT",
-				DateTimeFormatter.RFC_1123_DATE_TIME));
+		assertThat(cookie.getExpires()).isEqualTo(
+				ZonedDateTime.parse(expiresText, DateTimeFormatter.RFC_1123_DATE_TIME));
 	}
 
 	@Test
@@ -201,4 +202,5 @@ class MockCookieTests {
 		MockCookie cookie = new MockCookie("SESSION", "123");
 		assertThatThrownBy(() -> cookie.setAttribute("expires", "12345")).isInstanceOf(DateTimeParseException.class);
 	}
+
 }
