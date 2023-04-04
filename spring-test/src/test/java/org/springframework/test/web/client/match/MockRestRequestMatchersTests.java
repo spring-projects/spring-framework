@@ -212,7 +212,7 @@ class MockRestRequestMatchersTests {
 
 	@Test
 	void headerListDoesntHideHeaderWithSingleMatcher() throws IOException {
-		this.request.getHeaders().put("foo", List.of("bar", "baz"));
+		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
 		MockRestRequestMatchers.header("foo", equalTo("bar")).match(this.request);
 
