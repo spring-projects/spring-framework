@@ -208,6 +208,7 @@ public abstract class AbstractExpressionTests {
 			if (otherProperties != null && otherProperties.length != 0) {
 				// first one is expected position of the error within the string
 				int pos = (Integer) otherProperties[0];
+				assertThat(ex.getPosition()).as("reported position").isEqualTo(pos);
 				if (otherProperties.length > 1) {
 					// Check inserts match
 					Object[] inserts = ex.getInserts();

@@ -46,7 +46,7 @@ class ConstantsTests {
 		assertThatExceptionOfType(Constants.ConstantException.class).isThrownBy(() ->
 				c.asNumber("bogus"));
 
-		assertThat(c.asString("S1")).isEmpty();
+		assertThat(c.asString("S1")).isEqualTo(A.S1);
 		assertThatExceptionOfType(Constants.ConstantException.class).as("wrong type").isThrownBy(() ->
 				c.asNumber("S1"));
 	}
