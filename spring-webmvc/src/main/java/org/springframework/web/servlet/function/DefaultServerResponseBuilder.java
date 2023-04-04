@@ -70,6 +70,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse.BodyBuilder header(String headerName, String... headerValues) {
+		Assert.notNull(headerName, "HeaderName must not be null");
 		for (String headerValue : headerValues) {
 			this.headers.add(headerName, headerValue);
 		}
@@ -78,6 +79,7 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse.BodyBuilder headers(Consumer<HttpHeaders> headersConsumer) {
+		Assert.notNull(headersConsumer, "HeaderConsumer must not be null");
 		headersConsumer.accept(this.headers);
 		return this;
 	}
@@ -91,18 +93,21 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse.BodyBuilder cookies(Consumer<MultiValueMap<String, Cookie>> cookiesConsumer) {
+		Assert.notNull(cookiesConsumer, "CookiesConsumer must not be null");
 		cookiesConsumer.accept(this.cookies);
 		return this;
 	}
 
 	@Override
 	public ServerResponse.BodyBuilder allow(HttpMethod... allowedMethods) {
+		Assert.notNull(allowedMethods, "Http AllowedMethods must not be null");
 		this.headers.setAllow(new LinkedHashSet<>(Arrays.asList(allowedMethods)));
 		return this;
 	}
 
 	@Override
 	public ServerResponse.BodyBuilder allow(Set<HttpMethod> allowedMethods) {
+		Assert.notNull(allowedMethods, "Http AllowedMethods must not be null");
 		this.headers.setAllow(allowedMethods);
 		return this;
 	}
@@ -115,12 +120,14 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	@Override
 	public ServerResponse.BodyBuilder contentType(MediaType contentType) {
+		Assert.notNull(contentType, "ContentType must not be null");
 		this.headers.setContentType(contentType);
 		return this;
 	}
 
 	@Override
 	public ServerResponse.BodyBuilder eTag(String etag) {
+		Assert.notNull(etag, "etag must not be null");
 		if (!etag.startsWith("\"") && !etag.startsWith("W/\"")) {
 			etag = "\"" + etag;
 		}
