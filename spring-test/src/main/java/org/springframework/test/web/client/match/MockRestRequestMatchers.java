@@ -125,11 +125,11 @@ public abstract class MockRestRequestMatchers {
 	 * @param name the name of the query parameter whose value(s) will be asserted
 	 * @param matcher the Hamcrest matcher to apply to the entire list of values
 	 * for the given query parameter
-	 * @since 5.3.26
+	 * @since 5.3.27
 	 * @see #queryParam(String, Matcher...)
 	 * @see #queryParam(String, String...)
 	 */
-	public static RequestMatcher queryParam(String name, Matcher<? super List<String>> matcher) {
+	public static RequestMatcher queryParamList(String name, Matcher<? super List<String>> matcher) {
 		return request -> {
 			MultiValueMap<String, String> params = getQueryParams(request);
 			List<String> paramValues = params.get(name);
@@ -147,14 +147,14 @@ public abstract class MockRestRequestMatchers {
 	 * values, effectively ignoring the additional parameter values. If the number
 	 * of provided {@code matchers} exceeds the number of query parameter values,
 	 * an {@link AssertionError} will be thrown to signal the mismatch.
-	 * <p>See {@link #queryParam(String, Matcher)} for a variant which accepts a
+	 * <p>See {@link #queryParamList(String, Matcher)} for a variant which accepts a
 	 * {@code Matcher} that applies to the entire list of values as opposed to
 	 * applying only to individual values.
 	 * @param name the name of the query parameter whose value(s) will be asserted
 	 * @param matchers the Hamcrest matchers to apply to individual query parameter
 	 * values; the n<sup>th</sup> matcher is applied to the n<sup>th</sup> query
 	 * parameter value
-	 * @see #queryParam(String, Matcher)
+	 * @see #queryParamList(String, Matcher)
 	 * @see #queryParam(String, String...)
 	 */
 	@SafeVarargs
@@ -175,14 +175,14 @@ public abstract class MockRestRequestMatchers {
 	 * parameter values, effectively ignoring the additional parameter values. If
 	 * the number of {@code expectedValues} exceeds the number of query parameter
 	 * values, an {@link AssertionError} will be thrown to signal the mismatch.
-	 * <p>See {@link #queryParam(String, Matcher)} for a variant which accepts a
+	 * <p>See {@link #queryParamList(String, Matcher)} for a variant which accepts a
 	 * Hamcrest {@code Matcher} that applies to the entire list of values as opposed
 	 * to asserting only individual values.
 	 * @param name the name of the query parameter whose value(s) will be asserted
 	 * @param expectedValues the expected values of individual query parameter values;
 	 * the n<sup>th</sup> expected value is compared to the n<sup>th</sup> query
 	 * parameter value
-	 * @see #queryParam(String, Matcher)
+	 * @see #queryParamList(String, Matcher)
 	 * @see #queryParam(String, Matcher...)
 	 */
 	public static RequestMatcher queryParam(String name, String... expectedValues) {
@@ -211,11 +211,11 @@ public abstract class MockRestRequestMatchers {
 	 * @param name the name of the header whose value(s) will be asserted
 	 * @param matcher the Hamcrest matcher to apply to the entire list of values
 	 * for the given header
-	 * @since 5.3.26
+	 * @since 5.3.27
 	 * @see #header(String, Matcher...)
 	 * @see #header(String, String...)
 	 */
-	public static RequestMatcher header(String name, Matcher<? super List<String>> matcher) {
+	public static RequestMatcher headerList(String name, Matcher<? super List<String>> matcher) {
 		return request -> {
 			List<String> headerValues = request.getHeaders().get(name);
 			if (headerValues == null) {
@@ -232,13 +232,13 @@ public abstract class MockRestRequestMatchers {
 	 * effectively ignoring the additional header values. If the number of
 	 * provided {@code matchers} exceeds the number of header values, an
 	 * {@link AssertionError} will be thrown to signal the mismatch.
-	 * <p>See {@link #header(String, Matcher)} for a variant which accepts a
+	 * <p>See {@link #headerList(String, Matcher)} for a variant which accepts a
 	 * Hamcrest {@code Matcher} that applies to the entire list of values as
 	 * opposed to applying only to individual values.
 	 * @param name the name of the header whose value(s) will be asserted
 	 * @param matchers the Hamcrest matchers to apply to individual header values;
 	 * the n<sup>th</sup> matcher is applied to the n<sup>th</sup> header value
-	 * @see #header(String, Matcher)
+	 * @see #headerList(String, Matcher)
 	 * @see #header(String, String...)
 	 */
 	@SafeVarargs
@@ -260,13 +260,13 @@ public abstract class MockRestRequestMatchers {
 	 * additional header values. If the number of {@code expectedValues} exceeds the
 	 * number of header values, an {@link AssertionError} will be thrown to signal the
 	 * mismatch.
-	 * <p>See {@link #header(String, Matcher)} for a variant which accepts a
+	 * <p>See {@link #headerList(String, Matcher)} for a variant which accepts a
 	 * Hamcrest {@code Matcher} that applies to the entire list of values as
 	 * opposed to applying only to individual values.
 	 * @param name the name of the header whose value(s) will be asserted
 	 * @param expectedValues the expected values of individual header values; the
 	 * n<sup>th</sup> expected value is compared to the n<sup>th</sup> header value
-	 * @see #header(String, Matcher)
+	 * @see #headerList(String, Matcher)
 	 * @see #header(String, Matcher...)
 	 */
 	public static RequestMatcher header(String name, String... expectedValues) {

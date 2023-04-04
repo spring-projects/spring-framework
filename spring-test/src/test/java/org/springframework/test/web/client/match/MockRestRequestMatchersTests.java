@@ -28,19 +28,17 @@ import org.springframework.mock.http.client.MockClientHttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 /**
@@ -163,7 +161,7 @@ class MockRestRequestMatchersTests {
 	@Test
 	void headerListMissing() {
 		assertThatAssertionError()
-			.isThrownBy(() -> MockRestRequestMatchers.header("foo", hasSize(2)).match(this.request))
+			.isThrownBy(() -> MockRestRequestMatchers.headerList("foo", hasSize(2)).match(this.request))
 			.withMessage("Expected header <foo> to exist but was null");
 	}
 
@@ -171,29 +169,18 @@ class MockRestRequestMatchersTests {
 	void headerListMatchers() throws IOException {
 		this.request.getHeaders().put("foo", List.of("bar", "baz"));
 
-		MockRestRequestMatchers.header("foo", containsInAnyOrder(endsWith("baz"), endsWith("bar"))).match(this.request);
-		MockRestRequestMatchers.header("foo", contains(is("bar"), is("baz"))).match(this.request);
-		MockRestRequestMatchers.header("foo", contains(is("bar"), anything())).match(this.request);
-		MockRestRequestMatchers.header("foo", hasItem(endsWith("baz"))).match(this.request);
-		MockRestRequestMatchers.header("foo", everyItem(startsWith("ba"))).match(this.request);
-		MockRestRequestMatchers.header("foo", hasSize(2)).match(this.request);
+		MockRestRequestMatchers.headerList("foo", containsInAnyOrder(endsWith("baz"), endsWith("bar"))).match(this.request);
+		MockRestRequestMatchers.headerList("foo", contains(is("bar"), is("baz"))).match(this.request);
+		MockRestRequestMatchers.headerList("foo", contains(is("bar"), anything())).match(this.request);
+		MockRestRequestMatchers.headerList("foo", hasItem(endsWith("baz"))).match(this.request);
+		MockRestRequestMatchers.headerList("foo", everyItem(startsWith("ba"))).match(this.request);
+		MockRestRequestMatchers.headerList("foo", hasSize(2)).match(this.request);
 
-		// These can be a bit ambiguous when reading the test (the compiler selects the list matcher):
-		MockRestRequestMatchers.header("foo", notNullValue()).match(this.request);
-		MockRestRequestMatchers.header("foo", is(anything())).match(this.request);
-		MockRestRequestMatchers.header("foo", allOf(notNullValue(), notNullValue())).match(this.request);
+		MockRestRequestMatchers.headerList("foo", notNullValue()).match(this.request);
+		MockRestRequestMatchers.headerList("foo", is(anything())).match(this.request);
+		MockRestRequestMatchers.headerList("foo", allOf(notNullValue(), notNullValue())).match(this.request);
 
-		// These are not as ambiguous thanks to an inner matcher that is either obviously list-oriented,
-		// string-oriented, or obviously a vararg of matchers
-
-		// list matcher version
-		MockRestRequestMatchers.header("foo", allOf(notNullValue(), hasSize(2))).match(this.request);
-
-		// vararg version
-		MockRestRequestMatchers.header("foo", allOf(notNullValue(), endsWith("ar"))).match(this.request);
-		MockRestRequestMatchers.header("foo", is((any(String.class)))).match(this.request);
-		MockRestRequestMatchers.header("foo", either(is("bar")).or(is(nullValue()))).match(this.request);
-		MockRestRequestMatchers.header("foo", is(notNullValue()), is(notNullValue())).match(this.request);
+		MockRestRequestMatchers.headerList("foo", allOf(notNullValue(), hasSize(2))).match(this.request);
 	}
 
 	@Test
@@ -201,25 +188,39 @@ class MockRestRequestMatchersTests {
 		this.request.getHeaders().put("foo", List.of("bar", "baz"));
 
 		assertThatAssertionError()
-			.isThrownBy(() -> MockRestRequestMatchers.header("foo", contains(containsString("ba"))).match(this.request))
+			.isThrownBy(() -> MockRestRequestMatchers.headerList("foo", contains(containsString("ba"))).match(this.request))
 			.withMessageContainingAll(
 					"Request header [foo] values",
 					"Expected: iterable containing [a string containing \"ba\"]",
 					"but: not matched: \"baz\"");
 
 		assertThatAssertionError()
-			.isThrownBy(() -> MockRestRequestMatchers.header("foo", hasItem(endsWith("ba"))).match(this.request))
+			.isThrownBy(() -> MockRestRequestMatchers.headerList("foo", hasItem(endsWith("ba"))).match(this.request))
 			.withMessageContainingAll(
 					"Request header [foo] values",
 					"Expected: a collection containing a string ending with \"ba\"",
 					"but: mismatches were: [was \"bar\", was \"baz\"]");
 
 		assertThatAssertionError()
-			.isThrownBy(() -> MockRestRequestMatchers.header("foo", everyItem(endsWith("ar"))).match(this.request))
+			.isThrownBy(() -> MockRestRequestMatchers.headerList("foo", everyItem(endsWith("ar"))).match(this.request))
 			.withMessageContainingAll(
 					"Request header [foo] values",
 					"Expected: every item is a string ending with \"ar\"",
 					"but: an item was \"baz\"");
+	}
+
+	@Test
+	void headerListDoesntHideHeaderWithSingleMatcher() throws IOException {
+		this.request.getHeaders().put("foo", List.of("bar", "baz"));
+
+		MockRestRequestMatchers.header("foo", equalTo("bar")).match(this.request);
+
+		assertThatAssertionError()
+				.isThrownBy(() -> MockRestRequestMatchers.headerList("foo", equalTo("bar")).match(this.request))
+				.withMessageContainingAll(
+						"Request header [foo] values",
+						"Expected: \"bar\"",
+						"but: was <[bar, baz]>");
 	}
 
 	@Test
@@ -290,7 +291,7 @@ class MockRestRequestMatchersTests {
 	@Test
 	void queryParamListMissing() {
 		assertThatAssertionError()
-			.isThrownBy(() -> MockRestRequestMatchers.queryParam("foo", hasSize(2)).match(this.request))
+			.isThrownBy(() -> MockRestRequestMatchers.queryParamList("foo", hasSize(2)).match(this.request))
 			.withMessage("Expected query param <foo> to exist but was null");
 	}
 
@@ -298,29 +299,18 @@ class MockRestRequestMatchersTests {
 	void queryParamListMatchers() throws IOException {
 		this.request.setURI(URI.create("http://www.foo.example/a?foo=bar&foo=baz"));
 
-		MockRestRequestMatchers.queryParam("foo", containsInAnyOrder(endsWith("baz"), endsWith("bar"))).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", contains(is("bar"), is("baz"))).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", contains(is("bar"), anything())).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", hasItem(endsWith("baz"))).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", everyItem(startsWith("ba"))).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", hasSize(2)).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", containsInAnyOrder(endsWith("baz"), endsWith("bar"))).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", contains(is("bar"), is("baz"))).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", contains(is("bar"), anything())).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", hasItem(endsWith("baz"))).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", everyItem(startsWith("ba"))).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", hasSize(2)).match(this.request);
 
-		// These can be a bit ambiguous when reading the test (the compiler selects the list matcher):
-		MockRestRequestMatchers.queryParam("foo", notNullValue()).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", is(anything())).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", allOf(notNullValue(), notNullValue())).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", notNullValue()).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", is(anything())).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", allOf(notNullValue(), notNullValue())).match(this.request);
 
-		// These are not as ambiguous thanks to an inner matcher that is either obviously list-oriented,
-		// string-oriented, or obviously a vararg of matchers
-
-		// list matcher version
-		MockRestRequestMatchers.queryParam("foo", allOf(notNullValue(), hasSize(2))).match(this.request);
-
-		// vararg version
-		MockRestRequestMatchers.queryParam("foo", allOf(notNullValue(), endsWith("ar"))).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", is((any(String.class)))).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", either(is("bar")).or(is(nullValue()))).match(this.request);
-		MockRestRequestMatchers.queryParam("foo", is(notNullValue()), is(notNullValue())).match(this.request);
+		MockRestRequestMatchers.queryParamList("foo", allOf(notNullValue(), hasSize(2))).match(this.request);
 	}
 
 	@Test
@@ -328,25 +318,39 @@ class MockRestRequestMatchersTests {
 		this.request.setURI(URI.create("http://www.foo.example/a?foo=bar&foo=baz"));
 
 		assertThatAssertionError()
-			.isThrownBy(() -> MockRestRequestMatchers.queryParam("foo", contains(containsString("ba"))).match(this.request))
+			.isThrownBy(() -> MockRestRequestMatchers.queryParamList("foo", contains(containsString("ba"))).match(this.request))
 			.withMessageContainingAll(
 				"Query param [foo] values",
 				"Expected: iterable containing [a string containing \"ba\"]",
 				"but: not matched: \"baz\"");
 
 		assertThatAssertionError()
-			.isThrownBy(() -> MockRestRequestMatchers.queryParam("foo", hasItem(endsWith("ba"))).match(this.request))
+			.isThrownBy(() -> MockRestRequestMatchers.queryParamList("foo", hasItem(endsWith("ba"))).match(this.request))
 			.withMessageContainingAll(
 				"Query param [foo] values",
 				"Expected: a collection containing a string ending with \"ba\"",
 				"but: mismatches were: [was \"bar\", was \"baz\"]");
 
 		assertThatAssertionError()
-			.isThrownBy(() -> MockRestRequestMatchers.queryParam("foo", everyItem(endsWith("ar"))).match(this.request))
+			.isThrownBy(() -> MockRestRequestMatchers.queryParamList("foo", everyItem(endsWith("ar"))).match(this.request))
 			.withMessageContainingAll(
 				"Query param [foo] values",
 				"Expected: every item is a string ending with \"ar\"",
 				"but: an item was \"baz\"");
+	}
+
+	@Test
+	void queryParamListDoesntHideQueryParamWithSingleMatcher() throws IOException {
+		this.request.setURI(URI.create("http://www.foo.example/a?foo=bar&foo=baz"));
+
+		MockRestRequestMatchers.queryParam("foo", equalTo("bar")).match(this.request);
+
+		assertThatAssertionError()
+				.isThrownBy(() -> MockRestRequestMatchers.queryParamList("foo", equalTo("bar")).match(this.request))
+				.withMessageContainingAll(
+						"Query param [foo] values",
+						"Expected: \"bar\"",
+						"but: was <[bar, baz]>");
 	}
 
 	private static ThrowableTypeAssert<AssertionError> assertThatAssertionError() {
