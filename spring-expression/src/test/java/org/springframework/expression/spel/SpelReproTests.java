@@ -51,6 +51,7 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.common.TemplateParserContext;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
@@ -76,6 +77,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Sam Brannen
  */
 class SpelReproTests extends AbstractExpressionTests {
+
+	private static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new TemplateParserContext("$[", "]");
+
 
 	@Test
 	void NPE_SPR5661() {
@@ -193,8 +197,8 @@ class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	void NPE_SPR5673() {
-		ParserContext hashes = TemplateExpressionParsingTests.HASH_DELIMITED_PARSER_CONTEXT;
-		ParserContext dollars = TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT;
+		ParserContext hashes = ParserContext.TEMPLATE_EXPRESSION;
+		ParserContext dollars = TemplateExpressionParsingTests.DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT;
 
 		checkTemplateParsing("abc${'def'} ghi", "abcdef ghi");
 
@@ -378,7 +382,7 @@ class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	private void checkTemplateParsing(String expression, String expectedValue) {
-		checkTemplateParsing(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedValue);
+		checkTemplateParsing(expression, TemplateExpressionParsingTests.DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT, expectedValue);
 	}
 
 	private void checkTemplateParsing(String expression, ParserContext context, String expectedValue) {
@@ -388,7 +392,7 @@ class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	private void checkTemplateParsingError(String expression, String expectedMessage) {
-		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DEFAULT_TEMPLATE_PARSER_CONTEXT, expectedMessage);
+		checkTemplateParsingError(expression, TemplateExpressionParsingTests.DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT, expectedMessage);
 	}
 
 	private void checkTemplateParsingError(String expression, ParserContext context, String expectedMessage) {
@@ -403,22 +407,6 @@ class SpelReproTests extends AbstractExpressionTests {
 				assertThat(message).isEqualTo(expectedMessage);
 			});
 	}
-
-
-	private static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
-		@Override
-		public String getExpressionPrefix() {
-			return "$[";
-		}
-		@Override
-		public String getExpressionSuffix() {
-			return "]";
-		}
-		@Override
-		public boolean isTemplate() {
-			return true;
-		}
-	};
 
 	@Test
 	void beanResolution() {
