@@ -337,22 +337,39 @@ class Frame {
           ++elementDescriptorOffset;
         }
         int typeValue;
-		  switch (buffer.charAt(elementDescriptorOffset)) {
-			  case 'Z' -> typeValue = BOOLEAN;
-			  case 'C' -> typeValue = CHAR;
-			  case 'B' -> typeValue = BYTE;
-			  case 'S' -> typeValue = SHORT;
-			  case 'I' -> typeValue = INTEGER;
-			  case 'F' -> typeValue = FLOAT;
-			  case 'J' -> typeValue = LONG;
-			  case 'D' -> typeValue = DOUBLE;
-			  case 'L' -> {
-				  internalName = buffer.substring(elementDescriptorOffset + 1, buffer.length() - 1);
-				  typeValue = REFERENCE_KIND | symbolTable.addType(internalName);
-			  }
-			  default -> throw new IllegalArgumentException(
-					  "Invalid descriptor fragment: " + buffer.substring(elementDescriptorOffset));
-		  }
+        switch (buffer.charAt(elementDescriptorOffset)) {
+          case 'Z':
+            typeValue = BOOLEAN;
+            break;
+          case 'C':
+            typeValue = CHAR;
+            break;
+          case 'B':
+            typeValue = BYTE;
+            break;
+          case 'S':
+            typeValue = SHORT;
+            break;
+          case 'I':
+            typeValue = INTEGER;
+            break;
+          case 'F':
+            typeValue = FLOAT;
+            break;
+          case 'J':
+            typeValue = LONG;
+            break;
+          case 'D':
+            typeValue = DOUBLE;
+            break;
+          case 'L':
+            internalName = buffer.substring(elementDescriptorOffset + 1, buffer.length() - 1);
+            typeValue = REFERENCE_KIND | symbolTable.addType(internalName);
+            break;
+          default:
+            throw new IllegalArgumentException(
+                "Invalid descriptor fragment: " + buffer.substring(elementDescriptorOffset));
+        }
         return ((elementDescriptorOffset - offset) << DIM_SHIFT) | typeValue;
       default:
         throw new IllegalArgumentException("Invalid descriptor: " + buffer.substring(offset));
@@ -714,24 +731,39 @@ class Frame {
         push(TOP);
         break;
       case Opcodes.LDC:
-		  switch (argSymbol.tag) {
-			  case Symbol.CONSTANT_INTEGER_TAG -> push(INTEGER);
-			  case Symbol.CONSTANT_LONG_TAG -> {
-				  push(LONG);
-				  push(TOP);
-			  }
-			  case Symbol.CONSTANT_FLOAT_TAG -> push(FLOAT);
-			  case Symbol.CONSTANT_DOUBLE_TAG -> {
-				  push(DOUBLE);
-				  push(TOP);
-			  }
-			  case Symbol.CONSTANT_CLASS_TAG -> push(REFERENCE_KIND | symbolTable.addType("java/lang/Class"));
-			  case Symbol.CONSTANT_STRING_TAG -> push(REFERENCE_KIND | symbolTable.addType("java/lang/String"));
-			  case Symbol.CONSTANT_METHOD_TYPE_TAG -> push(REFERENCE_KIND | symbolTable.addType("java/lang/invoke/MethodType"));
-			  case Symbol.CONSTANT_METHOD_HANDLE_TAG -> push(REFERENCE_KIND | symbolTable.addType("java/lang/invoke/MethodHandle"));
-			  case Symbol.CONSTANT_DYNAMIC_TAG -> push(symbolTable, argSymbol.value);
-			  default -> throw new AssertionError();
-		  }
+        switch (argSymbol.tag) {
+          case Symbol.CONSTANT_INTEGER_TAG:
+            push(INTEGER);
+            break;
+          case Symbol.CONSTANT_LONG_TAG:
+            push(LONG);
+            push(TOP);
+            break;
+          case Symbol.CONSTANT_FLOAT_TAG:
+            push(FLOAT);
+            break;
+          case Symbol.CONSTANT_DOUBLE_TAG:
+            push(DOUBLE);
+            push(TOP);
+            break;
+          case Symbol.CONSTANT_CLASS_TAG:
+            push(REFERENCE_KIND | symbolTable.addType("java/lang/Class"));
+            break;
+          case Symbol.CONSTANT_STRING_TAG:
+            push(REFERENCE_KIND | symbolTable.addType("java/lang/String"));
+            break;
+          case Symbol.CONSTANT_METHOD_TYPE_TAG:
+            push(REFERENCE_KIND | symbolTable.addType("java/lang/invoke/MethodType"));
+            break;
+          case Symbol.CONSTANT_METHOD_HANDLE_TAG:
+            push(REFERENCE_KIND | symbolTable.addType("java/lang/invoke/MethodHandle"));
+            break;
+          case Symbol.CONSTANT_DYNAMIC_TAG:
+            push(symbolTable, argSymbol.value);
+            break;
+          default:
+            throw new AssertionError();
+        }
         break;
       case Opcodes.ALOAD:
         push(getLocal(arg));
@@ -1020,17 +1052,34 @@ class Frame {
         break;
       case Opcodes.NEWARRAY:
         pop();
-		  switch (arg) {
-			  case Opcodes.T_BOOLEAN -> push(ARRAY_OF | BOOLEAN);
-			  case Opcodes.T_CHAR -> push(ARRAY_OF | CHAR);
-			  case Opcodes.T_BYTE -> push(ARRAY_OF | BYTE);
-			  case Opcodes.T_SHORT -> push(ARRAY_OF | SHORT);
-			  case Opcodes.T_INT -> push(ARRAY_OF | INTEGER);
-			  case Opcodes.T_FLOAT -> push(ARRAY_OF | FLOAT);
-			  case Opcodes.T_DOUBLE -> push(ARRAY_OF | DOUBLE);
-			  case Opcodes.T_LONG -> push(ARRAY_OF | LONG);
-			  default -> throw new IllegalArgumentException();
-		  }
+        switch (arg) {
+          case Opcodes.T_BOOLEAN:
+            push(ARRAY_OF | BOOLEAN);
+            break;
+          case Opcodes.T_CHAR:
+            push(ARRAY_OF | CHAR);
+            break;
+          case Opcodes.T_BYTE:
+            push(ARRAY_OF | BYTE);
+            break;
+          case Opcodes.T_SHORT:
+            push(ARRAY_OF | SHORT);
+            break;
+          case Opcodes.T_INT:
+            push(ARRAY_OF | INTEGER);
+            break;
+          case Opcodes.T_FLOAT:
+            push(ARRAY_OF | FLOAT);
+            break;
+          case Opcodes.T_DOUBLE:
+            push(ARRAY_OF | DOUBLE);
+            break;
+          case Opcodes.T_LONG:
+            push(ARRAY_OF | LONG);
+            break;
+          default:
+            throw new IllegalArgumentException();
+        }
         break;
       case Opcodes.ANEWARRAY:
         String arrayElementType = argSymbol.value;
@@ -1361,14 +1410,21 @@ class Frame {
     int arrayDimensions = (abstractType & Frame.DIM_MASK) >> DIM_SHIFT;
     if (arrayDimensions == 0) {
       int typeValue = abstractType & VALUE_MASK;
-		switch (abstractType & KIND_MASK) {
-			case CONSTANT_KIND -> output.putByte(typeValue);
-			case REFERENCE_KIND -> output
-					.putByte(ITEM_OBJECT)
-					.putShort(symbolTable.addConstantClass(symbolTable.getType(typeValue).value).index);
-			case UNINITIALIZED_KIND -> output.putByte(ITEM_UNINITIALIZED).putShort((int) symbolTable.getType(typeValue).data);
-			default -> throw new AssertionError();
-		}
+      switch (abstractType & KIND_MASK) {
+        case CONSTANT_KIND:
+          output.putByte(typeValue);
+          break;
+        case REFERENCE_KIND:
+          output
+              .putByte(ITEM_OBJECT)
+              .putShort(symbolTable.addConstantClass(symbolTable.getType(typeValue).value).index);
+          break;
+        case UNINITIALIZED_KIND:
+          output.putByte(ITEM_UNINITIALIZED).putShort((int) symbolTable.getType(typeValue).data);
+          break;
+        default:
+          throw new AssertionError();
+      }
     } else {
       // Case of an array type, we need to build its descriptor first.
       StringBuilder typeDescriptor = new StringBuilder(32);  // SPRING PATCH: larger initial size
@@ -1381,17 +1437,34 @@ class Frame {
             .append(symbolTable.getType(abstractType & VALUE_MASK).value)
             .append(';');
       } else {
-		  switch (abstractType & VALUE_MASK) {
-			  case Frame.ITEM_ASM_BOOLEAN -> typeDescriptor.append('Z');
-			  case Frame.ITEM_ASM_BYTE -> typeDescriptor.append('B');
-			  case Frame.ITEM_ASM_CHAR -> typeDescriptor.append('C');
-			  case Frame.ITEM_ASM_SHORT -> typeDescriptor.append('S');
-			  case Frame.ITEM_INTEGER -> typeDescriptor.append('I');
-			  case Frame.ITEM_FLOAT -> typeDescriptor.append('F');
-			  case Frame.ITEM_LONG -> typeDescriptor.append('J');
-			  case Frame.ITEM_DOUBLE -> typeDescriptor.append('D');
-			  default -> throw new AssertionError();
-		  }
+        switch (abstractType & VALUE_MASK) {
+          case Frame.ITEM_ASM_BOOLEAN:
+            typeDescriptor.append('Z');
+            break;
+          case Frame.ITEM_ASM_BYTE:
+            typeDescriptor.append('B');
+            break;
+          case Frame.ITEM_ASM_CHAR:
+            typeDescriptor.append('C');
+            break;
+          case Frame.ITEM_ASM_SHORT:
+            typeDescriptor.append('S');
+            break;
+          case Frame.ITEM_INTEGER:
+            typeDescriptor.append('I');
+            break;
+          case Frame.ITEM_FLOAT:
+            typeDescriptor.append('F');
+            break;
+          case Frame.ITEM_LONG:
+            typeDescriptor.append('J');
+            break;
+          case Frame.ITEM_DOUBLE:
+            typeDescriptor.append('D');
+            break;
+          default:
+            throw new AssertionError();
+        }
       }
       output
           .putByte(ITEM_OBJECT)
