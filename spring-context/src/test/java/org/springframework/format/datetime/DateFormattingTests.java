@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public class DateFormattingTests {
 		assertThat(exception)
 			.hasMessageContaining("for property 'styleDate'")
 			.hasCauseInstanceOf(ConversionFailedException.class).cause()
-				.hasMessageContaining("for value '99/01/01'")
+				.hasMessageContaining("for value [99/01/01]")
 				.hasCauseInstanceOf(IllegalArgumentException.class).cause()
 					.hasMessageContaining("Parse attempt failed for value [99/01/01]")
 					.hasCauseInstanceOf(ParseException.class).cause()
@@ -353,7 +353,7 @@ public class DateFormattingTests {
 			assertThat(fieldError.unwrap(TypeMismatchException.class))
 				.hasMessageContaining("for property 'patternDateWithFallbackPatterns'")
 				.hasCauseInstanceOf(ConversionFailedException.class).cause()
-					.hasMessageContaining("for value '210302'")
+					.hasMessageContaining("for value [210302]")
 					.hasCauseInstanceOf(IllegalArgumentException.class).cause()
 						.hasMessageContaining("Parse attempt failed for value [210302]")
 						.hasCauseInstanceOf(ParseException.class).cause()
