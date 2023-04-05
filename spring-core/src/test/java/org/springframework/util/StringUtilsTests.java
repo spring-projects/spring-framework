@@ -799,6 +799,7 @@ class StringUtilsTests {
 
 	@ParameterizedTest
 	@CsvSource(delimiterString = "-->", value = {
+		"''                  --> ''",
 		"aardvark            --> aardvark",
 		"aardvark12          --> aardvark12",
 		"aardvark123         --> aardvark12 (truncated)...",
