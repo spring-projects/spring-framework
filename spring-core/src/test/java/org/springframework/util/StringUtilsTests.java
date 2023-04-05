@@ -22,6 +22,8 @@ import java.util.Locale;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -755,6 +757,28 @@ class StringUtilsTests {
 	@Test
 	void collectionToDelimitedStringWithNullValuesShouldNotFail() {
 		assertThat(StringUtils.collectionToCommaDelimitedString(Collections.singletonList(null))).isEqualTo("null");
+	}
+
+	@Test
+	void truncatePreconditions() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> StringUtils.truncate("foo", 0))
+				.withMessage("Truncation threshold must be a positive number: 0");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> StringUtils.truncate("foo", -99))
+				.withMessage("Truncation threshold must be a positive number: -99");
+	}
+
+	@ParameterizedTest
+	@CsvSource(delimiterString = "-->", textBlock = """
+			aardvark            --> aardvark
+			aardvark12          --> aardvark12
+			aardvark123         --> aardvark12 (truncated)...
+			aardvark, bird, cat --> aardvark,  (truncated)...
+			"""
+	)
+	void truncate(String text, String truncated) {
+		assertThat(StringUtils.truncate(text, 10)).isEqualTo(truncated);
 	}
 
 }
