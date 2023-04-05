@@ -104,47 +104,31 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 				documentStarted = true;
 			}
 			switch (event.getEventType()) {
-				case XMLStreamConstants.START_DOCUMENT:
+				case XMLStreamConstants.START_DOCUMENT -> {
 					handleStartDocument(event);
 					documentStarted = true;
-					break;
-				case XMLStreamConstants.START_ELEMENT:
+				}
+				case XMLStreamConstants.START_ELEMENT -> {
 					elementDepth++;
 					handleStartElement(event.asStartElement());
-					break;
-				case XMLStreamConstants.END_ELEMENT:
+				}
+				case XMLStreamConstants.END_ELEMENT -> {
 					elementDepth--;
 					if (elementDepth >= 0) {
 						handleEndElement(event.asEndElement());
 					}
-					break;
-				case XMLStreamConstants.PROCESSING_INSTRUCTION:
-					handleProcessingInstruction((ProcessingInstruction) event);
-					break;
-				case XMLStreamConstants.CHARACTERS:
-				case XMLStreamConstants.SPACE:
-				case XMLStreamConstants.CDATA:
-					handleCharacters(event.asCharacters());
-					break;
-				case XMLStreamConstants.END_DOCUMENT:
+				}
+				case XMLStreamConstants.PROCESSING_INSTRUCTION -> handleProcessingInstruction((ProcessingInstruction) event);
+				case XMLStreamConstants.CHARACTERS, XMLStreamConstants.SPACE, XMLStreamConstants.CDATA -> handleCharacters(event.asCharacters());
+				case XMLStreamConstants.END_DOCUMENT -> {
 					handleEndDocument();
 					documentEnded = true;
-					break;
-				case XMLStreamConstants.NOTATION_DECLARATION:
-					handleNotationDeclaration((NotationDeclaration) event);
-					break;
-				case XMLStreamConstants.ENTITY_DECLARATION:
-					handleEntityDeclaration((EntityDeclaration) event);
-					break;
-				case XMLStreamConstants.COMMENT:
-					handleComment((Comment) event);
-					break;
-				case XMLStreamConstants.DTD:
-					handleDtd((DTD) event);
-					break;
-				case XMLStreamConstants.ENTITY_REFERENCE:
-					handleEntityReference((EntityReference) event);
-					break;
+				}
+				case XMLStreamConstants.NOTATION_DECLARATION -> handleNotationDeclaration((NotationDeclaration) event);
+				case XMLStreamConstants.ENTITY_DECLARATION -> handleEntityDeclaration((EntityDeclaration) event);
+				case XMLStreamConstants.COMMENT -> handleComment((Comment) event);
+				case XMLStreamConstants.DTD -> handleDtd((DTD) event);
+				case XMLStreamConstants.ENTITY_REFERENCE -> handleEntityReference((EntityReference) event);
 			}
 		}
 		if (documentStarted && !documentEnded) {
