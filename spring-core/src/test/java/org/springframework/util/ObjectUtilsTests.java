@@ -821,6 +821,7 @@ class ObjectUtilsTests {
 			String repeat100 = "X".repeat(100);
 			String repeat101 = "X".repeat(101);
 
+			assertThat(ObjectUtils.nullSafeConciseToString("")).isEqualTo("");
 			assertThat(ObjectUtils.nullSafeConciseToString("foo")).isEqualTo("foo");
 			assertThat(ObjectUtils.nullSafeConciseToString(repeat100)).isEqualTo(repeat100);
 			assertThat(ObjectUtils.nullSafeConciseToString(repeat101)).hasSize(truncatedLength).endsWith(truncated);
