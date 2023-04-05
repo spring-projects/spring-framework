@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,10 @@ public abstract class StringUtils {
 	private static final String CURRENT_PATH = ".";
 
 	private static final char EXTENSION_SEPARATOR = '.';
+
+	private static final int DEFAULT_TRUNCATION_THRESHOLD = 100;
+
+	private static final String TRUNCATION_SUFFIX = " (truncated)...";
 
 
 	//---------------------------------------------------------------------
@@ -1386,6 +1390,42 @@ public abstract class StringUtils {
 	 */
 	public static String arrayToCommaDelimitedString(@Nullable Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
+	}
+
+	/**
+	 * Truncate the supplied {@link CharSequence}.
+	 * <p>Delegates to {@link #truncate(CharSequence, int)}, supplying {@code 100}
+	 * as the threshold.
+	 * @param charSequence the {@code CharSequence} to truncate
+	 * @return a truncated string, or a string representation of the original
+	 * {@code CharSequence} if its length does not exceed the threshold
+	 * @since 5.3.27
+	 */
+	public static String truncate(CharSequence charSequence) {
+		return truncate(charSequence, DEFAULT_TRUNCATION_THRESHOLD);
+	}
+
+	/**
+	 * Truncate the supplied {@link CharSequence}.
+	 * <p>If the length of the {@code CharSequence} is greater than the threshold,
+	 * this method returns a {@linkplain CharSequence#subSequence(int, int)
+	 * subsequence} of the {@code CharSequence} (up to the threshold) appended
+	 * with the suffix {@code " (truncated)..."}. Otherwise, this method returns
+	 * {@code charSequence.toString()}.
+	 * @param charSequence the {@code CharSequence} to truncate
+	 * @param threshold the maximum length after which to truncate; must be a
+	 * positive number
+	 * @return a truncated string, or a string representation of the original
+	 * {@code CharSequence} if its length does not exceed the threshold
+	 * @since 5.3.27
+	 */
+	public static String truncate(CharSequence charSequence, int threshold) {
+		Assert.isTrue(threshold > 0,
+				() -> "Truncation threshold must be a positive number: " + threshold);
+		if (charSequence.length() > threshold) {
+			return charSequence.subSequence(0, threshold) + TRUNCATION_SUFFIX;
+		}
+		return charSequence.toString();
 	}
 
 }
