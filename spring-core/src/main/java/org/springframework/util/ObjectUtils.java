@@ -909,8 +909,8 @@ public abstract class ObjectUtils {
 	 * with {@code @} and a hex string form of the object's identity hash code</li>
 	 * </ul>
 	 * <p>In the context of this method, a <em>simple type</em> is any of the following:
-	 * a primitive or primitive wrapper (excluding {@code Void} and {@code void}),
-	 * an enum, a Number, a Date, a Temporal, a URI, a URL, or a Locale.
+	 * a primitive wrapper (excluding {@link Void}), an {@link Enum}, a {@link Number},
+	 * a {@link Date}, a {@link Temporal}, a {@link URI}, a {@link URL}, or a {@link Locale}.
 	 * @param obj the object to build a string representation for
 	 * @return a concise string representation of the supplied object
 	 * @since 5.3.27
