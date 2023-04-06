@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,8 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 	 * @see jakarta.websocket.Decoder#init(EndpointConfig)
 	 */
 	public void init(EndpointConfig config) {
-		ApplicationContext applicationContext = getApplicationContext();
-		if (applicationContext instanceof ConfigurableApplicationContext) {
-			ConfigurableListableBeanFactory beanFactory =
-					((ConfigurableApplicationContext) applicationContext).getBeanFactory();
+		if (getApplicationContext() instanceof ConfigurableApplicationContext cac) {
+			ConfigurableListableBeanFactory beanFactory = cac.getBeanFactory();
 			beanFactory.autowireBean(this);
 		}
 	}
@@ -194,12 +192,12 @@ public abstract class ConvertingEncoderDecoderSupport<T, M> {
 			return (T) getConversionService().convert(message, getMessageType(), getType());
 		}
 		catch (ConversionException ex) {
-			if (message instanceof String) {
-				throw new DecodeException((String) message,
+			if (message instanceof String string) {
+				throw new DecodeException(string,
 						"Unable to decode websocket message using ConversionService", ex);
 			}
-			if (message instanceof ByteBuffer) {
-				throw new DecodeException((ByteBuffer) message,
+			if (message instanceof ByteBuffer byteBuffer) {
+				throw new DecodeException(byteBuffer,
 						"Unable to decode websocket message using ConversionService", ex);
 			}
 			throw ex;

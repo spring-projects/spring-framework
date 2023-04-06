@@ -18,9 +18,18 @@ package org.springframework.cglib.beans;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
-import org.springframework.cglib.core.*;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 /**
  * @author Chris Nokleberg
  */
@@ -60,11 +69,13 @@ public class ImmutableBean
 			// SPRING PATCH END
         }
 
-        protected ClassLoader getDefaultClassLoader() {
+        @Override
+		protected ClassLoader getDefaultClassLoader() {
             return target.getClassLoader();
         }
 
-        protected ProtectionDomain getProtectionDomain() {
+        @Override
+		protected ProtectionDomain getProtectionDomain() {
         	return ReflectUtils.getProtectionDomain(target);
         }
 
@@ -74,7 +85,8 @@ public class ImmutableBean
             return super.create(name);
         }
 
-        public void generateClass(ClassVisitor v) {
+        @Override
+		public void generateClass(ClassVisitor v) {
             Type targetType = Type.getType(target);
             ClassEmitter ce = new ClassEmitter(v);
             ce.begin_class(Constants.V1_8,
@@ -100,8 +112,8 @@ public class ImmutableBean
             Method[] getters = ReflectUtils.getPropertyMethods(descriptors, true, false);
             Method[] setters = ReflectUtils.getPropertyMethods(descriptors, false, true);
 
-            for (int i = 0; i < getters.length; i++) {
-                MethodInfo getter = ReflectUtils.getMethodInfo(getters[i]);
+            for (Method getter2 : getters) {
+                MethodInfo getter = ReflectUtils.getMethodInfo(getter2);
                 e = EmitUtils.begin_method(ce, getter, Constants.ACC_PUBLIC);
                 e.load_this();
                 e.getfield(FIELD_NAME);
@@ -110,8 +122,8 @@ public class ImmutableBean
                 e.end_method();
             }
 
-            for (int i = 0; i < setters.length; i++) {
-                MethodInfo setter = ReflectUtils.getMethodInfo(setters[i]);
+            for (Method setter2 : setters) {
+                MethodInfo setter = ReflectUtils.getMethodInfo(setter2);
                 e = EmitUtils.begin_method(ce, setter, Constants.ACC_PUBLIC);
                 e.throw_exception(ILLEGAL_STATE_EXCEPTION, "Bean is immutable");
                 e.end_method();
@@ -120,12 +132,14 @@ public class ImmutableBean
             ce.end_class();
         }
 
-        protected Object firstInstance(Class type) {
+        @Override
+		protected Object firstInstance(Class type) {
             return ReflectUtils.newInstance(type, OBJECT_CLASSES, new Object[]{ bean });
         }
 
         // TODO: optimize
-        protected Object nextInstance(Object instance) {
+        @Override
+		protected Object nextInstance(Object instance) {
             return firstInstance(instance.getClass());
         }
     }

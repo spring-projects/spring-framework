@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ class OptionWriter {
 		else if (this.optionSource instanceof Map) {
 			renderFromMap(tagWriter);
 		}
-		else if (this.optionSource instanceof Class && ((Class<?>) this.optionSource).isEnum()) {
+		else if (this.optionSource instanceof Class<?> clazz && clazz.isEnum()) {
 			renderFromEnum(tagWriter);
 		}
 		else {
@@ -205,8 +205,8 @@ class OptionWriter {
 			if (this.valueProperty != null) {
 				value = wrapper.getPropertyValue(this.valueProperty);
 			}
-			else if (item instanceof Enum) {
-				value = ((Enum<?>) item).name();
+			else if (item instanceof Enum<?> enumValue) {
+				value = enumValue.name();
 			}
 			else {
 				value = item;

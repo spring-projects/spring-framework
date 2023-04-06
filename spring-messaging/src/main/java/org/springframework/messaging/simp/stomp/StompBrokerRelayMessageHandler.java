@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -44,10 +43,13 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.messaging.tcp.FixedIntervalReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnection;
 import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.messaging.tcp.reactor.ReactorNetty2TcpClient;
 import org.springframework.messaging.tcp.reactor.ReactorNettyCodec;
 import org.springframework.messaging.tcp.reactor.ReactorNettyTcpClient;
+import org.springframework.messaging.tcp.reactor.TcpMessageCodec;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * A {@link org.springframework.messaging.MessageHandler} that handles messages by
@@ -102,10 +104,18 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final Message<byte[]> HEARTBEAT_MESSAGE;
 
+	private static final boolean reactorNettyClientPresent;
+
+	private static final boolean reactorNetty2ClientPresent;
+
 	static {
 		HEART_BEAT_ACCESSOR = StompHeaderAccessor.createForHeartbeat();
 		HEARTBEAT_MESSAGE = MessageBuilder.createMessage(
 				StompDecoder.HEARTBEAT_PAYLOAD, HEART_BEAT_ACCESSOR.getMessageHeaders());
+
+		ClassLoader classLoader = StompBrokerRelayMessageHandler.class.getClassLoader();
+		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", classLoader);
+		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", classLoader);
 	}
 
 
@@ -346,7 +356,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	/**
 	 * Configure a TCP client for managing TCP connections to the STOMP broker.
-	 * <p>By default {@link ReactorNettyTcpClient} is used.
+	 * <p>By default {@link ReactorNettyTcpClient} or
+	 * {@link ReactorNetty2TcpClient} is used.
 	 * <p><strong>Note:</strong> when this property is used, any
 	 * {@link #setRelayHost(String) host} or {@link #setRelayPort(int) port}
 	 * specified are effectively ignored.
@@ -431,7 +442,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		if (logger.isInfoEnabled()) {
-			logger.info("Starting \"system\" session, " + toString());
+			logger.info("Starting \"system\" session, " + this);
 		}
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
@@ -459,15 +470,24 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 	}
 
-	private ReactorNettyTcpClient<byte[]> initTcpClient() {
+	private TcpOperations<byte[]> initTcpClient() {
 		StompDecoder decoder = new StompDecoder();
 		if (this.headerInitializer != null) {
 			decoder.setHeaderInitializer(this.headerInitializer);
 		}
-		ReactorNettyCodec<byte[]> codec = new StompReactorNettyCodec(decoder);
-		ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(this.relayHost, this.relayPort, codec);
-		client.setLogger(SimpLogging.forLog(client.getLogger()));
-		return client;
+		if (reactorNettyClientPresent) {
+			ReactorNettyCodec<byte[]> codec = new StompReactorNettyCodec(decoder);
+			ReactorNettyTcpClient<byte[]> client = new ReactorNettyTcpClient<>(this.relayHost, this.relayPort, codec);
+			client.setLogger(SimpLogging.forLog(client.getLogger()));
+			return client;
+		}
+		else if (reactorNetty2ClientPresent) {
+			TcpMessageCodec<byte[]> codec = new StompTcpMessageCodec(decoder);
+			ReactorNetty2TcpClient<byte[]> client = new ReactorNetty2TcpClient<>(this.relayHost, this.relayPort, codec);
+			client.setLogger(SimpLogging.forLog(client.getLogger()));
+			return client;
+		}
+		throw new IllegalStateException("No compatible version of Reactor Netty");
 	}
 
 	@Override
@@ -514,7 +534,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			return;
 		}
 
-		StompHeaderAccessor stompAccessor;
+		StompHeaderAccessor stompHeaderAccessor;
 		StompCommand command;
 
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
@@ -522,15 +542,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			throw new IllegalStateException(
 					"No header accessor (not using the SimpMessagingTemplate?): " + message);
 		}
-		else if (accessor instanceof StompHeaderAccessor) {
-			stompAccessor = (StompHeaderAccessor) accessor;
-			command = stompAccessor.getCommand();
+		else if (accessor instanceof StompHeaderAccessor _stompHeaderAccessor) {
+			stompHeaderAccessor = _stompHeaderAccessor;
+			command = stompHeaderAccessor.getCommand();
 		}
 		else if (accessor instanceof SimpMessageHeaderAccessor) {
-			stompAccessor = StompHeaderAccessor.wrap(message);
-			command = stompAccessor.getCommand();
+			stompHeaderAccessor = StompHeaderAccessor.wrap(message);
+			command = stompHeaderAccessor.getCommand();
 			if (command == null) {
-				command = stompAccessor.updateStompCommandAsClientMessage();
+				command = stompHeaderAccessor.updateStompCommandAsClientMessage();
 			}
 		}
 		else {
@@ -539,14 +559,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		}
 
 		if (sessionId == null) {
-			if (!SimpMessageType.MESSAGE.equals(stompAccessor.getMessageType())) {
+			if (!SimpMessageType.MESSAGE.equals(stompHeaderAccessor.getMessageType())) {
 				if (logger.isErrorEnabled()) {
 					logger.error("Only STOMP SEND supported from within the server side. Ignoring " + message);
 				}
 				return;
 			}
 			sessionId = SYSTEM_SESSION_ID;
-			stompAccessor.setSessionId(sessionId);
+			stompHeaderAccessor.setSessionId(sessionId);
 		}
 
 		if (StompCommand.CONNECT.equals(command) || StompCommand.STOMP.equals(command)) {
@@ -557,15 +577,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 			if (logger.isDebugEnabled()) {
-				logger.debug(stompAccessor.getShortLogMessage(EMPTY_PAYLOAD));
+				logger.debug(stompHeaderAccessor.getShortLogMessage(EMPTY_PAYLOAD));
 			}
-			stompAccessor = (stompAccessor.isMutable() ? stompAccessor : StompHeaderAccessor.wrap(message));
-			stompAccessor.setLogin(this.clientLogin);
-			stompAccessor.setPasscode(this.clientPasscode);
+			stompHeaderAccessor = (stompHeaderAccessor.isMutable() ? stompHeaderAccessor : StompHeaderAccessor.wrap(message));
+			stompHeaderAccessor.setLogin(this.clientLogin);
+			stompHeaderAccessor.setPasscode(this.clientPasscode);
 			if (getVirtualHost() != null) {
-				stompAccessor.setHost(getVirtualHost());
+				stompHeaderAccessor.setHost(getVirtualHost());
 			}
-			RelayConnectionHandler handler = new RelayConnectionHandler(sessionId, stompAccessor);
+			RelayConnectionHandler handler = new RelayConnectionHandler(sessionId, stompHeaderAccessor);
 			this.connectionHandlers.put(sessionId, handler);
 			this.stats.incrementConnectCount();
 			Assert.state(this.tcpClient != null, "No TCP client available");
@@ -580,7 +600,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 			this.stats.incrementDisconnectCount();
-			handler.forward(message, stompAccessor);
+			handler.forward(message, stompHeaderAccessor);
 		}
 		else {
 			RelayConnectionHandler handler = this.connectionHandlers.get(sessionId);
@@ -591,7 +611,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 
-			String destination = stompAccessor.getDestination();
+			String destination = stompHeaderAccessor.getDestination();
 			if (command != null && command.requiresDestination() && !checkDestinationPrefix(destination)) {
 				// Not a broker destination but send a heartbeat to keep the connection
 				if (handler.shouldSendHeartbeatForIgnoredMessage()) {
@@ -600,7 +620,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				return;
 			}
 
-			handler.forward(message, stompAccessor);
+			handler.forward(message, stompHeaderAccessor);
 		}
 	}
 
@@ -679,7 +699,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		public void afterConnected(TcpConnection<byte[]> connection) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("TCP connection opened in session=" + getSessionId());
+				logger.debug("TCP connection " + connection + " opened in session=" + getSessionId());
 			}
 			this.tcpConnection = connection;
 			connection.onReadInactivity(() -> {
@@ -958,7 +978,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			this.tcpConnection = null;
 			if (conn != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Closing TCP connection in session " + this.sessionId);
+					logger.debug("Closing TCP connection " + conn + " in session " + this.sessionId);
 				}
 				conn.close();
 			}
@@ -1106,16 +1126,6 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			for (RelayConnectionHandler handler : connectionHandlers.values()) {
 				handler.updateClientSendMessageCount(now);
 			}
-		}
-	}
-
-
-
-	private static class VoidCallable implements Callable<Void> {
-
-		@Override
-		public Void call() {
-			return null;
 		}
 	}
 

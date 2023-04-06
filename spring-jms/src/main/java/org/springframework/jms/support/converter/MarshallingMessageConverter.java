@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	/**
 	 * Construct a new {@code MarshallingMessageConverter} with no {@link Marshaller}
 	 * or {@link Unmarshaller} set. The marshaller must be set after construction by invoking
-	 * {@link #setMarshaller(Marshaller)} and {@link #setUnmarshaller(Unmarshaller)} .
+	 * {@link #setMarshaller(Marshaller)} and {@link #setUnmarshaller(Unmarshaller)}.
 	 */
 	public MarshallingMessageConverter() {
 	}
@@ -81,7 +81,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 */
 	public MarshallingMessageConverter(Marshaller marshaller) {
 		Assert.notNull(marshaller, "Marshaller must not be null");
-		if (!(marshaller instanceof Unmarshaller)) {
+		if (!(marshaller instanceof Unmarshaller _unmarshaller)) {
 			throw new IllegalArgumentException(
 					"Marshaller [" + marshaller + "] does not implement the Unmarshaller " +
 					"interface. Please set an Unmarshaller explicitly by using the " +
@@ -89,7 +89,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 		}
 		else {
 			this.marshaller = marshaller;
-			this.unmarshaller = (Unmarshaller) marshaller;
+			this.unmarshaller = _unmarshaller;
 		}
 	}
 

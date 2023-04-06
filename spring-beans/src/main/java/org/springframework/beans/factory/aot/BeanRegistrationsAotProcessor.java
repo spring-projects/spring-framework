@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,33 +19,40 @@ package org.springframework.beans.factory.aot;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.aot.BeanRegistrationsAotContribution.Registration;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link BeanFactoryInitializationAotProcessor} that contributes code to
  * register beans.
  *
  * @author Phillip Webb
+ * @author Sebastien Deleuze
+ * @author Stephane Nicoll
+ * @author Brian Clozel
  * @since 6.0
  */
 class BeanRegistrationsAotProcessor implements BeanFactoryInitializationAotProcessor {
 
 	@Override
-	public BeanRegistrationsAotContribution processAheadOfTime(
-			ConfigurableListableBeanFactory beanFactory) {
-
+	@Nullable
+	public BeanRegistrationsAotContribution processAheadOfTime(ConfigurableListableBeanFactory beanFactory) {
 		BeanDefinitionMethodGeneratorFactory beanDefinitionMethodGeneratorFactory =
 				new BeanDefinitionMethodGeneratorFactory(beanFactory);
-		Map<String, BeanDefinitionMethodGenerator> registrations = new LinkedHashMap<>();
+		Map<BeanRegistrationKey, Registration> registrations = new LinkedHashMap<>();
+
 		for (String beanName : beanFactory.getBeanDefinitionNames()) {
 			RegisteredBean registeredBean = RegisteredBean.of(beanFactory, beanName);
-			BeanDefinitionMethodGenerator beanDefinitionMethodGenerator = beanDefinitionMethodGeneratorFactory
-					.getBeanDefinitionMethodGenerator(registeredBean, null);
+			BeanDefinitionMethodGenerator beanDefinitionMethodGenerator =
+					beanDefinitionMethodGeneratorFactory.getBeanDefinitionMethodGenerator(registeredBean);
 			if (beanDefinitionMethodGenerator != null) {
-				registrations.put(beanName, beanDefinitionMethodGenerator);
+				registrations.put(new BeanRegistrationKey(beanName, registeredBean.getBeanClass()),
+						new Registration(beanDefinitionMethodGenerator, beanFactory.getAliases(beanName)));
 			}
 		}
+
 		if (registrations.isEmpty()) {
 			return null;
 		}

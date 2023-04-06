@@ -26,9 +26,11 @@ import org.springframework.web.util.pattern.PathPattern.MatchingContext;
 
 /**
  * A regex path element. Used to represent any complicated element of the path.
- * For example in '<tt>/foo/&ast;_&ast;/&ast;_{foobar}</tt>' both <tt>*_*</tt> and <tt>*_{foobar}</tt>
- * are {@link RegexPathElement} path elements. Derived from the general
- * {@link org.springframework.util.AntPathMatcher} approach.
+ *
+ * <p>For example in '<code>/foo/&#42;_&#42;/&#42;_{foobar}</code>' both {@code *_*}
+ * and <code>*_{foobar}</code> are {@link RegexPathElement regex path elements}.
+ *
+ * <p>Derived from the general {@link org.springframework.util.AntPathMatcher} approach.
  *
  * @author Andy Clement
  * @since 5.0

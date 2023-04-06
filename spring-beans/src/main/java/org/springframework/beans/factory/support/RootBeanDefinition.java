@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -320,7 +320,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Specify a generics-containing target type of this bean definition, if known in advance.
 	 * @since 4.3.3
 	 */
-	public void setTargetType(ResolvableType targetType) {
+	public void setTargetType(@Nullable ResolvableType targetType) {
 		this.targetType = targetType;
 	}
 
@@ -418,6 +418,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public void setResolvedFactoryMethod(@Nullable Method method) {
 		this.factoryMethodToIntrospect = method;
+		if (method != null) {
+			setUniqueFactoryMethodName(method.getName());
+		}
 	}
 
 	/**
@@ -430,12 +433,23 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	@Override
-	public void setInstanceSupplier(@Nullable Supplier<?> instanceSupplier) {
-		super.setInstanceSupplier(instanceSupplier);
-		Method factoryMethod = (instanceSupplier instanceof InstanceSupplier<?>)
-				? ((InstanceSupplier<?>) instanceSupplier).getFactoryMethod() : null;
+	public void setInstanceSupplier(@Nullable Supplier<?> supplier) {
+		super.setInstanceSupplier(supplier);
+		Method factoryMethod = (supplier instanceof InstanceSupplier<?> instanceSupplier ?
+				instanceSupplier.getFactoryMethod() : null);
 		if (factoryMethod != null) {
 			setResolvedFactoryMethod(factoryMethod);
+		}
+	}
+
+	/**
+	 * Mark this bean definition as post-processed,
+	 * i.e. processed by {@link MergedBeanDefinitionPostProcessor}.
+	 * @since 6.0
+	 */
+	public void markAsPostProcessed() {
+		synchronized (this.postProcessingLock) {
+			this.postProcessed = true;
 		}
 	}
 

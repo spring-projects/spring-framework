@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpLogging;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -122,8 +121,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 		return Flux.from(input).map(element -> {
 
-			ServerSentEvent<?> sse = (element instanceof ServerSentEvent ?
-					(ServerSentEvent<?>) element : ServerSentEvent.builder().data(element).build());
+			ServerSentEvent<?> sse = (element instanceof ServerSentEvent<?> serverSentEvent ?
+					serverSentEvent : ServerSentEvent.builder().data(element).build());
 
 			StringBuilder sb = new StringBuilder();
 			String id = sse.id();
@@ -151,15 +150,15 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 			if (data == null) {
 				result = Flux.just(encodeText(sb + "\n", mediaType, factory));
 			}
-			else if (data instanceof String) {
-				data = StringUtils.replace((String) data, "\n", "\ndata:");
-				result = Flux.just(encodeText(sb + (String) data + "\n\n", mediaType, factory));
+			else if (data instanceof String text) {
+				text = StringUtils.replace(text, "\n", "\ndata:");
+				result = Flux.just(encodeText(sb + text + "\n\n", mediaType, factory));
 			}
 			else {
 				result = encodeEvent(sb, data, dataType, mediaType, factory, hints);
 			}
 
-			return result.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+			return result.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 		});
 	}
 
@@ -204,9 +203,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	private Map<String, Object> getEncodeHints(ResolvableType actualType, ResolvableType elementType,
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
-		if (this.encoder instanceof HttpMessageEncoder) {
-			HttpMessageEncoder<?> encoder = (HttpMessageEncoder<?>) this.encoder;
-			return encoder.getEncodeHints(actualType, elementType, mediaType, request, response);
+		if (this.encoder instanceof HttpMessageEncoder<?> httpMessageEncoder) {
+			return httpMessageEncoder.getEncodeHints(actualType, elementType, mediaType, request, response);
 		}
 		return Hints.none();
 	}

@@ -162,7 +162,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 		else {
 			try {
 				// Try to parse the location as a URL...
-				URL url = new URL(location);
+				URL url = ResourceUtils.toURL(location);
 				return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url) : new UrlResource(url));
 			}
 			catch (MalformedURLException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import kotlin.coroutines.Continuation;
+import kotlinx.coroutines.reactor.MonoKt;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import reactor.core.publisher.Mono;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.framework.ReflectiveMethodInvocation;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -43,135 +45,40 @@ import org.springframework.util.StringValueResolver;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /**
- * Factory for creating a client proxy given an HTTP service interface with
+ * Factory to create a client proxy from an HTTP service interface with
  * {@link HttpExchange @HttpExchange} methods.
  *
- * <p>This class is intended to be declared as a bean in a Spring configuration.
+ * <p>To create an instance, use static methods to obtain a
+ * {@link Builder Builder}.
  *
  * @author Rossen Stoyanchev
  * @since 6.0
  * @see org.springframework.web.reactive.function.client.support.WebClientAdapter
  */
-public final class HttpServiceProxyFactory implements InitializingBean, EmbeddedValueResolverAware {
+public final class HttpServiceProxyFactory {
 
 	private final HttpClientAdapter clientAdapter;
 
-	@Nullable
-	private List<HttpServiceArgumentResolver> customArgumentResolvers;
+	private final List<HttpServiceArgumentResolver> argumentResolvers;
 
 	@Nullable
-	private List<HttpServiceArgumentResolver> argumentResolvers;
+	private final StringValueResolver embeddedValueResolver;
 
-	@Nullable
-	private ConversionService conversionService;
+	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
-	@Nullable
-	private StringValueResolver embeddedValueResolver;
-
-	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-
-	private Duration blockTimeout = Duration.ofSeconds(5);
+	private final Duration blockTimeout;
 
 
-	/**
-	 * Create an instance with the underlying HTTP client to use.
-	 * @param clientAdapter an adapter for the client
-	 * @see org.springframework.web.reactive.function.client.support.WebClientAdapter#createHttpServiceProxyFactory(org.springframework.web.reactive.function.client.WebClient)
-	 */
-	public HttpServiceProxyFactory(HttpClientAdapter clientAdapter) {
-		Assert.notNull(clientAdapter, "HttpClientAdapter is required");
+	private HttpServiceProxyFactory(
+			HttpClientAdapter clientAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
+			@Nullable StringValueResolver embeddedValueResolver,
+			ReactiveAdapterRegistry reactiveAdapterRegistry, Duration blockTimeout) {
+
 		this.clientAdapter = clientAdapter;
-	}
-
-
-	/**
-	 * Register a custom argument resolver, invoked ahead of default resolvers.
-	 * @param resolver the resolver to add
-	 */
-	public void addCustomArgumentResolver(HttpServiceArgumentResolver resolver) {
-		if (this.customArgumentResolvers == null) {
-			this.customArgumentResolvers = new ArrayList<>();
-		}
-		this.customArgumentResolvers.add(resolver);
-	}
-
-	/**
-	 * Set the custom argument resolvers to use, ahead of default resolvers.
-	 * @param resolvers the resolvers to use
-	 */
-	public void setCustomArgumentResolvers(List<HttpServiceArgumentResolver> resolvers) {
-		this.customArgumentResolvers = new ArrayList<>(resolvers);
-	}
-
-	/**
-	 * Set the {@link ConversionService} to use where input values need to
-	 * be formatted as Strings.
-	 * <p>By default this is {@link DefaultFormattingConversionService}.
-	 */
-	public void setConversionService(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
-
-	/**
-	 * Set the StringValueResolver to use for resolving placeholders and
-	 * expressions in {@link HttpExchange#url()}.
-	 * @param resolver the resolver to use
-	 */
-	@Override
-	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver = resolver;
-	}
-
-	/**
-	 * Set the {@link ReactiveAdapterRegistry} to use to support different
-	 * asynchronous types for HTTP service method return values.
-	 * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.
-	 */
-	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
-		this.reactiveAdapterRegistry = registry;
-	}
-
-	/**
-	 * Configure how long to wait for a response for an HTTP service method
-	 * with a synchronous (blocking) method signature.
-	 * <p>By default this is 5 seconds.
-	 * @param blockTimeout the timeout value
-	 */
-	public void setBlockTimeout(Duration blockTimeout) {
+		this.argumentResolvers = argumentResolvers;
+		this.embeddedValueResolver = embeddedValueResolver;
+		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
 		this.blockTimeout = blockTimeout;
-	}
-
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-
-		this.conversionService = (this.conversionService != null ?
-				this.conversionService : new DefaultFormattingConversionService());
-
-		this.argumentResolvers = initArgumentResolvers(this.conversionService);
-	}
-
-	private List<HttpServiceArgumentResolver> initArgumentResolvers(ConversionService conversionService) {
-		List<HttpServiceArgumentResolver> resolvers = new ArrayList<>();
-
-		// Custom
-		if (this.customArgumentResolvers != null) {
-			resolvers.addAll(this.customArgumentResolvers);
-		}
-
-		// Annotation-based
-		resolvers.add(new RequestHeaderArgumentResolver(conversionService));
-		resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
-		resolvers.add(new PathVariableArgumentResolver(conversionService));
-		resolvers.add(new RequestParamArgumentResolver(conversionService));
-		resolvers.add(new CookieValueArgumentResolver(conversionService));
-		resolvers.add(new RequestAttributeArgumentResolver());
-
-		// Specific type
-		resolvers.add(new UrlArgumentResolver());
-		resolvers.add(new HttpMethodArgumentResolver());
-
-		return resolvers;
 	}
 
 
@@ -207,6 +114,148 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 
 
 	/**
+	 * Return a builder that's initialized with the given client.
+	 */
+	public static Builder builder(HttpClientAdapter clientAdapter) {
+		return new Builder().clientAdapter(clientAdapter);
+	}
+
+	/**
+	 * Return an empty builder, with the client to be provided to builder.
+	 */
+	public static Builder builder() {
+		return new Builder();
+	}
+
+
+	/**
+	 * Builder to create an {@link HttpServiceProxyFactory}.
+	 */
+	public static final class Builder {
+
+		@Nullable
+		private HttpClientAdapter clientAdapter;
+
+		private final List<HttpServiceArgumentResolver> customArgumentResolvers = new ArrayList<>();
+
+		@Nullable
+		private ConversionService conversionService;
+
+		@Nullable
+		private StringValueResolver embeddedValueResolver;
+
+		private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+
+		@Nullable
+		private Duration blockTimeout;
+
+		private Builder() {
+		}
+
+		/**
+		 * Provide the HTTP client to perform requests through.
+		 * @param clientAdapter a client adapted to {@link HttpClientAdapter}
+		 * @return this same builder instance
+		 */
+		public Builder clientAdapter(HttpClientAdapter clientAdapter) {
+			this.clientAdapter = clientAdapter;
+			return this;
+		}
+
+		/**
+		 * Register a custom argument resolver, invoked ahead of default resolvers.
+		 * @param resolver the resolver to add
+		 * @return this same builder instance
+		 */
+		public Builder customArgumentResolver(HttpServiceArgumentResolver resolver) {
+			this.customArgumentResolvers.add(resolver);
+			return this;
+		}
+
+		/**
+		 * Set the {@link ConversionService} to use where input values need to
+		 * be formatted as Strings.
+		 * <p>By default this is {@link DefaultFormattingConversionService}.
+		 * @return this same builder instance
+		 */
+		public Builder conversionService(ConversionService conversionService) {
+			this.conversionService = conversionService;
+			return this;
+		}
+
+		/**
+		 * Set the {@link StringValueResolver} to use for resolving placeholders
+		 * and expressions embedded in {@link HttpExchange#url()}.
+		 * @param embeddedValueResolver the resolver to use
+		 * @return this same builder instance
+		 */
+		public Builder embeddedValueResolver(StringValueResolver embeddedValueResolver) {
+			this.embeddedValueResolver = embeddedValueResolver;
+			return this;
+		}
+
+		/**
+		 * Set the {@link ReactiveAdapterRegistry} to use to support different
+		 * asynchronous types for HTTP service method return values.
+		 * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.
+		 * @return this same builder instance
+		 */
+		public Builder reactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
+			this.reactiveAdapterRegistry = registry;
+			return this;
+		}
+
+		/**
+		 * Configure how long to wait for a response for an HTTP service method
+		 * with a synchronous (blocking) method signature.
+		 * <p>By default this is 5 seconds.
+		 * @param blockTimeout the timeout value
+		 * @return this same builder instance
+		 */
+		public Builder blockTimeout(Duration blockTimeout) {
+			this.blockTimeout = blockTimeout;
+			return this;
+		}
+
+		/**
+		 * Build the {@link HttpServiceProxyFactory} instance.
+		 */
+		public HttpServiceProxyFactory build() {
+			Assert.notNull(this.clientAdapter, "HttpClientAdapter is required");
+
+			return new HttpServiceProxyFactory(
+					this.clientAdapter, initArgumentResolvers(),
+					this.embeddedValueResolver, this.reactiveAdapterRegistry,
+					(this.blockTimeout != null ? this.blockTimeout : Duration.ofSeconds(5)));
+		}
+
+		private List<HttpServiceArgumentResolver> initArgumentResolvers() {
+
+			// Custom
+			List<HttpServiceArgumentResolver> resolvers = new ArrayList<>(this.customArgumentResolvers);
+
+			ConversionService service = (this.conversionService != null ?
+					this.conversionService : new DefaultFormattingConversionService());
+
+			// Annotation-based
+			resolvers.add(new RequestHeaderArgumentResolver(service));
+			resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
+			resolvers.add(new PathVariableArgumentResolver(service));
+			resolvers.add(new RequestParamArgumentResolver(service));
+			resolvers.add(new RequestPartArgumentResolver(this.reactiveAdapterRegistry));
+			resolvers.add(new CookieValueArgumentResolver(service));
+			resolvers.add(new RequestAttributeArgumentResolver());
+
+			// Specific type
+			resolvers.add(new UrlArgumentResolver());
+			resolvers.add(new HttpMethodArgumentResolver());
+
+			return resolvers;
+		}
+	}
+
+
+	/**
 	 * {@link MethodInterceptor} that invokes an {@link HttpServiceMethod}.
 	 */
 	private static final class HttpServiceMethodInterceptor implements MethodInterceptor {
@@ -223,6 +272,9 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 			Method method = invocation.getMethod();
 			HttpServiceMethod httpServiceMethod = this.httpServiceMethods.get(method);
 			if (httpServiceMethod != null) {
+				if (KotlinDetector.isSuspendingFunction(method)) {
+					return KotlinDelegate.invokeSuspendingFunction(invocation, httpServiceMethod);
+				}
 				return httpServiceMethod.invoke(invocation.getArguments());
 			}
 			if (method.isDefault()) {
@@ -232,6 +284,27 @@ public final class HttpServiceProxyFactory implements InitializingBean, Embedded
 				}
 			}
 			throw new IllegalStateException("Unexpected method invocation: " + method);
+		}
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	@SuppressWarnings("unchecked")
+	private static class KotlinDelegate {
+
+		public static Object invokeSuspendingFunction(MethodInvocation invocation, HttpServiceMethod httpServiceMethod) {
+			Object[] rawArguments = invocation.getArguments();
+			Object[] arguments = resolveArguments(rawArguments);
+			Continuation<Object> continuation = (Continuation<Object>) rawArguments[rawArguments.length - 1];
+			Mono<Object> wrapped = (Mono<Object>) httpServiceMethod.invoke(arguments);
+			return MonoKt.awaitSingleOrNull(wrapped, continuation);
+		}
+
+		private static Object[] resolveArguments(Object[] args) {
+			Object[] functionArgs = new Object[args.length - 1];
+			System.arraycopy(args, 0, functionArgs, 0, args.length - 1);
+			return functionArgs;
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,8 +193,7 @@ public class ResponseBodyEmitter {
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	public synchronized void send(Object object, @Nullable MediaType mediaType) throws IOException {
-		Assert.state(!this.complete,
-				"ResponseBodyEmitter has already completed" +
+		Assert.state(!this.complete, () -> "ResponseBodyEmitter has already completed" +
 						(this.failure != null ? " with error: " + this.failure : ""));
 		sendInternal(object, mediaType);
 	}

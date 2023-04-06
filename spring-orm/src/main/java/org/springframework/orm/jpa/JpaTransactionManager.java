@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,11 +262,11 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
-		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+		if (dataSource instanceof TransactionAwareDataSourceProxy proxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
-			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
+			this.dataSource = proxy.getTargetDataSource();
 		}
 		else {
 			this.dataSource = dataSource;
@@ -344,8 +344,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		if (getEntityManagerFactory() == null) {
 			throw new IllegalArgumentException("'entityManagerFactory' or 'persistenceUnitName' is required");
 		}
-		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo) {
-			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) getEntityManagerFactory();
+		if (getEntityManagerFactory() instanceof EntityManagerFactoryInfo emfInfo) {
 			DataSource dataSource = emfInfo.getDataSource();
 			if (dataSource != null) {
 				setDataSource(dataSource);
@@ -481,8 +480,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		EntityManagerFactory emf = obtainEntityManagerFactory();
 		Map<String, Object> properties = getJpaPropertyMap();
 		EntityManager em;
-		if (emf instanceof EntityManagerFactoryInfo) {
-			em = ((EntityManagerFactoryInfo) emf).createNativeEntityManager(properties);
+		if (emf instanceof EntityManagerFactoryInfo emfInfo) {
+			em = emfInfo.createNativeEntityManager(properties);
 		}
 		else {
 			em = (!CollectionUtils.isEmpty(properties) ?
@@ -562,8 +561,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 			tx.commit();
 		}
 		catch (RollbackException ex) {
-			if (ex.getCause() instanceof RuntimeException) {
-				DataAccessException dae = getJpaDialect().translateExceptionIfPossible((RuntimeException) ex.getCause());
+			if (ex.getCause() instanceof RuntimeException runtimeException) {
+				DataAccessException dae = getJpaDialect().translateExceptionIfPossible(runtimeException);
 				if (dae != null) {
 					throw dae;
 				}
@@ -696,8 +695,8 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 		public void setTransactionData(@Nullable Object transactionData) {
 			this.transactionData = transactionData;
 			getEntityManagerHolder().setTransactionActive(true);
-			if (transactionData instanceof SavepointManager) {
-				getEntityManagerHolder().setSavepointManager((SavepointManager) transactionData);
+			if (transactionData instanceof SavepointManager savepointManager) {
+				getEntityManagerHolder().setSavepointManager(savepointManager);
 			}
 		}
 

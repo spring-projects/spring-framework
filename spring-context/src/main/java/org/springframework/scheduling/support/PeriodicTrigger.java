@@ -64,7 +64,7 @@ public class PeriodicTrigger implements Trigger {
 	 * Create a trigger with the given period in milliseconds.
 	 * @deprecated as of 6.0, in favor on {@link #PeriodicTrigger(Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public PeriodicTrigger(long period) {
 		this(period, null);
 	}
@@ -75,7 +75,7 @@ public class PeriodicTrigger implements Trigger {
 	 * configured on this Trigger later via {@link #setInitialDelay(long)}.
 	 * @deprecated as of 6.0, in favor on {@link #PeriodicTrigger(Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public PeriodicTrigger(long period, @Nullable TimeUnit timeUnit) {
 		this(toDuration(period, timeUnit), timeUnit);
 	}
@@ -115,7 +115,7 @@ public class PeriodicTrigger implements Trigger {
 	 * @since 5.0.2
 	 * @deprecated as of 6.0, in favor on {@link #getPeriodDuration()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public long getPeriod() {
 		if (this.chronoUnit != null) {
 			return this.period.get(this.chronoUnit);
@@ -138,7 +138,7 @@ public class PeriodicTrigger implements Trigger {
 	 * @since 5.0.2
 	 * @deprecated as of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public TimeUnit getTimeUnit() {
 		if (this.chronoUnit != null) {
 			return TimeUnit.of(this.chronoUnit);
@@ -154,7 +154,7 @@ public class PeriodicTrigger implements Trigger {
 	 * provided upon instantiation, the default is milliseconds.
 	 * @deprecated as of 6.0, in favor of {@link #setInitialDelay(Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setInitialDelay(long initialDelay) {
 		if (this.chronoUnit != null) {
 			this.initialDelay = Duration.of(initialDelay, this.chronoUnit);
@@ -177,7 +177,7 @@ public class PeriodicTrigger implements Trigger {
 	 * @since 5.0.2
 	 * @deprecated as of 6.0, in favor on {@link #getInitialDelayDuration()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public long getInitialDelay() {
 		Duration initialDelay = this.initialDelay;
 		if (initialDelay != null) {

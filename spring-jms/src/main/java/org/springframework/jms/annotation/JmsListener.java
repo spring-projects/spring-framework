@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * assumed to be available with a bean name of {@code jmsListenerContainerFactory}
  * unless an explicit default has been provided through configuration.
  *
- * <p><b>Consider setting up a custom
+ * <p><b>Consider registering a custom
  * {@link org.springframework.jms.config.DefaultJmsListenerContainerFactory} bean.</b>
- * For production purposes, you'll typically fine-tune timeouts and recovery settings.
+ * For production purposes, you'll typically fine tune timeouts and recovery settings.
  * Most importantly, the default 'AUTO_ACKNOWLEDGE' mode does not provide reliability
  * guarantees, so make sure to use transacted sessions in case of reliability needs.
  *
@@ -79,6 +79,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * <em>composed annotations</em> with attribute overrides.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.1
  * @see EnableJms
  * @see JmsListenerAnnotationBeanPostProcessor
@@ -113,6 +114,12 @@ public @interface JmsListener {
 
 	/**
 	 * The name for the durable subscription, if any.
+	 * <p>As of Spring Framework 5.3.26, if an explicit subscription name is not
+	 * specified, a default subscription name will be generated based on the fully
+	 * qualified name of the annotated listener method &mdash; for example,
+	 * {@code "org.example.jms.ProductListener.processRequest"} for a
+	 * {@code processRequest(...)} listener method in the
+	 * {@code org.example.jms.ProductListener} class.
 	 */
 	String subscription() default "";
 

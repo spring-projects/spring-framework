@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,19 +168,18 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 		return result;
 	}
 
-	@SuppressWarnings({"unchecked"})
-	public static AsyncServerResponse create(Object o, @Nullable Duration timeout) {
-		Assert.notNull(o, "Argument to async must not be null");
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static AsyncServerResponse create(Object obj, @Nullable Duration timeout) {
+		Assert.notNull(obj, "Argument to async must not be null");
 
-		if (o instanceof CompletableFuture) {
-			CompletableFuture<ServerResponse> futureResponse = (CompletableFuture<ServerResponse>) o;
+		if (obj instanceof CompletableFuture futureResponse) {
 			return new DefaultAsyncServerResponse(futureResponse, timeout);
 		}
 		else if (reactiveStreamsPresent) {
 			ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
-			ReactiveAdapter publisherAdapter = registry.getAdapter(o.getClass());
+			ReactiveAdapter publisherAdapter = registry.getAdapter(obj.getClass());
 			if (publisherAdapter != null) {
-				Publisher<ServerResponse> publisher = publisherAdapter.toPublisher(o);
+				Publisher<ServerResponse> publisher = publisherAdapter.toPublisher(obj);
 				ReactiveAdapter futureAdapter = registry.getAdapter(CompletableFuture.class);
 				if (futureAdapter != null) {
 					CompletableFuture<ServerResponse> futureResponse =
@@ -189,7 +188,7 @@ final class DefaultAsyncServerResponse extends ErrorHandlingServerResponse imple
 				}
 			}
 		}
-		throw new IllegalArgumentException("Asynchronous type not supported: " + o.getClass());
+		throw new IllegalArgumentException("Asynchronous type not supported: " + obj.getClass());
 	}
 
 

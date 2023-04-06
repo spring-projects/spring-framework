@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,8 +93,6 @@ StandardJUnit4FeaturesTests.class,//
 	RelativePathSpringJUnit4ClassRunnerAppCtxTests.class,//
 	MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests.class,//
 	InheritedConfigSpringJUnit4ClassRunnerAppCtxTests.class,//
-	PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests.class,//
-	CustomDefaultContextLoaderClassSpringRunnerTests.class,//
 	ParameterizedDependencyInjectionTests.class,//
 	ConcreteTransactionalJUnit4SpringContextTests.class,//
 	ClassLevelTransactionalSpringRunnerTests.class,//

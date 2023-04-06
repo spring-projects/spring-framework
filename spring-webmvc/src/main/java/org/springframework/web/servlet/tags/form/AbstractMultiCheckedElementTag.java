@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,16 +223,14 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 				writeObjectEntry(tagWriter, valueProperty, labelProperty, item, i);
 			}
 		}
-		else if (itemsObject instanceof Collection) {
-			final Collection<?> optionCollection = (Collection<?>) itemsObject;
+		else if (itemsObject instanceof Collection<?> optionCollection) {
 			int itemIndex = 0;
 			for (Iterator<?> it = optionCollection.iterator(); it.hasNext(); itemIndex++) {
 				Object item = it.next();
 				writeObjectEntry(tagWriter, valueProperty, labelProperty, item, itemIndex);
 			}
 		}
-		else if (itemsObject instanceof Map) {
-			final Map<?, ?> optionMap = (Map<?, ?>) itemsObject;
+		else if (itemsObject instanceof final Map<?, ?> optionMap) {
 			int itemIndex = 0;
 			for (Iterator it = optionMap.entrySet().iterator(); it.hasNext(); itemIndex++) {
 				Map.Entry entry = (Map.Entry) it.next();
@@ -254,8 +252,8 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		if (valueProperty != null) {
 			renderValue = wrapper.getPropertyValue(valueProperty);
 		}
-		else if (item instanceof Enum) {
-			renderValue = ((Enum<?>) item).name();
+		else if (item instanceof Enum<?> enumValue) {
+			renderValue = enumValue.name();
 		}
 		else {
 			renderValue = item;

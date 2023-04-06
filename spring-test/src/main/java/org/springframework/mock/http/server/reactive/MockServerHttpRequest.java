@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeType;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -54,8 +53,6 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @since 5.0
  */
 public final class MockServerHttpRequest extends AbstractServerHttpRequest {
-
-	private final HttpMethod httpMethod;
 
 	private final MultiValueMap<String, HttpCookie> cookies;
 
@@ -75,8 +72,7 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 			@Nullable InetSocketAddress localAddress, @Nullable InetSocketAddress remoteAddress,
 			@Nullable SslInfo sslInfo, Publisher<? extends DataBuffer> body) {
 
-		super(uri, contextPath, headers);
-		this.httpMethod = httpMethod;
+		super(httpMethod, uri, contextPath, headers);
 		this.cookies = cookies;
 		this.localAddress = localAddress;
 		this.remoteAddress = remoteAddress;
@@ -84,17 +80,6 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 		this.body = Flux.from(body);
 	}
 
-
-	@Override
-	public HttpMethod getMethod() {
-		return this.httpMethod;
-	}
-
-	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.httpMethod.name();
-	}
 
 	@Override
 	@Nullable
@@ -240,9 +225,9 @@ public final class MockServerHttpRequest extends AbstractServerHttpRequest {
 	 * @since 5.2.7
 	 * @deprecated as of Spring Framework 6.0 in favor of {@link #method(HttpMethod, String, Object...)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static BodyBuilder method(String httpMethod, String uri, Object... vars) {
-		Assert.isTrue(StringUtils.hasText(httpMethod), "HTTP method is required.");
+		Assert.hasText(httpMethod, "HTTP method is required.");
 		return new DefaultBodyBuilder(HttpMethod.valueOf(httpMethod), toUri(uri, vars));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ public class ModelAndView {
 	 */
 	@Nullable
 	public String getViewName() {
-		return (this.view instanceof String ? (String) this.view : null);
+		return (this.view instanceof String name ? name : null);
 	}
 
 	/**
@@ -212,7 +212,7 @@ public class ModelAndView {
 	 */
 	@Nullable
 	public View getView() {
-		return (this.view instanceof View ? (View) this.view : null);
+		return (this.view instanceof View v ? v : null);
 	}
 
 	/**

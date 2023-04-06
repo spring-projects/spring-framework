@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class ViewResolverRegistryTests {
 	@Test
 	public void noResolvers() {
 		assertThat(this.registry.getViewResolvers()).isNotNull();
-		assertThat(this.registry.getViewResolvers().size()).isEqualTo(0);
+		assertThat(this.registry.getViewResolvers()).isEmpty();
 		assertThat(this.registry.hasRegistrations()).isFalse();
 	}
 
@@ -81,7 +81,7 @@ public class ViewResolverRegistryTests {
 		this.registry.viewResolver(viewResolver);
 
 		assertThat(this.registry.getViewResolvers().get(0)).isSameAs(viewResolver);
-		assertThat(this.registry.getViewResolvers().size()).isEqualTo(1);
+		assertThat(this.registry.getViewResolvers()).hasSize(1);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class ViewResolverRegistryTests {
 		View view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 		this.registry.defaultViews(view);
 
-		assertThat(this.registry.getDefaultViews().size()).isEqualTo(1);
+		assertThat(this.registry.getDefaultViews()).hasSize(1);
 		assertThat(this.registry.getDefaultViews().get(0)).isSameAs(view);
 	}
 
@@ -98,7 +98,7 @@ public class ViewResolverRegistryTests {
 		this.registry.scriptTemplate().prefix("/").suffix(".html");
 
 		List<ViewResolver> viewResolvers = this.registry.getViewResolvers();
-		assertThat(viewResolvers.size()).isEqualTo(1);
+		assertThat(viewResolvers).hasSize(1);
 		assertThat(viewResolvers.get(0).getClass()).isEqualTo(ScriptTemplateViewResolver.class);
 		DirectFieldAccessor accessor =  new DirectFieldAccessor(viewResolvers.get(0));
 		assertThat(accessor.getPropertyValue("prefix")).isEqualTo("/");

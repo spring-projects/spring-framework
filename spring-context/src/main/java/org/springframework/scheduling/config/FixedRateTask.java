@@ -36,7 +36,7 @@ public class FixedRateTask extends IntervalTask {
 	 * @param initialDelay the initial delay before first execution of the task
 	 * @deprecated as of 6.0, in favor on {@link #FixedRateTask(Runnable, Duration, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public FixedRateTask(Runnable runnable, long interval, long initialDelay) {
 		super(runnable, interval, initialDelay);
 	}

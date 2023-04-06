@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Convenient super class for many html tags that render content using the databinding
+ * Convenient superclass for many html tags that render content using the databinding
  * features of the {@link AbstractHtmlElementTag AbstractHtmlElementTag}. The only thing
  * sub-tags need to do is override {@link #renderDefaultContent(TagWriter)}.
  *

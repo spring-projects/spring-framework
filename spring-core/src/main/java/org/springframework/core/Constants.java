@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,10 +111,10 @@ public class Constants {
 	 */
 	public Number asNumber(String code) throws ConstantException {
 		Object obj = asObject(code);
-		if (!(obj instanceof Number)) {
+		if (!(obj instanceof Number number)) {
 			throw new ConstantException(this.className, code, "not a Number");
 		}
-		return (Number) obj;
+		return number;
 	}
 
 	/**
@@ -132,7 +132,7 @@ public class Constants {
 	/**
 	 * Parse the given String (upper or lower case accepted) and return
 	 * the appropriate value if it's the name of a constant field in the
-	 * class that we're analysing.
+	 * class that we're analyzing.
 	 * @param code the name of the field (never {@code null})
 	 * @return the Object value
 	 * @throws ConstantException if there's no such field

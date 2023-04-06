@@ -55,7 +55,9 @@ public class PathVariableArgumentResolver extends AbstractNamedValueArgumentReso
 	}
 
 	@Override
-	protected void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues) {
+	protected void addRequestValue(
+			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues) {
+
 		requestValues.setUriVariable(name, (String) value);
 	}
 

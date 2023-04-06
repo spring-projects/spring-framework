@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,32 +97,26 @@ public class HttpServerErrorException extends HttpStatusCodeException {
 			String statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {
 
 		if (statusCode instanceof HttpStatus status) {
-			switch (status) {
-				case INTERNAL_SERVER_ERROR:
-					return message != null ?
-						new HttpServerErrorException.InternalServerError(message, statusText, headers, body, charset) :
-							new HttpServerErrorException.InternalServerError(statusText, headers, body, charset);
-				case NOT_IMPLEMENTED:
-					return message != null ?
-							new HttpServerErrorException.NotImplemented(message, statusText, headers, body, charset) :
-							new HttpServerErrorException.NotImplemented(statusText, headers, body, charset);
-				case BAD_GATEWAY:
-					return message != null ?
-							new HttpServerErrorException.BadGateway(message, statusText, headers, body, charset) :
-							new HttpServerErrorException.BadGateway(statusText, headers, body, charset);
-				case SERVICE_UNAVAILABLE:
-					return message != null ?
-						new HttpServerErrorException.ServiceUnavailable(message, statusText, headers, body, charset) :
-							new HttpServerErrorException.ServiceUnavailable(statusText, headers, body, charset);
-				case GATEWAY_TIMEOUT:
-					return message != null ?
-							new HttpServerErrorException.GatewayTimeout(message, statusText, headers, body, charset) :
-							new HttpServerErrorException.GatewayTimeout(statusText, headers, body, charset);
-				default:
-					return message != null ?
-							new HttpServerErrorException(message, statusCode, statusText, headers, body, charset) :
-							new HttpServerErrorException(statusCode, statusText, headers, body, charset);
-			}
+			return switch (status) {
+				case INTERNAL_SERVER_ERROR -> message != null ?
+						new InternalServerError(message, statusText, headers, body, charset) :
+						new InternalServerError(statusText, headers, body, charset);
+				case NOT_IMPLEMENTED -> message != null ?
+						new NotImplemented(message, statusText, headers, body, charset) :
+						new NotImplemented(statusText, headers, body, charset);
+				case BAD_GATEWAY -> message != null ?
+						new BadGateway(message, statusText, headers, body, charset) :
+						new BadGateway(statusText, headers, body, charset);
+				case SERVICE_UNAVAILABLE -> message != null ?
+						new ServiceUnavailable(message, statusText, headers, body, charset) :
+						new ServiceUnavailable(statusText, headers, body, charset);
+				case GATEWAY_TIMEOUT -> message != null ?
+						new GatewayTimeout(message, statusText, headers, body, charset) :
+						new GatewayTimeout(statusText, headers, body, charset);
+				default -> message != null ?
+						new HttpServerErrorException(message, statusCode, statusText, headers, body, charset) :
+						new HttpServerErrorException(statusCode, statusText, headers, body, charset);
+			};
 		}
 		if (message != null) {
 			return new HttpServerErrorException(message, statusCode, statusText, headers, body, charset);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.test.context.web.socket;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.websocket.ClientEndpointConfig;
@@ -131,6 +132,13 @@ class MockServerContainer implements ServerContainer {
 	public void addEndpoint(ServerEndpointConfig serverConfig) throws DeploymentException {
 		throw new UnsupportedOperationException(
 				"MockServerContainer does not support addEndpoint(ServerEndpointConfig)");
+	}
+
+	@Override
+	public void upgradeHttpToWebSocket(Object httpServletRequest, Object httpServletResponse,
+			ServerEndpointConfig sec, Map<String, String> pathParameters) throws IOException, DeploymentException {
+
+		throw new UnsupportedOperationException("MockServerContainer does not support upgradeHttpToWebSocket");
 	}
 
 }

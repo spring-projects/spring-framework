@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,9 +267,9 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 				context.setResult(this.methodInvoker.invoke());
 			}
 			catch (InvocationTargetException ex) {
-				if (ex.getTargetException() instanceof JobExecutionException) {
+				if (ex.getTargetException() instanceof JobExecutionException jobExecutionException) {
 					// -> JobExecutionException, to be logged at info level by Quartz
-					throw (JobExecutionException) ex.getTargetException();
+					throw jobExecutionException;
 				}
 				else {
 					// -> "unhandled exception", to be logged at error level by Quartz

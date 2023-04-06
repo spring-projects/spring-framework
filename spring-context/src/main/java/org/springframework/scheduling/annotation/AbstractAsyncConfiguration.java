@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.ObjectProvider;
@@ -72,7 +71,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	@Autowired
 	void setConfigurers(ObjectProvider<AsyncConfigurer> configurers) {
 		Supplier<AsyncConfigurer> configurer = SingletonSupplier.of(() -> {
-			List<AsyncConfigurer> candidates = configurers.stream().collect(Collectors.toList());
+			List<AsyncConfigurer> candidates = configurers.stream().toList();
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
 			}

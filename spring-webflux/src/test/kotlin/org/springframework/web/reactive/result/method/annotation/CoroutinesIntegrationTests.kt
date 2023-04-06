@@ -40,7 +40,6 @@ import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.UndertowHttpServer
 import reactor.core.publisher.Flux
-import java.time.Duration
 
 class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
@@ -123,7 +122,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 		val entity = performGet<String>("/entity-flux", HttpHeaders.EMPTY, String::class.java)
 		assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
-		assertThat(entity.body).isEqualTo("01234")
+		assertThat(entity.body).isEqualTo("foobar")
 	}
 
 	@ParameterizedHttpServerTest
@@ -196,8 +195,7 @@ class CoroutinesIntegrationTests : AbstractRequestMappingIntegrationTests() {
 
 		@GetMapping("/entity-flux")
 		suspend fun entityFlux() : ResponseEntity<Flux<String>> {
-			val strings = Flux.interval(Duration.ofMillis(100)).take(5)
-					.map { l -> l.toString() }
+			val strings = Flux.just("foo", "bar");
 			delay(1)
 			return ResponseEntity.ok().body(strings)
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.support.RuntimeHintsUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
@@ -58,7 +55,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
@@ -68,7 +64,6 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor.ScheduledAnnotationsRuntimeHints;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
 import org.springframework.scheduling.config.FixedRateTask;
@@ -111,7 +106,6 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  * @see AsyncAnnotationBeanPostProcessor
  */
-@ImportRuntimeHints(ScheduledAnnotationsRuntimeHints.class)
 public class ScheduledAnnotationBeanPostProcessor
 		implements ScheduledTaskHolder, MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor,
 		Ordered, EmbeddedValueResolverAware, BeanNameAware, BeanFactoryAware, ApplicationContextAware,
@@ -165,7 +159,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @since 5.1
 	 */
 	public ScheduledAnnotationBeanPostProcessor(ScheduledTaskRegistrar registrar) {
-		Assert.notNull(registrar, "ScheduledTaskRegistrar is required");
+		Assert.notNull(registrar, "ScheduledTaskRegistrar must not be null");
 		this.registrar = registrar;
 	}
 
@@ -250,9 +244,8 @@ public class ScheduledAnnotationBeanPostProcessor
 			this.registrar.setScheduler(this.scheduler);
 		}
 
-		if (this.beanFactory instanceof ListableBeanFactory) {
-			Map<String, SchedulingConfigurer> beans =
-					((ListableBeanFactory) this.beanFactory).getBeansOfType(SchedulingConfigurer.class);
+		if (this.beanFactory instanceof ListableBeanFactory lbf) {
+			Map<String, SchedulingConfigurer> beans = lbf.getBeansOfType(SchedulingConfigurer.class);
 			List<SchedulingConfigurer> configurers = new ArrayList<>(beans.values());
 			AnnotationAwareOrderComparator.sort(configurers);
 			for (SchedulingConfigurer configurer : configurers) {
@@ -328,16 +321,15 @@ public class ScheduledAnnotationBeanPostProcessor
 	private <T> T resolveSchedulerBean(BeanFactory beanFactory, Class<T> schedulerType, boolean byName) {
 		if (byName) {
 			T scheduler = beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, schedulerType);
-			if (this.beanName != null && this.beanFactory instanceof ConfigurableBeanFactory) {
-				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(
-						DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
+			if (this.beanName != null && this.beanFactory instanceof ConfigurableBeanFactory cbf) {
+				cbf.registerDependentBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, this.beanName);
 			}
 			return scheduler;
 		}
-		else if (beanFactory instanceof AutowireCapableBeanFactory) {
-			NamedBeanHolder<T> holder = ((AutowireCapableBeanFactory) beanFactory).resolveNamedBean(schedulerType);
-			if (this.beanName != null && beanFactory instanceof ConfigurableBeanFactory) {
-				((ConfigurableBeanFactory) beanFactory).registerDependentBean(holder.getBeanName(), this.beanName);
+		else if (beanFactory instanceof AutowireCapableBeanFactory acbf) {
+			NamedBeanHolder<T> holder = acbf.resolveNamedBean(schedulerType);
+			if (this.beanName != null && beanFactory instanceof ConfigurableBeanFactory cbf) {
+				cbf.registerDependentBean(holder.getBeanName(), this.beanName);
 			}
 			return holder.getBeanInstance();
 		}
@@ -609,16 +601,6 @@ public class ScheduledAnnotationBeanPostProcessor
 			this.scheduledTasks.clear();
 		}
 		this.registrar.destroy();
-	}
-
-	static class ScheduledAnnotationsRuntimeHints implements RuntimeHintsRegistrar {
-
-		@Override
-		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-			RuntimeHintsUtils.registerAnnotation(hints, Scheduled.class);
-			RuntimeHintsUtils.registerAnnotation(hints, Schedules.class);
-		}
-
 	}
 
 }

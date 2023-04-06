@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class ApplicationContextExpressionTests {
 		ac.registerBeanDefinition("tb1", bd1);
 
 		GenericBeanDefinition bd2 = new GenericBeanDefinition();
-		bd2.setBeanClassName("#{tb1.class.name}");
+		bd2.setBeanClassName("#{tb1.class}");
 		bd2.setScope("myScope");
 		bd2.getPropertyValues().add("name", "{ XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ }");
 		bd2.getPropertyValues().add("age", "#{mySpecialAttr}");
@@ -169,9 +169,9 @@ class ApplicationContextExpressionTests {
 			System.getProperties().put("country", "UK");
 			assertThat(tb3.country).isEqualTo("123 UK");
 			assertThat(tb3.countryFactory.getObject()).isEqualTo("123 UK");
-			assertThat(tb3.optionalValue1.get()).isEqualTo("123");
-			assertThat(tb3.optionalValue2.get()).isEqualTo("123");
-			assertThat(tb3.optionalValue3.isPresent()).isFalse();
+			assertThat(tb3.optionalValue1).contains("123");
+			assertThat(tb3.optionalValue2).contains("123");
+			assertThat(tb3.optionalValue3).isNotPresent();
 			assertThat(tb3.tb).isSameAs(tb0);
 
 			tb3 = SerializationTestUtils.serializeAndDeserialize(tb3);
@@ -246,7 +246,7 @@ class ApplicationContextExpressionTests {
 		ac.refresh();
 
 		String str = ac.getBean("str", String.class);
-		assertThat(str.startsWith("test-")).isTrue();
+		assertThat(str).startsWith("test-");
 		ac.close();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,10 @@ public class PerformanceMonitorInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsPerformanceMetricsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
 
-		Log log = mock(Log.class);
+		Log log = mock();
 
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
 		interceptor.invokeUnderTrace(mi, log);
@@ -63,11 +63,11 @@ public class PerformanceMonitorInterceptorTests {
 
 	@Test
 	public void testExceptionPathStillLogsPerformanceMetricsCorrectly() throws Throwable {
-		MethodInvocation mi = mock(MethodInvocation.class);
+		MethodInvocation mi = mock();
 
 		given(mi.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
 		given(mi.proceed()).willThrow(new IllegalArgumentException());
-		Log log = mock(Log.class);
+		Log log = mock();
 
 		PerformanceMonitorInterceptor interceptor = new PerformanceMonitorInterceptor(true);
 		assertThatIllegalArgumentException().isThrownBy(() ->

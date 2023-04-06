@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,20 +80,6 @@ class MockHttpSessionTests {
 	}
 
 	@Test
-	void getValueOnInvalidatedSession() {
-		session.invalidate();
-		assertThatIllegalStateException().isThrownBy(() ->
-				session.getValue("foo"));
-	}
-
-	@Test
-	void getValueNamesOnInvalidatedSession() {
-		session.invalidate();
-		assertThatIllegalStateException().isThrownBy(
-				session::getValueNames);
-	}
-
-	@Test
 	void setAttributeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
@@ -101,24 +87,10 @@ class MockHttpSessionTests {
 	}
 
 	@Test
-	void putValueOnInvalidatedSession() {
-		session.invalidate();
-		assertThatIllegalStateException().isThrownBy(() ->
-				session.putValue("name", "value"));
-	}
-
-	@Test
 	void removeAttributeOnInvalidatedSession() {
 		session.invalidate();
 		assertThatIllegalStateException().isThrownBy(() ->
 				session.removeAttribute("name"));
-	}
-
-	@Test
-	void removeValueOnInvalidatedSession() {
-		session.invalidate();
-		assertThatIllegalStateException().isThrownBy(() ->
-				session.removeValue("name"));
 	}
 
 	@Test
@@ -135,7 +107,7 @@ class MockHttpSessionTests {
 
 		session.setAttribute(bindingListenerName, bindingListener);
 
-		assertThat(1).isEqualTo(bindingListener.getCounter());
+		assertThat(bindingListener.getCounter()).isEqualTo(1);
 	}
 
 	@Test
@@ -146,7 +118,7 @@ class MockHttpSessionTests {
 		session.setAttribute(bindingListenerName, bindingListener);
 		session.removeAttribute(bindingListenerName);
 
-		assertThat(0).isEqualTo(bindingListener.getCounter());
+		assertThat(bindingListener.getCounter()).isEqualTo(0);
 	}
 
 	@Test
@@ -157,7 +129,7 @@ class MockHttpSessionTests {
 		session.setAttribute(bindingListenerName, bindingListener);
 		session.setAttribute(bindingListenerName, bindingListener);
 
-		assertThat(1).isEqualTo(bindingListener.getCounter());
+		assertThat(bindingListener.getCounter()).isEqualTo(1);
 	}
 
 	@Test
@@ -169,8 +141,8 @@ class MockHttpSessionTests {
 		session.setAttribute(bindingListenerName, bindingListener1);
 		session.setAttribute(bindingListenerName, bindingListener2);
 
-		assertThat(0).isEqualTo(bindingListener1.getCounter());
-		assertThat(1).isEqualTo(bindingListener2.getCounter());
+		assertThat(bindingListener1.getCounter()).isEqualTo(0);
+		assertThat(bindingListener2.getCounter()).isEqualTo(1);
 	}
 
 	private static class CountingHttpSessionBindingListener

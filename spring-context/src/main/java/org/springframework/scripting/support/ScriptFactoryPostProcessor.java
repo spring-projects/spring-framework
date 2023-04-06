@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,11 +219,11 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
+		if (!(beanFactory instanceof ConfigurableBeanFactory cbf)) {
 			throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with " +
 					"non-ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
-		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		this.beanFactory = cbf;
 
 		// Required so that references (up container hierarchies) are correctly resolved.
 		this.scriptBeanFactory.setParentBeanFactory(this.beanFactory);
@@ -282,8 +282,8 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 			}
 		}
 		catch (Exception ex) {
-			if (ex instanceof BeanCreationException &&
-					((BeanCreationException) ex).getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
+			if (ex instanceof BeanCreationException bce &&
+					bce.getMostSpecificCause() instanceof BeanCurrentlyInCreationException) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Could not determine scripted object type for bean '" + beanName + "': " +
 							ex.getMessage());
@@ -406,11 +406,11 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 	protected long resolveRefreshCheckDelay(BeanDefinition beanDefinition) {
 		long refreshCheckDelay = this.defaultRefreshCheckDelay;
 		Object attributeValue = beanDefinition.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
-		if (attributeValue instanceof Number) {
-			refreshCheckDelay = ((Number) attributeValue).longValue();
+		if (attributeValue instanceof Number number) {
+			refreshCheckDelay = number.longValue();
 		}
-		else if (attributeValue instanceof String) {
-			refreshCheckDelay = Long.parseLong((String) attributeValue);
+		else if (attributeValue instanceof String text) {
+			refreshCheckDelay = Long.parseLong(text);
 		}
 		else if (attributeValue != null) {
 			throw new BeanDefinitionStoreException("Invalid refresh check delay attribute [" +
@@ -423,11 +423,11 @@ public class ScriptFactoryPostProcessor implements SmartInstantiationAwareBeanPo
 	protected boolean resolveProxyTargetClass(BeanDefinition beanDefinition) {
 		boolean proxyTargetClass = this.defaultProxyTargetClass;
 		Object attributeValue = beanDefinition.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE);
-		if (attributeValue instanceof Boolean) {
-			proxyTargetClass = (Boolean) attributeValue;
+		if (attributeValue instanceof Boolean boo) {
+			proxyTargetClass = boo;
 		}
-		else if (attributeValue instanceof String) {
-			proxyTargetClass = Boolean.parseBoolean((String) attributeValue);
+		else if (attributeValue instanceof String text) {
+			proxyTargetClass = Boolean.parseBoolean(text);
 		}
 		else if (attributeValue != null) {
 			throw new BeanDefinitionStoreException("Invalid proxy target class attribute [" +

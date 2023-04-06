@@ -54,7 +54,7 @@ public class PathPatternParser {
 	 * 6.0 in favor of configuring explicit redirects through a proxy,
 	 * Servlet/web filter, or a controller.
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setMatchOptionalTrailingSeparator(boolean matchOptionalTrailingSeparator) {
 		this.matchOptionalTrailingSeparator = matchOptionalTrailingSeparator;
 	}
@@ -63,7 +63,7 @@ public class PathPatternParser {
 	 * Whether optional trailing slashing match is enabled.
 	 * @deprecated as of 6.0 together with {@link #setMatchOptionalTrailingSeparator(boolean)}.
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public boolean isMatchOptionalTrailingSeparator() {
 		return this.matchOptionalTrailingSeparator;
 	}

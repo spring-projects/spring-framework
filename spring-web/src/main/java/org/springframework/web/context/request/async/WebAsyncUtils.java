@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,8 @@ public abstract class WebAsyncUtils {
 	public static WebAsyncManager getAsyncManager(ServletRequest servletRequest) {
 		WebAsyncManager asyncManager = null;
 		Object asyncManagerAttr = servletRequest.getAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE);
-		if (asyncManagerAttr instanceof WebAsyncManager) {
-			asyncManager = (WebAsyncManager) asyncManagerAttr;
+		if (asyncManagerAttr instanceof WebAsyncManager wam) {
+			asyncManager = wam;
 		}
 		if (asyncManager == null) {
 			asyncManager = new WebAsyncManager();
@@ -64,8 +64,8 @@ public abstract class WebAsyncUtils {
 		int scope = RequestAttributes.SCOPE_REQUEST;
 		WebAsyncManager asyncManager = null;
 		Object asyncManagerAttr = webRequest.getAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE, scope);
-		if (asyncManagerAttr instanceof WebAsyncManager) {
-			asyncManager = (WebAsyncManager) asyncManagerAttr;
+		if (asyncManagerAttr instanceof WebAsyncManager wam) {
+			asyncManager = wam;
 		}
 		if (asyncManager == null) {
 			asyncManager = new WebAsyncManager();

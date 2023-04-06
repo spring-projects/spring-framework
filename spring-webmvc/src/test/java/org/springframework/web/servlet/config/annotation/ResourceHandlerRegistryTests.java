@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.Resource;
@@ -47,6 +46,7 @@ import org.springframework.web.testfixture.servlet.MockServletContext;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ResourceHandlerRegistry}.
@@ -132,8 +132,8 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void resourceChain() {
-		ResourceResolver mockResolver = Mockito.mock(ResourceResolver.class);
-		ResourceTransformer mockTransformer = Mockito.mock(ResourceTransformer.class);
+		ResourceResolver mockResolver = mock();
+		ResourceTransformer mockTransformer = mock();
 		this.registration.resourceChain(true).addResolver(mockResolver).addTransformer(mockTransformer);
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
@@ -190,11 +190,11 @@ public class ResourceHandlerRegistryTests {
 
 	@Test
 	public void resourceChainWithOverrides() {
-		CachingResourceResolver cachingResolver = Mockito.mock(CachingResourceResolver.class);
-		VersionResourceResolver versionResolver = Mockito.mock(VersionResourceResolver.class);
-		WebJarsResourceResolver webjarsResolver = Mockito.mock(WebJarsResourceResolver.class);
+		CachingResourceResolver cachingResolver = mock();
+		VersionResourceResolver versionResolver = mock();
+		WebJarsResourceResolver webjarsResolver = mock();
 		PathResourceResolver pathResourceResolver = new PathResourceResolver();
-		CachingResourceTransformer cachingTransformer = Mockito.mock(CachingResourceTransformer.class);
+		CachingResourceTransformer cachingTransformer = mock();
 		CssLinkResourceTransformer cssLinkTransformer = new CssLinkResourceTransformer();
 
 		this.registration.setCachePeriod(3600)
@@ -231,7 +231,7 @@ public class ResourceHandlerRegistryTests {
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
 		PathResourceResolver resolver = (PathResourceResolver) resolvers.get(resolvers.size()-1);
 		Map<Resource, Charset> locationCharsets = resolver.getLocationCharsets();
-		assertThat(locationCharsets.size()).isEqualTo(1);
+		assertThat(locationCharsets).hasSize(1);
 		assertThat(locationCharsets.values().iterator().next()).isEqualTo(StandardCharsets.ISO_8859_1);
 	}
 

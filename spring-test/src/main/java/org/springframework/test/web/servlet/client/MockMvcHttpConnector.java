@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -167,8 +167,8 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 									DataBufferUtils.release(buffer);
 
 									// Adapt to jakarta.servlet.http.Part...
-									MockPart mockPart = (part instanceof FilePart ?
-											new MockPart(part.name(), ((FilePart) part).filename(), partBytes) :
+									MockPart mockPart = (part instanceof FilePart filePart ?
+											new MockPart(part.name(), filePart.filename(), partBytes) :
 											new MockPart(part.name(), partBytes));
 									mockPart.getHeaders().putAll(part.headers());
 									requestBuilder.part(mockPart);
@@ -197,6 +197,7 @@ public class MockMvcHttpConnector implements ClientHttpConnector {
 							.path(cookie.getPath())
 							.secure(cookie.getSecure())
 							.httpOnly(cookie.isHttpOnly())
+							.sameSite(cookie.getAttribute("samesite"))
 							.build();
 			clientResponse.getCookies().add(httpCookie.getName(), httpCookie);
 		}

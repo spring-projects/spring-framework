@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,14 +70,14 @@ public class FunctionReference extends SpelNodeImpl {
 		if (value == TypedValue.NULL) {
 			throw new SpelEvaluationException(getStartPosition(), SpelMessage.FUNCTION_NOT_DEFINED, this.name);
 		}
-		if (!(value.getValue() instanceof Method)) {
+		if (!(value.getValue() instanceof Method function)) {
 			// Possibly a static Java method registered as a function
 			throw new SpelEvaluationException(
 					SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, value.getClass());
 		}
 
 		try {
-			return executeFunctionJLRMethod(state, (Method) value.getValue());
+			return executeFunctionJLRMethod(state, function);
 		}
 		catch (SpelEvaluationException ex) {
 			ex.setPosition(getStartPosition());
@@ -144,7 +144,7 @@ public class FunctionReference extends SpelNodeImpl {
 		for (int i = 0; i < getChildCount(); i++) {
 			sj.add(getChild(i).toStringAST());
 		}
-		return '#' + this.name + sj.toString();
+		return '#' + this.name + sj;
 	}
 
 	/**

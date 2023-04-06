@@ -18,15 +18,12 @@ package org.springframework.messaging.tcp;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
-import org.springframework.util.concurrent.ListenableFuture;
-
 /**
  * A contract for establishing TCP connections.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- * @param <P> the type of payload for in and outbound messages
+ * @param <P> the type of payload for inbound and outbound messages
  */
 public interface TcpOperations<P> {
 
@@ -37,9 +34,11 @@ public interface TcpOperations<P> {
 	 * connection is successfully established
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TcpConnectionHandler)}
 	 */
-	@Deprecated
-	default ListenableFuture<Void> connect(TcpConnectionHandler<P> connectionHandler) {
-		return new CompletableToListenableFutureAdapter<>(connectAsync(connectionHandler));
+	@Deprecated(since = "6.0")
+	default org.springframework.util.concurrent.ListenableFuture<Void> connect(
+			TcpConnectionHandler<P> connectionHandler) {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				connectAsync(connectionHandler));
 	}
 
 	/**
@@ -59,9 +58,11 @@ public interface TcpOperations<P> {
 	 * initial connection is successfully established
 	 * @deprecated as of 6.0, in favor of {@link #connectAsync(TcpConnectionHandler, ReconnectStrategy)}
 	 */
-	@Deprecated
-	default ListenableFuture<Void> connect(TcpConnectionHandler<P> connectionHandler, ReconnectStrategy reconnectStrategy) {
-		return new CompletableToListenableFutureAdapter<>(connectAsync(connectionHandler, reconnectStrategy));
+	@Deprecated(since = "6.0")
+	default org.springframework.util.concurrent.ListenableFuture<Void> connect(
+			TcpConnectionHandler<P> connectionHandler, ReconnectStrategy reconnectStrategy) {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				connectAsync(connectionHandler, reconnectStrategy));
 	}
 
 	/**
@@ -80,14 +81,15 @@ public interface TcpOperations<P> {
 	 * connection is successfully closed
 	 * @deprecated as of 6.0, in favor of {@link #shutdownAsync()}
 	 */
-	@Deprecated
-	default ListenableFuture<Void> shutdown() {
-		return new CompletableToListenableFutureAdapter<>(shutdownAsync());
+	@Deprecated(since = "6.0")
+	default org.springframework.util.concurrent.ListenableFuture<Void> shutdown() {
+		return new org.springframework.util.concurrent.CompletableToListenableFutureAdapter<>(
+				shutdownAsync());
 	}
 
 	/**
 	 * Shut down and close any open connections.
-	 * @return a ListenableFuture that can be used to determine when and if the
+	 * @return a CompletableFuture that can be used to determine when and if the
 	 * connection is successfully closed
 	 * @since 6.0
 	 */

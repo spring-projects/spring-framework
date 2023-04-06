@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -461,8 +461,8 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			if (rawValue != null && rawValue.getClass().isArray()) {
 				values = CollectionUtils.arrayToList(rawValue);
 			}
-			else if (rawValue instanceof Collection) {
-				values = ((Collection<?>) rawValue);
+			else if (rawValue instanceof Collection<?> collection) {
+				values = collection;
 			}
 			else {
 				values = Collections.singleton(rawValue);
@@ -537,8 +537,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			}
 			return true;
 		}
-		if (value instanceof Collection) {
-			Collection<?> coll = (Collection<?>) value;
+		if (value instanceof Collection<?> coll) {
 			if (coll.isEmpty()) {
 				return false;
 			}

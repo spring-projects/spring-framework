@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,17 @@
 package org.springframework.http.server.reactive;
 
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.SSLSession;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.ssl.SslHandler;
 import org.apache.commons.logging.Log;
 import reactor.core.publisher.Flux;
+import reactor.netty.ChannelOperationsId;
 import reactor.netty.Connection;
 import reactor.netty.http.server.HttpServerRequest;
 
@@ -39,7 +38,6 @@ import org.springframework.http.HttpLogging;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -51,10 +49,6 @@ import org.springframework.util.MultiValueMap;
  * @since 5.0
  */
 class ReactorServerHttpRequest extends AbstractServerHttpRequest {
-
-	/** Reactor Netty 1.0.5+. */
-	static final boolean reactorNettyRequestChannelOperationsIdPresent = ClassUtils.isPresent(
-			"reactor.netty.ChannelOperationsId", ReactorServerHttpRequest.class.getClassLoader());
 
 	private static final Log logger = HttpLogging.forLogName(ReactorServerHttpRequest.class);
 
@@ -70,84 +64,11 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	public ReactorServerHttpRequest(HttpServerRequest request, NettyDataBufferFactory bufferFactory)
 			throws URISyntaxException {
 
-		super(initUri(request), "", new NettyHeadersAdapter(request.requestHeaders()));
+		super(HttpMethod.valueOf(request.method().name()), ReactorUriHelper.createUri(request), "",
+				new NettyHeadersAdapter(request.requestHeaders()));
 		Assert.notNull(bufferFactory, "DataBufferFactory must not be null");
 		this.request = request;
 		this.bufferFactory = bufferFactory;
-	}
-
-	private static URI initUri(HttpServerRequest request) throws URISyntaxException {
-		Assert.notNull(request, "HttpServerRequest must not be null");
-		return new URI(resolveBaseUrl(request) + resolveRequestUri(request));
-	}
-
-	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
-		String scheme = getScheme(request);
-		String header = request.requestHeaders().get(HttpHeaderNames.HOST);
-		if (header != null) {
-			final int portIndex;
-			if (header.startsWith("[")) {
-				portIndex = header.indexOf(':', header.indexOf(']'));
-			}
-			else {
-				portIndex = header.indexOf(':');
-			}
-			if (portIndex != -1) {
-				try {
-					return new URI(scheme, null, header.substring(0, portIndex),
-							Integer.parseInt(header, portIndex + 1, header.length(), 10), null, null, null);
-				}
-				catch (NumberFormatException ex) {
-					throw new URISyntaxException(header, "Unable to parse port", portIndex);
-				}
-			}
-			else {
-				return new URI(scheme, header, null, null);
-			}
-		}
-		else {
-			InetSocketAddress localAddress = request.hostAddress();
-			Assert.state(localAddress != null, "No host address available");
-			return new URI(scheme, null, localAddress.getHostString(),
-					localAddress.getPort(), null, null, null);
-		}
-	}
-
-	private static String getScheme(HttpServerRequest request) {
-		return request.scheme();
-	}
-
-	private static String resolveRequestUri(HttpServerRequest request) {
-		String uri = request.uri();
-		for (int i = 0; i < uri.length(); i++) {
-			char c = uri.charAt(i);
-			if (c == '/' || c == '?' || c == '#') {
-				break;
-			}
-			if (c == ':' && (i + 2 < uri.length())) {
-				if (uri.charAt(i + 1) == '/' && uri.charAt(i + 2) == '/') {
-					for (int j = i + 3; j < uri.length(); j++) {
-						c = uri.charAt(j);
-						if (c == '/' || c == '?' || c == '#') {
-							return uri.substring(j);
-						}
-					}
-					return "";
-				}
-			}
-		}
-		return uri;
-	}
-
-	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.request.method().name());
-	}
-
-	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.request.method().name();
 	}
 
 	@Override
@@ -203,8 +124,8 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	@Nullable
 	protected String initId() {
-		if (this.request instanceof Connection) {
-			return ((Connection) this.request).channel().id().asShortText() +
+		if (this.request instanceof Connection connection) {
+			return connection.channel().id().asShortText() +
 					"-" + logPrefixIndex.incrementAndGet();
 		}
 		return null;
@@ -212,31 +133,18 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected String initLogPrefix() {
-		if (reactorNettyRequestChannelOperationsIdPresent) {
-			String id = (ChannelOperationsIdHelper.getId(this.request));
-			if (id != null) {
-				return id;
-			}
+		String id = null;
+		if (this.request instanceof ChannelOperationsId operationsId) {
+			id = (logger.isDebugEnabled() ? operationsId.asLongText() : operationsId.asShortText());
 		}
-		if (this.request instanceof Connection) {
-			return ((Connection) this.request).channel().id().asShortText() +
+		if (id != null) {
+			return id;
+		}
+		if (this.request instanceof Connection connection) {
+			return connection.channel().id().asShortText() +
 					"-" + logPrefixIndex.incrementAndGet();
 		}
 		return getId();
-	}
-
-
-	private static class ChannelOperationsIdHelper {
-
-		@Nullable
-		public static String getId(HttpServerRequest request) {
-			if (request instanceof reactor.netty.ChannelOperationsId) {
-				return (logger.isDebugEnabled() ?
-						((reactor.netty.ChannelOperationsId) request).asLongText() :
-						((reactor.netty.ChannelOperationsId) request).asShortText());
-			}
-			return null;
-		}
 	}
 
 }

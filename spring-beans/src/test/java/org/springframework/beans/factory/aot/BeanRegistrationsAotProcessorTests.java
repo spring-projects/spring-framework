@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link BeanRegistrationsAotProcessor}.
  *
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  */
 class BeanRegistrationsAotProcessorTests {
 
@@ -50,7 +51,21 @@ class BeanRegistrationsAotProcessorTests {
 		BeanRegistrationsAotContribution contribution = processor
 				.processAheadOfTime(beanFactory);
 		assertThat(contribution).extracting("registrations")
-				.asInstanceOf(InstanceOfAssertFactories.MAP).containsKeys("b1", "b2");
+				.asInstanceOf(InstanceOfAssertFactories.MAP).hasSize(2);
+	}
+
+	@Test
+	void processAheadOfTimeReturnsBeanRegistrationsAotContributionWithAliases() {
+		BeanRegistrationsAotProcessor processor = new BeanRegistrationsAotProcessor();
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("test", new RootBeanDefinition(TestBean.class));
+		beanFactory.registerAlias("test", "testAlias");
+		BeanRegistrationsAotContribution contribution = processor
+				.processAheadOfTime(beanFactory);
+		assertThat(contribution).extracting("registrations").asInstanceOf(InstanceOfAssertFactories.MAP)
+				.hasEntrySatisfying(new BeanRegistrationKey("test", TestBean.class), registration ->
+						assertThat(registration).extracting("aliases").asInstanceOf(InstanceOfAssertFactories.ARRAY)
+								.singleElement().isEqualTo("testAlias"));
 	}
 
 }

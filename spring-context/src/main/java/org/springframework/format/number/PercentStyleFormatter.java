@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ public class PercentStyleFormatter extends AbstractNumberFormatter {
 	@Override
 	protected NumberFormat getNumberFormat(Locale locale) {
 		NumberFormat format = NumberFormat.getPercentInstance(locale);
-		if (format instanceof DecimalFormat) {
-			((DecimalFormat) format).setParseBigDecimal(true);
+		if (format instanceof DecimalFormat decimalFormat) {
+			decimalFormat.setParseBigDecimal(true);
 		}
 		return format;
 	}

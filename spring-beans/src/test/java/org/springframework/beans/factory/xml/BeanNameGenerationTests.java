@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,13 +56,13 @@ public class BeanNameGenerationTests {
 
 		GeneratedNameBean child1 = topLevel1.getChild();
 		assertThat(child1.getBeanName()).isNotNull();
-		assertThat(child1.getBeanName().startsWith(className)).isTrue();
+		assertThat(child1.getBeanName()).startsWith(className);
 
 		GeneratedNameBean child2 = topLevel2.getChild();
 		assertThat(child2.getBeanName()).isNotNull();
-		assertThat(child2.getBeanName().startsWith(className)).isTrue();
+		assertThat(child2.getBeanName()).startsWith(className);
 
-		assertThat(child1.getBeanName().equals(child2.getBeanName())).isFalse();
+		assertThat(child1.getBeanName()).isNotEqualTo(child2.getBeanName());
 	}
 
 }

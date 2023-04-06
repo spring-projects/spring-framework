@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public abstract class CollectionUtils {
 	 * @see #newLinkedHashMap(int)
 	 */
 	public static <K, V> HashMap<K, V> newHashMap(int expectedSize) {
-		return new HashMap<>((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
+		return new HashMap<>(computeMapInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
 	}
 
 	/**
@@ -102,7 +102,11 @@ public abstract class CollectionUtils {
 	 * @see #newHashMap(int)
 	 */
 	public static <K, V> LinkedHashMap<K, V> newLinkedHashMap(int expectedSize) {
-		return new LinkedHashMap<>((int) (expectedSize / DEFAULT_LOAD_FACTOR), DEFAULT_LOAD_FACTOR);
+		return new LinkedHashMap<>(computeMapInitialCapacity(expectedSize), DEFAULT_LOAD_FACTOR);
+	}
+
+	private static int computeMapInitialCapacity(int expectedSize) {
+		return (int) Math.ceil(expectedSize / (double) DEFAULT_LOAD_FACTOR);
 	}
 
 	/**
@@ -357,8 +361,8 @@ public abstract class CollectionUtils {
 		if (isEmpty(set)) {
 			return null;
 		}
-		if (set instanceof SortedSet) {
-			return ((SortedSet<T>) set).first();
+		if (set instanceof SortedSet<T> sortedSet) {
+			return sortedSet.first();
 		}
 
 		Iterator<T> it = set.iterator();
@@ -398,8 +402,8 @@ public abstract class CollectionUtils {
 		if (isEmpty(set)) {
 			return null;
 		}
-		if (set instanceof SortedSet) {
-			return ((SortedSet<T>) set).last();
+		if (set instanceof SortedSet<T> sortedSet) {
+			return sortedSet.last();
 		}
 
 		// Full iteration necessary...

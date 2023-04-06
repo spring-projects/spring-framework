@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,10 @@ public class ConsumesRequestConditionTests {
 		condition = new ConsumesRequestCondition(base);
 		request.setContentType(base + ";profile=\"a\"");
 		assertThat(condition.getMatchingCondition(request)).isNotNull();
+
+		condition = new ConsumesRequestCondition(base + ";profile=\"a\"");
+		request.setContentType(base + ";profile=\"A\"");
+		assertThat(condition.getMatchingCondition(request)).isNotNull();
 	}
 
 	@Test
@@ -158,10 +162,10 @@ public class ConsumesRequestConditionTests {
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*");
 
 		int result = condition1.compareTo(condition2, request);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = condition2.compareTo(condition1, request);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 	}
 
 	@Test
@@ -172,10 +176,10 @@ public class ConsumesRequestConditionTests {
 		ConsumesRequestCondition condition2 = new ConsumesRequestCondition("text/*", "text/plain;q=0.7");
 
 		int result = condition1.compareTo(condition2, request);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = condition2.compareTo(condition1, request);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 	}
 
 

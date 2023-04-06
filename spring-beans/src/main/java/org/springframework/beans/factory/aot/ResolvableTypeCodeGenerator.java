@@ -45,7 +45,7 @@ final class ResolvableTypeCodeGenerator {
 			return CodeBlock.of("$T.NONE", ResolvableType.class);
 		}
 		Class<?> type = ClassUtils.getUserClass(resolvableType.toClass());
-		if (resolvableType.hasGenerics()) {
+		if (resolvableType.hasGenerics() && !resolvableType.hasUnresolvableGenerics()) {
 			return generateCodeWithGenerics(resolvableType, type);
 		}
 		if (allowClassResult) {
@@ -57,13 +57,13 @@ final class ResolvableTypeCodeGenerator {
 	private static CodeBlock generateCodeWithGenerics(ResolvableType target, Class<?> type) {
 		ResolvableType[] generics = target.getGenerics();
 		boolean hasNoNestedGenerics = Arrays.stream(generics).noneMatch(ResolvableType::hasGenerics);
-		CodeBlock.Builder builder = CodeBlock.builder();
-		builder.add("$T.forClassWithGenerics($T.class", ResolvableType.class, type);
+		CodeBlock.Builder code = CodeBlock.builder();
+		code.add("$T.forClassWithGenerics($T.class", ResolvableType.class, type);
 		for (ResolvableType generic : generics) {
-			builder.add(", $L", generateCode(generic, hasNoNestedGenerics));
+			code.add(", $L", generateCode(generic, hasNoNestedGenerics));
 		}
-		builder.add(")");
-		return builder.build();
+		code.add(")");
+		return code.build();
 	}
 
 }

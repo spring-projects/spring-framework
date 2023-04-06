@@ -29,7 +29,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * {@link EventListener @EventListener} annotation used to consume a
+ * {@link EventListener @EventListener} annotation used to consume an
  * {@link AfterTestMethodEvent} published by the
  * {@link org.springframework.test.context.event.EventPublishingTestExecutionListener
  * EventPublishingTestExecutionListener}.

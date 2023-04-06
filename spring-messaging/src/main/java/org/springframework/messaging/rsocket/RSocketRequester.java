@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,12 +84,17 @@ public interface RSocketRequester extends Disposable {
 	MimeType metadataMimeType();
 
 	/**
+	 * Return the configured {@link RSocketStrategies}.
+	 */
+	RSocketStrategies strategies();
+
+	/**
 	 * Begin to specify a new request with the given route to a remote handler.
 	 * <p>The route can be a template with placeholders, e.g.
 	 * {@code "flight.{code}"} in which case the supplied route variables are
 	 * formatted via {@code toString()} and expanded into the template.
 	 * If a formatted variable contains a "." it is replaced with the escape
-	 * sequence "%2E" to avoid treating it as separator by the responder .
+	 * sequence "%2E" to avoid treating it as separator by the responder.
 	 * <p>If the connection is set to use composite metadata, the route is
 	 * encoded as {@code "message/x.rsocket.routing.v0"}. Otherwise, the route
 	 * is encoded according to the mime type for the connection.

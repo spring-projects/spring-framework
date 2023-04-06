@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.testfixture.http.server.reactive.bootstrap.HttpServer;
 
@@ -75,7 +76,7 @@ class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionInt
 
 		assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
 		List<Person> body = result.getBody();
-		assertThat(body.size()).isEqualTo(2);
+		assertThat(body).hasSize(2);
 		assertThat(body.get(0).getName()).isEqualTo("John");
 		assertThat(body.get(1).getName()).isEqualTo("Jane");
 	}
@@ -137,7 +138,7 @@ class PublisherHandlerFunctionIntegrationTests extends AbstractRouterFunctionInt
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (this == o) {
 				return true;
 			}

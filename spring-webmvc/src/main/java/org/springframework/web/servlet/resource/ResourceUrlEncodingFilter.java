@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,8 +85,8 @@ public class ResourceUrlEncodingFilter extends GenericFilterBean {
 		public void setAttribute(String name, Object value) {
 			super.setAttribute(name, value);
 			if (ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR.equals(name)) {
-				if (value instanceof ResourceUrlProvider) {
-					initLookupPath((ResourceUrlProvider) value);
+				if (value instanceof ResourceUrlProvider urlProvider) {
+					initLookupPath(urlProvider);
 				}
 			}
 		}

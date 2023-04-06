@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,11 +162,11 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	 * @see org.springframework.transaction.jta.JtaTransactionManager
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
-		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+		if (dataSource instanceof TransactionAwareDataSourceProxy tadsp) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
-			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
+			this.dataSource = tadsp.getTargetDataSource();
 		}
 		else {
 			this.dataSource = dataSource;

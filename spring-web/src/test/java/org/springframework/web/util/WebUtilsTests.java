@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,11 +63,11 @@ public class WebUtilsTests {
 		MultiValueMap<String, String> variables;
 
 		variables = WebUtils.parseMatrixVariables(null);
-		assertThat(variables).hasSize(0);
+		assertThat(variables).isEmpty();
 
 		variables = WebUtils.parseMatrixVariables("year");
 		assertThat(variables).hasSize(1);
-		assertThat(variables.getFirst("year")).isEqualTo("");
+		assertThat(variables.getFirst("year")).isEmpty();
 
 		variables = WebUtils.parseMatrixVariables("year=2012");
 		assertThat(variables).hasSize(1);

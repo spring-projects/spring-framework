@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -87,8 +88,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(new NopInterceptor());
 		AopProxy aop = createAopProxy(pc);
-		assertThatExceptionOfType(AopConfigException.class).isThrownBy(
-				aop::getProxy);
+		assertThatExceptionOfType(AopConfigException.class).isThrownBy(aop::getProxy);
 	}
 
 	@Test
@@ -136,8 +136,8 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 		Object proxy = aop.getProxy();
 		assertThat(AopUtils.isCglibProxy(proxy)).isTrue();
-		assertThat(proxy instanceof ITestBean).isTrue();
-		assertThat(proxy instanceof TestBean).isTrue();
+		assertThat(proxy).isInstanceOf(ITestBean.class);
+		assertThat(proxy).isInstanceOf(TestBean.class);
 
 		TestBean tb = (TestBean) proxy;
 		assertThat(tb.getAge()).isEqualTo(32);
@@ -215,7 +215,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 				return MethodMatcher.TRUE;
 			}
 			@Override
-			public boolean equals(Object obj) {
+			public boolean equals(@Nullable Object obj) {
 				return true;
 			}
 			@Override
@@ -312,7 +312,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 		cglib = new CglibAopProxy(as);
 
 		ITestBean proxy2 = (ITestBean) cglib.getProxy();
-		assertThat(proxy2 instanceof Serializable).isTrue();
+		assertThat(proxy2).isInstanceOf(Serializable.class);
 	}
 
 	@Test
@@ -331,7 +331,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 			proxy.doTest();
 		}
 		catch (Exception ex) {
-			assertThat(ex instanceof ApplicationContextException).as("Invalid exception class").isTrue();
+			assertThat(ex).as("Invalid exception class").isInstanceOf(ApplicationContextException.class);
 		}
 
 		assertThat(proxy.isCatchInvoked()).as("Catch was not invoked").isTrue();

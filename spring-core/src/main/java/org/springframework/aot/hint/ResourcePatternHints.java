@@ -25,12 +25,13 @@ import java.util.Set;
 import org.springframework.lang.Nullable;
 
 /**
- * A collection of {@link ResourcePatternHint} describing whether
- * resources should be made available at runtime through a matching
- * mechanism or inclusion/exclusion.
+ * A collection of {@link ResourcePatternHint} describing whether resources should
+ * be made available at runtime using a matching algorithm based on include/exclude
+ * patterns.
  *
  * @author Stephane Nicoll
  * @author Brian Clozel
+ * @author Sam Brannen
  * @since 6.0
  */
 public final class ResourcePatternHints {
@@ -75,20 +76,60 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Includes the resources matching the specified pattern.
+		 * Include resources matching the specified patterns.
 		 * @param reachableType the type that should be reachable for this hint to apply
 		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder includes(@Nullable TypeReference reachableType, String... includes) {
-			List<ResourcePatternHint> newIncludes = Arrays.stream(includes)
-					.map(include -> new ResourcePatternHint(include, reachableType)).toList();
-			this.includes.addAll(newIncludes);
+			Arrays.stream(includes)
+					.map(this::expandToIncludeDirectories)
+					.flatMap(List::stream)
+					.map(include -> new ResourcePatternHint(include, reachableType))
+					.forEach(this.includes::add);
 			return this;
 		}
 
 		/**
-		 * Includes the resources matching the specified pattern.
+		 * Expand the supplied include pattern into multiple patterns that include
+		 * all parent directories for the ultimate resource or resources.
+		 * <p>This is necessary to support classpath scanning within a GraalVM
+		 * native image.
+		 * @see <a href="https://github.com/spring-projects/spring-framework/issues/29403">gh-29403</a>
+		 */
+		private List<String> expandToIncludeDirectories(String includePattern) {
+			// Resource in root or no explicit subdirectories?
+			if (!includePattern.contains("/")) {
+				// Include the root directory as well as the pattern
+				return List.of("/", includePattern);
+			}
+
+			List<String> includePatterns = new ArrayList<>();
+			// Ensure the root directory and original pattern are always included
+			includePatterns.add("/");
+			includePatterns.add(includePattern);
+			StringBuilder path = new StringBuilder();
+			for (String pathElement : includePattern.split("/")) {
+				if (pathElement.isEmpty()) {
+					// Skip empty path elements
+					continue;
+				}
+				if (pathElement.contains("*")) {
+					// Stop at the first encountered wildcard, since we cannot reliably reason
+					// any further about the directory structure below this path element.
+					break;
+				}
+				if (!path.isEmpty()) {
+					path.append("/");
+				}
+				path.append(pathElement);
+				includePatterns.add(path.toString());
+			}
+			return includePatterns;
+		}
+
+		/**
+		 * Include resources matching the specified patterns.
 		 * @param includes the include patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
@@ -97,9 +138,9 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Exclude resources matching the specified pattern.
+		 * Exclude resources matching the specified patterns.
 		 * @param reachableType the type that should be reachable for this hint to apply
-		 * @param excludes the excludes pattern (see {@link ResourcePatternHint} documentation)
+		 * @param excludes the exclude patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder excludes(TypeReference reachableType, String... excludes) {
@@ -110,8 +151,8 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Exclude resources matching the specified pattern.
-		 * @param excludes the excludes pattern (see {@link ResourcePatternHint} documentation)
+		 * Exclude resources matching the specified patterns.
+		 * @param excludes the exclude patterns (see {@link ResourcePatternHint} documentation)
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder excludes(String... excludes) {
@@ -119,13 +160,14 @@ public final class ResourcePatternHints {
 		}
 
 		/**
-		 * Creates a {@link ResourcePatternHints} based on the state of this
+		 * Create {@link ResourcePatternHints} based on the state of this
 		 * builder.
-		 * @return a resource pattern hint
+		 * @return resource pattern hints
 		 */
 		ResourcePatternHints build() {
 			return new ResourcePatternHints(this);
 		}
 
 	}
+
 }

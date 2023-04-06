@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,8 +161,8 @@ class BeanWrapperGenericsTests {
 		value2.add(Boolean.TRUE);
 		input.put("2", value2);
 		bw.setPropertyValue("collectionMap", input);
-		assertThat(gb.getCollectionMap().get(1) instanceof HashSet).isTrue();
-		assertThat(gb.getCollectionMap().get(2) instanceof ArrayList).isTrue();
+		assertThat(gb.getCollectionMap().get(1)).isInstanceOf(HashSet.class);
+		assertThat(gb.getCollectionMap().get(2)).isInstanceOf(ArrayList.class);
 	}
 
 	@Test
@@ -174,7 +174,7 @@ class BeanWrapperGenericsTests {
 		HashSet<Integer> value1 = new HashSet<>();
 		value1.add(1);
 		bw.setPropertyValue("collectionMap[1]", value1);
-		assertThat(gb.getCollectionMap().get(1) instanceof HashSet).isTrue();
+		assertThat(gb.getCollectionMap().get(1)).isInstanceOf(HashSet.class);
 	}
 
 	@Test
@@ -282,7 +282,7 @@ class BeanWrapperGenericsTests {
 		gb.setMapOfMaps(map);
 		BeanWrapper bw = new BeanWrapperImpl(gb);
 		bw.setPropertyValue("mapOfMaps[mykey][10]", "5");
-		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(Long.valueOf(5));
+		assertThat(bw.getPropertyValue("mapOfMaps[mykey][10]")).isEqualTo(5L);
 		assertThat(gb.getMapOfMaps().get("mykey").get(10)).isEqualTo(Long.valueOf(5));
 	}
 
@@ -320,7 +320,7 @@ class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfInteger", map);
 
 		Object obj = gb.getMapOfInteger().get("testKey");
-		assertThat(obj instanceof Integer).isTrue();
+		assertThat(obj).isInstanceOf(Integer.class);
 	}
 
 	@Test
@@ -334,7 +334,7 @@ class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfListOfInteger", map);
 
 		Object obj = gb.getMapOfListOfInteger().get("testKey").get(0);
-		assertThat(obj instanceof Integer).isTrue();
+		assertThat(obj).isInstanceOf(Integer.class);
 		assertThat(((Integer) obj).intValue()).isEqualTo(1);
 	}
 
@@ -350,7 +350,7 @@ class BeanWrapperGenericsTests {
 		bw.setPropertyValue("listOfMapOfInteger", list);
 
 		Object obj = gb.getListOfMapOfInteger().get(0).get("testKey");
-		assertThat(obj instanceof Integer).isTrue();
+		assertThat(obj).isInstanceOf(Integer.class);
 		assertThat(((Integer) obj).intValue()).isEqualTo(5);
 	}
 
@@ -365,7 +365,7 @@ class BeanWrapperGenericsTests {
 		bw.setPropertyValue("mapOfListOfListOfInteger", map);
 
 		Object obj = gb.getMapOfListOfListOfInteger().get("testKey").get(0).get(0);
-		assertThat(obj instanceof Integer).isTrue();
+		assertThat(obj).isInstanceOf(Integer.class);
 		assertThat(((Integer) obj).intValue()).isEqualTo(1);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.ObservationRegistry;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
@@ -34,6 +35,7 @@ import org.springframework.http.client.reactive.HttpComponentsClientHttpConnecto
 import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -53,7 +55,9 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 final class DefaultWebClientBuilder implements WebClient.Builder {
 
-	private static final boolean reactorClientPresent;
+	private static final boolean reactorNettyClientPresent;
+
+	private static final boolean reactorNetty2ClientPresent;
 
 	private static final boolean jettyClientPresent;
 
@@ -61,7 +65,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 
 	static {
 		ClassLoader loader = DefaultWebClientBuilder.class.getClassLoader();
-		reactorClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", loader);
 		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
 		httpComponentsClientPresent =
 				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
@@ -105,6 +110,11 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	@Nullable
 	private ExchangeFunction exchangeFunction;
 
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
+
+	@Nullable
+	private ClientRequestObservationConvention observationConvention;
+
 
 	public DefaultWebClientBuilder() {
 	}
@@ -136,6 +146,8 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 		this.strategiesConfigurers = (other.strategiesConfigurers != null ?
 				new ArrayList<>(other.strategiesConfigurers) : null);
 		this.exchangeFunction = other.exchangeFunction;
+		this.observationRegistry = other.observationRegistry;
+		this.observationConvention = other.observationConvention;
 	}
 
 
@@ -269,6 +281,20 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 	}
 
 	@Override
+	public WebClient.Builder observationRegistry(ObservationRegistry observationRegistry) {
+		Assert.notNull(observationRegistry, "observationRegistry must not be null");
+		this.observationRegistry = observationRegistry;
+		return this;
+	}
+
+	@Override
+	public WebClient.Builder observationConvention(ClientRequestObservationConvention observationConvention) {
+		Assert.notNull(observationConvention, "observationConvention must not be null");
+		this.observationConvention = observationConvention;
+		return this;
+	}
+
+	@Override
 	public WebClient.Builder apply(Consumer<WebClient.Builder> builderConsumer) {
 		builderConsumer.accept(this);
 		return this;
@@ -288,26 +314,32 @@ final class DefaultWebClientBuilder implements WebClient.Builder {
 				ExchangeFunctions.create(connectorToUse, initExchangeStrategies()) :
 				this.exchangeFunction);
 
-		ExchangeFunction filteredExchange = (this.filters != null ? this.filters.stream()
+		ExchangeFilterFunction filterFunctions = (this.filters != null ? this.filters.stream()
 				.reduce(ExchangeFilterFunction::andThen)
-				.map(filter -> filter.apply(exchange))
-				.orElse(exchange) : exchange);
+				.orElse(null) : null);
 
 		HttpHeaders defaultHeaders = copyDefaultHeaders();
 
 		MultiValueMap<String, String> defaultCookies = copyDefaultCookies();
 
-		return new DefaultWebClient(filteredExchange, initUriBuilderFactory(),
+		return new DefaultWebClient(exchange,
+				filterFunctions,
+				initUriBuilderFactory(),
 				defaultHeaders,
 				defaultCookies,
 				this.defaultRequest,
 				this.statusHandlers,
+				this.observationRegistry,
+				this.observationConvention,
 				new DefaultWebClientBuilder(this));
 	}
 
 	private ClientHttpConnector initConnector() {
-		if (reactorClientPresent) {
+		if (reactorNettyClientPresent) {
 			return new ReactorClientHttpConnector();
+		}
+		else if (reactorNetty2ClientPresent) {
+			return new ReactorNetty2ClientHttpConnector();
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpConnector();

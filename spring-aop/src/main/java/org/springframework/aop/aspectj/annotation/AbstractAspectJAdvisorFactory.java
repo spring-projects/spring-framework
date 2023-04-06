@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -53,6 +51,7 @@ import org.springframework.lang.Nullable;
  * @author Rod Johnson
  * @author Adrian Colyer
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.0
  */
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
@@ -102,14 +101,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	@Override
 	public void validate(Class<?> aspectClass) throws AopConfigException {
-		// If the parent has the annotation and isn't abstract it's an error
-		Class<?> superclass = aspectClass.getSuperclass();
-		if (superclass.getAnnotation(Aspect.class) != null &&
-				!Modifier.isAbstract(superclass.getModifiers())) {
-			throw new AopConfigException("[" + aspectClass.getName() + "] cannot extend concrete aspect [" +
-					superclass.getName() + "]");
-		}
-
 		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
 		if (!ajType.isAspect()) {
 			throw new NotAnAtAspectException(aspectClass);
@@ -130,21 +121,21 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
-		for (Class<?> clazz : ASPECTJ_ANNOTATION_CLASSES) {
-			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, (Class<Annotation>) clazz);
-			if (foundAnnotation != null) {
-				return foundAnnotation;
+	protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method method) {
+		for (Class<?> annotationType : ASPECTJ_ANNOTATION_CLASSES) {
+			AspectJAnnotation annotation = findAnnotation(method, (Class<Annotation>) annotationType);
+			if (annotation != null) {
+				return annotation;
 			}
 		}
 		return null;
 	}
 
 	@Nullable
-	private static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Method method, Class<A> toLookFor) {
-		A result = AnnotationUtils.findAnnotation(method, toLookFor);
-		if (result != null) {
-			return new AspectJAnnotation<>(result);
+	private static AspectJAnnotation findAnnotation(Method method, Class<? extends Annotation> annotationType) {
+		Annotation annotation = AnnotationUtils.findAnnotation(method, annotationType);
+		if (annotation != null) {
+			return new AspectJAnnotation(annotation);
 		}
 		else {
 			return null;
@@ -163,26 +154,23 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 
 	/**
-	 * Class modelling an AspectJ annotation, exposing its type enumeration and
+	 * Class modeling an AspectJ annotation, exposing its type enumeration and
 	 * pointcut String.
-	 * @param <A> the annotation type
 	 */
-	protected static class AspectJAnnotation<A extends Annotation> {
+	protected static class AspectJAnnotation {
 
-		private static final String[] EXPRESSION_ATTRIBUTES = new String[] {"pointcut", "value"};
+		private static final String[] EXPRESSION_ATTRIBUTES = {"pointcut", "value"};
 
-		private static Map<Class<?>, AspectJAnnotationType> annotationTypeMap = new HashMap<>(8);
+		private static final Map<Class<?>, AspectJAnnotationType> annotationTypeMap = Map.of(
+				Pointcut.class, AspectJAnnotationType.AtPointcut, //
+				Around.class, AspectJAnnotationType.AtAround, //
+				Before.class, AspectJAnnotationType.AtBefore, //
+				After.class, AspectJAnnotationType.AtAfter, //
+				AfterReturning.class, AspectJAnnotationType.AtAfterReturning, //
+				AfterThrowing.class, AspectJAnnotationType.AtAfterThrowing //
+			);
 
-		static {
-			annotationTypeMap.put(Pointcut.class, AspectJAnnotationType.AtPointcut);
-			annotationTypeMap.put(Around.class, AspectJAnnotationType.AtAround);
-			annotationTypeMap.put(Before.class, AspectJAnnotationType.AtBefore);
-			annotationTypeMap.put(After.class, AspectJAnnotationType.AtAfter);
-			annotationTypeMap.put(AfterReturning.class, AspectJAnnotationType.AtAfterReturning);
-			annotationTypeMap.put(AfterThrowing.class, AspectJAnnotationType.AtAfterThrowing);
-		}
-
-		private final A annotation;
+		private final Annotation annotation;
 
 		private final AspectJAnnotationType annotationType;
 
@@ -190,20 +178,20 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		private final String argumentNames;
 
-		public AspectJAnnotation(A annotation) {
+		public AspectJAnnotation(Annotation annotation) {
 			this.annotation = annotation;
 			this.annotationType = determineAnnotationType(annotation);
 			try {
-				this.pointcutExpression = resolveExpression(annotation);
+				this.pointcutExpression = resolvePointcutExpression(annotation);
 				Object argNames = AnnotationUtils.getValue(annotation, "argNames");
-				this.argumentNames = (argNames instanceof String ? (String) argNames : "");
+				this.argumentNames = (argNames instanceof String names ? names : "");
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException(annotation + " is not a valid AspectJ annotation", ex);
 			}
 		}
 
-		private AspectJAnnotationType determineAnnotationType(A annotation) {
+		private AspectJAnnotationType determineAnnotationType(Annotation annotation) {
 			AspectJAnnotationType type = annotationTypeMap.get(annotation.annotationType());
 			if (type != null) {
 				return type;
@@ -211,23 +199,21 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			throw new IllegalStateException("Unknown annotation type: " + annotation);
 		}
 
-		private String resolveExpression(A annotation) {
+		private String resolvePointcutExpression(Annotation annotation) {
 			for (String attributeName : EXPRESSION_ATTRIBUTES) {
 				Object val = AnnotationUtils.getValue(annotation, attributeName);
-				if (val instanceof String str) {
-					if (!str.isEmpty()) {
-						return str;
-					}
+				if (val instanceof String str && !str.isEmpty()) {
+					return str;
 				}
 			}
-			throw new IllegalStateException("Failed to resolve expression: " + annotation);
+			throw new IllegalStateException("Failed to resolve pointcut expression in: " + annotation);
 		}
 
 		public AspectJAnnotationType getAnnotationType() {
 			return this.annotationType;
 		}
 
-		public A getAnnotation() {
+		public Annotation getAnnotation() {
 			return this.annotation;
 		}
 
@@ -252,19 +238,22 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 */
 	private static class AspectJAnnotationParameterNameDiscoverer implements ParameterNameDiscoverer {
 
+		private static final String[] EMPTY_ARRAY = new String[0];
+
 		@Override
 		@Nullable
 		public String[] getParameterNames(Method method) {
 			if (method.getParameterCount() == 0) {
-				return new String[0];
+				return EMPTY_ARRAY;
 			}
-			AspectJAnnotation<?> annotation = findAspectJAnnotationOnMethod(method);
+			AspectJAnnotation annotation = findAspectJAnnotationOnMethod(method);
 			if (annotation == null) {
 				return null;
 			}
 			StringTokenizer nameTokens = new StringTokenizer(annotation.getArgumentNames(), ",");
-			if (nameTokens.countTokens() > 0) {
-				String[] names = new String[nameTokens.countTokens()];
+			int numTokens = nameTokens.countTokens();
+			if (numTokens > 0) {
+				String[] names = new String[numTokens];
 				for (int i = 0; i < names.length; i++) {
 					names[i] = nameTokens.nextToken();
 				}

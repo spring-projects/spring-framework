@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	public static final String RECEIPT_ID = "receipt-id";
 
 
+	@SuppressWarnings("serial")
 	private final Map<String, List<String>> headers;
 
 
@@ -211,7 +212,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 		}
 		Arrays.stream(acceptVersions).forEach(version ->
 				Assert.isTrue(version != null && (version.equals("1.1") || version.equals("1.2")),
-						"Invalid version: " + version));
+						() -> "Invalid version: " + version));
 		set(ACCEPT_VERSION, StringUtils.arrayToCommaDelimitedString(acceptVersions));
 	}
 
@@ -553,9 +554,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 
 	@Override
-	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof StompHeaders &&
-				this.headers.equals(((StompHeaders) other).headers)));
+	public boolean equals(@Nullable Object obj) {
+		return (this == obj || (obj instanceof StompHeaders that && this.headers.equals(that.headers)));
 	}
 
 	@Override

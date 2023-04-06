@@ -22,13 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.lang.Nullable;
@@ -42,12 +40,10 @@ import org.springframework.messaging.converter.KotlinSerializationJsonMessageCon
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
-import org.springframework.messaging.handler.annotation.MessagingAnnotationsRuntimeHints;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpLogging;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SimpAnnotationsRuntimeHints;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
@@ -71,6 +67,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 
 /**
  * Provides essential configuration for handling messages with simple messaging
@@ -98,7 +95,6 @@ import org.springframework.validation.Validator;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-@ImportRuntimeHints({ MessagingAnnotationsRuntimeHints.class, SimpAnnotationsRuntimeHints.class })
 public abstract class AbstractMessageBrokerConfiguration implements ApplicationContextAware {
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
@@ -465,6 +461,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (registerDefaults) {
 			converters.add(new StringMessageConverter());
 			converters.add(new ByteArrayMessageConverter());
+			if (kotlinSerializationJsonPresent) {
+				converters.add(new KotlinSerializationJsonMessageConverter());
+			}
 			if (jackson2Present) {
 				converters.add(createJacksonConverter());
 			}
@@ -473,9 +472,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			}
 			else if (jsonbPresent) {
 				converters.add(new JsonbMessageConverter());
-			}
-			else if (kotlinSerializationJsonPresent) {
-				converters.add(new KotlinSerializationJsonMessageConverter());
 			}
 		}
 		return new CompositeMessageConverter(converters);
@@ -550,15 +546,12 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 				validator = this.applicationContext.getBean(MVC_VALIDATOR_NAME, Validator.class);
 			}
 			else if (ClassUtils.isPresent("jakarta.validation.Validator", getClass().getClassLoader())) {
-				Class<?> clazz;
 				try {
-					String className = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
-					clazz = ClassUtils.forName(className, AbstractMessageBrokerConfiguration.class.getClassLoader());
+					validator = new OptionalValidatorFactoryBean();
 				}
 				catch (Throwable ex) {
-					throw new BeanInitializationException("Could not find default validator class", ex);
+					throw new BeanInitializationException("Failed to create default validator", ex);
 				}
-				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new Validator() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package org.springframework.context.support;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.support.ClassHintUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -29,6 +32,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -64,7 +68,7 @@ import org.springframework.util.Assert;
  * definitions on it. {@link #refresh()} may only be called once.
  *
  * <p>This ApplicationContext implementation is suitable for Ahead of Time
- * processing, using {@link #refreshForAotProcessing()} as an alternative to the
+ * processing, using {@link #refreshForAotProcessing} as an alternative to the
  * regular {@link #refresh()}.
  *
  * <p>Usage example:
@@ -80,16 +84,13 @@ import org.springframework.util.Assert;
  * MyBean myBean = (MyBean) ctx.getBean("myBean");
  * ...</pre>
  *
- * For the typical case of XML bean definitions, simply use
+ * For the typical case of XML bean definitions, you may also use
  * {@link ClassPathXmlApplicationContext} or {@link FileSystemXmlApplicationContext},
  * which are easier to set up - but less flexible, since you can just use standard
  * resource locations for XML bean definitions, rather than mixing arbitrary bean
- * definition formats. The equivalent in a web environment is
- * {@link org.springframework.web.context.support.XmlWebApplicationContext}.
- *
- * <p>For custom application context implementations that are supposed to read
- * special bean definition formats in a refreshable manner, consider deriving
- * from the {@link AbstractRefreshableApplicationContext} base class.
+ * definition formats. For a custom application context implementation supposed to
+ * read a specific bean definition format in a refreshable manner, consider
+ * deriving from the {@link AbstractRefreshableApplicationContext} base class.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -255,8 +256,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 */
 	@Override
 	public Resource[] getResources(String locationPattern) throws IOException {
-		if (this.resourceLoader instanceof ResourcePatternResolver) {
-			return ((ResourcePatternResolver) this.resourceLoader).getResources(locationPattern);
+		if (this.resourceLoader instanceof ResourcePatternResolver resourcePatternResolver) {
+			return resourcePatternResolver.getResources(locationPattern);
 		}
 		return super.getResources(locationPattern);
 	}
@@ -388,16 +389,17 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * Load or refresh the persistent representation of the configuration up to
 	 * a point where the underlying bean factory is ready to create bean
 	 * instances.
-	 * <p>This variant of {@link #refresh()} is used by Ahead of Time processing
-	 * that optimizes the application context, typically at build-time.
+	 * <p>This variant of {@link #refresh()} is used by Ahead of Time (AOT)
+	 * processing that optimizes the application context, typically at build time.
 	 * <p>In this mode, only {@link BeanDefinitionRegistryPostProcessor} and
 	 * {@link MergedBeanDefinitionPostProcessor} are invoked.
+	 * @param runtimeHints the runtime hints
 	 * @throws BeansException if the bean factory could not be initialized
 	 * @throws IllegalStateException if already initialized and multiple refresh
 	 * attempts are not supported
 	 * @since 6.0
 	 */
-	public void refreshForAotProcessing() {
+	public void refreshForAotProcessing(RuntimeHints runtimeHints) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Preparing bean factory for AOT processing");
 		}
@@ -406,8 +408,36 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 		prepareBeanFactory(this.beanFactory);
 		postProcessBeanFactory(this.beanFactory);
 		invokeBeanFactoryPostProcessors(this.beanFactory);
+		this.beanFactory.freezeConfiguration();
 		PostProcessorRegistrationDelegate.invokeMergedBeanDefinitionPostProcessors(this.beanFactory);
+		preDetermineBeanTypes(runtimeHints);
 	}
+
+	/**
+	 * Pre-determine bean types in order to trigger early proxy class creation.
+	 * @see org.springframework.beans.factory.BeanFactory#getType
+	 * @see SmartInstantiationAwareBeanPostProcessor#determineBeanType
+	 */
+	private void preDetermineBeanTypes(RuntimeHints runtimeHints) {
+		List<SmartInstantiationAwareBeanPostProcessor> bpps =
+				PostProcessorRegistrationDelegate.loadBeanPostProcessors(
+						this.beanFactory, SmartInstantiationAwareBeanPostProcessor.class);
+
+		for (String beanName : this.beanFactory.getBeanDefinitionNames()) {
+			Class<?> beanType = this.beanFactory.getType(beanName);
+			if (beanType != null) {
+				ClassHintUtils.registerProxyIfNecessary(beanType, runtimeHints);
+				for (SmartInstantiationAwareBeanPostProcessor bpp : bpps) {
+					Class<?> newBeanType = bpp.determineBeanType(beanType, beanName);
+					if (newBeanType != beanType) {
+						ClassHintUtils.registerProxyIfNecessary(newBeanType, runtimeHints);
+						beanType = newBeanType;
+					}
+				}
+			}
+		}
+	}
+
 
 	//---------------------------------------------------------------------
 	// Convenient methods for registering individual beans
@@ -528,7 +558,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
 
 	/**
-	 * {@link RootBeanDefinition} marker subclass for {@code #registerBean} based
+	 * {@link RootBeanDefinition} subclass for {@code #registerBean} based
 	 * registrations with flexible autowiring for public constructors.
 	 */
 	@SuppressWarnings("serial")

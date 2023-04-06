@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -40,9 +39,11 @@ import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 
 /**
  * Base class for SockJS client implementations of {@link WebSocketSession}.
- * Provides processing of incoming SockJS message frames and delegates lifecycle
+ *
+ * <p>Provides processing of incoming SockJS message frames and delegates lifecycle
  * events and messages to the (application) {@link WebSocketHandler}.
- * Sub-classes implement actual send as well as disconnect logic.
+ *
+ * <p>Subclasses implement actual send as well as disconnect logic.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -70,9 +71,9 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	 * Create a new {@code AbstractClientSockJsSession}.
 	 * @deprecated as of 6.0, in favor of {@link #AbstractClientSockJsSession(TransportRequest, WebSocketHandler, CompletableFuture)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	protected AbstractClientSockJsSession(TransportRequest request, WebSocketHandler handler,
-			SettableListenableFuture<WebSocketSession> connectFuture) {
+			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
 		this(request, handler, connectFuture.completable());
 	}
 
@@ -154,14 +155,14 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 
 	@Override
 	public final void sendMessage(WebSocketMessage<?> message) throws IOException {
-		if (!(message instanceof TextMessage)) {
+		if (!(message instanceof TextMessage textMessage)) {
 			throw new IllegalArgumentException(this + " supports text messages only.");
 		}
 		if (this.state != State.OPEN) {
 			throw new IllegalStateException(this + " is not open: current state " + this.state);
 		}
 
-		String payload = ((TextMessage) message).getPayload();
+		String payload = textMessage.getPayload();
 		payload = getMessageCodec().encode(payload);
 		payload = payload.substring(1);  // the client-side doesn't need message framing (letter "a")
 
@@ -228,19 +229,14 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	public void handleFrame(String payload) {
 		SockJsFrame frame = new SockJsFrame(payload);
 		switch (frame.getType()) {
-			case OPEN:
-				handleOpenFrame();
-				break;
-			case HEARTBEAT:
+			case OPEN -> handleOpenFrame();
+			case HEARTBEAT -> {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Received heartbeat in " + this);
 				}
-				break;
-			case MESSAGE:
-				handleMessageFrame(frame);
-				break;
-			case CLOSE:
-				handleCloseFrame(frame);
+			}
+			case MESSAGE -> handleMessageFrame(frame);
+			case CLOSE -> handleCloseFrame(frame);
 		}
 	}
 

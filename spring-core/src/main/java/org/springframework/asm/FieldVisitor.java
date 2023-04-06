@@ -79,6 +79,15 @@ public abstract class FieldVisitor {
   }
 
   /**
+   * The field visitor to which this visitor must delegate method calls. May be {@literal null}.
+   *
+   * @return the field visitor to which this visitor must delegate method calls, or {@literal null}.
+   */
+  public FieldVisitor getDelegate() {
+    return fv;
+  }
+
+  /**
    * Visits an annotation of the field.
    *
    * @param descriptor the class descriptor of the annotation class.

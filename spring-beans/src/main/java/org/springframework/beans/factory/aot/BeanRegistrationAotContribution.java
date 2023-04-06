@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  * a single bean definition.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see BeanRegistrationAotProcessor
  */
@@ -43,6 +44,7 @@ public interface BeanRegistrationAotContribution {
 	 */
 	default BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
 			GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
+
 		return codeFragments;
 	}
 
@@ -51,35 +53,32 @@ public interface BeanRegistrationAotContribution {
 	 * @param generationContext the generation context
 	 * @param beanRegistrationCode the generated registration
 	 */
-	void applyTo(GenerationContext generationContext,
-			BeanRegistrationCode beanRegistrationCode);
+	void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode);
 
 	/**
-	 * Factory method that can be used to create a
-	 * {@link BeanRegistrationAotContribution} that applies the given
-	 * {@link BeanRegistrationCodeFragments} customizer.
-	 * @param beanRegistrationCodeFragmentsCustomizer the
-	 * {@link BeanRegistrationCodeFragments} customizer
+	 * Create a {@link BeanRegistrationAotContribution} that customizes
+	 * the {@link BeanRegistrationCodeFragments}. Typically used in
+	 * conjunction with an extension of {@link BeanRegistrationCodeFragmentsDecorator}
+	 * that overrides a specific callback.
+	 * @param defaultCodeFragments the default code fragments
 	 * @return a new {@link BeanRegistrationAotContribution} instance
-	 * @see #customizeBeanRegistrationCodeFragments(GenerationContext, BeanRegistrationCodeFragments)
+	 * @see BeanRegistrationCodeFragmentsDecorator
 	 */
-	static BeanRegistrationAotContribution ofBeanRegistrationCodeFragmentsCustomizer(
-			UnaryOperator<BeanRegistrationCodeFragments> beanRegistrationCodeFragmentsCustomizer) {
-		Assert.notNull(beanRegistrationCodeFragmentsCustomizer,
-				"BeanRegistrationCodeFragmentsCustomizer must not be null");
-		return new BeanRegistrationAotContribution() {
+	static BeanRegistrationAotContribution withCustomCodeFragments(
+			UnaryOperator<BeanRegistrationCodeFragments> defaultCodeFragments) {
 
+		Assert.notNull(defaultCodeFragments, "'defaultCodeFragments' must not be null");
+
+		return new BeanRegistrationAotContribution() {
 			@Override
 			public BeanRegistrationCodeFragments customizeBeanRegistrationCodeFragments(
 					GenerationContext generationContext, BeanRegistrationCodeFragments codeFragments) {
-				return beanRegistrationCodeFragmentsCustomizer.apply(codeFragments);
+				return defaultCodeFragments.apply(codeFragments);
 			}
-
 			@Override
 			public void applyTo(GenerationContext generationContext,
 					BeanRegistrationCode beanRegistrationCode) {
 			}
-
 		};
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -69,7 +68,7 @@ public class SyncInvocableHandlerMethod extends HandlerMethod {
 	public List<SyncHandlerMethodArgumentResolver> getResolvers() {
 		return this.delegate.getResolvers().stream()
 				.map(resolver -> (SyncHandlerMethodArgumentResolver) resolver)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 	/**

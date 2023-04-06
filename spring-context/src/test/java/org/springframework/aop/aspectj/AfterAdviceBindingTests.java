@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class AfterAdviceBindingTests {
 
 	private ClassPathXmlApplicationContext ctx;
 
-	private AdviceBindingCollaborator mockCollaborator;
+	private AdviceBindingCollaborator mockCollaborator = mock();
 
 	private ITestBean testBeanProxy;
 
@@ -60,7 +60,6 @@ class AfterAdviceBindingTests {
 		// we need the real target too, not just the proxy...
 		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
 
-		mockCollaborator = mock(AdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 	}
 

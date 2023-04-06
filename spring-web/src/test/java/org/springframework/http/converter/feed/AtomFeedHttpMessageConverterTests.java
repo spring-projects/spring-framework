@@ -33,8 +33,8 @@ import org.xmlunit.diff.NodeMatcher;
 
 import org.springframework.core.testfixture.xml.XmlContent;
 import org.springframework.http.MediaType;
-import org.springframework.http.MockHttpInputMessage;
-import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.web.testfixture.http.MockHttpInputMessage;
+import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,7 +78,7 @@ public class AtomFeedHttpMessageConverterTests {
 		assertThat(result.getTitle()).isEqualTo("title");
 		assertThat(result.getSubtitle().getValue()).isEqualTo("subtitle");
 		List<?> entries = result.getEntries();
-		assertThat(entries.size()).isEqualTo(2);
+		assertThat(entries).hasSize(2);
 
 		Entry entry1 = (Entry) entries.get(0);
 		assertThat(entry1.getId()).isEqualTo("id1");

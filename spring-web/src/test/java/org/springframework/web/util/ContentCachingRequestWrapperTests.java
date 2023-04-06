@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class ContentCachingRequestWrapperTests {
 		assertThat(wrapper.getParameterMap().isEmpty()).isFalse();
 		assertThat(new String(wrapper.getContentAsByteArray())).isEqualTo("first=value&second=foo&second=bar");
 		// SPR-12810 : inputstream body should be consumed
-		assertThat(new String(FileCopyUtils.copyToByteArray(wrapper.getInputStream()))).isEqualTo("");
+		assertThat(new String(FileCopyUtils.copyToByteArray(wrapper.getInputStream()))).isEmpty();
 	}
 
 	@Test  // SPR-12810

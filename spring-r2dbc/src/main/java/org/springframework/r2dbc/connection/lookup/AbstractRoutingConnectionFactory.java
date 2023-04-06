@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,11 +168,11 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	protected ConnectionFactory resolveSpecifiedConnectionFactory(Object connectionFactory)
 			throws IllegalArgumentException {
 
-		if (connectionFactory instanceof ConnectionFactory) {
-			return (ConnectionFactory) connectionFactory;
+		if (connectionFactory instanceof ConnectionFactory factory) {
+			return factory;
 		}
-		else if (connectionFactory instanceof String) {
-			return this.connectionFactoryLookup.getConnectionFactory((String) connectionFactory);
+		else if (connectionFactory instanceof String factoryName) {
+			return this.connectionFactoryLookup.getConnectionFactory(factoryName);
 		}
 		else {
 			throw new IllegalArgumentException("Illegal connection factory value - " +
@@ -200,7 +200,7 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 	 * in the {@link #setTargetConnectionFactories targetConnectionFactories} map,
 	 * falls back to the specified {@link #setDefaultTargetConnectionFactory default
 	 * target ConnectionFactory} if necessary.
-	 * @return {@link Mono} emitting the current {@link ConnectionFactory} as
+	 * @return {@link Mono} that emits the current {@link ConnectionFactory} as
 	 * per {@link #determineCurrentLookupKey()}
 	 * @see #determineCurrentLookupKey()
 	 */

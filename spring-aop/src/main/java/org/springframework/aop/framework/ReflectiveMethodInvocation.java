@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,8 +169,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
-			if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) {
-				return dm.interceptor.invoke(this);
+			if (dm.matcher().matches(this.method, targetClass, this.arguments)) {
+				return dm.interceptor().invoke(this);
 			}
 			else {
 				// Dynamic matching failed.

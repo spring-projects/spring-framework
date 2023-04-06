@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ import org.springframework.core.io.support.PropertySourceFactory;
  *
  * <h3>A note on property overriding with {@code @PropertySource}</h3>
  *
- * <p>In cases where a given property key exists in more than one {@code .properties}
+ * <p>In cases where a given property key exists in more than one property resource
  * file, the last {@code @PropertySource} annotation processed will 'win' and override
  * any previous key with the same name.
  *
@@ -182,14 +182,13 @@ public @interface PropertySource {
 	String name() default "";
 
 	/**
-	 * Indicate the resource location(s) of the properties file to be loaded.
-	 * <p>Both traditional and XML-based properties file formats are supported
-	 * &mdash; for example, {@code "classpath:/com/myco/app.properties"}
-	 * or {@code "file:/path/to/file.xml"}.
+	 * Indicate the resource locations of the properties files to be loaded.
+	 * <p>The default {@link #factory() factory} supports both traditional and
+	 * XML-based properties file formats &mdash; for example,
+	 * {@code "classpath:/com/myco/app.properties"} or {@code "file:/path/to/file.xml"}.
 	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted;
-	 * each location must evaluate to exactly one {@code .properties} or {@code .xml}
-	 * resource.
-	 * <p>${...} placeholders will be resolved against any/all property sources already
+	 * each location must evaluate to exactly one resource.
+	 * <p>${...} placeholders will be resolved against property sources already
 	 * registered with the {@code Environment}. See {@linkplain PropertySource above}
 	 * for examples.
 	 * <p>Each location will be added to the enclosing {@code Environment} as its own
@@ -214,7 +213,9 @@ public @interface PropertySource {
 
 	/**
 	 * Specify a custom {@link PropertySourceFactory}, if any.
-	 * <p>By default, a default factory for standard resource files will be used.
+	 * <p>By default, a default factory for standard resource files will be used
+	 * which supports {@code *.properties} and {@code *.xml} file formats for
+	 * {@link java.util.Properties}.
 	 * @since 4.3
 	 * @see org.springframework.core.io.support.DefaultPropertySourceFactory
 	 * @see org.springframework.core.io.support.ResourcePropertySource

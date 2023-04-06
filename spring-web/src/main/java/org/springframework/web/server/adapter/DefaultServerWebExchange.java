@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.server.adapter;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -62,7 +62,7 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public class DefaultServerWebExchange implements ServerWebExchange {
 
-	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
+	private static final Set<HttpMethod> SAFE_METHODS = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
 	private static final ResolvableType FORM_DATA_TYPE =
 			ResolvableType.forClassWithGenerics(MultiValueMap.class, String.class, String.class);
@@ -135,48 +135,68 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.applicationContext = applicationContext;
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request,
 			ServerCodecConfigurer configurer, String logPrefix) {
 
-		try {
-			MediaType contentType = request.getHeaders().getContentType();
-			if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
-				return ((HttpMessageReader<MultiValueMap<String, String>>) configurer.getReaders().stream()
-						.filter(reader -> reader.canRead(FORM_DATA_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
-						.findFirst()
-						.orElseThrow(() -> new IllegalStateException("No form data HttpMessageReader.")))
-						.readMono(FORM_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
-						.switchIfEmpty(EMPTY_FORM_DATA)
-						.cache();
-			}
+		MediaType contentType = getContentType(request);
+		if (contentType == null || !contentType.isCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED)) {
+			return EMPTY_FORM_DATA;
 		}
-		catch (InvalidMediaTypeException ex) {
-			// Ignore
+
+		HttpMessageReader<MultiValueMap<String, String>> reader = getReader(configurer, contentType, FORM_DATA_TYPE);
+		if (reader == null) {
+			return Mono.error(new IllegalStateException("No HttpMessageReader for " + contentType));
 		}
-		return EMPTY_FORM_DATA;
+
+		return reader
+				.readMono(FORM_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+				.switchIfEmpty(EMPTY_FORM_DATA)
+				.cache();
 	}
 
-	@SuppressWarnings("unchecked")
 	private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
 			ServerCodecConfigurer configurer, String logPrefix) {
 
+		MediaType contentType = getContentType(request);
+		if (contentType == null || !contentType.getType().equalsIgnoreCase("multipart")) {
+			return EMPTY_MULTIPART_DATA;
+		}
+
+		HttpMessageReader<MultiValueMap<String, Part>> reader = getReader(configurer, contentType, MULTIPART_DATA_TYPE);
+		if (reader == null) {
+			return Mono.error(new IllegalStateException("No HttpMessageReader for " + contentType));
+		}
+
+		return reader
+				.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+				.switchIfEmpty(EMPTY_MULTIPART_DATA)
+				.cache();
+	}
+
+	@Nullable
+	private static MediaType getContentType(ServerHttpRequest request) {
+		MediaType contentType = null;
 		try {
-			MediaType contentType = request.getHeaders().getContentType();
-			if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
-				return ((HttpMessageReader<MultiValueMap<String, Part>>) configurer.getReaders().stream()
-						.filter(reader -> reader.canRead(MULTIPART_DATA_TYPE, MediaType.MULTIPART_FORM_DATA))
-						.findFirst()
-						.orElseThrow(() -> new IllegalStateException("No multipart HttpMessageReader.")))
-						.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
-						.switchIfEmpty(EMPTY_MULTIPART_DATA)
-						.cache();
-			}
+			contentType = request.getHeaders().getContentType();
 		}
 		catch (InvalidMediaTypeException ex) {
-			// Ignore
+			// ignore
 		}
-		return EMPTY_MULTIPART_DATA;
+		return contentType;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Nullable
+	private static <E> HttpMessageReader<E> getReader(
+			ServerCodecConfigurer configurer, MediaType contentType, ResolvableType targetType) {
+
+		HttpMessageReader<E> result = null;
+		for (HttpMessageReader<?> reader : configurer.getReaders()) {
+			if (reader.canRead(targetType, contentType)) {
+				result = (HttpMessageReader<E>) reader;
+			}
+		}
+		return result;
 	}
 
 
@@ -259,12 +279,12 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		// See https://datatracker.ietf.org/doc/html/rfc9110#section-13.2.2
 		// 1) If-Match
 		if (validateIfMatch(eTag)) {
-			updateResponseStateChanging();
+			updateResponseStateChanging(eTag, lastModified);
 			return this.notModified;
 		}
 		// 2) If-Unmodified-Since
 		else if (validateIfUnmodifiedSince(lastModified)) {
-			updateResponseStateChanging();
+			updateResponseStateChanging(eTag, lastModified);
 			return this.notModified;
 		}
 		// 3) If-None-Match
@@ -281,7 +301,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			if (SAFE_METHODS.contains(getRequest().getMethod())) {
 				return false;
 			}
-			if (CollectionUtils.isEmpty(getRequest().getHeaders().get(HttpHeaders.IF_MATCH))) {
+			if (CollectionUtils.isEmpty(getRequestHeaders().get(HttpHeaders.IF_MATCH))) {
 				return false;
 			}
 			this.notModified = matchRequestedETags(getRequestHeaders().getIfMatch(), eTag, false);
@@ -346,15 +366,18 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return first.equals(second);
 	}
 
-	private void updateResponseStateChanging() {
+	private void updateResponseStateChanging(@Nullable String eTag, Instant lastModified) {
 		if (this.notModified) {
 			getResponse().setStatusCode(HttpStatus.PRECONDITION_FAILED);
+		}
+		else {
+			addCachingResponseHeaders(eTag, lastModified);
 		}
 	}
 
 	private boolean validateIfNoneMatch(@Nullable String eTag) {
 		try {
-			if (CollectionUtils.isEmpty(getRequest().getHeaders().get(HttpHeaders.IF_NONE_MATCH))) {
+			if (CollectionUtils.isEmpty(getRequestHeaders().get(HttpHeaders.IF_NONE_MATCH))) {
 				return false;
 			}
 			this.notModified = !matchRequestedETags(getRequestHeaders().getIfNoneMatch(), eTag, true);
@@ -371,7 +394,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 			getResponse().setStatusCode(isSafeMethod ?
 					HttpStatus.NOT_MODIFIED : HttpStatus.PRECONDITION_FAILED);
 		}
-		if (isSafeMethod) {
+		addCachingResponseHeaders(eTag, lastModified);
+	}
+
+	private void addCachingResponseHeaders(@Nullable String eTag, Instant lastModified) {
+		if (SAFE_METHODS.contains(getRequest().getMethod())) {
 			if (lastModified.isAfter(Instant.EPOCH) && getResponseHeaders().getLastModified() == -1) {
 				getResponseHeaders().setLastModified(lastModified.toEpochMilli());
 			}
@@ -394,17 +421,15 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		return true;
 	}
 
-	private boolean validateIfModifiedSince(Instant lastModified) {
+	private void validateIfModifiedSince(Instant lastModified) {
 		if (lastModified.isBefore(Instant.EPOCH)) {
-			return false;
+			return;
 		}
 		long ifModifiedSince = getRequestHeaders().getIfModifiedSince();
-		if (ifModifiedSince == -1) {
-			return false;
+		if (ifModifiedSince != -1) {
+			// We will perform this validation...
+			this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
 		}
-		// We will perform this validation...
-		this.notModified = ChronoUnit.SECONDS.between(lastModified, Instant.ofEpochMilli(ifModifiedSince)) >= 0;
-		return true;
 	}
 
 	@Override

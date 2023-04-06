@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,7 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public Method getMethod() {
-		return (this.executable instanceof Method ? (Method) this.executable : null);
+		return (this.executable instanceof Method method ? method : null);
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class MethodParameter {
 	 */
 	@Nullable
 	public Constructor<?> getConstructor() {
-		return (this.executable instanceof Constructor ? (Constructor<?>) this.executable : null);
+		return (this.executable instanceof Constructor<?> constructor ? constructor : null);
 	}
 
 	/**

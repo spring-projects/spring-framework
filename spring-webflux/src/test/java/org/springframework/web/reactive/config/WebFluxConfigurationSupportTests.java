@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,7 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_PROTOBUF;
 import static org.springframework.http.MediaType.APPLICATION_XML;
 import static org.springframework.http.MediaType.IMAGE_PNG;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
@@ -130,7 +131,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(mapping).isNotNull();
 
 		Map<RequestMappingInfo, HandlerMethod> map = mapping.getHandlerMethods();
-		assertThat(map.size()).isEqualTo(1);
+		assertThat(map).hasSize(1);
 		assertThat(map.keySet().iterator().next().getPatternsCondition().getPatterns())
 				.isEqualTo(Collections.singleton(new PathPatternParser().parse("/api/user/{id}")));
 	}
@@ -144,7 +145,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(adapter).isNotNull();
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
-		assertThat(readers.size()).isEqualTo(15);
+		assertThat(readers).hasSize(17);
 
 		ResolvableType multiValueMapType = forClassWithGenerics(MultiValueMap.class, String.class, String.class);
 
@@ -152,7 +153,7 @@ public class WebFluxConfigurationSupportTests {
 		assertHasMessageReader(readers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageReader(readers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageReader(readers, forClass(Resource.class), IMAGE_PNG);
-		assertHasMessageReader(readers, forClass(Message.class), new MediaType("application", "x-protobuf"));
+		assertHasMessageReader(readers, forClass(Message.class), APPLICATION_PROTOBUF);
 		assertHasMessageReader(readers, multiValueMapType, APPLICATION_FORM_URLENCODED);
 		assertHasMessageReader(readers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageReader(readers, forClass(TestBean.class), APPLICATION_JSON);
@@ -182,7 +183,7 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(adapter).isNotNull();
 
 		List<HttpMessageReader<?>> messageReaders = adapter.getMessageReaders();
-		assertThat(messageReaders.size()).isEqualTo(2);
+		assertThat(messageReaders).hasSize(2);
 
 		assertHasMessageReader(messageReaders, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageReader(messageReaders, forClass(TestBean.class), APPLICATION_XML);
@@ -199,13 +200,13 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(0);
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertThat(writers.size()).isEqualTo(13);
+		assertThat(writers).hasSize(17);
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageWriter(writers, forClass(Resource.class), IMAGE_PNG);
-		assertHasMessageWriter(writers, forClass(Message.class), new MediaType("application", "x-protobuf"));
+		assertHasMessageWriter(writers, forClass(Message.class), APPLICATION_PROTOBUF);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_JSON);
 		assertHasMessageWriter(writers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
@@ -227,13 +228,13 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(100);
 
 		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
-		assertThat(writers.size()).isEqualTo(13);
+		assertThat(writers).hasSize(17);
 
 		assertHasMessageWriter(writers, forClass(byte[].class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(ByteBuffer.class), APPLICATION_OCTET_STREAM);
 		assertHasMessageWriter(writers, forClass(String.class), TEXT_PLAIN);
 		assertHasMessageWriter(writers, forClass(Resource.class), IMAGE_PNG);
-		assertHasMessageWriter(writers, forClass(Message.class), new MediaType("application", "x-protobuf"));
+		assertHasMessageWriter(writers, forClass(Message.class), APPLICATION_PROTOBUF);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_XML);
 		assertHasMessageWriter(writers, forClass(TestBean.class), APPLICATION_JSON);
 		assertHasMessageWriter(writers, forClass(TestBean.class), new MediaType("application", "x-jackson-smile"));
@@ -255,11 +256,11 @@ public class WebFluxConfigurationSupportTests {
 		assertThat(handler.getOrder()).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 
 		List<ViewResolver> resolvers = handler.getViewResolvers();
-		assertThat(resolvers.size()).isEqualTo(1);
+		assertThat(resolvers).hasSize(1);
 		assertThat(resolvers.get(0).getClass()).isEqualTo(FreeMarkerViewResolver.class);
 
 		List<View> views = handler.getDefaultViews();
-		assertThat(views.size()).isEqualTo(1);
+		assertThat(views).hasSize(1);
 
 		MimeType type = MimeTypeUtils.parseMimeType("application/json");
 		assertThat(views.get(0).getSupportedMediaTypes().get(0)).isEqualTo(type);
@@ -332,7 +333,7 @@ public class WebFluxConfigurationSupportTests {
 
 		@GetMapping("/{id}")
 		public Principal getUser() {
-			return mock(Principal.class);
+			return mock();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class BeanDefinitionTests {
 		otherBd.setScope("request");
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
-		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
@@ -66,7 +66,7 @@ public class BeanDefinitionTests {
 		otherBd.getPropertyValues().add("age", "99");
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
-		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class BeanDefinitionTests {
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5);
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
-		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class BeanDefinitionTests {
 		otherBd.getConstructorArgumentValues().addIndexedArgumentValue(1, 5, "long");
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
-		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
@@ -132,17 +132,17 @@ public class BeanDefinitionTests {
 		otherBd.setParentName("parent");
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
-		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 
 		bd.getPropertyValues();
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
-		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 
 		bd.getConstructorArgumentValues();
 		assertThat(bd.equals(otherBd)).isTrue();
 		assertThat(otherBd.equals(bd)).isTrue();
-		assertThat(bd.hashCode() == otherBd.hashCode()).isTrue();
+		assertThat(bd.hashCode()).isEqualTo(otherBd.hashCode());
 	}
 
 	@Test
@@ -163,7 +163,7 @@ public class BeanDefinitionTests {
 		BeanDefinitionHolder otherHolder = new BeanDefinitionHolder(bd, "bd");
 		assertThat(holder.equals(otherHolder)).isTrue();
 		assertThat(otherHolder.equals(holder)).isTrue();
-		assertThat(holder.hashCode() == otherHolder.hashCode()).isTrue();
+		assertThat(holder.hashCode()).isEqualTo(otherHolder.hashCode());
 	}
 
 	@Test
@@ -181,7 +181,7 @@ public class BeanDefinitionTests {
 		RootBeanDefinition mergedBd = new RootBeanDefinition(bd);
 		mergedBd.overrideFrom(childBd);
 		assertThat(mergedBd.getConstructorArgumentValues().getArgumentCount()).isEqualTo(2);
-		assertThat(mergedBd.getPropertyValues().size()).isEqualTo(2);
+		assertThat(mergedBd.getPropertyValues()).hasSize(2);
 		assertThat(mergedBd).isEqualTo(bd);
 
 		mergedBd.getConstructorArgumentValues().getArgumentValue(1, null).setValue(9);

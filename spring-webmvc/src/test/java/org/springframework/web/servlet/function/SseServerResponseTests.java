@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,12 +109,15 @@ class SseServerResponseTests {
 		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
 		assertThat(mav).isNull();
 
-		String expected = "id:id\n" +
-				"event:name\n" +
-				":comment line 1\n" +
-				":comment line 2\n" +
-				"retry:1000\n" +
-				"data:data\n\n";
+		String expected = """
+				id:id
+				event:name
+				:comment line 1
+				:comment line 2
+				retry:1000
+				data:data
+
+				""";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 

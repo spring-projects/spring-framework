@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.util.StringUtils;
  * @author Costin Leau
  * @author Stephane Nicoll
  * @author Sam Brannen
+ * @author Sebastien Deleuze
  * @since 2.0
  * @see AbstractBeanFactory
  * @see org.springframework.beans.factory.DisposableBean
@@ -200,12 +201,15 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				((DisposableBean) this.bean).destroy();
 			}
 			catch (Throwable ex) {
-				String msg = "Invocation of destroy method failed on bean with name '" + this.beanName + "'";
-				if (logger.isDebugEnabled()) {
-					logger.warn(msg, ex);
-				}
-				else {
-					logger.warn(msg + ": " + ex);
+				if (logger.isWarnEnabled()) {
+					String msg = "Invocation of destroy method failed on bean with name '" + this.beanName + "'";
+					if (logger.isDebugEnabled()) {
+						// Log at warn level like below but add the exception stacktrace only with debug level
+						logger.warn(msg, ex);
+					}
+					else {
+						logger.warn(msg + ": " + ex);
+					}
 				}
 			}
 		}
@@ -218,12 +222,15 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				((AutoCloseable) this.bean).close();
 			}
 			catch (Throwable ex) {
-				String msg = "Invocation of close method failed on bean with name '" + this.beanName + "'";
-				if (logger.isDebugEnabled()) {
-					logger.warn(msg, ex);
-				}
-				else {
-					logger.warn(msg + ": " + ex);
+				if (logger.isWarnEnabled()) {
+					String msg = "Invocation of close method failed on bean with name '" + this.beanName + "'";
+					if (logger.isDebugEnabled()) {
+						// Log at warn level like below but add the exception stacktrace only with debug level
+						logger.warn(msg, ex);
+					}
+					else {
+						logger.warn(msg + ": " + ex);
+					}
 				}
 			}
 		}
@@ -247,7 +254,18 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	@Nullable
 	private Method determineDestroyMethod(String name) {
 		try {
-			return findDestroyMethod(name);
+			Class<?> beanClass = this.bean.getClass();
+			Method destroyMethod = findDestroyMethod(beanClass, name);
+			if (destroyMethod != null) {
+				return destroyMethod;
+			}
+			for (Class<?> beanInterface : beanClass.getInterfaces()) {
+				destroyMethod = findDestroyMethod(beanInterface, name);
+				if (destroyMethod != null) {
+					return destroyMethod;
+				}
+			}
+			return null;
 		}
 		catch (IllegalArgumentException ex) {
 			throw new BeanDefinitionValidationException("Could not find unique destroy method on bean with name '" +
@@ -256,10 +274,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	}
 
 	@Nullable
-	private Method findDestroyMethod(String name) {
+	private Method findDestroyMethod(Class<?> clazz, String name) {
 		return (this.nonPublicAccessAllowed ?
-				BeanUtils.findMethodWithMinimalParameters(this.bean.getClass(), name) :
-				BeanUtils.findMethodWithMinimalParameters(this.bean.getClass().getMethods(), name));
+				BeanUtils.findMethodWithMinimalParameters(clazz, name) :
+				BeanUtils.findMethodWithMinimalParameters(clazz.getMethods(), name));
 	}
 
 	/**
@@ -283,18 +301,23 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			destroyMethod.invoke(this.bean, args);
 		}
 		catch (InvocationTargetException ex) {
-			String msg = "Custom destroy method '" + destroyMethod.getName() + "' on bean with name '" +
-					this.beanName + "' threw an exception";
-			if (logger.isDebugEnabled()) {
-				logger.warn(msg, ex.getTargetException());
-			}
-			else {
-				logger.warn(msg + ": " + ex.getTargetException());
+			if (logger.isWarnEnabled()) {
+				String msg = "Custom destroy method '" + destroyMethod.getName() + "' on bean with name '" +
+						this.beanName + "' threw an exception";
+				if (logger.isDebugEnabled()) {
+					// Log at warn level like below but add the exception stacktrace only with debug level
+					logger.warn(msg, ex.getTargetException());
+				}
+				else {
+					logger.warn(msg + ": " + ex.getTargetException());
+				}
 			}
 		}
 		catch (Throwable ex) {
-			logger.warn("Failed to invoke custom destroy method '" + destroyMethod.getName() +
-					"' on bean with name '" + this.beanName + "'", ex);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Failed to invoke custom destroy method '" + destroyMethod.getName() +
+						"' on bean with name '" + this.beanName + "'", ex);
+			}
 		}
 	}
 
@@ -325,8 +348,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param beanDefinition the corresponding bean definition
 	 */
 	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
-		return (bean instanceof DisposableBean
-				|| inferDestroyMethodsIfNecessary(bean.getClass(), beanDefinition) != null);
+		return (bean instanceof DisposableBean ||
+				inferDestroyMethodsIfNecessary(bean.getClass(), beanDefinition) != null);
 	}
 
 

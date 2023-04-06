@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ public interface DataBufferFactory {
 	 * underlying implementation and its configuration, this will be heap-based
 	 * or direct buffer.
 	 * @return the allocated buffer
+	 * @deprecated as of 6.0, in favor of {@link #allocateBuffer(int)}
 	 */
+	@Deprecated(since = "6.0")
 	DataBuffer allocateBuffer();
 
 	/**
@@ -74,5 +76,15 @@ public interface DataBufferFactory {
 	 * @since 5.0.3
 	 */
 	DataBuffer join(List<? extends DataBuffer> dataBuffers);
+
+	/**
+	 * Indicates whether this factory allocates direct buffers (i.e. non-heap,
+	 * native memory).
+	 * @return {@code true} if this factory allocates direct buffers;
+	 * {@code false} otherwise
+	 * @since 6.0
+	 */
+	boolean isDirect();
+
 
 }

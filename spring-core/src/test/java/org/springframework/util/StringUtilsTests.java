@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.Locale;
 import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -70,11 +72,11 @@ class StringUtilsTests {
 	@Deprecated
 	void trimWhitespace() {
 		assertThat(StringUtils.trimWhitespace(null)).isNull();
-		assertThat(StringUtils.trimWhitespace("")).isEqualTo("");
-		assertThat(StringUtils.trimWhitespace(" ")).isEqualTo("");
-		assertThat(StringUtils.trimWhitespace("\t")).isEqualTo("");
-		assertThat(StringUtils.trimWhitespace("\n")).isEqualTo("");
-		assertThat(StringUtils.trimWhitespace(" \t\n")).isEqualTo("");
+		assertThat(StringUtils.trimWhitespace("")).isEmpty();
+		assertThat(StringUtils.trimWhitespace(" ")).isEmpty();
+		assertThat(StringUtils.trimWhitespace("\t")).isEmpty();
+		assertThat(StringUtils.trimWhitespace("\n")).isEmpty();
+		assertThat(StringUtils.trimWhitespace(" \t\n")).isEmpty();
 		assertThat(StringUtils.trimWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimWhitespace(" a ")).isEqualTo("a");
@@ -85,11 +87,11 @@ class StringUtilsTests {
 	@Test
 	void trimAllWhitespace() {
 		assertThat(StringUtils.trimAllWhitespace(null)).isNull();
-		assertThat(StringUtils.trimAllWhitespace("")).isEqualTo("");
-		assertThat(StringUtils.trimAllWhitespace(" ")).isEqualTo("");
-		assertThat(StringUtils.trimAllWhitespace("\t")).isEqualTo("");
-		assertThat(StringUtils.trimAllWhitespace("\n")).isEqualTo("");
-		assertThat(StringUtils.trimAllWhitespace(" \t\n")).isEqualTo("");
+		assertThat(StringUtils.trimAllWhitespace("")).isEmpty();
+		assertThat(StringUtils.trimAllWhitespace(" ")).isEmpty();
+		assertThat(StringUtils.trimAllWhitespace("\t")).isEmpty();
+		assertThat(StringUtils.trimAllWhitespace("\n")).isEmpty();
+		assertThat(StringUtils.trimAllWhitespace(" \t\n")).isEmpty();
 		assertThat(StringUtils.trimAllWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimAllWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimAllWhitespace(" a ")).isEqualTo("a");
@@ -98,14 +100,14 @@ class StringUtilsTests {
 	}
 
 	@Test
-	@Deprecated
+	@SuppressWarnings("deprecation")
 	void trimLeadingWhitespace() {
 		assertThat(StringUtils.trimLeadingWhitespace(null)).isNull();
-		assertThat(StringUtils.trimLeadingWhitespace("")).isEqualTo("");
-		assertThat(StringUtils.trimLeadingWhitespace(" ")).isEqualTo("");
-		assertThat(StringUtils.trimLeadingWhitespace("\t")).isEqualTo("");
-		assertThat(StringUtils.trimLeadingWhitespace("\n")).isEqualTo("");
-		assertThat(StringUtils.trimLeadingWhitespace(" \t\n")).isEqualTo("");
+		assertThat(StringUtils.trimLeadingWhitespace("")).isEmpty();
+		assertThat(StringUtils.trimLeadingWhitespace(" ")).isEmpty();
+		assertThat(StringUtils.trimLeadingWhitespace("\t")).isEmpty();
+		assertThat(StringUtils.trimLeadingWhitespace("\n")).isEmpty();
+		assertThat(StringUtils.trimLeadingWhitespace(" \t\n")).isEmpty();
 		assertThat(StringUtils.trimLeadingWhitespace(" a")).isEqualTo("a");
 		assertThat(StringUtils.trimLeadingWhitespace("a ")).isEqualTo("a ");
 		assertThat(StringUtils.trimLeadingWhitespace(" a ")).isEqualTo("a ");
@@ -114,14 +116,14 @@ class StringUtilsTests {
 	}
 
 	@Test
-	@Deprecated
+	@SuppressWarnings("deprecation")
 	void trimTrailingWhitespace() {
 		assertThat(StringUtils.trimTrailingWhitespace(null)).isNull();
-		assertThat(StringUtils.trimTrailingWhitespace("")).isEqualTo("");
-		assertThat(StringUtils.trimTrailingWhitespace(" ")).isEqualTo("");
-		assertThat(StringUtils.trimTrailingWhitespace("\t")).isEqualTo("");
-		assertThat(StringUtils.trimTrailingWhitespace("\n")).isEqualTo("");
-		assertThat(StringUtils.trimTrailingWhitespace(" \t\n")).isEqualTo("");
+		assertThat(StringUtils.trimTrailingWhitespace("")).isEmpty();
+		assertThat(StringUtils.trimTrailingWhitespace(" ")).isEmpty();
+		assertThat(StringUtils.trimTrailingWhitespace("\t")).isEmpty();
+		assertThat(StringUtils.trimTrailingWhitespace("\n")).isEmpty();
+		assertThat(StringUtils.trimTrailingWhitespace(" \t\n")).isEmpty();
 		assertThat(StringUtils.trimTrailingWhitespace("a ")).isEqualTo("a");
 		assertThat(StringUtils.trimTrailingWhitespace(" a")).isEqualTo(" a");
 		assertThat(StringUtils.trimTrailingWhitespace(" a ")).isEqualTo(" a");
@@ -132,8 +134,8 @@ class StringUtilsTests {
 	@Test
 	void trimLeadingCharacter() {
 		assertThat(StringUtils.trimLeadingCharacter(null, ' ')).isNull();
-		assertThat(StringUtils.trimLeadingCharacter("", ' ')).isEqualTo("");
-		assertThat(StringUtils.trimLeadingCharacter(" ", ' ')).isEqualTo("");
+		assertThat(StringUtils.trimLeadingCharacter("", ' ')).isEmpty();
+		assertThat(StringUtils.trimLeadingCharacter(" ", ' ')).isEmpty();
 		assertThat(StringUtils.trimLeadingCharacter("\t", ' ')).isEqualTo("\t");
 		assertThat(StringUtils.trimLeadingCharacter(" a", ' ')).isEqualTo("a");
 		assertThat(StringUtils.trimLeadingCharacter("a ", ' ')).isEqualTo("a ");
@@ -145,8 +147,8 @@ class StringUtilsTests {
 	@Test
 	void trimTrailingCharacter() {
 		assertThat(StringUtils.trimTrailingCharacter(null, ' ')).isNull();
-		assertThat(StringUtils.trimTrailingCharacter("", ' ')).isEqualTo("");
-		assertThat(StringUtils.trimTrailingCharacter(" ", ' ')).isEqualTo("");
+		assertThat(StringUtils.trimTrailingCharacter("", ' ')).isEmpty();
+		assertThat(StringUtils.trimTrailingCharacter(" ", ' ')).isEmpty();
 		assertThat(StringUtils.trimTrailingCharacter("\t", ' ')).isEqualTo("\t");
 		assertThat(StringUtils.trimTrailingCharacter("a ", ' ')).isEqualTo("a");
 		assertThat(StringUtils.trimTrailingCharacter(" a", ' ')).isEqualTo(" a");
@@ -219,19 +221,19 @@ class StringUtilsTests {
 
 	@Test
 	void countOccurrencesOf() {
-		assertThat(StringUtils.countOccurrencesOf(null, null) == 0).as("nullx2 = 0").isTrue();
-		assertThat(StringUtils.countOccurrencesOf("s", null) == 0).as("null string = 0").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(null, "s") == 0).as("null substring = 0").isTrue();
+		assertThat(StringUtils.countOccurrencesOf(null, null)).as("nullx2 = 0").isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOf("s", null)).as("null string = 0").isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOf(null, "s")).as("null substring = 0").isEqualTo(0);
 		String s = "erowoiueoiur";
-		assertThat(StringUtils.countOccurrencesOf(s, "WERWER") == 0).as("not found = 0").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(s, "x") == 0).as("not found char = 0").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(s, " ") == 0).as("not found ws = 0").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(s, "") == 0).as("not found empty string = 0").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(s, "e") == 2).as("found char=2").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(s, "oi") == 2).as("found substring=2").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(s, "oiu") == 2).as("found substring=2").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(s, "oiur") == 1).as("found substring=3").isTrue();
-		assertThat(StringUtils.countOccurrencesOf(s, "r") == 2).as("test last").isTrue();
+		assertThat(StringUtils.countOccurrencesOf(s, "WERWER")).as("not found = 0").isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOf(s, "x")).as("not found char = 0").isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOf(s, " ")).as("not found ws = 0").isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOf(s, "")).as("not found empty string = 0").isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOf(s, "e")).as("found char=2").isEqualTo(2);
+		assertThat(StringUtils.countOccurrencesOf(s, "oi")).as("found substring=2").isEqualTo(2);
+		assertThat(StringUtils.countOccurrencesOf(s, "oiu")).as("found substring=2").isEqualTo(2);
+		assertThat(StringUtils.countOccurrencesOf(s, "oiur")).as("found substring=3").isEqualTo(1);
+		assertThat(StringUtils.countOccurrencesOf(s, "r")).as("test last").isEqualTo(2);
 	}
 
 	@Test
@@ -242,7 +244,7 @@ class StringUtilsTests {
 
 		// Simple replace
 		String s = StringUtils.replace(inString, oldPattern, newPattern);
-		assertThat(s.equals("a6AazAfoo77abfoo")).as("Replace 1 worked").isTrue();
+		assertThat(s).as("Replace 1 worked").isEqualTo("a6AazAfoo77abfoo");
 
 		// Non match: no change
 		s = StringUtils.replace(inString, "qwoeiruqopwieurpoqwieur", newPattern);
@@ -262,22 +264,23 @@ class StringUtilsTests {
 		String inString = "The quick brown fox jumped over the lazy dog";
 
 		String noThe = StringUtils.delete(inString, "the");
-		assertThat(noThe.equals("The quick brown fox jumped over  lazy dog")).as("Result has no the [" + noThe + "]").isTrue();
+		assertThat(noThe).as("Result has no the [" + noThe + "]")
+				.isEqualTo("The quick brown fox jumped over  lazy dog");
 
 		String nohe = StringUtils.delete(inString, "he");
-		assertThat(nohe.equals("T quick brown fox jumped over t lazy dog")).as("Result has no he [" + nohe + "]").isTrue();
+		assertThat(nohe).as("Result has no he [" + nohe + "]").isEqualTo("T quick brown fox jumped over t lazy dog");
 
 		String nosp = StringUtils.delete(inString, " ");
-		assertThat(nosp.equals("Thequickbrownfoxjumpedoverthelazydog")).as("Result has no spaces").isTrue();
+		assertThat(nosp).as("Result has no spaces").isEqualTo("Thequickbrownfoxjumpedoverthelazydog");
 
 		String killEnd = StringUtils.delete(inString, "dog");
-		assertThat(killEnd.equals("The quick brown fox jumped over the lazy ")).as("Result has no dog").isTrue();
+		assertThat(killEnd).as("Result has no dog").isEqualTo("The quick brown fox jumped over the lazy ");
 
 		String mismatch = StringUtils.delete(inString, "dxxcxcxog");
-		assertThat(mismatch.equals(inString)).as("Result is unchanged").isTrue();
+		assertThat(mismatch).as("Result is unchanged").isEqualTo(inString);
 
 		String nochange = StringUtils.delete(inString, "");
-		assertThat(nochange.equals(inString)).as("Result is unchanged").isTrue();
+		assertThat(nochange).as("Result is unchanged").isEqualTo(inString);
 	}
 
 	@Test
@@ -344,7 +347,7 @@ class StringUtilsTests {
 	@Test
 	void getFilename() {
 		assertThat(StringUtils.getFilename(null)).isNull();
-		assertThat(StringUtils.getFilename("")).isEqualTo("");
+		assertThat(StringUtils.getFilename("")).isEmpty();
 		assertThat(StringUtils.getFilename("myfile")).isEqualTo("myfile");
 		assertThat(StringUtils.getFilename("mypath/myfile")).isEqualTo("myfile");
 		assertThat(StringUtils.getFilename("myfile.")).isEqualTo("myfile.");
@@ -360,8 +363,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.getFilenameExtension("myfile")).isNull();
 		assertThat(StringUtils.getFilenameExtension("myPath/myfile")).isNull();
 		assertThat(StringUtils.getFilenameExtension("/home/user/.m2/settings/myfile")).isNull();
-		assertThat(StringUtils.getFilenameExtension("myfile.")).isEqualTo("");
-		assertThat(StringUtils.getFilenameExtension("myPath/myfile.")).isEqualTo("");
+		assertThat(StringUtils.getFilenameExtension("myfile.")).isEmpty();
+		assertThat(StringUtils.getFilenameExtension("myPath/myfile.")).isEmpty();
 		assertThat(StringUtils.getFilenameExtension("myfile.txt")).isEqualTo("txt");
 		assertThat(StringUtils.getFilenameExtension("mypath/myfile.txt")).isEqualTo("txt");
 		assertThat(StringUtils.getFilenameExtension("/home/user/.m2/settings/myfile.txt")).isEqualTo("txt");
@@ -369,7 +372,7 @@ class StringUtilsTests {
 
 	@Test
 	void stripFilenameExtension() {
-		assertThat(StringUtils.stripFilenameExtension("")).isEqualTo("");
+		assertThat(StringUtils.stripFilenameExtension("")).isEmpty();
 		assertThat(StringUtils.stripFilenameExtension("myfile")).isEqualTo("myfile");
 		assertThat(StringUtils.stripFilenameExtension("myfile.")).isEqualTo("myfile");
 		assertThat(StringUtils.stripFilenameExtension("myfile.txt")).isEqualTo("myfile");
@@ -394,8 +397,8 @@ class StringUtilsTests {
 		assertThat(StringUtils.cleanPath("/a/:b/../../mypath/myfile")).isEqualTo("/mypath/myfile");
 		assertThat(StringUtils.cleanPath("/")).isEqualTo("/");
 		assertThat(StringUtils.cleanPath("/mypath/../")).isEqualTo("/");
-		assertThat(StringUtils.cleanPath("mypath/..")).isEqualTo("");
-		assertThat(StringUtils.cleanPath("mypath/../.")).isEqualTo("");
+		assertThat(StringUtils.cleanPath("mypath/..")).isEmpty();
+		assertThat(StringUtils.cleanPath("mypath/../.")).isEmpty();
 		assertThat(StringUtils.cleanPath("mypath/../")).isEqualTo("./");
 		assertThat(StringUtils.cleanPath("././")).isEqualTo("./");
 		assertThat(StringUtils.cleanPath("./")).isEqualTo("./");
@@ -441,7 +444,7 @@ class StringUtilsTests {
 		String[] input1 = new String[] {"myString2"};
 		String[] input2 = new String[] {"myString1", "myString2"};
 		String[] result = StringUtils.concatenateStringArrays(input1, input2);
-		assertThat(result.length).isEqualTo(3);
+		assertThat(result).hasSize(3);
 		assertThat(result[0]).isEqualTo("myString2");
 		assertThat(result[1]).isEqualTo("myString1");
 		assertThat(result[2]).isEqualTo("myString2");
@@ -490,42 +493,42 @@ class StringUtilsTests {
 	@Test
 	void tokenizeToStringArray() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",");
-		assertThat(sa.length).isEqualTo(3);
+		assertThat(sa).hasSize(3);
 		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].equals("c")).as("components are correct").isTrue();
 	}
 
 	@Test
 	void tokenizeToStringArrayWithNotIgnoreEmptyTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b , ,c", ",", true, false);
-		assertThat(sa.length).isEqualTo(4);
+		assertThat(sa).hasSize(4);
 		assertThat(sa[0].equals("a") && sa[1].equals("b") && sa[2].isEmpty() && sa[3].equals("c")).as("components are correct").isTrue();
 	}
 
 	@Test
 	void tokenizeToStringArrayWithNotTrimTokens() {
 		String[] sa = StringUtils.tokenizeToStringArray("a,b ,c", ",", false, true);
-		assertThat(sa.length).isEqualTo(3);
+		assertThat(sa).hasSize(3);
 		assertThat(sa[0].equals("a") && sa[1].equals("b ") && sa[2].equals("c")).as("components are correct").isTrue();
 	}
 
 	@Test
 	void commaDelimitedListToStringArrayWithNullProducesEmptyArray() {
 		String[] sa = StringUtils.commaDelimitedListToStringArray(null);
-		assertThat(sa != null).as("String array isn't null with null input").isTrue();
-		assertThat(sa.length == 0).as("String array length == 0 with null input").isTrue();
+		assertThat(sa).as("String array isn't null with null input").isNotNull();
+		assertThat(sa.length).as("String array length == 0 with null input").isEqualTo(0);
 	}
 
 	@Test
 	void commaDelimitedListToStringArrayWithEmptyStringProducesEmptyArray() {
 		String[] sa = StringUtils.commaDelimitedListToStringArray("");
-		assertThat(sa != null).as("String array isn't null with null input").isTrue();
-		assertThat(sa.length == 0).as("String array length == 0 with null input").isTrue();
+		assertThat(sa).as("String array isn't null with null input").isNotNull();
+		assertThat(sa.length).as("String array length == 0 with null input").isEqualTo(0);
 	}
 
 	@Test
 	void delimitedListToStringArrayWithComma() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", ",");
-		assertThat(sa.length).isEqualTo(2);
+		assertThat(sa).hasSize(2);
 		assertThat(sa[0]).isEqualTo("a");
 		assertThat(sa[1]).isEqualTo("b");
 	}
@@ -533,7 +536,7 @@ class StringUtilsTests {
 	@Test
 	void delimitedListToStringArrayWithSemicolon() {
 		String[] sa = StringUtils.delimitedListToStringArray("a;b", ";");
-		assertThat(sa.length).isEqualTo(2);
+		assertThat(sa).hasSize(2);
 		assertThat(sa[0]).isEqualTo("a");
 		assertThat(sa[1]).isEqualTo("b");
 	}
@@ -541,7 +544,7 @@ class StringUtilsTests {
 	@Test
 	void delimitedListToStringArrayWithEmptyDelimiter() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", "");
-		assertThat(sa.length).isEqualTo(3);
+		assertThat(sa).hasSize(3);
 		assertThat(sa[0]).isEqualTo("a");
 		assertThat(sa[1]).isEqualTo(",");
 		assertThat(sa[2]).isEqualTo("b");
@@ -550,7 +553,7 @@ class StringUtilsTests {
 	@Test
 	void delimitedListToStringArrayWithNullDelimiter() {
 		String[] sa = StringUtils.delimitedListToStringArray("a,b", null);
-		assertThat(sa.length).isEqualTo(1);
+		assertThat(sa).hasSize(1);
 		assertThat(sa[0]).isEqualTo("a,b");
 	}
 
@@ -582,8 +585,8 @@ class StringUtilsTests {
 		// Could read these from files
 		String s = "woeirqupoiewuropqiewuorpqiwueopriquwopeiurqopwieur";
 		String[] sa = StringUtils.commaDelimitedListToStringArray(s);
-		assertThat(sa.length == 1).as("Found one String with no delimiters").isTrue();
-		assertThat(sa[0].equals(s)).as("Single array entry matches input String with no delimiters").isTrue();
+		assertThat(sa.length).as("Found one String with no delimiters").isEqualTo(1);
+		assertThat(sa[0]).as("Single array entry matches input String with no delimiters").isEqualTo(s);
 	}
 
 	@Test
@@ -610,7 +613,7 @@ class StringUtilsTests {
 	private void doTestCommaDelimitedListToStringArrayLegalMatch(String[] components) {
 		String sb = String.join(String.valueOf(','), components);
 		String[] sa = StringUtils.commaDelimitedListToStringArray(sb);
-		assertThat(sa != null).as("String array isn't null with legal match").isTrue();
+		assertThat(sa).as("String array isn't null with legal match").isNotNull();
 		assertThat(sa.length).as("String array length is correct with legal match").isEqualTo(components.length);
 		assertThat(Arrays.equals(sa, components)).as("Output equals input").isTrue();
 	}
@@ -622,12 +625,6 @@ class StringUtilsTests {
 		Locale locale = StringUtils.parseLocaleString(expectedLocale.toString());
 		assertThat(locale).as("When given a bona-fide Locale string, must not return null.").isNotNull();
 		assertThat(locale).isEqualTo(expectedLocale);
-	}
-
-	@Test
-	void parseLocaleStringWithMalformedLocaleString() {
-		Locale locale = StringUtils.parseLocaleString("_banjo_on_my_knee");
-		assertThat(locale).as("When given a malformed Locale string, must not return null.").isNotNull();
 	}
 
 	@Test
@@ -668,22 +665,6 @@ class StringUtilsTests {
 		assertThat(locale.getVariant()).as("Multi-valued variant portion of the Locale not extracted correctly.").isEqualTo(variant);
 	}
 
-	@Test  // SPR-3671
-	void parseLocaleWithMultiValuedVariantUsingSpacesAsSeparatorsWithLotsOfLeadingWhitespace() {
-		String variant = "proper northern";
-		String localeString = "en GB            " + variant;  // lots of whitespace
-		Locale locale = StringUtils.parseLocaleString(localeString);
-		assertThat(locale.getVariant()).as("Multi-valued variant portion of the Locale not extracted correctly.").isEqualTo(variant);
-	}
-
-	@Test  // SPR-3671
-	void parseLocaleWithMultiValuedVariantUsingUnderscoresAsSeparatorsWithLotsOfLeadingWhitespace() {
-		String variant = "proper_northern";
-		String localeString = "en_GB_____" + variant;  // lots of underscores
-		Locale locale = StringUtils.parseLocaleString(localeString);
-		assertThat(locale.getVariant()).as("Multi-valued variant portion of the Locale not extracted correctly.").isEqualTo(variant);
-	}
-
 	@Test  // SPR-7779
 	void parseLocaleWithInvalidCharacters() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
@@ -714,7 +695,7 @@ class StringUtilsTests {
 		for (Locale locale : Locale.getAvailableLocales()) {
 			Locale parsedLocale = StringUtils.parseLocaleString(locale.toString());
 			if (parsedLocale == null) {
-				assertThat(locale.getLanguage()).isEqualTo("");
+				assertThat(locale.getLanguage()).isEmpty();
 			}
 			else {
 				assertThat(locale.toString()).isEqualTo(parsedLocale.toString());
@@ -727,7 +708,7 @@ class StringUtilsTests {
 		for (Locale locale : Locale.getAvailableLocales()) {
 			Locale parsedLocale = StringUtils.parseLocale(locale.toLanguageTag());
 			if (parsedLocale == null) {
-				assertThat(locale.getLanguage()).isEqualTo("");
+				assertThat(locale.getLanguage()).isEmpty();
 			}
 			else {
 				assertThat(locale.toLanguageTag()).isEqualTo(parsedLocale.toLanguageTag());
@@ -752,6 +733,11 @@ class StringUtilsTests {
 	}
 
 	@Test
+	void parseLocaleStringWithEmptyCountryAndVariant() {
+		assertThat(StringUtils.parseLocale("be__TARASK").toString()).isEqualTo("be__TARASK");
+	}
+
+	@Test
 	void split() {
 		assertThat(StringUtils.split("Hello, world", ",")).containsExactly("Hello", " world");
 		assertThat(StringUtils.split(",Hello world", ",")).containsExactly("", "Hello world");
@@ -771,6 +757,29 @@ class StringUtilsTests {
 	@Test
 	void collectionToDelimitedStringWithNullValuesShouldNotFail() {
 		assertThat(StringUtils.collectionToCommaDelimitedString(Collections.singletonList(null))).isEqualTo("null");
+	}
+
+	@Test
+	void truncatePreconditions() {
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> StringUtils.truncate("foo", 0))
+				.withMessage("Truncation threshold must be a positive number: 0");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> StringUtils.truncate("foo", -99))
+				.withMessage("Truncation threshold must be a positive number: -99");
+	}
+
+	@ParameterizedTest
+	@CsvSource(delimiterString = "-->", textBlock = """
+			''                  --> ''
+			aardvark            --> aardvark
+			aardvark12          --> aardvark12
+			aardvark123         --> aardvark12 (truncated)...
+			aardvark, bird, cat --> aardvark,  (truncated)...
+			"""
+	)
+	void truncate(String text, String truncated) {
+		assertThat(StringUtils.truncate(text, 10)).isEqualTo(truncated);
 	}
 
 }

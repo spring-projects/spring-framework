@@ -33,8 +33,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
@@ -149,7 +147,9 @@ class DefaultTransportRequest implements TransportRequest {
 
 
 	@Deprecated
-	public void connect(WebSocketHandler handler, SettableListenableFuture<WebSocketSession> future) {
+	public void connect(WebSocketHandler handler,
+			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future) {
+
 		if (logger.isTraceEnabled()) {
 			logger.trace("Starting " + this);
 		}
@@ -208,15 +208,17 @@ class DefaultTransportRequest implements TransportRequest {
 	 * callback.
 	 */
 	@SuppressWarnings("deprecation")
-	private class ListenableConnectCallback implements ListenableFutureCallback<WebSocketSession>, Runnable {
+	private class ListenableConnectCallback implements
+			org.springframework.util.concurrent.ListenableFutureCallback<WebSocketSession>, Runnable {
 
 		private final WebSocketHandler handler;
 
-		private final SettableListenableFuture<WebSocketSession> future;
+		private final org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future;
 
 		private final AtomicBoolean handled = new AtomicBoolean();
 
-		public ListenableConnectCallback(WebSocketHandler handler, SettableListenableFuture<WebSocketSession> future) {
+		public ListenableConnectCallback(WebSocketHandler handler,
+				org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> future) {
 			this.handler = handler;
 			this.future = future;
 		}

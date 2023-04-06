@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
  * Abstract base class for {@link org.springframework.web.servlet.HandlerMapping}
- * implementations. Supports ordering, a default handler, handler interceptors,
+ * implementations. Supports ordering, a default handler, and handler interceptors,
  * including handler interceptors mapped by path patterns.
  *
  * <p>Note: This base class does <i>not</i> support exposure of the
@@ -181,7 +181,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see org.springframework.web.util.UrlPathHelper#setAlwaysUseFullPath(boolean)
 	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
@@ -196,7 +196,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see org.springframework.web.util.UrlPathHelper#setUrlDecode(boolean)
 	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
@@ -211,7 +211,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
 	 * @deprecated as of 6.0, in favor of using {@link #setUrlPathHelper(UrlPathHelper)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
 		if (this.corsConfigurationSource instanceof UrlBasedCorsConfigurationSource urlConfigSource) {
@@ -275,6 +275,34 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public void setInterceptors(Object... interceptors) {
 		this.interceptors.addAll(Arrays.asList(interceptors));
+	}
+
+	/**
+	 * Return all configured interceptors adapted to {@link HandlerInterceptor}.
+	 * @return the array of configured interceptors, or {@code null} if none
+	 * are configured; this method also returns {@code null} if called too early,
+	 * or more specifically before
+	 * {@link org.springframework.context.ApplicationContextAware#setApplicationContext}.
+	 */
+	@Nullable
+	public final HandlerInterceptor[] getAdaptedInterceptors() {
+		return (!this.adaptedInterceptors.isEmpty() ?
+				this.adaptedInterceptors.toArray(new HandlerInterceptor[0]) : null);
+	}
+
+	/**
+	 * Return all configured {@link MappedInterceptor}s as an array.
+	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
+	 */
+	@Nullable
+	protected final MappedInterceptor[] getMappedInterceptors() {
+		List<MappedInterceptor> mappedInterceptors = new ArrayList<>(this.adaptedInterceptors.size());
+		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
+			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
+				mappedInterceptors.add(mappedInterceptor);
+			}
+		}
+		return (!mappedInterceptors.isEmpty() ? mappedInterceptors.toArray(new MappedInterceptor[0]) : null);
 	}
 
 	/**
@@ -454,33 +482,6 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			throw new IllegalArgumentException("Interceptor type not supported: " + interceptor.getClass().getName());
 		}
 	}
-
-	/**
-	 * Return the adapted interceptors as {@link HandlerInterceptor} array.
-	 * @return the array of {@link HandlerInterceptor HandlerInterceptor}s,
-	 * or {@code null} if none
-	 */
-	@Nullable
-	protected final HandlerInterceptor[] getAdaptedInterceptors() {
-		return (!this.adaptedInterceptors.isEmpty() ?
-				this.adaptedInterceptors.toArray(new HandlerInterceptor[0]) : null);
-	}
-
-	/**
-	 * Return all configured {@link MappedInterceptor}s as an array.
-	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
-	 */
-	@Nullable
-	protected final MappedInterceptor[] getMappedInterceptors() {
-		List<MappedInterceptor> mappedInterceptors = new ArrayList<>(this.adaptedInterceptors.size());
-		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
-			if (interceptor instanceof MappedInterceptor mappedInterceptor) {
-				mappedInterceptors.add(mappedInterceptor);
-			}
-		}
-		return (!mappedInterceptors.isEmpty() ? mappedInterceptors.toArray(new MappedInterceptor[0]) : null);
-	}
-
 
 	/**
 	 * Return "true" if this {@code HandlerMapping} has been

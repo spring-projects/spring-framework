@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,8 +250,8 @@ public class CheckboxTag extends AbstractSingleCheckedElementTag {
 
 		if (Boolean.class == valueType || boolean.class == valueType) {
 			// the concrete type may not be a Boolean - can be String
-			if (boundValue instanceof String) {
-				boundValue = Boolean.valueOf((String) boundValue);
+			if (boundValue instanceof String string) {
+				boundValue = Boolean.valueOf(string);
 			}
 			Boolean booleanValue = (boundValue != null ? (Boolean) boundValue : Boolean.FALSE);
 			renderFromBoolean(booleanValue, tagWriter);

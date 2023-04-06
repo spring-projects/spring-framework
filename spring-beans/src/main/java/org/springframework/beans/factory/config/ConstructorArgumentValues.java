@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,7 +188,7 @@ public class ConstructorArgumentValues {
 	 * rather than matched multiple times.
 	 * @param value the argument value
 	 */
-	public void addGenericArgumentValue(Object value) {
+	public void addGenericArgumentValue(@Nullable Object value) {
 		this.genericArgumentValues.add(new ValueHolder(value));
 	}
 
@@ -358,6 +358,25 @@ public class ConstructorArgumentValues {
 			valueHolder = getGenericArgumentValue(requiredType, requiredName, usedValueHolders);
 		}
 		return valueHolder;
+	}
+
+	/**
+	 * Determine whether at least one argument value refers to a name.
+	 * @since 6.0.3
+	 * @see ValueHolder#getName()
+	 */
+	public boolean containsNamedArgument() {
+		for (ValueHolder valueHolder : this.indexedArgumentValues.values()) {
+			if (valueHolder.getName() != null) {
+				return true;
+			}
+		}
+		for (ValueHolder valueHolder : this.genericArgumentValues) {
+			if (valueHolder.getName() != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

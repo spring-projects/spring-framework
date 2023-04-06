@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
 import org.springframework.lang.Nullable;
-
 
 /**
  * Instrumented version of JDK methods to be used by bytecode rewritten by the {@link RuntimeHintsAgent}.
@@ -316,7 +315,7 @@ public abstract class InstrumentedBridgeMethods {
 				.onInstance(constructor).withArguments(arguments);
 		try {
 			if (!Modifier.isPublic(constructor.getModifiers()) ||
-					!Modifier.isPublic(constructor.getDeclaringClass().getModifiers()) || !constructor.canAccess(null)) {
+					!Modifier.isPublic(constructor.getDeclaringClass().getModifiers())) {
 				constructor.setAccessible(true);
 				accessibilityChanged = true;
 			}
@@ -337,13 +336,22 @@ public abstract class InstrumentedBridgeMethods {
 
 	public static Object methodinvoke(Method method, Object object, Object... arguments) throws InvocationTargetException, IllegalAccessException {
 		Object result = null;
+		boolean accessibilityChanged = false;
 		try {
+			if (!Modifier.isPublic(method.getModifiers())
+				|| !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+				method.setAccessible(true);
+				accessibilityChanged = true;
+			}
 			result = method.invoke(object, arguments);
 		}
 		finally {
 			RecordedInvocation invocation = RecordedInvocation.of(InstrumentedMethod.METHOD_INVOKE)
 					.onInstance(method).withArguments(object, arguments).returnValue(result).build();
 			RecordedInvocationsPublisher.publish(invocation);
+			if (accessibilityChanged) {
+				method.setAccessible(false);
+			}
 		}
 		return result;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -433,7 +433,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 
 		AtomicBoolean beforeCompletionInvoked = new AtomicBoolean();
 
-		Mono<Object> commit = prepareForCommit(synchronizationManager, status)
+		Mono<Void> commit = prepareForCommit(synchronizationManager, status)
 				.then(triggerBeforeCommit(synchronizationManager, status))
 				.then(triggerBeforeCompletion(synchronizationManager, status))
 				.then(Mono.defer(() -> {
@@ -445,11 +445,12 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 						return doCommit(synchronizationManager, status);
 					}
 					return Mono.empty();
-				})).then(Mono.empty().onErrorResume(ex -> {
-					Mono<Object> propagateException = Mono.error(ex);
+				})) //
+				.onErrorResume(ex -> {
+					Mono<Void> propagateException = Mono.error(ex);
 					// Store result in a local variable in order to appease the
 					// Eclipse compiler with regard to inferred generics.
-					Mono<Object> result = propagateException;
+					Mono<Void> result = propagateException;
 					if (ErrorPredicates.UNEXPECTED_ROLLBACK.test(ex)) {
 						result = triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_ROLLED_BACK)
 								.then(propagateException);
@@ -471,7 +472,8 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 					}
 
 					return result;
-				})).then(Mono.defer(() -> triggerAfterCommit(synchronizationManager, status).onErrorResume(ex ->
+				})
+				.then(Mono.defer(() -> triggerAfterCommit(synchronizationManager, status).onErrorResume(ex ->
 						triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_COMMITTED).then(Mono.error(ex)))
 						.then(triggerAfterCompletion(synchronizationManager, status, TransactionSynchronization.STATUS_COMMITTED))));
 

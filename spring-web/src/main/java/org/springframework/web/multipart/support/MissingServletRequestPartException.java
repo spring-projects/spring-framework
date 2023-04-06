@@ -84,4 +84,9 @@ public class MissingServletRequestPartException extends ServletException impleme
 		return this.body;
 	}
 
+	@Override
+	public Object[] getDetailMessageArguments() {
+		return new Object[] {getRequestPartName()};
+	}
+
 }

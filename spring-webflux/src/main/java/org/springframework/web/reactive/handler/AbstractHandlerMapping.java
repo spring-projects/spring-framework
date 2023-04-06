@@ -98,7 +98,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * @deprecated as of 6.0, see
 	 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void setUseTrailingSlashMatch(boolean trailingSlashMatch) {
 		this.patternParser.setMatchOptionalTrailingSeparator(trailingSlashMatch);
 	}
@@ -233,8 +233,8 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 */
 	@Nullable
 	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
-		if (handler instanceof CorsConfigurationSource) {
-			return ((CorsConfigurationSource) handler).getCorsConfiguration(exchange);
+		if (handler instanceof CorsConfigurationSource ccs) {
+			return ccs.getCorsConfiguration(exchange);
 		}
 		return null;
 	}

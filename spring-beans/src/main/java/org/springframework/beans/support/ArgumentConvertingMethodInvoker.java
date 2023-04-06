@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,11 +98,11 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 */
 	public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		TypeConverter converter = getTypeConverter();
-		if (!(converter instanceof PropertyEditorRegistry)) {
+		if (!(converter instanceof PropertyEditorRegistry registry)) {
 			throw new IllegalStateException(
 					"TypeConverter does not implement PropertyEditorRegistry interface: " + converter);
 		}
-		((PropertyEditorRegistry) converter).registerCustomEditor(requiredType, propertyEditor);
+		registry.registerCustomEditor(requiredType, propertyEditor);
 	}
 
 
@@ -111,6 +111,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * @see #doFindMatchingMethod
 	 */
 	@Override
+	@Nullable
 	protected Method findMatchingMethod() {
 		Method matchingMethod = super.findMatchingMethod();
 		// Second pass: look for method where arguments can be converted to parameter types.

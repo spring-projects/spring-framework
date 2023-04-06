@@ -36,10 +36,8 @@ import jakarta.websocket.Extension;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.WebSocketContainer;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -53,7 +51,7 @@ import org.springframework.web.socket.adapter.standard.WebSocketToStandardExtens
 import org.springframework.web.socket.client.AbstractWebSocketClient;
 
 /**
- * A WebSocketClient based on standard Java WebSocket API.
+ * A WebSocketClient based on the standard Jakarta WebSocket API.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -90,7 +88,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 
 	/**
-	 * The standard Java WebSocket API allows passing "user properties" to the
+	 * The standard Jakarta WebSocket API allows passing "user properties" to the
 	 * server via {@link ClientEndpointConfig#getUserProperties() userProperties}.
 	 * Use this property to configure one or more properties to be passed on
 	 * every handshake.
@@ -109,8 +107,8 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	}
 
 	/**
-	 * Set an {@link AsyncListenableTaskExecutor} to use when opening connections.
-	 * If this property is set to {@code null}, calls to any of the
+	 * Set an {@link AsyncTaskExecutor} to use when opening connections.
+	 * <p>If this property is set to {@code null}, calls to any of the
 	 * {@code doHandshake} methods will block until the connection is established.
 	 * <p>By default, an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
@@ -119,7 +117,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 	}
 
 	/**
-	 * Return the configured {@link TaskExecutor}.
+	 * Return the configured {@link AsyncTaskExecutor}.
 	 */
 	@Nullable
 	public AsyncTaskExecutor getTaskExecutor() {

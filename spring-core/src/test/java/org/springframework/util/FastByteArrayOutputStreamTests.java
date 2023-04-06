@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class FastByteArrayOutputStreamTests {
 	@Test
 	void size() throws Exception {
 		this.os.write(this.helloBytes);
-		assertThat(this.helloBytes.length).isEqualTo(this.os.size());
+		assertThat(this.helloBytes).hasSize(this.os.size());
 	}
 
 	@Test
@@ -123,7 +123,7 @@ class FastByteArrayOutputStreamTests {
 	@Test
 	void getInputStreamAvailable() throws Exception {
 		this.os.write(this.helloBytes);
-		assertThat(this.helloBytes.length).isEqualTo(this.os.getInputStream().available());
+		assertThat(this.helloBytes).hasSize(this.os.getInputStream().available());
 	}
 
 	@Test

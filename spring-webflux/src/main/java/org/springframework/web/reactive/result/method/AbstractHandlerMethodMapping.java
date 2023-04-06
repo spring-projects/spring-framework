@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,9 +107,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	public Map<T, HandlerMethod> getHandlerMethods() {
 		this.mappingRegistry.acquireReadLock();
 		try {
-			return Collections.unmodifiableMap(
-					this.mappingRegistry.getRegistrations().entrySet().stream()
-							.collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().handlerMethod)));
+			return this.mappingRegistry.getRegistrations().entrySet().stream()
+					.collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().handlerMethod));
 		}
 		finally {
 			this.mappingRegistry.releaseReadLock();

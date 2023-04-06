@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * A hint that describes resources that should be made available at runtime.
  *
- * <p>The patterns may be a simple path which has a one-to-one mapping to a
+ * <p>Each pattern may be a simple path which has a one-to-one mapping to a
  * resource on the classpath, or alternatively may contain the special
- * {@code *} character to indicate a wildcard search. For example:
+ * {@code *} character to indicate a wildcard match. For example:
  * <ul>
  *     <li>{@code file.properties}: matches just the {@code file.properties}
  *         file at the root of the classpath.</li>
@@ -42,9 +43,13 @@ import org.springframework.lang.Nullable;
  *         and its child directories at any depth.</li>
  * </ul>
  *
+ * <p>A resource pattern must not start with a slash ({@code /}) unless it is the
+ * root directory.
+ *
  * @author Stephane Nicoll
  * @author Brian Clozel
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 6.0
  */
 public final class ResourcePatternHint implements ConditionalHint {
@@ -54,10 +59,15 @@ public final class ResourcePatternHint implements ConditionalHint {
 	@Nullable
 	private final TypeReference reachableType;
 
+
 	ResourcePatternHint(String pattern, @Nullable TypeReference reachableType) {
+		Assert.isTrue(("/".equals(pattern) || !pattern.startsWith("/")),
+				() -> "Resource pattern [%s] must not start with a '/' unless it is the root directory"
+						.formatted(pattern));
 		this.pattern = pattern;
 		this.reachableType = reachableType;
 	}
+
 
 	/**
 	 * Return the pattern to use for identifying the resources to match.
@@ -88,7 +98,7 @@ public final class ResourcePatternHint implements ConditionalHint {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -104,4 +114,5 @@ public final class ResourcePatternHint implements ConditionalHint {
 	public int hashCode() {
 		return Objects.hash(this.pattern, this.reachableType);
 	}
+
 }

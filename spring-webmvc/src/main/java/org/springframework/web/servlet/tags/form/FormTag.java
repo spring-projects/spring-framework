@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -652,8 +652,8 @@ public class FormTag extends AbstractHtmlElementTag {
 				// shouldn't happen - if it does, proceed with requestUri as-is
 			}
 			ServletResponse response = this.pageContext.getResponse();
-			if (response instanceof HttpServletResponse) {
-				requestUri = ((HttpServletResponse) response).encodeURL(requestUri);
+			if (response instanceof HttpServletResponse httpServletResponse) {
+				requestUri = httpServletResponse.encodeURL(requestUri);
 				String queryString = getRequestContext().getQueryString();
 				if (StringUtils.hasText(queryString)) {
 					requestUri += "?" + HtmlUtils.htmlEscape(queryString);
@@ -676,8 +676,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	private String processAction(String action) {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if (processor != null && request instanceof HttpServletRequest) {
-			action = processor.processAction((HttpServletRequest) request, action, getHttpMethod());
+		if (processor != null && request instanceof HttpServletRequest httpServletRequest) {
+			action = processor.processAction(httpServletRequest, action, getHttpMethod());
 		}
 		return action;
 	}
@@ -690,8 +690,8 @@ public class FormTag extends AbstractHtmlElementTag {
 	public int doEndTag() throws JspException {
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
-		if (processor != null && request instanceof HttpServletRequest) {
-			writeHiddenFields(processor.getExtraHiddenFields((HttpServletRequest) request));
+		if (processor != null && request instanceof HttpServletRequest httpServletRequest) {
+			writeHiddenFields(processor.getExtraHiddenFields(httpServletRequest));
 		}
 		Assert.state(this.tagWriter != null, "No TagWriter set");
 		this.tagWriter.endTag();

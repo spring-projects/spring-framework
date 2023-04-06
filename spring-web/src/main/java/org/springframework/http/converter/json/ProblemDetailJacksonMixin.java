@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import org.springframework.http.ProblemDetail;
+import org.springframework.lang.Nullable;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 
@@ -32,7 +33,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
  * the Jackson library.
  *
  * <p>The annotations ensure the {@link ProblemDetail#getProperties() properties}
- * map is unwrapped and rendered as top level JSON properties, and likewise that
+ * map is unwrapped and rendered as top-level JSON properties, and likewise that
  * the {@code properties} map contains unknown properties from the JSON.
  *
  * <p>{@link Jackson2ObjectMapperBuilder} automatically registers this as a
@@ -46,7 +47,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 public interface ProblemDetailJacksonMixin {
 
 	@JsonAnySetter
-	void setProperty(String name, Object value);
+	void setProperty(String name, @Nullable Object value);
 
 	@JsonAnyGetter
 	Map<String, Object> getProperties();

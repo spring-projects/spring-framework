@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	protected final ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
-		HandlerMethod handlerMethod = (handler instanceof HandlerMethod ? (HandlerMethod) handler : null);
+		HandlerMethod handlerMethod = (handler instanceof HandlerMethod hm ? hm : null);
 		return doResolveHandlerMethodException(request, response, handlerMethod, ex);
 	}
 

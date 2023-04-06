@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 public abstract class AbstractExpressionTests {
 
-	private static final boolean DEBUG = false;
+	protected static final boolean DEBUG = false;
 
 	protected static final boolean SHOULD_BE_WRITABLE = true;
 
@@ -177,7 +177,7 @@ public abstract class AbstractExpressionTests {
 			assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
 			if (!ObjectUtils.isEmpty(otherProperties)) {
 				// first one is expected position of the error within the string
-				int pos = ((Integer) otherProperties[0]).intValue();
+				int pos = (Integer) otherProperties[0];
 				assertThat(ex.getPosition()).as("position").isEqualTo(pos);
 				if (otherProperties.length > 1) {
 					// Check inserts match
@@ -202,13 +202,15 @@ public abstract class AbstractExpressionTests {
 	protected void parseAndCheckError(String expression, SpelMessage expectedMessage, Object... otherProperties) {
 		assertThatExceptionOfType(SpelParseException.class).isThrownBy(() -> {
 			Expression expr = parser.parseExpression(expression);
-			SpelUtilities.printAbstractSyntaxTree(System.out, expr);
+			if (DEBUG) {
+				SpelUtilities.printAbstractSyntaxTree(System.out, expr);
+			}
 		}).satisfies(ex -> {
 			assertThat(ex.getMessageCode()).isEqualTo(expectedMessage);
 			if (otherProperties != null && otherProperties.length != 0) {
 				// first one is expected position of the error within the string
-				int pos = ((Integer) otherProperties[0]).intValue();
-				assertThat(pos).as("reported position").isEqualTo(pos);
+				int pos = (Integer) otherProperties[0];
+				assertThat(ex.getPosition()).as("reported position").isEqualTo(pos);
 				if (otherProperties.length > 1) {
 					// Check inserts match
 					Object[] inserts = ex.getInserts();

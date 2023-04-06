@@ -85,7 +85,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 * @param nullsLow whether to treat nulls lower or higher than non-null objects
 	 */
 	public NullSafeComparator(Comparator<T> comparator, boolean nullsLow) {
-		Assert.notNull(comparator, "Non-null Comparator is required");
+		Assert.notNull(comparator, "Comparator must not be null");
 		this.nonNullComparator = comparator;
 		this.nullsLow = nullsLow;
 	}

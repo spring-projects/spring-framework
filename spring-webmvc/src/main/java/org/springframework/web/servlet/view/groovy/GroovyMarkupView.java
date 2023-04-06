@@ -46,7 +46,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * @since 4.1
  * @see GroovyMarkupViewResolver
  * @see GroovyMarkupConfigurer
- * @see <a href="http://groovy-lang.org/templating.html#_the_markuptemplateengine">
+ * @see <a href="https://groovy-lang.org/templating.html#_the_markuptemplateengine">
  * Groovy Markup Template engine documentation</a>
  */
 public class GroovyMarkupView extends AbstractTemplateView {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.Aware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.context.ApplicationContextAware;
@@ -47,6 +48,7 @@ import org.springframework.util.StringValueResolver;
  * @author Juergen Hoeller
  * @author Costin Leau
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 10.10.2003
  * @see org.springframework.context.EnvironmentAware
  * @see org.springframework.context.EmbeddedValueResolverAware
@@ -87,26 +89,28 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	}
 
 	private void invokeAwareInterfaces(Object bean) {
-		if (bean instanceof EnvironmentAware) {
-			((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
-		}
-		if (bean instanceof EmbeddedValueResolverAware) {
-			((EmbeddedValueResolverAware) bean).setEmbeddedValueResolver(this.embeddedValueResolver);
-		}
-		if (bean instanceof ResourceLoaderAware) {
-			((ResourceLoaderAware) bean).setResourceLoader(this.applicationContext);
-		}
-		if (bean instanceof ApplicationEventPublisherAware) {
-			((ApplicationEventPublisherAware) bean).setApplicationEventPublisher(this.applicationContext);
-		}
-		if (bean instanceof MessageSourceAware) {
-			((MessageSourceAware) bean).setMessageSource(this.applicationContext);
-		}
-		if (bean instanceof ApplicationStartupAware) {
-			((ApplicationStartupAware) bean).setApplicationStartup(this.applicationContext.getApplicationStartup());
-		}
-		if (bean instanceof ApplicationContextAware) {
-			((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);
+		if (bean instanceof Aware) {
+			if (bean instanceof EnvironmentAware environmentAware) {
+				environmentAware.setEnvironment(this.applicationContext.getEnvironment());
+			}
+			if (bean instanceof EmbeddedValueResolverAware embeddedValueResolverAware) {
+				embeddedValueResolverAware.setEmbeddedValueResolver(this.embeddedValueResolver);
+			}
+			if (bean instanceof ResourceLoaderAware resourceLoaderAware) {
+				resourceLoaderAware.setResourceLoader(this.applicationContext);
+			}
+			if (bean instanceof ApplicationEventPublisherAware applicationEventPublisherAware) {
+				applicationEventPublisherAware.setApplicationEventPublisher(this.applicationContext);
+			}
+			if (bean instanceof MessageSourceAware messageSourceAware) {
+				messageSourceAware.setMessageSource(this.applicationContext);
+			}
+			if (bean instanceof ApplicationStartupAware applicationStartupAware) {
+				applicationStartupAware.setApplicationStartup(this.applicationContext.getApplicationStartup());
+			}
+			if (bean instanceof ApplicationContextAware applicationContextAware) {
+				applicationContextAware.setApplicationContext(this.applicationContext);
+			}
 		}
 	}
 

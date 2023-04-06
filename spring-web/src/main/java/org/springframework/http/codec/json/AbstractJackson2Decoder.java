@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.ContextView;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -51,9 +52,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Abstract base class for Jackson 2.9 decoding, leveraging non-blocking parsing.
- *
- * <p>Compatible with Jackson 2.9.7 and higher.
+ * Abstract base class for Jackson 2.x decoding, leveraging non-blocking parsing.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -126,7 +125,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
 		if (mapper == null) {
-			throw new IllegalStateException("No ObjectMapper for " + elementType);
+			return Flux.error(new IllegalStateException("No ObjectMapper for " + elementType));
 		}
 
 		boolean forceUseOfBigDecimal = mapper.isEnabled(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
@@ -138,19 +137,25 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(processed, mapper.getFactory(), mapper,
 				true, forceUseOfBigDecimal, getMaxInMemorySize());
 
-		ObjectReader reader = getObjectReader(mapper, elementType, hints);
+		return Flux.deferContextual(contextView -> {
 
-		return tokens.handle((tokenBuffer, sink) -> {
-			try {
-				Object value = reader.readValue(tokenBuffer.asParser(mapper));
-				logValue(value, hints);
-				if (value != null) {
-					sink.next(value);
+			Map<String, Object> hintsToUse = contextView.isEmpty() ? hints :
+					Hints.merge(hints, ContextView.class.getName(), contextView);
+
+			ObjectReader reader = createObjectReader(mapper, elementType, hintsToUse);
+
+			return tokens.handle((tokenBuffer, sink) -> {
+				try {
+					Object value = reader.readValue(tokenBuffer.asParser(mapper));
+					logValue(value, hints);
+					if (value != null) {
+						sink.next(value);
+					}
 				}
-			}
-			catch (IOException ex) {
-				sink.error(processException(ex));
-			}
+				catch (IOException ex) {
+					sink.error(processException(ex));
+				}
+			});
 		});
 	}
 
@@ -166,7 +171,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	 * @since 5.1.14
 	 */
 	protected Flux<DataBuffer> processInput(Publisher<DataBuffer> input, ResolvableType elementType,
-				@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
+			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
 		return Flux.from(input);
 	}
@@ -175,8 +180,14 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> input, ResolvableType elementType,
 			@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {
 
-		return DataBufferUtils.join(input, this.maxInMemorySize)
-				.flatMap(dataBuffer -> Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hints)));
+		return Mono.deferContextual(contextView -> {
+
+			Map<String, Object> hintsToUse = contextView.isEmpty() ? hints :
+					Hints.merge(hints, ContextView.class.getName(), contextView);
+
+			return DataBufferUtils.join(input, this.maxInMemorySize).flatMap(dataBuffer ->
+					Mono.justOrEmpty(decode(dataBuffer, elementType, mimeType, hintsToUse)));
+		});
 	}
 
 	@Override
@@ -189,7 +200,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		}
 
 		try {
-			ObjectReader objectReader = getObjectReader(mapper, targetType, hints);
+			ObjectReader objectReader = createObjectReader(mapper, targetType, hints);
 			Object value = objectReader.readValue(dataBuffer.asInputStream());
 			logValue(value, hints);
 			return value;
@@ -202,7 +213,7 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		}
 	}
 
-	private ObjectReader getObjectReader(
+	private ObjectReader createObjectReader(
 			ObjectMapper mapper, ResolvableType elementType, @Nullable Map<String, Object> hints) {
 
 		Assert.notNull(elementType, "'elementType' must not be null");
@@ -212,9 +223,29 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 		}
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		Class<?> jsonView = (hints != null ? (Class<?>) hints.get(Jackson2CodecSupport.JSON_VIEW_HINT) : null);
-		return jsonView != null ?
+
+		ObjectReader objectReader = (jsonView != null ?
 				mapper.readerWithView(jsonView).forType(javaType) :
-				mapper.readerFor(javaType);
+				mapper.readerFor(javaType));
+
+		return customizeReader(objectReader, elementType, hints);
+	}
+
+	/**
+	 * Subclasses can use this method to customize {@link ObjectReader} used
+	 * for reading values.
+	 * @param reader the reader instance to customize
+	 * @param elementType the target type of element values to read to
+	 * @param hints a map with serialization hints;
+	 * the Reactor Context, when available, may be accessed under the key
+	 * {@code ContextView.class.getName()}
+	 * @return the customized {@code ObjectReader} to use
+	 * @since 6.0
+	 */
+	protected ObjectReader customizeReader(
+			ObjectReader reader, ResolvableType elementType, @Nullable Map<String, Object> hints) {
+
+		return reader;
 	}
 
 	@Nullable
@@ -233,12 +264,12 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 	}
 
 	private CodecException processException(IOException ex) {
-		if (ex instanceof InvalidDefinitionException) {
-			JavaType type = ((InvalidDefinitionException) ex).getType();
+		if (ex instanceof InvalidDefinitionException ide) {
+			JavaType type = ide.getType();
 			return new CodecException("Type definition error: " + type, ex);
 		}
-		if (ex instanceof JsonProcessingException) {
-			String originalMessage = ((JsonProcessingException) ex).getOriginalMessage();
+		if (ex instanceof JsonProcessingException jpe) {
+			String originalMessage = jpe.getOriginalMessage();
 			return new DecodingException("JSON decoding error: " + originalMessage, ex);
 		}
 		return new DecodingException("I/O error while parsing input stream", ex);

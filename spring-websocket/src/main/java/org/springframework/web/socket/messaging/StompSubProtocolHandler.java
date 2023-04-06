@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,11 +230,11 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		List<Message<byte[]>> messages;
 		try {
 			ByteBuffer byteBuffer;
-			if (webSocketMessage instanceof TextMessage) {
-				byteBuffer = ByteBuffer.wrap(((TextMessage) webSocketMessage).asBytes());
+			if (webSocketMessage instanceof TextMessage textMessage) {
+				byteBuffer = ByteBuffer.wrap(textMessage.asBytes());
 			}
-			else if (webSocketMessage instanceof BinaryMessage) {
-				byteBuffer = ((BinaryMessage) webSocketMessage).getPayload();
+			else if (webSocketMessage instanceof BinaryMessage binaryMessage) {
+				byteBuffer = binaryMessage.getPayload();
 			}
 			else {
 				return;
@@ -398,8 +398,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			return this.immutableMessageInterceptorPresent;
 		}
 
-		if (channel instanceof AbstractMessageChannel) {
-			for (ChannelInterceptor interceptor : ((AbstractMessageChannel) channel).getInterceptors()) {
+		if (channel instanceof AbstractMessageChannel abstractMessageChannel) {
+			for (ChannelInterceptor interceptor : abstractMessageChannel.getInterceptors()) {
 				if (interceptor instanceof ImmutableMessageChannelInterceptor) {
 					this.immutableMessageInterceptorPresent = true;
 					return true;
@@ -427,7 +427,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	@Override
 	@SuppressWarnings("unchecked")
 	public void handleMessageToClient(WebSocketSession session, Message<?> message) {
-		if (!(message.getPayload() instanceof byte[])) {
+		if (!(message.getPayload() instanceof byte[] payload)) {
 			if (logger.isErrorEnabled()) {
 				logger.error("Expected byte[] payload. Ignoring " + message + ".");
 			}
@@ -464,7 +464,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			}
 		}
 
-		byte[] payload = (byte[]) message.getPayload();
 		if (StompCommand.ERROR.equals(command) && getErrorHandler() != null) {
 			Message<byte[]> errorMessage = getErrorHandler().handleErrorMessageToClient((Message<byte[]>) message);
 			if (errorMessage != null) {
@@ -521,8 +520,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private StompHeaderAccessor getStompHeaderAccessor(Message<?> message) {
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-		if (accessor instanceof StompHeaderAccessor) {
-			return (StompHeaderAccessor) accessor;
+		if (accessor instanceof StompHeaderAccessor stompHeaderAccessor) {
+			return stompHeaderAccessor;
 		}
 		else {
 			StompHeaderAccessor stompAccessor = StompHeaderAccessor.wrap(message);
@@ -615,8 +614,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		long[] heartbeat = accessor.getHeartbeat();
 		if (heartbeat[1] > 0) {
 			session = WebSocketSessionDecorator.unwrap(session);
-			if (session instanceof SockJsSession) {
-				((SockJsSession) session).disableHeartbeat();
+			if (session instanceof SockJsSession sockJsSession) {
+				sockJsSession.disableHeartbeat();
 			}
 		}
 

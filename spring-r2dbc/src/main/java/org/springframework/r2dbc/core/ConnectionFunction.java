@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,33 +21,17 @@ import java.util.function.Function;
 import io.r2dbc.spi.Connection;
 
 /**
- * Union type combining {@link Function} and {@link SqlProvider} to expose the SQL that is
- * related to the underlying action.
+ * Union type combining {@link Function} and {@link SqlProvider} to expose the SQL
+ * that is related to the underlying action. The {@code SqlProvider} can support
+ * lazy / generate-once semantics, in which case {@link #getSql()} can be {@code null}
+ * until the {@code #apply(Connection)} method is invoked.
  *
  * @author Mark Paluch
+ * @author Simon Baslé
  * @since 5.3
  * @param <R> the type of the result of the function.
  */
-class ConnectionFunction<R> implements Function<Connection, R>, SqlProvider {
-
-	private final String sql;
-
-	private final Function<Connection, R> function;
-
-
-	ConnectionFunction(String sql, Function<Connection, R> function) {
-		this.sql = sql;
-		this.function = function;
-	}
-
-
-	@Override
-	public R apply(Connection t) {
-		return this.function.apply(t);
-	}
-
-	@Override
-	public String getSql() {
-		return this.sql;
-	}
+@SuppressWarnings("rawtypes")
+sealed interface ConnectionFunction<R> extends Function<Connection, R>, SqlProvider
+		permits DelegateConnectionFunction, ResultFunction {
 }

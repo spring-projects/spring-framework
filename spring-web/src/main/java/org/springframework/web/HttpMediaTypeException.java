@@ -23,6 +23,7 @@ import jakarta.servlet.ServletException;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract base for exceptions related to media types. Adds a list of supported {@link MediaType MediaTypes}.
@@ -37,23 +38,49 @@ public abstract class HttpMediaTypeException extends ServletException implements
 
 	private final ProblemDetail body = ProblemDetail.forStatus(getStatusCode());
 
+	private final String messageDetailCode;
+
+	@Nullable
+	private final Object[] messageDetailArguments;
+
 
 	/**
 	 * Create a new HttpMediaTypeException.
 	 * @param message the exception message
+	 * @deprecated as of 6.0
 	 */
+	@Deprecated
 	protected HttpMediaTypeException(String message) {
-		super(message);
-		this.supportedMediaTypes = Collections.emptyList();
+		this(message, Collections.emptyList());
 	}
 
 	/**
 	 * Create a new HttpMediaTypeException with a list of supported media types.
 	 * @param supportedMediaTypes the list of supported media types
+	 * @deprecated as of 6.0
 	 */
+	@Deprecated
 	protected HttpMediaTypeException(String message, List<MediaType> supportedMediaTypes) {
+		this(message, supportedMediaTypes, null, null);
+	}
+
+	/**
+	 * Create a new HttpMediaTypeException with a list of supported media types.
+	 * @param supportedMediaTypes the list of supported media types
+	 * @param messageDetailCode the code to use to resolve the problem "detail"
+	 * through a {@link org.springframework.context.MessageSource}
+	 * @param messageDetailArguments the arguments to make available when
+	 * resolving the problem "detail" through a {@code MessageSource}
+	 * @since 6.0
+	 */
+	protected HttpMediaTypeException(String message, List<MediaType> supportedMediaTypes,
+			@Nullable String messageDetailCode, @Nullable Object[] messageDetailArguments) {
+
 		super(message);
 		this.supportedMediaTypes = Collections.unmodifiableList(supportedMediaTypes);
+		this.messageDetailCode = (messageDetailCode != null ?
+				messageDetailCode : ErrorResponse.getDefaultDetailMessageCode(getClass(), null));
+		this.messageDetailArguments = messageDetailArguments;
 	}
 
 
@@ -67,6 +94,16 @@ public abstract class HttpMediaTypeException extends ServletException implements
 	@Override
 	public ProblemDetail getBody() {
 		return this.body;
+	}
+
+	@Override
+	public String getDetailMessageCode() {
+		return this.messageDetailCode;
+	}
+
+	@Override
+	public Object[] getDetailMessageArguments() {
+		return this.messageDetailArguments;
 	}
 
 }

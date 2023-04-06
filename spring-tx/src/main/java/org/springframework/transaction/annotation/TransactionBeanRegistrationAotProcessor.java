@@ -20,7 +20,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -35,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * AOT {@code BeanRegistrationAotProcessor} that detects the presence of
  * {@link Transactional @Transactional} on annotated elements and creates
- * the required proxy and reflection hints.
+ * the required reflection hints.
  *
  * @author Sebastien Deleuze
  * @since 6.0
@@ -44,6 +43,7 @@ import org.springframework.util.ReflectionUtils;
 class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProcessor {
 
 	private final static String JAKARTA_TRANSACTIONAL_CLASS_NAME = "jakarta.transaction.Transactional";
+
 
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
@@ -68,6 +68,7 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 		});
 	}
 
+
 	private static class TransactionBeanRegistrationAotContribution implements BeanRegistrationAotContribution {
 
 		private final Class<?> beanClass;
@@ -84,9 +85,8 @@ class TransactionBeanRegistrationAotProcessor implements BeanRegistrationAotProc
 				return;
 			}
 			for (Class<?> proxyInterface : proxyInterfaces) {
-				runtimeHints.reflection().registerType(proxyInterface, builder -> builder.withMembers(MemberCategory.INVOKE_DECLARED_METHODS));
+				runtimeHints.reflection().registerType(proxyInterface, MemberCategory.INVOKE_DECLARED_METHODS);
 			}
-			runtimeHints.proxies().registerJdkProxy(AopProxyUtils.completeJdkProxyInterfaces(proxyInterfaces));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,10 @@ import org.springframework.lang.Nullable;
  * <p><b>NOTE:</b> This interface is a special purpose interface, mainly for
  * internal use within the framework. In general, application-provided
  * post-processors should simply implement the plain {@link BeanPostProcessor}
- * interface or derive from the {@link InstantiationAwareBeanPostProcessorAdapter}
- * class. New methods might be added to this interface even in point releases.
+ * interface.
  *
  * @author Juergen Hoeller
  * @since 2.0.3
- * @see InstantiationAwareBeanPostProcessorAdapter
  */
 public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationAwareBeanPostProcessor {
 
@@ -41,6 +39,8 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * Predict the type of the bean to be eventually returned from this
 	 * processor's {@link #postProcessBeforeInstantiation} callback.
 	 * <p>The default implementation returns {@code null}.
+	 * Specific implementations should try to predict the bean type as
+	 * far as known/cached already, without extra processing steps.
 	 * @param beanClass the raw class of the bean
 	 * @param beanName the name of the bean
 	 * @return the type of the bean, or {@code null} if not predictable
@@ -49,6 +49,22 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	@Nullable
 	default Class<?> predictBeanType(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
+	}
+
+	/**
+	 * Determine the type of the bean to be eventually returned from this
+	 * processor's {@link #postProcessBeforeInstantiation} callback.
+	 * <p>The default implementation returns the given bean class as-is.
+	 * Specific implementations should fully evaluate their processing steps
+	 * in order to create/initialize a potential proxy class upfront.
+	 * @param beanClass the raw class of the bean
+	 * @param beanName the name of the bean
+	 * @return the type of the bean (never {@code null})
+	 * @throws org.springframework.beans.BeansException in case of errors
+	 * @since 6.0
+	 */
+	default Class<?> determineBeanType(Class<?> beanClass, String beanName) throws BeansException {
+		return beanClass;
 	}
 
 	/**

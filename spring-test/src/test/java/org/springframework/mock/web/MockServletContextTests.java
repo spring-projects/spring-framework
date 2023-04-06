@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ class MockServletContextTests {
 		void getServletRegistrations() {
 			Map<String, ? extends ServletRegistration> servletRegistrations = servletContext.getServletRegistrations();
 			assertThat(servletRegistrations).isNotNull();
-			assertThat(servletRegistrations.size()).isEqualTo(0);
+			assertThat(servletRegistrations).isEmpty();
 		}
 
 		/**
@@ -198,7 +198,7 @@ class MockServletContextTests {
 		void getFilterRegistrations() {
 			Map<String, ? extends FilterRegistration> filterRegistrations = servletContext.getFilterRegistrations();
 			assertThat(filterRegistrations).isNotNull();
-			assertThat(filterRegistrations.size()).isEqualTo(0);
+			assertThat(filterRegistrations).isEmpty();
 		}
 
 	}

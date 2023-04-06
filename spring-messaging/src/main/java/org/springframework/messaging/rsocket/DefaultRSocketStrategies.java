@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,8 +222,8 @@ final class DefaultRSocketStrategies implements RSocketStrategies {
 			MetadataExtractor extractor = (this.metadataExtractor != null ?
 					this.metadataExtractor : new DefaultMetadataExtractor(this.decoders));
 
-			if (extractor instanceof MetadataExtractorRegistry) {
-				this.metadataExtractors.forEach(consumer -> consumer.accept((MetadataExtractorRegistry) extractor));
+			if (extractor instanceof MetadataExtractorRegistry metadataExtractorRegistry) {
+				this.metadataExtractors.forEach(consumer -> consumer.accept(metadataExtractorRegistry));
 			}
 
 			return new DefaultRSocketStrategies(

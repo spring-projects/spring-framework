@@ -83,7 +83,7 @@ class PayloadApplicationEventTests {
 	void testProgrammaticEventListener() {
 		List<Auditable> events = new ArrayList<>();
 		ApplicationListener<AuditablePayloadEvent<String>> listener = events::add;
-		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload().intValue());
+		ApplicationListener<AuditablePayloadEvent<Integer>> mismatch = (event -> event.getPayload());
 
 		ConfigurableApplicationContext ac = new GenericApplicationContext();
 		ac.addApplicationListener(listener);

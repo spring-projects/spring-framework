@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.config.annotation;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
@@ -71,14 +70,14 @@ public class InterceptorRegistry {
 		return this.registrations.stream()
 				.sorted(INTERCEPTOR_ORDER_COMPARATOR)
 				.map(InterceptorRegistration::getInterceptor)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 
 	private static final Comparator<Object> INTERCEPTOR_ORDER_COMPARATOR =
 			OrderComparator.INSTANCE.withSourceProvider(object -> {
-				if (object instanceof InterceptorRegistration) {
-					return (Ordered) ((InterceptorRegistration) object)::getOrder;
+				if (object instanceof InterceptorRegistration interceptorRegistration) {
+					return (Ordered) interceptorRegistration::getOrder;
 				}
 				return null;
 			});

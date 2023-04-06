@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.test.context.support;
 
 import java.util.Arrays;
 
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestPropertySource;
@@ -125,9 +127,9 @@ class MergedTestPropertySources {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
-				.append("locations", Arrays.toString(this.locations))
-				.append("properties", Arrays.toString(this.properties))
+		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
+				.append("locations", this.locations)
+				.append("properties", this.properties)
 				.toString();
 	}
 

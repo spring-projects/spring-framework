@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Sam Brannen
  * @since 18.06.2003
  */
+@SuppressWarnings("deprecation")
 public class ViewResolverTests {
 
 	private final StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -252,7 +253,7 @@ public class ViewResolverTests {
 		view.render(model, this.request, this.response);
 
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
-		assertThat(this.request.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
+		assertThat(this.request.getAttribute("rc")).as("Correct rc attribute").isNull();
 		assertThat(this.request.getAttribute("key1")).isEqualTo("value1");
 		assertThat(this.request.getAttribute("key2")).isEqualTo(2);
 	}
@@ -278,7 +279,7 @@ public class ViewResolverTests {
 				return new MockRequestDispatcher(path) {
 					@Override
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
-						assertThat(forwardRequest.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
+						assertThat(forwardRequest.getAttribute("rc")).as("Correct rc attribute").isNull();
 						assertThat(forwardRequest.getAttribute("key1")).isEqualTo("value1");
 						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(2);
 						assertThat(forwardRequest.getAttribute("myBean")).isSameAs(wac.getBean("myBean"));
@@ -314,7 +315,7 @@ public class ViewResolverTests {
 				return new MockRequestDispatcher(path) {
 					@Override
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
-						assertThat(forwardRequest.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
+						assertThat(forwardRequest.getAttribute("rc")).as("Correct rc attribute").isNull();
 						assertThat(forwardRequest.getAttribute("key1")).isEqualTo("value1");
 						assertThat(forwardRequest.getAttribute("key2")).isEqualTo(2);
 						assertThat(forwardRequest.getAttribute("myBean")).isNull();
@@ -355,7 +356,7 @@ public class ViewResolverTests {
 		view.render(model, this.request, this.response);
 
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
-		assertThat(this.request.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
+		assertThat(this.request.getAttribute("rc")).as("Correct rc attribute").isNull();
 
 		assertThat(Config.get(this.request, Config.FMT_LOCALE)).isEqualTo(locale);
 		LocalizationContext lc = (LocalizationContext) Config.get(this.request, Config.FMT_LOCALIZATION_CONTEXT);
@@ -389,7 +390,7 @@ public class ViewResolverTests {
 		view.render(model, this.request, this.response);
 
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
-		assertThat(this.request.getAttribute("rc") == null).as("Correct rc attribute").isTrue();
+		assertThat(this.request.getAttribute("rc")).as("Correct rc attribute").isNull();
 
 		assertThat(Config.get(this.request, Config.FMT_LOCALE)).isEqualTo(locale);
 		LocalizationContext lc = (LocalizationContext) Config.get(this.request, Config.FMT_LOCALIZATION_CONTEXT);
@@ -409,11 +410,11 @@ public class ViewResolverTests {
 
 		View view1 = vr.resolveViewName("example1", Locale.getDefault());
 		assertThat(TestView.class.equals(view1.getClass())).as("Correct view class").isTrue();
-		assertThat("/example1.jsp".equals(((InternalResourceView) view1).getUrl())).as("Correct URL").isTrue();
+		assertThat(((InternalResourceView) view1).getUrl()).as("Correct URL").isEqualTo("/example1.jsp");
 
 		View view2 = vr.resolveViewName("example2", Locale.getDefault());
 		assertThat(JstlView.class.equals(view2.getClass())).as("Correct view class").isTrue();
-		assertThat("/example2new.jsp".equals(((InternalResourceView) view2).getUrl())).as("Correct URL").isTrue();
+		assertThat(((InternalResourceView) view2).getUrl()).as("Correct URL").isEqualTo("/example2new.jsp");
 
 		Map<String, Object> model = new HashMap<>();
 		TestBean tb = new TestBean();
@@ -424,7 +425,7 @@ public class ViewResolverTests {
 		this.request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 		view1.render(model, this.request, this.response);
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
-		assertThat("testvalue1".equals(this.request.getAttribute("test1"))).as("Correct test1 attribute").isTrue();
+		assertThat(this.request.getAttribute("test1")).as("Correct test1 attribute").isEqualTo("testvalue1");
 		assertThat(testBean.equals(this.request.getAttribute("test2"))).as("Correct test2 attribute").isTrue();
 
 		this.request.clearAttributes();
@@ -433,8 +434,8 @@ public class ViewResolverTests {
 		this.request.setAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE, new FixedThemeResolver());
 		view2.render(model, this.request, this.response);
 		assertThat(tb.equals(this.request.getAttribute("tb"))).as("Correct tb attribute").isTrue();
-		assertThat("testvalue1".equals(this.request.getAttribute("test1"))).as("Correct test1 attribute").isTrue();
-		assertThat("testvalue2".equals(this.request.getAttribute("test2"))).as("Correct test2 attribute").isTrue();
+		assertThat(this.request.getAttribute("test1")).as("Correct test1 attribute").isEqualTo("testvalue1");
+		assertThat(this.request.getAttribute("test2")).as("Correct test2 attribute").isEqualTo("testvalue2");
 	}
 
 	@Test
@@ -443,7 +444,7 @@ public class ViewResolverTests {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			@Override
 			protected Resource getResourceByPath(String path) {
-				assertThat(org.springframework.web.servlet.view.XmlViewResolver.DEFAULT_LOCATION.equals(path)).as("Correct default location").isTrue();
+				assertThat(path).as("Correct default location").isEqualTo(XmlViewResolver.DEFAULT_LOCATION);
 				return super.getResourceByPath(path);
 			}
 		};
@@ -460,7 +461,7 @@ public class ViewResolverTests {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
 			@Override
 			protected Resource getResourceByPath(String path) {
-				assertThat(org.springframework.web.servlet.view.XmlViewResolver.DEFAULT_LOCATION.equals(path)).as("Correct default location").isTrue();
+				assertThat(path).as("Correct default location").isEqualTo(XmlViewResolver.DEFAULT_LOCATION);
 				return super.getResourceByPath(path);
 			}
 		};

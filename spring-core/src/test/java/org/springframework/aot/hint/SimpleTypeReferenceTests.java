@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,10 +77,25 @@ class SimpleTypeReferenceTests {
 	}
 
 	@Test
+	void nameOfCglibProxy() {
+		TypeReference reference = TypeReference.of("com.example.Test$$SpringCGLIB$$0");
+		assertThat(reference.getSimpleName()).isEqualTo("Test$$SpringCGLIB$$0");
+		assertThat(reference.getEnclosingType()).isNull();
+	}
+
+	@Test
+	void nameOfNestedCglibProxy() {
+		TypeReference reference = TypeReference.of("com.example.Test$Another$$SpringCGLIB$$0");
+		assertThat(reference.getSimpleName()).isEqualTo("Another$$SpringCGLIB$$0");
+		assertThat(reference.getEnclosingType()).isNotNull();
+		assertThat(reference.getEnclosingType().getSimpleName()).isEqualTo("Test");
+	}
+
+	@Test
 	void typeReferenceInRootPackage() {
 		TypeReference type = SimpleTypeReference.of("MyRootClass");
 		assertThat(type.getCanonicalName()).isEqualTo("MyRootClass");
-		assertThat(type.getPackageName()).isEqualTo("");
+		assertThat(type.getPackageName()).isEmpty();
 	}
 
 	@ParameterizedTest(name = "{0}")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ import static org.springframework.web.testfixture.method.ResolvableMethod.on;
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class MessageWriterResultHandlerTests {
 
@@ -180,6 +181,17 @@ public class MessageWriterResultHandlerTests {
 		assertResponseBody("[{\"id\":123,\"name\":\"foo\"},{\"id\":456,\"name\":\"bar\"}]");
 	}
 
+	@Test
+	public void jacksonTypeWithSubTypeAndObjectReturnValue() {
+		MethodParameter returnType = on(TestController.class).resolveReturnType(Object.class);
+
+		SimpleBean body = new SimpleBean(123L, "foo");
+		this.resultHandler.writeBody(body, returnType, this.exchange).block(Duration.ofSeconds(5));
+
+		assertThat(this.exchange.getResponse().getHeaders().getContentType()).isEqualTo(APPLICATION_JSON);
+		assertResponseBody("{\"id\":123,\"name\":\"foo\"}");
+	}
+
 
 	private void assertResponseBody(String responseBody) {
 		StepVerifier.create(this.exchange.getResponse().getBody())
@@ -287,6 +299,8 @@ public class MessageWriterResultHandlerTests {
 		Identifiable identifiable() { return null; }
 
 		List<Identifiable> listIdentifiable() { return null; }
+
+		Object object() { return null; }
 	}
 
 }

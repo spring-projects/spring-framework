@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,15 +139,15 @@ public class WebSocketServerSockJsSession extends AbstractSockJsSession implemen
 	@Override
 	public Object getNativeSession() {
 		Assert.state(this.webSocketSession != null, "WebSocketSession not yet initialized");
-		return (this.webSocketSession instanceof NativeWebSocketSession ?
-				((NativeWebSocketSession) this.webSocketSession).getNativeSession() : this.webSocketSession);
+		return (this.webSocketSession instanceof NativeWebSocketSession nativeWsSession ?
+				nativeWsSession.getNativeSession() : this.webSocketSession);
 	}
 
 	@Override
 	@Nullable
 	public <T> T getNativeSession(@Nullable Class<T> requiredType) {
-		return (this.webSocketSession instanceof NativeWebSocketSession ?
-				((NativeWebSocketSession) this.webSocketSession).getNativeSession(requiredType) : null);
+		return (this.webSocketSession instanceof NativeWebSocketSession nativeWsSession ?
+				nativeWsSession.getNativeSession(requiredType) : null);
 	}
 
 

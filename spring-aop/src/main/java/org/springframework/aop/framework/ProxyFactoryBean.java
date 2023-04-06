@@ -274,19 +274,9 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				return this.singletonInstance.getClass();
 			}
 		}
-		Class<?>[] ifcs = getProxiedInterfaces();
-		if (ifcs.length == 1) {
-			return ifcs[0];
-		}
-		else if (ifcs.length > 1) {
-			return createCompositeInterface(ifcs);
-		}
-		else if (this.targetName != null && this.beanFactory != null) {
-			return this.beanFactory.getType(this.targetName);
-		}
-		else {
-			return getTargetClass();
-		}
+		// This might be incomplete since it potentially misses introduced interfaces
+		// from Advisors that will be lazily retrieved via setInterceptorNames.
+		return createAopProxy().getProxyClass(this.proxyClassLoader);
 	}
 
 	@Override
@@ -294,19 +284,6 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		return this.singleton;
 	}
 
-
-	/**
-	 * Create a composite interface Class for the given interfaces,
-	 * implementing the given interfaces in one single Class.
-	 * <p>The default implementation builds a JDK proxy class for the
-	 * given interfaces.
-	 * @param interfaces the interfaces to merge
-	 * @return the merged interface as Class
-	 * @see java.lang.reflect.Proxy#getProxyClass
-	 */
-	protected Class<?> createCompositeInterface(Class<?>[] interfaces) {
-		return ClassUtils.createCompositeInterface(interfaces, this.proxyClassLoader);
-	}
 
 	/**
 	 * Return the singleton instance of this class's proxy object,

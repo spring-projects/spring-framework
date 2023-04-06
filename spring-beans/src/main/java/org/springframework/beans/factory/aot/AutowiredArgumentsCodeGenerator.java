@@ -28,14 +28,11 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Code generator to apply {@link AutowiredArguments}.
- * <p>
- * Generates code in the form:<pre class="code">{@code
- * args.get(0), args.get(1)
- * }</pre> or <pre class="code">{@code
- * args.get(0, String.class), args.get(1, Integer.class)
- * }</pre>
- * <p>
- * The simpler form is only used if the target method or constructor is
+ *
+ * <p>Generates code in the form: {@code args.get(0), args.get(1)} or
+ * {@code args.get(0, String.class), args.get(1, Integer.class)}
+ *
+ * <p>The simpler form is only used if the target method or constructor is
  * unambiguous.
  *
  * @author Phillip Webb
@@ -69,18 +66,18 @@ public class AutowiredArgumentsCodeGenerator {
 		Assert.notNull(parameterTypes, "'parameterTypes' must not be null");
 		Assert.notNull(variableName, "'variableName' must not be null");
 		boolean ambiguous = isAmbiguous();
-		CodeBlock.Builder builder = CodeBlock.builder();
+		CodeBlock.Builder code = CodeBlock.builder();
 		for (int i = startIndex; i < parameterTypes.length; i++) {
-			builder.add((i != startIndex) ? ", " : "");
+			code.add((i != startIndex) ? ", " : "");
 			if (!ambiguous) {
-				builder.add("$L.get($L)", variableName, i - startIndex);
+				code.add("$L.get($L)", variableName, i - startIndex);
 			}
 			else {
-				builder.add("$L.get($L, $T.class)", variableName, i - startIndex,
+				code.add("$L.get($L, $T.class)", variableName, i - startIndex,
 						parameterTypes[i]);
 			}
 		}
-		return builder.build();
+		return code.build();
 	}
 
 	private boolean isAmbiguous() {

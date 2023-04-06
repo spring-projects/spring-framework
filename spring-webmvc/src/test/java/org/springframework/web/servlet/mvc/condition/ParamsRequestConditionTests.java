@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,10 +96,10 @@ public class ParamsRequestConditionTests {
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("foo=a", "bar");
 
 		int result = condition1.compareTo(condition2, request);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = condition2.compareTo(condition1, request);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 	}
 
 	@Test // SPR-16674
@@ -110,7 +110,7 @@ public class ParamsRequestConditionTests {
 		ParamsRequestCondition condition2 = new ParamsRequestCondition("response_type");
 
 		int result = condition1.compareTo(condition2, request);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class ParamsRequestConditionTests {
 
 		ParamsRequestCondition result = condition1.combine(condition2);
 		Collection<ParamExpression> conditions = result.getContent();
-		assertThat(conditions.size()).isEqualTo(2);
+		assertThat(conditions).hasSize(2);
 	}
 
 }

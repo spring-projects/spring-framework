@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Optional;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,21 +51,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpServiceMethodTests {
+class HttpServiceMethodTests {
 
 	private static final ParameterizedTypeReference<String> BODY_TYPE = new ParameterizedTypeReference<>() {};
 
-
 	private final TestHttpClientAdapter client = new TestHttpClientAdapter();
 
-	private HttpServiceProxyFactory proxyFactory;
-
-
-	@BeforeEach
-	void setUp() throws Exception {
-		this.proxyFactory = new HttpServiceProxyFactory(this.client);
-		this.proxyFactory.afterPropertiesSet();
-	}
+	private final HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client).build();
 
 
 	@Test
@@ -160,7 +151,7 @@ public class HttpServiceMethodTests {
 
 		HttpRequestValues requestValues = this.client.getRequestValues();
 		assertThat(requestValues.getHttpMethod()).isEqualTo(HttpMethod.GET);
-		assertThat(requestValues.getUriTemplate()).isEqualTo("");
+		assertThat(requestValues.getUriTemplate()).isEmpty();
 		assertThat(requestValues.getHeaders().getContentType()).isNull();
 		assertThat(requestValues.getHeaders().getAccept()).isEmpty();
 
@@ -174,10 +165,10 @@ public class HttpServiceMethodTests {
 	}
 
 	@Test
-	void typeAndMethodAnnotatedService() throws Exception {
-		HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(this.client);
-		proxyFactory.setEmbeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value));
-		proxyFactory.afterPropertiesSet();
+	void typeAndMethodAnnotatedService() {
+		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.client)
+				.embeddedValueResolver(value -> (value.equals("${baseUrl}") ? "/base" : value))
+				.build();
 
 		MethodLevelAnnotatedService service = proxyFactory.createClient(TypeAndMethodLevelAnnotatedService.class);
 

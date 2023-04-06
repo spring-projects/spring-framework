@@ -30,7 +30,7 @@ eclipse.classpath.file.whenMerged { classpath ->
 	}
 
 	// Remove any remaining direct depencencies on JARs in the build/libs folder
-	// except Spring's spring-cglib-repack and spring-objenesis-repack JARs.
+	// except the repack JARs.
 	classpath.entries.removeAll { entry -> (entry.path =~ /(?!.*?repack.*\.jar).*?\/([^\/]+)\/build\/libs\/[^\/]+\.jar/) }
 }
 
@@ -64,7 +64,7 @@ eclipse.classpath.file.whenMerged {
 // so that they can see test fixtures.
 // https://github.com/melix/jmh-gradle-plugin/issues/157
 eclipse.classpath.file.whenMerged {
-	entries.findAll { it.path =~ /src\/jmh\/(java|resources)/ }.each {
+	entries.findAll { it.path =~ /src\/jmh\/(java|kotlin|resources)/ }.each {
 		it.entryAttributes['test'] = 'true'
 	}
 }

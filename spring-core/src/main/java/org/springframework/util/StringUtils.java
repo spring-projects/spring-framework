@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 
@@ -74,6 +75,10 @@ public abstract class StringUtils {
 	private static final String CURRENT_PATH = ".";
 
 	private static final char EXTENSION_SEPARATOR = '.';
+
+	private static final int DEFAULT_TRUNCATION_THRESHOLD = 100;
+
+	private static final String TRUNCATION_SUFFIX = " (truncated)...";
 
 
 	//---------------------------------------------------------------------
@@ -220,9 +225,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
-	 * @deprecated in favor of {@link String#strip()}
+	 * @deprecated since 6.0, in favor of {@link String#strip()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static String trimWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
@@ -276,9 +281,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
-	 * @deprecated in favor of {@link String#stripLeading()}
+	 * @deprecated since 6.0, in favor of {@link String#stripLeading()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static String trimLeadingWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
@@ -292,9 +297,9 @@ public abstract class StringUtils {
 	 * @param str the {@code String} to check
 	 * @return the trimmed {@code String}
 	 * @see java.lang.Character#isWhitespace
-	 * @deprecated in favor of {@link String#stripTrailing()}
+	 * @deprecated since 6.0, in favor of {@link String#stripTrailing()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public static String trimTrailingWhitespace(String str) {
 		if (!hasLength(str)) {
 			return str;
@@ -509,7 +514,7 @@ public abstract class StringUtils {
 	 */
 	@Nullable
 	public static Object quoteIfString(@Nullable Object obj) {
-		return (obj instanceof String ? quote((String) obj) : obj);
+		return (obj instanceof String text ? quote(text) : obj);
 	}
 
 	/**
@@ -550,6 +555,24 @@ public abstract class StringUtils {
 	 * @return the uncapitalized {@code String}
 	 */
 	public static String uncapitalize(String str) {
+		return changeFirstCharacterCase(str, false);
+	}
+
+	/**
+	 * Uncapitalize a {@code String} in JavaBeans property format,
+	 * changing the first letter to lower case as per
+	 * {@link Character#toLowerCase(char)}, unless the initial two
+	 * letters are upper case in direct succession.
+	 * @param str the {@code String} to uncapitalize
+	 * @return the uncapitalized {@code String}
+	 * @since 6.0
+	 * @see java.beans.Introspector#decapitalize(String)
+	 */
+	public static String uncapitalizeAsProperty(String str) {
+		if (!hasLength(str) || (str.length() > 1 && Character.isUpperCase(str.charAt(0)) &&
+				Character.isUpperCase(str.charAt(1)))) {
+			return str;
+		}
 		return changeFirstCharacterCase(str, false);
 	}
 
@@ -821,15 +844,14 @@ public abstract class StringUtils {
 	 */
 	@Nullable
 	public static Locale parseLocale(String localeValue) {
-		String[] tokens = tokenizeLocaleSource(localeValue);
-		if (tokens.length == 1) {
+		if (!localeValue.contains("_") && !localeValue.contains(" ")) {
 			validateLocalePart(localeValue);
 			Locale resolved = Locale.forLanguageTag(localeValue);
 			if (resolved.getLanguage().length() > 0) {
 				return resolved;
 			}
 		}
-		return parseLocaleTokens(localeValue, tokens);
+		return parseLocaleString(localeValue);
 	}
 
 	/**
@@ -848,38 +870,35 @@ public abstract class StringUtils {
 	 */
 	@Nullable
 	public static Locale parseLocaleString(String localeString) {
-		return parseLocaleTokens(localeString, tokenizeLocaleSource(localeString));
-	}
-
-	private static String[] tokenizeLocaleSource(String localeSource) {
-		return tokenizeToStringArray(localeSource, "_ ", false, false);
-	}
-
-	@Nullable
-	private static Locale parseLocaleTokens(String localeString, String[] tokens) {
-		String language = (tokens.length > 0 ? tokens[0] : "");
-		String country = (tokens.length > 1 ? tokens[1] : "");
-		validateLocalePart(language);
-		validateLocalePart(country);
-
-		String variant = "";
-		if (tokens.length > 2) {
-			// There is definitely a variant, and it is everything after the country
-			// code sans the separator between the country code and the variant.
-			int endIndexOfCountryCode = localeString.indexOf(country, language.length()) + country.length();
-			// Strip off any leading '_' and whitespace, what's left is the variant.
-			variant = localeString.substring(endIndexOfCountryCode).stripLeading();
-			if (variant.startsWith("_")) {
-				variant = trimLeadingCharacter(variant, '_');
-			}
+		if (localeString.equals("")) {
+			return null;
 		}
-
-		if (variant.isEmpty() && country.startsWith("#")) {
-			variant = country;
-			country = "";
+		String delimiter = "_";
+		if (!localeString.contains("_") && localeString.contains(" ")) {
+			delimiter = " ";
 		}
-
-		return (language.length() > 0 ? new Locale(language, country, variant) : null);
+		final String[] tokens = localeString.split(delimiter, -1);
+		if (tokens.length == 1) {
+			final String language = tokens[0];
+			validateLocalePart(language);
+			return new Locale(language);
+		}
+		else if (tokens.length == 2) {
+			final String language = tokens[0];
+			validateLocalePart(language);
+			final String country = tokens[1];
+			validateLocalePart(country);
+			return new Locale(language, country);
+		}
+		else if (tokens.length > 2) {
+			final String language = tokens[0];
+			validateLocalePart(language);
+			final String country = tokens[1];
+			validateLocalePart(country);
+			final String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
+			return new Locale(language, country, variant);
+		}
+		throw new IllegalArgumentException("Invalid locale format: '" + localeString + "'");
 	}
 
 	private static void validateLocalePart(String localePart) {
@@ -1330,6 +1349,42 @@ public abstract class StringUtils {
 	 */
 	public static String arrayToCommaDelimitedString(@Nullable Object[] arr) {
 		return arrayToDelimitedString(arr, ",");
+	}
+
+	/**
+	 * Truncate the supplied {@link CharSequence}.
+	 * <p>Delegates to {@link #truncate(CharSequence, int)}, supplying {@code 100}
+	 * as the threshold.
+	 * @param charSequence the {@code CharSequence} to truncate
+	 * @return a truncated string, or a string representation of the original
+	 * {@code CharSequence} if its length does not exceed the threshold
+	 * @since 5.3.27
+	 */
+	public static String truncate(CharSequence charSequence) {
+		return truncate(charSequence, DEFAULT_TRUNCATION_THRESHOLD);
+	}
+
+	/**
+	 * Truncate the supplied {@link CharSequence}.
+	 * <p>If the length of the {@code CharSequence} is greater than the threshold,
+	 * this method returns a {@linkplain CharSequence#subSequence(int, int)
+	 * subsequence} of the {@code CharSequence} (up to the threshold) appended
+	 * with the suffix {@code " (truncated)..."}. Otherwise, this method returns
+	 * {@code charSequence.toString()}.
+	 * @param charSequence the {@code CharSequence} to truncate
+	 * @param threshold the maximum length after which to truncate; must be a
+	 * positive number
+	 * @return a truncated string, or a string representation of the original
+	 * {@code CharSequence} if its length does not exceed the threshold
+	 * @since 5.3.27
+	 */
+	public static String truncate(CharSequence charSequence, int threshold) {
+		Assert.isTrue(threshold > 0,
+				() -> "Truncation threshold must be a positive number: " + threshold);
+		if (charSequence.length() > threshold) {
+			return charSequence.subSequence(0, threshold) + TRUNCATION_SUFFIX;
+		}
+		return charSequence.toString();
 	}
 
 }

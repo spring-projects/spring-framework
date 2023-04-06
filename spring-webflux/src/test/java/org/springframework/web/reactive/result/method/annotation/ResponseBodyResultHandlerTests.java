@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,11 @@ public class ResponseBodyResultHandlerTests {
 
 		// JSON requested
 		exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_JSON));
-		testProblemDetailMediaType(exchange, MediaType.APPLICATION_JSON);
+		testProblemDetailMediaType(exchange, MediaType.APPLICATION_PROBLEM_JSON);
+
+		// JSON & Problem Detail requested (gh-29588)
+		exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_PROBLEM_JSON));
+		testProblemDetailMediaType(exchange, MediaType.APPLICATION_PROBLEM_JSON);
 
 		// No match fallback
 		exchange = MockServerWebExchange.from(get("/path").accept(MediaType.APPLICATION_PDF));

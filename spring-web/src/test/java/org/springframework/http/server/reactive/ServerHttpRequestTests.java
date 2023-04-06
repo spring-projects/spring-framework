@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,13 @@ public class ServerHttpRequestTests {
 	@Test
 	public void queryParamsNone() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path").getQueryParams();
-		assertThat(params.size()).isEqualTo(0);
+		assertThat(params).isEmpty();
 	}
 
 	@Test
 	public void queryParams() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a=A&b=B").getQueryParams();
-		assertThat(params.size()).isEqualTo(2);
+		assertThat(params).hasSize(2);
 		assertThat(params.get("a")).isEqualTo(Collections.singletonList("A"));
 		assertThat(params.get("b")).isEqualTo(Collections.singletonList("B"));
 	}
@@ -67,28 +67,28 @@ public class ServerHttpRequestTests {
 	@Test
 	public void queryParamsWithMultipleValues() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a=1&a=2").getQueryParams();
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 		assertThat(params.get("a")).isEqualTo(Arrays.asList("1", "2"));
 	}
 
 	@Test  // SPR-15140
 	public void queryParamsWithEncodedValue() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a=%20%2B+%C3%A0").getQueryParams();
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 		assertThat(params.get("a")).isEqualTo(Collections.singletonList(" + \u00e0"));
 	}
 
 	@Test
 	public void queryParamsWithEmptyValue() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a=").getQueryParams();
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 		assertThat(params.get("a")).isEqualTo(Collections.singletonList(""));
 	}
 
 	@Test
 	public void queryParamsWithNoValue() throws Exception {
 		MultiValueMap<String, String> params = createRequest("/path?a").getQueryParams();
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 		assertThat(params.get("a")).isEqualTo(Collections.singletonList(null));
 	}
 
@@ -100,7 +100,7 @@ public class ServerHttpRequestTests {
 
 	@Test
 	public void mutateSslInfo() throws Exception {
-		SslInfo sslInfo = mock(SslInfo.class);
+		SslInfo sslInfo = mock();
 		ServerHttpRequest request = createRequest("/").mutate().sslInfo(sslInfo).build();
 		assertThat(request.getSslInfo()).isSameAs(sslInfo);
 	}

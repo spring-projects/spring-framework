@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class AopNamespaceHandlerTests {
 		Advised advised = (Advised) bean;
 		Advisor[] advisors = advised.getAdvisors();
 
-		assertThat(advisors.length > 0).as("Advisors should not be empty").isTrue();
+		assertThat(advisors).as("Advisors should not be empty").isNotEmpty();
 	}
 
 	@Test

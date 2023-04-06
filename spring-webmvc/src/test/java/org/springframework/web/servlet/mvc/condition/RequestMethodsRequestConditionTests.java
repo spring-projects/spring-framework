@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,13 +105,13 @@ public class RequestMethodsRequestConditionTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 
 		int result = c1.compareTo(c2, request);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = c2.compareTo(c1, request);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 
 		result = c2.compareTo(c3, request);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = c1.compareTo(c1, request);
 		assertThat(result).as("Invalid comparison result ").isEqualTo(0);
@@ -123,7 +123,7 @@ public class RequestMethodsRequestConditionTests {
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(POST);
 
 		RequestMethodsRequestCondition result = condition1.combine(condition2);
-		assertThat(result.getContent().size()).isEqualTo(2);
+		assertThat(result.getContent()).hasSize(2);
 	}
 
 

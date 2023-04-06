@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public abstract class TransactionSynchronizationManager {
 		}
 		Object value = map.get(actualKey);
 		// Transparently remove ResourceHolder that was marked as void...
-		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
+		if (value instanceof ResourceHolder resourceHolder && resourceHolder.isVoid()) {
 			map.remove(actualKey);
 			// Remove entire ThreadLocal if empty...
 			if (map.isEmpty()) {
@@ -175,7 +175,7 @@ public abstract class TransactionSynchronizationManager {
 		}
 		Object oldValue = map.put(actualKey, value);
 		// Transparently suppress a ResourceHolder that was marked as void...
-		if (oldValue instanceof ResourceHolder && ((ResourceHolder) oldValue).isVoid()) {
+		if (oldValue instanceof ResourceHolder resourceHolder && resourceHolder.isVoid()) {
 			oldValue = null;
 		}
 		if (oldValue != null) {
@@ -226,7 +226,7 @@ public abstract class TransactionSynchronizationManager {
 			resources.remove();
 		}
 		// Transparently suppress a ResourceHolder that was marked as void...
-		if (value instanceof ResourceHolder && ((ResourceHolder) value).isVoid()) {
+		if (value instanceof ResourceHolder resourceHolder && resourceHolder.isVoid()) {
 			value = null;
 		}
 		return value;

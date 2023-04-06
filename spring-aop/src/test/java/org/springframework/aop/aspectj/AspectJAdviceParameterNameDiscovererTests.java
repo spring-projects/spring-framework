@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.aop.aspectj;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -43,17 +42,17 @@ class AspectJAdviceParameterNameDiscovererTests {
 
 		@Test
 		void noArgs() {
-			assertParameterNames(getMethod("noArgs"), "execution(* *(..))", new String[0]);
+			assertParameterNames(getMethod("noArgs"), "execution(* *(..))");
 		}
 
 		@Test
 		void joinPointOnly() {
-			assertParameterNames(getMethod("tjp"), "execution(* *(..))", new String[] {"thisJoinPoint"});
+			assertParameterNames(getMethod("tjp"), "execution(* *(..))", "thisJoinPoint");
 		}
 
 		@Test
 		void joinPointStaticPartOnly() {
-			assertParameterNames(getMethod("tjpsp"), "execution(* *(..))", new String[] {"thisJoinPointStaticPart"});
+			assertParameterNames(getMethod("tjpsp"), "execution(* *(..))", "thisJoinPointStaticPart");
 		}
 
 		@Test
@@ -64,18 +63,18 @@ class AspectJAdviceParameterNameDiscovererTests {
 
 		@Test
 		void oneThrowable() {
-			assertParameterNames(getMethod("oneThrowable"), "foo()", null, "ex", new String[] {"ex"});
+			assertParameterNamesExtended(getMethod("oneThrowable"), "foo()", null, "ex", "ex");
 		}
 
 		@Test
 		void oneJPAndOneThrowable() {
-			assertParameterNames(getMethod("jpAndOneThrowable"), "foo()", null, "ex", new String[] {"thisJoinPoint", "ex"});
+			assertParameterNamesExtended(getMethod("jpAndOneThrowable"), "foo()", null, "ex", "thisJoinPoint", "ex");
 		}
 
 		@Test
 		void oneJPAndTwoThrowables() {
 			assertException(getMethod("jpAndTwoThrowables"), "foo()", null, "ex", AmbiguousBindingException.class,
-					"Binding of throwing parameter 'ex' is ambiguous: could be bound to argument 1 or argument 2");
+					"Binding of throwing parameter 'ex' is ambiguous: could be bound to argument 1 or 2");
 		}
 
 		@Test
@@ -86,13 +85,13 @@ class AspectJAdviceParameterNameDiscovererTests {
 
 		@Test
 		void returning() {
-			assertParameterNames(getMethod("oneObject"), "foo()", "obj", null, new String[] {"obj"});
+			assertParameterNamesExtended(getMethod("oneObject"), "foo()", "obj", null, "obj");
 		}
 
 		@Test
 		void ambiguousReturning() {
 			assertException(getMethod("twoObjects"), "foo()", "obj", null, AmbiguousBindingException.class,
-					"Binding of returning parameter 'obj' is ambiguous, there are 2 candidates.");
+					"Binding of returning parameter 'obj' is ambiguous: there are 2 candidates.");
 		}
 
 		@Test
@@ -103,22 +102,22 @@ class AspectJAdviceParameterNameDiscovererTests {
 
 		@Test
 		void thisBindingOneCandidate() {
-			assertParameterNames(getMethod("oneObject"), "this(x)", new String[] {"x"});
+			assertParameterNames(getMethod("oneObject"), "this(x)", "x");
 		}
 
 		@Test
 		void thisBindingWithAlternateTokenizations() {
-			assertParameterNames(getMethod("oneObject"), "this( x )", new String[] {"x"});
-			assertParameterNames(getMethod("oneObject"), "this( x)", new String[] {"x"});
-			assertParameterNames(getMethod("oneObject"), "this (x )", new String[] {"x"});
-			assertParameterNames(getMethod("oneObject"), "this(x )", new String[] {"x"});
-			assertParameterNames(getMethod("oneObject"), "foo() && this(x)", new String[] {"x"});
+			assertParameterNames(getMethod("oneObject"), "this( x )", "x");
+			assertParameterNames(getMethod("oneObject"), "this( x)", "x");
+			assertParameterNames(getMethod("oneObject"), "this (x )", "x");
+			assertParameterNames(getMethod("oneObject"), "this(x )", "x");
+			assertParameterNames(getMethod("oneObject"), "foo() && this(x)", "x");
 		}
 
 		@Test
 		void thisBindingTwoCandidates() {
 			assertException(getMethod("oneObject"), "this(x) || this(y)", AmbiguousBindingException.class,
-					"Found 2 candidate this(), target() or args() variables but only one unbound argument slot");
+					"Found 2 candidate this(), target(), or args() variables but only one unbound argument slot");
 		}
 
 		@Test
@@ -131,22 +130,22 @@ class AspectJAdviceParameterNameDiscovererTests {
 
 		@Test
 		void targetBindingOneCandidate() {
-			assertParameterNames(getMethod("oneObject"), "target(x)", new String[] {"x"});
+			assertParameterNames(getMethod("oneObject"), "target(x)", "x");
 		}
 
 		@Test
 		void targetBindingWithAlternateTokenizations() {
-			assertParameterNames(getMethod("oneObject"), "target( x )", new String[] {"x"});
-			assertParameterNames(getMethod("oneObject"), "target( x)", new String[] {"x"});
-			assertParameterNames(getMethod("oneObject"), "target (x )", new String[] {"x"});
-			assertParameterNames(getMethod("oneObject"), "target(x )", new String[] {"x"});
-			assertParameterNames(getMethod("oneObject"), "foo() && target(x)", new String[] {"x"});
+			assertParameterNames(getMethod("oneObject"), "target( x )", "x");
+			assertParameterNames(getMethod("oneObject"), "target( x)", "x");
+			assertParameterNames(getMethod("oneObject"), "target (x )", "x");
+			assertParameterNames(getMethod("oneObject"), "target(x )", "x");
+			assertParameterNames(getMethod("oneObject"), "foo() && target(x)", "x");
 		}
 
 		@Test
 		void targetBindingTwoCandidates() {
 			assertException(getMethod("oneObject"), "target(x) || target(y)", AmbiguousBindingException.class,
-					"Found 2 candidate this(), target() or args() variables but only one unbound argument slot");
+					"Found 2 candidate this(), target(), or args() variables but only one unbound argument slot");
 		}
 
 		@Test
@@ -159,24 +158,24 @@ class AspectJAdviceParameterNameDiscovererTests {
 
 		@Test
 		void argsBindingOneObject() {
-			assertParameterNames(getMethod("oneObject"), "args(x)", new String[] {"x"});
+			assertParameterNames(getMethod("oneObject"), "args(x)", "x");
 		}
 
 		@Test
 		void argsBindingOneObjectTwoCandidates() {
 			assertException(getMethod("oneObject"), "args(x,y)", AmbiguousBindingException.class,
-					"Found 2 candidate this(), target() or args() variables but only one unbound argument slot");
+					"Found 2 candidate this(), target(), or args() variables but only one unbound argument slot");
 		}
 
 		@Test
 		void ambiguousArgsBinding() {
 			assertException(getMethod("twoObjects"), "args(x,y)", AmbiguousBindingException.class,
-					"Still 2 unbound args at this(),target(),args() binding stage, with no way to determine between them");
+					"Still 2 unbound args at this()/target()/args() binding stage, with no way to determine between them");
 		}
 
 		@Test
 		void argsOnePrimitive() {
-			assertParameterNames(getMethod("onePrimitive"), "args(count)", new String[] {"count"});
+			assertParameterNames(getMethod("onePrimitive"), "args(count)", "count");
 		}
 
 		@Test
@@ -188,37 +187,37 @@ class AspectJAdviceParameterNameDiscovererTests {
 		@Test
 		void thisAndPrimitive() {
 			assertParameterNames(getMethod("oneObjectOnePrimitive"), "args(count) && this(obj)",
-					new String[] {"obj", "count"});
+					"obj", "count");
 		}
 
 		@Test
 		void targetAndPrimitive() {
 			assertParameterNames(getMethod("oneObjectOnePrimitive"), "args(count) && target(obj)",
-					new String[] {"obj", "count"});
+					"obj", "count");
 		}
 
 		@Test
 		void throwingAndPrimitive() {
-			assertParameterNames(getMethod("oneThrowableOnePrimitive"), "args(count)", null, "ex",
-					new String[] {"ex", "count"});
+			assertParameterNamesExtended(getMethod("oneThrowableOnePrimitive"), "args(count)", null, "ex",
+					"ex", "count");
 		}
 
 		@Test
 		void allTogetherNow() {
-			assertParameterNames(getMethod("theBigOne"), "this(foo) && args(x)", null, "ex",
-					new String[] {"thisJoinPoint", "ex", "x", "foo"});
+			assertParameterNamesExtended(getMethod("theBigOne"), "this(foo) && args(x)", null, "ex",
+					"thisJoinPoint", "ex", "x", "foo");
 		}
 
 		@Test
 		void referenceBinding() {
-			assertParameterNames(getMethod("onePrimitive"),"somepc(foo)", new String[] {"foo"});
+			assertParameterNames(getMethod("onePrimitive"),"somepc(foo)", "foo");
 		}
 
 		@Test
 		void referenceBindingWithAlternateTokenizations() {
-			assertParameterNames(getMethod("onePrimitive"),"call(bar *) && somepc(foo)", new String[] {"foo"});
-			assertParameterNames(getMethod("onePrimitive"),"somepc ( foo )", new String[] {"foo"});
-			assertParameterNames(getMethod("onePrimitive"),"somepc( foo)", new String[] {"foo"});
+			assertParameterNames(getMethod("onePrimitive"),"call(bar *) && somepc(foo)", "foo");
+			assertParameterNames(getMethod("onePrimitive"),"somepc ( foo )", "foo");
+			assertParameterNames(getMethod("onePrimitive"),"somepc( foo)", "foo");
 		}
 	}
 
@@ -230,38 +229,38 @@ class AspectJAdviceParameterNameDiscovererTests {
 
 		@Test
 		void atThis() {
-			assertParameterNames(getMethod("oneAnnotation"),"@this(a)", new String[] {"a"});
+			assertParameterNames(getMethod("oneAnnotation"),"@this(a)", "a");
 		}
 
 		@Test
 		void atTarget() {
-			assertParameterNames(getMethod("oneAnnotation"),"@target(a)", new String[] {"a"});
+			assertParameterNames(getMethod("oneAnnotation"),"@target(a)", "a");
 		}
 
 		@Test
 		void atArgs() {
-			assertParameterNames(getMethod("oneAnnotation"),"@args(a)", new String[] {"a"});
+			assertParameterNames(getMethod("oneAnnotation"),"@args(a)", "a");
 		}
 
 		@Test
 		void atWithin() {
-			assertParameterNames(getMethod("oneAnnotation"),"@within(a)", new String[] {"a"});
+			assertParameterNames(getMethod("oneAnnotation"),"@within(a)", "a");
 		}
 
 		@Test
 		void atWithincode() {
-			assertParameterNames(getMethod("oneAnnotation"),"@withincode(a)", new String[] {"a"});
+			assertParameterNames(getMethod("oneAnnotation"),"@withincode(a)", "a");
 		}
 
 		@Test
 		void atAnnotation() {
-			assertParameterNames(getMethod("oneAnnotation"),"@annotation(a)", new String[] {"a"});
+			assertParameterNames(getMethod("oneAnnotation"),"@annotation(a)", "a");
 		}
 
 		@Test
 		void ambiguousAnnotationTwoVars() {
 			assertException(getMethod("twoAnnotations"),"@annotation(a) && @this(x)", AmbiguousBindingException.class,
-					"Found 2 potential annotation variable(s), and 2 potential argument slots");
+					"Found 2 potential annotation variable(s) and 2 potential argument slots");
 		}
 
 		@Test
@@ -272,15 +271,14 @@ class AspectJAdviceParameterNameDiscovererTests {
 
 		@Test
 		void annotationMedley() {
-			assertParameterNames(getMethod("annotationMedley"),"@annotation(a) && args(count) && this(foo)",
-					null, "ex", new String[] {"ex", "foo", "count", "a"});
+			assertParameterNamesExtended(getMethod("annotationMedley"),"@annotation(a) && args(count) && this(foo)",
+					null, "ex", "ex", "foo", "count", "a");
 		}
 
 		@Test
 		void annotationBinding() {
 			assertParameterNames(getMethod("pjpAndAnAnnotation"),
-					"execution(* *(..)) && @annotation(ann)",
-					new String[] {"thisJoinPoint","ann"});
+					"execution(* *(..)) && @annotation(ann)", "thisJoinPoint", "ann");
 		}
 
 	}
@@ -296,33 +294,23 @@ class AspectJAdviceParameterNameDiscovererTests {
 		throw new AssertionError("Bad test specification, no method '" + name + "' found in test class");
 	}
 
-	private void assertParameterNames(Method method, String pointcut, String[] parameterNames) {
-		assertParameterNames(method, pointcut, null, null, parameterNames);
+	private void assertParameterNames(Method method, String pointcut, String... parameterNames) {
+		assertParameterNamesExtended(method, pointcut, null, null, parameterNames);
 	}
 
-	private void assertParameterNames(
-			Method method, String pointcut, String returning, String throwing, String[] parameterNames) {
+	private void assertParameterNamesExtended(
+			Method method, String pointcut, String returning, String throwing, String... parameterNames) {
 
-		assertThat(parameterNames.length).as("bad test specification, must have same number of parameter names as method arguments").isEqualTo(method.getParameterCount());
+		assertThat(parameterNames)
+			.as("bad test specification, must have same number of parameter names as method arguments")
+			.hasSize(method.getParameterCount());
 
 		AspectJAdviceParameterNameDiscoverer discoverer = new AspectJAdviceParameterNameDiscoverer(pointcut);
 		discoverer.setRaiseExceptions(true);
 		discoverer.setReturningName(returning);
 		discoverer.setThrowingName(throwing);
-		String[] discoveredNames = discoverer.getParameterNames(method);
 
-		String formattedExpectedNames = Arrays.toString(parameterNames);
-		String formattedActualNames = Arrays.toString(discoveredNames);
-
-		assertThat(discoveredNames.length).as("Expecting " + parameterNames.length + " parameter names in return set '" +
-				formattedExpectedNames + "', but found " + discoveredNames.length +
-				" '" + formattedActualNames + "'").isEqualTo(parameterNames.length);
-
-		for (int i = 0; i < discoveredNames.length; i++) {
-			assertThat(discoveredNames[i]).as("Parameter names must never be null").isNotNull();
-			assertThat(discoveredNames[i]).as("Expecting parameter " + i + " to be named '" +
-						parameterNames[i] + "' but was '" + discoveredNames[i] + "'").isEqualTo(parameterNames[i]);
-		}
+		assertThat(discoverer.getParameterNames(method)).isEqualTo(parameterNames);
 	}
 
 	private void assertException(Method method, String pointcut, Class<? extends Throwable> exceptionType, String message) {

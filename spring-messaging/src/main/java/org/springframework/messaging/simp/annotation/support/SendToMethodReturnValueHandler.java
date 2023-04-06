@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,8 +212,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	protected String getUserName(Message<?> message, MessageHeaders headers) {
 		Principal principal = SimpMessageHeaderAccessor.getUser(headers);
 		if (principal != null) {
-			return (principal instanceof DestinationUserNameProvider ?
-					((DestinationUserNameProvider) principal).getDestinationUserName() : principal.getName());
+			return (principal instanceof DestinationUserNameProvider provider ?
+					provider.getDestinationUserName() : principal.getName());
 		}
 		return null;
 	}

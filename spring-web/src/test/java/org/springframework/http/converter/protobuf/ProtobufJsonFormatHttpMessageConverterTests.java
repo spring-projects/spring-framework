@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import com.google.protobuf.util.JsonFormat;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.MockHttpInputMessage;
-import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.protobuf.Msg;
 import org.springframework.protobuf.SecondMsg;
+import org.springframework.web.testfixture.http.MockHttpInputMessage;
+import org.springframework.web.testfixture.http.MockHttpOutputMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -83,7 +83,7 @@ public class ProtobufJsonFormatHttpMessageConverterTests {
 		MediaType contentType = ProtobufHttpMessageConverter.PROTOBUF;
 		this.converter.write(this.testMsg, contentType, outputMessage);
 		assertThat(outputMessage.getHeaders().getContentType()).isEqualTo(contentType);
-		assertThat(outputMessage.getBodyAsBytes().length > 0).isTrue();
+		assertThat(outputMessage.getBodyAsBytes().length).isGreaterThan(0);
 		Message result = Msg.parseFrom(outputMessage.getBodyAsBytes());
 		assertThat(result).isEqualTo(this.testMsg);
 

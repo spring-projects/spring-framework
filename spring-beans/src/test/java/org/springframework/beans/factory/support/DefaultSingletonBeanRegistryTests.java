@@ -45,13 +45,13 @@ public class DefaultSingletonBeanRegistryTests {
 		assertThat(beanRegistry.getSingleton("tb2")).isSameAs(tb2);
 		assertThat(beanRegistry.getSingletonCount()).isEqualTo(2);
 		String[] names = beanRegistry.getSingletonNames();
-		assertThat(names.length).isEqualTo(2);
+		assertThat(names).hasSize(2);
 		assertThat(names[0]).isEqualTo("tb");
 		assertThat(names[1]).isEqualTo("tb2");
 
 		beanRegistry.destroySingletons();
 		assertThat(beanRegistry.getSingletonCount()).isEqualTo(0);
-		assertThat(beanRegistry.getSingletonNames().length).isEqualTo(0);
+		assertThat(beanRegistry.getSingletonNames()).isEmpty();
 	}
 
 	@Test
@@ -66,13 +66,13 @@ public class DefaultSingletonBeanRegistryTests {
 		assertThat(beanRegistry.getSingleton("tb")).isSameAs(tb);
 		assertThat(beanRegistry.getSingletonCount()).isEqualTo(1);
 		String[] names = beanRegistry.getSingletonNames();
-		assertThat(names.length).isEqualTo(1);
+		assertThat(names).hasSize(1);
 		assertThat(names[0]).isEqualTo("tb");
 		assertThat(tb.wasDestroyed()).isFalse();
 
 		beanRegistry.destroySingletons();
 		assertThat(beanRegistry.getSingletonCount()).isEqualTo(0);
-		assertThat(beanRegistry.getSingletonNames().length).isEqualTo(0);
+		assertThat(beanRegistry.getSingletonNames()).isEmpty();
 		assertThat(tb.wasDestroyed()).isTrue();
 	}
 

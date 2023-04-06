@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,10 +114,10 @@ public class HeadersRequestConditionTests {
 		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo=a", "bar");
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 
 		result = condition2.compareTo(condition1, exchange);
-		assertThat(result > 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isGreaterThan(0);
 	}
 
 	@Test // SPR-16674
@@ -128,7 +128,7 @@ public class HeadersRequestConditionTests {
 		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo");
 
 		int result = condition1.compareTo(condition2, exchange);
-		assertThat(result < 0).as("Invalid comparison result: " + result).isTrue();
+		assertThat(result).as("Invalid comparison result: " + result).isLessThan(0);
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public class HeadersRequestConditionTests {
 
 		HeadersRequestCondition result = condition1.combine(condition2);
 		Collection<?> conditions = result.getContent();
-		assertThat(conditions.size()).isEqualTo(2);
+		assertThat(conditions).hasSize(2);
 	}
 
 	@Test

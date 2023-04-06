@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,8 @@ public abstract class MimeTypeUtils {
 	 * Comparator formally used by {@link #sortBySpecificity(List)}.
 	 * @deprecated As of 6.0, with no direct replacement
 	 */
-	@Deprecated
+	@SuppressWarnings("removal")
+	@Deprecated(since = "6.0", forRemoval = true)
 	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new MimeType.SpecificityComparator<>();
 
 	/**
@@ -280,7 +281,7 @@ public abstract class MimeTypeUtils {
 	}
 
 	/**
-	 * Parse the comma-separated string into a list of {@code MimeType} objects.
+	 * Parse the comma-separated string into a mutable list of {@code MimeType} objects.
 	 * @param mimeTypes the string to parse
 	 * @return the list of mime types
 	 * @throws InvalidMimeTypeException if the string cannot be parsed
@@ -313,18 +314,14 @@ public abstract class MimeTypeUtils {
 		int i = 0;
 		while (i < mimeTypes.length()) {
 			switch (mimeTypes.charAt(i)) {
-				case '"':
-					inQuotes = !inQuotes;
-					break;
-				case ',':
+				case '"' -> inQuotes = !inQuotes;
+				case ',' -> {
 					if (!inQuotes) {
 						tokens.add(mimeTypes.substring(startIndex, i));
 						startIndex = i + 1;
 					}
-					break;
-				case '\\':
-					i++;
-					break;
+				}
+				case '\\' -> i++;
 			}
 			i++;
 		}

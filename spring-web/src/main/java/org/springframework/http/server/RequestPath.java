@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public interface RequestPath extends PathContainer {
 
 	/**
 	 * The portion of the request path after the context path which is typically
-	 * used for request mapping within the application .
+	 * used for request mapping within the application.
 	 */
 	PathContainer pathWithinApplication();
 

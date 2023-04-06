@@ -17,10 +17,18 @@ package org.springframework.cglib.beans;
 
 import java.beans.PropertyDescriptor;
 import java.security.ProtectionDomain;
-import java.util.*;
-import org.springframework.cglib.core.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.KeyFactory;
+import org.springframework.cglib.core.ReflectUtils;
 
 /**
  * @author Juozas Baliuka, Chris Nokleberg
@@ -31,7 +39,7 @@ public class BeanGenerator extends AbstractClassGenerator
     private static final Source SOURCE = new Source(BeanGenerator.class.getName());
     private static final BeanGeneratorKey KEY_FACTORY =
       (BeanGeneratorKey)KeyFactory.create(BeanGeneratorKey.class);
-    
+
     interface BeanGeneratorKey {
         public Object newInstance(String superclass, Map props);
     }
@@ -67,7 +75,8 @@ public class BeanGenerator extends AbstractClassGenerator
         props.put(name, Type.getType(type));
     }
 
-    protected ClassLoader getDefaultClassLoader() {
+    @Override
+	protected ClassLoader getDefaultClassLoader() {
         if (superclass != null) {
             return superclass.getClassLoader();
         } else {
@@ -75,7 +84,8 @@ public class BeanGenerator extends AbstractClassGenerator
         }
     }
 
-    protected ProtectionDomain getProtectionDomain() {
+    @Override
+	protected ProtectionDomain getProtectionDomain() {
         return ReflectUtils.getProtectionDomain(superclass);
     }
 
@@ -98,7 +108,8 @@ public class BeanGenerator extends AbstractClassGenerator
         return super.create(key);
     }
 
-    public void generateClass(ClassVisitor v) throws Exception {
+    @Override
+	public void generateClass(ClassVisitor v) throws Exception {
         int size = props.size();
         String[] names = (String[])props.keySet().toArray(new String[size]);
         Type[] types = new Type[size];
@@ -117,7 +128,8 @@ public class BeanGenerator extends AbstractClassGenerator
         ce.end_class();
     }
 
-    protected Object firstInstance(Class type) {
+    @Override
+	protected Object firstInstance(Class type) {
         if (classOnly) {
             return type;
         } else {
@@ -125,8 +137,9 @@ public class BeanGenerator extends AbstractClassGenerator
         }
     }
 
-    protected Object nextInstance(Object instance) {
-        Class protoclass = (instance instanceof Class) ? (Class)instance : instance.getClass();
+    @Override
+	protected Object nextInstance(Object instance) {
+        Class protoclass = (instance instanceof Class<?> clazz) ? clazz : instance.getClass();
         if (classOnly) {
             return protoclass;
         } else {
@@ -146,8 +159,8 @@ public class BeanGenerator extends AbstractClassGenerator
     }
 
     public static void addProperties(BeanGenerator gen, PropertyDescriptor[] descriptors) {
-        for (int i = 0; i < descriptors.length; i++) {
-            gen.addProperty(descriptors[i].getName(), descriptors[i].getPropertyType());
+        for (PropertyDescriptor descriptor : descriptors) {
+            gen.addProperty(descriptor.getName(), descriptor.getPropertyType());
         }
     }
 }

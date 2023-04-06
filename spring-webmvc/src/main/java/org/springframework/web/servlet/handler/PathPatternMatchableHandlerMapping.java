@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,9 @@ import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 /**
- * Wraps {@link MatchableHandlerMapping}s configured with a {@link PathPatternParser}
- * in order to parse patterns lazily and cache them for re-ues.
+ * Decorate another {@link MatchableHandlerMapping} that's configured with a
+ * {@link PathPatternParser} in order to parse and cache String patterns passed
+ * into the {@code match} method.
  *
  * @author Rossen Stoyanchev
  * @since 5.3
@@ -49,8 +50,8 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 
 
 	public PathPatternMatchableHandlerMapping(MatchableHandlerMapping delegate) {
-		Assert.notNull(delegate, "Delegate MatchableHandlerMapping is required.");
-		Assert.notNull(delegate.getPatternParser(), "PatternParser is required.");
+		Assert.notNull(delegate, "HandlerMapping to delegate to is required.");
+		Assert.notNull(delegate.getPatternParser(), "Expected HandlerMapping configured to use PatternParser.");
 		this.delegate = delegate;
 		this.parser = delegate.getPatternParser();
 	}
@@ -59,7 +60,7 @@ class PathPatternMatchableHandlerMapping implements MatchableHandlerMapping {
 	@Override
 	public RequestMatchResult match(HttpServletRequest request, String pattern) {
 		PathPattern pathPattern = this.pathPatternCache.computeIfAbsent(pattern, value -> {
-			Assert.isTrue(this.pathPatternCache.size() < MAX_PATTERNS, "Max size for pattern cache exceeded.");
+			Assert.state(this.pathPatternCache.size() < MAX_PATTERNS, "Max size for pattern cache exceeded.");
 			return this.parser.parse(pattern);
 		});
 		PathContainer path = ServletRequestPathUtils.getParsedRequestPath(request).pathWithinApplication();

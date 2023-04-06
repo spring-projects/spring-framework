@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,8 +95,8 @@ public class WebSocketTransport implements Transport, Lifecycle {
 	@Override
 	public void start() {
 		if (!isRunning()) {
-			if (this.webSocketClient instanceof Lifecycle) {
-				((Lifecycle) this.webSocketClient).start();
+			if (this.webSocketClient instanceof Lifecycle lifecycle) {
+				lifecycle.start();
 			}
 			else {
 				this.running = true;
@@ -107,8 +107,8 @@ public class WebSocketTransport implements Transport, Lifecycle {
 	@Override
 	public void stop() {
 		if (isRunning()) {
-			if (this.webSocketClient instanceof Lifecycle) {
-				((Lifecycle) this.webSocketClient).stop();
+			if (this.webSocketClient instanceof Lifecycle lifecycle) {
+				lifecycle.stop();
 			}
 			else {
 				this.running = false;
@@ -118,8 +118,8 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 	@Override
 	public boolean isRunning() {
-		if (this.webSocketClient instanceof Lifecycle) {
-			return ((Lifecycle) this.webSocketClient).isRunning();
+		if (this.webSocketClient instanceof Lifecycle lifecycle) {
+			return lifecycle.isRunning();
 		}
 		else {
 			return this.running;

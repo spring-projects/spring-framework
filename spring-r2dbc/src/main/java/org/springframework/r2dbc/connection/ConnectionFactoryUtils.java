@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,13 @@ import io.r2dbc.spi.Wrapped;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
-import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.PermissionDeniedDataAccessException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.lang.Nullable;
@@ -215,17 +217,23 @@ public abstract class ConnectionFactoryUtils {
 				return new TransientDataAccessResourceException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcRollbackException) {
-				return new ConcurrencyFailureException(buildMessage(task, sql, ex), ex);
+				if ("40001".equals(ex.getSqlState())) {
+					return new CannotAcquireLockException(buildMessage(task, sql, ex), ex);
+				}
+				return new PessimisticLockingFailureException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcTimeoutException) {
 				return new QueryTimeoutException(buildMessage(task, sql, ex), ex);
 			}
 		}
-		if (ex instanceof R2dbcNonTransientException) {
+		else if (ex instanceof R2dbcNonTransientException) {
 			if (ex instanceof R2dbcNonTransientResourceException) {
 				return new DataAccessResourceFailureException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcDataIntegrityViolationException) {
+				if (indicatesDuplicateKey(ex.getSqlState(), ex.getErrorCode())) {
+					return new DuplicateKeyException(buildMessage(task, sql, ex), ex);
+				}
 				return new DataIntegrityViolationException(buildMessage(task, sql, ex), ex);
 			}
 			if (ex instanceof R2dbcPermissionDeniedException) {
@@ -236,6 +244,19 @@ public abstract class ConnectionFactoryUtils {
 			}
 		}
 		return new UncategorizedR2dbcException(buildMessage(task, sql, ex), sql, ex);
+	}
+
+	/**
+	 * Check whether the given SQL state (and the associated error code in case
+	 * of a generic SQL state value) indicate a duplicate key exception. See
+	 * {@code org.springframework.jdbc.support.SQLStateSQLExceptionTranslator#indicatesDuplicateKey}.
+	 * @param sqlState the SQL state value
+	 * @param errorCode the error code value
+	 */
+	static boolean indicatesDuplicateKey(@Nullable String sqlState, int errorCode) {
+		return ("23505".equals(sqlState) ||
+				("23000".equals(sqlState) &&
+						(errorCode == 1 || errorCode == 1062 || errorCode == 2601 || errorCode == 2627)));
 	}
 
 	/**
@@ -280,13 +301,13 @@ public abstract class ConnectionFactoryUtils {
 	 * @return the innermost target Connection, or the passed-in one if not wrapped
 	 * @see Wrapped#unwrap()
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Connection getTargetConnection(Connection con) {
-		Connection conToUse = con;
-		while (conToUse instanceof Wrapped<?>) {
-			conToUse = ((Wrapped<Connection>) conToUse).unwrap();
+		Object conToUse = con;
+		while (conToUse instanceof Wrapped wrapped) {
+			conToUse = wrapped.unwrap();
 		}
-		return conToUse;
+		return (Connection) conToUse;
 	}
 
 	/**
@@ -300,9 +321,9 @@ public abstract class ConnectionFactoryUtils {
 	private static int getConnectionSynchronizationOrder(ConnectionFactory connectionFactory) {
 		int order = CONNECTION_SYNCHRONIZATION_ORDER;
 		ConnectionFactory current = connectionFactory;
-		while (current instanceof DelegatingConnectionFactory) {
+		while (current instanceof DelegatingConnectionFactory delegatingConnectionFactory) {
 			order--;
-			current = ((DelegatingConnectionFactory) current).getTargetConnectionFactory();
+			current = delegatingConnectionFactory.getTargetConnectionFactory();
 		}
 		return order;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +40,12 @@ public class SockJsWebSocketHandlerTests {
 
 	@Test
 	public void getSubProtocols() throws Exception {
-		SubscribableChannel channel = mock(SubscribableChannel.class);
+		SubscribableChannel channel = mock();
 		SubProtocolWebSocketHandler handler = new SubProtocolWebSocketHandler(channel, channel);
 		StompSubProtocolHandler stompHandler = new StompSubProtocolHandler();
 		handler.addProtocolHandler(stompHandler);
 
-		TaskScheduler scheduler = mock(TaskScheduler.class);
+		TaskScheduler scheduler = mock();
 		DefaultSockJsService service = new DefaultSockJsService(scheduler);
 		WebSocketServerSockJsSession session = new WebSocketServerSockJsSession("1", service, handler, null);
 		SockJsWebSocketHandler sockJsHandler = new SockJsWebSocketHandler(service, handler, session);
@@ -56,7 +56,7 @@ public class SockJsWebSocketHandlerTests {
 	@Test
 	public void getSubProtocolsNone() throws Exception {
 		WebSocketHandler handler = new TextWebSocketHandler();
-		TaskScheduler scheduler = mock(TaskScheduler.class);
+		TaskScheduler scheduler = mock();
 		DefaultSockJsService service = new DefaultSockJsService(scheduler);
 		WebSocketServerSockJsSession session = new WebSocketServerSockJsSession("1", service, handler, null);
 		SockJsWebSocketHandler sockJsHandler = new SockJsWebSocketHandler(service, handler, session);

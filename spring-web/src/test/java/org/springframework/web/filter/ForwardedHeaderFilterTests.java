@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ public class ForwardedHeaderFilterTests {
 		@Test
 		public void contextPathEmpty() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "");
-			assertThat(filterAndGetContextPath()).isEqualTo("");
+			assertThat(filterAndGetContextPath()).isEmpty();
 		}
 
 		@Test
@@ -269,7 +269,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/path");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path");
 		}
 
@@ -280,7 +280,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/path/");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path/");
 		}
 
@@ -302,7 +302,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/");
 		}
 
@@ -313,7 +313,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/");
 		}
 
@@ -323,7 +323,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/path;a=b/with/semicolon");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path;a=b/with/semicolon");
 			assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/path;a=b/with/semicolon");
 		}
@@ -634,7 +634,7 @@ public class ForwardedHeaderFilterTests {
 				}
 			};
 			MockHttpServletResponse response = new MockHttpServletResponse();
-			FilterChain filterChain = new MockFilterChain(mock(HttpServlet.class), filter, redirectFilter);
+			FilterChain filterChain = new MockFilterChain(mock(), filter, redirectFilter);
 			filterChain.doFilter(request, response);
 			return response.getRedirectedUrl();
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -240,9 +240,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public Set<String> getDirectPaths() {
 		RequestCondition<?> condition = getActivePatternsCondition();
-		return (condition instanceof PathPatternsRequestCondition ?
-				((PathPatternsRequestCondition) condition).getDirectPaths() :
-				((PatternsRequestCondition) condition).getDirectPaths());
+		return (condition instanceof PathPatternsRequestCondition pprc ?
+				pprc.getDirectPaths() : ((PatternsRequestCondition) condition).getDirectPaths());
 	}
 
 	/**
@@ -252,9 +251,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	public Set<String> getPatternValues() {
 		RequestCondition<?> condition = getActivePatternsCondition();
-		return (condition instanceof PathPatternsRequestCondition ?
-				((PathPatternsRequestCondition) condition).getPatternValues() :
-				((PatternsRequestCondition) condition).getPatterns());
+		return (condition instanceof PathPatternsRequestCondition pprc ?
+				pprc.getPatternValues() : ((PatternsRequestCondition) condition).getPatterns());
 	}
 
 	/**
@@ -954,7 +952,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * @deprecated as of 6.0, see
 		 * {@link PathPatternParser#setMatchOptionalTrailingSeparator(boolean)}
 		 */
-		@Deprecated
+		@Deprecated(since = "6.0")
 		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
 			this.trailingSlashMatch = trailingSlashMatch;
 		}
@@ -963,7 +961,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Return whether to apply trailing slash matching in PatternsRequestCondition.
 		 * @deprecated as of 6.0 together with {@link #setTrailingSlashMatch(boolean)}
 		 */
-		@Deprecated
+		@Deprecated(since = "6.0")
 		public boolean useTrailingSlashMatch() {
 			return this.trailingSlashMatch;
 		}

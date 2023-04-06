@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ class RootBeanDefinitionTests {
 
 	@Test
 	void setInstanceSetResolvedFactoryMethod() {
-		InstanceSupplier<?> instanceSupplier = mock(InstanceSupplier.class);
+		InstanceSupplier<?> instanceSupplier = mock();
 		Method method = ReflectionUtils.findMethod(String.class, "toString");
 		given(instanceSupplier.getFactoryMethod()).willReturn(method);
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);
@@ -47,7 +47,7 @@ class RootBeanDefinitionTests {
 
 	@Test
 	void setInstanceDoesNotOverrideResolvedFactoryMethodWithNull() {
-		InstanceSupplier<?> instanceSupplier = mock(InstanceSupplier.class);
+		InstanceSupplier<?> instanceSupplier = mock();
 		given(instanceSupplier.getFactoryMethod()).willReturn(null);
 		Method method = ReflectionUtils.findMethod(String.class, "toString");
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(String.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 
 /**
@@ -53,9 +54,6 @@ import org.springframework.lang.Nullable;
  * @see ContentCachingResponseWrapper
  */
 public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
-
-	private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
-
 
 	private final ByteArrayOutputStream cachedContent;
 
@@ -151,7 +149,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 	private boolean isFormPost() {
 		String contentType = getContentType();
-		return (contentType != null && contentType.contains(FORM_CONTENT_TYPE) &&
+		return (contentType != null && contentType.contains(MediaType.APPLICATION_FORM_URLENCODED_VALUE) &&
 				HttpMethod.POST.matches(getMethod()));
 	}
 

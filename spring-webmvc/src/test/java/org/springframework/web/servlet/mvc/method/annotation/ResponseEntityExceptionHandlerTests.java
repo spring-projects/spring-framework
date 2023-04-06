@@ -16,27 +16,33 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.beans.PropertyChangeEvent;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindException;
 import org.springframework.validation.MapBindingResult;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -106,7 +112,7 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void handleHttpMediaTypeNotSupported() {
+	public void httpMediaTypeNotSupported() {
 		ResponseEntity<Object> entity = testException(new HttpMediaTypeNotSupportedException(
 				MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML)));
 
@@ -153,6 +159,37 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
+	public void errorResponseProblemDetailViaMessageSource() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		try {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage(
+					ErrorResponse.getDefaultDetailMessageCode(HttpMediaTypeNotSupportedException.class, null), locale,
+					"Content-Type {0} not supported. Supported: {1}");
+			messageSource.addMessage(
+					ErrorResponse.getDefaultTitleMessageCode(HttpMediaTypeNotSupportedException.class), locale,
+					"Media type is not valid or not supported");
+
+			this.exceptionHandler.setMessageSource(messageSource);
+
+			ResponseEntity<?> entity = testException(new HttpMediaTypeNotSupportedException(
+					MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML)));
+
+			ProblemDetail body = (ProblemDetail) entity.getBody();
+			assertThat(body.getDetail()).isEqualTo(
+					"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+			assertThat(body.getTitle()).isEqualTo(
+					"Media type is not valid or not supported");
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
+	@Test
 	public void conversionNotSupported() {
 		testException(new ConversionNotSupportedException(new Object(), Object.class, null));
 	}
@@ -160,6 +197,30 @@ public class ResponseEntityExceptionHandlerTests {
 	@Test
 	public void typeMismatch() {
 		testException(new TypeMismatchException("foo", String.class));
+	}
+
+	@Test
+	public void typeMismatchWithProblemDetailViaMessageSource() {
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		try {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage(
+					ErrorResponse.getDefaultDetailMessageCode(TypeMismatchException.class, null), locale,
+					"Failed to set {0} to value: {1}");
+
+			this.exceptionHandler.setMessageSource(messageSource);
+
+			ResponseEntity<?> entity = testException(
+					new TypeMismatchException(new PropertyChangeEvent(this, "name", "John", "James"), String.class));
+
+			ProblemDetail body = (ProblemDetail) entity.getBody();
+			assertThat(body.getDetail()).isEqualTo("Failed to set name to value: James");
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 	@Test
@@ -192,7 +253,13 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	public void noHandlerFoundException() {
-		testException(new NoHandlerFoundException("GET", "/resource", HttpHeaders.EMPTY));
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED); // gh-29626
+
+		ResponseEntity<Object> responseEntity =
+				testException(new NoHandlerFoundException("GET", "/resource", requestHeaders));
+
+		assertThat(responseEntity.getHeaders()).isEmpty();
 	}
 
 	@Test

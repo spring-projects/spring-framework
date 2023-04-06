@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public class SimpleBrokerMessageHandlerTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void startAndStopWithHeartbeatValue() {
-		ScheduledFuture future = mock(ScheduledFuture.class);
+		ScheduledFuture future = mock();
 		given(this.taskScheduler.scheduleWithFixedDelay(any(Runnable.class), eq(Duration.ofMillis(15000)))).willReturn(future);
 
 		this.messageHandler.setTaskScheduler(this.taskScheduler);
@@ -230,7 +230,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		verify(this.clientOutChannel, atLeast(2)).send(this.messageCaptor.capture());
 		List<Message<?>> messages = this.messageCaptor.getAllValues();
-		assertThat(messages.size()).isEqualTo(2);
+		assertThat(messages).hasSize(2);
 
 		MessageHeaders headers = messages.get(0).getHeaders();
 		assertThat(headers.get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER)).isEqualTo(SimpMessageType.CONNECT_ACK);
@@ -261,7 +261,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		verify(this.clientOutChannel, times(2)).send(this.messageCaptor.capture());
 		List<Message<?>> messages = this.messageCaptor.getAllValues();
-		assertThat(messages.size()).isEqualTo(2);
+		assertThat(messages).hasSize(2);
 
 		MessageHeaders headers = messages.get(0).getHeaders();
 		assertThat(headers.get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER)).isEqualTo(SimpMessageType.CONNECT_ACK);
@@ -292,7 +292,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		verify(this.clientOutChannel, times(1)).send(this.messageCaptor.capture());
 		List<Message<?>> messages = this.messageCaptor.getAllValues();
-		assertThat(messages.size()).isEqualTo(1);
+		assertThat(messages).hasSize(1);
 		assertThat(messages.get(0).getHeaders().get(SimpMessageHeaderAccessor.MESSAGE_TYPE_HEADER)).isEqualTo(SimpMessageType.CONNECT_ACK);
 	}
 

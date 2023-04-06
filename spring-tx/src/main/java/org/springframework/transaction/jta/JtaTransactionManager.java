@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -547,8 +547,8 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @return a corresponding UserTransaction handle
 	 */
 	protected UserTransaction buildUserTransaction(TransactionManager transactionManager) {
-		if (transactionManager instanceof UserTransaction) {
-			return (UserTransaction) transactionManager;
+		if (transactionManager instanceof UserTransaction ut) {
+			return ut;
 		}
 		else {
 			return new UserTransactionAdapter(transactionManager);
@@ -702,11 +702,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 */
 	@Nullable
 	protected TransactionManager findTransactionManager(@Nullable UserTransaction ut) {
-		if (ut instanceof TransactionManager) {
+		if (ut instanceof TransactionManager tm) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("JTA UserTransaction object [" + ut + "] implements TransactionManager");
 			}
-			return (TransactionManager) ut;
+			return tm;
 		}
 
 		// Check fallback JNDI locations.
@@ -762,11 +762,11 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 		// Check whether the UserTransaction or TransactionManager implements it...
-		if (ut instanceof TransactionSynchronizationRegistry) {
-			return (TransactionSynchronizationRegistry) ut;
+		if (ut instanceof TransactionSynchronizationRegistry tsr) {
+			return tsr;
 		}
-		if (tm instanceof TransactionSynchronizationRegistry) {
-			return (TransactionSynchronizationRegistry) tm;
+		if (tm instanceof TransactionSynchronizationRegistry tsr) {
+			return tsr;
 		}
 		// OK, so no JTA 1.1 TransactionSynchronizationRegistry is available...
 		return null;

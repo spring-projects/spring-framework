@@ -35,14 +35,14 @@ import org.springframework.util.ObjectUtils;
  * {@link RegisteredBean}.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see BeanDefinitionMethodGenerator
- * @see #getBeanDefinitionMethodGenerator(RegisteredBean, String)
+ * @see #getBeanDefinitionMethodGenerator(RegisteredBean)
  */
 class BeanDefinitionMethodGeneratorFactory {
 
-	private static final Log logger = LogFactory
-			.getLog(BeanDefinitionMethodGeneratorFactory.class);
+	private static final Log logger = LogFactory.getLog(BeanDefinitionMethodGeneratorFactory.class);
 
 
 	private final AotServices<BeanRegistrationAotProcessor> aotProcessors;
@@ -80,26 +80,39 @@ class BeanDefinitionMethodGeneratorFactory {
 
 	/**
 	 * Return a {@link BeanDefinitionMethodGenerator} for the given
+	 * {@link RegisteredBean} defined with the specified property name, or
+	 * {@code null} if the registered bean is excluded by a
+	 * {@link BeanRegistrationExcludeFilter}. The resulting
+	 * {@link BeanDefinitionMethodGenerator} will include all
+	 * {@link BeanRegistrationAotProcessor} provided contributions.
+	 * @param registeredBean the registered bean
+	 * @param currentPropertyName the property name that this bean belongs to
+	 * @return a new {@link BeanDefinitionMethodGenerator} instance or {@code null}
+	 */
+	@Nullable
+	BeanDefinitionMethodGenerator getBeanDefinitionMethodGenerator(
+			RegisteredBean registeredBean, @Nullable String currentPropertyName) {
+
+		if (isExcluded(registeredBean)) {
+			return null;
+		}
+		List<BeanRegistrationAotContribution> contributions = getAotContributions(registeredBean);
+		return new BeanDefinitionMethodGenerator(this, registeredBean,
+				currentPropertyName, contributions);
+	}
+
+	/**
+	 * Return a {@link BeanDefinitionMethodGenerator} for the given
 	 * {@link RegisteredBean} or {@code null} if the registered bean is excluded
 	 * by a {@link BeanRegistrationExcludeFilter}. The resulting
 	 * {@link BeanDefinitionMethodGenerator} will include all
 	 * {@link BeanRegistrationAotProcessor} provided contributions.
 	 * @param registeredBean the registered bean
-	 * @param innerBeanPropertyName the inner bean property name or {@code null}
-	 * @return a new {@link BeanDefinitionMethodGenerator} instance or
-	 * {@code null}
+	 * @return a new {@link BeanDefinitionMethodGenerator} instance or {@code null}
 	 */
 	@Nullable
-	BeanDefinitionMethodGenerator getBeanDefinitionMethodGenerator(
-			RegisteredBean registeredBean, @Nullable String innerBeanPropertyName) {
-
-		if (isExcluded(registeredBean)) {
-			return null;
-		}
-		List<BeanRegistrationAotContribution> contributions = getAotContributions(
-				registeredBean);
-		return new BeanDefinitionMethodGenerator(this, registeredBean,
-				innerBeanPropertyName, contributions);
+	BeanDefinitionMethodGenerator getBeanDefinitionMethodGenerator(RegisteredBean registeredBean) {
+		return getBeanDefinitionMethodGenerator(registeredBean, null);
 	}
 
 	private boolean isExcluded(RegisteredBean registeredBean) {
@@ -126,19 +139,16 @@ class BeanDefinitionMethodGeneratorFactory {
 		}
 		if (BeanRegistrationAotProcessor.class.isAssignableFrom(beanClass)) {
 			BeanRegistrationAotProcessor processor = this.aotProcessors.findByBeanName(registeredBean.getBeanName());
-			return (processor == null) || processor.isBeanExcludedFromAotProcessing();
+			return (processor == null || processor.isBeanExcludedFromAotProcessing());
 		}
 		return false;
 	}
 
-	private List<BeanRegistrationAotContribution> getAotContributions(
-			RegisteredBean registeredBean) {
-
+	private List<BeanRegistrationAotContribution> getAotContributions(RegisteredBean registeredBean) {
 		String beanName = registeredBean.getBeanName();
 		List<BeanRegistrationAotContribution> contributions = new ArrayList<>();
 		for (BeanRegistrationAotProcessor aotProcessor : this.aotProcessors) {
-			BeanRegistrationAotContribution contribution = aotProcessor
-					.processAheadOfTime(registeredBean);
+			BeanRegistrationAotContribution contribution = aotProcessor.processAheadOfTime(registeredBean);
 			if (contribution != null) {
 				logger.trace(LogMessage.format(
 						"Adding bean registration AOT contribution %S from %S to '%S'",

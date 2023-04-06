@@ -28,7 +28,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @since 4.2
  * @deprecated as of 6.0, in favor of {@link CompletableFutureReturnValueHandler}
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class ListenableFutureReturnValueHandler extends AbstractAsyncReturnValueHandler {
 
 	@Override

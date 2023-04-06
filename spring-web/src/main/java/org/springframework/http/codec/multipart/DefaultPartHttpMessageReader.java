@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,6 @@ import org.springframework.util.Assert;
  * {@link #setMaxInMemorySize(int) maxInMemorySize} in memory, and parts larger
  * than that to a temporary file in
  * {@link #setFileStorageDirectory(Path) fileStorageDirectory}.
- * <p>In {@linkplain #setStreaming(boolean) streaming} mode, the contents of the
- * part is streamed directly from the parsed input buffer stream, and not stored
- * in memory nor file.
  *
  * <p>This reader can be provided to {@link MultipartHttpMessageReader} in order
  * to aggregate all parts into a Map.
@@ -157,7 +154,7 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * @see Schedulers#newBoundedElastic
 	 */
 	public void setBlockingOperationScheduler(Scheduler blockingOperationScheduler) {
-		Assert.notNull(blockingOperationScheduler, "FileCreationScheduler must not be null");
+		Assert.notNull(blockingOperationScheduler, "'blockingOperationScheduler' must not be null");
 		this.blockingOperationScheduler = blockingOperationScheduler;
 	}
 
@@ -181,7 +178,10 @@ public class DefaultPartHttpMessageReader extends LoggingCodecSupport implements
 	 * {@link #setMaxDiskUsagePerPart(long) maxDiskUsagePerPart},
 	 * {@link #setFileStorageDirectory(Path) fileStorageDirectory}, and
 	 * {@link #setBlockingOperationScheduler(Scheduler) fileCreationScheduler}.
+	 * @deprecated as of 6.0, in favor of {@link PartEvent} and
+	 * {@link PartEventHttpMessageReader}
 	 */
+	@Deprecated(since = "6.0", forRemoval = true)
 	public void setStreaming(boolean streaming) {
 		this.streaming = streaming;
 	}

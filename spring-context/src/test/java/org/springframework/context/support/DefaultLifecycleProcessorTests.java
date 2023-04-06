@@ -74,7 +74,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean.isRunning()).isTrue();
 		context.stop();
 		assertThat(bean.isRunning()).isFalse();
-		assertThat(startedBeans.size()).isEqualTo(1);
+		assertThat(startedBeans).hasSize(1);
 		context.close();
 	}
 
@@ -116,10 +116,10 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean.isRunning()).isFalse();
 		context.refresh();
 		assertThat(bean.isRunning()).isFalse();
-		assertThat(startedBeans.size()).isEqualTo(0);
+		assertThat(startedBeans).isEmpty();
 		context.start();
 		assertThat(bean.isRunning()).isTrue();
-		assertThat(startedBeans.size()).isEqualTo(1);
+		assertThat(startedBeans).hasSize(1);
 		context.stop();
 		context.close();
 	}
@@ -143,7 +143,7 @@ class DefaultLifecycleProcessorTests {
 		context.stop();
 		assertThat(bean.isRunning()).isFalse();
 		assertThat(dependency.isRunning()).isFalse();
-		assertThat(startedBeans.size()).isEqualTo(1);
+		assertThat(startedBeans).hasSize(1);
 		context.close();
 	}
 
@@ -173,7 +173,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean3.isRunning()).isTrue();
 		assertThat(beanMax.isRunning()).isTrue();
 		context.stop();
-		assertThat(startedBeans.size()).isEqualTo(5);
+		assertThat(startedBeans).hasSize(5);
 		assertThat(getPhase(startedBeans.get(0))).isEqualTo(Integer.MIN_VALUE);
 		assertThat(getPhase(startedBeans.get(1))).isEqualTo(1);
 		assertThat(getPhase(startedBeans.get(2))).isEqualTo(2);
@@ -203,7 +203,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(smartBean2.isRunning()).isTrue();
 		assertThat(simpleBean1.isRunning()).isFalse();
 		assertThat(simpleBean2.isRunning()).isFalse();
-		assertThat(startedBeans.size()).isEqualTo(2);
+		assertThat(startedBeans).hasSize(2);
 		assertThat(getPhase(startedBeans.get(0))).isEqualTo(-3);
 		assertThat(getPhase(startedBeans.get(1))).isEqualTo(5);
 		context.start();
@@ -211,7 +211,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(smartBean2.isRunning()).isTrue();
 		assertThat(simpleBean1.isRunning()).isTrue();
 		assertThat(simpleBean2.isRunning()).isTrue();
-		assertThat(startedBeans.size()).isEqualTo(4);
+		assertThat(startedBeans).hasSize(4);
 		assertThat(getPhase(startedBeans.get(2))).isEqualTo(0);
 		assertThat(getPhase(startedBeans.get(3))).isEqualTo(0);
 		context.close();
@@ -238,7 +238,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(smartBean2.isRunning()).isTrue();
 		assertThat(simpleBean1.isRunning()).isFalse();
 		assertThat(simpleBean2.isRunning()).isFalse();
-		assertThat(startedBeans.size()).isEqualTo(2);
+		assertThat(startedBeans).hasSize(2);
 		assertThat(getPhase(startedBeans.get(0))).isEqualTo(-3);
 		assertThat(getPhase(startedBeans.get(1))).isEqualTo(5);
 		context.stop();
@@ -251,7 +251,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(smartBean2.isRunning()).isTrue();
 		assertThat(simpleBean1.isRunning()).isTrue();
 		assertThat(simpleBean2.isRunning()).isTrue();
-		assertThat(startedBeans.size()).isEqualTo(6);
+		assertThat(startedBeans).hasSize(6);
 		assertThat(getPhase(startedBeans.get(2))).isEqualTo(-3);
 		assertThat(getPhase(startedBeans.get(3))).isEqualTo(0);
 		assertThat(getPhase(startedBeans.get(4))).isEqualTo(0);
@@ -300,7 +300,7 @@ class DefaultLifecycleProcessorTests {
 		context.refresh();
 		assertThat(bean.isRunning()).isTrue();
 		context.stop();
-		assertThat(stoppedBeans.size()).isEqualTo(1);
+		assertThat(stoppedBeans).hasSize(1);
 		assertThat(bean.isRunning()).isFalse();
 		assertThat(stoppedBeans.get(0)).isEqualTo(bean);
 		context.close();
@@ -317,7 +317,7 @@ class DefaultLifecycleProcessorTests {
 		bean.start();
 		assertThat(bean.isRunning()).isTrue();
 		context.stop();
-		assertThat(stoppedBeans.size()).isEqualTo(1);
+		assertThat(stoppedBeans).hasSize(1);
 		assertThat(bean.isRunning()).isFalse();
 		assertThat(stoppedBeans.get(0)).isEqualTo(bean);
 		context.close();
@@ -361,7 +361,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean5.isRunning()).isFalse();
 		assertThat(bean6.isRunning()).isFalse();
 		assertThat(bean7.isRunning()).isFalse();
-		assertThat(stoppedBeans.size()).isEqualTo(7);
+		assertThat(stoppedBeans).hasSize(7);
 		assertThat(getPhase(stoppedBeans.get(0))).isEqualTo(Integer.MAX_VALUE);
 		assertThat(getPhase(stoppedBeans.get(1))).isEqualTo(500);
 		assertThat(getPhase(stoppedBeans.get(2))).isEqualTo(1);
@@ -390,7 +390,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean2.isRunning()).isTrue();
 		assertThat(bean99.isRunning()).isTrue();
 		assertThat(beanMax.isRunning()).isTrue();
-		assertThat(startedBeans.size()).isEqualTo(4);
+		assertThat(startedBeans).hasSize(4);
 		assertThat(getPhase(startedBeans.get(0))).isEqualTo(Integer.MIN_VALUE);
 		assertThat(getPhase(startedBeans.get(1))).isEqualTo(99);
 		assertThat(startedBeans.get(1)).isEqualTo(bean99);
@@ -433,7 +433,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean7.isRunning()).isFalse();
 		assertThat(bean99.isRunning()).isFalse();
 		assertThat(beanMax.isRunning()).isFalse();
-		assertThat(stoppedBeans.size()).isEqualTo(6);
+		assertThat(stoppedBeans).hasSize(6);
 		assertThat(getPhase(stoppedBeans.get(0))).isEqualTo(Integer.MAX_VALUE);
 		assertThat(getPhase(stoppedBeans.get(1))).isEqualTo(2);
 		assertThat(stoppedBeans.get(1)).isEqualTo(bean2);
@@ -467,7 +467,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean99.isRunning()).isTrue();
 		assertThat(bean7.isRunning()).isTrue();
 		assertThat(simpleBean.isRunning()).isTrue();
-		assertThat(startedBeans.size()).isEqualTo(4);
+		assertThat(startedBeans).hasSize(4);
 		assertThat(getPhase(startedBeans.get(0))).isEqualTo(-99);
 		assertThat(getPhase(startedBeans.get(1))).isEqualTo(7);
 		assertThat(getPhase(startedBeans.get(2))).isEqualTo(0);
@@ -509,7 +509,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean2.isRunning()).isFalse();
 		assertThat(bean7.isRunning()).isFalse();
 		assertThat(simpleBean.isRunning()).isFalse();
-		assertThat(stoppedBeans.size()).isEqualTo(6);
+		assertThat(stoppedBeans).hasSize(6);
 		assertThat(getPhase(stoppedBeans.get(0))).isEqualTo(7);
 		assertThat(getPhase(stoppedBeans.get(1))).isEqualTo(2);
 		assertThat(getPhase(stoppedBeans.get(2))).isEqualTo(1);
@@ -534,7 +534,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(beanMin.isRunning()).isTrue();
 		assertThat(bean7.isRunning()).isTrue();
 		assertThat(simpleBean.isRunning()).isTrue();
-		assertThat(startedBeans.size()).isEqualTo(3);
+		assertThat(startedBeans).hasSize(3);
 		assertThat(getPhase(startedBeans.get(0))).isEqualTo(0);
 		assertThat(getPhase(startedBeans.get(1))).isEqualTo(Integer.MIN_VALUE);
 		assertThat(getPhase(startedBeans.get(2))).isEqualTo(7);
@@ -572,7 +572,7 @@ class DefaultLifecycleProcessorTests {
 		assertThat(bean2.isRunning()).isFalse();
 		assertThat(bean7.isRunning()).isFalse();
 		assertThat(simpleBean.isRunning()).isFalse();
-		assertThat(stoppedBeans.size()).isEqualTo(5);
+		assertThat(stoppedBeans).hasSize(5);
 		assertThat(getPhase(stoppedBeans.get(0))).isEqualTo(7);
 		assertThat(getPhase(stoppedBeans.get(1))).isEqualTo(0);
 		assertThat(getPhase(stoppedBeans.get(2))).isEqualTo(2);

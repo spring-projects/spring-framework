@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import org.springframework.util.CollectionUtils;
  * The default implementation of {@link CorsProcessor}, as defined by the
  * <a href="https://www.w3.org/TR/cors/">CORS W3C recommendation</a>.
  *
- * <p>Note that when input {@link CorsConfiguration} is {@code null}, this
+ * <p>Note that when the supplied {@link CorsConfiguration} is {@code null}, this
  * implementation does not reject simple or actual requests outright but simply
- * avoid adding CORS headers to the response. CORS processing is also skipped
+ * avoids adding CORS headers to the response. CORS processing is also skipped
  * if the response already contains CORS headers.
  *
  * @author Sebastien Deleuze

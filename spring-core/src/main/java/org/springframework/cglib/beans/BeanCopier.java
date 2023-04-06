@@ -16,12 +16,25 @@
 package org.springframework.cglib.beans;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.*;
+import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
-import org.springframework.cglib.core.*;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Type;
-import java.util.*;
+import org.springframework.cglib.core.AbstractClassGenerator;
+import org.springframework.cglib.core.ClassEmitter;
+import org.springframework.cglib.core.CodeEmitter;
+import org.springframework.cglib.core.Constants;
+import org.springframework.cglib.core.Converter;
+import org.springframework.cglib.core.EmitUtils;
+import org.springframework.cglib.core.KeyFactory;
+import org.springframework.cglib.core.Local;
+import org.springframework.cglib.core.MethodInfo;
+import org.springframework.cglib.core.ReflectUtils;
+import org.springframework.cglib.core.Signature;
+import org.springframework.cglib.core.TypeUtils;
 
 /**
  * @author Chris Nokleberg
@@ -39,7 +52,7 @@ abstract public class BeanCopier
       new Signature("copy", Type.VOID_TYPE, new Type[]{ Constants.TYPE_OBJECT, Constants.TYPE_OBJECT, CONVERTER });
     private static final Signature CONVERT =
       TypeUtils.parseSignature("Object convert(Object, Class, Object)");
-    
+
     interface BeanCopierKey {
         public Object newInstance(String source, String target, boolean useConverter);
     }
@@ -65,14 +78,14 @@ abstract public class BeanCopier
         }
 
         public void setSource(Class source) {
-            if(!Modifier.isPublic(source.getModifiers())){ 
+            if(!Modifier.isPublic(source.getModifiers())){
                setNamePrefix(source.getName());
             }
             this.source = source;
         }
-        
+
         public void setTarget(Class target) {
-            if(!Modifier.isPublic(target.getModifiers())){ 
+            if(!Modifier.isPublic(target.getModifiers())){
                setNamePrefix(target.getName());
             }
             this.target = target;
@@ -85,11 +98,13 @@ abstract public class BeanCopier
             this.useConverter = useConverter;
         }
 
-        protected ClassLoader getDefaultClassLoader() {
+        @Override
+		protected ClassLoader getDefaultClassLoader() {
             return source.getClassLoader();
         }
 
-        protected ProtectionDomain getProtectionDomain() {
+        @Override
+		protected ProtectionDomain getProtectionDomain() {
         	return ReflectUtils.getProtectionDomain(source);
         }
 
@@ -98,7 +113,8 @@ abstract public class BeanCopier
             return (BeanCopier)super.create(key);
         }
 
-        public void generateClass(ClassVisitor v) {
+        @Override
+		public void generateClass(ClassVisitor v) {
             Type sourceType = Type.getType(source);
             Type targetType = Type.getType(target);
             ClassEmitter ce = new ClassEmitter(v);
@@ -115,8 +131,8 @@ abstract public class BeanCopier
             PropertyDescriptor[] setters = ReflectUtils.getBeanSetters(target);
 
             Map names = new HashMap();
-            for (int i = 0; i < getters.length; i++) {
-                names.put(getters[i].getName(), getters[i]);
+            for (PropertyDescriptor getter : getters) {
+                names.put(getter.getName(), getter);
             }
             Local targetLocal = e.make_local();
             Local sourceLocal = e.make_local();
@@ -124,7 +140,7 @@ abstract public class BeanCopier
                 e.load_arg(1);
                 e.checkcast(targetType);
                 e.store_local(targetLocal);
-                e.load_arg(0);                
+                e.load_arg(0);
                 e.checkcast(sourceType);
                 e.store_local(sourceLocal);
             } else {
@@ -133,8 +149,7 @@ abstract public class BeanCopier
                 e.load_arg(0);
                 e.checkcast(sourceType);
             }
-            for (int i = 0; i < setters.length; i++) {
-                PropertyDescriptor setter = setters[i];
+            for (PropertyDescriptor setter : setters) {
                 PropertyDescriptor getter = (PropertyDescriptor)names.get(setter.getName());
                 if (getter != null) {
                     MethodInfo read = ReflectUtils.getMethodInfo(getter.getReadMethod());
@@ -168,11 +183,13 @@ abstract public class BeanCopier
             return setter.getPropertyType().isAssignableFrom(getter.getPropertyType());
         }
 
-        protected Object firstInstance(Class type) {
+        @Override
+		protected Object firstInstance(Class type) {
             return ReflectUtils.newInstance(type);
         }
 
-        protected Object nextInstance(Object instance) {
+        @Override
+		protected Object nextInstance(Object instance) {
             return instance;
         }
     }

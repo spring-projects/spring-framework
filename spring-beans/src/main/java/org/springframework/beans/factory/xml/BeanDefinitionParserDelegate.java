@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -916,14 +916,14 @@ public class BeanDefinitionParserDelegate {
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
+			if (node instanceof Element currentElement && !nodeNameEquals(node, DESCRIPTION_ELEMENT) &&
 					!nodeNameEquals(node, META_ELEMENT)) {
 				// Child element is what we're looking for.
 				if (subElement != null) {
 					error(elementName + " must not contain more than one sub-element", ele);
 				}
 				else {
-					subElement = (Element) node;
+					subElement = currentElement;
 				}
 			}
 		}
@@ -1158,8 +1158,8 @@ public class BeanDefinitionParserDelegate {
 
 		for (int i = 0; i < elementNodes.getLength(); i++) {
 			Node node = elementNodes.item(i);
-			if (node instanceof Element && !nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
-				target.add(parsePropertySubElement((Element) node, bd, defaultElementType));
+			if (node instanceof Element currentElement && !nodeNameEquals(node, DESCRIPTION_ELEMENT)) {
+				target.add(parsePropertySubElement(currentElement, bd, defaultElementType));
 			}
 		}
 	}
@@ -1309,13 +1309,13 @@ public class BeanDefinitionParserDelegate {
 		Element subElement = null;
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			if (node instanceof Element) {
+			if (node instanceof Element currentElement) {
 				// Child element is what we're looking for.
 				if (subElement != null) {
 					error("<key> element must not contain more than one value sub-element", keyEle);
 				}
 				else {
-					subElement = (Element) node;
+					subElement = currentElement;
 				}
 			}
 		}

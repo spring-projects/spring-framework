@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,8 +184,9 @@ public abstract class YamlProcessor {
 	protected Yaml createYaml() {
 		LoaderOptions loaderOptions = new LoaderOptions();
 		loaderOptions.setAllowDuplicateKeys(false);
-		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(),
-				new DumperOptions(), loaderOptions);
+		DumperOptions dumperOptions = new DumperOptions();
+		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(dumperOptions),
+				dumperOptions, loaderOptions);
 	}
 
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
@@ -225,17 +226,16 @@ public abstract class YamlProcessor {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Map<String, Object> asMap(Object object) {
 		// YAML can have numbers as keys
 		Map<String, Object> result = new LinkedHashMap<>();
-		if (!(object instanceof Map)) {
+		if (!(object instanceof Map map)) {
 			// A document can be a text literal
 			result.put("document", object);
 			return result;
 		}
 
-		Map<Object, Object> map = (Map<Object, Object>) object;
 		map.forEach((key, value) -> {
 			if (value instanceof Map) {
 				value = asMap(value);
@@ -305,6 +305,7 @@ public abstract class YamlProcessor {
 		return result;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void buildFlattenedMap(Map<String, Object> result, Map<String, Object> source, @Nullable String path) {
 		source.forEach((key, value) -> {
 			if (StringUtils.hasText(path)) {
@@ -318,16 +319,12 @@ public abstract class YamlProcessor {
 			if (value instanceof String) {
 				result.put(key, value);
 			}
-			else if (value instanceof Map) {
+			else if (value instanceof Map map) {
 				// Need a compound key
-				@SuppressWarnings("unchecked")
-				Map<String, Object> map = (Map<String, Object>) value;
 				buildFlattenedMap(result, map, key);
 			}
-			else if (value instanceof Collection) {
+			else if (value instanceof Collection collection) {
 				// Need a compound key
-				@SuppressWarnings("unchecked")
-				Collection<Object> collection = (Collection<Object>) value;
 				if (collection.isEmpty()) {
 					result.put(key, "");
 				}

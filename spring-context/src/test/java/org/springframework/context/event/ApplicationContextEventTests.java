@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.PayloadApplicationEvent;
-import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
@@ -59,6 +58,7 @@ import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.context.support.AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME;
 
 /**
  * Unit and integration tests for the ApplicationContext event support.
@@ -136,7 +136,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void simpleApplicationEventMulticasterWithTaskExecutor() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -153,7 +153,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void simpleApplicationEventMulticasterWithException() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -163,13 +163,13 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		willThrow(thrown).given(listener).onApplicationEvent(evt);
 		assertThatRuntimeException()
 			.isThrownBy(() -> smc.multicastEvent(evt))
-			.satisfies(ex -> assertThat(ex).isSameAs(thrown));
+			.isSameAs(thrown);
 	}
 
 	@Test
 	public void simpleApplicationEventMulticasterWithErrorHandler() {
 		@SuppressWarnings("unchecked")
-		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
+		ApplicationListener<ApplicationEvent> listener = mock();
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
@@ -191,7 +191,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
-		assertThat(listener1.seenEvents.size()).isEqualTo(2);
+		assertThat(listener1.seenEvents).hasSize(2);
 	}
 
 	@Test
@@ -205,7 +205,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
-		assertThat(listener1.seenEvents.size()).isEqualTo(2);
+		assertThat(listener1.seenEvents).hasSize(2);
 	}
 
 	@Test
@@ -222,7 +222,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
-		assertThat(listener1.seenEvents.size()).isEqualTo(2);
+		assertThat(listener1.seenEvents).hasSize(2);
 	}
 
 	@Test
@@ -241,13 +241,13 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		smc.multicastEvent(new MyEvent(this));
 		smc.multicastEvent(new MyOtherEvent(this));
-		assertThat(listener1.seenEvents.size()).isEqualTo(2);
+		assertThat(listener1.seenEvents).hasSize(2);
 	}
 
 	@Test
 	public void testEventPublicationInterceptor() throws Throwable {
-		MethodInvocation invocation = mock(MethodInvocation.class);
-		ApplicationContext ctx = mock(ApplicationContext.class);
+		MethodInvocation invocation = mock();
+		ApplicationContext ctx = mock();
 
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventClass(MyEvent.class);
@@ -282,23 +282,17 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		context.publishEvent(event3);
 		MyOtherEvent event4 = new MyOtherEvent(context);
 		context.publishEvent(event4);
-		assertThat(listener1.seenEvents.contains(event1)).isTrue();
-		assertThat(listener1.seenEvents.contains(event2)).isTrue();
-		assertThat(listener1.seenEvents.contains(event3)).isTrue();
-		assertThat(listener1.seenEvents.contains(event4)).isTrue();
+		assertThat(listener1.seenEvents).contains(event1, event2, event3, event4);
 
 		listener1.seenEvents.clear();
 		context.publishEvent(event1);
 		context.publishEvent(event2);
 		context.publishEvent(event3);
 		context.publishEvent(event4);
-		assertThat(listener1.seenEvents.contains(event1)).isTrue();
-		assertThat(listener1.seenEvents.contains(event2)).isTrue();
-		assertThat(listener1.seenEvents.contains(event3)).isTrue();
-		assertThat(listener1.seenEvents.contains(event4)).isTrue();
+		assertThat(listener1.seenEvents).contains(event1, event2, event3, event4);
 
 		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
-		assertThat(multicaster.retrieverCache.size()).isEqualTo(2);
+		assertThat(multicaster.retrieverCache).hasSize(2);
 
 		context.close();
 	}
@@ -314,13 +308,10 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		context.publishEvent("event2");
 		context.publishEvent("event3");
 		context.publishEvent("event4");
-		assertThat(listener.seenPayloads.contains("event1")).isTrue();
-		assertThat(listener.seenPayloads.contains("event2")).isTrue();
-		assertThat(listener.seenPayloads.contains("event3")).isTrue();
-		assertThat(listener.seenPayloads.contains("event4")).isTrue();
+		assertThat(listener.seenPayloads).contains("event1", "event2", "event3", "event4");
 
 		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
-		assertThat(multicaster.retrieverCache.size()).isEqualTo(2);
+		assertThat(multicaster.retrieverCache).hasSize(2);
 
 		context.close();
 	}
@@ -340,15 +331,13 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		MyOrderedListener1 listener1 = context.getBean("listener1", MyOrderedListener1.class);
 		MyEvent event1 = new MyEvent(context);
 		context.publishEvent(event1);
-		assertThat(listener1.seenEvents.contains(event1)).isTrue();
+		assertThat(listener1.seenEvents).contains(event1);
 
-		SimpleApplicationEventMulticaster multicaster = context.getBean(
-				AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME,
-				SimpleApplicationEventMulticaster.class);
-		assertThat(multicaster.getApplicationListeners().isEmpty()).isFalse();
+		SimpleApplicationEventMulticaster multicaster = context.getBean(SimpleApplicationEventMulticaster.class);
+		assertThat(multicaster.getApplicationListeners()).isNotEmpty();
 
 		context.close();
-		assertThat(multicaster.getApplicationListeners().isEmpty()).isTrue();
+		assertThat(multicaster.getApplicationListeners()).isEmpty();
 	}
 
 	@Test
@@ -367,24 +356,18 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		context.publishEvent(event3);
 		MyOtherEvent event4 = new MyOtherEvent(context);
 		context.publishEvent(event4);
-		assertThat(MyNonSingletonListener.seenEvents.contains(event1)).isTrue();
-		assertThat(MyNonSingletonListener.seenEvents.contains(event2)).isTrue();
-		assertThat(MyNonSingletonListener.seenEvents.contains(event3)).isTrue();
-		assertThat(MyNonSingletonListener.seenEvents.contains(event4)).isTrue();
+		assertThat(MyNonSingletonListener.seenEvents).contains(event1, event2, event3, event4);
 		MyNonSingletonListener.seenEvents.clear();
 
 		context.publishEvent(event1);
 		context.publishEvent(event2);
 		context.publishEvent(event3);
 		context.publishEvent(event4);
-		assertThat(MyNonSingletonListener.seenEvents.contains(event1)).isTrue();
-		assertThat(MyNonSingletonListener.seenEvents.contains(event2)).isTrue();
-		assertThat(MyNonSingletonListener.seenEvents.contains(event3)).isTrue();
-		assertThat(MyNonSingletonListener.seenEvents.contains(event4)).isTrue();
+		assertThat(MyNonSingletonListener.seenEvents).contains(event1, event2, event3, event4);
 		MyNonSingletonListener.seenEvents.clear();
 
 		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
-		assertThat(multicaster.retrieverCache.size()).isEqualTo(3);
+		assertThat(multicaster.retrieverCache).hasSize(3);
 
 		context.close();
 	}
@@ -433,9 +416,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		context.publishEvent(new MyOtherEvent(context));
 		MyEvent event2 = new MyEvent(context);
 		context.publishEvent(event2);
-		assertThat(seenEvents.size()).isSameAs(2);
-		assertThat(seenEvents.contains(event1)).isTrue();
-		assertThat(seenEvents.contains(event2)).isTrue();
+		assertThat(seenEvents).contains(event1, event2);
 
 		context.close();
 	}
@@ -453,9 +434,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		context.publishEvent(new MyOtherEvent(context));
 		MyEvent event2 = new MyEvent(context);
 		context.publishEvent(event2);
-		assertThat(seenEvents.size()).isSameAs(2);
-		assertThat(seenEvents.contains(event1)).isTrue();
-		assertThat(seenEvents.contains(event2)).isTrue();
+		assertThat(seenEvents).contains(event1, event2);
 
 		context.close();
 	}
@@ -466,8 +445,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		StaticApplicationContext context = new StaticApplicationContext();
 		SimpleApplicationEventMulticaster multicaster = new SimpleApplicationEventMulticaster();
 		multicaster.setErrorHandler(ReflectionUtils::rethrowRuntimeException);
-		context.getBeanFactory().registerSingleton(
-				StaticApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME, multicaster);
+		context.getBeanFactory().registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, multicaster);
 		ApplicationListener<MyEvent> listener = seenEvents::add;
 		context.addApplicationListener(listener);
 		context.refresh();
@@ -477,9 +455,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		context.publishEvent(new MyOtherEvent(context));
 		MyEvent event2 = new MyEvent(context);
 		context.publishEvent(event2);
-		assertThat(seenEvents.size()).isSameAs(2);
-		assertThat(seenEvents.contains(event1)).isTrue();
-		assertThat(seenEvents.contains(event2)).isTrue();
+		assertThat(seenEvents).containsExactlyInAnyOrder(event1, event2);
 
 		context.close();
 	}

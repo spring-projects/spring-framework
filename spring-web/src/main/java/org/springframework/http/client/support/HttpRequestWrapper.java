@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,15 +60,6 @@ public class HttpRequestWrapper implements HttpRequest {
 	@Override
 	public HttpMethod getMethod() {
 		return this.request.getMethod();
-	}
-
-	/**
-	 * Return the method value of the wrapped request.
-	 */
-	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.request.getMethodValue();
 	}
 
 	/**

@@ -16,8 +16,6 @@
 
 package org.springframework.web.service.invoker;
 
-import org.reactivestreams.Publisher;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
@@ -55,31 +53,23 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 
 		if (argument != null) {
 			ReactiveAdapter reactiveAdapter = this.reactiveAdapterRegistry.getAdapter(parameter.getParameterType());
-			if (reactiveAdapter != null) {
-				setBody(argument, parameter, reactiveAdapter, requestValues);
+			if (reactiveAdapter == null) {
+				requestValues.setBodyValue(argument);
 			}
 			else {
-				requestValues.setBodyValue(argument);
+				MethodParameter nestedParameter = parameter.nested();
+
+				String message = "Async type for @RequestBody should produce value(s)";
+				Assert.isTrue(!reactiveAdapter.isNoValue(), message);
+				Assert.isTrue(nestedParameter.getNestedParameterType() != Void.class, message);
+
+				requestValues.setBody(
+						reactiveAdapter.toPublisher(argument),
+						ParameterizedTypeReference.forType(nestedParameter.getNestedGenericParameterType()));
 			}
 		}
 
 		return true;
-	}
-
-	private <E> void setBody(
-			Object argument, MethodParameter parameter, ReactiveAdapter reactiveAdapter,
-			HttpRequestValues.Builder requestValues) {
-
-		String message = "Async type for @RequestBody should produce value(s)";
-		Assert.isTrue(!reactiveAdapter.isNoValue(), message);
-
-		parameter = parameter.nested();
-		Class<?> elementClass = parameter.getNestedParameterType();
-		Assert.isTrue(elementClass != Void.class, message);
-		ParameterizedTypeReference<E> typeRef = ParameterizedTypeReference.forType(parameter.getNestedGenericParameterType());
-		Publisher<E> publisher = reactiveAdapter.toPublisher(argument);
-
-		requestValues.setBody(publisher, typeRef);
 	}
 
 }

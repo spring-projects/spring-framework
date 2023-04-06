@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
@@ -116,11 +115,11 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		return setStatusCode(statusCode != null ? HttpStatusCode.valueOf(statusCode) : null);
 	}
 
+	@Deprecated
 	@Override
 	@Nullable
-	@Deprecated
 	public Integer getRawStatusCode() {
-		return this.statusCode != null ? this.statusCode.value() : null;
+		return (this.statusCode != null ? this.statusCode.value() : null);
 	}
 
 	@Override
@@ -190,7 +189,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 									try {
 										return writeWithInternal(Mono.fromCallable(() -> buffer)
 												.doOnSubscribe(s -> subscribed.set(true))
-												.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release));
+												.doOnDiscard(DataBuffer.class, DataBufferUtils::release));
 									}
 									catch (Throwable ex) {
 										return Mono.error(ex);
@@ -204,7 +203,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 								});
 					})
 					.doOnError(t -> getHeaders().clearContentHeaders())
-					.doOnDiscard(PooledDataBuffer.class, DataBufferUtils::release);
+					.doOnDiscard(DataBuffer.class, DataBufferUtils::release);
 		}
 		else {
 			return new ChannelSendOperator<>(body, inner -> doCommit(() -> writeWithInternal(inner)))
@@ -292,10 +291,10 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	/**
 	 * Invoked when the response is getting committed allowing subclasses to
 	 * make apply header values to the underlying response.
-	 * <p>Note that most subclasses use an {@link HttpHeaders} instance that
+	 * <p>Note that some subclasses use an {@link HttpHeaders} instance that
 	 * wraps an adapter to the native response headers such that changes are
 	 * propagated to the underlying response on the go. That means this callback
-	 * is typically not used other than for specialized updates such as setting
+	 * might not be used other than for specialized updates such as setting
 	 * the contentType or characterEncoding fields in a Servlet response.
 	 */
 	protected abstract void applyHeaders();

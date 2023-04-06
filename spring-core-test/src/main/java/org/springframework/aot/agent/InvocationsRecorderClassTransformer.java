@@ -37,15 +37,15 @@ class InvocationsRecorderClassTransformer implements ClassFileTransformer {
 
 	private static final String AGENT_PACKAGE = InvocationsRecorderClassTransformer.class.getPackageName().replace('.', '/');
 
-	private static final String AOT_DYNAMIC_CLASSLOADER = "org/springframework/aot/test/generator/compile/DynamicClassLoader";
+	private static final String AOT_DYNAMIC_CLASSLOADER = "org/springframework/aot/test/generate/compile/DynamicClassLoader";
 
 	private final String[] instrumentedPackages;
 
 	private final String[] ignoredPackages;
 
 	public InvocationsRecorderClassTransformer(String[] instrumentedPackages, String[] ignoredPackages) {
-		Assert.notNull(instrumentedPackages, "instrumentedPackages should not be null");
-		Assert.notNull(ignoredPackages, "ignoredPackages should not be null");
+		Assert.notNull(instrumentedPackages, "instrumentedPackages must not be null");
+		Assert.notNull(ignoredPackages, "ignoredPackages must not be null");
 		this.instrumentedPackages = rewriteToAsmFormat(instrumentedPackages);
 		this.ignoredPackages = rewriteToAsmFormat(ignoredPackages);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
 /**
  * {@code MockMvcWebConnection} enables {@link MockMvc} to transform a
  * {@link WebRequest} into a {@link WebResponse}.
- * <p>This is the core integration with <a href="http://htmlunit.sourceforge.net/">HtmlUnit</a>.
+ * <p>This is the core integration with <a href="https://htmlunit.sourceforge.io/">HtmlUnit</a>.
  * <p>Example usage can be seen below.
  *
  * <pre class="code">
@@ -67,6 +67,8 @@ public final class MockMvcWebConnection implements WebConnection {
 	private final String contextPath;
 
 	private WebClient webClient;
+
+	private static final int MAX_FORWARDS = 100;
 
 
 	/**
@@ -133,10 +135,15 @@ public final class MockMvcWebConnection implements WebConnection {
 
 		MockHttpServletResponse httpServletResponse = getResponse(requestBuilder);
 		String forwardedUrl = httpServletResponse.getForwardedUrl();
-		while (forwardedUrl != null) {
+		int forwards = 0;
+		while (forwardedUrl != null && forwards < MAX_FORWARDS) {
 			requestBuilder.setForwardPostProcessor(new ForwardRequestPostProcessor(forwardedUrl));
 			httpServletResponse = getResponse(requestBuilder);
 			forwardedUrl = httpServletResponse.getForwardedUrl();
+			forwards += 1;
+		}
+		if (forwards == MAX_FORWARDS) {
+			throw new IllegalStateException("Forwarded " + forwards + " times in a row, potential infinite forward loop");
 		}
 		storeCookies(webRequest, httpServletResponse.getCookies());
 
@@ -173,6 +180,7 @@ public final class MockMvcWebConnection implements WebConnection {
 		}
 	}
 
+	@SuppressWarnings("removal")
 	private static com.gargoylesoftware.htmlunit.util.Cookie createCookie(jakarta.servlet.http.Cookie cookie) {
 		Date expires = null;
 		if (cookie.getMaxAge() > -1) {

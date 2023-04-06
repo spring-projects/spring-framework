@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,11 +121,8 @@ public final class CronExpression {
 	 * {@code LW}), it means "the last weekday of the month".
 	 * </li>
 	 * <li>
-	 * In the "day of week" field, {@code L} stands for "the last day of the
-	 * week".
-	 * If prefixed by a number or three-letter name (i.e. {@code dL} or
-	 * {@code DDDL}), it means "the last day of week {@code d} (or {@code DDD})
-	 * in the month".
+	 * In the "day of week" field, {@code dL} or {@code DDDL} stands for
+	 * "the last day of week {@code d} (or {@code DDD}) in the month".
 	 * </li>
 	 * </ul>
 	 * </li>
@@ -276,7 +273,7 @@ public final class CronExpression {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}

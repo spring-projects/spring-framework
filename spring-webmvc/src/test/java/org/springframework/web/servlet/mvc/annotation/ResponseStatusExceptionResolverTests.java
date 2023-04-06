@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class ResponseStatusExceptionResolverTests {
 	}
 
 	@Test // SPR-12903
-	public void nestedException() throws Exception {
+	public void nestedException() {
 		Exception cause = new StatusCodeAndReasonMessageException();
 		TypeMismatchException ex = new TypeMismatchException("value", ITestBean.class, cause);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
@@ -119,14 +119,14 @@ public class ResponseStatusExceptionResolverTests {
 	}
 
 	@Test
-	public void responseStatusException() throws Exception {
+	public void responseStatusException() {
 		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertResolved(mav, 400, null);
 	}
 
 	@Test  // SPR-15524
-	public void responseStatusExceptionWithReason() throws Exception {
+	public void responseStatusExceptionWithReason() {
 		ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "The reason");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertResolved(mav, 400, "The reason");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class ConcurrentMapCacheTests extends AbstractValueAdaptingCacheTests<Con
 		serializeCache.put(key, content);
 		content.remove(0);
 		List<String> entry = (List<String>) serializeCache.get(key).get();
-		assertThat(entry.size()).isEqualTo(3);
+		assertThat(entry).hasSize(3);
 		assertThat(entry.get(0)).isEqualTo("one");
 	}
 

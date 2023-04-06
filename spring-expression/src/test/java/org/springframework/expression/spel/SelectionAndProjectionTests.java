@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,7 @@ class SelectionAndProjectionTests {
 
 		Expression exp = parser.parseExpression("colors.^[key.startsWith('b')]");
 		Map<String, String> colorsMap = (Map<String, String>) exp.getValue(context);
-		assertThat(colorsMap.size()).isEqualTo(1);
+		assertThat(colorsMap).hasSize(1);
 		assertThat(colorsMap.keySet().iterator().next()).isEqualTo("beige");
 	}
 
@@ -201,7 +201,7 @@ class SelectionAndProjectionTests {
 
 		Expression exp = parser.parseExpression("colors.$[key.startsWith('b')]");
 		Map<String, String> colorsMap = (Map<String, String>) exp.getValue(context);
-		assertThat(colorsMap.size()).isEqualTo(1);
+		assertThat(colorsMap).hasSize(1);
 		assertThat(colorsMap.keySet().iterator().next()).isEqualTo("brown");
 	}
 

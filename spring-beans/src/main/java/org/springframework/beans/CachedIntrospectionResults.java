@@ -18,7 +18,6 @@ package org.springframework.beans;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -36,7 +35,6 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.lang.Nullable;
@@ -60,14 +58,15 @@ import org.springframework.util.StringUtils;
  * <p>Note that for caching to work effectively, some preconditions need to be met:
  * Prefer an arrangement where the Spring jars live in the same ClassLoader as the
  * application classes, which allows for clean caching along with the application's
- * lifecycle in any case. For a web application, consider declaring a local
- * {@link org.springframework.web.util.IntrospectorCleanupListener} in {@code web.xml}
- * in case of a multi-ClassLoader layout, which will allow for effective caching as well.
+ * lifecycle in any case.
  *
- * <p>In case of a non-clean ClassLoader arrangement without a cleanup listener having
- * been set up, this class will fall back to a weak-reference-based caching model that
- * recreates much-requested entries every time the garbage collector removed them. In
- * such a scenario, consider the {@link #IGNORE_BEANINFO_PROPERTY_NAME} system property.
+ * <p>As of 6.0, Spring's default introspection discovers basic JavaBeans properties
+ * through an efficient method reflection pass. For full JavaBeans introspection
+ * including indexed properties and all JDK-supported customizers, configure a
+ * {@code META-INF/spring.factories} file with the following content:
+ * {@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.StandardBeanInfoFactory}
+ * For Spring 5.3 compatible extended introspection including non-void setter methods:
+ * {@code org.springframework.beans.BeanInfoFactory=org.springframework.beans.ExtendedBeanInfoFactory}
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -78,34 +77,10 @@ import org.springframework.util.StringUtils;
  */
 public final class CachedIntrospectionResults {
 
-	/**
-	 * System property that instructs Spring to use the {@link Introspector#IGNORE_ALL_BEANINFO}
-	 * mode when calling the JavaBeans {@link Introspector}: "spring.beaninfo.ignore", with a
-	 * value of "true" skipping the search for {@code BeanInfo} classes (typically for scenarios
-	 * where no such classes are being defined for beans in the application in the first place).
-	 * <p>The default is "false", considering all {@code BeanInfo} metadata classes, like for
-	 * standard {@link Introspector#getBeanInfo(Class)} calls. Consider switching this flag to
-	 * "true" if you experience repeated ClassLoader access for non-existing {@code BeanInfo}
-	 * classes, in case such access is expensive on startup or on lazy loading.
-	 * <p>Note that such an effect may also indicate a scenario where caching doesn't work
-	 * effectively: Prefer an arrangement where the Spring jars live in the same ClassLoader
-	 * as the application classes, which allows for clean caching along with the application's
-	 * lifecycle in any case. For a web application, consider declaring a local
-	 * {@link org.springframework.web.util.IntrospectorCleanupListener} in {@code web.xml}
-	 * in case of a multi-ClassLoader layout, which will allow for effective caching as well.
-	 * @see Introspector#getBeanInfo(Class, int)
-	 */
-	public static final String IGNORE_BEANINFO_PROPERTY_NAME = "spring.beaninfo.ignore";
-
-	private static final PropertyDescriptor[] EMPTY_PROPERTY_DESCRIPTOR_ARRAY = {};
-
-
-	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
-			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
-
-	/** Stores the BeanInfoFactory instances. */
 	private static final List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(
 			BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
+
+	private static final SimpleBeanInfoFactory simpleBeanInfoFactory = new SimpleBeanInfoFactory();
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
@@ -241,7 +216,7 @@ public final class CachedIntrospectionResults {
 	 * Retrieve a {@link BeanInfo} descriptor for the given target class.
 	 * @param beanClass the target class to introspect
 	 * @return the resulting {@code BeanInfo} descriptor (never {@code null})
-	 * @throws IntrospectionException from the underlying {@link Introspector}
+	 * @throws IntrospectionException from introspecting the given bean class
 	 */
 	private static BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
@@ -250,9 +225,7 @@ public final class CachedIntrospectionResults {
 				return beanInfo;
 			}
 		}
-		return (shouldIntrospectorIgnoreBeaninfoClasses ?
-				Introspector.getBeanInfo(beanClass, Introspector.IGNORE_ALL_BEANINFO) :
-				Introspector.getBeanInfo(beanClass));
+		return simpleBeanInfoFactory.getBeanInfo(beanClass);
 	}
 
 
@@ -297,7 +270,7 @@ public final class CachedIntrospectionResults {
 					// Only allow URL attribute introspection, not content resolution
 					continue;
 				}
-				if (pd.getWriteMethod() == null && isInvalidReadOnlyPropertyType(pd.getPropertyType())) {
+				if (pd.getWriteMethod() == null && isInvalidReadOnlyPropertyType(pd.getPropertyType(), beanClass)) {
 					// Ignore read-only properties such as ClassLoader - no need to bind to those
 					continue;
 				}
@@ -347,7 +320,8 @@ public final class CachedIntrospectionResults {
 						// GenericTypeAwarePropertyDescriptor leniently resolves a set* write method
 						// against a declared read method, so we prefer read method descriptors here.
 						pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
-						if (pd.getWriteMethod() == null && isInvalidReadOnlyPropertyType(pd.getPropertyType())) {
+						if (pd.getWriteMethod() == null &&
+								isInvalidReadOnlyPropertyType(pd.getPropertyType(), beanClass)) {
 							// Ignore read-only properties such as ClassLoader - no need to bind to those
 							continue;
 						}
@@ -380,7 +354,7 @@ public final class CachedIntrospectionResults {
 		if (Modifier.isStatic(method.getModifiers()) ||
 				method.getDeclaringClass() == Object.class || method.getDeclaringClass() == Class.class ||
 				method.getParameterCount() > 0 || method.getReturnType() == void.class ||
-				isInvalidReadOnlyPropertyType(method.getReturnType())) {
+				isInvalidReadOnlyPropertyType(method.getReturnType(), method.getDeclaringClass())) {
 			return false;
 		}
 		try {
@@ -393,10 +367,11 @@ public final class CachedIntrospectionResults {
 		}
 	}
 
-	private boolean isInvalidReadOnlyPropertyType(@Nullable Class<?> returnType) {
-		return (returnType != null && (AutoCloseable.class.isAssignableFrom(returnType) ||
-				ClassLoader.class.isAssignableFrom(returnType) ||
-				ProtectionDomain.class.isAssignableFrom(returnType)));
+	private boolean isInvalidReadOnlyPropertyType(@Nullable Class<?> returnType, Class<?> beanClass) {
+		return (returnType != null && (ClassLoader.class.isAssignableFrom(returnType) ||
+				ProtectionDomain.class.isAssignableFrom(returnType) ||
+				(AutoCloseable.class.isAssignableFrom(returnType) &&
+						!AutoCloseable.class.isAssignableFrom(beanClass))));
 	}
 
 
@@ -422,7 +397,7 @@ public final class CachedIntrospectionResults {
 	}
 
 	PropertyDescriptor[] getPropertyDescriptors() {
-		return this.propertyDescriptors.values().toArray(EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
+		return this.propertyDescriptors.values().toArray(PropertyDescriptorUtils.EMPTY_PROPERTY_DESCRIPTOR_ARRAY);
 	}
 
 	private PropertyDescriptor buildGenericTypeAwarePropertyDescriptor(Class<?> beanClass, PropertyDescriptor pd) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 	@Test
 	public void noTransaction() throws Exception {
-		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
+		ReactiveTransactionManager rtm = mock();
 
 		DefaultTestBean tb = new DefaultTestBean();
 		TransactionAttributeSource tas = new MapTransactionAttributeSource();
@@ -92,8 +92,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(getNameMethod, txatt);
 
-		ReactiveTransaction status = mock(ReactiveTransaction.class);
-		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
+		ReactiveTransaction status = mock();
+		ReactiveTransactionManager rtm = mock();
 		// expect a transaction
 		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
 		given(rtm.commit(status)).willReturn(Mono.empty());
@@ -120,8 +120,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		MapTransactionAttributeSource tas2 = new MapTransactionAttributeSource();
 		tas2.register(setNameMethod, txatt);
 
-		ReactiveTransaction status = mock(ReactiveTransaction.class);
-		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
+		ReactiveTransaction status = mock();
+		ReactiveTransactionManager rtm = mock();
 		// expect a transaction
 		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
 		given(rtm.commit(status)).willReturn(Mono.empty());
@@ -150,8 +150,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(getNameMethod, txatt);
 
-		ReactiveTransaction status = mock(ReactiveTransaction.class);
-		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
+		ReactiveTransaction status = mock();
+		ReactiveTransactionManager rtm = mock();
 		// expect a transaction
 		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
 		given(rtm.commit(status)).willReturn(Mono.empty());
@@ -229,8 +229,8 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		ReactiveTransaction status = mock(ReactiveTransaction.class);
-		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
+		ReactiveTransaction status = mock();
+		ReactiveTransactionManager rtm = mock();
 		// Gets additional call(s) from TransactionControl
 
 		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
@@ -285,7 +285,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		MapTransactionAttributeSource tas = new MapTransactionAttributeSource();
 		tas.register(m, txatt);
 
-		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
+		ReactiveTransactionManager rtm = mock();
 		// Expect a transaction
 		CannotCreateTransactionException ex = new CannotCreateTransactionException("foobar", null);
 		given(rtm.getReactiveTransaction(txatt)).willThrow(ex);
@@ -320,9 +320,9 @@ public abstract class AbstractReactiveTransactionAspectTests {
 		// Method m2 = getNameMethod;
 		// No attributes for m2
 
-		ReactiveTransactionManager rtm = mock(ReactiveTransactionManager.class);
+		ReactiveTransactionManager rtm = mock();
 
-		ReactiveTransaction status = mock(ReactiveTransaction.class);
+		ReactiveTransaction status = mock();
 		given(rtm.getReactiveTransaction(txatt)).willReturn(Mono.just(status));
 		UnexpectedRollbackException ex = new UnexpectedRollbackException("foobar", null);
 		given(rtm.commit(status)).willReturn(Mono.error(ex));
@@ -335,11 +335,7 @@ public abstract class AbstractReactiveTransactionAspectTests {
 
 		Mono.from(itb.setName(name))
 				.as(StepVerifier::create)
-				.consumeErrorWith(throwable -> {
-					assertThat(throwable.getClass()).isEqualTo(RuntimeException.class);
-					assertThat(throwable.getCause()).isEqualTo(ex);
-				})
-				.verify();
+				.verifyErrorSatisfies(actual -> assertThat(actual).isEqualTo(ex));
 
 		// Should have invoked target and changed name
 

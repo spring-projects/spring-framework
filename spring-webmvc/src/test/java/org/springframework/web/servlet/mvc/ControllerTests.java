@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,9 @@ public class ControllerTests {
 		pvc.setViewName(viewName);
 		// We don't care about the params.
 		ModelAndView mv = pvc.handleRequest(new MockHttpServletRequest("GET", "foo.html"), new MockHttpServletResponse());
-		assertThat(mv.getModel().size() == 0).as("model has no data").isTrue();
-		assertThat(mv.getViewName().equals(viewName)).as("model has correct viewname").isTrue();
-		assertThat(pvc.getViewName().equals(viewName)).as("getViewName matches").isTrue();
+		assertThat(mv.getModel()).as("model has no data").isEmpty();
+		assertThat(mv.getViewName()).as("model has correct viewname").isEqualTo(viewName);
+		assertThat(pvc.getViewName()).as("getViewName matches").isEqualTo(viewName);
 	}
 
 	@Test
@@ -81,10 +81,10 @@ public class ControllerTests {
 	private void doTestServletForwardingController(ServletForwardingController sfc, boolean include)
 			throws Exception {
 
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		ServletContext context = mock(ServletContext.class);
-		RequestDispatcher dispatcher = mock(RequestDispatcher.class);
+		HttpServletRequest request = mock();
+		HttpServletResponse response = mock();
+		ServletContext context = mock();
+		RequestDispatcher dispatcher = mock();
 
 		given(request.getMethod()).willReturn("GET");
 		given(context.getNamedDispatcher("action")).willReturn(dispatcher);

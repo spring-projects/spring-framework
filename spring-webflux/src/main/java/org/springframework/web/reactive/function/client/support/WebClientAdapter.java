@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function.client.support;
 
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,7 +28,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.HttpClientAdapter;
 import org.springframework.web.service.invoker.HttpRequestValues;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
-
 
 /**
  * {@link HttpClientAdapter} that enables an {@link HttpServiceProxyFactory} to
@@ -123,30 +121,6 @@ public final class WebClientAdapter implements HttpClientAdapter {
 		return bodySpec;
 	}
 
-
-	/**
-	 * Static method to create a {@link HttpServiceProxyFactory} configured to
-	 * use the given {@link WebClient} instance. Effectively a shortcut for:
-	 * <pre>
-	 * WebClientAdapter adapter = WebClientAdapter.forClient(webClient);
-	 * HttpServiceProxyFactory proxyFactory = new HttpServiceProxyFactory(adapter);
-	 * </pre>
-	 * @param webClient the client to use
-	 * @return the created {@code HttpServiceProxyFactory} instance
-	 */
-	public static HttpServiceProxyFactory createHttpServiceProxyFactory(WebClient webClient) {
-		return new HttpServiceProxyFactory(new WebClientAdapter(webClient));
-	}
-
-	/**
-	 * Variant of {@link #createHttpServiceProxyFactory(WebClient)} that accepts
-	 * a {@link WebClient.Builder} and uses it to create the client.
-	 * @param webClientBuilder a builder to create the client to use with
-	 * @return the created {@code HttpServiceProxyFactory} instance
-	 */
-	public static HttpServiceProxyFactory createHttpServiceProxyFactory(WebClient.Builder webClientBuilder) {
-		return createHttpServiceProxyFactory(webClientBuilder.build());
-	}
 
 	/**
 	 * Create a {@link WebClientAdapter} for the given {@code WebClient} instance.

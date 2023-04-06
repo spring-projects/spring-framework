@@ -31,7 +31,7 @@ import org.springframework.lang.Nullable;
  * @param <T> the result type returned by this Future's {@code get} method
  * @deprecated as of 6.0, with no concrete replacement
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public class ListenableFutureTask<T> extends FutureTask<T> implements ListenableFuture<T> {
 
 	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<>();

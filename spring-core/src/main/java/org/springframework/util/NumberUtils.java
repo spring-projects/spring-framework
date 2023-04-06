@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,8 +246,8 @@ public abstract class NumberUtils {
 			Assert.notNull(targetClass, "Target class must not be null");
 			DecimalFormat decimalFormat = null;
 			boolean resetBigDecimal = false;
-			if (numberFormat instanceof DecimalFormat) {
-				decimalFormat = (DecimalFormat) numberFormat;
+			if (numberFormat instanceof DecimalFormat dc) {
+				decimalFormat = dc;
 				if (BigDecimal.class == targetClass && !decimalFormat.isParseBigDecimal()) {
 					decimalFormat.setParseBigDecimal(true);
 					resetBigDecimal = true;

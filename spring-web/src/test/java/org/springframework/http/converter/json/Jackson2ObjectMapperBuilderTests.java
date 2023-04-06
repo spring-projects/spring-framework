@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,12 +81,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kotlin.ranges.IntRange;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.FatalBeanException;
 import org.springframework.http.ProblemDetail;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
@@ -105,7 +103,7 @@ class Jackson2ObjectMapperBuilderTests {
 
 	@Test
 	void unknownFeature() {
-		assertThatExceptionOfType(FatalBeanException.class).isThrownBy(() ->
+		assertThatIllegalArgumentException().isThrownBy(() ->
 				Jackson2ObjectMapperBuilder.json().featuresToEnable(Boolean.TRUE).build());
 	}
 
@@ -282,7 +280,7 @@ class Jackson2ObjectMapperBuilderTests {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 
 		Path file = Paths.get("foo");
-		assertThat(new String(objectMapper.writeValueAsBytes(file), "UTF-8").endsWith("foo\"")).isTrue();
+		assertThat(new String(objectMapper.writeValueAsBytes(file), "UTF-8")).endsWith("foo\"");
 
 		Optional<String> optional = Optional.of("test");
 		assertThat(new String(objectMapper.writeValueAsBytes(optional), "UTF-8")).isEqualTo("\"test\"");
@@ -373,7 +371,7 @@ class Jackson2ObjectMapperBuilderTests {
 				.build();
 
 		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonXmlMixin.class);
 		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 
@@ -389,7 +387,7 @@ class Jackson2ObjectMapperBuilderTests {
 				.build();
 
 		assertThat(mapper.mixInCount()).isEqualTo(2);
-		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonMixin.class);
+		assertThat(mapper.findMixInClassFor(ProblemDetail.class)).isAssignableFrom(ProblemDetailJacksonXmlMixin.class);
 		assertThat(mapper.findMixInClassFor(target)).isSameAs(mixInSource);
 	}
 

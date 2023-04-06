@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ class AnnotationMetadataTests {
 		assertThat(metadata.isConcrete()).isTrue();
 		assertThat(metadata.hasSuperClass()).isTrue();
 		assertThat(metadata.getSuperClassName()).isEqualTo(AnnotatedComponent.class.getName());
-		assertThat(metadata.getInterfaceNames().length).isEqualTo(0);
+		assertThat(metadata.getInterfaceNames()).isEmpty();
 		assertThat(metadata.isAnnotated(Component.class.getName())).isFalse();
 		assertThat(metadata.isAnnotated(Scope.class.getName())).isFalse();
 		assertThat(metadata.isAnnotated(SpecialAttr.class.getName())).isFalse();
@@ -114,7 +114,7 @@ class AnnotationMetadataTests {
 		assertThat(metadata.getAnnotationAttributes(Component.class.getName())).isNull();
 		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), false)).isNull();
 		assertThat(metadata.getAnnotationAttributes(MetaAnnotation.class.getName(), true)).isNull();
-		assertThat(metadata.getAnnotatedMethods(DirectAnnotation.class.getName()).size()).isEqualTo(0);
+		assertThat(metadata.getAnnotatedMethods(DirectAnnotation.class.getName())).isEmpty();
 		assertThat(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName())).isFalse();
 		assertThat(metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName())).isNull();
 	}
@@ -141,10 +141,10 @@ class AnnotationMetadataTests {
 		assertThat(metadata.isConcrete()).isFalse();
 		assertThat(metadata.hasSuperClass()).isFalse();
 		assertThat(metadata.getSuperClassName()).isNull();
-		assertThat(metadata.getInterfaceNames().length).isEqualTo(2);
+		assertThat(metadata.getInterfaceNames()).hasSize(2);
 		assertThat(metadata.getInterfaceNames()[0]).isEqualTo(ClassMetadata.class.getName());
 		assertThat(metadata.getInterfaceNames()[1]).isEqualTo(AnnotatedTypeMetadata.class.getName());
-		assertThat(metadata.getAnnotationTypes()).hasSize(0);
+		assertThat(metadata.getAnnotationTypes()).isEmpty();
 	}
 
 	@Test
@@ -169,7 +169,7 @@ class AnnotationMetadataTests {
 		assertThat(metadata.isConcrete()).isFalse();
 		assertThat(metadata.hasSuperClass()).isFalse();
 		assertThat(metadata.getSuperClassName()).isNull();
-		assertThat(metadata.getInterfaceNames().length).isEqualTo(1);
+		assertThat(metadata.getInterfaceNames()).hasSize(1);
 		assertThat(metadata.getInterfaceNames()[0]).isEqualTo(Annotation.class.getName());
 		assertThat(metadata.isAnnotated(Documented.class.getName())).isFalse();
 		assertThat(metadata.isAnnotated(Scope.class.getName())).isFalse();
@@ -188,8 +188,8 @@ class AnnotationMetadataTests {
 	 * 'true' as is done in the main test above.
 	 */
 	@Test
-	@Deprecated
 	void standardAnnotationMetadata_nestedAnnotationsAsMap_false() {
+		@SuppressWarnings("deprecation")
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponent.class);
 		AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(SpecialAttr.class.getName());
 		Annotation[] nestedAnnoArray = (Annotation[]) specialAttrs.get("nestedAnnoArray");
@@ -197,8 +197,8 @@ class AnnotationMetadataTests {
 	}
 
 	@Test
-	@Deprecated
 	void metaAnnotationOverridesUsingStandardAnnotationMetadata() {
+		@SuppressWarnings("deprecation")
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(ComposedConfigurationWithAttributeOverridesClass.class);
 		assertMetaAnnotationOverrides(metadata);
 	}
@@ -287,7 +287,7 @@ class AnnotationMetadataTests {
 		assertThat(metadata.isConcrete()).isTrue();
 		assertThat(metadata.hasSuperClass()).isTrue();
 		assertThat(metadata.getSuperClassName()).isEqualTo(Object.class.getName());
-		assertThat(metadata.getInterfaceNames().length).isEqualTo(1);
+		assertThat(metadata.getInterfaceNames()).hasSize(1);
 		assertThat(metadata.getInterfaceNames()[0]).isEqualTo(Serializable.class.getName());
 
 		assertThat(metadata.isAnnotated(Component.class.getName())).isTrue();
@@ -330,12 +330,12 @@ class AnnotationMetadataTests {
 			assertThat(specialAttrs.getEnum("state").equals(Thread.State.NEW)).isTrue();
 
 			AnnotationAttributes nestedAnno = specialAttrs.getAnnotation("nestedAnno");
-			assertThat("na").isEqualTo(nestedAnno.getString("value"));
+			assertThat(nestedAnno.getString("value")).isEqualTo("na");
 			assertThat(nestedAnno.getEnum("anEnum").equals(SomeEnum.LABEL1)).isTrue();
 			assertThat((Class<?>[]) nestedAnno.get("classArray")).isEqualTo(new Class<?>[] {String.class});
 
 			AnnotationAttributes[] nestedAnnoArray = specialAttrs.getAnnotationArray("nestedAnnoArray");
-			assertThat(nestedAnnoArray.length).isEqualTo(2);
+			assertThat(nestedAnnoArray).hasSize(2);
 			assertThat(nestedAnnoArray[0].getString("value")).isEqualTo("default");
 			assertThat(nestedAnnoArray[0].getEnum("anEnum").equals(SomeEnum.DEFAULT)).isTrue();
 			assertThat((Class<?>[]) nestedAnnoArray[0].get("classArray")).isEqualTo(new Class<?>[] {Void.class});
@@ -351,7 +351,7 @@ class AnnotationMetadataTests {
 			assertThat(optional.getClassArray("classArray")).isEqualTo(new Class<?>[] {Void.class});
 
 			AnnotationAttributes[] optionalArray = specialAttrs.getAnnotationArray("optionalArray");
-			assertThat(optionalArray.length).isEqualTo(1);
+			assertThat(optionalArray).hasSize(1);
 			assertThat(optionalArray[0].getString("value")).isEqualTo("optional");
 			assertThat(optionalArray[0].getEnum("anEnum").equals(SomeEnum.DEFAULT)).isTrue();
 			assertThat((Class<?>[]) optionalArray[0].get("classArray")).isEqualTo(new Class<?>[] {Void.class});
@@ -363,7 +363,7 @@ class AnnotationMetadataTests {
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
 			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<Object>(Arrays.asList("direct", "")));
 			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additional")).isEqualTo("");
-			assertThat(((String[]) metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additionalArray")).length).isEqualTo(0);
+			assertThat(((String[]) metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additionalArray"))).isEmpty();
 		}
 		{ // perform tests with classValuesAsString = true
 			AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(

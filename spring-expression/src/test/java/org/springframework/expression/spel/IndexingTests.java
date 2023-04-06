@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,7 +196,7 @@ class IndexingTests {
 			expression.setValue(this, "4");
 		}
 		catch (EvaluationException ex) {
-			assertThat(ex.getMessage().startsWith("EL1053E")).isTrue();
+			assertThat(ex.getMessage()).startsWith("EL1053E");
 		}
 	}
 
@@ -277,7 +277,7 @@ class IndexingTests {
 			assertThat(expression.getValue(this)).isEqualTo("bar");
 		}
 		catch (EvaluationException ex) {
-			assertThat(ex.getMessage().startsWith("EL1027E")).isTrue();
+			assertThat(ex.getMessage()).startsWith("EL1027E");
 		}
 	}
 
@@ -295,7 +295,7 @@ class IndexingTests {
 			assertThat(expression.getValue(this)).isEqualTo("bar");
 		}
 		catch (EvaluationException ex) {
-			assertThat(ex.getMessage().startsWith("EL1053E")).isTrue();
+			assertThat(ex.getMessage()).startsWith("EL1053E");
 		}
 	}
 
@@ -313,7 +313,7 @@ class IndexingTests {
 			assertThat(expression.getValue(this)).isEqualTo("bar");
 		}
 		catch (EvaluationException ex) {
-			assertThat(ex.getMessage().startsWith("EL1053E")).isTrue();
+			assertThat(ex.getMessage()).startsWith("EL1053E");
 		}
 	}
 
@@ -337,7 +337,7 @@ class IndexingTests {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("listOfScalarNotGeneric");
 		assertThat(expression.getValueTypeDescriptor(this).toString()).isEqualTo("java.util.ArrayList<?>");
-		assertThat(expression.getValue(this, String.class)).isEqualTo("");
+		assertThat(expression.getValue(this, String.class)).isEmpty();
 	}
 
 	@SuppressWarnings("unchecked")

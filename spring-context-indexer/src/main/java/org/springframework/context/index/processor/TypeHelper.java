@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,14 +73,14 @@ class TypeHelper {
 	}
 
 	private String getQualifiedName(Element element) {
-		if (element instanceof QualifiedNameable) {
-			return ((QualifiedNameable) element).getQualifiedName().toString();
+		if (element instanceof QualifiedNameable qualifiedNameable) {
+			return qualifiedNameable.getQualifiedName().toString();
 		}
 		return element.toString();
 	}
 
 	/**
-	 * Return the super class of the specified {@link Element} or null if this
+	 * Return the superclass of the specified {@link Element} or null if this
 	 * {@code element} represents {@link Object}.
 	 */
 	public Element getSuperClass(Element element) {
@@ -99,7 +99,7 @@ class TypeHelper {
 	public List<Element> getDirectInterfaces(Element element) {
 		List<? extends TypeMirror> superTypes = this.types.directSupertypes(element.asType());
 		List<Element> directInterfaces = new ArrayList<>();
-		if (superTypes.size() > 1) { // index 0 is the super class
+		if (superTypes.size() > 1) { // index 0 is the superclass
 			for (int i = 1; i < superTypes.size(); i++) {
 				Element e = this.types.asElement(superTypes.get(i));
 				if (e != null) {

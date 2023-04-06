@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -32,12 +33,14 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.condition.JRE.JAVA_19;
 
 /**
  * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
  *
  * @author Sebastien Deleuze
  */
+@DisabledForJreRange(min = JAVA_19, disabledReason = "Kotlin doesn't support Java 19+ yet")
 public class KotlinScriptTemplateTests {
 
 	@Test

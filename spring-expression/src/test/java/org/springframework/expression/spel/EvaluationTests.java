@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,14 +70,14 @@ class EvaluationTests extends AbstractExpressionTests {
 			assertThat(o).isEqualTo("");
 			o = parser.parseExpression("list[3]").getValue(new StandardEvaluationContext(testClass));
 			assertThat(o).isEqualTo("");
-			assertThat(testClass.list.size()).isEqualTo(4);
+			assertThat(testClass.list).hasSize(4);
 
 			assertThatExceptionOfType(EvaluationException.class).isThrownBy(() ->
 			parser.parseExpression("list2[3]").getValue(new StandardEvaluationContext(testClass)));
 
 			o = parser.parseExpression("foo[3]").getValue(new StandardEvaluationContext(testClass));
 			assertThat(o).isEqualTo("");
-			assertThat(testClass.getFoo().size()).isEqualTo(4);
+			assertThat(testClass.getFoo()).hasSize(4);
 		}
 
 		@Test
@@ -116,22 +116,15 @@ class EvaluationTests extends AbstractExpressionTests {
 		void elvisOperator() {
 			evaluate("'Andy'?:'Dave'", "Andy", String.class);
 			evaluate("null?:'Dave'", "Dave", String.class);
+			evaluate("3?:1", 3, Integer.class);
+			evaluate("(2*3)?:1*10", 6, Integer.class);
+			evaluate("null?:2*10", 20, Integer.class);
+			evaluate("(null?:1)*10", 10, Integer.class);
 		}
 
 		@Test
 		void safeNavigation() {
 			evaluate("null?.null?.null", null, null);
-		}
-
-		@Test  // SPR-16731
-		void matchesWithPatternAccessThreshold() {
-			String pattern = "^(?=[a-z0-9-]{1,47})([a-z0-9]+[-]{0,1}){1,47}[a-z0-9]{1}$";
-			String expression = "'abcde-fghijklmn-o42pasdfasdfasdf.qrstuvwxyz10x.xx.yyy.zasdfasfd' matches \'" + pattern + "\'";
-			Expression expr = parser.parseExpression(expression);
-			assertThatExceptionOfType(SpelEvaluationException.class)
-			.isThrownBy(expr::getValue)
-			.withCauseInstanceOf(IllegalStateException.class)
-			.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.FLAWED_PATTERN));
 		}
 
 		// mixing operators
@@ -315,7 +308,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e =  parser.parseExpression("listOfStrings[++index3]='def'");
 			e.getValue(ctx);
-			assertThat(instance.listOfStrings.size()).isEqualTo(2);
+			assertThat(instance.listOfStrings).hasSize(2);
 			assertThat(instance.listOfStrings.get(1)).isEqualTo("def");
 
 			// Check reference beyond end of collection
@@ -329,7 +322,7 @@ class EvaluationTests extends AbstractExpressionTests {
 			assertThat(value).isEqualTo("def");
 			e =  parser.parseExpression("listOfStrings[2]");
 			value = e.getValue(ctx, String.class);
-			assertThat(value).isEqualTo("");
+			assertThat(value).isEmpty();
 
 			// Now turn off growing and reference off the end
 			StandardEvaluationContext failCtx = new StandardEvaluationContext(instance);
@@ -347,15 +340,64 @@ class EvaluationTests extends AbstractExpressionTests {
 			SpelExpressionParser parser = new SpelExpressionParser( new SpelParserConfiguration(true, true, 3));
 			Expression e = parser.parseExpression("foo[2]");
 			e.setValue(ctx, "2");
-			assertThat(instance.getFoo().size()).isEqualTo(3);
+			assertThat(instance.getFoo()).hasSize(3);
 			e = parser.parseExpression("foo[3]");
 			try {
 				e.setValue(ctx, "3");
 			}
 			catch (SpelEvaluationException see) {
 				assertThat(see.getMessageCode()).isEqualTo(SpelMessage.UNABLE_TO_GROW_COLLECTION);
-				assertThat(instance.getFoo().size()).isEqualTo(3);
+				assertThat(instance.getFoo()).hasSize(3);
 			}
+		}
+
+	}
+
+	@Nested
+	class StringLiterals {
+
+		@Test
+		void insideSingleQuotes() {
+			evaluate("'hello'", "hello", String.class);
+			evaluate("'hello world'", "hello world", String.class);
+		}
+
+		@Test
+		void insideDoubleQuotes() {
+			evaluate("\"hello\"", "hello", String.class);
+			evaluate("\"hello world\"", "hello world", String.class);
+		}
+
+		@Test
+		void singleQuotesInsideSingleQuotes() {
+			evaluate("'Tony''s Pizza'", "Tony's Pizza", String.class);
+			evaluate("'big ''''pizza'''' parlor'", "big ''pizza'' parlor", String.class);
+		}
+
+		@Test
+		void doubleQuotesInsideDoubleQuotes() {
+			evaluate("\"big \"\"pizza\"\" parlor\"", "big \"pizza\" parlor", String.class);
+			evaluate("\"big \"\"\"\"pizza\"\"\"\" parlor\"", "big \"\"pizza\"\" parlor", String.class);
+		}
+
+		@Test
+		void singleQuotesInsideDoubleQuotes() {
+			evaluate("\"Tony's Pizza\"", "Tony's Pizza", String.class);
+			evaluate("\"big ''pizza'' parlor\"", "big ''pizza'' parlor", String.class);
+		}
+
+		@Test
+		void doubleQuotesInsideSingleQuotes() {
+			evaluate("'big \"pizza\" parlor'", "big \"pizza\" parlor", String.class);
+			evaluate("'two double \"\" quotes'", "two double \"\" quotes", String.class);
+		}
+
+		@Test
+		void inCompoundExpressions() {
+			evaluate("'123''4' == '123''4'", true, Boolean.class);
+			evaluate("""
+				"123""4" == "123""4"\
+				""", true, Boolean.class);
 		}
 
 	}
@@ -409,28 +451,49 @@ class EvaluationTests extends AbstractExpressionTests {
 		}
 
 		@Test
-		void relOperatorsMatches01() {
-			evaluate("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'", "false", Boolean.class);
-		}
-
-		@Test
-		void relOperatorsMatches02() {
+		void matchesTrue() {
 			evaluate("'5.00' matches '^-?\\d+(\\.\\d{2})?$'", "true", Boolean.class);
 		}
 
 		@Test
-		void relOperatorsMatches03() {
+		void matchesFalse() {
+			evaluate("'5.0067' matches '^-?\\d+(\\.\\d{2})?$'", "false", Boolean.class);
+		}
+
+		@Test
+		void matchesWithInputConversion() {
+			evaluate("27 matches '^.*2.*$'", true, Boolean.class);  // conversion int --> string
+		}
+
+		@Test
+		void matchesWithNullInput() {
 			evaluateAndCheckError("null matches '^.*$'", SpelMessage.INVALID_FIRST_OPERAND_FOR_MATCHES_OPERATOR, 0, null);
 		}
 
 		@Test
-		void relOperatorsMatches04() {
+		void matchesWithNullPattern() {
 			evaluateAndCheckError("'abc' matches null", SpelMessage.INVALID_SECOND_OPERAND_FOR_MATCHES_OPERATOR, 14, null);
 		}
 
+		@Test  // SPR-16731
+		void matchesWithPatternAccessThreshold() {
+			String pattern = "^(?=[a-z0-9-]{1,47})([a-z0-9]+[-]{0,1}){1,47}[a-z0-9]{1}$";
+			String expression = "'abcde-fghijklmn-o42pasdfasdfasdf.qrstuvwxyz10x.xx.yyy.zasdfasfd' matches '" + pattern + "'";
+			evaluateAndCheckError(expression, SpelMessage.FLAWED_PATTERN);
+		}
+
 		@Test
-		void relOperatorsMatches05() {
-			evaluate("27 matches '^.*2.*$'", true, Boolean.class);  // conversion int>string
+		void matchesWithPatternLengthThreshold() {
+			String pattern = "(0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+					"0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
+					"01234567890123456789012345678901234567890123456789|abc)";
+			assertThat(pattern).hasSize(256);
+			Expression expr = parser.parseExpression("'abc' matches '" + pattern + "'");
+			assertThat(expr.getValue(context, Boolean.class)).isTrue();
+
+			pattern += "?";
+			assertThat(pattern).hasSize(257);
+			evaluateAndCheckError("'abc' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
 		}
 
 	}
@@ -622,6 +685,24 @@ class EvaluationTests extends AbstractExpressionTests {
 			evaluate("3?:#var=5", 3, Integer.class);
 			evaluate("null?:#var=5", 5, Integer.class);
 			evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
+		}
+
+		@Test
+		void ternaryOperator06() {
+			evaluate("3?:#var=5", 3, Integer.class);
+			evaluate("null?:#var=5", 5, Integer.class);
+			evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
+		}
+
+		@Test
+		void ternaryExpressionWithImplicitGrouping() {
+			evaluate("4 % 2 == 0 ? 2 : 3 * 10", 2, Integer.class);
+			evaluate("4 % 2 == 1 ? 2 : 3 * 10", 30, Integer.class);
+		}
+
+		@Test
+		void ternaryExpressionWithExplicitGrouping() {
+			evaluate("((4 % 2 == 0) ? 2 : 1) * 10", 20, Integer.class);
 		}
 
 		@Test
@@ -1379,7 +1460,9 @@ class EvaluationTests extends AbstractExpressionTests {
 		private void expectFail(ExpressionParser parser, EvaluationContext eContext, String expressionString, SpelMessage messageCode) {
 			assertThatExceptionOfType(SpelEvaluationException.class).isThrownBy(() -> {
 				Expression e = parser.parseExpression(expressionString);
-				SpelUtilities.printAbstractSyntaxTree(System.out, e);
+				if (DEBUG) {
+					SpelUtilities.printAbstractSyntaxTree(System.out, e);
+				}
 				e.getValue(eContext);
 			}).satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(messageCode));
 		}

@@ -34,7 +34,7 @@ import org.springframework.lang.Nullable;
  * @deprecated as of 6.0, in favor of
  * {@link java.util.concurrent.CompletableFuture}
  */
-@Deprecated
+@Deprecated(since = "6.0")
 public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S> implements ListenableFuture<T> {
 
 	/**

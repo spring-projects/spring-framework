@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,12 @@ public class Spr8954Tests {
 
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
-		assertThat(1).isEqualTo(fbBeans.size());
-		assertThat("&foo").isEqualTo(fbBeans.keySet().iterator().next());
+		assertThat(fbBeans.size()).isEqualTo(1);
+		assertThat(fbBeans.keySet().iterator().next()).isEqualTo("&foo");
 
 		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
-		assertThat(1).isEqualTo(aiBeans.size());
-		assertThat("&foo").isEqualTo(aiBeans.keySet().iterator().next());
+		assertThat(aiBeans.size()).isEqualTo(1);
+		assertThat(aiBeans.keySet().iterator().next()).isEqualTo("&foo");
 	}
 
 	@Test
@@ -76,12 +76,12 @@ public class Spr8954Tests {
 
 		@SuppressWarnings("rawtypes")
 		Map<String, FactoryBean> fbBeans = bf.getBeansOfType(FactoryBean.class);
-		assertThat(1).isEqualTo(fbBeans.size());
-		assertThat("&foo").isEqualTo(fbBeans.keySet().iterator().next());
+		assertThat(fbBeans.size()).isEqualTo(1);
+		assertThat(fbBeans.keySet().iterator().next()).isEqualTo("&foo");
 
 		Map<String, AnInterface> aiBeans = bf.getBeansOfType(AnInterface.class);
-		assertThat(1).isEqualTo(aiBeans.size());
-		assertThat("&foo").isEqualTo(aiBeans.keySet().iterator().next());
+		assertThat(aiBeans.size()).isEqualTo(1);
+		assertThat(aiBeans.keySet().iterator().next()).isEqualTo("&foo");
 	}
 
 

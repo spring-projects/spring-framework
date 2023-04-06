@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,13 +107,13 @@ public class SimpleServletPostProcessor implements
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof Servlet) {
+		if (bean instanceof Servlet servlet) {
 			ServletConfig config = this.servletConfig;
 			if (config == null || !this.useSharedServletConfig) {
 				config = new DelegatingServletConfig(beanName, this.servletContext);
 			}
 			try {
-				((Servlet) bean).init(config);
+				servlet.init(config);
 			}
 			catch (ServletException ex) {
 				throw new BeanInitializationException("Servlet.init threw exception", ex);
@@ -124,8 +124,8 @@ public class SimpleServletPostProcessor implements
 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
-		if (bean instanceof Servlet) {
-			((Servlet) bean).destroy();
+		if (bean instanceof Servlet servlet) {
+			servlet.destroy();
 		}
 	}
 

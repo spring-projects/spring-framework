@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,9 +104,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	 */
 	public JdkDynamicAopProxy(AdvisedSupport config) throws AopConfigException {
 		Assert.notNull(config, "AdvisedSupport must not be null");
-		if (config.getAdvisorCount() == 0 && config.getTargetSource() == AdvisedSupport.EMPTY_TARGET_SOURCE) {
-			throw new AopConfigException("No advisors and no TargetSource specified");
-		}
 		this.advised = config;
 		this.proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised, true);
 		findDefinedEqualsAndHashCodeMethods(this.proxiedInterfaces);
@@ -123,7 +120,18 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		if (logger.isTraceEnabled()) {
 			logger.trace("Creating JDK dynamic proxy: " + this.advised.getTargetSource());
 		}
+		if (classLoader == null || classLoader.getParent() == null) {
+			// JDK bootstrap loader or platform loader suggested ->
+			// use higher-level loader which can see Spring infrastructure classes
+			classLoader = getClass().getClassLoader();
+		}
 		return Proxy.newProxyInstance(classLoader, this.proxiedInterfaces, this);
+	}
+
+	@SuppressWarnings("deprecation")
+	@Override
+	public Class<?> getProxyClass(@Nullable ClassLoader classLoader) {
+		return Proxy.getProxyClass(classLoader, this.proxiedInterfaces);
 	}
 
 	/**
@@ -259,15 +267,15 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		}
 
 		JdkDynamicAopProxy otherProxy;
-		if (other instanceof JdkDynamicAopProxy) {
-			otherProxy = (JdkDynamicAopProxy) other;
+		if (other instanceof JdkDynamicAopProxy jdkDynamicAopProxy) {
+			otherProxy = jdkDynamicAopProxy;
 		}
 		else if (Proxy.isProxyClass(other.getClass())) {
 			InvocationHandler ih = Proxy.getInvocationHandler(other);
-			if (!(ih instanceof JdkDynamicAopProxy)) {
+			if (!(ih instanceof JdkDynamicAopProxy jdkDynamicAopProxy)) {
 				return false;
 			}
-			otherProxy = (JdkDynamicAopProxy) ih;
+			otherProxy = jdkDynamicAopProxy;
 		}
 		else {
 			// Not a valid comparison...

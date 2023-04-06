@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ import org.springframework.util.CollectionUtils;
  * Helper bean for registering tasks with a {@link TaskScheduler}, typically using cron
  * expressions.
  *
- * <p>As of Spring 3.1, {@code ScheduledTaskRegistrar} has a more prominent user-facing
- * role when used in conjunction with the {@link
+ * <p>{@code ScheduledTaskRegistrar} has a more prominent user-facing role when used in
+ * conjunction with the {@link
  * org.springframework.scheduling.annotation.EnableAsync @EnableAsync} annotation and its
  * {@link org.springframework.scheduling.annotation.SchedulingConfigurer
  * SchedulingConfigurer} callback interface.
@@ -111,11 +111,11 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 		if (scheduler == null) {
 			this.taskScheduler = null;
 		}
-		else if (scheduler instanceof TaskScheduler) {
-			this.taskScheduler = (TaskScheduler) scheduler;
+		else if (scheduler instanceof TaskScheduler ts) {
+			this.taskScheduler = ts;
 		}
-		else if (scheduler instanceof ScheduledExecutorService) {
-			this.taskScheduler = new ConcurrentTaskScheduler(((ScheduledExecutorService) scheduler));
+		else if (scheduler instanceof ScheduledExecutorService ses) {
+			this.taskScheduler = new ConcurrentTaskScheduler(ses);
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported scheduler type: " + scheduler.getClass());
@@ -294,7 +294,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * Add a {@code Runnable} task to be triggered at the given fixed-rate interval.
 	 * @deprecated as of 6.0, in favor of {@link #addFixedRateTask(Runnable, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void addFixedRateTask(Runnable task, long interval) {
 		addFixedRateTask(new IntervalTask(task, Duration.ofMillis(interval)));
 	}
@@ -324,7 +324,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 	 * Add a Runnable task to be triggered with the given fixed delay.
 	 * @deprecated as of 6.0, in favor of {@link #addFixedDelayTask(Runnable, Duration)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public void addFixedDelayTask(Runnable task, long delay) {
 		addFixedDelayTask(new IntervalTask(task, Duration.ofMillis(delay)));
 	}

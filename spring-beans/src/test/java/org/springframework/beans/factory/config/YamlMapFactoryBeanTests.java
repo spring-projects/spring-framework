@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class YamlMapFactoryBeanTests {
 	public void testSetIgnoreResourceNotFound() {
 		this.factory.setResolutionMethod(YamlMapFactoryBean.ResolutionMethod.OVERRIDE_AND_IGNORE);
 		this.factory.setResources(new FileSystemResource("non-exsitent-file.yml"));
-		assertThat(this.factory.getObject().size()).isEqualTo(0);
+		assertThat(this.factory.getObject()).isEmpty();
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class YamlMapFactoryBeanTests {
 	@Test
 	public void testGetObject() {
 		this.factory.setResources(new ByteArrayResource("foo: bar".getBytes()));
-		assertThat(this.factory.getObject().size()).isEqualTo(1);
+		assertThat(this.factory.getObject()).hasSize(1);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -70,8 +70,8 @@ public class YamlMapFactoryBeanTests {
 		this.factory.setResources(new ByteArrayResource("foo:\n  bar: spam".getBytes()),
 				new ByteArrayResource("foo:\n  spam: bar".getBytes()));
 
-		assertThat(this.factory.getObject().size()).isEqualTo(1);
-		assertThat(((Map<String, Object>) this.factory.getObject().get("foo")).size()).isEqualTo(2);
+		assertThat(this.factory.getObject()).hasSize(1);
+		assertThat(((Map<String, Object>) this.factory.getObject().get("foo"))).hasSize(2);
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class YamlMapFactoryBeanTests {
 			}
 		}, new ByteArrayResource("foo:\n  spam: bar".getBytes()));
 
-		assertThat(this.factory.getObject().size()).isEqualTo(1);
+		assertThat(this.factory.getObject()).hasSize(1);
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class YamlMapFactoryBeanTests {
 		this.factory.setResources(new ByteArrayResource("foo:\n  ? key1.key2\n  : value".getBytes()));
 		Map<String, Object> map = this.factory.getObject();
 
-		assertThat(map.size()).isEqualTo(1);
+		assertThat(map).hasSize(1);
 		assertThat(map.containsKey("foo")).isTrue();
 		Object object = map.get("foo");
 		boolean condition = object instanceof LinkedHashMap;
@@ -112,15 +112,15 @@ public class YamlMapFactoryBeanTests {
 		this.factory.setResources(new ByteArrayResource("foo:\n  ? key1.key2\n  : 3".getBytes()));
 		Map<String, Object> map = this.factory.getObject();
 
-		assertThat(map.size()).isEqualTo(1);
+		assertThat(map).hasSize(1);
 		assertThat(map.containsKey("foo")).isTrue();
 		Object object = map.get("foo");
 		boolean condition = object instanceof LinkedHashMap;
 		assertThat(condition).isTrue();
 		@SuppressWarnings("unchecked")
 		Map<String, Object> sub = (Map<String, Object>) object;
-		assertThat(sub.size()).isEqualTo(1);
-		assertThat(sub.get("key1.key2")).isEqualTo(Integer.valueOf(3));
+		assertThat(sub).hasSize(1);
+		assertThat(sub.get("key1.key2")).isEqualTo(3);
 	}
 
 	@Test

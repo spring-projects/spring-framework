@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,8 +161,8 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 */
 	@Override
 	public boolean isGlobalRollbackOnly() {
-		return ((this.transaction instanceof SmartTransactionObject) &&
-				((SmartTransactionObject) this.transaction).isRollbackOnly());
+		return (this.transaction instanceof SmartTransactionObject smartTransactionObject &&
+				smartTransactionObject.isRollbackOnly());
 	}
 
 	/**
@@ -174,11 +174,11 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	@Override
 	protected SavepointManager getSavepointManager() {
 		Object transaction = this.transaction;
-		if (!(transaction instanceof SavepointManager)) {
+		if (!(transaction instanceof SavepointManager savepointManager)) {
 			throw new NestedTransactionNotSupportedException(
 					"Transaction object [" + this.transaction + "] does not support savepoints");
 		}
-		return (SavepointManager) transaction;
+		return savepointManager;
 	}
 
 	/**
@@ -198,8 +198,8 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 */
 	@Override
 	public void flush() {
-		if (this.transaction instanceof SmartTransactionObject) {
-			((SmartTransactionObject) this.transaction).flush();
+		if (this.transaction instanceof SmartTransactionObject smartTransactionObject) {
+			smartTransactionObject.flush();
 		}
 	}
 

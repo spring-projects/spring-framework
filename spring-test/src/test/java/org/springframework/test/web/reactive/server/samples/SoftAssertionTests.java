@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,10 @@ class SoftAssertionTests {
 										responseSpec -> responseSpec.expectBody(String.class).isEqualTo("bogus")
 								)
 				)
-				.withMessage("Multiple Exceptions (2):\n" +
-						"Status expected:<400 BAD_REQUEST> but was:<200 OK>\n" +
-						"Response body expected:<bogus> but was:<hello>");
+				.withMessage("""
+						Multiple Exceptions (2):
+						Status expected:<400 BAD_REQUEST> but was:<200 OK>
+						Response body expected:<bogus> but was:<hello>""");
 	}
 
 

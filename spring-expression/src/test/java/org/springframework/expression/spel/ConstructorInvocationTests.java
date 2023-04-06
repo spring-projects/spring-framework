@@ -156,19 +156,19 @@ public class ConstructorInvocationTests extends AbstractExpressionTests {
 
 		// reflective constructor accessor is the only one by default
 		List<ConstructorResolver> constructorResolvers = ctx.getConstructorResolvers();
-		assertThat(constructorResolvers.size()).isEqualTo(1);
+		assertThat(constructorResolvers).hasSize(1);
 
 		ConstructorResolver dummy = new DummyConstructorResolver();
 		ctx.addConstructorResolver(dummy);
-		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(2);
+		assertThat(ctx.getConstructorResolvers()).hasSize(2);
 
 		List<ConstructorResolver> copy = new ArrayList<>(ctx.getConstructorResolvers());
 		assertThat(ctx.removeConstructorResolver(dummy)).isTrue();
 		assertThat(ctx.removeConstructorResolver(dummy)).isFalse();
-		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(1);
+		assertThat(ctx.getConstructorResolvers()).hasSize(1);
 
 		ctx.setConstructorResolvers(copy);
-		assertThat(ctx.getConstructorResolvers().size()).isEqualTo(2);
+		assertThat(ctx.getConstructorResolvers()).hasSize(2);
 	}
 
 

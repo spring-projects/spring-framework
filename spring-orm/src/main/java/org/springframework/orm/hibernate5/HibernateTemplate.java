@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -369,8 +369,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			throw SessionFactoryUtils.convertHibernateAccessException(ex);
 		}
 		catch (PersistenceException ex) {
-			if (ex.getCause() instanceof HibernateException) {
-				throw SessionFactoryUtils.convertHibernateAccessException((HibernateException) ex.getCause());
+			if (ex.getCause() instanceof HibernateException hibernateEx) {
+				throw SessionFactoryUtils.convertHibernateAccessException(hibernateEx);
 			}
 			throw ex;
 		}
@@ -1115,11 +1115,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	protected void applyNamedParameterToQuery(Query<?> queryObject, String paramName, Object value)
 			throws HibernateException {
 
-		if (value instanceof Collection) {
-			queryObject.setParameterList(paramName, (Collection<?>) value);
+		if (value instanceof Collection<?> collection) {
+			queryObject.setParameterList(paramName, collection);
 		}
-		else if (value instanceof Object[]) {
-			queryObject.setParameterList(paramName, (Object[]) value);
+		else if (value instanceof Object[] array) {
+			queryObject.setParameterList(paramName, array);
 		}
 		else {
 			queryObject.setParameter(paramName, value);
@@ -1168,11 +1168,11 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 				// If return value is a Query or Criteria, apply transaction timeout.
 				// Applies to createQuery, getNamedQuery, createCriteria.
-				if (retVal instanceof Criteria) {
-					prepareCriteria(((Criteria) retVal));
+				if (retVal instanceof Criteria criteria) {
+					prepareCriteria(criteria);
 				}
-				else if (retVal instanceof Query) {
-					prepareQuery(((Query<?>) retVal));
+				else if (retVal instanceof Query<?> query) {
+					prepareQuery(query);
 				}
 
 				return retVal;

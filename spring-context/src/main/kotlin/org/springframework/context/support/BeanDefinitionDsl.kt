@@ -16,6 +16,7 @@
 
 package org.springframework.context.support
 
+import org.springframework.aot.AotDetector
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer
@@ -1145,6 +1146,9 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 	 * @param context The `ApplicationContext` to use for registering the beans
 	 */
 	override fun initialize(context: GenericApplicationContext) {
+		if (AotDetector.useGeneratedArtifacts()) {
+			return
+		}
 		this.context = context
 		init()
 		for (child in children) {

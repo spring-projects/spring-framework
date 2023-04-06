@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	}
 
 	@Override
+	@Nullable
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
 		beanDefinition.resolveDestroyMethodIfNecessary();
@@ -180,8 +181,8 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 	private String[] safeMerge(@Nullable String[] existingNames, Collection<LifecycleElement> detectedElements) {
 		Stream<String> detectedNames = detectedElements.stream().map(LifecycleElement::getIdentifier);
-		Stream<String> mergedNames = (existingNames != null
-				? Stream.concat(Stream.of(existingNames), detectedNames) : detectedNames);
+		Stream<String> mergedNames = (existingNames != null ?
+				Stream.concat(Stream.of(existingNames), detectedNames) : detectedNames);
 		return mergedNames.distinct().toArray(String[]::new);
 	}
 

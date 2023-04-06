@@ -73,7 +73,7 @@ import org.springframework.util.ReflectionUtils;
 class ConfigurationClassEnhancer {
 
 	// The callbacks to use. Note that these callbacks must be stateless.
-	private static final Callback[] CALLBACKS = new Callback[] {
+	static final Callback[] CALLBACKS = new Callback[] {
 			new BeanMethodInterceptor(),
 			new BeanFactoryAwareMethodInterceptor(),
 			NoOp.INSTANCE
@@ -123,6 +123,7 @@ class ConfigurationClassEnhancer {
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+		enhancer.setAttemptLoad(true);
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
@@ -207,8 +208,7 @@ class ConfigurationClassEnhancer {
 	 * Also exposes the application ClassLoader as thread context ClassLoader for the time of
 	 * class generation (in order for ASM to pick it up when doing common superclass resolution).
 	 */
-	private static class BeanFactoryAwareGeneratorStrategy extends
-			ClassLoaderAwareGeneratorStrategy {
+	private static class BeanFactoryAwareGeneratorStrategy extends ClassLoaderAwareGeneratorStrategy {
 
 		public BeanFactoryAwareGeneratorStrategy(@Nullable ClassLoader classLoader) {
 			super(classLoader);
@@ -508,6 +508,7 @@ class ConfigurationClassEnhancer {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(factoryBean.getClass());
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+			enhancer.setAttemptLoad(true);
 			enhancer.setCallbackType(MethodInterceptor.class);
 
 			// Ideally create enhanced FactoryBean proxy without constructor side effects,
@@ -539,7 +540,7 @@ class ConfigurationClassEnhancer {
 				if (method.getName().equals("getObject") && args.length == 0) {
 					return beanFactory.getBean(beanName);
 				}
-				return proxy.invoke(factoryBean, args);
+				return method.invoke(factoryBean, args);
 			});
 
 			return fbProxy;

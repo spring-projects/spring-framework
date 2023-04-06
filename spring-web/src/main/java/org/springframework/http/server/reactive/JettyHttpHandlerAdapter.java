@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 
 import jakarta.servlet.AsyncContext;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,8 +34,8 @@ import org.eclipse.jetty.server.Response;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -45,10 +44,18 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Violeta Georgieva
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 5.0
  * @see org.springframework.web.server.adapter.AbstractReactiveWebInitializer
  */
 public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
+
+	private static final boolean jetty11Present = ClassUtils.isPresent(
+			"org.eclipse.jetty.server.HttpOutput", JettyHttpHandlerAdapter.class.getClassLoader());
+
+	private static final boolean jetty12Present = ClassUtils.isPresent(
+			"org.eclipse.jetty.ee10.servlet.HttpOutput", JettyHttpHandlerAdapter.class.getClassLoader());
+
 
 	public JettyHttpHandlerAdapter(HttpHandler httpHandler) {
 		super(httpHandler);
@@ -59,23 +66,37 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)
 			throws IOException, URISyntaxException {
 
-		Assert.notNull(getServletPath(), "Servlet path is not initialized");
-		return new JettyServerHttpRequest(
-				request, context, getServletPath(), getDataBufferFactory(), getBufferSize());
+		if (jetty11Present) {
+			Assert.state(getServletPath() != null, "Servlet path is not initialized");
+			return new Jetty11ServerHttpRequest(
+					request, context, getServletPath(), getDataBufferFactory(), getBufferSize());
+		}
+		else {
+			return super.createRequest(request, context);
+		}
 	}
 
 	@Override
 	protected ServletServerHttpResponse createResponse(HttpServletResponse response,
 			AsyncContext context, ServletServerHttpRequest request) throws IOException {
 
-		return new JettyServerHttpResponse(
-				response, context, getDataBufferFactory(), getBufferSize(), request);
+		if (jetty11Present) {
+			return new Jetty11ServerHttpResponse(
+					response, context, getDataBufferFactory(), getBufferSize(), request);
+		}
+		else if (jetty12Present) {
+			return new Jetty12ServerHttpResponse(
+					response, context, getDataBufferFactory(), getBufferSize(), request);
+		}
+		else {
+			return super.createResponse(response, context, request);
+		}
 	}
 
 
-	private static final class JettyServerHttpRequest extends ServletServerHttpRequest {
+	private static final class Jetty11ServerHttpRequest extends ServletServerHttpRequest {
 
-		JettyServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
+		Jetty11ServerHttpRequest(HttpServletRequest request, AsyncContext asyncContext,
 				String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 				throws IOException, URISyntaxException {
 
@@ -84,8 +105,7 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		private static MultiValueMap<String, String> createHeaders(HttpServletRequest servletRequest) {
 			Request request = getRequest(servletRequest);
-			HttpFields.Mutable fields = HttpFields.build(request.getHttpFields());
-			return new JettyHeadersAdapter(fields);
+			return new JettyHeadersAdapter(HttpFields.build(request.getHttpFields()));
 		}
 
 		private static Request getRequest(HttpServletRequest request) {
@@ -104,9 +124,9 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 	}
 
 
-	private static final class JettyServerHttpResponse extends ServletServerHttpResponse {
+	private static final class Jetty11ServerHttpResponse extends ServletServerHttpResponse {
 
-		JettyServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
+		Jetty11ServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
 				DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request)
 				throws IOException {
 
@@ -115,8 +135,7 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		private static HttpHeaders createHeaders(HttpServletResponse servletResponse) {
 			Response response = getResponse(servletResponse);
-			HttpFields.Mutable fields = response.getHttpFields();
-			return new HttpHeaders(new JettyHeadersAdapter(fields));
+			return new HttpHeaders(new JettyHeadersAdapter(response.getHttpFields()));
 		}
 
 		private static Response getResponse(HttpServletResponse response) {
@@ -135,35 +154,51 @@ public class JettyHttpHandlerAdapter extends ServletHttpHandlerAdapter {
 
 		@Override
 		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
-			ByteBuffer input = dataBuffer.asByteBuffer();
-			int len = input.remaining();
-			ServletResponse response = getNativeResponse();
-			((HttpOutput) response.getOutputStream()).write(input);
-			return len;
+			if (getOutputStream() instanceof HttpOutput httpOutput) {
+				int len = 0;
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+					while (iterator.hasNext() && httpOutput.isReady()) {
+						ByteBuffer byteBuffer = iterator.next();
+						len += byteBuffer.remaining();
+						httpOutput.write(byteBuffer);
+					}
+				}
+				return len;
+			}
+			return super.writeToOutputStream(dataBuffer);
 		}
 
 		@Override
 		protected void applyHeaders() {
-			HttpServletResponse response = getNativeResponse();
-			MediaType contentType = null;
-			try {
-				contentType = getHeaders().getContentType();
+			adaptHeaders(false);
+		}
+	}
+
+
+	private static final class Jetty12ServerHttpResponse extends ServletServerHttpResponse {
+
+		Jetty12ServerHttpResponse(HttpServletResponse response, AsyncContext asyncContext,
+				DataBufferFactory bufferFactory, int bufferSize, ServletServerHttpRequest request)
+				throws IOException {
+
+			super(response, asyncContext, bufferFactory, bufferSize, request);
+		}
+
+		@Override
+		protected int writeToOutputStream(DataBuffer dataBuffer) throws IOException {
+			OutputStream output = getOutputStream();
+			if (output instanceof org.eclipse.jetty.ee10.servlet.HttpOutput httpOutput) {
+				int len = 0;
+				try (DataBuffer.ByteBufferIterator iterator = dataBuffer.readableByteBuffers()) {
+					while (iterator.hasNext() && httpOutput.isReady()) {
+						ByteBuffer byteBuffer = iterator.next();
+						len += byteBuffer.remaining();
+						httpOutput.write(byteBuffer);
+					}
+				}
+				return len;
 			}
-			catch (Exception ex) {
-				String rawContentType = getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
-				response.setContentType(rawContentType);
-			}
-			if (response.getContentType() == null && contentType != null) {
-				response.setContentType(contentType.toString());
-			}
-			Charset charset = (contentType != null ? contentType.getCharset() : null);
-			if (response.getCharacterEncoding() == null && charset != null) {
-				response.setCharacterEncoding(charset.name());
-			}
-			long contentLength = getHeaders().getContentLength();
-			if (contentLength != -1) {
-				response.setContentLengthLong(contentLength);
-			}
+			return super.writeToOutputStream(dataBuffer);
 		}
 	}
 

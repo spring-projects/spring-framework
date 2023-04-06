@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -122,9 +123,9 @@ import org.springframework.web.util.WebUtils;
  * with XmlWebApplicationContext). The namespace can also be set explicitly via
  * the "namespace" servlet init-param.
  *
- * <p>As of Spring 3.1, {@code FrameworkServlet} may now be injected with a web
- * application context, rather than creating its own internally. This is useful in Servlet
- * 3.0+ environments, which support programmatic registration of servlet instances. See
+ * <p>{@code FrameworkServlet} may be injected with a web application context,
+ * rather than creating its own internally. This is useful in Servlet 3.0+
+ * environments, which support programmatic registration of servlet instances. See
  * {@link #FrameworkServlet(WebApplicationContext)} Javadoc for details.
  *
  * @author Rod Johnson
@@ -166,6 +167,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * multiple values in a single init-param String value.
 	 */
 	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
+
+	/**
+	 * HTTP methods supported by {@link jakarta.servlet.http.HttpServlet}.
+	 */
+	private static final Set<String> HTTP_SERVLET_METHODS =
+			Set.of("DELETE", "HEAD", "GET", "OPTIONS", "POST", "PUT", "TRACE");
 
 
 	/** ServletContext attribute to find the WebApplicationContext in. */
@@ -859,25 +866,26 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	public void destroy() {
 		getServletContext().log("Destroying Spring FrameworkServlet '" + getServletName() + "'");
 		// Only call close() on WebApplicationContext if locally managed...
-		if (!this.webApplicationContextInjected && this.webApplicationContext instanceof ConfigurableApplicationContext cac) {
+		if (!this.webApplicationContextInjected &&
+				this.webApplicationContext instanceof ConfigurableApplicationContext cac) {
 			cac.close();
 		}
 	}
 
 
 	/**
-	 * Override the parent class implementation in order to intercept PATCH requests.
+	 * Override the parent class implementation in order to intercept requests
+	 * using PATCH or non-standard HTTP methods (WebDAV).
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
-		if (HttpMethod.PATCH.equals(httpMethod)) {
-			processRequest(request, response);
+		if (HTTP_SERVLET_METHODS.contains(request.getMethod())) {
+			super.service(request, response);
 		}
 		else {
-			super.service(request, response);
+			processRequest(request, response);
 		}
 	}
 
@@ -1124,8 +1132,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			logger.debug("Exiting from \"" + dispatchType + "\" dispatch, status " + status + headers);
 		}
 		else {
-			HttpStatusCode httpStatus = HttpStatusCode.valueOf(status);
-			logger.debug("Completed " + httpStatus + headers);
+			logger.debug("Completed " + HttpStatusCode.valueOf(status) + headers);
 		}
 	}
 

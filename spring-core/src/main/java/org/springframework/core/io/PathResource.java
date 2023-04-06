@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.OpenOption;
@@ -139,6 +140,26 @@ public class PathResource extends AbstractResource implements WritableResource {
 			throw new FileNotFoundException(getPath() + " (is a directory)");
 		}
 		return Files.newInputStream(this.path);
+	}
+
+	@Override
+	public byte[] getContentAsByteArray() throws IOException {
+		try {
+			return Files.readAllBytes(this.path);
+		}
+		catch (NoSuchFileException ex) {
+			throw new FileNotFoundException(ex.getMessage());
+		}
+	}
+
+	@Override
+	public String getContentAsString(Charset charset) throws IOException {
+		try {
+			return Files.readString(this.path, charset);
+		}
+		catch (NoSuchFileException ex) {
+			throw new FileNotFoundException(ex.getMessage());
+		}
 	}
 
 	/**
@@ -277,9 +298,8 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 * This implementation compares the underlying Path references.
 	 */
 	@Override
-	public boolean equals(@Nullable Object other) {
-		return (this == other || (other instanceof PathResource &&
-				this.path.equals(((PathResource) other).path)));
+	public boolean equals(@Nullable Object obj) {
+		return (this == obj || (obj instanceof PathResource that && this.path.equals(that.path)));
 	}
 
 	/**

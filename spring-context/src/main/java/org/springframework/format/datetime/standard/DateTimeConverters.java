@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,8 @@ final class DateTimeConverters {
 	}
 
 	private static ZonedDateTime calendarToZonedDateTime(Calendar source) {
-		if (source instanceof GregorianCalendar) {
-			return ((GregorianCalendar) source).toZonedDateTime();
+		if (source instanceof GregorianCalendar gc) {
+			return gc.toZonedDateTime();
 		}
 		else {
 			return ZonedDateTime.ofInstant(Instant.ofEpochMilli(source.getTimeInMillis()),

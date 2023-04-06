@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ package org.springframework.web.reactive.result.method.annotation;
 
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.MethodNotAllowedException;
@@ -56,7 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ResponseEntityExceptionHandlerTests {
 
-	private final ResponseEntityExceptionHandler exceptionHandler = new GlobalExceptionHandler();
+	private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
 	private final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").build());
 
@@ -97,7 +101,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void handleWebExchangeBindException() {
-		testException(new WebExchangeBindException(null, null));
+		testException(new WebExchangeBindException(null, new BeanPropertyBindingResult(new Object(), "foo")));
 	}
 
 	@Test
@@ -120,20 +124,68 @@ public class ResponseEntityExceptionHandlerTests {
 		testException(new ErrorResponseException(HttpStatus.CONFLICT));
 	}
 
+	@Test
+	void errorResponseProblemDetailViaMessageSource() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage(
+				ErrorResponse.getDefaultDetailMessageCode(UnsupportedMediaTypeStatusException.class, null), locale,
+				"Content-Type {0} not supported. Supported: {1}");
+		messageSource.addMessage(
+				ErrorResponse.getDefaultTitleMessageCode(UnsupportedMediaTypeStatusException.class), locale,
+				"Media type is not valid or not supported");
+
+		this.exceptionHandler.setMessageSource(messageSource);
+
+		Exception ex = new UnsupportedMediaTypeStatusException(MediaType.APPLICATION_JSON,
+				List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+				.acceptLanguageAsLocales(locale).build());
+
+		ResponseEntity<?> responseEntity = this.exceptionHandler.handleException(ex, exchange).block();
+
+		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
+		assertThat(body.getDetail()).isEqualTo(
+				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+		assertThat(body.getTitle()).isEqualTo(
+				"Media type is not valid or not supported");
+	}
+
+	@Test
+	void customExceptionToProblemDetailViaMessageSource() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		StaticMessageSource messageSource = new StaticMessageSource();
+		messageSource.addMessage(
+				"problemDetail." + IllegalStateException.class.getName(), locale,
+				"Invalid state: {0}");
+
+		this.exceptionHandler.setMessageSource(messageSource);
+
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
+				.acceptLanguageAsLocales(locale).build());
+
+		ResponseEntity<?> responseEntity =
+				this.exceptionHandler.handleException(new IllegalStateException("test"), exchange).block();
+
+		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
+		assertThat(body.getDetail()).isEqualTo("Invalid state: A");
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private ResponseEntity<ProblemDetail> testException(ErrorResponseException exception) {
-		ResponseEntity<?> responseEntity =
-				this.exceptionHandler.handleException(exception, this.exchange).block();
-
-		assertThat(responseEntity).isNotNull();
-		assertThat(responseEntity.getStatusCode()).isEqualTo(exception.getStatusCode());
-
-		assertThat(responseEntity.getBody()).isNotNull().isInstanceOf(ProblemDetail.class);
-		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
-		assertThat(body.getType()).isEqualTo(URI.create(exception.getClass().getName()));
-
-		return (ResponseEntity<ProblemDetail>) responseEntity;
+		ResponseEntity<?> entity = this.exceptionHandler.handleException(exception, this.exchange).block();
+		assertThat(entity).isNotNull();
+		assertThat(entity.getStatusCode()).isEqualTo(exception.getStatusCode());
+		assertThat(entity.getBody()).isInstanceOf(ProblemDetail.class);
+		return (ResponseEntity<ProblemDetail>) entity;
 	}
 
 
@@ -142,9 +194,7 @@ public class ResponseEntityExceptionHandlerTests {
 		private Mono<ResponseEntity<Object>> handleAndSetTypeToExceptionName(
 				ErrorResponseException ex, HttpHeaders headers, HttpStatusCode status, ServerWebExchange exchange) {
 
-			ProblemDetail body = ex.getBody();
-			body.setType(URI.create(ex.getClass().getName()));
-			return handleExceptionInternal(ex, body, headers, status, exchange);
+			return handleExceptionInternal(ex, null, headers, status, exchange);
 		}
 
 		@Override
@@ -225,6 +275,12 @@ public class ResponseEntityExceptionHandlerTests {
 				ServerWebExchange exchange) {
 
 			return handleAndSetTypeToExceptionName(ex, headers, status, exchange);
+		}
+
+		public Mono<ResponseEntity<Object>> handleException(IllegalStateException ex, ServerWebExchange exchange) {
+			HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+			ProblemDetail body = createProblemDetail(ex, status, ex.getMessage(), null, new Object[] {"A"}, exchange);
+			return handleExceptionInternal(ex, body, null, status, exchange);
 		}
 	}
 

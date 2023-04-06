@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,14 @@ package org.springframework.transaction.annotation;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aop.SpringProxy;
-import org.springframework.aop.framework.Advised;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
-import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.DecoratingProxy;
-import org.springframework.core.testfixture.aot.generate.TestGenerationContext;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,14 +46,12 @@ public class TransactionBeanRegistrationAotProcessorTests {
 	void shouldSkipNonAnnotatedType() {
 		process(NonAnnotatedBean.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).isEmpty();
-		assertThat(this.generationContext.getRuntimeHints().proxies().jdkProxies()).isEmpty();
 	}
 
 	@Test
 	void shouldSkipAnnotatedTypeWithNoInterface() {
 		process(NoInterfaceBean.class);
 		assertThat(this.generationContext.getRuntimeHints().reflection().typeHints()).isEmpty();
-		assertThat(this.generationContext.getRuntimeHints().proxies().jdkProxies()).isEmpty();
 	}
 
 	@Test
@@ -65,7 +59,6 @@ public class TransactionBeanRegistrationAotProcessorTests {
 		process(TransactionalOnTypeBean.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(NonAnnotatedTransactionalInterface.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.generationContext.getRuntimeHints());
-		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(NonAnnotatedTransactionalInterface.class, SpringProxy.class, Advised.class, DecoratingProxy.class)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	@Test
@@ -73,7 +66,6 @@ public class TransactionBeanRegistrationAotProcessorTests {
 		process(JakartaTransactionalOnTypeBean.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(NonAnnotatedTransactionalInterface.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.generationContext.getRuntimeHints());
-		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(NonAnnotatedTransactionalInterface.class, SpringProxy.class, Advised.class, DecoratingProxy.class)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	@Test
@@ -81,7 +73,6 @@ public class TransactionBeanRegistrationAotProcessorTests {
 		process(TransactionalOnTypeInterface.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(TransactionalOnTypeInterface.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.generationContext.getRuntimeHints());
-		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(TransactionalOnTypeInterface.class, SpringProxy.class, Advised.class, DecoratingProxy.class)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	@Test
@@ -89,7 +80,6 @@ public class TransactionBeanRegistrationAotProcessorTests {
 		process(TransactionalOnClassMethodBean.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(NonAnnotatedTransactionalInterface.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.generationContext.getRuntimeHints());
-		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(NonAnnotatedTransactionalInterface.class, SpringProxy.class, Advised.class, DecoratingProxy.class)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	@Test
@@ -97,13 +87,12 @@ public class TransactionBeanRegistrationAotProcessorTests {
 		process(TransactionalOnInterfaceMethodBean.class);
 		assertThat(RuntimeHintsPredicates.reflection().onType(TransactionalOnMethodInterface.class)
 				.withMemberCategory(MemberCategory.INVOKE_DECLARED_METHODS)).accepts(this.generationContext.getRuntimeHints());
-		assertThat(RuntimeHintsPredicates.proxies().forInterfaces(TransactionalOnMethodInterface.class, SpringProxy.class, Advised.class, DecoratingProxy.class)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	private void process(Class<?> beanClass) {
 		BeanRegistrationAotContribution contribution = createContribution(beanClass);
 		if (contribution != null) {
-			contribution.applyTo(this.generationContext, mock(BeanRegistrationCode.class));
+			contribution.applyTo(this.generationContext, mock());
 		}
 	}
 
@@ -133,6 +122,7 @@ public class TransactionBeanRegistrationAotProcessorTests {
 	@Transactional
 	static class TransactionalOnTypeBean implements NonAnnotatedTransactionalInterface {
 
+		@Override
 		public void transactional() {
 		}
 	}
@@ -140,6 +130,7 @@ public class TransactionBeanRegistrationAotProcessorTests {
 	@jakarta.transaction.Transactional
 	static class JakartaTransactionalOnTypeBean implements NonAnnotatedTransactionalInterface {
 
+		@Override
 		public void transactional() {
 		}
 	}
@@ -157,6 +148,7 @@ public class TransactionBeanRegistrationAotProcessorTests {
 
 	static class TransactionalOnClassMethodBean implements NonAnnotatedTransactionalInterface {
 
+		@Override
 		@Transactional
 		public void transactional() {
 		}
@@ -170,6 +162,7 @@ public class TransactionBeanRegistrationAotProcessorTests {
 
 	static class TransactionalOnInterfaceMethodBean implements TransactionalOnMethodInterface {
 
+		@Override
 		public void transactional() {
 		}
 	}

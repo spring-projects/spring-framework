@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		// set up test data
 		this.rob = new TestBean();
 		this.rob.setName("Rob");
-		this.rob.setMyFloat(Float.valueOf(12.34f));
+		this.rob.setMyFloat(12.34f);
 
 		TestBean sally = new TestBean();
 		sally.setName("Sally");
@@ -372,11 +372,11 @@ public class InputTagTests extends AbstractFormTagTests {
 	}
 
 	protected final void assertTagClosed(String output) {
-		assertThat(output.endsWith("/>")).as("Tag not closed properly").isTrue();
+		assertThat(output).as("Tag not closed properly").endsWith("/>");
 	}
 
 	protected final void assertTagOpened(String output) {
-		assertThat(output.startsWith("<input ")).as("Tag not opened properly").isTrue();
+		assertThat(output).as("Tag not opened properly").startsWith("<input ");
 	}
 
 	@SuppressWarnings("serial")

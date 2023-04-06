@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.beans.factory.groovy;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import groovy.lang.GroovyObjectSupport;
 
@@ -30,6 +30,8 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -51,58 +53,54 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 	private static final String DESTROY_METHOD = "destroyMethod";
 	private static final String SINGLETON = "singleton";
 
-	private static final List<String> dynamicProperties = new ArrayList<>(8);
-
-	static {
-		dynamicProperties.add(PARENT);
-		dynamicProperties.add(AUTOWIRE);
-		dynamicProperties.add(CONSTRUCTOR_ARGS);
-		dynamicProperties.add(FACTORY_BEAN);
-		dynamicProperties.add(FACTORY_METHOD);
-		dynamicProperties.add(INIT_METHOD);
-		dynamicProperties.add(DESTROY_METHOD);
-		dynamicProperties.add(SINGLETON);
-	}
+	private static final Set<String> dynamicProperties = Set.of(PARENT, AUTOWIRE, CONSTRUCTOR_ARGS,
+			FACTORY_BEAN, FACTORY_METHOD, INIT_METHOD, DESTROY_METHOD, SINGLETON);
 
 
+	@Nullable
 	private String beanName;
 
-	private Class<?> clazz;
+	@Nullable
+	private final Class<?> clazz;
 
-	private Collection<?> constructorArgs;
+	@Nullable
+	private final Collection<?> constructorArgs;
 
+	@Nullable
 	private AbstractBeanDefinition definition;
 
+	@Nullable
 	private BeanWrapper definitionWrapper;
 
+	@Nullable
 	private String parentName;
 
 
-	public GroovyBeanDefinitionWrapper(String beanName) {
-		this.beanName = beanName;
+	GroovyBeanDefinitionWrapper(String beanName) {
+		this(beanName, null);
 	}
 
-	public GroovyBeanDefinitionWrapper(String beanName, Class<?> clazz) {
-		this.beanName = beanName;
-		this.clazz = clazz;
+	GroovyBeanDefinitionWrapper(@Nullable String beanName, @Nullable Class<?> clazz) {
+		this(beanName, clazz, null);
 	}
 
-	public GroovyBeanDefinitionWrapper(String beanName, Class<?> clazz, Collection<?> constructorArgs) {
+	GroovyBeanDefinitionWrapper(@Nullable String beanName, Class<?> clazz, @Nullable Collection<?> constructorArgs) {
 		this.beanName = beanName;
 		this.clazz = clazz;
 		this.constructorArgs = constructorArgs;
 	}
 
 
+	@Nullable
 	public String getBeanName() {
 		return this.beanName;
 	}
 
-	public void setBeanDefinition(AbstractBeanDefinition definition) {
+	void setBeanDefinition(AbstractBeanDefinition definition) {
 		this.definition = definition;
 	}
 
-	public AbstractBeanDefinition getBeanDefinition() {
+	AbstractBeanDefinition getBeanDefinition() {
 		if (this.definition == null) {
 			this.definition = createBeanDefinition();
 		}
@@ -126,35 +124,33 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		return bd;
 	}
 
-	public void setBeanDefinitionHolder(BeanDefinitionHolder holder) {
+	void setBeanDefinitionHolder(BeanDefinitionHolder holder) {
 		this.definition = (AbstractBeanDefinition) holder.getBeanDefinition();
 		this.beanName = holder.getBeanName();
 	}
 
-	public BeanDefinitionHolder getBeanDefinitionHolder() {
+	BeanDefinitionHolder getBeanDefinitionHolder() {
 		return new BeanDefinitionHolder(getBeanDefinition(), getBeanName());
 	}
 
-	public void setParent(Object obj) {
-		if (obj == null) {
-			throw new IllegalArgumentException("Parent bean cannot be set to a null runtime bean reference!");
+	void setParent(Object obj) {
+		Assert.notNull(obj, "Parent bean cannot be set to a null runtime bean reference.");
+		if (obj instanceof String name) {
+			this.parentName = name;
 		}
-		if (obj instanceof String) {
-			this.parentName = (String) obj;
+		else if (obj instanceof RuntimeBeanReference runtimeBeanReference) {
+			this.parentName = runtimeBeanReference.getBeanName();
 		}
-		else if (obj instanceof RuntimeBeanReference) {
-			this.parentName = ((RuntimeBeanReference) obj).getBeanName();
-		}
-		else if (obj instanceof GroovyBeanDefinitionWrapper) {
-			this.parentName = ((GroovyBeanDefinitionWrapper) obj).getBeanName();
+		else if (obj instanceof GroovyBeanDefinitionWrapper wrapper) {
+			this.parentName = wrapper.getBeanName();
 		}
 		getBeanDefinition().setParentName(this.parentName);
 		getBeanDefinition().setAbstract(false);
 	}
 
-	public GroovyBeanDefinitionWrapper addProperty(String propertyName, Object propertyValue) {
-		if (propertyValue instanceof GroovyBeanDefinitionWrapper) {
-			propertyValue = ((GroovyBeanDefinitionWrapper) propertyValue).getBeanDefinition();
+	GroovyBeanDefinitionWrapper addProperty(String propertyName, Object propertyValue) {
+		if (propertyValue instanceof GroovyBeanDefinitionWrapper wrapper) {
+			propertyValue = wrapper.getBeanDefinition();
 		}
 		getBeanDefinition().getPropertyValues().add(propertyName, propertyValue);
 		return this;
@@ -163,6 +159,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 
 	@Override
 	public Object getProperty(String property) {
+		Assert.state(this.definitionWrapper != null, "BeanDefinition wrapper not initialized");
 		if (this.definitionWrapper.isReadableProperty(property)) {
 			return this.definitionWrapper.getPropertyValue(property);
 		}
@@ -179,6 +176,7 @@ class GroovyBeanDefinitionWrapper extends GroovyObjectSupport {
 		}
 		else {
 			AbstractBeanDefinition bd = getBeanDefinition();
+			Assert.state(this.definitionWrapper != null, "BeanDefinition wrapper not initialized");
 			if (AUTOWIRE.equals(property)) {
 				if ("byName".equals(newValue)) {
 					bd.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);

@@ -87,17 +87,6 @@ final class AttributeMethods {
 
 
 	/**
-	 * Determine if this instance only contains a single attribute named
-	 * {@code value}.
-	 * @return {@code true} if there is only a value attribute
-	 */
-	boolean hasOnlyValueAttribute() {
-		return (this.attributeMethods.length == 1 &&
-				MergedAnnotation.VALUE.equals(this.attributeMethods[0].getName()));
-	}
-
-
-	/**
 	 * Determine if values from the given annotation can be safely accessed without
 	 * causing any {@link TypeNotPresentException TypeNotPresentExceptions}.
 	 * @param annotation the annotation to check
@@ -109,7 +98,7 @@ final class AttributeMethods {
 		for (int i = 0; i < size(); i++) {
 			if (canThrowTypeNotPresentException(i)) {
 				try {
-					get(i).invoke(annotation);
+					AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
 				}
 				catch (Throwable ex) {
 					return false;
@@ -134,7 +123,7 @@ final class AttributeMethods {
 		for (int i = 0; i < size(); i++) {
 			if (canThrowTypeNotPresentException(i)) {
 				try {
-					get(i).invoke(annotation);
+					AnnotationUtils.invokeAnnotationMethod(get(i), annotation);
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Could not obtain annotation attribute value for " +
@@ -168,7 +157,7 @@ final class AttributeMethods {
 	 * @param index the index of the attribute to return
 	 * @return the attribute method
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 * (<tt>index &lt; 0 || index &gt;= size()</tt>)
+	 * ({@code index < 0 || index >= size()})
 	 */
 	Method get(int index) {
 		return this.attributeMethods[index];

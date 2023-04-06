@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,8 +218,8 @@ class PeriodicTriggerTests {
 	private static void assertApproximateDifference(Instant lesser, Instant greater, long expected) {
 		long diff = greater.toEpochMilli() - lesser.toEpochMilli();
 		long variance = Math.abs(expected - diff);
-		assertThat(variance < 100).as("expected approximate difference of " + expected +
-				", but actual difference was " + diff).isTrue();
+		assertThat(variance).as("expected approximate difference of " + expected +
+				", but actual difference was " + diff).isLessThan(100);
 	}
 
 	private static TriggerContext context(@Nullable Object scheduled, @Nullable Object actual,

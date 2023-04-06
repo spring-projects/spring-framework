@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,13 +86,13 @@ public class URLEditorTests {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText(null);
 		assertThat(urlEditor.getValue()).isNull();
-		assertThat(urlEditor.getAsText()).isEqualTo("");
+		assertThat(urlEditor.getAsText()).isEmpty();
 	}
 
 	@Test
 	public void testGetAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
 		PropertyEditor urlEditor = new URLEditor();
-		assertThat(urlEditor.getAsText()).isEqualTo("");
+		assertThat(urlEditor.getAsText()).isEmpty();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,19 @@
 package org.springframework.http;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
  * @author Arjen Poutsma
@@ -37,7 +44,7 @@ class HttpStatusTests {
 		statusCodes.put(100, "CONTINUE");
 		statusCodes.put(101, "SWITCHING_PROTOCOLS");
 		statusCodes.put(102, "PROCESSING");
-		statusCodes.put(103, "CHECKPOINT");
+		statusCodes.put(103, "EARLY_HINTS");
 
 		statusCodes.put(200, "OK");
 		statusCodes.put(201, "CREATED");
@@ -120,8 +127,7 @@ class HttpStatusTests {
 	void fromEnumToMap() {
 		for (HttpStatus status : HttpStatus.values()) {
 			int code = status.value();
-			// The following status codes have more than one corresponding HttpStatus enum constant.
-			if (code == 302 || code == 413 || code == 414) {
+			if (DEPRECATED_CODES.contains(status)) {
 				continue;
 			}
 			assertThat(statusCodes).as("Map has no value for [" + code + "]").containsKey(code);
@@ -136,6 +142,37 @@ class HttpStatusTests {
 			HttpStatus.Series expectedSeries = HttpStatus.Series.valueOf(status.value());
 			assertThat(status.series()).isEqualTo(expectedSeries);
 		}
+	}
+
+	@ParameterizedTest(name = "[{index}] code {0}")
+	@MethodSource("codesWithAliases")
+	void codeWithDeprecatedAlias(int code, HttpStatus expected, HttpStatus outdated) {
+		HttpStatus resolved = HttpStatus.valueOf(code);
+		assertThat(resolved)
+				.as("HttpStatus.valueOf(" + code + ")")
+				.isSameAs(expected)
+				.isNotEqualTo(outdated);
+		assertThat(outdated.isSameCodeAs(resolved))
+				.as("outdated isSameCodeAs(resolved)")
+				.isTrue();
+		assertThat(outdated.value())
+				.as("outdated value()")
+				.isEqualTo(resolved.value());
+	}
+
+	private static final Set<HttpStatus> DEPRECATED_CODES = codesWithAliases()
+				.stream()
+				.map(args -> (HttpStatus) args.get()[2])
+				.collect(Collectors.toUnmodifiableSet());
+
+	@SuppressWarnings("deprecation")
+	static List<Arguments> codesWithAliases() {
+		return List.of(
+				arguments(103, HttpStatus.EARLY_HINTS, HttpStatus.CHECKPOINT),
+				arguments(302, HttpStatus.FOUND, HttpStatus.MOVED_TEMPORARILY),
+				arguments(413, HttpStatus.PAYLOAD_TOO_LARGE, HttpStatus.REQUEST_ENTITY_TOO_LARGE),
+				arguments(414, HttpStatus.URI_TOO_LONG, HttpStatus.REQUEST_URI_TOO_LONG)
+		);
 	}
 
 }

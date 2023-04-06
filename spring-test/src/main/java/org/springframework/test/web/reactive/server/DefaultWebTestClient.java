@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -370,12 +370,28 @@ class DefaultWebTestClient implements WebTestClient {
 
 		private ClientRequest.Builder initRequestBuilder() {
 			ClientRequest.Builder builder = ClientRequest.create(this.httpMethod, initUri())
-					.headers(headers -> headers.addAll(initHeaders()))
-					.cookies(cookies -> cookies.addAll(initCookies()))
+					.headers(headersToUse -> {
+						if (!CollectionUtils.isEmpty(defaultHeaders)) {
+							headersToUse.putAll(defaultHeaders);
+						}
+						if (!CollectionUtils.isEmpty(this.headers)) {
+							headersToUse.putAll(this.headers);
+						}
+					})
+					.cookies(cookiesToUse -> {
+						if (!CollectionUtils.isEmpty(defaultCookies)) {
+							cookiesToUse.putAll(defaultCookies);
+						}
+						if (!CollectionUtils.isEmpty(this.cookies)) {
+							cookiesToUse.putAll(this.cookies);
+						}
+					})
 					.attributes(attributes -> attributes.putAll(this.attributes));
+
 			if (this.httpRequestConsumer != null) {
 				builder.httpRequest(this.httpRequestConsumer);
 			}
+
 			return builder;
 		}
 
@@ -383,30 +399,6 @@ class DefaultWebTestClient implements WebTestClient {
 			return (this.uri != null ? this.uri : uriBuilderFactory.expand(""));
 		}
 
-		private HttpHeaders initHeaders() {
-			if (CollectionUtils.isEmpty(defaultHeaders)) {
-				return this.headers;
-			}
-			HttpHeaders result = new HttpHeaders();
-			result.putAll(defaultHeaders);
-			result.putAll(this.headers);
-			return result;
-		}
-
-		private MultiValueMap<String, String> initCookies() {
-			if (CollectionUtils.isEmpty(this.cookies)) {
-				return (defaultCookies != null ? defaultCookies : new LinkedMultiValueMap<>());
-			}
-			else if (CollectionUtils.isEmpty(defaultCookies)) {
-				return this.cookies;
-			}
-			else {
-				MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
-				result.putAll(defaultCookies);
-				result.putAll(this.cookies);
-				return result;
-			}
-		}
 	}
 
 

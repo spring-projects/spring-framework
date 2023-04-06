@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,37 +193,37 @@ class SpelParserTests {
 	@Test
 	void booleanOperators() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("true");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.TRUE);
+		assertThat(expr.getValue(Boolean.class)).isTrue();
 		expr = new SpelExpressionParser().parseRaw("false");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(expr.getValue(Boolean.class)).isFalse();
 		expr = new SpelExpressionParser().parseRaw("false and false");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(expr.getValue(Boolean.class)).isFalse();
 		expr = new SpelExpressionParser().parseRaw("true and (true or false)");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.TRUE);
+		assertThat(expr.getValue(Boolean.class)).isTrue();
 		expr = new SpelExpressionParser().parseRaw("true and true or false");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.TRUE);
+		assertThat(expr.getValue(Boolean.class)).isTrue();
 		expr = new SpelExpressionParser().parseRaw("!true");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(expr.getValue(Boolean.class)).isFalse();
 		expr = new SpelExpressionParser().parseRaw("!(false or true)");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(expr.getValue(Boolean.class)).isFalse();
 	}
 
 	@Test
 	void booleanOperators_symbolic_spr9614() {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("true");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.TRUE);
+		assertThat(expr.getValue(Boolean.class)).isTrue();
 		expr = new SpelExpressionParser().parseRaw("false");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(expr.getValue(Boolean.class)).isFalse();
 		expr = new SpelExpressionParser().parseRaw("false && false");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(expr.getValue(Boolean.class)).isFalse();
 		expr = new SpelExpressionParser().parseRaw("true && (true || false)");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.TRUE);
+		assertThat(expr.getValue(Boolean.class)).isTrue();
 		expr = new SpelExpressionParser().parseRaw("true && true || false");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.TRUE);
+		assertThat(expr.getValue(Boolean.class)).isTrue();
 		expr = new SpelExpressionParser().parseRaw("!true");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(expr.getValue(Boolean.class)).isFalse();
 		expr = new SpelExpressionParser().parseRaw("!(false || true)");
-		assertThat(expr.getValue(Boolean.class)).isEqualTo(Boolean.FALSE);
+		assertThat(expr.getValue(Boolean.class)).isFalse();
 	}
 
 	@Test

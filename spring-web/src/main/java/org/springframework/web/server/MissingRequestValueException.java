@@ -36,11 +36,12 @@ public class MissingRequestValueException extends ServerWebInputException {
 
 
 	public MissingRequestValueException(String name, Class<?> type, String label, MethodParameter parameter) {
-		super("Required " + label + " '" + name + "' is not present.", parameter);
+		super("Required " + label + " '" + name + "' is not present.", parameter,
+				null, null, new Object[] {label, name});
+
 		this.name = name;
 		this.type = type;
 		this.label = label;
-		getBody().setDetail(getReason());
 	}
 
 

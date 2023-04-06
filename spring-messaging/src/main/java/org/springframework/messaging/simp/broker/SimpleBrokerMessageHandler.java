@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,8 +130,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initPathMatcherToUse() {
-		if (this.pathMatcher != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setPathMatcher(this.pathMatcher);
+		if (this.pathMatcher != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setPathMatcher(this.pathMatcher);
 		}
 	}
 
@@ -151,8 +151,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initCacheLimitToUse() {
-		if (this.cacheLimit != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setCacheLimit(this.cacheLimit);
+		if (this.cacheLimit != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setCacheLimit(this.cacheLimit);
 		}
 	}
 
@@ -178,8 +178,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	}
 
 	private void initSelectorHeaderNameToUse() {
-		if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setSelectorHeaderName(this.selectorHeaderName);
+		if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry defaultRegistry) {
+			defaultRegistry.setSelectorHeaderName(this.selectorHeaderName);
 		}
 	}
 

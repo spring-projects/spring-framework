@@ -36,13 +36,11 @@ public class UnsatisfiedRequestParameterException extends ServerWebInputExceptio
 	private final MultiValueMap<String, String> requestParams;
 
 
-	public UnsatisfiedRequestParameterException(
-			List<String> conditions, MultiValueMap<String, String> requestParams) {
-
-		super(initReason(conditions, requestParams));
+	public UnsatisfiedRequestParameterException(List<String> conditions, MultiValueMap<String, String> params) {
+		super(initReason(conditions, params), null, null, null, new Object[] {conditions});
 		this.conditions = conditions;
-		this.requestParams = requestParams;
-		getBody().setDetail("Invalid request parameters.");
+		this.requestParams = params;
+		setDetail("Invalid request parameters.");
 	}
 
 	private static String initReason(List<String> conditions, MultiValueMap<String, String> queryParams) {

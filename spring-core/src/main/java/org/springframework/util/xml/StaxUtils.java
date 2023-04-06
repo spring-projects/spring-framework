@@ -16,6 +16,7 @@
 
 package org.springframework.util.xml;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -37,7 +38,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.XMLReader;
 
 import org.springframework.lang.Nullable;
-import org.springframework.util.StreamUtils;
 
 /**
  * Convenience methods for working with the StAX API. Partly historic due to JAXP 1.3
@@ -54,7 +54,7 @@ import org.springframework.util.StreamUtils;
 public abstract class StaxUtils {
 
 	private static final XMLResolver NO_OP_XML_RESOLVER =
-			(publicID, systemID, base, ns) -> StreamUtils.emptyInput();
+			(publicID, systemID, base, ns) -> InputStream.nullInputStream();
 
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,9 @@ class UserDestinationMessageHandlerTests {
 
 	private static final String SESSION_ID = "123";
 
-	private final SimpUserRegistry registry = mock(SimpUserRegistry.class);
+	private final SimpUserRegistry registry = mock();
 
-	private final SubscribableChannel brokerChannel = mock(SubscribableChannel.class);
+	private final SubscribableChannel brokerChannel = mock();
 
 	private final UserDestinationMessageHandler handler = new UserDestinationMessageHandler(new StubMessageChannel(), this.brokerChannel, new DefaultUserDestinationResolver(this.registry));
 

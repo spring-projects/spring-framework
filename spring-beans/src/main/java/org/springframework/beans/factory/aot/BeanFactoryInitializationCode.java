@@ -24,27 +24,34 @@ import org.springframework.aot.generate.MethodReference;
  * perform bean factory initialization.
  *
  * @author Phillip Webb
+ * @author Stephane Nicoll
  * @since 6.0
  * @see BeanFactoryInitializationAotContribution
  */
 public interface BeanFactoryInitializationCode {
 
 	/**
-	 * The recommended variable name to used referring to the bean factory.
+	 * The recommended variable name to use to refer to the bean factory.
 	 */
 	String BEAN_FACTORY_VARIABLE = "beanFactory";
 
 	/**
-	 * Return the {@link GeneratedMethods} being used by the Initializing code.
+	 * Get the {@link GeneratedMethods} used by the initializing code.
 	 * @return the generated methods
 	 */
 	GeneratedMethods getMethods();
 
 	/**
-	 * Add an initializer method call.
-	 * @param methodReference a reference to the initialize method to call. The
-	 * referenced method must have the same functional signature as
-	 * {@code Consumer<DefaultListableBeanFactory>}.
+	 * Add an initializer method call. An initializer can use a flexible signature,
+	 * using any of the following:
+	 * <ul>
+	 * <li>{@code DefaultListableBeanFactory}, or {@code ConfigurableListableBeanFactory}
+	 * to use the bean factory.</li>
+	 * <li>{@code ConfigurableEnvironment} or {@code Environment} to access the
+	 * environment.</li>
+	 * <li>{@code ResourceLoader} to load resources.</li>
+	 * </ul>
+	 * @param methodReference a reference to the initialize method to call.
 	 */
 	void addInitializer(MethodReference methodReference);
 

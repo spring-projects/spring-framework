@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,16 +131,16 @@ public class JettyResourceFactory implements InitializingBean, DisposableBean {
 		}
 		if (this.byteBufferPool == null) {
 			this.byteBufferPool = new MappedByteBufferPool(2048,
-					this.executor instanceof ThreadPool.SizedThreadPool
-							? ((ThreadPool.SizedThreadPool) this.executor).getMaxThreads() / 2
-							: ProcessorUtils.availableProcessors() * 2);
+					this.executor instanceof ThreadPool.SizedThreadPool sizedThreadPool ?
+							sizedThreadPool.getMaxThreads() / 2 :
+							ProcessorUtils.availableProcessors() * 2);
 		}
 		if (this.scheduler == null) {
 			this.scheduler = new ScheduledExecutorScheduler(name + "-scheduler", false);
 		}
 
-		if (this.executor instanceof LifeCycle) {
-			((LifeCycle)this.executor).start();
+		if (this.executor instanceof LifeCycle lifeCycle) {
+			lifeCycle.start();
 		}
 		this.scheduler.start();
 	}
@@ -148,8 +148,8 @@ public class JettyResourceFactory implements InitializingBean, DisposableBean {
 	@Override
 	public void destroy() throws Exception {
 		try {
-			if (this.executor instanceof LifeCycle) {
-				((LifeCycle)this.executor).stop();
+			if (this.executor instanceof LifeCycle lifeCycle) {
+				lifeCycle.stop();
 			}
 		}
 		catch (Throwable ex) {

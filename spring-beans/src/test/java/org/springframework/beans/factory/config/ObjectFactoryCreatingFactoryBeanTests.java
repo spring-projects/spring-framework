@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
-		assertThat(date1 != date2).isTrue();
+		assertThat(date1).isNotSameAs(date2);
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) objectFactory.getObject();
 		Date date2 = (Date) objectFactory.getObject();
-		assertThat(date1 != date2).isTrue();
+		assertThat(date1).isNotSameAs(date2);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();
-		assertThat(date1 != date2).isTrue();
+		assertThat(date1).isNotSameAs(date2);
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 		Date date1 = (Date) provider.get();
 		Date date2 = (Date) provider.get();
-		assertThat(date1 != date2).isTrue();
+		assertThat(date1).isNotSameAs(date2);
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		final String targetBeanName = "singleton";
 		final String expectedSingleton = "Alicia Keys";
 
-		BeanFactory beanFactory = mock(BeanFactory.class);
+		BeanFactory beanFactory = mock();
 		given(beanFactory.getBean(targetBeanName)).willReturn(expectedSingleton);
 
 		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();

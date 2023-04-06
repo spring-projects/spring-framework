@@ -42,7 +42,7 @@ import org.springframework.web.reactive.socket.WebSocketSession;
 
 /**
  * Base class for {@link WebSocketSession} implementations that bridge between
- * event-listener WebSocket APIs (e.g. Java WebSocket API JSR-356, Jetty,
+ * event-listener WebSocket APIs (e.g. Jakarta WebSocket API (JSR-356), Jetty,
  * Undertow) and Reactive Streams.
  *
  * <p>Also implements {@code Subscriber<Void>} so it can be used to subscribe to
@@ -221,7 +221,13 @@ public abstract class AbstractListenerWebSocketSession<T> extends AbstractWebSoc
 			// Ignore result: can't overflow, ok if not first or no one listens
 			this.handlerCompletionSink.tryEmitError(ex);
 		}
-		close(CloseStatus.SERVER_ERROR.withReason(ex.getMessage()));
+		if (logger.isDebugEnabled()) {
+			logger.debug("WebSocket session completed with error", ex);
+		}
+		else if (logger.isInfoEnabled()) {
+			logger.info("WebSocket session completed with error: " + ex.getMessage());
+		}
+		close(CloseStatus.SERVER_ERROR);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,14 +138,14 @@ public class ConfigurationClassWithConditionTests {
 	@Test
 	public void conditionOnOverriddenMethodHonored() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanSkipped.class);
-		assertThat(context.getBeansOfType(ExampleBean.class).size()).isEqualTo(0);
+		assertThat(context.getBeansOfType(ExampleBean.class)).isEmpty();
 	}
 
 	@Test
 	public void noConditionOnOverriddenMethodHonored() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanReactivated.class);
 		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
-		assertThat(beans.size()).isEqualTo(1);
+		assertThat(beans).hasSize(1);
 		assertThat(beans.keySet().iterator().next()).isEqualTo("baz");
 	}
 
@@ -153,7 +153,7 @@ public class ConfigurationClassWithConditionTests {
 	public void configWithAlternativeBeans() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithAlternativeBeans.class);
 		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
-		assertThat(beans.size()).isEqualTo(1);
+		assertThat(beans).hasSize(1);
 		assertThat(beans.keySet().iterator().next()).isEqualTo("baz");
 	}
 

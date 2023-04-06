@@ -54,6 +54,7 @@ public class RestClientResponseException extends RestClientException {
 	private final String responseCharset;
 
 	@Nullable
+	@SuppressWarnings("serial")
 	private Function<ResolvableType, ?> bodyConvertFunction;
 
 
@@ -106,7 +107,7 @@ public class RestClientResponseException extends RestClientException {
 	 * Return the raw HTTP status code value.
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public int getRawStatusCode() {
 		return this.statusCode.value();
 	}

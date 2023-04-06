@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 
 	@Override
 	public boolean containsKey(Object key) {
-		return (key instanceof String && this.caseInsensitiveKeys.containsKey(convertKey((String) key)));
+		return (key instanceof String string && this.caseInsensitiveKeys.containsKey(convertKey(string)));
 	}
 
 	@Override

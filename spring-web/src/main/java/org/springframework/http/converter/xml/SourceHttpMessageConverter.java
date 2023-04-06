@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -73,17 +72,14 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			(publicId, systemId) -> new InputSource(new StringReader(""));
 
 	private static final XMLResolver NO_OP_XML_RESOLVER =
-			(publicID, systemID, base, ns) -> StreamUtils.emptyInput();
+			(publicID, systemID, base, ns) -> InputStream.nullInputStream();
 
-	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<>(8);
-
-	static {
-		SUPPORTED_CLASSES.add(DOMSource.class);
-		SUPPORTED_CLASSES.add(SAXSource.class);
-		SUPPORTED_CLASSES.add(StAXSource.class);
-		SUPPORTED_CLASSES.add(StreamSource.class);
-		SUPPORTED_CLASSES.add(Source.class);
-	}
+	private static final Set<Class<?>> SUPPORTED_CLASSES = Set.of(
+			DOMSource.class,
+			SAXSource.class,
+			StAXSource.class,
+			StreamSource.class,
+			Source.class);
 
 
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();

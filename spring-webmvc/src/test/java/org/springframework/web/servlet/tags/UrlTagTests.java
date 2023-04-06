@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,7 +204,7 @@ public class UrlTagTests extends AbstractTagTests {
 		Set<String> usedParams = new HashSet<>();
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertThat(queryString).isEqualTo("");
+		assertThat(queryString).isEmpty();
 	}
 
 	@Test
@@ -275,7 +275,7 @@ public class UrlTagTests extends AbstractTagTests {
 		usedParams.add("name");
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertThat(queryString).isEqualTo("");
+		assertThat(queryString).isEmpty();
 	}
 
 	@Test
@@ -327,7 +327,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertThat(queryString).isEqualTo("");
+		assertThat(queryString).isEmpty();
 	}
 
 	@Test
@@ -341,7 +341,7 @@ public class UrlTagTests extends AbstractTagTests {
 		params.add(param);
 
 		String queryString = tag.createQueryString(params, usedParams, true);
-		assertThat(queryString).isEqualTo("");
+		assertThat(queryString).isEmpty();
 	}
 
 	@Test
@@ -351,7 +351,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = tag.replaceUriTemplateParams("url/path", params, usedParams);
 		assertThat(uri).isEqualTo("url/path");
-		assertThat(usedParams.size()).isEqualTo(0);
+		assertThat(usedParams).isEmpty();
 	}
 
 	@Test
@@ -361,7 +361,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = tag.replaceUriTemplateParams("url/{path}", params, usedParams);
 		assertThat(uri).isEqualTo("url/{path}");
-		assertThat(usedParams.size()).isEqualTo(0);
+		assertThat(usedParams).isEmpty();
 	}
 
 	@Test
@@ -376,7 +376,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
 		assertThat(uri).isEqualTo("url/value");
-		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams).hasSize(1);
 		assertThat(usedParams.contains("name")).isTrue();
 	}
 
@@ -392,7 +392,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = tag.replaceUriTemplateParams("url/{n me}", params, usedParams);
 		assertThat(uri).isEqualTo("url/value");
-		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams).hasSize(1);
 		assertThat(usedParams.contains("n me")).isTrue();
 	}
 
@@ -410,7 +410,7 @@ public class UrlTagTests extends AbstractTagTests {
 				usedParams);
 
 		assertThat(uri).isEqualTo("url/v%20lue");
-		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams).hasSize(1);
 		assertThat(usedParams.contains("name")).isTrue();
 	}
 
@@ -427,7 +427,7 @@ public class UrlTagTests extends AbstractTagTests {
 		String uri = tag.replaceUriTemplateParams("url/{/name}", params, usedParams);
 
 		assertThat(uri).isEqualTo("url/my%2FId");
-		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams).hasSize(1);
 		assertThat(usedParams.contains("name")).isTrue();
 	}
 
@@ -443,7 +443,7 @@ public class UrlTagTests extends AbstractTagTests {
 
 		String uri = tag.replaceUriTemplateParams("url/{name}", params, usedParams);
 		assertThat(uri).isEqualTo("url/my/Id");
-		assertThat(usedParams.size()).isEqualTo(1);
+		assertThat(usedParams).hasSize(1);
 		assertThat(usedParams.contains("name")).isTrue();
 	}
 

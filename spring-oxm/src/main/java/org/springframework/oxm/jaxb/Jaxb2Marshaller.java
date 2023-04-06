@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
@@ -985,7 +986,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		private String getHost(String elementNamespace, DataHandler dataHandler) {
 			try {
-				URI uri = new URI(elementNamespace);
+				URI uri = ResourceUtils.toURI(elementNamespace);
 				return uri.getHost();
 			}
 			catch (URISyntaxException ex) {

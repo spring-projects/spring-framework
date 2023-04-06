@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,13 +93,13 @@ public class WebSocketMessageBrokerStats {
 			return null;
 		}
 		for (SubProtocolHandler handler : this.webSocketHandler.getProtocolHandlers()) {
-			if (handler instanceof StompSubProtocolHandler) {
-				return (StompSubProtocolHandler) handler;
+			if (handler instanceof StompSubProtocolHandler stompHandler) {
+				return stompHandler;
 			}
 		}
 		SubProtocolHandler defaultHandler = this.webSocketHandler.getDefaultProtocolHandler();
-		if (defaultHandler instanceof StompSubProtocolHandler) {
-			return (StompSubProtocolHandler) defaultHandler;
+		if (defaultHandler instanceof StompSubProtocolHandler stompHandler) {
+			return stompHandler;
 		}
 		return null;
 	}
@@ -193,9 +193,8 @@ public class WebSocketMessageBrokerStats {
 		if (this.sockJsTaskScheduler == null) {
 			return "null";
 		}
-		if (this.sockJsTaskScheduler instanceof ThreadPoolTaskScheduler) {
-			return getExecutorStatsInfo(((ThreadPoolTaskScheduler) this.sockJsTaskScheduler)
-					.getScheduledThreadPoolExecutor());
+		if (this.sockJsTaskScheduler instanceof ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+			return getExecutorStatsInfo(threadPoolTaskScheduler.getScheduledThreadPoolExecutor());
 		}
 		return "unknown";
 	}
@@ -205,8 +204,8 @@ public class WebSocketMessageBrokerStats {
 			return "null";
 		}
 
-		if (executor instanceof ThreadPoolTaskExecutor) {
-			executor = ((ThreadPoolTaskExecutor) executor).getThreadPoolExecutor();
+		if (executor instanceof ThreadPoolTaskExecutor threadPoolTaskScheduler) {
+			executor = threadPoolTaskScheduler.getThreadPoolExecutor();
 		}
 
 		if (executor instanceof ThreadPoolExecutor) {

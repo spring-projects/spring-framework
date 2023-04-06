@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN" "https://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="com.puppycrawl.tools.checkstyle.Checker">
+
 	<!-- Suppressions -->
 	<module name="SuppressionFilter">
 		<property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
@@ -14,9 +15,29 @@
 		<property name="packageInfoHeaderType" value="none"/>
 	</module>
 	<module name="com.puppycrawl.tools.checkstyle.checks.NewlineAtEndOfFileCheck"/>
+	<module name="JavadocPackage" /><!-- package-info.java -->
 
 	<!-- TreeWalker Checks -->
 	<module name="com.puppycrawl.tools.checkstyle.TreeWalker">
+
+		<!-- Package-level null-safety annotations -->
+		<module name="RegexpSinglelineJavaCheck">
+			<property name="id" value="packageLevelNonNullApiAnnotation"/>
+			<property name="format" value="@NonNullApi"/>
+			<property name="minimum" value="1"/>
+			<property name="maximum" value="1"/>
+			<property name="message" value="package-info.java is missing required null-safety annotation @NonNullApi."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="RegexpSinglelineJavaCheck">
+			<property name="id" value="packageLevelNonNullFieldsAnnotation"/>
+			<property name="format" value="@NonNullFields"/>
+			<property name="minimum" value="1"/>
+			<property name="maximum" value="1"/>
+			<property name="message" value="package-info.java is missing required null-safety annotation @NonNullFields."/>
+			<property name="ignoreComments" value="true"/>
+		</module>
+
 		<!-- Annotations -->
 		<module name="com.puppycrawl.tools.checkstyle.checks.annotation.AnnotationUseStyleCheck">
 			<property name="elementStyle" value="compact"/>
@@ -239,5 +260,7 @@
 		<module name="io.spring.javaformat.checkstyle.check.SpringCatchCheck"/>
 		<module name="io.spring.javaformat.checkstyle.check.SpringJavadocCheck"/>
 		<module name="io.spring.javaformat.checkstyle.check.SpringJUnit5Check"/>
- 	</module>
+
+	</module>
+
 </module>

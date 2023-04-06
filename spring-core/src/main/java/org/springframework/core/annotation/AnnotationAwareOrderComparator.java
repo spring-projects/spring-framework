@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 
 	@Nullable
 	private Integer findOrderFromAnnotation(Object obj) {
-		AnnotatedElement element = (obj instanceof AnnotatedElement ? (AnnotatedElement) obj : obj.getClass());
+		AnnotatedElement element = (obj instanceof AnnotatedElement ae ? ae : obj.getClass());
 		MergedAnnotations annotations = MergedAnnotations.from(element, SearchStrategy.TYPE_HIERARCHY);
 		Integer order = OrderUtils.getOrderFromAnnotations(element, annotations);
 		if (order == null && obj instanceof DecoratingProxy decoratingProxy) {

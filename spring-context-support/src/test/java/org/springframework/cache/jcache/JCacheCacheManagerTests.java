@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,11 +86,10 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 
 		private final List<String> cacheNames;
 
-		private final CacheManager cacheManager;
+		private final CacheManager cacheManager = mock();
 
 		private CacheManagerMock() {
 			this.cacheNames = new ArrayList<>();
-			this.cacheManager = mock(CacheManager.class);
 			given(cacheManager.getCacheNames()).willReturn(cacheNames);
 		}
 
@@ -101,7 +100,7 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public void addCache(String name) {
 			cacheNames.add(name);
-			Cache cache = mock(Cache.class);
+			Cache cache = mock();
 			given(cache.getName()).willReturn(name);
 			given(cacheManager.getCache(name)).willReturn(cache);
 		}

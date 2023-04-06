@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,19 +63,18 @@ import static org.mockito.Mockito.verify;
  */
 public class DataSourceJtaTransactionTests {
 
-	private Connection connection;
-	private DataSource dataSource;
-	private UserTransaction userTransaction;
-	private TransactionManager transactionManager;
-	private Transaction transaction;
+	private DataSource dataSource = mock();
+
+	private Connection connection = mock();
+
+	private UserTransaction userTransaction = mock();
+
+	private TransactionManager transactionManager = mock();
+
+	private Transaction transaction = mock();
 
 	@BeforeEach
 	public void setup() throws Exception {
-		connection =mock(Connection.class);
-		dataSource = mock(DataSource.class);
-		userTransaction = mock(UserTransaction.class);
-		transactionManager = mock(TransactionManager.class);
-		transaction = mock(Transaction.class);
 		given(dataSource.getConnection()).willReturn(connection);
 	}
 
@@ -365,9 +364,9 @@ public class DataSourceJtaTransactionTests {
 					Status.STATUS_ACTIVE);
 		}
 
-		final DataSource dataSource = mock(DataSource.class);
-		final Connection connection1 = mock(Connection.class);
-		final Connection connection2 = mock(Connection.class);
+		final DataSource dataSource = mock();
+		final Connection connection1 = mock();
+		final Connection connection2 = mock();
 		given(dataSource.getConnection()).willReturn(connection1, connection2);
 
 		final JtaTransactionManager ptm = new JtaTransactionManager(userTransaction, transactionManager);
@@ -686,14 +685,15 @@ public class DataSourceJtaTransactionTests {
 	}
 
 	private void doTestJtaTransactionWithIsolationLevelDataSourceRouter(boolean dataSourceLookup) throws Exception {
-given(		userTransaction.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE, Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
+		given(userTransaction.getStatus())
+			.willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE, Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
-		final DataSource dataSource1 = mock(DataSource.class);
-		final Connection connection1 = mock(Connection.class);
+		final DataSource dataSource1 = mock();
+		final Connection connection1 = mock();
 		given(dataSource1.getConnection()).willReturn(connection1);
 
-		final DataSource dataSource2 = mock(DataSource.class);
-		final Connection connection2 = mock(Connection.class);
+		final DataSource dataSource2 = mock();
+		final Connection connection2 = mock();
 		given(dataSource2.getConnection()).willReturn(connection2);
 
 		final IsolationLevelDataSourceRouter dsToUse = new IsolationLevelDataSourceRouter();

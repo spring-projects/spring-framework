@@ -35,7 +35,7 @@ class SerializationHintsTests {
 	void registerTypeTwiceExposesOneHint() {
 		this.serializationHints.registerType(URL.class);
 		this.serializationHints.registerType(TypeReference.of(URL.class.getName()));
-		assertThat(this.serializationHints.javaSerialization()).singleElement()
+		assertThat(this.serializationHints.javaSerializationHints()).singleElement()
 				.extracting(JavaSerializationHint::getType).isEqualTo(TypeReference.of(URL.class));
 	}
 

@@ -64,8 +64,6 @@ import org.springframework.web.servlet.mvc.ParameterizableViewController;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
-import org.springframework.web.servlet.theme.SessionThemeResolver;
-import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
 
@@ -79,13 +77,16 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	@SuppressWarnings("deprecation")
 	public void refresh() throws BeansException {
 		registerSingleton(DispatcherServlet.LOCALE_RESOLVER_BEAN_NAME, SessionLocaleResolver.class);
-		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME, SessionThemeResolver.class);
+		registerSingleton(DispatcherServlet.THEME_RESOLVER_BEAN_NAME,
+				org.springframework.web.servlet.theme.SessionThemeResolver.class);
 
 		LocaleChangeInterceptor interceptor1 = new LocaleChangeInterceptor();
 		LocaleChangeInterceptor interceptor2 = new LocaleChangeInterceptor();
 		interceptor2.setParamName("locale2");
-		ThemeChangeInterceptor interceptor3 = new ThemeChangeInterceptor();
-		ThemeChangeInterceptor interceptor4 = new ThemeChangeInterceptor();
+		org.springframework.web.servlet.theme.ThemeChangeInterceptor interceptor3 =
+				new org.springframework.web.servlet.theme.ThemeChangeInterceptor();
+		org.springframework.web.servlet.theme.ThemeChangeInterceptor interceptor4 =
+				new org.springframework.web.servlet.theme.ThemeChangeInterceptor();
 		interceptor4.setParamName("theme2");
 		UserRoleAuthorizationInterceptor interceptor5 = new UserRoleAuthorizationInterceptor();
 		interceptor5.setAuthorizedRoles("role1", "role2");
@@ -126,7 +127,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.add("order", 0);
 		pvs.add("basename", "org.springframework.web.servlet.complexviews");
-		registerSingleton("viewResolver", org.springframework.web.servlet.view.ResourceBundleViewResolver.class, pvs);
+		registerSingleton("viewResolver",
+				org.springframework.web.servlet.view.ResourceBundleViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
 		pvs.add("suffix", ".jsp");
@@ -410,6 +412,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	public static class ComplexLocaleChecker implements MyHandler {
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void doSomething(HttpServletRequest request) throws ServletException, IllegalAccessException {
 			WebApplicationContext wac = RequestContextUtils.findWebApplicationContext(request);
 			if (!(wac instanceof ComplexWebApplicationContext)) {
@@ -445,7 +448,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 			if (!TimeZone.getDefault().equals(LocaleContextHolder.getTimeZone())) {
 				throw new ServletException("Incorrect TimeZone");
 			}
-			if (!(RequestContextUtils.getThemeResolver(request) instanceof SessionThemeResolver)) {
+			if (!(RequestContextUtils.getThemeResolver(request)
+					instanceof org.springframework.web.servlet.theme.SessionThemeResolver)) {
 				throw new ServletException("Incorrect ThemeResolver");
 			}
 			if (!"theme".equals(RequestContextUtils.getThemeResolver(request).resolveThemeName(request))) {

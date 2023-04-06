@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,8 +77,8 @@ public class DispatcherHandlerTests {
 
 	@Test
 	void preFlightRequest() {
-		WebHandler webHandler = mock(WebHandler.class);
-		HandlerMapping handlerMapping = mock(HandlerMapping.class);
+		WebHandler webHandler = mock();
+		HandlerMapping handlerMapping = mock();
 		given((handlerMapping).getHandler(any())).willReturn(Mono.just(webHandler));
 
 		StaticApplicationContext context = new StaticApplicationContext();

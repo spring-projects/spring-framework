@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public final class ResourceBundleHint implements ConditionalHint {
 	}
 
 	@Override
-	public boolean equals(Object o) {
+	public boolean equals(@Nullable Object o) {
 		if (this == o) {
 			return true;
 		}
@@ -100,7 +100,7 @@ public final class ResourceBundleHint implements ConditionalHint {
 		}
 
 		/**
-		 * Use the the {@code baseName} of the resource bundle.
+		 * Use the {@code baseName} of the resource bundle.
 		 * @return {@code this}, to facilitate method chaining
 		 */
 		public Builder baseName(String baseName) {

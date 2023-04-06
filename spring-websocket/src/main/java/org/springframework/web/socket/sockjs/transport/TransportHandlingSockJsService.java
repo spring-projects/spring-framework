@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,8 +169,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		if (!isRunning()) {
 			this.running = true;
 			for (TransportHandler handler : this.handlers.values()) {
-				if (handler instanceof Lifecycle) {
-					((Lifecycle) handler).start();
+				if (handler instanceof Lifecycle lifecycle) {
+					lifecycle.start();
 				}
 			}
 		}
@@ -181,8 +181,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		if (isRunning()) {
 			this.running = false;
 			for (TransportHandler handler : this.handlers.values()) {
-				if (handler instanceof Lifecycle) {
-					((Lifecycle) handler).stop();
+				if (handler instanceof Lifecycle lifecycle) {
+					lifecycle.stop();
 				}
 			}
 		}
@@ -199,7 +199,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			WebSocketHandler handler) throws IOException {
 
 		TransportHandler transportHandler = this.handlers.get(TransportType.WEBSOCKET);
-		if (!(transportHandler instanceof HandshakeHandler)) {
+		if (!(transportHandler instanceof HandshakeHandler handshakeHandler)) {
 			logger.error("No handler configured for raw WebSocket messages");
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return;
@@ -213,7 +213,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;
 			}
-			((HandshakeHandler) transportHandler).doHandshake(request, response, handler, attributes);
+			handshakeHandler.doHandshake(request, response, handler, attributes);
 			chain.applyAfterHandshake(request, response, null);
 		}
 		catch (HandshakeFailureException ex) {
@@ -276,12 +276,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			SockJsSession session = this.sessions.get(sessionId);
 			boolean isNewSession = false;
 			if (session == null) {
-				if (transportHandler instanceof SockJsSessionFactory) {
+				if (transportHandler instanceof SockJsSessionFactory sessionFactory) {
 					Map<String, Object> attributes = new HashMap<>();
 					if (!chain.applyBeforeHandshake(request, response, attributes)) {
 						return;
 					}
-					SockJsSessionFactory sessionFactory = (SockJsSessionFactory) transportHandler;
 					session = createSockJsSession(sessionId, sessionFactory, handler, attributes);
 					isNewSession = true;
 				}

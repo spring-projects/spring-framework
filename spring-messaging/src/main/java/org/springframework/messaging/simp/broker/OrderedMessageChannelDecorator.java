@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,14 +148,14 @@ public class OrderedMessageChannelDecorator implements MessageChannel {
 	public static void configureInterceptor(MessageChannel channel, boolean preserveOrder) {
 		if (preserveOrder) {
 			Assert.isInstanceOf(ExecutorSubscribableChannel.class, channel,
-					"An ExecutorSubscribableChannel is required for `preservePublishOrder`");
+					"An ExecutorSubscribableChannel is required for 'preservePublishOrder'");
 			ExecutorSubscribableChannel execChannel = (ExecutorSubscribableChannel) channel;
-			if (execChannel.getInterceptors().stream().noneMatch(i -> i instanceof CallbackInterceptor)) {
+			if (execChannel.getInterceptors().stream().noneMatch(CallbackInterceptor.class::isInstance)) {
 				execChannel.addInterceptor(0, new CallbackInterceptor());
 			}
 		}
 		else if (channel instanceof ExecutorSubscribableChannel execChannel) {
-			execChannel.getInterceptors().stream().filter(i -> i instanceof CallbackInterceptor)
+			execChannel.getInterceptors().stream().filter(CallbackInterceptor.class::isInstance)
 					.findFirst().map(execChannel::removeInterceptor);
 
 		}

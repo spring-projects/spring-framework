@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 
 	private final List<ProduceMediaTypeExpression> mediaTypeAllList =
-			Collections.singletonList(new ProduceMediaTypeExpression(MediaType.ALL_VALUE));
+			List.of(new ProduceMediaTypeExpression(MediaType.ALL_VALUE));
 
 	private final List<ProduceMediaTypeExpression> expressions;
 
@@ -248,6 +248,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	@Override
 	public int compareTo(ProducesRequestCondition other, ServerWebExchange exchange) {
+		if (this.expressions.isEmpty() && other.expressions.isEmpty()) {
+			return 0;
+		}
 		try {
 			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(exchange);
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {

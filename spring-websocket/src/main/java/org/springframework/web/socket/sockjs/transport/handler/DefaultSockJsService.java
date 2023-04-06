@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,9 +103,10 @@ public class DefaultSockJsService extends TransportHandlingSockJsService impleme
 	@Override
 	public void setServletContext(ServletContext servletContext) {
 		for (TransportHandler handler : getTransportHandlers().values()) {
-			if (handler instanceof ServletContextAware) {
-				((ServletContextAware) handler).setServletContext(servletContext);
+			if (handler instanceof ServletContextAware servletContextAware) {
+				servletContextAware.setServletContext(servletContext);
 			}
 		}
 	}
+
 }

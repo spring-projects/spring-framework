@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,9 +172,8 @@ public final class GenericTypeResolver {
 					ResolvableType contextType = ResolvableType.forClass(contextClass);
 					for (int i = 0; i < typeArguments.length; i++) {
 						Type typeArgument = typeArguments[i];
-						if (typeArgument instanceof TypeVariable) {
-							ResolvableType resolvedTypeArgument = resolveVariable(
-									(TypeVariable<?>) typeArgument, contextType);
+						if (typeArgument instanceof TypeVariable<?> typeVariable) {
+							ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
 							if (resolvedTypeArgument != ResolvableType.NONE) {
 								generics[i] = resolvedTypeArgument.resolve();
 							}
@@ -199,8 +198,12 @@ public final class GenericTypeResolver {
 	private static ResolvableType resolveVariable(TypeVariable<?> typeVariable, ResolvableType contextType) {
 		ResolvableType resolvedType;
 		if (contextType.hasGenerics()) {
-			resolvedType = ResolvableType.forType(typeVariable, contextType);
-			if (resolvedType.resolve() != null) {
+			ResolvableType.VariableResolver variableResolver = contextType.asVariableResolver();
+			if (variableResolver == null) {
+				return ResolvableType.NONE;
+			}
+			resolvedType = variableResolver.resolveVariable(typeVariable);
+			if (resolvedType != null) {
 				return resolvedType;
 			}
 		}
@@ -208,13 +211,13 @@ public final class GenericTypeResolver {
 		ResolvableType superType = contextType.getSuperType();
 		if (superType != ResolvableType.NONE) {
 			resolvedType = resolveVariable(typeVariable, superType);
-			if (resolvedType.resolve() != null) {
+			if (resolvedType != ResolvableType.NONE) {
 				return resolvedType;
 			}
 		}
 		for (ResolvableType ifc : contextType.getInterfaces()) {
 			resolvedType = resolveVariable(typeVariable, ifc);
-			if (resolvedType.resolve() != null) {
+			if (resolvedType != ResolvableType.NONE) {
 				return resolvedType;
 			}
 		}

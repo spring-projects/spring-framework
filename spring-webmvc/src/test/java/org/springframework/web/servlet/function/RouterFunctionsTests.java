@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class RouterFunctionsTests {
 	public void routeMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.test(request)).willReturn(true);
 
 		RouterFunction<ServerResponse>
@@ -49,22 +49,22 @@ public class RouterFunctionsTests {
 		assertThat(result).isNotNull();
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isTrue();
-		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
+		assertThat(resultHandlerFunction).isPresent();
+		assertThat(resultHandlerFunction).contains(handlerFunction);
 	}
 
 	@Test
 	public void routeNoMatch() {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.test(request)).willReturn(false);
 
 		RouterFunction<ServerResponse> result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertThat(result).isNotNull();
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isFalse();
+		assertThat(resultHandlerFunction).isNotPresent();
 	}
 
 	@Test
@@ -72,15 +72,15 @@ public class RouterFunctionsTests {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.nest(request)).willReturn(Optional.of(request));
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
 		assertThat(result).isNotNull();
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isTrue();
-		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
+		assertThat(resultHandlerFunction).isPresent();
+		assertThat(resultHandlerFunction).contains(handlerFunction);
 	}
 
 	@Test
@@ -88,14 +88,14 @@ public class RouterFunctionsTests {
 		HandlerFunction<ServerResponse> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<ServerResponse> routerFunction = request -> Optional.of(handlerFunction);
 
-		RequestPredicate requestPredicate = mock(RequestPredicate.class);
+		RequestPredicate requestPredicate = mock();
 		given(requestPredicate.nest(request)).willReturn(Optional.empty());
 
 		RouterFunction<ServerResponse> result = RouterFunctions.nest(requestPredicate, routerFunction);
 		assertThat(result).isNotNull();
 
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isFalse();
+		assertThat(resultHandlerFunction).isNotPresent();
 	}
 
 	@Test
@@ -110,8 +110,8 @@ public class RouterFunctionsTests {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest("GET", "/bar");
 		ServerRequest request = new DefaultServerRequest(servletRequest, Collections.emptyList());
 		Optional<HandlerFunction<ServerResponse>> resultHandlerFunction = result.route(request);
-		assertThat(resultHandlerFunction.isPresent()).isTrue();
-		assertThat(resultHandlerFunction.get()).isEqualTo(handlerFunction);
+		assertThat(resultHandlerFunction).isPresent();
+		assertThat(resultHandlerFunction).contains(handlerFunction);
 	}
 
 }

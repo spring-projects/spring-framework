@@ -73,7 +73,7 @@ import org.springframework.core.annotation.AliasFor;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Mapping
-@Reflective(RequestMappingReflectiveProcessor.class)
+@Reflective(ControllerMappingReflectiveProcessor.class)
 public @interface RequestMapping {
 
 	/**

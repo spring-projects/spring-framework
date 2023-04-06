@@ -34,13 +34,14 @@ public interface Trigger {
 
 	/**
 	 * Determine the next execution time according to the given trigger context.
+	 * <p>The default implementation delegates to {@link #nextExecution(TriggerContext)}.
 	 * @param triggerContext context object encapsulating last execution times
 	 * and last completion time
 	 * @return the next execution time as defined by the trigger,
 	 * or {@code null} if the trigger won't fire anymore
 	 * @deprecated as of 6.0, in favor of {@link #nextExecution(TriggerContext)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	@Nullable
 	default Date nextExecutionTime(TriggerContext triggerContext) {
 		Instant instant = nextExecution(triggerContext);

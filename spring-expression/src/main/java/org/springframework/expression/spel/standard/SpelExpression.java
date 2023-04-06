@@ -249,7 +249,7 @@ public class SpelExpression implements Expression {
 	@Override
 	@Nullable
 	public Object getValue(EvaluationContext context) throws EvaluationException {
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 
 		CompiledExpression compiledAst = this.compiledAst;
 		if (compiledAst != null) {
@@ -279,7 +279,7 @@ public class SpelExpression implements Expression {
 	@Override
 	@Nullable
 	public <T> T getValue(EvaluationContext context, @Nullable Class<T> expectedResultType) throws EvaluationException {
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 
 		CompiledExpression compiledAst = this.compiledAst;
 		if (compiledAst != null) {
@@ -314,7 +314,7 @@ public class SpelExpression implements Expression {
 	@Override
 	@Nullable
 	public Object getValue(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 
 		CompiledExpression compiledAst = this.compiledAst;
 		if (compiledAst != null) {
@@ -346,7 +346,7 @@ public class SpelExpression implements Expression {
 	public <T> T getValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Class<T> expectedResultType)
 			throws EvaluationException {
 
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 
 		CompiledExpression compiledAst = this.compiledAst;
 		if (compiledAst != null) {
@@ -393,7 +393,7 @@ public class SpelExpression implements Expression {
 	@Override
 	@Nullable
 	public Class<?> getValueType(EvaluationContext context) throws EvaluationException {
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 		ExpressionState expressionState = new ExpressionState(context, this.configuration);
 		TypeDescriptor typeDescriptor = this.ast.getValueInternal(expressionState).getTypeDescriptor();
 		return (typeDescriptor != null ? typeDescriptor.getType() : null);
@@ -424,7 +424,7 @@ public class SpelExpression implements Expression {
 	@Override
 	@Nullable
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context) throws EvaluationException {
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 		ExpressionState expressionState = new ExpressionState(context, this.configuration);
 		return this.ast.getValueInternal(expressionState).getTypeDescriptor();
 	}
@@ -434,7 +434,7 @@ public class SpelExpression implements Expression {
 	public TypeDescriptor getValueTypeDescriptor(EvaluationContext context, @Nullable Object rootObject)
 			throws EvaluationException {
 
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 		ExpressionState expressionState = new ExpressionState(context, toTypedValue(rootObject), this.configuration);
 		return this.ast.getValueInternal(expressionState).getTypeDescriptor();
 	}
@@ -447,13 +447,13 @@ public class SpelExpression implements Expression {
 
 	@Override
 	public boolean isWritable(EvaluationContext context) throws EvaluationException {
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 		return this.ast.isWritable(new ExpressionState(context, this.configuration));
 	}
 
 	@Override
 	public boolean isWritable(EvaluationContext context, @Nullable Object rootObject) throws EvaluationException {
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 		return this.ast.isWritable(new ExpressionState(context, toTypedValue(rootObject), this.configuration));
 	}
 
@@ -465,7 +465,7 @@ public class SpelExpression implements Expression {
 
 	@Override
 	public void setValue(EvaluationContext context, @Nullable Object value) throws EvaluationException {
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 		this.ast.setValue(new ExpressionState(context, this.configuration), value);
 	}
 
@@ -473,7 +473,7 @@ public class SpelExpression implements Expression {
 	public void setValue(EvaluationContext context, @Nullable Object rootObject, @Nullable Object value)
 			throws EvaluationException {
 
-		Assert.notNull(context, "EvaluationContext is required");
+		Assert.notNull(context, "EvaluationContext must not be null");
 		this.ast.setValue(new ExpressionState(context, toTypedValue(rootObject), this.configuration), value);
 	}
 

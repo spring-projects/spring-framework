@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,18 +53,20 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 
 
 	@ParameterizedWebSocketTest
+	@SuppressWarnings("deprecation")
 	void subProtocolNegotiation(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
 		super.setup(server, webSocketClient, testInfo);
 
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.setSecWebSocketProtocol("foo");
-		URI url = new URI(getWsBaseUrl() + "/ws");
+		URI url = URI.create(getWsBaseUrl() + "/ws");
 		WebSocketSession session = this.webSocketClient.doHandshake(new TextWebSocketHandler(), headers, url).get();
 		assertThat(session.getAcceptedProtocol()).isEqualTo("foo");
 		session.close();
 	}
 
 	@ParameterizedWebSocketTest  // SPR-12727
+	@SuppressWarnings("deprecation")
 	void unsolicitedPongWithEmptyPayload(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
 		super.setup(server, webSocketClient, testInfo);
 
@@ -78,7 +80,7 @@ class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 
 		serverHandler.await();
 		assertThat(serverHandler.getTransportError()).isNull();
-		assertThat(serverHandler.getReceivedMessages().size()).isEqualTo(1);
+		assertThat(serverHandler.getReceivedMessages()).hasSize(1);
 		assertThat(serverHandler.getReceivedMessages().get(0).getClass()).isEqualTo(PongMessage.class);
 	}
 

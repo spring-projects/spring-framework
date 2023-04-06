@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.SpringJUnitJupiterTestSuite;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,9 +37,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
  * instance in an {@link BeforeEach @BeforeEach} method with the
  * {@link SpringExtension} (registered via a custom
  * {@link SpringJUnitWebConfig @SpringJUnitWebConfig} composed annotation).
- *
- * <p>To run these tests in an IDE that does not have built-in support for the JUnit
- * Platform, simply run {@link SpringJUnitJupiterTestSuite} as a JUnit 4 test.
  *
  * @author Sam Brannen
  * @since 5.0

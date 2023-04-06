@@ -47,13 +47,25 @@ import org.springframework.util.ClassUtils;
  * caches the ASM discovered information for each introspected Class, in a thread-safe
  * manner. It is recommended to reuse ParameterNameDiscoverer instances as far as possible.
  *
+ * <p>This class is deprecated in the 6.0 generation and scheduled for removal in 6.1
+ * since it is effectively superseded by {@link StandardReflectionParameterNameDiscoverer}.
+ * For the time being, this discoverer logs a warning every time it actually inspects a
+ * class file which is particularly useful for identifying remaining gaps in usage of
+ * the standard "-parameters" compiler flag, and also unintended over-inspection of
+ * e.g. JDK core library classes (which are not compiled with the "-parameters" flag).
+ *
  * @author Adrian Colyer
  * @author Costin Leau
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
  * @since 2.0
+ * @see StandardReflectionParameterNameDiscoverer
+ * @see DefaultParameterNameDiscoverer
+ * @deprecated as of 6.0.1, in favor of {@link StandardReflectionParameterNameDiscoverer}
+ * (with the "-parameters" compiler flag)
  */
+@Deprecated(since = "6.0.1", forRemoval = true)
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 	private static final Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
@@ -107,6 +119,10 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			ClassReader classReader = new ClassReader(is);
 			Map<Executable, String[]> map = new ConcurrentHashMap<>(32);
 			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), 0);
+			if (logger.isWarnEnabled()) {
+				logger.warn("Using deprecated '-debug' fallback for parameter name resolution. Compile the " +
+						"affected code with '-parameters' instead or avoid its introspection: " + clazz.getName());
+			}
 			return map;
 		}
 		catch (IOException ex) {

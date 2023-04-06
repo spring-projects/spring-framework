@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,8 +124,8 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 
 	@Override
 	public void setServletContext(ServletContext servletContext) {
-		if (this.handshakeHandler instanceof ServletContextAware) {
-			((ServletContextAware) this.handshakeHandler).setServletContext(servletContext);
+		if (this.handshakeHandler instanceof ServletContextAware servletContextAware) {
+			servletContextAware.setServletContext(servletContext);
 		}
 	}
 
@@ -134,8 +134,8 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 	public void start() {
 		if (!isRunning()) {
 			this.running = true;
-			if (this.handshakeHandler instanceof Lifecycle) {
-				((Lifecycle) this.handshakeHandler).start();
+			if (this.handshakeHandler instanceof Lifecycle lifecycle) {
+				lifecycle.start();
 			}
 		}
 	}
@@ -144,8 +144,8 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 	public void stop() {
 		if (isRunning()) {
 			this.running = false;
-			if (this.handshakeHandler instanceof Lifecycle) {
-				((Lifecycle) this.handshakeHandler).stop();
+			if (this.handshakeHandler instanceof Lifecycle lifecycle) {
+				lifecycle.stop();
 			}
 		}
 	}

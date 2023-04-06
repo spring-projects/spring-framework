@@ -54,11 +54,14 @@ public class RuntimeHintsAgentTests {
 
 	private static Method toStringMethod;
 
+	private static Method privateGreetMethod;
+
 
 	@BeforeAll
 	public static void classSetup() throws NoSuchMethodException {
 		defaultConstructor = String.class.getConstructor();
 		toStringMethod = String.class.getMethod("toString");
+		privateGreetMethod = PrivateClass.class.getDeclaredMethod("greet");
 	}
 
 
@@ -79,6 +82,7 @@ public class RuntimeHintsAgentTests {
 						Class.forName("java.lang.String");
 					}
 					catch (ClassNotFoundException e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(Class.class, "forName")),
 				Arguments.of((Runnable) () -> String.class.getClasses(), MethodReference.of(Class.class, "getClasses")),
@@ -87,6 +91,7 @@ public class RuntimeHintsAgentTests {
 						String.class.getConstructor();
 					}
 					catch (NoSuchMethodException e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(Class.class, "getConstructor")),
 				Arguments.of((Runnable) () -> String.class.getConstructors(), MethodReference.of(Class.class, "getConstructors")),
@@ -96,14 +101,16 @@ public class RuntimeHintsAgentTests {
 						String.class.getDeclaredConstructor();
 					}
 					catch (NoSuchMethodException e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(Class.class, "getDeclaredConstructor")),
 				Arguments.of((Runnable) () -> String.class.getDeclaredConstructors(), MethodReference.of(Class.class, "getDeclaredConstructors")),
 				Arguments.of((Runnable) () -> {
 					try {
-						String.class.getDeclaredField("test");
+						String.class.getDeclaredField("value");
 					}
 					catch (NoSuchFieldException e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(Class.class, "getDeclaredField")),
 				Arguments.of((Runnable) () -> String.class.getDeclaredFields(), MethodReference.of(Class.class, "getDeclaredFields")),
@@ -112,12 +119,13 @@ public class RuntimeHintsAgentTests {
 						String.class.getDeclaredMethod("toString");
 					}
 					catch (NoSuchMethodException e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(Class.class, "getDeclaredMethod")),
 				Arguments.of((Runnable) () -> String.class.getDeclaredMethods(), MethodReference.of(Class.class, "getDeclaredMethods")),
 				Arguments.of((Runnable) () -> {
 					try {
-						String.class.getField("test");
+						String.class.getField("value");
 					}
 					catch (NoSuchFieldException e) {
 					}
@@ -128,6 +136,7 @@ public class RuntimeHintsAgentTests {
 						String.class.getMethod("toString");
 					}
 					catch (NoSuchMethodException e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(Class.class, "getMethod")),
 				Arguments.of((Runnable) () -> String.class.getMethods(), MethodReference.of(Class.class, "getMethods")),
@@ -136,6 +145,7 @@ public class RuntimeHintsAgentTests {
 						classLoader.loadClass("java.lang.String");
 					}
 					catch (ClassNotFoundException e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(ClassLoader.class, "loadClass")),
 				Arguments.of((Runnable) () -> {
@@ -143,6 +153,7 @@ public class RuntimeHintsAgentTests {
 						defaultConstructor.newInstance();
 					}
 					catch (Exception e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(Constructor.class, "newInstance")),
 				Arguments.of((Runnable) () -> {
@@ -150,6 +161,15 @@ public class RuntimeHintsAgentTests {
 						toStringMethod.invoke("");
 					}
 					catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}, MethodReference.of(Method.class, "invoke")),
+				Arguments.of((Runnable) () -> {
+					try {
+						privateGreetMethod.invoke(new PrivateClass());
+					}
+					catch (Exception e) {
+						throw new RuntimeException(e);
 					}
 				}, MethodReference.of(Method.class, "invoke"))
 		);
@@ -261,6 +281,15 @@ public class RuntimeHintsAgentTests {
 
 		Stream<RecordedInvocation> recordedInvocations(HintType hintType) {
 			return recordedInvocations().filter(invocation -> invocation.getHintType() == hintType);
+		}
+
+	}
+
+	private static class PrivateClass {
+
+		@SuppressWarnings("unused")
+		private String greet() {
+			return "hello";
 		}
 
 	}

@@ -30,10 +30,8 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 import org.springframework.context.Lifecycle;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.concurrent.FutureUtils;
@@ -47,7 +45,8 @@ import org.springframework.web.socket.client.AbstractWebSocketClient;
 
 /**
  * Initiates WebSocket requests to a WebSocket server programmatically
- * through the Jetty WebSocket API.
+ * through the Jetty WebSocket API. Only supported on Jetty 11, superseded by
+ * {@link org.springframework.web.socket.client.standard.StandardWebSocketClient}.
  *
  * <p>As of 4.1 this class implements {@link Lifecycle} rather than
  * {@link org.springframework.context.SmartLifecycle}. Use
@@ -57,7 +56,10 @@ import org.springframework.web.socket.client.AbstractWebSocketClient;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @since 4.0
+ * @deprecated as of 6.0.3, in favor of
+ * {@link org.springframework.web.socket.client.standard.StandardWebSocketClient}
  */
+@Deprecated(since = "6.0.3", forRemoval = true)
 public class JettyWebSocketClient extends AbstractWebSocketClient implements Lifecycle {
 
 	private final org.eclipse.jetty.websocket.client.WebSocketClient client;
@@ -84,8 +86,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 
 
 	/**
-	 * Set an {@link AsyncListenableTaskExecutor} to use when opening connections.
-	 * If this property is set to {@code null}, calls to any of the
+	 * Set an {@link AsyncTaskExecutor} to use when opening connections.
+	 * <p>If this property is set to {@code null}, calls to any of the
 	 * {@code doHandshake} methods will block until the connection is established.
 	 * <p>By default an instance of {@code SimpleAsyncTaskExecutor} is used.
 	 */
@@ -94,7 +96,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 	}
 
 	/**
-	 * Return the configured {@link TaskExecutor}.
+	 * Return the configured {@link AsyncTaskExecutor}.
 	 */
 	@Nullable
 	public AsyncTaskExecutor getTaskExecutor() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,13 +66,13 @@ public class ByteArrayMultipartFileEditorTests {
 	@Test
 	public void setValueAsNullGetsBackEmptyString() throws Exception {
 		editor.setValue(null);
-		assertThat(editor.getAsText()).isEqualTo("");
+		assertThat(editor.getAsText()).isEmpty();
 	}
 
 	@Test
 	public void setValueAsMultipartFile() throws Exception {
 		String expectedValue = "That is comforting to know";
-		MultipartFile file = mock(MultipartFile.class);
+		MultipartFile file = mock();
 		given(file.getBytes()).willReturn(expectedValue.getBytes());
 		editor.setValue(file);
 		assertThat(editor.getAsText()).isEqualTo(expectedValue);
@@ -80,7 +80,7 @@ public class ByteArrayMultipartFileEditorTests {
 
 	@Test
 	public void setValueAsMultipartFileWithBadBytes() throws Exception {
-		MultipartFile file = mock(MultipartFile.class);
+		MultipartFile file = mock();
 		given(file.getBytes()).willThrow(new IOException());
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setValue(file));

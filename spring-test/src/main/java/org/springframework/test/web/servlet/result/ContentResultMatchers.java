@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ public class ContentResultMatchers {
 	 * are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
 	 * <p>Use of this matcher requires the <a
-	 * href="http://xmlunit.sourceforge.net/">XMLUnit</a> library.
+	 * href="https://www.xmlunit.org/">XMLUnit</a> library.
 	 * @param xmlContent the expected XML content
 	 * @see MockMvcResultMatchers#xpath(String, Object...)
 	 * @see MockMvcResultMatchers#xpath(String, Map, Object...)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,18 +297,18 @@ class MimeTypeTests {
 		String s = "text/plain, text/html, text/x-dvi, text/x-c";
 		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes(s);
 		assertThat(mimeTypes).as("No mime types returned").isNotNull();
-		assertThat(mimeTypes.size()).as("Invalid amount of mime types").isEqualTo(4);
+		assertThat(mimeTypes).as("Invalid amount of mime types").hasSize(4);
 
 		mimeTypes = MimeTypeUtils.parseMimeTypes(null);
 		assertThat(mimeTypes).as("No mime types returned").isNotNull();
-		assertThat(mimeTypes.size()).as("Invalid amount of mime types").isEqualTo(0);
+		assertThat(mimeTypes).as("Invalid amount of mime types").isEmpty();
 	}
 
 	@Test  // gh-23241
 	void parseMimeTypesWithTrailingComma() {
 		List<MimeType> mimeTypes = MimeTypeUtils.parseMimeTypes("text/plain, text/html,");
 		assertThat(mimeTypes).as("No mime types returned").isNotNull();
-		assertThat(mimeTypes.size()).as("Incorrect number of mime types").isEqualTo(2);
+		assertThat(mimeTypes).as("Incorrect number of mime types").hasSize(2);
 	}
 
 	@Test  // SPR-17459
@@ -328,7 +328,7 @@ class MimeTypeTests {
 		type = new MimeType("application", "vdn.something");
 		assertThat(type.getSubtypeSuffix()).isNull();
 		type = new MimeType("application", "vdn.something+");
-		assertThat(type.getSubtypeSuffix()).isEqualTo("");
+		assertThat(type.getSubtypeSuffix()).isEmpty();
 		type = new MimeType("application", "vdn.some+thing+json");
 		assertThat(type.getSubtypeSuffix()).isEqualTo("json");
 	}
@@ -344,7 +344,7 @@ class MimeTypeTests {
 		String s = String.join(",", mimeTypes);
 		List<MimeType> actual = MimeTypeUtils.parseMimeTypes(s);
 
-		assertThat(actual.size()).isEqualTo(mimeTypes.length);
+		assertThat(actual).hasSameSizeAs(mimeTypes);
 		for (int i = 0; i < mimeTypes.length; i++) {
 			assertThat(actual.get(i).toString()).isEqualTo(mimeTypes[i]);
 		}
@@ -362,7 +362,7 @@ class MimeTypeTests {
 		assertThat(audio.compareTo(audio)).as("Invalid comparison result").isEqualTo(0);
 		assertThat(audioBasicLevel.compareTo(audioBasicLevel)).as("Invalid comparison result").isEqualTo(0);
 
-		assertThat(audioBasicLevel.compareTo(audio) > 0).as("Invalid comparison result").isTrue();
+		assertThat(audioBasicLevel.compareTo(audio)).as("Invalid comparison result").isGreaterThan(0);
 
 		List<MimeType> expected = new ArrayList<>();
 		expected.add(audio);
@@ -398,8 +398,8 @@ class MimeTypeTests {
 
 		m1 = new MimeType("audio", "basic", singletonMap("foo", "bar"));
 		m2 = new MimeType("audio", "basic", singletonMap("foo", "Bar"));
-		assertThat(m1.compareTo(m2) != 0).as("Invalid comparison result").isTrue();
-		assertThat(m2.compareTo(m1) != 0).as("Invalid comparison result").isTrue();
+		assertThat(m1.compareTo(m2)).as("Invalid comparison result").isNotEqualTo(0);
+		assertThat(m2.compareTo(m1)).as("Invalid comparison result").isNotEqualTo(0);
 	}
 
 	@Test

@@ -28,7 +28,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.SpringProperties;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
@@ -68,22 +67,21 @@ public class SQLErrorCodesFactory {
 	private static final Log logger = LogFactory.getLog(SQLErrorCodesFactory.class);
 
 	/**
-	 * Boolean flag controlled by a {@code spring.xml.ignore} system property that instructs Spring to
-	 * ignore XML, i.e. to not initialize the XML-related infrastructure.
-	 * <p>The default is "false".
-	 */
-	private static final boolean shouldIgnoreXml = SpringProperties.getFlag("spring.xml.ignore");
-
-	/**
 	 * Keep track of a single instance so we can return it to classes that request it.
+	 * Lazily initialized in order to avoid making {@code SQLErrorCodesFactory} constructor
+	 * reachable on native images when not needed.
 	 */
-	private static final SQLErrorCodesFactory instance = new SQLErrorCodesFactory();
+	@Nullable
+	private static SQLErrorCodesFactory instance;
 
 
 	/**
 	 * Return the singleton instance.
 	 */
 	public static SQLErrorCodesFactory getInstance() {
+		if (instance == null) {
+			instance = new SQLErrorCodesFactory();
+		}
 		return instance;
 	}
 
@@ -109,9 +107,6 @@ public class SQLErrorCodesFactory {
 	 * @see #loadResource(String)
 	 */
 	protected SQLErrorCodesFactory() {
-		if (shouldIgnoreXml) {
-			throw new UnsupportedOperationException("XML support disabled");
-		}
 
 		Map<String, SQLErrorCodes> errorCodes;
 

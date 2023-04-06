@@ -8,7 +8,4 @@ milestone: "6.0.x"
 build-name: "spring-framework"
 pipeline-name: "spring-framework"
 concourse-url: "https://ci.spring.io"
-registry-mirror-host: docker.repo.spring.io
-registry-mirror-username: ((artifactory-username))
-registry-mirror-password: ((artifactory-password))
 task-timeout: 1h00m

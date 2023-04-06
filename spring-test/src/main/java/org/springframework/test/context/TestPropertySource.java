@@ -112,11 +112,11 @@ public @interface TestPropertySource {
 	 * {@code Environment}'s set of {@code PropertySources}. Each location
 	 * will be added to the enclosing {@code Environment} as its own property
 	 * source, in the order declared.
-	 * <h3>Supported File Formats</h3>
+	 * <h4>Supported File Formats</h4>
 	 * <p>Both traditional and XML-based properties file formats are supported
 	 * &mdash; for example, {@code "classpath:/com/example/test.properties"}
 	 * or {@code "file:/path/to/file.xml"}.
-	 * <h3>Path Resource Semantics</h3>
+	 * <h4>Path Resource Semantics</h4>
 	 * <p>Each path will be interpreted as a Spring
 	 * {@link org.springframework.core.io.Resource Resource}. A plain path
 	 * &mdash; for example, {@code "test.properties"} &mdash; will be treated as a
@@ -134,9 +134,9 @@ public @interface TestPropertySource {
 	 * in paths (i.e., <code>${...}</code>) will be
 	 * {@linkplain org.springframework.core.env.Environment#resolveRequiredPlaceholders(String) resolved}
 	 * against the {@code Environment}.
-	 * <h3>Default Properties File Detection</h3>
+	 * <h4>Default Properties File Detection</h4>
 	 * <p>See the class-level Javadoc for a discussion on detection of defaults.
-	 * <h3>Precedence</h3>
+	 * <h4>Precedence</h4>
 	 * <p>Properties loaded from resource locations have lower precedence than
 	 * inlined {@link #properties}.
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
@@ -209,7 +209,7 @@ public @interface TestPropertySource {
 	 * {@code ApplicationContext} is loaded for the test. All key-value pairs
 	 * will be added to the enclosing {@code Environment} as a single test
 	 * {@code PropertySource} with the highest precedence.
-	 * <h3>Supported Syntax</h3>
+	 * <h4>Supported Syntax</h4>
 	 * <p>The supported syntax for key-value pairs is the same as the
 	 * syntax defined for entries in a Java
 	 * {@linkplain java.util.Properties#load(java.io.Reader) properties file}:
@@ -218,7 +218,7 @@ public @interface TestPropertySource {
 	 * <li>{@code "key:value"}</li>
 	 * <li>{@code "key value"}</li>
 	 * </ul>
-	 * <h3>Precedence</h3>
+	 * <h4>Precedence</h4>
 	 * <p>Properties declared via this attribute have higher precedence than
 	 * properties loaded from resource {@link #locations}.
 	 * <p>This attribute may be used in conjunction with {@link #value}

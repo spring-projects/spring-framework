@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
@@ -56,7 +57,7 @@ class CachingMetadataReaderLeakTests {
 			Resource resource = new UrlResource(url) {
 
 				@Override
-				public boolean equals(Object obj) {
+				public boolean equals(@Nullable Object obj) {
 					return (obj == this);
 				}
 

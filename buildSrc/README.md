@@ -5,9 +5,12 @@ They are declared in the `build.gradle` file in this folder.
 
 ## Build Conventions
 
-### Compiler conventions
+The `org.springframework.build.conventions` plugin applies all conventions to the Framework build:
 
-The `org.springframework.build.compile` plugin applies the Java compiler conventions to the build.
+* Configuring the Java compiler, see `JavaConventions`
+* Configuring the Kotlin compiler, see `KotlinConventions`
+* Configuring testing in the build with `TestConventions` 
+
 
 ## Build Plugins
 

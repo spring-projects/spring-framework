@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.springframework.util.StringUtils;
  * Adapt {@link ServerHttpRequest} to the Servlet {@link HttpServletRequest}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  */
 class ServletServerHttpRequest extends AbstractServerHttpRequest {
@@ -64,6 +65,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 
 	private final HttpServletRequest request;
+
+	private final ServletInputStream inputStream;
 
 	private final RequestBodyPublisher bodyPublisher;
 
@@ -87,10 +90,11 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			AsyncContext asyncContext, String servletPath, DataBufferFactory bufferFactory, int bufferSize)
 			throws IOException, URISyntaxException {
 
-		super(initUri(request), request.getContextPath() + servletPath, initHeaders(headers, request));
+		super(HttpMethod.valueOf(request.getMethod()), initUri(request), request.getContextPath() + servletPath,
+				initHeaders(headers, request));
 
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
-		Assert.isTrue(bufferSize > 0, "'bufferSize' must be higher than 0");
+		Assert.isTrue(bufferSize > 0, "'bufferSize' must be greater than 0");
 
 		this.request = request;
 		this.bufferFactory = bufferFactory;
@@ -99,8 +103,8 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		this.asyncListener = new RequestAsyncListener();
 
 		// Tomcat expects ReadListener registration on initial thread
-		ServletInputStream inputStream = request.getInputStream();
-		this.bodyPublisher = new RequestBodyPublisher(inputStream);
+		this.inputStream = request.getInputStream();
+		this.bodyPublisher = new RequestBodyPublisher(this.inputStream);
 		this.bodyPublisher.registerReadListener();
 	}
 
@@ -157,17 +161,6 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 		return (headers != null ? headers : headerValues);
-	}
-
-	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.request.getMethod());
-	}
-
-	@Override
-	@Deprecated
-	public String getMethodValue() {
-		return this.request.getMethod();
 	}
 
 	@Override
@@ -238,6 +231,13 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	/**
+	 * Return the {@link ServletInputStream} for the current response.
+	 */
+	protected final ServletInputStream getInputStream() {
+		return this.inputStream;
+	}
+
+	/**
 	 * Read from the request body InputStream and return a DataBuffer.
 	 * Invoked only when {@link ServletInputStream#isReady()} returns "true".
 	 * @return a DataBuffer with data read, or
@@ -245,7 +245,7 @@ class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	 * or {@link #EOF_BUFFER} if the input stream returned -1.
 	 */
 	DataBuffer readFromInputStream() throws IOException {
-		int read = this.request.getInputStream().read(this.buffer);
+		int read = this.inputStream.read(this.buffer);
 		logBytesRead(read);
 
 		if (read > 0) {

@@ -17,45 +17,58 @@
 package org.springframework.test.context.aot.samples.basic;
 
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.Extension;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests.DummyTestExecutionListener;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS;
 
 /**
  * @author Sam Brannen
  * @since 6.0
  */
-// Register an extension other than the SpringExtension to verify proper lookups
-// for repeated annotations.
-@ExtendWith(DummyExtension.class)
 @SpringJUnitConfig(BasicTestConfiguration.class)
+@TestExecutionListeners(listeners = DummyTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
+@TestPropertySource(properties = "test.engine = jupiter")
 public class BasicSpringJupiterTests {
 
 	@org.junit.jupiter.api.Test
-	void test(@Autowired MessageService messageService) {
+	void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
+			@Value("${test.engine}") String testEngine) {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+		assertThat(testEngine).isEqualTo("jupiter");
+		assertThat(context.getEnvironment().getProperty("test.engine"))
+			.as("@TestPropertySource").isEqualTo("jupiter");
 	}
 
 	@Nested
 	@TestPropertySource(properties = "foo=bar")
+	@ActiveProfiles(resolver = SpanishActiveProfilesResolver.class)
 	public class NestedTests {
 
 		@org.junit.jupiter.api.Test
-		void test(@Autowired MessageService messageService, @Value("${foo}") String foo) {
-			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+		void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
+				@Value("${test.engine}") String testEngine, @Value("${foo}") String foo) {
+			assertThat(messageService.generateMessage()).isEqualTo("¡Hola, AOT!");
 			assertThat(foo).isEqualTo("bar");
+			assertThat(testEngine).isEqualTo("jupiter");
+			assertThat(context.getEnvironment().getProperty("test.engine"))
+				.as("@TestPropertySource").isEqualTo("jupiter");
 		}
 
 	}
 
+	public static class DummyTestExecutionListener extends AbstractTestExecutionListener {
+	}
+
 }
 
-class DummyExtension implements Extension {
-}

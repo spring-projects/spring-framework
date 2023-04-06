@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 
 	private final boolean canCreateTransaction;
 
+	private final boolean forceFailOnCommit;
+
 	protected boolean begin = false;
 
 	protected boolean commit = false;
@@ -48,8 +50,13 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 
 
 	ReactiveTestTransactionManager(boolean existingTransaction, boolean canCreateTransaction) {
+		this(existingTransaction, canCreateTransaction, false);
+	}
+
+	ReactiveTestTransactionManager(boolean existingTransaction, boolean canCreateTransaction, boolean forceFailOnCommit) {
 		this.existingTransaction = existingTransaction;
 		this.canCreateTransaction = canCreateTransaction;
+		this.forceFailOnCommit = forceFailOnCommit;
 	}
 
 
@@ -79,7 +86,12 @@ class ReactiveTestTransactionManager extends AbstractReactiveTransactionManager 
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			return Mono.error(new IllegalArgumentException("Not the same transaction object"));
 		}
-		return Mono.fromRunnable(() -> this.commit = true);
+		return Mono.fromRunnable(() -> {
+			this.commit = true;
+			if (this.forceFailOnCommit) {
+				throw new IllegalArgumentException("Forced failure on commit");
+			}
+		});
 	}
 
 	@Override

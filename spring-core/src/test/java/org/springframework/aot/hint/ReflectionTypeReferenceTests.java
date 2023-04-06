@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.aot.hint;
 
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 /**
@@ -30,8 +32,20 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  *
  * @author Stephane Nicoll
  * @author Moritz Halbritter
+ * @author Sebastien Deleuze
  */
 class ReflectionTypeReferenceTests {
+
+	@Test
+	void typeReferenceWithNullClass() {
+		assertThatIllegalArgumentException().isThrownBy(() -> ReflectionTypeReference.of(null));
+	}
+
+	@Test
+	void typeReferenceWithLambda() {
+		Runnable lambda = () -> { };
+		assertThatIllegalArgumentException().isThrownBy(() -> ReflectionTypeReference.of(lambda.getClass()));
+	}
 
 	@ParameterizedTest
 	@MethodSource("reflectionTargetNames")

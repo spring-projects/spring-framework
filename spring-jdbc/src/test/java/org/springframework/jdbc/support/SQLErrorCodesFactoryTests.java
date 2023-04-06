@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ public class SQLErrorCodesFactoryTests {
 	@Test
 	public void testDefaultInstanceWithNoSuchDatabase() {
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes("xx");
-		assertThat(sec.getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sec.getDataIntegrityViolationCodes().length == 0).isTrue();
+		assertThat(sec.getBadSqlGrammarCodes().length).isEqualTo(0);
+		assertThat(sec.getDataIntegrityViolationCodes().length).isEqualTo(0);
 	}
 
 	/**
@@ -64,80 +64,80 @@ public class SQLErrorCodesFactoryTests {
 	}
 
 	private void assertIsOracle(SQLErrorCodes sec) {
-		assertThat(sec.getBadSqlGrammarCodes().length > 0).isTrue();
-		assertThat(sec.getDataIntegrityViolationCodes().length > 0).isTrue();
+		assertThat(sec.getBadSqlGrammarCodes().length).isGreaterThan(0);
+		assertThat(sec.getDataIntegrityViolationCodes().length).isGreaterThan(0);
 		// These had better be a Bad SQL Grammar code
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "942") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "6550") >= 0).isTrue();
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "942")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "6550")).isGreaterThanOrEqualTo(0);
 		// This had better NOT be
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "9xx42") >= 0).isFalse();
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "9xx42")).isLessThan(0);
 	}
 
 	private void assertIsSQLServer(SQLErrorCodes sec) {
 		assertThat(sec.getDatabaseProductName()).isEqualTo("Microsoft SQL Server");
 
-		assertThat(sec.getBadSqlGrammarCodes().length > 0).isTrue();
+		assertThat(sec.getBadSqlGrammarCodes().length).isGreaterThan(0);
 
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "156") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "170") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "207") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "208") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "209") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "9xx42") >= 0).isFalse();
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "156")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "170")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "207")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "208")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "209")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "9xx42")).isLessThan(0);
 
-		assertThat(sec.getPermissionDeniedCodes().length > 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getPermissionDeniedCodes(), "229") >= 0).isTrue();
+		assertThat(sec.getPermissionDeniedCodes().length).isGreaterThan(0);
+		assertThat(Arrays.binarySearch(sec.getPermissionDeniedCodes(), "229")).isGreaterThanOrEqualTo(0);
 
-		assertThat(sec.getDuplicateKeyCodes().length > 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDuplicateKeyCodes(), "2601") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDuplicateKeyCodes(), "2627") >= 0).isTrue();
+		assertThat(sec.getDuplicateKeyCodes().length).isGreaterThan(0);
+		assertThat(Arrays.binarySearch(sec.getDuplicateKeyCodes(), "2601")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getDuplicateKeyCodes(), "2627")).isGreaterThanOrEqualTo(0);
 
-		assertThat(sec.getDataIntegrityViolationCodes().length > 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDataIntegrityViolationCodes(), "544") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDataIntegrityViolationCodes(), "8114") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDataIntegrityViolationCodes(), "8115") >= 0).isTrue();
+		assertThat(sec.getDataIntegrityViolationCodes().length).isGreaterThan(0);
+		assertThat(Arrays.binarySearch(sec.getDataIntegrityViolationCodes(), "544")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getDataIntegrityViolationCodes(), "8114")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getDataIntegrityViolationCodes(), "8115")).isGreaterThanOrEqualTo(0);
 
-		assertThat(sec.getDataAccessResourceFailureCodes().length > 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDataAccessResourceFailureCodes(), "4060") >= 0).isTrue();
+		assertThat(sec.getDataAccessResourceFailureCodes().length).isGreaterThan(0);
+		assertThat(Arrays.binarySearch(sec.getDataAccessResourceFailureCodes(), "4060")).isGreaterThanOrEqualTo(0);
 
-		assertThat(sec.getCannotAcquireLockCodes().length > 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getCannotAcquireLockCodes(), "1222") >= 0).isTrue();
+		assertThat(sec.getCannotAcquireLockCodes().length).isGreaterThan(0);
+		assertThat(Arrays.binarySearch(sec.getCannotAcquireLockCodes(), "1222")).isGreaterThanOrEqualTo(0);
 
-		assertThat(sec.getDeadlockLoserCodes().length > 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDeadlockLoserCodes(), "1205") >= 0).isTrue();
+		assertThat(sec.getDeadlockLoserCodes().length).isGreaterThan(0);
+		assertThat(Arrays.binarySearch(sec.getDeadlockLoserCodes(), "1205")).isGreaterThanOrEqualTo(0);
 	}
 
 	private void assertIsHsql(SQLErrorCodes sec) {
-		assertThat(sec.getBadSqlGrammarCodes().length > 0).isTrue();
-		assertThat(sec.getDataIntegrityViolationCodes().length > 0).isTrue();
+		assertThat(sec.getBadSqlGrammarCodes().length).isGreaterThan(0);
+		assertThat(sec.getDataIntegrityViolationCodes().length).isGreaterThan(0);
 		// This had better be a Bad SQL Grammar code
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-22") >= 0).isTrue();
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-22")).isGreaterThanOrEqualTo(0);
 		// This had better NOT be
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-9") >= 0).isFalse();
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-9")).isLessThan(0);
 	}
 
 	private void assertIsDB2(SQLErrorCodes sec) {
-		assertThat(sec.getBadSqlGrammarCodes().length > 0).isTrue();
-		assertThat(sec.getDataIntegrityViolationCodes().length > 0).isTrue();
+		assertThat(sec.getBadSqlGrammarCodes().length).isGreaterThan(0);
+		assertThat(sec.getDataIntegrityViolationCodes().length).isGreaterThan(0);
 
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "942") >= 0).isFalse();
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "942")).isLessThan(0);
 		// This had better NOT be
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-204") >= 0).isTrue();
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-204")).isGreaterThanOrEqualTo(0);
 	}
 
 	private void assertIsHana(SQLErrorCodes sec) {
-		assertThat(sec.getBadSqlGrammarCodes().length > 0).isTrue();
-		assertThat(sec.getDataIntegrityViolationCodes().length > 0).isTrue();
+		assertThat(sec.getBadSqlGrammarCodes().length).isGreaterThan(0);
+		assertThat(sec.getDataIntegrityViolationCodes().length).isGreaterThan(0);
 
-		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "368") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getPermissionDeniedCodes(), "10") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDuplicateKeyCodes(), "301") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDataIntegrityViolationCodes(), "461") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDataAccessResourceFailureCodes(), "-813") >=0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getInvalidResultSetAccessCodes(), "582") >=0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getCannotAcquireLockCodes(), "131") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getCannotSerializeTransactionCodes(), "138") >= 0).isTrue();
-		assertThat(Arrays.binarySearch(sec.getDeadlockLoserCodes(), "133") >= 0).isTrue();
+		assertThat(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "368")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getPermissionDeniedCodes(), "10")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getDuplicateKeyCodes(), "301")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getDataIntegrityViolationCodes(), "461")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getDataAccessResourceFailureCodes(), "-813")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getInvalidResultSetAccessCodes(), "582")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getCannotAcquireLockCodes(), "131")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getCannotSerializeTransactionCodes(), "138")).isGreaterThanOrEqualTo(0);
+		assertThat(Arrays.binarySearch(sec.getDeadlockLoserCodes(), "133")).isGreaterThanOrEqualTo(0);
 
 	}
 
@@ -163,8 +163,8 @@ public class SQLErrorCodesFactoryTests {
 
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
-		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sf.getErrorCodes("Oracle").getDataIntegrityViolationCodes().length == 0).isTrue();
+		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length).isEqualTo(0);
+		assertThat(sf.getErrorCodes("Oracle").getDataIntegrityViolationCodes().length).isEqualTo(0);
 	}
 
 	/**
@@ -184,8 +184,8 @@ public class SQLErrorCodesFactoryTests {
 
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
-		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length).isEqualTo(2);
+		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length).isEqualTo(0);
+		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()).hasSize(2);
 		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[0]).isEqualTo("1");
 		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[1]).isEqualTo("2");
 	}
@@ -205,8 +205,8 @@ public class SQLErrorCodesFactoryTests {
 
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
-		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0).isTrue();
-		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length).isEqualTo(0);
+		assertThat(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length).isEqualTo(0);
+		assertThat(sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()).isEmpty();
 	}
 
 	/**
@@ -226,17 +226,17 @@ public class SQLErrorCodesFactoryTests {
 
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
-		assertThat(sf.getErrorCodes("Oracle").getCustomTranslations().length).isEqualTo(1);
+		assertThat(sf.getErrorCodes("Oracle").getCustomTranslations()).hasSize(1);
 		CustomSQLErrorCodesTranslation translation =
 				sf.getErrorCodes("Oracle").getCustomTranslations()[0];
 		assertThat(translation.getExceptionClass()).isEqualTo(CustomErrorCodeException.class);
-		assertThat(translation.getErrorCodes().length).isEqualTo(1);
+		assertThat(translation.getErrorCodes()).hasSize(1);
 	}
 
 	@Test
 	public void testDataSourceWithNullMetadata() throws Exception {
-		Connection connection = mock(Connection.class);
-		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock();
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
@@ -253,7 +253,7 @@ public class SQLErrorCodesFactoryTests {
 	public void testGetFromDataSourceWithSQLException() throws Exception {
 		SQLException expectedSQLException = new SQLException();
 
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willThrow(expectedSQLException);
 
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
@@ -264,13 +264,13 @@ public class SQLErrorCodesFactoryTests {
 	}
 
 	private SQLErrorCodes getErrorCodesFromDataSource(String productName, SQLErrorCodesFactory factory) throws Exception {
-		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		DatabaseMetaData databaseMetaData = mock();
 		given(databaseMetaData.getDatabaseProductName()).willReturn(productName);
 
-		Connection connection = mock(Connection.class);
+		Connection connection = mock();
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 
-		DataSource dataSource = mock(DataSource.class);
+		DataSource dataSource = mock();
 		given(dataSource.getConnection()).willReturn(connection);
 
 		SQLErrorCodesFactory secf = (factory != null ? factory : SQLErrorCodesFactory.getInstance());
@@ -371,8 +371,8 @@ public class SQLErrorCodesFactoryTests {
 	}
 
 	private void assertIsEmpty(SQLErrorCodes sec) {
-		assertThat(sec.getBadSqlGrammarCodes().length).isEqualTo(0);
-		assertThat(sec.getDataIntegrityViolationCodes().length).isEqualTo(0);
+		assertThat(sec.getBadSqlGrammarCodes()).isEmpty();
+		assertThat(sec.getDataIntegrityViolationCodes()).isEmpty();
 	}
 
 }

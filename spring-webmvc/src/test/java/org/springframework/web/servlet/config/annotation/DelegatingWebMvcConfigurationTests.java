@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,15 +112,15 @@ public class DelegatingWebMvcConfigurationTests {
 		assertThat(initializer.getConversionService()).isSameAs(conversionService.getValue());
 		boolean condition = initializer.getValidator() instanceof LocalValidatorFactoryBean;
 		assertThat(condition).isTrue();
-		assertThat(resolvers.getValue().size()).isEqualTo(0);
-		assertThat(handlers.getValue().size()).isEqualTo(0);
+		assertThat(resolvers.getValue()).isEmpty();
+		assertThat(handlers.getValue()).isEmpty();
 		assertThat(adapter.getMessageConverters()).isEqualTo(converters.getValue());
 		assertThat(asyncConfigurer).isNotNull();
 	}
 
 	@Test
 	public void configureMessageConverters() {
-		HttpMessageConverter<?> customConverter = mock(HttpMessageConverter.class);
+		HttpMessageConverter<?> customConverter = mock();
 		StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override
@@ -140,7 +140,7 @@ public class DelegatingWebMvcConfigurationTests {
 				this.webMvcConfig.mvcConversionService(),
 				this.webMvcConfig.mvcValidator());
 
-		assertThat(adapter.getMessageConverters().size()).as("One custom converter expected").isEqualTo(2);
+		assertThat(adapter.getMessageConverters()).as("One custom converter expected").hasSize(2);
 		assertThat(adapter.getMessageConverters().get(0)).isSameAs(customConverter);
 		assertThat(adapter.getMessageConverters().get(1)).isSameAs(stringConverter);
 	}
@@ -174,14 +174,14 @@ public class DelegatingWebMvcConfigurationTests {
 		verify(webMvcConfigurer).configureContentNegotiation(contentNegotiationConfigurer.capture());
 		verify(webMvcConfigurer).configureHandlerExceptionResolvers(exceptionResolvers.capture());
 
-		assertThat(exceptionResolvers.getValue().size()).isEqualTo(3);
+		assertThat(exceptionResolvers.getValue()).hasSize(3);
 		boolean condition2 = exceptionResolvers.getValue().get(0) instanceof ExceptionHandlerExceptionResolver;
 		assertThat(condition2).isTrue();
 		boolean condition1 = exceptionResolvers.getValue().get(1) instanceof ResponseStatusExceptionResolver;
 		assertThat(condition1).isTrue();
 		boolean condition = exceptionResolvers.getValue().get(2) instanceof DefaultHandlerExceptionResolver;
 		assertThat(condition).isTrue();
-		assertThat(converters.getValue().size() > 0).isTrue();
+		assertThat(converters.getValue()).isNotEmpty();
 	}
 
 	@Test
@@ -198,16 +198,15 @@ public class DelegatingWebMvcConfigurationTests {
 				(HandlerExceptionResolverComposite) webMvcConfig
 						.handlerExceptionResolver(webMvcConfig.mvcContentNegotiationManager());
 
-		assertThat(composite.getExceptionResolvers().size())
-				.as("Only one custom converter is expected")
-				.isEqualTo(1);
+		assertThat(composite.getExceptionResolvers())
+				.as("Only one custom converter is expected").hasSize(1);
 	}
 
 	@Test
 	@SuppressWarnings("deprecation")
 	public void configurePathMatcher() {
-		PathMatcher pathMatcher = mock(PathMatcher.class);
-		UrlPathHelper pathHelper = mock(UrlPathHelper.class);
+		PathMatcher pathMatcher = mock();
+		UrlPathHelper pathHelper = mock();
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override
@@ -275,8 +274,8 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	public void configurePathPatternParser() {
 		PathPatternParser patternParser = new PathPatternParser();
-		PathMatcher pathMatcher = mock(PathMatcher.class);
-		UrlPathHelper pathHelper = mock(UrlPathHelper.class);
+		PathMatcher pathMatcher = mock();
+		UrlPathHelper pathHelper = mock();
 
 		WebMvcConfigurer configurer = new WebMvcConfigurer() {
 			@Override

@@ -17,7 +17,6 @@
 package org.springframework.web.socket.client;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -40,12 +39,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Rossen Stoyanchev
  */
-public class WebSocketConnectionManagerTests {
-
+class WebSocketConnectionManagerTests {
 
 	@Test
-	public void openConnection() throws Exception {
-		List<String> subprotocols = Arrays.asList("abc");
+	void openConnection() {
+		List<String> subprotocols = List.of("abc");
 
 		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(false);
 		WebSocketHandler handler = new TextWebSocketHandler();
@@ -58,7 +56,7 @@ public class WebSocketConnectionManagerTests {
 		expectedHeaders.setSecWebSocketProtocol(subprotocols);
 
 		assertThat(client.headers).isEqualTo(expectedHeaders);
-		assertThat(client.uri).isEqualTo(new URI("/path/123"));
+		assertThat(client.uri).isEqualTo(URI.create("/path/123"));
 
 		WebSocketHandlerDecorator loggingHandler = (WebSocketHandlerDecorator) client.webSocketHandler;
 		assertThat(loggingHandler.getClass()).isEqualTo(LoggingWebSocketHandlerDecorator.class);
@@ -67,7 +65,7 @@ public class WebSocketConnectionManagerTests {
 	}
 
 	@Test
-	public void clientLifecycle() throws Exception {
+	void clientLifecycle() throws Exception {
 		TestLifecycleWebSocketClient client = new TestLifecycleWebSocketClient(false);
 		WebSocketHandler handler = new TextWebSocketHandler();
 		WebSocketConnectionManager manager = new WebSocketConnectionManager(client, handler , "/a");

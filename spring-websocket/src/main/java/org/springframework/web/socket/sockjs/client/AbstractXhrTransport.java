@@ -29,7 +29,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -112,7 +111,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 	@Deprecated
 	protected void connectInternal(TransportRequest request, WebSocketHandler handler,
 			URI receiveUrl, HttpHeaders handshakeHeaders, XhrClientSockJsSession session,
-			SettableListenableFuture<WebSocketSession> connectFuture) {
+			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
 		throw new UnsupportedOperationException("connectInternal has been deprecated in favor of connectInternal");
 	}
 

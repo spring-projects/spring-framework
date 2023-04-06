@@ -61,7 +61,7 @@ class InstanceSupplierTests {
 		InstanceSupplier<String> supplier = registeredBean -> "test";
 		ThrowingBiFunction<RegisteredBean, String, String> after = null;
 		assertThatIllegalArgumentException().isThrownBy(() -> supplier.andThen(after))
-				.withMessage("After must not be null");
+				.withMessage("'after' function must not be null");
 	}
 
 	@Test

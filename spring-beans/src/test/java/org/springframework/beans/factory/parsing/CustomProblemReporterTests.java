@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class CustomProblemReporterTests {
 	@Test
 	public void testErrorsAreCollated() {
 		this.reader.loadBeanDefinitions(qualifiedResource(CustomProblemReporterTests.class, "context.xml"));
-		assertThat(this.problemReporter.getErrors().length).as("Incorrect number of errors collated").isEqualTo(4);
+		assertThat(this.problemReporter.getErrors()).as("Incorrect number of errors collated").hasSize(4);
 
 		TestBean bean = (TestBean) this.beanFactory.getBean("validBean");
 		assertThat(bean).isNotNull();

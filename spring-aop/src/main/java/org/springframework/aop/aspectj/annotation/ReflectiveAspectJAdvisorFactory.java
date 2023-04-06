@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				new InstanceComparator<>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
 				(Converter<Method, Annotation>) method -> {
-					AspectJAnnotation<?> ann = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
+					AspectJAnnotation ann = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
 					return (ann != null ? ann.getAnnotation() : null);
 				});
 		Comparator<Method> methodNameComparator = new ConvertingComparator<>(Method::getName);
@@ -216,7 +216,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 	@Nullable
 	private AspectJExpressionPointcut getPointcut(Method candidateAdviceMethod, Class<?> candidateAspectClass) {
-		AspectJAnnotation<?> aspectJAnnotation =
+		AspectJAnnotation aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
 		if (aspectJAnnotation == null) {
 			return null;
@@ -240,7 +240,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		Class<?> candidateAspectClass = aspectInstanceFactory.getAspectMetadata().getAspectClass();
 		validate(candidateAspectClass);
 
-		AspectJAnnotation<?> aspectJAnnotation =
+		AspectJAnnotation aspectJAnnotation =
 				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(candidateAdviceMethod);
 		if (aspectJAnnotation == null) {
 			return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class AnonymousBindMarkers implements BindMarkers {
 
 	// access via COUNTER_INCREMENTER
 	@SuppressWarnings("unused")
-	private volatile int counter = 0;
+	private volatile int counter;
 
 
 	/**

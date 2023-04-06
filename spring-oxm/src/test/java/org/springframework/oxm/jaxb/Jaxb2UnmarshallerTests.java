@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 	protected void testFlights(Object o) {
 		Flights flights = (Flights) o;
 		assertThat(flights).as("Flights is null").isNotNull();
-		assertThat(flights.getFlight().size()).as("Invalid amount of flight elements").isEqualTo(1);
+		assertThat(flights.getFlight()).as("Invalid amount of flight elements").hasSize(1);
 		testFlight(flights.getFlight().get(0));
 	}
 
@@ -83,7 +83,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 		unmarshaller.setClassesToBeBound(BinaryObject.class);
 		unmarshaller.setMtomEnabled(true);
 		unmarshaller.afterPropertiesSet();
-		MimeContainer mimeContainer = mock(MimeContainer.class);
+		MimeContainer mimeContainer = mock();
 
 		Resource logo = new ClassPathResource("spring-ws.png", getClass());
 		DataHandler dataHandler = new DataHandler(new FileDataSource(logo.getFile()));
@@ -106,7 +106,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 		assertThat(condition).as("Result is not a BinaryObject").isTrue();
 		BinaryObject object = (BinaryObject) result;
 		assertThat(object.getBytes()).as("bytes property not set").isNotNull();
-		assertThat(object.getBytes().length > 0).as("bytes property not set").isTrue();
+		assertThat(object.getBytes()).as("bytes property not set").isNotEmpty();
 		assertThat(object.getSwaDataHandler()).as("datahandler property not set").isNotNull();
 	}
 

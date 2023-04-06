@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,15 +129,15 @@ class ServletRequestUtilsTests {
 		request.addParameter("paramEmpty", "");
 
 		assertThat(ServletRequestUtils.getFloatParameter(request, "param1")).isEqualTo(Float.valueOf(5.5f));
-		assertThat(ServletRequestUtils.getFloatParameter(request, "param1", 6.5f) == 5.5f).isTrue();
-		assertThat(ServletRequestUtils.getRequiredFloatParameter(request, "param1") == 5.5f).isTrue();
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param1", 6.5f)).isEqualTo(5.5f);
+		assertThat(ServletRequestUtils.getRequiredFloatParameter(request, "param1")).isEqualTo(5.5f);
 
-		assertThat(ServletRequestUtils.getFloatParameter(request, "param2", 6.5f) == 6.5f).isTrue();
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param2", 6.5f)).isEqualTo(6.5f);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredFloatParameter(request, "param2"));
 
 		assertThat(ServletRequestUtils.getFloatParameter(request, "param3")).isNull();
-		assertThat(ServletRequestUtils.getFloatParameter(request, "param3", 6.5f) == 6.5f).isTrue();
+		assertThat(ServletRequestUtils.getFloatParameter(request, "param3", 6.5f)).isEqualTo(6.5f);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredFloatParameter(request, "param3"));
 
@@ -167,15 +167,15 @@ class ServletRequestUtilsTests {
 		request.addParameter("paramEmpty", "");
 
 		assertThat(ServletRequestUtils.getDoubleParameter(request, "param1")).isEqualTo(Double.valueOf(5.5));
-		assertThat(ServletRequestUtils.getDoubleParameter(request, "param1", 6.5) == 5.5).isTrue();
-		assertThat(ServletRequestUtils.getRequiredDoubleParameter(request, "param1") == 5.5).isTrue();
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param1", 6.5)).isEqualTo(5.5);
+		assertThat(ServletRequestUtils.getRequiredDoubleParameter(request, "param1")).isEqualTo(5.5);
 
-		assertThat(ServletRequestUtils.getDoubleParameter(request, "param2", 6.5) == 6.5).isTrue();
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param2", 6.5)).isEqualTo(6.5);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredDoubleParameter(request, "param2"));
 
 		assertThat(ServletRequestUtils.getDoubleParameter(request, "param3")).isNull();
-		assertThat(ServletRequestUtils.getDoubleParameter(request, "param3", 6.5) == 6.5).isTrue();
+		assertThat(ServletRequestUtils.getDoubleParameter(request, "param3", 6.5)).isEqualTo(6.5);
 		assertThatExceptionOfType(ServletRequestBindingException.class).isThrownBy(() ->
 				ServletRequestUtils.getRequiredDoubleParameter(request, "param3"));
 

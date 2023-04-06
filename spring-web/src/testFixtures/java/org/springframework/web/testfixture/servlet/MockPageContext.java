@@ -342,13 +342,17 @@ public class MockPageContext extends PageContext {
 	}
 
 	public byte[] getContentAsByteArray() {
-		Assert.state(this.response instanceof MockHttpServletResponse, "MockHttpServletResponse required");
-		return ((MockHttpServletResponse) this.response).getContentAsByteArray();
+		if (this.response instanceof MockHttpServletResponse mockResponse) {
+			return mockResponse.getContentAsByteArray();
+		}
+		throw new IllegalStateException("MockHttpServletResponse is required");
 	}
 
 	public String getContentAsString() throws UnsupportedEncodingException {
-		Assert.state(this.response instanceof MockHttpServletResponse, "MockHttpServletResponse required");
-		return ((MockHttpServletResponse) this.response).getContentAsString();
+		if (this.response instanceof MockHttpServletResponse mockResponse) {
+			return mockResponse.getContentAsString();
+		}
+		throw new IllegalStateException("MockHttpServletResponse is required");
 	}
 
 	@Override

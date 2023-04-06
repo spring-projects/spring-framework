@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	@Override
 	public ServerHttpRequest.Builder path(String path) {
-		Assert.isTrue(path.startsWith("/"), "The path does not have a leading slash.");
+		Assert.isTrue(path.startsWith("/"), () -> "The path does not have a leading slash: " + path);
 		this.uriPath = path;
 		return this;
 	}
@@ -177,8 +177,6 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 
 	private static class MutatedServerHttpRequest extends AbstractServerHttpRequest {
 
-		private final HttpMethod method;
-
 		@Nullable
 		private final SslInfo sslInfo;
 
@@ -194,23 +192,11 @@ class DefaultServerHttpRequestBuilder implements ServerHttpRequest.Builder {
 				HttpMethod method, @Nullable SslInfo sslInfo, @Nullable InetSocketAddress remoteAddress,
 				HttpHeaders headers, Flux<DataBuffer> body, ServerHttpRequest originalRequest) {
 
-			super(uri, contextPath, headers);
-			this.method = method;
+			super(method, uri, contextPath, headers);
 			this.remoteAddress = (remoteAddress != null ? remoteAddress : originalRequest.getRemoteAddress());
 			this.sslInfo = (sslInfo != null ? sslInfo : originalRequest.getSslInfo());
 			this.body = body;
 			this.originalRequest = originalRequest;
-		}
-
-		@Override
-		public HttpMethod getMethod() {
-			return this.method;
-		}
-
-		@Override
-		@Deprecated
-		public String getMethodValue() {
-			return this.method.name();
 		}
 
 		@Override

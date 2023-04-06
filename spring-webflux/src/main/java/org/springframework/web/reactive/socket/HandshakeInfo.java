@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,9 +117,9 @@ public class HandshakeInfo {
 
 		Assert.notNull(uri, "URI is required");
 		Assert.notNull(headers, "HttpHeaders are required");
-		Assert.notNull(cookies, "`cookies` are required");
+		Assert.notNull(cookies, "'cookies' are required");
 		Assert.notNull(principal, "Principal is required");
-		Assert.notNull(attributes, "'attributes' is required");
+		Assert.notNull(attributes, "'attributes' are required");
 
 		this.uri = uri;
 		this.headers = headers;

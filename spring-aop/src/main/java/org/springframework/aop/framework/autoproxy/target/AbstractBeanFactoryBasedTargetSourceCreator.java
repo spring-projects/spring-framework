@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,25 +58,26 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Nullable
 	private ConfigurableBeanFactory beanFactory;
 
 	/** Internally used DefaultListableBeanFactory instances, keyed by bean name. */
-	private final Map<String, DefaultListableBeanFactory> internalBeanFactories =
-			new HashMap<>();
+	private final Map<String, DefaultListableBeanFactory> internalBeanFactories = new HashMap<>();
 
 
 	@Override
 	public final void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
+		if (!(beanFactory instanceof ConfigurableBeanFactory clbf)) {
 			throw new IllegalStateException("Cannot do auto-TargetSource creation with a BeanFactory " +
 					"that doesn't implement ConfigurableBeanFactory: " + beanFactory.getClass());
 		}
-		this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		this.beanFactory = clbf;
 	}
 
 	/**
 	 * Return the BeanFactory that this TargetSourceCreators runs in.
 	 */
+	@Nullable
 	protected final BeanFactory getBeanFactory() {
 		return this.beanFactory;
 	}

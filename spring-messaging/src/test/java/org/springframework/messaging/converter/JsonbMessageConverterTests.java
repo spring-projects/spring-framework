@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class JsonbMessageConverterTests {
 		MethodParameter param = new MethodParameter(method, 0);
 		Object actual = converter.fromMessage(message, MyBean.class, param);
 
-		assertThat(actual instanceof MyBean).isTrue();
+		assertThat(actual).isInstanceOf(MyBean.class);
 		assertThat(((MyBean) actual).getString()).isEqualTo("foo");
 	}
 
@@ -148,11 +148,11 @@ public class JsonbMessageConverterTests {
 		Message<?> message = converter.toMessage(payload, null);
 		String actual = new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
 
-		assertThat(actual.contains("\"string\":\"Foo\"")).isTrue();
-		assertThat(actual.contains("\"number\":42")).isTrue();
-		assertThat(actual.contains("fraction\":42.0")).isTrue();
-		assertThat(actual.contains("\"array\":[\"Foo\",\"Bar\"]")).isTrue();
-		assertThat(actual.contains("\"bool\":true")).isTrue();
+		assertThat(actual).contains("\"string\":\"Foo\"");
+		assertThat(actual).contains("\"number\":42");
+		assertThat(actual).contains("fraction\":42.0");
+		assertThat(actual).contains("\"array\":[\"Foo\",\"Bar\"]");
+		assertThat(actual).contains("\"bool\":true");
 		assertThat(message.getHeaders().get(MessageHeaders.CONTENT_TYPE, MimeType.class)).as("Invalid content-type").isEqualTo(new MimeType("application", "json"));
 	}
 

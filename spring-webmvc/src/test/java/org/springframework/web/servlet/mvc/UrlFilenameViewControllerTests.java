@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,8 +154,7 @@ class UrlFilenameViewControllerTests {
 				.as("For setPrefix(..) with null, the empty string must be used instead.")
 				.isNotNull();
 		assertThat(controller.getPrefix())
-				.as("For setPrefix(..) with null, the empty string must be used instead.")
-				.isEqualTo("");
+				.as("For setPrefix(..) with null, the empty string must be used instead.").isEmpty();
 	}
 
 	@Test
@@ -166,8 +165,7 @@ class UrlFilenameViewControllerTests {
 				.as("For setPrefix(..) with null, the empty string must be used instead.")
 				.isNotNull();
 		assertThat(controller.getSuffix())
-				.as("For setPrefix(..) with null, the empty string must be used instead.")
-				.isEqualTo("");
+				.as("For setPrefix(..) with null, the empty string must be used instead.").isEmpty();
 	}
 
 	/**
@@ -192,7 +190,7 @@ class UrlFilenameViewControllerTests {
 		request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));
 		ModelAndView mv = controller.handleRequest(request, new MockHttpServletResponse());
 		assertThat(mv.getViewName()).isEqualTo("index");
-		assertThat(mv.getModel().size()).isEqualTo(1);
+		assertThat(mv.getModel()).hasSize(1);
 		assertThat(mv.getModel().get("name")).isEqualTo("value");
 	}
 

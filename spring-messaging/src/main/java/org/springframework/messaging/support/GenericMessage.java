@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 
 	private static final long serialVersionUID = 4268801052358035098L;
 
-
+	@SuppressWarnings("serial")
 	private final T payload;
 
 	private final MessageHeaders headers;
@@ -93,10 +93,9 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof GenericMessage)) {
+		if (!(other instanceof GenericMessage<?> otherMsg)) {
 			return false;
 		}
-		GenericMessage<?> otherMsg = (GenericMessage<?>) other;
 		// Using nullSafeEquals for proper array equals comparisons
 		return (ObjectUtils.nullSafeEquals(this.payload, otherMsg.payload) && this.headers.equals(otherMsg.headers));
 	}
@@ -111,8 +110,8 @@ public class GenericMessage<T> implements Message<T>, Serializable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
 		sb.append(" [payload=");
-		if (this.payload instanceof byte[]) {
-			sb.append("byte[").append(((byte[]) this.payload).length).append(']');
+		if (this.payload instanceof byte[] bytes) {
+			sb.append("byte[").append(bytes.length).append(']');
 		}
 		else {
 			sb.append(this.payload);

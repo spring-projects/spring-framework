@@ -1,0 +1,20 @@
+// Spring Portfolio
+:docs-site:                     https://docs.spring.io
+:docs-spring-boot:              {docs-site}/spring-boot/docs/current/reference
+:docs-spring-gemfire:           {docs-site}/spring-gemfire/docs/current/reference
+:docs-spring-security:          {docs-site}/spring-security/reference
+// spring-asciidoctor-backends Settings
+:chomp:                         default headers packages
+:fold:                          all
+// Spring Framework
+:docs-spring-framework:         {docs-site}/spring-framework/docs/{spring-version}
+:api-spring-framework:          {docs-spring-framework}/javadoc-api/org/springframework
+:docs-java:                     {docdir}/../../main/java/org/springframework/docs
+:docs-kotlin:                   {docdir}/../../main/kotlin/org/springframework/docs
+:docs-resources:                {docdir}/../../main/resources
+:spring-framework-main-code:    https://github.com/spring-projects/spring-framework/tree/main
+// Third-party Links
+:docs-graalvm:                  https://www.graalvm.org/22.3/reference-manual
+:gh-rsocket:                    https://github.com/rsocket
+:gh-rsocket-extensions:         {gh-rsocket}/rsocket/blob/master/Extensions
+:gh-rsocket-java:               {gh-rsocket}/rsocket-java

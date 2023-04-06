@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class ReactiveAdapterRegistry {
 			return null;
 		}
 
-		Object sourceToUse = (source instanceof Optional ? ((Optional<?>) source).orElse(null) : source);
+		Object sourceToUse = (source instanceof Optional<?> optional ? optional.orElse(null) : source);
 		Class<?> clazz = (sourceToUse != null ? sourceToUse.getClass() : reactiveType);
 		if (clazz == null) {
 			return null;
@@ -339,11 +339,7 @@ public class ReactiveAdapterRegistry {
 
 	/**
 	 * {@code BlockHoundIntegration} for spring-core classes.
-	 * <p>Explicitly allow the following:
-	 * <ul>
-	 * <li>Reading class info via {@link LocalVariableTableParameterNameDiscoverer}.
-	 * <li>Locking within {@link ConcurrentReferenceHashMap}.
-	 * </ul>
+	 * Explicitly allows locking within {@link ConcurrentReferenceHashMap}.
 	 * @since 5.2.4
 	 */
 	public static class SpringCoreBlockHoundIntegration implements BlockHoundIntegration {
@@ -351,9 +347,6 @@ public class ReactiveAdapterRegistry {
 		@Override
 		public void applyTo(BlockHound.Builder builder) {
 			// Avoid hard references potentially anywhere in spring-core (no need for structural dependency)
-
-			builder.allowBlockingCallsInside(
-					"org.springframework.core.LocalVariableTableParameterNameDiscoverer", "inspectClass");
 
 			String className = "org.springframework.util.ConcurrentReferenceHashMap$Segment";
 			builder.allowBlockingCallsInside(className, "doTask");

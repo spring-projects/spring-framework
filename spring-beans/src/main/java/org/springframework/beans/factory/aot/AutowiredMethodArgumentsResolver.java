@@ -42,8 +42,8 @@ import org.springframework.util.function.ThrowingConsumer;
  * AOT-processed applications as a targeted alternative to the
  * {@link org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * AutowiredAnnotationBeanPostProcessor}.
- * <p>
- * When resolving arguments in a native image, the {@link Method} being used
+ *
+ * <p>When resolving arguments in a native image, the {@link Method} being used
  * must be marked with an {@link ExecutableMode#INTROSPECT introspection} hint
  * so that field annotations can be read. Full {@link ExecutableMode#INVOKE
  * invocation} hints are only required if the
@@ -205,9 +205,8 @@ public final class AutowiredMethodArgumentsResolver extends AutowiredElementReso
 	private Method getMethod(RegisteredBean registeredBean) {
 		Method method = ReflectionUtils.findMethod(registeredBean.getBeanClass(),
 				this.methodName, this.parameterTypes);
-		Assert.notNull(method,
-				() -> String.format(
-						"Method '%s' with parameter types [%s] declared on %s",
+		Assert.notNull(method, () ->
+				"Method '%s' with parameter types [%s] declared on %s could not be found.".formatted(
 						this.methodName, toCommaSeparatedNames(this.parameterTypes),
 						registeredBean.getBeanClass().getName()));
 		return method;

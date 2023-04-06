@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.MultiValueMap;
  */
 class JettyClientHttpResponse implements ClientHttpResponse {
 
-	private static final Pattern SAMESITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
+	private static final Pattern SAME_SITE_PATTERN = Pattern.compile("(?i).*SameSite=(Strict|Lax|None).*");
 
 
 	private final ReactiveResponse reactiveResponse;
@@ -69,12 +69,6 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() {
-		return this.reactiveResponse.getStatus();
-	}
-
-	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
 		List<String> cookieHeader = getHeaders().get(HttpHeaders.SET_COOKIE);
@@ -96,7 +90,7 @@ class JettyClientHttpResponse implements ClientHttpResponse {
 
 	@Nullable
 	private static String parseSameSite(String headerValue) {
-		Matcher matcher = SAMESITE_PATTERN.matcher(headerValue);
+		Matcher matcher = SAME_SITE_PATTERN.matcher(headerValue);
 		return (matcher.matches() ? matcher.group(1) : null);
 	}
 

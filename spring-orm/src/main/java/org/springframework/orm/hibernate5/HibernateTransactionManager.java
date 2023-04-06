@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,11 +215,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
-		if (dataSource instanceof TransactionAwareDataSourceProxy) {
+		if (dataSource instanceof TransactionAwareDataSourceProxy proxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
-			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
+			this.dataSource = proxy.getTargetDataSource();
 		}
 		else {
 			this.dataSource = dataSource;
@@ -359,14 +359,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 */
 	@Nullable
 	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
-		if (this.entityInterceptor instanceof Interceptor) {
-			return (Interceptor) this.entityInterceptor;
+		if (this.entityInterceptor instanceof Interceptor interceptor) {
+			return interceptor;
 		}
-		else if (this.entityInterceptor instanceof String) {
+		else if (this.entityInterceptor instanceof String beanName) {
 			if (this.beanFactory == null) {
 				throw new IllegalStateException("Cannot get entity interceptor via bean name if no bean factory set");
 			}
-			String beanName = (String) this.entityInterceptor;
 			return this.beanFactory.getBean(beanName, Interceptor.class);
 		}
 		else {
@@ -653,8 +652,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			throw convertHibernateAccessException(ex);
 		}
 		catch (PersistenceException ex) {
-			if (ex.getCause() instanceof HibernateException) {
-				throw convertHibernateAccessException((HibernateException) ex.getCause());
+			if (ex.getCause() instanceof HibernateException hibernateEx) {
+				throw convertHibernateAccessException(hibernateEx);
 			}
 			throw ex;
 		}
@@ -681,8 +680,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			throw convertHibernateAccessException(ex);
 		}
 		catch (PersistenceException ex) {
-			if (ex.getCause() instanceof HibernateException) {
-				throw convertHibernateAccessException((HibernateException) ex.getCause());
+			if (ex.getCause() instanceof HibernateException hibernateEx) {
+				throw convertHibernateAccessException(hibernateEx);
 			}
 			throw ex;
 		}
@@ -891,8 +890,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 				throw convertHibernateAccessException(ex);
 			}
 			catch (PersistenceException ex) {
-				if (ex.getCause() instanceof HibernateException) {
-					throw convertHibernateAccessException((HibernateException) ex.getCause());
+				if (ex.getCause() instanceof HibernateException hibernateEx) {
+					throw convertHibernateAccessException(hibernateEx);
 				}
 				throw ex;
 			}

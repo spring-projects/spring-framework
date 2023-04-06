@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import reactor.blockhound.BlockHound;
 import reactor.blockhound.integration.BlockHoundIntegration;
@@ -170,13 +169,13 @@ public final class WebHttpHandlerBuilder {
 		List<WebFilter> webFilters = context
 				.getBeanProvider(WebFilter.class)
 				.orderedStream()
-				.collect(Collectors.toList());
+				.toList();
 		builder.filters(filters -> filters.addAll(webFilters));
 
 		List<WebExceptionHandler> exceptionHandlers = context
 				.getBeanProvider(WebExceptionHandler.class)
 				.orderedStream()
-				.collect(Collectors.toList());
+				.toList();
 		builder.exceptionHandlers(handlers -> handlers.addAll(exceptionHandlers));
 
 		context.getBeanProvider(HttpHandlerDecoratorFactory.class)
@@ -248,12 +247,13 @@ public final class WebHttpHandlerBuilder {
 
 		List<WebFilter> filtersToUse = this.filters.stream()
 				.peek(filter -> {
-					if (filter instanceof ForwardedHeaderTransformer && this.forwardedHeaderTransformer == null) {
-						this.forwardedHeaderTransformer = (ForwardedHeaderTransformer) filter;
+					if (filter instanceof ForwardedHeaderTransformer forwardedHeaderTransformerFilter
+							&& this.forwardedHeaderTransformer == null) {
+						this.forwardedHeaderTransformer = forwardedHeaderTransformerFilter;
 					}
 				})
 				.filter(filter -> !(filter instanceof ForwardedHeaderTransformer))
-				.collect(Collectors.toList());
+				.toList();
 
 		this.filters.clear();
 		this.filters.addAll(filtersToUse);

@@ -39,7 +39,7 @@ class ProxyHintsWriter {
 	public static final ProxyHintsWriter INSTANCE = new ProxyHintsWriter();
 
 	public void write(BasicJsonWriter writer, ProxyHints hints) {
-		writer.writeArray(hints.jdkProxies().map(this::toAttributes).toList());
+		writer.writeArray(hints.jdkProxyHints().map(this::toAttributes).toList());
 	}
 
 	private Map<String, Object> toAttributes(JdkProxyHint hint) {

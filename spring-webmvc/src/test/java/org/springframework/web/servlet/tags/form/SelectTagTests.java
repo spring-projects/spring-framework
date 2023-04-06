@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -230,9 +230,9 @@ public class SelectTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
 		this.tag.doStartTag();
 		String output = getOutput();
-		assertThat(output.startsWith("<select ")).isTrue();
-		assertThat(output.endsWith("</select>")).isTrue();
-		assertThat(output.contains("option value=\"AT\" selected=\"selected\">Austria")).isTrue();
+		assertThat(output).startsWith("<select ");
+		assertThat(output).endsWith("</select>");
+		assertThat(output).contains("option value=\"AT\" selected=\"selected\">Austria");
 	}
 
 	@Test
@@ -268,10 +268,10 @@ public class SelectTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
 		this.tag.doStartTag();
 		String output = getOutput();
-		assertThat(output.startsWith("<select ")).isTrue();
-		assertThat(output.endsWith("</select>")).isTrue();
-		assertThat(output.contains("selected=\"selected\"")).isFalse();
-		assertThat(output.contains("multiple=\"multiple\"")).isFalse();
+		assertThat(output).startsWith("<select ");
+		assertThat(output).endsWith("</select>");
+		assertThat(output).doesNotContain("selected=\"selected\"");
+		assertThat(output).doesNotContain("multiple=\"multiple\"");
 	}
 
 	@Test
@@ -296,9 +296,9 @@ public class SelectTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
 		this.tag.doStartTag();
 		String output = getOutput();
-		assertThat(output.startsWith("<select ")).isTrue();
-		assertThat(output.endsWith("</select>")).isTrue();
-		assertThat(output.contains("option value=\"AT\" selected=\"selected\">Austria")).isTrue();
+		assertThat(output).startsWith("<select ");
+		assertThat(output).endsWith("</select>");
+		assertThat(output).contains("option value=\"AT\" selected=\"selected\">Austria");
 	}
 
 	@Test
@@ -327,9 +327,9 @@ public class SelectTagTests extends AbstractFormTagTests {
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
 		this.tag.doStartTag();
 		String output = getOutput();
-		assertThat(output.startsWith("<select ")).isTrue();
-		assertThat(output.endsWith("</select>")).isTrue();
-		assertThat(output.contains("selected=\"selected\"")).isFalse();
+		assertThat(output).startsWith("<select ");
+		assertThat(output).endsWith("</select>");
+		assertThat(output).doesNotContain("selected=\"selected\"");
 	}
 
 	@Test
@@ -365,8 +365,8 @@ public class SelectTagTests extends AbstractFormTagTests {
 		this.tag.doFinally();
 
 		String output = getOutput();
-		assertThat(output.startsWith("<select ")).isTrue();
-		assertThat(output.endsWith("</select>")).isTrue();
+		assertThat(output).startsWith("<select ");
+		assertThat(output).endsWith("</select>");
 		assertContainsAttribute(output, "name", "country");
 	}
 
@@ -401,14 +401,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
 		assertThat(selectElement.attribute("name").getValue()).isEqualTo("someIntegerArray");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(array.length);
+		assertThat(children).as("Incorrect number of children").hasSameSizeAs(array);
 
 		Element e = (Element) selectElement.selectSingleNode("option[text() = '12']");
 		assertThat(e.attribute("selected").getValue()).as("'12' node not selected").isEqualTo("selected");
@@ -437,8 +437,8 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
-		assertThat(output.startsWith("<select ")).isTrue();
-		assertThat(output.endsWith("</select>")).isTrue();
+		assertThat(output).startsWith("<select ");
+		assertThat(output).endsWith("</select>");
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
@@ -446,7 +446,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(rootElement.getName()).isEqualTo("select");
 		assertThat(rootElement.attribute("name").getValue()).isEqualTo("myFloat");
 		List children = rootElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(array.length);
+		assertThat(children).as("Incorrect number of children").hasSameSizeAs(array);
 
 		Element e = (Element) rootElement.selectSingleNode("option[text() = '12.34f']");
 		assertThat(e.attribute("selected").getValue()).as("'12.34' node not selected").isEqualTo("selected");
@@ -474,14 +474,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
 		assertThat(selectElement.attribute("name").getValue()).isEqualTo("someList");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element e = (Element) selectElement.selectSingleNode("option[@value = 'UK']");
 		assertThat(e.attribute("selected").getValue()).as("UK node not selected").isEqualTo("selected");
@@ -523,14 +523,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(1);
+		assertThat(rootElement.elements()).hasSize(1);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
 		assertThat(selectElement.attribute("name").getValue()).isEqualTo("realCountry");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element e = (Element) selectElement.selectSingleNode("option[@value = 'UK']");
 		assertThat(e.attribute("selected").getValue()).as("UK node not selected").isEqualTo("selected");
@@ -571,14 +571,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
 		assertThat(selectElement.attribute("name").getValue()).isEqualTo("someList");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element e = (Element) selectElement.selectSingleNode("option[@value = 'UK']");
 		assertThat(e.attribute("selected").getValue()).as("UK node not selected").isEqualTo("selected");
@@ -617,14 +617,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
 		assertThat(selectElement.attribute("name").getValue()).isEqualTo("someList");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element e = (Element) selectElement.selectSingleNode("option[@value = 'UK']");
 		assertThat(e.attribute("selected").getValue()).as("UK node not selected").isEqualTo("selected");
@@ -652,14 +652,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
 		assertThat(selectElement.attribute("name").getValue()).isEqualTo("someMap");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(2);
+		assertThat(children).as("Incorrect number of children").hasSize(2);
 
 		Element e = (Element) selectElement.selectSingleNode("option[@value = 'M']");
 		assertThat(e.attribute("selected").getValue()).as("M node not selected").isEqualTo("selected");
@@ -728,14 +728,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 			SAXReader reader = new SAXReader();
 			Document document = reader.read(new StringReader(output));
 			Element rootElement = document.getRootElement();
-			assertThat(rootElement.elements().size()).isEqualTo(2);
+			assertThat(rootElement.elements()).hasSize(2);
 
 			Element selectElement = rootElement.element("select");
 			assertThat(selectElement.getName()).isEqualTo("select");
 			assertThat(selectElement.attribute("name").getValue()).isEqualTo("someMap");
 
 			List children = selectElement.elements();
-			assertThat(children.size()).as("Incorrect number of children").isEqualTo(3);
+			assertThat(children).as("Incorrect number of children").hasSize(3);
 
 			Element e;
 			e = (Element) selectElement.selectSingleNode("option[@value = '" + austria.getIsoCode() + "']");
@@ -771,7 +771,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
@@ -779,7 +779,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(selectElement.attribute("multiple").getValue()).isEqualTo("multiple");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element inputElement = rootElement.element("input");
 		assertThat(inputElement).isNotNull();
@@ -800,7 +800,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
@@ -808,7 +808,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(selectElement.attribute("multiple").getValue()).isEqualTo("multiple");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element inputElement = rootElement.element("input");
 		assertThat(inputElement).isNotNull();
@@ -829,7 +829,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
@@ -837,7 +837,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(selectElement.attribute("multiple").getValue()).isEqualTo("multiple");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element inputElement = rootElement.element("input");
 		assertThat(inputElement).isNotNull();
@@ -858,7 +858,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(1);
+		assertThat(rootElement.elements()).hasSize(1);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
@@ -866,7 +866,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(selectElement.attribute("multiple")).isNull();
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 	}
 
 	@Test
@@ -884,7 +884,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(2);
+		assertThat(rootElement.elements()).hasSize(2);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
@@ -892,7 +892,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(selectElement.attribute("multiple").getValue()).isEqualTo("multiple");
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element inputElement = rootElement.element("input");
 		assertThat(inputElement).isNotNull();
@@ -913,7 +913,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		assertThat(rootElement.elements().size()).isEqualTo(1);
+		assertThat(rootElement.elements()).hasSize(1);
 
 		Element selectElement = rootElement.element("select");
 		assertThat(selectElement.getName()).isEqualTo("select");
@@ -921,7 +921,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(selectElement.attribute("multiple")).isNull();
 
 		List children = selectElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 	}
 
 
@@ -930,8 +930,8 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(result).isEqualTo(Tag.SKIP_BODY);
 
 		String output = getOutput();
-		assertThat(output.startsWith("<select ")).isTrue();
-		assertThat(output.endsWith("</select>")).isTrue();
+		assertThat(output).startsWith("<select ");
+		assertThat(output).endsWith("</select>");
 
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
@@ -940,7 +940,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(rootElement.attribute("name").getValue()).isEqualTo("name");
 
 		List children = rootElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element e = (Element) rootElement.selectSingleNode("option[text() = 'Rob']");
 		assertThat(e.attribute("selected").getValue()).as("Rob node not selected").isEqualTo("selected");
@@ -985,7 +985,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 		assertThat(rootElement.attribute("name").getValue()).isEqualTo("country");
 
 		List children = rootElement.elements();
-		assertThat(children.size()).as("Incorrect number of children").isEqualTo(4);
+		assertThat(children).as("Incorrect number of children").hasSize(4);
 
 		Element e = (Element) rootElement.selectSingleNode("option[@value = 'UK']");
 		Attribute selectedAttr = e.attribute("selected");

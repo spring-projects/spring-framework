@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	}
 
 	@Override
-	public void multicastEvent(final ApplicationEvent event, @Nullable ResolvableType eventType) {
+	public void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType) {
 		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
 		Executor executor = getTaskExecutor();
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
@@ -178,8 +178,8 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		catch (ClassCastException ex) {
 			String msg = ex.getMessage();
 			if (msg == null || matchesClassCastMessage(msg, event.getClass()) ||
-					(event instanceof PayloadApplicationEvent &&
-							matchesClassCastMessage(msg, ((PayloadApplicationEvent) event).getPayload().getClass()))) {
+					(event instanceof PayloadApplicationEvent payloadEvent &&
+							matchesClassCastMessage(msg, payloadEvent.getPayload().getClass()))) {
 				// Possibly a lambda-defined listener which we could not resolve the generic event type for
 				// -> let's suppress the exception.
 				Log loggerToUse = this.lazyLogger;

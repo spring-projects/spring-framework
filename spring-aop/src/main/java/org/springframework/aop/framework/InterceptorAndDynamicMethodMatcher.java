@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,13 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.aop.MethodMatcher;
 
 /**
- * Internal framework class, combining a MethodInterceptor instance
- * with a MethodMatcher for use as an element in the advisor chain.
+ * Internal framework record, combining a {@link MethodInterceptor} instance
+ * with a {@link MethodMatcher} for use as an element in the advisor chain.
  *
  * @author Rod Johnson
+ * @author Sam Brannen
+ * @param interceptor the {@code MethodInterceptor}
+ * @param matcher the {@code MethodMatcher}
  */
-class InterceptorAndDynamicMethodMatcher {
-
-	final MethodInterceptor interceptor;
-
-	final MethodMatcher methodMatcher;
-
-	public InterceptorAndDynamicMethodMatcher(MethodInterceptor interceptor, MethodMatcher methodMatcher) {
-		this.interceptor = interceptor;
-		this.methodMatcher = methodMatcher;
-	}
-
+record InterceptorAndDynamicMethodMatcher(MethodInterceptor interceptor, MethodMatcher matcher) {
 }

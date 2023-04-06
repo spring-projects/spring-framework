@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,8 +157,8 @@ public class DefaultMessageHandlerMethodFactory
 
 	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
-		ConfigurableBeanFactory beanFactory = (this.beanFactory instanceof ConfigurableBeanFactory ?
-				(ConfigurableBeanFactory) this.beanFactory : null);
+		ConfigurableBeanFactory beanFactory = (this.beanFactory instanceof ConfigurableBeanFactory cbf ?
+				cbf : null);
 
 		// Annotation-based argument resolution
 		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,20 +44,17 @@ import static org.mockito.Mockito.mock;
  */
 public class MessageMethodArgumentResolverTests {
 
-	private MessageConverter converter;
+	private MessageConverter converter = mock();
 
-	private MessageMethodArgumentResolver resolver;
+	private MessageMethodArgumentResolver resolver = new MessageMethodArgumentResolver(this.converter);
 
 	private Method method;
 
 
 	@BeforeEach
 	public void setup() throws Exception {
-		this.method = MessageMethodArgumentResolverTests.class.getDeclaredMethod("handle",
+		this.method = getClass().getDeclaredMethod("handle",
 				Message.class, Message.class, Message.class, Message.class, ErrorMessage.class, Message.class);
-
-		this.converter = mock(MessageConverter.class);
-		this.resolver = new MessageMethodArgumentResolver(this.converter);
 	}
 
 

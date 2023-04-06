@@ -197,6 +197,13 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				URI path = URI.create(inputMessage.getServletRequest().getRequestURI());
 				detail.setInstance(path);
 			}
+			if (logger.isWarnEnabled() && httpEntity instanceof ResponseEntity<?> responseEntity) {
+				if (responseEntity.getStatusCode().value() != detail.getStatus()) {
+					logger.warn(returnType.getExecutable().toGenericString() +
+							" returned ResponseEntity: " + responseEntity + ", but its status" +
+							" doesn't match the ProblemDetail status: " + detail.getStatus());
+				}
+			}
 		}
 
 		HttpHeaders outputHeaders = outputMessage.getHeaders();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -33,6 +32,7 @@ import org.springframework.web.servlet.resource.GzipSupport.GzippedFiles;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for
@@ -76,7 +76,7 @@ public class CachingResourceResolverTests {
 
 	@Test
 	public void resolveResourceInternalFromCache() {
-		Resource expected = Mockito.mock(Resource.class);
+		Resource expected = mock();
 		this.cache.put(resourceKey("bar.css"), expected);
 		Resource actual = this.chain.resolveResource(null, "bar.css", this.locations);
 
@@ -157,8 +157,8 @@ public class CachingResourceResolverTests {
 
 	@Test
 	public void resolveResourceMatchingEncoding() {
-		Resource resource = Mockito.mock(Resource.class);
-		Resource gzipped = Mockito.mock(Resource.class);
+		Resource resource = mock();
+		Resource gzipped = mock();
 		this.cache.put(resourceKey("bar.css"), resource);
 		this.cache.put(resourceKey("bar.css+encoding=gzip"), gzipped);
 

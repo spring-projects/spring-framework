@@ -25,6 +25,7 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
+import org.springframework.javapoet.ClassName;
 
 /**
  * Mock {@link BeanFactoryInitializationCode} implementation.
@@ -42,16 +43,16 @@ public class MockBeanFactoryInitializationCode implements BeanFactoryInitializat
 
 
 	public MockBeanFactoryInitializationCode(GenerationContext generationContext) {
-		this.generatedClass = generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
+		this.generatedClass = generationContext.getGeneratedClasses()
+				.addForFeature("TestCode", this.typeBuilder);
 	}
 
+	public ClassName getClassName() {
+		return this.generatedClass.getName();
+	}
 
 	public DeferredTypeBuilder getTypeBuilder() {
-		return typeBuilder;
-	}
-
-	public GeneratedClass getGeneratedClass() {
-		return generatedClass;
+		return this.typeBuilder;
 	}
 
 	@Override

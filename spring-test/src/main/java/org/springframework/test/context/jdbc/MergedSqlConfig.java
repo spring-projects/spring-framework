@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Arrays;
 
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.style.DefaultToStringStyler;
+import org.springframework.core.style.SimpleValueStyler;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.lang.Nullable;
@@ -210,7 +212,7 @@ class MergedSqlConfig {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)
+		return new ToStringCreator(this, new DefaultToStringStyler(new SimpleValueStyler()))
 				.append("dataSource", this.dataSource)
 				.append("transactionManager", this.transactionManager)
 				.append("transactionMode", this.transactionMode)
@@ -289,7 +291,7 @@ class MergedSqlConfig {
 	}
 
 	private static boolean isEmptyString(@Nullable Object value) {
-		return (value instanceof String && ((String) value).isEmpty());
+		return (value instanceof String str && str.isEmpty());
 	}
 
 	private static boolean isEmptyArray(@Nullable Object value) {

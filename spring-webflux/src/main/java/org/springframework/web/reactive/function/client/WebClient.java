@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
+import io.micrometer.observation.ObservationConvention;
+import io.micrometer.observation.ObservationRegistry;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -261,6 +263,8 @@ public interface WebClient {
 		 * apply to every response. Such default handlers are applied in the
 		 * order in which they are registered, and after any others that are
 		 * registered for a specific response.
+		 * <p>The default status handlers are not applied to {@code exchangeTo*()}
+		 * methods, as those variants have direct access to the client response.
 		 * @param statusPredicate to match responses with
 		 * @param exceptionFunction to map the response to an error signal
 		 * @return this builder
@@ -336,6 +340,23 @@ public interface WebClient {
 		Builder exchangeFunction(ExchangeFunction exchangeFunction);
 
 		/**
+		 * Provide an {@link ObservationRegistry} to use for recording
+		 * observations for HTTP client calls.
+		 * @param observationRegistry the observation registry to use
+		 * @since 6.0
+		 */
+		Builder observationRegistry(ObservationRegistry observationRegistry);
+
+		/**
+		 * Provide an {@link ObservationConvention} to use for collecting
+		 * metadata for the request observation. Will use {@link DefaultClientRequestObservationConvention}
+		 * if none provided.
+		 * @param observationConvention the observation convention to use
+		 * @since 6.0
+		 */
+		Builder observationConvention(ClientRequestObservationConvention observationConvention);
+
+		/**
 		 * Apply the given {@code Consumer} to this builder instance.
 		 * <p>This can be useful for applying pre-packaged customizations.
 		 * @param builderConsumer the consumer to apply
@@ -348,7 +369,7 @@ public interface WebClient {
 		Builder clone();
 
 		/**
-		 * Builder the {@link WebClient} instance.
+		 * Build the {@link WebClient} instance.
 		 */
 		WebClient build();
 	}

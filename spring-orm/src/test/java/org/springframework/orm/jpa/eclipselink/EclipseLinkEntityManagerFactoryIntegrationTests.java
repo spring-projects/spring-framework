@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,26 @@ package org.springframework.orm.jpa.eclipselink;
 
 import org.eclipse.persistence.jpa.JpaEntityManager;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.condition.JRE.JAVA_18;
 
 /**
  * EclipseLink-specific JPA tests.
  *
  * @author Juergen Hoeller
  */
+@DisabledForJreRange(min = JAVA_18, disabledReason = "These JPA tests don't pass on Java 18+")
 public class EclipseLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	@Test
 	public void testCanCastNativeEntityManagerFactoryToEclipseLinkEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
-		assertThat(emfi.getNativeEntityManagerFactory().getClass().getName().endsWith("EntityManagerFactoryImpl")).isTrue();
+		assertThat(emfi.getNativeEntityManagerFactory().getClass().getName()).endsWith("EntityManagerFactoryImpl");
 	}
 
 	@Test

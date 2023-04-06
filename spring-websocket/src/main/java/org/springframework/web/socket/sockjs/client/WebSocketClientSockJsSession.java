@@ -23,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.concurrent.SettableListenableFuture;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketExtension;
@@ -47,9 +46,9 @@ public class WebSocketClientSockJsSession extends AbstractClientSockJsSession im
 	 * Create a new {@code WebSocketClientSockJsSession}.
 	 * @deprecated as of 6.0, in favor of {@link #WebSocketClientSockJsSession(TransportRequest, WebSocketHandler, CompletableFuture)}
 	 */
-	@Deprecated
+	@Deprecated(since = "6.0")
 	public WebSocketClientSockJsSession(TransportRequest request, WebSocketHandler handler,
-			SettableListenableFuture<WebSocketSession> connectFuture) {
+			org.springframework.util.concurrent.SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		super(request, handler, connectFuture);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ public class SimpleControllerHandlerAdapter implements HandlerAdapter {
 	@Override
 	@SuppressWarnings("deprecation")
 	public long getLastModified(HttpServletRequest request, Object handler) {
-		if (handler instanceof LastModified) {
-			return ((LastModified) handler).getLastModified(request);
+		if (handler instanceof LastModified lastModified) {
+			return lastModified.getLastModified(request);
 		}
 		return -1L;
 	}

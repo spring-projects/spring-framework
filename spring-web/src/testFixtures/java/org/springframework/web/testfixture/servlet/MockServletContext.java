@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link jakarta.servlet.ServletContext} interface.
  *
- * <p>As of Spring 5.0, this set of mocks is designed on a Servlet 4.0 baseline.
+ * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
  *
  * <p>Compatible with Servlet 3.1 but can be configured to expose a specific version
  * through {@link #setMajorVersion}/{@link #setMinorVersion}; default is 3.1.
@@ -430,34 +430,9 @@ public class MockServletContext implements ServletContext {
 		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
-	@Deprecated
-	@Override
-	@Nullable
-	public Servlet getServlet(String name) {
-		return null;
-	}
-
-	@Override
-	@Deprecated
-	public Enumeration<Servlet> getServlets() {
-		return Collections.enumeration(Collections.emptySet());
-	}
-
-	@Override
-	@Deprecated
-	public Enumeration<String> getServletNames() {
-		return Collections.enumeration(Collections.emptySet());
-	}
-
 	@Override
 	public void log(String message) {
 		logger.info(message);
-	}
-
-	@Override
-	@Deprecated
-	public void log(Exception ex, String message) {
-		logger.info(message, ex);
 	}
 
 	@Override

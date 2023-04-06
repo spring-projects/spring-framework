@@ -22,6 +22,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -58,13 +61,13 @@ import org.springframework.web.util.WebUtils;
  * for global exception handling in an application. Subclasses can override
  * individual methods that handle a specific exception, override
  * {@link #handleExceptionInternal} to override common handling of all exceptions,
- * or {@link #createResponseEntity} to intercept the final step of creating the
- * {@link ResponseEntity} from the selected HTTP status code, headers, and body.
+ * or override {@link #createResponseEntity} to intercept the final step of creating
+ * the {@link ResponseEntity} from the selected HTTP status code, headers, and body.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public abstract class ResponseEntityExceptionHandler {
+public abstract class ResponseEntityExceptionHandler implements MessageSourceAware {
 
 	/**
 	 * Log category to use when no mapped handler is found for a request.
@@ -84,8 +87,27 @@ public abstract class ResponseEntityExceptionHandler {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
+	@Nullable
+	private MessageSource messageSource;
+
+
+	@Override
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
+
 	/**
-	 * Handle all exceptions raised within Spring MVC handling of the request .
+	 * Get the {@link MessageSource} that this exception handler uses.
+	 * @since 6.0.3
+	 */
+	@Nullable
+	protected MessageSource getMessageSource() {
+		return this.messageSource;
+	}
+
+
+	/**
+	 * Handle all exceptions raised within Spring MVC handling of the request.
 	 * @param ex the exception to handle
 	 * @param request the current request
 	 */
@@ -365,7 +387,8 @@ public abstract class ResponseEntityExceptionHandler {
 	/**
 	 * Customize the handling of {@link ConversionNotSupportedException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
+	 * and a short detail message, and also looks up an override for the detail
+	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
 	 * @param headers the headers to use for the response
@@ -378,8 +401,9 @@ public abstract class ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleConversionNotSupported(
 			ConversionNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status,
-				"Failed to convert '" + ex.getPropertyName() + "' with value: '" + ex.getValue() + "'");
+		Object[] args = {ex.getPropertyName(), ex.getValue()};
+		String defaultDetail = "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'";
+		ProblemDetail body = createProblemDetail(ex, status, defaultDetail, null, args, request);
 
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
@@ -387,7 +411,8 @@ public abstract class ResponseEntityExceptionHandler {
 	/**
 	 * Customize the handling of {@link TypeMismatchException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
+	 * and a short detail message, and also looks up an override for the detail
+	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
 	 * @param headers the headers to use for the response
@@ -400,8 +425,10 @@ public abstract class ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleTypeMismatch(
 			TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status,
-				"Unexpected type for '" + ex.getPropertyName() + "' with value: '" + ex.getValue() + "'");
+		Object[] args = {ex.getPropertyName(), ex.getValue()};
+		String defaultDetail = "Failed to convert '" + args[0] + "' with value: '" + args[1] + "'";
+		String messageCode = ErrorResponse.getDefaultDetailMessageCode(TypeMismatchException.class, null);
+		ProblemDetail body = createProblemDetail(ex, status, defaultDetail, messageCode, args, request);
 
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
@@ -409,7 +436,8 @@ public abstract class ResponseEntityExceptionHandler {
 	/**
 	 * Customize the handling of {@link HttpMessageNotReadableException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
+	 * and a short detail message, and also looks up an override for the detail
+	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
 	 * @param headers the headers to use for the response
@@ -422,14 +450,15 @@ public abstract class ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(
 			HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Failed to read request body");
+		ProblemDetail body = createProblemDetail(ex, status, "Failed to read request", null, null, request);
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
 
 	/**
 	 * Customize the handling of {@link HttpMessageNotWritableException}.
 	 * <p>By default this method creates a {@link ProblemDetail} with the status
-	 * and a short detail message, and then delegates to
+	 * and a short detail message, and also looks up an override for the detail
+	 * via {@link MessageSource}, before delegating to
 	 * {@link #handleExceptionInternal}.
 	 * @param ex the exception to handle
 	 * @param headers the headers to use for the response
@@ -442,7 +471,7 @@ public abstract class ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleHttpMessageNotWritable(
 			HttpMessageNotWritableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Failed to write response body");
+		ProblemDetail body = createProblemDetail(ex, status, "Failed to write request", null, null, request);
 		return handleExceptionInternal(ex, body, headers, status, request);
 	}
 
@@ -457,13 +486,45 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param request the current request
 	 * @return a {@code ResponseEntity} for the response to use, possibly
 	 * {@code null} when the response is already committed
+	 * @deprecated as of 6.0 since {@link org.springframework.web.method.annotation.ModelAttributeMethodProcessor}
+	 * now raises the {@link MethodArgumentNotValidException} subclass instead.
 	 */
 	@Nullable
+	@Deprecated(since = "6.0", forRemoval = true)
 	protected ResponseEntity<Object> handleBindException(
 			BindException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
 		ProblemDetail body = ProblemDetail.forStatusAndDetail(status, "Failed to bind request");
 		return handleExceptionInternal(ex, body, headers, status, request);
+	}
+
+	/**
+	 * Convenience method to create a {@link ProblemDetail} for any exception
+	 * that doesn't implement {@link ErrorResponse}, also performing a
+	 * {@link MessageSource} lookup for the "detail" field.
+	 * @param ex the exception being handled
+	 * @param status the status to associate with the exception
+	 * @param defaultDetail default value for the "detail" field
+	 * @param detailMessageCode the code to use to look up the "detail" field
+	 * through a {@code MessageSource}, falling back on
+	 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)}
+	 * @param detailMessageArguments the arguments to go with the detailMessageCode
+	 * @param request the current request
+	 * @return the created {@code ProblemDetail} instance
+	 * @since 6.0
+	 */
+	protected ProblemDetail createProblemDetail(
+			Exception ex, HttpStatusCode status, String defaultDetail, @Nullable String detailMessageCode,
+			@Nullable Object[] detailMessageArguments, WebRequest request) {
+
+		ErrorResponse.Builder builder = ErrorResponse.builder(ex, status, defaultDetail);
+		if (detailMessageCode != null) {
+			builder.detailMessageCode(detailMessageCode);
+		}
+		if (detailMessageArguments != null) {
+			builder.detailMessageArguments(detailMessageArguments);
+		}
+		return builder.build().updateAndGetBody(this.messageSource, LocaleContextHolder.getLocale());
 	}
 
 	/**
@@ -504,7 +565,7 @@ public abstract class ResponseEntityExceptionHandler {
 		}
 
 		if (body == null && ex instanceof ErrorResponse errorResponse) {
-			body = errorResponse.getBody();
+			body = errorResponse.updateAndGetBody(this.messageSource, LocaleContextHolder.getLocale());
 		}
 
 		return createResponseEntity(body, headers, statusCode, request);

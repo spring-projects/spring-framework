@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,10 +299,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected final void detectHandlerMethods(final Object handler) {
 		Class<?> handlerType;
-		if (handler instanceof String) {
+		if (handler instanceof String beanName) {
 			ApplicationContext context = getApplicationContext();
 			Assert.state(context != null, "ApplicationContext is required for resolving handler bean names");
-			handlerType = context.getType((String) handler);
+			handlerType = context.getType(beanName);
 		}
 		else {
 			handlerType = handler.getClass();
@@ -378,10 +378,9 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
 		HandlerMethod handlerMethod;
-		if (handler instanceof String) {
+		if (handler instanceof String beanName) {
 			ApplicationContext context = getApplicationContext();
 			Assert.state(context != null, "ApplicationContext is required for resolving handler bean names");
-			String beanName = (String) handler;
 			handlerMethod = new HandlerMethod(beanName, context.getAutowireCapableBeanFactory(), method);
 		}
 		else {
@@ -731,8 +730,9 @@ public abstract class AbstractMethodMessageHandler<T>
 			}
 		}
 
-		private void handleFailure(Throwable ex) {
-			Exception cause = (ex instanceof Exception ? (Exception) ex : new IllegalStateException(ex));
+		private void handleFailure(Throwable throwable) {
+			Exception cause = (throwable instanceof Exception exception ? exception :
+					new IllegalStateException(throwable));
 			processHandlerMethodException(this.handlerMethod, cause, this.message);
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Abstract superclass for counting advices etc.
@@ -59,7 +61,7 @@ public class MethodCounter implements Serializable {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		return (other != null && other.getClass() == this.getClass());
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.WebSocketExtension;
@@ -47,6 +46,13 @@ import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
+import org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.StandardWebSocketUpgradeStrategy;
+import org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy;
+import org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStrategy;
 
 /**
  * A base class for {@link HandshakeHandler} implementations, independent of the Servlet API.
@@ -128,41 +134,6 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	}
 
 
-	private static RequestUpgradeStrategy initRequestUpgradeStrategy() {
-		String className;
-		if (tomcatWsPresent) {
-			className = "org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy";
-		}
-		else if (jettyWsPresent) {
-			className = "org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy";
-		}
-		else if (undertowWsPresent) {
-			className = "org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy";
-		}
-		else if (glassfishWsPresent) {
-			className = "org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy";
-		}
-		else if (weblogicWsPresent) {
-			className = "org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy";
-		}
-		else if (websphereWsPresent) {
-			className = "org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStrategy";
-		}
-		else {
-			throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");
-		}
-
-		try {
-			Class<?> clazz = ClassUtils.forName(className, AbstractHandshakeHandler.class.getClassLoader());
-			return (RequestUpgradeStrategy) ReflectionUtils.accessibleConstructor(clazz).newInstance();
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException(
-					"Failed to instantiate RequestUpgradeStrategy: " + className, ex);
-		}
-	}
-
-
 	/**
 	 * Return the {@link RequestUpgradeStrategy} for WebSocket requests.
 	 */
@@ -205,8 +176,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	}
 
 	protected void doStart() {
-		if (this.requestUpgradeStrategy instanceof Lifecycle) {
-			((Lifecycle) this.requestUpgradeStrategy).start();
+		if (this.requestUpgradeStrategy instanceof Lifecycle lifecycle) {
+			lifecycle.start();
 		}
 	}
 
@@ -219,8 +190,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	}
 
 	protected void doStop() {
-		if (this.requestUpgradeStrategy instanceof Lifecycle) {
-			((Lifecycle) this.requestUpgradeStrategy).stop();
+		if (this.requestUpgradeStrategy instanceof Lifecycle lifecycle) {
+			lifecycle.stop();
 		}
 	}
 
@@ -378,8 +349,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	protected final List<String> determineHandlerSupportedProtocols(WebSocketHandler handler) {
 		WebSocketHandler handlerToCheck = WebSocketHandlerDecorator.unwrap(handler);
 		List<String> subProtocols = null;
-		if (handlerToCheck instanceof SubProtocolCapable) {
-			subProtocols = ((SubProtocolCapable) handlerToCheck).getSubProtocols();
+		if (handlerToCheck instanceof SubProtocolCapable subProtocolCapable) {
+			subProtocols = subProtocolCapable.getSubProtocols();
 		}
 		return (subProtocols != null ? subProtocols : Collections.emptyList());
 	}
@@ -421,6 +392,47 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 		return request.getPrincipal();
+	}
+
+
+	private static RequestUpgradeStrategy initRequestUpgradeStrategy() {
+		if (tomcatWsPresent) {
+			return new TomcatRequestUpgradeStrategy();
+		}
+		else if (jettyWsPresent) {
+			return new JettyRequestUpgradeStrategy();
+		}
+		else if (undertowWsPresent) {
+			return new UndertowRequestUpgradeStrategy();
+		}
+		else if (glassfishWsPresent) {
+			return TyrusStrategyDelegate.forGlassFish();
+		}
+		else if (weblogicWsPresent) {
+			return TyrusStrategyDelegate.forWebLogic();
+		}
+		else if (websphereWsPresent) {
+			return new WebSphereRequestUpgradeStrategy();
+		}
+		else {
+			// Let's assume Jakarta WebSocket API 2.1+
+			return new StandardWebSocketUpgradeStrategy();
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid a reachable dependency on Tyrus API.
+	 */
+	private static class TyrusStrategyDelegate {
+
+		public static RequestUpgradeStrategy forGlassFish() {
+			return new GlassFishRequestUpgradeStrategy();
+		}
+
+		public static RequestUpgradeStrategy forWebLogic() {
+			return new WebLogicRequestUpgradeStrategy();
+		}
 	}
 
 }

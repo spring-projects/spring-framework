@@ -82,6 +82,15 @@ public abstract class ClassVisitor {
   }
 
   /**
+   * The class visitor to which this visitor must delegate method calls. May be {@literal null}.
+   *
+   * @return the class visitor to which this visitor must delegate method calls, or {@literal null}.
+   */
+  public ClassVisitor getDelegate() {
+    return cv;
+  }
+
+  /**
    * Visits the header of the class.
    *
    * @param version the class version. The minor version is stored in the 16 most significant bits,
@@ -155,7 +164,8 @@ public abstract class ClassVisitor {
    * implicitly its own nest, so it's invalid to call this method with the visited class name as
    * argument.
    *
-   * @param nestHost the internal name of the host class of the nest.
+   * @param nestHost the internal name of the host class of the nest (see {@link
+   *     Type#getInternalName()}).
    */
   public void visitNestHost(final String nestHost) {
     if (api < Opcodes.ASM7) {
@@ -167,14 +177,19 @@ public abstract class ClassVisitor {
   }
 
   /**
-   * Visits the enclosing class of the class. This method must be called only if the class has an
-   * enclosing class.
+   * Visits the enclosing class of the class. This method must be called only if this class is a
+   * local or anonymous class. See the JVMS 4.7.7 section for more details.
    *
-   * @param owner internal name of the enclosing class of the class.
+   * @param owner internal name of the enclosing class of the class (see {@link
+   *     Type#getInternalName()}).
    * @param name the name of the method that contains the class, or {@literal null} if the class is
-   *     not enclosed in a method of its enclosing class.
+   *     not enclosed in a method or constructor of its enclosing class (e.g. if it is enclosed in
+   *     an instance initializer, static initializer, instance variable initializer, or class
+   *     variable initializer).
    * @param descriptor the descriptor of the method that contains the class, or {@literal null} if
-   *     the class is not enclosed in a method of its enclosing class.
+   *     the class is not enclosed in a method or constructor of its enclosing class (e.g. if it is
+   *     enclosed in an instance initializer, static initializer, instance variable initializer, or
+   *     class variable initializer).
    */
   public void visitOuterClass(final String owner, final String name, final String descriptor) {
     if (cv != null) {
@@ -241,7 +256,7 @@ public abstract class ClassVisitor {
    * the visited class is the host of a nest. A nest host is implicitly a member of its own nest, so
    * it's invalid to call this method with the visited class name as argument.
    *
-   * @param nestMember the internal name of a nest member.
+   * @param nestMember the internal name of a nest member (see {@link Type#getInternalName()}).
    */
   public void visitNestMember(final String nestMember) {
     if (api < Opcodes.ASM7) {
@@ -256,7 +271,8 @@ public abstract class ClassVisitor {
    * Visits a permitted subclasses. A permitted subclass is one of the allowed subclasses of the
    * current class.
    *
-   * @param permittedSubclass the internal name of a permitted subclass.
+   * @param permittedSubclass the internal name of a permitted subclass (see {@link
+   *     Type#getInternalName()}).
    */
   public void visitPermittedSubclass(final String permittedSubclass) {
     if (api < Opcodes.ASM9) {
@@ -269,15 +285,18 @@ public abstract class ClassVisitor {
 
   /**
    * Visits information about an inner class. This inner class is not necessarily a member of the
-   * class being visited.
+   * class being visited. More precisely, every class or interface C which is referenced by this
+   * class and which is not a package member must be visited with this method. This class must
+   * reference its nested class or interface members, and its enclosing class, if any. See the JVMS
+   * 4.7.6 section for more details.
    *
-   * @param name the internal name of an inner class (see {@link Type#getInternalName()}).
-   * @param outerName the internal name of the class to which the inner class belongs (see {@link
-   *     Type#getInternalName()}). May be {@literal null} for not member classes.
-   * @param innerName the (simple) name of the inner class inside its enclosing class. May be
-   *     {@literal null} for anonymous inner classes.
-   * @param access the access flags of the inner class as originally declared in the enclosing
-   *     class.
+   * @param name the internal name of C (see {@link Type#getInternalName()}).
+   * @param outerName the internal name of the class or interface C is a member of (see {@link
+   *     Type#getInternalName()}). Must be {@literal null} if C is not the member of a class or
+   *     interface (e.g. for local or anonymous classes).
+   * @param innerName the (simple) name of C. Must be {@literal null} for anonymous inner classes.
+   * @param access the access flags of C originally declared in the source code from which this
+   *     class was compiled.
    */
   public void visitInnerClass(
       final String name, final String outerName, final String innerName, final int access) {
