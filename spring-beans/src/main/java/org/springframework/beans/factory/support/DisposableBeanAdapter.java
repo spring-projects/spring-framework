@@ -236,7 +236,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 		else if (this.destroyMethods != null) {
 			for (Method destroyMethod : this.destroyMethods) {
-				invokeCustomDestroyMethod(destroyMethod);
+				if (destroyMethod != null) {
+					invokeCustomDestroyMethod(destroyMethod);
+				}
 			}
 		}
 		else if (this.destroyMethodNames != null) {
