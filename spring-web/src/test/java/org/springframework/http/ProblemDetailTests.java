@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,11 +25,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link ProblemDetail}.
  *
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  */
 class ProblemDetailTests {
 
 	@Test
-	void equalsAndHashCode() {
+	void equalsAndHashCode() throws Exception {
 		ProblemDetail pd1 = ProblemDetail.forStatus(500);
 		ProblemDetail pd2 = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		ProblemDetail pd3 = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
@@ -48,6 +50,12 @@ class ProblemDetailTests {
 		assertThat(pd2).isNotEqualTo(pd4);
 		assertThat(pd1.hashCode()).isNotEqualTo(pd3.hashCode());
 		assertThat(pd1.hashCode()).isNotEqualTo(pd4.hashCode());
+
+		ObjectMapper om = new ObjectMapper();
+		ProblemDetail pd5 = om.readValue(om.writeValueAsBytes(pd1), ProblemDetail.class);
+		assertThat(pd1).isEqualTo(pd5);
+		assertThat(pd5).isEqualTo(pd1);
+		assertThat(pd1.hashCode()).isEqualTo(pd5.hashCode());
 	}
 
 }

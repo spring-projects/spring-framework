@@ -42,6 +42,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Yanming Zhou
  * @since 6.0
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7807">RFC 7807</a>
  * @see org.springframework.web.ErrorResponse
@@ -239,7 +240,7 @@ public class ProblemDetail {
 			return false;
 		}
 		return (this.type.equals(otherDetail.type) &&
-				ObjectUtils.nullSafeEquals(this.title, otherDetail.title) &&
+				ObjectUtils.nullSafeEquals(this.getTitle(), otherDetail.getTitle()) &&
 				this.status == otherDetail.status &&
 				ObjectUtils.nullSafeEquals(this.detail, otherDetail.detail) &&
 				ObjectUtils.nullSafeEquals(this.instance, otherDetail.instance) &&
@@ -249,7 +250,7 @@ public class ProblemDetail {
 	@Override
 	public int hashCode() {
 		int result = this.type.hashCode();
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.title);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.getTitle());
 		result = 31 * result + this.status;
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.detail);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.instance);
