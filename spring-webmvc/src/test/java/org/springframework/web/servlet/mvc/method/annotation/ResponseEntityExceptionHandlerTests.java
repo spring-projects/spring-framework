@@ -63,6 +63,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -80,6 +81,7 @@ import static org.mockito.BDDMockito.mock;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Yanming Zhou
  */
 public class ResponseEntityExceptionHandlerTests {
 
@@ -193,6 +195,30 @@ public class ResponseEntityExceptionHandlerTests {
 			assertThat(problem.getTitle()).isEqualTo(title);
 			assertThat(problem.getDetail()).isEqualTo(
 					"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
+	}
+
+	@Test
+	public void reasonAsDetailShouldBeUpdatedViaMessageSource() {
+
+		Locale locale = Locale.UK;
+		LocaleContextHolder.setLocale(locale);
+
+		String code = "bad.request";
+		String message = "Breaking Bad Request";
+		try {
+			StaticMessageSource messageSource = new StaticMessageSource();
+			messageSource.addMessage(code, locale, message);
+
+			this.exceptionHandler.setMessageSource(messageSource);
+
+			ResponseEntity<?> entity = testException(new ResponseStatusException(HttpStatus.BAD_REQUEST, code));
+
+			ProblemDetail body = (ProblemDetail) entity.getBody();
+			assertThat(body.getDetail()).isEqualTo(message);
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
