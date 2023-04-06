@@ -16,14 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.BeanCreationException;
@@ -180,24 +173,28 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		// Quick check for existing instance without full singleton lock
 		Object singletonObject = this.singletonObjects.get(beanName);
-		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+		if (Objects.nonNull(singletonObject) && !isSingletonCurrentlyInCreation(beanName)) {
+			return singletonObject;
+		}
+		singletonObject = this.earlySingletonObjects.get(beanName);
+		if (Objects.nonNull(singletonObject) && !allowEarlyReference) {
+			return singletonObject;
+		}
+		synchronized (this.singletonObjects) {
+			// Consistent creation of early reference within full singleton lock
+			singletonObject = this.singletonObjects.get(beanName);
+			if (Objects.nonNull(singletonObject)) {
+				return singletonObject;
+			}
 			singletonObject = this.earlySingletonObjects.get(beanName);
-			if (singletonObject == null && allowEarlyReference) {
-				synchronized (this.singletonObjects) {
-					// Consistent creation of early reference within full singleton lock
-					singletonObject = this.singletonObjects.get(beanName);
-					if (singletonObject == null) {
-						singletonObject = this.earlySingletonObjects.get(beanName);
-						if (singletonObject == null) {
-							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
-							if (singletonFactory != null) {
-								singletonObject = singletonFactory.getObject();
-								this.earlySingletonObjects.put(beanName, singletonObject);
-								this.singletonFactories.remove(beanName);
-							}
-						}
-					}
-				}
+			if (Objects.nonNull(singletonObject)) {
+				return singletonObject;
+			}
+			ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+			if (singletonFactory != null) {
+				singletonObject = singletonFactory.getObject();
+				this.earlySingletonObjects.put(beanName, singletonObject);
+				this.singletonFactories.remove(beanName);
 			}
 		}
 		return singletonObject;
