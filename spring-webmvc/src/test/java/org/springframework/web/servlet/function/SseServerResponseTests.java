@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 class SseServerResponseTests {
 
@@ -86,6 +87,33 @@ class SseServerResponseTests {
 		assertThat(mav).isNull();
 
 		String expected = "data:{\"name\":\"John Doe\",\"age\":42}\n\n";
+		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
+	}
+
+	@Test
+	void sendObjectWithPrettyPrint() throws Exception {
+		Person person = new Person("John Doe", 42);
+		ServerResponse response = ServerResponse.sse(sse -> {
+			try {
+				sse.send(person);
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
+		});
+
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+		converter.setPrettyPrint(true);
+		ServerResponse.Context context = () -> Collections.singletonList(converter);
+
+		ModelAndView mav = response.writeTo(this.mockRequest, this.mockResponse, context);
+		assertThat(mav).isNull();
+
+		String expected = "data:{\n" +
+				"data:  \"name\" : \"John Doe\",\n" +
+				"data:  \"age\" : 42\n" +
+				"data:}\n" +
+				"\n";
 		assertThat(this.mockResponse.getContentAsString()).isEqualTo(expected);
 	}
 

@@ -48,6 +48,7 @@ import org.springframework.web.servlet.ModelAndView;
  * <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.3.2
  */
 final class SseServerResponse extends AbstractServerResponse {
@@ -90,7 +91,7 @@ final class SseServerResponse extends AbstractServerResponse {
 		}
 
 		DefaultAsyncServerResponse.writeAsync(request, response, result);
-		this.sseConsumer.accept(new DefaultSseBuilder(response, context, result));
+		this.sseConsumer.accept(new DefaultSseBuilder(response, context, result, this.headers()));
 		return null;
 	}
 
@@ -113,15 +114,19 @@ final class SseServerResponse extends AbstractServerResponse {
 
 		private final List<HttpMessageConverter<?>> messageConverters;
 
+		private final HttpHeaders httpHeaders;
+
 		private final StringBuilder builder = new StringBuilder();
 
 		private boolean sendFailed;
 
 
-		public DefaultSseBuilder(HttpServletResponse response, Context context, DeferredResult<?> deferredResult) {
+		public DefaultSseBuilder(HttpServletResponse response, Context context, DeferredResult<?> deferredResult,
+				HttpHeaders httpHeaders) {
 			this.outputMessage = new ServletServerHttpResponse(response);
 			this.deferredResult = deferredResult;
 			this.messageConverters = context.messageConverters();
+			this.httpHeaders = httpHeaders;
 		}
 
 		@Override
@@ -206,7 +211,7 @@ final class SseServerResponse extends AbstractServerResponse {
 				for (HttpMessageConverter<?> converter : this.messageConverters) {
 					if (converter.canWrite(dataClass, MediaType.APPLICATION_JSON)) {
 						HttpMessageConverter<Object> objectConverter = (HttpMessageConverter<Object>) converter;
-						ServerHttpResponse response = new MutableHeadersServerHttpResponse(this.outputMessage);
+						ServerHttpResponse response = new MutableHeadersServerHttpResponse(this.outputMessage, this.httpHeaders);
 						objectConverter.write(data, MediaType.APPLICATION_JSON, response);
 						this.outputMessage.getBody().write(NL_NL);
 						this.outputMessage.flush();
@@ -276,9 +281,10 @@ final class SseServerResponse extends AbstractServerResponse {
 
 			private final HttpHeaders mutableHeaders = new HttpHeaders();
 
-			public MutableHeadersServerHttpResponse(ServerHttpResponse delegate) {
+			public MutableHeadersServerHttpResponse(ServerHttpResponse delegate, HttpHeaders headers) {
 				super(delegate);
 				this.mutableHeaders.putAll(delegate.getHeaders());
+				this.mutableHeaders.putAll(headers);
 			}
 
 			@Override
