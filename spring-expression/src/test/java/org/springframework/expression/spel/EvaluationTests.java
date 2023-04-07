@@ -60,6 +60,20 @@ import static org.assertj.core.api.Assertions.within;
 public class EvaluationTests extends AbstractExpressionTests {
 
 	@Test
+	void expressionLength() {
+		String expression = String.format("'X' + '%s'", repeat(" ", 9_992));
+		assertThat(expression).hasSize(10_000);
+		Expression expr = parser.parseExpression(expression);
+		String result = expr.getValue(context, String.class);
+		assertThat(result).hasSize(9_993);
+		assertThat(result.trim()).isEqualTo("X");
+
+		expression = String.format("'X' + '%s'", repeat(" ", 9_993));
+		assertThat(expression).hasSize(10_001);
+		evaluateAndCheckError(expression, String.class, SpelMessage.MAX_EXPRESSION_LENGTH_EXCEEDED);
+	}
+
+	@Test
 	public void testCreateListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression e = parser.parseExpression("list[0]");
@@ -209,14 +223,6 @@ public class EvaluationTests extends AbstractExpressionTests {
 		pattern += "?";
 		assertThat(pattern).hasSize(1001);
 		evaluateAndCheckError("'abc' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
-	}
-
-	private String repeat(String str, int count) {
-		String result = "";
-		for (int i = 0; i < count; i++) {
-			result += str;
-		}
-		return result;
 	}
 
 	// mixing operators
@@ -1370,6 +1376,15 @@ public class EvaluationTests extends AbstractExpressionTests {
 			return null;
 		}
 
+	}
+
+
+	private static String repeat(String str, int count) {
+		String result = "";
+		for (int i = 0; i < count; i++) {
+			result += str;
+		}
+		return result;
 	}
 
 
