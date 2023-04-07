@@ -61,6 +61,20 @@ class EvaluationTests extends AbstractExpressionTests {
 	class MiscellaneousTests {
 
 		@Test
+		void expressionLength() {
+			String expression = String.format("'X' + '%s'", repeat(" ", 9_992));
+			assertThat(expression).hasSize(10_000);
+			Expression expr = parser.parseExpression(expression);
+			String result = expr.getValue(context, String.class);
+			assertThat(result).hasSize(9_993);
+			assertThat(result.trim()).isEqualTo("X");
+
+			expression = String.format("'X' + '%s'", repeat(" ", 9_993));
+			assertThat(expression).hasSize(10_001);
+			evaluateAndCheckError(expression, String.class, SpelMessage.MAX_EXPRESSION_LENGTH_EXCEEDED);
+		}
+
+		@Test
 		void createListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e = parser.parseExpression("list[0]");
@@ -490,14 +504,6 @@ class EvaluationTests extends AbstractExpressionTests {
 			pattern += "?";
 			assertThat(pattern).hasSize(1001);
 			evaluateAndCheckError("'abc' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
-		}
-
-		private String repeat(String str, int count) {
-			String result = "";
-			for (int i = 0; i < count; i++) {
-				result += str;
-			}
-			return result;
 		}
 
 	}
@@ -1471,6 +1477,15 @@ class EvaluationTests extends AbstractExpressionTests {
 			}).satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(messageCode));
 		}
 
+	}
+
+
+	private static String repeat(String str, int count) {
+		String result = "";
+		for (int i = 0; i < count; i++) {
+			result += str;
+		}
+		return result;
 	}
 
 
