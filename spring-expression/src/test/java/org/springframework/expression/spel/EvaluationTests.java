@@ -61,6 +61,20 @@ class EvaluationTests extends AbstractExpressionTests {
 	class MiscellaneousTests {
 
 		@Test
+		void expressionLength() {
+			String expression = "'X' + '%s'".formatted(" ".repeat(9_992));
+			assertThat(expression).hasSize(10_000);
+			Expression expr = parser.parseExpression(expression);
+			String result = expr.getValue(context, String.class);
+			assertThat(result).hasSize(9_993);
+			assertThat(result.trim()).isEqualTo("X");
+
+			expression = "'X' + '%s'".formatted(" ".repeat(9_993));
+			assertThat(expression).hasSize(10_001);
+			evaluateAndCheckError(expression, String.class, SpelMessage.MAX_EXPRESSION_LENGTH_EXCEEDED);
+		}
+
+		@Test
 		void createListsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
 			ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 			Expression e = parser.parseExpression("list[0]");
