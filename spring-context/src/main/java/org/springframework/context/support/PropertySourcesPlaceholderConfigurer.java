@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,8 +139,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				// See https://github.com/spring-projects/spring-framework/issues/27947
 				if (this.ignoreUnresolvablePlaceholders &&
 						(this.environment instanceof ConfigurableEnvironment configurableEnvironment)) {
-					PropertySourcesPropertyResolver resolver =
-							new PropertySourcesPropertyResolver(configurableEnvironment.getPropertySources());
+					ConfigurablePropertyResolver resolver = createPropertyResolver(configurableEnvironment.getPropertySources());
 					resolver.setIgnoreUnresolvableNestedPlaceholders(true);
 					propertyResolver = resolver;
 				}
@@ -169,9 +168,17 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 				throw new BeanInitializationException("Could not load properties", ex);
 			}
 		}
-
-		processProperties(beanFactory, new PropertySourcesPropertyResolver(this.propertySources));
+		processProperties(beanFactory, createPropertyResolver(this.propertySources));
 		this.appliedPropertySources = this.propertySources;
+	}
+
+	/**
+	 * Factory method used to create the {@link ConfigurablePropertyResolver}
+	 * instance used by the placeholder configurer.
+	 * @since 6.0.8
+	 */
+	protected ConfigurablePropertyResolver createPropertyResolver(MutablePropertySources propertySources) {
+		return new PropertySourcesPropertyResolver(propertySources);
 	}
 
 	/**

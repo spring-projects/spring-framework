@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,16 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.env.ConfigurablePropertyResolver;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.PropertySources;
+import org.springframework.core.env.PropertySourcesPropertyResolver;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.testfixture.env.MockPropertySource;
+import org.springframework.lang.Nullable;
 import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -428,6 +432,47 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setNullValue("");
 		ppc.postProcessBeanFactory(bf);
 		assertThat(bf.getBean(OptionalTestBean.class).getName()).isEqualTo(Optional.empty());
+	}
+
+	@Test
+	void withCustomPropertyResolver() {
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.registerBeanDefinition("testBean",
+				genericBeanDefinition(TestBean.class)
+						.addPropertyValue("name", "${my.name}")
+						.getBeanDefinition());
+
+		MockEnvironment env = new MockEnvironment();
+		env.setProperty("my.name", "myValue");
+
+		CustomPropertySourcesPlaceholderConfigurer configurer = new CustomPropertySourcesPlaceholderConfigurer();
+		configurer.setEnvironment(env);
+		configurer.setIgnoreUnresolvablePlaceholders(true);
+		configurer.postProcessBeanFactory(beanFactory);
+		assertThat(beanFactory.getBean(TestBean.class).getName()).isEqualTo("myValue-custom");
+	}
+
+	private static class CustomPropertySourcesPropertyResolver extends PropertySourcesPropertyResolver {
+
+		public CustomPropertySourcesPropertyResolver(PropertySources propertySources) {
+			super(propertySources);
+		}
+
+		@Override
+		@Nullable
+		public String getProperty(String key) {
+			return super.getProperty(key) + "-custom";
+		}
+
+	}
+
+	private static class CustomPropertySourcesPlaceholderConfigurer extends PropertySourcesPlaceholderConfigurer {
+
+		@Override
+		protected ConfigurablePropertyResolver createPropertyResolver(MutablePropertySources propertySources) {
+			return new CustomPropertySourcesPropertyResolver(propertySources);
+		}
+
 	}
 
 
