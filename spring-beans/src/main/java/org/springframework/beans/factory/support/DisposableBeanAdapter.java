@@ -115,7 +115,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					(bean instanceof AutoCloseable && CLOSE_METHOD_NAME.equals(destroyMethodNames[0]));
 			if (!this.invokeAutoCloseable) {
 				this.destroyMethodNames = destroyMethodNames;
-				Method[] destroyMethods = new Method[destroyMethodNames.length];
+				List<Method> destroyMethods = new ArrayList<>(destroyMethodNames.length);
 				for (int i = 0; i < destroyMethodNames.length; i++) {
 					String destroyMethodName = destroyMethodNames[i];
 					Method destroyMethod = determineDestroyMethod(destroyMethodName);
@@ -138,10 +138,10 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 							}
 						}
 						destroyMethod = ClassUtils.getInterfaceMethodIfPossible(destroyMethod, bean.getClass());
+						destroyMethods.add(destroyMethod);
 					}
-					destroyMethods[i] = destroyMethod;
 				}
-				this.destroyMethods = destroyMethods;
+				this.destroyMethods = destroyMethods.toArray(Method[]::new);
 			}
 		}
 
@@ -236,9 +236,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 		else if (this.destroyMethods != null) {
 			for (Method destroyMethod : this.destroyMethods) {
-				if (destroyMethod != null) {
-					invokeCustomDestroyMethod(destroyMethod);
-				}
+				invokeCustomDestroyMethod(destroyMethod);
 			}
 		}
 		else if (this.destroyMethodNames != null) {
