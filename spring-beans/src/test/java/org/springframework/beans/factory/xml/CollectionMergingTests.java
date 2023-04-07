@@ -53,7 +53,7 @@ public class CollectionMergingTests {
 	@Test
 	public void mergeList() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithList");
-		List list = bean.getSomeList();
+		List<?> list = bean.getSomeList();
 		assertThat(list).as("Incorrect size").hasSize(3);
 		assertThat(list.get(0)).isEqualTo("Rob Harrop");
 		assertThat(list.get(1)).isEqualTo("Rod Johnson");
@@ -66,15 +66,13 @@ public class CollectionMergingTests {
 		List<?> list = bean.getSomeList();
 		assertThat(list).isNotNull();
 		assertThat(list).hasSize(3);
-		assertThat(list.get(2)).isNotNull();
-		boolean condition = list.get(2) instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(list.get(2) instanceof TestBean).isTrue();
 	}
 
 	@Test
 	public void mergeSet() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithSet");
-		Set set = bean.getSomeSet();
+		Set<?> set = bean.getSomeSet();
 		assertThat(set).as("Incorrect size").hasSize(2);
 		assertThat(set.contains("Rob Harrop")).isTrue();
 		assertThat(set.contains("Sally Greenwood")).isTrue();
@@ -89,16 +87,14 @@ public class CollectionMergingTests {
 		Iterator it = set.iterator();
 		it.next();
 		Object o = it.next();
-		assertThat(o).isNotNull();
-		boolean condition = o instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(o instanceof TestBean).isTrue();
 		assertThat(((TestBean) o).getName()).isEqualTo("Sally");
 	}
 
 	@Test
 	public void mergeMap() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithMap");
-		Map map = bean.getSomeMap();
+		Map<?, ?> map = bean.getSomeMap();
 		assertThat(map).as("Incorrect size").hasSize(3);
 		assertThat(map.get("Rob")).isEqualTo("Sally");
 		assertThat(map.get("Rod")).isEqualTo("Kerry");
@@ -112,8 +108,7 @@ public class CollectionMergingTests {
 		assertThat(map).isNotNull();
 		assertThat(map).hasSize(2);
 		assertThat(map.get("Rob")).isNotNull();
-		boolean condition = map.get("Rob") instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(map.get("Rob") instanceof TestBean).isTrue();
 		assertThat(((TestBean) map.get("Rob")).getName()).isEqualTo("Sally");
 	}
 
@@ -130,7 +125,7 @@ public class CollectionMergingTests {
 	@Test
 	public void mergeListInConstructor() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithListInConstructor");
-		List list = bean.getSomeList();
+		List<?> list = bean.getSomeList();
 		assertThat(list).as("Incorrect size").hasSize(3);
 		assertThat(list.get(0)).isEqualTo("Rob Harrop");
 		assertThat(list.get(1)).isEqualTo("Rod Johnson");
@@ -144,14 +139,13 @@ public class CollectionMergingTests {
 		assertThat(list).isNotNull();
 		assertThat(list).hasSize(3);
 		assertThat(list.get(2)).isNotNull();
-		boolean condition = list.get(2) instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(list.get(2) instanceof TestBean).isTrue();
 	}
 
 	@Test
 	public void mergeSetInConstructor() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithSetInConstructor");
-		Set set = bean.getSomeSet();
+		Set<?> set = bean.getSomeSet();
 		assertThat(set).as("Incorrect size").hasSize(2);
 		assertThat(set.contains("Rob Harrop")).isTrue();
 		assertThat(set.contains("Sally Greenwood")).isTrue();
@@ -166,16 +160,14 @@ public class CollectionMergingTests {
 		Iterator it = set.iterator();
 		it.next();
 		Object o = it.next();
-		assertThat(o).isNotNull();
-		boolean condition = o instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(o instanceof TestBean).isTrue();
 		assertThat(((TestBean) o).getName()).isEqualTo("Sally");
 	}
 
 	@Test
 	public void mergeMapInConstructor() throws Exception {
 		TestBean bean = (TestBean) this.beanFactory.getBean("childWithMapInConstructor");
-		Map map = bean.getSomeMap();
+		Map<?, ?> map = bean.getSomeMap();
 		assertThat(map).as("Incorrect size").hasSize(3);
 		assertThat(map.get("Rob")).isEqualTo("Sally");
 		assertThat(map.get("Rod")).isEqualTo("Kerry");
@@ -188,9 +180,7 @@ public class CollectionMergingTests {
 		Map<?, ?> map = bean.getSomeMap();
 		assertThat(map).isNotNull();
 		assertThat(map).hasSize(2);
-		assertThat(map.get("Rob")).isNotNull();
-		boolean condition = map.get("Rob") instanceof TestBean;
-		assertThat(condition).isTrue();
+		assertThat(map.get("Rob") instanceof TestBean).isTrue();
 		assertThat(((TestBean) map.get("Rob")).getName()).isEqualTo("Sally");
 	}
 

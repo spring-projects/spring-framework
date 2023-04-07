@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 public class ManagedPropertiesTests {
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void mergeSunnyDay() {
 		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");
@@ -67,6 +68,7 @@ public class ManagedPropertiesTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void mergeEmptyChild() {
 		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");
@@ -78,6 +80,7 @@ public class ManagedPropertiesTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void mergeChildValuesOverrideTheParents() {
 		ManagedProperties parent = new ManagedProperties();
 		parent.setProperty("one", "one");

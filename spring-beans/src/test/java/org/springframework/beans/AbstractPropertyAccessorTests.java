@@ -236,6 +236,7 @@ abstract class AbstractPropertyAccessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void getPropertyIntermediateMapEntryIsNullWithAutoGrow() {
 		Foo target = new Foo();
 		AbstractPropertyAccessor accessor = createAccessor(target);

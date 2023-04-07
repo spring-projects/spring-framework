@@ -375,7 +375,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(response.getContentAsString()).isEmpty();
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@PathPatternsParameterizedTest
 	void sessionAttributeExposure(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(
@@ -405,7 +405,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@PathPatternsParameterizedTest
 	void sessionAttributeExposureWithInterface(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(MySessionAttributesControllerImpl.class, usePathPatterns, wac -> {
@@ -438,7 +438,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(((Map) session.getAttribute("model"))).containsKey("object2");
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@PathPatternsParameterizedTest
 	void parameterizedAnnotatedInterface(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(
@@ -470,7 +470,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		assertThat(((Map) session.getAttribute("model"))).containsKey("testBeanList");
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@PathPatternsParameterizedTest
 	void parameterizedAnnotatedInterfaceWithOverriddenMappingsInImpl(boolean usePathPatterns) throws Exception {
 		initDispatcherServlet(
