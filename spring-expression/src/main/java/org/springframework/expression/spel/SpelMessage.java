@@ -272,7 +272,11 @@ public enum SpelMessage {
 
 	/** @since 5.2.23 */
 	MAX_REGEX_LENGTH_EXCEEDED(Kind.ERROR, 1077,
-			"Regular expression contains too many characters, exceeding the threshold of ''{0}''");
+			"Regular expression contains too many characters, exceeding the threshold of ''{0}''"),
+
+	/** @since 5.2.24 */
+	MAX_CONCATENATED_STRING_LENGTH_EXCEEDED(Kind.ERROR, 1078,
+			"Concatenated string is too long, exceeding the threshold of ''{0}'' characters");
 
 
 	private final Kind kind;
