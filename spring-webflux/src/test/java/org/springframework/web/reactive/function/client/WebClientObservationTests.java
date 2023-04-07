@@ -18,6 +18,9 @@ package org.springframework.web.reactive.function.client;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalLong;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationHandler;
@@ -27,10 +30,13 @@ import io.micrometer.observation.tck.TestObservationRegistryAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,7 +65,10 @@ class WebClientObservationTests {
 	void setup() {
 		ClientResponse mockResponse = mock();
 		when(mockResponse.statusCode()).thenReturn(HttpStatus.OK);
+		when(mockResponse.headers()).thenReturn(new MockClientHeaders());
 		when(mockResponse.bodyToMono(Void.class)).thenReturn(Mono.empty());
+		when(mockResponse.bodyToFlux(String.class)).thenReturn(Flux.just("first", "second"));
+		when(mockResponse.releaseBody()).thenReturn(Mono.empty());
 		given(this.exchangeFunction.exchange(this.request.capture())).willReturn(Mono.just(mockResponse));
 		this.builder = WebClient.builder().baseUrl("/base").exchangeFunction(this.exchangeFunction).observationRegistry(this.observationRegistry);
 		this.observationRegistry.observationConfig().observationHandler(new HeaderInjectingHandler());
@@ -115,6 +124,16 @@ class WebClientObservationTests {
 	}
 
 	@Test
+	void recordsObservationForCancelledExchangeDuringResponse() {
+		StepVerifier.create(this.builder.build().get().uri("/path").retrieve().bodyToFlux(String.class).take(1))
+				.expectNextCount(1)
+				.expectComplete()
+				.verify(Duration.ofSeconds(5));
+		assertThatHttpObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
+				.hasLowCardinalityKeyValue("status", "200");
+	}
+
+	@Test
 	void setsCurrentObservationInReactorContext() {
 		ExchangeFilterFunction assertionFilter = new ExchangeFilterFunction() {
 			@Override
@@ -130,7 +149,7 @@ class WebClientObservationTests {
 		this.builder.filter(assertionFilter).build().get().uri("/resource/{id}", 42)
 				.retrieve().bodyToMono(Void.class)
 				.block(Duration.ofSeconds(10));
-			verifyAndGetRequest();
+		verifyAndGetRequest();
 	}
 
 	@Test
@@ -167,6 +186,31 @@ class WebClientObservationTests {
 		@Override
 		public boolean supportsContext(Observation.Context context) {
 			return context instanceof ClientRequestObservationContext;
+		}
+	}
+
+	static class MockClientHeaders implements ClientResponse.Headers {
+
+		private HttpHeaders headers = new HttpHeaders();
+
+		@Override
+		public OptionalLong contentLength() {
+			return OptionalLong.empty();
+		}
+
+		@Override
+		public Optional<MediaType> contentType() {
+			return Optional.empty();
+		}
+
+		@Override
+		public List<String> header(String headerName) {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public HttpHeaders asHttpHeaders() {
+			return this.headers;
 		}
 	}
 

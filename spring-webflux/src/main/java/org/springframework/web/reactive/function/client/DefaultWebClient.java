@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -37,6 +38,7 @@ import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccess
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 import reactor.util.context.Context;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -455,13 +457,16 @@ class DefaultWebClient implements WebClient {
 				if (this.contextModifier != null) {
 					responseMono = responseMono.contextWrite(this.contextModifier);
 				}
+				final AtomicBoolean responseReceived = new AtomicBoolean();
 				return responseMono
+						.doOnNext(response -> responseReceived.set(true))
 						.doOnError(observationContext::setError)
-						.doOnCancel(() -> {
-							observationContext.setAborted(true);
+						.doFinally(signalType -> {
+							if (signalType == SignalType.CANCEL && !responseReceived.get()) {
+								observationContext.setAborted(true);
+							}
 							observation.stop();
 						})
-						.doOnTerminate(observation::stop)
 						.contextWrite(context -> context.put(ObservationThreadLocalAccessor.KEY, observation));
 			});
 		}
