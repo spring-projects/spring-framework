@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -38,6 +40,7 @@ import org.springframework.expression.MethodResolver;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.TestPerson;
@@ -367,9 +370,26 @@ public class EvaluationTests extends AbstractExpressionTests {
 	}
 
 	// assignment
+
 	@Test
-	public void testAssignmentToVariables01() {
-		evaluate("#var1='value1'", "value1", String.class);
+	void assignmentToVariableWithStandardEvaluationContext() {
+		evaluate("#var1 = 'value1'", "value1", String.class);
+	}
+
+	@ParameterizedTest
+	@CsvSource(delimiterString = "->", value = {
+		"'#var1 = \"value1\"'    -> #var1",
+		"'true ? #myVar = 4 : 0' -> #myVar"
+	})
+	void assignmentToVariableWithSimpleEvaluationContext(String expression, String varName) {
+		EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+		Expression expr = parser.parseExpression(expression);
+		assertThatExceptionOfType(SpelEvaluationException.class)
+			.isThrownBy(() -> expr.getValue(context))
+			.satisfies(ex -> {
+				assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.VARIABLE_ASSIGNMENT_NOT_SUPPORTED);
+				assertThat(ex.getInserts()).as("inserts").containsExactly(varName);
+			});
 	}
 
 	@Test
