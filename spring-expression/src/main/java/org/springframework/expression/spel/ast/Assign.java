@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.expression.spel.ExpressionState;
  * <p>Example: 'someNumberProperty=42'
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0
  */
 public class Assign extends SpelNodeImpl {
@@ -38,9 +39,7 @@ public class Assign extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		TypedValue newValue = this.children[1].getValueInternal(state);
-		getChild(0).setValue(state, newValue.getValue());
-		return newValue;
+		return this.children[0].setValueInternal(state, () -> this.children[1].getValueInternal(state));
 	}
 
 	@Override
