@@ -81,6 +81,11 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 		return MIME_TYPES;
 	}
 
+	@Override
+	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
+		return supportsMediaType(mediaType) && MULTIPART_VALUE_TYPE.isAssignableFrom(elementType);
+	}
+
 	private boolean supportsMediaType(@Nullable MediaType mediaType) {
 		if (mediaType == null) {
 			return true;
@@ -92,12 +97,6 @@ public class MultipartHttpMessageReader extends LoggingCodecSupport
 		}
 		return false;
 	}
-
-	@Override
-	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		return supportsMediaType(mediaType) && MULTIPART_VALUE_TYPE.isAssignableFrom(elementType);
-	}
-
 
 	@Override
 	public Flux<MultiValueMap<String, Part>> read(ResolvableType elementType,

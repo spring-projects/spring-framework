@@ -97,12 +97,14 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
-		// Skip String: CharSequenceDecoder + "*/*" comes after
-		if (CharSequence.class.isAssignableFrom(elementType.toClass()) || !supportsMimeType(mimeType)) {
+		if (!supportsMimeType(mimeType)) {
 			return false;
 		}
 		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
 		if (mapper == null) {
+			return false;
+		}
+		if (CharSequence.class.isAssignableFrom(elementType.toClass())) {
 			return false;
 		}
 		JavaType javaType = mapper.constructType(elementType.getType());

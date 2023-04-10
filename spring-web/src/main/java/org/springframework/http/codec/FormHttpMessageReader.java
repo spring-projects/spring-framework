@@ -104,14 +104,17 @@ public class FormHttpMessageReader extends LoggingCodecSupport
 
 	@Override
 	public boolean canRead(ResolvableType elementType, @Nullable MediaType mediaType) {
-		if (mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType)) {
-			if (MultiValueMap.class.isAssignableFrom(elementType.toClass()) &&
-					elementType.hasUnresolvableGenerics()) {
-				return true;
-			}
-			return MULTIVALUE_STRINGS_TYPE.isAssignableFrom(elementType);
+		if (!supportsMediaType(mediaType)) {
+			return false;
 		}
-		return false;
+		if (MultiValueMap.class.isAssignableFrom(elementType.toClass()) && elementType.hasUnresolvableGenerics()) {
+			return true;
+		}
+		return MULTIVALUE_STRINGS_TYPE.isAssignableFrom(elementType);
+	}
+
+	private static boolean supportsMediaType(@Nullable MediaType mediaType) {
+		return (mediaType == null || MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType));
 	}
 
 	@Override

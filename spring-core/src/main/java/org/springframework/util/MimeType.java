@@ -269,7 +269,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 */
 	public boolean isWildcardSubtype() {
 		String subtype = getSubtype();
-		return WILDCARD_TYPE.equals(subtype) || subtype.startsWith("*+");
+		return (WILDCARD_TYPE.equals(subtype) || subtype.startsWith("*+"));
 	}
 
 	/**
