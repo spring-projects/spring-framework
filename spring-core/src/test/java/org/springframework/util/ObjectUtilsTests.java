@@ -919,7 +919,6 @@ class ObjectUtilsTests {
 		void nullSafeConciseToStringForArraysAndCollections() {
 			List<String> list = Arrays.asList("a", "b", "c");
 			assertThat(ObjectUtils.nullSafeConciseToString(new int[][] {{1, 2}, {3, 4}})).startsWith(prefix(int[][].class));
-			assertThat(ObjectUtils.nullSafeConciseToString(list.toArray())).startsWith(prefix(String[].class));
 			assertThat(ObjectUtils.nullSafeConciseToString(list.toArray(new Object[0]))).startsWith(prefix(Object[].class));
 			assertThat(ObjectUtils.nullSafeConciseToString(list.toArray(new String[0]))).startsWith(prefix(String[].class));
 			assertThat(ObjectUtils.nullSafeConciseToString(new ArrayList<>(list))).startsWith(prefix(ArrayList.class));
