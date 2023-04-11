@@ -201,16 +201,22 @@ public class EvaluationTests extends AbstractExpressionTests {
 
 	@Test
 	void matchesWithPatternLengthThreshold() {
-		String pattern = "(0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
-				"0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" +
-				"01234567890123456789012345678901234567890123456789|abc)";
-		assertThat(pattern).hasSize(256);
-		Expression expr = parser.parseExpression("'abc' matches '" + pattern + "'");
+		String pattern = String.format("^(%s|X)", repeat("12345", 199));
+		assertThat(pattern).hasSize(1000);
+		Expression expr = parser.parseExpression("'X' matches '" + pattern + "'");
 		assertThat(expr.getValue(context, Boolean.class)).isTrue();
 
 		pattern += "?";
-		assertThat(pattern).hasSize(257);
+		assertThat(pattern).hasSize(1001);
 		evaluateAndCheckError("'abc' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
+	}
+
+	private String repeat(String str, int count) {
+		String result = "";
+		for (int i = 0; i < count; i++) {
+			result += str;
+		}
+		return result;
 	}
 
 	// mixing operators
