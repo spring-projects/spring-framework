@@ -1702,13 +1702,13 @@ ternary operator.
 
 The Elvis operator is a shortening of the ternary operator syntax and is used in the
 https://www.groovy-lang.org/operators.html#_elvis_operator[Groovy] language.
-With the ternary operator syntax, you usually have to repeat a variable twice, as the
+With the ternary operator syntax, you usually have to repeat a variable multiple times, as the
 following example shows:
 
 [source,groovy,indent=0,subs="verbatim,quotes"]
 ----
 	String name = "Elvis Presley";
-	String displayName = (name != null ? name : "Unknown");
+	String displayName = (name != null && name.length() > 0) ? name : "Unknown";
 ----
 
 Instead, you can use the Elvis operator (named for the resemblance to Elvis' hair style).
@@ -1774,6 +1774,11 @@ example shows how to use the Elvis operator in a `@Value` expression:
 
 This will inject a system property `pop3.port` if it is defined or 25 if not.
 =====
+
+CAUTION: Beware that the behavior of the Elvis operator follows boolean semantics as opposed
+to object reference semantics. Thus, rather than returning the first operand if it is non-null,
+it returns the first operand if it evaluates to true based on the rules that comprise
+https://groovy-lang.org/semantics.html#the-groovy-truth[The Groovy Truth].
 
 
 [[expressions-operator-safe-navigation]]
