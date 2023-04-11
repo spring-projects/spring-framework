@@ -465,9 +465,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 
 		if (StompCommand.ERROR.equals(command) && getErrorHandler() != null) {
-			Message<byte[]> enrichedMessage =
-					MessageBuilder.createMessage((byte[]) message.getPayload(), accessor.getMessageHeaders());
-			Message<byte[]> errorMessage = getErrorHandler().handleErrorMessageToClient(enrichedMessage);
+			Message<byte[]> errorMessage = getErrorHandler().handleErrorMessageToClient(
+					MessageBuilder.createMessage((byte[]) message.getPayload(), accessor.getMessageHeaders()));
 			if (errorMessage != null) {
 				accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
 				Assert.state(accessor != null, "No StompHeaderAccessor");
