@@ -79,10 +79,12 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 		return new URI(resolveBaseUrl(request) + resolveRequestUri(request));
 	}
 
-	private static String resolveBaseUrl(HttpServerRequest request) {
+	private static URI resolveBaseUrl(HttpServerRequest request) throws URISyntaxException {
 		String scheme = request.scheme();
 		int port = request.hostPort();
-		return scheme + "://" + request.hostName() + (usePort(scheme, port) ? ":" + port : "");
+		return (usePort(scheme, port) ?
+				new URI(scheme, null, request.hostName(), port, null, null, null) :
+				new URI(scheme, request.hostName(), null, null));
 	}
 
 	private static boolean usePort(String scheme, int port) {
