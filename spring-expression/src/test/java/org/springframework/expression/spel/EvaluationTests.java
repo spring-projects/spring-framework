@@ -482,13 +482,13 @@ class EvaluationTests extends AbstractExpressionTests {
 
 		@Test
 		void matchesWithPatternLengthThreshold() {
-			String pattern = String.format("(%s|X)", repeat("1234", 255));
-			assertThat(pattern).hasSize(1024);
+			String pattern = String.format("^(%s|X)", repeat("12345", 199));
+			assertThat(pattern).hasSize(1000);
 			Expression expr = parser.parseExpression("'X' matches '" + pattern + "'");
 			assertThat(expr.getValue(context, Boolean.class)).isTrue();
 
 			pattern += "?";
-			assertThat(pattern).hasSize(1025);
+			assertThat(pattern).hasSize(1001);
 			evaluateAndCheckError("'abc' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
 		}
 
