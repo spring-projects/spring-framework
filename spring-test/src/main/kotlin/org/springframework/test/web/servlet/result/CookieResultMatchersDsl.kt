@@ -101,6 +101,7 @@ class CookieResultMatchersDsl internal constructor (private val actions: ResultA
 
 	/**
 	 * @see CookieResultMatchers.sameSite
+	 * @since 6.0.8
 	 */
 	fun sameSite(name: String, matcher: Matcher<String>) {
 		actions.andExpect(matchers.sameSite(name, matcher))
@@ -108,6 +109,7 @@ class CookieResultMatchersDsl internal constructor (private val actions: ResultA
 
 	/**
 	 * @see CookieResultMatchers.sameSite
+	 * @since 6.0.8
 	 */
 	fun sameSite(name: String, sameSite: String) {
 		actions.andExpect(matchers.sameSite(name, sameSite))
@@ -157,6 +159,7 @@ class CookieResultMatchersDsl internal constructor (private val actions: ResultA
 
 	/**
 	 * @see CookieResultMatchers.attribute
+	 * @since 6.0.8
 	 */
 	fun attribute(name: String, attributeName: String, matcher: Matcher<String>) {
 		actions.andExpect(matchers.attribute(name, attributeName, matcher))
@@ -164,6 +167,7 @@ class CookieResultMatchersDsl internal constructor (private val actions: ResultA
 
 	/**
 	 * @see CookieResultMatchers.attribute
+	 * @since 6.0.8
 	 */
 	fun attribute(name: String, attributeName: String, attributeValue: String) {
 		actions.andExpect(matchers.attribute(name, attributeName, attributeValue))
