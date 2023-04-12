@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProblemDetailTests {
 
 	@Test
-	void equalsAndHashCode() throws Exception {
+	void equalsAndHashCode() {
 		ProblemDetail pd1 = ProblemDetail.forStatus(500);
 		ProblemDetail pd2 = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 		ProblemDetail pd3 = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
@@ -50,12 +50,19 @@ class ProblemDetailTests {
 		assertThat(pd2).isNotEqualTo(pd4);
 		assertThat(pd1.hashCode()).isNotEqualTo(pd3.hashCode());
 		assertThat(pd1.hashCode()).isNotEqualTo(pd4.hashCode());
+	}
 
-		ObjectMapper om = new ObjectMapper();
-		ProblemDetail pd5 = om.readValue(om.writeValueAsBytes(pd1), ProblemDetail.class);
-		assertThat(pd1).isEqualTo(pd5);
-		assertThat(pd5).isEqualTo(pd1);
-		assertThat(pd1.hashCode()).isEqualTo(pd5.hashCode());
+	@Test // gh-30294
+	void equalsAndHashCodeWithDeserialization() throws Exception {
+		ProblemDetail originalDetail = ProblemDetail.forStatus(500);
+
+		ObjectMapper mapper = new ObjectMapper();
+		byte[] bytes = mapper.writeValueAsBytes(originalDetail);
+		ProblemDetail deserializedDetail = mapper.readValue(bytes, ProblemDetail.class);
+
+		assertThat(originalDetail).isEqualTo(deserializedDetail);
+		assertThat(deserializedDetail).isEqualTo(originalDetail);
+		assertThat(originalDetail.hashCode()).isEqualTo(deserializedDetail.hashCode());
 	}
 
 }
