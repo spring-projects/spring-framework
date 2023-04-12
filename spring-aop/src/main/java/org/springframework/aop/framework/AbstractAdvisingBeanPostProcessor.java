@@ -16,7 +16,9 @@
 
 package org.springframework.aop.framework;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.Advisor;
@@ -43,6 +45,8 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	protected boolean beforeExistingAdvisors = false;
 
 	private final Map<Class<?>, Boolean> eligibleBeans = new ConcurrentHashMap<>(256);
+
+	protected final Set<Object> resolvedBean = new HashSet<>(16);
 
 
 	/**
@@ -88,6 +92,10 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyProcessorSu
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (this.advisor == null || bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
+			return bean;
+		}
+
+		if(!this.resolvedBean.add(bean)){
 			return bean;
 		}
 
