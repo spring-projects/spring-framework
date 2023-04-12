@@ -58,7 +58,6 @@ public class WebClientResponseException extends WebClientException {
 	@Nullable
 	private transient final HttpRequest request;
 
-	@SuppressWarnings("MutableException")
 	@Nullable
 	private transient Function<ResolvableType, ?> bodyDecodeFunction;
 
