@@ -19,7 +19,6 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -100,7 +99,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 */
 	public void setSupportedMediaTypes(List<MediaType> supportedMediaTypes) {
 		Assert.notEmpty(supportedMediaTypes, "MediaType List must not be empty");
-		this.supportedMediaTypes = Collections.unmodifiableList(new ArrayList<>(supportedMediaTypes));
+		this.supportedMediaTypes = List.copyOf(supportedMediaTypes);
 	}
 
 	@Override
