@@ -17,7 +17,8 @@
 package org.springframework.build;
 
 import io.spring.javaformat.gradle.SpringJavaFormatPlugin;
-import io.spring.javaformat.gradle.tasks.Format;
+import io.spring.nohttp.gradle.NoHttpExtension;
+import io.spring.nohttp.gradle.NoHttpPlugin;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.DependencySet;
@@ -25,6 +26,9 @@ import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
 import org.gradle.api.plugins.quality.CheckstylePlugin;
+
+import java.nio.file.Path;
+import java.util.List;
 
 /**
  * {@link Plugin} that applies conventions for checkstyle.
@@ -38,6 +42,9 @@ public class CheckstyleConventions {
 	 */
 	public void apply(Project project) {
 		project.getPlugins().withType(JavaBasePlugin.class, (java) -> {
+			if (project.getRootProject() == project) {
+				configureNoHttpPlugin(project);
+			}
 			project.getPlugins().apply(CheckstylePlugin.class);
 			project.getTasks().withType(Checkstyle.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
 			CheckstyleExtension checkstyle = project.getExtensions().getByType(CheckstyleExtension.class);
@@ -47,6 +54,22 @@ public class CheckstyleConventions {
 			DependencySet checkstyleDependencies = project.getConfigurations().getByName("checkstyle").getDependencies();
 			checkstyleDependencies
 				.add(project.getDependencies().create("io.spring.javaformat:spring-javaformat-checkstyle:" + version));
+		});
+	}
+
+	private static void configureNoHttpPlugin(Project project) {
+		project.getPlugins().apply(NoHttpPlugin.class);
+		NoHttpExtension noHttp = project.getExtensions().getByType(NoHttpExtension.class);
+		noHttp.setAllowlistFile(project.file("src/nohttp/allowlist.lines"));
+		noHttp.getSource().exclude("**/test-output/**", "**/.settings/**",
+				"**/.classpath", "**/.project");
+		List<String> buildFolders = List.of("bin", "build", "out");
+		project.allprojects(subproject -> {
+			Path rootPath = project.getRootDir().toPath();
+			Path projectPath = rootPath.relativize(subproject.getProjectDir().toPath());
+			for (String buildFolder : buildFolders) {
+				noHttp.getSource().exclude(projectPath.resolve(buildFolder).resolve("**").toString());
+			}
 		});
 	}
 
