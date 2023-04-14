@@ -2,16 +2,14 @@
  * Apply the JVM Toolchain conventions
  * See https://docs.gradle.org/current/userguide/toolchains.html
  *
- * One can choose the toolchain to use for compiling the MAIN sources and/or compiling
- * and running the TEST sources. These options apply to Java, Kotlin and Groovy sources
- * when available.
- * {@code "./gradlew check -PmainToolchain=17 -PtestToolchain=20"} will use:
- * <ul>
- *     <li>a JDK17 toolchain for compiling the main SourceSet
- *     <li>a JDK20 toolchain for compiling and running the test SourceSet
- * </ul>
+ * One can choose the toolchain to use for compiling and running the TEST sources.
+ * These options apply to Java, Kotlin and Groovy test sources when available.
+ * {@code "./gradlew check -PtestToolchain=22"} will use a JDK22
+ * toolchain for compiling and running the test SourceSet.
  *
- * By default, the build will fall back to using the current JDK and 17 language level for all sourceSets.
+ * By default, the main build will fall back to using the a JDK 17
+ * toolchain (and 17 language level) for all main sourceSets.
+ * See {@link org.springframework.build.JavaConventions}.
  *
  * Gradle will automatically detect JDK distributions in well-known locations.
  * The following command will list the detected JDKs on the host.
@@ -23,52 +21,27 @@
  * {@code
  * $ echo JDK17
  * /opt/openjdk/java17
- * $ echo JDK20
- * /opt/openjdk/java20
- * $ ./gradlew -Porg.gradle.java.installations.fromEnv=JDK17,JDK20 check
+ * $ echo JDK22
+ * /opt/openjdk/java22
+ * $ ./gradlew -Porg.gradle.java.installations.fromEnv=JDK17,JDK22 check
  * }
  *
  * @author Brian Clozel
  * @author Sam Brannen
  */
 
-def mainToolchainConfigured() {
-	return project.hasProperty('mainToolchain') && project.mainToolchain
-}
-
 def testToolchainConfigured() {
 	return project.hasProperty('testToolchain') && project.testToolchain
-}
-
-def mainToolchainLanguageVersion() {
-	if (mainToolchainConfigured()) {
-		return JavaLanguageVersion.of(project.mainToolchain.toString())
-	}
-	return JavaLanguageVersion.of(17)
 }
 
 def testToolchainLanguageVersion() {
 	if (testToolchainConfigured()) {
 		return JavaLanguageVersion.of(project.testToolchain.toString())
 	}
-	return mainToolchainLanguageVersion()
+	return JavaLanguageVersion.of(17)
 }
 
-plugins.withType(JavaPlugin) {
-	// Configure the Java Toolchain if the 'mainToolchain' is configured
-	if (mainToolchainConfigured()) {
-		java {
-			toolchain {
-				languageVersion = mainToolchainLanguageVersion()
-			}
-		}
-	}
-	else {
-		// Fallback to JDK17
-		java {
-			sourceCompatibility = JavaVersion.VERSION_17
-		}
-	}
+plugins.withType(JavaPlugin).configureEach {
 	// Configure a specific Java Toolchain for compiling and running tests if the 'testToolchain' property is defined
 	if (testToolchainConfigured()) {
 		def testLanguageVersion = testToolchainLanguageVersion()
@@ -81,37 +54,13 @@ plugins.withType(JavaPlugin) {
 			javaLauncher = javaToolchains.launcherFor {
 				languageVersion = testLanguageVersion
 			}
-			jvmArgs += ['-Djava.locale.providers=COMPAT']
-		}
-	}
-}
-
-plugins.withType(GroovyPlugin) {
-	// Fallback to JDK17
-	if (!mainToolchainConfigured()) {
-		compileGroovy {
-			sourceCompatibility = JavaVersion.VERSION_17
-		}
-	}
-}
-
-pluginManager.withPlugin("kotlin") {
-	// Fallback to JDK17
-	compileKotlin {
-		kotlinOptions {
-			jvmTarget = '17'
-		}
-	}
-	compileTestKotlin {
-		kotlinOptions {
-			jvmTarget = '17'
 		}
 	}
 }
 
 // Configure the JMH plugin to use the toolchain for generating and running JMH bytecode
 pluginManager.withPlugin("me.champeau.jmh") {
-	if (mainToolchainConfigured() || testToolchainConfigured()) {
+	if (testToolchainConfigured()) {
 		tasks.matching { it.name.contains('jmh') && it.hasProperty('javaLauncher') }.configureEach {
 			javaLauncher.set(javaToolchains.launcherFor {
 				languageVersion.set(testToolchainLanguageVersion())
@@ -131,7 +80,7 @@ rootProject.ext {
 	resolvedTestToolchain = false
 }
 gradle.taskGraph.afterTask { Task task, TaskState state ->
-	if (mainToolchainConfigured() && !resolvedMainToolchain && task instanceof JavaCompile && task.javaCompiler.isPresent()) {
+	if (!resolvedMainToolchain && task instanceof JavaCompile && task.javaCompiler.isPresent()) {
 		def metadata = task.javaCompiler.get().metadata
 		task.project.buildScan.value('Main toolchain', "$metadata.vendor $metadata.languageVersion ($metadata.installationPath)")
 		resolvedMainToolchain = true
