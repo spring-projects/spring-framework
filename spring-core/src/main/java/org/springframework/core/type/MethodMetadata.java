@@ -29,7 +29,7 @@ package org.springframework.core.type;
  * @see AnnotationMetadata#getAnnotatedMethods
  * @see AnnotatedTypeMetadata
  */
-public interface MethodMetadata extends AnnotatedTypeMetadata {
+public interface MethodMetadata extends ExecutableTypeMetadata {
 
 	/**
 	 * Get the name of the underlying method.
@@ -48,12 +48,24 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 	String getReturnTypeName();
 
 	/**
+	 * Get the type of underlying method's return type.
+	 * @since 6.x
+	 */
+	TypeMetadata getReturnType();
+
+	/**
 	 * Determine whether the underlying method is effectively abstract:
 	 * i.e. marked as abstract in a class or declared as a regular,
 	 * non-default method in an interface.
 	 * @since 4.2
 	 */
 	boolean isAbstract();
+
+	/**
+	 * Determine whether the underlying method is marked as 'default'.
+	 * @since 6.x
+	 */
+	boolean isDefault();
 
 	/**
 	 * Determine whether the underlying method is declared as 'static'.

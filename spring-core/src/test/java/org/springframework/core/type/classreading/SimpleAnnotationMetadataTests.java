@@ -39,4 +39,6 @@ class SimpleAnnotationMetadataTests extends AbstractAnnotationMetadataTests {
 		}
 	}
 
+
+
 }

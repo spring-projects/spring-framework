@@ -38,7 +38,7 @@ import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
  * @see org.springframework.core.type.classreading.MetadataReader#getAnnotationMetadata()
  * @see AnnotatedTypeMetadata
  */
-public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata {
+public interface AnnotationMetadata extends ClassMetadata, BeanClassMetadata, AnnotatedTypeMetadata {
 
 	/**
 	 * Get the fully qualified class names of all annotation types that
@@ -123,6 +123,17 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
 	 */
 	Set<MethodMetadata> getDeclaredMethods();
 
+	/**
+	 * Get the constructors annotated with the provided annotation class name.
+	 * @since 6.x
+	 */
+	Set<FieldMetadata> getAnnotatedFields(String annotationName);
+
+	/**
+	 * Get the constructors annotated with the provided annotation class name.
+	 * @since 6.x
+	 */
+	Set<ConstructorMetadata> getAnnotatedConstructors(String annotationName);
 
 	/**
 	 * Factory method to create a new {@link AnnotationMetadata} instance

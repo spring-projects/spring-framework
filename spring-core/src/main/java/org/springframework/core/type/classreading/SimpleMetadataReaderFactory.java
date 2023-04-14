@@ -100,7 +100,7 @@ public class SimpleMetadataReaderFactory implements MetadataReaderFactory {
 
 	@Override
 	public MetadataReader getMetadataReader(Resource resource) throws IOException {
-		return new SimpleMetadataReader(resource, this.resourceLoader.getClassLoader());
+		return new SimpleMetadataReader(resource, this);
 	}
 
 }

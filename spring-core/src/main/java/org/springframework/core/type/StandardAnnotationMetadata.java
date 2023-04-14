@@ -124,6 +124,18 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 				getIntrospectedClass(), annotationName, classValuesAsString, false);
 	}
 
+	// TODO Unimplemented until we have code review feedback on the class reader implementation
+
+	@Override
+	public String getDeclaringClassName() {
+		return null;
+	}
+
+	@Override
+	public TypeMetadata getAnnotatedType() {
+		return null;
+	}
+
 	@Override
 	public boolean hasAnnotatedMethods(String annotationName) {
 		if (AnnotationUtils.isCandidateClass(getIntrospectedClass(), annotationName)) {
@@ -163,7 +175,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return result;
 	}
 
-
 	private static boolean isAnnotatedMethod(Method method, String annotationName) {
 		return !method.isBridge() && method.getAnnotations().length > 0 &&
 				AnnotatedElementUtils.isAnnotated(method, annotationName);
@@ -171,6 +182,16 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	static AnnotationMetadata from(Class<?> introspectedClass) {
 		return new StandardAnnotationMetadata(introspectedClass, true);
+	}
+
+	@Override
+	public Set<FieldMetadata> getAnnotatedFields(String annotationName) {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public Set<ConstructorMetadata> getAnnotatedConstructors(String annotationName) {
+		throw new UnsupportedOperationException("Unimplemented");
 	}
 
 }

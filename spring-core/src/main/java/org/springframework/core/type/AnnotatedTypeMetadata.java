@@ -146,4 +146,17 @@ public interface AnnotatedTypeMetadata {
 						map.isEmpty() ? null : map, adaptations));
 	}
 
+	/**
+	 * Determine the name of the declaring class.
+	 * @since 6.x
+	 */
+	String getDeclaringClassName();
+
+	/**
+	 * Convenience method to get the {@link TypeMetadata} for the annotated type. For classes, their own type,
+	 * methods the return type, and the declared type for fields and parameters.
+	 * @since 6.x
+	 */
+	TypeMetadata getAnnotatedType();
+
 }

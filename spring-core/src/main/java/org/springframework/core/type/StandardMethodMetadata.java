@@ -18,6 +18,7 @@ package org.springframework.core.type;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -125,7 +126,8 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return !isStatic() && !isFinal() && !isPrivate();
 	}
 
-	private boolean isPrivate() {
+	@Override
+	public boolean isPrivate() {
 		return Modifier.isPrivate(this.introspectedMethod.getModifiers());
 	}
 
@@ -163,6 +165,33 @@ public class StandardMethodMetadata implements MethodMetadata {
 	@Override
 	public String toString() {
 		return this.introspectedMethod.toString();
+	}
+
+	// TODO Unimplemented until we have code review feedback on the class reader implementation
+
+	@Override
+	public List<ParameterMetadata> getParameters() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public List<ParameterMetadata> getAnnotatedParameters(String annotationName) {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public TypeMetadata getAnnotatedType() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public TypeMetadata getReturnType() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isDefault() {
+		throw new UnsupportedOperationException("Unimplemented");
 	}
 
 }

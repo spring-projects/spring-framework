@@ -16,9 +16,15 @@
 
 package org.springframework.core.type.classreading;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.asm.Opcodes;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.core.type.ParameterMetadata;
+import org.springframework.core.type.TypeMetadata;
 import org.springframework.lang.Nullable;
 
 /**
@@ -36,25 +42,27 @@ final class SimpleMethodMetadata implements MethodMetadata {
 
 	private final String declaringClassName;
 
-	private final String returnTypeName;
+	private final int declaringClassAccess;
 
-	// The source implements equals(), hashCode(), and toString() for the underlying method.
+	private final TypeMetadata returnType;
+
 	private final Object source;
 
 	private final MergedAnnotations annotations;
 
+	private final List<ParameterMetadata> methodArguments;
 
-	SimpleMethodMetadata(String methodName, int access, String declaringClassName,
-			String returnTypeName, Object source, MergedAnnotations annotations) {
-
+	SimpleMethodMetadata(String declaringClassName, int declaringClassAccess, String methodName, int access,
+		TypeMetadata returnType, Object source, MergedAnnotations annotations, List<ParameterMetadata> methodArguments) {
+		this.declaringClassName = declaringClassName;
+		this.declaringClassAccess = declaringClassAccess;
 		this.methodName = methodName;
 		this.access = access;
-		this.declaringClassName = declaringClassName;
-		this.returnTypeName = returnTypeName;
+		this.returnType = returnType;
 		this.source = source;
 		this.annotations = annotations;
+		this.methodArguments = Collections.unmodifiableList(methodArguments);
 	}
-
 
 	@Override
 	public String getMethodName() {
@@ -67,8 +75,18 @@ final class SimpleMethodMetadata implements MethodMetadata {
 	}
 
 	@Override
+	public TypeMetadata getAnnotatedType() {
+		return this.returnType;
+	}
+
+	@Override
+	public TypeMetadata getReturnType() {
+		return this.returnType;
+	}
+
+	@Override
 	public String getReturnTypeName() {
-		return this.returnTypeName;
+		return this.returnType.getTypeName();
 	}
 
 	@Override
@@ -87,12 +105,21 @@ final class SimpleMethodMetadata implements MethodMetadata {
 	}
 
 	@Override
-	public boolean isOverridable() {
-		return !isStatic() && !isFinal() && !isPrivate();
+	public boolean isPrivate() {
+		return (this.access & Opcodes.ACC_PRIVATE) != 0;
 	}
 
-	private boolean isPrivate() {
-		return (this.access & Opcodes.ACC_PRIVATE) != 0;
+	@Override
+	public boolean isDefault() {
+		// Default methods are public non-abstract instance methods declared in an
+		// interface.
+		return ((this.access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC)) == Opcodes.ACC_PUBLIC)
+				&& (this.declaringClassAccess & Opcodes.ACC_INTERFACE) != 0;
+	}
+
+	@Override
+	public boolean isOverridable() {
+		return !isStatic() && !isFinal() && !isPrivate();
 	}
 
 	@Override
@@ -101,8 +128,25 @@ final class SimpleMethodMetadata implements MethodMetadata {
 	}
 
 	@Override
+	public List<ParameterMetadata> getParameters() {
+		return this.methodArguments;
+	}
+
+	@Override
+	public List<ParameterMetadata> getAnnotatedParameters(String annotationName) {
+		List<ParameterMetadata> result = new ArrayList<>(this.methodArguments.size());
+		for (ParameterMetadata metadata : this.methodArguments) {
+			if (metadata.isAnnotated(annotationName)) {
+				result.add(metadata);
+			}
+		}
+		return Collections.unmodifiableList(result);
+	}
+
+	@Override
 	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof SimpleMethodMetadata that && this.source.equals(that.source)));
+		return ((this == obj) || ((obj instanceof SimpleMethodMetadata)
+				&& this.source.equals(((SimpleMethodMetadata) obj).source)));
 	}
 
 	@Override

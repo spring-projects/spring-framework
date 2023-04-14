@@ -141,9 +141,10 @@ class AnnotationMetadataTests {
 		assertThat(metadata.isConcrete()).isFalse();
 		assertThat(metadata.hasSuperClass()).isFalse();
 		assertThat(metadata.getSuperClassName()).isNull();
-		assertThat(metadata.getInterfaceNames()).hasSize(2);
+		assertThat(metadata.getInterfaceNames()).hasSize(3);
 		assertThat(metadata.getInterfaceNames()[0]).isEqualTo(ClassMetadata.class.getName());
-		assertThat(metadata.getInterfaceNames()[1]).isEqualTo(AnnotatedTypeMetadata.class.getName());
+		assertThat(metadata.getInterfaceNames()[1]).isEqualTo(BeanClassMetadata.class.getName());
+		assertThat(metadata.getInterfaceNames()[2]).isEqualTo(AnnotatedTypeMetadata.class.getName());
 		assertThat(metadata.getAnnotationTypes()).isEmpty();
 	}
 
@@ -404,7 +405,6 @@ class AnnotationMetadataTests {
 			assertThat(methodMetadata.isAnnotated(TestAutowired.class.getName())).isTrue();
 		}
 	}
-
 
 	// -------------------------------------------------------------------------
 

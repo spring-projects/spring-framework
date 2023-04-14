@@ -18,6 +18,7 @@ package org.springframework.core.type;
 
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -31,7 +32,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 2.5
  */
-public class StandardClassMetadata implements ClassMetadata {
+public class StandardClassMetadata implements ClassMetadata, BeanClassMetadata {
 
 	private final Class<?> introspectedClass;
 
@@ -134,6 +135,98 @@ public class StandardClassMetadata implements ClassMetadata {
 	@Override
 	public String toString() {
 		return getClassName();
+	}
+
+	// TODO Unimplemented until we have code review feedback on the class reader implementation
+
+	@Override
+	public ClassMetadata getEnclosingClassMetadata() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public ClassMetadata getSuperClassMetadata() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public Set<ClassMetadata> getInterfaceClassMetadata() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public Set<ClassMetadata> getMemberClassMetadata() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isEnum() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isPrimitive() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isSynthetic() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public int getModifiers() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public Set<MethodMetadata> getDeclaredMethods() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public FieldMetadata getDeclaredField(String name) {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public Set<FieldMetadata> getDeclaredFields() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public Set<ConstructorMetadata> getDeclaredConstructors() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isType(Class<?> clazz) {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isType(String className) {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isAssignableTo(Class<?> clazz) {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isAssignableTo(String className) {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public boolean isBeanFactory() {
+		throw new UnsupportedOperationException("Unimplemented");
+	}
+
+	@Override
+	public TypeMetadata getBeanFactoryTypeMetadata() {
+		throw new UnsupportedOperationException("Unimplemented");
 	}
 
 }

@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
@@ -34,14 +37,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link AnnotationVisitor} that can be used to construct a
- * {@link MergedAnnotation}.
+ * {@link AnnotationVisitor} that can be used to construct a {@link MergedAnnotation}.
  *
  * @author Phillip Webb
  * @since 5.2
  * @param <A> the annotation type
  */
 class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVisitor {
+
+	private final Log logger = LogFactory.getLog(MergedAnnotationReadingVisitor.class);
 
 	@Nullable
 	private final ClassLoader classLoader;
@@ -55,7 +59,6 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	private final Map<String, Object> attributes = new LinkedHashMap<>(4);
 
-
 	public MergedAnnotationReadingVisitor(@Nullable ClassLoader classLoader, @Nullable Object source,
 			Class<A> annotationType, Consumer<MergedAnnotation<A>> consumer) {
 
@@ -66,11 +69,10 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 		this.consumer = consumer;
 	}
 
-
 	@Override
 	public void visit(String name, Object value) {
-		if (value instanceof Type type) {
-			value = type.getClassName();
+		if (value instanceof Type) {
+			value = ((Type) value).getClassName();
 		}
 		this.attributes.put(name, value);
 	}
@@ -93,11 +95,16 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@Override
 	public void visitEnd() {
-		Map<String, Object> compactedAttributes =
-				(this.attributes.size() == 0 ? Collections.emptyMap() : this.attributes);
-		MergedAnnotation<A> annotation = MergedAnnotation.of(
-				this.classLoader, this.source, this.annotationType, compactedAttributes);
-		this.consumer.accept(annotation);
+		Map<String, Object> compactedAttributes = (this.attributes.size() == 0 ? Collections.emptyMap()
+				: this.attributes);
+		try {
+			MergedAnnotation<A> annotation = MergedAnnotation.of(this.classLoader, null, this.annotationType,
+					compactedAttributes);
+			this.consumer.accept(annotation);
+		}
+		catch (NoClassDefFoundError ex) {
+			logger.debug("Could not load dependency of " + this.annotationType, ex);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -109,8 +116,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	private <T extends Annotation> AnnotationVisitor visitAnnotation(
-			String descriptor, Consumer<MergedAnnotation<T>> consumer) {
+	private <T extends Annotation> AnnotationVisitor visitAnnotation(String descriptor,
+			Consumer<MergedAnnotation<T>> consumer) {
 
 		String className = Type.getType(descriptor).getClassName();
 		if (AnnotationFilter.PLAIN.matches(className)) {
@@ -122,9 +129,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 	@SuppressWarnings("unchecked")
 	@Nullable
-	static <A extends Annotation> AnnotationVisitor get(@Nullable ClassLoader classLoader,
-			@Nullable Object source, String descriptor, boolean visible,
-			Consumer<MergedAnnotation<A>> consumer) {
+	static <A extends Annotation> AnnotationVisitor get(@Nullable ClassLoader classLoader, @Nullable Object source,
+			String descriptor, boolean visible, Consumer<MergedAnnotation<A>> consumer) {
 
 		if (!visible) {
 			return null;
@@ -144,7 +150,6 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 		}
 	}
 
-
 	/**
 	 * {@link AnnotationVisitor} to deal with array attributes.
 	 */
@@ -161,8 +166,8 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 
 		@Override
 		public void visit(String name, Object value) {
-			if (value instanceof Type type) {
-				value = type.getClassName();
+			if (value instanceof Type) {
+				value = ((Type) value).getClassName();
 			}
 			this.elements.add(value);
 		}
@@ -190,11 +195,12 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 				return Object.class;
 			}
 			Object firstElement = this.elements.get(0);
-			if (firstElement instanceof Enum<?> enumeration) {
-				return enumeration.getDeclaringClass();
+			if (firstElement instanceof Enum<?>) {
+				return ((Enum<?>) firstElement).getDeclaringClass();
 			}
 			return firstElement.getClass();
 		}
+
 	}
 
 }

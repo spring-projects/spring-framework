@@ -14,22 +14,42 @@
  * limitations under the License.
  */
 
+/*
+ * Copyright 2002-2023 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.core.type.classreading;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.SpringAsmInfo;
-import org.springframework.asm.Type;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.type.ParameterMetadata;
+import org.springframework.core.type.TypeMetadata;
 import org.springframework.lang.Nullable;
 
 /**
- * ASM method visitor that creates {@link SimpleMethodMetadata}.
+ * ASM method visitor that creates {@link SimpleAdditionalMethodMetadata}.
  *
  * @author Phillip Webb
  * @author Sam Brannen
@@ -41,124 +61,91 @@ final class SimpleMethodMetadataReadingVisitor extends MethodVisitor {
 	@Nullable
 	private final ClassLoader classLoader;
 
+	private final Object source;
+
+	private final List<MergedAnnotation<?>> annotations = new ArrayList<>(4);
+
+	private final Map<Integer, List<MergedAnnotation<?>>> parameterAnnotations = new HashMap<>();
+
 	private final String declaringClassName;
+
+	private final int delcaringClassAccess;
 
 	private final int access;
 
 	private final String methodName;
 
-	private final String descriptor;
+	private final List<TypeMetadata> parameterTypes;
 
-	private final List<MergedAnnotation<?>> annotations = new ArrayList<>(4);
+	private final TypeMetadata returnType;
 
-	private final Consumer<SimpleMethodMetadata> consumer;
+	private final Object value;
 
-	@Nullable
-	private Source source;
+	private final Consumer<SimpleMethodMetadata> methodConsumer;
 
+	private final Consumer<SimpleConstructorMetadata> constructorConsumer;
 
-	SimpleMethodMetadataReadingVisitor(@Nullable ClassLoader classLoader, String declaringClassName,
-			int access, String methodName, String descriptor, Consumer<SimpleMethodMetadata> consumer) {
+	SimpleMethodMetadataReadingVisitor(@Nullable ClassLoader classLoader, SimpleSource source,
+			String declaringClassName, int declaringClassAccess, int access, String methodName,
+			List<TypeMetadata> parameterTypes, TypeMetadata returnType, Object value,
+			Consumer<SimpleMethodMetadata> methodConsumer,
+			Consumer<SimpleConstructorMetadata> constructorConsumer) {
 
 		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
+		this.source = source;
 		this.declaringClassName = declaringClassName;
+		this.delcaringClassAccess = declaringClassAccess;
 		this.access = access;
 		this.methodName = methodName;
-		this.descriptor = descriptor;
-		this.consumer = consumer;
+		this.parameterTypes = parameterTypes;
+		this.returnType = returnType;
+		this.value = value;
+		this.methodConsumer = methodConsumer;
+		this.constructorConsumer = constructorConsumer;
 	}
-
 
 	@Override
 	@Nullable
 	public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-		return MergedAnnotationReadingVisitor.get(this.classLoader, getSource(),
-				descriptor, visible, this.annotations::add);
+		return MergedAnnotationReadingVisitor.get(this.classLoader, this.source, descriptor, visible, this.annotations::add);
+	}
+
+	@Override
+	@Nullable
+	public AnnotationVisitor visitParameterAnnotation(int parameter, String descriptor, boolean visible) {
+		List<MergedAnnotation<?>> parameterAnnotations = this.parameterAnnotations.computeIfAbsent(parameter,
+				k -> new ArrayList<>());
+		return MergedAnnotationReadingVisitor.get(this.classLoader, this.source, descriptor, visible, parameterAnnotations::add);
 	}
 
 	@Override
 	public void visitEnd() {
-		String returnTypeName = Type.getReturnType(this.descriptor).getClassName();
+		String declaringClassName = this.declaringClassName;
+		String methodName = this.methodName;
+		int access = this.access;
+		TypeMetadata returnType = this.returnType;
+
+		List<ParameterMetadata> methodParameters = new ArrayList<>(this.parameterTypes.size());
+		for (int i = 0; i < this.parameterTypes.size(); i++) {
+			TypeMetadata parameterType = this.parameterTypes.get(i);
+			MergedAnnotations annotations = MergedAnnotations
+					.of(this.parameterAnnotations.getOrDefault(i, Collections.emptyList()));
+			ParameterMetadata metadata = new SimpleParameterMetadata(declaringClassName, methodName, parameterType, i,
+					this.source, annotations);
+			methodParameters.add(metadata);
+		}
+
 		MergedAnnotations annotations = MergedAnnotations.of(this.annotations);
-		SimpleMethodMetadata metadata = new SimpleMethodMetadata(this.methodName, this.access,
-				this.declaringClassName, returnTypeName, getSource(), annotations);
-		this.consumer.accept(metadata);
-	}
-
-	private Object getSource() {
-		Source source = this.source;
-		if (source == null) {
-			source = new Source(this.declaringClassName, this.methodName, this.descriptor);
-			this.source = source;
+		if (methodName.equals("<init>")) {
+			SimpleConstructorMetadata metadata = new SimpleConstructorMetadata(access, declaringClassName, this.source,
+					annotations, methodParameters);
+			this.constructorConsumer.accept(metadata);
 		}
-		return source;
-	}
-
-
-	/**
-	 * {@link MergedAnnotation} source.
-	 */
-	static final class Source {
-
-		private final String declaringClassName;
-
-		private final String methodName;
-
-		private final String descriptor;
-
-		@Nullable
-		private String toStringValue;
-
-		Source(String declaringClassName, String methodName, String descriptor) {
-			this.declaringClassName = declaringClassName;
-			this.methodName = methodName;
-			this.descriptor = descriptor;
-		}
-
-		@Override
-		public int hashCode() {
-			int result = 1;
-			result = 31 * result + this.declaringClassName.hashCode();
-			result = 31 * result + this.methodName.hashCode();
-			result = 31 * result + this.descriptor.hashCode();
-			return result;
-		}
-
-		@Override
-		public boolean equals(@Nullable Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (other == null || getClass() != other.getClass()) {
-				return false;
-			}
-			Source otherSource = (Source) other;
-			return (this.declaringClassName.equals(otherSource.declaringClassName) &&
-					this.methodName.equals(otherSource.methodName) && this.descriptor.equals(otherSource.descriptor));
-		}
-
-		@Override
-		public String toString() {
-			String value = this.toStringValue;
-			if (value == null) {
-				StringBuilder builder = new StringBuilder();
-				builder.append(this.declaringClassName);
-				builder.append('.');
-				builder.append(this.methodName);
-				Type[] argumentTypes = Type.getArgumentTypes(this.descriptor);
-				builder.append('(');
-				for (int i = 0; i < argumentTypes.length; i++) {
-					if (i != 0) {
-						builder.append(',');
-					}
-					builder.append(argumentTypes[i].getClassName());
-				}
-				builder.append(')');
-				value = builder.toString();
-				this.toStringValue = value;
-			}
-			return value;
+		else {
+			SimpleMethodMetadata metadata = new SimpleMethodMetadata(declaringClassName,
+					this.delcaringClassAccess, methodName, access, returnType, this.source, annotations, methodParameters);
+			this.methodConsumer.accept(metadata);
 		}
 	}
 

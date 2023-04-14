@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,29 @@
 package org.springframework.core.type.classreading;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.asm.AnnotationVisitor;
 import org.springframework.asm.ClassVisitor;
+import org.springframework.asm.FieldVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
 import org.springframework.asm.SpringAsmInfo;
+import org.springframework.asm.signature.SignatureReader;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.type.ConstructorMetadata;
+import org.springframework.core.type.FieldMetadata;
 import org.springframework.core.type.MethodMetadata;
+import org.springframework.core.type.TypeMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * ASM class visitor that creates {@link SimpleAnnotationMetadata}.
+ * ASM class visitor that creates {@link SimpleAdditionalAnnotationMetadata}.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
@@ -42,6 +49,8 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
 	@Nullable
 	private final ClassLoader classLoader;
+
+	private final MetadataReaderFactory metadataReaderFactory;
 
 	private String className = "";
 
@@ -61,25 +70,27 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 
 	private final Set<MergedAnnotation<?>> annotations = new LinkedHashSet<>(4);
 
+	private final Set<FieldMetadata> declaredFields = new LinkedHashSet<>(4);
+
+	private final Set<ConstructorMetadata> declaredConstructors = new LinkedHashSet<>(4);
+
 	private final Set<MethodMetadata> declaredMethods = new LinkedHashSet<>(4);
+
+	@Nullable
+	private SimpleSource classSource;
 
 	@Nullable
 	private SimpleAnnotationMetadata metadata;
 
-	@Nullable
-	private Source source;
-
-
-	SimpleAnnotationMetadataReadingVisitor(@Nullable ClassLoader classLoader) {
+	SimpleAnnotationMetadataReadingVisitor(SimpleMetadataReaderFactory metadataReaderFactory) {
 		super(SpringAsmInfo.ASM_VERSION);
-		this.classLoader = classLoader;
+		this.metadataReaderFactory = metadataReaderFactory;
+		this.classLoader = metadataReaderFactory.getResourceLoader().getClassLoader();
 	}
 
-
 	@Override
-	public void visit(int version, int access, String name, String signature,
-			@Nullable String supername, String[] interfaces) {
-
+	public void visit(int version, int access, String name, String signature, @Nullable String supername,
+			String[] interfaces) {
 		this.className = toClassName(name);
 		this.access = access;
 		if (supername != null && !isInterface(access)) {
@@ -88,6 +99,8 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 		for (String element : interfaces) {
 			this.interfaceNames.add(toClassName(element));
 		}
+
+		this.classSource = new SimpleSource(this.className);
 	}
 
 	@Override
@@ -113,43 +126,45 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 	@Override
 	@Nullable
 	public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-		return MergedAnnotationReadingVisitor.get(this.classLoader, getSource(),
-				descriptor, visible, this.annotations::add);
+		return MergedAnnotationReadingVisitor.get(this.classLoader, this.classSource, descriptor, visible, this.annotations::add);
+	}
+
+	@Override
+	public FieldVisitor visitField(int access, String name, String descriptor, @Nullable String signature,
+			Object value) {
+		SimpleSource source = new SimpleSource(this.className, name, descriptor);
+		TypeMetadata fieldType = readTypeSignature(descriptor, signature);
+		return new SimpleFieldMetadataReadingVisitor(this.classLoader, source, this.className, access, name, fieldType,
+				value, this.declaredFields::add);
 	}
 
 	@Override
 	@Nullable
-	public MethodVisitor visitMethod(
-			int access, String name, String descriptor, String signature, String[] exceptions) {
-
-		// Skip bridge methods and constructors - we're only interested in original user methods.
-		if (isBridge(access) || name.equals("<init>")) {
+	public MethodVisitor visitMethod(int access, String name, String descriptor, @Nullable String signature,
+			String[] exceptions) {
+		// We're only interested in user defined methods
+		if (isBridge(access)) {
 			return null;
 		}
-		return new SimpleMethodMetadataReadingVisitor(this.classLoader, this.className,
-				access, name, descriptor, this.declaredMethods::add);
+		SimpleSource source = new SimpleSource(this.className, name, descriptor);
+		SimpleMethodSignature methodSignature = readMethodSignature(descriptor, signature);
+		return new SimpleMethodMetadataReadingVisitor(this.classLoader, source, this.className, this.access, access, name,
+				methodSignature.getParameterTypes(), methodSignature.getReturnType(), exceptions,
+				this.declaredMethods::add, this.declaredConstructors::add);
 	}
 
 	@Override
 	public void visitEnd() {
 		MergedAnnotations annotations = MergedAnnotations.of(this.annotations);
-		this.metadata = new SimpleAnnotationMetadata(this.className, this.access,
-				this.enclosingClassName, this.superClassName, this.independentInnerClass,
-				this.interfaceNames, this.memberClassNames, this.declaredMethods, annotations);
+		this.metadata = new SimpleAnnotationMetadata(this.className, this.access, this.enclosingClassName,
+				this.superClassName, this.independentInnerClass, this.interfaceNames, this.memberClassNames,
+				this.declaredFields, this.declaredConstructors, this.declaredMethods, annotations,
+				this.metadataReaderFactory);
 	}
 
 	public SimpleAnnotationMetadata getMetadata() {
 		Assert.state(this.metadata != null, "AnnotationMetadata not initialized");
 		return this.metadata;
-	}
-
-	private Source getSource() {
-		Source source = this.source;
-		if (source == null) {
-			source = new Source(this.className);
-			this.source = source;
-		}
-		return source;
 	}
 
 	private String toClassName(String name) {
@@ -164,38 +179,18 @@ final class SimpleAnnotationMetadataReadingVisitor extends ClassVisitor {
 		return (access & Opcodes.ACC_INTERFACE) != 0;
 	}
 
-	/**
-	 * {@link MergedAnnotation} source.
-	 */
-	private static final class Source {
+	private TypeMetadata readTypeSignature(String descriptor, @Nullable String signature) {
+		AtomicReference<TypeMetadata> ref = new AtomicReference<>();
+		SignatureReader reader = new SignatureReader(signature == null ? descriptor : signature);
+		reader.accept(new SimpleTypeMetadataSignatureVisitor(descriptor, this.metadataReaderFactory, ref::set));
+		return Objects.requireNonNull(ref.get(), "Consumer did not return a value");
+	}
 
-		private final String className;
-
-		Source(String className) {
-			this.className = className;
-		}
-
-		@Override
-		public int hashCode() {
-			return this.className.hashCode();
-		}
-
-		@Override
-		public boolean equals(@Nullable Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null || getClass() != obj.getClass()) {
-				return false;
-			}
-			return this.className.equals(((Source) obj).className);
-		}
-
-		@Override
-		public String toString() {
-			return this.className;
-		}
-
+	private SimpleMethodSignature readMethodSignature(String descriptor, @Nullable String signature) {
+		AtomicReference<SimpleMethodSignature> ref = new AtomicReference<>();
+		SignatureReader reader = new SignatureReader(signature == null ? descriptor : signature);
+		reader.accept(new SimpleMethodSignatureVisitor(this.metadataReaderFactory, ref::set));
+		return Objects.requireNonNull(ref.get(), "Consumer did not return a value");
 	}
 
 }

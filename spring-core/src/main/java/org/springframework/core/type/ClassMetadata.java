@@ -16,6 +16,8 @@
 
 package org.springframework.core.type;
 
+import java.util.Set;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -91,10 +93,23 @@ public interface ClassMetadata {
 
 	/**
 	 * Return whether the underlying class has a superclass.
+	 *
+	 * Note this differs from {@link Class#getSuperclass()}, and considers {@link Object} a super class.
 	 */
 	default boolean hasSuperClass() {
 		return (getSuperClassName() != null);
 	}
+
+	/**
+	 * Return the {@link ClassMetadata} for the enclosing class.
+	 * @throws ClassMetadataNotFoundException if class metadata for the super class could
+	 * not be loaded.
+	 * @returns the {@link ClassMetadata} for the enclosing class. Null if the
+	 * class isn't enclosed
+	 * @since 6.x
+	 */
+	@Nullable
+	ClassMetadata getEnclosingClassMetadata();
 
 	/**
 	 * Return the name of the superclass of the underlying class,
@@ -104,10 +119,30 @@ public interface ClassMetadata {
 	String getSuperClassName();
 
 	/**
+	 * Return the {@link ClassMetadata} for the super class.
+	 * @throws ClassMetadataNotFoundException if class metadata for the super class could
+	 * not be loaded.
+	 * @since 6.x
+	 */
+	@Nullable
+	ClassMetadata getSuperClassMetadata();
+
+	/**
 	 * Return the names of all interfaces that the underlying class
 	 * implements, or an empty array if there are none.
 	 */
 	String[] getInterfaceNames();
+
+	/**
+	 * Return the {@link ClassMetadata} of the interfaces this class directly
+	 * implements.
+	 * @return a set of {@link ClassMetadata} containing the interface classes
+	 * for the class
+	 * @throws ClassMetadataNotFoundException if class metadata for the interface classes
+	 * coudl not be loaded.
+	 * @since 6.x
+	 */
+	Set<ClassMetadata> getInterfaceClassMetadata();
 
 	/**
 	 * Return the names of all classes declared as members of the class represented by
@@ -118,5 +153,104 @@ public interface ClassMetadata {
 	 * @since 3.1
 	 */
 	String[] getMemberClassNames();
+
+	/**
+	 * Return the {@link ClassMetadata} of the member clases of this class.
+	 * @return a set of {@link ClassMetadata} containing the interface classes
+	 * for the class
+	 * @throws ClassMetadataNotFoundException if class metadata for the interface classes
+	 * coudl not be loaded.
+	 * @since 6.x
+	 */
+	Set<ClassMetadata> getMemberClassMetadata();
+
+	/**
+	 * Satisfies {@link Class#isEnum()}.
+	 * @since 6.x
+	 */
+	boolean isEnum();
+
+	/**
+	 * Satisfies {@link Class#isPrimitive()}.
+	 * @since 6.x
+	 */
+	boolean isPrimitive();
+
+	/**
+	 * Satisfies {@link Class#isSynthetic()}.
+	 * @since 6.x
+	 */
+	boolean isSynthetic();
+
+	/**
+	 * Return the underlying modifiers for the class.
+	 * @since 6.x
+	 */
+	int getModifiers();
+
+	/**
+	 * Retrieve the method metadata for all user-declared methods on the underlying class,
+	 * preserving declaration order as far as possible.
+	 * @return a set of {@link MethodMetadata}
+	 * @since 6.x
+	 */
+	Set<MethodMetadata> getDeclaredMethods();
+
+	/**
+	 * Retrieve the method metadata for a given declared field.
+	 * @since 6.x
+	 */
+	FieldMetadata getDeclaredField(String name);
+
+	/**
+	 * Retrieve the method metadata for all user-declared fields on the underlying class,
+	 * preserving declaration order as far as possible.
+	 * @return a set of {@link FieldMetadata}
+	 * @since 6.x
+	 */
+	Set<FieldMetadata> getDeclaredFields();
+
+	/**
+	 * Retrieve the method metadata for all user-declared constructors.
+	 * @return a set of {@link ConstructorMetadata}
+	 * @since 6.x
+	 */
+	Set<ConstructorMetadata> getDeclaredConstructors();
+
+	/**
+	 * Determine if the given class is exactly this type.
+	 * @throws NullPointerException if clazz is null
+	 * @throws ClassMetadataNotFoundException if class metadata for the class hierarchy of
+	 * this class could not be loaded
+	 * @since 6.x
+	 */
+	boolean isType(Class<?> clazz);
+
+	/**
+	 * Determine if the given class name is exactly this type.
+	 * @throws NullPointerException if className is null
+	 * @throws ClassMetadataNotFoundException if class metadata for the class hierarchy of
+	 * this class could not be loaded
+	 * @since 6.x
+	 */
+	boolean isType(String className);
+
+	/**
+	 * Determine if the given type is, implements or extends the given class.
+	 * @throws NullPointerException if clazz is null
+	 * @throws ClassMetadataNotFoundException if class metadata for the class hierarchy of
+	 * this class could not be loaded
+	 * @since 6.x
+	 */
+	boolean isAssignableTo(Class<?> clazz);
+
+	/**
+	 * Determine if the given type is, implements or extends the given class.
+	 * @throws NullPointerException if className is null
+	 * @throws ClassMetadataNotFoundException if class metadata for the class hierarchy of
+	 * this class could not be loaded
+	 * @since 6.x
+	 */
+	boolean isAssignableTo(String className);
 
 }
