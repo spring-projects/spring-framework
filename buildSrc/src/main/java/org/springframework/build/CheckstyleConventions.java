@@ -16,13 +16,8 @@
 
 package org.springframework.build;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
-
 import io.spring.javaformat.gradle.SpringJavaFormatPlugin;
-import io.spring.nohttp.gradle.NoHttpExtension;
-import io.spring.nohttp.gradle.NoHttpPlugin;
+import io.spring.javaformat.gradle.tasks.Format;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.DependencySet;
@@ -33,7 +28,6 @@ import org.gradle.api.plugins.quality.CheckstylePlugin;
 
 /**
  * {@link Plugin} that applies conventions for checkstyle.
- *
  * @author Brian Clozel
  */
 public class CheckstyleConventions {
@@ -44,35 +38,15 @@ public class CheckstyleConventions {
 	 */
 	public void apply(Project project) {
 		project.getPlugins().withType(JavaBasePlugin.class, (java) -> {
-			if (project.getRootProject() == project) {
-				configureNoHttpPlugin(project);
-			}
 			project.getPlugins().apply(CheckstylePlugin.class);
 			project.getTasks().withType(Checkstyle.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
 			CheckstyleExtension checkstyle = project.getExtensions().getByType(CheckstyleExtension.class);
-			checkstyle.setToolVersion("10.12.0");
+			checkstyle.setToolVersion("10.9.1");
 			checkstyle.getConfigDirectory().set(project.getRootProject().file("src/checkstyle"));
 			String version = SpringJavaFormatPlugin.class.getPackage().getImplementationVersion();
 			DependencySet checkstyleDependencies = project.getConfigurations().getByName("checkstyle").getDependencies();
 			checkstyleDependencies
 				.add(project.getDependencies().create("io.spring.javaformat:spring-javaformat-checkstyle:" + version));
-		});
-	}
-
-	private static void configureNoHttpPlugin(Project project) {
-		project.getPlugins().apply(NoHttpPlugin.class);
-		NoHttpExtension noHttp = project.getExtensions().getByType(NoHttpExtension.class);
-		noHttp.setAllowlistFile(project.file("src/nohttp/allowlist.lines"));
-		noHttp.getSource().exclude("**/test-output/**", "**/.settings/**",
-				"**/.classpath", "**/.project", "**/.gradle/**");
-		List<String> buildFolders = List.of("bin", "build", "out");
-		project.allprojects(subproject -> {
-			Path rootPath = project.getRootDir().toPath();
-			Path projectPath = rootPath.relativize(subproject.getProjectDir().toPath());
-			for (String buildFolder : buildFolders) {
-				Path innerBuildDir = projectPath.resolve(buildFolder);
-				noHttp.getSource().exclude(innerBuildDir + File.separator + "**");
-			}
 		});
 	}
 
