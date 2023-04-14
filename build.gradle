@@ -49,7 +49,6 @@ configure([rootProject] + javaProjects) { project ->
 
 	apply plugin: "java"
 	apply plugin: "java-test-fixtures"
-	apply plugin: "checkstyle"
 	apply plugin: 'org.springframework.build.conventions'
 	apply from: "${rootDir}/gradle/toolchains.gradle"
 	apply from: "${rootDir}/gradle/ide.gradle"
@@ -77,18 +76,6 @@ configure([rootProject] + javaProjects) { project ->
 				 "--add-opens=java.base/java.util=ALL-UNNAMED"])
 	}
 
-	checkstyle {
-		toolVersion = "10.9.3"
-		configDirectory.set(rootProject.file("src/checkstyle"))
-	}
-
-	tasks.named("checkstyleMain").configure {
-		maxHeapSize = "1g"
-	}
-
-	tasks.named("checkstyleTest").configure {
-		maxHeapSize = "1g"
-	}
 
 	dependencies {
 		dependencyManagement(enforcedPlatform(dependencies.project(path: ":framework-platform")))
@@ -109,7 +96,6 @@ configure([rootProject] + javaProjects) { project ->
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.38")
 	}
 
 	ext.javadocLinks = [
@@ -166,10 +152,6 @@ configure(rootProject) {
 				.collect { rootPath.relativize(new File(dir, it).toPath()) }
 				.forEach { source.exclude "$it" }
 		}
-	}
-
-	tasks.named("checkstyleNohttp").configure {
-		maxHeapSize = "1g"
 	}
 
 }
