@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * ASM class visitor that creates {@link SimpleAdditionalAnnotationMetadata}.
+ * ASM class visitor that creates {@link SimplennotationMetadata}.
  *
  * @author Phillip Webb
  * @author Juergen Hoeller

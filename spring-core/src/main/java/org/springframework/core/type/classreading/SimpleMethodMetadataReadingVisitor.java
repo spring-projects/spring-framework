@@ -49,7 +49,7 @@ import org.springframework.core.type.TypeMetadata;
 import org.springframework.lang.Nullable;
 
 /**
- * ASM method visitor that creates {@link SimpleAdditionalMethodMetadata}.
+ * ASM method visitor that creates {@link SimpleMethodMetadata}.
  *
  * @author Phillip Webb
  * @author Sam Brannen
