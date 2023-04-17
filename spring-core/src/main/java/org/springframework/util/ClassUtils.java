@@ -531,24 +531,24 @@ public abstract class ClassUtils {
 	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
-	 * @param lhsType the target type
-	 * @param rhsType the value type that should be assigned to the target type
+	 * @param leftHandSideType the target type
+	 * @param rightHandSideType the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
 	 * @see TypeUtils#isAssignable(java.lang.reflect.Type, java.lang.reflect.Type)
 	 */
-	public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
-		Assert.notNull(lhsType, "Left-hand side type must not be null");
-		Assert.notNull(rhsType, "Right-hand side type must not be null");
-		if (lhsType.isAssignableFrom(rhsType)) {
+	public static boolean isAssignable(Class<?> leftHandSideType, Class<?> rightHandSideType) {
+		Assert.notNull(leftHandSideType, "Left-hand side type must not be null");
+		Assert.notNull(rightHandSideType, "Right-hand side type must not be null");
+		if (leftHandSideType.isAssignableFrom(rightHandSideType)) {
 			return true;
 		}
-		if (lhsType.isPrimitive()) {
-			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
-			return (lhsType == resolvedPrimitive);
+		if (leftHandSideType.isPrimitive()) {
+			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rightHandSideType);
+			return (leftHandSideType == resolvedPrimitive);
 		}
 		else {
-			Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
-			return (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper));
+			Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rightHandSideType);
+			return (resolvedWrapper != null && leftHandSideType.isAssignableFrom(resolvedWrapper));
 		}
 	}
 
