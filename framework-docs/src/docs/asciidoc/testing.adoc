@@ -11,20 +11,20 @@ constructors on classes makes them easier to wire together in a test without hav
 set up service locator registries and similar structures).
 
 
-include::testing/testing-introduction.adoc[leveloffset=+1]
+include::testing/introduction.adoc[leveloffset=+1]
 
-include::testing/unit-testing.adoc[leveloffset=+1]
+include::testing/unit.adoc[leveloffset=+1]
 
-include::testing/integration-testing.adoc[leveloffset=+1]
+include::testing/integration.adoc[leveloffset=+1]
 
-include::testing/testing-support-jdbc.adoc[leveloffset=+1]
+include::testing/support-jdbc.adoc[leveloffset=+1]
 
 include::testing/testcontext-framework.adoc[leveloffset=+1]
 
-include::testing/testing-webtestclient.adoc[leveloffset=+1]
+include::testing/webtestclient.adoc[leveloffset=+1]
 
 include::testing/spring-mvc-test-framework.adoc[leveloffset=+1]
 
 include::testing/spring-mvc-test-client.adoc[leveloffset=+1]
 
-include::testing/testing-appendix.adoc[leveloffset=+1]
+include::testing/appendix.adoc[leveloffset=+1]
