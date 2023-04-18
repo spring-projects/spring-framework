@@ -23,6 +23,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.BitSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,6 +58,19 @@ public final class ContentDisposition {
 
 	private static final String INVALID_HEADER_FIELD_PARAMETER_FORMAT =
 			"Invalid header field parameter format (as defined in RFC 5987)";
+
+	private static final BitSet PRINTABLE = new BitSet(256);
+
+
+	static {
+		// RFC 2045, Section 6.7, and RFC 2047, Section 4.2
+		for (int i=33; i<= 126; i++) {
+			PRINTABLE.set(i);
+		}
+		PRINTABLE.set(61, false); // =
+		PRINTABLE.set(63, false); // ?
+		PRINTABLE.set(95, false); // _
+	}
 
 
 	@Nullable
@@ -545,7 +559,7 @@ public final class ContentDisposition {
 		int index = 0;
 		while (index < value.length) {
 			byte b = value[index];
-			if (b == '_') {
+			if (b == '_') { // RFC 2047, section 4.2, rule (2)
 				baos.write(' ');
 				index++;
 			}
@@ -583,7 +597,10 @@ public final class ContentDisposition {
 		sb.append(charset.name());
 		sb.append("?Q?");
 		for (byte b : source) {
-			if (isPrintable(b)) {
+			if (b == 32) { // RFC 2047, section 4.2, rule (2)
+				sb.append('_');
+			}
+			else if (isPrintable(b)) {
 				sb.append((char) b);
 			}
 			else {
@@ -599,7 +616,11 @@ public final class ContentDisposition {
 	}
 
 	private static boolean isPrintable(byte c) {
-		return (c >= '!' && c <= '<') || (c >= '>' && c <= '~');
+		int b = c;
+		if (b < 0) {
+			b = 256 + b;
+		}
+		return PRINTABLE.get(b);
 	}
 
 	private static String encodeQuotedPairs(String filename) {
