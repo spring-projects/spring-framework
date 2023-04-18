@@ -331,7 +331,12 @@ class ContentDispositionTests {
 		ContentDisposition cd = ContentDisposition.attachment()
 				.filename(filename, StandardCharsets.UTF_8)
 				.build();
-		String[] parts = cd.toString().split("; ");
+		String result = cd.toString();
+		assertThat(result).isEqualTo("attachment; " +
+						"filename=\"=?UTF-8?Q?filename_with_=3F=E9=97=AE=E5=8F=B7.txt?=\"; " +
+						"filename*=UTF-8''filename%20with%20%3F%E9%97%AE%E5%8F%B7.txt");
+
+		String[] parts = result.split("; ");
 
 		String quotedPrintableFilename = parts[0] + "; " + parts[1];
 		assertThat(ContentDisposition.parse(quotedPrintableFilename).getFilename())
@@ -341,4 +346,5 @@ class ContentDispositionTests {
 		assertThat(ContentDisposition.parse(rfc5987Filename).getFilename())
 				.isEqualTo(filename);
 	}
+
 }
