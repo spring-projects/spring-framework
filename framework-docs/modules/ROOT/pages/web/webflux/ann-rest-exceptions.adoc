@@ -76,7 +76,7 @@ to customize the problem details for Spring WebFlux exceptions. This is supporte
 - Each `ErrorResponse` exposes a message code and arguments to resolve the "detail" field
 through a xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource].
 The actual message code value is parameterized with placeholders, e.g.
-`"HTTP method {0} not supported"` to be expanded from the arguments.
+`+"HTTP method {0} not supported"+` to be expanded from the arguments.
 - Each `ErrorResponse` also exposes a message code to resolve the "title" field.
 - `ResponseEntityExceptionHandler` uses the message code and arguments to resolve the
 "detail" and the "title" fields.
@@ -93,7 +93,7 @@ arguments and codes for Spring WebFlux exceptions:
 
 | `UnsupportedMediaTypeStatusException`
 | (default)
-| `{0}` the media type that is not supported, `{1}` list of supported media types
+| `+{0}+` the media type that is not supported, `+{1}+` list of supported media types
 
 | `UnsupportedMediaTypeStatusException`
 | (default) + ".parseError"
@@ -101,21 +101,21 @@ arguments and codes for Spring WebFlux exceptions:
 
 | `MissingRequestValueException`
 | (default)
-| `{0}` a label for the value (e.g. "request header", "cookie value", ...), `{1}` the value name
+| `+{0}+` a label for the value (e.g. "request header", "cookie value", ...), `+{1}+` the value name
 
 | `UnsatisfiedRequestParameterException`
 | (default)
-| `{0}` the list of parameter conditions
+| `+{0}+` the list of parameter conditions
 
 | `WebExchangeBindException`
 | (default)
-| `{0}` the list of global errors, `{1}` the list of field errors.
+| `+{0}+` the list of global errors, `+{1}+` the list of field errors.
 Message codes and arguments for each error within the `BindingResult` are also resolved
 via `MessageSource`.
 
 | `NotAcceptableStatusException`
 | (default)
-| `{0}` list of supported media types
+| `+{0}+` list of supported media types
 
 | `NotAcceptableStatusException`
 | (default) + ".parseError"
@@ -123,11 +123,11 @@ via `MessageSource`.
 
 | `ServerErrorException`
 | (default)
-| `{0}` the failure reason provided to the class constructor
+| `+{0}+` the failure reason provided to the class constructor
 
 | `MethodNotAllowedException`
 | (default)
-| `{0}` the current HTTP method, `{1}` the list of supported HTTP methods
+| `+{0}+` the current HTTP method, `+{1}+` the list of supported HTTP methods
 
 |===
 
