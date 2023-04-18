@@ -155,6 +155,7 @@ configure(rootProject) {
 
 	nohttp {
 		source.exclude "**/test-output/**"
+		source.exclude "**/.gradle/**"
 		allowlistFile = project.file("src/nohttp/allowlist.lines")
 		def rootPath = file(rootDir).toPath()
 		def projectDirs = allprojects.collect { it.projectDir } + "${rootDir}/buildSrc"
