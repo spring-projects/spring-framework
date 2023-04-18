@@ -20,4 +20,4 @@ include::integration/cache.adoc[leveloffset=+1]
 
 include::integration/observability.adoc[leveloffset=+1]
 
-include::integration/integration-appendix.adoc[leveloffset=+1]
+include::integration/appendix.adoc[leveloffset=+1]
