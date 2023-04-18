@@ -76,7 +76,7 @@ to customize the problem details for Spring MVC exceptions. This is supported as
 - Each `ErrorResponse` exposes a message code and arguments to resolve the "detail" field
 through a xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource].
 The actual message code value is parameterized with placeholders, e.g.
-`"HTTP method {0} not supported"` to be expanded from the arguments.
+`+"HTTP method {0} not supported"+` to be expanded from the arguments.
 - Each `ErrorResponse` also exposes a message code to resolve the "title" field.
 - `ResponseEntityExceptionHandler` uses the message code and arguments to resolve the
 "detail" and the "title" fields.
@@ -97,11 +97,11 @@ arguments and codes for Spring MVC exceptions:
 
 | `ConversionNotSupportedException`
 | (default)
-| `{0}` property name, `{1}` property value
+| `+{0}+` property name, `+{1}+` property value
 
 | `HttpMediaTypeNotAcceptableException`
 | (default)
-| `{0}` list of supported media types
+| `+{0}+` list of supported media types
 
 | `HttpMediaTypeNotAcceptableException`
 | (default) + ".parseError"
@@ -109,7 +109,7 @@ arguments and codes for Spring MVC exceptions:
 
 | `HttpMediaTypeNotSupportedException`
 | (default)
-| `{0}` the media type that is not supported, `{1}` list of supported media types
+| `+{0}+` the media type that is not supported, `+{1}+` list of supported media types
 
 | `HttpMediaTypeNotSupportedException`
 | (default) + ".parseError"
@@ -125,37 +125,37 @@ arguments and codes for Spring MVC exceptions:
 
 | `HttpRequestMethodNotSupportedException`
 | (default)
-| `{0}` the current HTTP method, `{1}` the list of supported HTTP methods
+| `+{0}+` the current HTTP method, `+{1}+` the list of supported HTTP methods
 
 | `MethodArgumentNotValidException`
 | (default)
-| `{0}` the list of global errors, `{1}` the list of field errors.
+| `+{0}+` the list of global errors, `+{1}+` the list of field errors.
   Message codes and arguments for each error within the `BindingResult` are also resolved
   via `MessageSource`.
 
 | `MissingRequestHeaderException`
 | (default)
-| `{0}` the header name
+| `+{0}+` the header name
 
 | `MissingServletRequestParameterException`
 | (default)
-| `{0}` the request parameter name
+| `+{0}+` the request parameter name
 
 | `MissingMatrixVariableException`
 | (default)
-| `{0}` the matrix variable name
+| `+{0}+` the matrix variable name
 
 | `MissingPathVariableException`
 | (default)
-| `{0}` the path variable name
+| `+{0}+` the path variable name
 
 | `MissingRequestCookieException`
 | (default)
-| `{0}` the cookie name
+| `+{0}+` the cookie name
 
 | `MissingServletRequestPartException`
 | (default)
-| `{0}` the part name
+| `+{0}+` the part name
 
 | `NoHandlerFoundException`
 | (default)
@@ -163,11 +163,11 @@ arguments and codes for Spring MVC exceptions:
 
 | `TypeMismatchException`
 | (default)
-| `{0}` property name, `{1}` property value
+| `+{0}+` property name, `+{1}+` property value
 
 | `UnsatisfiedServletRequestParameterException`
 | (default)
-| `{0}` the list of parameter conditions
+| `+{0}+` the list of parameter conditions
 
 |===
 

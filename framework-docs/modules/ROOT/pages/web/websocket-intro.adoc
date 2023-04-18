@@ -1,4 +1,3 @@
-[id={chapter}.websocket-intro]
 [[introduction-to-websocket]]
 = Introduction to WebSocket
 
@@ -55,7 +54,6 @@ instructions of the cloud provider related to WebSocket support.
 
 
 
-[id={chapter}.websocket-intro-architecture]
 [[http-versus-websocket]]
 == HTTP Versus WebSocket
 
@@ -82,7 +80,6 @@ In the absence of that, they need to come up with their own conventions.
 
 
 
-[id={chapter}.websocket-intro-when-to-use]
 [[when-to-use-websockets]]
 == When to Use WebSockets
 
