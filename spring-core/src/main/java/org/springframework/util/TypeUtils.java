@@ -39,92 +39,92 @@ public abstract class TypeUtils {
 	/**
 	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type following the Java generics rules.
-	 * @param leftHandSideType the target type
-	 * @param rightHandSideType the value type that should be assigned to the target type
-	 * @return true if right-hand side is assignable to left-hand side
+	 * @param lhsType the target type
+	 * @param rhsType the value type that should be assigned to the target type
+	 * @return true if rhs is assignable to lhs
 	 */
-	public static boolean isAssignable(Type leftHandSideType, Type rightHandSideType) {
-		Assert.notNull(leftHandSideType, "Left-hand side type must not be null");
-		Assert.notNull(rightHandSideType, "Right-hand side type must not be null");
+	public static boolean isAssignable(Type lhsType, Type rhsType) {
+		Assert.notNull(lhsType, "Left-hand side type must not be null");
+		Assert.notNull(rhsType, "Right-hand side type must not be null");
 
 		// all types are assignable to themselves and to class Object
-		if (leftHandSideType.equals(rightHandSideType) || Object.class == leftHandSideType) {
+		if (lhsType.equals(rhsType) || Object.class == lhsType) {
 			return true;
 		}
 
-		if (leftHandSideType instanceof Class<?> leftHandSideClass) {
+		if (lhsType instanceof Class<?> lhsClass) {
 			// just comparing two classes
-			if (rightHandSideType instanceof Class<?> rightHandSideClass) {
-				return ClassUtils.isAssignable(leftHandSideClass, rightHandSideClass);
+			if (rhsType instanceof Class<?> rhsClass) {
+				return ClassUtils.isAssignable(lhsClass, rhsClass);
 			}
 
-			if (rightHandSideType instanceof ParameterizedType rightHandSideParameterizedType) {
-				Type rightHandSideRawType = rightHandSideParameterizedType.getRawType();
+			if (rhsType instanceof ParameterizedType rhsParameterizedType) {
+				Type rhsRaw = rhsParameterizedType.getRawType();
 
 				// a parameterized type is always assignable to its raw class type
-				if (rightHandSideRawType instanceof Class<?> rightHandSideRawClass) {
-					return ClassUtils.isAssignable(leftHandSideClass, rightHandSideRawClass);
+				if (rhsRaw instanceof Class<?> rhRawClass) {
+					return ClassUtils.isAssignable(lhsClass, rhRawClass);
 				}
 			}
-			else if (leftHandSideClass.isArray() && rightHandSideType instanceof GenericArrayType rightHandSideGenericArrayType) {
-				Type rightHandSideComponent = rightHandSideGenericArrayType.getGenericComponentType();
+			else if (lhsClass.isArray() && rhsType instanceof GenericArrayType rhsGenericArrayType) {
+				Type rhsComponent = rhsGenericArrayType.getGenericComponentType();
 
-				return isAssignable(leftHandSideClass.getComponentType(), rightHandSideComponent);
+				return isAssignable(lhsClass.getComponentType(), rhsComponent);
 			}
 		}
 
 		// parameterized types are only assignable to other parameterized types and class types
-		if (leftHandSideType instanceof ParameterizedType leftHandSideParameterizedType) {
-			if (rightHandSideType instanceof Class<?> rightHandSideClass) {
-				Type leftHandSideRawType = leftHandSideParameterizedType.getRawType();
+		if (lhsType instanceof ParameterizedType lhsParameterizedType) {
+			if (rhsType instanceof Class<?> rhsClass) {
+				Type lhsRaw = lhsParameterizedType.getRawType();
 
-				if (leftHandSideRawType instanceof Class<?> leftHandSideClass) {
-					return ClassUtils.isAssignable(leftHandSideClass, rightHandSideClass);
+				if (lhsRaw instanceof Class<?> lhsClass) {
+					return ClassUtils.isAssignable(lhsClass, rhsClass);
 				}
 			}
-			else if (rightHandSideType instanceof ParameterizedType rightHandSideParameterizedType) {
-				return isAssignable(leftHandSideParameterizedType, rightHandSideParameterizedType);
+			else if (rhsType instanceof ParameterizedType rhsParameterizedType) {
+				return isAssignable(lhsParameterizedType, rhsParameterizedType);
 			}
 		}
 
-		if (leftHandSideType instanceof GenericArrayType leftHandSideGenericArrayType) {
-			Type leftHandSideComponent = leftHandSideGenericArrayType.getGenericComponentType();
+		if (lhsType instanceof GenericArrayType lhsGenericArrayType) {
+			Type lhsComponent = lhsGenericArrayType.getGenericComponentType();
 
-			if (rightHandSideType instanceof Class<?> rightHandSideClass && rightHandSideClass.isArray()) {
-				return isAssignable(leftHandSideComponent, rightHandSideClass.getComponentType());
+			if (rhsType instanceof Class<?> rhsClass && rhsClass.isArray()) {
+				return isAssignable(lhsComponent, rhsClass.getComponentType());
 			}
-			else if (rightHandSideType instanceof GenericArrayType rightHandSideGenericArrayType) {
-				Type rightHandSideComponent = rightHandSideGenericArrayType.getGenericComponentType();
+			else if (rhsType instanceof GenericArrayType rhsGenericArrayType) {
+				Type rhsComponent = rhsGenericArrayType.getGenericComponentType();
 
-				return isAssignable(leftHandSideComponent, rightHandSideComponent);
+				return isAssignable(lhsComponent, rhsComponent);
 			}
 		}
 
-		if (leftHandSideType instanceof WildcardType leftHandSideWildcardType) {
-			return isAssignable(leftHandSideWildcardType, rightHandSideType);
+		if (lhsType instanceof WildcardType lhsWildcardType) {
+			return isAssignable(lhsWildcardType, rhsType);
 		}
 
 		return false;
 	}
 
-	private static boolean isAssignable(ParameterizedType leftHandSideType, ParameterizedType rightHandSideType) {
-		if (leftHandSideType.equals(rightHandSideType)) {
+	private static boolean isAssignable(ParameterizedType lhsType, ParameterizedType rhsType) {
+		if (lhsType.equals(rhsType)) {
 			return true;
 		}
 
-		Type[] leftHandSideTypeArguments = leftHandSideType.getActualTypeArguments();
-		Type[] rightHandSideTypeArguments = rightHandSideType.getActualTypeArguments();
+		Type[] lhsTypeArguments = lhsType.getActualTypeArguments();
+		Type[] rhsTypeArguments = rhsType.getActualTypeArguments();
 
-		if (leftHandSideTypeArguments.length != rightHandSideTypeArguments.length) {
+		if (lhsTypeArguments.length != rhsTypeArguments.length) {
 			return false;
 		}
 
-		for (int size = leftHandSideTypeArguments.length, i = 0; i < size; ++i) {
-			Type leftHandSideTypeArgument = leftHandSideTypeArguments[i];
-			Type rightHandSideTypeArgument = rightHandSideTypeArguments[i];
+		for (int size = lhsTypeArguments.length, i = 0; i < size; ++i) {
+			Type lhsArg = lhsTypeArguments[i];
+			Type rhsArg = rhsTypeArguments[i];
 
-			if (!leftHandSideTypeArgument.equals(rightHandSideTypeArgument) &&
-					!(leftHandSideTypeArgument instanceof WildcardType wildcardType && isAssignable(wildcardType, rightHandSideTypeArgument))) {
+			if (!lhsArg.equals(rhsArg) &&
+					!(lhsArg instanceof WildcardType wildcardType && isAssignable(wildcardType, rhsArg))) {
 				return false;
 			}
 		}
@@ -132,56 +132,56 @@ public abstract class TypeUtils {
 		return true;
 	}
 
-	private static boolean isAssignable(WildcardType leftHandSideType, Type rightHandSideType) {
-		Type[] leftUpperBounds = getUpperBounds(leftHandSideType);
+	private static boolean isAssignable(WildcardType lhsType, Type rhsType) {
+		Type[] lUpperBounds = getUpperBounds(lhsType);
 
-		Type[] leftLowerBounds = getLowerBounds(leftHandSideType);
+		Type[] lLowerBounds = getLowerBounds(lhsType);
 
-		if (rightHandSideType instanceof WildcardType rightHandSideWildcardType) {
+		if (rhsType instanceof WildcardType rhsWcType) {
 			// both the upper and lower bounds of the right-hand side must be
 			// completely enclosed in the upper and lower bounds of the left-
 			// hand side.
-			Type[] rightUpperBounds = getUpperBounds(rightHandSideWildcardType);
+			Type[] rUpperBounds = getUpperBounds(rhsWcType);
 
-			Type[] rightLowerBounds = getLowerBounds(rightHandSideWildcardType);
+			Type[] rLowerBounds = getLowerBounds(rhsWcType);
 
-			for (Type leftBound : leftUpperBounds) {
-				for (Type rightBound : rightUpperBounds) {
-					if (!isAssignableBound(leftBound, rightBound)) {
+			for (Type lBound : lUpperBounds) {
+				for (Type rBound : rUpperBounds) {
+					if (!isAssignableBound(lBound, rBound)) {
 						return false;
 					}
 				}
 
-				for (Type rightBound : rightLowerBounds) {
-					if (!isAssignableBound(leftBound, rightBound)) {
+				for (Type rBound : rLowerBounds) {
+					if (!isAssignableBound(lBound, rBound)) {
 						return false;
 					}
 				}
 			}
 
-			for (Type leftBound : leftLowerBounds) {
-				for (Type rightBound : rightUpperBounds) {
-					if (!isAssignableBound(rightBound, leftBound)) {
+			for (Type lBound : lLowerBounds) {
+				for (Type rBound : rUpperBounds) {
+					if (!isAssignableBound(rBound, lBound)) {
 						return false;
 					}
 				}
 
-				for (Type rightBound : rightLowerBounds) {
-					if (!isAssignableBound(rightBound, leftBound)) {
+				for (Type rBound : rLowerBounds) {
+					if (!isAssignableBound(rBound, lBound)) {
 						return false;
 					}
 				}
 			}
 		}
 		else {
-			for (Type leftBound : leftUpperBounds) {
-				if (!isAssignableBound(leftBound, rightHandSideType)) {
+			for (Type lBound : lUpperBounds) {
+				if (!isAssignableBound(lBound, rhsType)) {
 					return false;
 				}
 			}
 
-			for (Type leftBound : leftLowerBounds) {
-				if (!isAssignableBound(rightHandSideType, leftBound)) {
+			for (Type lBound : lLowerBounds) {
+				if (!isAssignableBound(rhsType, lBound)) {
 					return false;
 				}
 			}
@@ -190,34 +190,34 @@ public abstract class TypeUtils {
 		return true;
 	}
 
-	private static Type[] getLowerBounds(WildcardType wildcardType) {
-		Type[] lowerBounds = wildcardType.getLowerBounds();
+	private static Type[] getLowerBounds(WildcardType lhsType) {
+		Type[] lLowerBounds = lhsType.getLowerBounds();
 
 		// supply the implicit lower bound if none are specified
-		if (lowerBounds.length == 0) {
-			lowerBounds = new Type[] { null };
+		if (lLowerBounds.length == 0) {
+			lLowerBounds = new Type[] { null };
 		}
-		return lowerBounds;
+		return lLowerBounds;
 	}
 
-	private static Type[] getUpperBounds(WildcardType wildcardType) {
-		Type[] upperBounds = wildcardType.getUpperBounds();
+	private static Type[] getUpperBounds(WildcardType lhsType) {
+		Type[] lUpperBounds = lhsType.getUpperBounds();
 
 		// supply the implicit upper bound if none are specified
-		if (upperBounds.length == 0) {
-			upperBounds = new Type[] { Object.class };
+		if (lUpperBounds.length == 0) {
+			lUpperBounds = new Type[] { Object.class };
 		}
-		return upperBounds;
+		return lUpperBounds;
 	}
 
-	public static boolean isAssignableBound(@Nullable Type leftHandSideType, @Nullable Type rightHandSideType) {
-		if (rightHandSideType == null) {
+	public static boolean isAssignableBound(@Nullable Type lhsType, @Nullable Type rhsType) {
+		if (rhsType == null) {
 			return true;
 		}
-		if (leftHandSideType == null) {
+		if (lhsType == null) {
 			return false;
 		}
-		return isAssignable(leftHandSideType, rightHandSideType);
+		return isAssignable(lhsType, rhsType);
 	}
 
 }
