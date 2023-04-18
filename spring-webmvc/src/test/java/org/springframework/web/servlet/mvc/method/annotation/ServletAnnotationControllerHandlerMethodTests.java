@@ -34,6 +34,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -3430,7 +3431,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 		@RequestMapping(method = RequestMethod.GET)
 		public void handle(@CookieValue("date") Date date, Writer writer) throws IOException {
-			assertThat(date).as("Invalid path variable value").isEqualTo(new GregorianCalendar(2008, 10, 18).getTime());
+			assertThat(date).as("Invalid path variable value").isEqualTo(new GregorianCalendar(2008, Calendar.NOVEMBER, 18).getTime());
 			writer.write("test-" + new SimpleDateFormat("yyyy").format(date));
 		}
 	}

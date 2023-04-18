@@ -589,7 +589,7 @@ class CronTriggerTests {
 
 		CronTrigger trigger = new CronTrigger("0 0 7 ? * MON-FRI", timeZone);
 		// This is a Saturday
-		this.calendar.set(2009, 8, 26);
+		this.calendar.set(2009, Calendar.SEPTEMBER, 26);
 		Date localDate = this.calendar.getTime();
 		// 7 am is the trigger time
 		this.calendar.set(Calendar.HOUR_OF_DAY, 7);
@@ -790,7 +790,7 @@ class CronTriggerTests {
 		setup(localDateTime, timeZone);
 
 		CronTrigger trigger = new CronTrigger("0 30 23 30 1/3 ?", timeZone);
-		this.calendar.set(2010, 11, 30);
+		this.calendar.set(2010, Calendar.DECEMBER, 30);
 		Date localDate = this.calendar.getTime();
 		// set expected next trigger time
 		this.calendar.set(Calendar.HOUR_OF_DAY, 23);

@@ -21,6 +21,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -58,7 +59,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 
 	static {
 		GregorianCalendar c = new GregorianCalendar();
-		c.set(1856, 7, 9);
+		c.set(1856, Calendar.AUGUST, 9);
 		tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 		tesla.setPlaceOfBirth(new PlaceOfBirth("SmilJan"));
 		tesla.setInventions(new String[] { "Telephone repeater", "Rotating magnetic field principle",
@@ -88,7 +89,7 @@ class SpelDocumentationTests extends AbstractExpressionTests {
 	@Test
 	void rootObject() throws Exception {
 		GregorianCalendar c = new GregorianCalendar();
-		c.set(1856, 7, 9);
+		c.set(1856, Calendar.AUGUST, 9);
 
 		//  The constructor arguments are name, birthday, and nationaltiy.
 		Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");

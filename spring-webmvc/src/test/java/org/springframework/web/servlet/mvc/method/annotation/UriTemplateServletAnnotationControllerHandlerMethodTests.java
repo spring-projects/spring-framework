@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -430,7 +431,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		void handle(@PathVariable("hotel") String hotel, @PathVariable Date date, Writer writer)
 				throws IOException {
 			assertThat(hotel).as("Invalid path variable value").isEqualTo("42");
-			assertThat(date).as("Invalid path variable value").isEqualTo(new GregorianCalendar(2008, 10, 18).getTime());
+			assertThat(date).as("Invalid path variable value").isEqualTo(new GregorianCalendar(2008, Calendar.NOVEMBER, 18).getTime());
 			writer.write("test-" + hotel);
 		}
 	}

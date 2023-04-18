@@ -20,6 +20,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -116,7 +117,7 @@ class TestScenarioCreator {
 	 */
 	private static void setupRootContextObject(StandardEvaluationContext testContext) {
 		GregorianCalendar c = new GregorianCalendar();
-		c.set(1856, 7, 9);
+		c.set(1856, Calendar.AUGUST, 9);
 		Inventor tesla = new Inventor("Nikola Tesla", c.getTime(), "Serbian");
 		tesla.setPlaceOfBirth(new PlaceOfBirth("SmilJan"));
 		tesla.setInventions(new String[] { "Telephone repeater", "Rotating magnetic field principle",

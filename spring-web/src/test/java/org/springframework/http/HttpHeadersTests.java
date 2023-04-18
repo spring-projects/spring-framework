@@ -250,7 +250,7 @@ public class HttpHeadersTests {
 
 	@Test
 	void date() {
-		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+		Calendar calendar = new GregorianCalendar(2008, Calendar.DECEMBER, 18, 11, 20);
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setDate(date);
@@ -273,7 +273,7 @@ public class HttpHeadersTests {
 		Locale defaultLocale = Locale.getDefault();
 		try {
 			Locale.setDefault(new Locale("nl", "nl"));
-			Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+			Calendar calendar = new GregorianCalendar(2008, Calendar.DECEMBER, 18, 11, 20);
 			calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 			long date = calendar.getTimeInMillis();
 			headers.setDate(date);
@@ -287,7 +287,7 @@ public class HttpHeadersTests {
 
 	@Test
 	void lastModified() {
-		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+		Calendar calendar = new GregorianCalendar(2008, Calendar.DECEMBER, 18, 11, 20);
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setLastModified(date);
@@ -297,7 +297,7 @@ public class HttpHeadersTests {
 
 	@Test
 	void expiresLong() {
-		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+		Calendar calendar = new GregorianCalendar(2008, Calendar.DECEMBER, 18, 11, 20);
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setExpires(date);
@@ -321,7 +321,7 @@ public class HttpHeadersTests {
 
 	@Test
 	void ifModifiedSince() {
-		Calendar calendar = new GregorianCalendar(2008, 11, 18, 11, 20);
+		Calendar calendar = new GregorianCalendar(2008, Calendar.DECEMBER, 18, 11, 20);
 		calendar.setTimeZone(TimeZone.getTimeZone("CET"));
 		long date = calendar.getTimeInMillis();
 		headers.setIfModifiedSince(date);

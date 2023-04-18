@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -201,7 +202,7 @@ class DateTimeFormattingTests {
 	@Test
 	void testBindLocalDateFromJavaUtilCalendar() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDate", new GregorianCalendar(2009, 9, 31, 0, 0));
+		propertyValues.add("localDate", new GregorianCalendar(2009, Calendar.OCTOBER, 31, 0, 0));
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localDate")).isEqualTo("10/31/09");
@@ -261,7 +262,7 @@ class DateTimeFormattingTests {
 	@Test
 	void testBindLocalTimeFromJavaUtilCalendar() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localTime", new GregorianCalendar(1970, 0, 0, 12, 0));
+		propertyValues.add("localTime", new GregorianCalendar(1970, Calendar.JANUARY, 0, 12, 0));
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		assertThat(binder.getBindingResult().getFieldValue("localTime")).isEqualTo("12:00 PM");
@@ -306,7 +307,7 @@ class DateTimeFormattingTests {
 	@Test
 	void testBindLocalDateTimeFromJavaUtilCalendar() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDateTime", new GregorianCalendar(2009, 9, 31, 12, 0));
+		propertyValues.add("localDateTime", new GregorianCalendar(2009, Calendar.OCTOBER, 31, 12, 0));
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		String value = binder.getBindingResult().getFieldValue("localDateTime").toString();
@@ -447,7 +448,7 @@ class DateTimeFormattingTests {
 		TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 		try {
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
-			propertyValues.add("instant", new Date(109, 9, 31, 12, 0));
+			propertyValues.add("instant", new Date(109, Calendar.OCTOBER, 31, 12, 0));
 			binder.bind(propertyValues);
 			assertThat(binder.getBindingResult().getErrorCount()).isZero();
 			assertThat(binder.getBindingResult().getFieldValue("instant").toString()).startsWith("2009-10-31");
