@@ -296,12 +296,11 @@ public abstract class AbstractApplicationEventMulticaster
 		if (retriever != null) {
 			if (filteredListenerBeans.isEmpty()) {
 				retriever.applicationListeners = new LinkedHashSet<>(allListeners);
-				retriever.applicationListenerBeans = filteredListenerBeans;
 			}
 			else {
 				retriever.applicationListeners = filteredListeners;
-				retriever.applicationListenerBeans = filteredListenerBeans;
 			}
+			retriever.applicationListenerBeans = filteredListenerBeans;
 		}
 		return allListeners;
 	}

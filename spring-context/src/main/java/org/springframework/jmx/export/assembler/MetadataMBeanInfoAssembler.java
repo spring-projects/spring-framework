@@ -241,15 +241,14 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 			if (metric != null && StringUtils.hasText(metric.getDescription())) {
 				return metric.getDescription();
 			}
-			return method.getName();
 		}
 		else {
 			ManagedOperation mo = obtainAttributeSource().getManagedOperation(method);
 			if (mo != null && StringUtils.hasText(mo.getDescription())) {
 				return mo.getDescription();
 			}
-			return method.getName();
 		}
+		return method.getName();
 	}
 
 	/**

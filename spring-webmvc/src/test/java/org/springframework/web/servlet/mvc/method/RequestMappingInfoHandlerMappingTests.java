@@ -375,15 +375,13 @@ class RequestMappingInfoHandlerMappingTests {
 		assertThat(matrixVariables).isNotNull();
 		if (mapping.getPatternParser() != null) {
 			assertThat(matrixVariables).hasSize(1);
-			assertThat(matrixVariables.getFirst("b")).isEqualTo("c");
-			assertThat(uriVariables.get("foo")).isEqualTo("a=42");
 		}
 		else {
 			assertThat(matrixVariables).hasSize(2);
 			assertThat(matrixVariables.getFirst("a")).isEqualTo("42");
-			assertThat(matrixVariables.getFirst("b")).isEqualTo("c");
-			assertThat(uriVariables.get("foo")).isEqualTo("a=42");
 		}
+		assertThat(matrixVariables.getFirst("b")).isEqualTo("c");
+		assertThat(uriVariables.get("foo")).isEqualTo("a=42");
 	}
 
 	@PathPatternsParameterizedTest // SPR-10140, SPR-16867

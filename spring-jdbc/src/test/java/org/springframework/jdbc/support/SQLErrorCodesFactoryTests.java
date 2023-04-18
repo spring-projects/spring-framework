@@ -150,14 +150,13 @@ public class SQLErrorCodesFactoryTests {
 				++lookups;
 				if (lookups == 1) {
 					assertThat(path).isEqualTo(SQLErrorCodesFactory.SQL_ERROR_CODE_DEFAULT_PATH);
-					return null;
 				}
 				else {
 					// Should have only one more lookup
 					assertThat(lookups).isEqualTo(2);
 					assertThat(path).isEqualTo(SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH);
-					return null;
 				}
+				return null;
 			}
 		}
 
