@@ -3,7 +3,7 @@
 = Spring Framework Documentation
 
 [horizontal]
-xref:web/websocket/stomp/overview.adoc[Overview] :: History, Design Philosophy, Feedback,
+xref:overview.adoc[Overview] :: History, Design Philosophy, Feedback,
 Getting Started.
 xref:core.adoc[Core] :: IoC Container, Events, Resources, i18n,
 Validation, Data Binding, Type Conversion, SpEL, AOP, AOT.
