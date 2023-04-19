@@ -1,5 +1,6 @@
 [[webflux-uri-building]]
 = URI Links
+:page-section-summary-toc: 1
 
 [.small]#xref:web/webmvc/mvc-uri-building.adoc[See equivalent in the Servlet stack]#
 

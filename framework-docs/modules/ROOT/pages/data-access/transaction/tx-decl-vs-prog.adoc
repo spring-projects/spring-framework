@@ -1,5 +1,6 @@
 [[tx-decl-vs-prog]]
 = Choosing Between Programmatic and Declarative Transaction Management
+:page-section-summary-toc: 1
 
 Programmatic transaction management is usually a good idea only if you have a small
 number of transactional operations. For example, if you have a web application that

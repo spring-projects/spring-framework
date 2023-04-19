@@ -1,5 +1,6 @@
 [[kotlin]]
 = Kotlin
+:page-section-summary-toc: 1
 
 https://kotlinlang.org[Kotlin] is a statically typed language that targets the JVM
 (and other platforms) which allows writing concise and elegant code while providing

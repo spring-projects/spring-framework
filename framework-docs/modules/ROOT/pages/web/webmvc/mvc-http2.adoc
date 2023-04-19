@@ -1,5 +1,6 @@
 [[mvc-http2]]
 = HTTP/2
+:page-section-summary-toc: 1
 
 [.small]#xref:web/webflux/http2.adoc[See equivalent in the Reactive stack]#
 

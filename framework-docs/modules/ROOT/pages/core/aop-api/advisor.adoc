@@ -1,5 +1,6 @@
 [[aop-api-advisor]]
 = The Advisor API in Spring
+:page-section-summary-toc: 1
 
 In Spring, an Advisor is an aspect that contains only a single advice object associated
 with a pointcut expression.

@@ -1,5 +1,6 @@
 [[aop-ataspectj]]
 = @AspectJ support
+:page-section-summary-toc: 1
 
 @AspectJ refers to a style of declaring aspects as regular Java classes annotated with
 annotations. The @AspectJ style was introduced by the

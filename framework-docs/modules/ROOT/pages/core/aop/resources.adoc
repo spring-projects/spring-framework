@@ -1,5 +1,6 @@
 [[aop-resources]]
 = Further Resources
+:page-section-summary-toc: 1
 
 More information on AspectJ can be found on the https://www.eclipse.org/aspectj[AspectJ website].
 

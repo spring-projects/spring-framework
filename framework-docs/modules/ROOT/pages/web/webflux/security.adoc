@@ -1,5 +1,6 @@
 [[webflux-web-security]]
 = Web Security
+:page-section-summary-toc: 1
 
 [.small]#xref:web/webmvc/mvc-security.adoc[See equivalent in the Servlet stack]#
 

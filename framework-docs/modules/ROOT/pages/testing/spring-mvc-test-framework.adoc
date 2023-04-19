@@ -1,5 +1,6 @@
 [[spring-mvc-test-framework]]
 = MockMvc
+:page-section-summary-toc: 1
 
 The Spring MVC Test framework, also known as MockMvc, provides support for testing Spring
 MVC applications. It performs full Spring MVC request handling but via mock request and

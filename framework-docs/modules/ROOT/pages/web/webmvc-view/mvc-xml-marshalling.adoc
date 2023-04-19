@@ -1,5 +1,6 @@
 [[mvc-view-xml-marshalling]]
 = XML Marshalling
+:page-section-summary-toc: 1
 
 The `MarshallingView` uses an XML `Marshaller` (defined in the `org.springframework.oxm`
 package) to render the response content as XML. You can explicitly set the object to be

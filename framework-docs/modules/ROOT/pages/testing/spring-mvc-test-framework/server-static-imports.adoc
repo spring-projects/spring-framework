@@ -1,5 +1,6 @@
 [[spring-mvc-test-server-static-imports]]
 = Static Imports
+:page-section-summary-toc: 1
 
 When using MockMvc directly to perform requests, you'll need static imports for:
 

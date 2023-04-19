@@ -1,5 +1,6 @@
 [[websocket-stomp-benefits]]
 = Benefits
+:page-section-summary-toc: 1
 
 Using STOMP as a sub-protocol lets the Spring Framework and Spring Security
 provide a richer programming model versus using raw WebSockets. The same point can be

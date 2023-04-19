@@ -1,5 +1,6 @@
 [[transaction-resources]]
 = Further Resources
+:page-section-summary-toc: 1
 
 For more information about the Spring Framework's transaction support, see:
 

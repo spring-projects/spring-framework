@@ -1,5 +1,6 @@
 [[websocket-stomp]]
 = STOMP
+:page-section-summary-toc: 1
 
 The WebSocket protocol defines two types of messages (text and binary), but their
 content is undefined. The protocol defines a mechanism for client and server to negotiate a
