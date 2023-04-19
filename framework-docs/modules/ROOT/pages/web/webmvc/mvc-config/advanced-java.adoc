@@ -1,7 +1,7 @@
 [[mvc-config-advanced-java]]
 = Advanced Java Config
 
-[.small]#<<web-reactive.adoc#webflux-config-advanced-java, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/config.adoc#webflux-config-advanced-java[See equivalent in the Reactive stack]#
 
 `@EnableWebMvc` imports `DelegatingWebMvcConfiguration`, which:
 

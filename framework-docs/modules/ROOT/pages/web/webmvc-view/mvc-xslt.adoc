@@ -9,7 +9,7 @@ XSLT in a Spring Web MVC application.
 
 This example is a trivial Spring application that creates a list of words in the
 `Controller` and adds them to the model map. The map is returned, along with the view
-name of our XSLT view. See <<mvc-controller>> for details of Spring Web MVC's
+name of our XSLT view. See xref:web/webmvc/mvc-controller.adoc[Annotated Controllers] for details of Spring Web MVC's
 `Controller` interface. The XSLT controller turns the list of words into a simple XML
 document ready for transformation.
 

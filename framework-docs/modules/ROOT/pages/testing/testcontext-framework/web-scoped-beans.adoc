@@ -1,8 +1,8 @@
 [[testcontext-web-scoped-beans]]
 = Testing Request- and Session-scoped Beans
 
-Spring has supported <<core#beans-factory-scopes-other, Request- and session-scoped
-beans>> since the early years, and you can test your request-scoped and session-scoped
+Spring has supported xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other[Request- and session-scoped beans]
+ since the early years, and you can test your request-scoped and session-scoped
 beans by following these steps:
 
 * Ensure that a `WebApplicationContext` is loaded for your test by annotating your test
@@ -15,7 +15,7 @@ beans by following these steps:
 
 The next code snippet shows the XML configuration for a login use case. Note that the
 `userService` bean has a dependency on a request-scoped `loginAction` bean. Also, the
-`LoginAction` is instantiated by using <<core.adoc#expressions, SpEL expressions>> that
+`LoginAction` is instantiated by using xref:core/expressions.adoc[SpEL expressions] that
 retrieve the username and password from the current HTTP request. In our test, we want to
 configure these request parameters through the mock managed by the TestContext framework.
 The following listing shows the configuration for this use case:

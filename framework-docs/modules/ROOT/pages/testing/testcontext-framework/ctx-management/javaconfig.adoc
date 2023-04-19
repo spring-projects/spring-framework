@@ -2,7 +2,7 @@
 = Context Configuration with Component Classes
 
 To load an `ApplicationContext` for your tests by using component classes (see
-<<core.adoc#beans-java, Java-based container configuration>>), you can annotate your test
+xref:core/beans/java.adoc[Java-based container configuration]), you can annotate your test
 class with `@ContextConfiguration` and configure the `classes` attribute with an array
 that contains references to component classes. The following example shows how to do so:
 

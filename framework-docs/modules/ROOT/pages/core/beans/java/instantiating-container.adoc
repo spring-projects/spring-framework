@@ -177,7 +177,7 @@ following example shows:
 	}
 ----
 
-NOTE: Remember that `@Configuration` classes are <<beans-meta-annotations, meta-annotated>>
+NOTE: Remember that `@Configuration` classes are xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotated]
 with `@Component`, so they are candidates for component-scanning. In the preceding example,
 assuming that `AppConfig` is declared within the `com.acme` package (or any package
 underneath), it is picked up during the call to `scan()`. Upon `refresh()`, all its `@Bean`

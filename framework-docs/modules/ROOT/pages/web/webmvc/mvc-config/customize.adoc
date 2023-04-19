@@ -1,7 +1,7 @@
 [[mvc-config-customize]]
 = MVC Config API
 
-[.small]#<<web-reactive.adoc#webflux-config-customize, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/config.adoc#webflux-config-customize[See equivalent in the Reactive stack]#
 
 In Java configuration, you can implement the `WebMvcConfigurer` interface, as the
 following example shows:

@@ -80,7 +80,7 @@ the web application context into your test, as follows:
 
 Dependency injection by using `@Autowired` is provided by the
 `DependencyInjectionTestExecutionListener`, which is configured by default
-(see <<testcontext-fixture-di>>).
+(see xref:testing/testcontext-framework/fixture-di.adoc[Dependency Injection of Test Fixtures]).
 =====
 
 Test classes that use the TestContext framework do not need to extend any particular
@@ -98,16 +98,16 @@ component classes (typically `@Configuration` classes), or context initializers.
 Alternatively, you can implement and configure your own custom `SmartContextLoader` for
 advanced use cases.
 
-* <<testcontext-ctx-management-xml>>
-* <<testcontext-ctx-management-groovy>>
-* <<testcontext-ctx-management-javaconfig>>
-* <<testcontext-ctx-management-mixed-config>>
-* <<testcontext-ctx-management-initializers>>
-* <<testcontext-ctx-management-inheritance>>
-* <<testcontext-ctx-management-env-profiles>>
-* <<testcontext-ctx-management-property-sources>>
-* <<testcontext-ctx-management-dynamic-property-sources>>
-* <<testcontext-ctx-management-web>>
-* <<testcontext-ctx-management-caching>>
-* <<testcontext-ctx-management-ctx-hierarchies>>
+* xref:testing/testcontext-framework/ctx-management/xml.adoc[Context Configuration with XML resources]
+* xref:testing/testcontext-framework/ctx-management/groovy.adoc[Context Configuration with Groovy Scripts]
+* xref:testing/testcontext-framework/ctx-management/javaconfig.adoc[Context Configuration with Component Classes]
+* xref:testing/testcontext-framework/ctx-management/mixed-config.adoc[Mixing XML, Groovy Scripts, and Component Classes]
+* xref:testing/testcontext-framework/ctx-management/initializers.adoc[Context Configuration with Context Initializers]
+* xref:testing/testcontext-framework/ctx-management/inheritance.adoc[Context Configuration Inheritance]
+* xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[Context Configuration with Environment Profiles]
+* xref:testing/testcontext-framework/ctx-management/property-sources.adoc[Context Configuration with Test Property Sources]
+* xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[Context Configuration with Dynamic Property Sources]
+* xref:testing/testcontext-framework/ctx-management/web.adoc[Loading a `WebApplicationContext`]
+* xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching]
+* xref:testing/testcontext-framework/ctx-management/hierarchies.adoc[Context Hierarchies]
 

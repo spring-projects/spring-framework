@@ -2,7 +2,7 @@
 = Lazy-initialized Beans
 
 By default, `ApplicationContext` implementations eagerly create and configure all
-<<beans-factory-scopes-singleton,singleton>> beans as part of the initialization
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singleton] beans as part of the initialization
 process. Generally, this pre-instantiation is desirable, because errors in the
 configuration or surrounding environment are discovered immediately, as opposed to hours
 or even days later. When this behavior is not desirable, you can prevent

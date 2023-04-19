@@ -71,7 +71,7 @@ dependencies to your project for TCP connection management.
 
 Furthermore, application components (such as HTTP request handling methods,
 business services, and others) can also send messages to the broker relay, as described
-in <<websocket-stomp-handle-send>>, to broadcast messages to subscribed WebSocket clients.
+in xref:web/websocket/stomp/handle-send.adoc[Sending Messages], to broadcast messages to subscribed WebSocket clients.
 
 In effect, the broker relay enables robust and scalable message broadcasting.
 

@@ -57,7 +57,7 @@ within a test class hierarchy):
 If you need to merge or override the configuration for a given level of the context
 hierarchy within a test class hierarchy, you must explicitly name that level by supplying
 the same value to the `name` attribute in `@ContextConfiguration` at each corresponding
-level in the class hierarchy. See <<testcontext-ctx-management-ctx-hierarchies>> and the
+level in the class hierarchy. See xref:testing/testcontext-framework/ctx-management/hierarchies.adoc[Context Hierarchies] and the
 {api-spring-framework}/test/context/ContextHierarchy.html[`@ContextHierarchy`] javadoc
 for further examples.
 

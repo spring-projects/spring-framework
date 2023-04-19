@@ -1,7 +1,7 @@
 [[webflux-controller]]
 = Annotated Controllers
 
-[.small]#<<web.adoc#mvc-controller, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller.adoc[See equivalent in the Servlet stack]#
 
 Spring WebFlux provides an annotation-based programming model, where `@Controller` and
 `@RestController` components use annotations to express request mappings, request input,

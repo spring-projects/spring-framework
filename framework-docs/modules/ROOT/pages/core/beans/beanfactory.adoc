@@ -43,7 +43,7 @@ by convention (that is, by bean name or by bean type -- in particular, post-proc
 while a plain `DefaultListableBeanFactory` is agnostic about any special beans.
 
 For many extended container features, such as annotation processing and AOP proxying,
-the <<beans-factory-extension-bpp, `BeanPostProcessor` extension point>> is essential.
+the xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[`BeanPostProcessor` extension point] is essential.
 If you use only a plain `DefaultListableBeanFactory`, such post-processors do not
 get detected and activated by default. This situation could be confusing, because
 nothing is actually wrong with your bean configuration. Rather,  in such a scenario,

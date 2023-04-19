@@ -27,31 +27,31 @@ The following table describes these properties:
 | Property| Explained in...
 
 | Class
-| <<beans-factory-class>>
+| xref:core/beans/definition.adoc#beans-factory-class[Instantiating Beans]
 
 | Name
-| <<beans-beanname>>
+| xref:core/beans/definition.adoc#beans-beanname[Naming Beans]
 
 | Scope
-| <<beans-factory-scopes>>
+| xref:core/beans/factory-scopes.adoc[Bean Scopes]
 
 | Constructor arguments
-| <<beans-factory-collaborators>>
+| xref:core/beans/dependencies/factory-collaborators.adoc[Dependency Injection]
 
 | Properties
-| <<beans-factory-collaborators>>
+| xref:core/beans/dependencies/factory-collaborators.adoc[Dependency Injection]
 
 | Autowiring mode
-| <<beans-factory-autowire>>
+| xref:core/beans/dependencies/factory-autowire.adoc[Autowiring Collaborators]
 
 | Lazy initialization mode
-| <<beans-factory-lazy-init>>
+| xref:core/beans/dependencies/factory-lazy-init.adoc[Lazy-initialized Beans]
 
 | Initialization method
-| <<beans-factory-lifecycle-initializingbean>>
+| xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[Initialization Callbacks]
 
 | Destruction method
-| <<beans-factory-lifecycle-disposablebean>>
+| xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[Destruction Callbacks]
 |===
 
 In addition to bean definitions that contain information on how to create a specific
@@ -95,8 +95,8 @@ You are not required to supply a `name` or an `id` for a bean. If you do not sup
 `name` or `id` explicitly, the container generates a unique name for that bean. However,
 if you want to refer to that bean by name, through the use of the `ref` element or a
 Service Locator style lookup, you must provide a name.
-Motivations for not supplying a name are related to using <<beans-inner-beans,inner
-beans>> and <<beans-factory-autowire,autowiring collaborators>>.
+Motivations for not supplying a name are related to using xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-inner-beans[inner beans]
+ and xref:core/beans/dependencies/factory-autowire.adoc[autowiring collaborators].
 
 .Bean Naming Conventions
 ****
@@ -163,7 +163,7 @@ creating a namespace), yet they refer to the same bean.
 .Java-configuration
 ****
 If you use Java Configuration, the `@Bean` annotation can be used to provide aliases.
-See <<beans-java-bean-annotation>> for details.
+See xref:core/beans/java/bean-annotation.adoc[Using the `@Bean` Annotation] for details.
 ****
 
 
@@ -179,7 +179,7 @@ If you use XML-based configuration metadata, you specify the type (or class) of 
 that is to be instantiated in the `class` attribute of the `<bean/>` element. This
 `class` attribute (which, internally, is a `Class` property on a `BeanDefinition`
 instance) is usually mandatory. (For exceptions, see
-<<beans-factory-class-instance-factory-method>> and <<beans-child-bean-definitions>>.)
+xref:core/beans/definition.adoc#beans-factory-class-instance-factory-method[Instantiation by Using an Instance Factory Method] and xref:core/beans/child-bean-definitions.adoc[Bean Definition Inheritance].)
 You can use the `Class` property in one of two ways:
 
 * Typically, to specify the bean class to be constructed in the case where the container
@@ -232,7 +232,7 @@ With XML-based configuration metadata you can specify your bean class as follows
 
 For details about the mechanism for supplying arguments to the constructor (if required)
 and setting object instance properties after the object is constructed, see
-<<beans-factory-collaborators,Injecting Dependencies>>.
+xref:core/beans/dependencies/factory-collaborators.adoc[Injecting Dependencies].
 
 
 [[beans-factory-class-static-factory-method]]
@@ -286,14 +286,14 @@ The following example shows a class that would work with the preceding bean defi
 
 For details about the mechanism for supplying (optional) arguments to the factory method
 and setting object instance properties after the object is returned from the factory,
-see <<beans-factory-properties-detailed,Dependencies and Configuration in Detail>>.
+see xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail].
 
 
 [[beans-factory-class-instance-factory-method]]
 === Instantiation by Using an Instance Factory Method
 
-Similar to instantiation through a <<beans-factory-class-static-factory-method,static
-factory method>>, instantiation with an instance factory method invokes a non-static
+Similar to instantiation through a xref:core/beans/definition.adoc#beans-factory-class-static-factory-method[static factory method]
+, instantiation with an instance factory method invokes a non-static
 method of an existing bean from the container to create a new bean. To use this
 mechanism, leave the `class` attribute empty and, in the `factory-bean` attribute,
 specify the name of a bean in the current (or parent or ancestor) container that contains
@@ -398,15 +398,15 @@ The following example shows the corresponding class:
 ----
 
 This approach shows that the factory bean itself can be managed and configured through
-dependency injection (DI). See <<beans-factory-properties-detailed,Dependencies and
-Configuration in Detail>>.
+dependency injection (DI). See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail]
+.
 
 NOTE: In Spring documentation, "factory bean" refers to a bean that is configured in the
 Spring container and that creates objects through an
-<<beans-factory-class-instance-factory-method,instance>> or
-<<beans-factory-class-static-factory-method,static>> factory method. By contrast,
+xref:core/beans/definition.adoc#beans-factory-class-instance-factory-method[instance] or
+xref:core/beans/definition.adoc#beans-factory-class-static-factory-method[static] factory method. By contrast,
 `FactoryBean` (notice the capitalization) refers to a Spring-specific
-<<beans-factory-extension-factorybean, `FactoryBean`>> implementation class.
+xref:core/beans/factory-extension.adoc#beans-factory-extension-factorybean[`FactoryBean`] implementation class.
 
 
 [[beans-factory-type-determination]]

@@ -42,7 +42,7 @@ To set up MockMvc for testing a specific controller, use the following:
 ----
 
 Or you can also use this setup when testing through the
-<<webtestclient-controller-config, WebTestClient>> which delegates to the same builder
+xref:testing/webtestclient.adoc#webtestclient-controller-config[WebTestClient] which delegates to the same builder
 as shown above.
 
 To set up MockMvc through Spring configuration, use the following:
@@ -84,7 +84,7 @@ To set up MockMvc through Spring configuration, use the following:
 ----
 
 Or you can also use this setup when testing through the
-<<webtestclient-context-config, WebTestClient>> which delegates to the same builder
+xref:testing/webtestclient.adoc#webtestclient-context-config[WebTestClient] which delegates to the same builder
 as shown above.
 
 

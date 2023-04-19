@@ -34,7 +34,7 @@ This may be due to the use of `@DirtiesContext` or due to automatic eviction fro
 `ContextCache`. If `@DirtiesContext` is the culprit, you either need to find a way to
 avoid using `@DirtiesContext` or exclude such tests from parallel execution. If the
 maximum size of the `ContextCache` has been exceeded, you can increase the maximum size
-of the cache. See the discussion on <<testcontext-ctx-management-caching, context caching>>
+of the cache. See the discussion on xref:testing/testcontext-framework/ctx-management/caching.adoc[context caching]
 for details.
 ====
 

@@ -1,7 +1,7 @@
 [[mvc-controller]]
 = Annotated Controllers
 
-[.small]#<<web-reactive.adoc#webflux-controller, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller.adoc[See equivalent in the Reactive stack]#
 
 Spring MVC provides an annotation-based programming model where `@Controller` and
 `@RestController` components use annotations to express request mappings, request input,

@@ -8,22 +8,22 @@ values, attribute aliases, and other details.
 
 Spring's testing annotations include the following:
 
-* <<spring-testing-annotation-bootstrapwith>>
-* <<spring-testing-annotation-contextconfiguration>>
-* <<spring-testing-annotation-webappconfiguration>>
-* <<spring-testing-annotation-contexthierarchy>>
-* <<spring-testing-annotation-activeprofiles>>
-* <<spring-testing-annotation-testpropertysource>>
-* <<spring-testing-annotation-dynamicpropertysource>>
-* <<spring-testing-annotation-dirtiescontext>>
-* <<spring-testing-annotation-testexecutionlisteners>>
-* <<spring-testing-annotation-recordapplicationevents>>
-* <<spring-testing-annotation-commit>>
-* <<spring-testing-annotation-rollback>>
-* <<spring-testing-annotation-beforetransaction>>
-* <<spring-testing-annotation-aftertransaction>>
-* <<spring-testing-annotation-sql>>
-* <<spring-testing-annotation-sqlconfig>>
-* <<spring-testing-annotation-sqlmergemode>>
-* <<spring-testing-annotation-sqlgroup>>
+* xref:testing/annotations/integration-spring/annotation-bootstrapwith.adoc[`@BootstrapWith`]
+* xref:testing/annotations/integration-spring/annotation-contextconfiguration.adoc[`@ContextConfiguration`]
+* xref:testing/annotations/integration-spring/annotation-webappconfiguration.adoc[`@WebAppConfiguration`]
+* xref:testing/annotations/integration-spring/annotation-contexthierarchy.adoc[`@ContextHierarchy`]
+* xref:testing/annotations/integration-spring/annotation-activeprofiles.adoc[`@ActiveProfiles`]
+* xref:testing/annotations/integration-spring/annotation-testpropertysource.adoc[`@TestPropertySource`]
+* xref:testing/annotations/integration-spring/annotation-dynamicpropertysource.adoc[`@DynamicPropertySource`]
+* xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[`@DirtiesContext`]
+* xref:testing/annotations/integration-spring/annotation-testexecutionlisteners.adoc[`@TestExecutionListeners`]
+* xref:testing/annotations/integration-spring/annotation-recordapplicationevents.adoc[`@RecordApplicationEvents`]
+* xref:testing/annotations/integration-spring/annotation-commit.adoc[`@Commit`]
+* xref:testing/annotations/integration-spring/annotation-rollback.adoc[`@Rollback`]
+* xref:testing/annotations/integration-spring/annotation-beforetransaction.adoc[`@BeforeTransaction`]
+* xref:testing/annotations/integration-spring/annotation-aftertransaction.adoc[`@AfterTransaction`]
+* xref:testing/annotations/integration-spring/annotation-sql.adoc[`@Sql`]
+* xref:testing/annotations/integration-spring/annotation-sqlconfig.adoc[`@SqlConfig`]
+* xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode`]
+* xref:testing/annotations/integration-spring/annotation-sqlgroup.adoc[`@SqlGroup`]
 

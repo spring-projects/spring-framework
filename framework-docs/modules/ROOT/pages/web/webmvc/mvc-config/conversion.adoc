@@ -1,7 +1,7 @@
 [[mvc-config-conversion]]
 = Type Conversion
 
-[.small]#<<web-reactive.adoc#webflux-config-conversion, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/config.adoc#webflux-config-conversion[See equivalent in the Reactive stack]#
 
 By default, formatters for various number and date types are installed, along with support
 for customization via `@NumberFormat` and `@DateTimeFormat` on fields.
@@ -108,7 +108,7 @@ in the HTML spec. For such cases date and time formatting can be customized as f
 	}
 ----
 
-NOTE: See <<core.adoc#format-FormatterRegistrar-SPI, the `FormatterRegistrar` SPI>>
+NOTE: See xref:core/validation/format.adoc#format-FormatterRegistrar-SPI[the `FormatterRegistrar` SPI]
 and the `FormattingConversionServiceFactoryBean` for more information on when to use
 FormatterRegistrar implementations.
 

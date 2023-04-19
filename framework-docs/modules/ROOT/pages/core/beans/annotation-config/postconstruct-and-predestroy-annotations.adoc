@@ -5,8 +5,8 @@ The `CommonAnnotationBeanPostProcessor` not only recognizes the `@Resource` anno
 but also the JSR-250 lifecycle annotations: `jakarta.annotation.PostConstruct` and
 `jakarta.annotation.PreDestroy`. Introduced in Spring 2.5, the support for these
 annotations offers an alternative to the lifecycle callback mechanism described in
-<<beans-factory-lifecycle-initializingbean,initialization callbacks>> and
-<<beans-factory-lifecycle-disposablebean,destruction callbacks>>. Provided that the
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[initialization callbacks] and
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[destruction callbacks]. Provided that the
 `CommonAnnotationBeanPostProcessor` is registered within the Spring `ApplicationContext`,
 a method carrying one of these annotations is invoked at the same point in the lifecycle
 as the corresponding Spring lifecycle interface method or explicitly declared callback
@@ -47,7 +47,7 @@ cleared upon destruction:
 ----
 
 For details about the effects of combining various lifecycle mechanisms, see
-<<beans-factory-lifecycle-combined-effects>>.
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-combined-effects[Combining Lifecycle Mechanisms].
 
 [NOTE]
 ====

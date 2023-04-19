@@ -1,11 +1,11 @@
 [[webflux-multipart-forms]]
 = Multipart Content
 
-[.small]#<<web.adoc#mvc-multipart-forms, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[See equivalent in the Servlet stack]#
 
-As explained in <<webflux-multipart>>, `ServerWebExchange` provides access to multipart
+As explained in xref:web/webflux/reactive-spring.adoc#webflux-multipart[Multipart Data], `ServerWebExchange` provides access to multipart
 content. The best way to handle a file upload form (for example, from a browser) in a controller
-is through data binding to a <<webflux-ann-modelattrib-method-args, command object>>,
+is through data binding to a xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[command object],
 as the following example shows:
 
 --
@@ -274,6 +274,6 @@ file upload.
 <6> The body contents must be completely consumed, relayed, or released to avoid memory leaks.
 
 Received part events can also be relayed to another service by using the `WebClient`.
-See <<webflux-client-body-multipart>>.
+See xref:web/webflux-webclient/client-body.adoc#webflux-client-body-multipart[Multipart Data].
 
 

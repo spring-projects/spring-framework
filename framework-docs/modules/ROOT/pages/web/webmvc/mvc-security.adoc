@@ -1,7 +1,7 @@
 [[mvc-web-security]]
 = Web Security
 
-[.small]#<<web-reactive.adoc#webflux-web-security, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/security.adoc[See equivalent in the Reactive stack]#
 
 The https://spring.io/projects/spring-security[Spring Security] project provides support
 for protecting web applications from malicious exploits. See the Spring Security

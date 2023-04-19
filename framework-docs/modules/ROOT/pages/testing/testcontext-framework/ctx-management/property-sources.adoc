@@ -137,7 +137,7 @@ declaratively by using `@PropertySource` or programmatically. Thus, test propert
 be used to selectively override properties loaded from system and application property
 sources. Furthermore, inlined properties have higher precedence than properties loaded
 from resource locations. Note, however, that properties registered via
-<<testcontext-ctx-management-dynamic-property-sources, `@DynamicPropertySource`>> have
+xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[`@DynamicPropertySource`] have
 higher precedence than those loaded via `@TestPropertySource`.
 
 In the next example, the `timezone` and `port` properties and any properties defined in
@@ -191,7 +191,7 @@ set to `false`, the locations or inlined properties, respectively, for the test 
 shadow and effectively replace the configuration defined by superclasses.
 
 NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
-classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
 
 In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
 `base.properties` file as a test property source. In contrast, the `ApplicationContext`

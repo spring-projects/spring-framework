@@ -246,10 +246,10 @@ any of the `Converter`, `ConverterFactory`, or `GenericConverter` interfaces.
 ----
 
 It is also common to use a `ConversionService` within a Spring MVC application. See
-<<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring MVC chapter.
+xref:web/webmvc/mvc-config/conversion.adoc[Conversion and Formatting] in the Spring MVC chapter.
 
 In certain situations, you may wish to apply formatting during conversion. See
-<<format-FormatterRegistry-SPI>> for details on using `FormattingConversionServiceFactoryBean`.
+xref:core/validation/format.adoc#format-FormatterRegistry-SPI[The `FormatterRegistry` SPI] for details on using `FormattingConversionServiceFactoryBean`.
 
 
 

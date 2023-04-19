@@ -10,7 +10,7 @@ finds one, it tries to use it to set the locale. By using the `RequestContext.ge
 method, you can always retrieve the locale that was resolved by the locale resolver.
 
 In addition to automatic locale resolution, you can also attach an interceptor to the
-handler mapping (see <<mvc-handlermapping-interceptor>> for more information on handler
+handler mapping (see xref:web/webmvc/mvc-servlet/handlermapping-interceptor.adoc[Interception] for more information on handler
 mapping interceptors) to change the locale under specific circumstances (for example,
 based on a parameter in the request).
 
@@ -19,11 +19,11 @@ Locale resolvers and interceptors are defined in the
 context in the normal way. The following selection of locale resolvers is included in
 Spring.
 
-* <<mvc-timezone>>
-* <<mvc-localeresolver-acceptheader>>
-* <<mvc-localeresolver-cookie>>
-* <<mvc-localeresolver-session>>
-* <<mvc-localeresolver-interceptor>>
+* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-timezone[Time Zone]
+* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-localeresolver-acceptheader[Header Resolver]
+* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-localeresolver-cookie[Cookie Resolver]
+* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-localeresolver-session[Session Resolver]
+* xref:web/webmvc/mvc-servlet/localeresolver.adoc#mvc-localeresolver-interceptor[Locale Interceptor]
 
 
 [[mvc-timezone]]

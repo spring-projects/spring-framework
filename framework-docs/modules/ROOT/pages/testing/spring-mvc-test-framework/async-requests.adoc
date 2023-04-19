@@ -2,11 +2,11 @@
 = Async Requests
 
 This section shows how to use MockMvc on its own to test asynchronous request handling.
-If using MockMvc through the <<webtestclient>>, there is nothing special to do to make
+If using MockMvc through the xref:testing/webtestclient.adoc[WebTestClient], there is nothing special to do to make
 asynchronous requests work as the `WebTestClient` automatically does what is described
 in this section.
 
-Servlet asynchronous requests, <<web.adoc#mvc-ann-async,supported in Spring MVC>>,
+Servlet asynchronous requests, xref:web/webmvc/mvc-ann-async.adoc[supported in Spring MVC],
 work by exiting the Servlet container thread and allowing the application to compute
 the response asynchronously, after which an async dispatch is made to complete
 processing on a Servlet container thread.

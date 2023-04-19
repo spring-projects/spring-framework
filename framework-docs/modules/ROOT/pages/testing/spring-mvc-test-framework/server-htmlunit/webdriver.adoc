@@ -180,7 +180,7 @@ We can easily create a Selenium WebDriver that integrates with MockMvc by using 
 ----
 
 NOTE: This is a simple example of using `MockMvcHtmlUnitDriverBuilder`. For more advanced
-usage, see <<spring-mvc-test-server-htmlunit-webdriver-advanced-builder>>.
+usage, see xref:testing/spring-mvc-test-framework/server-htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-advanced-builder[Advanced `MockMvcHtmlUnitDriverBuilder`].
 
 The preceding example ensures that any URL that references `localhost` as the server is
 directed to our `MockMvc` instance without the need for a real HTTP connection. Any other
@@ -226,9 +226,9 @@ We can then fill out the form and submit it to create a message, as follows:
 ----
 --
 
-This improves on the design of our <<spring-mvc-test-server-htmlunit-mah-usage, HtmlUnit test>>
+This improves on the design of our xref:testing/spring-mvc-test-framework/server-htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-usage[HtmlUnit test]
 by leveraging the Page Object Pattern. As we mentioned in
-<<spring-mvc-test-server-htmlunit-webdriver-why>>, we can use the Page Object Pattern
+xref:testing/spring-mvc-test-framework/server-htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-why[Why WebDriver and MockMvc?], we can use the Page Object Pattern
 with HtmlUnit, but it is much easier with WebDriver. Consider the following
 `CreateMessagePage` implementation:
 
@@ -499,5 +499,5 @@ This is more verbose, but, by building the `WebDriver` with a `MockMvc` instance
 the full power of MockMvc at our fingertips.
 
 TIP: For additional information on creating a `MockMvc` instance, see
-<<spring-mvc-test-server-setup-options>>.
+xref:testing/spring-mvc-test-framework/server-setup-options.adoc[Setup Choices].
 

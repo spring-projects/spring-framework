@@ -181,7 +181,7 @@ callback interface. In the following example, the `mailSender` property is of ty
 ----
 
 NOTE: The mail code is a crosscutting concern and could well be a candidate for
-refactoring into a <<core.adoc#aop, custom Spring AOP aspect>>, which could then
+refactoring into a xref:core/aop.adoc[custom Spring AOP aspect], which could then
 be run at appropriate joinpoints on the `OrderManager` target.
 
 The Spring Framework's mail support ships with the standard JavaMail implementation.

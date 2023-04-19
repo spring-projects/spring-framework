@@ -22,7 +22,7 @@ additional metadata formats.
 In most application scenarios, explicit user code is not required to instantiate one or
 more instances of a Spring IoC container. For example, in a web application scenario, a
 simple eight (or so) lines of boilerplate web descriptor XML in the `web.xml` file
-of the application typically suffices (see <<context-create>>). If you use the
+of the application typically suffices (see xref:core/beans/context-introduction.adoc#context-create[Convenient ApplicationContext Instantiation for Web Applications]). If you use the
 https://spring.io/tools[Spring Tools for Eclipse] (an Eclipse-powered development
 environment), you can easily create this boilerplate configuration with a few mouse clicks or
 keystrokes.
@@ -52,13 +52,13 @@ Spring IoC container.
 NOTE: XML-based metadata is not the only allowed form of configuration metadata.
 The Spring IoC container itself is totally decoupled from the format in which this
 configuration metadata is actually written. These days, many developers choose
-<<beans-java, Java-based configuration>> for their Spring applications.
+xref:core/beans/java.adoc[Java-based configuration] for their Spring applications.
 
 For information about using other forms of metadata with the Spring container, see:
 
-* <<beans-annotation-config,Annotation-based configuration>>: define beans using
+* xref:core/beans/annotation-config.adoc[Annotation-based configuration]: define beans using
   annotation-based configuration metadata.
-* <<beans-java, Java-based configuration>>: define beans external to your application
+* xref:core/beans/java.adoc[Java-based configuration]: define beans external to your application
   classes by using Java rather than XML files. To use these features, see the
   {api-spring-framework}/context/annotation/Configuration.html[`@Configuration`],
   {api-spring-framework}/context/annotation/Bean.html[`@Bean`],
@@ -107,7 +107,7 @@ class name.
 
 The value of the `id` attribute can be used to refer to collaborating objects. The XML
 for referring to collaborating objects is not shown in this example. See
-<<beans-dependencies,Dependencies>> for more information.
+xref:core/beans/dependencies.adoc[Dependencies] for more information.
 
 
 
@@ -133,9 +133,9 @@ as the local file system, the Java `CLASSPATH`, and so on.
 [NOTE]
 ====
 After you learn about Spring's IoC container, you may want to know more about Spring's
-`Resource` abstraction (as described in <<resources>>), which provides a convenient
+`Resource` abstraction (as described in xref:web/webflux-webclient/client-builder.adoc#webflux-client-builder-reactor-resources[Resources]), which provides a convenient
 mechanism for reading an InputStream from locations defined in a URI syntax. In particular,
-`Resource` paths are used to construct applications contexts, as described in <<resources-app-ctx>>.
+`Resource` paths are used to construct applications contexts, as described in xref:core/resources.adoc#resources-app-ctx[Application Contexts and Resource Paths].
 ====
 
 The following example shows the service layer objects `(services.xml)` configuration file:
@@ -191,7 +191,7 @@ on the JPA Object-Relational Mapping standard). The `property name` element refe
 name of the JavaBean property, and the `ref` element refers to the name of another bean
 definition. This linkage between `id` and `ref` elements expresses the dependency between
 collaborating objects. For details of configuring an object's dependencies, see
-<<beans-dependencies,Dependencies>>.
+xref:core/beans/dependencies.adoc[Dependencies].
 
 
 [[beans-factory-xml-import]]
@@ -202,7 +202,7 @@ XML configuration file represents a logical layer or module in your architecture
 
 You can use the application context constructor to load bean definitions from all these
 XML fragments. This constructor takes multiple `Resource` locations, as was shown in the
-<<beans-factory-instantiation, previous section>>. Alternatively, use one or more
+xref:core/beans/basics.adoc#beans-factory-instantiation[previous section]. Alternatively, use one or more
 occurrences of the `<import/>` element to load bean definitions from another file or
 files. The following example shows how to do so:
 

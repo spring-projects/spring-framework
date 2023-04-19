@@ -41,7 +41,7 @@ We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by usi
 ----
 
 NOTE: This is a simple example of using `MockMvcWebClientBuilder`. For advanced usage,
-see <<spring-mvc-test-server-htmlunit-mah-advanced-builder>>.
+see xref:testing/spring-mvc-test-framework/server-htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-advanced-builder[Advanced `MockMvcWebClientBuilder`].
 
 This ensures that any URL that references `localhost` as the server is directed to our
 `MockMvc` instance without the need for a real HTTP connection. Any other URL is
@@ -68,7 +68,7 @@ message with the following:
 ----
 
 NOTE: The default context path is `""`. Alternatively, we can specify the context path,
-as described in <<spring-mvc-test-server-htmlunit-mah-advanced-builder>>.
+as described in xref:testing/spring-mvc-test-framework/server-htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-advanced-builder[Advanced `MockMvcWebClientBuilder`].
 
 Once we have a reference to the `HtmlPage`, we can then fill out the form and submit it
 to create a message, as the following example shows:
@@ -123,7 +123,7 @@ assertions use the https://assertj.github.io/doc/[AssertJ] library:
 ----
 
 The preceding code improves on our
-<<spring-mvc-test-server-htmlunit-mock-mvc-test, MockMvc test>> in a number of ways.
+xref:testing/spring-mvc-test-framework/server-htmlunit/why.adoc#spring-mvc-test-server-htmlunit-mock-mvc-test[MockMvc test] in a number of ways.
 First, we no longer have to explicitly verify our form and then create a request that
 looks like the form. Instead, we request the form, fill it out, and submit it, thereby
 significantly reducing the overhead.
@@ -238,5 +238,5 @@ This is more verbose, but, by building the `WebClient` with a `MockMvc` instance
 the full power of MockMvc at our fingertips.
 
 TIP: For additional information on creating a `MockMvc` instance, see
-<<spring-mvc-test-server-setup-options>>.
+xref:testing/spring-mvc-test-framework/server-setup-options.adoc[Setup Choices].
 

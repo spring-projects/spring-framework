@@ -1,7 +1,7 @@
 [[websocket-stomp-interceptors]]
 = Interception
 
-<<websocket-stomp-application-context-events>> provide notifications for the lifecycle
+xref:web/websocket/stomp/application-context-events.adoc[Events] provide notifications for the lifecycle
 of a STOMP connection but not for every client message. Applications can also register a
 `ChannelInterceptor` to intercept any message and in any part of the processing chain.
 The following example shows how to intercept inbound messages from clients:

@@ -22,7 +22,7 @@ default Servlet with `"/"` or otherwise without a prefix with `"/*"` and the Ser
 container is 4.0+ then Spring MVC is able to detect the Servlet mapping type and avoid
 use of the `servletPath` and `pathInfo` altogether. On a 3.1 Servlet container,
 assuming the same Servlet mapping types, the equivalent can be achieved by providing
-a `UrlPathHelper` with `alwaysUseFullPath=true` via <<mvc-config-path-matching>> in
+a `UrlPathHelper` with `alwaysUseFullPath=true` via xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching] in
 the MVC config.
 
 Fortunately the default Servlet mapping `"/"` is a good choice. However, there is still
@@ -45,7 +45,7 @@ sanitizing path segment values individually without the risk of altering the str
 of the path. Parsed `PathPattern` also supports the use of `servletPath` prefix mapping
 as long as a Servlet path mapping is used and the prefix is kept simple, i.e. it has no
 encoded characters. For pattern syntax details and comparison, see
-<<mvc-ann-requestmapping-pattern-comparison>>.
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-pattern-comparison[Pattern Comparison].
 
 
 

@@ -15,18 +15,18 @@ to), AOP complements Spring IoC to provide a very capable middleware solution.
 .Spring AOP with AspectJ pointcuts
 ****
 Spring provides simple and powerful ways of writing custom aspects by using either a
-<<aop-schema, schema-based approach>> or the <<aop-ataspectj, @AspectJ annotation style>>.
+xref:core/aop/schema.adoc[schema-based approach] or the xref:core/aop/ataspectj.adoc[@AspectJ annotation style].
 Both of these styles offer fully typed advice and use of the AspectJ pointcut language
 while still using Spring AOP for weaving.
 
 This chapter discusses the schema- and @AspectJ-based AOP support.
-The lower-level AOP support is discussed in <<aop-api, the following chapter>>.
+The lower-level AOP support is discussed in xref:core/aop-api.adoc[the following chapter].
 ****
 
 AOP is used in the Spring Framework to:
 
 * Provide declarative enterprise services. The most important such service is
-  <<data-access.adoc#transaction-declarative, declarative transaction management>>.
+  xref:data-access/transaction/declarative.adoc[declarative transaction management].
 * Let users implement custom aspects, complementing their use of OOP with AOP.
 
 NOTE: If you are interested only in generic declarative services or other pre-packaged

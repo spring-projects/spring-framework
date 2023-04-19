@@ -3,8 +3,8 @@
 
 Navigating with property references is easy. To do so, use a period to indicate a nested
 property value. The instances of the `Inventor` class, `pupin` and `tesla`, were
-populated with data listed in the <<expressions-example-classes, Classes used in the
-examples>> section. To navigate "down" the object graph and get Tesla's year of birth and
+populated with data listed in the xref:core/expressions/example-classes.adoc[Classes used in the examples]
+ section. To navigate "down" the object graph and get Tesla's year of birth and
 Pupin's city of birth, we use the following expressions:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

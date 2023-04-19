@@ -22,7 +22,7 @@ transaction management. The following listing shows the definition of the
 ----
 
 This is primarily a service provider interface (SPI), although you can use it
-<<transaction-programmatic-ptm, programmatically>> from your application code. Because
+xref:data-access/transaction/programmatic.adoc#transaction-programmatic-ptm[programmatically] from your application code. Because
 `PlatformTransactionManager` is an interface, it can be easily mocked or stubbed as
 necessary. It is not tied to a lookup strategy, such as JNDI.
 `PlatformTransactionManager` implementations are defined like any other object (or bean)
@@ -63,7 +63,7 @@ listing shows the transaction strategy defined by
 ----
 
 The reactive transaction manager is primarily a service provider interface (SPI),
-although you can use it <<transaction-programmatic-rtm, programmatically>> from your
+although you can use it xref:data-access/transaction/programmatic.adoc#transaction-programmatic-rtm[programmatically] from your
 application code. Because `ReactiveTransactionManager` is an interface, it can be easily
 mocked or stubbed as necessary.
 
@@ -75,7 +75,7 @@ The `TransactionDefinition` interface specifies:
   example, code can continue running in the existing transaction (the common case), or
   the existing transaction can be suspended and a new transaction created. Spring
   offers all of the transaction propagation options familiar from EJB CMT. To read
-  about the semantics of transaction propagation in Spring, see <<tx-propagation>>.
+  about the semantics of transaction propagation in Spring, see xref:data-access/transaction/declarative/tx-propagation.adoc[Transaction Propagation].
 * Isolation: The degree to which this transaction is isolated from the work of other
   transactions. For example, can this transaction see uncommitted writes from other
   transactions?
@@ -179,7 +179,7 @@ infrastructure.
 
 NOTE: The preceding definition of the `dataSource` bean uses the `<jndi-lookup/>` tag
 from the `jee` namespace. For more information see
-<<integration.adoc#integration.appendix.xsd-schemas-jee, The JEE Schema>>.
+xref:integration/appendix.adoc#integration.appendix.xsd-schemas-jee[The JEE Schema].
 
 NOTE: If you use JTA, your transaction manager definition should look the same, regardless
 of what data access technology you use, be it JDBC, Hibernate JPA, or any other supported

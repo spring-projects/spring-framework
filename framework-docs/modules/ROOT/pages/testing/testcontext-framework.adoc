@@ -17,9 +17,9 @@ required to extend a particular class hierarchy, such as the `abstract` support 
 The following section provides an overview of the internals of the TestContext framework.
 If you are interested only in using the framework and are not interested in extending it
 with your own custom listeners or custom loaders, feel free to go directly to the
-configuration (<<testcontext-ctx-management, context management>>,
-<<testcontext-fixture-di, dependency injection>>, <<testcontext-tx,transaction
-management>>), <<testcontext-support-classes, support classes>>, and
-<<integration-testing-annotations, annotation support>> sections.
+configuration (xref:testing/testcontext-framework/ctx-management.adoc[context management],
+xref:testing/testcontext-framework/fixture-di.adoc[dependency injection], xref:testing/testcontext-framework/tx.adoc[transaction management]
+), xref:testing/testcontext-framework/support-classes.adoc[support classes], and
+xref:testing/annotations.adoc[annotation support] sections.
 
 

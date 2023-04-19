@@ -1,7 +1,7 @@
 [[mvc-exceptionhandlers]]
 = Exceptions
 
-[.small]#<<web-reactive.adoc#webflux-dispatcher-exceptions, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/dispatcher-handler.adoc#webflux-dispatcher-exceptions[See equivalent in the Reactive stack]#
 
 If an exception occurs during request mapping or is thrown from a request handler (such as
 a `@Controller`), the `DispatcherServlet` delegates to a chain of `HandlerExceptionResolver`
@@ -21,7 +21,7 @@ The following table lists the available `HandlerExceptionResolver` implementatio
 
 | {api-spring-framework}/web/servlet/mvc/support/DefaultHandlerExceptionResolver.html[`DefaultHandlerExceptionResolver`]
 | Resolves exceptions raised by Spring MVC and maps them to HTTP status codes.
-  See also alternative `ResponseEntityExceptionHandler` and <<mvc-ann-rest-exceptions>>.
+  See also alternative `ResponseEntityExceptionHandler` and xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses].
 
 | `ResponseStatusExceptionResolver`
 | Resolves exceptions with the `@ResponseStatus` annotation and maps them to HTTP status
@@ -29,7 +29,7 @@ The following table lists the available `HandlerExceptionResolver` implementatio
 
 | `ExceptionHandlerExceptionResolver`
 | Resolves exceptions by invoking an `@ExceptionHandler` method in a `@Controller` or a
-  `@ControllerAdvice` class. See <<mvc-ann-exceptionhandler, @ExceptionHandler methods>>.
+  `@ControllerAdvice` class. See xref:web/webmvc/mvc-controller/ann-exceptionhandler.adoc[@ExceptionHandler methods].
 |===
 
 
@@ -47,7 +47,7 @@ The contract of `HandlerExceptionResolver` specifies that it can return:
 * `null` if the exception remains unresolved, for subsequent resolvers to try, and, if the
 exception remains at the end, it is allowed to bubble up to the Servlet container.
 
-The <<mvc-config>> automatically declares built-in resolvers for default Spring MVC
+The xref:web/webmvc/mvc-config.adoc[MVC Config] automatically declares built-in resolvers for default Spring MVC
 exceptions, for `@ResponseStatus` annotated exceptions, and for support of
 `@ExceptionHandler` methods. You can customize that list or replace it.
 

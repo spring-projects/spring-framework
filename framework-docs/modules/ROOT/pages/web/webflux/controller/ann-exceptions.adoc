@@ -1,9 +1,9 @@
 [[webflux-ann-controller-exceptions]]
 = Exceptions
 
-[.small]#<<web.adoc#mvc-ann-exceptionhandler, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-exceptionhandler.adoc[See equivalent in the Servlet stack]#
 
-`@Controller` and <<webflux-ann-controller-advice, @ControllerAdvice>> classes can have
+`@Controller` and xref:web/webflux/controller/ann-advice.adoc[@ControllerAdvice] classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods. The following
 example includes such a handler method:
 
@@ -49,32 +49,32 @@ as shown in the preceding example. Alternatively, the annotation declaration can
 exception types to match. We generally recommend being as specific as possible in the
 argument signature and to declare your primary root exception mappings on a
 `@ControllerAdvice` prioritized with a corresponding order.
-See <<web.adoc#mvc-ann-exceptionhandler, the MVC section>> for details.
+See xref:web/webmvc/mvc-controller/ann-exceptionhandler.adoc[the MVC section] for details.
 
 NOTE: An `@ExceptionHandler` method in WebFlux supports the same method arguments and
 return values as a `@RequestMapping` method, with the exception of request body-
 and `@ModelAttribute`-related method arguments.
 
 Support for `@ExceptionHandler` methods in Spring WebFlux is provided by the
-`HandlerAdapter` for `@RequestMapping` methods. See <<webflux-dispatcher-handler>>
+`HandlerAdapter` for `@RequestMapping` methods. See xref:web/webflux/dispatcher-handler.adoc[`DispatcherHandler`]
 for more detail.
 
 
 
 [[webflux-ann-exceptionhandler-args]]
 == Method Arguments
-[.small]#<<web.adoc#mvc-ann-exceptionhandler-args, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-exceptionhandler.adoc#mvc-ann-exceptionhandler-args[See equivalent in the Servlet stack]#
 
-`@ExceptionHandler` methods support the same <<webflux-ann-arguments,method arguments>>
+`@ExceptionHandler` methods support the same xref:web/webflux/controller/ann-methods/arguments.adoc[method arguments]
 as `@RequestMapping` methods, except the request body might have been consumed already.
 
 
 
 [[webflux-ann-exceptionhandler-return-values]]
 == Return Values
-[.small]#<<web.adoc#mvc-ann-exceptionhandler-return-values, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-exceptionhandler.adoc#mvc-ann-exceptionhandler-return-values[See equivalent in the Servlet stack]#
 
-`@ExceptionHandler` methods support the same <<webflux-ann-return-types,return values>>
+`@ExceptionHandler` methods support the same xref:web/webflux/controller/ann-methods/return-types.adoc[return values]
 as `@RequestMapping` methods.
 
 

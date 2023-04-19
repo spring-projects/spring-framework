@@ -1,7 +1,7 @@
 [[mvc-multipart]]
 = Multipart Resolver
 
-[.small]#<<web-reactive.adoc#webflux-multipart, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-multipart[See equivalent in the Reactive stack]#
 
 `MultipartResolver` from the `org.springframework.web.multipart` package is a strategy
 for parsing multipart requests including file uploads. There is a container-based

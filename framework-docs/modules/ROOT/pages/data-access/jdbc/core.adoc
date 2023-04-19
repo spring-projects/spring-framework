@@ -4,13 +4,13 @@
 This section covers how to use the JDBC core classes to control basic JDBC processing,
 including error handling. It includes the following topics:
 
-* <<jdbc-JdbcTemplate>>
-* <<jdbc-NamedParameterJdbcTemplate>>
-* <<jdbc-SQLExceptionTranslator>>
-* <<jdbc-statements-executing>>
-* <<jdbc-statements-querying>>
-* <<jdbc-updates>>
-* <<jdbc-auto-generated-keys>>
+* xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate[Using `JdbcTemplate`]
+* xref:data-access/jdbc/core.adoc#jdbc-NamedParameterJdbcTemplate[Using `NamedParameterJdbcTemplate`]
+* xref:data-access/jdbc/core.adoc#jdbc-SQLExceptionTranslator[Using `SQLExceptionTranslator`]
+* xref:data-access/jdbc/core.adoc#jdbc-statements-executing[Running Statements]
+* xref:data-access/jdbc/core.adoc#jdbc-statements-querying[Running Queries]
+* xref:data-access/jdbc/core.adoc#jdbc-updates[Updating the Database]
+* xref:data-access/jdbc/core.adoc#jdbc-auto-generated-keys[Retrieving Auto-generated Keys]
 
 
 [[jdbc-JdbcTemplate]]
@@ -26,7 +26,7 @@ SQL and extract results. The `JdbcTemplate` class:
 * Updates statements and stored procedure calls
 * Performs iteration over `ResultSet` instances and extraction of returned parameter values.
 * Catches JDBC exceptions and translates them to the generic, more informative, exception
-hierarchy defined in the `org.springframework.dao` package. (See <<dao-exceptions>>.)
+hierarchy defined in the `org.springframework.dao` package. (See xref:data-access/dao.adoc#dao-exceptions[Consistent Exception Hierarchy].)
 
 When you use the `JdbcTemplate` for your code, you need only to implement callback
 interfaces, giving them a clearly defined contract. Given a `Connection` provided by the
@@ -270,7 +270,7 @@ The following example invokes a stored procedure:
 ----
 
 
-More sophisticated stored procedure support is <<jdbc-StoredProcedure, covered later>>.
+More sophisticated stored procedure support is xref:data-access/jdbc/object.adoc#jdbc-StoredProcedure[covered later].
 
 [[jdbc-JdbcTemplate-idioms]]
 === `JdbcTemplate` Best Practices
@@ -282,7 +282,7 @@ The `JdbcTemplate` is stateful, in that it maintains a reference to a `DataSourc
 this state is not conversational state.
 
 A common practice when using the `JdbcTemplate` class (and the associated
-<<jdbc-NamedParameterJdbcTemplate, `NamedParameterJdbcTemplate`>> class) is to
+xref:data-access/jdbc/core.adoc#jdbc-NamedParameterJdbcTemplate[`NamedParameterJdbcTemplate`] class) is to
 configure a `DataSource` in your Spring configuration file and then dependency-inject
 that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is created in
 the setter for the `DataSource`. This leads to DAOs that resemble the following:
@@ -607,7 +607,7 @@ functionality that is present only in the `JdbcTemplate` class, you can use the
 `getJdbcOperations()` method to access the wrapped `JdbcTemplate` through the
 `JdbcOperations` interface.
 
-See also <<jdbc-JdbcTemplate-idioms>> for guidelines on using the
+See also xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate-idioms[`JdbcTemplate` Best Practices] for guidelines on using the
 `NamedParameterJdbcTemplate` class in the context of an application.
 
 

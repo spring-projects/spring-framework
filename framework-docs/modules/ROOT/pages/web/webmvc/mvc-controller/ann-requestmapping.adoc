@@ -1,7 +1,7 @@
 [[mvc-ann-requestmapping]]
 = Request Mapping
 
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc[See equivalent in the Reactive stack]#
 
 You can use the `@RequestMapping` annotation to map requests to controllers methods. It has
 various attributes to match by URL, HTTP method, request parameters, headers, and media
@@ -16,7 +16,7 @@ There are also HTTP method specific shortcut variants of `@RequestMapping`:
 * `@DeleteMapping`
 * `@PatchMapping`
 
-The shortcuts are <<mvc-ann-requestmapping-composed>> that are provided because,
+The shortcuts are xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-composed[Custom Annotations] that are provided because,
 arguably, most controller methods should be mapped to a specific HTTP method versus
 using `@RequestMapping`, which, by default, matches to all HTTP methods.
 A `@RequestMapping` is still needed at the class level to express shared mappings.
@@ -66,7 +66,7 @@ The following example has type and method level mappings:
 
 [[mvc-ann-requestmapping-uri-templates]]
 == URI patterns
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-uri-templates, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-uri-templates[See equivalent in the Reactive stack]#
 
 `@RequestMapping` methods can be mapped using URL patterns. There are two alternatives:
 
@@ -80,7 +80,7 @@ challenge for dealing effectively with encoding and other issues with URLs.
 
 `PathPattern` is the recommended solution for web applications and it is the only choice in
 Spring WebFlux. It was enabled for use in Spring MVC from version 5.3 and is enabled by
-default from version 6.0. See <<mvc-config-path-matching, MVC config>> for
+default from version 6.0. See xref:web/webmvc/mvc-config/path-matching.adoc[MVC config] for
 customizations of path matching options.
 
 `PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition, it also
@@ -152,7 +152,7 @@ You can declare URI variables at the class and method levels, as the following e
 URI variables are automatically converted to the appropriate type, or `TypeMismatchException`
 is raised. Simple types (`int`, `long`, `Date`, and so on) are supported by default and you can
 register support for any other data type.
-See <<mvc-ann-typeconversion>> and <<mvc-ann-initbinder>>.
+See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion] and xref:web/webmvc/mvc-controller/ann-initbinder.adoc[`DataBinder`].
 
 You can explicitly name URI variables (for example, `@PathVariable("customId")`), but you can
 leave that detail out if the names are the same and your code is compiled with the `-parameters`
@@ -188,7 +188,7 @@ some external configuration.
 
 [[mvc-ann-requestmapping-pattern-comparison]]
 == Pattern Comparison
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-pattern-comparison, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-pattern-comparison[See equivalent in the Reactive stack]#
 
 When multiple patterns match a URL, the best match must be selected. This is done with
 one of the following depending on whether use of parsed `PathPattern` is enabled for use or not:
@@ -229,14 +229,14 @@ and security (see next section for more details) also becomes more difficult.
 
 To completely disable the use of path extensions in versions prior to 5.3, set the following:
 
-* `useSuffixPatternMatching(false)`, see <<mvc-config-path-matching, PathMatchConfigurer>>
-* `favorPathExtension(false)`, see <<mvc-config-content-negotiation, ContentNegotiationConfigurer>>
+* `useSuffixPatternMatching(false)`, see xref:web/webmvc/mvc-config/path-matching.adoc[PathMatchConfigurer]
+* `favorPathExtension(false)`, see xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer]
 
 Having a way to request content types other than through the `"Accept"` header can still
 be useful, e.g. when typing a URL in a browser. A safe alternative to path extensions is
 to use the query parameter strategy. If you must use file extensions, consider restricting
 them to a list of explicitly registered extensions through the `mediaTypes` property of
-<<mvc-config-content-negotiation,ContentNegotiationConfigurer>>.
+xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer].
 
 
 [[mvc-ann-requestmapping-rfd]]
@@ -261,7 +261,7 @@ potentially have side effects when URLs are typed directly into a browser.
 Many common path extensions are allowed as safe by default. Applications with custom
 `HttpMessageConverter` implementations can explicitly register file extensions for content
 negotiation to avoid having a `Content-Disposition` header added for those extensions.
-See <<mvc-config-content-negotiation>>.
+See xref:web/webmvc/mvc-config/content-negotiation.adoc[Content Types].
 
 See https://pivotal.io/security/cve-2015-5211[CVE-2015-5211] for additional
 recommendations related to RFD.
@@ -269,7 +269,7 @@ recommendations related to RFD.
 
 [[mvc-ann-requestmapping-consumes]]
 == Consumable Media Types
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-consumes, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-consumes[See equivalent in the Reactive stack]#
 
 You can narrow the request mapping based on the `Content-Type` of the request,
 as the following example shows:
@@ -307,7 +307,7 @@ TIP: `MediaType` provides constants for commonly used media types, such as
 
 [[mvc-ann-requestmapping-produces]]
 == Producible Media Types
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-produces, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-produces[See equivalent in the Reactive stack]#
 
 You can narrow the request mapping based on the `Accept` request header and the list of
 content types that a controller method produces, as the following example shows:
@@ -347,7 +347,7 @@ TIP: `MediaType` provides constants for commonly used media types, such as
 
 [[mvc-ann-requestmapping-params-and-headers]]
 == Parameters, headers
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-params-and-headers, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-params-and-headers[See equivalent in the Reactive stack]#
 
 You can narrow request mappings based on request parameter conditions. You can test for the
 presence of a request parameter (`myParam`), for the absence of one (`!myParam`), or for a
@@ -396,13 +396,13 @@ You can also use the same with request header conditions, as the following examp
 <1> Testing whether `myHeader` equals `myValue`.
 
 TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is better to use
-<<mvc-ann-requestmapping-consumes, consumes>> and <<mvc-ann-requestmapping-produces, produces>>
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-consumes[consumes] and xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-produces[produces]
 instead.
 
 
 [[mvc-ann-requestmapping-head-options]]
 == HTTP HEAD, OPTIONS
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-head-options, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-head-options[See equivalent in the Reactive stack]#
 
 `@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) support HTTP HEAD
 transparently for request mapping. Controller methods do not need to change.
@@ -428,9 +428,9 @@ is not necessary in the common case.
 
 [[mvc-ann-requestmapping-composed]]
 == Custom Annotations
-[.small]#<<web-reactive.adoc#mvc-ann-requestmapping-head-options, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-head-options[See equivalent in the Reactive stack]#
 
-Spring MVC supports the use of <<core.adoc#beans-meta-annotations, composed annotations>>
+Spring MVC supports the use of xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[composed annotations]
 for request mapping. Those are annotations that are themselves meta-annotated with
 `@RequestMapping` and composed to redeclare a subset (or all) of the `@RequestMapping`
 attributes with a narrower, more specific purpose.
@@ -449,7 +449,7 @@ you can check the custom attribute and return your own `RequestCondition`.
 
 [[mvc-ann-requestmapping-registration]]
 == Explicit Registrations
-[.small]#<<web-reactive.adoc#webflux-ann-requestmapping-registration, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-registration[See equivalent in the Reactive stack]#
 
 You can programmatically register handler methods, which you can use for dynamic
 registrations or for advanced cases, such as different instances of the same handler

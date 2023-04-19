@@ -67,15 +67,15 @@ The pertinent bean definition from the preceding configuration snippet is the `e
 bean. The `beans` property tells the `MBeanExporter` exactly which of your beans must be
 exported to the JMX `MBeanServer`. In the default configuration, the key of each entry
 in the `beans` `Map` is used as the `ObjectName` for the bean referenced by the
-corresponding entry value. You can change this behavior, as described in <<jmx-naming>>.
+corresponding entry value. You can change this behavior, as described in xref:integration/jmx/naming.adoc[Controlling  `ObjectName` Instances for Your Beans].
 
 With this configuration, the `testBean` bean is exposed as an MBean under the
 `ObjectName` `bean:name=testBean1`. By default, all `public` properties of the bean
 are exposed as attributes and all `public` methods (except those inherited from the
 `Object` class) are exposed as operations.
 
-NOTE: `MBeanExporter` is a `Lifecycle` bean (see <<core.adoc#beans-factory-lifecycle-processor,
-Startup and Shutdown Callbacks>>). By default, MBeans are exported as late as possible during
+NOTE: `MBeanExporter` is a `Lifecycle` bean (see xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-processor[Startup and Shutdown Callbacks]
+). By default, MBeans are exported as late as possible during
 the application lifecycle. You can configure the `phase` at which
 the export happens or disable automatic registration by setting the `autoStartup` flag.
 
@@ -83,7 +83,7 @@ the export happens or disable automatic registration by setting the `autoStartup
 [[jmx-exporting-mbeanserver]]
 == Creating an MBeanServer
 
-The configuration shown in the <<jmx-exporting, preceding section>> assumes that the
+The configuration shown in the xref:integration/jmx/exporting.adoc[preceding section] assumes that the
 application is running in an environment that has one (and only one) `MBeanServer`
 already running. In this case, Spring tries to locate the running `MBeanServer` and
 register your beans with that server (if any). This behavior is useful when your
@@ -159,7 +159,7 @@ be used, as the following example shows:
 
 For platforms or cases where the existing `MBeanServer` has a dynamic (or unknown)
 `agentId` that is retrieved through lookup methods, you should use
-<<core.adoc#beans-factory-class-static-factory-method, factory-method>>,
+xref:core/beans/definition.adoc#beans-factory-class-static-factory-method[factory-method],
 as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -208,7 +208,7 @@ property to `true`, as the following example shows:
 In the preceding example, the bean called `spring:mbean=true` is already a valid JMX MBean
 and is automatically registered by Spring. By default, a bean that is autodetected for JMX
 registration has its bean name used as the `ObjectName`. You can override this behavior,
-as detailed in <<jmx-naming>>.
+as detailed in xref:integration/jmx/naming.adoc[Controlling  `ObjectName` Instances for Your Beans].
 
 
 [[jmx-exporting-registration-behavior]]

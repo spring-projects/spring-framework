@@ -40,7 +40,7 @@ In common with most `FactoryBean` implementations provided with Spring, the
 `ProxyFactoryBean` class is itself a JavaBean. Its properties are used to:
 
 * Specify the target you want to proxy.
-* Specify whether to use CGLIB (described later and see also <<aop-pfb-proxy-types>>).
+* Specify whether to use CGLIB (described later and see also xref:core/aop-api/pfb.adoc#aop-pfb-proxy-types[JDK- and CGLIB-based proxies]).
 
 Some key properties are inherited from `org.springframework.aop.framework.ProxyConfig`
 (the superclass for all AOP proxy factories in Spring). These key properties include
@@ -48,7 +48,7 @@ the following:
 
 * `proxyTargetClass`: `true` if the target class is to be proxied, rather than the
   target class's interfaces. If this property value is set to `true`, then CGLIB proxies
-  are created (but see also <<aop-pfb-proxy-types>>).
+  are created (but see also xref:core/aop-api/pfb.adoc#aop-pfb-proxy-types[JDK- and CGLIB-based proxies]).
 * `optimize`: Controls whether or not aggressive optimizations are applied to proxies
   created through CGLIB. You should not blithely use this setting unless you fully
   understand how the relevant AOP proxy handles optimization. This is currently used
@@ -66,7 +66,7 @@ the following:
 Other properties specific to `ProxyFactoryBean` include the following:
 
 * `proxyInterfaces`: An array of `String` interface names. If this is not supplied, a CGLIB
-  proxy for the target class is used (but see also <<aop-pfb-proxy-types>>).
+  proxy for the target class is used (but see also xref:core/aop-api/pfb.adoc#aop-pfb-proxy-types[JDK- and CGLIB-based proxies]).
 * `interceptorNames`: A `String` array of `Advisor`, interceptor, or other advice names to
   apply. Ordering is significant, on a first come-first served basis. That is to say
   that the first interceptor in the list is the first to be able to intercept the
@@ -78,7 +78,7 @@ factories. You cannot mention bean references here, since doing so results in th
 +
 You can append an interceptor name with an asterisk (`*`). Doing so results in the
 application of all advisor beans with names that start with the part before the asterisk
-to be applied. You can find an example of using this feature in <<aop-global-advisors>>.
+to be applied. You can find an example of using this feature in xref:core/aop-api/pfb.adoc#aop-global-advisors[Using "`Global`" Advisors].
 
 * singleton: Whether or not the factory should return a single object, no matter how
   often the `getObject()` method is called. Several `FactoryBean` implementations offer

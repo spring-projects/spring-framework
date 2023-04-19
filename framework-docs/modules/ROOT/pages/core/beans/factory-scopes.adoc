@@ -14,7 +14,7 @@ through configuration instead of having to bake in the scope of an object at the
 class level. Beans can be defined to be deployed in one of a number of scopes.
 The Spring Framework supports six scopes, four of which are available only if
 you use a web-aware `ApplicationContext`. You can also create
-<<beans-factory-scopes-custom,a custom scope.>>
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-custom[a custom scope.]
 
 The following table describes the supported scopes:
 
@@ -24,27 +24,27 @@ The following table describes the supported scopes:
 |===
 | Scope| Description
 
-| <<beans-factory-scopes-singleton,singleton>>
+| xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singleton]
 | (Default) Scopes a single bean definition to a single object instance for each Spring IoC
   container.
 
-| <<beans-factory-scopes-prototype,prototype>>
+| xref:core/beans/factory-scopes.adoc#beans-factory-scopes-prototype[prototype]
 | Scopes a single bean definition to any number of object instances.
 
-| <<beans-factory-scopes-request,request>>
+| xref:core/beans/factory-scopes.adoc#beans-factory-scopes-request[request]
 | Scopes a single bean definition to the lifecycle of a single HTTP request. That is,
   each HTTP request has its own instance of a bean created off the back of a single bean
   definition. Only valid in the context of a web-aware Spring `ApplicationContext`.
 
-| <<beans-factory-scopes-session,session>>
+| xref:core/beans/factory-scopes.adoc#beans-factory-scopes-session[session]
 | Scopes a single bean definition to the lifecycle of an HTTP `Session`. Only valid in
   the context of a web-aware Spring `ApplicationContext`.
 
-| <<beans-factory-scopes-application,application>>
+| xref:core/beans/factory-scopes.adoc#beans-factory-scopes-application[application]
 | Scopes a single bean definition to the lifecycle of a `ServletContext`. Only valid in
   the context of a web-aware Spring `ApplicationContext`.
 
-| <<web.adoc#websocket-stomp-websocket-scope,websocket>>
+| xref:web/websocket/stomp/scope.adoc[websocket]
 | Scopes a single bean definition to the lifecycle of a `WebSocket`. Only valid in
   the context of a web-aware Spring `ApplicationContext`.
 |===
@@ -53,7 +53,7 @@ NOTE: A thread scope is available but is not registered by default. For more inf
 see the documentation for
 {api-spring-framework}/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
 For instructions on how to register this or any other custom scope, see
-<<beans-factory-scopes-custom-using>>.
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-custom-using[Using a Custom Scope].
 
 
 
@@ -125,13 +125,13 @@ objects regardless of scope, in the case of prototypes, configured destruction
 lifecycle callbacks are not called. The client code must clean up prototype-scoped
 objects and release expensive resources that the prototype beans hold. To get
 the Spring container to release resources held by prototype-scoped beans, try using a
-custom <<beans-factory-extension-bpp,bean post-processor>>, which holds a reference to
+custom xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[bean post-processor], which holds a reference to
 beans that need to be cleaned up.
 
 In some respects, the Spring container's role in regard to a prototype-scoped bean is a
 replacement for the Java `new` operator. All lifecycle management past that point must
 be handled by the client. (For details on the lifecycle of a bean in the Spring
-container, see <<beans-factory-lifecycle>>.)
+container, see xref:core/beans/factory-nature.adoc#beans-factory-lifecycle[Lifecycle Callbacks].)
 
 
 
@@ -149,7 +149,7 @@ prototype-scoped bean repeatedly at runtime. You cannot dependency-inject a
 prototype-scoped bean into your singleton bean, because that injection occurs only
 once, when the Spring container instantiates the singleton bean and resolves
 and injects its dependencies. If you need a new instance of a prototype bean at
-runtime more than once, see <<beans-factory-method-injection>>.
+runtime more than once, see xref:core/beans/dependencies/factory-method-injection.adoc[Method Injection].
 
 
 
@@ -362,7 +362,7 @@ following example shows how to do so:
 
 WebSocket scope is associated with the lifecycle of a WebSocket session and applies to
 STOMP over WebSocket applications, see
-<<web.adoc#websocket-stomp-websocket-scope,WebSocket scope>> for more details.
+xref:web/websocket/stomp/scope.adoc[WebSocket scope] for more details.
 
 
 
@@ -399,7 +399,7 @@ several additional access variants, including `getIfAvailable` and `getIfUnique`
 
 The JSR-330 variant of this is called `Provider` and is used with a `Provider<MyTargetBean>`
 declaration and a corresponding `get()` call for every retrieval attempt.
-See <<beans-standard-annotations,here>> for more details on JSR-330 overall.
+See xref:core/beans/standard-annotations.adoc[here] for more details on JSR-330 overall.
 ====
 
 The configuration in the following example is only one line, but it is important to
@@ -433,8 +433,8 @@ understand the "`why`" as well as the "`how`" behind it:
 
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
-bean definition (see <<beans-factory-scopes-other-injection-proxies>> and
-<<core.adoc#core.appendix.xsd-schemas, XML Schema-based configuration>>).
+bean definition (see xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection-proxies[Choosing the Type of Proxy to Create] and
+xref:core/appendix/xsd-schemas.adoc[XML Schema-based configuration]).
 Why do definitions of beans scoped at the `request`, `session` and custom-scope
 levels require the `<aop:scoped-proxy/>` element?
 Consider the following singleton bean definition and contrast it with
@@ -521,7 +521,7 @@ interfaces. The following example shows a proxy based on an interface:
 ----
 
 For more detailed information about choosing class-based or interface-based proxying,
-see <<aop-proxying>>.
+see xref:core/aop/proxying.adoc[Proxying Mechanisms].
 
 
 

@@ -2,15 +2,15 @@
 = Spring JUnit Jupiter Testing Annotations
 
 The following annotations are supported when used in conjunction with the
-<<testcontext-junit-jupiter-extension, `SpringExtension`>> and JUnit Jupiter
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-extension[`SpringExtension`] and JUnit Jupiter
 (that is, the programming model in JUnit 5):
 
-* <<integration-testing-annotations-junit-jupiter-springjunitconfig>>
-* <<integration-testing-annotations-junit-jupiter-springjunitwebconfig>>
-* <<integration-testing-annotations-testconstructor>>
-* <<integration-testing-annotations-nestedtestconfiguration>>
-* <<integration-testing-annotations-junit-jupiter-enabledif>>
-* <<integration-testing-annotations-junit-jupiter-disabledif>>
+* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitconfig[`@SpringJUnitConfig`]
+* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-springjunitwebconfig[`@SpringJUnitWebConfig`]
+* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[`@TestConstructor`]
+* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[`@NestedTestConfiguration`]
+* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-enabledif[`@EnabledIf`]
+* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-junit-jupiter-disabledif[`@DisabledIf`]
 
 [[integration-testing-annotations-junit-jupiter-springjunitconfig]]
 == `@SpringJUnitConfig`
@@ -70,7 +70,7 @@ location of a configuration file:
 <1> Specify the location of a configuration file.
 
 
-See <<testcontext-ctx-management>> as well as the javadoc for
+See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] as well as the javadoc for
 {api-spring-framework}/test/context/junit/jupiter/SpringJUnitConfig.html[`@SpringJUnitConfig`]
 and `@ContextConfiguration` for further details.
 
@@ -135,7 +135,7 @@ location of a configuration file:
 <1> Specify the location of a configuration file.
 
 
-See <<testcontext-ctx-management>> as well as the javadoc for
+See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] as well as the javadoc for
 {api-spring-framework}/test/context/junit/jupiter/web/SpringJUnitWebConfig.html[`@SpringJUnitWebConfig`],
 {api-spring-framework}/test/context/ContextConfiguration.html[`@ContextConfiguration`], and
 {api-spring-framework}/test/context/web/WebAppConfiguration.html[`@WebAppConfiguration`]
@@ -159,7 +159,7 @@ constructor takes precedence over both `@TestConstructor` and the default mode.
 The default _test constructor autowire mode_ can be changed by setting the
 `spring.test.constructor.autowire.mode` JVM system property to `all`. Alternatively, the
 default mode may be set via the
-<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 
 As of Spring Framework 5.3, the default mode may also be configured as a
 https://junit.org/junit5/docs/current/user-guide/#running-tests-config-params[JUnit Platform configuration parameter].
@@ -192,36 +192,36 @@ change the default mode.
 The default _enclosing configuration inheritance mode_ is `INHERIT`, but it can be
 changed by setting the `spring.test.enclosing.configuration` JVM system property to
 `OVERRIDE`. Alternatively, the default mode may be set via the
-<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 =====
 
-The <<testcontext-framework>> honors `@NestedTestConfiguration` semantics for the
+The xref:testing/testcontext-framework.adoc[Spring TestContext Framework] honors `@NestedTestConfiguration` semantics for the
 following annotations.
 
-* <<spring-testing-annotation-bootstrapwith>>
-* <<spring-testing-annotation-contextconfiguration>>
-* <<spring-testing-annotation-webappconfiguration>>
-* <<spring-testing-annotation-contexthierarchy>>
-* <<spring-testing-annotation-activeprofiles>>
-* <<spring-testing-annotation-testpropertysource>>
-* <<spring-testing-annotation-dynamicpropertysource>>
-* <<spring-testing-annotation-dirtiescontext>>
-* <<spring-testing-annotation-testexecutionlisteners>>
-* <<spring-testing-annotation-recordapplicationevents>>
-* <<testcontext-tx,`@Transactional`>>
-* <<spring-testing-annotation-commit>>
-* <<spring-testing-annotation-rollback>>
-* <<spring-testing-annotation-sql>>
-* <<spring-testing-annotation-sqlconfig>>
-* <<spring-testing-annotation-sqlmergemode>>
-* <<integration-testing-annotations-testconstructor>>
+* xref:testing/annotations/integration-spring/annotation-bootstrapwith.adoc[`@BootstrapWith`]
+* xref:testing/annotations/integration-spring/annotation-contextconfiguration.adoc[`@ContextConfiguration`]
+* xref:testing/annotations/integration-spring/annotation-webappconfiguration.adoc[`@WebAppConfiguration`]
+* xref:testing/annotations/integration-spring/annotation-contexthierarchy.adoc[`@ContextHierarchy`]
+* xref:testing/annotations/integration-spring/annotation-activeprofiles.adoc[`@ActiveProfiles`]
+* xref:testing/annotations/integration-spring/annotation-testpropertysource.adoc[`@TestPropertySource`]
+* xref:testing/annotations/integration-spring/annotation-dynamicpropertysource.adoc[`@DynamicPropertySource`]
+* xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[`@DirtiesContext`]
+* xref:testing/annotations/integration-spring/annotation-testexecutionlisteners.adoc[`@TestExecutionListeners`]
+* xref:testing/annotations/integration-spring/annotation-recordapplicationevents.adoc[`@RecordApplicationEvents`]
+* xref:testing/testcontext-framework/tx.adoc[`@Transactional`]
+* xref:testing/annotations/integration-spring/annotation-commit.adoc[`@Commit`]
+* xref:testing/annotations/integration-spring/annotation-rollback.adoc[`@Rollback`]
+* xref:testing/annotations/integration-spring/annotation-sql.adoc[`@Sql`]
+* xref:testing/annotations/integration-spring/annotation-sqlconfig.adoc[`@SqlConfig`]
+* xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode`]
+* xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[`@TestConstructor`]
 
 NOTE: The use of `@NestedTestConfiguration` typically only makes sense in conjunction
 with `@Nested` test classes in JUnit Jupiter; however, there may be other testing
 frameworks with support for Spring and nested test classes that make use of this
 annotation.
 
-See <<testcontext-junit-jupiter-nested-test-configuration>> for an example and further
+See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for an example and further
 details.
 
 [[integration-testing-annotations-junit-jupiter-enabledif]]
@@ -235,9 +235,9 @@ within that class are automatically enabled by default as well.
 
 Expressions can be any of the following:
 
-* <<core.adoc#expressions, Spring Expression Language>> (SpEL) expression. For example:
+* xref:core/expressions.adoc[Spring Expression Language] (SpEL) expression. For example:
   `@EnabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")`
-* Placeholder for a property available in the Spring <<core.adoc#beans-environment, `Environment`>>.
+* Placeholder for a property available in the Spring xref:core/beans/environment.adoc[`Environment`].
   For example: `@EnabledIf("${smoke.tests.enabled}")`
 * Text literal. For example: `@EnabledIf("true")`
 
@@ -295,9 +295,9 @@ test methods within that class are automatically disabled as well.
 
 Expressions can be any of the following:
 
-* <<core.adoc#expressions, Spring Expression Language>> (SpEL) expression. For example:
+* xref:core/expressions.adoc[Spring Expression Language] (SpEL) expression. For example:
   `@DisabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")`
-* Placeholder for a property available in the Spring <<core.adoc#beans-environment, `Environment`>>.
+* Placeholder for a property available in the Spring xref:core/beans/environment.adoc[`Environment`].
   For example: `@DisabledIf("${smoke.tests.disabled}")`
 * Text literal. For example: `@DisabledIf("true")`
 

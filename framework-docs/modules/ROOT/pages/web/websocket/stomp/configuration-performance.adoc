@@ -11,7 +11,7 @@ on how to reason about scaling.
 In a messaging application, messages are passed through channels for asynchronous
 executions that are backed by thread pools. Configuring such an application requires
 good knowledge of the channels and the flow of messages. Therefore, it is
-recommended to review <<websocket-stomp-message-flow>>.
+recommended to review xref:web/websocket/stomp/message-flow.adoc[Flow of Messages].
 
 The obvious place to start is to configure the thread pools that back the
 `clientInboundChannel` and the `clientOutboundChannel`. By default, both

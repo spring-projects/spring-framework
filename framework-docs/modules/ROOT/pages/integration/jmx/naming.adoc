@@ -116,7 +116,7 @@ example, the generated `ObjectName` for the following bean would be
 [[jmx-context-mbeanexport]]
 == Configuring Annotation-based MBean Export
 
-If you prefer to use <<jmx-interface-metadata, the annotation-based approach>> to define
+If you prefer to use xref:integration/jmx/interface.adoc#jmx-interface-metadata[the annotation-based approach] to define
 your management interfaces, a convenience subclass of `MBeanExporter` is available:
 `AnnotationMBeanExporter`. When defining an instance of this subclass, you no longer need the
 `namingStrategy`, `assembler`, and `attributeSource` configuration,
@@ -146,7 +146,7 @@ If necessary, you can provide a reference to a particular MBean `server`, and th
 `defaultDomain` attribute (a property of `AnnotationMBeanExporter`) accepts an alternate
 value for the generated MBean `ObjectName` domains. This is used in place of the
 fully qualified package name as described in the previous section on
-<<jmx-naming-metadata, MetadataNamingStrategy>>, as the following example shows:
+xref:integration/jmx/naming.adoc#jmx-naming-metadata[MetadataNamingStrategy], as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----

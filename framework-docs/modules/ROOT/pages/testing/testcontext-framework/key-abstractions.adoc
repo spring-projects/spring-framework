@@ -40,7 +40,7 @@ responsible for managing a single `TestContext` and signaling events to each reg
 == `TestExecutionListener`
 
 `TestExecutionListener` defines the API for reacting to test-execution events published by
-the `TestContextManager` with which the listener is registered. See <<testcontext-tel-config>>.
+the `TestContextManager` with which the listener is registered. See xref:testing/testcontext-framework/tel-config.adoc[`TestExecutionListener` Configuration].
 
 [[context-loaders]]
 == Context Loaders

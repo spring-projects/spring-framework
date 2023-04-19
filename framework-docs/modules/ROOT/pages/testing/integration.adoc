@@ -12,7 +12,7 @@ Doing so lets you test things such as:
 The Spring Framework provides first-class support for integration testing in the
 `spring-test` module. The name of the actual JAR file might include the release version
 and might also be in the long `org.springframework.test` form, depending on where you get
-it from (see the <<core.adoc#beans-dependencies, section on Dependency Management>>
+it from (see the xref:core/beans/dependencies.adoc[section on Dependency Management]
 for an explanation). This library includes the `org.springframework.test` package, which
 contains valuable classes for integration testing with a Spring container. This testing
 does not rely on an application server or other deployment environment. Such tests are
@@ -20,19 +20,19 @@ slower to run than unit tests but much faster than the equivalent Selenium tests
 remote tests that rely on deployment to an application server.
 
 Unit and integration testing support is provided in the form of the annotation-driven
-<<testcontext-framework, Spring TestContext Framework>>. The TestContext framework is
+xref:testing/testcontext-framework.adoc[Spring TestContext Framework]. The TestContext framework is
 agnostic of the actual testing framework in use, which allows instrumentation of tests
 in various environments, including JUnit, TestNG, and others.
 
 The following section provides an overview of the high-level goals of Spring's
 integration support, and the rest of this chapter then focuses on dedicated topics:
 
-* <<integration-testing-support-jdbc>>
-* <<testcontext-framework>>
-* <<webtestclient>>
-* <<spring-mvc-test-framework>>
-* <<spring-mvc-test-client>>
-* <<integration-testing-annotations>>
+* xref:testing/support-jdbc.adoc[JDBC Testing Support]
+* xref:testing/testcontext-framework.adoc[Spring TestContext Framework]
+* xref:testing/webtestclient.adoc[WebTestClient]
+* xref:testing/spring-mvc-test-framework.adoc[MockMvc]
+* xref:testing/spring-mvc-test-client.adoc[Testing Client Applications]
+* xref:testing/annotations.adoc[Annotations]
 
 
 
@@ -41,10 +41,10 @@ integration support, and the rest of this chapter then focuses on dedicated topi
 
 Spring's integration testing support has the following primary goals:
 
-* To manage <<testing-ctx-management, Spring IoC container caching>> between tests.
-* To provide <<testing-fixture-di, Dependency Injection of test fixture instances>>.
-* To provide <<testing-tx, transaction management>> appropriate to integration testing.
-* To supply <<testing-support-classes, Spring-specific base classes>> that assist
+* To manage xref:testing/integration.adoc#testing-ctx-management[Spring IoC container caching] between tests.
+* To provide xref:testing/integration.adoc#testing-fixture-di[Dependency Injection of test fixture instances].
+* To provide xref:testing/integration.adoc#testing-tx[transaction management] appropriate to integration testing.
+* To supply xref:testing/integration.adoc#testing-support-classes[Spring-specific base classes] that assist
   developers in writing integration tests.
 
 The next few sections describe each goal and provide links to implementation and
@@ -78,7 +78,7 @@ reloading (for example, by modifying a bean definition or the state of an applic
 object) the TestContext framework can be configured to reload the configuration and
 rebuild the application context before executing the next test.
 
-See <<testcontext-ctx-management>> and <<testcontext-ctx-management-caching>> with the
+See xref:testing/testcontext-framework/ctx-management.adoc[Context Management] and xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching] with the
 TestContext framework.
 
 
@@ -105,7 +105,7 @@ integration tests that test the following areas:
   perform as anticipated?
 
 See dependency injection of test fixtures with the
-<<testcontext-fixture-di, TestContext framework>>.
+xref:testing/testcontext-framework/fixture-di.adoc[TestContext framework].
 
 
 [[testing-tx]]
@@ -128,9 +128,9 @@ using a `PlatformTransactionManager` bean defined in the test's application cont
 If you want a transaction to commit (unusual, but occasionally useful when you want a
 particular test to populate or modify the database), you can tell the TestContext
 framework to cause the transaction to commit instead of roll back by using the
-<<integration-testing-annotations, `@Commit`>> annotation.
+xref:testing/annotations.adoc[`@Commit`] annotation.
 
-See transaction management with the <<testcontext-tx, TestContext framework>>.
+See transaction management with the xref:testing/testcontext-framework/tx.adoc[TestContext framework].
 
 
 [[testing-support-classes]]
@@ -147,9 +147,9 @@ which let you access:
   queries to confirm database state both before and after execution of database-related
   application code, and Spring ensures that such queries run in the scope of the same
   transaction as the application code. When used in conjunction with an ORM tool, be sure
-  to avoid <<testcontext-tx-false-positives, false positives>>.
+  to avoid xref:testing/testcontext-framework/tx.adoc#testcontext-tx-false-positives[false positives].
 
 In addition, you may want to create your own custom, application-wide superclass with
 instance variables and methods specific to your project.
 
-See support classes for the <<testcontext-support-classes, TestContext framework>>.
+See support classes for the xref:testing/testcontext-framework/support-classes.adoc[TestContext framework].

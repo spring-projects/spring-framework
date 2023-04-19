@@ -1,7 +1,7 @@
 [[format]]
 = Spring Field Formatting
 
-As discussed in the previous section, <<core-convert, `core.convert`>> is a
+As discussed in the previous section, xref:core/validation/convert.adoc[`core.convert`] is a
 general-purpose type conversion system. It provides a unified `ConversionService` API as
 well as a strongly typed `Converter` SPI for implementing conversion logic from one type
 to another. A Spring container uses this system to bind bean property values. In
@@ -356,7 +356,7 @@ converter and formatter registration.
 [[format-configuring-formatting-mvc]]
 == Configuring Formatting in Spring MVC
 
-See <<web.adoc#mvc-config-conversion, Conversion and Formatting>> in the Spring MVC chapter.
+See xref:web/webmvc/mvc-config/conversion.adoc[Conversion and Formatting] in the Spring MVC chapter.
 
 
 

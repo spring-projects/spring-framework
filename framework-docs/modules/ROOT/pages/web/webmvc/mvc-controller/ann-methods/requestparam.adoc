@@ -1,7 +1,7 @@
 [[mvc-ann-requestparam]]
 = `@RequestParam`
 
-[.small]#<<web-reactive.adoc#webflux-ann-requestparam, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/requestparam.adoc[See equivalent in the Reactive stack]#
 
 You can use the `@RequestParam` annotation to bind Servlet request parameters (that is,
 query parameters or form data) to a method argument in a controller.
@@ -59,7 +59,7 @@ a method parameter is optional by setting the `@RequestParam` annotation's `requ
 `false` or by declaring the argument with an `java.util.Optional` wrapper.
 
 Type conversion is automatically applied if the target method parameter type is not
-`String`. See <<mvc-ann-typeconversion>>.
+`String`. See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].
 
 Declaring the argument type as an array or list allows for resolving multiple parameter
 values for the same parameter name.

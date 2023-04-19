@@ -1,9 +1,9 @@
 [[mvc-multipart-forms]]
 = Multipart
 
-[.small]#<<web-reactive.adoc#webflux-multipart-forms, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/multipart-forms.adoc[See equivalent in the Reactive stack]#
 
-After a `MultipartResolver` has been <<mvc-multipart,enabled>>, the content of POST
+After a `MultipartResolver` has been xref:web/webmvc/mvc-servlet/multipart.adoc[enabled], the content of POST
 requests with `multipart/form-data` is parsed and accessible as regular request
 parameters. The following example accesses one regular form field and one uploaded
 file:
@@ -58,7 +58,7 @@ NOTE: With Servlet multipart parsing, you may also declare `jakarta.servlet.http
 instead of Spring's `MultipartFile`, as a method argument or collection value type.
 
 You can also use multipart content as part of data binding to a
-<<mvc-ann-modelattrib-method-args, command object>>. For example, the form field
+xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[command object]. For example, the form field
 and file from the preceding example could be fields on a form object,
 as the following example shows:
 
@@ -135,7 +135,7 @@ Content-Transfer-Encoding: 8bit
 You can access the "meta-data" part with `@RequestParam` as a `String` but you'll
 probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 `@RequestPart` annotation to access a multipart after converting it with an
-<<integration.adoc#rest-message-conversion, HttpMessageConverter>>:
+xref:integration/rest-clients.adoc#rest-message-conversion[HttpMessageConverter]:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java

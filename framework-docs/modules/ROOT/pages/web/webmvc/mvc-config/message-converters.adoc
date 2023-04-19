@@ -1,7 +1,7 @@
 [[mvc-config-message-converters]]
 = Message Converters
 
-[.small]#<<web-reactive.adoc#webflux-config-message-codecs, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/config.adoc#webflux-config-message-codecs[See equivalent in the Reactive stack]#
 
 You can customize `HttpMessageConverter` in Java configuration by overriding
 {api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`]

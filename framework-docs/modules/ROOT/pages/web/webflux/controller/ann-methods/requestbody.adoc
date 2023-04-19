@@ -1,10 +1,10 @@
 [[webflux-ann-requestbody]]
 = `@RequestBody`
 
-[.small]#<<web.adoc#mvc-ann-requestbody, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/requestbody.adoc[See equivalent in the Servlet stack]#
 
 You can use the `@RequestBody` annotation to have the request body read and deserialized into an
-`Object` through an <<webflux-codecs,HttpMessageReader>>.
+`Object` through an xref:web/webflux/reactive-spring.adoc#webflux-codecs[HttpMessageReader].
 The following example uses a `@RequestBody` argument:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -45,7 +45,7 @@ and fully non-blocking reading and (client-to-server) streaming.
 	}
 ----
 
-You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
+You can use the xref:web/webflux/config.adoc#webflux-config-message-codecs[HTTP message codecs] option of the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config] to
 configure or customize message readers.
 
 You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's

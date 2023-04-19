@@ -1,7 +1,7 @@
 [[mvc-config-static-resources]]
 = Static Resources
 
-[.small]#<<web-reactive.adoc#webflux-config-static-resources, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/config.adoc#webflux-config-static-resources[See equivalent in the Reactive stack]#
 
 This option provides a convenient way to serve static resources from a list of
 {api-spring-framework}/core/io/Resource.html[`Resource`]-based locations.
@@ -55,7 +55,7 @@ The following example shows how to achieve the same configuration in XML:
 ----
 
 See also
-<<mvc-caching-static-resources, HTTP caching support for static resources>>.
+xref:web/webmvc/mvc-caching.adoc#mvc-caching-static-resources[HTTP caching support for static resources].
 
 The resource handler also supports a chain of
 {api-spring-framework}/web/servlet/resource/ResourceResolver.html[`ResourceResolver`] implementations and

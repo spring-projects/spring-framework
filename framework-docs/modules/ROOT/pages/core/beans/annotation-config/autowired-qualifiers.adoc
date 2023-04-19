@@ -296,8 +296,8 @@ demonstrates both approaches:
 ----
 --
 
-In <<beans-classpath-scanning>>, you can see an annotation-based alternative to
-providing the qualifier metadata in XML. Specifically, see <<beans-scanning-qualifiers>>.
+In xref:core/beans/classpath-scanning.adoc[Classpath Scanning and Managed Components], you can see an annotation-based alternative to
+providing the qualifier metadata in XML. Specifically, see xref:core/beans/classpath-scanning.adoc#beans-scanning-qualifiers[Providing Qualifier Metadata with Annotations].
 
 In some cases, using an annotation without a value may suffice. This can be
 useful when the annotation serves a more generic purpose and can be applied across

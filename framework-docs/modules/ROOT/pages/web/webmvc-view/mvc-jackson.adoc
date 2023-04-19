@@ -1,7 +1,7 @@
 [[mvc-view-jackson]]
 = Jackson
 
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-httpmessagewriter[See equivalent in the Reactive stack]#
 
 Spring offers support for the Jackson JSON library.
 
@@ -9,7 +9,7 @@ Spring offers support for the Jackson JSON library.
 
 [[mvc-view-json-mapping]]
 == Jackson-based JSON MVC Views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-httpmessagewriter[See equivalent in the Reactive stack]#
 
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
@@ -28,7 +28,7 @@ serializers and deserializers for specific types.
 
 [[mvc-view-xml-mapping]]
 == Jackson-based XML Views
-[.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-httpmessagewriter[See equivalent in the Reactive stack]#
 
 `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`

@@ -13,7 +13,7 @@ When you invoke the `updateFoo(Foo)` method, you want to see the following actio
 * The profiling aspect reports the exact duration of the whole transactional method invocation.
 
 NOTE: This chapter is not concerned with explaining AOP in any great detail (except as it
-applies to transactions). See <<core.adoc#aop,AOP>> for detailed coverage of the AOP
+applies to transactions). See xref:core/aop.adoc[AOP] for detailed coverage of the AOP
 configuration and AOP in general.
 
 The following code shows the simple profiling aspect discussed earlier:
@@ -95,7 +95,7 @@ The following code shows the simple profiling aspect discussed earlier:
 
 The ordering of advice
 is controlled through the `Ordered` interface. For full details on advice ordering, see
-<<core.adoc#aop-ataspectj-advice-ordering,Advice ordering>>.
+xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-ordering[Advice ordering].
 
 The following configuration creates a `fooService` bean that has profiling and
 transactional aspects applied to it in the desired order:

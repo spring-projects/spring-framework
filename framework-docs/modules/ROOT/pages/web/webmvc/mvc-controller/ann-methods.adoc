@@ -1,7 +1,7 @@
 [[mvc-ann-methods]]
 = Handler Methods
 
-[.small]#<<web-reactive.adoc#webflux-ann-methods, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods.adoc[See equivalent in the Reactive stack]#
 
 `@RequestMapping` handler methods have a flexible signature and can choose from a range of
 supported controller method arguments and return values.

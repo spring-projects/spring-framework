@@ -24,8 +24,8 @@ namespace elements, you need to reference the JMS schema, as the following examp
 
 
 The namespace consists of three top-level elements: `<annotation-driven/>`, `<listener-container/>`
-and `<jca-listener-container/>`. `<annotation-driven/>` enables the use of <<jms-annotated,
-annotation-driven listener endpoints>>. `<listener-container/>` and `<jca-listener-container/>`
+and `<jca-listener-container/>`. `<annotation-driven/>` enables the use of xref:integration/jms/annotated.adoc[annotation-driven listener endpoints]
+. `<listener-container/>` and `<jca-listener-container/>`
 define shared listener container configuration and can contain `<listener/>` child elements.
 The following example shows a basic configuration for two listeners:
 
@@ -42,7 +42,7 @@ The following example shows a basic configuration for two listeners:
 
 The preceding example is equivalent to creating two distinct listener container bean
 definitions and two distinct `MessageListenerAdapter` bean definitions, as shown
-in <<jms-receiving-async-message-listener-adapter>>. In addition to the attributes shown
+in xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[Using `MessageListenerAdapter`]. In addition to the attributes shown
 in the preceding example, the `listener` element can contain several optional ones.
 The following table describes all of the available attributes:
 

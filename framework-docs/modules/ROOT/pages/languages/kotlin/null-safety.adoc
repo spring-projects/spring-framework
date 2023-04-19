@@ -9,7 +9,7 @@ declarations and expressing "`value or no value`" semantics without paying the c
 https://www.baeldung.com/kotlin-null-safety[comprehensive guide to Kotlin null-safety].)
 
 Although Java does not let you express null-safety in its type-system, the Spring Framework
-provides <<core#null-safety, null-safety of the whole Spring Framework API>>
+provides xref:languages/kotlin/null-safety.adoc[null-safety of the whole Spring Framework API]
 via tooling-friendly annotations declared in the `org.springframework.lang` package.
 By default, types from Java APIs used in Kotlin are recognized as
 https://kotlinlang.org/docs/reference/java-interop.html#null-safety-and-platform-types[platform types],

@@ -2,11 +2,11 @@
 = Context Configuration with Groovy Scripts
 
 To load an `ApplicationContext` for your tests by using Groovy scripts that use the
-<<core.adoc#groovy-bean-definition-dsl, Groovy Bean Definition DSL>>, you can annotate
+xref:core/beans/basics.adoc#groovy-bean-definition-dsl[Groovy Bean Definition DSL], you can annotate
 your test class with `@ContextConfiguration` and configure the `locations` or `value`
 attribute with an array that contains the resource locations of Groovy scripts. Resource
 lookup semantics for Groovy scripts are the same as those described for
-<<testcontext-ctx-management-xml, XML configuration files>>.
+xref:testing/testcontext-framework/ctx-management/xml.adoc[XML configuration files].
 
 .Enabling Groovy script support
 TIP: Support for using Groovy scripts to load an `ApplicationContext` in the Spring

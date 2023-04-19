@@ -1,7 +1,7 @@
 [[context-introduction]]
 = Additional Capabilities of the `ApplicationContext`
 
-As discussed in the <<beans, chapter introduction>>, the `org.springframework.beans.factory`
+As discussed in the xref:web/webmvc-view/mvc-xslt.adoc#mvc-view-xslt-beandefs[chapter introduction], the `org.springframework.beans.factory`
 package provides basic functionality for managing and manipulating beans, including in a
 programmatic way. The `org.springframework.context` package adds the
 {api-spring-framework}/context/ApplicationContext.html[`ApplicationContext`]
@@ -266,7 +266,7 @@ class and the `ApplicationListener` interface. If a bean that implements the
 Essentially, this is the standard Observer design pattern.
 
 TIP: As of Spring 4.2, the event infrastructure has been significantly improved and offers
-an <<context-functionality-events-annotation, annotation-based model>> as well as the
+an xref:core/beans/context-introduction.adoc#context-functionality-events-annotation[annotation-based model] as well as the
 ability to publish any arbitrary event (that is, an object that does not necessarily
 extend from `ApplicationEvent`). When such an object is published, we wrap it in an
 event for you.
@@ -555,7 +555,7 @@ following example shows how to do so:
 ----
 
 It is also possible to add additional runtime filtering by using the `condition` attribute
-of the annotation that defines a <<expressions, `SpEL` expression>>, which should match
+of the annotation that defines a xref:core/expressions.adoc[`SpEL` expression], which should match
 to actually invoke the method for a particular event.
 
 The following example shows how our notifier can be rewritten to be invoked only if the
@@ -631,7 +631,7 @@ method signature to return the event that should be published, as the following 
 ----
 
 NOTE: This feature is not supported for
-<<context-functionality-events-async, asynchronous listeners>>.
+xref:core/beans/context-introduction.adoc#context-functionality-events-async[asynchronous listeners].
 
 The `handleBlockedListEvent()` method publishes a new `ListUpdateEvent` for every
 `BlockedListEvent` that it handles. If you need to publish several events, you can return
@@ -642,7 +642,7 @@ a `Collection` or an array of events instead.
 === Asynchronous Listeners
 
 If you want a particular listener to process events asynchronously, you can reuse the
-<<integration.adoc#scheduling-annotation-support-async, regular `@Async` support>>.
+xref:integration/scheduling.adoc#scheduling-annotation-support-async[regular `@Async` support].
 The following example shows how to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -771,7 +771,7 @@ an event.
 == Convenient Access to Low-level Resources
 
 For optimal usage and understanding of application contexts, you should familiarize
-yourself with Spring's `Resource` abstraction, as described in <<resources>>.
+yourself with Spring's `Resource` abstraction, as described in xref:web/webflux-webclient/client-builder.adoc#webflux-client-builder-reactor-resources[Resources].
 
 An application context is a `ResourceLoader`, which can be used to load `Resource` objects.
 A `Resource` is essentially a more feature rich version of the JDK `java.net.URL` class.
@@ -847,7 +847,7 @@ Here is an example of instrumentation in the `AnnotationConfigApplicationContext
 The application context is already instrumented with multiple steps.
 Once recorded, these startup steps can be collected, displayed and analyzed with specific tools.
 For a complete list of existing startup steps, you can check out the
-<<core.appendix.application-startup-steps, dedicated appendix section>>.
+xref:core/appendix/application-startup-steps.adoc[dedicated appendix section].
 
 The default `ApplicationStartup` implementation is a no-op variant, for minimal overhead.
 This means no metrics will be collected during application startup by default.

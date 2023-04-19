@@ -1,7 +1,7 @@
 [[mvc-ann-sessionattribute]]
 = `@SessionAttribute`
 
-[.small]#<<web-reactive.adoc#webflux-ann-sessionattribute, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/sessionattribute.adoc[See equivalent in the Reactive stack]#
 
 If you need access to pre-existing session attributes that are managed globally
 (that is, outside the controller -- for example, by a filter) and may or may not be present,
@@ -34,6 +34,6 @@ For use cases that require adding or removing session attributes, consider injec
 
 For temporary storage of model attributes in the session as part of a controller
 workflow, consider using `@SessionAttributes` as described in
-<<mvc-ann-sessionattributes>>.
+xref:web/webmvc/mvc-controller/ann-methods/sessionattributes.adoc[`@SessionAttributes`].
 
 

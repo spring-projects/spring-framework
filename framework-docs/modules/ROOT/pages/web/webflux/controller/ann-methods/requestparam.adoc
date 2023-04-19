@@ -1,7 +1,7 @@
 [[webflux-ann-requestparam]]
 = `@RequestParam`
 
-[.small]#<<web.adoc#mvc-ann-requestparam, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/requestparam.adoc[See equivalent in the Servlet stack]#
 
 You can use the `@RequestParam` annotation to bind query parameters to a method argument in a
 controller. The following code snippet shows the usage:
@@ -54,7 +54,7 @@ TIP: The Servlet API "`request parameter`" concept conflates query parameters, f
 data, and multiparts into one. However, in WebFlux, each is accessed individually through
 `ServerWebExchange`. While `@RequestParam` binds to query parameters only, you can use
 data binding to apply query parameters, form data, and multiparts to a
-<<webflux-ann-modelattrib-method-args, command object>>.
+xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[command object].
 
 Method parameters that use the `@RequestParam` annotation are required by default, but
 you can specify that a method parameter is optional by setting the required flag of a `@RequestParam`
@@ -62,7 +62,7 @@ to `false` or by declaring the argument with a `java.util.Optional`
 wrapper.
 
 Type conversion is applied automatically if the target method parameter type is not
-`String`. See <<webflux-ann-typeconversion>>.
+`String`. See xref:web/webflux/controller/ann-methods/typeconversion.adoc[Type Conversion].
 
 When a `@RequestParam` annotation is declared on a `Map<String, String>` or
 `MultiValueMap<String, String>` argument, the map is populated with all query parameters.

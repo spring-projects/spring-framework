@@ -99,7 +99,7 @@ If a pointcut is strictly meant to be public-only, even in a CGLIB proxy scenari
 potential non-public interactions through proxies, it needs to be defined accordingly.
 
 If your interception needs include method calls or even constructors within the target
-class, consider the use of Spring-driven <<aop-aj-ltw, native AspectJ weaving>> instead
+class, consider the use of Spring-driven xref:core/aop/using-aspectj.adoc#aop-aj-ltw[native AspectJ weaving] instead
 of Spring's proxy-based AOP framework. This constitutes a different mode of AOP usage
 with different characteristics, so be sure to make yourself familiar with weaving
 before making a decision.
@@ -350,8 +350,8 @@ could write the following which references the
 	</tx:advice>
 ----
 
-The `<aop:config>` and `<aop:advisor>` elements are discussed in <<aop-schema>>. The
-transaction elements are discussed in <<data-access.adoc#transaction, Transaction Management>>.
+The `<aop:config>` and `<aop:advisor>` elements are discussed in xref:core/aop/schema.adoc[Schema-based AOP Support]. The
+transaction elements are discussed in xref:data-access/transaction.adoc[Transaction Management].
 
 
 [[aop-pointcuts-examples]]
@@ -444,7 +444,7 @@ sub-packages:
 	this(com.xyz.service.AccountService)
 ----
 +
-NOTE: `this` is more commonly used in a binding form. See the section on <<aop-advice>>
+NOTE: `this` is more commonly used in a binding form. See the section on xref:core/aop/ataspectj/advice.adoc[Declaring Advice]
 for how to make the proxy object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) where the target object
@@ -455,7 +455,7 @@ implements the `AccountService` interface:
 	target(com.xyz.service.AccountService)
 ----
 +
-NOTE: `target` is more commonly used in a binding form. See the <<aop-advice>> section
+NOTE: `target` is more commonly used in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
 for how to make the target object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) that takes a single parameter
@@ -466,7 +466,7 @@ and where the argument passed at runtime is `Serializable`:
 	args(java.io.Serializable)
 ----
 +
-NOTE: `args` is more commonly used in a binding form. See the <<aop-advice>> section
+NOTE: `args` is more commonly used in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
 for how to make the method arguments available in the advice body.
 +
 Note that the pointcut given in this example is different from `execution(*
@@ -482,7 +482,7 @@ parameter of type `Serializable`.
 	@target(org.springframework.transaction.annotation.Transactional)
 ----
 +
-NOTE: You can also use `@target` in a binding form. See the <<aop-advice>> section for
+NOTE: You can also use `@target` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section for
 how to make the annotation object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) where the declared type of the
@@ -493,7 +493,7 @@ target object has an `@Transactional` annotation:
 	@within(org.springframework.transaction.annotation.Transactional)
 ----
 +
-NOTE: You can also use `@within` in a binding form. See the <<aop-advice>> section for
+NOTE: You can also use `@within` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section for
 how to make the annotation object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) where the executing method has an
@@ -504,7 +504,7 @@ how to make the annotation object available in the advice body.
 	@annotation(org.springframework.transaction.annotation.Transactional)
 ----
 +
-NOTE: You can also use `@annotation` in a binding form. See the <<aop-advice>> section
+NOTE: You can also use `@annotation` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
 for how to make the annotation object available in the advice body.
 
 * Any join point (method execution only in Spring AOP) which takes a single parameter,
@@ -515,7 +515,7 @@ and where the runtime type of the argument passed has the `@Classified` annotati
 	@args(com.xyz.security.Classified)
 ----
 +
-NOTE: You can also use `@args` in a binding form. See the <<aop-advice>> section
+NOTE: You can also use `@args` in a binding form. See the xref:core/aop/ataspectj/advice.adoc[Declaring Advice] section
 how to make the annotation object(s) available in the advice body.
 
 * Any join point (method execution only in Spring AOP) on a Spring bean named

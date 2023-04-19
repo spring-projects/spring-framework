@@ -1,7 +1,7 @@
 [[webflux-http2]]
 = HTTP/2
 
-[.small]#<<web.adoc#mvc-http2, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-http2.adoc[See equivalent in the Servlet stack]#
 
 HTTP/2 is supported with Reactor Netty, Tomcat, Jetty, and Undertow. However, there are
 considerations related to server configuration. For more details, see the

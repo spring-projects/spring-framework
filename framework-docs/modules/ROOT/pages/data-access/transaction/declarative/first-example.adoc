@@ -187,7 +187,7 @@ advisor. The result indicates that, at the execution of a `fooServiceOperation`,
 the advice defined by `txAdvice` is run.
 
 The expression defined within the `<aop:pointcut/>` element is an AspectJ pointcut
-expression. See <<core.adoc#aop, the AOP section>> for more details on pointcut
+expression. See xref:core/aop.adoc[the AOP section] for more details on pointcut
 expressions in Spring.
 
 A common requirement is to make an entire service layer transactional. The best way to
@@ -203,7 +203,7 @@ service layer. The following example shows how to do so:
 ----
 
 NOTE: In the preceding example, it is assumed that all your service interfaces are defined
-in the `x.y.service` package. See <<core.adoc#aop, the AOP section>> for more details.
+in the `x.y.service` package. See xref:core/aop.adoc[the AOP section] for more details.
 
 Now that we have analyzed the configuration, you may be asking yourself,
 "What does all this configuration actually do?"

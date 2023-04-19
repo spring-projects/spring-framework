@@ -2,12 +2,12 @@
 = WebTestClient
 
 `WebTestClient` is an HTTP client designed for testing server applications. It wraps
-Spring's <<web-reactive.adoc#webflux-client, WebClient>> and uses it to perform requests
+Spring's xref:web/webflux-webclient.adoc[WebClient] and uses it to perform requests
 but exposes a testing facade for verifying responses. `WebTestClient` can be used to
 perform end-to-end HTTP tests. It can also be used to test Spring MVC and Spring WebFlux
 applications without a running server via mock server request and response objects.
 
-TIP: Kotlin users: See <<languages.adoc#kotlin-webtestclient-issue, this section>>
+TIP: Kotlin users: See xref:languages/kotlin/spring-projects-in.adoc#kotlin-webtestclient-issue[this section]
 related to use of the `WebTestClient`.
 
 
@@ -28,8 +28,8 @@ This setup allows you to test specific controller(s) via mock request and respon
 without a running server.
 
 For WebFlux applications, use the following which loads infrastructure equivalent to the
-<<web-reactive.adoc#webflux-config, WebFlux Java config>>, registers the given
-controller(s), and creates a <<web-reactive.adoc#webflux-web-handler-api, WebHandler chain>>
+xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Java config], registers the given
+controller(s), and creates a xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[WebHandler chain]
 to handle requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -46,9 +46,9 @@ to handle requests:
 
 For Spring MVC, use the following which delegates to the
 {api-spring-framework}/test/web/servlet/setup/StandaloneMockMvcBuilder.html[StandaloneMockMvcBuilder]
-to load infrastructure equivalent to the <<web.adoc#mvc-config, WebMvc Java config>>,
+to load infrastructure equivalent to the xref:web/webmvc/mvc-config.adoc[WebMvc Java config],
 registers the given controller(s), and creates an instance of
-<<testing.adoc#spring-mvc-test-framework, MockMvc>> to handle requests:
+xref:testing/spring-mvc-test-framework.adoc[MockMvc] to handle requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -73,7 +73,7 @@ and response objects, without a running server.
 
 For WebFlux, use the following where the Spring `ApplicationContext` is passed to
 {api-spring-framework}/web/server/adapter/WebHttpHandlerBuilder.html#applicationContext-org.springframework.context.ApplicationContext-[WebHttpHandlerBuilder]
-to create the <<web-reactive.adoc#webflux-web-handler-api, WebHandler chain>> to handle
+to create the xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[WebHandler chain] to handle
 requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -114,7 +114,7 @@ requests:
 
 For Spring MVC, use the following where the Spring `ApplicationContext` is passed to
 {api-spring-framework}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup-org.springframework.web.context.WebApplicationContext-[MockMvcBuilders.webAppContextSetup]
-to create a <<testing.adoc#spring-mvc-test-framework, MockMvc>> instance to handle
+to create a xref:testing/spring-mvc-test-framework.adoc[MockMvc] instance to handle
 requests:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -194,7 +194,7 @@ create a server setup to handle requests:
 ----
 
 For Spring MVC there are currently no options to test
-<<web.adoc#webmvc-fn, WebMvc functional endpoints>>.
+xref:web/webmvc-functional.adoc[WebMvc functional endpoints].
 
 
 
@@ -248,9 +248,9 @@ follows:
 [[webtestclient-tests]]
 == Writing Tests
 
-`WebTestClient` provides an API identical to <<web-reactive.adoc#webflux-client, WebClient>>
+`WebTestClient` provides an API identical to xref:web/webflux-webclient.adoc[WebClient]
 up to the point of performing a request by using `exchange()`. See the
-<<web-reactive.adoc#webflux-client-body, WebClient>> documentation for examples on how to
+xref:web/webflux-webclient/client-body.adoc[WebClient] documentation for examples on how to
 prepare a request with any content including form data, multipart data, and more.
 
 After the call to `exchange()`, `WebTestClient` diverges from the `WebClient` and
@@ -298,7 +298,7 @@ You can then choose to decode the response body through one of the following:
 
 * `expectBody(Class<T>)`: Decode to single object.
 * `expectBodyList(Class<T>)`: Decode and collect objects to `List<T>`.
-* `expectBody()`: Decode to `byte[]` for <<webtestclient-json>> or an empty body.
+* `expectBody()`: Decode to `byte[]` for xref:testing/webtestclient.adoc#webtestclient-json[JSON Content] or an empty body.
 
 And perform assertions on the resulting higher level Object(s):
 

@@ -22,7 +22,7 @@ necessary. The differences between the two types of transaction management are:
 * You can apply the Spring Framework declarative transaction management to any class,
   not merely special classes such as EJBs.
 * The Spring Framework offers declarative
-  <<transaction-declarative-rolling-back, rollback rules>>, a feature with no EJB
+  xref:data-access/transaction/declarative/rolling-back.adoc[rollback rules], a feature with no EJB
   equivalent. Both programmatic and declarative support for rollback rules is provided.
 * The Spring Framework lets you customize transactional behavior by using AOP.
   For example, you can insert custom behavior in the case of transaction rollback. You

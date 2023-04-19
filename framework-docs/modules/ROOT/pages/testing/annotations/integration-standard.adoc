@@ -15,7 +15,7 @@ and can be used anywhere in the Spring Framework.
 * `@PersistenceContext` (jakarta.persistence) if JPA is present
 * `@PersistenceUnit` (jakarta.persistence) if JPA is present
 * `@Transactional` (org.springframework.transaction.annotation)
-  _with <<testcontext-tx-attribute-support, limited attribute support>>_
+  _with xref:testing/testcontext-framework/tx.adoc#testcontext-tx-attribute-support[limited attribute support]_
 
 .JSR-250 Lifecycle Annotations
 [NOTE]

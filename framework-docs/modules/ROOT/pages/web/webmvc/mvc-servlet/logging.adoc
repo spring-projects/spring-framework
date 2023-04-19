@@ -1,7 +1,7 @@
 [[mvc-logging]]
 = Logging
 
-[.small]#<<web-reactive.adoc#webflux-logging, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-logging[See equivalent in the Reactive stack]#
 
 DEBUG-level logging in Spring MVC is designed to be compact, minimal, and
 human-friendly. It focuses on high-value bits of information that are useful over and
@@ -17,7 +17,7 @@ not meet the stated goals, please let us know.
 
 [[mvc-logging-sensitive-data]]
 == Sensitive Data
-[.small]#<<web-reactive.adoc#webflux-logging-sensitive-data, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-logging-sensitive-data[See equivalent in the Reactive stack]#
 
 DEBUG and TRACE logging may log sensitive information. This is why request parameters and
 headers are masked by default and their logging in full must be enabled explicitly

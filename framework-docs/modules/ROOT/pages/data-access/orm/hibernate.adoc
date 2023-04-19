@@ -21,7 +21,7 @@ To avoid tying application objects to hard-coded resource lookups, you can defin
 resources (such as a JDBC `DataSource` or a Hibernate `SessionFactory`) as beans in the
 Spring container. Application objects that need to access resources receive references
 to such predefined instances through bean references, as illustrated in the DAO
-definition in the <<orm-hibernate-straight, next section>>.
+definition in the xref:data-access/orm/hibernate.adoc#orm-hibernate-straight[next section].
 
 The following excerpt from an XML application context definition shows how to set up a
 JDBC `DataSource` and a Hibernate `SessionFactory` on top of it:
@@ -83,7 +83,7 @@ property. On the programmatic `LocalSessionFactoryBuilder`, there is an overload
 
 As of Spring Framework 5.1, such a native Hibernate setup can also expose a JPA
 `EntityManagerFactory` for standard JPA interaction next to native Hibernate access.
-See <<orm-jpa-hibernate, Native Hibernate Setup for JPA>> for details.
+See xref:data-access/orm/jpa.adoc#orm-jpa-hibernate[Native Hibernate Setup for JPA] for details.
 ====
 
 
@@ -185,7 +185,7 @@ container by using either Java annotations or XML. This declarative transaction 
 lets you keep business services free of repetitive transaction demarcation code and
 focus on adding business logic, which is the real value of your application.
 
-NOTE: Before you continue, we are strongly encourage you to read <<transaction-declarative>>
+NOTE: Before you continue, we are strongly encourage you to read xref:data-access/transaction/declarative.adoc[Declarative Transaction Management]
 if you have not already done so.
 
 You can annotate the service layer with `@Transactional` annotations and instruct the
@@ -447,7 +447,7 @@ to which it synchronizes (along with Spring). You have two options for doing thi
 
 * Pass your Spring `JtaTransactionManager` bean to your Hibernate setup. The easiest
   way is a bean reference into the `jtaTransactionManager` property for your
-  `LocalSessionFactoryBean` bean (see <<transaction-strategies-hibernate>>).
+  `LocalSessionFactoryBean` bean (see xref:data-access/transaction/strategies.adoc#transaction-strategies-hibernate[Hibernate Transaction Setup]).
   Spring then makes the corresponding JTA strategies available to Hibernate.
 * You may also configure Hibernate's JTA-related properties explicitly, in particular
   "hibernate.transaction.coordinator_class", "hibernate.connection.handling_mode"

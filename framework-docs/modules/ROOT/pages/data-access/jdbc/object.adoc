@@ -10,7 +10,7 @@ procedures and run update, delete, and insert statements.
 [NOTE]
 ====
 Many Spring developers believe that the various RDBMS operation classes described below
-(with the exception of the <<jdbc-StoredProcedure, `StoredProcedure`>> class) can often
+(with the exception of the xref:data-access/jdbc/object.adoc#jdbc-StoredProcedure[`StoredProcedure`] class) can often
 be replaced with straight `JdbcTemplate` calls. Often, it is simpler to write a DAO
 method that calls a method on a `JdbcTemplate` directly (as opposed to
 encapsulating a query as a full-blown class).
@@ -236,7 +236,7 @@ The SQL type is specified using the `java.sql.Types` constants.
 
 The first line (with the `SqlParameter`) declares an IN parameter. You can use IN parameters
 both for stored procedure calls and for queries using the `SqlQuery` and its
-subclasses (covered in <<jdbc-SqlQuery>>).
+subclasses (covered in xref:data-access/jdbc/object.adoc#jdbc-SqlQuery[Understanding `SqlQuery`]).
 
 The second line (with the `SqlOutParameter`) declares an `out` parameter to be used in the
 stored procedure call. There is also an `SqlInOutParameter` for `InOut` parameters

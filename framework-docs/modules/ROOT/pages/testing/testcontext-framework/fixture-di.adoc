@@ -7,7 +7,7 @@ application context that you configured with `@ContextConfiguration` or related
 annotations. You may use setter injection, field injection, or both, depending on
 which annotations you choose and whether you place them on setter methods or fields.
 If you are using JUnit Jupiter you may also optionally use constructor injection
-(see <<testcontext-junit-jupiter-di>>). For consistency with Spring's annotation-based
+(see xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency Injection with `SpringExtension`]). For consistency with Spring's annotation-based
 injection support, you may also use Spring's `@Autowired` annotation or the `@Inject`
 annotation from JSR-330 for field and setter injection.
 
@@ -20,8 +20,8 @@ actually quite natural in test code. The rationale for the difference is that yo
 never instantiate your test class directly. Consequently, there is no need to be able to
 invoke a `public` constructor or setter method on your test class.
 
-Because `@Autowired` is used to perform <<core.adoc#beans-factory-autowire, autowiring by
-type>>, if you have multiple bean definitions of the same type, you cannot rely on this
+Because `@Autowired` is used to perform xref:core/beans/dependencies/factory-autowire.adoc[autowiring by type]
+, if you have multiple bean definitions of the same type, you cannot rely on this
 approach for those particular beans. In that case, you can use `@Autowired` in
 conjunction with `@Qualifier`. You can also choose to use `@Inject` in conjunction with
 `@Named`. Alternatively, if your test class has access to its `ApplicationContext`, you
@@ -35,7 +35,7 @@ dependency injection altogether by explicitly configuring your class with
 from the list of listeners.
 
 Consider the scenario of testing a `HibernateTitleRepository` class, as outlined in the
-<<integration-testing-goals, Goals>> section. The next two code listings demonstrate the
+xref:testing/integration.adoc#integration-testing-goals[Goals] section. The next two code listings demonstrate the
 use of `@Autowired` on fields and setter methods. The application context configuration
 is presented after all sample code listings.
 

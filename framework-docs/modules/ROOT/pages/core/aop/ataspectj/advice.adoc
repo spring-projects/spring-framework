@@ -3,7 +3,7 @@
 
 Advice is associated with a pointcut expression and runs before, after, or around method
 executions matched by the pointcut. The pointcut expression may be either an _inline
-pointcut_ or a reference to a <<aop-common-pointcuts,_named pointcut_>>.
+pointcut_ or a reference to a xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[_named pointcut_].
 
 
 [[aop-advice-before]]
@@ -44,7 +44,7 @@ The following example uses an inline pointcut expression.
 	}
 ----
 
-If we use a <<aop-common-pointcuts,named pointcut>>, we can rewrite the preceding example
+If we use a xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[named pointcut], we can rewrite the preceding example
 as follows:
 
 [source,java,indent=0,subs="verbatim",role="primary"]
@@ -352,7 +352,7 @@ execution-only semantics. You only need to be aware of this difference if you co
 `@AspectJ` aspects written for Spring and use `proceed` with arguments with the AspectJ
 compiler and weaver. There is a way to write such aspects that is 100% compatible across
 both Spring AOP and AspectJ, and this is discussed in the
-<<aop-ataspectj-advice-proceeding-with-the-call, following section on advice parameters>>.
+xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-proceeding-with-the-call[following section on advice parameters].
 ====
 
 The value returned by the around advice is the return value seen by the caller of the
@@ -536,7 +536,7 @@ The following shows the advice that matches the execution of `@Auditable` method
 		// ...
 	}
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
@@ -547,7 +547,7 @@ The following shows the advice that matches the execution of `@Auditable` method
 		// ...
 	}
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 
 [[aop-ataspectj-advice-params-generics]]
 === Advice Parameters and Generics
@@ -633,7 +633,7 @@ of determining parameter names, an exception will be thrown.
 
 `AspectJAnnotationParameterNameDiscoverer` :: Uses parameter names that have been explicitly
   specified by the user via the `argNames` attribute in the corresponding advice or
-  pointcut annotation. See <<aop-ataspectj-advice-params-names-explicit>> for details.
+  pointcut annotation. See xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params-names-explicit[Explicit Argument Names] for details.
 `KotlinReflectionParameterNameDiscoverer` :: Uses Kotlin reflection APIs to determine
   parameter names. This discoverer is only used if such APIs are present on the classpath.
 `StandardReflectionParameterNameDiscoverer` :: Uses the standard `java.lang.reflect.Parameter`
@@ -679,7 +679,7 @@ The following example shows how to use the `argNames` attribute:
 		// ... use code and bean
 	}
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 <2> Declares `bean` and `auditable` as the argument names.
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
@@ -693,7 +693,7 @@ The following example shows how to use the `argNames` attribute:
 		// ... use code and bean
 	}
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 <2> Declares `bean` and `auditable` as the argument names.
 
 If the first parameter is of type `JoinPoint`, `ProceedingJoinPoint`, or
@@ -712,7 +712,7 @@ point object, the `argNames` attribute does not need to include it:
 		// ... use code, bean, and jp
 	}
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 <2> Declares `bean` and `auditable` as the argument names.
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
@@ -726,7 +726,7 @@ point object, the `argNames` attribute does not need to include it:
 		// ... use code, bean, and jp
 	}
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 <2> Declares `bean` and `auditable` as the argument names.
 
 The special treatment given to the first parameter of type `JoinPoint`,
@@ -743,7 +743,7 @@ the `argNames` attribute:
 		// ... use jp
 	}
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
@@ -753,7 +753,7 @@ the `argNames` attribute:
 		// ... use jp
 	}
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 
 
 [[aop-ataspectj-advice-proceeding-with-the-call]]
@@ -776,7 +776,7 @@ The following example shows how to do so:
 		return pjp.proceed(new Object[] {newPattern});
 	}
 ----
-<1> References the `inDataAccessLayer` named pointcut defined in <<aop-common-pointcuts>>.
+<1> References the `inDataAccessLayer` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
@@ -790,7 +790,7 @@ The following example shows how to do so:
 		return pjp.proceed(arrayOf<Any>(newPattern))
 	}
 ----
-<1> References the `inDataAccessLayer` named pointcut defined in <<aop-common-pointcuts>>.
+<1> References the `inDataAccessLayer` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 In many cases, you do this binding anyway (as in the preceding example).
 

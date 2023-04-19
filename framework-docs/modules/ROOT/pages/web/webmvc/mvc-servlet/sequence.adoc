@@ -1,7 +1,7 @@
 [[mvc-servlet-sequence]]
 = Processing
 
-[.small]#<<web-reactive.adoc#webflux-dispatcher-handler-sequence, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/dispatcher-handler.adoc#webflux-dispatcher-handler-sequence[See equivalent in the Reactive stack]#
 
 The `DispatcherServlet` processes requests as follows:
 
@@ -15,7 +15,7 @@ The `DispatcherServlet` processes requests as follows:
   which theme to use. If you do not use themes, you can ignore it.
 * If you specify a multipart file resolver, the request is inspected for multiparts. If
   multiparts are found, the request is wrapped in a `MultipartHttpServletRequest` for
-  further processing by other elements in the process. See <<mvc-multipart>> for further
+  further processing by other elements in the process. See xref:web/webmvc/mvc-servlet/multipart.adoc[Multipart Resolver] for further
   information about multipart handling.
 * An appropriate handler is searched for. If a handler is found, the execution chain
   associated with the handler (preprocessors, postprocessors, and controllers) is
@@ -28,11 +28,11 @@ The `DispatcherServlet` processes requests as follows:
 
 The `HandlerExceptionResolver` beans declared in the `WebApplicationContext` are used to
 resolve exceptions thrown during request processing. Those exception resolvers allow
-customizing the logic to address exceptions. See <<mvc-exceptionhandlers>> for more details.
+customizing the logic to address exceptions. See xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[Exceptions] for more details.
 
 For HTTP caching support, handlers can use the `checkNotModified` methods of `WebRequest`,
 along with further options for annotated controllers as described in
-<<mvc-caching-etag-lastmodified,HTTP Caching for Controllers>>.
+xref:web/webmvc/mvc-caching.adoc#mvc-caching-etag-lastmodified[HTTP Caching for Controllers].
 
 You can customize individual `DispatcherServlet` instances by adding Servlet
 initialization parameters (`init-param` elements) to the Servlet declaration in the
@@ -65,7 +65,7 @@ initialization parameters (`init-param` elements) to the Servlet declaration in 
   By default, this is set to `false`, in which case the `DispatcherServlet` sets the
   response status to 404 (NOT_FOUND) without raising an exception.
 
-  Note that, if <<mvc-default-servlet-handler,default servlet handling>>  is
+  Note that, if xref:web/webmvc/mvc-config/default-servlet-handler.adoc[default servlet handling]  is
   also configured, unresolved requests are always forwarded to the default servlet
   and a 404 is never raised.
 |===

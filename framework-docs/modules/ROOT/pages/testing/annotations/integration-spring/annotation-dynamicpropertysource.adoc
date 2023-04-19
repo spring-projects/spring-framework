@@ -55,5 +55,5 @@ The following example demonstrates how to register a dynamic property:
 <2> Accept a `DynamicPropertyRegistry` as an argument.
 <3> Register a dynamic `server.port` property to be retrieved lazily from the server.
 
-See <<testcontext-ctx-management-dynamic-property-sources>> for further details.
+See xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[Context Configuration with Dynamic Property Sources] for further details.
 

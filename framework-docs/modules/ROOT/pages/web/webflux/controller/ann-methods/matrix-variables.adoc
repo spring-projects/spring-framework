@@ -1,7 +1,7 @@
 [[webflux-ann-matrix-variables]]
 = Matrix Variables
 
-[.small]#<<web.adoc#mvc-ann-matrix-variables, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/matrix-variables.adoc[See equivalent in the Servlet stack]#
 
 https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring WebFlux, we refer to those as "`matrix variables`" based on an

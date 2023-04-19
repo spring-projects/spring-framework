@@ -1,6 +1,6 @@
 [[webflux-websocket]]
 = WebSockets
-[.small]#<<web.adoc#websocket, See equivalent in the Servlet stack>>#
+[.small]#xref:web/websocket.adoc[See equivalent in the Servlet stack]#
 
 This part of the reference documentation covers support for reactive-stack WebSocket
 messaging.
@@ -11,7 +11,7 @@ messaging.
 
 [[webflux-websocket-server]]
 == WebSocket API
-[.small]#<<web.adoc#websocket-server, See equivalent in the Servlet stack>>#
+[.small]#xref:web/websocket/stomp/server-config.adoc[See equivalent in the Servlet stack]#
 
 The Spring Framework provides a WebSocket API that you can use to write client- and
 server-side applications that handle WebSocket messages.
@@ -20,7 +20,7 @@ server-side applications that handle WebSocket messages.
 
 [[webflux-websocket-server-handler]]
 === Server
-[.small]#<<web.adoc#websocket-server-handler, See equivalent in the Servlet stack>>#
+[.small]#xref:web/websocket/server.adoc#websocket-server-handler[See equivalent in the Servlet stack]#
 
 To create a WebSocket server, you can first create a `WebSocketHandler`.
 The following example shows how to do so:
@@ -87,7 +87,7 @@ Then you can map it to a URL:
 	}
 ----
 
-If using the <<web-reactive.adoc#webflux-config, WebFlux Config>> there is nothing
+If using the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config] there is nothing
 further to do, or otherwise if not using the WebFlux config you'll need to declare a
 `WebSocketHandlerAdapter` as shown below:
 
@@ -206,7 +206,7 @@ following example shows such an implementation:
 TIP: For nested, asynchronous operations, you may need to call `message.retain()` on underlying
 servers that use pooled data buffers (for example, Netty). Otherwise, the data buffer may be
 released before you have had a chance to read the data. For more background, see
-<<core.adoc#databuffers, Data Buffers and Codecs>>.
+xref:core/databuffer-codec.adoc[Data Buffers and Codecs].
 
 The following implementation combines the inbound and outbound streams:
 
@@ -325,7 +325,7 @@ as the following example shows:
 
 `DataBuffer` is the representation for a byte buffer in WebFlux. The Spring Core part of
 the reference has more on that in the section on
-<<core#databuffers, Data Buffers and Codecs>>. The key point to understand is that on some
+xref:core/databuffer-codec.adoc[Data Buffers and Codecs]. The key point to understand is that on some
 servers like Netty, byte buffers are pooled and reference counted, and must be released
 when consumed to avoid memory leaks.
 
@@ -338,7 +338,7 @@ subsequently use `DataBufferUtils.release(dataBuffer)` when the buffers are cons
 
 [[webflux-websocket-server-handshake]]
 === Handshake
-[.small]#<<web.adoc#websocket-server-handshake, See equivalent in the Servlet stack>>#
+[.small]#xref:web/websocket/server.adoc#websocket-server-handshake[See equivalent in the Servlet stack]#
 
 `WebSocketHandlerAdapter` delegates to a `WebSocketService`. By default, that is an instance
 of `HandshakeWebSocketService`, which performs basic checks on the WebSocket request and
@@ -353,12 +353,12 @@ into the attributes of the `WebSocketSession`.
 
 [[webflux-websocket-server-config]]
 === Server Configuration
-[.small]#<<web.adoc#websocket-server-runtime-configuration, See equivalent in the Servlet stack>>#
+[.small]#xref:web/websocket/server.adoc#websocket-server-runtime-configuration[See equivalent in the Servlet stack]#
 
 The `RequestUpgradeStrategy` for each server exposes configuration specific to the
 underlying WebSocket server engine. When using the WebFlux Java config you can customize
 such properties as shown in the corresponding section of the
-<<web-reactive.adoc#webflux-config-websocket-service, WebFlux Config>>, or otherwise if
+xref:web/webflux/config.adoc#webflux-config-websocket-service[WebFlux Config], or otherwise if
 not using the WebFlux config, use the below:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -407,7 +407,7 @@ only Tomcat and Jetty expose such options.
 
 [[webflux-websocket-server-cors]]
 === CORS
-[.small]#<<web.adoc#websocket-server-allowed-origins, See equivalent in the Servlet stack>>#
+[.small]#xref:web/websocket/server.adoc#websocket-server-allowed-origins[See equivalent in the Servlet stack]#
 
 The easiest way to configure CORS and restrict access to a WebSocket endpoint is to
 have your `WebSocketHandler` implement `CorsConfigurationSource` and return a

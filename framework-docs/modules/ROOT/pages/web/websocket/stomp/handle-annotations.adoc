@@ -5,9 +5,9 @@ Applications can use annotated `@Controller` classes to handle messages from cli
 Such classes can declare `@MessageMapping`, `@SubscribeMapping`, and `@ExceptionHandler`
 methods, as described in the following topics:
 
-* <<websocket-stomp-message-mapping>>
-* <<websocket-stomp-subscribe-mapping>>
-* <<websocket-stomp-exception-handler>>
+* xref:web/websocket/stomp/handle-annotations.adoc#websocket-stomp-message-mapping[`@MessageMapping`]
+* xref:web/websocket/stomp/handle-annotations.adoc#websocket-stomp-subscribe-mapping[`@SubscribeMapping`]
+* xref:web/websocket/stomp/handle-annotations.adoc#websocket-stomp-exception-handler[`@MessageExceptionHandler`]
 
 
 [[websocket-stomp-message-mapping]]
@@ -22,7 +22,7 @@ By default, the mapping values are Ant-style path patterns (for example `/thing*
 including support for template variables (for example, pass:q[`/thing/{id}`]). The values can be
 referenced through `@DestinationVariable` method arguments. Applications can also switch to
 a dot-separated destination convention for mappings, as explained in
-<<websocket-stomp-destination-separator>>.
+xref:web/websocket/stomp/destination-separator.adoc[Dots as Separators].
 
 [[supported-method-arguments]]
 === Supported Method Arguments
@@ -80,7 +80,7 @@ same as that of the inbound message but prefixed with `/topic`.
 You can use the `@SendTo` and `@SendToUser` annotations to customize the destination of
 the output message. `@SendTo` is used to customize the target destination or to
 specify multiple destinations. `@SendToUser` is used to direct the output message
-to only the user associated with the input message. See <<websocket-stomp-user-destination>>.
+to only the user associated with the input message. See xref:web/websocket/stomp/user-destination.adoc[User Destinations].
 
 You can use both `@SendTo` and `@SendToUser` at the same time on the same method, and both
 are supported at the class level, in which case they act as a default for methods in the
@@ -94,7 +94,7 @@ Note that `@SendTo` and `@SendToUser` are merely a convenience that amounts to u
 `SimpMessagingTemplate` to send messages. If necessary, for more advanced scenarios,
 `@MessageMapping` methods can fall back on using the `SimpMessagingTemplate` directly.
 This can be done instead of, or possibly in addition to, returning a value.
-See <<websocket-stomp-handle-send>>.
+See xref:web/websocket/stomp/handle-send.adoc[Sending Messages].
 
 
 [[websocket-stomp-subscribe-mapping]]
@@ -102,7 +102,7 @@ See <<websocket-stomp-handle-send>>.
 
 `@SubscribeMapping` is similar to `@MessageMapping` but narrows the mapping to
 subscription messages only. It supports the same
-<<websocket-stomp-message-mapping, method arguments>> as `@MessageMapping`. However
+xref:web/websocket/stomp/handle-annotations.adoc#websocket-stomp-message-mapping[method arguments] as `@MessageMapping`. However
 for the return value, by default, a message is sent directly to the client (through
 `clientOutboundChannel`, in response to the subscription) and not to the broker (through
 `brokerChannel`, as a broadcast to matching subscriptions). Adding `@SendTo` or
@@ -123,7 +123,7 @@ for some reason. Inbound messages are handled in parallel. There are no guarante
 a broker or a controller processes a given message first. If the goal is to be notified
 when a subscription is stored and ready for broadcasts, a client should ask for a
 receipt if the server supports it (simple broker does not). For example, with the Java
-<<websocket-stomp-client, STOMP client>>, you could do the following to add a receipt:
+xref:web/websocket/stomp/client.adoc[STOMP client], you could do the following to add a receipt:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -143,7 +143,7 @@ receipt if the server supports it (simple broker does not). For example, with th
 	});
 ----
 
-A server side option is <<websocket-stomp-interceptors, to register>> an
+A server side option is xref:web/websocket/stomp/interceptors.adoc[to register] an
 `ExecutorChannelInterceptor` on the `brokerChannel` and implement the `afterMessageHandled`
 method that is invoked after messages, including subscriptions, have been handled.
 
@@ -173,13 +173,13 @@ The following example declares an exception through a method argument:
 
 `@MessageExceptionHandler` methods support flexible method signatures and support
 the same method argument types and return values as
-<<websocket-stomp-message-mapping, `@MessageMapping`>> methods.
+xref:web/websocket/stomp/handle-annotations.adoc#websocket-stomp-message-mapping[`@MessageMapping`] methods.
 
 Typically, `@MessageExceptionHandler` methods apply within the `@Controller` class
 (or class hierarchy) in which they are declared. If you want such methods to apply
 more globally (across controllers), you can declare them in a class marked with
 `@ControllerAdvice`. This is comparable to the
-<<web.adoc#mvc-ann-controller-advice, similar support>> available in Spring MVC.
+xref:web/webmvc/mvc-controller/ann-advice.adoc[similar support] available in Spring MVC.
 
 
 

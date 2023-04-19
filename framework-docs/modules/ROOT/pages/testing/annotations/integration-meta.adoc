@@ -2,11 +2,11 @@
 = Meta-Annotation Support for Testing
 
 You can use most test-related annotations as
-<<core.adoc#beans-meta-annotations, meta-annotations>> to create custom composed
+xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotations] to create custom composed
 annotations and reduce configuration duplication across a test suite.
 
 You can use each of the following as a meta-annotation in conjunction with the
-<<testcontext-framework, TestContext framework>>.
+xref:testing/testcontext-framework.adoc[TestContext framework].
 
 * `@BootstrapWith`
 * `@ContextConfiguration`

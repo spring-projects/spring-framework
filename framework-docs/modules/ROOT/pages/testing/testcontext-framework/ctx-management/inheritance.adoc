@@ -18,7 +18,7 @@ initializers, respectively, for the test class shadow and effectively replace th
 configuration defined by superclasses.
 
 NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
-classes. See <<testcontext-junit-jupiter-nested-test-configuration>> for details.
+classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
 
 In the next example, which uses XML resource locations, the `ApplicationContext` for
 `ExtendedTest` is loaded from `base-config.xml` and `extended-config.xml`, in that order.

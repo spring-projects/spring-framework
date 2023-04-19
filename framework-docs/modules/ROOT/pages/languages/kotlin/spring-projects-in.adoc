@@ -250,7 +250,7 @@ https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-featu
 [[constructor-injection]]
 === Constructor injection
 
-As described in the <<testing#testcontext-junit-jupiter-di, dedicated section>>,
+As described in the xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[dedicated section],
 JUnit 5 allows constructor injection of beans which is pretty useful with Kotlin
 in order to use `val` instead of `lateinit var`. You can use
 {api-spring-framework}/test/context/TestConstructor.html[`@TestConstructor(autowireMode = AutowireMode.ALL)`]

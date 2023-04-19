@@ -3,8 +3,8 @@
 
 The {api-spring-framework}/core/env/Environment.html[`Environment`] interface
 is an abstraction integrated in the container that models two key
-aspects of the application environment: <<beans-definition-profiles, profiles>>
-and <<beans-property-source-abstraction, properties>>.
+aspects of the application environment: xref:core/beans/environment.adoc#beans-definition-profiles[profiles]
+and xref:core/beans/environment.adoc#beans-property-source-abstraction[properties].
 
 A profile is a named, logical group of bean definitions to be registered with the
 container only if the given profile is active. Beans may be assigned to a profile
@@ -200,7 +200,7 @@ NOTE: You cannot mix the `&` and `|` operators without using parentheses. For ex
 `production & us-east | eu-central` is not a valid expression. It must be expressed as
 `production & (us-east | eu-central)`.
 
-You can use `@Profile` as a <<beans-meta-annotations, meta-annotation>> for the purpose
+You can use `@Profile` as a xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotation] for the purpose
 of creating a custom composed annotation. The following example defines a custom
 `@Production` annotation that you can use as a drop-in replacement for
 `@Profile("production")`:
@@ -437,10 +437,10 @@ it programmatically against the `Environment` API which is available through an
 In addition, you can also declaratively activate profiles through the
 `spring.profiles.active` property, which may be specified through system environment
 variables, JVM system properties, servlet context parameters in `web.xml`, or even as an
-entry in JNDI (see <<beans-property-source-abstraction>>). In integration tests, active
+entry in JNDI (see xref:core/beans/environment.adoc#beans-property-source-abstraction[`PropertySource` Abstraction]). In integration tests, active
 profiles can be declared by using the `@ActiveProfiles` annotation in the `spring-test`
-module (see <<testing.adoc#testcontext-ctx-management-env-profiles,
-context configuration with environment profiles>>).
+module (see xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[context configuration with environment profiles]
+).
 
 Note that profiles are not an "`either-or`" proposition. You can activate multiple
 profiles at once. Programmatically, you can provide multiple profile names to the

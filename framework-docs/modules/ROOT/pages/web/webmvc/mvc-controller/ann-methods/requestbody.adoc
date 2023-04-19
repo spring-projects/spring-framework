@@ -1,10 +1,10 @@
 [[mvc-ann-requestbody]]
 = `@RequestBody`
 
-[.small]#<<web-reactive.adoc#webflux-ann-requestbody, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/requestbody.adoc[See equivalent in the Reactive stack]#
 
 You can use the `@RequestBody` annotation to have the request body read and deserialized into an
-`Object` through an <<integration.adoc#rest-message-conversion, `HttpMessageConverter`>>.
+`Object` through an xref:integration/rest-clients.adoc#rest-message-conversion[`HttpMessageConverter`].
 The following example uses a `@RequestBody` argument:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -25,7 +25,7 @@ The following example uses a `@RequestBody` argument:
 ----
 
 
-You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
+You can use the xref:web/webmvc/mvc-config/message-converters.adoc[Message Converters] option of the xref:web/webmvc/mvc-config.adoc[MVC Config] to
 configure or customize message conversion.
 
 You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's

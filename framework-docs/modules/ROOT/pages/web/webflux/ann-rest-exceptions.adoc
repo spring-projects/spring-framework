@@ -1,7 +1,7 @@
 [[webflux-ann-rest-exceptions]]
 = Error Responses
 
-[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc[See equivalent in the Servlet stack]#
 
 A common requirement for REST services is to include details in the body of error
 responses. The Spring Framework supports the "Problem Details for HTTP APIs"
@@ -18,14 +18,14 @@ exceptions implement this.
 - `ErrorResponseException` -- basic `ErrorResponse` implementation that others
 can use as a convenient base class.
 - `ResponseEntityExceptionHandler` -- convenient base class for an
-<<webflux-ann-controller-advice,@ControllerAdvice>> that handles all Spring WebFlux exceptions,
+xref:web/webflux/controller/ann-advice.adoc[@ControllerAdvice] that handles all Spring WebFlux exceptions,
 and any `ErrorResponseException`, and renders an error response with a body.
 
 
 
 [[webflux-ann-rest-exceptions-render]]
 == Render
-[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-render, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-render[See equivalent in the Servlet stack]#
 
 You can return `ProblemDetail` or `ErrorResponse` from any `@ExceptionHandler` or from
 any `@RequestMapping` method to render an RFC 7807 response. This is processed as follows:
@@ -39,7 +39,7 @@ and also falls back on it if no compatible media type is found.
 
 To enable RFC 7807 responses for Spring WebFlux exceptions and for any
 `ErrorResponseException`, extend `ResponseEntityExceptionHandler` and declare it as an
-<<webflux-ann-controller-advice,@ControllerAdvice>> in Spring configuration. The handler
+xref:web/webflux/controller/ann-advice.adoc[@ControllerAdvice] in Spring configuration. The handler
 has an `@ExceptionHandler` method that handles any `ErrorResponse` exception, which
 includes all built-in web exceptions. You can add more exception handling methods, and
 use a protected method to map any exception to a `ProblemDetail`.
@@ -48,7 +48,7 @@ use a protected method to map any exception to a `ProblemDetail`.
 
 [[webflux-ann-rest-exceptions-non-standard]]
 == Non-Standard Fields
-[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-non-standard, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-non-standard[See equivalent in the Servlet stack]#
 
 You can extend an RFC 7807 response with non-standard fields in one of two ways.
 
@@ -68,13 +68,13 @@ from an existing `ProblemDetail`. This could be done centrally, e.g. from an
 
 [[webflux-ann-rest-exceptions-i18n]]
 == Internationalization
-[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-i18n, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-i18n[See equivalent in the Servlet stack]#
 
 It is a common requirement to internationalize error response details, and good practice
 to customize the problem details for Spring WebFlux exceptions. This is supported as follows:
 
 - Each `ErrorResponse` exposes a message code and arguments to resolve the "detail" field
-through a <<core.adoc#context-functionality-messagesource,MessageSource>>.
+through a xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource].
 The actual message code value is parameterized with placeholders, e.g.
 `"HTTP method {0} not supported"` to be expanded from the arguments.
 - Each `ErrorResponse` also exposes a message code to resolve the "title" field.
@@ -139,7 +139,7 @@ qualified exception class name.
 
 [[webflux-ann-rest-exceptions-client]]
 == Client Handling
-[.small]#<<webmvc.adoc#mvc-ann-rest-exceptions-client, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-ann-rest-exceptions.adoc#mvc-ann-rest-exceptions-client[See equivalent in the Servlet stack]#
 
 A client application can catch `WebClientResponseException`, when using the `WebClient`,
 or `RestClientResponseException` when using the `RestTemplate`, and use their

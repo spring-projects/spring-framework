@@ -1,7 +1,7 @@
 [[webflux-ann-controller]]
 = `@Controller`
 
-[.small]#<<web.adoc#mvc-ann-controller, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann.adoc[See equivalent in the Servlet stack]#
 
 You can define controller beans by using a standard Spring bean definition.
 The `@Controller` stereotype allows for auto-detection and is aligned with Spring general support
@@ -36,7 +36,7 @@ your Java configuration, as the following example shows:
 ----
 <1> Scan the `org.example.web` package.
 
-`@RestController` is a <<core.adoc#beans-meta-annotations, composed annotation>> that is
+`@RestController` is a xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[composed annotation] that is
 itself meta-annotated with `@Controller` and `@ResponseBody`, indicating a controller whose
 every method inherits the type-level `@ResponseBody` annotation and, therefore, writes
 directly to the response body versus view resolution and rendering with an HTML template.
@@ -45,7 +45,7 @@ directly to the response body versus view resolution and rendering with an HTML 
 
 [[webflux-ann-requestmapping-proxying]]
 == AOP Proxies
-[.small]#<<web.adoc#mvc-ann-requestmapping-proxying, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann.adoc#mvc-ann-requestmapping-proxying[See equivalent in the Servlet stack]#
 
 In some cases, you may need to decorate a controller with an AOP proxy at runtime.
 One example is if you choose to have `@Transactional` annotations directly on the

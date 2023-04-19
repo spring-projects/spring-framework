@@ -2,7 +2,7 @@
 = General ORM Integration Considerations
 
 This section highlights considerations that apply to all ORM technologies.
-The <<orm-hibernate>> section provides more details and also show these features and
+The xref:data-access/orm/hibernate.adoc[Hibernate] section provides more details and also show these features and
 configurations in a concrete context.
 
 The major goal of Spring's ORM integration is clear application layering (with any data
@@ -31,18 +31,18 @@ interceptors for the ORM technologies.
 The infrastructure provides proper resource handling and appropriate conversion of
 specific API exceptions to an unchecked infrastructure exception hierarchy. Spring
 introduces a DAO exception hierarchy, applicable to any data access strategy. For direct
-JDBC, the `JdbcTemplate` class mentioned in a <<jdbc-JdbcTemplate, previous section>>
+JDBC, the `JdbcTemplate` class mentioned in a xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate[previous section]
 provides connection handling and proper conversion of `SQLException` to the
 `DataAccessException` hierarchy, including translation of database-specific SQL error
 codes to meaningful exception classes. For ORM technologies, see the
-<<orm-exception-translation, next section>> for how to get the same exception
+xref:data-access/orm/general.adoc#orm-exception-translation[next section] for how to get the same exception
 translation benefits.
 
 When it comes to transaction management, the `JdbcTemplate` class hooks in to the Spring
 transaction support and supports both JTA and JDBC transactions, through respective
 Spring transaction managers. For the supported ORM technologies, Spring offers Hibernate
 and JPA support through the Hibernate and JPA transaction managers as well as JTA support.
-For details on transaction support, see the <<transaction>> chapter.
+For details on transaction support, see the xref:data-access/transaction.adoc[Transaction Management] chapter.
 
 
 [[orm-exception-translation]]

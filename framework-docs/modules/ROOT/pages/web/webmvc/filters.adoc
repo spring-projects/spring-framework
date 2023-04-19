@@ -1,14 +1,14 @@
 [[filters]]
 = Filters
 
-[.small]#<<web-reactive.adoc#webflux-filters, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-filters[See equivalent in the Reactive stack]#
 
 The `spring-web` module provides some useful filters:
 
-* <<filters-http-put>>
-* <<filters-forwarded-headers>>
-* <<filters-shallow-etag>>
-* <<filters-cors>>
+* xref:web/webmvc/filters.adoc#filters-http-put[Form Data]
+* xref:web/webmvc/filters.adoc#filters-forwarded-headers[Forwarded Headers]
+* xref:web/webmvc/filters.adoc#filters-shallow-etag[Shallow ETag]
+* xref:web/webmvc/filters.adoc#filters-cors[CORS]
 
 
 
@@ -28,7 +28,7 @@ available through the `ServletRequest.getParameter{asterisk}()` family of method
 
 [[filters-forwarded-headers]]
 == Forwarded Headers
-[.small]#<<web-reactive.adoc#webflux-forwarded-headers, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-forwarded-headers[See equivalent in the Reactive stack]#
 
 As a request goes through proxies (such as load balancers) the host, port, and
 scheme may change, and that makes it a challenge to create links that point to the correct
@@ -51,10 +51,10 @@ a proxy at the boundary of trust should be configured to remove untrusted `Forwa
 headers that come from the outside. You can also configure the `ForwardedHeaderFilter`
 with `removeOnly=true`, in which case it removes but does not use the headers.
 
-In order to support <<mvc-ann-async,asynchronous requests>> and error dispatches this
+In order to support xref:web/webmvc/mvc-ann-async.adoc[asynchronous requests] and error dispatches this
 filter should be mapped with `DispatcherType.ASYNC` and also `DispatcherType.ERROR`.
 If using Spring Framework's `AbstractAnnotationConfigDispatcherServletInitializer`
-(see <<mvc-container-config>>) all filters are automatically registered for all dispatch
+(see xref:web/webmvc/mvc-servlet/container-config.adoc[Servlet Config]) all filters are automatically registered for all dispatch
 types. However if registering the filter via `web.xml` or in Spring Boot via a
 `FilterRegistrationBean` be sure to include `DispatcherType.ASYNC` and
 `DispatcherType.ERROR` in addition to `DispatcherType.REQUEST`.
@@ -71,16 +71,16 @@ request header and, if the two are equal, returns a 304 (NOT_MODIFIED).
 
 This strategy saves network bandwidth but not CPU, as the full response must be computed
 for each request. Other strategies at the controller level, described earlier, can avoid
-the computation. See <<mvc-caching>>.
+the computation. See xref:web/webmvc/mvc-caching.adoc[HTTP Caching].
 
 This filter has a `writeWeakETag` parameter that configures the filter to write weak ETags
 similar to the following: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"` (as defined in
 https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3]).
 
-In order to support <<mvc-ann-async,asynchronous requests>> this filter must be mapped
+In order to support xref:web/webmvc/mvc-ann-async.adoc[asynchronous requests] this filter must be mapped
 with `DispatcherType.ASYNC` so that the filter can delay and successfully generate an
 ETag to the end of the last async dispatch. If using Spring Framework's
-`AbstractAnnotationConfigDispatcherServletInitializer` (see <<mvc-container-config>>)
+`AbstractAnnotationConfigDispatcherServletInitializer` (see xref:web/webmvc/mvc-servlet/container-config.adoc[Servlet Config])
 all filters are automatically registered for all dispatch types. However if registering
 the filter via `web.xml` or in Spring Boot via a `FilterRegistrationBean` be sure to include
 `DispatcherType.ASYNC`.
@@ -89,13 +89,13 @@ the filter via `web.xml` or in Spring Boot via a `FilterRegistrationBean` be sur
 
 [[filters-cors]]
 == CORS
-[.small]#<<web-reactive.adoc#webflux-filters-cors, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-filters-cors[See equivalent in the Reactive stack]#
 
 Spring MVC provides fine-grained support for CORS configuration through annotations on
 controllers. However, when used with Spring Security, we advise relying on the built-in
 `CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
 
-See the sections on <<mvc-cors>> and the <<mvc-cors-filter>> for more details.
+See the sections on xref:web/webmvc-cors.adoc[CORS] and the xref:web/webmvc-cors.adoc#mvc-cors-filter[CORS Filter] for more details.
 
 
 

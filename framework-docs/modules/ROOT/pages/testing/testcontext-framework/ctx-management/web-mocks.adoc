@@ -3,7 +3,7 @@
 
 To provide comprehensive web testing support, the TestContext framework has a
 `ServletTestExecutionListener` that is enabled by default. When testing against a
-`WebApplicationContext`, this <<testcontext-key-abstractions, `TestExecutionListener`>>
+`WebApplicationContext`, this xref:testing/testcontext-framework/key-abstractions.adoc[`TestExecutionListener`]
 sets up default thread-local state by using Spring Web's `RequestContextHolder` before
 each test method and creates a `MockHttpServletRequest`, a `MockHttpServletResponse`, and
 a `ServletWebRequest` based on the base resource path configured with

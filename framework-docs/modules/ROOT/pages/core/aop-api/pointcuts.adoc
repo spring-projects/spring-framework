@@ -92,7 +92,7 @@ Since 2.0, the most important type of pointcut used by Spring is
 `org.springframework.aop.aspectj.AspectJExpressionPointcut`. This is a pointcut that
 uses an AspectJ-supplied library to parse an AspectJ pointcut expression string.
 
-See the <<aop, previous chapter>> for a discussion of supported AspectJ pointcut primitives.
+See the xref:core/aop.adoc[previous chapter] for a discussion of supported AspectJ pointcut primitives.
 
 
 

@@ -2,22 +2,22 @@
 = Asynchronous Requests
 
 Spring MVC has an extensive integration with Servlet asynchronous request
-<<mvc-ann-async-processing,processing>>:
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-processing[processing]:
 
-* <<mvc-ann-async-deferredresult, `DeferredResult`>> and <<mvc-ann-async-callable, `Callable`>>
+* xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-deferredresult[`DeferredResult`] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-callable[`Callable`]
 return values in controller methods provide basic support for a single asynchronous
 return value.
-* Controllers can <<mvc-ann-async-http-streaming,stream>> multiple values, including
-<<mvc-ann-async-sse, SSE>> and <<mvc-ann-async-output-stream, raw data>>.
+* Controllers can xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-http-streaming[stream] multiple values, including
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-sse[SSE] and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-output-stream[raw data].
 * Controllers can use reactive clients and return
-<<mvc-ann-async-reactive-types, reactive types>> for response handling.
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive types] for response handling.
 
-For an overview of how this differs from Spring WebFlux, see the <<mvc-ann-async-vs-webflux>> section below.
+For an overview of how this differs from Spring WebFlux, see the xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-vs-webflux[Async Spring MVC compared to WebFlux] section below.
 
 [[mvc-ann-async-deferredresult]]
 == `DeferredResult`
 
-Once the asynchronous request processing feature is <<mvc-ann-async-configuration, enabled>>
+Once the asynchronous request processing feature is xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration[enabled]
 in the Servlet container, controller methods can wrap any supported controller method
 return value with `DeferredResult`, as the following example shows:
 
@@ -80,7 +80,7 @@ as the following example shows:
 ----
 
 The return value can then be obtained by running the given task through the
-<<mvc-ann-async-configuration-spring-mvc, configured>> `TaskExecutor`.
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured] `TaskExecutor`.
 
 
 
@@ -180,7 +180,7 @@ handling is built into all framework contracts and is intrinsically supported th
 stages of request processing.
 
 From a programming model perspective, both Spring MVC and Spring WebFlux support
-asynchronous and <<mvc-ann-async-reactive-types>> as return values in controller methods.
+asynchronous and xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] as return values in controller methods.
 Spring MVC even supports streaming, including reactive back pressure. However, individual
 writes to the response remain blocking (and are performed on a separate thread), unlike WebFlux,
 which relies on non-blocking I/O and does not need an extra thread for each write.
@@ -191,12 +191,12 @@ nor does it have any explicit support for asynchronous and reactive types as mod
 Spring WebFlux does support all that.
 
 Finally, from a configuration perspective the asynchronous request processing feature must be
-<<mvc-ann-async-configuration, enabled at the Servlet container level>>.
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration[enabled at the Servlet container level].
 
 
 [[mvc-ann-async-http-streaming]]
 == HTTP Streaming
-[.small]#<<web-reactive.adoc#webflux-codecs-streaming, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[See equivalent in the Reactive stack]#
 
 You can use `DeferredResult` and `Callable` for a single asynchronous return value.
 What if you want to produce multiple asynchronous values and have those written to the
@@ -208,7 +208,7 @@ response? This section describes how to do so.
 
 You can use the `ResponseBodyEmitter` return value to produce a stream of objects, where
 each object is serialized with an
-<<integration.adoc#rest-message-conversion, `HttpMessageConverter`>> and written to the
+xref:integration/rest-clients.adoc#rest-message-conversion[`HttpMessageConverter`] and written to the
 response, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -306,11 +306,11 @@ stream from a controller, return `SseEmitter`, as the following example shows:
 
 While SSE is the main option for streaming into browsers, note that Internet Explorer
 does not support Server-Sent Events. Consider using Spring's
-<<web.adoc#websocket, WebSocket messaging>> with
-<<web.adoc#websocket-fallback, SockJS fallback>> transports (including SSE) that target
+xref:web/websocket.adoc[WebSocket messaging] with
+xref:web/websocket/fallback.adoc[SockJS fallback] transports (including SSE) that target
 a wide range of browsers.
 
-See also <<mvc-ann-async-objects, previous section>> for notes on exception handling.
+See also xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-objects[previous section] for notes on exception handling.
 
 
 [[mvc-ann-async-output-stream]]
@@ -349,10 +349,10 @@ customize the status and headers of the response.
 
 [[mvc-ann-async-reactive-types]]
 == Reactive Types
-[.small]#<<web-reactive.adoc#webflux-codecs-streaming, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[See equivalent in the Reactive stack]#
 
 Spring MVC supports use of reactive client libraries in a controller (also read
-<<web-reactive.adoc#webflux-reactive-libraries, Reactive Libraries>> in the WebFlux section).
+xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries] in the WebFlux section).
 This includes the `WebClient` from `spring-webflux` and others, such as Spring Data
 reactive data repositories. In such scenarios, it is convenient to be able to return
 reactive types from the controller method.
@@ -374,11 +374,11 @@ TIP: Spring MVC supports Reactor and RxJava through the
 
 For streaming to the response, reactive back pressure is supported, but writes to the
 response are still blocking and are run on a separate thread through the
-<<mvc-ann-async-configuration-spring-mvc, configured>> `TaskExecutor`, to avoid
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[configured] `TaskExecutor`, to avoid
 blocking the upstream source (such as a `Flux` returned from `WebClient`).
 By default, `SimpleAsyncTaskExecutor` is used for the blocking writes, but that is not
 suitable under load. If you plan to stream with a reactive type, you should use the
-<<mvc-ann-async-configuration-spring-mvc, MVC configuration>> to configure a task executor.
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-configuration-spring-mvc[MVC configuration] to configure a task executor.
 
 
 
@@ -396,7 +396,7 @@ GraphQL Java https://www.graphql-java.com/documentation/concerns/#context-object
 and others.
 
 If Micrometer Context Propagation is present on the classpath, when a controller method
-returns a <<mvc-ann-async-reactive-types,reactive type>> such as `Flux` or `Mono`, all
+returns a xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive type] such as `Flux` or `Mono`, all
 `ThreadLocal` values, for which there is a registered `io.micrometer.ThreadLocalAccessor`,
 are written to the Reactor `Context` as key-value pairs, using the key assigned by the
 `ThreadLocalAccessor`.
@@ -424,17 +424,17 @@ Propagation library.
 
 [[mvc-ann-async-disconnects]]
 == Disconnects
-[.small]#<<web-reactive.adoc#webflux-codecs-streaming, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[See equivalent in the Reactive stack]#
 
 The Servlet API does not provide any notification when a remote client goes away.
-Therefore, while streaming to the response, whether through <<mvc-ann-async-sse, SseEmitter>>
-or <<mvc-ann-async-reactive-types, reactive types>>, it is important to send data periodically,
+Therefore, while streaming to the response, whether through xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-sse[SseEmitter]
+or xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive types], it is important to send data periodically,
 since the write fails if the client has disconnected. The send could take the form of an
 empty (comment-only) SSE event or any other data that the other side would have to interpret
 as a heartbeat and ignore.
 
 Alternatively, consider using web messaging solutions (such as
-<<websocket-stomp, STOMP over WebSocket>> or WebSocket with <<websocket-fallback, SockJS>>)
+xref:web/websocket/stomp.adoc[STOMP over WebSocket] or WebSocket with xref:web/websocket/fallback.adoc[SockJS])
 that have a built-in heartbeat mechanism.
 
 
@@ -474,7 +474,7 @@ You can configure the following:
 * Default timeout value for async requests, which if not set, depends
 on the underlying Servlet container.
 * `AsyncTaskExecutor` to use for blocking writes when streaming with
-<<mvc-ann-async-reactive-types>> and for executing `Callable` instances returned from
+xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[Reactive Types] and for executing `Callable` instances returned from
 controller methods. We highly recommended configuring this property if you
 stream with reactive types or have controller methods that return `Callable`, since
 by default, it is a `SimpleAsyncTaskExecutor`.

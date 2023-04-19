@@ -137,9 +137,9 @@ demonstrate its API and protocol features.
 
 The `spring-messaging` module contains the following:
 
-* <<rsocket-requester>> -- fluent API to make requests through an `io.rsocket.RSocket`
+* xref:rsocket.adoc#rsocket-requester[RSocketRequester] -- fluent API to make requests through an `io.rsocket.RSocket`
   with data and metadata encoding/decoding.
-* <<rsocket-annot-responders>> -- `@MessageMapping` annotated handler methods for
+* xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders] -- `@MessageMapping` annotated handler methods for
   responding.
 
 The `spring-web` module contains `Encoder` and `Decoder` implementations such as Jackson
@@ -219,7 +219,7 @@ metadata, the default mime type is
 metadata value and mime type pairs per request. Typically both don't need to be changed.
 
 Data and metadata in the `SETUP` frame is optional. On the server side,
-<<rsocket-annot-connectmapping>> methods can be used to handle the start of a
+xref:rsocket.adoc#rsocket-annot-connectmapping[@ConnectMapping] methods can be used to handle the start of a
 connection and the content of the `SETUP` frame. Metadata may be used for connection
 level security.
 
@@ -344,7 +344,7 @@ annotation such as `@RSocketClientResponder` vs the default `@Controller`. This
 is necessary in scenarios with client and server, or multiple clients in the same
 application.
 
-See also <<rsocket-annot-responders>>, for more on the programming model.
+See also xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders], for more on the programming model.
 
 
 [[rsocket-requester-client-advanced]]
@@ -382,7 +382,7 @@ at that level as follows:
 To make requests from a server to connected clients is a matter of obtaining the
 requester for the connected client from the server.
 
-In <<rsocket-annot-responders>>, `@ConnectMapping` and `@MessageMapping` methods support an
+In xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders], `@ConnectMapping` and `@MessageMapping` methods support an
 `RSocketRequester` argument. Use it to access the requester for the connection. Keep in
 mind that `@ConnectMapping` methods are essentially handlers of the `SETUP` frame which
 must be handled before requests can begin. Therefore, requests at the very start must be
@@ -425,8 +425,8 @@ decoupled from handling. For example:
 [[rsocket-requester-requests]]
 === Requests
 
-Once you have a <<rsocket-requester-client,client>> or
-<<rsocket-requester-server,server>> requester, you can make requests as follows:
+Once you have a xref:rsocket.adoc#rsocket-requester-client[client] or
+xref:rsocket.adoc#rsocket-requester-server[server] requester, you can make requests as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -604,7 +604,7 @@ Then start an RSocket server through the Java RSocket API and plug the
 `RSocketMessageHandler` supports
 {gh-rsocket-extensions}/CompositeMetadata.md[composite] and
 {gh-rsocket-extensions}/Routing.md[routing] metadata by default. You can set its
-<<rsocket-metadata-extractor>> if you need to switch to a
+xref:rsocket.adoc#rsocket-metadata-extractor[MetadataExtractor] if you need to switch to a
 different mime type or register additional metadata mime types.
 
 You'll need to set the `Encoder` and `Decoder` instances required for metadata and data
@@ -669,15 +669,15 @@ you need to share configuration between a client and a server in the same proces
 
 Annotated responders on the client side need to be configured in the
 `RSocketRequester.Builder`. For details, see
-<<rsocket-requester-client-responder>>.
+xref:rsocket.adoc#rsocket-requester-client-responder[Client Responders].
 
 
 
 [[rsocket-annot-messagemapping]]
 === @MessageMapping
 
-Once <<rsocket-annot-responders-server,server>> or
-<<rsocket-annot-responders-client,client>> responder configuration is in place,
+Once xref:rsocket.adoc#rsocket-annot-responders-server[server] or
+xref:rsocket.adoc#rsocket-annot-responders-client[client] responder configuration is in place,
 `@MessageMapping` methods can be used as follows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -729,10 +729,10 @@ use the following method arguments:
   pass:q[`@MessageMapping("find.radar.{id}")`].
 
 | `@Header`
-| Metadata value registered for extraction as described in <<rsocket-metadata-extractor>>.
+| Metadata value registered for extraction as described in xref:rsocket.adoc#rsocket-metadata-extractor[MetadataExtractor].
 
 | `@Headers Map<String, Object>`
-| All metadata values registered for extraction as described in <<rsocket-metadata-extractor>>.
+| All metadata values registered for extraction as described in xref:rsocket.adoc#rsocket-metadata-extractor[MetadataExtractor].
 
 |===
 
@@ -800,7 +800,7 @@ any subsequent metadata push notifications through the `METADATA_PUSH` frame, i.
 `metadataPush(Payload)` in `io.rsocket.RSocket`.
 
 `@ConnectMapping` methods support the same arguments as
-<<rsocket-annot-messagemapping>> but based on metadata and data from the `SETUP` and
+xref:rsocket.adoc#rsocket-annot-messagemapping[@MessageMapping] but based on metadata and data from the `SETUP` and
 `METADATA_PUSH` frames. `@ConnectMapping` can have a pattern to narrow handling to
 specific connections that have a route in the metadata, or if no patterns are declared
 then all connections match.
@@ -809,7 +809,7 @@ then all connections match.
 `Mono<Void>` as the return value. If handling returns an error for a new
 connection then the connection is rejected. Handling must not be held up to make
 requests to the `RSocketRequester` for the connection. See
-<<rsocket-requester-server>> for details.
+xref:rsocket.adoc#rsocket-requester-server[Server Requester] for details.
 
 
 
@@ -911,7 +911,7 @@ simply use a callback to customize registrations as follows:
 The Spring Framework lets you define an RSocket service as a Java interface with annotated
 methods for RSocket exchanges. You can then generate a proxy that implements this interface
 and performs the exchanges. This helps to simplify RSocket remote access by wrapping the
-use of the underlying <<rsocket-requester>>.
+use of the underlying xref:rsocket.adoc#rsocket-requester[RSocketRequester].
 
 One, declare an interface with `@RSocketExchange` methods:
 

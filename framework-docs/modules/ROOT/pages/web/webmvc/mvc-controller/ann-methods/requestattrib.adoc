@@ -1,7 +1,7 @@
 [[mvc-ann-requestattrib]]
 = `@RequestAttribute`
 
-[.small]#<<web-reactive.adoc#webflux-ann-requestattrib, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/requestattrib.adoc[See equivalent in the Reactive stack]#
 
 Similar to `@SessionAttribute`, you can use the `@RequestAttribute` annotations to
 access pre-existing request attributes created earlier (for example, by a Servlet `Filter`

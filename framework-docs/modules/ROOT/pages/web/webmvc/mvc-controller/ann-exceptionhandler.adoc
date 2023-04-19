@@ -1,9 +1,9 @@
 [[mvc-ann-exceptionhandler]]
 = Exceptions
 
-[.small]#<<web-reactive.adoc#webflux-ann-controller-exceptions, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-exceptions.adoc[See equivalent in the Reactive stack]#
 
-`@Controller` and <<mvc-ann-controller-advice, @ControllerAdvice>> classes can have
+`@Controller` and xref:web/webmvc/mvc-controller/ann-advice.adoc[@ControllerAdvice] classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods, as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -122,12 +122,12 @@ exception is propagated through the remaining resolution chain, as though
 the given `@ExceptionHandler` method would not have matched in the first place.
 
 Support for `@ExceptionHandler` methods in Spring MVC is built on the `DispatcherServlet`
-level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
+level, xref:web/webmvc/mvc-servlet/exceptionhandlers.adoc[HandlerExceptionResolver] mechanism.
 
 
 [[mvc-ann-exceptionhandler-args]]
 == Method Arguments
-[.small]#<<webflux.adoc#webflux-ann-exceptionhandler-args, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-exceptions.adoc#webflux-ann-exceptionhandler-args[See equivalent in the Reactive stack]#
 
 `@ExceptionHandler` methods support the following arguments:
 
@@ -177,22 +177,22 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 | `RedirectAttributes`
 | Specify attributes to use in case of a redirect -- (that is to be appended to the query
   string) and flash attributes to be stored temporarily until the request after the redirect.
-  See <<mvc-redirecting-passing-data>> and <<mvc-flash-attributes>>.
+  See xref:web/webmvc/mvc-controller/ann-methods/redirecting-passing-data.adoc[Redirect Attributes] and xref:web/webmvc/mvc-controller/ann-methods/flash-attributes.adoc[Flash Attributes].
 
 | `@SessionAttribute`
 | For access to any session attribute, in contrast to model attributes stored in the
   session as a result of a class-level `@SessionAttributes` declaration.
-  See <<mvc-ann-sessionattribute>> for more details.
+  See xref:web/webmvc/mvc-controller/ann-methods/sessionattribute.adoc[`@SessionAttribute`] for more details.
 
 | `@RequestAttribute`
-| For access to request attributes. See <<mvc-ann-requestattrib>> for more details.
+| For access to request attributes. See xref:web/webmvc/mvc-controller/ann-methods/requestattrib.adoc[`@RequestAttribute`] for more details.
 
 |===
 
 
 [[mvc-ann-exceptionhandler-return-values]]
 == Return Values
-[.small]#<<webflux.adoc#webflux-ann-exceptionhandler-return-values, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-exceptions.adoc#webflux-ann-exceptionhandler-return-values[See equivalent in the Reactive stack]#
 
 `@ExceptionHandler` methods support the following return values:
 
@@ -202,20 +202,20 @@ level, <<mvc-exceptionhandlers, HandlerExceptionResolver>> mechanism.
 
 | `@ResponseBody`
 | The return value is converted through `HttpMessageConverter` instances and written to the
-  response. See <<mvc-ann-responsebody>>.
+  response. See xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[`@ResponseBody`].
 
 | `HttpEntity<B>`, `ResponseEntity<B>`
 | The return value specifies that the full response (including the HTTP headers and the body)
   be converted through `HttpMessageConverter` instances and written to the response.
-  See <<mvc-ann-responseentity>>.
+  See xref:web/webmvc/mvc-controller/ann-methods/responseentity.adoc[ResponseEntity].
 
 | `ErrorResponse`
 | To render an RFC 7807 error response with details in the body,
-see <<mvc-ann-rest-exceptions>>
+see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
 
 | `ProblemDetail`
 | To render an RFC 7807 error response with details in the body,
-see <<mvc-ann-rest-exceptions>>
+see xref:web/webmvc/mvc-ann-rest-exceptions.adoc[Error Responses]
 
 | `String`
 | A view name to be resolved with `ViewResolver` implementations and used together with the
@@ -246,7 +246,7 @@ see <<mvc-ann-rest-exceptions>>
 | A method with a `void` return type (or `null` return value) is considered to have fully
   handled the response if it also has a `ServletResponse` an `OutputStream` argument, or
   a `@ResponseStatus` annotation. The same is also true if the controller has made a positive
-  `ETag` or `lastModified` timestamp check (see <<mvc-caching-etag-lastmodified>> for details).
+  `ETag` or `lastModified` timestamp check (see xref:web/webmvc/mvc-caching.adoc#mvc-caching-etag-lastmodified[Controllers] for details).
 
   If none of the above is true, a `void` return type can also indicate "`no response body`" for
   REST controllers or default view name selection for HTML controllers.

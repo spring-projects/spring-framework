@@ -127,7 +127,7 @@ The following example shows the XML configuration equivalent of the preceding ex
 ----
 
 The preceding example is for use in Spring MVC applications and should be included in the
-configuration of a <<mvc-servlet, `DispatcherServlet`>>. However, Spring's WebSocket
+configuration of a xref:web/webmvc/mvc-servlet.adoc[`DispatcherServlet`]. However, Spring's WebSocket
 and SockJS support does not depend on Spring MVC. It is relatively simple to
 integrate into other HTTP serving environments with the help of
 {api-spring-framework}/web/socket/sockjs/support/SockJsHttpRequestHandler.html[`SockJsHttpRequestHandler`].
@@ -273,7 +273,7 @@ log category to TRACE.
 [[websocket-fallback-cors]]
 == SockJS and CORS
 
-If you allow cross-origin requests (see <<websocket-server-allowed-origins>>), the SockJS protocol
+If you allow cross-origin requests (see xref:web/websocket/server.adoc#websocket-server-allowed-origins[Allowed Origins]), the SockJS protocol
 uses CORS for cross-domain support in the XHR streaming and polling transports. Therefore,
 CORS headers are added automatically, unless the presence of CORS headers in the response
 is detected. So, if an application is already configured to provide CORS support (for example,

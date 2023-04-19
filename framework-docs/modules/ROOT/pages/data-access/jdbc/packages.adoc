@@ -8,19 +8,19 @@ various callback interfaces, plus a variety of related classes. A subpackage nam
 `org.springframework.jdbc.core.simple` contains the `SimpleJdbcInsert` and
 `SimpleJdbcCall` classes. Another subpackage named
 `org.springframework.jdbc.core.namedparam` contains the `NamedParameterJdbcTemplate`
-class and the related support classes. See <<jdbc-core>>, <<jdbc-advanced-jdbc>>, and
-<<jdbc-simple-jdbc>>.
+class and the related support classes. See xref:data-access/jdbc/core.adoc[Using the JDBC Core Classes to Control Basic JDBC Processing and Error Handling], xref:data-access/jdbc/advanced.adoc[JDBC Batch Operations], and
+xref:data-access/jdbc/simple.adoc[Simplifying JDBC Operations with the `SimpleJdbc` Classes].
 
 * `datasource`: The `org.springframework.jdbc.datasource` package contains a utility class for easy
 `DataSource` access and various simple `DataSource` implementations that you can use for
 testing and running unmodified JDBC code outside of a Jakarta EE container. A subpackage
 named `org.springfamework.jdbc.datasource.embedded` provides support for creating
 embedded databases by using Java database engines, such as HSQL, H2, and Derby. See
-<<jdbc-connections>> and <<jdbc-embedded-database-support>>.
+xref:data-access/jdbc/connections.adoc[Controlling Database Connections] and xref:data-access/jdbc/embedded-database-support.adoc[Embedded Database Support].
 
 * `object`: The `org.springframework.jdbc.object` package contains classes that represent RDBMS
 queries, updates, and stored procedures as thread-safe, reusable objects. See
-<<jdbc-object>>. This approach is modeled by JDO, although objects returned by queries
+xref:data-access/jdbc/object.adoc[Modeling JDBC Operations as Java Objects]. This approach is modeled by JDO, although objects returned by queries
 are naturally disconnected from the database. This higher-level of JDBC abstraction
 depends on the lower-level abstraction in the `org.springframework.jdbc.core` package.
 
@@ -30,7 +30,7 @@ translated to exceptions defined in the `org.springframework.dao` package. This 
 that code using the Spring JDBC abstraction layer does not need to implement JDBC or
 RDBMS-specific error handling. All translated exceptions are unchecked, which gives you
 the option of catching the exceptions from which you can recover while letting other
-exceptions be propagated to the caller. See <<jdbc-SQLExceptionTranslator>>.
+exceptions be propagated to the caller. See xref:data-access/jdbc/core.adoc#jdbc-SQLExceptionTranslator[Using `SQLExceptionTranslator`].
 
 
 

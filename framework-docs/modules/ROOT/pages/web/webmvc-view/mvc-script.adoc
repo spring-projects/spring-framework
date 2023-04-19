@@ -1,7 +1,7 @@
 [[mvc-view-script]]
 = Script Views
 
-[.small]#<<web-reactive.adoc#webflux-view-script, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-script[See equivalent in the Reactive stack]#
 
 The Spring Framework has a built-in integration for using Spring MVC with any
 templating library that can run on top of the
@@ -27,7 +27,7 @@ TIP: The basic rule for integrating any other script engine is that it must impl
 
 [[mvc-view-script-dependencies]]
 == Requirements
-[.small]#<<web-reactive.adoc#webflux-view-script-dependencies, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-script-dependencies[See equivalent in the Reactive stack]#
 
 You need to have the script engine on your classpath, the details of which vary by script engine:
 
@@ -47,7 +47,7 @@ through https://www.webjars.org/[WebJars].
 
 [[mvc-view-script-integrate]]
 == Script Templates
-[.small]#<<web-reactive.adoc#webflux-view-script, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-script[See equivalent in the Reactive stack]#
 
 You can declare a `ScriptTemplateConfigurer` bean to specify the script engine to use,
 the script files to load, what function to call to render templates, and so on.
