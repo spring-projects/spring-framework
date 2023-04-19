@@ -1,0 +1,134 @@
+[[jms-sending]]
+= Sending a Message
+
+The `JmsTemplate` contains many convenience methods to send a message. Send
+methods specify the destination by using a `jakarta.jms.Destination` object, and others
+specify the destination by using a `String` in a JNDI lookup. The `send` method
+that takes no destination argument uses the default destination.
+
+The following example uses the `MessageCreator` callback to create a text message from the
+supplied `Session` object:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import jakarta.jms.ConnectionFactory;
+	import jakarta.jms.JMSException;
+	import jakarta.jms.Message;
+	import jakarta.jms.Queue;
+	import jakarta.jms.Session;
+
+	import org.springframework.jms.core.MessageCreator;
+	import org.springframework.jms.core.JmsTemplate;
+
+	public class JmsQueueSender {
+
+		private JmsTemplate jmsTemplate;
+		private Queue queue;
+
+		public void setConnectionFactory(ConnectionFactory cf) {
+			this.jmsTemplate = new JmsTemplate(cf);
+		}
+
+		public void setQueue(Queue queue) {
+			this.queue = queue;
+		}
+
+		public void simpleSend() {
+			this.jmsTemplate.send(this.queue, new MessageCreator() {
+				public Message createMessage(Session session) throws JMSException {
+					return session.createTextMessage("hello queue world");
+				}
+			});
+		}
+	}
+----
+
+In the preceding example, the `JmsTemplate` is constructed by passing a reference to a
+`ConnectionFactory`. As an alternative, a zero-argument constructor and
+`connectionFactory` is provided and can be used for constructing the instance in
+JavaBean style (using a `BeanFactory` or plain Java code). Alternatively, consider
+deriving from Spring's `JmsGatewaySupport` convenience base class, which provides
+pre-built bean properties for JMS configuration.
+
+The `send(String destinationName, MessageCreator creator)` method lets you send a
+message by using the string name of the destination. If these names are registered in JNDI,
+you should set the `destinationResolver` property of the template to an instance of
+`JndiDestinationResolver`.
+
+If you created the `JmsTemplate` and specified a default destination, the
+`send(MessageCreator c)` sends a message to that destination.
+
+
+[[jms-msg-conversion]]
+== Using Message Converters
+
+To facilitate the sending of domain model objects, the `JmsTemplate` has
+various send methods that take a Java object as an argument for a message's data
+content. The overloaded methods `convertAndSend()` and `receiveAndConvert()` methods in
+`JmsTemplate` delegate the conversion process to an instance of the `MessageConverter`
+interface. This interface defines a simple contract to convert between Java objects and
+JMS messages. The default implementation (`SimpleMessageConverter`) supports conversion
+between `String` and `TextMessage`, `byte[]` and `BytesMessage`, and `java.util.Map`
+and `MapMessage`. By using the converter, you and your application code can focus on the
+business object that is being sent or received through JMS and not be concerned with the
+details of how it is represented as a JMS message.
+
+The sandbox currently includes a `MapMessageConverter`, which uses reflection to convert
+between a JavaBean and a `MapMessage`. Other popular implementation choices you might
+implement yourself are converters that use an existing XML marshalling package (such as
+JAXB or XStream) to create a `TextMessage` that represents the object.
+
+To accommodate the setting of a message's properties, headers, and body that can not be
+generically encapsulated inside a converter class, the `MessagePostProcessor` interface
+gives you access to the message after it has been converted but before it is sent. The
+following example shows how to modify a message header and a property after a
+`java.util.Map` is converted to a message:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public void sendWithConversion() {
+		Map map = new HashMap();
+		map.put("Name", "Mark");
+		map.put("Age", new Integer(47));
+		jmsTemplate.convertAndSend("testQueue", map, new MessagePostProcessor() {
+			public Message postProcessMessage(Message message) throws JMSException {
+				message.setIntProperty("AccountID", 1234);
+				message.setJMSCorrelationID("123-00001");
+				return message;
+			}
+		});
+	}
+----
+
+This results in a message of the following form:
+
+[literal]
+[subs="verbatim,quotes"]
+----
+MapMessage={
+	Header={
+		... standard headers ...
+		CorrelationID={123-00001}
+	}
+	Properties={
+		AccountID={Integer:1234}
+	}
+	Fields={
+		Name={String:Mark}
+		Age={Integer:47}
+	}
+}
+----
+
+
+[[jms-callbacks]]
+== Using `SessionCallback` and `ProducerCallback`
+
+While the send operations cover many common usage scenarios, you might sometimes
+want to perform multiple operations on a JMS `Session` or `MessageProducer`. The
+`SessionCallback` and `ProducerCallback` expose the JMS `Session` and `Session` /
+`MessageProducer` pair, respectively. The `execute()` methods on `JmsTemplate` run
+these callback methods.
+
+
+

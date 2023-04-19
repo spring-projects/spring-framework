@@ -1,0 +1,40 @@
+[[mvc-ann-responseentity]]
+= ResponseEntity
+
+[.small]#<<web-reactive.adoc#webflux-ann-responseentity, See equivalent in the Reactive stack>>#
+
+`ResponseEntity` is like <<mvc-ann-responsebody>> but with status and headers. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@GetMapping("/something")
+	public ResponseEntity<String> handle() {
+		String body = ... ;
+		String etag = ... ;
+		return ResponseEntity.ok().eTag(etag).body(body);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/something")
+	fun handle(): ResponseEntity<String> {
+		val body = ...
+		val etag = ...
+		return ResponseEntity.ok().eTag(etag).build(body)
+	}
+----
+
+Spring MVC supports using a single value <<mvc-ann-async-reactive-types, reactive type>>
+to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive
+types for the body. This allows the following types of async responses:
+
+* `ResponseEntity<Mono<T>>` or `ResponseEntity<Flux<T>>` make the response status and
+  headers known immediately while the body is provided asynchronously at a later point.
+  Use `Mono` if the body consists of 0..1 values or `Flux` if it can produce multiple values.
+* `Mono<ResponseEntity<T>>` provides all three -- response status, headers, and body,
+  asynchronously at a later point. This allows the response status and headers to vary
+  depending on the outcome of asynchronous request handling.
+
+

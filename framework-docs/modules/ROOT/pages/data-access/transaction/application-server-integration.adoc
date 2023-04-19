@@ -1,0 +1,51 @@
+[[transaction-application-server-integration]]
+= Application server-specific integration
+
+Spring's transaction abstraction is generally application server-agnostic. Additionally,
+Spring's `JtaTransactionManager` class (which can optionally perform a JNDI lookup for
+the JTA `UserTransaction` and `TransactionManager` objects) autodetects the location for
+the latter object, which varies by application server. Having access to the JTA
+`TransactionManager` allows for enhanced transaction semantics -- in particular,
+supporting transaction suspension. See the
+{api-spring-framework}/transaction/jta/JtaTransactionManager.html[`JtaTransactionManager`]
+javadoc for details.
+
+Spring's `JtaTransactionManager` is the standard choice to run on Jakarta EE application
+servers and is known to work on all common servers. Advanced functionality, such as
+transaction suspension, works on many servers as well (including GlassFish, JBoss and
+Geronimo) without any special configuration required. However, for fully supported
+transaction suspension and further advanced integration, Spring includes special adapters
+for WebLogic Server and WebSphere. These adapters are discussed in the following
+sections.
+
+For standard scenarios, including WebLogic Server and WebSphere, consider using the
+convenient `<tx:jta-transaction-manager/>` configuration element. When configured,
+this element automatically detects the underlying server and chooses the best
+transaction manager available for the platform. This means that you need not explicitly
+configure server-specific adapter classes (as discussed in the following sections).
+Rather, they are chosen automatically, with the standard
+`JtaTransactionManager` as the default fallback.
+
+
+[[transaction-application-server-integration-websphere]]
+== IBM WebSphere
+
+On WebSphere 6.1.0.9 and above, the recommended Spring JTA transaction manager to use is
+`WebSphereUowTransactionManager`. This special adapter uses IBM's `UOWManager` API,
+which is available in WebSphere Application Server 6.1.0.9 and later. With this adapter,
+Spring-driven transaction suspension (suspend and resume as initiated by
+`PROPAGATION_REQUIRES_NEW`) is officially supported by IBM.
+
+
+[[transaction-application-server-integration-weblogic]]
+== Oracle WebLogic Server
+
+On WebLogic Server 9.0 or above, you would typically use the
+`WebLogicJtaTransactionManager` instead of the stock `JtaTransactionManager` class. This
+special WebLogic-specific subclass of the normal `JtaTransactionManager` supports the
+full power of Spring's transaction definitions in a WebLogic-managed transaction
+environment, beyond standard JTA semantics. Features include transaction names,
+per-transaction isolation levels, and proper resuming of transactions in all cases.
+
+
+

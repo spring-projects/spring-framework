@@ -1,0 +1,55 @@
+[[mvc-ann-requestbody]]
+= `@RequestBody`
+
+[.small]#<<web-reactive.adoc#webflux-ann-requestbody, See equivalent in the Reactive stack>>#
+
+You can use the `@RequestBody` annotation to have the request body read and deserialized into an
+`Object` through an <<integration.adoc#rest-message-conversion, `HttpMessageConverter`>>.
+The following example uses a `@RequestBody` argument:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@PostMapping("/accounts")
+	public void handle(@RequestBody Account account) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(@RequestBody account: Account) {
+		// ...
+	}
+----
+
+
+You can use the <<mvc-config-message-converters>> option of the <<mvc-config>> to
+configure or customize message conversion.
+
+You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
+`@Validated` annotation, both of which cause Standard Bean Validation to be applied.
+By default, validation errors cause a `MethodArgumentNotValidException`, which is turned
+into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation errors locally
+within the controller through an `Errors` or `BindingResult` argument,
+as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@PostMapping("/accounts")
+	public void handle(@Valid @RequestBody Account account, BindingResult result) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(@Valid @RequestBody account: Account, result: BindingResult) {
+		// ...
+	}
+----
+
+

@@ -1,0 +1,40 @@
+[[transaction]]
+= Transaction Management
+
+Comprehensive transaction support is among the most compelling reasons to use the Spring
+Framework. The Spring Framework provides a consistent abstraction for transaction
+management that delivers the following benefits:
+
+* A consistent programming model across different transaction APIs, such as Java
+  Transaction API (JTA), JDBC, Hibernate, and the Java Persistence API (JPA).
+* Support for <<transaction-declarative, declarative transaction management>>.
+* A simpler API for <<transaction-programmatic, programmatic>> transaction management
+  than complex transaction APIs, such as JTA.
+* Excellent integration with Spring's data access abstractions.
+
+The following sections describe the Spring Framework's transaction features and
+technologies:
+
+* <<transaction-motivation, Advantages of the Spring Framework's transaction support
+  model>> describes why you would use the Spring Framework's transaction abstraction
+  instead of EJB Container-Managed Transactions (CMT) or choosing to drive local
+  transactions through a proprietary API, such as Hibernate.
+* <<transaction-strategies, Understanding the Spring Framework transaction abstraction>>
+  outlines the core classes and describes how to configure and obtain `DataSource`
+  instances from a variety of sources.
+* <<tx-resource-synchronization, Synchronizing resources with transactions>> describes
+  how the application code ensures that resources are created, reused, and cleaned up
+  properly.
+* <<transaction-declarative, Declarative transaction management>> describes support for
+  declarative transaction management.
+* <<transaction-programmatic, Programmatic transaction management>> covers support for
+  programmatic (that is, explicitly coded) transaction management.
+* <<transaction-event, Transaction bound event>> describes how you could use application
+  events within a transaction.
+
+The chapter also includes discussions of best practices,
+<<transaction-application-server-integration, application server integration>>,
+and <<transaction-solutions-to-common-problems, solutions to common problems>>.
+
+
+

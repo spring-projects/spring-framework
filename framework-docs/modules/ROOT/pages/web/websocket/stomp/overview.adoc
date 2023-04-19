@@ -1,0 +1,97 @@
+[[websocket-stomp-overview]]
+= Overview
+
+https://stomp.github.io/stomp-specification-1.2.html#Abstract[STOMP] (Simple
+Text Oriented Messaging Protocol) was originally created for scripting languages
+(such as Ruby, Python, and Perl) to connect to enterprise message brokers. It is
+designed to address a minimal subset of commonly used messaging patterns. STOMP can be
+used over any reliable two-way streaming network protocol, such as TCP and WebSocket.
+Although STOMP is a text-oriented protocol, message payloads can be
+either text or binary.
+
+STOMP is a frame-based protocol whose frames are modeled on HTTP. The following listing shows the structure
+of a STOMP frame:
+
+----
+COMMAND
+header1:value1
+header2:value2
+
+Body^@
+----
+
+Clients can use the `SEND` or `SUBSCRIBE` commands to send or subscribe for
+messages, along with a `destination` header that describes what the
+message is about and who should receive it. This enables a simple
+publish-subscribe mechanism that you can use to send messages through the broker
+to other connected clients or to send messages to the server to request that
+some work be performed.
+
+When you use Spring's STOMP support, the Spring WebSocket application acts
+as the STOMP broker to clients. Messages are routed to `@Controller` message-handling
+methods or to a simple in-memory broker that keeps track of subscriptions and
+broadcasts messages to subscribed users. You can also configure Spring to work
+with a dedicated STOMP broker (such as RabbitMQ, ActiveMQ, and others) for the actual
+broadcasting of messages. In that case, Spring maintains
+TCP connections to the broker, relays messages to it, and passes messages
+from it down to connected WebSocket clients. Thus, Spring web applications can
+rely on unified HTTP-based security, common validation, and a familiar programming
+model for message handling.
+
+The following example shows a client subscribing to receive stock quotes, which
+the server may emit periodically (for example, via a scheduled task that sends messages
+through a `SimpMessagingTemplate` to the broker):
+
+----
+SUBSCRIBE
+id:sub-1
+destination:/topic/price.stock.*
+
+^@
+----
+
+The following example shows a client that sends a trade request, which the server
+can handle through an `@MessageMapping` method:
+
+----
+SEND
+destination:/queue/trade
+content-type:application/json
+content-length:44
+
+{"action":"BUY","ticker":"MMM","shares",44}^@
+----
+
+After the execution, the server can
+broadcast a trade confirmation message and details down to the client.
+
+The meaning of a destination is intentionally left opaque in the STOMP spec. It can
+be any string, and it is entirely up to STOMP servers to define the semantics and
+the syntax of the destinations that they support. It is very common, however, for
+destinations to be path-like strings where `/topic/..` implies publish-subscribe
+(one-to-many) and `/queue/` implies point-to-point (one-to-one) message
+exchanges.
+
+STOMP servers can use the `MESSAGE` command to broadcast messages to all subscribers.
+The following example shows a server sending a stock quote to a subscribed client:
+
+----
+MESSAGE
+message-id:nxahklf6-1
+subscription:sub-1
+destination:/topic/price.stock.MMM
+
+{"ticker":"MMM","price":129.45}^@
+----
+
+A server cannot send unsolicited messages. All messages
+from a server must be in response to a specific client subscription, and the
+`subscription` header of the server message must match the `id` header of the
+client subscription.
+
+The preceding overview is intended to provide the most basic understanding of the
+STOMP protocol. We recommended reviewing the protocol
+https://stomp.github.io/stomp-specification-1.2.html[specification] in full.
+
+
+
