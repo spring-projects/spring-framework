@@ -1,7 +1,7 @@
 [[mvc-config-view-resolvers]]
 = View Resolvers
 
-[.small]#<<web-reactive.adoc#webflux-config-view-resolvers, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/config.adoc#webflux-config-view-resolvers[See equivalent in the Reactive stack]#
 
 The MVC configuration simplifies the registration of view resolvers.
 

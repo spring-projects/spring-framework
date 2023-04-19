@@ -8,10 +8,10 @@ alone.
 
 Spring ships with a small AspectJ aspect library, which is available stand-alone in your
 distribution as `spring-aspects.jar`. You need to add this to your classpath in order
-to use the aspects in it. <<aop-atconfigurable>> and <<aop-ajlib-other>> discuss the
-content of this library and how you can use it. <<aop-aj-configure>> discusses how to
+to use the aspects in it. xref:core/aop/using-aspectj.adoc#aop-atconfigurable[Using AspectJ to Dependency Inject Domain Objects with Spring] and xref:core/aop/using-aspectj.adoc#aop-ajlib-other[Other Spring aspects for AspectJ] discuss the
+content of this library and how you can use it. xref:core/aop/using-aspectj.adoc#aop-aj-configure[Configuring AspectJ Aspects by Using Spring IoC] discusses how to
 dependency inject AspectJ aspects that are woven using the AspectJ compiler. Finally,
-<<aop-aj-ltw>> provides an introduction to load-time weaving for Spring applications
+xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework] provides an introduction to load-time weaving for Spring applications
 that use AspectJ.
 
 
@@ -108,7 +108,7 @@ annotation. You can specify either `@Configurable(autowire=Autowire.BY_TYPE)` or
 `@Configurable(autowire=Autowire.BY_NAME)` for autowiring by type or by name,
 respectively. As an alternative, it is preferable to specify explicit, annotation-driven
 dependency injection for your `@Configurable` beans through `@Autowired` or `@Inject`
-at the field or method level (see <<beans-annotation-config>> for further details).
+at the field or method level (see xref:core/beans/annotation-config.adoc[Annotation-based Container Configuration] for further details).
 
 Finally, you can enable Spring dependency checking for the object references in the newly
 created and configured object by using the `dependencyCheck` attribute (for example,
@@ -158,7 +158,7 @@ Programming Guide].
 For this to work, the annotated types must be woven with the AspectJ weaver. You can
 either use a build-time Ant or Maven task to do this (see, for example, the
 https://www.eclipse.org/aspectj/doc/released/devguide/antTasks.html[AspectJ Development
-Environment Guide]) or load-time weaving (see <<aop-aj-ltw>>). The
+Environment Guide]) or load-time weaving (see xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework]). The
 `AnnotationBeanConfigurerAspect` itself needs to be configured by Spring (in order to obtain
 a reference to the bean factory that is to be used to configure new objects). If you
 use Java-based configuration, you can add `@EnableSpringConfigured` to any
@@ -182,7 +182,7 @@ use Java-based configuration, you can add `@EnableSpringConfigured` to any
 ----
 
 If you prefer XML based configuration, the Spring
-<<core.adoc#core.appendix.xsd-schemas-context, `context` namespace>>
+xref:core/appendix/xsd-schemas.adoc#core.appendix.xsd-schemas-context[`context` namespace]
 defines a convenient `context:spring-configured` element, which you can use as follows:
 
 [source,xml,indent=0,subs="verbatim"]
@@ -387,7 +387,7 @@ per-`ClassLoader` basis, which is more fine-grained and which can make more
 sense in a 'single-JVM-multiple-application' environment (such as is found in a typical
 application server environment).
 
-Further, <<aop-aj-ltw-environments, in certain environments>>, this support enables
+Further, xref:core/aop/using-aspectj.adoc#aop-aj-ltw-environments[in certain environments], this support enables
 load-time weaving without making any modifications to the application server's launch
 script that is needed to add `-javaagent:path/to/aspectjweaver.jar` or (as we describe
 later in this section) `-javaagent:path/to/spring-instrument.jar`. Developers configure
@@ -410,9 +410,9 @@ quickly get some performance metrics. We can then apply a finer-grained profilin
 tool to that specific area immediately afterwards.
 
 NOTE: The example presented here uses XML configuration. You can also configure and
-use @AspectJ with <<beans-java, Java configuration>>. Specifically, you can use the
+use @AspectJ with xref:core/beans/java.adoc[Java configuration]. Specifically, you can use the
 `@EnableLoadTimeWeaving` annotation as an alternative to `<context:load-time-weaver/>`
-(see <<aop-aj-ltw-spring, below>> for details).
+(see xref:core/aop/using-aspectj.adoc#aop-aj-ltw-spring[below] for details).
 
 The following example shows the profiling aspect, which is not fancy.
 It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
@@ -692,8 +692,8 @@ for AspectJ LTW:
 * `spring-aop.jar`
 * `aspectjweaver.jar`
 
-If you use the <<aop-aj-ltw-environments-generic, Spring-provided agent to enable
-instrumentation>>, you also need:
+If you use the xref:core/aop/using-aspectj.adoc#aop-aj-ltw-environments-generic[Spring-provided agent to enable instrumentation]
+, you also need:
 
 * `spring-instrument.jar`
 
@@ -900,7 +900,7 @@ containers.
 Tomcat, JBoss/WildFly, IBM WebSphere Application Server and Oracle WebLogic Server all
 provide a general app `ClassLoader` that is capable of local instrumentation. Spring's
 native LTW may leverage those ClassLoader implementations to provide AspectJ weaving.
-You can simply enable load-time weaving, as <<aop-using-aspectj, described earlier>>.
+You can simply enable load-time weaving, as xref:core/aop/using-aspectj.adoc[described earlier].
 Specifically, you do not need to modify the JVM launch script to add
 `-javaagent:path/to/spring-instrument.jar`.
 

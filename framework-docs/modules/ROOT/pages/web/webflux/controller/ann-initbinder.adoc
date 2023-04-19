@@ -1,7 +1,7 @@
 [[webflux-ann-initbinder]]
 = `DataBinder`
 
-[.small]#<<web.adoc#mvc-ann-initbinder, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-initbinder.adoc[See equivalent in the Servlet stack]#
 
 `@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods, to
 initialize instances of `WebDataBinder`. Those, in turn, are used to:
@@ -13,7 +13,7 @@ headers, cookies, and others) to the target type of controller method arguments.
 
 `@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
 Spring `Converter` and `Formatter` components. In addition, you can use the
-<<webflux-config-conversion, WebFlux Java configuration>> to register `Converter` and
+xref:web/webflux/config.adoc#webflux-config-conversion[WebFlux Java configuration] to register `Converter` and
 `Formatter` types in a globally shared `FormattingConversionService`.
 
 `@InitBinder` methods support many of the same arguments that `@RequestMapping` methods
@@ -100,7 +100,7 @@ controller-specific `Formatter` instances, as the following example shows:
 
 [[webflux-ann-initbinder-model-design]]
 == Model Design
-[.small]#<<web.adoc#mvc-ann-initbinder-model-design, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-initbinder.adoc#mvc-ann-initbinder-model-design[See equivalent in the Servlet stack]#
 
 include:../../:web-data-binding-model-design.adoc[]
 

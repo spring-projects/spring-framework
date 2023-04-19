@@ -3,10 +3,10 @@
 
 The Spring Expression Language supports the following kinds of operators:
 
-* <<expressions-operators-relational>>
-* <<expressions-operators-logical>>
-* <<expressions-operators-mathematical>>
-* <<expressions-assignment>>
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-relational[Relational Operators]
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-logical[Logical Operators]
+* xref:core/expressions/language-ref/operators.adoc#expressions-operators-mathematical[Mathematical Operators]
+* xref:core/expressions/language-ref/operators.adoc#expressions-assignment[The Assignment Operator]
 
 
 [[expressions-operators-relational]]

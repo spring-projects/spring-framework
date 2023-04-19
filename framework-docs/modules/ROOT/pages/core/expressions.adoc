@@ -23,7 +23,7 @@ infrastructure classes, such as the parser. Most Spring users need not deal with
 this infrastructure and can, instead, author only expression strings for evaluation.
 An example of this typical use is the integration of SpEL into creating XML or
 annotation-based bean definitions, as shown in
-<<expressions-beandef, Expression support for defining bean definitions>>.
+xref:core/expressions/beandef.adoc[Expression support for defining bean definitions].
 
 This chapter covers the features of the expression language, its API, and its language
 syntax. In several places, `Inventor` and `Society` classes are used as the target

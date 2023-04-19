@@ -94,16 +94,16 @@ they are no use for the cache. Furthermore, what if only one of the two is impor
 while the other is not?
 
 For such cases, the `@Cacheable` annotation lets you specify how the key is generated
-through its `key` attribute. You can use <<core.adoc#expressions, SpEL>> to pick the
+through its `key` attribute. You can use xref:core/expressions.adoc[SpEL] to pick the
 arguments of interest (or their nested properties), perform operations, or even
 invoke arbitrary methods without having to write any code or implement any interface.
 This is the recommended approach over the
-<<cache-annotations-cacheable-default-key, default generator>>, since methods tend to be
+xref:integration/cache/annotations.adoc#cache-annotations-cacheable-default-key[default generator], since methods tend to be
 quite different in signatures as the code base grows. While the default strategy might
 work for some methods, it rarely works for all methods.
 
 The following examples use various SpEL declarations (if you are not familiar with SpEL,
-do yourself a favor and read <<core.adoc#expressions, Spring Expression Language>>):
+do yourself a favor and read xref:core/expressions.adoc[Spring Expression Language]):
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -162,7 +162,7 @@ For applications that work with several cache managers, you can set the
 
 
 You can also replace the `CacheResolver` entirely in a fashion similar to that of
-replacing <<cache-annotations-cacheable-key, key generation>>. The resolution is
+replacing xref:integration/cache/annotations.adoc#cache-annotations-cacheable-key[key generation]. The resolution is
 requested for every cache operation, letting the implementation actually resolve
 the caches to use based on runtime arguments. The following example shows how to
 specify a `CacheResolver`:
@@ -256,12 +256,12 @@ as follows:
 ----
 
 Note that `#result` still refers to `Book` and not `Optional<Book>`. Since it might be
-`null`, we use SpEL's <<core.adoc#expressions-operator-safe-navigation, safe navigation operator>>.
+`null`, we use SpEL's xref:core/expressions/language-ref/operator-safe-navigation.adoc[safe navigation operator].
 
 [[cache-spel-context]]
 === Available Caching SpEL Evaluation Context
 
-Each `SpEL` expression evaluates against a dedicated <<core.adoc#expressions-language-ref, `context`>>.
+Each `SpEL` expression evaluates against a dedicated xref:core/expressions/language-ref.adoc[`context`].
 In addition to the built-in parameters, the framework provides dedicated caching-related
 metadata, such as the argument names. The following table describes the items made
 available to the context so that you can use them for key and conditional computations:
@@ -472,7 +472,7 @@ Alternatively, for XML configuration you can use the `cache:annotation-driven` e
 Both the `cache:annotation-driven` element and the `@EnableCaching` annotation let you
 specify various options that influence the way the caching behavior is added to the
 application through AOP. The configuration is intentionally similar with that of
-<<data-access.adoc#tx-annotation-driven-settings, `@Transactional`>>.
+xref:data-access/transaction/declarative/annotations.adoc#tx-annotation-driven-settings[`@Transactional`].
 
 NOTE: The default advice mode for processing caching annotations is `proxy`, which allows
 for interception of calls through the proxy only. Local calls within the same class
@@ -524,7 +524,7 @@ required to implement `CachingConfigurer`, see the
   affected classes with Spring's AspectJ caching aspect, modifying the target class byte
   code to apply to any kind of method call. AspectJ weaving requires `spring-aspects.jar`
   in the classpath as well as load-time weaving (or compile-time weaving) enabled. (See
-  <<core.adoc#aop-aj-ltw-spring, Spring configuration>> for details on how to set up
+  xref:core/aop/using-aspectj.adoc#aop-aj-ltw-spring[Spring configuration] for details on how to set up
   load-time weaving.)
 
 | `proxy-target-class`
@@ -534,7 +534,7 @@ required to implement `CachingConfigurer`, see the
   classes annotated with the `@Cacheable` or `@CacheEvict` annotations. If the
   `proxy-target-class` attribute is set to `true`, class-based proxies are created.
   If `proxy-target-class` is `false` or if the attribute is omitted, standard JDK
-  interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying Mechanisms>>
+  interface-based proxies are created. (See xref:core/aop/proxying.adoc[Proxying Mechanisms]
   for a detailed examination of the different proxy types.)
 
 | `order`
@@ -542,7 +542,7 @@ required to implement `CachingConfigurer`, see the
 | Ordered.LOWEST_PRECEDENCE
 | Defines the order of the cache advice that is applied to beans annotated with
   `@Cacheable` or `@CacheEvict`. (For more information about the rules related to
-  ordering AOP advice, see <<core.adoc#aop-ataspectj-advice-ordering, Advice Ordering>>.)
+  ordering AOP advice, see xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-ordering[Advice Ordering].)
   No specified ordering means that the AOP subsystem determines the order of the advice.
 |===
 
@@ -550,7 +550,7 @@ NOTE: `<cache:annotation-driven/>` looks for `@Cacheable/@CachePut/@CacheEvict/@
 only on beans in the same application context in which it is defined. This means that,
 if you put `<cache:annotation-driven/>` in a `WebApplicationContext` for a
 `DispatcherServlet`, it checks for beans only in your controllers, not your services.
-See <<web.adoc#mvc-servlet, the MVC section>> for more information.
+See xref:web/webmvc/mvc-servlet.adoc[the MVC section] for more information.
 
 .Method visibility and cache annotations
 ****
@@ -595,9 +595,9 @@ triggers cache population or eviction. This is quite handy as a template mechani
 as it eliminates the need to duplicate cache annotation declarations, which is
 especially useful if the key or condition are specified or if the foreign imports
 (`org.springframework`) are not allowed in your code base. Similarly to the rest
-of the <<core.adoc#beans-stereotype-annotations, stereotype>> annotations, you can
+of the xref:core/beans/classpath-scanning.adoc#beans-stereotype-annotations[stereotype] annotations, you can
 use `@Cacheable`, `@CachePut`, `@CacheEvict`, and `@CacheConfig` as
-<<core.adoc#beans-meta-annotations, meta-annotations>> (that is, annotations that
+xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotations] (that is, annotations that
 can annotate other annotations). In the following example, we replace a common
 `@Cacheable` declaration with our own custom annotation:
 
@@ -630,7 +630,7 @@ preceding code:
 
 Even though `@SlowService` is not a Spring annotation, the container automatically picks
 up its declaration at runtime and understands its meaning. Note that, as mentioned
-<<cache-annotation-enable, earlier>>, annotation-driven behavior needs to be enabled.
+xref:integration/cache/annotations.adoc#cache-annotation-enable[earlier], annotation-driven behavior needs to be enabled.
 
 
 

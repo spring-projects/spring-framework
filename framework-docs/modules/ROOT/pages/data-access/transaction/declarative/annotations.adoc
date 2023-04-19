@@ -70,7 +70,7 @@ Consider the following class definition:
 
 Used at the class level as above, the annotation indicates a default for all methods of
 the declaring class (as well as its subclasses). Alternatively, each method can be
-annotated individually. See <<transaction-declarative-annotations-method-visibility>> for
+annotated individually. See xref:data-access/transaction/declarative/annotations.adoc#transaction-declarative-annotations-method-visibility[null] for
 further details on which methods Spring considers transactional. Note that a class-level
 annotation does not apply to ancestor classes up the class hierarchy; in such a scenario,
 inherited methods need to be locally redeclared in order to participate in a
@@ -182,7 +182,7 @@ programming arrangements as the following listing shows:
 ----
 
 Note that there are special considerations for the returned `Publisher` with regards to
-Reactive Streams cancellation signals. See the <<tx-prog-operator-cancel>> section under
+Reactive Streams cancellation signals. See the xref:data-access/transaction/programmatic.adoc#tx-prog-operator-cancel[Cancel Signals] section under
 "Using the TransactionalOperator" for more details.
 
 
@@ -221,7 +221,7 @@ Note, however, that transactional methods in interface-based proxies must always
 ----
 
 The _Spring TestContext Framework_ supports non-private `@Transactional` test methods by
-default. See <<testing.adoc#testcontext-tx,Transaction Management>> in the testing
+default. See xref:testing/testcontext-framework/tx.adoc[Transaction Management] in the testing
 chapter for examples.
 ====
 
@@ -276,7 +276,7 @@ is modified) to support `@Transactional` runtime behavior on any kind of method.
   affected classes with Spring's AspectJ transaction aspect, modifying the target class
   byte code to apply to any kind of method call. AspectJ weaving requires
   `spring-aspects.jar` in the classpath as well as having load-time weaving (or compile-time
-  weaving) enabled. (See <<core.adoc#aop-aj-ltw-spring, Spring configuration>>
+  weaving) enabled. (See xref:core/aop/using-aspectj.adoc#aop-aj-ltw-spring[Spring configuration]
   for details on how to set up load-time weaving.)
 
 | `proxy-target-class`
@@ -286,7 +286,7 @@ is modified) to support `@Transactional` runtime behavior on any kind of method.
   for classes annotated with the `@Transactional` annotation. If the
   `proxy-target-class` attribute is set to `true`, class-based proxies are created.
   If `proxy-target-class` is `false` or if the attribute is omitted, then standard JDK
-  interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying Mechanisms>>
+  interface-based proxies are created. (See xref:core/aop/proxying.adoc[Proxying Mechanisms]
   for a detailed examination of the different proxy types.)
 
 | `order`
@@ -294,7 +294,7 @@ is modified) to support `@Transactional` runtime behavior on any kind of method.
 | `Ordered.LOWEST_PRECEDENCE`
 | Defines the order of the transaction advice that is applied to beans annotated with
   `@Transactional`. (For more information about the rules related to ordering of AOP
-  advice, see <<core.adoc#aop-ataspectj-advice-ordering, Advice Ordering>>.)
+  advice, see xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-ordering[Advice Ordering].)
   No specified ordering means that the AOP subsystem determines the order of the advice.
 |===
 
@@ -307,14 +307,14 @@ NOTE: The `proxy-target-class` attribute controls what type of transactional pro
 created for classes annotated with the `@Transactional` annotation. If
 `proxy-target-class` is set to `true`, class-based proxies are created. If
 `proxy-target-class` is `false` or if the attribute is omitted, standard JDK
-interface-based proxies are created. (See <<core.adoc#aop-proxying, Proxying Mechanisms>>
+interface-based proxies are created. (See xref:core/aop/proxying.adoc[Proxying Mechanisms]
 for a discussion of the different proxy types.)
 
 NOTE: `@EnableTransactionManagement` and `<tx:annotation-driven/>` look for
 `@Transactional` only on beans in the same application context in which they are defined.
 This means that, if you put annotation-driven configuration in a `WebApplicationContext`
 for a `DispatcherServlet`, it checks for `@Transactional` beans only in your controllers
-and not in your services. See <<web.adoc#mvc-servlet, MVC>> for more information.
+and not in your services. See xref:web/webmvc/mvc-servlet.adoc[MVC] for more information.
 
 The most derived location takes precedence when evaluating the transactional settings
 for a method. In the case of the following example, the `DefaultFooService` class is
@@ -382,7 +382,7 @@ properties of the `@Transactional` annotation:
 |===
 | Property| Type| Description
 
-| <<tx-multiple-tx-mgrs-with-attransactional,value>>
+| xref:data-access/transaction/declarative/annotations.adoc#tx-multiple-tx-mgrs-with-attransactional[value]
 | `String`
 | Optional qualifier that specifies the transaction manager to be used.
 
@@ -394,7 +394,7 @@ properties of the `@Transactional` annotation:
 | Array of `String` labels to add an expressive description to the transaction.
 | Labels may be evaluated by transaction managers to associate implementation-specific behavior with the actual transaction.
 
-| <<tx-propagation,propagation>>
+| xref:data-access/transaction/declarative/tx-propagation.adoc[propagation]
 | `enum`: `Propagation`
 | Optional propagation setting.
 
@@ -431,7 +431,7 @@ properties of the `@Transactional` annotation:
 | Optional array of exception name patterns that must not cause rollback.
 |===
 
-TIP: See <<transaction-declarative-rollback-rules, Rollback rules>> for further details
+TIP: See xref:data-access/transaction/declarative/rolling-back.adoc#transaction-declarative-rollback-rules[Rollback rules] for further details
 on rollback rule semantics, patterns, and warnings regarding possible unintentional
 matches for pattern-based rollback rules.
 
@@ -523,7 +523,7 @@ is still used if no specifically qualified `TransactionManager` bean is found.
 == Custom Composed Annotations
 
 If you find you repeatedly use the same attributes with `@Transactional` on many different
-methods, <<core.adoc#beans-meta-annotations, Spring's meta-annotation support>> lets you
+methods, xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[Spring's meta-annotation support] lets you
 define custom composed annotations for your specific use cases. For example, consider the
 following annotation definitions:
 

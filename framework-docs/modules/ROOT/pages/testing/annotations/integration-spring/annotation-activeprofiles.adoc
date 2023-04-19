@@ -59,11 +59,11 @@ be active:
 NOTE: `@ActiveProfiles` provides support for inheriting active bean definition profiles
 declared by superclasses and enclosing classes by default. You can also resolve active
 bean definition profiles programmatically by implementing a custom
-<<testcontext-ctx-management-env-profiles-ActiveProfilesResolver, `ActiveProfilesResolver`>>
+xref:testing/testcontext-framework/ctx-management/env-profiles.adoc#testcontext-ctx-management-env-profiles-ActiveProfilesResolver[`ActiveProfilesResolver`]
 and registering it by using the `resolver` attribute of `@ActiveProfiles`.
 
-See <<testcontext-ctx-management-env-profiles>>,
-<<testcontext-junit-jupiter-nested-test-configuration>>, and the
+See xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[Context Configuration with Environment Profiles],
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration], and the
 {api-spring-framework}/test/context/ActiveProfiles.html[`@ActiveProfiles`] javadoc for
 examples and further details.
 

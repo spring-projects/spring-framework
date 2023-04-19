@@ -56,7 +56,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 		}
 	}
 ----
-<1> References the `businessService` named pointcut defined in <<aop-common-pointcuts>>.
+<1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
 .Kotlin
@@ -97,7 +97,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 		}
 	}
 ----
-<1> References the `businessService` named pointcut defined in <<aop-common-pointcuts>>.
+<1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 Note that the aspect implements the `Ordered` interface so that we can set the precedence of
 the aspect higher than the transaction advice (we want a fresh transaction each time we

@@ -167,9 +167,9 @@ operations that do not refer to a specific destination.
 
 One of the most common uses of JMS messages in the EJB world is to drive message-driven
 beans (MDBs). Spring offers a solution to create message-driven POJOs (MDPs) in a way
-that does not tie a user to an EJB container. (See <<jms-receiving-async>> for detailed
+that does not tie a user to an EJB container. (See xref:integration/jms/receiving.adoc#jms-receiving-async[Asynchronous reception: Message-Driven POJOs] for detailed
 coverage of Spring's MDP support.) Since Spring Framework 4.1, endpoint methods can be
-annotated with `@JmsListener` -- see <<jms-annotated>> for more details.
+annotated with `@JmsListener` -- see xref:integration/jms/annotated.adoc[Annotation-driven Listener Endpoints] for more details.
 
 A message listener container is used to receive messages from a JMS message queue and
 drive the `MessageListener` that is injected into it. The listener container is
@@ -184,8 +184,8 @@ boilerplate JMS infrastructure concerns to the framework.
 There are two standard JMS message listener containers packaged with Spring, each with
 its specialized feature set.
 
-* <<jms-mdp-simple, `SimpleMessageListenerContainer`>>
-* <<jms-mdp-default, `DefaultMessageListenerContainer`>>
+* xref:integration/jms/using.adoc#jms-mdp-simple[`SimpleMessageListenerContainer`]
+* xref:integration/jms/using.adoc#jms-mdp-default[`DefaultMessageListenerContainer`]
 
 [[jms-mdp-simple]]
 === Using `SimpleMessageListenerContainer`
@@ -236,7 +236,7 @@ a simple `BackOff` implementation retries every five seconds. You can specify
 a custom `BackOff` implementation for more fine-grained recovery options. See
 {api-spring-framework}/util/backoff/ExponentialBackOff.html[`ExponentialBackOff`] for an example.
 
-NOTE: Like its sibling (<<jms-mdp-simple, `SimpleMessageListenerContainer`>>),
+NOTE: Like its sibling (xref:integration/jms/using.adoc#jms-mdp-simple[`SimpleMessageListenerContainer`]),
 `DefaultMessageListenerContainer` supports native JMS transactions and allows for
 customizing the acknowledgment mode. If feasible for your scenario, This is strongly
 recommended over externally managed transactions -- that is, if you can live with
@@ -263,7 +263,7 @@ reliability needs (for example, for reliable queue handling and durable topic su
 Spring provides a `JmsTransactionManager` that manages transactions for a single JMS
 `ConnectionFactory`. This lets JMS applications leverage the managed-transaction
 features of Spring, as described in
-<<data-access.adoc#transaction, Transaction Management section of the Data Access chapter>>.
+xref:data-access/transaction.adoc[Transaction Management section of the Data Access chapter].
 The `JmsTransactionManager` performs local resource transactions, binding a JMS
 Connection/Session pair from the specified `ConnectionFactory` to the thread.
 `JmsTemplate` automatically detects such transactional resources and operates

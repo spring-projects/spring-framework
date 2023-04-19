@@ -3,7 +3,7 @@
 
 This section shows how to use MockMvc on its own to perform requests and verify responses.
 If using MockMvc through the `WebTestClient` please see the corresponding section on
-<<webtestclient-tests>> instead.
+xref:testing/webtestclient.adoc#webtestclient-tests[Writing Tests] instead.
 
 To perform requests that use any HTTP method, as the following example shows:
 

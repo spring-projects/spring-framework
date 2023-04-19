@@ -14,17 +14,17 @@ You can learn more about {docs-spring-boot}/html/actuator.html#actuator.metrics[
 == List of produced Observations
 
 Spring Framework instruments various features for observability.
-As outlined <<integration.observability,at the beginning of this section>>, observations can generate timer Metrics and/or Traces depending on the configuration.
+As outlined xref:integration/observability.adoc[at the beginning of this section], observations can generate timer Metrics and/or Traces depending on the configuration.
 
 .Observations produced by Spring Framework
 [%autowidth]
 |===
 |Observation name |Description
 
-|<<integration.observability.http-client,`"http.client.requests"`>>
+|xref:integration/observability.adoc#integration.observability.http-client[`"http.client.requests"`]
 |Time spent for HTTP client exchanges
 
-|<<integration.observability.http-server,`"http.server.requests"`>>
+|xref:integration/observability.adoc#integration.observability.http-server[`"http.server.requests"`]
 |Processing time for HTTP server exchanges at the Framework level
 |===
 
@@ -92,7 +92,7 @@ Applications need to configure the `org.springframework.web.filter.ServerHttpObs
 It is using the `org.springframework.http.server.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
 This will only record an observation as an error if the `Exception` has not been handled by the web Framework and has bubbled up to the Servlet filter.
-Typically, all exceptions handled by Spring MVC's `@ExceptionHandler` and <<web.adoc#mvc-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
+Typically, all exceptions handled by Spring MVC's `@ExceptionHandler` and xref:web/webmvc/mvc-ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
 include::code:UserController[]
@@ -125,7 +125,7 @@ Applications need to configure the `org.springframework.web.filter.reactive.Serv
 It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
 This will only record an observation as an error if the `Exception` has not been handled by the web Framework and has bubbled up to the `WebFilter`.
-Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and <<web.adoc#webflux-ann-rest-exceptions,`ProblemDetail` support>> will not be recorded with the observation.
+Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
 include::code:UserController[]

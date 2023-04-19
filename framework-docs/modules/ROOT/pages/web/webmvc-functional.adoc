@@ -5,14 +5,14 @@
 Spring Web MVC includes WebMvc.fn, a lightweight functional programming model in which functions
 are used to route and handle requests and contracts are designed for immutability.
 It is an alternative to the annotation-based programming model but otherwise runs on
-the same <<web#mvc-servlet>>.
+the same xref:web/webmvc/mvc-servlet.adoc[DispatcherServlet].
 
 
 
 
 [[webmvc-fn-overview]]
 == Overview
-[.small]#<<web-reactive.adoc#webflux-fn-overview, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-functional.adoc#webflux-fn-overview[See equivalent in the Reactive stack]#
 
 In WebMvc.fn, an HTTP request is handled with a `HandlerFunction`: a function that takes
 `ServerRequest` and returns a `ServerResponse`.
@@ -104,14 +104,14 @@ as the following example shows:
 
 
 If you register the `RouterFunction` as a bean, for instance by exposing it in a
-`@Configuration` class, it will be auto-detected by the servlet, as explained in <<webmvc-fn-running>>.
+`@Configuration` class, it will be auto-detected by the servlet, as explained in xref:web/webmvc-functional.adoc#webmvc-fn-running[Running a Server].
 
 
 
 
 [[webmvc-fn-handler-functions]]
 == HandlerFunction
-[.small]#<<web-reactive.adoc#webflux-fn-handler-functions, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-functional.adoc#webflux-fn-handler-functions[See equivalent in the Reactive stack]#
 
 `ServerRequest` and `ServerResponse` are immutable interfaces that offer JDK 8-friendly
 access to the HTTP request and response, including headers, body, method, and status code.
@@ -393,9 +393,9 @@ found. If it is not found, we return a 404 Not Found response.
 [[webmvc-fn-handler-validation]]
 === Validation
 
-A functional endpoint can use Spring's <<core.adoc#validation, validation facilities>> to
+A functional endpoint can use Spring's xref:web/webmvc/mvc-config/validation.adoc[validation facilities] to
 apply validation to the request body. For example, given a custom Spring
-<<core.adoc#validation, Validator>> implementation for a `Person`:
+xref:web/webmvc/mvc-config/validation.adoc[Validator] implementation for a `Person`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -457,13 +457,13 @@ apply validation to the request body. For example, given a custom Spring
 
 Handlers can also use the standard bean validation API (JSR-303) by creating and injecting
 a global `Validator` instance based on `LocalValidatorFactoryBean`.
-See <<core.adoc#validation-beanvalidation, Spring Validation>>.
+See xref:core/validation/beanvalidation.adoc[Spring Validation].
 
 
 
 [[webmvc-fn-router-functions]]
 == `RouterFunction`
-[.small]#<<web-reactive.adoc#webflux-fn-router-functions, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-functional.adoc#webflux-fn-router-functions[See equivalent in the Reactive stack]#
 
 Router functions are used to route the requests to the corresponding `HandlerFunction`.
 Typically, you do not write router functions yourself, but rather use a method on the
@@ -673,15 +673,15 @@ We can further improve by using the `nest` method together with `accept`:
 
 [[webmvc-fn-running]]
 == Running a Server
-[.small]#<<web-reactive.adoc#webflux-fn-running, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-functional.adoc#webflux-fn-running[See equivalent in the Reactive stack]#
 
-You typically run router functions in a <<web.adoc#mvc-servlet, `DispatcherHandler`>>-based setup through the
-<<web.adoc#mvc-config>>, which uses Spring configuration to declare the
+You typically run router functions in a xref:web/webmvc/mvc-servlet.adoc[`DispatcherHandler`]-based setup through the
+xref:web/webmvc/mvc-config.adoc[MVC Config], which uses Spring configuration to declare the
 components required to process requests. The MVC Java configuration declares the following
 infrastructure components to support functional endpoints:
 
 * `RouterFunctionMapping`: Detects one or more `RouterFunction<?>` beans in the Spring
-configuration, <<core.adoc#beans-factory-ordered, orders them>>, combines them through
+configuration, xref:core/beans/annotation-config/autowired.adoc#beans-factory-ordered[orders them], combines them through
 `RouterFunction.andOther`, and routes requests to the resulting composed `RouterFunction`.
 * `HandlerFunctionAdapter`: Simple adapter that lets `DispatcherHandler` invoke
 a `HandlerFunction` that was mapped to a request.
@@ -766,7 +766,7 @@ The following example shows a WebFlux Java configuration:
 
 [[webmvc-fn-handler-filter-function]]
 == Filtering Handler Functions
-[.small]#<<web-reactive.adoc#webflux-fn-handler-filter-function, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-functional.adoc#webflux-fn-handler-filter-function[See equivalent in the Reactive stack]#
 
 You can filter handler functions by using the `before`, `after`, or `filter` methods on the routing
 function builder.
@@ -879,4 +879,4 @@ Besides using the `filter` method on the router function builder, it is possible
 filter to an existing router function via `RouterFunction.filter(HandlerFilterFunction)`.
 
 NOTE: CORS support for functional endpoints is provided through a dedicated
-<<webmvc-cors.adoc#mvc-cors-filter, `CorsFilter`>>.
+xref:web/webmvc-cors.adoc#mvc-cors-filter[`CorsFilter`].

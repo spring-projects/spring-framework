@@ -4,10 +4,10 @@
 This part of the documentation covers support for reactive-stack web applications built
 on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
 servers, such as Netty, Undertow, and Servlet containers. Individual chapters cover
-the <<webflux, Spring WebFlux>> framework,
-the reactive <<webflux-client, `WebClient`>>, support for <<webflux-test, testing>>,
-and <<webflux-reactive-libraries, reactive libraries>>. For Servlet-stack web applications,
-see <<web.adoc#spring-web, Web on Servlet Stack>>.
+the xref:web/webflux.adoc#webflux[Spring WebFlux] framework,
+the reactive xref:web/webflux-webclient.adoc[`WebClient`], support for xref:web-reactive.adoc#webflux-test[testing],
+and xref:web-reactive.adoc#webflux-reactive-libraries[reactive libraries]. For Servlet-stack web applications,
+see xref:web.adoc[Web on Servlet Stack].
 
 
 
@@ -20,7 +20,7 @@ exchange methods. You can then generate a proxy that implements this interface a
 performs the exchanges. This helps to simplify HTTP remote access and provides additional
 flexibility for to choose an API style such as synchronous or reactive.
 
-See <<integration.adoc#rest-http-interface, REST Endpoints>> for details.
+See xref:integration/rest-clients.adoc#rest-http-interface[REST Endpoints] for details.
 
 
 
@@ -28,14 +28,14 @@ See <<integration.adoc#rest-http-interface, REST Endpoints>> for details.
 
 [[webflux-test]]
 == Testing
-[.small]#<<web.adoc#webmvc.test, Same in Spring MVC>>#
+[.small]#xref:web/webmvc-test.adoc[Same in Spring MVC]#
 
 The `spring-test` module provides mock implementations of `ServerHttpRequest`,
 `ServerHttpResponse`, and `ServerWebExchange`.
-See <<testing.adoc#mock-objects-web-reactive, Spring Web Reactive>> for a
+See xref:testing/unit.adoc#mock-objects-web-reactive[Spring Web Reactive] for a
 discussion of mock objects.
 
-<<testing.adoc#webtestclient, `WebTestClient`>> builds on these mock request and
+xref:testing/webtestclient.adoc[`WebTestClient`] builds on these mock request and
 response objects to provide support for testing WebFlux applications without an HTTP
 server. You can use the `WebTestClient` for end-to-end integration tests, too.
 

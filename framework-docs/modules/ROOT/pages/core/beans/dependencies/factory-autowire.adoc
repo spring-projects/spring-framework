@@ -8,7 +8,7 @@ advantages:
 
 * Autowiring can significantly reduce the need to specify properties or constructor
   arguments. (Other mechanisms such as a bean template
-  <<beans-child-bean-definitions,discussed elsewhere in this chapter>> are also valuable
+  xref:core/beans/child-bean-definitions.adoc[discussed elsewhere in this chapter] are also valuable
   in this regard.)
 * Autowiring can update a configuration as your objects evolve. For example, if you need
   to add a dependency to a class, that dependency can be satisfied automatically without
@@ -16,7 +16,7 @@ advantages:
   during development, without negating the option of switching to explicit wiring when
   the code base becomes more stable.
 
-When using XML-based configuration metadata (see <<beans-factory-collaborators>>), you
+When using XML-based configuration metadata (see xref:core/beans/dependencies/factory-collaborators.adoc[Dependency Injection]), you
 can specify the autowire mode for a bean definition with the `autowire` attribute of the
 `<bean/>` element. The autowiring functionality has four modes. You specify autowiring
 per bean and can thus choose which ones to autowire. The following table describes the
@@ -89,11 +89,11 @@ In the latter scenario, you have several options:
 
 * Abandon autowiring in favor of explicit wiring.
 * Avoid autowiring for a bean definition by setting its `autowire-candidate` attributes
-  to `false`, as described in the <<beans-factory-autowire-candidate, next section>>.
+  to `false`, as described in the xref:core/beans/dependencies/factory-autowire.adoc#beans-factory-autowire-candidate[next section].
 * Designate a single bean definition as the primary candidate by setting the
   `primary` attribute of its `<bean/>` element to `true`.
 * Implement the more fine-grained control available with annotation-based configuration,
-  as described in <<beans-annotation-config>>.
+  as described in xref:core/beans/annotation-config.adoc[Annotation-based Container Configuration].
 
 
 
@@ -103,8 +103,8 @@ In the latter scenario, you have several options:
 On a per-bean basis, you can exclude a bean from autowiring. In Spring's XML format, set
 the `autowire-candidate` attribute of the `<bean/>` element to `false`. The container
 makes that specific bean definition unavailable to the autowiring infrastructure
-(including annotation style configurations such as <<beans-autowired-annotation,
-`@Autowired`>>).
+(including annotation style configurations such as xref:core/beans/annotation-config/autowired.adoc[`@Autowired`]
+).
 
 NOTE: The `autowire-candidate` attribute is designed to only affect type-based autowiring.
 It does not affect explicit references by name, which get resolved even if the

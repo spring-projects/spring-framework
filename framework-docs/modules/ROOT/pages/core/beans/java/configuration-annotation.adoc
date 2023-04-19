@@ -4,7 +4,7 @@
 `@Configuration` is a class-level annotation indicating that an object is a source of
 bean definitions. `@Configuration` classes declare beans through `@Bean`-annotated
 methods. Calls to `@Bean` methods on `@Configuration` classes can also be used to define
-inter-bean dependencies. See <<beans-java-basic-concepts>> for a general introduction.
+inter-bean dependencies. See xref:core/beans/java/basic-concepts.adoc[Basic Concepts: `@Bean` and `@Configuration`] for a general introduction.
 
 
 [[beans-java-injecting-dependencies]]
@@ -56,7 +56,7 @@ by using plain `@Component` classes.
 [[beans-java-method-injection]]
 == Lookup Method Injection
 
-As noted earlier, <<beans-factory-method-injection, lookup method injection>> is an
+As noted earlier, xref:core/beans/dependencies/factory-method-injection.adoc[lookup method injection] is an
 advanced feature that you should use rarely. It is useful in cases where a
 singleton-scoped bean has a dependency on a prototype-scoped bean. Using Java for this
 type of configuration provides a natural means for implementing this pattern. The

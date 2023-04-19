@@ -7,7 +7,7 @@ destinations. The broker supports path-like destinations, including subscription
 to Ant-style destination patterns.
 
 NOTE: Applications can also use dot-separated (rather than slash-separated) destinations.
-See <<websocket-stomp-destination-separator>>.
+See xref:web/websocket/stomp/destination-separator.adoc[Dots as Separators].
 
 If configured with a task scheduler, the simple broker supports
 https://stomp.github.io/stomp-specification-1.2.html#Heart-beating[STOMP heartbeats].

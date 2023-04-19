@@ -11,11 +11,11 @@ specification effort to standardize access to SQL databases using reactive patte
 The Spring Framework's R2DBC abstraction framework consists of two different packages:
 
 * `core`: The `org.springframework.r2dbc.core` package contains the `DatabaseClient`
-class plus a variety of related classes. See <<r2dbc-core>>.
+class plus a variety of related classes. See xref:data-access/r2dbc.adoc#r2dbc-core[Using the R2DBC Core Classes to Control Basic R2DBC Processing and Error Handling].
 
 * `connection`: The `org.springframework.r2dbc.connection` package contains a utility class
 for easy `ConnectionFactory` access and various simple `ConnectionFactory` implementations
-that you can use for testing and running unmodified R2DBC. See <<r2dbc-connections>>.
+that you can use for testing and running unmodified R2DBC. See xref:data-access/r2dbc.adoc#r2dbc-connections[Controlling Database Connections].
 
 
 [[r2dbc-core]]
@@ -24,12 +24,12 @@ that you can use for testing and running unmodified R2DBC. See <<r2dbc-connectio
 This section covers how to use the R2DBC core classes to control basic R2DBC processing,
 including error handling. It includes the following topics:
 
-* <<r2dbc-DatabaseClient>>
-* <<r2dbc-DatabaseClient-examples-statement>>
-* <<r2dbc-DatabaseClient-examples-query>>
-* <<r2dbc-DatabaseClient-examples-update>>
-* <<r2dbc-DatabaseClient-filter>>
-* <<r2dbc-auto-generated-keys>>
+* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient[Using `DatabaseClient`]
+* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-examples-statement[Executing Statements]
+* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-examples-query[Querying (`SELECT`)]
+* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-examples-update[Updating (`INSERT`, `UPDATE`, and `DELETE`) with `DatabaseClient`]
+* xref:data-access/r2dbc.adoc#r2dbc-DatabaseClient-filter[Statement Filters]
+* xref:data-access/r2dbc.adoc#r2dbc-auto-generated-keys[Retrieving Auto-generated Keys]
 
 [[r2dbc-DatabaseClient]]
 === Using `DatabaseClient`
@@ -44,7 +44,7 @@ SQL and extract results. The `DatabaseClient` class:
 * Update statements and stored procedure calls
 * Performs iteration over `Result` instances
 * Catches R2DBC exceptions and translates them to the generic, more informative, exception
-hierarchy defined in the `org.springframework.dao` package. (See <<dao-exceptions>>.)
+hierarchy defined in the `org.springframework.dao` package. (See xref:data-access/dao.adoc#dao-exceptions[Consistent Exception Hierarchy].)
 
 The client has a functional, fluent API using reactive types for declarative composition.
 
@@ -543,11 +543,11 @@ requests the generated key for the desired column.
 
 This section covers:
 
-* <<r2dbc-ConnectionFactory>>
-* <<r2dbc-ConnectionFactoryUtils>>
-* <<r2dbc-SingleConnectionFactory>>
-* <<r2dbc-TransactionAwareConnectionFactoryProxy>>
-* <<r2dbc-R2dbcTransactionManager>>
+* xref:data-access/r2dbc.adoc#r2dbc-ConnectionFactory[Using `ConnectionFactory`]
+* xref:data-access/r2dbc.adoc#r2dbc-ConnectionFactoryUtils[Using `ConnectionFactoryUtils`]
+* xref:data-access/r2dbc.adoc#r2dbc-SingleConnectionFactory[Using `SingleConnectionFactory`]
+* xref:data-access/r2dbc.adoc#r2dbc-TransactionAwareConnectionFactoryProxy[Using `TransactionAwareConnectionFactoryProxy`]
+* xref:data-access/r2dbc.adoc#r2dbc-R2dbcTransactionManager[Using `R2dbcTransactionManager`]
 
 
 [[r2dbc-ConnectionFactory]]

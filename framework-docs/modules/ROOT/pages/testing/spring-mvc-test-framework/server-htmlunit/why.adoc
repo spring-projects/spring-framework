@@ -177,11 +177,11 @@ with HtmlUnit.`"
 
 You have a number of options when you want to integrate MockMvc with HtmlUnit:
 
-* <<spring-mvc-test-server-htmlunit-mah,MockMvc and HtmlUnit>>: Use this option if you
+* xref:testing/spring-mvc-test-framework/server-htmlunit/mah.adoc[MockMvc and HtmlUnit]: Use this option if you
   want to use the raw HtmlUnit libraries.
-* <<spring-mvc-test-server-htmlunit-webdriver,MockMvc and WebDriver>>: Use this option to
+* xref:testing/spring-mvc-test-framework/server-htmlunit/webdriver.adoc[MockMvc and WebDriver]: Use this option to
   ease development and reuse code between integration and end-to-end testing.
-* <<spring-mvc-test-server-htmlunit-geb,MockMvc and Geb>>: Use this option if you want to
+* xref:testing/spring-mvc-test-framework/server-htmlunit/geb.adoc[MockMvc and Geb]: Use this option if you want to
   use Groovy for testing, ease development, and reuse code between integration and
   end-to-end testing.
 

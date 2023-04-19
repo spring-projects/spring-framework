@@ -5,7 +5,7 @@ Spring offers support for the Jackson JSON library.
 
 [[webflux-ann-jsonview]]
 == JSON Views
-[.small]#<<web.adoc#mvc-ann-jackson, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/jackson.adoc[See equivalent in the Servlet stack]#
 
 Spring WebFlux provides built-in support for
 https://www.baeldung.com/jackson-json-view-annotation[Jackson's Serialization Views],

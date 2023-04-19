@@ -58,7 +58,7 @@ we override the transaction propagation settings:
 
 Note that in the parent bean example, we explicitly marked the parent bean definition as
 being abstract by setting the `abstract` attribute to `true`, as described
-<<beans-child-bean-definitions, previously>>, so that it may not actually ever be
+xref:core/beans/child-bean-definitions.adoc[previously], so that it may not actually ever be
 instantiated. Application contexts (but not simple bean factories), by default,
 pre-instantiate all singletons. Therefore, it is important (at least for singleton beans)
 that, if you have a (parent) bean definition that you intend to use only as a template,

@@ -1,7 +1,7 @@
 [[mvc-ann-arguments]]
 = Method Arguments
 
-[.small]#<<web-reactive.adoc#webflux-ann-arguments, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/arguments.adoc[See equivalent in the Reactive stack]#
 
 The next table describes the supported controller method arguments. Reactive types are not supported
 for any arguments.
@@ -59,38 +59,38 @@ and others) and is equivalent to `required=false`.
 | For access to the raw response body as exposed by the Servlet API.
 
 | `@PathVariable`
-| For access to URI template variables. See <<mvc-ann-requestmapping-uri-templates>>.
+| For access to URI template variables. See xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-uri-templates[URI patterns].
 
 | `@MatrixVariable`
-| For access to name-value pairs in URI path segments. See <<mvc-ann-matrix-variables>>.
+| For access to name-value pairs in URI path segments. See xref:web/webmvc/mvc-controller/ann-methods/matrix-variables.adoc[Matrix Variables].
 
 | `@RequestParam`
 | For access to the Servlet request parameters, including multipart files. Parameter values
-  are converted to the declared method argument type. See <<mvc-ann-requestparam>> as well
-  as <<mvc-multipart-forms>>.
+  are converted to the declared method argument type. See xref:web/webmvc/mvc-controller/ann-methods/requestparam.adoc[`@RequestParam`] as well
+  as xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[Multipart].
 
   Note that use of `@RequestParam` is optional for simple parameter values.
   See "`Any other argument`", at the end of this table.
 
 | `@RequestHeader`
 | For access to request headers. Header values are converted to the declared method argument
-  type. See <<mvc-ann-requestheader>>.
+  type. See xref:web/webmvc/mvc-controller/ann-methods/requestheader.adoc[`@RequestHeader`].
 
 | `@CookieValue`
 | For access to cookies. Cookies values are converted to the declared method argument
-  type. See <<mvc-ann-cookievalue>>.
+  type. See xref:web/webmvc/mvc-controller/ann-methods/cookievalue.adoc[`@CookieValue`].
 
 | `@RequestBody`
 | For access to the HTTP request body. Body content is converted to the declared method
-  argument type by using `HttpMessageConverter` implementations. See <<mvc-ann-requestbody>>.
+  argument type by using `HttpMessageConverter` implementations. See xref:web/webmvc/mvc-controller/ann-methods/requestbody.adoc[`@RequestBody`].
 
 | `HttpEntity<B>`
 | For access to request headers and body. The body is converted with an `HttpMessageConverter`.
-  See <<mvc-ann-httpentity>>.
+  See xref:web/webmvc/mvc-controller/ann-methods/httpentity.adoc[HttpEntity].
 
 | `@RequestPart`
 | For access to a part in a `multipart/form-data` request, converting the part's body
-  with an `HttpMessageConverter`. See <<mvc-multipart-forms>>.
+  with an `HttpMessageConverter`. See xref:web/webmvc/mvc-controller/ann-methods/multipart-forms.adoc[Multipart].
 
 | `java.util.Map`, `org.springframework.ui.Model`, `org.springframework.ui.ModelMap`
 | For access to the model that is used in HTML controllers and exposed to templates as
@@ -99,12 +99,12 @@ and others) and is equivalent to `required=false`.
 | `RedirectAttributes`
 | Specify attributes to use in case of a redirect (that is, to be appended to the query
   string) and flash attributes to be stored temporarily until the request after redirect.
-  See <<mvc-redirecting-passing-data>> and <<mvc-flash-attributes>>.
+  See xref:web/webmvc/mvc-controller/ann-methods/redirecting-passing-data.adoc[Redirect Attributes] and xref:web/webmvc/mvc-controller/ann-methods/flash-attributes.adoc[Flash Attributes].
 
 | `@ModelAttribute`
 | For access to an existing attribute in the model (instantiated if not present) with
-  data binding and validation applied. See <<mvc-ann-modelattrib-method-args>> as well as
-  <<mvc-ann-modelattrib-methods>> and <<mvc-ann-initbinder>>.
+  data binding and validation applied. See xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[`@ModelAttribute`] as well as
+  xref:web/webmvc/mvc-controller/ann-modelattrib-methods.adoc[Model] and xref:web/webmvc/mvc-controller/ann-initbinder.adoc[`DataBinder`].
 
   Note that use of `@ModelAttribute` is optional (for example, to set its attributes).
   See "`Any other argument`" at the end of this table.
@@ -118,19 +118,19 @@ and others) and is equivalent to `required=false`.
 | `SessionStatus` + class-level `@SessionAttributes`
 | For marking form processing complete, which triggers cleanup of session attributes
   declared through a class-level `@SessionAttributes` annotation. See
-  <<mvc-ann-sessionattributes>> for more details.
+  xref:web/webmvc/mvc-controller/ann-methods/sessionattributes.adoc[`@SessionAttributes`] for more details.
 
 | `UriComponentsBuilder`
 | For preparing a URL relative to the current request's host, port, scheme, context path, and
-  the literal part of the servlet mapping. See <<mvc-uri-building>>.
+  the literal part of the servlet mapping. See xref:web/webmvc/mvc-uri-building.adoc[URI Links].
 
 | `@SessionAttribute`
 | For access to any session attribute, in contrast to model attributes stored in the session
   as a result of a class-level `@SessionAttributes` declaration. See
-  <<mvc-ann-sessionattribute>> for more details.
+  xref:web/webmvc/mvc-controller/ann-methods/sessionattribute.adoc[`@SessionAttribute`] for more details.
 
 | `@RequestAttribute`
-| For access to request attributes. See <<mvc-ann-requestattrib>> for more details.
+| For access to request attributes. See xref:web/webmvc/mvc-controller/ann-methods/requestattrib.adoc[`@RequestAttribute`] for more details.
 
 | Any other argument
 | If a method argument is not matched to any of the earlier values in this table and it is

@@ -1,7 +1,7 @@
 [[mvc-ann-controller-advice]]
 = Controller Advice
 
-[.small]#<<web-reactive.adoc#webflux-ann-controller-advice, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-advice.adoc[See equivalent in the Reactive stack]#
 
 `@ExceptionHandler`, `@InitBinder`, and `@ModelAttribute` methods apply only to the
 `@Controller` class, or class hierarchy, in which they are declared. If, instead, they
@@ -10,8 +10,8 @@ to any controller. Moreover, as of 5.3, `@ExceptionHandler` methods in `@Control
 can be used to handle exceptions from any `@Controller` or any other handler.
 
 `@ControllerAdvice` is meta-annotated with `@Component` and therefore can be registered as
-a Spring bean through <<core.adoc#beans-java-instantiating-container-scan,
-component scanning>>. `@RestControllerAdvice` is meta-annotated with `@ControllerAdvice`
+a Spring bean through xref:core/beans/java/instantiating-container.adoc#beans-java-instantiating-container-scan[component scanning]
+. `@RestControllerAdvice` is meta-annotated with `@ControllerAdvice`
 and `@ResponseBody`, and that means `@ExceptionHandler` methods will have their return
 value rendered via response body message conversion, rather than via HTML views.
 

@@ -209,7 +209,7 @@ default). The following listing shows the available methods for `Trigger` implem
 
 Spring provides two implementations of the `Trigger` interface. The most interesting one
 is the `CronTrigger`. It enables the scheduling of tasks based on
-<<scheduling-cron-expression,cron expressions>>.
+xref:integration/scheduling.adoc#scheduling-cron-expression[cron expressions].
 For example, the following task is scheduled to run 15 minutes past each hour but only
 during the 9-to-5 "business hours" on weekdays:
 
@@ -361,7 +361,7 @@ amount of time to wait before the first execution of the method, as the followin
 ----
 
 If simple periodic scheduling is not expressive enough, you can provide a
-<<scheduling-cron-expression,cron expression>>.
+xref:integration/scheduling.adoc#scheduling-cron-expression[cron expression].
 The following example runs only on weekdays:
 
 [source,java,indent=0]
@@ -485,7 +485,7 @@ in combination with a custom pointcut.
 === Executor Qualification with `@Async`
 
 By default, when specifying `@Async` on a method, the executor that is used is the
-one <<scheduling-enable-annotation-support, configured when enabling async support>>,
+one xref:integration/scheduling.adoc#scheduling-enable-annotation-support[configured when enabling async support],
 i.e. the "`annotation-driven`" element if you are using XML or your `AsyncConfigurer`
 implementation, if any. However, you can use the `value` attribute of the `@Async`
 annotation when you need to indicate that an executor other than the default should be
@@ -565,7 +565,7 @@ The following creates a `ThreadPoolTaskExecutor` instance:
 	<task:executor id="executor" pool-size="10"/>
 ----
 
-As with the scheduler shown in the <<scheduling-task-namespace-scheduler, previous section>>,
+As with the scheduler shown in the xref:integration/scheduling.adoc#scheduling-task-namespace-scheduler[previous section],
 the value provided for the `id` attribute is used as the prefix for thread names within
 the pool. As far as the pool size is concerned, the `executor` element supports more
 configuration options than the `scheduler` element. For one thing, the thread pool for
@@ -676,7 +676,7 @@ milliseconds to wait after each task execution has completed. Another option is
 any previous execution takes. Additionally, for both `fixed-delay` and `fixed-rate` tasks, you can specify an
 'initial-delay' parameter, indicating the number of milliseconds to wait
 before the first execution of the method. For more control, you can instead provide a `cron` attribute
-to provide a <<scheduling-cron-expression,cron expression>>.
+to provide a xref:integration/scheduling.adoc#scheduling-cron-expression[cron expression].
 The following example shows these other options:
 
 [source,xml,indent=0]
@@ -697,8 +697,8 @@ The following example shows these other options:
 == Cron Expressions
 
 All Spring cron expressions have to conform to the same format, whether you are using them in
-<<scheduling-annotation-support-scheduled,`@Scheduled` annotations>>,
-<<scheduling-task-namespace-scheduled-tasks,`task:scheduled-tasks` elements>>,
+xref:integration/scheduling.adoc#scheduling-annotation-support-scheduled[`@Scheduled` annotations],
+xref:integration/scheduling.adoc#scheduling-task-namespace-scheduled-tasks[`task:scheduled-tasks` elements],
 or someplace else.
 A well-formed cron expression, such as `* * * * * *`, consists of six space-separated time and date
 fields, each with its own range of valid values:

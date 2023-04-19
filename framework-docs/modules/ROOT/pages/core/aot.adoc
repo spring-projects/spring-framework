@@ -3,7 +3,7 @@
 
 This chapter covers Spring's Ahead of Time (AOT) optimizations.
 
-For AOT support specific to integration tests, see <<testing.adoc#testcontext-aot, Ahead of Time Support for Tests>>.
+For AOT support specific to integration tests, see xref:testing/testcontext-framework/aot.adoc[Ahead of Time Support for Tests].
 
 [[core.aot.introduction]]
 == Introduction to Ahead of Time Optimizations
@@ -57,12 +57,12 @@ Let's look at a basic example:
 include::code:AotProcessingSample[tag=myapplication]
 
 Starting this application with the regular runtime involves a number of steps including classpath scanning, configuration class parsing, bean instantiation, and lifecycle callback handling.
-Refresh for AOT processing only applies a subset of what happens with a <<beans-introduction,regular `refresh`>>.
+Refresh for AOT processing only applies a subset of what happens with a xref:core/beans/introduction.adoc[regular `refresh`].
 AOT processing can be triggered as follows:
 
 include::code:AotProcessingSample[tag=aotcontext]
 
-In this mode, <<beans-factory-extension-factory-postprocessors,`BeanFactoryPostProcessor` implementations>> are invoked as usual.
+In this mode, xref:core/beans/factory-extension.adoc#beans-factory-extension-factory-postprocessors[`BeanFactoryPostProcessor` implementations] are invoked as usual.
 This includes configuration class parsing, import selectors, classpath scanning, etc.
 Such steps make sure that the `BeanRegistry` contains the relevant bean definitions for the application.
 If bean definitions are guarded by conditions (such as `@Profile`), these are discarded at this stage.
@@ -108,7 +108,7 @@ It does so using a dedicated `BeanRegistrationAotProcessor`.
 This interface is used as follows:
 
 * Implemented by a `BeanPostProcessor` bean, to replace its runtime behavior.
-For instance <<beans-factory-extension-bpp-examples-aabpp,`AutowiredAnnotationBeanPostProcessor`>> implements this interface to generate code that injects members annotated with `@Autowired`.
+For instance xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp-examples-aabpp[`AutowiredAnnotationBeanPostProcessor`] implements this interface to generate code that injects members annotated with `@Autowired`.
 * Implemented by a type registered in `META-INF/spring/aot.factories` with a key equal to the fully qualified name of the interface.
 Typically used when the bean definition needs to be tuned for specific features of the core framework.
 

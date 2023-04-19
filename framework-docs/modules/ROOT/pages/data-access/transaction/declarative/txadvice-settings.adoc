@@ -4,7 +4,7 @@
 This section summarizes the various transactional settings that you can specify by using
 the `<tx:advice/>` tag. The default `<tx:advice/>` settings are:
 
-* The <<tx-propagation, propagation setting>> is `REQUIRED.`
+* The xref:data-access/transaction/declarative/tx-propagation.adoc[propagation setting] is `REQUIRED.`
 * The isolation level is `DEFAULT.`
 * The transaction is read-write.
 * The transaction timeout defaults to the default timeout of the underlying transaction

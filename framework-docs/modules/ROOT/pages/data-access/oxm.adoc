@@ -18,9 +18,9 @@ stream, or a SAX handler.
 
 Some of the benefits of using Spring for your O/X mapping needs are:
 
-* <<oxm-ease-of-configuration>>
-* <<oxm-consistent-interfaces>>
-* <<oxm-consistent-exception-hierarchy>>
+* xref:data-access/oxm.adoc#oxm-ease-of-configuration[Ease of configuration]
+* xref:data-access/oxm.adoc#oxm-consistent-interfaces[Consistent Interfaces]
+* xref:data-access/oxm.adoc#oxm-consistent-exception-hierarchy[Consistent Exception Hierarchy]
 
 
 [[oxm-ease-of-configuration]]
@@ -57,7 +57,7 @@ These runtime exceptions wrap the original exception so that no information is l
 [[oxm-marshaller-unmarshaller]]
 == `Marshaller` and `Unmarshaller`
 
-As stated in the <<oxm-introduction, introduction>>, a marshaller serializes an object
+As stated in the xref:data-access/oxm.adoc#oxm-introduction[introduction], a marshaller serializes an object
 to XML, and an unmarshaller deserializes XML stream to an object. This section describes
 the two Spring interfaces used for this purpose.
 
@@ -332,8 +332,8 @@ preamble of the XML configuration file. The following example shows how to do so
 
 The schema makes the following elements available:
 
-* <<oxm-jaxb2-xsd, `jaxb2-marshaller`>>
-* <<oxm-jibx-xsd, `jibx-marshaller`>>
+* xref:data-access/oxm.adoc#oxm-jaxb2-xsd[`jaxb2-marshaller`]
+* xref:data-access/oxm.adoc#oxm-jibx-xsd[`jibx-marshaller`]
 
 Each tag is explained in its respective marshaller's section. As an example, though,
 the configuration of a JAXB2 marshaller might resemble the following:
@@ -353,7 +353,7 @@ The JAXB binding compiler translates a W3C XML Schema into one or more Java clas
 generate a schema from annotated Java classes.
 
 Spring supports the JAXB 2.0 API as XML marshalling strategies, following the
-`Marshaller` and `Unmarshaller` interfaces described in <<oxm-marshaller-unmarshaller>>.
+`Marshaller` and `Unmarshaller` interfaces described in xref:data-access/oxm.adoc#oxm-marshaller-unmarshaller[`Marshaller` and `Unmarshaller`].
 The corresponding integration classes reside in the `org.springframework.oxm.jaxb`
 package.
 

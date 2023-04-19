@@ -10,16 +10,16 @@ integrate such parsers into the Spring IoC container.
 To facilitate authoring configuration files that use a schema-aware XML editor,
 Spring's extensible XML configuration mechanism is based on XML Schema. If you are not
 familiar with Spring's current XML configuration extensions that come with the standard
-Spring distribution, you should first read the previous section on <<core.appendix.xsd-schemas>>.
+Spring distribution, you should first read the previous section on xref:core/appendix/xsd-schemas.adoc[XML Schemas].
 
 
 To create new XML configuration extensions:
 
-. <<core.appendix.xsd-custom-schema, Author>> an XML schema to describe your custom element(s).
-. <<core.appendix.xsd-custom-namespacehandler, Code>> a custom `NamespaceHandler` implementation.
-. <<core.appendix.xsd-custom-parser, Code>> one or more `BeanDefinitionParser` implementations
+. xref:core/appendix/xml-custom.adoc#core.appendix.xsd-custom-schema[Author] an XML schema to describe your custom element(s).
+. xref:core/appendix/xml-custom.adoc#core.appendix.xsd-custom-namespacehandler[Code] a custom `NamespaceHandler` implementation.
+. xref:core/appendix/xml-custom.adoc#core.appendix.xsd-custom-parser[Code] one or more `BeanDefinitionParser` implementations
   (this is where the real work is done).
-. <<core.appendix.xsd-custom-registration, Register>> your new artifacts with Spring.
+. xref:core/appendix/xml-custom.adoc#core.appendix.xsd-custom-registration[Register] your new artifacts with Spring.
 
 For a unified example, we create an
 XML extension (a custom XML element) that lets us configure objects of the type
@@ -129,7 +129,7 @@ The `NamespaceHandler` interface features three methods:
 * `BeanDefinitionHolder decorate(Node, BeanDefinitionHolder, ParserContext)`: Called
   when Spring encounters an attribute or nested element of a different namespace.
   The decoration of one or more bean definitions is used (for example) with the
-  <<core.adoc#beans-factory-scopes, scopes that Spring supports>>.
+  xref:core/beans/factory-scopes.adoc[scopes that Spring supports].
   We start by highlighting a simple example, without using decoration, after which
   we show decoration in a somewhat more advanced example.
 
@@ -541,7 +541,7 @@ setter property for the `components` property. The following listing shows such 
 
 This works nicely, but it exposes a lot of Spring plumbing to the end user. What we are
 going to do is write a custom extension that hides away all of this Spring plumbing.
-If we stick to <<core.appendix.xsd-custom-introduction, the steps described previously>>, we start off
+If we stick to xref:core/appendix/xml-custom.adoc#core.appendix.xsd-custom-introduction[the steps described previously], we start off
 by creating the XSD schema to define the structure of our custom tag, as the following
 listing shows:
 
@@ -568,7 +568,7 @@ listing shows:
 	</xsd:schema>
 ----
 
-Again following <<core.appendix.xsd-custom-introduction, the process described earlier>>,
+Again following xref:core/appendix/xml-custom.adoc#core.appendix.xsd-custom-introduction[the process described earlier],
 we then create a custom `NamespaceHandler`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]

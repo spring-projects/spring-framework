@@ -1,9 +1,9 @@
 [[mvc-ann-httpentity]]
 = HttpEntity
 
-[.small]#<<web-reactive.adoc#webflux-ann-httpentity, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/httpentity.adoc[See equivalent in the Reactive stack]#
 
-`HttpEntity` is more or less identical to using <<mvc-ann-requestbody>> but is based on a
+`HttpEntity` is more or less identical to using xref:web/webmvc/mvc-controller/ann-methods/requestbody.adoc[`@RequestBody`] but is based on a
 container object that exposes request headers and body. The following listing shows an example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

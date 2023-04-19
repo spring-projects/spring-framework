@@ -4,9 +4,9 @@
 The Spring Framework provides a number of interfaces you can use to customize the nature
 of a bean. This section groups them as follows:
 
-* <<beans-factory-lifecycle>>
-* <<beans-factory-aware>>
-* <<aware-list>>
+* xref:core/beans/factory-nature.adoc#beans-factory-lifecycle[Lifecycle Callbacks]
+* xref:core/beans/factory-nature.adoc#beans-factory-aware[`ApplicationContextAware` and `BeanNameAware`]
+* xref:core/beans/factory-nature.adoc#aware-list[Other `Aware` Interfaces]
 
 
 
@@ -23,7 +23,7 @@ perform certain actions upon initialization and destruction of your beans.
 The JSR-250 `@PostConstruct` and `@PreDestroy` annotations are generally considered best
 practice for receiving lifecycle callbacks in a modern Spring application. Using these
 annotations means that your beans are not coupled to Spring-specific interfaces.
-For details, see <<beans-postconstruct-and-predestroy-annotations>>.
+For details, see xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[Using `@PostConstruct` and `@PreDestroy`].
 
 If you do not want to use the JSR-250 annotations but you still want to remove
 coupling, consider `init-method` and `destroy-method` bean definition metadata.
@@ -33,7 +33,7 @@ Internally, the Spring Framework uses `BeanPostProcessor` implementations to pro
 callback interfaces it can find and call the appropriate methods. If you need custom
 features or other lifecycle behavior Spring does not by default offer, you can
 implement a `BeanPostProcessor` yourself. For more information, see
-<<beans-factory-extension>>.
+xref:core/beans/factory-extension.adoc[Container Extension Points].
 
 In addition to the initialization and destruction callbacks, Spring-managed objects may
 also implement the `Lifecycle` interface so that those objects can participate in the
@@ -56,11 +56,11 @@ bean. The `InitializingBean` interface specifies a single method:
 
 We recommend that you do not use the `InitializingBean` interface, because it
 unnecessarily couples the code to Spring. Alternatively, we suggest using
-the <<beans-postconstruct-and-predestroy-annotations, `@PostConstruct`>> annotation or
+the xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[`@PostConstruct`] annotation or
 specifying a POJO initialization method. In the case of XML-based configuration metadata,
 you can use the `init-method` attribute to specify the name of the method that has a void
 no-argument signature. With Java configuration, you can use the `initMethod` attribute of
-`@Bean`. See <<beans-java-lifecycle-callbacks>>. Consider the following example:
+`@Bean`. See xref:core/beans/java/bean-annotation.adoc#beans-java-lifecycle-callbacks[Receiving Lifecycle Callbacks]. Consider the following example:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -135,11 +135,11 @@ bean get a callback when the container that contains it is destroyed. The
 
 We recommend that you do not use the `DisposableBean` callback interface, because it
 unnecessarily couples the code to Spring. Alternatively, we suggest using
-the <<beans-postconstruct-and-predestroy-annotations, `@PreDestroy`>> annotation or
+the xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[`@PreDestroy`] annotation or
 specifying a generic method that is supported by bean definitions. With XML-based
 configuration metadata, you can use the `destroy-method` attribute on the `<bean/>`.
 With Java configuration, you can use the `destroyMethod` attribute of `@Bean`. See
-<<beans-java-lifecycle-callbacks>>. Consider the following definition:
+xref:core/beans/java/bean-annotation.adoc#beans-java-lifecycle-callbacks[Receiving Lifecycle Callbacks]. Consider the following definition:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -204,7 +204,7 @@ TIP: You can assign the `destroy-method` attribute of a `<bean>` element a speci
 `java.lang.AutoCloseable` or `java.io.Closeable` would therefore match.) You can also set
 this special `(inferred)` value on the `default-destroy-method` attribute of a
 `<beans>` element to apply this behavior to an entire set of beans (see
-<<beans-factory-lifecycle-default-init-destroy-methods>>). Note that this is the
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[Default Initialization and Destroy Methods]). Note that this is the
 default behavior with Java configuration.
 
 [[beans-factory-lifecycle-default-init-destroy-methods]]
@@ -221,8 +221,8 @@ callback method names on every bean. This means that you, as an application
 developer, can write your application classes and use an initialization callback called
 `init()`, without having to configure an `init-method="init"` attribute with each bean
 definition. The Spring IoC container calls that method when the bean is created (and in
-accordance with the standard lifecycle callback contract <<beans-factory-lifecycle,
-described previously>>). This feature also enforces a consistent naming convention for
+accordance with the standard lifecycle callback contract xref:core/beans/factory-nature.adoc#beans-factory-lifecycle[described previously]
+). This feature also enforces a consistent naming convention for
 initialization and destroy method callbacks.
 
 Suppose that your initialization callback methods are named `init()` and your destroy
@@ -308,18 +308,18 @@ interacts directly with the raw target bean.
 
 As of Spring 2.5, you have three options for controlling bean lifecycle behavior:
 
-* The <<beans-factory-lifecycle-initializingbean, `InitializingBean`>> and
-<<beans-factory-lifecycle-disposablebean, `DisposableBean`>> callback interfaces
+* The xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[`InitializingBean`] and
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[`DisposableBean`] callback interfaces
 * Custom `init()` and `destroy()` methods
-* The <<beans-postconstruct-and-predestroy-annotations, `@PostConstruct` and `@PreDestroy`
-annotations>>. You can combine these mechanisms to control a given bean.
+* The xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[`@PostConstruct` and `@PreDestroy` annotations]
+. You can combine these mechanisms to control a given bean.
 
 NOTE: If multiple lifecycle mechanisms are configured for a bean and each mechanism is
 configured with a different method name, then each configured method is run in the
 order listed after this note. However, if the same method name is configured -- for example,
 `init()` for an initialization method -- for more than one of these lifecycle mechanisms,
 that method is run once, as explained in the
-<<beans-factory-lifecycle-default-init-destroy-methods, preceding section>>.
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[preceding section].
 
 Multiple lifecycle mechanisms configured for the same bean, with different
 initialization methods, are called as follows:
@@ -542,18 +542,18 @@ it couples the code to Spring and does not follow the Inversion of Control style
 where collaborators are provided to beans as properties. Other methods of the
 `ApplicationContext` provide access to file resources, publishing application events,
 and accessing a `MessageSource`. These additional features are described in
-<<context-introduction>>.
+xref:core/beans/context-introduction.adoc[Additional Capabilities of the `ApplicationContext`].
 
 Autowiring is another alternative to obtain a reference to the
 `ApplicationContext`. The _traditional_ `constructor` and `byType` autowiring modes
-(as described in <<beans-factory-autowire>>) can provide a dependency of type
+(as described in xref:core/beans/dependencies/factory-autowire.adoc[Autowiring Collaborators]) can provide a dependency of type
 `ApplicationContext` for a constructor argument or a setter method parameter,
 respectively. For more flexibility, including the ability to autowire fields and
 multiple parameter methods, use the annotation-based autowiring features. If you do,
 the `ApplicationContext` is autowired into a field, constructor argument, or method
 parameter that expects the `ApplicationContext` type if the field, constructor, or
 method in question carries the `@Autowired` annotation. For more information, see
-<<beans-autowired-annotation>>.
+xref:core/beans/annotation-config/autowired.adoc[Using `@Autowired`].
 
 When an `ApplicationContext` creates a class that implements the
 `org.springframework.beans.factory.BeanNameAware` interface, the class is provided with
@@ -577,7 +577,7 @@ init-method.
 [[aware-list]]
 == Other `Aware` Interfaces
 
-Besides `ApplicationContextAware` and `BeanNameAware` (discussed <<beans-factory-aware, earlier>>),
+Besides `ApplicationContextAware` and `BeanNameAware` (discussed xref:core/beans/factory-nature.adoc#beans-factory-aware[earlier]),
 Spring offers a wide range of `Aware` callback interfaces that let beans indicate to the container
 that they require a certain infrastructure dependency. As a general rule, the name indicates the
 dependency type. The following table summarizes the most important `Aware` interfaces:
@@ -589,50 +589,50 @@ dependency type. The following table summarizes the most important `Aware` inter
 
 | `ApplicationContextAware`
 | Declaring `ApplicationContext`.
-| <<beans-factory-aware>>
+| xref:core/beans/factory-nature.adoc#beans-factory-aware[`ApplicationContextAware` and `BeanNameAware`]
 
 | `ApplicationEventPublisherAware`
 | Event publisher of the enclosing `ApplicationContext`.
-| <<context-introduction>>
+| xref:core/beans/context-introduction.adoc[Additional Capabilities of the `ApplicationContext`]
 
 | `BeanClassLoaderAware`
 | Class loader used to load the bean classes.
-| <<beans-factory-class>>
+| xref:core/beans/definition.adoc#beans-factory-class[Instantiating Beans]
 
 | `BeanFactoryAware`
 | Declaring `BeanFactory`.
-| <<beans-beanfactory>>
+| xref:core/beans/beanfactory.adoc[The `BeanFactory` API]
 
 | `BeanNameAware`
 | Name of the declaring bean.
-| <<beans-factory-aware>>
+| xref:core/beans/factory-nature.adoc#beans-factory-aware[`ApplicationContextAware` and `BeanNameAware`]
 
 | `LoadTimeWeaverAware`
 | Defined weaver for processing class definition at load time.
-| <<aop-aj-ltw>>
+| xref:core/aop/using-aspectj.adoc#aop-aj-ltw[Load-time Weaving with AspectJ in the Spring Framework]
 
 | `MessageSourceAware`
 | Configured strategy for resolving messages (with support for parameterization and
   internationalization).
-| <<context-introduction>>
+| xref:core/beans/context-introduction.adoc[Additional Capabilities of the `ApplicationContext`]
 
 | `NotificationPublisherAware`
 | Spring JMX notification publisher.
-| <<integration.adoc#jmx-notifications, Notifications>>
+| xref:integration/jmx/notifications.adoc[Notifications]
 
 | `ResourceLoaderAware`
 | Configured loader for low-level access to resources.
-| <<resources>>
+| xref:web/webflux-webclient/client-builder.adoc#webflux-client-builder-reactor-resources[Resources]
 
 | `ServletConfigAware`
 | Current `ServletConfig` the container runs in. Valid only in a web-aware Spring
   `ApplicationContext`.
-| <<web.adoc#mvc, Spring MVC>>
+| xref:web/webmvc.adoc#mvc[Spring MVC]
 
 | `ServletContextAware`
 | Current `ServletContext` the container runs in. Valid only in a web-aware Spring
   `ApplicationContext`.
-| <<web.adoc#mvc, Spring MVC>>
+| xref:web/webmvc.adoc#mvc[Spring MVC]
 |===
 
 Note again that using these interfaces ties your code to the Spring API and does not

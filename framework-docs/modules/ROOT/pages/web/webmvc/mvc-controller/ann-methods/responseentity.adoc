@@ -1,9 +1,9 @@
 [[mvc-ann-responseentity]]
 = ResponseEntity
 
-[.small]#<<web-reactive.adoc#webflux-ann-responseentity, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/responseentity.adoc[See equivalent in the Reactive stack]#
 
-`ResponseEntity` is like <<mvc-ann-responsebody>> but with status and headers. For example:
+`ResponseEntity` is like xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[`@ResponseBody`] but with status and headers. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -26,7 +26,7 @@
 	}
 ----
 
-Spring MVC supports using a single value <<mvc-ann-async-reactive-types, reactive type>>
+Spring MVC supports using a single value xref:web/webmvc/mvc-ann-async.adoc#mvc-ann-async-reactive-types[reactive type]
 to produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive
 types for the body. This allows the following types of async responses:
 

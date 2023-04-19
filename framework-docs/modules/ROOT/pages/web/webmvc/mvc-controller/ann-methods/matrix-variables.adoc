@@ -1,7 +1,7 @@
 [[mvc-ann-matrix-variables]]
 = Matrix Variables
 
-[.small]#<<web-reactive.adoc#webflux-ann-matrix-variables, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/matrix-variables.adoc[See equivalent in the Reactive stack]#
 
 https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring MVC, we refer to those as "`matrix variables`" based on an
@@ -135,7 +135,7 @@ To get all matrix variables, you can use a `MultiValueMap`, as the following exa
 
 Note that you need to enable the use of matrix variables. In the MVC Java configuration,
 you need to set a `UrlPathHelper` with `removeSemicolonContent=false` through
-<<mvc-config-path-matching>>. In the MVC XML namespace, you can set
+xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching]. In the MVC XML namespace, you can set
 `<mvc:annotation-driven enable-matrix-variables="true"/>`.
 
 

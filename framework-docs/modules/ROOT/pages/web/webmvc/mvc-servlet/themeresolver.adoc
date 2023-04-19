@@ -62,7 +62,7 @@ background image with Dutch text on it.
 [[mvc-themeresolver-resolving]]
 == Resolving Themes
 
-After you define themes, as described in the <<mvc-themeresolver-defining, preceding section>>,
+After you define themes, as described in the xref:web/webmvc/mvc-servlet/themeresolver.adoc#mvc-themeresolver-defining[preceding section],
 you decide which theme to use. The `DispatcherServlet` looks for a bean named `themeResolver`
 to find out which `ThemeResolver` implementation to use. A theme resolver works in much the same
 way as a `LocaleResolver`. It detects the theme to use for a particular request and can also

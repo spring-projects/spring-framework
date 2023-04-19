@@ -1,7 +1,7 @@
 [[beans-factory-properties-detailed]]
 = Dependencies and Configuration in Detail
 
-As mentioned in the <<beans-factory-collaborators, previous section>>, you can define bean
+As mentioned in the xref:core/beans/dependencies/factory-collaborators.adoc[previous section], you can define bean
 properties and constructor arguments as references to other managed beans (collaborators)
 or as values defined inline. Spring's XML-based configuration metadata supports
 sub-element types within its `<property/>` and `<constructor-arg/>` elements for this
@@ -13,7 +13,7 @@ purpose.
 
 The `value` attribute of the `<property/>` element specifies a property or constructor
 argument as a human-readable string representation. Spring's
-<<core-convert-ConversionService-API, conversion service>> is used to convert these
+xref:core/validation/convert.adoc#core-convert-ConversionService-API[conversion service] is used to convert these
 values from a `String` to the actual type of the property or argument.
 The following example shows various values being set:
 
@@ -28,7 +28,7 @@ The following example shows various values being set:
 	</bean>
 ----
 
-The following example uses the <<beans-p-namespace,p-namespace>> for even more succinct
+The following example uses the xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[p-namespace] for even more succinct
 XML configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -112,7 +112,7 @@ container validate at deployment time that the referenced, named bean actually
 exists. In the second variation, no validation is performed on the value that is passed
 to the `targetName` property of the `client` bean. Typos are only discovered (with most
 likely fatal results) when the `client` bean is actually instantiated. If the `client`
-bean is a <<beans-factory-scopes,prototype>> bean, this typo and the resulting exception
+bean is a xref:core/beans/factory-scopes.adoc[prototype] bean, this typo and the resulting exception
 may only be discovered long after the container is deployed.
 
 NOTE: The `local` attribute on the `idref` element is no longer supported in the 4.0 beans
@@ -120,7 +120,7 @@ XSD, since it does not provide value over a regular `bean` reference any more. C
 your existing `idref local` references to `idref bean` when upgrading to the 4.0 schema.
 
 A common place (at least in versions earlier than Spring 2.0) where the `<idref/>` element
-brings value is in the configuration of <<aop-pfb-1,AOP interceptors>> in a
+brings value is in the configuration of xref:core/aop-api/pfb.adoc#aop-pfb-1[AOP interceptors] in a
 `ProxyFactoryBean` bean definition. Using `<idref/>` elements when you specify the
 interceptor names prevents you from misspelling an interceptor ID.
 
@@ -277,7 +277,7 @@ collection elements overriding values specified in the parent collection.
 
 This section on merging discusses the parent-child bean mechanism. Readers unfamiliar
 with parent and child bean definitions may wish to read the
-<<beans-child-bean-definitions,relevant section>> before continuing.
+xref:core/beans/child-bean-definitions.adoc[relevant section] before continuing.
 
 The following example demonstrates collection merging:
 
@@ -451,7 +451,7 @@ The preceding configuration is equivalent to the following Java code:
 The p-namespace lets you use the `bean` element's attributes (instead of nested
 `<property/>` elements) to describe your property values collaborating beans, or both.
 
-Spring supports extensible configuration formats <<core.adoc#core.appendix.xsd-schemas,with namespaces>>,
+Spring supports extensible configuration formats xref:core/appendix/xsd-schemas.adoc[with namespaces],
 which are based on an XML Schema definition. The `beans` configuration format discussed in
 this chapter is defined in an XML Schema document. However, the p-namespace is not defined
 in an XSD file and exists only in the core of Spring.
@@ -526,12 +526,12 @@ three approaches at the same time.
 [[beans-c-namespace]]
 == XML Shortcut with the c-namespace
 
-Similar to the <<beans-p-namespace>>, the c-namespace, introduced in Spring
+Similar to the xref:core/beans/dependencies/factory-properties-detailed.adoc#beans-p-namespace[XML Shortcut with the p-namespace], the c-namespace, introduced in Spring
 3.1, allows inlined attributes for configuring the constructor arguments rather
 then nested `constructor-arg` elements.
 
 The following example uses the `c:` namespace to do the same thing as the from
-<<beans-constructor-injection>>:
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[Constructor-based Dependency Injection]:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -580,7 +580,7 @@ A corresponding index notation is also available for `<constructor-arg>` element
 not commonly used since the plain order of declaration is usually sufficient there.
 
 In practice, the constructor resolution
-<<beans-factory-ctor-arguments-resolution,mechanism>> is quite efficient in matching
+xref:core/beans/dependencies/factory-collaborators.adoc#beans-factory-ctor-arguments-resolution[mechanism] is quite efficient in matching
 arguments, so unless you really need to, we recommend using the name notation
 throughout your configuration.
 

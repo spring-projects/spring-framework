@@ -7,7 +7,7 @@ easily and transparently integrate your Spring application into a JMX infrastruc
 .JMX?
 ****
 This chapter is not an introduction to JMX. It does not try to explain why you might want
-to use JMX. If you are new to JMX, see <<jmx-resources>> at the end of this chapter.
+to use JMX. If you are new to JMX, see xref:integration/jmx/resources.adoc[Further Resources] at the end of this chapter.
 ****
 
 Specifically, Spring's JMX support provides four core features:

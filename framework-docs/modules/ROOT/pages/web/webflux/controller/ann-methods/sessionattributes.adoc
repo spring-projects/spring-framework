@@ -1,7 +1,7 @@
 [[webflux-ann-sessionattributes]]
 = `@SessionAttributes`
 
-[.small]#<<web.adoc#mvc-ann-sessionattributes, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/sessionattributes.adoc[See equivalent in the Servlet stack]#
 
 `@SessionAttributes` is used to store model attributes in the `WebSession` between
 requests. It is a type-level annotation that declares session attributes used by a

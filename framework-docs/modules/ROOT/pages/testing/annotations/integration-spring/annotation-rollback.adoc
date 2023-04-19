@@ -4,7 +4,7 @@
 `@Rollback` indicates whether the transaction for a transactional test method should be
 rolled back after the test method has completed. If `true`, the transaction is rolled
 back. Otherwise, the transaction is committed (see also
-<<spring-testing-annotation-commit>>). Rollback for integration tests in the Spring
+xref:testing/annotations/integration-spring/annotation-commit.adoc[`@Commit`]). Rollback for integration tests in the Spring
 TestContext Framework defaults to `true` even if `@Rollback` is not explicitly declared.
 
 When declared as a class-level annotation, `@Rollback` defines the default rollback

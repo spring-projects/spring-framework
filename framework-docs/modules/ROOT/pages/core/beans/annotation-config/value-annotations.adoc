@@ -149,7 +149,7 @@ provide conversion support for your own custom type, you can provide your own
 	}
 ----
 
-When `@Value` contains a <<expressions, `SpEL` expression>> the value will be dynamically
+When `@Value` contains a xref:core/expressions.adoc[`SpEL` expression] the value will be dynamically
 computed at runtime as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

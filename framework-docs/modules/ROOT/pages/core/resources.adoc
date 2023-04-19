@@ -4,14 +4,14 @@
 This chapter covers how Spring handles resources and how you can work with resources in
 Spring. It includes the following topics:
 
-* <<resources-introduction>>
-* <<resources-resource>>
-* <<resources-implementations>>
-* <<resources-resourceloader>>
-* <<resources-resourcepatternresolver>>
-* <<resources-resourceloaderaware>>
-* <<resources-as-dependencies>>
-* <<resources-app-ctx>>
+* xref:core/resources.adoc#resources-introduction[Introduction]
+* xref:core/resources.adoc#resources-resource[The `Resource` Interface]
+* xref:core/resources.adoc#resources-implementations[Built-in `Resource` Implementations]
+* xref:core/resources.adoc#resources-resourceloader[The `ResourceLoader` Interface]
+* xref:core/resources.adoc#resources-resourcepatternresolver[The `ResourcePatternResolver` Interface]
+* xref:core/resources.adoc#resources-resourceloaderaware[The `ResourceLoaderAware` Interface]
+* xref:core/resources.adoc#resources-as-dependencies[Resources as Dependencies]
+* xref:core/resources.adoc#resources-app-ctx[Application Contexts and Resource Paths]
 
 
 
@@ -133,13 +133,13 @@ work.
 
 Spring includes several built-in `Resource` implementations:
 
-* <<resources-implementations-urlresource>>
-* <<resources-implementations-classpathresource>>
-* <<resources-implementations-filesystemresource>>
-* <<resources-implementations-pathresource>>
-* <<resources-implementations-servletcontextresource>>
-* <<resources-implementations-inputstreamresource>>
-* <<resources-implementations-bytearrayresource>>
+* xref:core/resources.adoc#resources-implementations-urlresource[`UrlResource`]
+* xref:core/resources.adoc#resources-implementations-classpathresource[`ClassPathResource`]
+* xref:core/resources.adoc#resources-implementations-filesystemresource[`FileSystemResource`]
+* xref:core/resources.adoc#resources-implementations-pathresource[`PathResource`]
+* xref:core/resources.adoc#resources-implementations-servletcontextresource[`ServletContextResource`]
+* xref:core/resources.adoc#resources-implementations-inputstreamresource[`InputStreamResource`]
+* xref:core/resources.adoc#resources-implementations-bytearrayresource[`ByteArrayResource`]
 
 For a complete list of `Resource` implementations available in Spring, consult the
 "All Known Implementing Classes" section of the
@@ -349,7 +349,7 @@ objects:
 
 | file:
 | `\file:///data/config.xml`
-| Loaded as a `URL` from the filesystem. See also <<resources-filesystemresource-caveats>>.
+| Loaded as a `URL` from the filesystem. See also xref:core/resources.adoc#resources-filesystemresource-caveats[`FileSystemResource` Caveats].
 
 | https:
 | `\https://myserver/logo.png`
@@ -385,11 +385,11 @@ for all matching resources from the class path. Note that the resource location 
 expected to be a path without placeholders in this case -- for example,
 `classpath*:/config/beans.xml`. JAR files or different directories in the class path can
 contain multiple files with the same path and the same name. See
-<<resources-app-ctx-wildcards-in-resource-paths>> and its subsections for further details
+xref:core/resources.adoc#resources-app-ctx-wildcards-in-resource-paths[Wildcards in Application Context Constructor Resource Paths] and its subsections for further details
 on wildcard support with the `classpath*:` resource prefix.
 
 A passed-in `ResourceLoader` (for example, one supplied via
-<<resources-resourceloaderaware,`ResourceLoaderAware`>> semantics) can be checked whether
+xref:core/resources.adoc#resources-resourceloaderaware[`ResourceLoaderAware`] semantics) can be checked whether
 it implements this extended interface too.
 
 `PathMatchingResourcePatternResolver` is a standalone implementation that is usable
@@ -444,18 +444,18 @@ interface (which can be considered a utility interface) and not to the whole Spr
 
 In application components, you may also rely upon autowiring of the `ResourceLoader` as
 an alternative to implementing the `ResourceLoaderAware` interface. The _traditional_
-`constructor` and `byType` autowiring modes (as described in <<beans-factory-autowire>>)
+`constructor` and `byType` autowiring modes (as described in xref:core/beans/dependencies/factory-autowire.adoc[Autowiring Collaborators])
 are capable of providing a `ResourceLoader` for either a constructor argument or a
 setter method parameter, respectively. For more flexibility (including the ability to
 autowire fields and multiple parameter methods), consider using the annotation-based
 autowiring features. In that case, the `ResourceLoader` is autowired into a field,
 constructor argument, or method parameter that expects the `ResourceLoader` type as long
 as the field, constructor, or method in question carries the `@Autowired` annotation.
-For more information, see <<beans-autowired-annotation>>.
+For more information, see xref:core/beans/annotation-config/autowired.adoc[Using `@Autowired`].
 
 NOTE: To load one or more `Resource` objects for a resource path that contains wildcards
 or makes use of the special `classpath*:` resource prefix, consider having an instance of
-<<resources-resourcepatternresolver,`ResourcePatternResolver`>> autowired into your
+xref:core/resources.adoc#resources-resourcepatternresolver[`ResourcePatternResolver`] autowired into your
 application components instead of `ResourceLoader`.
 
 
@@ -531,8 +531,8 @@ latter being used to access a file in the filesystem):
 If the `MyBean` class is refactored for use with annotation-driven configuration, the
 path to `myTemplate.txt` can be stored under a key named `template.path` -- for example,
 in a properties file made available to the Spring `Environment` (see
-<<beans-environment>>). The template path can then be referenced via the `@Value`
-annotation using a property placeholder (see <<beans-value-annotations>>). Spring will
+xref:core/beans/environment.adoc[Environment Abstraction]). The template path can then be referenced via the `@Value`
+annotation using a property placeholder (see xref:core/beans/annotation-config/value-annotations.adoc[Using `@Value`]). Spring will
 retrieve the value of the template path as a string, and a special `PropertyEditor` will
 convert the string to a `Resource` object to be injected into the `MyBean` constructor.
 The following example demonstrates how to achieve this.

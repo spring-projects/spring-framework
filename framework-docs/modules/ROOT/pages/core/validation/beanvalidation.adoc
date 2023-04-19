@@ -265,10 +265,10 @@ for setup details with the Hibernate Validator and Bean Validation 1.1 providers
 
 [TIP]
 ====
-Method validation relies on <<core.adoc#aop-introduction-proxies,AOP Proxies>> around the
+Method validation relies on xref:core/aop/introduction-proxies.adoc[AOP Proxies] around the
 target classes, either JDK dynamic proxies for methods on interfaces or CGLIB proxies.
 There are certain limitations with the use of proxies, some of which are described in
-<<core.adoc#aop-understanding-aop-proxies,Understanding AOP Proxies>>. In addition remember
+xref:core/aop/proxying.adoc#aop-understanding-aop-proxies[Understanding AOP Proxies]. In addition remember
 to always use methods and accessors on proxied classes; direct field access will not work.
 ====
 
@@ -333,11 +333,11 @@ You can also configure a `DataBinder` with multiple `Validator` instances throug
 `dataBinder.addValidators` and `dataBinder.replaceValidators`. This is useful when
 combining globally configured bean validation with a Spring `Validator` configured
 locally on a DataBinder instance. See
-<<web.adoc#mvc-config-validation,Spring MVC Validation Configuration>>.
+xref:web/webmvc/mvc-config/validation.adoc[Spring MVC Validation Configuration].
 
 
 
 [[validation-mvc]]
 == Spring MVC 3 Validation
 
-See <<web.adoc#mvc-config-validation, Validation>> in the Spring MVC chapter.
+See xref:web/webmvc/mvc-config/validation.adoc[Validation] in the Spring MVC chapter.

@@ -5,7 +5,7 @@ Spring offers support for the Jackson JSON library.
 
 [[mvc-ann-jsonview]]
 == JSON Views
-[.small]#<<web-reactive.adoc#webflux-ann-jsonview, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/jackson.adoc#webflux-ann-jsonview[See equivalent in the Reactive stack]#
 
 Spring MVC provides built-in support for
 https://www.baeldung.com/jackson-json-view-annotation[Jackson's Serialization Views],

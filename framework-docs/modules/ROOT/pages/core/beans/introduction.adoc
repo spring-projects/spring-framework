@@ -30,7 +30,7 @@ and the `ApplicationContext` adds more enterprise-specific functionality. The
 `ApplicationContext` is a complete superset of the `BeanFactory` and is used exclusively
 in this chapter in descriptions of Spring's IoC container. For more information on using
 the `BeanFactory` instead of the `ApplicationContext,` see the section covering the
-<<beans-beanfactory, `BeanFactory` API>>.
+xref:core/beans/beanfactory.adoc[`BeanFactory` API].
 
 In Spring, the objects that form the backbone of your application and that are managed
 by the Spring IoC container are called beans. A bean is an object that is

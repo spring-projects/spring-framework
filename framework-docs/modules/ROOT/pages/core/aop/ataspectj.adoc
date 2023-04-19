@@ -9,7 +9,7 @@ for pointcut parsing and matching. The AOP runtime is still pure Spring AOP, tho
 there is no dependency on the AspectJ compiler or weaver.
 
 NOTE: Using the AspectJ compiler and weaver enables use of the full AspectJ language and
-is discussed in <<aop-using-aspectj>>.
+is discussed in xref:core/aop/using-aspectj.adoc[Using AspectJ with Spring Applications].
 
 
 

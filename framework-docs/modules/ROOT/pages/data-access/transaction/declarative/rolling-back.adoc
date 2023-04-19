@@ -6,7 +6,7 @@ classes, typically service layer classes, declaratively in your application. Thi
 describes how you can control the rollback of transactions in a simple, declarative
 fashion in XML configuration. For details on controlling rollback semantics declaratively
 with the `@Transactional` annotation, see
-<<transaction-declarative-attransactional-settings>>.
+xref:data-access/transaction/declarative/annotations.adoc#transaction-declarative-attransactional-settings[`@Transactional` Settings].
 
 The recommended way to indicate to the Spring Framework's transaction infrastructure
 that a transaction's work is to be rolled back is to throw an `Exception` from code that
@@ -51,7 +51,7 @@ thrown, and the rules are based on exception types or exception patterns.
 
 Rollback rules may be configured in XML via the `rollback-for` and `no-rollback-for`
 attributes, which allow rules to be defined as patterns. When using
-<<transaction-declarative-attransactional-settings,`@Transactional`>>, rollback rules may
+xref:data-access/transaction/declarative/annotations.adoc#transaction-declarative-attransactional-settings[`@Transactional`], rollback rules may
 be configured via the `rollbackFor`/`noRollbackFor` and
 `rollbackForClassName`/`noRollbackForClassName` attributes, which allow rules to be
 defined based on exception types or patterns, respectively.

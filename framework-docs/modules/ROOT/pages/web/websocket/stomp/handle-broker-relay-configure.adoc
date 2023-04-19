@@ -16,7 +16,7 @@ values of `guest` and `guest`.
 
 NOTE: The STOMP broker relay always sets the `login` and `passcode` headers on every `CONNECT`
 frame that it forwards to the broker on behalf of clients. Therefore, WebSocket clients
-need not set those headers. They are ignored. As the <<websocket-stomp-authentication>>
+need not set those headers. They are ignored. As the xref:web/websocket/stomp/authentication.adoc[Authentication]
 section explains, WebSocket clients should instead rely on HTTP authentication to protect
 the WebSocket endpoint and establish the client identity.
 

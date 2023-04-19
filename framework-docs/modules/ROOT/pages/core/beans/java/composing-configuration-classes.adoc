@@ -101,7 +101,7 @@ issue, because no compiler is involved, and you can declare
 When using `@Configuration` classes, the Java compiler places constraints on
 the configuration model, in that references to other beans must be valid Java syntax.
 
-Fortunately, solving this problem is simple. As <<beans-java-dependencies, we already discussed>>,
+Fortunately, solving this problem is simple. As xref:core/beans/java/bean-annotation.adoc#beans-java-dependencies[we already discussed],
 a `@Bean` method can have an arbitrary number of parameters that describe the bean
 dependencies. Consider the following more real-world scenario with several `@Configuration`
 classes, each depending on beans declared in the others:
@@ -474,7 +474,7 @@ created before the current bean, beyond what the latter's direct dependencies im
 It is often useful to conditionally enable or disable a complete `@Configuration` class
 or even individual `@Bean` methods, based on some arbitrary system state. One common
 example of this is to use the `@Profile` annotation to activate beans only when a specific
-profile has been enabled in the Spring `Environment` (see <<beans-definition-profiles>>
+profile has been enabled in the Spring `Environment` (see xref:core/beans/environment.adoc#beans-definition-profiles[Bean Definition Profiles]
 for details).
 
 The `@Profile` annotation is actually implemented by using a much more flexible annotation

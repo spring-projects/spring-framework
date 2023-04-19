@@ -1,7 +1,7 @@
 [[mvc-ann-modelattrib-method-args]]
 = `@ModelAttribute`
 
-[.small]#<<web-reactive.adoc#webflux-ann-modelattrib-method-args, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[See equivalent in the Reactive stack]#
 
 You can use the `@ModelAttribute` annotation on a method argument to access an attribute from
 the model or have it be instantiated if not present. The model attribute is also overlain with
@@ -32,9 +32,9 @@ fun processSubmit(@ModelAttribute pet: Pet): String { // <1>
 The `Pet` instance above is sourced in one of the following ways:
 
 * Retrieved from the model where it may have been added by a
-  <<mvc-ann-modelattrib-methods,@ModelAttribute method>>.
+  xref:web/webmvc/mvc-controller/ann-modelattrib-methods.adoc[@ModelAttribute method].
 * Retrieved from the HTTP session if the model attribute was listed in
-  the class-level <<mvc-ann-sessionattributes>> annotation.
+  the class-level xref:web/webmvc/mvc-controller/ann-methods/sessionattributes.adoc[`@SessionAttributes`] annotation.
 * Obtained through a `Converter` where the model attribute name matches the name of a
   request value such as a path variable or a request parameter (see next example).
 * Instantiated using its default constructor.
@@ -42,7 +42,7 @@ The `Pet` instance above is sourced in one of the following ways:
   request parameters. Argument names are determined through JavaBeans
   `@ConstructorProperties` or through runtime-retained parameter names in the bytecode.
 
-One alternative to using a <<mvc-ann-modelattrib-methods,@ModelAttribute method>> to
+One alternative to using a xref:web/webmvc/mvc-controller/ann-modelattrib-methods.adoc[@ModelAttribute method] to
 supply it or relying on the framework to create the model attribute, is to have a
 `Converter<String, T>` to provide the instance. This is applied when the model attribute
 name matches to the name of a request value such as a path variable or a request
@@ -75,8 +75,8 @@ After the model attribute instance is obtained, data binding is applied. The
 `WebDataBinder` class matches Servlet request parameter names (query parameters and form
 fields) to field names on the target `Object`. Matching fields are populated after type
 conversion is applied, where necessary. For more on data binding (and validation), see
-<<core.adoc#validation, Validation>>. For more on customizing data binding, see
-<<mvc-ann-initbinder>>.
+xref:web/webmvc/mvc-config/validation.adoc[Validation]. For more on customizing data binding, see
+xref:web/webmvc/mvc-controller/ann-initbinder.adoc[`DataBinder`].
 
 Data binding can result in errors. By default, a `BindException` is raised. However, to check
 for such errors in the controller method, you can add a `BindingResult` argument immediately next
@@ -156,8 +156,8 @@ alternatively, set `@ModelAttribute(binding=false)`, as the following example sh
 
 You can automatically apply validation after data binding by adding the
 `jakarta.validation.Valid` annotation or Spring's `@Validated` annotation
-(<<core.adoc#validation-beanvalidation, Bean Validation>> and
-<<core.adoc#validation, Spring validation>>). The following example shows how to do so:
+(xref:core/validation/beanvalidation.adoc[Bean Validation] and
+xref:web/webmvc/mvc-config/validation.adoc[Spring validation]). The following example shows how to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java

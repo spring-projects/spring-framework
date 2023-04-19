@@ -1,7 +1,7 @@
 [[webflux-ann-modelattrib-method-args]]
 = `@ModelAttribute`
 
-[.small]#<<web.adoc#mvc-ann-modelattrib-method-args, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[See equivalent in the Servlet stack]#
 
 You can use the `@ModelAttribute` annotation on a method argument to access an attribute from the
 model or have it instantiated if not present. The model attribute is also overlaid with
@@ -27,8 +27,8 @@ converting individual query parameters and form fields. The following example bi
 
 The `Pet` instance in the preceding example is resolved as follows:
 
-* From the model if already added through <<webflux-ann-modelattrib-methods>>.
-* From the HTTP session through <<webflux-ann-sessionattributes>>.
+* From the model if already added through xref:web/webflux/controller/ann-modelattrib-methods.adoc[`Model`].
+* From the HTTP session through xref:web/webflux/controller/ann-methods/sessionattributes.adoc[`@SessionAttributes`].
 * From the invocation of a default constructor.
 * From the invocation of a "`primary constructor`" with arguments that match query
 parameters or form fields. Argument names are determined through JavaBeans
@@ -38,8 +38,8 @@ After the model attribute instance is obtained, data binding is applied. The
 `WebExchangeDataBinder` class matches names of query parameters and form fields to field
 names on the target `Object`. Matching fields are populated after type conversion is applied
 where necessary. For more on data binding (and validation), see
-<<core.adoc#validation, Validation>>. For more on customizing data binding, see
-<<webflux-ann-initbinder>>.
+xref:web/webmvc/mvc-config/validation.adoc[Validation]. For more on customizing data binding, see
+xref:web/webflux/controller/ann-initbinder.adoc[`DataBinder`].
 
 Data binding can result in errors. By default, a `WebExchangeBindException` is raised, but,
 to check for such errors in the controller method, you can add a `BindingResult` argument
@@ -73,8 +73,8 @@ immediately next to the `@ModelAttribute`, as the following example shows:
 
 You can automatically apply validation after data binding by adding the
 `jakarta.validation.Valid` annotation or Spring's `@Validated` annotation (see also
-<<core.adoc#validation-beanvalidation, Bean Validation>> and
-<<core.adoc#validation, Spring validation>>). The following example uses the `@Valid` annotation:
+xref:core/validation/beanvalidation.adoc[Bean Validation] and
+xref:web/webmvc/mvc-config/validation.adoc[Spring validation]). The following example uses the `@Valid` annotation:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java

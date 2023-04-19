@@ -5,9 +5,9 @@ When writing integration tests against a relational database, it is often benefi
 run SQL scripts to modify the database schema or insert test data into tables. The
 `spring-jdbc` module provides support for _initializing_ an embedded or existing database
 by executing SQL scripts when the Spring `ApplicationContext` is loaded. See
-<<data-access.adoc#jdbc-embedded-database-support, Embedded database support>> and
-<<data-access.adoc#jdbc-embedded-database-dao-testing, Testing data access logic with an
-embedded database>> for details.
+xref:data-access/jdbc/embedded-database-support.adoc[Embedded database support] and
+xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-dao-testing[Testing data access logic with an embedded database]
+ for details.
 
 Although it is very useful to initialize a database for testing _once_ when the
 `ApplicationContext` is loaded, sometimes it is essential to be able to modify the
@@ -77,8 +77,8 @@ specifies SQL scripts for a test schema and test data, sets the statement separa
 
 Note that `ResourceDatabasePopulator` internally delegates to `ScriptUtils` for parsing
 and running SQL scripts. Similarly, the `executeSqlScript(..)` methods in
-<<testcontext-support-classes-junit4, `AbstractTransactionalJUnit4SpringContextTests`>>
-and <<testcontext-support-classes-testng, `AbstractTransactionalTestNGSpringContextTests`>>
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[`AbstractTransactionalJUnit4SpringContextTests`]
+and xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-testng[`AbstractTransactionalTestNGSpringContextTests`]
 internally use a `ResourceDatabasePopulator` to run SQL scripts. See the Javadoc for the
 various `executeSqlScript(..)` methods for further details.
 
@@ -95,7 +95,7 @@ run against a given database before or after an integration test method. Support
 NOTE: Method-level `@Sql` declarations override class-level declarations by default. As
 of Spring Framework 5.2, however, this behavior may be configured per test class or per
 test method via `@SqlMergeMode`. See
-<<testcontext-executing-sql-declaratively-script-merging>> for further details.
+xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively-script-merging[Merging and Overriding Configuration with `@SqlMergeMode`] for further details.
 
 [[testcontext-executing-sql-declaratively-script-resources]]
 === Path Resource Semantics
@@ -382,7 +382,7 @@ that uses JUnit Jupiter and transactional tests with `@Sql`:
 Note that there is no need to clean up the database after the `usersTest()` method is
 run, since any changes made to the database (either within the test method or within the
 `/test-data.sql` script) are automatically rolled back by the
-`TransactionalTestExecutionListener` (see <<testcontext-tx,transaction management>> for
+`TransactionalTestExecutionListener` (see xref:testing/testcontext-framework/tx.adoc[transaction management] for
 details).
 
 [[testcontext-executing-sql-declaratively-script-merging]]
@@ -394,7 +394,7 @@ database schema or some common test data once per test class and then provide ad
 use case specific test data per test method. To enable `@Sql` merging, annotate either
 your test class or test method with `@SqlMergeMode(MERGE)`. To disable merging for a
 specific test method (or specific test subclass), you can switch back to the default mode
-via `@SqlMergeMode(OVERRIDE)`. Consult the <<spring-testing-annotation-sqlmergemode,
-`@SqlMergeMode` annotation documentation section>> for examples and further details.
+via `@SqlMergeMode(OVERRIDE)`. Consult the xref:testing/annotations/integration-spring/annotation-sqlmergemode.adoc[`@SqlMergeMode` annotation documentation section]
+ for examples and further details.
 
 

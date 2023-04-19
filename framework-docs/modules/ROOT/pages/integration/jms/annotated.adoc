@@ -18,7 +18,7 @@ bean as a JMS listener endpoint. The following example shows how to use it:
 The idea of the preceding example is that, whenever a message is available on the
 `jakarta.jms.Destination` `myDestination`, the `processOrder` method is invoked
 accordingly (in this case, with the content of the JMS message, similar to
-what the <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter`>>
+what the xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[`MessageListenerAdapter`]
 provides).
 
 The annotated endpoint infrastructure creates a message listener container
@@ -67,7 +67,7 @@ container factory. See the javadoc of classes that implement
 {api-spring-framework}/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`]
 for details and examples.
 
-If you prefer <<jms-namespace, XML configuration>>, you can use the `<jms:annotation-driven>`
+If you prefer xref:integration/jms/namespace.adoc[XML configuration], you can use the `<jms:annotation-driven>`
 element, as the following example shows:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
@@ -197,7 +197,7 @@ annotate the payload with `@Valid` and configure the necessary validator, as the
 [[jms-annotated-response]]
 == Response Management
 
-The existing support in <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter`>>
+The existing support in xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[`MessageListenerAdapter`]
 already lets your method have a non-`void` return type. When that is the case, the result of
 the invocation is encapsulated in a `jakarta.jms.Message`, sent either in the destination specified
 in the `JMSReplyTo` header of the original message or in the default destination configured on

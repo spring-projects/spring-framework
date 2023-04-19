@@ -173,7 +173,7 @@ following example shows:
 === The `input` Tag
 
 This tag renders an HTML `input` element with the bound value and `type='text'` by default.
-For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag>>. You can also use
+For an example of this tag, see xref:web/webmvc-view/mvc-jsp.adoc#mvc-view-jsp-formtaglib-formtag[The Form Tag]. You can also use
 HTML5-specific types, such as `email`, `tel`, `date`, and others.
 
 
@@ -362,7 +362,7 @@ but with different values, as the following example shows:
 
 This tag renders multiple HTML `input` elements with the `type` set to `radio`.
 
-As with the <<mvc-view-jsp-formtaglib-checkboxestag, `checkboxes` tag>>, you might want to
+As with the xref:web/webmvc-view/mvc-jsp.adoc#mvc-view-jsp-formtaglib-checkboxestag[`checkboxes` tag], you might want to
 pass in the available options as a runtime variable. For this usage, you can use the
 `radiobuttons` tag. You pass in an `Array`, a `List`, or a `Map` that contains the
 available options in the `items` property. If you use a `Map`, the map entry key is

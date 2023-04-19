@@ -437,7 +437,7 @@ returned `out` parameters.
 Earlier in this chapter, we described how parameters are deduced from metadata, but you can declare them
 explicitly if you wish. You can do so by creating and configuring `SimpleJdbcCall` with
 the `declareParameters` method, which takes a variable number of `SqlParameter` objects
-as input. See the <<jdbc-params, next section>> for details on how to define an `SqlParameter`.
+as input. See the xref:data-access/jdbc/simple.adoc#jdbc-params[next section] for details on how to define an `SqlParameter`.
 
 NOTE: Explicit declarations are necessary if the database you use is not a Spring-supported
 database. Currently, Spring supports metadata lookup of stored procedure calls for the
@@ -510,7 +510,7 @@ details explicitly rather than relying on metadata.
 == How to Define `SqlParameters`
 
 To define a parameter for the `SimpleJdbc` classes and also for the RDBMS operations
-classes (covered in <<jdbc-object>>) you can use `SqlParameter` or one of its subclasses.
+classes (covered in xref:data-access/jdbc/object.adoc[Modeling JDBC Operations as Java Objects]) you can use `SqlParameter` or one of its subclasses.
 To do so, you typically specify the parameter name and SQL type in the constructor. The SQL type
 is specified by using the `java.sql.Types` constants. Earlier in this chapter, we saw declarations
 similar to the following:
@@ -530,7 +530,7 @@ similar to the following:
 
 The first line with the `SqlParameter` declares an IN parameter. You can use IN parameters
 for both stored procedure calls and for queries by using the `SqlQuery` and its
-subclasses (covered in <<jdbc-SqlQuery>>).
+subclasses (covered in xref:data-access/jdbc/object.adoc#jdbc-SqlQuery[Understanding `SqlQuery`]).
 
 The second line (with the `SqlOutParameter`) declares an `out` parameter to be used in a
 stored procedure call. There is also an `SqlInOutParameter` for `InOut` parameters

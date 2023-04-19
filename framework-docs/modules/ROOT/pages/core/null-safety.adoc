@@ -39,7 +39,7 @@ warnings related to null-safety in order to avoid `NullPointerException` at runt
 
 They are also used to make Spring API null-safe in Kotlin projects, since Kotlin natively
 supports https://kotlinlang.org/docs/reference/null-safety.html[null-safety]. More details
-are available in the <<languages#kotlin-null-safety, Kotlin support documentation>>.
+are available in the xref:languages/kotlin/null-safety.adoc[Kotlin support documentation].
 
 
 

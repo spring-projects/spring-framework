@@ -55,5 +55,5 @@ The following example demonstrates how to declare inlined properties:
 ----
 <1> Declare `timezone` and `port` properties.
 
-See <<testcontext-ctx-management-property-sources>> for examples and further details.
+See xref:testing/testcontext-framework/ctx-management/property-sources.adoc[Context Configuration with Test Property Sources] for examples and further details.
 

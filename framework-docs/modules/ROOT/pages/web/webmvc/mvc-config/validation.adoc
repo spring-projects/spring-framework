@@ -1,11 +1,11 @@
 [[mvc-config-validation]]
 = Validation
 
-[.small]#<<web-reactive.adoc#webflux-config-validation, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/config.adoc#webflux-config-validation[See equivalent in the Reactive stack]#
 
-By default, if <<core.adoc#validation-beanvalidation-overview, Bean Validation>> is present
+By default, if xref:core/validation/beanvalidation.adoc#validation-beanvalidation-overview[Bean Validation] is present
 on the classpath (for example, Hibernate Validator), the `LocalValidatorFactoryBean` is
-registered as a global <<core.adoc#validator, Validator>> for use with `@Valid` and
+registered as a global xref:core/validation/validator.adoc[Validator] for use with `@Valid` and
 `Validated` on controller method arguments.
 
 In Java configuration, you can customize the global `Validator` instance, as the

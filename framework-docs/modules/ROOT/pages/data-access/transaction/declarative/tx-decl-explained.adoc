@@ -9,13 +9,13 @@ infrastructure in the context of transaction-related issues.
 
 The most important concepts to grasp with regard to the Spring Framework's declarative
 transaction support are that this support is enabled
-<<core.adoc#aop-understanding-aop-proxies, via AOP proxies>> and that the transactional
+xref:core/aop/proxying.adoc#aop-understanding-aop-proxies[via AOP proxies] and that the transactional
 advice is driven by metadata (currently XML- or annotation-based). The combination of AOP
 with transactional metadata yields an AOP proxy that uses a `TransactionInterceptor` in
 conjunction with an appropriate `TransactionManager` implementation to drive transactions
 around method invocations.
 
-NOTE: Spring AOP is covered in <<core.adoc#aop, the AOP section>>.
+NOTE: Spring AOP is covered in xref:core/aop.adoc[the AOP section].
 
 Spring Framework's `TransactionInterceptor` provides transaction management for
 imperative and reactive programming models. The interceptor detects the desired flavor of

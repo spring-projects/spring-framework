@@ -4,7 +4,7 @@
 [NOTE]
 ====
 JSR 330's `@Inject` annotation can be used in place of Spring's `@Autowired` annotation in the
-examples included in this section. See <<beans-standard-annotations,here>> for more details.
+examples included in this section. See xref:core/beans/standard-annotations.adoc[here] for more details.
 ====
 
 You can apply the `@Autowired` annotation to constructors, as the following example shows:
@@ -38,7 +38,7 @@ necessary if the target bean defines only one constructor to begin with. However
 several constructors are available and there is no primary/default constructor, at least
 one of the constructors must be annotated with `@Autowired` in order to instruct the
 container which one to use. See the discussion on
-<<beans-autowired-annotation-constructor-resolution, constructor resolution>> for details.
+xref:core/beans/annotation-config/autowired.adoc#beans-autowired-annotation-constructor-resolution[constructor resolution] for details.
 ====
 
 You can also apply the `@Autowired` annotation to _traditional_ setter methods,

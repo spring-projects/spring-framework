@@ -27,6 +27,6 @@ it:
 ----
 <1> Run two scripts for this test.
 
-See <<testcontext-executing-sql-declaratively>> for further details.
+See xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively[Executing SQL scripts declaratively with @Sql] for further details.
 
 

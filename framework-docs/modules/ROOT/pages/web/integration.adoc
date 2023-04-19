@@ -9,7 +9,7 @@ particular architecture, technology, or methodology (although it certainly recom
 some over others). This freedom to pick and choose the architecture, technology, or
 methodology that is most relevant to a developer and their development team is
 arguably most evident in the web area, where Spring provides its own web frameworks
-(<<mvc, Spring MVC>> and <<web-reactive.adoc#webflux, Spring WebFlux>>) while, at the same time,
+(xref:web/webmvc.adoc#mvc[Spring MVC] and xref:web/webflux.adoc#webflux[Spring WebFlux]) while, at the same time,
 supporting integration with a number of popular third-party web frameworks.
 
 
@@ -178,7 +178,7 @@ https://struts.apache.org/plugins/spring/[Spring Plugin] for built-in Spring int
 https://tapestry.apache.org/[Tapestry] is a "Component oriented framework for creating
 dynamic, robust, highly scalable web applications in Java."
 
-While Spring has its own <<mvc, powerful web layer>>, there are a number of unique
+While Spring has its own xref:web/webmvc.adoc#mvc[powerful web layer], there are a number of unique
 advantages to building an enterprise Java application by using a combination of Tapestry
 for the web user interface and the Spring container for the lower layers.
 

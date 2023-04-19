@@ -1,7 +1,7 @@
 [[mvc-view-thymeleaf]]
 = Thymeleaf
 
-[.small]#<<web-reactive.adoc#webflux-view-thymeleaf, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-thymeleaf[See equivalent in the Reactive stack]#
 
 Thymeleaf is a modern server-side Java template engine that emphasizes natural HTML
 templates that can be previewed in a browser by double-clicking, which is very helpful

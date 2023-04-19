@@ -7,7 +7,7 @@ made about HTTP versus raw TCP and how it lets Spring MVC and other web framewor
 provide rich functionality. The following is a list of benefits:
 
 * No need to invent a custom messaging protocol and message format.
-* STOMP clients, including a <<websocket-stomp-client, Java client>>
+* STOMP clients, including a xref:web/websocket/stomp/client.adoc[Java client]
 in the Spring Framework, are available.
 * You can (optionally) use message brokers (such as RabbitMQ, ActiveMQ, and others) to
 manage subscriptions and broadcast messages.

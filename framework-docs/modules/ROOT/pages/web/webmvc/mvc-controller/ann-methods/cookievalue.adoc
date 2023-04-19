@@ -1,7 +1,7 @@
 [[mvc-ann-cookievalue]]
 = `@CookieValue`
 
-[.small]#<<web-reactive.adoc#webflux-ann-cookievalue, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/controller/ann-methods/cookievalue.adoc[See equivalent in the Reactive stack]#
 
 You can use the `@CookieValue` annotation to bind the value of an HTTP cookie to a method argument
 in a controller.
@@ -36,6 +36,6 @@ The following example shows how to get the cookie value:
 <1> Get the value of the `JSESSIONID` cookie.
 
 If the target method parameter type is not `String`, type conversion is applied automatically.
-See <<mvc-ann-typeconversion>>.
+See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].
 
 

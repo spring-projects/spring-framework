@@ -15,7 +15,7 @@ loading application contexts, dependency injection of test instances, transactio
 method execution, and so on. If you want to use the Spring TestContext Framework with an
 alternative runner (such as JUnit 4's `Parameterized` runner) or third-party runners
 (such as the `MockitoJUnitRunner`), you can, optionally, use
-<<testcontext-junit4-rules, Spring's support for JUnit rules>> instead.
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's support for JUnit rules] instead.
 
 The following code listing shows the minimal requirements for configuring a test class to
 run with the custom Spring `Runner`:
@@ -140,8 +140,8 @@ extend `AbstractTransactionalJUnit4SpringContextTests`, you can access a `protec
 database. You can use such queries to confirm database state both before and after
 running database-related application code, and Spring ensures that such queries run in
 the scope of the same transaction as the application code. When used in conjunction with
-an ORM tool, be sure to avoid <<testcontext-tx-false-positives, false positives>>.
-As mentioned in <<integration-testing-support-jdbc>>,
+an ORM tool, be sure to avoid xref:testing/testcontext-framework/tx.adoc#testcontext-tx-false-positives[false positives].
+As mentioned in xref:testing/support-jdbc.adoc[JDBC Testing Support],
 `AbstractTransactionalJUnit4SpringContextTests` also provides convenience methods that
 delegate to methods in `JdbcTestUtils` by using the aforementioned `jdbcTemplate`.
 Furthermore, `AbstractTransactionalJUnit4SpringContextTests` provides an
@@ -149,8 +149,8 @@ Furthermore, `AbstractTransactionalJUnit4SpringContextTests` provides an
 
 TIP: These classes are a convenience for extension. If you do not want your test classes
 to be tied to a Spring-specific class hierarchy, you can configure your own custom test
-classes by using `@RunWith(SpringRunner.class)` or <<testcontext-junit4-rules, Spring's
-JUnit rules>>.
+classes by using `@RunWith(SpringRunner.class)` or xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules[Spring's JUnit rules]
+.
 
 [[testcontext-junit-jupiter-extension]]
 == SpringExtension for JUnit Jupiter
@@ -167,14 +167,14 @@ following features above and beyond the feature set that Spring supports for JUn
 TestNG:
 
 * Dependency injection for test constructors, test methods, and test lifecycle callback
-  methods. See <<testcontext-junit-jupiter-di>> for further details.
+  methods. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-di[Dependency Injection with `SpringExtension`] for further details.
 * Powerful support for link:https://junit.org/junit5/docs/current/user-guide/#extensions-conditions[conditional
   test execution] based on SpEL expressions, environment variables, system properties,
   and so on. See the documentation for `@EnabledIf` and `@DisabledIf` in
-  <<integration-testing-annotations-junit-jupiter>> for further details and examples.
+  xref:testing/annotations/integration-junit-jupiter.adoc[Spring JUnit Jupiter Testing Annotations] for further details and examples.
 * Custom composed annotations that combine annotations from Spring and JUnit Jupiter. See
   the `@TransactionalDevTestConfig` and `@TransactionalIntegrationTest` examples in
-  <<integration-testing-annotations-meta>> for further details.
+  xref:testing/annotations/integration-meta.adoc[Meta-Annotation Support for Testing] for further details.
 
 The following code listing shows how to configure a test class to use the
 `SpringExtension` in conjunction with `@ContextConfiguration`:
@@ -282,7 +282,7 @@ Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 ----
 
 See the documentation for `@SpringJUnitConfig` and `@SpringJUnitWebConfig` in
-<<integration-testing-annotations-junit-jupiter>> for further details.
+xref:testing/annotations/integration-junit-jupiter.adoc[Spring JUnit Jupiter Testing Annotations] for further details.
 
 [[testcontext-junit-jupiter-di]]
 === Dependency Injection with `SpringExtension`
@@ -314,7 +314,7 @@ autowirable if one of the following conditions is met (in order of precedence).
   attribute set to `ALL`.
 * The default _test constructor autowire mode_ has been changed to `ALL`.
 
-See <<integration-testing-annotations-testconstructor>> for details on the use of
+See xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[`@TestConstructor`] for details on the use of
 `@TestConstructor` and how to change the global _test constructor autowire mode_.
 
 WARNING: If the constructor for a test class is considered to be _autowirable_, Spring
@@ -375,7 +375,7 @@ In the following example, Spring injects the `OrderService` bean from the
 Note that this feature lets test dependencies be `final` and therefore immutable.
 
 If the `spring.test.constructor.autowire.mode` property is to `all` (see
-<<integration-testing-annotations-testconstructor>>), we can omit the declaration of
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[`@TestConstructor`]), we can omit the declaration of
 `@Autowired` on the constructor in the previous example, resulting in the following.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -502,16 +502,16 @@ recursively.
 In order to allow development teams to change the default to `OVERRIDE` – for example,
 for compatibility with Spring Framework 5.0 through 5.2 – the default mode can be changed
 globally via a JVM system property or a `spring.properties` file in the root of the
-classpath. See the <<integration-testing-annotations-nestedtestconfiguration, "Changing
-the default enclosing configuration inheritance mode">> note for details.
+classpath. See the xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration["Changing the default enclosing configuration inheritance mode"]
+ note for details.
 
 Although the following "Hello World" example is very simplistic, it shows how to declare
 common configuration on a top-level class that is inherited by its `@Nested` test
 classes. In this particular example, only the `TestConfig` configuration class is
 inherited. Each nested test class provides its own set of active profiles, resulting in a
 distinct `ApplicationContext` for each nested test class (see
-<<testcontext-ctx-management-caching>> for details). Consult the list of
-<<integration-testing-annotations-nestedtestconfiguration, supported annotations>> to see
+xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching] for details). Consult the list of
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[supported annotations] to see
 which annotations can be inherited in `@Nested` test classes.
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -594,8 +594,8 @@ extend `AbstractTransactionalTestNGSpringContextTests`, you can access a `protec
 database. You can use such queries to confirm database state both before and after
 running database-related application code, and Spring ensures that such queries run in
 the scope of the same transaction as the application code. When used in conjunction with
-an ORM tool, be sure to avoid <<testcontext-tx-false-positives, false positives>>.
-As mentioned in <<integration-testing-support-jdbc>>,
+an ORM tool, be sure to avoid xref:testing/testcontext-framework/tx.adoc#testcontext-tx-false-positives[false positives].
+As mentioned in xref:testing/support-jdbc.adoc[JDBC Testing Support],
 `AbstractTransactionalTestNGSpringContextTests` also provides convenience methods that
 delegate to methods in `JdbcTestUtils` by using the aforementioned `jdbcTemplate`.
 Furthermore, `AbstractTransactionalTestNGSpringContextTests` provides an

@@ -5,12 +5,12 @@ If you prefer an XML-based format, Spring also offers support for defining aspec
 using the `aop` namespace tags. The exact same pointcut expressions and advice kinds
 as when using the @AspectJ style are supported. Hence, in this section we focus on
 that syntax and refer the reader to the discussion in the previous section
-(<<aop-ataspectj>>) for an understanding of writing pointcut expressions and the binding
+(xref:core/aop/ataspectj.adoc[@AspectJ support]) for an understanding of writing pointcut expressions and the binding
 of advice parameters.
 
 To use the aop namespace tags described in this section, you need to import the
-`spring-aop` schema, as described in <<core.adoc#core.appendix.xsd-schemas,
-XML Schema-based configuration>>. See <<core.adoc#core.appendix.xsd-schemas-aop, the AOP schema>>
+`spring-aop` schema, as described in xref:core/appendix/xsd-schemas.adoc[XML Schema-based configuration]
+. See xref:core/appendix/xsd-schemas.adoc#core.appendix.xsd-schemas-aop[the AOP schema]
 for how to import the tags in the `aop` namespace.
 
 Within your Spring configurations, all aspect and advisor elements must be placed within
@@ -19,7 +19,7 @@ application context configuration). An `<aop:config>` element can contain pointc
 advisor, and aspect elements (note that these must be declared in that order).
 
 WARNING: The `<aop:config>` style of configuration makes heavy use of Spring's
-<<aop-autoproxy, auto-proxying>> mechanism. This can cause issues (such as advice
+xref:core/aop-api/autoproxy.adoc[auto-proxying] mechanism. This can cause issues (such as advice
 not being woven) if you already use explicit auto-proxying through the use of
 `BeanNameAutoProxyCreator` or something similar. The recommended usage pattern is to
 use either only the `<aop:config>` style or only the `AutoProxyCreator` style and
@@ -75,7 +75,7 @@ be defined as follows:
 ----
 
 Note that the pointcut expression itself uses the same AspectJ pointcut expression
-language as described in <<aop-ataspectj>>. If you use the schema based declaration
+language as described in xref:core/aop/ataspectj.adoc[@AspectJ support]. If you use the schema based declaration
 style, you can also refer to _named pointcuts_ defined in `@Aspect` types within the
 pointcut expression. Thus, another way of defining the above pointcut would be as follows:
 
@@ -88,7 +88,7 @@ pointcut expression. Thus, another way of defining the above pointcut would be a
 
 	</aop:config>
 ----
-<1> References the `businessService` named pointcut defined in <<aop-common-pointcuts>>.
+<1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 Declaring a pointcut _inside_ an aspect is very similar to declaring a top-level pointcut,
 as the following example shows:
@@ -203,10 +203,10 @@ Before advice runs before a matched method execution. It is declared inside an
 ----
 
 In the example above, `dataAccessOperation` is the `id` of a _named pointcut_ defined at
-the top (`<aop:config>`) level (see <<aop-schema-pointcuts>>).
+the top (`<aop:config>`) level (see xref:core/aop/schema.adoc#aop-schema-pointcuts[Declaring a Pointcut]).
 
 NOTE: As we noted in the discussion of the @AspectJ style, using _named pointcuts_ can
-significantly improve the readability of your code. See <<aop-common-pointcuts>> for
+significantly improve the readability of your code. See xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions] for
 details.
 
 To define the pointcut inline instead, replace the `pointcut-ref` attribute with a
@@ -379,7 +379,7 @@ Invoking `proceed()` without arguments will result in the caller's original argu
 being supplied to the underlying method when it is invoked. For advanced use cases, there
 is an overloaded variant of the `proceed()` method which accepts an array of arguments
 (`Object[]`). The values in the array will be used as the arguments to the underlying
-method when it is invoked. See <<aop-ataspectj-around-advice>> for notes on calling
+method when it is invoked. See xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-around-advice[Around Advice] for notes on calling
 `proceed` with an `Object[]`.
 
 The following example shows how to declare around advice in XML:
@@ -426,11 +426,11 @@ The implementation of the `doBasicProfiling` advice can be exactly the same as i
 
 The schema-based declaration style supports fully typed advice in the same way as
 described for the @AspectJ support -- by matching pointcut parameters by name against
-advice method parameters. See <<aop-ataspectj-advice-params>> for details. If you wish
+advice method parameters. See xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params[Advice Parameters] for details. If you wish
 to explicitly specify argument names for the advice methods (not relying on the
 detection strategies previously described), you can do so by using the `arg-names`
 attribute of the advice element, which is treated in the same manner as the `argNames`
-attribute in an advice annotation (as described in <<aop-ataspectj-advice-params-names>>).
+attribute in an advice annotation (as described in xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params-names[Determining Argument Names]).
 The following example shows how to specify an argument name in XML:
 
 [source,xml,indent=0,subs="verbatim"]
@@ -440,7 +440,7 @@ The following example shows how to specify an argument name in XML:
 		method="audit"
 		arg-names="auditable" />
 ----
-<1> References the `publicMethod` named pointcut defined in <<aop-pointcuts-combining>>.
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 
 The `arg-names` attribute accepts a comma-delimited list of parameter names.
 
@@ -608,7 +608,7 @@ ms     %     Task name
 === Advice Ordering
 
 When multiple pieces of advice need to run at the same join point (executing method)
-the ordering rules are as described in <<aop-ataspectj-advice-ordering>>. The precedence
+the ordering rules are as described in xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-ordering[Advice Ordering]. The precedence
 between aspects is determined via the `order` attribute in the `<aop:aspect>` element or
 by either adding the `@Order` annotation to the bean that backs the aspect or by having
 the bean implement the `Ordered` interface.
@@ -718,7 +718,7 @@ The concept of "advisors" comes from the AOP support defined in Spring
 and does not have a direct equivalent in AspectJ. An advisor is like a small
 self-contained aspect that has a single piece of advice. The advice itself is
 represented by a bean and must implement one of the advice interfaces described in
-<<aop-api-advice-types>>. Advisors can take advantage of AspectJ pointcut expressions.
+xref:core/aop-api/advice.adoc#aop-api-advice-types[Advice Types in Spring]. Advisors can take advantage of AspectJ pointcut expressions.
 
 Spring supports the advisor concept with the `<aop:advisor>` element. You most
 commonly see it used in conjunction with transactional advice, which also has its own
@@ -756,7 +756,7 @@ use the `order` attribute to define the `Ordered` value of the advisor.
 == An AOP Schema Example
 
 This section shows how the concurrent locking failure retry example from
-<<aop-ataspectj-example>> looks when rewritten with the schema support.
+xref:core/aop/ataspectj/example.adoc[An AOP Example] looks when rewritten with the schema support.
 
 The execution of business services can sometimes fail due to concurrency issues (for
 example, a deadlock loser). If the operation is retried, it is likely to succeed

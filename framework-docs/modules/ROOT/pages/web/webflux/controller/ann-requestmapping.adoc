@@ -1,7 +1,7 @@
 [[webflux-ann-requestmapping]]
 = Request Mapping
 
-[.small]#<<web.adoc#mvc-ann-requestmapping, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc[See equivalent in the Servlet stack]#
 
 The `@RequestMapping` annotation is used to map requests to controllers methods. It has
 various attributes to match by URL, HTTP method, request parameters, headers, and media
@@ -16,7 +16,7 @@ There are also HTTP method specific shortcut variants of `@RequestMapping`:
 * `@DeleteMapping`
 * `@PatchMapping`
 
-The preceding annotations are <<webflux-ann-requestmapping-composed>> that are provided
+The preceding annotations are xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-composed[Custom Annotations] that are provided
 because, arguably, most controller methods should be mapped to a specific HTTP method versus
 using `@RequestMapping`, which, by default, matches to all HTTP methods. At the same time, a
 `@RequestMapping` is still needed at the class level to express shared mappings.
@@ -65,7 +65,7 @@ The following example uses type and method level mappings:
 
 [[webflux-ann-requestmapping-uri-templates]]
 == URI Patterns
-[.small]#<<web.adoc#mvc-ann-requestmapping-uri-templates, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-uri-templates[See equivalent in the Servlet stack]#
 
 You can map requests by using glob patterns and wildcards:
 
@@ -164,7 +164,7 @@ You can declare URI variables at the class and method levels, as the following e
 URI variables are automatically converted to the appropriate type or a `TypeMismatchException`
 is raised. Simple types (`int`, `long`, `Date`, and so on) are supported by default and you can
 register support for any other data type.
-See <<webflux-ann-typeconversion>> and <<webflux-ann-initbinder>>.
+See xref:web/webflux/controller/ann-methods/typeconversion.adoc[Type Conversion] and xref:web/webflux/controller/ann-initbinder.adoc[`DataBinder`].
 
 URI variables can be named explicitly (for example, `@PathVariable("customId")`), but you can
 leave that detail out if the names are the same and you compile your code with the `-parameters`
@@ -214,7 +214,7 @@ explicit, and less vulnerable to URL path based exploits.
 
 [[webflux-ann-requestmapping-pattern-comparison]]
 == Pattern Comparison
-[.small]#<<web.adoc#mvc-ann-requestmapping-pattern-comparison, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-pattern-comparison[See equivalent in the Servlet stack]#
 
 When multiple patterns match a URL, they must be compared to find the best match. This is done
 with `PathPattern.SPECIFICITY_COMPARATOR`, which looks for patterns that are more specific.
@@ -229,7 +229,7 @@ sorted last instead. If two patterns are both catch-all, the longer is chosen.
 
 [[webflux-ann-requestmapping-consumes]]
 == Consumable Media Types
-[.small]#<<web.adoc#mvc-ann-requestmapping-consumes, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-consumes[See equivalent in the Servlet stack]#
 
 You can narrow the request mapping based on the `Content-Type` of the request,
 as the following example shows:
@@ -264,7 +264,7 @@ TIP: `MediaType` provides constants for commonly used media types -- for example
 
 [[webflux-ann-requestmapping-produces]]
 == Producible Media Types
-[.small]#<<web.adoc#mvc-ann-requestmapping-produces, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-produces[See equivalent in the Servlet stack]#
 
 You can narrow the request mapping based on the `Accept` request header and the list of
 content types that a controller method produces, as the following example shows:
@@ -301,7 +301,7 @@ TIP: `MediaType` provides constants for commonly used media types -- e.g.
 
 [[webflux-ann-requestmapping-params-and-headers]]
 == Parameters and Headers
-[.small]#<<web.adoc#mvc-ann-requestmapping-params-and-headers, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-params-and-headers[See equivalent in the Servlet stack]#
 
 You can narrow request mappings based on query parameter conditions. You can test for the
 presence of a query parameter (`myParam`), for its absence (`!myParam`), or for a
@@ -353,7 +353,7 @@ You can also use the same with request header conditions, as the following examp
 
 [[webflux-ann-requestmapping-head-options]]
 == HTTP HEAD, OPTIONS
-[.small]#<<web.adoc#mvc-ann-requestmapping-head-options, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-head-options[See equivalent in the Servlet stack]#
 
 `@GetMapping` and `@RequestMapping(method=HttpMethod.GET)` support HTTP HEAD
 transparently for request mapping purposes. Controller methods need not change.
@@ -374,9 +374,9 @@ is not necessary in the common case.
 
 [[webflux-ann-requestmapping-composed]]
 == Custom Annotations
-[.small]#<<web.adoc#mvc-ann-requestmapping-composed, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-composed[See equivalent in the Servlet stack]#
 
-Spring WebFlux supports the use of <<core.adoc#beans-meta-annotations, composed annotations>>
+Spring WebFlux supports the use of xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[composed annotations]
 for request mapping. Those are annotations that are themselves meta-annotated with
 `@RequestMapping` and composed to redeclare a subset (or all) of the `@RequestMapping`
 attributes with a narrower, more specific purpose.
@@ -395,7 +395,7 @@ you can check the custom attribute and return your own `RequestCondition`.
 
 [[webflux-ann-requestmapping-registration]]
 == Explicit Registrations
-[.small]#<<web.adoc#mvc-ann-requestmapping-registration, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-registration[See equivalent in the Servlet stack]#
 
 You can programmatically register Handler methods, which can be used for dynamic
 registrations or for advanced cases, such as different instances of the same handler

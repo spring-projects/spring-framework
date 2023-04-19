@@ -1,11 +1,11 @@
 [[webflux-ann-modelattrib-methods]]
 = `Model`
 
-[.small]#<<web.adoc#mvc-ann-modelattrib-methods, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-modelattrib-methods.adoc[See equivalent in the Servlet stack]#
 
 You can use the `@ModelAttribute` annotation:
 
-* On a <<webflux-ann-modelattrib-method-args, method argument>> in `@RequestMapping` methods
+* On a xref:web/webflux/controller/ann-methods/modelattrib-method-args.adoc[method argument] in `@RequestMapping` methods
 to create or access an Object from the model and to bind it to the request through a
 `WebDataBinder`.
 * As a method-level annotation in `@Controller` or `@ControllerAdvice` classes, helping
@@ -16,7 +16,7 @@ This section discusses `@ModelAttribute` methods, or the second item from the pr
 A controller can have any number of `@ModelAttribute` methods. All such methods are
 invoked before `@RequestMapping` methods in the same controller. A `@ModelAttribute`
 method can also be shared across controllers through `@ControllerAdvice`. See the section on
-<<webflux-ann-controller-advice>> for more details.
+xref:web/webflux/controller/ann-advice.adoc[Controller Advice] for more details.
 
 `@ModelAttribute` methods have flexible method signatures. They support many of the same
 arguments as `@RequestMapping` methods (except for `@ModelAttribute` itself and anything

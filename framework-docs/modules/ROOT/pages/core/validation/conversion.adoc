@@ -2,7 +2,7 @@
 = Resolving Codes to Error Messages
 
 We covered databinding and validation. This section covers outputting messages that correspond
-to validation errors. In the example shown in the <<validator, preceding section>>,
+to validation errors. In the example shown in the xref:core/validation/validator.adoc[preceding section],
 we rejected the `name` and `age` fields. If we want to output the error messages by using a
 `MessageSource`, we can do so using the error code we provide when rejecting the field
 ('name' and 'age' in this case). When you call (either directly, or indirectly, by using,

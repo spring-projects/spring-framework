@@ -30,7 +30,7 @@ for details.
 
 | `spring.expression.compiler.mode`
 | The mode to use when compiling expressions for the
-<<core.adoc#expressions-compiler-configuration, Spring Expression Language>>.
+xref:core/expressions/evaluation.adoc#expressions-compiler-configuration[Spring Expression Language].
 
 | `spring.getenv.ignore`
 | Instructs Spring to ignore operating system environment variables if a Spring
@@ -41,12 +41,12 @@ for details.
 
 | `spring.index.ignore`
 | Instructs Spring to ignore the components index located in
-`META-INF/spring.components`. See <<core.adoc#beans-scanning-index, Generating an Index
-of Candidate Components>>.
+`META-INF/spring.components`. See xref:core/beans/classpath-scanning.adoc#beans-scanning-index[Generating an Index of Candidate Components]
+.
 
 | `spring.jdbc.getParameterType.ignore`
 | Instructs Spring to ignore `java.sql.ParameterMetaData.getParameterType` completely.
-See the note in <<data-access.adoc#jdbc-batch-list, Batch Operations with a List of Objects>>.
+See the note in xref:data-access/jdbc/advanced.adoc#jdbc-batch-list[Batch Operations with a List of Objects].
 
 | `spring.jndi.ignore`
 | Instructs Spring to ignore a default JNDI environment, as an optimization for scenarios
@@ -62,17 +62,17 @@ for details.
 
 | `spring.test.constructor.autowire.mode`
 | The default _test constructor autowire mode_ to use if `@TestConstructor` is not present
-on a test class. See <<testing.adoc#integration-testing-annotations-testconstructor,
-Changing the default test constructor autowire mode>>.
+on a test class. See xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[Changing the default test constructor autowire mode]
+.
 
 | `spring.test.context.cache.maxSize`
 | The maximum size of the context cache in the _Spring TestContext Framework_. See
-<<testing.adoc#testcontext-ctx-management-caching, Context Caching>>.
+xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching].
 
 | `spring.test.enclosing.configuration`
 | The default _enclosing configuration inheritance mode_ to use if
 `@NestedTestConfiguration` is not present on a test class. See
-<<testing.adoc#integration-testing-annotations-nestedtestconfiguration, Changing the
-default enclosing configuration inheritance mode>>.
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[Changing the default enclosing configuration inheritance mode]
+.
 
 |===

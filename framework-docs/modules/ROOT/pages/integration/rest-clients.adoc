@@ -3,9 +3,9 @@
 
 The Spring Framework provides the following choices for making calls to REST endpoints:
 
-* <<rest-webclient>> - non-blocking, reactive client w fluent API.
-* <<rest-resttemplate>> - synchronous client with template method API.
-* <<rest-http-interface>> - annotated interface with generated, dynamic proxy implementation.
+* xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] - non-blocking, reactive client w fluent API.
+* xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] - synchronous client with template method API.
+* xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] - annotated interface with generated, dynamic proxy implementation.
 
 
 [[rest-webclient]]
@@ -24,7 +24,7 @@ synchronous, asynchronous, and streaming scenarios.
 * Synchronous and asynchronous interactions.
 * Streaming up to or streaming down from a server.
 
-See <<web-reactive.adoc#webflux-client, WebClient>> for more details.
+See xref:web/webflux-webclient.adoc[WebClient] for more details.
 
 
 
@@ -38,7 +38,7 @@ overloaded methods:
 
 NOTE: `RestTemplate` is in maintenance mode, with only requests for minor
 changes and bugs to be accepted. Please, consider using the
-<<web-reactive.adoc#webflux-client, WebClient>> instead.
+xref:web/webflux-webclient.adoc[WebClient] instead.
 
 [[rest-overview-of-resttemplate-methods-tbl]]
 .RestTemplate methods
@@ -118,7 +118,7 @@ accessing the status of a response that represents an error (such as 401). If th
 issue, switch to another HTTP client library.
 
 NOTE: `RestTemplate` can be instrumented for observability, in order to produce metrics and traces.
-See the <<integration.adoc#integration.observability.http-client.resttemplate,RestTemplate Observability support>> section.
+See the xref:integration/observability.adoc#integration.observability.http-client.resttemplate[RestTemplate Observability support] section.
 
 [[rest-resttemplate-uri]]
 ==== URIs
@@ -157,7 +157,7 @@ You can use the `uriTemplateHandler` property of `RestTemplate` to customize how
 are encoded. Alternatively, you can prepare a `java.net.URI` and pass it into one of
 the `RestTemplate` methods that accepts a `URI`.
 
-For more details on working with and encoding URIs, see <<web.adoc#mvc-uri-building, URI Links>>.
+For more details on working with and encoding URIs, see xref:web/webmvc/mvc-uri-building.adoc[URI Links].
 
 [[rest-template-headers]]
 ==== Headers
@@ -212,13 +212,13 @@ then helps to populate the `Accept` header. If necessary, you can use the `excha
 methods to provide the `Accept` header explicitly.
 
 By default, `RestTemplate` registers all built-in
-<<rest-message-conversion, message converters>>, depending on classpath checks that help
+xref:integration/rest-clients.adoc#rest-message-conversion[message converters], depending on classpath checks that help
 to determine what optional conversion libraries are present. You can also set the message
 converters to use explicitly.
 
 [[rest-message-conversion]]
 ==== Message Conversion
-[.small]#<<web-reactive.adoc#webflux-codecs, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-codecs[See equivalent in the Reactive stack]#
 
 The `spring-web` module contains the `HttpMessageConverter` contract for reading and
 writing the body of HTTP requests and responses through `InputStream` and `OutputStream`.
@@ -228,7 +228,7 @@ on the server side (for example, in Spring MVC REST controllers).
 Concrete implementations for the main media (MIME) types are provided in the framework
 and are, by default, registered with the `RestTemplate` on the client side and with
 `RequestMappingHandlerAdapter` on the server side (see
-<<web.adoc#mvc-config-message-converters, Configuring Message Converters>>).
+xref:web/webmvc/mvc-config/message-converters.adoc[Configuring Message Converters]).
 
 The implementations of `HttpMessageConverter` are described in the following sections.
 For all converters, a default media type is used, but you can override it by setting the

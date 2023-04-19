@@ -16,8 +16,8 @@ not know the location or class of the dependencies. As a result, your classes be
 to test, particularly when the dependencies are on interfaces or abstract base classes,
 which allow for stub or mock implementations to be used in unit tests.
 
-DI exists in two major variants: <<beans-constructor-injection,Constructor-based
-dependency injection>> and <<beans-setter-injection,Setter-based dependency injection>>.
+DI exists in two major variants: xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[Constructor-based dependency injection]
+ and xref:core/beans/dependencies/factory-collaborators.adoc#beans-setter-injection[Setter-based dependency injection].
 
 
 [[beans-constructor-injection]]
@@ -279,7 +279,7 @@ load an entire Spring IoC container instance.
 ****
 Since you can mix constructor-based and setter-based DI, it is a good rule of thumb to
 use constructors for mandatory dependencies and setter methods or configuration methods
-for optional dependencies. Note that use of the <<beans-autowired-annotation, @Autowired>>
+for optional dependencies. Note that use of the xref:core/beans/annotation-config/autowired.adoc[@Autowired]
 annotation on a setter method can be used to make the property be a required dependency;
 however, constructor injection with programmatic validation of arguments is preferable.
 
@@ -294,7 +294,7 @@ Setter injection should primarily only be used for optional dependencies that ca
 assigned reasonable default values within the class. Otherwise, not-null checks must be
 performed everywhere the code uses the dependency. One benefit of setter injection is that
 setter methods make objects of that class amenable to reconfiguration or re-injection
-later. Management through <<integration.adoc#jmx,JMX MBeans>> is therefore a compelling
+later. Management through xref:integration/jmx.adoc[JMX MBeans] is therefore a compelling
 use case for setter injection.
 
 Use the DI style that makes the most sense for a particular class. Sometimes, when dealing
@@ -326,7 +326,7 @@ The container performs bean dependency resolution as follows:
 The Spring container validates the configuration of each bean as the container is created.
 However, the bean properties themselves are not set until the bean is actually created.
 Beans that are singleton-scoped and set to be pre-instantiated (the default) are created
-when the container is created. Scopes are defined in <<beans-factory-scopes>>. Otherwise,
+when the container is created. Scopes are defined in xref:core/beans/factory-scopes.adoc[Bean Scopes]. Otherwise,
 the bean is created only when it is requested. Creation of a bean potentially causes a
 graph of beans to be created, as the bean's dependencies and its dependencies'
 dependencies (and so on) are created and assigned. Note that resolution mismatches among
@@ -373,8 +373,8 @@ to being injected into the dependent bean. This means that, if bean A has a depe
 bean B, the Spring IoC container completely configures bean B prior to invoking the
 setter method on bean A. In other words, the bean is instantiated (if it is not a
 pre-instantiated singleton), its dependencies are set, and the relevant lifecycle
-methods (such as a <<beans-factory-lifecycle-initializingbean, configured init method>>
-or the <<beans-factory-lifecycle-initializingbean,InitializingBean callback method>>)
+methods (such as a xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[configured init method]
+or the xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[InitializingBean callback method])
 are invoked.
 
 

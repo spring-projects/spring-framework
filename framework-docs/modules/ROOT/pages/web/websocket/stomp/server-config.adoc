@@ -2,7 +2,7 @@
 = WebSocket Server
 
 To configure the underlying WebSocket server, the information in
-<<websocket-server-runtime-configuration>> applies. For Jetty, however you need to set
+xref:web/websocket/server.adoc#websocket-server-runtime-configuration[Server Configuration] applies. For Jetty, however you need to set
 the `HandshakeHandler` and `WebSocketPolicy` through the `StompEndpointRegistry`:
 
 [source,java,indent=0,subs="verbatim,quotes"]

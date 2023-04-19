@@ -1,15 +1,15 @@
 [[mvc-servlet-config]]
 = Web MVC Config
 
-[.small]#<<web-reactive.adoc#webflux-framework-config, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[See equivalent in the Reactive stack]#
 
-Applications can declare the infrastructure beans listed in <<mvc-servlet-special-bean-types>>
+Applications can declare the infrastructure beans listed in xref:web/webmvc/mvc-servlet/special-bean-types.adoc[Special Bean Types]
 that are required to process requests. The `DispatcherServlet` checks the
 `WebApplicationContext` for each special bean. If there are no matching bean types,
 it falls back on the default types listed in
 {spring-framework-main-code}/spring-webmvc/src/main/resources/org/springframework/web/servlet/DispatcherServlet.properties[`DispatcherServlet.properties`].
 
-In most cases, the <<mvc-config>> is the best starting point. It declares the required
+In most cases, the xref:web/webmvc/mvc-config.adoc[MVC Config] is the best starting point. It declares the required
 beans in either Java or XML and provides a higher-level configuration callback API to
 customize it.
 

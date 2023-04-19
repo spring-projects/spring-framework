@@ -1,10 +1,10 @@
 [[webflux-ann-responsebody]]
 = `@ResponseBody`
 
-[.small]#<<web.adoc#mvc-ann-responsebody, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[See equivalent in the Servlet stack]#
 
 You can use the `@ResponseBody` annotation on a method to have the return serialized
-to the response body through an <<webflux-codecs, HttpMessageWriter>>. The following
+to the response body through an xref:web/webflux/reactive-spring.adoc#webflux-codecs[HttpMessageWriter]. The following
 example shows how to do so:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -32,13 +32,13 @@ than a meta-annotation marked with `@Controller` and `@ResponseBody`.
 
 `@ResponseBody` supports reactive types, which means you can return Reactor or RxJava
 types and have the asynchronous values they produce rendered to the response.
-For additional details, see <<webflux-codecs-streaming>> and
-<<webflux-codecs-jackson,JSON rendering>>.
+For additional details, see xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[Streaming] and
+xref:web/webflux/reactive-spring.adoc#webflux-codecs-jackson[JSON rendering].
 
 You can combine `@ResponseBody` methods with JSON serialization views.
-See <<webflux-ann-jackson>> for details.
+See xref:web/webflux/controller/ann-methods/jackson.adoc[Jackson JSON] for details.
 
-You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
+You can use the xref:web/webflux/config.adoc#webflux-config-message-codecs[HTTP message codecs] option of the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config] to
 configure or customize message writing.
 
 

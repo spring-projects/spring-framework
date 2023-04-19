@@ -1,7 +1,7 @@
 [[webflux-ann-requestheader]]
 = `@RequestHeader`
 
-[.small]#<<web.adoc#mvc-ann-requestheader, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/requestheader.adoc[See equivalent in the Servlet stack]#
 
 You can use the `@RequestHeader` annotation to bind a request header to a method argument in a
 controller.
@@ -48,7 +48,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 <2> Get the value of the `Keep-Alive` header.
 
 Type conversion is applied automatically if the target method parameter type is not
-`String`. See <<webflux-ann-typeconversion>>.
+`String`. See xref:web/webflux/controller/ann-methods/typeconversion.adoc[Type Conversion].
 
 When a `@RequestHeader` annotation is used on a `Map<String, String>`,
 `MultiValueMap<String, String>`, or `HttpHeaders` argument, the map is populated

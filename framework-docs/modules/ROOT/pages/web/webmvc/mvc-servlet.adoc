@@ -1,7 +1,7 @@
 [[mvc-servlet]]
 = DispatcherServlet
 
-[.small]#<<web-reactive.adoc#webflux-dispatcher-handler, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux/dispatcher-handler.adoc[See equivalent in the Reactive stack]#
 
 Spring MVC, as many other web frameworks, is designed around the front controller
 pattern where a central `Servlet`, the `DispatcherServlet`, provides a shared algorithm
@@ -12,11 +12,11 @@ The `DispatcherServlet`, as any `Servlet`, needs to be declared and mapped accor
 to the Servlet specification by using Java configuration or in `web.xml`.
 In turn, the `DispatcherServlet` uses Spring configuration to discover
 the delegate components it needs for request mapping, view resolution, exception
-handling, <<mvc-servlet-special-bean-types, and more>>.
+handling, xref:web/webmvc/mvc-servlet/special-bean-types.adoc[and more].
 
 The following example of the Java configuration registers and initializes
 the `DispatcherServlet`, which is auto-detected by the Servlet container
-(see <<mvc-container-config>>):
+(see xref:web/webmvc/mvc-servlet/container-config.adoc[Servlet Config]):
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -60,7 +60,7 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 
 NOTE: In addition to using the ServletContext API directly, you can also extend
 `AbstractAnnotationConfigDispatcherServletInitializer` and override specific methods
-(see the example under <<mvc-servlet-context-hierarchy>>).
+(see the example under xref:web/webmvc/mvc-servlet/context-hierarchy.adoc[Context Hierarchy]).
 
 NOTE: For programmatic use cases, a `GenericWebApplicationContext` can be used as an
 alternative to `AnnotationConfigWebApplicationContext`. See the

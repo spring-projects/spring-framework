@@ -60,7 +60,7 @@ maximum size is reached, a least recently used (LRU) eviction policy is used to 
 close stale contexts. You can configure the maximum size from the command line or a build
 script by setting a JVM system property named `spring.test.context.cache.maxSize`. As an
 alternative, you can set the same property via the
-<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism.
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism.
 
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to run, it is often beneficial to
@@ -71,8 +71,8 @@ the underlying context cache, you can set the log level for the
 In the unlikely case that a test corrupts the application context and requires reloading
 (for example, by modifying a bean definition or the state of an application object), you
 can annotate your test class or test method with `@DirtiesContext` (see the discussion of
-`@DirtiesContext` in <<spring-testing-annotation-dirtiescontext, Spring Testing
-Annotations>>). This instructs Spring to remove the context from the cache and rebuild
+`@DirtiesContext` in xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[Spring Testing Annotations]
+). This instructs Spring to remove the context from the cache and rebuild
 the application context before running the next test that requires the same application
 context. Note that support for the `@DirtiesContext` annotation is provided by the
 `DirtiesContextBeforeModesTestExecutionListener` and the
@@ -96,7 +96,7 @@ class is being prepared -- for example, to perform dependency injection into `@A
 fields of the test instance. This means that any console logging triggered during the
 initialization of the `ApplicationContext` typically cannot be associated with an
 individual test method. However, if the context is closed immediately before the
-execution of a test method according to <<spring-testing-annotation-dirtiescontext>>
+execution of a test method according to xref:testing/annotations/integration-spring/annotation-dirtiescontext.adoc[`@DirtiesContext`]
 semantics, a new instance of the context will be loaded just prior to execution of the
 test method. In the latter scenario, an IDE or build tool may potentially associate
 console logging with the individual test method.

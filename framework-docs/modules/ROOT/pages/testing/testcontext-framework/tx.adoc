@@ -21,7 +21,7 @@ application code that is invoked by tests). Spring-managed and application-manag
 transactions typically participate in test-managed transactions. However, you should use
 caution if Spring-managed or application-managed transactions are configured with any
 propagation type other than `REQUIRED` or `SUPPORTS` (see the discussion on
-<<data-access.adoc#tx-propagation, transaction propagation>> for details).
+xref:data-access/transaction/declarative/tx-propagation.adoc[transaction propagation] for details).
 
 .Preemptive timeouts and test-managed transactions
 [WARNING]
@@ -94,9 +94,9 @@ your test class and then use that with a `TransactionTemplate` for programmatic
 transaction management.
 ====
 
-Note that <<testcontext-support-classes-junit4,
-`AbstractTransactionalJUnit4SpringContextTests`>> and
-<<testcontext-support-classes-testng, `AbstractTransactionalTestNGSpringContextTests`>>
+Note that xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-junit4[`AbstractTransactionalJUnit4SpringContextTests`]
+ and
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-support-classes-testng[`AbstractTransactionalTestNGSpringContextTests`]
 are preconfigured for transactional support at the class level.
 
 The following example demonstrates a common scenario for writing an integration test for
@@ -188,7 +188,7 @@ a Hibernate-based `UserRepository`:
 	}
 ----
 
-As explained in <<testcontext-tx-rollback-and-commit-behavior>>, there is no need to
+As explained in xref:testing/testcontext-framework/tx.adoc#testcontext-tx-rollback-and-commit-behavior[Transaction Rollback and Commit Behavior], there is no need to
 clean up the database after the `createUser()` method runs, since any changes made to the
 database are automatically rolled back by the `TransactionalTestExecutionListener`.
 
@@ -198,7 +198,7 @@ database are automatically rolled back by the `TransactionalTestExecutionListene
 By default, test transactions will be automatically rolled back after completion of the
 test; however, transactional commit and rollback behavior can be configured declaratively
 via the `@Commit` and `@Rollback` annotations. See the corresponding entries in the
-<<integration-testing-annotations, annotation support>> section for further details.
+xref:testing/annotations.adoc[annotation support] section for further details.
 
 [[testcontext-tx-programmatic-tx-mgt]]
 == Programmatic Transaction Management
@@ -312,9 +312,9 @@ algorithm used to look up a transaction manager in the test's `ApplicationContex
 The following JUnit Jupiter based example displays a fictitious integration testing
 scenario that highlights all transaction-related annotations. The example is not intended
 to demonstrate best practices but rather to demonstrate how these annotations can be
-used. See the <<integration-testing-annotations, annotation support>> section for further
-information and configuration examples. <<testcontext-executing-sql-declaratively-tx,
-Transaction management for `@Sql`>> contains an additional example that uses `@Sql` for
+used. See the xref:testing/annotations.adoc[annotation support] section for further
+information and configuration examples. xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively-tx[Transaction management for `@Sql`]
+ contains an additional example that uses `@Sql` for
 declarative SQL script execution with default transaction rollback semantics. The
 following example shows the relevant annotations:
 
@@ -521,7 +521,7 @@ The following example shows matching methods for JPA:
 .Testing ORM entity lifecycle callbacks
 [NOTE]
 =====
-Similar to the note about avoiding <<testcontext-tx-false-positives, false positives>>
+Similar to the note about avoiding xref:testing/testcontext-framework/tx.adoc#testcontext-tx-false-positives[false positives]
 when testing ORM code, if your application makes use of entity lifecycle callbacks (also
 known as entity listeners), make sure to flush the underlying unit of work within test
 methods that run that code. Failing to _flush_ or _clear_ the underlying unit of work can

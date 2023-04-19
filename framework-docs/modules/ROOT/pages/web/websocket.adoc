@@ -1,6 +1,6 @@
 [[websocket]]
 = WebSockets
-[.small]#<<web-reactive.adoc#webflux-websocket, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-websocket.adoc[See equivalent in the Reactive stack]#
 
 This part of the reference documentation covers support for Servlet stack, WebSocket
 messaging that includes raw WebSocket interactions, WebSocket emulation through SockJS, and

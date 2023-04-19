@@ -1,9 +1,9 @@
 [[webflux-ann-responseentity]]
 = `ResponseEntity`
 
-[.small]#<<web.adoc#mvc-ann-responseentity, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/responseentity.adoc[See equivalent in the Servlet stack]#
 
-`ResponseEntity` is like <<webflux-ann-responsebody>> but with status and headers. For example:
+`ResponseEntity` is like xref:web/webflux/controller/ann-methods/responsebody.adoc[`@ResponseBody`] but with status and headers. For example:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -26,7 +26,7 @@
 	}
 ----
 
-WebFlux supports using a single value <<webflux-reactive-libraries, reactive type>> to
+WebFlux supports using a single value xref:web-reactive.adoc#webflux-reactive-libraries[reactive type] to
 produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
 for the body. This allows a variety of async responses with `ResponseEntity` as follows:
 

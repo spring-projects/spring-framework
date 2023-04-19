@@ -12,7 +12,7 @@ transactional technologies and requirements. Used properly, the Spring Framework
 provides a straightforward and portable abstraction. If you use global
 transactions, you must use the
 `org.springframework.transaction.jta.JtaTransactionManager` class (or an
-<<transaction-application-server-integration,application server-specific subclass>> of
+xref:data-access/transaction/application-server-integration.adoc[application server-specific subclass] of
 it) for all your transactional operations. Otherwise, the transaction infrastructure
 tries to perform local transactions on such resources as container `DataSource`
 instances. Such local transactions do not make sense, and a good application server

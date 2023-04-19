@@ -8,12 +8,12 @@ Spring AOP can also use CGLIB proxies. This is necessary to proxy classes rather
 interfaces. By default, CGLIB is used if a business object does not implement an
 interface. As it is good practice to program to interfaces rather than classes, business
 classes normally implement one or more business interfaces. It is possible to
-<<aop-proxying, force the use of CGLIB>>, in those (hopefully rare) cases where you
+xref:core/aop/proxying.adoc[force the use of CGLIB], in those (hopefully rare) cases where you
 need to advise a method that is not declared on an interface or where you need to
 pass a proxied object to a method as a concrete type.
 
 It is important to grasp the fact that Spring AOP is proxy-based. See
-<<aop-understanding-aop-proxies>> for a thorough examination of exactly what this
+xref:core/aop/proxying.adoc#aop-understanding-aop-proxies[Understanding AOP Proxies] for a thorough examination of exactly what this
 implementation detail actually means.
 
 

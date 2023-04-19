@@ -1,7 +1,7 @@
 [[mvc-view-freemarker]]
 = FreeMarker
 
-[.small]#<<web-reactive.adoc#webflux-view-freemarker, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-freemarker[See equivalent in the Reactive stack]#
 
 https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
 kind of text output from HTML to email and others. The Spring Framework has built-in
@@ -11,7 +11,7 @@ integration for using Spring MVC with FreeMarker templates.
 
 [[mvc-view-freemarker-contextconfig]]
 == View Configuration
-[.small]#<<web-reactive.adoc#webflux-view-freemarker-contextconfig, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-freemarker-contextconfig[See equivalent in the Reactive stack]#
 
 The following example shows how to configure FreeMarker as a view technology:
 
@@ -92,7 +92,7 @@ returns a view name of `welcome`, the resolver looks for the
 
 [[mvc-views-freemarker]]
 == FreeMarker Configuration
-[.small]#<<web-reactive.adoc#webflux-views-freemarker, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-views-freemarker[See equivalent in the Reactive stack]#
 
 You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
 `Configuration` object (which is managed by Spring) by setting the appropriate bean
@@ -131,7 +131,7 @@ with additional convenience macros for generating form input elements themselves
 
 [[mvc-view-bind-macros]]
 === The Bind Macros
-[.small]#<<web-reactive.adoc#webflux-view-bind-macros, See equivalent in the Reactive stack>>#
+[.small]#xref:web/webflux-view.adoc#webflux-view-bind-macros[See equivalent in the Reactive stack]#
 
 A standard set of macros are maintained within the `spring-webmvc.jar` file for
 FreeMarker, so they are always available to a suitably configured application.

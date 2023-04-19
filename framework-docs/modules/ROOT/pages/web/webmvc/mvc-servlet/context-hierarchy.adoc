@@ -11,7 +11,7 @@ For many applications, having a single `WebApplicationContext` is simple and suf
 It is also possible to have a context hierarchy where one root `WebApplicationContext`
 is shared across multiple `DispatcherServlet` (or other `Servlet`) instances, each with
 its own child `WebApplicationContext` configuration.
-See <<core.adoc#context-introduction,Additional Capabilities of the `ApplicationContext`>>
+See xref:core/beans/context-introduction.adoc[Additional Capabilities of the `ApplicationContext`]
 for more on the context hierarchy feature.
 
 The root `WebApplicationContext` typically contains infrastructure beans, such as data repositories and

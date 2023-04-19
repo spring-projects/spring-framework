@@ -21,11 +21,11 @@ the receiver should wait before giving up waiting for a message.
 NOTE: Spring also supports annotated-listener endpoints through the use of the `@JmsListener`
 annotation and provides an open infrastructure to register endpoints programmatically.
 This is, by far, the most convenient way to setup an asynchronous receiver.
-See <<jms-annotated-support>> for more details.
+See xref:integration/jms/annotated.adoc#jms-annotated-support[Enable Listener Endpoint Annotations] for more details.
 
 In a fashion similar to a Message-Driven Bean (MDB) in the EJB world, the Message-Driven
 POJO (MDP) acts as a receiver for JMS messages. The one restriction (but see
-<<jms-receiving-async-message-listener-adapter>>) on an MDP is that it must implement
+xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[Using `MessageListenerAdapter`]) on an MDP is that it must implement
 the `jakarta.jms.MessageListener` interface. Note that, if your POJO receives messages
 on multiple threads, it is important to ensure that your implementation is thread-safe.
 

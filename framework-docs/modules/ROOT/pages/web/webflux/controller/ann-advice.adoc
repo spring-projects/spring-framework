@@ -1,7 +1,7 @@
 [[webflux-ann-controller-advice]]
 = Controller Advice
 
-[.small]#<<web.adoc#mvc-ann-controller-advice, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-controller/ann-advice.adoc[See equivalent in the Servlet stack]#
 
 Typically, the `@ExceptionHandler`, `@InitBinder`, and `@ModelAttribute` methods apply
 within the `@Controller` class (or class hierarchy) in which they are declared. If you
@@ -9,8 +9,8 @@ want such methods to apply more globally (across controllers), you can declare t
 class annotated with `@ControllerAdvice` or `@RestControllerAdvice`.
 
 `@ControllerAdvice` is annotated with `@Component`, which means that such classes can be
-registered as Spring beans through <<core.adoc#beans-java-instantiating-container-scan,
-component scanning>>. `@RestControllerAdvice` is a composed annotation that is annotated
+registered as Spring beans through xref:core/beans/java/instantiating-container.adoc#beans-java-instantiating-container-scan[component scanning]
+. `@RestControllerAdvice` is a composed annotation that is annotated
 with both `@ControllerAdvice` and `@ResponseBody`, which essentially means
 `@ExceptionHandler` methods are rendered to the response body through message conversion
 (versus view resolution or template rendering).

@@ -79,10 +79,10 @@ as input, adapts it to a Reactor type internally, uses that, and returns either 
 `Flux` or a `Mono` as output. So, you can pass any `Publisher` as input and you can apply
 operations on the output, but you need to adapt the output for use with another reactive library.
 Whenever feasible (for example, annotated controllers), WebFlux adapts transparently to the use
-of RxJava or another reactive library. See <<webflux-reactive-libraries>> for more details.
+of RxJava or another reactive library. See xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries] for more details.
 
 NOTE: In addition to Reactive APIs, WebFlux can also be used with
-<<languages.adoc#coroutines, Coroutines>> APIs in Kotlin which provides a more imperative style of programming.
+xref:languages/kotlin/coroutines.adoc[Coroutines] APIs in Kotlin which provides a more imperative style of programming.
 The following Kotlin code samples will be provided with Coroutines APIs.
 
 
@@ -91,13 +91,13 @@ The following Kotlin code samples will be provided with Coroutines APIs.
 == Programming Models
 
 The `spring-web` module contains the reactive foundation that underlies Spring WebFlux,
-including HTTP abstractions, Reactive Streams <<webflux-httphandler, adapters>> for supported
-servers, <<webflux-codecs, codecs>>, and a core <<webflux-web-handler-api>> comparable to
+including HTTP abstractions, Reactive Streams xref:web/webflux/reactive-spring.adoc#webflux-httphandler[adapters] for supported
+servers, xref:web/webflux/reactive-spring.adoc#webflux-codecs[codecs], and a core xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[`WebHandler` API] comparable to
 the Servlet API but with non-blocking contracts.
 
 On that foundation, Spring WebFlux provides a choice of two programming models:
 
-* <<webflux-controller>>: Consistent with Spring MVC and based on the same annotations
+* xref:web/webflux/controller.adoc[Annotated Controllers]: Consistent with Spring MVC and based on the same annotations
 from the `spring-web` module. Both Spring MVC and WebFlux controllers support reactive
 (Reactor and RxJava) return types, and, as a result, it is not easy to tell them apart. One notable
 difference is that WebFlux also supports reactive `@RequestBody` arguments.
@@ -151,7 +151,7 @@ RxJava to perform blocking calls on a separate thread but you would not be makin
 most of a non-blocking web stack.
 
 * If you have a Spring MVC application with calls to remote services, try the reactive `WebClient`.
-You can return reactive types (Reactor, RxJava, <<webflux-reactive-libraries, or other>>)
+You can return reactive types (Reactor, RxJava, xref:web-reactive.adoc#webflux-reactive-libraries[or other])
 directly from Spring MVC controller methods. The greater the latency per call or the
 interdependency among calls, the more dramatic the benefits. Spring MVC controllers
 can call other reactive components too.
@@ -170,12 +170,12 @@ unsure what benefits to look for, start by learning about how non-blocking I/O w
 
 Spring WebFlux is supported on Tomcat, Jetty, Servlet containers, as well as on
 non-Servlet runtimes such as Netty and Undertow. All servers are adapted to a low-level,
-<<webflux-httphandler, common API>> so that higher-level
-<<webflux-programming-models, programming models>> can be supported across servers.
+xref:web/webflux/reactive-spring.adoc#webflux-httphandler[common API] so that higher-level
+xref:web/webflux/new-framework.adoc#webflux-programming-models[programming models] can be supported across servers.
 
 Spring WebFlux does not have built-in support to start or stop a server. However, it is
-easy to <<webflux-web-handler-api, assemble>> an application from Spring configuration and
-<<webflux-config, WebFlux infrastructure>> and <<webflux-httphandler, run it>> with a few
+easy to xref:web/webflux/reactive-spring.adoc#webflux-web-handler-api[assemble] an application from Spring configuration and
+xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux infrastructure] and xref:web/webflux/reactive-spring.adoc#webflux-httphandler[run it] with a few
 lines of code.
 
 Spring Boot has a WebFlux starter that automates these steps. By default, the starter uses
@@ -275,10 +275,10 @@ of their own.
 === Configuring
 
 The Spring Framework does not provide support for starting and stopping
-<<webflux-server-choice, servers>>. To configure the threading model for a server,
+xref:web/webflux/new-framework.adoc#webflux-server-choice[servers]. To configure the threading model for a server,
 you need to use server-specific configuration APIs, or, if you use Spring Boot,
 check the Spring Boot configuration options for each server. You can
-<<web-reactive.adoc#webflux-client-builder, configure>> the `WebClient` directly.
+xref:web/webflux-webclient/client-builder.adoc[configure] the `WebClient` directly.
 For all other libraries, see their respective documentation.
 
 

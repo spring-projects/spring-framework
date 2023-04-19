@@ -1,7 +1,7 @@
 [[webflux-client-context]]
 = Context
 
-<<webflux-client-attributes>> provide a convenient way to pass information to the filter
+xref:web/webflux-webclient/client-attributes.adoc[Attributes] provide a convenient way to pass information to the filter
 chain but they only influence the current request. If you want to pass information that
 propagates to additional requests that are nested, e.g. via `flatMap`, or executed after,
 e.g. via `concatMap`, then you'll need to use the Reactor `Context`.

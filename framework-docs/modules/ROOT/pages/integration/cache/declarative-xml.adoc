@@ -5,7 +5,7 @@ If annotations are not an option (perhaps due to having no access to the sources
 or no external code), you can use XML for declarative caching. So, instead of
 annotating the methods for caching, you can specify the target method and the
 caching directives externally (similar to the declarative transaction management
-<<data-access.adoc#transaction-declarative-first-example, advice>>). The example
+xref:data-access/transaction/declarative/first-example.adoc[advice]). The example
 from the previous section can be translated into the following example:
 
 [source,xml,indent=0]
@@ -37,7 +37,7 @@ data. Both definitions work against the `books` cache.
 
 The `aop:config` definition applies the cache advice to the appropriate points in the
 program by using the AspectJ pointcut expression (more information is available in
-<<core.adoc#aop, Aspect Oriented Programming with Spring>>). In the preceding example,
+xref:core/aop.adoc[Aspect Oriented Programming with Spring]). In the preceding example,
 all methods from the `BookService` are considered and the cache advice is applied to them.
 
 The declarative XML caching supports all of the annotation-based model, so moving between

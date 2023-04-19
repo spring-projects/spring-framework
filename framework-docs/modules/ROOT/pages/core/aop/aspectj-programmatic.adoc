@@ -4,7 +4,7 @@
 In addition to declaring aspects in your configuration by using either `<aop:config>`
 or `<aop:aspectj-autoproxy>`, it is also possible to programmatically create proxies
 that advise target objects. For the full details of Spring's AOP API, see the
-<<aop-api, next chapter>>. Here, we want to focus on the ability to automatically
+xref:core/aop-api.adoc[next chapter]. Here, we want to focus on the ability to automatically
 create proxies by using @AspectJ aspects.
 
 You can use the `org.springframework.aop.aspectj.annotation.AspectJProxyFactory` class

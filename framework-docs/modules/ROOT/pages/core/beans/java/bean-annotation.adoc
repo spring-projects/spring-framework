@@ -4,9 +4,9 @@
 `@Bean` is a method-level annotation and a direct analog of the XML `<bean/>` element.
 The annotation supports some of the attributes offered by `<bean/>`, such as:
 
-* <<beans-factory-lifecycle-initializingbean, init-method>>
-* <<beans-factory-lifecycle-disposablebean, destroy-method>>
-* <<beans-factory-autowire,autowiring>>
+* xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[init-method]
+* xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[destroy-method]
+* xref:core/beans/dependencies/factory-autowire.adoc[autowiring]
 * `name`.
 
 You can use the `@Bean` annotation in a `@Configuration`-annotated or in a
@@ -160,7 +160,7 @@ parameter, as the following example shows:
 
 
 The resolution mechanism is pretty much identical to constructor-based dependency
-injection. See <<beans-constructor-injection, the relevant section>> for more details.
+injection. See xref:core/beans/dependencies/factory-collaborators.adoc#beans-constructor-injection[the relevant section] for more details.
 
 
 [[beans-java-lifecycle-callbacks]]
@@ -168,17 +168,17 @@ injection. See <<beans-constructor-injection, the relevant section>> for more de
 
 Any classes defined with the `@Bean` annotation support the regular lifecycle callbacks
 and can use the `@PostConstruct` and `@PreDestroy` annotations from JSR-250. See
-<<beans-postconstruct-and-predestroy-annotations, JSR-250 annotations>> for further
+xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[JSR-250 annotations] for further
 details.
 
-The regular Spring <<beans-factory-nature, lifecycle>> callbacks are fully supported as
+The regular Spring xref:core/beans/factory-nature.adoc[lifecycle] callbacks are fully supported as
 well. If a bean implements `InitializingBean`, `DisposableBean`, or `Lifecycle`, their
 respective methods are called by the container.
 
-The standard set of `*Aware` interfaces (such as <<beans-beanfactory, BeanFactoryAware>>,
-<<beans-factory-aware, BeanNameAware>>,
-<<context-functionality-messagesource, MessageSourceAware>>,
-<<beans-factory-aware, ApplicationContextAware>>, and so on) are also fully supported.
+The standard set of `*Aware` interfaces (such as xref:core/beans/beanfactory.adoc[BeanFactoryAware],
+xref:core/beans/factory-nature.adoc#beans-factory-aware[BeanNameAware],
+xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSourceAware],
+xref:core/beans/factory-nature.adoc#beans-factory-aware[ApplicationContextAware], and so on) are also fully supported.
 
 The `@Bean` annotation supports specifying arbitrary initialization and destruction
 callback methods, much like Spring XML's `init-method` and `destroy-method` attributes
@@ -331,7 +331,7 @@ Spring includes the `@Scope` annotation so that you can specify the scope of a b
 
 You can specify that your beans defined with the `@Bean` annotation should have a
 specific scope. You can use any of the standard scopes specified in the
-<<beans-factory-scopes, Bean Scopes>> section.
+xref:core/beans/factory-scopes.adoc[Bean Scopes] section.
 
 The default scope is `singleton`, but you can override this with the `@Scope` annotation,
 as the following example shows:
@@ -367,7 +367,7 @@ as the following example shows:
 === `@Scope` and `scoped-proxy`
 
 Spring offers a convenient way of working with scoped dependencies through
-<<beans-factory-scopes-other-injection, scoped proxies>>. The easiest way to create
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[scoped proxies]. The easiest way to create
 such a proxy when using the XML configuration is the `<aop:scoped-proxy/>` element.
 Configuring your beans in Java with a `@Scope` annotation offers equivalent support
 with the `proxyMode` attribute. The default is `ScopedProxyMode.DEFAULT`, which
@@ -376,7 +376,7 @@ has been configured at the component-scan instruction level. You can specify
 `ScopedProxyMode.TARGET_CLASS`, `ScopedProxyMode.INTERFACES` or `ScopedProxyMode.NO`.
 
 If you port the scoped proxy example from the XML reference documentation (see
-<<beans-factory-scopes-other-injection, scoped proxies>>) to our `@Bean` using Java,
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[scoped proxies]) to our `@Bean` using Java,
 it resembles the following:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
@@ -448,7 +448,7 @@ as the following example shows:
 [[beans-java-bean-aliasing]]
 == Bean Aliasing
 
-As discussed in <<beans-beanname>>, it is sometimes desirable to give a single bean
+As discussed in xref:core/beans/definition.adoc#beans-beanname[Naming Beans], it is sometimes desirable to give a single bean
 multiple names, otherwise known as bean aliasing. The `name` attribute of the `@Bean`
 annotation accepts a String array for this purpose. The following example shows how to set
 a number of aliases for a bean:

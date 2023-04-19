@@ -52,7 +52,7 @@ In order to listen to test execution events, a Spring bean may choose to impleme
 `org.springframework.context.ApplicationListener` interface. Alternatively, listener
 methods can be annotated with `@EventListener` and configured to listen to one of the
 particular event types listed above (see
-<<core.adoc#context-functionality-events-annotation, Annotation-based Event Listeners>>).
+xref:core/beans/context-introduction.adoc#context-functionality-events-annotation[Annotation-based Event Listeners]).
 Due to the popularity of this approach, Spring provides the following dedicated
 `@EventListener` annotations to simplify registration of test execution event listeners.
 These annotations reside in the `org.springframework.test.context.event.annotation`
@@ -81,8 +81,8 @@ asynchronous exception handling, consult the class-level javadoc for `@EventList
 == Asynchronous Listeners
 
 If you want a particular test execution event listener to process events asynchronously,
-you can use Spring's <<integration.adoc#scheduling-annotation-support-async,regular
-`@Async` support>>. For further details, consult the class-level javadoc for
+you can use Spring's xref:integration/scheduling.adoc#scheduling-annotation-support-async[regular `@Async` support]
+. For further details, consult the class-level javadoc for
 `@EventListener`.
 
 

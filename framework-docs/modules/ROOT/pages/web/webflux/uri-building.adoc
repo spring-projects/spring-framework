@@ -1,7 +1,7 @@
 [[webflux-uri-building]]
 = URI Links
 
-[.small]#<<web.adoc#mvc-uri-building, See equivalent in the Servlet stack>>#
+[.small]#xref:web/webmvc/mvc-uri-building.adoc[See equivalent in the Servlet stack]#
 
 This section describes various options available in the Spring Framework to prepare URIs.
 

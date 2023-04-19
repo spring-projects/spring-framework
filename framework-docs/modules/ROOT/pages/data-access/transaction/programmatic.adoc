@@ -139,7 +139,7 @@ Code within the callback can roll the transaction back by calling the
 You can specify transaction settings (such as the propagation mode, the isolation level,
 the timeout, and so forth) on the `TransactionTemplate` either programmatically or in
 configuration. By default, `TransactionTemplate` instances have the
-<<transaction-declarative-txadvice-settings,default transactional settings>>. The
+xref:data-access/transaction/declarative/txadvice-settings.adoc[default transactional settings]. The
 following example shows the programmatic customization of the transactional settings for
 a specific `TransactionTemplate:`
 
@@ -302,7 +302,7 @@ the full output must be consumed to allow the transaction to complete.
 You can specify transaction settings (such as the propagation mode, the isolation level,
 the timeout, and so forth) for the `TransactionalOperator`. By default,
 `TransactionalOperator` instances have
-<<transaction-declarative-txadvice-settings,default transactional settings>>. The
+xref:data-access/transaction/declarative/txadvice-settings.adoc[default transactional settings]. The
 following example shows customization of the transactional settings for a specific
 `TransactionalOperator:`
 

@@ -16,8 +16,8 @@ You can also use `WebClient.builder()` with further options:
 * `filter`: Client filter for every request.
 * `exchangeStrategies`: HTTP message reader/writer customizations.
 * `clientConnector`: HTTP client library settings.
-* `observationRegistry`: the registry to use for enabling <<integration.adoc#integration.observability.http-client.webclient, Observability support>>.
-* `observationConvention`: <<integration.adoc#integration.observability.config,an optional, custom convention to extract metadata>> for recorded observations.
+* `observationRegistry`: the registry to use for enabling xref:integration/observability.adoc#integration.observability.http-client.webclient[Observability support].
+* `observationConvention`: xref:integration/observability.adoc#integration.observability.config[an optional, custom convention to extract metadata] for recorded observations.
 
 For example:
 
@@ -69,7 +69,7 @@ modified copy as follows:
 [[webflux-client-builder-maxinmemorysize]]
 == MaxInMemorySize
 
-Codecs have <<web-reactive.adoc#webflux-codecs-limits,limits>> for buffering data in
+Codecs have xref:web/webflux/reactive-spring.adoc#webflux-codecs-limits[limits] for buffering data in
 memory to avoid application memory issues. By default those are set to 256KB.
 If that's not enough you'll get the following error:
 

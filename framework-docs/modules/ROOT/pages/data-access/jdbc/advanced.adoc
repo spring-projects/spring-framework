@@ -198,7 +198,7 @@ While this usually works well, there is a potential for issues (for example, wit
 case, which can be expensive with your JDBC driver. You should use a recent driver
 version and consider setting the `spring.jdbc.getParameterType.ignore` property to `true`
 (as a JVM system property or via the
-<<appendix.adoc#appendix-spring-properties,`SpringProperties`>> mechanism) if you encounter
+xref:appendix.adoc#appendix-spring-properties[`SpringProperties`] mechanism) if you encounter
 a performance issue (as reported on Oracle 12c, JBoss, and PostgreSQL).
 
 Alternatively, you might consider specifying the corresponding JDBC types explicitly,

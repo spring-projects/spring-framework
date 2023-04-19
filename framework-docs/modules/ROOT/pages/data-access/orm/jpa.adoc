@@ -14,9 +14,9 @@ the underlying implementation in order to provide additional features.
 The Spring JPA support offers three ways of setting up the JPA `EntityManagerFactory`
 that is used by the application to obtain an entity manager.
 
-* <<orm-jpa-setup-lemfb>>
-* <<orm-jpa-setup-jndi>>
-* <<orm-jpa-setup-lcemfb>>
+* xref:data-access/orm/jpa.adoc#orm-jpa-setup-lemfb[Using `LocalEntityManagerFactoryBean`]
+* xref:data-access/orm/jpa.adoc#orm-jpa-setup-jndi[Obtaining an EntityManagerFactory from JNDI]
+* xref:data-access/orm/jpa.adoc#orm-jpa-setup-lcemfb[Using `LocalContainerEntityManagerFactoryBean`]
 
 [[orm-jpa-setup-lemfb]]
 === Using `LocalEntityManagerFactoryBean`
@@ -92,7 +92,7 @@ NOTE: If you want to specifically configure a Hibernate setup, an immediate alte
 is to set up a native Hibernate `LocalSessionFactoryBean` instead of a plain JPA
 `LocalContainerEntityManagerFactoryBean`, letting it interact with JPA access code
 as well as native Hibernate access code.
-See <<orm-jpa-hibernate, Native Hibernate setup for JPA interaction>> for details.
+See xref:data-access/orm/jpa.adoc#orm-jpa-hibernate[Native Hibernate setup for JPA interaction] for details.
 
 The `LocalContainerEntityManagerFactoryBean` gives full control over
 `EntityManagerFactory` configuration and is appropriate for environments where
@@ -172,11 +172,11 @@ Spring provides a number of `LoadTimeWeaver` implementations for various environ
 letting `ClassTransformer` instances be applied only for each class loader and not
 for each VM.
 
-See the <<core.adoc#aop-aj-ltw-spring, Spring configuration>> in the AOP chapter for
+See the xref:core/aop/using-aspectj.adoc#aop-aj-ltw-spring[Spring configuration] in the AOP chapter for
 more insight regarding the `LoadTimeWeaver` implementations and their setup, either
 generic or customized to various platforms (such as Tomcat, JBoss and WebSphere).
 
-As described in <<core.adoc#aop-aj-ltw-spring, Spring configuration>>, you can configure
+As described in xref:core/aop/using-aspectj.adoc#aop-aj-ltw-spring[Spring configuration], you can configure
 a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation or the
 `context:load-time-weaver` XML element. Such a global weaver is automatically picked up
 by all JPA `LocalContainerEntityManagerFactoryBean` instances. The following example
@@ -452,7 +452,7 @@ a non-invasiveness perspective and can feel more natural to JPA developers.
 [[orm-jpa-tx]]
 == Spring-driven JPA transactions
 
-NOTE: We strongly encourage you to read <<transaction-declarative>>, if you have not
+NOTE: We strongly encourage you to read xref:data-access/transaction/declarative.adoc[Declarative Transaction Management], if you have not
 already done so, to get more detailed coverage of Spring's declarative transaction support.
 
 The recommended strategy for JPA is local transactions through JPA's native transaction
@@ -464,12 +464,12 @@ Spring JPA also lets a configured `JpaTransactionManager` expose a JPA transacti
 to JDBC access code that accesses the same `DataSource`, provided that the registered
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`.
 Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
-See the <<orm-jpa-dialect, next section>> for details on the `JpaDialect` mechanism.
+See the xref:data-access/orm/jpa.adoc#orm-jpa-dialect[next section] for details on the `JpaDialect` mechanism.
 
 NOTE: As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
 of interacting with JPA access code, adapting to several Hibernate specifics and providing
 JDBC interaction. This makes particular sense in combination with `LocalSessionFactoryBean`
-setup. See <<orm-jpa-hibernate, Native Hibernate Setup for JPA Interaction>> for details.
+setup. See xref:data-access/orm/jpa.adoc#orm-jpa-hibernate[Native Hibernate Setup for JPA Interaction] for details.
 
 
 [[orm-jpa-dialect]]
@@ -529,7 +529,7 @@ Hibernate 5.0 but not any more in Hibernate 5.1+. For a JTA setup, make sure to 
 your persistence unit transaction type as "JTA". Alternatively, set Hibernate 5.2's
 `hibernate.connection.handling_mode` property to
 `DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT` to restore Hibernate's own default.
-See <<orm-hibernate-invalid-jdbc-access-error>> for related notes.
+See xref:data-access/orm/hibernate.adoc#orm-hibernate-invalid-jdbc-access-error[Spurious Application Server Warnings with Hibernate] for related notes.
 
 * Alternatively, consider obtaining the `EntityManagerFactory` from your application
 server itself (that is, through a JNDI lookup instead of a locally declared
@@ -565,7 +565,7 @@ seamlessly integrating with `@Bean` style configuration (no `FactoryBean` involv
 ====
 `LocalSessionFactoryBean` and `LocalSessionFactoryBuilder` support background
 bootstrapping, just as the JPA `LocalContainerEntityManagerFactoryBean` does.
-See <<orm-jpa-setup-background, Background Bootstrapping>> for an introduction.
+See xref:data-access/orm/jpa.adoc#orm-jpa-setup-background[Background Bootstrapping] for an introduction.
 
 On `LocalSessionFactoryBean`, this is available through the `bootstrapExecutor`
 property. On the programmatic `LocalSessionFactoryBuilder`, an overloaded

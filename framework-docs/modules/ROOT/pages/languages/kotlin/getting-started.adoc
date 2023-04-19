@@ -17,8 +17,8 @@ Boot 2 project on https://start.spring.io/#!language=kotlin&type=gradle-project[
 [[choosing-the-web-flavor]]
 == Choosing the Web Flavor
 
-Spring Framework now comes with two different web stacks: <<web#mvc, Spring MVC>> and
-<<web-reactive#spring-web-reactive, Spring WebFlux>>.
+Spring Framework now comes with two different web stacks: xref:web/webmvc.adoc#mvc[Spring MVC] and
+xref:testing/unit.adoc#mock-objects-web-reactive[Spring WebFlux].
 
 Spring WebFlux is recommended if you want to create applications that will deal with latency,
 long-lived connections, streaming scenarios or if you want to use the web functional

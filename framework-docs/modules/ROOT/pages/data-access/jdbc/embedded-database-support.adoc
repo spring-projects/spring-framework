@@ -129,9 +129,9 @@ configuration, as the following example shows:
 This section covers how to select one of the three embedded databases that Spring
 supports. It includes the following topics:
 
-* <<jdbc-embedded-database-using-HSQL>>
-* <<jdbc-embedded-database-using-H2>>
-* <<jdbc-embedded-database-using-Derby>>
+* xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-using-HSQL[Using HSQL]
+* xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-using-H2[Using H2]
+* xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-using-Derby[Using Derby]
 
 [[jdbc-embedded-database-using-HSQL]]
 === Using HSQL
@@ -163,9 +163,9 @@ Embedded databases provide a lightweight way to test data access code. The next 
 data access integration test template that uses an embedded database. Using such a template
 can be useful for one-offs when the embedded database does not need to be reused across test
 classes. However, if you wish to create an embedded database that is shared within a test suite,
-consider using the <<testing.adoc#testcontext-framework, Spring TestContext Framework>> and
+consider using the xref:testing/testcontext-framework.adoc[Spring TestContext Framework] and
 configuring the embedded database as a bean in the Spring `ApplicationContext` as described
-in <<jdbc-embedded-database-xml>> and <<jdbc-embedded-database-java>>. The following listing
+in xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-xml[Creating an Embedded Database by Using Spring XML] and xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-java[Creating an Embedded Database Programmatically]. The following listing
 shows the test template:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]

@@ -14,7 +14,7 @@ while others argue that annotated classes are no longer POJOs and, furthermore, 
 configuration becomes decentralized and harder to control.
 
 No matter the choice, Spring can accommodate both styles and even mix them together.
-It is worth pointing out that through its <<beans-java, JavaConfig>> option, Spring lets
+It is worth pointing out that through its xref:core/beans/java.adoc[JavaConfig] option, Spring lets
 annotations be used in a non-invasive way, without touching the target components'
 source code and that, in terms of tooling, all configuration styles are supported by
 https://spring.io/tools[Spring Tools] for Eclipse, Visual Studio Code, and Theia.
@@ -24,15 +24,15 @@ An alternative to XML setup is provided by annotation-based configuration, which
 on bytecode metadata for wiring up components instead of XML declarations. Instead of
 using XML to describe a bean wiring, the developer moves the configuration into the
 component class itself by using annotations on the relevant class, method, or field
-declaration. As mentioned in <<beans-factory-extension-bpp-examples-aabpp>>, using a
+declaration. As mentioned in xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp-examples-aabpp[Example: The `AutowiredAnnotationBeanPostProcessor`], using a
 `BeanPostProcessor` in conjunction with annotations is a common means of extending the
-Spring IoC container. For example, the <<beans-autowired-annotation, `@Autowired`>>
-annotation provides the same capabilities as described in <<beans-factory-autowire>> but
+Spring IoC container. For example, the xref:core/beans/annotation-config/autowired.adoc[`@Autowired`]
+annotation provides the same capabilities as described in xref:core/beans/dependencies/factory-autowire.adoc[Autowiring Collaborators] but
 with more fine-grained control and wider applicability. In addition, Spring provides
 support for JSR-250 annotations, such as `@PostConstruct` and `@PreDestroy`, as well as
 support for JSR-330 (Dependency Injection for Java) annotations contained in the
 `jakarta.inject` package such as `@Inject` and `@Named`. Details about those annotations
-can be found in the <<beans-standard-annotations, relevant section>>.
+can be found in the xref:core/beans/standard-annotations.adoc[relevant section].
 
 [NOTE]
 ====
@@ -74,7 +74,7 @@ The `<context:annotation-config/>` element implicitly registers the following po
 application context in which it is defined. This means that, if you put
 `<context:annotation-config/>` in a `WebApplicationContext` for a `DispatcherServlet`,
 it only checks for `@Autowired` beans in your controllers, and not your services. See
-<<web.adoc#mvc-servlet, The DispatcherServlet>> for more information.
+xref:web/webmvc/mvc-servlet.adoc[The DispatcherServlet] for more information.
 ====
 
 

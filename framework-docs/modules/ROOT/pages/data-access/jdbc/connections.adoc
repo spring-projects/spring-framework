@@ -3,14 +3,14 @@
 
 This section covers:
 
-* <<jdbc-datasource>>
-* <<jdbc-DataSourceUtils>>
-* <<jdbc-SmartDataSource>>
-* <<jdbc-AbstractDataSource>>
-* <<jdbc-SingleConnectionDataSource>>
-* <<jdbc-DriverManagerDataSource>>
-* <<jdbc-TransactionAwareDataSourceProxy>>
-* <<jdbc-DataSourceTransactionManager>>
+* xref:data-access/jdbc/connections.adoc#jdbc-datasource[Using `DataSource`]
+* xref:data-access/jdbc/connections.adoc#jdbc-DataSourceUtils[Using `DataSourceUtils`]
+* xref:data-access/jdbc/connections.adoc#jdbc-SmartDataSource[Implementing `SmartDataSource`]
+* xref:data-access/jdbc/connections.adoc#jdbc-AbstractDataSource[Extending `AbstractDataSource`]
+* xref:data-access/jdbc/connections.adoc#jdbc-SingleConnectionDataSource[Using `SingleConnectionDataSource`]
+* xref:data-access/jdbc/connections.adoc#jdbc-DriverManagerDataSource[Using `DriverManagerDataSource`]
+* xref:data-access/jdbc/connections.adoc#jdbc-TransactionAwareDataSourceProxy[Using `TransactionAwareDataSourceProxy`]
+* xref:data-access/jdbc/connections.adoc#jdbc-DataSourceTransactionManager[Using `DataSourceTransactionManager`]
 
 
 [[jdbc-datasource]]
