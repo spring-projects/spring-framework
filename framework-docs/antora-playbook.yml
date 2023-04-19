@@ -11,8 +11,8 @@ site:
   url: https://https://rwinch.github.io/spring-framework/
 content:
   sources:
-    - url: https://github.com/rwinch/spring-framework
-      branches: ./..
+    - url: ../.
+      branches: HEAD
       start_path: framework-docs
       worktrees: true
 asciidoc:
