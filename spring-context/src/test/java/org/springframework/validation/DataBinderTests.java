@@ -82,7 +82,7 @@ import static org.assertj.core.api.Assertions.entry;
  */
 class DataBinderTests {
 
-	Validator spouseValidator = Validator.of(TestBean.class, (tb, errors) -> {
+	private final Validator spouseValidator = Validator.forInstanceOf(TestBean.class, (tb, errors) -> {
 				if (tb == null || "XXX".equals(tb.getName())) {
 					errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");
 					return;

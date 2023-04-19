@@ -18,8 +18,6 @@ package org.springframework.validation;
 
 import java.util.function.BiConsumer;
 
-import org.springframework.util.Assert;
-
 /**
  * A validator for application-specific objects.
  *
@@ -30,33 +28,25 @@ import org.springframework.util.Assert;
  * of an application, and supports the encapsulation of validation
  * logic as a first-class citizen in its own right.
  *
- * <p>Find below a simple but complete {@code Validator}
- * implementation, which validates that the various {@link String}
- * properties of a {@code UserLogin} instance are not empty
- * (that is they are not {@code null} and do not consist
+ * <p>Implementations can be created via the static factory methods
+ * {@link #forInstanceOf(Class, BiConsumer)} or
+ * {@link #forType(Class, BiConsumer)}.
+ * Below is a simple but complete {@code Validator} that validates that the
+ * various {@link String} properties of a {@code UserLogin} instance are not
+ * empty (they are not {@code null} and do not consist
  * wholly of whitespace), and that any password that is present is
  * at least {@code 'MINIMUM_PASSWORD_LENGTH'} characters in length.
  *
- * <pre class="code">public class UserLoginValidator implements Validator {
- *
- *    private static final int MINIMUM_PASSWORD_LENGTH = 6;
- *
- *    public boolean supports(Class clazz) {
- *       return UserLogin.class.isAssignableFrom(clazz);
- *    }
- *
- *    public void validate(Object target, Errors errors) {
- *       ValidationUtils.rejectIfEmptyOrWhitespace(errors, "userName", "field.required");
- *       ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "field.required");
- *       UserLogin login = (UserLogin) target;
- *       if (login.getPassword() != null
- *             &amp;&amp; login.getPassword().trim().length() &lt; MINIMUM_PASSWORD_LENGTH) {
- *          errors.rejectValue("password", "field.min.length",
- *                new Object[]{Integer.valueOf(MINIMUM_PASSWORD_LENGTH)},
- *                "The password must be at least [" + MINIMUM_PASSWORD_LENGTH + "] characters in length.");
- *       }
- *    }
- * }</pre>
+ * <pre class="code">Validator userLoginValidator = Validator.forInstance(UserLogin.class, (login, errors) -> {
+ *   ValidationUtils.rejectIfEmptyOrWhitespace(errors, "userName", "field.required");
+ *   ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "field.required");
+ *   if (login.getPassword() != null
+ *         &amp;&amp; login.getPassword().trim().length() &lt; MINIMUM_PASSWORD_LENGTH) {
+ *      errors.rejectValue("password", "field.min.length",
+ *            new Object[]{Integer.valueOf(MINIMUM_PASSWORD_LENGTH)},
+ *            "The password must be at least [" + MINIMUM_PASSWORD_LENGTH + "] characters in length.");
+ *   }
+ * });</pre>
  *
  * <p>See also the Spring reference manual for a fuller discussion of
  * the {@code Validator} interface and its role in an enterprise
@@ -64,6 +54,7 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Toshiaki Maki
+ * @author Arjen Poutsma
  * @see SmartValidator
  * @see Errors
  * @see ValidationUtils
@@ -97,38 +88,54 @@ public interface Validator {
 	 */
 	void validate(Object target, Errors errors);
 
-	/**
-	 * Takes the {@link BiConsumer} containing the validation logic for the specific type
-	 * <code>&lt;T&gt;</code> and returns the {@link Validator} instance.<br>
-	 * This validator implements the <i>typical</i> {@link #supports(Class)} method
-	 * for the given <code>&lt;T&gt;</code>.<br>
-	 *
-	 * By using this method, a {@link Validator}  can be implemented as follows:
-	 *
-	 * <pre class="code">Validator passwordEqualsValidator = Validator.of(PasswordResetForm.class, (form, errors) -> {
-	 *       if (!Objects.equals(form.getPassword(), form.getConfirmPassword())) {
-	 *         errors.rejectValue("confirmPassword",
-	 *             "PasswordEqualsValidator.passwordResetForm.password",
-	 *             "password and confirm password must be same.");
-	 *       }
-	 *     });</pre>
-	 * @param targetClass  the class of the object that is to be validated
-	 * @param delegate the validation logic to delegate for the specific type <code>&lt;T&gt;</code>
-	 * @param <T> the type of the object that is to be validated
-	 * @return the {@link Validator} instance
-	 */
-	static <T> Validator of(Class<T> targetClass, BiConsumer<T, Errors> delegate) {
-		Assert.notNull(targetClass, "'targetClass' must not be null.");
-		return new Validator() {
-			@Override
-			public boolean supports(Class<?> clazz) {
-				return targetClass.isAssignableFrom(clazz);
-			}
 
-			@Override
-			public void validate(Object target, Errors errors) {
-				delegate.accept(targetClass.cast(target), errors);
-			}
-		};
+	/**
+	 * Return a {@code Validator} that checks whether the target object
+	 * {@linkplain Class#isAssignableFrom(Class) is an instance of}
+	 * {@code targetClass}, resorting to {@code delegate} to populate
+	 * {@link Errors} if it is.
+	 *
+	 * <p>For instance:
+	 * <pre class="code">Validator passwordEqualsValidator = Validator.forInstanceOf(PasswordResetForm.class, (form, errors) -> {
+	 *   if (!Objects.equals(form.getPassword(), form.getConfirmPassword())) {
+	 * 	   errors.rejectValue("confirmPassword",
+	 * 	         "PasswordEqualsValidator.passwordResetForm.password",
+	 * 	         "password and confirm password must be same.");
+	 * 	   }
+	 * 	 });</pre>
+	 * @param targetClass the class supported by the returned validator
+	 * @param delegate function invoked with the target object, if it is an
+	 * instance of type T
+	 * @param <T> the target object type
+	 * @return the created {@code Validator}
+	 * @since 6.1
+	 */
+	static <T> Validator forInstanceOf(Class<T> targetClass, BiConsumer<T, Errors> delegate) {
+		return new TypedValidator<>(targetClass, targetClass::isAssignableFrom, delegate);
 	}
+
+	/**
+	 * Return a {@code Validator} that checks whether the target object's class
+	 * is identical to {@code targetClass}, resorting to {@code delegate} to
+	 * populate {@link Errors} if it is.
+	 *
+	 * <p>For instance:
+	 * <pre class="code">Validator passwordEqualsValidator = Validator.forType(PasswordResetForm.class, (form, errors) -> {
+	 *   if (!Objects.equals(form.getPassword(), form.getConfirmPassword())) {
+	 * 	   errors.rejectValue("confirmPassword",
+	 * 	         "PasswordEqualsValidator.passwordResetForm.password",
+	 * 	         "password and confirm password must be same.");
+	 * 	   }
+	 * 	 });</pre>
+	 * @param targetClass the exact class supported by the returned validator (no subclasses)
+	 * @param delegate function invoked with the target object, if it is an
+	 * instance of type T
+	 * @param <T> the target object type
+	 * @return the created {@code Validator}
+	 * @since 6.1
+	 */
+	static <T> Validator forType(Class<T> targetClass, BiConsumer<T, Errors> delegate) {
+		return new TypedValidator<>(targetClass, targetClass::equals, delegate);
+	}
+
 }
