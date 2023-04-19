@@ -1,7 +1,5 @@
 [[spring-core]]
 = Core Technologies
-include::attributes.adoc[]
-include::page-layout.adoc[]
 
 This part of the reference documentation covers all the technologies that are
 absolutely integral to the Spring Framework.
@@ -20,24 +18,13 @@ is also provided.
 AOT processing can be used to optimize your application ahead-of-time. It is typically
 used for native image deployment using GraalVM.
 
-include::core/beans.adoc[leveloffset=+1]
 
-include::core/resources.adoc[leveloffset=+1]
 
-include::core/validation.adoc[leveloffset=+1]
 
-include::core/expressions.adoc[leveloffset=+1]
 
-include::core/aop.adoc[leveloffset=+1]
 
-include::core/aop-api.adoc[leveloffset=+1]
 
-include::core/null-safety.adoc[leveloffset=+1]
 
-include::core/databuffer-codec.adoc[leveloffset=+1]
 
-include::core/spring-jcl.adoc[leveloffset=+1]
 
-include::core/aot.adoc[leveloffset=+1]
 
-include::core/appendix.adoc[leveloffset=+1]

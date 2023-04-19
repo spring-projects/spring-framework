@@ -1,7 +1,5 @@
 [[testing]]
 = Testing
-include::attributes.adoc[]
-include::page-layout.adoc[]
 
 This chapter covers Spring's support for integration testing and best practices for unit
 testing. The Spring team advocates test-driven development (TDD). The Spring team has
@@ -11,20 +9,11 @@ constructors on classes makes them easier to wire together in a test without hav
 set up service locator registries and similar structures).
 
 
-include::testing/introduction.adoc[leveloffset=+1]
 
-include::testing/unit.adoc[leveloffset=+1]
 
-include::testing/integration.adoc[leveloffset=+1]
 
-include::testing/support-jdbc.adoc[leveloffset=+1]
 
-include::testing/testcontext-framework.adoc[leveloffset=+1]
 
-include::testing/webtestclient.adoc[leveloffset=+1]
 
-include::testing/spring-mvc-test-framework.adoc[leveloffset=+1]
 
-include::testing/spring-mvc-test-client.adoc[leveloffset=+1]
 
-include::testing/appendix.adoc[leveloffset=+1]

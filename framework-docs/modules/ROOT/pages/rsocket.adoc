@@ -1,7 +1,5 @@
 [[rsocket]]
 = RSocket
-include::attributes.adoc[]
-include::page-layout.adoc[]
 
 This section describes Spring Framework's support for the RSocket protocol.
 

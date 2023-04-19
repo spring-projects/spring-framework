@@ -6,7 +6,6 @@ This part of the reference documentation covers support for Servlet stack, WebSo
 messaging that includes raw WebSocket interactions, WebSocket emulation through SockJS, and
 publish-subscribe messaging through STOMP as a sub-protocol over WebSocket.
 
-include::websocket-intro.adoc[leveloffset=+1]
 
 
 

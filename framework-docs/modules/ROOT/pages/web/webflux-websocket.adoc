@@ -5,7 +5,6 @@
 This part of the reference documentation covers support for reactive-stack WebSocket
 messaging.
 
-include::websocket-intro.adoc[leveloffset=+1]
 
 
 
