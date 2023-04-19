@@ -196,6 +196,18 @@ class MockHttpServletResponseTests {
 	}
 
 	@Test
+	void setCharacterEncodingNull() {
+		response.setContentType("test/plain");
+		response.setCharacterEncoding("UTF-8");
+		assertThat(response.getContentType()).isEqualTo("test/plain;charset=UTF-8");
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain;charset=UTF-8");
+		response.setCharacterEncoding(null);
+		assertThat(response.getContentType()).isEqualTo("test/plain");
+		assertThat(response.getHeader(CONTENT_TYPE)).isEqualTo("test/plain");
+		assertThat(response.getCharacterEncoding()).isEqualTo(WebUtils.DEFAULT_CHARACTER_ENCODING);
+	}
+
+	@Test
 	void defaultCharacterEncoding() {
 		assertThat(response.isCharset()).isFalse();
 		assertThat(response.getContentType()).isNull();
