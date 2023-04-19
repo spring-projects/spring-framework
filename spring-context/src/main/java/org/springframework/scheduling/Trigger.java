@@ -45,7 +45,7 @@ public interface Trigger {
 	@Nullable
 	default Date nextExecutionTime(TriggerContext triggerContext) {
 		Instant instant = nextExecution(triggerContext);
-		return instant != null ? Date.from(instant) : null;
+		return (instant != null ? Date.from(instant) : null);
 	}
 
 	/**
