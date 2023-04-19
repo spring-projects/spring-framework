@@ -38,7 +38,7 @@ Kotlin::
 ----
 ======
 
-NOTE: The SpEL Elvis operator actually also checks for empty Strings, in addition to null objects.
+NOTE: The SpEL Elvis operator also checks for _empty_ Strings in addition to `null` objects.
 The original snippet is thus only close to emulating the semantics of the operator (it would need an
 additional `!name.isEmpty()` check).
 
