@@ -1,6 +1,6 @@
 name: framework
 version: true
-title: Spring Framework Documentation
+title: Spring Framework
 nav:
   - modules/ROOT/nav.adoc
 ext:
