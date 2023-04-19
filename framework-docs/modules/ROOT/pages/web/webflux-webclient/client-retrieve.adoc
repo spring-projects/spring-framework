@@ -1,0 +1,96 @@
+[[webflux-client-retrieve]]
+= `retrieve()`
+
+The `retrieve()` method can be used to declare how to extract the response. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebClient client = WebClient.create("https://example.org");
+
+	Mono<ResponseEntity<Person>> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.toEntity(Person.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = WebClient.create("https://example.org")
+
+	val result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.toEntity<Person>().awaitSingle()
+----
+
+Or to get only the body:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	WebClient client = WebClient.create("https://example.org");
+
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.bodyToMono(Person.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val client = WebClient.create("https://example.org")
+
+	val result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.awaitBody<Person>()
+----
+
+To get a stream of decoded objects:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	Flux<Quote> result = client.get()
+			.uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
+			.retrieve()
+			.bodyToFlux(Quote.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val result = client.get()
+			.uri("/quotes").accept(MediaType.TEXT_EVENT_STREAM)
+			.retrieve()
+			.bodyToFlow<Quote>()
+----
+
+By default, 4xx or 5xx responses result in an `WebClientResponseException`, including
+sub-classes for specific HTTP status codes. To customize the handling of error
+responses, use `onStatus` handlers as follows:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	Mono<Person> result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.onStatus(HttpStatus::is4xxClientError, response -> ...)
+			.onStatus(HttpStatus::is5xxServerError, response -> ...)
+			.bodyToMono(Person.class);
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	val result = client.get()
+			.uri("/persons/{id}", id).accept(MediaType.APPLICATION_JSON)
+			.retrieve()
+			.onStatus(HttpStatus::is4xxClientError) { ... }
+			.onStatus(HttpStatus::is5xxServerError) { ... }
+			.awaitBody<Person>()
+----
+
+
+
+

@@ -1,0 +1,31 @@
+[[jdbc-choose-style]]
+= Choosing an Approach for JDBC Database Access
+
+You can choose among several approaches to form the basis for your JDBC database access.
+In addition to three flavors of `JdbcTemplate`, a new `SimpleJdbcInsert` and
+`SimpleJdbcCall` approach optimizes database metadata, and the RDBMS Object style takes a
+more object-oriented approach similar to that of JDO Query design. Once you start using
+one of these approaches, you can still mix and match to include a feature from a
+different approach. All approaches require a JDBC 2.0-compliant driver, and some
+advanced features require a JDBC 3.0 driver.
+
+* `JdbcTemplate` is the classic and most popular Spring JDBC approach. This
+  "`lowest-level`" approach and all others use a JdbcTemplate under the covers.
+* `NamedParameterJdbcTemplate` wraps a `JdbcTemplate` to provide named parameters
+  instead of the traditional JDBC `?` placeholders. This approach provides better
+  documentation and ease of use when you have multiple parameters for an SQL statement.
+* `SimpleJdbcInsert` and `SimpleJdbcCall` optimize database metadata to limit the amount
+  of necessary configuration. This approach simplifies coding so that you need to
+  provide only the name of the table or procedure and provide a map of parameters matching
+  the column names. This works only if the database provides adequate metadata. If the
+  database does not provide this metadata, you have to provide explicit
+  configuration of the parameters.
+* RDBMS objects — including `MappingSqlQuery`, `SqlUpdate`, and `StoredProcedure` —
+  require you to create reusable and thread-safe objects during initialization of your
+  data-access layer. This approach is modeled after JDO Query, wherein you define your
+  query string, declare parameters, and compile the query. Once you do that,
+  `execute(...)`, `update(...)`, and `findObject(...)` methods can be called multiple
+  times with various parameter values.
+
+
+

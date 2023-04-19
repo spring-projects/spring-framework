@@ -1,0 +1,24 @@
+[[expressions-language-ref]]
+= Language Reference
+
+This section describes how the Spring Expression Language works. It covers the following
+topics:
+
+* <<expressions-ref-literal>>
+* <<expressions-properties-arrays>>
+* <<expressions-inline-lists>>
+* <<expressions-inline-maps>>
+* <<expressions-array-construction>>
+* <<expressions-methods>>
+* <<expressions-operators>>
+* <<expressions-types>>
+* <<expressions-constructors>>
+* <<expressions-ref-variables>>
+* <<expressions-ref-functions>>
+* <<expressions-bean-references>>
+* <<expressions-operator-ternary>>
+* <<expressions-operator-elvis>>
+* <<expressions-operator-safe-navigation>>
+
+
+

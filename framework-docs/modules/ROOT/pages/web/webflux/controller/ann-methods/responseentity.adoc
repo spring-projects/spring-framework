@@ -1,0 +1,43 @@
+[[webflux-ann-responseentity]]
+= `ResponseEntity`
+
+[.small]#<<web.adoc#mvc-ann-responseentity, See equivalent in the Servlet stack>>#
+
+`ResponseEntity` is like <<webflux-ann-responsebody>> but with status and headers. For example:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@GetMapping("/something")
+	public ResponseEntity<String> handle() {
+		String body = ... ;
+		String etag = ... ;
+		return ResponseEntity.ok().eTag(etag).body(body);
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/something")
+	fun handle(): ResponseEntity<String> {
+		val body: String = ...
+		val etag: String = ...
+		return ResponseEntity.ok().eTag(etag).build(body)
+	}
+----
+
+WebFlux supports using a single value <<webflux-reactive-libraries, reactive type>> to
+produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
+for the body. This allows a variety of async responses with `ResponseEntity` as follows:
+
+* `ResponseEntity<Mono<T>>` or `ResponseEntity<Flux<T>>` make the response status and
+  headers known immediately while the body is provided asynchronously at a later point.
+  Use `Mono` if the body consists of 0..1 values or `Flux` if it can produce multiple values.
+* `Mono<ResponseEntity<T>>` provides all three -- response status, headers, and body,
+  asynchronously at a later point. This allows the response status and headers to vary
+  depending on the outcome of asynchronous request handling.
+* `Mono<ResponseEntity<Mono<T>>>` or `Mono<ResponseEntity<Flux<T>>>` are yet another
+  possible, albeit less common alternative. They provide the response status and headers
+  asynchronously first and then the response body, also asynchronously, second.
+
+

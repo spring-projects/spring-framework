@@ -1,0 +1,75 @@
+[[webflux-ann-requestbody]]
+= `@RequestBody`
+
+[.small]#<<web.adoc#mvc-ann-requestbody, See equivalent in the Servlet stack>>#
+
+You can use the `@RequestBody` annotation to have the request body read and deserialized into an
+`Object` through an <<webflux-codecs,HttpMessageReader>>.
+The following example uses a `@RequestBody` argument:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@PostMapping("/accounts")
+	public void handle(@RequestBody Account account) {
+		// ...
+	}
+----
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(@RequestBody account: Account) {
+		// ...
+	}
+----
+
+Unlike Spring MVC, in WebFlux, the `@RequestBody` method argument supports reactive types
+and fully non-blocking reading and (client-to-server) streaming.
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@PostMapping("/accounts")
+	public void handle(@RequestBody Mono<Account> account) {
+		// ...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(@RequestBody accounts: Flow<Account>) {
+		// ...
+	}
+----
+
+You can use the <<webflux-config-message-codecs>> option of the <<webflux-config>> to
+configure or customize message readers.
+
+You can use `@RequestBody` in combination with `jakarta.validation.Valid` or Spring's
+`@Validated` annotation, which causes Standard Bean Validation to be applied. Validation
+errors cause a `WebExchangeBindException`, which results in a 400 (BAD_REQUEST) response.
+The exception contains a `BindingResult` with error details and can be handled in the
+controller method by declaring the argument with an async wrapper and then using error
+related operators:
+
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+.Java
+----
+	@PostMapping("/accounts")
+	public void handle(@Valid @RequestBody Mono<Account> account) {
+		// use one of the onError* operators...
+	}
+----
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/accounts")
+	fun handle(@Valid @RequestBody account: Mono<Account>) {
+		// ...
+	}
+----
+
+

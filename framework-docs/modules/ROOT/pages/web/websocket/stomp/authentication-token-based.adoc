@@ -1,0 +1,74 @@
+[[websocket-stomp-authentication-token-based]]
+= Token Authentication
+
+https://github.com/spring-projects/spring-security-oauth[Spring Security OAuth]
+provides support for token based security, including JSON Web Token (JWT).
+You can use this as the authentication mechanism in Web applications,
+including STOMP over WebSocket interactions, as described in the previous
+section (that is, to maintain identity through a cookie-based session).
+
+At the same time, cookie-based sessions are not always the best fit (for example,
+in applications that do not maintain a server-side session or in
+mobile applications where it is common to use headers for authentication).
+
+The https://tools.ietf.org/html/rfc6455#section-10.5[WebSocket protocol, RFC 6455]
+"doesn't prescribe any particular way that servers can authenticate clients during
+the WebSocket handshake." In practice, however, browser clients can use only standard
+authentication headers (that is, basic HTTP authentication) or cookies and cannot (for example)
+provide custom headers. Likewise, the SockJS JavaScript client does not provide
+a way to send HTTP headers with SockJS transport requests. See
+https://github.com/sockjs/sockjs-client/issues/196[sockjs-client issue 196].
+Instead, it does allow sending query parameters that you can use to send a token,
+but that has its own drawbacks (for example, the token may be inadvertently
+logged with the URL in server logs).
+
+NOTE: The preceding limitations are for browser-based clients and do not apply to the
+Spring Java-based STOMP client, which does support sending headers with both
+WebSocket and SockJS requests.
+
+Therefore, applications that wish to avoid the use of cookies may not have any good
+alternatives for authentication at the HTTP protocol level. Instead of using cookies,
+they may prefer to authenticate with headers at the STOMP messaging protocol level.
+Doing so requires two simple steps:
+
+. Use the STOMP client to pass authentication headers at connect time.
+. Process the authentication headers with a `ChannelInterceptor`.
+
+The next example uses server-side configuration to register a custom authentication
+interceptor. Note that an interceptor needs only to authenticate and set
+the user header on the CONNECT `Message`. Spring notes and saves the authenticated
+user and associate it with subsequent STOMP messages on the same session. The following
+example shows how register a custom authentication interceptor:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class MyConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void configureClientInboundChannel(ChannelRegistration registration) {
+			registration.interceptors(new ChannelInterceptor() {
+				@Override
+				public Message<?> preSend(Message<?> message, MessageChannel channel) {
+					StompHeaderAccessor accessor =
+							MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+					if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+						Authentication user = ... ; // access authentication header(s)
+						accessor.setUser(user);
+					}
+					return message;
+				}
+			});
+		}
+	}
+----
+
+Also, note that, when you use Spring Security's authorization for messages, at present,
+you need to ensure that the authentication `ChannelInterceptor` config is ordered
+ahead of Spring Security's. This is best done by declaring the custom interceptor in
+its own implementation of `WebSocketMessageBrokerConfigurer` that is marked with
+`@Order(Ordered.HIGHEST_PRECEDENCE + 99)`.
+
+
+

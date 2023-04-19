@@ -1,0 +1,29 @@
+[[integration-testing-annotations-spring]]
+= Spring Testing Annotations
+
+The Spring Framework provides the following set of Spring-specific annotations that you
+can use in your unit and integration tests in conjunction with the TestContext framework.
+See the corresponding javadoc for further information, including default attribute
+values, attribute aliases, and other details.
+
+Spring's testing annotations include the following:
+
+* <<spring-testing-annotation-bootstrapwith>>
+* <<spring-testing-annotation-contextconfiguration>>
+* <<spring-testing-annotation-webappconfiguration>>
+* <<spring-testing-annotation-contexthierarchy>>
+* <<spring-testing-annotation-activeprofiles>>
+* <<spring-testing-annotation-testpropertysource>>
+* <<spring-testing-annotation-dynamicpropertysource>>
+* <<spring-testing-annotation-dirtiescontext>>
+* <<spring-testing-annotation-testexecutionlisteners>>
+* <<spring-testing-annotation-recordapplicationevents>>
+* <<spring-testing-annotation-commit>>
+* <<spring-testing-annotation-rollback>>
+* <<spring-testing-annotation-beforetransaction>>
+* <<spring-testing-annotation-aftertransaction>>
+* <<spring-testing-annotation-sql>>
+* <<spring-testing-annotation-sqlconfig>>
+* <<spring-testing-annotation-sqlmergemode>>
+* <<spring-testing-annotation-sqlgroup>>
+

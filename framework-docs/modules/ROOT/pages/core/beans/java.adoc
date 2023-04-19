@@ -1,0 +1,18 @@
+[[beans-java]]
+= Java-based Container Configuration
+
+This section covers how to use annotations in your Java code to configure the Spring
+container. It includes the following topics:
+
+* <<beans-java-basic-concepts>>
+* <<beans-java-instantiating-container>>
+* <<beans-java-bean-annotation>>
+* <<beans-java-configuration-annotation>>
+* <<beans-java-composing-configuration-classes>>
+* <<beans-definition-profiles>>
+* <<beans-property-source-abstraction>>
+* <<beans-using-propertysource>>
+* <<beans-placeholder-resolution-in-statements>>
+
+
+
