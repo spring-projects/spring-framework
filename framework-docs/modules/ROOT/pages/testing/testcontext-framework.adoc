@@ -1,5 +1,6 @@
 [[testcontext-framework]]
 = Spring TestContext Framework
+:page-section-summary-toc: 1
 
 The Spring TestContext Framework (located in the `org.springframework.test.context`
 package) provides generic, annotation-driven unit and integration testing support that is

@@ -1,5 +1,6 @@
 [[webflux-ann-typeconversion]]
 = Type Conversion
+:page-section-summary-toc: 1
 
 [.small]#xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[See equivalent in the Servlet stack]#
 

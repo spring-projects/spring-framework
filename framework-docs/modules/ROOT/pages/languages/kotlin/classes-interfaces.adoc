@@ -1,5 +1,6 @@
 [[kotlin-classes-interfaces]]
 = Classes and Interfaces
+:page-section-summary-toc: 1
 
 The Spring Framework supports various Kotlin constructs, such as instantiating Kotlin classes
 through primary constructors, immutable classes data binding, and function optional parameters

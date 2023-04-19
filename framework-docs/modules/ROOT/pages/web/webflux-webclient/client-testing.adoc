@@ -1,5 +1,6 @@
 [[webflux-client-testing]]
 = Testing
+:page-section-summary-toc: 1
 
 To test code that uses the `WebClient`, you can use a mock web server, such as the
 https://github.com/square/okhttp#mockwebserver[OkHttp MockWebServer]. To see an example

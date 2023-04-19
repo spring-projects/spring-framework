@@ -1,5 +1,6 @@
 [[webflux-client]]
 = WebClient
+:page-section-summary-toc: 1
 
 Spring WebFlux includes a client to perform HTTP requests with. `WebClient` has a
 functional, fluent API based on Reactor, see xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries],

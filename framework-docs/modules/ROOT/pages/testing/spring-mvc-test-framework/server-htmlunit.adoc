@@ -1,5 +1,6 @@
 [[spring-mvc-test-server-htmlunit]]
 = HtmlUnit Integration
+:page-section-summary-toc: 1
 
 Spring provides integration between xref:testing/spring-mvc-test-framework/server.adoc[MockMvc] and
 https://htmlunit.sourceforge.io/[HtmlUnit]. This simplifies performing end-to-end testing

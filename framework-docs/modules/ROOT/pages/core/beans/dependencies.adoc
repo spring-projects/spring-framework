@@ -1,5 +1,6 @@
 [[beans-dependencies]]
 = Dependencies
+:page-section-summary-toc: 1
 
 A typical enterprise application does not consist of a single object (or bean in the
 Spring parlance). Even the simplest application has a few objects that work together to

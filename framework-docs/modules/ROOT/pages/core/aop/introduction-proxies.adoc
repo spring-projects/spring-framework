@@ -1,5 +1,6 @@
 [[aop-introduction-proxies]]
 = AOP Proxies
+:page-section-summary-toc: 1
 
 Spring AOP defaults to using standard JDK dynamic proxies for AOP proxies. This
 enables any interface (or set of interfaces) to be proxied.

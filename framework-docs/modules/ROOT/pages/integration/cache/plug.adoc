@@ -1,5 +1,6 @@
 [[cache-plug]]
 = Plugging-in Different Back-end Caches
+:page-section-summary-toc: 1
 
 Clearly, there are plenty of caching products out there that you can use as a backing
 store. For those that do not support JSR-107 you need to provide a `CacheManager` and a

@@ -1,5 +1,6 @@
 [[spring-testing-annotation-recordapplicationevents]]
 = `@RecordApplicationEvents`
+:page-section-summary-toc: 1
 
 `@RecordApplicationEvents` is a class-level annotation that is used to instruct the
 _Spring TestContext Framework_ to record all application events that are published in the

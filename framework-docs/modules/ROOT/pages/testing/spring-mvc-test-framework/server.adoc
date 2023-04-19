@@ -1,5 +1,6 @@
 [[spring-mvc-test-server]]
 = Overview
+:page-section-summary-toc: 1
 
 You can write plain unit tests for Spring MVC by instantiating a controller, injecting it
 with dependencies, and calling its methods. However such tests do not verify request

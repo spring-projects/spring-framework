@@ -1,5 +1,6 @@
 [[mvc-config]]
 = MVC Config
+:page-section-summary-toc: 1
 
 [.small]#xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[See equivalent in the Reactive stack]#
 

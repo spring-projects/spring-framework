@@ -1,5 +1,6 @@
 [[transaction-solutions-to-common-problems]]
 = Solutions to Common Problems
+:page-section-summary-toc: 1
 
 This section describes solutions to some common problems.
 

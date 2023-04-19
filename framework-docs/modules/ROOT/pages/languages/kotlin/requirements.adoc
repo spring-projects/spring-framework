@@ -1,5 +1,6 @@
 [[kotlin-requirements]]
 = Requirements
+:page-section-summary-toc: 1
 
 Spring Framework supports Kotlin 1.3+ and requires
 https://search.maven.org/artifact/org.jetbrains.kotlin/kotlin-stdlib[`kotlin-stdlib`]

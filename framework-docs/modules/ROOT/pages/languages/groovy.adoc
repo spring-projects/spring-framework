@@ -1,5 +1,6 @@
 [[groovy]]
 = Apache Groovy
+:page-section-summary-toc: 1
 
 Groovy is a powerful, optionally typed, and dynamic language, with static-typing and static
 compilation capabilities. It offers a concise syntax and integrates smoothly with any

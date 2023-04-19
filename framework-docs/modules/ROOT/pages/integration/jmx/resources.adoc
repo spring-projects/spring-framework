@@ -1,5 +1,6 @@
 [[jmx-resources]]
 = Further Resources
+:page-section-summary-toc: 1
 
 This section contains links to further resources about JMX:
 

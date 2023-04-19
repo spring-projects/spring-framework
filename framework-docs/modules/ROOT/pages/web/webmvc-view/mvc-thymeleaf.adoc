@@ -1,5 +1,6 @@
 [[mvc-view-thymeleaf]]
 = Thymeleaf
+:page-section-summary-toc: 1
 
 [.small]#xref:web/webflux-view.adoc#webflux-view-thymeleaf[See equivalent in the Reactive stack]#
 

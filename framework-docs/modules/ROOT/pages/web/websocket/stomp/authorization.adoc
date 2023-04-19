@@ -1,5 +1,6 @@
 [[websocket-stomp-authorization]]
 = Authorization
+:page-section-summary-toc: 1
 
 Spring Security provides
 {docs-spring-security}/servlet/integrations/websocket.html#websocket-authorization[WebSocket sub-protocol authorization]

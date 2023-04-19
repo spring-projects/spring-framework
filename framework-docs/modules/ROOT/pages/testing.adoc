@@ -1,5 +1,6 @@
 [[testing]]
 = Testing
+:page-section-summary-toc: 1
 
 This chapter covers Spring's support for integration testing and best practices for unit
 testing. The Spring team advocates test-driven development (TDD). The Spring team has

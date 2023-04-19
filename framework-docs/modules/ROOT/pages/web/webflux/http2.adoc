@@ -1,5 +1,6 @@
 [[webflux-http2]]
 = HTTP/2
+:page-section-summary-toc: 1
 
 [.small]#xref:web/webmvc/mvc-http2.adoc[See equivalent in the Servlet stack]#
 
