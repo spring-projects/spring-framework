@@ -1,4 +1,5 @@
 [id={chapter}.web-uricomponents]
+[[uricomponents]]
 = UriComponents
 [.small]#Spring MVC and Spring WebFlux#
 
@@ -102,6 +103,7 @@ You can shorten it further still with a full URI template, as the following exam
 
 
 [id={chapter}.web-uribuilder]
+[[uribuilder]]
 = UriBuilder
 [.small]#Spring MVC and Spring WebFlux#
 
@@ -194,6 +196,7 @@ that holds configuration and preferences, as the following example shows:
 
 
 [id={chapter}.web-uri-encoding]
+[[uri-encoding]]
 = URI Encoding
 [.small]#Spring MVC and Spring WebFlux#
 

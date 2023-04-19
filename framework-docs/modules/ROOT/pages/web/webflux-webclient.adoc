@@ -869,6 +869,7 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 			.awaitBody<Unit>()
 ----
 
+[[partevent]]
 ==== `PartEvent`
 
 To stream multipart data sequentially, you can provide multipart content through `PartEvent`

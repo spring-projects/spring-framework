@@ -30,6 +30,7 @@ Spring application developers.
 
 
 
+[[use-cases]]
 == Use cases
 
 In addition to providing an explicit declaration for Spring Framework API nullability,
@@ -43,6 +44,7 @@ are available in the <<languages#kotlin-null-safety, Kotlin support documentatio
 
 
 
+[[jsr-305-meta-annotations]]
 == JSR-305 meta-annotations
 
 Spring annotations are meta-annotated with https://jcp.org/en/jsr/detail?id=305[JSR 305]

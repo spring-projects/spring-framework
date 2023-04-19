@@ -1,5 +1,6 @@
 [[webflux]]
 :chapter: webflux
+[[spring-webflux]]
 = Spring WebFlux
 
 The original web framework included in the Spring Framework, Spring Web MVC, was
@@ -248,6 +249,7 @@ current thread (and rely on callbacks instead) means that you do not need extra 
 there are no blocking calls to absorb.
 
 
+[[invoking-a-blocking-api]]
 ==== Invoking a Blocking API
 
 What if you do need to use a blocking library? Both Reactor and RxJava provide the
@@ -255,6 +257,7 @@ What if you do need to use a blocking library? Both Reactor and RxJava provide t
 easy escape hatch. Keep in mind, however, that blocking APIs are not a good fit for
 this concurrency model.
 
+[[mutable-state]]
 ==== Mutable State
 
 In Reactor and RxJava, you declare logic through operators. At runtime, a reactive
@@ -262,6 +265,7 @@ pipeline is formed where data is processed sequentially, in distinct stages. A k
 of this is that it frees applications from having to protect mutable state because
 application code within that pipeline is never invoked concurrently.
 
+[[threading-model]]
 ==== Threading Model
 
 What threads should you expect to see on a server running with Spring WebFlux?
@@ -287,6 +291,7 @@ specific thread pool `Scheduler` strategy.
 * Data access libraries and other third party dependencies can also create and use threads
 of their own.
 
+[[configuring]]
 ==== Configuring
 
 The Spring Framework does not provide support for starting and stopping
@@ -2841,6 +2846,7 @@ as the following example shows:
 <1> Using `@RequestBody`.
 --
 
+[[partevent]]
 ===== `PartEvent`
 
 To access multipart data sequentially, in a streaming fashion, you can use `@RequestBody` with

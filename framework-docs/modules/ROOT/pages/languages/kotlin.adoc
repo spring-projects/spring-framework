@@ -296,6 +296,7 @@ for more details and up-to-date information. See also the experimental Kofu DSL 
 
 
 
+[[router-dsl]]
 === Router DSL
 
 Spring Framework comes with a Kotlin router DSL available in 3 flavors:
@@ -339,6 +340,7 @@ See https://github.com/mixitconf/mixit/[MiXiT project] for a concrete example.
 
 
 
+[[mockmvc-dsl]]
 === MockMvc DSL
 
 A Kotlin DSL is provided via `MockMvc` Kotlin extensions in order to provide a more
@@ -366,6 +368,7 @@ mockMvc.get("/person/{name}", "Lee") {
 
 
 
+[[kotlin-script-templates]]
 === Kotlin Script Templates
 
 Spring Framework provides a
@@ -413,6 +416,7 @@ project for more details.
 
 
 
+[[kotlin-multiplatform-serialization]]
 === Kotlin multiplatform serialization
 
 As of Spring Framework 5.3, https://github.com/Kotlin/kotlinx.serialization[Kotlin multiplatform serialization] is
@@ -427,6 +431,7 @@ if Jackson is needed configure `KotlinSerializationJsonMessageConverter` manuall
 
 
 
+[[coroutines]]
 == Coroutines
 
 Kotlin https://kotlinlang.org/docs/reference/coroutines-overview.html[Coroutines] are Kotlin
@@ -447,6 +452,7 @@ Spring Framework provides support for Coroutines on the following scope:
 
 
 
+[[dependencies]]
 === Dependencies
 
 Coroutines support is enabled when `kotlinx-coroutines-core` and `kotlinx-coroutines-reactor`
@@ -466,6 +472,7 @@ Version `1.4.0` and above are supported.
 
 
 
+[[how-reactive-translates-to-coroutines?]]
 === How Reactive translates to Coroutines?
 
 For return values, the translation from Reactive to Coroutines APIs is the following:
@@ -494,6 +501,7 @@ for more details, including how to run code concurrently with Coroutines.
 
 
 
+[[controllers]]
 === Controllers
 
 Here is an example of a Coroutines `@RestController`.
@@ -592,6 +600,7 @@ class CoroutinesViewController(banner: Banner) {
 
 
 
+[[webflux-fn]]
 === WebFlux.fn
 
 Here is an example of Coroutines router defined via the {docs-spring-framework}/kdoc-api/spring-webflux/org.springframework.web.reactive.function.server/co-router.html[coRouter { }] DSL and related handlers.
@@ -627,6 +636,7 @@ class UserHandler(builder: WebClient.Builder) {
 
 
 
+[[transactions]]
 === Transactions
 
 Transactions on Coroutines are supported via the programmatic variant of the Reactive
@@ -686,6 +696,7 @@ in Kotlin.
 
 
 
+[[final-by-default]]
 === Final by Default
 
 By default, https://discuss.kotlinlang.org/t/classes-final-by-default/166[all classes in Kotlin are `final`].
@@ -727,6 +738,7 @@ using the `kotlin-allopen` plugin, since this is the most commonly used setup.
 
 
 
+[[using-immutable-class-instances-for-persistence]]
 === Using Immutable Class Instances for Persistence
 
 In Kotlin, it is convenient and considered to be a best practice to declare read-only properties
@@ -772,6 +784,7 @@ does not require the `kotlin-noarg` plugin if the module uses Spring Data object
 
 
 
+[[injecting-dependencies]]
 === Injecting Dependencies
 
 Our recommendation is to try to favor constructor injection with `val` read-only (and
@@ -809,6 +822,7 @@ as the following example shows:
 
 
 
+[[injecting-configuration-properties]]
 === Injecting Configuration Properties
 
 In Java, you can inject configuration properties by using annotations (such as pass:q[`@Value("${property}")`)].
@@ -850,6 +864,7 @@ that uses the `${...}` syntax, with configuration beans, as the following exampl
 
 
 
+[[checked-exceptions]]
 === Checked Exceptions
 
 Java and https://kotlinlang.org/docs/reference/exceptions.html[Kotlin exception handling]
@@ -864,6 +879,7 @@ to specify explicitly the checked exceptions thrown (for example `@Throws(IOExce
 
 
 
+[[annotation-array-attributes]]
 === Annotation Array Attributes
 
 Kotlin annotations are mostly similar to Java annotations, but array attributes (which are
@@ -910,6 +926,7 @@ be matched, not only the `GET` method.
 
 
 
+[[testing]]
 === Testing
 
 This section addresses testing with the combination of Kotlin and Spring Framework.
@@ -920,6 +937,7 @@ NOTE: If you are using Spring Boot, see
 https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-kotlin-testing[this related documentation].
 
 
+[[constructor-injection]]
 ==== Constructor injection
 
 As described in the <<testing#testcontext-junit-jupiter-di, dedicated section>>,
@@ -942,6 +960,7 @@ class OrderServiceIntegrationTests(val orderService: OrderService,
 ====
 
 
+[[per_class-lifecycle]]
 ==== `PER_CLASS` Lifecycle
 
 Kotlin lets you specify meaningful test function names between backticks (```).
@@ -986,6 +1005,7 @@ class IntegrationTests {
 ----
 
 
+[[specification-like-tests]]
 ==== Specification-like Tests
 
 You can create specification-like tests with JUnit 5 and Kotlin.
@@ -1036,6 +1056,7 @@ https://spring.io/guides/tutorials/spring-boot-kotlin/[the dedicated tutorial].
 
 
 
+[[start-spring-io]]
 === `start.spring.io`
 
 The easiest way to start a new Spring Framework project in Kotlin is to create a new Spring
@@ -1043,6 +1064,7 @@ Boot 2 project on https://start.spring.io/#!language=kotlin&type=gradle-project[
 
 
 
+[[choosing-the-web-flavor]]
 === Choosing the Web Flavor
 
 Spring Framework now comes with two different web stacks: <<web#mvc, Spring MVC>> and
@@ -1073,6 +1095,7 @@ Kotlin and the Spring Framework:
 
 
 
+[[examples]]
 === Examples
 
 The following Github projects offer examples that you can learn from and possibly even extend:
@@ -1087,6 +1110,7 @@ The following Github projects offer examples that you can learn from and possibl
 
 
 
+[[issues]]
 === Issues
 
 The following list categorizes the pending issues related to Spring and Kotlin support:

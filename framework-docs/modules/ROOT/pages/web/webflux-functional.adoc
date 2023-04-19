@@ -619,6 +619,7 @@ RouterFunction<ServerResponse> route = route()
 <4> `otherRoute` is a router function that is created elsewhere, and added to the route built.
 
 
+[[nested-routes]]
 === Nested Routes
 
 It is common for a group of router functions to have a shared predicate, for instance a

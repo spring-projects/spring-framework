@@ -831,6 +831,7 @@ invoking the method again:
 ----
 
 
+[[enabling-jsr-107-support]]
 === Enabling JSR-107 Support
 
 You do not need to do anything specific to enable the JSR-107 support alongside Spring's
