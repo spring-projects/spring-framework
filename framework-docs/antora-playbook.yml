@@ -1,0 +1,36 @@
+# PACKAGES antora@3.2.0-alpha.2 @antora/atlas-extension:1.0.0-alpha.1 @antora/collector-extension@1.0.0-alpha.3 @springio/antora-extensions@1.1.0-alpha.2 @asciidoctor/tabs@1.0.0-alpha.12 @opendevise/antora-release-line-extension@1.0.0-alpha.2
+#
+# The purpose of this Antora playbook is to build the docs in the current branch.
+antora:
+  extensions:
+    - '@antora/collector-extension'
+    - require: '@springio/antora-extensions/tabs-migration-extension'
+      unwrap_example_block: always
+site:
+  title: Spring Framework Reference
+  url: https://https://rwinch.github.io/spring-framework/
+content:
+  sources:
+    - url: https://github.com/rwinch/spring-framework
+      branches: ./..
+      start_path: framework-docs
+      worktrees: true
+asciidoc:
+  attributes:
+    page-pagination: ''
+    hide-uri-scheme: '@'
+    tabs-sync-option: '@'
+    chomp: 'all'
+  extensions:
+    - '@asciidoctor/tabs'
+    - '@springio/asciidoctor-extensions'
+  sourcemap: true
+urls:
+  latest_version_segment: ''
+runtime:
+  log:
+    failure_level: warn
+ui:
+  bundle:
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/latest/ui-bundle.zip
+    snapshot: true
