@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,19 +33,6 @@ public interface HttpRequest extends HttpMessage {
 	 * @see HttpMethod#valueOf(String)
 	 */
 	HttpMethod getMethod();
-
-	/**
-	 * Return the HTTP method of the request as a String value.
-	 * @return the HTTP method as a plain String
-	 * @since 5.0
-	 * @see #getMethod()
-	 * @deprecated as of Spring Framework 6.0 in favor of {@link #getMethod()} and
-	 * {@link HttpMethod#name()}
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	default String getMethodValue() {
-		return getMethod().name();
-	}
 
 	/**
 	 * Return the URI of the request (including a query string if any,

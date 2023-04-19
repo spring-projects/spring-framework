@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER;
+import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_COMMENT_PREFIX;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_COMMENT_PREFIXES;
 import static org.springframework.jdbc.datasource.init.ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
-import static org.springframework.jdbc.datasource.init.ScriptUtils.containsSqlScriptDelimiters;
-import static org.springframework.jdbc.datasource.init.ScriptUtils.splitSqlScript;
 
 /**
  * Unit tests for {@link ScriptUtils}.
@@ -46,11 +46,10 @@ import static org.springframework.jdbc.datasource.init.ScriptUtils.splitSqlScrip
  * @since 4.0.3
  * @see ScriptUtilsIntegrationTests
  */
-public class ScriptUtilsUnitTests {
+class ScriptUtilsUnitTests {
 
 	@Test
-	@SuppressWarnings("deprecation")
-	public void splitSqlScriptDelimitedWithSemicolon() {
+	void splitSqlScriptDelimitedWithSemicolon() {
 		String rawStatement1 = "insert into customer (id, name)\nvalues (1, 'Rod ; Johnson'), (2, 'Adrian \n Collier')";
 		String cleanedStatement1 = "insert into customer (id, name) values (1, 'Rod ; Johnson'), (2, 'Adrian \n Collier')";
 		String rawStatement2 = "insert into orders(id, order_date, customer_id)\nvalues (1, '2008-01-02', 2)";
@@ -68,8 +67,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	public void splitSqlScriptDelimitedWithNewLine() {
+	void splitSqlScriptDelimitedWithNewLine() {
 		String statement1 = "insert into customer (id, name) values (1, 'Rod ; Johnson'), (2, 'Adrian \n Collier')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		String statement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
@@ -84,8 +82,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	public void splitSqlScriptDelimitedWithNewLineButDefaultDelimiterSpecified() {
+	void splitSqlScriptDelimitedWithNewLineButDefaultDelimiterSpecified() {
 		String statement1 = "do something";
 		String statement2 = "do something else";
 
@@ -99,8 +96,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-13218
-	@SuppressWarnings("deprecation")
-	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() {
+	void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() {
 		String statement1 = "select '1' as \"Dogbert's owner's\" from dual";
 		String statement2 = "select '2' as \"Dilbert's\" from dual";
 
@@ -114,8 +110,7 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-11560
-	@SuppressWarnings("deprecation")
-	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() throws Exception {
+	void readAndSplitScriptWithMultipleNewlinesAsSeparator() throws Exception {
 		String script = readScript("db-test-data-multi-newline.sql");
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, "\n\n", statements);
@@ -127,24 +122,23 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
-	public void readAndSplitScriptContainingComments() throws Exception {
+	void readAndSplitScriptContainingComments() throws Exception {
 		String script = readScript("test-data-with-comments.sql");
 		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
 	@Test
-	public void readAndSplitScriptContainingCommentsWithWindowsLineEnding() throws Exception {
+	void readAndSplitScriptContainingCommentsWithWindowsLineEnding() throws Exception {
 		String script = readScript("test-data-with-comments.sql").replaceAll("\n", "\r\n");
 		splitScriptContainingComments(script, DEFAULT_COMMENT_PREFIXES);
 	}
 
 	@Test
-	public void readAndSplitScriptContainingCommentsWithMultiplePrefixes() throws Exception {
+	void readAndSplitScriptContainingCommentsWithMultiplePrefixes() throws Exception {
 		String script = readScript("test-data-with-multi-prefix-comments.sql");
 		splitScriptContainingComments(script, "--", "#", "^");
 	}
 
-	@SuppressWarnings("deprecation")
 	private void splitScriptContainingComments(String script, String... commentPrefixes) {
 		List<String> statements = new ArrayList<>();
 		splitSqlScript(null, script, ";", commentPrefixes, DEFAULT_BLOCK_COMMENT_START_DELIMITER,
@@ -160,11 +154,10 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-10330
-	@SuppressWarnings("deprecation")
-	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
+	void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ";", statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Sam Brannen')";
 		String statement2 = "insert into orders(id, order_date, customer_id) values (1, '2013-06-08', 1)";
@@ -174,11 +167,10 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test  // SPR-9531
-	@SuppressWarnings("deprecation")
-	public void readAndSplitScriptContainingMultiLineComments() throws Exception {
+	void readAndSplitScriptContainingMultiLineComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-comments.sql");
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ";", statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
@@ -187,11 +179,10 @@ public class ScriptUtilsUnitTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	public void readAndSplitScriptContainingMultiLineNestedComments() throws Exception {
+	void readAndSplitScriptContainingMultiLineNestedComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-nested-comments.sql");
 		List<String> statements = new ArrayList<>();
-		splitSqlScript(script, ';', statements);
+		splitSqlScript(script, ";", statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";
 		String statement2 = "INSERT INTO users(first_name, last_name) VALUES( 'Sam' , 'Brannen' )";
@@ -237,16 +228,36 @@ public class ScriptUtilsUnitTests {
 		~/* double " quotes */\n insert into colors(color_num) values(42);~                | ;      | true
 		~/* double \\" quotes */\n insert into colors(color_num) values(42);~              | ;      | true
 		""")
-	@SuppressWarnings("deprecation")
-	public void containsStatementSeparator(String script, String delimiter, boolean expected) {
+	void containsStatementSeparator(String script, String delimiter, boolean expected) {
 		// Indirectly tests ScriptUtils.containsStatementSeparator(EncodedResource, String, String, String[], String, String).
 		assertThat(containsSqlScriptDelimiters(script, delimiter)).isEqualTo(expected);
 	}
+
 
 	private String readScript(String path) throws Exception {
 		EncodedResource resource = new EncodedResource(new ClassPathResource(path, getClass()));
 		return ScriptUtils.readScript(resource, DEFAULT_STATEMENT_SEPARATOR, DEFAULT_COMMENT_PREFIXES,
 			DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+	}
+
+
+	private static void splitSqlScript(String script, String separator, List<String> statements) throws ScriptException {
+		splitSqlScript(null, script, separator, new String[] { DEFAULT_COMMENT_PREFIX },
+				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER, statements);
+	}
+
+	private static void splitSqlScript(@Nullable EncodedResource resource, String script,
+			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
+			String blockCommentEndDelimiter, List<String> statements) throws ScriptException {
+
+		ScriptUtils.splitSqlScript(resource, script, separator, commentPrefixes,
+				blockCommentStartDelimiter, blockCommentEndDelimiter, statements);
+	}
+
+
+	private static boolean containsSqlScriptDelimiters(String script, String delimiter) {
+		return ScriptUtils.containsStatementSeparator(null, script, delimiter, DEFAULT_COMMENT_PREFIXES,
+			DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 }

@@ -684,13 +684,6 @@ class UriComponentsBuilderTests {
 				return HttpMethod.GET;
 			}
 
-			@SuppressWarnings("removal")
-			@Override
-			@Deprecated
-			public String getMethodValue() {
-				return "GET";
-			}
-
 			@Override
 			public URI getURI() {
 				return UriComponentsBuilder.fromUriString("/").build().toUri();
