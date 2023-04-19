@@ -140,7 +140,7 @@ continuity and consistency with each other, they are available side by side, and
 from each side benefits both sides. The following diagram shows how the two relate, what they
 have in common, and what each supports uniquely:
 
-image::images/spring-mvc-and-webflux-venn.png[]
+image::spring-mvc-and-webflux-venn.png[]
 
 We suggest that you consider the following specific points:
 

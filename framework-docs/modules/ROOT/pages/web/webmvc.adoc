@@ -154,7 +154,7 @@ are effectively inherited and can be overridden (that is, re-declared) in the Se
 child `WebApplicationContext`, which typically contains beans local to the given `Servlet`.
 The following image shows this relationship:
 
-image::images/mvc-context-hierarchy.png[]
+image::mvc-context-hierarchy.png[]
 
 The following example configures a `WebApplicationContext` hierarchy:
 
