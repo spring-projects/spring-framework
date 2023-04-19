@@ -607,7 +607,7 @@ operations need to execute within the same Reactor context in the same reactive 
 
 The following image shows a conceptual view of calling a method on a transactional proxy:
 
-image::images/tx.png[]
+image::tx.png[]
 
 
 [[transaction-declarative-first-example]]
@@ -1967,7 +1967,7 @@ logical transactions, and how the propagation setting applies to this difference
 [[tx-propagation-required]]
 ===== Understanding `PROPAGATION_REQUIRED`
 
-image::images/tx_prop_required.png[]
+image::tx_prop_required.png[]
 
 `PROPAGATION_REQUIRED` enforces a physical transaction, either locally for the current
 scope if no transaction exists yet or participating in an existing 'outer' transaction
@@ -2004,7 +2004,7 @@ indicate clearly that a rollback was performed instead.
 [[tx-propagation-requires_new]]
 ===== Understanding `PROPAGATION_REQUIRES_NEW`
 
-image::images/tx_prop_requires_new.png[]
+image::tx_prop_requires_new.png[]
 
 `PROPAGATION_REQUIRES_NEW`, in contrast to `PROPAGATION_REQUIRED`, always uses an
 independent physical transaction for each affected transaction scope, never
@@ -2955,7 +2955,7 @@ The following image shows the exception hierarchy that Spring provides.
 (Note that the class hierarchy detailed in the image shows only a subset of the entire
 `DataAccessException` hierarchy.)
 
-image::images/DataAccessException.png[]
+image::DataAccessException.png[]
 
 
 
@@ -8736,7 +8736,7 @@ underlying O-X mapping tool does not do so.
 
 The O-X Mapping exception hierarchy is shown in the following figure:
 
-image::images/oxm-exceptions.png[]
+image::oxm-exceptions.png[]
 
 
 

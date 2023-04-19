@@ -1114,7 +1114,7 @@ Both the Java configuration (that is, `@EnableWebSocketMessageBroker`) and the X
 workflow. The following diagram shows the components used when the simple built-in message
 broker is enabled:
 
-image::images/message-flow-simple-broker.png[]
+image::message-flow-simple-broker.png[]
 
 The preceding diagram shows three message channels:
 
@@ -1126,7 +1126,7 @@ server-side application code.
 The next diagram shows the components used when an external broker (such as RabbitMQ)
 is configured for managing subscriptions and broadcasting messages:
 
-image::images/message-flow-broker-relay.png[]
+image::message-flow-broker-relay.png[]
 
 The main difference between the two preceding diagrams is the use of the "`broker relay`" for passing
 messages up to the external STOMP broker over TCP and for passing messages down from the

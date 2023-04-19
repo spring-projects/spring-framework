@@ -84,7 +84,7 @@ created and initialized, you have a fully configured and executable system or
 application.
 
 .The Spring IoC container
-image::images/container-magic.png[]
+image::container-magic.png[]
 
 
 
@@ -2727,7 +2727,7 @@ defined by that bean definition. This single instance is stored in a cache of su
 singleton beans, and all subsequent requests and references for that named bean
 return the cached object. The following image shows how the singleton scope works:
 
-image::images/singleton.png[]
+image::singleton.png[]
 
 Spring's concept of a singleton bean differs from the singleton pattern as defined in
 the Gang of Four (GoF) patterns book. The GoF singleton hard-codes the scope of an
@@ -2760,7 +2760,7 @@ singleton scope for stateless beans.
 
 The following diagram illustrates the Spring prototype scope:
 
-image::images/prototype.png[]
+image::prototype.png[]
 
 (A data access object
 (DAO) is not typically configured as a prototype, because a typical DAO does not hold

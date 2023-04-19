@@ -3173,7 +3173,7 @@ code snippet shows:
 If you invoke a method on an object reference, the method is invoked directly on
 that object reference, as the following image and listing show:
 
-image::images/aop-proxy-plain-pojo-call.png[]
+image::aop-proxy-plain-pojo-call.png[]
 
 [source,java,indent=0,subs="verbatim",role="primary"]
 .Java
@@ -3200,7 +3200,7 @@ image::images/aop-proxy-plain-pojo-call.png[]
 Things change slightly when the reference that client code has is a proxy. Consider the
 following diagram and code snippet:
 
-image::images/aop-proxy-call.png[]
+image::aop-proxy-call.png[]
 
 [source,java,indent=0,subs="verbatim",role="primary"]
 .Java
