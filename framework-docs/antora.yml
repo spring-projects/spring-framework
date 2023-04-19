@@ -17,7 +17,7 @@ asciidoc:
     # FIXME: the copyright is not removed
     # FIXME: The package is not renamed
     chomp: 'all'
-    import-java: 'example$docs-src/main/java/org/springframework/docs'
+    include-java: 'example$docs-src/main/java/org/springframework/docs'
     spring-framework-main-code: 'https://github.com/spring-projects/spring-framework/tree/main'
     docs-site: 'https://docs.spring.io'
     docs-spring: "{docs-site}/spring-framework/docs/{spring-version}"
