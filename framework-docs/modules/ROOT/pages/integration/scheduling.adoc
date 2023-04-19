@@ -763,6 +763,7 @@ Here are some examples:
 | `0 0 0 ? * MON#1`     | the first Monday in the month at midnight
 |===
 
+[[macros]]
 === Macros
 
 Expressions such as `0 0 * * * *` are hard for humans to parse and are, therefore, hard to fix in case of bugs.

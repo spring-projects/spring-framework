@@ -1,5 +1,6 @@
 [[mvc]]
 :chapter: mvc
+[[spring-web-mvc]]
 = Spring Web MVC
 
 Spring Web MVC is the original web framework built on the Servlet API and has been included

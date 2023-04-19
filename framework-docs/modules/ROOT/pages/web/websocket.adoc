@@ -1226,6 +1226,7 @@ referenced through `@DestinationVariable` method arguments. Applications can als
 a dot-separated destination convention for mappings, as explained in
 <<websocket-stomp-destination-separator>>.
 
+[[supported-method-arguments]]
 ===== Supported Method Arguments
 
 The following table describes the method arguments:
@@ -1270,6 +1271,7 @@ Values are converted to the declared method argument type as necessary.
 
 |===
 
+[[return-values]]
 ===== Return Values
 
 By default, the return value from a `@MessageMapping` method is serialized to a payload

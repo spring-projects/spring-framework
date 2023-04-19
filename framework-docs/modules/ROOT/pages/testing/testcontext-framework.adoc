@@ -38,6 +38,7 @@ test execution by providing dependency injection, managing transactions, and so 
 class. See the {api-spring-framework}/test/context/package-summary.html[javadoc] and the
 Spring test suite for further information and examples of various implementations.
 
+[[testcontext]]
 === `TestContext`
 
 `TestContext` encapsulates the context in which a test is run (agnostic of the
@@ -45,6 +46,7 @@ actual testing framework in use) and provides context management and caching sup
 the test instance for which it is responsible. The `TestContext` also delegates to a
 `SmartContextLoader` to load an `ApplicationContext` if requested.
 
+[[testcontextmanager]]
 === `TestContextManager`
 
 `TestContextManager` is the main entry point into the Spring TestContext Framework and is
@@ -59,11 +61,13 @@ responsible for managing a single `TestContext` and signaling events to each reg
 * After any "`after`" or "`after each`" methods of a particular testing framework.
 * After any "`after class`" or "`after all`" methods of a particular testing framework.
 
+[[testexecutionlistener]]
 === `TestExecutionListener`
 
 `TestExecutionListener` defines the API for reacting to test-execution events published by
 the `TestContextManager` with which the listener is registered. See <<testcontext-tel-config>>.
 
+[[context-loaders]]
 === Context Loaders
 
 `ContextLoader` is a strategy interface for loading an `ApplicationContext` for an
@@ -1732,6 +1736,7 @@ through the `getPropertySourceLocations()` and `getPropertySourceProperties()` m
 `MergedContextConfiguration`.
 ====
 
+[[declaring-test-property-sources]]
 ==== Declaring Test Property Sources
 
 You can configure test properties files by using the `locations` or `value` attribute of
@@ -1829,6 +1834,7 @@ meta-annotation.
 ====
 
 
+[[default-properties-file-detection]]
 ==== Default Properties File Detection
 
 If `@TestPropertySource` is declared as an empty annotation (that is, without explicit
@@ -1838,6 +1844,7 @@ if the annotated test class is `com.example.MyTest`, the corresponding default p
 file is `classpath:com/example/MyTest.properties`. If the default cannot be detected, an
 `IllegalStateException` is thrown.
 
+[[precedence]]
 ==== Precedence
 
 Test properties have higher precedence than those defined in the operating system's
@@ -1881,6 +1888,7 @@ to specify properties both in a file and inline:
 	}
 ----
 
+[[inheriting-and-overriding-test-property-sources]]
 ==== Inheriting and Overriding Test Property Sources
 
 `@TestPropertySource` supports boolean `inheritLocations` and `inheritProperties`
@@ -2062,6 +2070,7 @@ properties.
 	}
 ----
 
+[[precedence]]
 ==== Precedence
 
 Dynamic properties have higher precedence than those loaded from `@TestPropertySource`,

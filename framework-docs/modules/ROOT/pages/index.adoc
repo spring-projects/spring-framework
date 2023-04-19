@@ -1,4 +1,5 @@
 :noheader:
+[[spring-framework-documentation]]
 = Spring Framework Documentation
 include::attributes.adoc[]
 
