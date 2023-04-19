@@ -1,6 +1,5 @@
 [[overview]]
 = Spring Framework Overview
-include::attributes.adoc[]
 :docinfo1:
 
 Spring makes it easy to create Java enterprise applications. It provides everything you

@@ -1,12 +1,7 @@
 [[languages]]
 = Language Support
-include::attributes.adoc[]
-include::page-layout.adoc[]
 
-include::languages/kotlin.adoc[leveloffset=+1]
 
-include::languages/groovy.adoc[leveloffset=+1]
 
-include::languages/dynamic.adoc[leveloffset=+1]
 
 

@@ -1,7 +1,5 @@
 [[appendix]]
 = Appendix
-include::attributes.adoc[]
-include::page-layout.adoc[]
 
 This part of the reference documentation covers topics that apply to multiple modules
 within the core Spring Framework.
