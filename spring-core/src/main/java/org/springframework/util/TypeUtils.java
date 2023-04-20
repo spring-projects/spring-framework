@@ -190,24 +190,24 @@ public abstract class TypeUtils {
 		return true;
 	}
 
-	private static Type[] getLowerBounds(WildcardType lhsType) {
-		Type[] lLowerBounds = lhsType.getLowerBounds();
+	private static Type[] getLowerBounds(WildcardType wildcardType) {
+		Type[] lowerBounds = wildcardType.getLowerBounds();
 
 		// supply the implicit lower bound if none are specified
-		if (lLowerBounds.length == 0) {
-			lLowerBounds = new Type[] { null };
+		if (lowerBounds.length == 0) {
+			lowerBounds = new Type[] { null };
 		}
-		return lLowerBounds;
+		return lowerBounds;
 	}
 
-	private static Type[] getUpperBounds(WildcardType lhsType) {
-		Type[] lUpperBounds = lhsType.getUpperBounds();
+	private static Type[] getUpperBounds(WildcardType wildcardType) {
+		Type[] upperBounds = wildcardType.getUpperBounds();
 
 		// supply the implicit upper bound if none are specified
-		if (lUpperBounds.length == 0) {
-			lUpperBounds = new Type[] { Object.class };
+		if (upperBounds.length == 0) {
+			upperBounds = new Type[] { Object.class };
 		}
-		return lUpperBounds;
+		return upperBounds;
 	}
 
 	public static boolean isAssignableBound(@Nullable Type lhsType, @Nullable Type rhsType) {
