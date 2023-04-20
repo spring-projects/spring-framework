@@ -27,6 +27,7 @@ import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
 import org.gradle.api.plugins.quality.CheckstylePlugin;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -68,7 +69,8 @@ public class CheckstyleConventions {
 			Path rootPath = project.getRootDir().toPath();
 			Path projectPath = rootPath.relativize(subproject.getProjectDir().toPath());
 			for (String buildFolder : buildFolders) {
-				noHttp.getSource().exclude(projectPath.resolve(buildFolder).resolve("**").toString());
+				Path innerBuildDir = projectPath.resolve(buildFolder);
+				noHttp.getSource().exclude(innerBuildDir + File.separator + "**");
 			}
 		});
 	}
