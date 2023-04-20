@@ -171,7 +171,3 @@ to 412 (PRECONDITION_FAILED) to prevent concurrent modification.
 You should serve static resources with a `Cache-Control` and conditional response headers
 for optimal performance. See the section on configuring xref:web/webflux/config.adoc#webflux-config-static-resources[Static Resources].
 
-
-include:../:webflux-view.adoc[leveloffset=+1]
-
-

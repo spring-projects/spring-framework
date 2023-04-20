@@ -39,7 +39,7 @@ Version `1.4.0` and above are supported.
 
 
 
-[[how-reactive-translates-to-coroutines?]]
+[[how-reactive-translates-to-coroutines]]
 == How Reactive translates to Coroutines?
 
 For return values, the translation from Reactive to Coroutines APIs is the following:

@@ -62,8 +62,3 @@ performance if used extensively. See the
 {api-spring-framework}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`]
 javadoc for more details.
 
-include:../../:webflux-functional.adoc[leveloffset=+1]
-
-
-
-
