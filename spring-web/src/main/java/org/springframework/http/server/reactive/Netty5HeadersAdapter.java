@@ -89,9 +89,8 @@ final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 	@Override
 	public Map<String, String> toSingleValueMap() {
 		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
-		this.headers.forEach(entry ->
-				singleValueMap.putIfAbsent(entry.getKey().toString(), entry.getValue().toString())
-		);
+		this.headers.forEach(entry -> singleValueMap.putIfAbsent(
+				entry.getKey().toString(), entry.getValue().toString()));
 		return singleValueMap;
 	}
 
