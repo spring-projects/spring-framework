@@ -41,7 +41,7 @@ import org.springframework.util.ReflectionUtils;
  * Helper class for @{@link ScheduledAnnotationBeanPostProcessor} to support reactive cases
  * without a dependency on optional classes.
  * @author Simon Baslé
- * @since 6.1.0 //FIXME
+ * @since 6.1.0
  */
 abstract class ScheduledAnnotationReactiveSupport {
 
