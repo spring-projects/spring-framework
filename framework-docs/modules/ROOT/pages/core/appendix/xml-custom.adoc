@@ -1,7 +1,7 @@
-[[core.appendix.xml-custom]]
+[[xml-custom]]
 = XML Schema Authoring
 
-[[core.appendix.xsd-custom-introduction]]
+[[xsd-custom-introduction]]
 Since version 2.0, Spring has featured a mechanism for adding schema-based extensions to the
 basic Spring XML format for defining and configuring beans. This section covers
 how to write your own custom XML bean definition parsers and
@@ -39,7 +39,7 @@ through the basic steps of making a custom extension.)
 
 
 
-[[core.appendix.xsd-custom-schema]]
+[[xsd-custom-schema]]
 == Authoring the Schema
 
 Creating an XML configuration extension for use with Spring's IoC container starts with
@@ -111,7 +111,7 @@ defined in the enumeration.
 
 
 
-[[core.appendix.xsd-custom-namespacehandler]]
+[[xsd-custom-namespacehandler]]
 == Coding a `NamespaceHandler`
 
 In addition to the schema, we need a `NamespaceHandler` to parse all elements of
@@ -182,7 +182,7 @@ custom element, as we can see in the next step.
 
 
 
-[[core.appendix.xsd-custom-parser]]
+[[xsd-custom-parser]]
 == Using `BeanDefinitionParser`
 
 A `BeanDefinitionParser` is used if the `NamespaceHandler` encounters an XML
@@ -272,7 +272,7 @@ is the extraction and setting of the bean definition's unique identifier.
 
 
 
-[[core.appendix.xsd-custom-registration]]
+[[xsd-custom-registration]]
 == Registering the Handler and the Schema
 
 The coding is finished. All that remains to be done is to make the Spring XML
@@ -284,7 +284,7 @@ XML parsing infrastructure automatically picks up your new extension by consumin
 these special properties files, the formats of which are detailed in the next two sections.
 
 
-[[core.appendix.xsd-custom-registration-spring-handlers]]
+[[xsd-custom-registration-spring-handlers]]
 === Writing `META-INF/spring.handlers`
 
 The properties file called `spring.handlers` contains a mapping of XML Schema URIs to
@@ -303,7 +303,7 @@ namespace extension and needs to exactly match exactly the value of the `targetN
 attribute, as specified in your custom XSD schema.
 
 
-[[core.appendix.xsd-custom-registration-spring-schemas]]
+[[xsd-custom-registration-spring-schemas]]
 === Writing 'META-INF/spring.schemas'
 
 The properties file called `spring.schemas` contains a mapping of XML Schema locations
@@ -327,7 +327,7 @@ the `NamespaceHandler` and `BeanDefinitionParser` classes on the classpath.
 
 
 
-[[core.appendix.xsd-custom-using]]
+[[xsd-custom-using]]
 == Using a Custom Extension in Your Spring XML Configuration
 
 Using a custom extension that you yourself have implemented is no different from using
@@ -361,13 +361,13 @@ in a Spring XML configuration file:
 
 
 
-[[core.appendix.xsd-custom-meat]]
+[[xsd-custom-meat]]
 == More Detailed Examples
 
 This section presents some more detailed examples of custom XML extensions.
 
 
-[[core.appendix.xsd-custom-custom-nested]]
+[[xsd-custom-custom-nested]]
 === Nesting Custom Elements within Custom Elements
 
 The example presented in this section shows how you to write the various artifacts required
@@ -719,7 +719,7 @@ http\://www.foo.example/schema/component/component.xsd=com/foo/component.xsd
 ----
 
 
-[[core.appendix.xsd-custom-custom-just-attributes]]
+[[xsd-custom-custom-just-attributes]]
 === Custom Attributes on "`Normal`" Elements
 
 Writing your own custom parser and the associated artifacts is not hard. However,

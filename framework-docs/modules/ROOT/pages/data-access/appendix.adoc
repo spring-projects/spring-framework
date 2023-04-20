@@ -1,10 +1,10 @@
-[[data.access.appendix]]
+[[appendix]]
 = Appendix
 
 
 
 
-[[data.access.xsd-schemas]]
+[[xsd-schemas]]
 == XML Schemas
 
 This part of the appendix lists XML schemas for data access, including the following:

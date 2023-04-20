@@ -48,7 +48,7 @@ element, as the following example shows:
 
 This assumes that you use schema support as described in
 xref:core/appendix/xsd-schemas.adoc[XML Schema-based configuration].
-See xref:core/appendix/xsd-schemas.adoc#core.appendix.xsd-schemas-aop[the AOP schema] for how to
+See xref:core/appendix/xsd-schemas.adoc#aop[the AOP schema] for how to
 import the tags in the `aop` namespace.
 
 

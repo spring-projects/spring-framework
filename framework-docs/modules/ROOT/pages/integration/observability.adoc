@@ -1,4 +1,4 @@
-[[integration.observability]]
+[[observability]]
 = Observability Support
 
 Micrometer defines an https://micrometer.io/docs/observation[Observation concept that enables both Metrics and Traces] in applications.
@@ -10,7 +10,7 @@ Spring Framework instruments various parts of its own codebase to publish observ
 You can learn more about {docs-spring-boot}/html/actuator.html#actuator.metrics[configuring the observability infrastructure in Spring Boot].
 
 
-[[integration.observability.list]]
+[[observability.list]]
 == List of produced Observations
 
 Spring Framework instruments various features for observability.
@@ -21,10 +21,10 @@ As outlined xref:integration/observability.adoc[at the beginning of this section
 |===
 |Observation name |Description
 
-|xref:integration/observability.adoc#integration.observability.http-client[`"http.client.requests"`]
+|xref:integration/observability.adoc#http-client[`"http.client.requests"`]
 |Time spent for HTTP client exchanges
 
-|xref:integration/observability.adoc#integration.observability.http-server[`"http.server.requests"`]
+|xref:integration/observability.adoc#http-server[`"http.server.requests"`]
 |Processing time for HTTP server exchanges at the Framework level
 |===
 
@@ -33,7 +33,7 @@ https://micrometer.io/docs/concepts#_naming_meters[to the format preferred by th
 (Prometheus, Atlas, Graphite, InfluxDB...).
 
 
-[[integration.observability.concepts]]
+[[observability.concepts]]
 == Micrometer Observation concepts
 
 If you are not familiar with Micrometer Observation, here's a quick summary of the new concepts you should know about.
@@ -49,7 +49,7 @@ If you are not familiar with Micrometer Observation, here's a quick summary of t
 * An `ObservationDocumentation` documents all observations in a particular domain, listing the expected key names and their meaning.
 
 
-[[integration.observability.config]]
+[[observability.config]]
 == Configuring Observations
 
 Global configuration options are available at the `ObservationRegistry#observationConfig()` level.
@@ -59,33 +59,33 @@ Each instrumented component will provide two extension points:
 * providing a custom `ObservationConvention` to change the default observation name and extracted `KeyValues`
 
 
-[[integration.observability.config.conventions]]
+[[observability.config.conventions]]
 === Using custom Observation conventions
 
 Let's take the example of the Spring MVC "http.server.requests" metrics instrumentation with the `ServerHttpObservationFilter`.
 This observation is using a `ServerRequestObservationConvention` with a `ServerRequestObservationContext`; custom conventions can be configured on the Servlet filter.
 If you would like to customize the metadata produced with the observation, you can extend the `DefaultServerRequestObservationConvention` for your requirements:
 
-include-code::ExtendedServerRequestObservationConvention[]
+include-code::./ExtendedServerRequestObservationConvention[]
 
 If you want full control, you can then implement the entire convention contract for the observation you're interested in:
 
-include-code::CustomServerRequestObservationConvention[]
+include-code::./CustomServerRequestObservationConvention[]
 
 You can also achieve similar goals using a custom `ObservationFilter` - adding or removing key values for an observation.
 Filters do not replace the default convention and are used as a post-processing component.
 
-include-code::ServerRequestObservationFilter[]
+include-code::./ServerRequestObservationFilter[]
 
 You can configure `ObservationFilter` instances on the `ObservationRegistry`.
 
 
-[[integration.observability.http-server]]
+[[observability.http-server]]
 == HTTP Server instrumentation
 
 HTTP server exchanges observations are created with the name `"http.server.requests"` for Servlet and Reactive applications.
 
-[[integration.observability.http-server.servlet]]
+[[observability.http-server.servlet]]
 === Servlet applications
 
 Applications need to configure the `org.springframework.web.filter.ServerHttpObservationFilter` Servlet filter in their application.
@@ -95,7 +95,7 @@ This will only record an observation as an error if the `Exception` has not been
 Typically, all exceptions handled by Spring MVC's `@ExceptionHandler` and xref:web/webmvc/mvc-ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
-include-code::UserController[]
+include-code::./UserController[]
 
 By default, the following `KeyValues` are created:
 
@@ -118,7 +118,7 @@ By default, the following `KeyValues` are created:
 |===
 
 
-[[integration.observability.http-server.reactive]]
+[[observability.http-server.reactive]]
 === Reactive applications
 
 Applications need to configure the `org.springframework.web.filter.reactive.ServerHttpObservationFilter` reactive `WebFilter` in their application.
@@ -128,7 +128,7 @@ This will only record an observation as an error if the `Exception` has not been
 Typically, all exceptions handled by Spring WebFlux's `@ExceptionHandler` and xref:web/webflux/ann-rest-exceptions.adoc[`ProblemDetail` support] will not be recorded with the observation.
 You can, at any point during request processing, set the error field on the `ObservationContext` yourself:
 
-include-code::UserController[]
+include-code::./UserController[]
 
 By default, the following `KeyValues` are created:
 
@@ -152,13 +152,13 @@ By default, the following `KeyValues` are created:
 
 
 
-[[integration.observability.http-client]]
+[[observability.http-client]]
 == HTTP Client instrumentation
 
 HTTP client exchanges observations are created with the name `"http.client.requests"` for blocking and reactive clients.
 Unlike their server counterparts, the instrumentation is implemented directly in the client so the only required step is to configure an `ObservationRegistry` on the client.
 
-[[integration.observability.http-client.resttemplate]]
+[[observability.http-client.resttemplate]]
 === RestTemplate
 
 Applications must configure an `ObservationRegistry` on `RestTemplate` instances to enable the instrumentation; without that, observations are "no-ops".
@@ -187,7 +187,7 @@ Instrumentation is using the `org.springframework.http.client.observation.Client
 
 
 
-[[integration.observability.http-client.webclient]]
+[[observability.http-client.webclient]]
 === WebClient
 
 Applications must configure an `ObservationRegistry` on the `WebClient` builder to enable the instrumentation; without that, observations are "no-ops".

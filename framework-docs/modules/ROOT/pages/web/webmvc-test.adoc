@@ -1,4 +1,4 @@
-[[webmvc.test]]
+[[test]]
 = Testing
 [.small]#xref:web-reactive.adoc#webflux-test[See equivalent in the Reactive stack]#
 

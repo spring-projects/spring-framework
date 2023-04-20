@@ -1,11 +1,11 @@
-[[core.aot]]
+[[aot]]
 = Ahead of Time Optimizations
 
 This chapter covers Spring's Ahead of Time (AOT) optimizations.
 
 For AOT support specific to integration tests, see xref:testing/testcontext-framework/aot.adoc[Ahead of Time Support for Tests].
 
-[[core.aot.introduction]]
+[[aot.introduction]]
 == Introduction to Ahead of Time Optimizations
 
 Spring's support for AOT optimizations is meant to inspect an `ApplicationContext` at build time and apply decisions and discovery logic that usually happens at runtime.
@@ -30,7 +30,7 @@ A Spring AOT processed application typically generates:
 NOTE: At the moment, AOT is focused on allowing Spring applications to be deployed as native images using GraalVM.
 We intend to support more JVM-based use cases in future generations.
 
-[[core.aot.basics]]
+[[aot.basics]]
 == AOT engine overview
 
 The entry point of the AOT engine for processing an `ApplicationContext` arrangement is `ApplicationContextAotGenerator`. It takes care of the following steps, based on a `GenericApplicationContext` that represents the application to optimize and a {api-spring-framework}/aot/generate/GenerationContext.html[`GenerationContext`]:
@@ -46,7 +46,7 @@ The `RuntimeHints` instance can also be used to generate the relevant GraalVM na
 
 Those steps are covered in greater detail in the sections below.
 
-[[core.aot.refresh]]
+[[aot.refresh]]
 == Refresh for AOT Processing
 
 Refresh for AOT processing is supported on all `GenericApplicationContext` implementations.
@@ -54,13 +54,13 @@ An application context is created with any number of entry points, usually in th
 
 Let's look at a basic example:
 
-include-code::AotProcessingSample[tag=myapplication]
+include-code::./AotProcessingSample[tag=myapplication]
 
 Starting this application with the regular runtime involves a number of steps including classpath scanning, configuration class parsing, bean instantiation, and lifecycle callback handling.
 Refresh for AOT processing only applies a subset of what happens with a xref:core/beans/introduction.adoc[regular `refresh`].
 AOT processing can be triggered as follows:
 
-include-code::AotProcessingSample[tag=aotcontext]
+include-code::./AotProcessingSample[tag=aotcontext]
 
 In this mode, xref:core/beans/factory-extension.adoc#beans-factory-extension-factory-postprocessors[`BeanFactoryPostProcessor` implementations] are invoked as usual.
 This includes configuration class parsing, import selectors, classpath scanning, etc.
@@ -76,7 +76,7 @@ This makes sure to create any proxy that will be required at runtime.
 
 Once this part completes, the `BeanFactory` contains the bean definitions that are necessary for the application to run. It does not trigger bean instantiation but allows the AOT engine to inspect the beans that will be created at runtime.
 
-[[core.aot.bean-factory-initialization-contributions]]
+[[aot.bean-factory-initialization-contributions]]
 == Bean Factory Initialization AOT Contributions
 
 Components that want to participate in this step can implement the {api-spring-framework}/beans/factory/aot/BeanFactoryInitializationAotProcessor.html[`BeanFactoryInitializationAotProcessor`] interface.
@@ -99,7 +99,7 @@ If such a bean is registered using an `@Bean` factory method, ensure the method 
 ====
 
 
-[[core.aot.bean-registration-contributions]]
+[[aot.bean-registration-contributions]]
 === Bean Registration AOT Contributions
 
 A core `BeanFactoryInitializationAotProcessor` implementation is responsible for collecting the necessary contributions for each candidate `BeanDefinition`.
@@ -186,7 +186,7 @@ When a `datasource` instance is required, a `BeanInstanceSupplier` is called.
 This supplier invokes the `dataSource()` method on the `dataSourceConfiguration` bean.
 
 
-[[core.aot.hints]]
+[[aot.hints]]
 == Runtime Hints
 
 Running an application as a native image requires additional information compared to a regular JVM runtime.
@@ -210,14 +210,14 @@ For cases that the core container cannot infer, you can register such hints prog
 A number of convenient annotations are also provided for common use cases.
 
 
-[[core.aot.hints.import-runtime-hints]]
+[[aot.hints.import-runtime-hints]]
 === `@ImportRuntimeHints`
 
 `RuntimeHintsRegistrar` implementations allow you to get a callback to the `RuntimeHints` instance managed by the AOT engine.
 Implementations of this interface can be registered using `@ImportRuntimeHints` on any Spring bean or `@Bean` factory method.
 `RuntimeHintsRegistrar` implementations are detected and invoked at build time.
 
-include-code::SpellCheckService[]
+include-code::./SpellCheckService[]
 
 If at all possible, `@ImportRuntimeHints` should be used as close as possible to the component that requires the hints.
 This way, if the component is not contributed to the `BeanFactory`, the hints won't be contributed either.
@@ -225,7 +225,7 @@ This way, if the component is not contributed to the `BeanFactory`, the hints wo
 It is also possible to register an implementation statically by adding an entry in `META-INF/spring/aot.factories` with a key equal to the fully qualified name of the `RuntimeHintsRegistrar` interface.
 
 
-[[core.aot.hints.reflective]]
+[[aot.hints.reflective]]
 === `@Reflective`
 
 {api-spring-framework}/aot/hint/annotation/Reflective.html[`@Reflective`] provides an idiomatic way to flag the need for reflection on an annotated element.
@@ -239,7 +239,7 @@ Library authors can reuse this annotation for their own purposes.
 If components other than Spring beans need to be processed, a `BeanFactoryInitializationAotProcessor` can detect the relevant types and use `ReflectiveRuntimeHintsRegistrar` to process them.
 
 
-[[core.aot.hints.register-reflection-for-binding]]
+[[aot.hints.register-reflection-for-binding]]
 === `@RegisterReflectionForBinding`
 
 {api-spring-framework}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`] is a specialization of `@Reflective` that registers the need for serializing arbitrary types.
@@ -262,14 +262,14 @@ The following example registers `Account` for serialization.
 	}
 ----
 
-[[core.aot.hints.testing]]
+[[aot.hints.testing]]
 === Testing Runtime Hints
 
 Spring Core also ships `RuntimeHintsPredicates`, a utility for checking that existing hints match a particular use case.
 This can be used in your own tests to validate that a `RuntimeHintsRegistrar` contains the expected results.
 We can write a test for our `SpellCheckService` and ensure that we will be able to load a dictionary at runtime:
 
-include-code::SpellCheckServiceTests[tag=hintspredicates]
+include-code::./SpellCheckServiceTests[tag=hintspredicates]
 
 With `RuntimeHintsPredicates`, we can check for reflection, resource, serialization, or proxy generation hints.
 This approach works well for unit tests but implies that the runtime behavior of a component is well known.
@@ -281,11 +281,11 @@ For more targeted discovery and testing, Spring Framework ships a dedicated modu
 This module contains the RuntimeHints Agent, a Java agent that records all method invocations that are related to runtime hints and helps you to assert that a given `RuntimeHints` instance covers all recorded invocations.
 Let's consider a piece of infrastructure for which we'd like to test the hints we're contributing during the AOT processing phase.
 
-include-code::SampleReflection[]
+include-code::./SampleReflection[]
 
 We can then write a unit test (no native compilation required) that checks our contributed hints:
 
-include-code::SampleReflectionRuntimeHintsTests[]
+include-code::./SampleReflectionRuntimeHintsTests[]
 
 If you forgot to contribute a hint, the test will fail and provide some details about the invocation:
 

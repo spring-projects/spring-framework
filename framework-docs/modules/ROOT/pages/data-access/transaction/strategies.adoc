@@ -179,7 +179,7 @@ infrastructure.
 
 NOTE: The preceding definition of the `dataSource` bean uses the `<jndi-lookup/>` tag
 from the `jee` namespace. For more information see
-xref:integration/appendix.adoc#integration.appendix.xsd-schemas-jee[The JEE Schema].
+xref:integration/appendix.adoc#xsd-schemas-jee[The JEE Schema].
 
 NOTE: If you use JTA, your transaction manager definition should look the same, regardless
 of what data access technology you use, be it JDBC, Hibernate JPA, or any other supported

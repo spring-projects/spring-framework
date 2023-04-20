@@ -1,4 +1,4 @@
-[[core.appendix.application-startup-steps]]
+[[application-startup-steps]]
 = Application Startup Steps
 
 This part of the appendix lists the existing `StartupSteps` that the core container is instrumented with.

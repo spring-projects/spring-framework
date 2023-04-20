@@ -118,7 +118,7 @@ accessing the status of a response that represents an error (such as 401). If th
 issue, switch to another HTTP client library.
 
 NOTE: `RestTemplate` can be instrumented for observability, in order to produce metrics and traces.
-See the xref:integration/observability.adoc#integration.observability.http-client.resttemplate[RestTemplate Observability support] section.
+See the xref:integration/observability.adoc#http-client.resttemplate[RestTemplate Observability support] section.
 
 [[rest-resttemplate-uri]]
 ==== URIs
