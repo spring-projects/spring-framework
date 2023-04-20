@@ -9,8 +9,11 @@ is through data binding to a xref:web/webflux/controller/ann-methods/modelattrib
 as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class MyForm {
 
@@ -32,8 +35,10 @@ as the following example shows:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyForm(
 			val name: String,
@@ -49,6 +54,7 @@ as the following example shows:
 
 	}
 ----
+======
 --
 
 You can also submit multipart requests from non-browser clients in a RESTful service
@@ -77,8 +83,11 @@ Content-Transfer-Encoding: 8bit
 You can access individual parts with `@RequestPart`, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/")
 	public String handle(@RequestPart("meta-data") Part metadata, // <1>
@@ -86,6 +95,7 @@ You can access individual parts with `@RequestPart`, as the following example sh
 		// ...
 	}
 ----
+======
 <1> Using `@RequestPart` to get the metadata.
 <2> Using `@RequestPart` to get the file.
 
@@ -107,14 +117,18 @@ To deserialize the raw part content (for example, to JSON -- similar to `@Reques
 you can declare a concrete target `Object`, instead of `Part`, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/")
 	public String handle(@RequestPart("meta-data") MetaData metadata) { // <1>
 		// ...
 	}
 ----
+======
 <1> Using `@RequestPart` to get the metadata.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -136,8 +150,11 @@ in the controller method by declaring the argument with an async wrapper and the
 error related operators:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/")
 	public String handle(@Valid @RequestPart("meta-data") Mono<MetaData> metadata) {
@@ -145,28 +162,34 @@ error related operators:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/")
 	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData): String {
 		// ...
 	}
 ----
+======
 --
 
 To access all multipart data as a `MultiValueMap`, you can use `@RequestBody`,
 as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/")
 	public String handle(@RequestBody Mono<MultiValueMap<String, Part>> parts) { // <1>
 		// ...
 	}
 ----
+======
 <1> Using `@RequestBody`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -196,8 +219,11 @@ when uploading. If the file is large enough to be split across multiple buffers,
 
 For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
   @PostMapping("/")
   public void handle(@RequestBody Flux<PartEvent> allPartsEvents) { <1>
@@ -224,6 +250,7 @@ For example:
               }));
   }
 ----
+======
 <1> Using `@RequestBody`.
 <2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
 followed by additional events belonging to subsequent parts.

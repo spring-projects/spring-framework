@@ -33,8 +33,11 @@ anonymous inner class) that contains the code that you need to run in the contex
 a transaction. You can then pass an instance of your custom `TransactionCallback` to the
 `execute(..)` method exposed on the `TransactionTemplate`. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleService implements Service {
 
@@ -57,8 +60,10 @@ a transaction. You can then pass an instance of your custom `TransactionCallback
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// use constructor-injection to supply the PlatformTransactionManager
 	class SimpleService(transactionManager: PlatformTransactionManager) : Service {
@@ -72,13 +77,17 @@ a transaction. You can then pass an instance of your custom `TransactionCallback
 		}
 	}
 ----
+======
 
 
 If there is no return value, you can use the convenient `TransactionCallbackWithoutResult` class
 with an anonymous class, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 		protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -87,8 +96,10 @@ with an anonymous class, as follows:
 		}
 	});
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	transactionTemplate.execute(object : TransactionCallbackWithoutResult() {
 		override fun doInTransactionWithoutResult(status: TransactionStatus) {
@@ -97,13 +108,17 @@ with an anonymous class, as follows:
 		}
 	})
 ----
+======
 
 
 Code within the callback can roll the transaction back by calling the
 `setRollbackOnly()` method on the supplied `TransactionStatus` object, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 
@@ -117,8 +132,10 @@ Code within the callback can roll the transaction back by calling the
 		}
 	});
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	transactionTemplate.execute(object : TransactionCallbackWithoutResult() {
 
@@ -132,6 +149,7 @@ Code within the callback can roll the transaction back by calling the
 		}
 	})
 ----
+======
 
 [[tx-prog-template-settings]]
 === Specifying Transaction Settings
@@ -143,8 +161,11 @@ xref:data-access/transaction/declarative/txadvice-settings.adoc[default transact
 following example shows the programmatic customization of the transactional settings for
 a specific `TransactionTemplate:`
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleService implements Service {
 
@@ -160,8 +181,10 @@ a specific `TransactionTemplate:`
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SimpleService(transactionManager: PlatformTransactionManager) : Service {
 
@@ -173,6 +196,7 @@ a specific `TransactionTemplate:`
 		}
 	}
 ----
+======
 
 The following example defines a `TransactionTemplate` with some custom transactional
 settings by using Spring XML configuration:
@@ -212,8 +236,11 @@ to make yourself.
 Application code that must run in a transactional context and that explicitly uses
 the `TransactionalOperator` resembles the next example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleService implements Service {
 
@@ -235,8 +262,10 @@ the `TransactionalOperator` resembles the next example:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// use constructor-injection to supply the ReactiveTransactionManager
 	class SimpleService(transactionManager: ReactiveTransactionManager) : Service {
@@ -250,6 +279,7 @@ the `TransactionalOperator` resembles the next example:
 		}
 	}
 ----
+======
 
 `TransactionalOperator` can be used in two ways:
 
@@ -259,8 +289,11 @@ the `TransactionalOperator` resembles the next example:
 Code within the callback can roll the transaction back by calling the `setRollbackOnly()`
 method on the supplied `ReactiveTransaction` object, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	transactionalOperator.execute(new TransactionCallback<>() {
 
@@ -271,8 +304,10 @@ method on the supplied `ReactiveTransaction` object, as follows:
 		}
 	});
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	transactionalOperator.execute(object : TransactionCallback() {
 
@@ -282,6 +317,7 @@ method on the supplied `ReactiveTransaction` object, as follows:
 		}
 	})
 ----
+======
 
 [[tx-prog-operator-cancel]]
 === Cancel Signals
@@ -306,8 +342,11 @@ xref:data-access/transaction/declarative/txadvice-settings.adoc[default transact
 following example shows customization of the transactional settings for a specific
 `TransactionalOperator:`
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleService implements Service {
 
@@ -325,8 +364,10 @@ following example shows customization of the transactional settings for a specif
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SimpleService(transactionManager: ReactiveTransactionManager) : Service {
 
@@ -339,6 +380,7 @@ following example shows customization of the transactional settings for a specif
 		private val transactionalOperator = TransactionalOperator(transactionManager, definition)
 	}
 ----
+======
 
 [[transaction-programmatic-tm]]
 == Using the `TransactionManager`
@@ -356,8 +398,11 @@ use to your bean through a bean reference. Then, by using the `TransactionDefini
 `TransactionStatus` objects, you can initiate transactions, roll back, and commit. The
 following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 	// explicitly setting the transaction name is something that can be done only programmatically
@@ -373,8 +418,10 @@ following example shows how to do so:
 	}
 	txManager.commit(status);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val def = DefaultTransactionDefinition()
 	// explicitly setting the transaction name is something that can be done only programmatically
@@ -391,6 +438,7 @@ following example shows how to do so:
 
 	txManager.commit(status)
 ----
+======
 
 
 [[transaction-programmatic-rtm]]
@@ -403,8 +451,11 @@ use to your bean through a bean reference. Then, by using the `TransactionDefini
 `ReactiveTransaction` objects, you can initiate transactions, roll back, and commit. The
 following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 	// explicitly setting the transaction name is something that can be done only programmatically
@@ -421,8 +472,10 @@ following example shows how to do so:
 				.onErrorResume(ex -> txManager.rollback(status).then(Mono.error(ex)));
 	});
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val def = DefaultTransactionDefinition()
 	// explicitly setting the transaction name is something that can be done only programmatically
@@ -438,5 +491,6 @@ following example shows how to do so:
 				.onErrorResume { ex -> txManager.rollback(status).then(Mono.error(ex)) }
 	}
 ----
+======
 
 

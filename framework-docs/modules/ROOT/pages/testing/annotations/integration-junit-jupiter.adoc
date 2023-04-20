@@ -25,14 +25,18 @@ classes may be declared with the `value` attribute in `@SpringJUnitConfig`.
 The following example shows how to use the `@SpringJUnitConfig` annotation to specify a
 configuration class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class) // <1>
 	class ConfigurationClassJUnitJupiterSpringTests {
 		// class body...
 	}
 ----
+======
 <1> Specify the configuration class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -49,14 +53,18 @@ configuration class:
 The following example shows how to use the `@SpringJUnitConfig` annotation to specify the
 location of a configuration file:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(locations = "/test-config.xml") // <1>
 	class XmlJUnitJupiterSpringTests {
 		// class body...
 	}
 ----
+======
 <1> Specify the location of a configuration file.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -90,14 +98,18 @@ attribute from `@WebAppConfiguration` only by using the `resourcePath` attribute
 The following example shows how to use the `@SpringJUnitWebConfig` annotation to specify
 a configuration class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitWebConfig(TestConfig.class) // <1>
 	class ConfigurationClassJUnitJupiterSpringWebTests {
 		// class body...
 	}
 ----
+======
 <1> Specify the configuration class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -114,14 +126,18 @@ a configuration class:
 The following example shows how to use the `@SpringJUnitWebConfig` annotation to specify the
 location of a configuration file:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitWebConfig(locations = "/test-config.xml") // <1>
 	class XmlJUnitJupiterSpringWebTests {
 		// class body...
 	}
 ----
+======
 <1> Specify the location of a configuration file.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -248,8 +264,11 @@ equivalent to `@Disabled` and `@EnabledIf("true")` is logically meaningless.
 You can use `@EnabledIf` as a meta-annotation to create custom composed annotations. For
 example, you can create a custom `@EnabledOnMac` annotation as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -259,8 +278,10 @@ example, you can create a custom `@EnabledOnMac` annotation as follows:
 	)
 	public @interface EnabledOnMac {}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.TYPE, AnnotationTarget.FUNCTION)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -270,6 +291,7 @@ example, you can create a custom `@EnabledOnMac` annotation as follows:
 	)
 	annotation class EnabledOnMac {}
 ----
+======
 
 [NOTE]
 ====
@@ -308,8 +330,11 @@ equivalent to `@Disabled` and `@DisabledIf("false")` is logically meaningless.
 You can use `@DisabledIf` as a meta-annotation to create custom composed annotations. For
 example, you can create a custom `@DisabledOnMac` annotation as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -320,8 +345,9 @@ example, you can create a custom `@DisabledOnMac` annotation as follows:
 	public @interface DisabledOnMac {}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.TYPE, AnnotationTarget.FUNCTION)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -331,6 +357,7 @@ example, you can create a custom `@DisabledOnMac` annotation as follows:
 	)
 	annotation class DisabledOnMac {}
 ----
+======
 
 [NOTE]
 ====

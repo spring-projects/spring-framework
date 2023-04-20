@@ -16,27 +16,36 @@ built-in constraints, and you can also define your own custom constraints.
 
 Consider the following example, which shows a simple `PersonForm` model with two properties:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class PersonForm {
 		private String name;
 		private int age;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class PersonForm(
 			private val name: String,
 			private val age: Int
 	)
 ----
+======
 
 Bean Validation lets you declare constraints as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class PersonForm {
 
@@ -48,8 +57,10 @@ Bean Validation lets you declare constraints as the following example shows:
 		private int age;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class PersonForm(
 		@get:NotNull @get:Size(max=64)
@@ -58,6 +69,7 @@ Bean Validation lets you declare constraints as the following example shows:
 		private val age: Int
 	)
 ----
+======
 
 A Bean Validation validator then validates instances of this class based on the declared
 constraints. See https://beanvalidation.org/[Bean Validation] for general information about
@@ -78,8 +90,11 @@ is needed in your application.
 You can use the `LocalValidatorFactoryBean` to configure a default Validator as a Spring
 bean, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
@@ -92,12 +107,15 @@ bean, as the following example shows:
 		}
 	}
 ----
+
+XML::
++
 [source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
-.XML
 ----
 	<bean id="validator"
 		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
 ----
+======
 
 The basic configuration in the preceding example triggers bean validation to initialize by
 using its default bootstrap mechanism. A Bean Validation provider, such as the Hibernate
@@ -115,8 +133,11 @@ validation logic.
 You can inject a reference to `jakarta.validation.Validator` if you prefer to work with the Bean
 Validation API directly, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import jakarta.validation.Validator;
 
@@ -127,20 +148,26 @@ Validation API directly, as the following example shows:
 		private Validator validator;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import jakarta.validation.Validator;
 
 	@Service
 	class MyService(@Autowired private val validator: Validator)
 ----
+======
 
 You can inject a reference to `org.springframework.validation.Validator` if your bean
 requires the Spring Validation API, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import org.springframework.validation.Validator;
 
@@ -151,14 +178,17 @@ requires the Spring Validation API, as the following example shows:
 		private Validator validator;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.validation.Validator
 
 	@Service
 	class MyService(@Autowired private val validator: Validator)
 ----
+======
 
 
 [[validation-beanvalidation-spring-constraints]]
@@ -182,8 +212,11 @@ that uses Spring to create `ConstraintValidator` instances. This lets your custo
 The following example shows a custom `@Constraint` declaration followed by an associated
 `ConstraintValidator` implementation that uses Spring for dependency injection:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target({ElementType.METHOD, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -191,17 +224,23 @@ The following example shows a custom `@Constraint` declaration followed by an as
 	public @interface MyConstraint {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.FIELD)
 	@Retention(AnnotationRetention.RUNTIME)
 	@Constraint(validatedBy = MyConstraintValidator::class)
 	annotation class MyConstraint
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import jakarta.validation.ConstraintValidator;
 
@@ -213,8 +252,10 @@ The following example shows a custom `@Constraint` declaration followed by an as
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import jakarta.validation.ConstraintValidator
 
@@ -223,6 +264,7 @@ The following example shows a custom `@Constraint` declaration followed by an as
 		// ...
 	}
 ----
+======
 
 
 As the preceding example shows, a `ConstraintValidator` implementation can have its dependencies
@@ -236,8 +278,11 @@ You can integrate the method validation feature supported by Bean Validation 1.1
 a custom extension, also by Hibernate Validator 4.3) into a Spring context through a
 `MethodValidationPostProcessor` bean definition:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
@@ -251,11 +296,14 @@ a custom extension, also by Hibernate Validator 4.3) into a Spring context throu
 	}
 
 ----
+
+XML::
++
 [source,xml,indent=0,subs="verbatim,quotes",role="secondary"]
-.XML
 ----
 	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
 ----
+======
 
 To be eligible for Spring-driven method validation, all target classes need to be annotated
 with Spring's `@Validated` annotation, which can optionally also declare the validation
@@ -296,8 +344,11 @@ automatically added to the binder's `BindingResult`.
 The following example shows how to use a `DataBinder` programmatically to invoke validation
 logic after binding to a target object:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Foo target = new Foo();
 	DataBinder binder = new DataBinder(target);
@@ -312,8 +363,10 @@ logic after binding to a target object:
 	// get BindingResult that includes any validation errors
 	BindingResult results = binder.getBindingResult();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val target = Foo()
 	val binder = DataBinder(target)
@@ -328,6 +381,7 @@ logic after binding to a target object:
 	// get BindingResult that includes any validation errors
 	val results = binder.bindingResult
 ----
+======
 
 You can also configure a `DataBinder` with multiple `Validator` instances through
 `dataBinder.addValidators` and `dataBinder.replaceValidators`. This is useful when

@@ -38,12 +38,10 @@ you can instead write the following:
 		registerBean { Bar(it.getBean()) }
 	}
 ----
-====
 
 When the class `Bar` has a single constructor, you can even just specify the bean class,
 the constructor parameters will be autowired by type:
 
-====
 [source,kotlin,indent=0]
 ----
 	val context = GenericApplicationContext().apply {

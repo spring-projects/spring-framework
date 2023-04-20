@@ -55,8 +55,11 @@ own code. A meta-annotation is an annotation that can be applied to another anno
 For example, the `@Service` annotation mentioned xref:core/beans/classpath-scanning.adoc#beans-stereotype-annotations[earlier]
 is meta-annotated with `@Component`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -67,6 +70,7 @@ is meta-annotated with `@Component`, as the following example shows:
 		// ...
 	}
 ----
+======
 <1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -94,8 +98,11 @@ want to only expose a subset of the meta-annotation's attributes. For example, S
 customization of the `proxyMode`. The following listing shows the definition of the
 `SessionScope` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -112,8 +119,10 @@ customization of the `proxyMode`. The following listing shows the definition of 
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.TYPE, AnnotationTarget.FUNCTION)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -124,11 +133,15 @@ customization of the `proxyMode`. The following listing shows the definition of 
 			val proxyMode: ScopedProxyMode = ScopedProxyMode.TARGET_CLASS
 	)
 ----
+======
 
 You can then use `@SessionScope` without declaring the `proxyMode` as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Service
 	@SessionScope
@@ -136,8 +149,10 @@ You can then use `@SessionScope` without declaring the `proxyMode` as follows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Service
 	@SessionScope
@@ -145,11 +160,15 @@ You can then use `@SessionScope` without declaring the `proxyMode` as follows:
 		// ...
 	}
 ----
+======
 
 You can also override the value for the `proxyMode`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Service
 	@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)
@@ -157,8 +176,10 @@ You can also override the value for the `proxyMode`, as the following example sh
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Service
 	@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)
@@ -166,6 +187,7 @@ You can also override the value for the `proxyMode`, as the following example sh
 		// ...
 	}
 ----
+======
 
 For further details, see the
 https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]
@@ -180,8 +202,11 @@ Spring can automatically detect stereotyped classes and register corresponding
 `BeanDefinition` instances with the `ApplicationContext`. For example, the following two classes
 are eligible for such autodetection:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Service
 	public class SimpleMovieLister {
@@ -193,29 +218,38 @@ are eligible for such autodetection:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Service
 	class SimpleMovieLister(private val movieFinder: MovieFinder)
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repository
 	public class JpaMovieFinder implements MovieFinder {
 		// implementation elided for clarity
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repository
 	class JpaMovieFinder : MovieFinder {
 		// implementation elided for clarity
 	}
 ----
+======
 
 
 To autodetect these classes and register the corresponding beans, you need to add
@@ -223,8 +257,11 @@ To autodetect these classes and register the corresponding beans, you need to ad
 is a common parent package for the two classes. (Alternatively, you can specify a
 comma- or semicolon- or space-separated list that includes the parent package of each class.)
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example")
@@ -232,8 +269,10 @@ comma- or semicolon- or space-separated list that includes the parent package of
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"])
@@ -241,6 +280,7 @@ comma- or semicolon- or space-separated list that includes the parent package of
 		// ...
 	}
 ----
+======
 
 NOTE: For brevity, the preceding example could have used the `value` attribute of the
 annotation (that is, `@ComponentScan("org.example")`).
@@ -335,8 +375,11 @@ The following table describes the filtering options:
 The following example shows the configuration ignoring all `@Repository` annotations
 and using "`stub`" repositories instead:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example",
@@ -346,8 +389,10 @@ and using "`stub`" repositories instead:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"],
@@ -357,6 +402,7 @@ and using "`stub`" repositories instead:
 		// ...
 	}
 ----
+======
 
 The following listing shows the equivalent XML:
 
@@ -387,8 +433,11 @@ Spring components can also contribute bean definition metadata to the container.
 this with the same `@Bean` annotation used to define bean metadata within `@Configuration`
 annotated classes. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	public class FactoryMethodComponent {
@@ -404,8 +453,10 @@ annotated classes. The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class FactoryMethodComponent {
@@ -419,6 +470,7 @@ annotated classes. The following example shows how to do so:
 		}
 	}
 ----
+======
 
 The preceding class is a Spring component that has application-specific code in its
 `doWork()` method. However, it also contributes a bean definition that has a factory
@@ -436,8 +488,11 @@ with optional dependencies, we recommend `ObjectProvider<MyTargetBean>` instead.
 Autowired fields and methods are supported, as previously discussed, with additional
 support for autowiring of `@Bean` methods. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	public class FactoryMethodComponent {
@@ -473,8 +528,10 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class FactoryMethodComponent {
@@ -504,6 +561,7 @@ support for autowiring of `@Bean` methods. The following example shows how to do
 		fun requestScopedInstance() = TestBean("requestScopedInstance", 3)
 	}
 ----
+======
 
 The example autowires the `String` method parameter `country` to the value of the `age`
 property on another bean named `privateInstance`. A Spring Expression Language element
@@ -522,8 +580,11 @@ injection point that triggered the creation of a new bean instance in the given 
 You can use the provided injection point metadata with semantic care in such scenarios.
 The following example shows how to use `InjectionPoint`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	public class FactoryMethodComponent {
@@ -534,8 +595,10 @@ The following example shows how to use `InjectionPoint`:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class FactoryMethodComponent {
@@ -546,6 +609,7 @@ The following example shows how to use `InjectionPoint`:
 				TestBean("prototypeInstance for ${injectionPoint.member}")
 	}
 ----
+======
 
 The `@Bean` methods in a regular Spring component are processed differently than their
 counterparts inside a Spring `@Configuration` class. The difference is that `@Component`
@@ -609,39 +673,51 @@ If such an annotation contains no name `value` or for any other detected compone
 the uncapitalized non-qualified class name. For example, if the following component
 classes were detected, the names would be `myMovieLister` and `movieFinderImpl`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Service("myMovieLister")
 	public class SimpleMovieLister {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Service("myMovieLister")
 	class SimpleMovieLister {
 		// ...
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repository
 	public class MovieFinderImpl implements MovieFinder {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repository
 	class MovieFinderImpl : MovieFinder {
 		// ...
 	}
 ----
+======
 
 If you do not want to rely on the default bean-naming strategy, you can provide a custom
 bean-naming strategy. First, implement the
@@ -657,8 +733,11 @@ fully qualified class name for the generated bean name. As of Spring Framework 5
 `FullyQualifiedAnnotationBeanNameGenerator` located in package
 `org.springframework.context.annotation` can be used for such purposes.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example", nameGenerator = MyNameGenerator.class)
@@ -666,8 +745,10 @@ fully qualified class name for the generated bean name. As of Spring Framework 5
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"], nameGenerator = MyNameGenerator::class)
@@ -675,6 +756,7 @@ fully qualified class name for the generated bean name. As of Spring Framework 5
 		// ...
 	}
 ----
+======
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -698,8 +780,11 @@ autodetected components is `singleton`. However, sometimes you need a different 
 that can be specified by the `@Scope` annotation. You can provide the name of the
 scope within the annotation, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Scope("prototype")
 	@Repository
@@ -707,8 +792,10 @@ scope within the annotation, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Scope("prototype")
 	@Repository
@@ -716,6 +803,7 @@ scope within the annotation, as the following example shows:
 		// ...
 	}
 ----
+======
 
 NOTE: `@Scope` annotations are only introspected on the concrete bean class (for annotated
 components) or the factory method (for `@Bean` methods). In contrast to XML bean
@@ -735,8 +823,11 @@ interface. Be sure to include a default no-arg constructor. Then you can provide
 fully qualified class name when configuring the scanner, as the following example of both
 an annotation and a bean definition shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example", scopeResolver = MyScopeResolver.class)
@@ -744,8 +835,10 @@ an annotation and a bean definition shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"], scopeResolver = MyScopeResolver::class)
@@ -753,6 +846,7 @@ an annotation and a bean definition shows:
 		// ...
 	}
 ----
+======
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -767,8 +861,11 @@ For this purpose, a scoped-proxy attribute is available on the component-scan
 element. The three possible values are: `no`, `interfaces`, and `targetClass`. For example,
 the following configuration results in standard JDK dynamic proxies:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example", scopedProxy = ScopedProxyMode.INTERFACES)
@@ -776,8 +873,10 @@ the following configuration results in standard JDK dynamic proxies:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"], scopedProxy = ScopedProxyMode.INTERFACES)
@@ -785,6 +884,7 @@ the following configuration results in standard JDK dynamic proxies:
 		// ...
 	}
 ----
+======
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -808,8 +908,11 @@ auto-detection of components, you can provide the qualifier metadata with type-l
 annotations on the candidate class. The following three examples demonstrate this
 technique:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	@Qualifier("Action")
@@ -817,16 +920,22 @@ technique:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	@Qualifier("Action")
 	class ActionMovieCatalog : MovieCatalog
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	@Genre("Action")
@@ -834,8 +943,10 @@ technique:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	@Genre("Action")
@@ -843,9 +954,13 @@ technique:
 		// ...
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	@Offline
@@ -853,8 +968,10 @@ technique:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 @Component
 @Offline
@@ -862,6 +979,7 @@ class CachingMovieCatalog : MovieCatalog {
 	// ...
 }
 ----
+======
 
 NOTE: As with most annotation-based alternatives, keep in mind that the annotation metadata is
 bound to the class definition itself, while the use of XML allows for multiple beans

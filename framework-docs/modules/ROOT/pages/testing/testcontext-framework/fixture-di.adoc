@@ -54,8 +54,11 @@ example.
 The first code listing shows a JUnit Jupiter based implementation of the test class that
 uses `@Autowired` for field injection:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// specifies the Spring configuration to load for this test fixture
@@ -74,8 +77,9 @@ uses `@Autowired` for field injection:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// specifies the Spring configuration to load for this test fixture
@@ -93,12 +97,16 @@ uses `@Autowired` for field injection:
 		}
 	}
 ----
+======
 
 Alternatively, you can configure the class to use `@Autowired` for setter injection, as
 follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// specifies the Spring configuration to load for this test fixture
@@ -121,8 +129,9 @@ follows:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// specifies the Spring configuration to load for this test fixture
@@ -144,6 +153,7 @@ follows:
 		}
 	}
 ----
+======
 
 The preceding code listings use the same XML context file referenced by the
 `@ContextConfiguration` annotation (that is, `repository-config.xml`). The following
@@ -178,8 +188,11 @@ such a case, you can override the setter method and use the `@Qualifier` annotat
 indicate a specific target bean, as follows (but make sure to delegate to the overridden
 method in the superclass as well):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// ...
 
@@ -192,8 +205,9 @@ method in the superclass as well):
 	// ...
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// ...
 
@@ -204,6 +218,7 @@ method in the superclass as well):
 
 	// ...
 ----
+======
 
 The specified qualifier value indicates the specific `DataSource` bean to inject,
 narrowing the set of type matches to a specific bean. Its value is matched against

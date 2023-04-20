@@ -9,8 +9,11 @@ e.g. via `concatMap`, then you'll need to use the Reactor `Context`.
 The Reactor `Context` needs to be populated at the end of a reactive chain in order to
 apply to all operations. For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient client = WebClient.builder()
 			.filter((request, next) ->
@@ -28,6 +31,7 @@ apply to all operations. For example:
 			})
 			.contextWrite(context -> context.put("foo", ...));
 ----
+======
 
 
 

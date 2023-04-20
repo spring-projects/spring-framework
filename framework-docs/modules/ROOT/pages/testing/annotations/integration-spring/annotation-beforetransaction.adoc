@@ -9,14 +9,18 @@ methods.
 
 The following example shows how to use the `@BeforeTransaction` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@BeforeTransaction // <1>
 	void beforeTransaction() {
 		// logic to be run before a transaction is started
 	}
 ----
+======
 <1> Run this method before a transaction.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

@@ -119,16 +119,22 @@ supplied to an `ApplicationContext` constructor are resource strings that let
 the container load configuration metadata from a variety of external resources, such
 as the local file system, the Java `CLASSPATH`, and so on.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
 ----
-.Kotlin
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
     val context = ClassPathXmlApplicationContext("services.xml", "daos.xml")
 ----
+======
 
 [NOTE]
 ====
@@ -295,8 +301,11 @@ a registry of different beans and their dependencies. By using the method
 The `ApplicationContext` lets you read bean definitions and access them, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// create and configure beans
 	ApplicationContext context = new ClassPathXmlApplicationContext("services.xml", "daos.xml");
@@ -307,7 +316,9 @@ example shows:
 	// use configured instance
 	List<String> userList = service.getUsernameList();
 ----
-.Kotlin
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
     import org.springframework.beans.factory.getBean
@@ -321,58 +332,77 @@ example shows:
     // use configured instance
     var userList = service.getUsernameList()
 ----
+======
 
 With Groovy configuration, bootstrapping looks very similar. It has a different context
 implementation class which is Groovy-aware (but also understands XML bean definitions).
 The following example shows Groovy configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext context = new GenericGroovyApplicationContext("services.groovy", "daos.groovy");
 ----
-.Kotlin
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 val context = GenericGroovyApplicationContext("services.groovy", "daos.groovy")
 ----
+======
 
 The most flexible variant is `GenericApplicationContext` in combination with reader
 delegates -- for example, with `XmlBeanDefinitionReader` for XML files, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	GenericApplicationContext context = new GenericApplicationContext();
 	new XmlBeanDefinitionReader(context).loadBeanDefinitions("services.xml", "daos.xml");
 	context.refresh();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val context = GenericApplicationContext()
 	XmlBeanDefinitionReader(context).loadBeanDefinitions("services.xml", "daos.xml")
 	context.refresh()
 ----
+======
 
 You can also use the `GroovyBeanDefinitionReader` for Groovy files, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	GenericApplicationContext context = new GenericApplicationContext();
 	new GroovyBeanDefinitionReader(context).loadBeanDefinitions("services.groovy", "daos.groovy");
 	context.refresh();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val context = GenericApplicationContext()
 	GroovyBeanDefinitionReader(context).loadBeanDefinitions("services.groovy", "daos.groovy")
 	context.refresh()
 ----
+======
 
 You can mix and match such reader delegates on the same `ApplicationContext`,
 reading bean definitions from diverse configuration sources.

@@ -74,8 +74,11 @@ Servlet container makes an ERROR dispatch within the container to the configured
 to a `@Controller`, which could be implemented to return an error view name with a model
 or to render a JSON response, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RestController
 	public class ErrorController {
@@ -89,8 +92,10 @@ or to render a JSON response, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RestController
 	class ErrorController {
@@ -104,6 +109,7 @@ or to render a JSON response, as the following example shows:
 		}
 	}
 ----
+======
 
 TIP: The Servlet API does not provide a way to create error page mappings in Java. You can,
 however, use both a `WebApplicationInitializer` and a minimal `web.xml`.

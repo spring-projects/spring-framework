@@ -19,8 +19,11 @@ Configuration methods for this class follow the `fluid` style that returns the i
 of the `SimpleJdbcInsert`, which lets you chain all configuration methods. The following
 example uses only one configuration method (we show examples of multiple methods later):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -41,8 +44,10 @@ example uses only one configuration method (we show examples of multiple methods
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -59,6 +64,7 @@ example uses only one configuration method (we show examples of multiple methods
 		// ... additional methods
 	}
 ----
+======
 
 The `execute` method used here takes a plain `java.util.Map` as its only parameter. The
 important thing to note here is that the keys used for the `Map` must match the column
@@ -75,8 +81,11 @@ the `SimpleJdbcInsert`, in addition to specifying the table name, it specifies t
 of the generated key column with the `usingGeneratedKeyColumns` method. The following
 listing shows how it works:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -99,8 +108,10 @@ listing shows how it works:
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -118,6 +129,7 @@ listing shows how it works:
 		// ... additional methods
 	}
 ----
+======
 
 The main difference when you run the insert by using this second approach is that you do not
 add the `id` to the `Map`, and you call the `executeAndReturnKey` method. This returns a
@@ -134,8 +146,11 @@ use a `KeyHolder` that is returned from the `executeAndReturnKeyHolder` method.
 You can limit the columns for an insert by specifying a list of column names with the
 `usingColumns` method, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -159,8 +174,10 @@ You can limit the columns for an insert by specifying a list of column names wit
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -180,6 +197,7 @@ You can limit the columns for an insert by specifying a list of column names wit
 		// ... additional methods
 	}
 ----
+======
 
 The execution of the insert is the same as if you had relied on the metadata to determine
 which columns to use.
@@ -195,8 +213,11 @@ which is a very convenient class if you have a JavaBean-compliant class that con
 your values. It uses the corresponding getter method to extract the parameter
 values. The following example shows how to use `BeanPropertySqlParameterSource`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -217,8 +238,10 @@ values. The following example shows how to use `BeanPropertySqlParameterSource`:
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -235,12 +258,16 @@ values. The following example shows how to use `BeanPropertySqlParameterSource`:
 		// ... additional methods
 	}
 ----
+======
 
 Another option is the `MapSqlParameterSource` that resembles a `Map` but provides a more
 convenient `addValue` method that can be chained. The following example shows how to use it:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -263,8 +290,10 @@ convenient `addValue` method that can be chained. The following example shows ho
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -283,6 +312,7 @@ convenient `addValue` method that can be chained. The following example shows ho
 		// ... additional methods
 	}
 ----
+======
 
 As you can see, the configuration is the same. Only the executing code has to change to
 use these alternative input classes.
@@ -325,8 +355,11 @@ The following example of a `SimpleJdbcCall` configuration uses the preceding sto
 procedure (the only configuration option, in addition to the `DataSource`, is the name
 of the stored procedure):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -352,8 +385,10 @@ of the stored procedure):
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -374,6 +409,7 @@ of the stored procedure):
 			// ... additional methods
 	}
 ----
+======
 
 The code you write for the execution of the call involves creating an `SqlParameterSource`
 containing the IN parameter. You must match the name provided for the input value
@@ -397,8 +433,11 @@ To do the latter, you can create your own `JdbcTemplate` and set the `setResults
 property to `true`. Then you can pass this customized `JdbcTemplate` instance into
 the constructor of your `SimpleJdbcCall`. The following example shows this configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -414,8 +453,10 @@ the constructor of your `SimpleJdbcCall`. The following example shows this confi
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -426,6 +467,7 @@ the constructor of your `SimpleJdbcCall`. The following example shows this confi
 		// ... additional methods
 	}
 ----
+======
 
 By taking this action, you avoid conflicts in the case used for the names of your
 returned `out` parameters.
@@ -456,8 +498,11 @@ of IN parameter names to include for a given signature.
 The following example shows a fully declared procedure call and uses the information from
 the preceding example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -481,8 +526,10 @@ the preceding example:
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -501,6 +548,7 @@ the preceding example:
 			// ... additional methods
 	}
 ----
+======
 
 The execution and end results of the two examples are the same. The second example specifies all
 details explicitly rather than relying on metadata.
@@ -515,18 +563,24 @@ To do so, you typically specify the parameter name and SQL type in the construct
 is specified by using the `java.sql.Types` constants. Earlier in this chapter, we saw declarations
 similar to the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	new SqlParameter("in_id", Types.NUMERIC),
 	new SqlOutParameter("out_first_name", Types.VARCHAR),
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	SqlParameter("in_id", Types.NUMERIC),
 	SqlOutParameter("out_first_name", Types.VARCHAR),
 ----
+======
 
 The first line with the `SqlParameter` declares an IN parameter. You can use IN parameters
 for both stored procedure calls and for queries by using the `SqlQuery` and its
@@ -578,8 +632,11 @@ that returns an actor's full name:
 To call this function, we again create a `SimpleJdbcCall` in the initialization method,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -602,8 +659,10 @@ as the following example shows:
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -621,6 +680,7 @@ as the following example shows:
 		// ... additional methods
 	}
 ----
+======
 
 The `executeFunction` method used returns a `String` that contains the return value from the
 function call.
@@ -656,8 +716,11 @@ to map follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is
 passing in the required class to map to in the `newInstance` method.
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcActorDao implements ActorDao {
 
@@ -680,8 +743,10 @@ The following example shows how to do so:
 		// ... additional methods
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcActorDao(dataSource: DataSource) : ActorDao {
 
@@ -699,6 +764,7 @@ The following example shows how to do so:
 		// ... additional methods
 	}
 ----
+======
 
 The `execute` call passes in an empty `Map`, because this call does not take any parameters.
 The list of actors is then retrieved from the results map and returned to the caller.

@@ -18,8 +18,11 @@ method must use a URI variable to mask that variable content and ensure the requ
 be matched successfully independent of matrix variable order and presence.
 The following example uses a matrix variable:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// GET /pets/42;q=11;r=22
 
@@ -30,8 +33,10 @@ The following example uses a matrix variable:
 		// q == 11
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// GET /pets/42;q=11;r=22
 
@@ -42,13 +47,17 @@ The following example uses a matrix variable:
 		// q == 11
 	}
 ----
+======
 
 Given that all path segments may contain matrix variables, you may sometimes need to
 disambiguate which path variable the matrix variable is expected to be in.
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// GET /owners/42;q=11/pets/21;q=22
 
@@ -61,8 +70,10 @@ The following example shows how to do so:
 		// q2 == 22
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// GET /owners/42;q=11/pets/21;q=22
 
@@ -75,12 +86,16 @@ The following example shows how to do so:
 		// q2 == 22
 	}
 ----
+======
 
 A matrix variable may be defined as optional and a default value specified, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// GET /pets/42
 
@@ -90,8 +105,10 @@ following example shows:
 		// q == 1
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// GET /pets/42
 
@@ -101,11 +118,15 @@ following example shows:
 		// q == 1
 	}
 ----
+======
 
 To get all matrix variables, you can use a `MultiValueMap`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
 
@@ -118,8 +139,10 @@ To get all matrix variables, you can use a `MultiValueMap`, as the following exa
 		// petMatrixVars: ["q" : 22, "s" : 23]
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
 
@@ -132,6 +155,7 @@ To get all matrix variables, you can use a `MultiValueMap`, as the following exa
 		// petMatrixVars: ["q" : 22, "s" : 23]
 	}
 ----
+======
 
 Note that you need to enable the use of matrix variables. In the MVC Java configuration,
 you need to set a `UrlPathHelper` with `removeSemicolonContent=false` through

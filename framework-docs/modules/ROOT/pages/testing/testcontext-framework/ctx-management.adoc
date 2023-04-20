@@ -16,8 +16,11 @@ As an alternative to implementing the `ApplicationContextAware` interface, you c
 the application context for your test class through the `@Autowired` annotation on either
 a field or setter method, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig
 	class MyTest {
@@ -28,6 +31,7 @@ a field or setter method, as the following example shows:
 		// class body...
 	}
 ----
+======
 <1> Injecting the `ApplicationContext`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -48,8 +52,11 @@ a field or setter method, as the following example shows:
 Similarly, if your test is configured to load a `WebApplicationContext`, you can inject
 the web application context into your test, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitWebConfig // <1>
 	class MyWebAppTest {
@@ -60,6 +67,7 @@ the web application context into your test, as follows:
 		// class body...
 	}
 ----
+======
 <1> Configuring the `WebApplicationContext`.
 <2> Injecting the `WebApplicationContext`.
 

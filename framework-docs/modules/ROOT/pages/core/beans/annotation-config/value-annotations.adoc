@@ -3,8 +3,11 @@
 
 `@Value` is typically used to inject externalized properties:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
     @Component
     public class MovieRecommender {
@@ -16,29 +19,38 @@
         }
     }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class MovieRecommender(@Value("\${catalog.name}") private val catalog: String)
 ----
+======
 
 With the following configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
     @Configuration
     @PropertySource("classpath:application.properties")
     public class AppConfig { }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@PropertySource("classpath:application.properties")
 	class AppConfig
 ----
+======
 
 And the following `application.properties` file:
 
@@ -55,8 +67,11 @@ will be injected as the value. If you want to maintain strict control over nonex
 values, you should declare a `PropertySourcesPlaceholderConfigurer` bean, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -67,8 +82,10 @@ example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -77,6 +94,7 @@ example shows:
 		fun propertyPlaceholderConfigurer() = PropertySourcesPlaceholderConfigurer()
 	}
 ----
+======
 
 NOTE: When configuring a `PropertySourcesPlaceholderConfigurer` using JavaConfig, the
 `@Bean` method must be `static`.
@@ -95,8 +113,11 @@ automatically converted to `String` array without extra effort.
 
 It is possible to provide a default value as following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
     @Component
     public class MovieRecommender {
@@ -108,20 +129,26 @@ It is possible to provide a default value as following:
         }
     }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class MovieRecommender(@Value("\${catalog.name:defaultCatalog}") private val catalog: String)
 ----
+======
 
 A Spring `BeanPostProcessor` uses a `ConversionService` behind the scenes to handle the
 process for converting the `String` value in `@Value` to the target type. If you want to
 provide conversion support for your own custom type, you can provide your own
 `ConversionService` bean instance as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
     @Configuration
     public class AppConfig {
@@ -134,8 +161,10 @@ provide conversion support for your own custom type, you can provide your own
         }
     }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -148,12 +177,16 @@ provide conversion support for your own custom type, you can provide your own
 		}
 	}
 ----
+======
 
 When `@Value` contains a xref:core/expressions.adoc[`SpEL` expression] the value will be dynamically
 computed at runtime as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
     @Component
     public class MovieRecommender {
@@ -165,18 +198,24 @@ computed at runtime as the following example shows:
         }
     }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class MovieRecommender(
 		@Value("#{systemProperties['user.catalog'] + 'Catalog' }") private val catalog: String)
 ----
+======
 
 SpEL also enables the use of more complex data structures:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
     @Component
     public class MovieRecommender {
@@ -189,12 +228,15 @@ SpEL also enables the use of more complex data structures:
         }
     }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class MovieRecommender(
 		@Value("#{{'Thriller': 100, 'Comedy': 300}}") private val countOfMoviesPerCatalog: Map<String, Int>)
 ----
+======
 
 

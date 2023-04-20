@@ -11,8 +11,11 @@ the bean name to be injected. In other words, it follows by-name semantics,
 as demonstrated in the following example:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -24,6 +27,7 @@ as demonstrated in the following example:
 		}
 	}
 ----
+======
 <1> This line injects a `@Resource`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -45,8 +49,11 @@ it takes the bean property name. The following example is going to have the bean
 named `movieFinder` injected into its setter method:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -58,8 +65,10 @@ named `movieFinder` injected into its setter method:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SimpleMovieLister {
 
@@ -68,6 +77,7 @@ named `movieFinder` injected into its setter method:
 
 	}
 ----
+======
 --
 
 NOTE: The name provided with the annotation is resolved as a bean name by the
@@ -88,8 +98,11 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 `CustomerPreferenceDao`:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -105,6 +118,7 @@ named "customerPreferenceDao" and then falls back to a primary type match for th
 		// ...
 	}
 ----
+======
 <1> The `context` field is injected based on the known resolvable dependency type:
 `ApplicationContext`.
 

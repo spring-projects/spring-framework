@@ -13,8 +13,11 @@ inter-bean dependencies. See xref:core/beans/java/basic-concepts.adoc[Basic Conc
 When beans have dependencies on one another, expressing that dependency is as simple
 as having one bean method call another, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -30,8 +33,10 @@ as having one bean method call another, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -43,6 +48,7 @@ as having one bean method call another, as the following example shows:
 		fun beanTwo() = BeanTwo()
 	}
 ----
+======
 
 In the preceding example, `beanOne` receives a reference to `beanTwo` through constructor
 injection.
@@ -62,8 +68,11 @@ singleton-scoped bean has a dependency on a prototype-scoped bean. Using Java fo
 type of configuration provides a natural means for implementing this pattern. The
 following example shows how to use lookup method injection:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public abstract class CommandManager {
 		public Object process(Object commandState) {
@@ -78,8 +87,10 @@ following example shows how to use lookup method injection:
 		protected abstract Command createCommand();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	abstract class CommandManager {
 		fun process(commandState: Any): Any {
@@ -94,13 +105,17 @@ following example shows how to use lookup method injection:
 		protected abstract fun createCommand(): Command
 	}
 ----
+======
 
 By using Java configuration, you can create a subclass of `CommandManager` where
 the abstract `createCommand()` method is overridden in such a way that it looks up a new
 (prototype) command object. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Bean
 	@Scope("prototype")
@@ -121,8 +136,10 @@ the abstract `createCommand()` method is overridden in such a way that it looks 
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Bean
 	@Scope("prototype")
@@ -143,6 +160,7 @@ the abstract `createCommand()` method is overridden in such a way that it looks 
 		}
 	}
 ----
+======
 
 
 [[beans-java-further-information-java-config]]
@@ -150,8 +168,11 @@ the abstract `createCommand()` method is overridden in such a way that it looks 
 
 Consider the following example, which shows a `@Bean` annotated method being called twice:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -176,8 +197,10 @@ Consider the following example, which shows a `@Bean` annotated method being cal
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -202,6 +225,7 @@ Consider the following example, which shows a `@Bean` annotated method being cal
 		}
 	}
 ----
+======
 
 `clientDao()` has been called once in `clientService1()` and once in `clientService2()`.
 Since this method creates a new instance of `ClientDaoImpl` and returns it, you would

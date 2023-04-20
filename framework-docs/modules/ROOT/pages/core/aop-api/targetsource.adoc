@@ -34,18 +34,24 @@ Changing the target source's target takes effect immediately. The
 
 You can change the target by using the `swap()` method on HotSwappableTargetSource, as the follow example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
 	Object oldTarget = swapper.swap(newTarget);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val swapper = beanFactory.getBean("swapper") as HotSwappableTargetSource
 	val oldTarget = swapper.swap(newTarget)
 ----
+======
 
 The following example shows the required XML definitions:
 
@@ -142,18 +148,24 @@ the `ProxyFactoryBean` that exposes the pooled object.
 
 The cast is defined as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
 	System.out.println("Max pool size is " + conf.getMaxSize());
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val conf = beanFactory.getBean("businessObject") as PoolingConfig
 	println("Max pool size is " + conf.maxSize)
 ----
+======
 
 NOTE: Pooling stateless service objects is not usually necessary. We do not believe it should
 be the default choice, as most stateless objects are naturally thread safe, and instance

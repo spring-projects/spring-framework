@@ -3,8 +3,11 @@
 
 `WebClient` can be used in synchronous style by blocking at the end for the result:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Person person = client.get().uri("/person/{id}", i).retrieve()
 		.bodyToMono(Person.class)
@@ -15,8 +18,10 @@
 		.collectList()
 		.block();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val person = runBlocking {
 		client.get().uri("/person/{id}", i).retrieve()
@@ -29,12 +34,16 @@
 				.toList()
 	}
 ----
+======
 
 However if multiple calls need to be made, it's more efficient to avoid blocking on each
 response individually, and instead wait for the combined result:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Mono<Person> personMono = client.get().uri("/person/{id}", personId)
 			.retrieve().bodyToMono(Person.class);
@@ -50,8 +59,10 @@ response individually, and instead wait for the combined result:
 			})
 			.block();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val data = runBlocking {
 			val personDeferred = async {
@@ -67,6 +78,7 @@ response individually, and instead wait for the combined result:
 			mapOf("person" to personDeferred.await(), "hobbies" to hobbiesDeferred.await())
 		}
 ----
+======
 
 The above is merely one example. There are lots of other patterns and operators for putting
 together a reactive pipeline that makes many remote calls, potentially some nested,

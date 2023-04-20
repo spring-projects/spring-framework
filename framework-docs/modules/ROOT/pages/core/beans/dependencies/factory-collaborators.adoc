@@ -30,8 +30,11 @@ treats arguments to a constructor and to a `static` factory method similarly. Th
 following example shows a class that can only be dependency-injected with constructor
 injection:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -46,14 +49,17 @@ injection:
 		// business logic that actually uses the injected MovieFinder is omitted...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// a constructor so that the Spring container can inject a MovieFinder
 	class SimpleMovieLister(private val movieFinder: MovieFinder) {
 		// business logic that actually uses the injected MovieFinder is omitted...
 	}
 ----
+======
 
 Notice that there is nothing special about this class. It is a POJO that
 has no dependencies on container specific interfaces, base classes, or annotations.
@@ -67,8 +73,11 @@ order in which the constructor arguments are defined in a bean definition is the
 in which those arguments are supplied to the appropriate constructor when the bean is
 being instantiated. Consider the following class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package x.y;
 
@@ -79,13 +88,16 @@ being instantiated. Consider the following class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package x.y
 
 	class ThingOne(thingTwo: ThingTwo, thingThree: ThingThree)
 ----
+======
 
 Assuming that the `ThingTwo` and `ThingThree` classes are not related by inheritance, no
 potential ambiguity exists. Thus, the following configuration works fine, and you do not
@@ -111,8 +123,11 @@ case with the preceding example). When a simple type is used, such as
 `<value>true</value>`, Spring cannot determine the type of the value, and so cannot match
 by type without help. Consider the following class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package examples;
 
@@ -130,8 +145,10 @@ by type without help. Consider the following class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package examples
 
@@ -140,6 +157,7 @@ by type without help. Consider the following class:
 		private val ultimateAnswer: String // The Answer to Life, the Universe, and Everything
 	)
 ----
+======
 
 .[[beans-factory-ctor-arguments-type]]Constructor argument type matching
 --
@@ -195,8 +213,11 @@ https://download.oracle.com/javase/8/docs/api/java/beans/ConstructorProperties.h
 JDK annotation to explicitly name your constructor arguments. The sample class would
 then have to look as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package examples;
 
@@ -211,8 +232,10 @@ then have to look as follows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package examples
 
@@ -220,6 +243,7 @@ then have to look as follows:
 	@ConstructorProperties("years", "ultimateAnswer")
 	constructor(val years: Int, val ultimateAnswer: String)
 ----
+======
 --
 
 
@@ -234,8 +258,11 @@ The following example shows a class that can only be dependency-injected by usin
 setter injection. This class is conventional Java. It is a POJO that has no dependencies
 on container specific interfaces, base classes, or annotations.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -250,8 +277,10 @@ on container specific interfaces, base classes, or annotations.
 		// business logic that actually uses the injected MovieFinder is omitted...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class SimpleMovieLister {
 
@@ -261,6 +290,7 @@ class SimpleMovieLister {
 	// business logic that actually uses the injected MovieFinder is omitted...
 }
 ----
+======
 
 
 The `ApplicationContext` supports constructor-based and setter-based DI for the beans it
@@ -403,8 +433,11 @@ part of a Spring XML configuration file specifies some bean definitions as follo
 
 The following example shows the corresponding `ExampleBean` class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ExampleBean {
 
@@ -427,8 +460,10 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class ExampleBean {
 	lateinit var beanOne: AnotherBean
@@ -436,6 +471,7 @@ class ExampleBean {
 	var i: Int = 0
 }
 ----
+======
 
 In the preceding example, setters are declared to match against the properties specified
 in the XML file. The following example uses constructor-based DI:
@@ -460,8 +496,11 @@ in the XML file. The following example uses constructor-based DI:
 
 The following example shows the corresponding `ExampleBean` class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ExampleBean {
 
@@ -479,14 +518,17 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class ExampleBean(
 		private val beanOne: AnotherBean,
 		private val beanTwo: YetAnotherBean,
 		private val i: Int)
 ----
+======
 
 The constructor arguments specified in the bean definition are used as arguments to
 the constructor of the `ExampleBean`.
@@ -508,8 +550,11 @@ told to call a `static` factory method to return an instance of the object:
 
 The following example shows the corresponding `ExampleBean` class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ExampleBean {
 
@@ -530,8 +575,10 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ExampleBean private constructor() {
 		companion object {
@@ -547,6 +594,7 @@ The following example shows the corresponding `ExampleBean` class:
 		}
 	}
 ----
+======
 
 Arguments to the `static` factory method are supplied by `<constructor-arg/>` elements,
 exactly the same as if a constructor had actually been used. The type of the class being

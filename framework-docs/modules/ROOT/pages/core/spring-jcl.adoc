@@ -23,19 +23,25 @@ For logging needs within application code, prefer direct use of Log4j 2.x, SLF4J
 A `Log` implementation may be retrieved via `org.apache.commons.logging.LogFactory` as in
 the following example.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 public class MyBean {
 	private final Log log = LogFactory.getLog(getClass());
     // ...
 }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class MyBean {
   private val log = LogFactory.getLog(javaClass)
   // ...
 }
 ----
+======

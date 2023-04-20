@@ -19,21 +19,27 @@ classpath of your application (version 1.9 or later). This library is available 
 
 To enable @AspectJ support with Java `@Configuration`, add the `@EnableAspectJAutoProxy`
 annotation, as the following example shows:
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableAspectJAutoProxy
 	public class AppConfig {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableAspectJAutoProxy
 	class AppConfig
 ----
+======
 
 [[aop-enable-aspectj-xml]]
 == Enabling @AspectJ Support with XML Configuration

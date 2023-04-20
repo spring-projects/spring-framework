@@ -23,8 +23,11 @@ A `@RequestMapping` is still needed at the class level to express shared mapping
 
 The following example has type and method level mappings:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RestController
 	@RequestMapping("/persons")
@@ -42,8 +45,10 @@ The following example has type and method level mappings:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RestController
 	@RequestMapping("/persons")
@@ -61,6 +66,7 @@ The following example has type and method level mappings:
 		}
 	}
 ----
+======
 
 
 
@@ -102,28 +108,37 @@ Some example patterns:
 
 Captured URI variables can be accessed with `@PathVariable`. For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	fun findPet(@PathVariable ownerId: Long, @PathVariable petId: Long): Pet {
 		// ...
 	}
 ----
+======
 
 
 You can declare URI variables at the class and method levels, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	@RequestMapping("/owners/{ownerId}")
@@ -135,8 +150,10 @@ You can declare URI variables at the class and method levels, as the following e
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	@RequestMapping("/owners/{ownerId}")
@@ -148,6 +165,7 @@ You can declare URI variables at the class and method levels, as the following e
 		}
 	}
 ----
+======
 
 URI variables are automatically converted to the appropriate type, or `TypeMismatchException`
 is raised. Simple types (`int`, `long`, `Date`, and so on) are supported by default and you can
@@ -162,22 +180,28 @@ The syntax `{varName:regex}` declares a URI variable with a regular expression t
 syntax of `{varName:regex}`. For example, given URL `"/spring-web-3.0.5.jar"`, the following method
 extracts the name, version, and file extension:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
 	public void handle(@PathVariable String name, @PathVariable String version, @PathVariable String ext) {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
 	fun handle(@PathVariable name: String, @PathVariable version: String, @PathVariable ext: String) {
 		// ...
 	}
 ----
+======
 
 URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
 by using `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
@@ -274,14 +298,18 @@ recommendations related to RFD.
 You can narrow the request mapping based on the `Content-Type` of the request,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping(path = "/pets", consumes = "application/json") // <1>
 	public void addPet(@RequestBody Pet pet) {
 		// ...
 	}
 ----
+======
 <1> Using a `consumes` attribute to narrow the mapping by the content type.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -312,8 +340,11 @@ TIP: `MediaType` provides constants for commonly used media types, such as
 You can narrow the request mapping based on the `Accept` request header and the list of
 content types that a controller method produces, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping(path = "/pets/{petId}", produces = "application/json") // <1>
 	@ResponseBody
@@ -321,6 +352,7 @@ content types that a controller method produces, as the following example shows:
 		// ...
 	}
 ----
+======
 <1> Using a `produces` attribute to narrow the mapping by the content type.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -353,14 +385,18 @@ You can narrow request mappings based on request parameter conditions. You can t
 presence of a request parameter (`myParam`), for the absence of one (`!myParam`), or for a
 specific value (`myParam=myValue`). The following example shows how to test for a specific value:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping(path = "/pets/{petId}", params = "myParam=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
 		// ...
 	}
 ----
+======
 <1> Testing whether `myParam` equals `myValue`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -375,14 +411,18 @@ specific value (`myParam=myValue`). The following example shows how to test for 
 
 You can also use the same with request header conditions, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping(path = "/pets/{petId}", headers = "myHeader=myValue") // <1>
 	public void findPet(@PathVariable String petId) {
 		// ...
 	}
 ----
+======
 <1> Testing whether `myHeader` equals `myValue`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -455,8 +495,11 @@ You can programmatically register handler methods, which you can use for dynamic
 registrations or for advanced cases, such as different instances of the same handler
 under different URLs. The following example registers a handler method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class MyConfig {
@@ -474,6 +517,7 @@ under different URLs. The following example registers a handler method:
 		}
 	}
 ----
+======
 <1> Inject the target handler and the handler mapping for controllers.
 <2> Prepare the request mapping meta data.
 <3> Get the handler method.

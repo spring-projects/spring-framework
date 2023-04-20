@@ -15,8 +15,11 @@ lower than that of the `DefaultServletHttpRequestHandler`, which is `Integer.MAX
 
 The following example shows how to enable the feature by using the default setup:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -28,8 +31,10 @@ The following example shows how to enable the feature by using the default setup
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -40,6 +45,7 @@ The following example shows how to enable the feature by using the default setup
 		}
 	}
 ----
+======
 
 The following example shows how to achieve the same configuration in XML:
 
@@ -57,8 +63,11 @@ If the default Servlet has been custom-configured with a different name, or if a
 different Servlet container is being used where the default Servlet name is unknown,
 then you must explicitly provide the default Servlet's name, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -70,8 +79,10 @@ then you must explicitly provide the default Servlet's name, as the following ex
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -82,6 +93,7 @@ then you must explicitly provide the default Servlet's name, as the following ex
 		}
 	}
 ----
+======
 
 
 The following example shows how to achieve the same configuration in XML:

@@ -350,8 +350,11 @@ type-conversion support such that the elements of your strongly-typed `Collectio
 instances are converted to the appropriate type prior to being added to the `Collection`.
 The following Java class and bean definition show how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SomeClass {
 
@@ -362,13 +365,16 @@ The following Java class and bean definition show how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class SomeClass {
 	lateinit var accounts: Map<String, Float>
 }
 ----
+======
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -408,16 +414,22 @@ following XML-based configuration metadata snippet sets the `email` property to 
 
 The preceding example is equivalent to the following Java code:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	exampleBean.setEmail("");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	exampleBean.email = ""
 ----
+======
 
 
 The `<null/>` element handles `null` values. The following listing shows an example:
@@ -433,16 +445,22 @@ The `<null/>` element handles `null` values. The following listing shows an exam
 
 The preceding configuration is equivalent to the following Java code:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	exampleBean.setEmail(null);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	exampleBean.email = null
 ----
+======
 
 
 [[beans-p-namespace]]

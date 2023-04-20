@@ -13,8 +13,11 @@ resource base path). The resource base path is used behind the scenes to create 
 The following example shows how to use the `@WebAppConfiguration` annotation:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@WebAppConfiguration // <1>
@@ -22,6 +25,7 @@ The following example shows how to use the `@WebAppConfiguration` annotation:
 		// class body...
 	}
 ----
+======
 <1> The `@WebAppConfiguration` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -43,8 +47,11 @@ supported. If no resource prefix is supplied, the path is assumed to be a file s
 resource. The following example shows how to specify a classpath resource:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@WebAppConfiguration("classpath:test-web-resources") // <1>
@@ -52,6 +59,7 @@ resource. The following example shows how to specify a classpath resource:
 		// class body...
 	}
 ----
+======
 <1> Specifying a classpath resource.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

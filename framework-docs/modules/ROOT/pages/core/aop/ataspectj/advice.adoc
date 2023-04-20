@@ -13,8 +13,11 @@ You can declare before advice in an aspect by using the `@Before` annotation.
 
 The following example uses an inline pointcut expression.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Before;
@@ -28,8 +31,10 @@ The following example uses an inline pointcut expression.
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Before
@@ -43,12 +48,16 @@ The following example uses an inline pointcut expression.
 		}
 	}
 ----
+======
 
 If we use a xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[named pointcut], we can rewrite the preceding example
 as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Before;
@@ -62,8 +71,10 @@ as follows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Before
@@ -77,6 +88,7 @@ as follows:
 		}
 	}
 ----
+======
 
 
 [[aop-advice-after-returning]]
@@ -85,8 +97,11 @@ as follows:
 After returning advice runs when a matched method execution returns normally.
 You can declare it by using the `@AfterReturning` annotation.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.AfterReturning;
@@ -100,8 +115,10 @@ You can declare it by using the `@AfterReturning` annotation.
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.AfterReturning
@@ -115,6 +132,7 @@ You can declare it by using the `@AfterReturning` annotation.
 		}
 	}
 ----
+======
 
 NOTE: You can have multiple advice declarations (and other members as well),
 all inside the same aspect. We show only a single advice declaration in these
@@ -124,8 +142,11 @@ Sometimes, you need access in the advice body to the actual value that was retur
 You can use the form of `@AfterReturning` that binds the return value to get that
 access, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.AfterReturning;
@@ -141,8 +162,10 @@ access, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.AfterReturning
@@ -158,6 +181,7 @@ access, as the following example shows:
 		}
 	}
 ----
+======
 
 The name used in the `returning` attribute must correspond to the name of a parameter
 in the advice method. When a method execution returns, the return value is passed to
@@ -176,8 +200,11 @@ After throwing advice runs when a matched method execution exits by throwing an
 exception. You can declare it by using the `@AfterThrowing` annotation, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.AfterThrowing;
@@ -191,8 +218,10 @@ following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.AfterThrowing
@@ -206,6 +235,7 @@ following example shows:
 		}
 	}
 ----
+======
 
 Often, you want the advice to run only when exceptions of a given type are thrown,
 and you also often need access to the thrown exception in the advice body. You can
@@ -213,8 +243,11 @@ use the `throwing` attribute to both restrict matching (if desired -- use `Throw
 as the exception type otherwise) and bind the thrown exception to an advice parameter.
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.AfterThrowing;
@@ -230,8 +263,10 @@ The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.AfterThrowing
@@ -247,6 +282,7 @@ The following example shows how to do so:
 		}
 	}
 ----
+======
 
 The name used in the `throwing` attribute must correspond to the name of a parameter in
 the advice method. When a method execution exits by throwing an exception, the exception
@@ -271,8 +307,11 @@ using the `@After` annotation. After advice must be prepared to handle both norm
 exception return conditions. It is typically used for releasing resources and similar
 purposes. The following example shows how to use after finally advice:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.After;
@@ -286,8 +325,10 @@ purposes. The following example shows how to use after finally advice:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.After
@@ -301,6 +342,7 @@ purposes. The following example shows how to use after finally advice:
 		}
 	}
 ----
+======
 
 [NOTE]
 ====
@@ -371,8 +413,11 @@ value depending on the use case.
 
 The following example shows how to use around advice:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Around;
@@ -390,8 +435,10 @@ The following example shows how to use around advice:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Around
@@ -409,6 +456,7 @@ The following example shows how to use around advice:
 		}
 	}
 ----
+======
 
 [[aop-ataspectj-advice-params]]
 == Advice Parameters
@@ -448,22 +496,28 @@ Suppose you want to advise the execution of DAO operations that take an `Account
 object as the first parameter, and you need access to the account in the advice body.
 You could write the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Before("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
 	public void validateAccount(Account account) {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Before("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
 	fun validateAccount(account: Account) {
 		// ...
 	}
 ----
+======
 
 The `args(account,..)` part of the pointcut expression serves two purposes. First, it
 restricts matching to only those method executions where the method takes at least one
@@ -475,8 +529,11 @@ Another way of writing this is to declare a pointcut that "provides" the `Accoun
 object value when it matches a join point, and then refer to the named pointcut
 from the advice. This would look as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Pointcut("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
 	private void accountDataAccessOperation(Account account) {}
@@ -486,8 +543,10 @@ from the advice. This would look as follows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Pointcut("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
 	private fun accountDataAccessOperation(account: Account) {
@@ -498,6 +557,7 @@ from the advice. This would look as follows:
 		// ...
 	}
 ----
+======
 
 See the AspectJ programming guide for more details.
 
@@ -508,8 +568,11 @@ set of examples shows how to match the execution of methods annotated with an
 
 The following shows the definition of the `@Auditable` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
@@ -517,18 +580,24 @@ The following shows the definition of the `@Auditable` annotation:
 		AuditCode value();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Retention(AnnotationRetention.RUNTIME)
 	@Target(AnnotationTarget.FUNCTION)
 	annotation class Auditable(val value: AuditCode)
 ----
+======
 
 The following shows the advice that matches the execution of `@Auditable` methods:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Before("com.xyz.Pointcuts.publicMethod() && @annotation(auditable)") // <1>
 	public void audit(Auditable auditable) {
@@ -536,6 +605,7 @@ The following shows the advice that matches the execution of `@Auditable` method
 		// ...
 	}
 ----
+======
 <1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
@@ -555,62 +625,80 @@ The following shows the advice that matches the execution of `@Auditable` method
 Spring AOP can handle generics used in class declarations and method parameters. Suppose
 you have a generic type like the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public interface Sample<T> {
 		void sampleGenericMethod(T param);
 		void sampleGenericCollectionMethod(Collection<T> param);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	interface Sample<T> {
 		fun sampleGenericMethod(param: T)
 		fun sampleGenericCollectionMethod(param: Collection<T>)
 	}
 ----
+======
 
 You can restrict interception of method types to certain parameter types by
 tying the advice parameter to the parameter type for which you want to intercept the method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
 	public void beforeSampleMethod(MyType param) {
 		// Advice implementation
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
 	fun beforeSampleMethod(param: MyType) {
 		// Advice implementation
 	}
 ----
+======
 
 This approach does not work for generic collections. So you cannot define a
 pointcut as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
 	public void beforeSampleMethod(Collection<MyType> param) {
 		// Advice implementation
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
 	fun beforeSampleMethod(param: Collection<MyType>) {
 		// Advice implementation
 	}
 ----
+======
 
 To make this work, we would have to inspect every element of the collection, which is not
 reasonable, as we also cannot decide how to treat `null` values in general. To achieve
@@ -668,8 +756,11 @@ needed information.
 
 The following example shows how to use the `argNames` attribute:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
@@ -679,6 +770,7 @@ The following example shows how to use the `argNames` attribute:
 		// ... use code and bean
 	}
 ----
+======
 <1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 <2> Declares `bean` and `auditable` as the argument names.
 
@@ -701,8 +793,11 @@ If the first parameter is of type `JoinPoint`, `ProceedingJoinPoint`, or
 `argNames` attribute. For example, if you modify the preceding advice to receive the join
 point object, the `argNames` attribute does not need to include it:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Before(
 		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
@@ -712,6 +807,7 @@ point object, the `argNames` attribute does not need to include it:
 		// ... use code, bean, and jp
 	}
 ----
+======
 <1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 <2> Declares `bean` and `auditable` as the argument names.
 
@@ -735,14 +831,18 @@ methods that do not collect any other join point context. In such situations, yo
 omit the `argNames` attribute. For example, the following advice does not need to declare
 the `argNames` attribute:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Before("com.xyz.Pointcuts.publicMethod()") // <1>
 	public void audit(JoinPoint jp) {
 		// ... use jp
 	}
 ----
+======
 <1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
@@ -764,8 +864,11 @@ arguments that works consistently across Spring AOP and AspectJ. The solution is
 to ensure that the advice signature binds each of the method parameters in order.
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Around("execution(List<Account> find*(..)) && " +
 			"com.xyz.CommonPointcuts.inDataAccessLayer() && " +
@@ -776,6 +879,7 @@ The following example shows how to do so:
 		return pjp.proceed(new Object[] {newPattern});
 	}
 ----
+======
 <1> References the `inDataAccessLayer` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]

@@ -32,8 +32,11 @@ A simple PDF view for a word list could extend
 `org.springframework.web.servlet.view.document.AbstractPdfView` and implement the
 `buildPdfDocument()` method, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class PdfWordList extends AbstractPdfView {
 
@@ -47,8 +50,10 @@ A simple PDF view for a word list could extend
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class PdfWordList : AbstractPdfView() {
 
@@ -62,6 +67,7 @@ A simple PDF view for a word list could extend
 		}
 	}
 ----
+======
 
 A controller can return such a view either from an external view definition
 (referencing it by name) or as a `View` instance from the handler method.

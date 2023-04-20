@@ -46,8 +46,11 @@ to run the populator against a `javax.sql.DataSource`. The following example
 specifies SQL scripts for a test schema and test data, sets the statement separator to
 `@@`, and run the scripts against a `DataSource`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Test
 	void databaseTest() {
@@ -60,8 +63,10 @@ specifies SQL scripts for a test schema and test data, sets the statement separa
 		// run code that uses the test schema and data
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Test
 	fun databaseTest() {
@@ -74,6 +79,7 @@ specifies SQL scripts for a test schema and test data, sets the statement separa
 		// run code that uses the test schema and data
 	}
 ----
+======
 
 Note that `ResourceDatabasePopulator` internally delegates to `ScriptUtils` for parsing
 and running SQL scripts. Similarly, the `executeSqlScript(..)` methods in
@@ -110,8 +116,11 @@ the specified resource protocol.
 The following example shows how to use `@Sql` at the class level and at the method level
 within a JUnit Jupiter based integration test class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig
 	@Sql("/test-schema.sql")
@@ -130,8 +139,9 @@ within a JUnit Jupiter based integration test class:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig
 	@Sql("/test-schema.sql")
@@ -149,6 +159,7 @@ within a JUnit Jupiter based integration test class:
 		}
 	}
 ----
+======
 
 [[testcontext-executing-sql-declaratively-script-detection]]
 === Default Script Detection
@@ -175,8 +186,11 @@ Java 8, you can use `@Sql` as a repeatable annotation. Otherwise, you can use th
 
 The following example shows how to use `@Sql` as a repeatable annotation with Java 8:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Test
 	@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`"))
@@ -185,11 +199,14 @@ The following example shows how to use `@Sql` as a repeatable annotation with Ja
 		// run code that uses the test schema and test data
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Repeatable annotations with non-SOURCE retention are not yet supported by Kotlin
 ----
+======
 
 In the scenario presented in the preceding example, the `test-schema.sql` script uses a
 different syntax for single-line comments.
@@ -199,8 +216,11 @@ declarations are grouped together within `@SqlGroup`. With Java 8 and above, the
 `@SqlGroup` is optional, but you may need to use `@SqlGroup` for compatibility with
 other JVM languages such as Kotlin.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Test
 	@SqlGroup({
@@ -211,8 +231,10 @@ other JVM languages such as Kotlin.
 		// run code that uses the test schema and test data
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Test
 	@SqlGroup(
@@ -222,6 +244,7 @@ other JVM languages such as Kotlin.
 		// Run code that uses the test schema and test data
 	}
 ----
+======
 
 [[testcontext-executing-sql-declaratively-script-execution-phases]]
 === Script Execution Phases
@@ -231,8 +254,11 @@ you need to run a particular set of scripts after the test method (for example, 
 up database state), you can use the `executionPhase` attribute in `@Sql`, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Test
 	@Sql(
@@ -249,8 +275,10 @@ following example shows:
 		// to the database outside of the test's transaction
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Test
 	@SqlGroup(
@@ -264,6 +292,7 @@ following example shows:
 		// to the database outside of the test's transaction
 	}
 ----
+======
 
 Note that `ISOLATED` and `AFTER_TEST_METHOD` are statically imported from
 `Sql.TransactionMode` and `Sql.ExecutionPhase`, respectively.
@@ -319,8 +348,11 @@ reference manual, the javadoc for
 provide detailed information, and the following example shows a typical testing scenario
 that uses JUnit Jupiter and transactional tests with `@Sql`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestDatabaseConfig.class)
 	@Transactional
@@ -351,8 +383,10 @@ that uses JUnit Jupiter and transactional tests with `@Sql`:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestDatabaseConfig::class)
 	@Transactional
@@ -378,6 +412,7 @@ that uses JUnit Jupiter and transactional tests with `@Sql`:
 		}
 	}
 ----
+======
 
 Note that there is no need to clean up the database after the `usersTest()` method is
 run, since any changes made to the database (either within the test method or within the

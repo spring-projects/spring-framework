@@ -23,8 +23,11 @@ isolation like this but, rather, as part of a more complex expression -- for exa
 using a literal on one side of a logical comparison operator or as an argument to a
 method.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
@@ -43,8 +46,10 @@ method.
 
 	Object nullValue = parser.parseExpression("null").getValue();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 
@@ -63,6 +68,7 @@ method.
 
 	val nullValue = parser.parseExpression("null").value
 ----
+======
 
 
 

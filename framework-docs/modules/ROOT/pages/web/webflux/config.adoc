@@ -22,8 +22,11 @@ xref:web/webflux/config.adoc#webflux-config-advanced-java[Advanced Configuration
 
 You can use the `@EnableWebFlux` annotation in your Java config, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -31,13 +34,15 @@ You can use the `@EnableWebFlux` annotation in your Java config, as the followin
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
 	class WebConfig
 ----
+======
 
 The preceding example registers a number of Spring WebFlux
 xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[infrastructure beans] and adapts to dependencies
@@ -52,8 +57,11 @@ available on the classpath -- for JSON, XML, and others.
 In your Java configuration, you can implement the `WebFluxConfigurer` interface,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -63,8 +71,9 @@ as the following example shows:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 @Configuration
 @EnableWebFlux
@@ -73,6 +82,7 @@ class WebConfig : WebFluxConfigurer {
 	// Implement configuration methods...
 }
 ----
+======
 
 
 
@@ -85,8 +95,11 @@ for customization via `@NumberFormat` and `@DateTimeFormat` on fields.
 
 To register custom formatters and converters in Java config, use the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -99,8 +112,10 @@ To register custom formatters and converters in Java config, use the following:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -111,14 +126,18 @@ To register custom formatters and converters in Java config, use the following:
 		}
 	}
 ----
+======
 
 By default Spring WebFlux considers the request Locale when parsing and formatting date
 values. This works for forms where dates are represented as Strings with "input" form
 fields. For "date" and "time" form fields, however, browsers use a fixed format defined
 in the HTML spec. For such cases date and time formatting can be customized as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -132,8 +151,10 @@ in the HTML spec. For such cases date and time formatting can be customized as f
       	}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -146,6 +167,7 @@ in the HTML spec. For such cases date and time formatting can be customized as f
 		}
 	}
 ----
+======
 
 NOTE: See xref:core/validation/format.adoc#format-FormatterRegistrar-SPI[`FormatterRegistrar` SPI]
 and the `FormattingConversionServiceFactoryBean` for more information on when to
@@ -165,8 +187,11 @@ is registered as a global xref:core/validation/validator.adoc[validator] for use
 In your Java configuration, you can customize the global `Validator` instance,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -179,8 +204,10 @@ as the following example shows:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -192,12 +219,16 @@ as the following example shows:
 
 	}
 ----
+======
 
 Note that you can also register `Validator` implementations locally,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class MyController {
@@ -209,8 +240,10 @@ as the following example shows:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class MyController {
@@ -221,6 +254,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
@@ -238,8 +272,11 @@ but you can also enable a query parameter-based strategy.
 
 The following example shows how to customize the requested content type resolution:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -251,8 +288,10 @@ The following example shows how to customize the requested content type resoluti
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -263,6 +302,7 @@ The following example shows how to customize the requested content type resoluti
 		}
 	}
 ----
+======
 
 
 
@@ -272,8 +312,11 @@ The following example shows how to customize the requested content type resoluti
 
 The following example shows how to customize how the request and response body are read and written:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -285,8 +328,10 @@ The following example shows how to customize how the request and response body a
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -297,6 +342,7 @@ The following example shows how to customize how the request and response body a
 		}
 	}
 ----
+======
 
 `ServerCodecConfigurer` provides a set of default readers and writers. You can use it to add
 more readers and writers, customize the default ones, or replace the default ones completely.
@@ -323,8 +369,11 @@ It also automatically registers the following well-known modules if they are det
 
 The following example shows how to configure view resolution:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -336,8 +385,10 @@ The following example shows how to configure view resolution:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -348,13 +399,17 @@ The following example shows how to configure view resolution:
 		}
 	}
 ----
+======
 
 The `ViewResolverRegistry` has shortcuts for view technologies with which the Spring Framework
 integrates. The following example uses FreeMarker (which also requires configuring the
 underlying FreeMarker view technology):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -376,8 +431,10 @@ underlying FreeMarker view technology):
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -395,11 +452,15 @@ underlying FreeMarker view technology):
 		}
 	}
 ----
+======
 
 You can also plug in any `ViewResolver` implementation, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -413,8 +474,10 @@ You can also plug in any `ViewResolver` implementation, as the following example
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -426,14 +489,18 @@ You can also plug in any `ViewResolver` implementation, as the following example
 		}
 	}
 ----
+======
 
 To support xref:web/webflux/dispatcher-handler.adoc#webflux-multiple-representations[Content Negotiation] and rendering other formats
 through view resolution (besides HTML), you can configure one or more default views based
 on the `HttpMessageWriterView` implementation, which accepts any of the available
 xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] from `spring-web`. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -451,8 +518,10 @@ xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] from `spring-web`. 
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -469,6 +538,7 @@ xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] from `spring-web`. 
 		// ...
 	}
 ----
+======
 
 See xref:web/webflux-view.adoc[View Technologies] for more on the view technologies that are integrated with Spring WebFlux.
 
@@ -488,8 +558,11 @@ and a reduction in HTTP requests made by the browser. The `Last-Modified` header
 evaluated and, if present, a `304` status code is returned. The following listing shows
 the example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -504,8 +577,10 @@ the example:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -518,6 +593,7 @@ the example:
 		}
 	}
 ----
+======
 
 See also xref:web/webflux/caching.adoc#webflux-caching-static-resources[HTTP caching support for static resources].
 
@@ -533,8 +609,11 @@ JavaScript resources used with a module loader).
 
 The following example shows how to use `VersionResourceResolver` in your Java configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -550,8 +629,10 @@ The following example shows how to use `VersionResourceResolver` in your Java co
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -566,6 +647,7 @@ The following example shows how to use `VersionResourceResolver` in your Java co
 
 	}
 ----
+======
 
 You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
 transformers (for example, to insert versions). The WebFlux configuration provides a `ResourceUrlProvider`
@@ -606,8 +688,11 @@ You can customize options related to path matching. For details on the individua
 {api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
 The following example shows how to use `PathMatchConfigurer`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -621,8 +706,10 @@ The following example shows how to use `PathMatchConfigurer`:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -636,6 +723,7 @@ The following example shows how to use `PathMatchConfigurer`:
 		}
 	}
 ----
+======
 
 [TIP]
 ====
@@ -664,8 +752,11 @@ In some cases it may be necessary to create the `WebSocketHandlerAdapter` bean w
 provided `WebSocketService` service which allows configuring WebSocket server properties.
 For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -679,8 +770,10 @@ For example:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -695,6 +788,7 @@ For example:
 		}
 	}
 ----
+======
 
 
 
@@ -713,8 +807,11 @@ For advanced mode, you can remove `@EnableWebFlux` and extend directly from
 `DelegatingWebFluxConfiguration` instead of implementing `WebFluxConfigurer`,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class WebConfig extends DelegatingWebFluxConfiguration {
@@ -722,8 +819,10 @@ as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class WebConfig : DelegatingWebFluxConfiguration {
@@ -731,6 +830,7 @@ as the following example shows:
 		// ...
 	}
 ----
+======
 
 You can keep existing methods in `WebConfig`, but you can now also override bean declarations
 from the base class and still have any number of other `WebMvcConfigurer` implementations on

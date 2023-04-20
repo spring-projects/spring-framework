@@ -9,12 +9,16 @@ the values of query parameters and form fields whose names match to field names.
 referred to as data binding, and it saves you from having to deal with parsing and
 converting individual query parameters and form fields. The following example binds an instance of `Pet`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(@ModelAttribute Pet pet) { } // <1>
 ----
+======
 <1> Bind an instance of `Pet`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -45,8 +49,11 @@ Data binding can result in errors. By default, a `WebExchangeBindException` is r
 to check for such errors in the controller method, you can add a `BindingResult` argument
 immediately next to the `@ModelAttribute`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(@ModelAttribute("pet") Pet pet, BindingResult result) { <1>
@@ -56,6 +63,7 @@ immediately next to the `@ModelAttribute`, as the following example shows:
 		// ...
 	}
 ----
+======
 <1> Adding a `BindingResult`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -76,8 +84,11 @@ You can automatically apply validation after data binding by adding the
 xref:core/validation/beanvalidation.adoc[Bean Validation] and
 xref:web/webmvc/mvc-config/validation.adoc[Spring validation]). The following example uses the `@Valid` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(@Valid @ModelAttribute("pet") Pet pet, BindingResult result) { // <1>
@@ -87,6 +98,7 @@ xref:web/webmvc/mvc-config/validation.adoc[Spring validation]). The following ex
 		// ...
 	}
 ----
+======
 <1> Using `@Valid` on a model attribute argument.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -110,8 +122,11 @@ argument, you must declare the `@ModelAttribute` argument before it without a re
 type wrapper, as shown earlier. Alternatively, you can handle any errors through the
 reactive type, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public Mono<String> processSubmit(@Valid @ModelAttribute("pet") Mono<Pet> petMono) {
@@ -124,8 +139,10 @@ reactive type, as the following example shows:
 			});
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	fun processSubmit(@Valid @ModelAttribute("pet") petMono: Mono<Pet>): Mono<String> {
@@ -138,6 +155,7 @@ reactive type, as the following example shows:
 				}
 	}
 ----
+======
 
 Note that use of `@ModelAttribute` is optional -- for example, to set its attributes.
 By default, any argument that is not a simple value type (as determined by

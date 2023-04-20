@@ -10,8 +10,11 @@ do not have to extend base classes nor implement specific interfaces.
 
 The following listing shows a basic example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RestController
 	public class HelloController {
@@ -22,8 +25,10 @@ The following listing shows a basic example:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RestController
 	class HelloController {
@@ -32,6 +37,7 @@ The following listing shows a basic example:
 		fun handle() = "Hello WebFlux"
 	}
 ----
+======
 
 In the preceding example, the method returns a `String` to be written to the response body.
 

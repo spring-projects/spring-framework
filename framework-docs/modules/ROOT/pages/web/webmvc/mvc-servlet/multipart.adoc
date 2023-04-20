@@ -28,8 +28,11 @@ To do so:
 
 The following example shows how to set a `MultipartConfigElement` on the Servlet registration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -44,8 +47,10 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class AppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
 
@@ -59,6 +64,7 @@ The following example shows how to set a `MultipartConfigElement` on the Servlet
 
 	}
 ----
+======
 
 Once the Servlet multipart configuration is in place, you can add a bean of type
 `StandardServletMultipartResolver` with a name of `multipartResolver`.

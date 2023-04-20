@@ -11,8 +11,11 @@ Note that a method-level `@SqlMergeMode` declaration overrides a class-level dec
 
 The following example shows how to use `@SqlMergeMode` at the class level.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	@Sql("/test-schema.sql")
@@ -26,6 +29,7 @@ The following example shows how to use `@SqlMergeMode` at the class level.
 		}
 	}
 ----
+======
 <1> Set the `@Sql` merge mode to `MERGE` for all test methods in the class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -47,8 +51,11 @@ The following example shows how to use `@SqlMergeMode` at the class level.
 
 The following example shows how to use `@SqlMergeMode` at the method level.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	@Sql("/test-schema.sql")
@@ -62,6 +69,7 @@ The following example shows how to use `@SqlMergeMode` at the method level.
 		}
 	}
 ----
+======
 <1> Set the `@Sql` merge mode to `MERGE` for a specific test method.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

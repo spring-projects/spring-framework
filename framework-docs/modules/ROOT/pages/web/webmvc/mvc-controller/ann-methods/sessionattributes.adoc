@@ -11,8 +11,11 @@ requests to access.
 
 The following example uses the `@SessionAttributes` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	@SessionAttributes("pet") // <1>
@@ -20,6 +23,7 @@ The following example uses the `@SessionAttributes` annotation:
 		// ...
 	}
 ----
+======
 <1> Using the `@SessionAttributes` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -38,8 +42,11 @@ it is automatically promoted to and saved in the HTTP Servlet session. It remain
 until another controller method uses a `SessionStatus` method argument to clear the
 storage, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	@SessionAttributes("pet") // <1>
@@ -57,6 +64,7 @@ storage, as the following example shows:
 		}
 	}
 ----
+======
 <1> Storing the `Pet` value in the Servlet session.
 <2> Clearing the `Pet` value from the Servlet session.
 

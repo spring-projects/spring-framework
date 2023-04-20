@@ -83,8 +83,11 @@ The {api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation enables cross-origin requests on annotated controller methods,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RestController
 	@RequestMapping("/account")
@@ -102,8 +105,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RestController
 	@RequestMapping("/account")
@@ -121,6 +126,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 By default, `@CrossOrigin` allows:
 
@@ -139,8 +145,11 @@ the `allowOriginPatterns` property may be used to match to a dynamic set of orig
 `@CrossOrigin` is supported at the class level, too, and is inherited by all methods,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 @CrossOrigin(origins = "https://domain2.com", maxAge = 3600)
 @RestController
@@ -158,8 +167,10 @@ public class AccountController {
 	}
 }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@CrossOrigin(origins = ["https://domain2.com"], maxAge = 3600)
 	@RestController
@@ -176,12 +187,16 @@ public class AccountController {
 			// ...
 		}
 ----
+======
 
 You can use `@CrossOrigin` at both the class level and the method level,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@CrossOrigin(maxAge = 3600)
 	@RestController
@@ -200,8 +215,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@CrossOrigin(maxAge = 3600)
 	@RestController
@@ -220,6 +237,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 
 
@@ -257,8 +275,11 @@ the `allowOriginPatterns` property may be used to match to a dynamic set of orig
 To enable CORS in the MVC Java config, you can use the `CorsRegistry` callback,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -278,8 +299,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -298,6 +321,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 
 
@@ -341,8 +365,11 @@ CORS.
 To configure the filter, pass a `CorsConfigurationSource` to its constructor, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	CorsConfiguration config = new CorsConfiguration();
 
@@ -359,8 +386,10 @@ following example shows:
 
 	CorsFilter filter = new CorsFilter(source);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	val config = CorsConfiguration()
 
@@ -377,3 +406,4 @@ following example shows:
 
 	val filter = CorsFilter(source)
 ----
+======

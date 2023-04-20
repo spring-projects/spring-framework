@@ -6,8 +6,11 @@
 `@Controller` and xref:web/webmvc/mvc-controller/ann-advice.adoc[@ControllerAdvice] classes can have
 `@ExceptionHandler` methods to handle exceptions from controller methods, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class SimpleController {
@@ -20,8 +23,10 @@
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class SimpleController {
@@ -34,6 +39,7 @@
 		}
 	}
 ----
+======
 
 The exception may match against a top-level exception being propagated (e.g. a direct
 `IOException` being thrown) or against a nested cause within a wrapper exception (e.g.
@@ -48,42 +54,54 @@ is used to sort exceptions based on their depth from the thrown exception type.
 Alternatively, the annotation declaration may narrow the exception types to match,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExceptionHandler({FileSystemException.class, RemoteException.class})
 	public ResponseEntity<String> handle(IOException ex) {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExceptionHandler(FileSystemException::class, RemoteException::class)
 	fun handle(ex: IOException): ResponseEntity<String> {
 		// ...
 	}
 ----
+======
 
 You can even use a list of specific exception types with a very generic argument signature,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExceptionHandler({FileSystemException.class, RemoteException.class})
 	public ResponseEntity<String> handle(Exception ex) {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExceptionHandler(FileSystemException::class, RemoteException::class)
 	fun handle(ex: Exception): ResponseEntity<String> {
 		// ...
 	}
 ----
+======
 
 [NOTE]
 ====

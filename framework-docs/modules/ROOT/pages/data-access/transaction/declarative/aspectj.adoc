@@ -20,8 +20,11 @@ xref:core/aop.adoc[AOP] respectively.
 The following example shows how to create a transaction manager and configure the
 `AnnotationTransactionAspect` to use it:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// construct an appropriate transaction manager
 	DataSourceTransactionManager txManager = new DataSourceTransactionManager(getDataSource());
@@ -29,8 +32,10 @@ The following example shows how to create a transaction manager and configure th
 	// configure the AnnotationTransactionAspect to use it; this must be done before executing any transactional methods
 	AnnotationTransactionAspect.aspectOf().setTransactionManager(txManager);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// construct an appropriate transaction manager
 	val txManager = DataSourceTransactionManager(getDataSource())
@@ -38,6 +43,7 @@ The following example shows how to create a transaction manager and configure th
 	// configure the AnnotationTransactionAspect to use it; this must be done before executing any transactional methods
 	AnnotationTransactionAspect.aspectOf().transactionManager = txManager
 ----
+======
 
 NOTE: When you use this aspect, you must annotate the implementation class (or the methods
 within that class or both), not the interface (if any) that the class implements. AspectJ

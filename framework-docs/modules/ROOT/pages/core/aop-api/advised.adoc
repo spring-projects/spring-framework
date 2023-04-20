@@ -6,8 +6,11 @@ However you create AOP proxies, you can manipulate them BY using the
 interface, no matter which other interfaces it implements. This interface includes the
 following methods:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Advisor[] getAdvisors();
 
@@ -29,8 +32,10 @@ following methods:
 
 	boolean isFrozen();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun getAdvisors(): Array<Advisor>
 
@@ -59,6 +64,7 @@ following methods:
 
 	fun isFrozen(): Boolean
 ----
+======
 
 The `getAdvisors()` method returns an `Advisor` for every advisor, interceptor, or
 other advice type that has been added to the factory. If you added an `Advisor`, the
@@ -80,8 +86,11 @@ change. (You can obtain a new proxy from the factory to avoid this problem.)
 The following example shows casting an AOP proxy to the `Advised` interface and examining and
 manipulating its advice:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Advised advised = (Advised) myObject;
 	Advisor[] advisors = advised.getAdvisors();
@@ -98,8 +107,10 @@ manipulating its advice:
 
 	assertEquals("Added two advisors", oldAdvisorCount + 2, advised.getAdvisors().length);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val advised = myObject as Advised
 	val advisors = advised.advisors
@@ -116,6 +127,7 @@ manipulating its advice:
 
 	assertEquals("Added two advisors", oldAdvisorCount + 2, advised.advisors.size)
 ----
+======
 
 NOTE: It is questionable whether it is advisable (no pun intended) to modify advice on a
 business object in production, although there are, no doubt, legitimate usage cases.

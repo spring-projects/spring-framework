@@ -40,8 +40,11 @@ loaded by using the specified resource protocol. Resource location wildcards (su
 
 The following example uses a test properties file:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -49,6 +52,7 @@ The following example uses a test properties file:
 		// class body...
 	}
 ----
+======
 <1> Specifying a properties file with an absolute path.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -77,8 +81,11 @@ a Java properties file:
 
 The following example sets two inlined properties:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = {"timezone = GMT", "port: 4242"}) // <1>
@@ -86,6 +93,7 @@ The following example sets two inlined properties:
 		// class body...
 	}
 ----
+======
 <1> Setting two properties by using two variations of the key-value syntax.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -147,8 +155,11 @@ entries for the `timezone` and `port` properties those are overridden by the inl
 properties declared by using the `properties` attribute. The following example shows how
 to specify properties both in a file and inline:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@TestPropertySource(
@@ -160,8 +171,9 @@ to specify properties both in a file and inline:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties",
@@ -171,6 +183,7 @@ to specify properties both in a file and inline:
 		// class body...
 	}
 ----
+======
 
 [[inheriting-and-overriding-test-property-sources]]
 == Inheriting and Overriding Test Property Sources
@@ -199,8 +212,11 @@ for `ExtendedTest` is loaded by using the `base.properties` and `extended.proper
 files as test property source locations. The following example shows how to define
 properties in both a subclass and its superclass by using `properties` files:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@TestPropertySource("base.properties")
 	@ContextConfiguration
@@ -214,8 +230,10 @@ properties in both a subclass and its superclass by using `properties` files:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@TestPropertySource("base.properties")
 	@ContextConfiguration
@@ -229,14 +247,18 @@ properties in both a subclass and its superclass by using `properties` files:
 		// ...
 	}
 ----
+======
 
 In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
 inlined `key1` property. In contrast, the `ApplicationContext` for `ExtendedTest` is
 loaded by using the inlined `key1` and `key2` properties. The following example shows how
 to define properties in both a subclass and its superclass by using inline properties:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@TestPropertySource(properties = "key1 = value1")
 	@ContextConfiguration
@@ -250,8 +272,10 @@ to define properties in both a subclass and its superclass by using inline prope
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@TestPropertySource(properties = ["key1 = value1"])
 	@ContextConfiguration
@@ -265,4 +289,5 @@ to define properties in both a subclass and its superclass by using inline prope
 		// ...
 	}
 ----
+======
 

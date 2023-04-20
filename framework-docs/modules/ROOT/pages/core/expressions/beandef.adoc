@@ -67,8 +67,11 @@ and method or constructor parameters.
 
 The following example sets the default value of a field:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 		public class FieldValueTestBean {
 
@@ -84,8 +87,10 @@ The following example sets the default value of a field:
 			}
 		}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class FieldValueTestBean {
 
@@ -93,11 +98,15 @@ The following example sets the default value of a field:
 		var defaultLocale: String? = null
 	}
 ----
+======
 
 The following example shows the equivalent but on a property setter method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class PropertyValueTestBean {
 
@@ -113,8 +122,10 @@ The following example shows the equivalent but on a property setter method:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class PropertyValueTestBean {
 
@@ -122,12 +133,16 @@ The following example shows the equivalent but on a property setter method:
 		var defaultLocale: String? = null
 	}
 ----
+======
 
 Autowired methods and constructors can also use the `@Value` annotation, as the following
 examples show:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -144,8 +159,10 @@ examples show:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SimpleMovieLister {
 
@@ -162,9 +179,13 @@ examples show:
 		// ...
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -181,14 +202,17 @@ examples show:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender(private val customerPreferenceDao: CustomerPreferenceDao,
 				@Value("#{systemProperties['user.country']}") private val defaultLocale: String) {
 		// ...	
 	}
 ----
+======
 
 
 

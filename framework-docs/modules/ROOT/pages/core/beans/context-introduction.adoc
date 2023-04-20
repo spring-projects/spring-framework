@@ -98,8 +98,11 @@ The next example shows a program to run the `MessageSource` functionality.
 Remember that all `ApplicationContext` implementations are also `MessageSource`
 implementations and so can be cast to the `MessageSource` interface.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(String[] args) {
 		MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
@@ -107,8 +110,10 @@ implementations and so can be cast to the `MessageSource` interface.
 		System.out.println(message);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun main() {
 		val resources = ClassPathXmlApplicationContext("beans.xml")
@@ -116,6 +121,7 @@ implementations and so can be cast to the `MessageSource` interface.
 		println(message)
 	}
 ----
+======
 
 The resulting output from the above program is as follows:
 
@@ -151,8 +157,11 @@ converted into `String` objects and inserted into placeholders in the lookup mes
 	</beans>
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class Example {
 
@@ -169,8 +178,10 @@ converted into `String` objects and inserted into placeholders in the lookup mes
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Example {
 
@@ -183,6 +194,7 @@ converted into `String` objects and inserted into placeholders in the lookup mes
 	}
 }
 ----
+======
 
 The resulting output from the invocation of the `execute()` method is as follows:
 
@@ -208,8 +220,11 @@ resolved is specified manually:
 argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(final String[] args) {
 		MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
@@ -218,8 +233,10 @@ argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
 		System.out.println(message);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun main() {
 		val resources = ClassPathXmlApplicationContext("beans.xml")
@@ -228,6 +245,7 @@ argument.required=Ebagum lad, the ''{0}'' argument is required, I say, required.
 		println(message)
 	}
 ----
+======
 
 The resulting output from the running of the above program is as follows:
 
@@ -322,8 +340,11 @@ The following table describes the standard events that Spring provides:
 You can also create and publish your own custom events. The following example shows a
 simple class that extends Spring's `ApplicationEvent` base class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class BlockedListEvent extends ApplicationEvent {
 
@@ -339,21 +360,27 @@ simple class that extends Spring's `ApplicationEvent` base class:
 		// accessor and other methods...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class BlockedListEvent(source: Any,
 						val address: String,
 						val content: String) : ApplicationEvent(source)
 ----
+======
 
 To publish a custom `ApplicationEvent`, call the `publishEvent()` method on an
 `ApplicationEventPublisher`. Typically, this is done by creating a class that implements
 `ApplicationEventPublisherAware` and registering it as a Spring bean. The following
 example shows such a class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class EmailService implements ApplicationEventPublisherAware {
 
@@ -377,8 +404,10 @@ example shows such a class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class EmailService : ApplicationEventPublisherAware {
 
@@ -402,6 +431,7 @@ example shows such a class:
 		}
 	}
 ----
+======
 
 At configuration time, the Spring container detects that `EmailService` implements
 `ApplicationEventPublisherAware` and automatically calls
@@ -413,8 +443,11 @@ To receive the custom `ApplicationEvent`, you can create a class that implements
 `ApplicationListener` and register it as a Spring bean. The following example
 shows such a class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class BlockedListNotifier implements ApplicationListener<BlockedListEvent> {
 
@@ -429,8 +462,10 @@ shows such a class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class BlockedListNotifier : ApplicationListener<BlockedListEvent> {
 
@@ -441,6 +476,7 @@ shows such a class:
 		}
 	}
 ----
+======
 
 Notice that `ApplicationListener` is generically parameterized with the type of your
 custom event (`BlockedListEvent` in the preceding example). This means that the
@@ -497,8 +533,11 @@ architectures that build upon the well-known Spring programming model.
 You can register an event listener on any method of a managed bean by using the
 `@EventListener` annotation. The `BlockedListNotifier` can be rewritten as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class BlockedListNotifier {
 
@@ -514,8 +553,10 @@ You can register an event listener on any method of a managed bean by using the
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class BlockedListNotifier {
 
@@ -527,6 +568,7 @@ You can register an event listener on any method of a managed bean by using the
 		}
 	}
 ----
+======
 
 The method signature once again declares the event type to which it listens,
 but, this time, with a flexible name and without implementing a specific listener interface.
@@ -537,22 +579,28 @@ If your method should listen to several events or if you want to define it with 
 parameter at all, the event types can also be specified on the annotation itself. The
 following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@EventListener({ContextStartedEvent.class, ContextRefreshedEvent.class})
 	public void handleContextStart() {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@EventListener(ContextStartedEvent::class, ContextRefreshedEvent::class)
 	fun handleContextStart() {
 		// ...
 	}
 ----
+======
 
 It is also possible to add additional runtime filtering by using the `condition` attribute
 of the annotation that defines a xref:core/expressions.adoc[`SpEL` expression], which should match
@@ -561,22 +609,28 @@ to actually invoke the method for a particular event.
 The following example shows how our notifier can be rewritten to be invoked only if the
 `content` attribute of the event is equal to `my-event`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
 	public void processBlockedListEvent(BlockedListEvent blEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@EventListener(condition = "#blEvent.content == 'my-event'")
 	fun processBlockedListEvent(blEvent: BlockedListEvent) {
 		// notify appropriate parties via notificationAddress...
 	}
 ----
+======
 
 Each `SpEL` expression evaluates against a dedicated context. The following table lists the
 items made available to the context so that you can use them for conditional event processing:
@@ -611,8 +665,11 @@ signature actually refers to an arbitrary object that was published.
 If you need to publish an event as the result of processing another event, you can change the
 method signature to return the event that should be published, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@EventListener
 	public ListUpdateEvent handleBlockedListEvent(BlockedListEvent event) {
@@ -620,8 +677,10 @@ method signature to return the event that should be published, as the following 
 		// then publish a ListUpdateEvent...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@EventListener
 	fun handleBlockedListEvent(event: BlockedListEvent): ListUpdateEvent {
@@ -629,6 +688,7 @@ method signature to return the event that should be published, as the following 
 		// then publish a ListUpdateEvent...
 	}
 ----
+======
 
 NOTE: This feature is not supported for
 xref:core/beans/context-introduction.adoc#context-functionality-events-async[asynchronous listeners].
@@ -645,8 +705,11 @@ If you want a particular listener to process events asynchronously, you can reus
 xref:integration/scheduling.adoc#scheduling-annotation-support-async[regular `@Async` support].
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@EventListener
 	@Async
@@ -654,8 +717,10 @@ The following example shows how to do so:
 		// BlockedListEvent is processed in a separate thread
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@EventListener
 	@Async
@@ -663,6 +728,7 @@ The following example shows how to do so:
 		// BlockedListEvent is processed in a separate thread
 	}
 ----
+======
 
 Be aware of the following limitations when using asynchronous events:
 
@@ -682,8 +748,11 @@ Be aware of the following limitations when using asynchronous events:
 If you need one listener to be invoked before another one, you can add the `@Order`
 annotation to the method declaration, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@EventListener
 	@Order(42)
@@ -691,8 +760,10 @@ annotation to the method declaration, as the following example shows:
 		// notify appropriate parties via notificationAddress...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@EventListener
 	@Order(42)
@@ -700,6 +771,7 @@ annotation to the method declaration, as the following example shows:
 		// notify appropriate parties via notificationAddress...
 	}
 ----
+======
 
 
 [[context-functionality-events-generics]]
@@ -710,22 +782,28 @@ You can also use generics to further define the structure of your event. Conside
 can create the following listener definition to receive only `EntityCreatedEvent` for a
 `Person`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@EventListener
 	public void onPersonCreated(EntityCreatedEvent<Person> event) {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@EventListener
 	fun onPersonCreated(event: EntityCreatedEvent<Person>) {
 		// ...
 	}
 ----
+======
 
 Due to type erasure, this works only if the event that is fired resolves the generic
 parameters on which the event listener filters (that is, something like
@@ -736,8 +814,11 @@ structure (as should be the case for the event in the preceding example). In suc
 you can implement `ResolvableTypeProvider` to guide the framework beyond what the runtime
 environment provides. The following event shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class EntityCreatedEvent<T> extends ApplicationEvent implements ResolvableTypeProvider {
 
@@ -751,8 +832,10 @@ environment provides. The following event shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class EntityCreatedEvent<T>(entity: T) : ApplicationEvent(entity), ResolvableTypeProvider {
 
@@ -761,6 +844,7 @@ environment provides. The following event shows how to do so:
 		}
 	}
 ----
+======
 
 TIP: This works not only for `ApplicationEvent` but any arbitrary object that you send as
 an event.
@@ -819,8 +903,11 @@ The `AbstractApplicationContext` (and its subclasses) is instrumented with an
 
 Here is an example of instrumentation in the `AnnotationConfigApplicationContext`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// create a startup step and start recording
 	StartupStep scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan");
@@ -831,8 +918,10 @@ Here is an example of instrumentation in the `AnnotationConfigApplicationContext
 	// end the current step
 	scanPackages.end();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// create a startup step and start recording
 	val scanPackages = this.getApplicationStartup().start("spring.context.base-packages.scan")
@@ -843,6 +932,7 @@ Here is an example of instrumentation in the `AnnotationConfigApplicationContext
 	// end the current step
 	scanPackages.end()
 ----
+======
 
 The application context is already instrumented with multiple steps.
 Once recorded, these startup steps can be collected, displayed and analyzed with specific tools.

@@ -18,9 +18,11 @@ mocks can be autowired into your test instance. Note that the `WebApplicationCon
 `MockServletContext` are both cached across the test suite, whereas the other mocks are
 managed per test method by the `ServletTestExecutionListener`.
 
-.Injecting mocks
+[tabs]
+======
+Injecting mocks::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitWebConfig
 	class WacTests {
@@ -47,8 +49,9 @@ managed per test method by the `ServletTestExecutionListener`.
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitWebConfig
 	class WacTests {
@@ -74,4 +77,5 @@ managed per test method by the `ServletTestExecutionListener`.
 		//...
 	}
 ----
+======
 

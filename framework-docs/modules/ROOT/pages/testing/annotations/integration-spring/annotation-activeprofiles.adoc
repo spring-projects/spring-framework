@@ -7,8 +7,11 @@ integration test.
 
 The following example indicates that the `dev` profile should be active:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@ActiveProfiles("dev") // <1>
@@ -16,6 +19,7 @@ The following example indicates that the `dev` profile should be active:
 		// class body...
 	}
 ----
+======
 <1> Indicate that the `dev` profile should be active.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -33,8 +37,11 @@ The following example indicates that the `dev` profile should be active:
 The following example indicates that both the `dev` and the `integration` profiles should
 be active:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@ActiveProfiles({"dev", "integration"}) // <1>
@@ -42,6 +49,7 @@ be active:
 		// class body...
 	}
 ----
+======
 <1> Indicate that the `dev` and `integration` profiles should be active.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

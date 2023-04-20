@@ -48,8 +48,11 @@ To configure a `DriverManagerDataSource`:
 
 The following example shows how to configure a `DriverManagerDataSource` in Java:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	DriverManagerDataSource dataSource = new DriverManagerDataSource();
 	dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
@@ -57,8 +60,10 @@ The following example shows how to configure a `DriverManagerDataSource` in Java
 	dataSource.setUsername("sa");
 	dataSource.setPassword("");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val dataSource = DriverManagerDataSource().apply {
 		setDriverClassName("org.hsqldb.jdbcDriver")
@@ -67,6 +72,7 @@ The following example shows how to configure a `DriverManagerDataSource` in Java
 		password = ""
 	}
 ----
+======
 
 The following example shows the corresponding XML configuration:
 

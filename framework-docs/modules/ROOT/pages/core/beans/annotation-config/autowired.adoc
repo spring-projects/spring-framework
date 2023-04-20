@@ -9,8 +9,11 @@ examples included in this section. See xref:core/beans/standard-annotations.adoc
 
 You can apply the `@Autowired` annotation to constructors, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -24,12 +27,15 @@ You can apply the `@Autowired` annotation to constructors, as the following exam
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender @Autowired constructor(
 		private val customerPreferenceDao: CustomerPreferenceDao)
 ----
+======
 
 [NOTE]
 ====
@@ -44,8 +50,11 @@ xref:core/beans/annotation-config/autowired.adoc#beans-autowired-annotation-cons
 You can also apply the `@Autowired` annotation to _traditional_ setter methods,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -59,8 +68,10 @@ as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SimpleMovieLister {
 
@@ -71,12 +82,16 @@ as the following example shows:
 
 	}
 ----
+======
 
 You can also apply the annotation to methods with arbitrary names and multiple
 arguments, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -94,8 +109,10 @@ arguments, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -113,12 +130,16 @@ arguments, as the following example shows:
 		// ...
 	}
 ----
+======
 
 You can apply `@Autowired` to fields as well and even mix it with constructors, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -135,8 +156,10 @@ following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender @Autowired constructor(
 		private val customerPreferenceDao: CustomerPreferenceDao) {
@@ -147,6 +170,7 @@ following example shows:
 		// ...
 	}
 ----
+======
 
 [TIP]
 ====
@@ -166,8 +190,11 @@ You can also instruct Spring to provide all beans of a particular type from the
 `ApplicationContext` by adding the `@Autowired` annotation to a field or method that
 expects an array of that type, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -177,8 +204,10 @@ expects an array of that type, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -188,11 +217,15 @@ expects an array of that type, as the following example shows:
 		// ...
 	}
 ----
+======
 
 The same applies for typed collections, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -206,8 +239,10 @@ The same applies for typed collections, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -217,6 +252,7 @@ The same applies for typed collections, as the following example shows:
 		// ...
 	}
 ----
+======
 
 [[beans-factory-ordered]]
 [TIP]
@@ -241,8 +277,11 @@ Even typed `Map` instances can be autowired as long as the expected key type is 
 The map values contain all beans of the expected type, and the keys contain the
 corresponding bean names, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -256,8 +295,10 @@ corresponding bean names, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -267,6 +308,7 @@ corresponding bean names, as the following example shows:
 		// ...
 	}
 ----
+======
 
 By default, autowiring fails when no matching candidate beans are available for a given
 injection point. In the case of a declared array, collection, or map, at least one
@@ -277,8 +319,11 @@ dependencies. You can change this behavior as demonstrated in the following exam
 enabling the framework to skip a non-satisfiable injection point through marking it as
 non-required (i.e., by setting the `required` attribute in `@Autowired` to `false`):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -292,8 +337,10 @@ non-required (i.e., by setting the `required` attribute in `@Autowired` to `fals
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SimpleMovieLister {
 
@@ -303,6 +350,7 @@ non-required (i.e., by setting the `required` attribute in `@Autowired` to `fals
 		// ...
 	}
 ----
+======
 
 [NOTE]
 ====
@@ -317,8 +365,8 @@ that can be optionally overridden via dependency injection.
 ====
 
 
-[[beans-autowired-annotation-constructor-resolution]]
 
+[[beans-autowired-annotation-constructor-resolution]]
 Injected constructor and factory method arguments are a special case since the `required`
 attribute in `@Autowired` has a somewhat different meaning due to Spring's constructor
 resolution algorithm that may potentially deal with multiple constructors. Constructor
@@ -364,8 +412,11 @@ As of Spring Framework 5.0, you can also use a `@Nullable` annotation (of any ki
 in any package -- for example, `javax.annotation.Nullable` from JSR-305) or just leverage
 Kotlin built-in null-safety support:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -375,8 +426,10 @@ Kotlin built-in null-safety support:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SimpleMovieLister {
 
@@ -386,6 +439,7 @@ Kotlin built-in null-safety support:
 		// ...
 	}
 ----
+======
 
 You can also use `@Autowired` for interfaces that are well-known resolvable
 dependencies: `BeanFactory`, `ApplicationContext`, `Environment`, `ResourceLoader`,
@@ -394,8 +448,11 @@ interfaces, such as `ConfigurableApplicationContext` or `ResourcePatternResolver
 automatically resolved, with no special setup necessary. The following example autowires
 an `ApplicationContext` object:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -408,8 +465,10 @@ an `ApplicationContext` object:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class MovieRecommender {
 
@@ -419,6 +478,7 @@ class MovieRecommender {
 	// ...
 }
 ----
+======
 
 [NOTE]
 ====

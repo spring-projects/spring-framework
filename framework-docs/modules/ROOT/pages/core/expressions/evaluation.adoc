@@ -8,13 +8,17 @@ xref:core/expressions/language-ref.adoc[Language Reference].
 The following code introduces the SpEL API to evaluate the literal string expression,
 `Hello World`.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	Expression exp = parser.parseExpression("'Hello World'"); // <1>
 	String message = (String) exp.getValue();
 ----
+======
 <1> The value of the message variable is `'Hello World'`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -42,13 +46,17 @@ and calling constructors.
 
 In the following example of method invocation, we call the `concat` method on the string literal:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	Expression exp = parser.parseExpression("'Hello World'.concat('!')"); // <1>
 	String message = (String) exp.getValue();
 ----
+======
 <1> The value of `message` is now 'Hello World!'.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -62,8 +70,11 @@ In the following example of method invocation, we call the `concat` method on th
 
 The following example of calling a JavaBean property calls the `String` property `Bytes`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
@@ -71,6 +82,7 @@ The following example of calling a JavaBean property calls the `String` property
 	Expression exp = parser.parseExpression("'Hello World'.bytes"); // <1>
 	byte[] bytes = (byte[]) exp.getValue();
 ----
+======
 <1> This line converts the literal to a byte array.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -90,8 +102,11 @@ Public fields may also be accessed.
 
 The following example shows how to use dot notation to get the length of a literal:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
@@ -99,6 +114,7 @@ The following example shows how to use dot notation to get the length of a liter
 	Expression exp = parser.parseExpression("'Hello World'.bytes.length"); // <1>
 	int length = (Integer) exp.getValue();
 ----
+======
 <1> `'Hello World'.bytes.length` gives the length of the literal.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -115,13 +131,17 @@ The following example shows how to use dot notation to get the length of a liter
 The String's constructor can be called instead of using a string literal, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	Expression exp = parser.parseExpression("new String('hello world').toUpperCase()"); // <1>
 	String message = exp.getValue(String.class);
 ----
+======
 <1> Construct a new `String` from the literal and make it be upper case.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -144,8 +164,11 @@ against a specific object instance (called the root object). The following examp
 how to retrieve the `name` property from an instance of the `Inventor` class or
 create a boolean condition:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Create and set a calendar
 	GregorianCalendar c = new GregorianCalendar();
@@ -164,8 +187,10 @@ create a boolean condition:
 	boolean result = exp.getValue(tesla, Boolean.class);
 	// result == true
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Create and set a calendar
 	val c = GregorianCalendar()
@@ -184,6 +209,7 @@ create a boolean condition:
 	val result = exp.getValue(tesla, Boolean::class.java)
 	// result == true
 ----
+======
 
 
 
@@ -232,8 +258,11 @@ to set a `List` property. The type of the property is actually `List<Boolean>`. 
 recognizes that the elements of the list need to be converted to `Boolean` before
 being placed in it. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class Simple {
 		public List<Boolean> booleanList = new ArrayList<>();
@@ -251,8 +280,10 @@ being placed in it. The following example shows how to do so:
 	// b is false
 	Boolean b = simple.booleanList.get(0);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Simple {
 		var booleanList: MutableList<Boolean> = ArrayList()
@@ -270,6 +301,7 @@ being placed in it. The following example shows how to do so:
 	// b is false
 	val b = simple.booleanList[0]
 ----
+======
 
 
 [[expressions-parser-configuration]]
@@ -290,8 +322,11 @@ or custom converter that knows how to set the value, `null` will remain in the a
 list at the specified index. The following example demonstrates how to automatically grow
 the list:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class Demo {
 		public List<String> list;
@@ -313,8 +348,10 @@ the list:
 	// demo.list will now be a real collection of 4 entries
 	// Each entry is a new empty String
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Demo {
 		var list: List<String>? = null
@@ -336,6 +373,7 @@ the list:
 	// demo.list will now be a real collection of 4 entries
 	// Each entry is a new empty String
 ----
+======
 
 
 
@@ -404,8 +442,11 @@ since part of the expression may be running twice.
 After selecting a mode, use the `SpelParserConfiguration` to configure the parser. The
 following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	SpelParserConfiguration config = new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
 			this.getClass().getClassLoader());
@@ -418,8 +459,10 @@ following example shows how to do so:
 
 	Object payload = expr.getValue(message);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val config = SpelParserConfiguration(SpelCompilerMode.IMMEDIATE,
 			this.javaClass.classLoader)
@@ -432,6 +475,7 @@ following example shows how to do so:
 
 	val payload = expr.getValue(message)
 ----
+======
 
 When you specify the compiler mode, you can also specify a classloader (passing null is allowed).
 Compiled expressions are defined in a child classloader created under any that is supplied.

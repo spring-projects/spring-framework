@@ -21,8 +21,11 @@ do, except for `@ModelAttribute` (command object) arguments. Typically, they are
 with a `WebDataBinder` argument (for registrations) and a `void` return value.
 The following listing shows an example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class FormController {
@@ -37,6 +40,7 @@ The following listing shows an example:
 		// ...
 	}
 ----
+======
 <1> Defining an `@InitBinder` method.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -61,8 +65,11 @@ Alternatively, when you use a `Formatter`-based setup through a shared
 `FormattingConversionService`, you can re-use the same approach and register
 controller-specific `Formatter` implementations, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class FormController {
@@ -75,6 +82,7 @@ controller-specific `Formatter` implementations, as the following example shows:
 		// ...
 	}
 ----
+======
 <1> Defining an `@InitBinder` method on a custom formatter.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

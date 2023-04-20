@@ -15,27 +15,36 @@ following example shows:
 Instead, you can use the Elvis operator (named for the resemblance to Elvis' hair style).
 The following example shows how to use the Elvis operator:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
 	String name = parser.parseExpression("name?:'Unknown'").getValue(new Inventor(), String.class);
 	System.out.println(name);  // 'Unknown'
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 
 	val name = parser.parseExpression("name?:'Unknown'").getValue(Inventor(), String::class.java)
 	println(name)  // 'Unknown'
 ----
+======
 
 The following listing shows a more complex example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
@@ -48,8 +57,10 @@ The following listing shows a more complex example:
 	name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String.class);
 	System.out.println(name);  // Elvis Presley
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
@@ -62,6 +73,7 @@ The following listing shows a more complex example:
 	name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
 	println(name)  // Elvis Presley
 ----
+======
 
 [NOTE]
 =====

@@ -247,8 +247,11 @@ When using annotation-driven components or Java configuration, the `@RequestScop
 can be used to assign a component to the `request` scope. The following example shows how
 to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RequestScope
 	@Component
@@ -256,8 +259,10 @@ to do so:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RequestScope
 	@Component
@@ -265,6 +270,7 @@ to do so:
 		// ...
 	}
 ----
+======
 
 
 
@@ -291,8 +297,11 @@ HTTP `Session` is eventually discarded, the bean that is scoped to that particul
 When using annotation-driven components or Java configuration, you can use the
 `@SessionScope` annotation to assign a component to the `session` scope.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SessionScope
 	@Component
@@ -300,8 +309,10 @@ When using annotation-driven components or Java configuration, you can use the
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SessionScope
 	@Component
@@ -309,6 +320,7 @@ When using annotation-driven components or Java configuration, you can use the
 		// ...
 	}
 ----
+======
 
 
 
@@ -335,8 +347,11 @@ When using annotation-driven components or Java configuration, you can use the
 `@ApplicationScope` annotation to assign a component to the `application` scope. The
 following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ApplicationScope
 	@Component
@@ -344,8 +359,10 @@ following example shows how to do so:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ApplicationScope
 	@Component
@@ -353,6 +370,7 @@ following example shows how to do so:
 		// ...
 	}
 ----
+======
 
 
 
@@ -551,62 +569,86 @@ does not exist, the method returns a new instance of the bean, after having boun
 the session for future reference). The following method returns the object from the
 underlying scope:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Object get(String name, ObjectFactory<?> objectFactory)
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun get(name: String, objectFactory: ObjectFactory<*>): Any
 ----
+======
 
 The session scope implementation, for example, removes the session-scoped bean from the
 underlying session. The object should be returned, but you can return `null` if the
 object with the specified name is not found. The following method removes the object from
 the underlying scope:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Object remove(String name)
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun remove(name: String): Any
 ----
+======
 
 The following method registers a callback that the scope should invoke when it is
 destroyed or when the specified object in the scope is destroyed:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	void registerDestructionCallback(String name, Runnable destructionCallback)
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun registerDestructionCallback(name: String, destructionCallback: Runnable)
 ----
+======
 
 See the {api-spring-framework}/beans/factory/config/Scope.html#registerDestructionCallback[javadoc]
 or a Spring scope implementation for more information on destruction callbacks.
 
 The following method obtains the conversation identifier for the underlying scope:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	String getConversationId()
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun getConversationId(): String
 ----
+======
 
 This identifier is different for each scope. For a session scoped implementation, this
 identifier can be the session identifier.
@@ -620,16 +662,22 @@ After you write and test one or more custom `Scope` implementations, you need to
 the Spring container aware of your new scopes. The following method is the central
 method to register a new `Scope` with the Spring container:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	void registerScope(String scopeName, Scope scope);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun registerScope(scopeName: String, scope: Scope)
 ----
+======
 
 This method is declared on the `ConfigurableBeanFactory` interface, which is available
 through the `BeanFactory` property on most of the concrete `ApplicationContext`
@@ -647,18 +695,24 @@ NOTE: The next example uses `SimpleThreadScope`, which is included with Spring b
 registered by default. The instructions would be the same for your own custom `Scope`
 implementations.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Scope threadScope = new SimpleThreadScope();
 	beanFactory.registerScope("thread", threadScope);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val threadScope = SimpleThreadScope()
 	beanFactory.registerScope("thread", threadScope)
 ----
+======
 
 You can then create bean definitions that adhere to the scoping rules of your custom
 `Scope`, as follows:

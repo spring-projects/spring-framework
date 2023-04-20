@@ -22,8 +22,11 @@ Configuration is standard for a simple Spring web application: The MVC configura
 has to define an `XsltViewResolver` bean and regular MVC annotation configuration.
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@EnableWebMvc
 	@ComponentScan
@@ -39,8 +42,10 @@ The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@EnableWebMvc
 	@ComponentScan
@@ -54,6 +59,7 @@ The following example shows how to do so:
 		}
 	}
 ----
+======
 
 
 [[mvc-view-xslt-controllercode]]
@@ -64,8 +70,11 @@ We also need a Controller that encapsulates our word-generation logic.
 The controller logic is encapsulated in a `@Controller` class, with the
 handler method being defined as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class XsltController {
@@ -88,8 +97,10 @@ handler method being defined as follows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.ui.set
 
@@ -114,6 +125,7 @@ handler method being defined as follows:
 		}
 	}
 ----
+======
 
 So far, we have only created a DOM document and added it to the Model map. Note that you
 can also load an XML file as a `Resource` and use it instead of a custom DOM document.

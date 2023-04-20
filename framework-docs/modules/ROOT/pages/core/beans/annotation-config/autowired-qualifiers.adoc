@@ -9,8 +9,11 @@ chosen for each argument. In the simplest case, this can be a plain descriptive 
 shown in the following example:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -21,8 +24,10 @@ shown in the following example:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -33,14 +38,18 @@ shown in the following example:
 		// ...
 	}
 ----
+======
 --
 
 You can also specify the `@Qualifier` annotation on individual constructor arguments or
 method parameters, as shown in the following example:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -58,8 +67,10 @@ method parameters, as shown in the following example:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -77,6 +88,7 @@ method parameters, as shown in the following example:
 		// ...
 	}
 ----
+======
 --
 
 The following example shows corresponding bean definitions.
@@ -194,8 +206,11 @@ You can create your own custom qualifier annotations. To do so, define an annota
 provide the `@Qualifier` annotation within your definition, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target({ElementType.FIELD, ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -205,22 +220,28 @@ provide the `@Qualifier` annotation within your definition, as the following exa
 		String value();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 	@Retention(AnnotationRetention.RUNTIME)
 	@Qualifier
 	annotation class Genre(val value: String)
 ----
+======
 --
 
 Then you can provide the custom qualifier on autowired fields and parameters, as the
 following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -238,8 +259,10 @@ following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -257,6 +280,7 @@ following example shows:
 		// ...
 	}
 ----
+======
 --
 
 Next, you can provide the information for the candidate bean definitions. You can add
@@ -306,8 +330,11 @@ catalog that can be searched when no Internet connection is available. First, de
 the simple annotation, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target({ElementType.FIELD, ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -315,22 +342,28 @@ the simple annotation, as the following example shows:
 	public @interface Offline {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 	@Retention(AnnotationRetention.RUNTIME)
 	@Qualifier
 	annotation class Offline
 ----
+======
 --
 
 Then add the annotation to the field or property to be autowired, as shown in the
 following example:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -341,6 +374,7 @@ following example:
 		// ...
 	}
 ----
+======
 <1> This line adds the `@Offline` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -379,8 +413,11 @@ all such attribute values to be considered an autowire candidate. As an example,
 consider the following annotation definition:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target({ElementType.FIELD, ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -392,41 +429,53 @@ consider the following annotation definition:
 		Format format();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 	@Retention(AnnotationRetention.RUNTIME)
 	@Qualifier
 	annotation class MovieQualifier(val genre: String, val format: Format)
 ----
+======
 --
 
 In this case `Format` is an enum, defined as follows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public enum Format {
 		VHS, DVD, BLURAY
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	enum class Format {
 		VHS, DVD, BLURAY
 	}
 ----
+======
 --
 
 The fields to be autowired are annotated with the custom qualifier and include values
 for both attributes: `genre` and `format`, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -449,8 +498,10 @@ for both attributes: `genre` and `format`, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -473,6 +524,7 @@ for both attributes: `genre` and `format`, as the following example shows:
 		// ...
 	}
 ----
+======
 --
 
 Finally, the bean definitions should contain matching qualifier values. This example

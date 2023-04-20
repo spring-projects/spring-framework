@@ -7,21 +7,27 @@ loaded into the Java virtual machine (JVM).
 To enable load-time weaving, you can add the `@EnableLoadTimeWeaving` to one of your
 `@Configuration` classes, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableLoadTimeWeaving
 	public class AppConfig {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableLoadTimeWeaving
 	class AppConfig
 ----
+======
 
 Alternatively, for XML configuration, you can use the `context:load-time-weaver` element:
 

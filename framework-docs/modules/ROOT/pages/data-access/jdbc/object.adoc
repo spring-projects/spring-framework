@@ -40,8 +40,11 @@ abstract `mapRow(..)` method to convert each row of the supplied `ResultSet` int
 object of the type specified. The following example shows a custom query that maps the
 data from the `t_actor` relation to an instance of the `Actor` class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ActorMappingQuery extends MappingSqlQuery<Actor> {
 
@@ -61,8 +64,10 @@ data from the `t_actor` relation to an instance of the `Actor` class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ActorMappingQuery(ds: DataSource) : MappingSqlQuery<Actor>(ds, "select id, first_name, last_name from t_actor where id = ?") {
 
@@ -79,6 +84,7 @@ data from the `t_actor` relation to an instance of the `Actor` class:
 	}
 
 ----
+======
 
 The class extends `MappingSqlQuery` parameterized with the `Actor` type. The constructor
 for this customer query takes a `DataSource` as the only parameter. In this
@@ -93,8 +99,11 @@ thread-safe after it is compiled, so, as long as these instances are created whe
 is initialized, they can be kept as instance variables and be reused. The following
 example shows how to define such a class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	private ActorMappingQuery actorMappingQuery;
 
@@ -107,13 +116,16 @@ example shows how to define such a class:
 		return actorMappingQuery.findObject(id);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	private val actorMappingQuery = ActorMappingQuery(dataSource)
 
 	fun getCustomer(id: Long) = actorMappingQuery.findObject(id)
 ----
+======
 
 The method in the preceding example retrieves the customer with the `id` that is passed in as the
 only parameter. Since we want only one object to be returned, we call the `findObject` convenience
@@ -122,19 +134,25 @@ list of objects and took additional parameters, we would use one of the `execute
 methods that takes an array of parameter values passed in as varargs. The following
 example shows such a method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public List<Actor> searchForActors(int age, String namePattern) {
 		return actorSearchMappingQuery.execute(age, namePattern);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun searchForActors(age: Int, namePattern: String) =
 				actorSearchMappingQuery.execute(age, namePattern)
 ----
+======
 
 
 [[jdbc-SqlUpdate]]
@@ -149,8 +167,11 @@ However, you do not have to subclass the `SqlUpdate`
 class, since it can easily be parameterized by setting SQL and declaring parameters.
 The following example creates a custom update method named `execute`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import java.sql.Types;
 	import javax.sql.DataSource;
@@ -177,8 +198,10 @@ The following example creates a custom update method named `execute`:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import java.sql.Types
 	import javax.sql.DataSource
@@ -205,6 +228,7 @@ The following example creates a custom update method named `execute`:
 		}
 	}
 ----
+======
 
 
 [[jdbc-StoredProcedure]]
@@ -219,18 +243,24 @@ To define a parameter for the `StoredProcedure` class, you can use an `SqlParame
 of its subclasses. You must specify the parameter name and SQL type in the constructor,
 as the following code snippet shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	new SqlParameter("in_id", Types.NUMERIC),
 	new SqlOutParameter("out_first_name", Types.VARCHAR),
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	SqlParameter("in_id", Types.NUMERIC),
 	SqlOutParameter("out_first_name", Types.VARCHAR),
 ----
+======
 
 The SQL type is specified using the `java.sql.Types` constants.
 
@@ -259,8 +289,11 @@ returned date from the results `Map`. The results `Map` has an entry for each de
 output parameter (in this case, only one) by using the parameter name as the key.
 The following listing shows our custom StoredProcedure class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import java.sql.Types;
 	import java.util.Date;
@@ -306,8 +339,10 @@ The following listing shows our custom StoredProcedure class:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import java.sql.Types
 	import java.util.Date
@@ -343,12 +378,16 @@ The following listing shows our custom StoredProcedure class:
 		}
 	}
 ----
+======
 
 The following example of a `StoredProcedure` has two output parameters (in this case,
 Oracle REF cursors):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import java.util.HashMap;
 	import java.util.Map;
@@ -374,8 +413,10 @@ Oracle REF cursors):
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import java.util.HashMap
 	import javax.sql.DataSource
@@ -401,6 +442,7 @@ Oracle REF cursors):
 		}
 	}
 ----
+======
 
 Notice how the overloaded variants of the `declareParameter(..)` method that have been
 used in the `TitlesAndGenresStoredProcedure` constructor are passed `RowMapper`
@@ -410,8 +452,11 @@ functionality. The next two examples provide code for the two `RowMapper` implem
 The `TitleMapper` class maps a `ResultSet` to a `Title` domain object for each row in
 the supplied `ResultSet`, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import java.sql.ResultSet;
 	import java.sql.SQLException;
@@ -428,8 +473,10 @@ the supplied `ResultSet`, as follows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import java.sql.ResultSet
 	import com.foo.domain.Title
@@ -441,12 +488,16 @@ the supplied `ResultSet`, as follows:
 				Title(rs.getLong("id"), rs.getString("name"))
 	}
 ----
+======
 
 The `GenreMapper` class maps a `ResultSet` to a `Genre` domain object for each row in
 the supplied `ResultSet`, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import java.sql.ResultSet;
 	import java.sql.SQLException;
@@ -460,8 +511,10 @@ the supplied `ResultSet`, as follows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import java.sql.ResultSet
 	import com.foo.domain.Genre
@@ -474,13 +527,17 @@ the supplied `ResultSet`, as follows:
 		}
 	}
 ----
+======
 
 To pass parameters to a stored procedure that has one or more input parameters in its
 definition in the RDBMS, you can code a strongly typed `execute(..)` method that would
 delegate to the untyped `execute(Map)` method in the superclass, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import java.sql.Types;
 	import java.util.Date;
@@ -511,8 +568,10 @@ delegate to the untyped `execute(Map)` method in the superclass, as the followin
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import java.sql.Types
 	import java.util.Date
@@ -539,6 +598,7 @@ delegate to the untyped `execute(Map)` method in the superclass, as the followin
 				mapOf<String, Any>(CUTOFF_DATE_PARAM to cutoffDate))
 	}
 ----
+======
 
 
 

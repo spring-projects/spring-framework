@@ -7,8 +7,11 @@
 `@ExceptionHandler` methods to handle exceptions from controller methods. The following
 example includes such a handler method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class SimpleController {
@@ -21,6 +24,7 @@ example includes such a handler method:
 		}
 	}
 ----
+======
 <1> Declaring an `@ExceptionHandler`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

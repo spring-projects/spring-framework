@@ -5,8 +5,11 @@ The best way to test streaming responses such as Server-Sent Events is through t
 <<WebTestClient>> which can be used as a test client to connect to a `MockMvc` instance
 to perform tests on Spring MVC controllers without a running server. For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebTestClient client = MockMvcWebTestClient.bindToController(new SseController()).build();
 
@@ -26,6 +29,7 @@ to perform tests on Spring MVC controllers without a running server. For example
 			.thenCancel()
 			.verify();
 ----
+======
 
 `WebTestClient` can also connect to a live server and perform full end-to-end integration
 tests. This is also supported in Spring Boot where you can

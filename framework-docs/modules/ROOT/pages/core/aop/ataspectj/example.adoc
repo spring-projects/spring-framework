@@ -16,8 +16,11 @@ aspect.
 Because we want to retry the operation, we need to use around advice so that we can
 call `proceed` multiple times. The following listing shows the basic aspect implementation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Aspect
 	public class ConcurrentOperationExecutor implements Ordered {
@@ -56,6 +59,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 		}
 	}
 ----
+======
 <1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
@@ -123,28 +127,37 @@ The corresponding Spring configuration follows:
 To refine the aspect so that it retries only idempotent operations, we might define the following
 `Idempotent` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	// marker annotation
 	public @interface Idempotent {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Retention(AnnotationRetention.RUNTIME)
 	// marker annotation
 	annotation class Idempotent
 ----
+======
 
 We can then use the annotation to annotate the implementation of service operations. The change
 to the aspect to retry only idempotent operations involves refining the pointcut
 expression so that only `@Idempotent` operations match, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Around("execution(* com.xyz..service.*.*(..)) && " +
 			"@annotation(com.xyz.service.Idempotent)")
@@ -152,8 +165,10 @@ expression so that only `@Idempotent` operations match, as follows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Around("execution(* com.xyz..service.*.*(..)) && " +
 			"@annotation(com.xyz.service.Idempotent)")
@@ -161,6 +176,7 @@ expression so that only `@Idempotent` operations match, as follows:
 		// ...
 	}
 ----
+======
 
 
 

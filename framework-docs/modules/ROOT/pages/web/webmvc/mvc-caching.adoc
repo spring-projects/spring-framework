@@ -32,8 +32,11 @@ While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all 
 directives for the `Cache-Control` response header, the `CacheControl` type takes a
 use case-oriented approach that focuses on the common scenarios:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Cache for an hour - "Cache-Control: max-age=3600"
 	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
@@ -46,8 +49,10 @@ use case-oriented approach that focuses on the common scenarios:
 	// "Cache-Control: max-age=864000, public, no-transform"
 	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Cache for an hour - "Cache-Control: max-age=3600"
 	val ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS)
@@ -60,6 +65,7 @@ use case-oriented approach that focuses on the common scenarios:
 	// "Cache-Control: max-age=864000, public, no-transform"
 	val ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic()
 ----
+======
 
 `WebContentGenerator` also accepts a simpler `cachePeriod` property (defined in seconds) that
 works as follows:
@@ -81,8 +87,11 @@ against conditional request headers. A controller can add an `ETag` header and `
 settings to a `ResponseEntity`, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/book/{id}")
 	public ResponseEntity<Book> showBook(@PathVariable Long id) {
@@ -97,8 +106,10 @@ settings to a `ResponseEntity`, as the following example shows:
 				.body(book);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/book/{id}")
 	fun showBook(@PathVariable id: Long): ResponseEntity<Book> {
@@ -113,6 +124,7 @@ settings to a `ResponseEntity`, as the following example shows:
 				.body(book)
 	}
 ----
+======
 --
 
 The preceding example sends a 304 (NOT_MODIFIED) response with an empty body if the comparison
@@ -123,8 +135,11 @@ You can also make the check against conditional request headers in the controlle
 as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RequestMapping
 	public String myHandleMethod(WebRequest request, Model model) {
@@ -139,6 +154,7 @@ as the following example shows:
 		return "myViewName";
 	}
 ----
+======
 <1> Application-specific calculation.
 <2> The response has been set to 304 (NOT_MODIFIED) -- no further processing.
 <3> Continue with the request processing.

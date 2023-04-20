@@ -26,8 +26,11 @@ automatically rolled back in case of a failure. For more information on Vavr's T
 refer to the [official Vavr documentation](https://www.vavr.io/vavr-docs/#_try).
 
 Here's an example of how to use Vavr's Try with a transactional method:
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Transactional
 	public Try<String> myTransactionalMethod() {
@@ -37,6 +40,7 @@ Here's an example of how to use Vavr's Try with a transactional method:
 		return Try.of(delegate::myDataAccessOperation);
 	}
 ----
+======
 
 Checked exceptions that are thrown from a transactional method do not result in a rollback
 in the default configuration. You can configure exactly which `Exception` types mark a
@@ -138,8 +142,11 @@ is quite invasive and tightly couples your code to the Spring Framework's transa
 infrastructure. The following example shows how to programmatically indicate a required
 rollback:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public void resolvePosition() {
 		try {
@@ -150,8 +157,10 @@ rollback:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun resolvePosition() {
 		try {
@@ -162,6 +171,7 @@ rollback:
 		}
 	}
 ----
+======
 
 You are strongly encouraged to use the declarative approach to rollback, if at all
 possible. Programmatic rollback is available should you absolutely need it, but its

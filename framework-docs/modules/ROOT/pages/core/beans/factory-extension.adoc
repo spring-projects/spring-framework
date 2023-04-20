@@ -120,8 +120,11 @@ it is created by the container and prints the resulting string to the system con
 
 The following listing shows the custom `BeanPostProcessor` implementation class definition:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package scripting;
 
@@ -140,8 +143,10 @@ The following listing shows the custom `BeanPostProcessor` implementation class 
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package scripting
 
@@ -160,6 +165,7 @@ The following listing shows the custom `BeanPostProcessor` implementation class 
 		}
 	}
 ----
+======
 
 The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
 
@@ -196,8 +202,11 @@ xref:languages/dynamic.adoc[Dynamic Language Support].)
 
 The following Java application runs the preceding code and configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import org.springframework.context.ApplicationContext;
 	import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -213,8 +222,10 @@ The following Java application runs the preceding code and configuration:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
     import org.springframework.beans.factory.getBean
 
@@ -224,6 +235,7 @@ The following Java application runs the preceding code and configuration:
 		println(messenger)
 	}
 ----
+======
 
 The output of the preceding application resembles the following:
 

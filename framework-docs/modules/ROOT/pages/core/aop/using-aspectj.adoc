@@ -32,8 +32,11 @@ The `@Configurable` annotation marks a class as being eligible for Spring-driven
 configuration. In the simplest case, you can use purely it as a marker annotation, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.xyz.domain;
 
@@ -44,8 +47,10 @@ following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.xyz.domain
 
@@ -56,6 +61,7 @@ following example shows:
 		// ...
 	}
 ----
+======
 
 When used as a marker interface in this way, Spring configures new instances of the
 annotated type (`Account`, in this case) by using a bean definition (typically
@@ -74,8 +80,11 @@ is to omit the `id` attribute, as the following example shows:
 If you want to explicitly specify the name of the prototype bean definition to use, you
 can do so directly in the annotation, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.xyz.domain;
 
@@ -86,8 +95,10 @@ can do so directly in the annotation, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.xyz.domain
 
@@ -98,6 +109,7 @@ can do so directly in the annotation, as the following example shows:
 		// ...
 	}
 ----
+======
 
 Spring now looks for a bean definition named `account` and uses that as the
 definition to configure new `Account` instances.
@@ -137,16 +149,22 @@ dependencies to be injected before the constructor bodies run and thus be
 available for use in the body of the constructors, you need to define this on the
 `@Configurable` declaration, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configurable(preConstruction = true)
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configurable(preConstruction = true)
 ----
+======
 
 You can find more information about the language semantics of the various pointcut
 types in AspectJ
@@ -164,22 +182,28 @@ a reference to the bean factory that is to be used to configure new objects). If
 use Java-based configuration, you can add `@EnableSpringConfigured` to any
 `@Configuration` class, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableSpringConfigured
 	public class AppConfig {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableSpringConfigured
 	class AppConfig {
 	}
 ----
+======
 
 If you prefer XML based configuration, the Spring
 xref:core/appendix/xsd-schemas.adoc#context[`context` namespace]
@@ -417,8 +441,11 @@ use @AspectJ with xref:core/beans/java.adoc[Java configuration]. Specifically, y
 The following example shows the profiling aspect, which is not fancy.
 It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.xyz;
 
@@ -448,8 +475,10 @@ It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
 		public void methodsToBeProfiled(){}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.xyz
 
@@ -480,6 +509,7 @@ It is a time-based profiler that uses the @AspectJ-style of aspect declaration:
 		}
 	}
 ----
+======
 
 We also need to create an `META-INF/aop.xml` file, to inform the AspectJ weaver that
 we want to weave our `ProfilingAspect` into our classes. This file convention, namely
@@ -537,8 +567,11 @@ Now that all the required artifacts (the aspect, the `META-INF/aop.xml`
 file, and the Spring configuration) are in place, we can create the following
 driver class with a `main(..)` method to demonstrate the LTW in action:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.xyz;
 
@@ -557,8 +590,10 @@ driver class with a `main(..)` method to demonstrate the LTW in action:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.xyz
 
@@ -573,6 +608,7 @@ driver class with a `main(..)` method to demonstrate the LTW in action:
 		service.calculateEntitlement()
 	}
 ----
+======
 
 We have one last thing to do. The introduction to this section did say that one could
 switch on LTW selectively on a per-`ClassLoader` basis with Spring, and this is true.
@@ -612,8 +648,11 @@ Since this LTW is effected by using full-blown AspectJ, we are not limited only 
 Spring beans. The following slight variation on the `Main` program yields the same
 result:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.xyz;
 
@@ -632,8 +671,10 @@ result:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.xyz
 
@@ -648,6 +689,7 @@ result:
 		service.calculateEntitlement()
 	}
 ----
+======
 
 Notice how, in the preceding program, we bootstrap the Spring container and
 then create a new instance of the `StubEntitlementCalculationService` totally outside
@@ -721,22 +763,28 @@ enough because the LTW support uses `BeanFactoryPostProcessors`.)
 To enable the Spring Framework's LTW support, you need to configure a `LoadTimeWeaver`,
 which typically is done by using the `@EnableLoadTimeWeaving` annotation, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableLoadTimeWeaving
 	public class AppConfig {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableLoadTimeWeaving
 	class AppConfig {
 	}
 ----
+======
 
 Alternatively, if you prefer XML-based configuration, use the
 `<context:load-time-weaver/>` element. Note that the element is defined in the
@@ -804,8 +852,11 @@ To specify a specific `LoadTimeWeaver` with Java configuration, implement the
 `LoadTimeWeavingConfigurer` interface and override the `getLoadTimeWeaver()` method.
 The following example specifies a `ReflectiveLoadTimeWeaver`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableLoadTimeWeaving
@@ -817,8 +868,10 @@ The following example specifies a `ReflectiveLoadTimeWeaver`:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableLoadTimeWeaving
@@ -829,6 +882,7 @@ The following example specifies a `ReflectiveLoadTimeWeaver`:
 		}
 	}
 ----
+======
 
 If you use XML-based configuration, you can specify the fully qualified class name
 as the value of the `weaver-class` attribute on the `<context:load-time-weaver/>`

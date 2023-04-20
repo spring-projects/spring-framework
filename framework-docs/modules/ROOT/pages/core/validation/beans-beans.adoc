@@ -62,8 +62,11 @@ xref:core/validation/beans-beans.adoc#beans-beans-conversion[section on `Propert
 The following two example classes use the `BeanWrapper` to get and set
 properties:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class Company {
 
@@ -87,17 +90,23 @@ properties:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Company {
 		var name: String? = null
 		var managingDirector: Employee? = null
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class Employee {
 
@@ -122,20 +131,26 @@ properties:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Employee {
 		var name: String? = null
 		var salary: Float? = null
 	}
 ----
+======
 
 The following code snippets show some examples of how to retrieve and manipulate some of
 the properties of instantiated ``Company``s and ``Employee``s:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	BeanWrapper company = new BeanWrapperImpl(new Company());
 	// setting the company name..
@@ -152,8 +167,10 @@ the properties of instantiated ``Company``s and ``Employee``s:
 	// retrieving the salary of the managingDirector through the company
 	Float salary = (Float) company.getPropertyValue("managingDirector.salary");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val company = BeanWrapperImpl(Company())
 	// setting the company name..
@@ -170,6 +187,7 @@ the properties of instantiated ``Company``s and ``Employee``s:
 	// retrieving the salary of the managingDirector through the company
 	val salary = company.getPropertyValue("managingDirector.salary") as Float?
 ----
+======
 
 
 
@@ -308,8 +326,11 @@ com
 The following Java source code for the referenced `SomethingBeanInfo` class
 associates a `CustomNumberEditor` with the `age` property of the `Something` class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SomethingBeanInfo extends SimpleBeanInfo {
 
@@ -330,8 +351,10 @@ associates a `CustomNumberEditor` with the `age` property of the `Something` cla
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SomethingBeanInfo : SimpleBeanInfo() {
 
@@ -351,6 +374,7 @@ associates a `CustomNumberEditor` with the `age` property of the `Something` cla
 		}
 	}
 ----
+======
 
 
 [[beans-beans-conversion-customeditor-registration]]
@@ -390,8 +414,11 @@ support for additional `PropertyEditor` instances to an `ApplicationContext`.
 Consider the following example, which defines a user class called `ExoticType` and
 another class called `DependsOnExoticType`, which needs `ExoticType` set as a property:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package example;
 
@@ -413,8 +440,10 @@ another class called `DependsOnExoticType`, which needs `ExoticType` set as a pr
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package example
 
@@ -425,6 +454,7 @@ another class called `DependsOnExoticType`, which needs `ExoticType` set as a pr
 		var type: ExoticType? = null
 	}
 ----
+======
 
 When things are properly set up, we want to be able to assign the type property as a
 string, which a `PropertyEditor` converts into an actual
@@ -439,8 +469,11 @@ string, which a `PropertyEditor` converts into an actual
 
 The `PropertyEditor` implementation could look similar to the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package example;
 
@@ -454,8 +487,10 @@ The `PropertyEditor` implementation could look similar to the following:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package example
 
@@ -469,6 +504,7 @@ The `PropertyEditor` implementation could look similar to the following:
 		}
 	}
 ----
+======
 
 Finally, the following example shows how to use `CustomEditorConfigurer` to register the new `PropertyEditor` with the
 `ApplicationContext`, which will then be able to use it as needed:
@@ -504,8 +540,11 @@ instances for each bean creation attempt.
 
 The following example shows how to create your own `PropertyEditorRegistrar` implementation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.foo.editors.spring;
 
@@ -520,8 +559,10 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.foo.editors.spring
 
@@ -539,6 +580,7 @@ The following example shows how to create your own `PropertyEditorRegistrar` imp
 		}
 	}
 ----
+======
 
 See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an example
 `PropertyEditorRegistrar` implementation. Notice how in its implementation of the
@@ -566,8 +608,11 @@ using xref:web/webmvc.adoc#mvc[Spring's MVC web framework], using a `PropertyEdi
 conjunction with data-binding web controllers can be very convenient. The following
 example uses a `PropertyEditorRegistrar` in the implementation of an `@InitBinder` method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class RegisterUserController {
@@ -586,8 +631,10 @@ example uses a `PropertyEditorRegistrar` in the implementation of an `@InitBinde
 		// other methods related to registering a User
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class RegisterUserController(
@@ -601,6 +648,7 @@ example uses a `PropertyEditorRegistrar` in the implementation of an `@InitBinde
 		// other methods related to registering a User
 	}
 ----
+======
 
 This style of `PropertyEditor` registration can lead to concise code (the implementation
 of the `@InitBinder` method is only one line long) and lets common `PropertyEditor`

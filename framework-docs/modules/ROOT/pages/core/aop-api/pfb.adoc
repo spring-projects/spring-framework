@@ -192,16 +192,22 @@ an instance of the prototype from the factory. Holding a reference is not suffic
 The `person` bean definition shown earlier can be used in place of a `Person` implementation, as
 follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Person person = (Person) factory.getBean("person");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val person = factory.getBean("person") as Person;
 ----
+======
 
 Other beans in the same IoC context can express a strongly typed dependency on it, as
 with an ordinary Java object. The following example shows how to do so:

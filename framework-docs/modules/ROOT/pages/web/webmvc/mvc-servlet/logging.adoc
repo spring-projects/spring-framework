@@ -25,8 +25,11 @@ through the `enableLoggingRequestDetails` property on `DispatcherServlet`.
 
 The following example shows how to do so by using Java configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 public class MyInitializer
 		extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -53,8 +56,10 @@ public class MyInitializer
 
 }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
 
@@ -75,6 +80,7 @@ public class MyInitializer
 		}
 	}
 ----
+======
 
 
 

@@ -6,8 +6,11 @@ xref:core/beans/java.adoc[Java-based container configuration]), you can annotate
 class with `@ContextConfiguration` and configure the `classes` attribute with an array
 that contains references to component classes. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from AppConfig and TestConfig
@@ -16,6 +19,7 @@ that contains references to component classes. The following example shows how t
 		// class body...
 	}
 ----
+======
 <1> Specifying component classes.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -64,8 +68,11 @@ example, the `OrderServiceTest` class declares a `static` nested configuration c
 named `Config` that is automatically used to load the `ApplicationContext` for the test
 class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig <1>
 	// ApplicationContext will be loaded from the static nested Config class
@@ -93,6 +100,7 @@ class:
 
 	}
 ----
+======
 <1> Loading configuration information from the nested `Config` class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

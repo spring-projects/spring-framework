@@ -13,8 +13,11 @@ supported.
 You can declare a `perthis` aspect by specifying a `perthis` clause in the `@Aspect`
 annotation. Consider the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Aspect("perthis(execution(* com.xyz..service.*.*(..)))")
 	public class MyAspect {
@@ -27,8 +30,10 @@ annotation. Consider the following example:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Aspect("perthis(execution(* com.xyz..service.*.*(..)))")
 	class MyAspect {
@@ -41,6 +46,7 @@ annotation. Consider the following example:
 		}
 	}
 ----
+======
 
 In the preceding example, the effect of the `perthis` clause is that one aspect instance
 is created for each unique service object that performs a business service (each unique

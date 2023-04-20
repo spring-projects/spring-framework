@@ -23,8 +23,11 @@ By contrast, global `@ModelAttribute` and `@InitBinder` methods are applied _bef
 The `@ControllerAdvice` annotation has attributes that let you narrow the set of controllers
 and handlers that they apply to. For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Target all Controllers annotated with @RestController
 	@ControllerAdvice(annotations = RestController.class)
@@ -38,8 +41,10 @@ and handlers that they apply to. For example:
 	@ControllerAdvice(assignableTypes = {ControllerInterface.class, AbstractController.class})
 	public class ExampleAdvice3 {}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Target all Controllers annotated with @RestController
 	@ControllerAdvice(annotations = [RestController::class])
@@ -53,6 +58,7 @@ and handlers that they apply to. For example:
 	@ControllerAdvice(assignableTypes = [ControllerInterface::class, AbstractController::class])
 	class ExampleAdvice3
 ----
+======
 
 The selectors in the preceding example are evaluated at runtime and may negatively impact
 performance if used extensively. See the

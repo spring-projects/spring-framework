@@ -7,14 +7,18 @@ transaction by using Spring's `@Transactional` annotation. `@AfterTransaction` m
 are not required to be `public` and may be declared on Java 8-based interface default
 methods.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@AfterTransaction // <1>
 	void afterTransaction() {
 		// logic to be run after a transaction has ended
 	}
 ----
+======
 <1> Run this method after a transaction.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

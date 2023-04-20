@@ -47,9 +47,11 @@ the provided `MockHttpServletRequest`. When the `loginUser()` method is invoked 
 set parameters). We can then perform assertions against the results based on the known
 inputs for the username and password. The following listing shows how to do so:
 
-.Request-scoped bean test
+[tabs]
+======
+Request-scoped bean test::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitWebConfig
 	class RequestScopedBeanTests {
@@ -67,8 +69,10 @@ inputs for the username and password. The following listing shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitWebConfig
 	class RequestScopedBeanTests {
@@ -86,6 +90,7 @@ inputs for the username and password. The following listing shows how to do so:
 		}
 	}
 ----
+======
 
 The following code snippet is similar to the one we saw earlier for a request-scoped
 bean. However, this time, the `userService` bean has a dependency on a session-scoped
@@ -119,9 +124,11 @@ the user service has access to the session-scoped `userPreferences` for the curr
 `MockHttpSession`, and we can perform assertions against the results based on the
 configured theme. The following example shows how to do so:
 
-.Session-scoped bean test
+[tabs]
+======
+Session-scoped bean test::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitWebConfig
 	class SessionScopedBeanTests {
@@ -139,8 +146,9 @@ configured theme. The following example shows how to do so:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitWebConfig
 	class SessionScopedBeanTests {
@@ -157,4 +165,5 @@ configured theme. The following example shows how to do so:
 		}
 	}
 ----
+======
 

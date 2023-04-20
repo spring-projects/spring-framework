@@ -17,8 +17,11 @@ characters.
 
 The following example shows how to use variables.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
 
@@ -28,8 +31,10 @@ The following example shows how to use variables.
 	parser.parseExpression("name = #newName").getValue(context, tesla);
 	System.out.println(tesla.getName())  // "Mike Tesla"
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val tesla = Inventor("Nikola Tesla", "Serbian")
 
@@ -39,6 +44,7 @@ The following example shows how to use variables.
 	parser.parseExpression("name = #newName").getValue(context, tesla)
 	println(tesla.name)  // "Mike Tesla"
 ----
+======
 
 
 [[expressions-this-root]]
@@ -50,8 +56,11 @@ defined and refers to the root context object. Although `#this` may vary as comp
 an expression are evaluated, `#root` always refers to the root. The following examples
 show how to use the `#this` and `#root` variables:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// create an array of integers
 	List<Integer> primes = new ArrayList<>();
@@ -67,8 +76,10 @@ show how to use the `#this` and `#root` variables:
 	List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression(
 			"#primes.?[#this>10]").getValue(context);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// create an array of integers
 	val primes = ArrayList<Int>()
@@ -84,6 +95,7 @@ show how to use the `#this` and `#root` variables:
 	val primesGreaterThanTen = parser.parseExpression(
 			"#primes.?[#this>10]").getValue(context) as List<Int>
 ----
+======
 
 
 

@@ -259,8 +259,11 @@ xref:core/validation/format.adoc#format-FormatterRegistry-SPI[The `FormatterRegi
 To work with a `ConversionService` instance programmatically, you can inject a reference to
 it like you would for any other bean. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Service
 	public class MyService {
@@ -274,8 +277,10 @@ it like you would for any other bean. The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Service
 	class MyService(private val conversionService: ConversionService) {
@@ -285,6 +290,7 @@ it like you would for any other bean. The following example shows how to do so:
 		}
 	}
 ----
+======
 
 For most use cases, you can use the `convert` method that specifies the `targetType`, but it
 does not work with more complex types, such as a collection of a parameterized element.
@@ -294,8 +300,11 @@ you need to provide a formal definition of the source and target types.
 Fortunately, `TypeDescriptor` provides various options to make doing so straightforward,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	DefaultConversionService cs = new DefaultConversionService();
 
@@ -304,8 +313,10 @@ as the following example shows:
 		TypeDescriptor.forObject(input), // List<Integer> type descriptor
 		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)));
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val cs = DefaultConversionService()
 
@@ -314,6 +325,7 @@ as the following example shows:
 			TypeDescriptor.forObject(input), // List<Integer> type descriptor
 			TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(String::class.java)))
 ----
+======
 
 Note that `DefaultConversionService` automatically registers converters that are
 appropriate for most environments. This includes collection converters, scalar

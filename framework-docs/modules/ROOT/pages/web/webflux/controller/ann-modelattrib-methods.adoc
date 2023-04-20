@@ -24,8 +24,11 @@ related to the request body).
 
 The following example uses a `@ModelAttribute` method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ModelAttribute
 	public void populateModel(@RequestParam String number, Model model) {
@@ -33,8 +36,10 @@ The following example uses a `@ModelAttribute` method:
 		// add more ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ModelAttribute
 	fun populateModel(@RequestParam number: String, model: Model) {
@@ -42,25 +47,32 @@ The following example uses a `@ModelAttribute` method:
 		// add more ...
 	}
 ----
+======
 
 The following example adds one attribute only:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ModelAttribute
 	public Account addAccount(@RequestParam String number) {
 		return accountRepository.findAccount(number);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ModelAttribute
 	fun addAccount(@RequestParam number: String): Account {
 		return accountRepository.findAccount(number);
 	}
 ----
+======
 
 NOTE: When a name is not explicitly specified, a default name is chosen based on the type,
 as explained in the javadoc for {api-spring-framework}/core/Conventions.html[`Conventions`].
@@ -73,8 +85,11 @@ attributes can be transparently resolved (and the model updated) to their actual
 at the time of `@RequestMapping` invocation, provided a `@ModelAttribute` argument is
 declared without a wrapper, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ModelAttribute
 	public void addAccount(@RequestParam String number) {
@@ -87,8 +102,10 @@ declared without a wrapper, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.ui.set
 
@@ -103,6 +120,7 @@ declared without a wrapper, as the following example shows:
 		// ...
 	}
 ----
+======
 
 
 In addition, any model attributes that have a reactive type wrapper are resolved to their
@@ -115,8 +133,11 @@ controllers, unless the return value is a `String` that would otherwise be inter
 as a view name. `@ModelAttribute` can also help to customize the model attribute name,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/accounts/{id}")
 	@ModelAttribute("myAccount")
@@ -125,8 +146,10 @@ as the following example shows:
 		return account;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/accounts/{id}")
 	@ModelAttribute("myAccount")
@@ -135,6 +158,7 @@ as the following example shows:
 		return account
 	}
 ----
+======
 
 
 

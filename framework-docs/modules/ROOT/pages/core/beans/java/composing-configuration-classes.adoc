@@ -12,8 +12,11 @@ Much as the `<import/>` element is used within Spring XML files to aid in modula
 configurations, the `@Import` annotation allows for loading `@Bean` definitions from
 another configuration class, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class ConfigA {
@@ -34,8 +37,10 @@ another configuration class, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class ConfigA {
@@ -52,13 +57,17 @@ another configuration class, as the following example shows:
 		fun b() = B()
 	}
 ----
+======
 
 Now, rather than needing to specify both `ConfigA.class` and `ConfigB.class` when
 instantiating the context, only `ConfigB` needs to be supplied explicitly, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(String[] args) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigB.class);
@@ -68,8 +77,10 @@ following example shows:
 		B b = ctx.getBean(B.class);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -81,6 +92,7 @@ following example shows:
 		val b = ctx.getBean<B>()
 	}
 ----
+======
 
 This approach simplifies container instantiation, as only one class needs to be dealt
 with, rather than requiring you to remember a potentially large number of
@@ -106,8 +118,11 @@ a `@Bean` method can have an arbitrary number of parameters that describe the be
 dependencies. Consider the following more real-world scenario with several `@Configuration`
 classes, each depending on beans declared in the others:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class ServiceConfig {
@@ -144,8 +159,10 @@ classes, each depending on beans declared in the others:
 		transferService.transfer(100.00, "A123", "C456");
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -185,6 +202,7 @@ classes, each depending on beans declared in the others:
 		transferService.transfer(100.00, "A123", "C456")
 	}
 ----
+======
 
 
 There is another way to achieve the same result. Remember that `@Configuration` classes are
@@ -207,8 +225,11 @@ work on the configuration class itself, since it is possible to create it as a b
 
 The following example shows how one bean can be autowired to another bean:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class ServiceConfig {
@@ -254,8 +275,10 @@ The following example shows how one bean can be autowired to another bean:
 		transferService.transfer(100.00, "A123", "C456");
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -297,6 +320,7 @@ The following example shows how one bean can be autowired to another bean:
 		transferService.transfer(100.00, "A123", "C456")
 	}
 ----
+======
 
 TIP: Constructor injection in `@Configuration` classes is only supported as of Spring
 Framework 4.3. Note also that there is no need to specify `@Autowired` if the target
@@ -318,8 +342,11 @@ In cases where this ambiguity is not acceptable and you wish to have direct navi
 from within your IDE from one `@Configuration` class to another, consider autowiring the
 configuration classes themselves. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class ServiceConfig {
@@ -334,8 +361,10 @@ configuration classes themselves. The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 @Configuration
 class ServiceConfig {
@@ -350,14 +379,18 @@ class ServiceConfig {
 	}
 }
 ----
+======
 
 In the preceding situation, where `AccountRepository` is defined is completely explicit.
 However, `ServiceConfig` is now tightly coupled to `RepositoryConfig`. That is the
 tradeoff. This tight coupling can be somewhat mitigated by using interface-based or
 abstract class-based `@Configuration` classes. Consider the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class ServiceConfig {
@@ -404,8 +437,10 @@ abstract class-based `@Configuration` classes. Consider the following example:
 		transferService.transfer(100.00, "A123", "C456");
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -454,6 +489,7 @@ abstract class-based `@Configuration` classes. Consider the following example:
 		transferService.transfer(100.00, "A123", "C456")
 	}
 ----
+======
 
 Now `ServiceConfig` is loosely coupled with respect to the concrete
 `DefaultRepositoryConfig`, and built-in IDE tooling is still useful: You can easily
@@ -487,8 +523,11 @@ Implementations of the `Condition` interface provide a `matches(...)`
 method that returns `true` or `false`. For example, the following listing shows the actual
 `Condition` implementation used for `@Profile`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
@@ -505,8 +544,10 @@ method that returns `true` or `false`. For example, the following listing shows 
 		return true;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
 		// Read the @Profile annotation attributes
@@ -522,6 +563,7 @@ method that returns `true` or `false`. For example, the following listing shows 
 		return true
 	}
 ----
+======
 
 See the {api-spring-framework}/context/annotation/Conditional.html[`@Conditional`]
 javadoc for more detail.
@@ -558,8 +600,11 @@ properly.
 
 The following example shows an ordinary configuration class in Java:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -578,8 +623,10 @@ The following example shows an ordinary configuration class in Java:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -596,6 +643,7 @@ The following example shows an ordinary configuration class in Java:
 		fun transferService() = TransferService(accountRepository())
 	}
 ----
+======
 
 The following example shows part of a sample `system-test-config.xml` file:
 
@@ -625,8 +673,11 @@ jdbc.username=sa
 jdbc.password=
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(String[] args) {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:/com/acme/system-test-config.xml");
@@ -634,8 +685,10 @@ jdbc.password=
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun main() {
 		val ctx = ClassPathXmlApplicationContext("classpath:/com/acme/system-test-config.xml")
@@ -643,6 +696,7 @@ jdbc.password=
 		// ...
 	}
 ----
+======
 
 
 NOTE: In `system-test-config.xml` file, the `AppConfig` `<bean/>` does not declare an `id`
@@ -691,8 +745,11 @@ that defines a bean, a properties file, and the `main` class) shows how to use
 the `@ImportResource` annotation to achieve "`Java-centric`" configuration that uses XML
 as needed:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ImportResource("classpath:/com/acme/properties-config.xml")
@@ -713,8 +770,10 @@ as needed:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ImportResource("classpath:/com/acme/properties-config.xml")
@@ -735,6 +794,7 @@ as needed:
 		}
 	}
 ----
+======
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -752,8 +812,11 @@ jdbc.username=sa
 jdbc.password=
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(String[] args) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
@@ -761,8 +824,10 @@ jdbc.password=
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -772,6 +837,7 @@ jdbc.password=
 		// ...
 	}
 ----
+======
 
 
 

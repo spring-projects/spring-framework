@@ -38,8 +38,11 @@ xref:testing/testcontext-framework.adoc[TestContext framework].
 
 Consider the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RunWith(SpringRunner.class)
 	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
@@ -54,8 +57,9 @@ Consider the following example:
 	public class UserRepositoryTests { }
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RunWith(SpringRunner::class)
 	@ContextConfiguration("/app-config.xml", "/test-data-access-config.xml")
@@ -69,13 +73,17 @@ Consider the following example:
 	@Transactional
 	class UserRepositoryTests { }
 ----
+======
 
 If we discover that we are repeating the preceding configuration across our JUnit 4-based
 test suite, we can reduce the duplication by introducing a custom composed annotation
 that centralizes the common test configuration for Spring, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -85,8 +93,9 @@ that centralizes the common test configuration for Spring, as follows:
 	public @interface TransactionalDevTestConfig { }
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -95,12 +104,16 @@ that centralizes the common test configuration for Spring, as follows:
 	@Transactional
 	annotation class TransactionalDevTestConfig { }
 ----
+======
 
 Then we can use our custom `@TransactionalDevTestConfig` annotation to simplify the
 configuration of individual JUnit 4 based test classes, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RunWith(SpringRunner.class)
 	@TransactionalDevTestConfig
@@ -111,8 +124,9 @@ configuration of individual JUnit 4 based test classes, as follows:
 	public class UserRepositoryTests { }
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RunWith(SpringRunner::class)
 	@TransactionalDevTestConfig
@@ -122,13 +136,17 @@ configuration of individual JUnit 4 based test classes, as follows:
 	@TransactionalDevTestConfig
 	class UserRepositoryTests
 ----
+======
 
 If we write tests that use JUnit Jupiter, we can reduce code duplication even further,
 since annotations in JUnit 5 can also be used as meta-annotations. Consider the following
 example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
@@ -142,8 +160,10 @@ example:
 	@Transactional
 	class UserRepositoryTests { }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	@ContextConfiguration("/app-config.xml", "/test-data-access-config.xml")
@@ -157,14 +177,18 @@ example:
 	@Transactional
 	class UserRepositoryTests { }
 ----
+======
 
 If we discover that we are repeating the preceding configuration across our JUnit
 Jupiter-based test suite, we can reduce the duplication by introducing a custom composed
 annotation that centralizes the common test configuration for Spring and JUnit Jupiter,
 as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -174,8 +198,10 @@ as follows:
 	@Transactional
 	public @interface TransactionalDevTestConfig { }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -185,12 +211,16 @@ as follows:
 	@Transactional
 	annotation class TransactionalDevTestConfig { }
 ----
+======
 
 Then we can use our custom `@TransactionalDevTestConfig` annotation to simplify the
 configuration of individual JUnit Jupiter based test classes, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@TransactionalDevTestConfig
 	class OrderRepositoryTests { }
@@ -198,8 +228,10 @@ configuration of individual JUnit Jupiter based test classes, as follows:
 	@TransactionalDevTestConfig
 	class UserRepositoryTests { }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@TransactionalDevTestConfig
 	class OrderRepositoryTests { }
@@ -207,6 +239,7 @@ configuration of individual JUnit Jupiter based test classes, as follows:
 	@TransactionalDevTestConfig
 	class UserRepositoryTests { }
 ----
+======
 
 Since JUnit Jupiter supports the use of `@Test`, `@RepeatedTest`, `ParameterizedTest`,
 and others as meta-annotations, you can also create custom composed annotations at the
@@ -215,8 +248,11 @@ the `@Test` and `@Tag` annotations from JUnit Jupiter with the `@Transactional`
 annotation from Spring, we could create an `@TransactionalIntegrationTest` annotation, as
 follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -225,8 +261,10 @@ follows:
 	@Test // org.junit.jupiter.api.Test
 	public @interface TransactionalIntegrationTest { }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -235,12 +273,16 @@ follows:
 	@Test // org.junit.jupiter.api.Test
 	annotation class TransactionalIntegrationTest { }
 ----
+======
 
 Then we can use our custom `@TransactionalIntegrationTest` annotation to simplify the
 configuration of individual JUnit Jupiter based test methods, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@TransactionalIntegrationTest
 	void saveOrder() { }
@@ -249,8 +291,9 @@ configuration of individual JUnit Jupiter based test methods, as follows:
 	void deleteOrder() { }
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@TransactionalIntegrationTest
 	fun saveOrder() { }
@@ -258,6 +301,7 @@ configuration of individual JUnit Jupiter based test methods, as follows:
 	@TransactionalIntegrationTest
 	fun deleteOrder() { }
 ----
+======
 
 For further details, see the
 https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Annotation Programming Model]

@@ -10,8 +10,11 @@ transactions being created and then rolled back in response to the
 `UnsupportedOperationException` instance. The following listing shows the `FooService`
 interface:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	// the service interface that we want to make transactional
 
@@ -29,8 +32,10 @@ interface:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	// the service interface that we want to make transactional
 
@@ -47,11 +52,15 @@ interface:
 		fun updateFoo(foo: Foo)
 	}
 ----
+======
 
 The following example shows an implementation of the preceding interface:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package x.y.service;
 
@@ -78,8 +87,10 @@ The following example shows an implementation of the preceding interface:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package x.y.service
 
@@ -102,6 +113,7 @@ The following example shows an implementation of the preceding interface:
 		}
 	}
 ----
+======
 
 Assume that the first two methods of the `FooService` interface, `getFoo(String)` and
 `getFoo(String, String)`, must run in the context of a transaction with read-only
@@ -215,8 +227,11 @@ a transaction is started, suspended, marked as read-only, and so on, depending o
 transaction configuration associated with that method. Consider the following program
 that test drives the configuration shown earlier:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public final class Boot {
 
@@ -227,8 +242,10 @@ that test drives the configuration shown earlier:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -238,6 +255,7 @@ that test drives the configuration shown earlier:
 		fooService.insertFoo(Foo())
 	}
 ----
+======
 
 The output from running the preceding program should resemble the following (the Log4J
 output and the stack trace from the `UnsupportedOperationException` thrown by the
@@ -281,8 +299,11 @@ return type is reactive.
 The following listing shows a modified version of the previously used `FooService`, but
 this time the code uses reactive types:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	// the reactive service interface that we want to make transactional
 
@@ -300,8 +321,10 @@ this time the code uses reactive types:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	// the reactive service interface that we want to make transactional
 
@@ -318,11 +341,15 @@ this time the code uses reactive types:
 		fun updateFoo(foo: Foo) : Mono<Void>
 	}
 ----
+======
 
 The following example shows an implementation of the preceding interface:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package x.y.service;
 
@@ -349,8 +376,10 @@ The following example shows an implementation of the preceding interface:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package x.y.service
 
@@ -373,6 +402,7 @@ The following example shows an implementation of the preceding interface:
 		}
 	}
 ----
+======
 
 Imperative and reactive transaction management share the same semantics for transaction
 boundary and transaction attribute definitions. The main difference between imperative

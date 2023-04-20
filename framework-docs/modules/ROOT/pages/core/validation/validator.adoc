@@ -7,8 +7,11 @@ validators can report validation failures to the `Errors` object.
 
 Consider the following example of a small data object:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class Person {
 
@@ -18,11 +21,14 @@ Consider the following example of a small data object:
 		// the usual getters and setters...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Person(val name: String, val age: Int)
 ----
+======
 
 The next example provides validation behavior for the `Person` class by implementing the
 following two methods of the `org.springframework.validation.Validator` interface:
@@ -35,8 +41,11 @@ Implementing a `Validator` is fairly straightforward, especially when you know o
 `ValidationUtils` helper class that the Spring Framework also provides. The following
 example implements `Validator` for `Person` instances:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class PersonValidator implements Validator {
 
@@ -58,8 +67,10 @@ example implements `Validator` for `Person` instances:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class PersonValidator : Validator {
 
@@ -81,6 +92,7 @@ example implements `Validator` for `Person` instances:
 		}
 	}
 ----
+======
 
 The `static` `rejectIfEmpty(..)` method on the `ValidationUtils` class is used to
 reject the `name` property if it is `null` or the empty string. Have a look at the
@@ -98,8 +110,11 @@ within the `AddressValidator` class without resorting to copy-and-paste, you can
 dependency-inject or instantiate an `AddressValidator` within your `CustomerValidator`,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class CustomerValidator implements Validator {
 
@@ -137,8 +152,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class CustomerValidator(private val addressValidator: Validator) : Validator {
 
@@ -171,6 +188,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 Validation errors are reported to the `Errors` object passed to the validator. In the case
 of Spring Web MVC, you can use the `<spring:bind/>` tag to inspect the error messages, but

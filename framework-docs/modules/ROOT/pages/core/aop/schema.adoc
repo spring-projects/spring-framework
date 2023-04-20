@@ -132,20 +132,26 @@ collects the `this` object as the join point context and passes it to the advice
 The advice must be declared to receive the collected join point context by including
 parameters of the matching names, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public void monitor(Object service) {
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	fun monitor(service: Any) {
 		// ...
 	}
 ----
+======
 
 When combining pointcut sub-expressions, `+&amp;&amp;+` is awkward within an XML
 document, so you can use the `and`, `or`, and `not` keywords in place of `+&amp;&amp;+`,
@@ -272,16 +278,22 @@ The `doAccessCheck` method must declare a parameter named `retVal`. The type of 
 parameter constrains matching in the same way as described for `@AfterReturning`. For
 example, you can declare the method signature as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public void doAccessCheck(Object retVal) {...
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	fun doAccessCheck(retVal: Any) {...
 ----
+======
 
 
 [[aop-schema-advice-after-throwing]]
@@ -324,16 +336,22 @@ The `doRecoveryActions` method must declare a parameter named `dataAccessEx`.
 The type of this parameter constrains matching in the same way as described for
 `@AfterThrowing`. For example, the method signature may be declared as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public void doRecoveryActions(DataAccessException dataAccessEx) {...
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	fun doRecoveryActions(dataAccessEx: DataAccessException) {...
 ----
+======
 
 
 [[aop-schema-advice-after-finally]]
@@ -399,8 +417,11 @@ The following example shows how to declare around advice in XML:
 The implementation of the `doBasicProfiling` advice can be exactly the same as in the
 @AspectJ example (minus the annotation, of course), as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
 		// start stopwatch
@@ -409,8 +430,10 @@ The implementation of the `doBasicProfiling` advice can be exactly the same as i
 		return retVal;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	fun doBasicProfiling(pjp: ProceedingJoinPoint): Any {
 		// start stopwatch
@@ -419,6 +442,7 @@ The implementation of the `doBasicProfiling` advice can be exactly the same as i
 		return pjp.proceed()
 	}
 ----
+======
 
 
 [[aop-schema-params]]
@@ -447,8 +471,11 @@ The `arg-names` attribute accepts a comma-delimited list of parameter names.
 The following slightly more involved example of the XSD-based approach shows
 some around advice used in conjunction with a number of strongly typed parameters:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.xyz.service;
 
@@ -464,8 +491,10 @@ some around advice used in conjunction with a number of strongly typed parameter
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.xyz.service
 
@@ -481,14 +510,18 @@ some around advice used in conjunction with a number of strongly typed parameter
 		}
 	}
 ----
+======
 
 Next up is the aspect. Notice the fact that the `profile(..)` method accepts a number of
 strongly-typed parameters, the first of which happens to be the join point used to
 proceed with the method call. The presence of this parameter is an indication that the
 `profile(..)` is to be used as `around` advice, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.xyz;
 
@@ -509,8 +542,10 @@ proceed with the method call. The presence of this parameter is an indication th
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.xyz
 
@@ -531,6 +566,7 @@ proceed with the method call. The presence of this parameter is an indication th
 		}
 	}
 ----
+======
 
 Finally, the following example XML configuration effects the execution of the
 preceding advice for a particular join point:
@@ -570,8 +606,11 @@ preceding advice for a particular join point:
 
 Consider the following driver script:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public class Boot {
 
@@ -582,8 +621,10 @@ Consider the following driver script:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	fun main() {
 		val ctx = ClassPathXmlApplicationContext("beans.xml")
@@ -591,6 +632,7 @@ Consider the following driver script:
 		person.getPerson("Pengo", 12)
 	}
 ----
+======
 
 With such a `Boot` class, we would get output similar to the following on standard output:
 
@@ -668,20 +710,26 @@ through JMX for example.)
 
 The class that backs the `usageTracking` bean would then contain the following method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public void recordUsage(UsageTracked usageTracked) {
 		usageTracked.incrementUseCount();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	fun recordUsage(usageTracked: UsageTracked) {
 		usageTracked.incrementUseCount()
 	}
 ----
+======
 
 The interface to be implemented is determined by the `implement-interface` attribute. The
 value of the `types-matching` attribute is an AspectJ type pattern. Any bean of a
@@ -690,16 +738,22 @@ advice of the preceding example, service beans can be directly used as implement
 the `UsageTracked` interface. To access a bean programmatically, you could write the
 following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	val usageTracked = context.getBean("myService", UsageTracked.class)
 ----
+======
 
 
 
@@ -771,8 +825,11 @@ Because we want to retry the operation, we need to use around advice so that we 
 call `proceed` multiple times. The following listing shows the basic aspect implementation
 (which is a regular Java class that uses the schema support):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public class ConcurrentOperationExecutor implements Ordered {
 
@@ -809,8 +866,10 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	class ConcurrentOperationExecutor : Ordered {
 
@@ -847,6 +906,7 @@ call `proceed` multiple times. The following listing shows the basic aspect impl
 		}
 	}
 ----
+======
 
 Note that the aspect implements the `Ordered` interface so that we can set the precedence of
 the aspect higher than the transaction advice (we want a fresh transaction each time we
@@ -889,21 +949,27 @@ this is not the case, we can refine the aspect so that it retries only genuinely
 idempotent operations, by introducing an `Idempotent` annotation and using the annotation
 to annotate the implementation of service operations, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	// marker annotation
 	public @interface Idempotent {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Retention(AnnotationRetention.RUNTIME)
 	// marker annotation
 	annotation class Idempotent
 ----
+======
 
 The
 change to the aspect to retry only idempotent operations involves refining the

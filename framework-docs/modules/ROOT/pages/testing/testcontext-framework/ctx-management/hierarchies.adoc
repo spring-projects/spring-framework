@@ -35,8 +35,11 @@ one for the root `WebApplicationContext` (loaded by using the `TestAppConfig`
 that is autowired into the test instance is the one for the child context (that is, the
 lowest context in the hierarchy). The following listing shows this configuration scenario:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	@WebAppConfiguration
@@ -53,8 +56,9 @@ lowest context in the hierarchy). The following listing shows this configuration
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	@WebAppConfiguration
@@ -69,6 +73,7 @@ lowest context in the hierarchy). The following listing shows this configuration
 		// ...
 	}
 ----
+======
 --
 
 **Class hierarchy with implicit parent context**
@@ -86,8 +91,11 @@ based on the configuration in `AbstractWebTests` is set as the parent context fo
 the contexts loaded for the concrete subclasses. The following listing shows this
 configuration scenario:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	@WebAppConfiguration
@@ -100,8 +108,10 @@ configuration scenario:
 	@ContextHierarchy(@ContextConfiguration("/spring/rest-ws-config.xml"))
 	public class RestWebServiceTests extends AbstractWebTests {}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	@WebAppConfiguration
@@ -115,6 +125,7 @@ configuration scenario:
 	class RestWebServiceTests : AbstractWebTests()
 
 ----
+======
 --
 
 **Class hierarchy with merged context hierarchy configuration**
@@ -131,8 +142,11 @@ application context loaded from `/app-config.xml` is set as the parent context f
 contexts loaded from `/user-config.xml` and `{"/user-config.xml", "/order-config.xml"}`.
 The following listing shows this configuration scenario:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	@ContextHierarchy({
@@ -147,8 +161,9 @@ The following listing shows this configuration scenario:
 	class ExtendedTests extends BaseTests {}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	@ContextHierarchy(
@@ -161,6 +176,7 @@ The following listing shows this configuration scenario:
 	)
 	class ExtendedTests : BaseTests() {}
 ----
+======
 --
 
 **Class hierarchy with overridden context hierarchy configuration**
@@ -172,8 +188,11 @@ application context for `ExtendedTests` is loaded only from `/test-user-config.x
 has its parent set to the context loaded from `/app-config.xml`. The following listing
 shows this configuration scenario:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	@ContextHierarchy({
@@ -190,8 +209,10 @@ shows this configuration scenario:
 	))
 	class ExtendedTests extends BaseTests {}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	@ContextHierarchy(
@@ -207,6 +228,7 @@ shows this configuration scenario:
 			))
 	class ExtendedTests : BaseTests() {}
 ----
+======
 
 .Dirtying a context within a context hierarchy
 NOTE: If you use `@DirtiesContext` in a test whose context is configured as part of a

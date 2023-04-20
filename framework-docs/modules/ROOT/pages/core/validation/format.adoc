@@ -78,8 +78,11 @@ a `java.text.DateFormat`.
 
 The following `DateFormatter` is an example `Formatter` implementation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package org.springframework.format.datetime;
 
@@ -112,8 +115,10 @@ The following `DateFormatter` is an example `Formatter` implementation:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	class DateFormatter(private val pattern: String) : Formatter<Date> {
 
@@ -131,6 +136,7 @@ The following `DateFormatter` is an example `Formatter` implementation:
 		}
 	}
 ----
+======
 
 The Spring team welcomes community-driven `Formatter` contributions. See
 https://github.com/spring-projects/spring-framework/issues[GitHub Issues] to contribute.
@@ -169,8 +175,11 @@ formatting  logic -- for example `org.springframework.format.annotation.DateTime
 The following example `AnnotationFormatterFactory` implementation binds the `@NumberFormat`
 annotation to a formatter to let a number style or pattern be specified:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public final class NumberFormatAnnotationFormatterFactory
 			implements AnnotationFormatterFactory<NumberFormat> {
@@ -204,8 +213,10 @@ annotation to a formatter to let a number style or pattern be specified:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class NumberFormatAnnotationFormatterFactory : AnnotationFormatterFactory<NumberFormat> {
 
@@ -235,12 +246,16 @@ annotation to a formatter to let a number style or pattern be specified:
 		}
 	}
 ----
+======
 
 To trigger formatting, you can annotate fields with `@NumberFormat`, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MyModel {
 
@@ -248,13 +263,16 @@ example shows:
 		private BigDecimal decimal;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyModel(
 		@field:NumberFormat(style = Style.CURRENCY) private val decimal: BigDecimal
 	)
 ----
+======
 
 
 [[format-annotations-api]]
@@ -268,8 +286,11 @@ package. You can use `@NumberFormat` to format `Number` fields such as `Double` 
 The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
 (yyyy-MM-dd):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MyModel {
 
@@ -277,13 +298,16 @@ The following example uses `@DateTimeFormat` to format a `java.util.Date` as an 
 		private Date date;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyModel(
 		@DateTimeFormat(iso=ISO.DATE) private val date: Date
 	)
 ----
+======
 
 
 [[format-FormatterRegistry-SPI]]

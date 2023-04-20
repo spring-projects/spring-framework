@@ -10,8 +10,11 @@ is treated as an absolute classpath location (for example, `/org/example/config.
 path that represents a resource URL (i.e., a path prefixed with `classpath:`, `file:`,
 `http:`, etc.) is used _as is_.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "/app-config.xml" and
@@ -21,6 +24,7 @@ path that represents a resource URL (i.e., a path prefixed with `classpath:`, `f
 		// class body...
 	}
 ----
+======
 <1> Setting the locations attribute to a list of XML files.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -43,8 +47,11 @@ attributes in `@ContextConfiguration`, you can omit the declaration of the `loca
 attribute name and declare the resource locations by using the shorthand format
 demonstrated in the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	@ContextConfiguration({"/app-config.xml", "/test-config.xml"}) <1>
@@ -52,6 +59,7 @@ demonstrated in the following example:
 		// class body...
 	}
 ----
+======
 <1> Specifying XML files without using the `locations` attribute.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -74,8 +82,11 @@ class. If your class is named `com.example.MyTest`, `GenericXmlContextLoader` lo
 application context from `"classpath:com/example/MyTest-context.xml"`. The following
 example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from
@@ -85,6 +96,7 @@ example shows how to do so:
 		// class body...
 	}
 ----
+======
 <1> Loading configuration from the default location.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

@@ -11,8 +11,11 @@ autowired value.
 Consider the following configuration that defines `firstMovieCatalog` as the
 primary `MovieCatalog`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class MovieConfiguration {
@@ -27,8 +30,10 @@ primary `MovieCatalog`:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class MovieConfiguration {
@@ -43,12 +48,16 @@ primary `MovieCatalog`:
 		// ...
 	}
 ----
+======
 
 With the preceding configuration, the following `MovieRecommender` is autowired with the
 `firstMovieCatalog`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MovieRecommender {
 
@@ -58,8 +67,10 @@ With the preceding configuration, the following `MovieRecommender` is autowired 
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class MovieRecommender {
 
@@ -69,6 +80,7 @@ class MovieRecommender {
 	// ...
 }
 ----
+======
 
 The corresponding bean definitions follow:
 

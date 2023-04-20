@@ -15,14 +15,18 @@ xref:testing/testcontext-framework/ctx-management/javaconfig.adoc#testcontext-ct
 The following example shows a `@ContextConfiguration` annotation that refers to an XML
 file:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration("/test-config.xml") // <1>
 	class XmlApplicationContextTests {
 		// class body...
 	}
 ----
+======
 <1> Referring to an XML file.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -38,14 +42,18 @@ file:
 
 The following example shows a `@ContextConfiguration` annotation that refers to a class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration(classes = TestConfig.class) // <1>
 	class ConfigClassApplicationContextTests {
 		// class body...
 	}
 ----
+======
 <1> Referring to a class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -63,14 +71,18 @@ As an alternative or in addition to declaring resource locations or component cl
 you can use `@ContextConfiguration` to declare `ApplicationContextInitializer` classes.
 The following example shows such a case:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration(initializers = CustomContextInitializer.class) // <1>
 	class ContextInitializerTests {
 		// class body...
 	}
 ----
+======
 <1> Declaring an initializer class.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -91,14 +103,18 @@ component `classes`.
 
 The following example uses both a location and a loader:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration(locations = "/test-context.xml", loader = CustomContextLoader.class) // <1>
 	class CustomLoaderXmlApplicationContextTests {
 		// class body...
 	}
 ----
+======
 <1> Configuring both a location and a custom loader.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

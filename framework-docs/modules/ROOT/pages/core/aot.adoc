@@ -124,8 +124,11 @@ This is the default behavior, since tuning the generated code for a bean definit
 
 Taking our previous example, let's assume that `DataSourceConfiguration` is as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration(proxyBeanMethods = false)
 	public class DataSourceConfiguration {
@@ -137,12 +140,16 @@ Taking our previous example, let's assume that `DataSourceConfiguration` is as f
 
 	}
 ----
+======
 
 Since there isn't any particular condition on this class, `dataSourceConfiguration` and `dataSource` are identified as candidates.
 The AOT engine will convert the configuration class above to code similar to the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,role="primary"]
-.Java
 ----
 	/**
 	 * Bean definitions for {@link DataSourceConfiguration}
@@ -177,6 +184,7 @@ The AOT engine will convert the configuration class above to code similar to the
 		}
 	}
 ----
+======
 
 NOTE: The exact code generated may differ depending on the exact nature of your bean definitions.
 
@@ -197,11 +205,15 @@ Consequently, if the application needs to load a resource, it must be referenced
 The {api-spring-framework}/aot/hint/RuntimeHints.html[`RuntimeHints`] API collects the need for reflection, resource loading, serialization, and JDK proxies at runtime.
 The following example makes sure that `config/app.properties` can be loaded from the classpath at runtime within a native image:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	runtimeHints.resources().registerPattern("config/app.properties");
 ----
+======
 
 A number of contracts are handled automatically during AOT processing.
 For instance, the return type of a `@Controller` method is inspected, and relevant reflection hints are added if Spring detects that the type should be serialized (typically to JSON).
@@ -248,8 +260,11 @@ A typical use case is the use of DTOs that the container cannot infer, such as u
 `@RegisterReflectionForBinding` can be applied to any Spring bean at the class level, but it can also be applied directly to a method, field, or constructor to better indicate where the hints are actually required.
 The following example registers `Account` for serialization.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	public class OrderService {
@@ -261,6 +276,7 @@ The following example registers `Account` for serialization.
 
 	}
 ----
+======
 
 [[aot.hints.testing]]
 === Testing Runtime Hints

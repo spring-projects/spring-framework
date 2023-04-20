@@ -24,8 +24,11 @@ image::mvc-context-hierarchy.png[]
 
 The following example configures a `WebApplicationContext` hierarchy:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -45,8 +48,10 @@ The following example configures a `WebApplicationContext` hierarchy:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyWebAppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
 
@@ -63,6 +68,7 @@ The following example configures a `WebApplicationContext` hierarchy:
 		}
 	}
 ----
+======
 
 TIP: If an application context hierarchy is not required, applications can return all
 configuration through `getRootConfigClasses()` and `null` from `getServletConfigClasses()`.

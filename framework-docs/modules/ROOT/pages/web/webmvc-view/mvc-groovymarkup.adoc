@@ -15,8 +15,11 @@ NOTE: The Groovy Markup Template engine requires Groovy 2.3.1+.
 
 The following example shows how to configure the Groovy Markup Template Engine:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -37,8 +40,10 @@ The following example shows how to configure the Groovy Markup Template Engine:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -56,6 +61,7 @@ The following example shows how to configure the Groovy Markup Template Engine:
 		}
 	}
 ----
+======
 
 The following example shows how to configure the same in XML:
 

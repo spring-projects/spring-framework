@@ -26,8 +26,11 @@ Note that URI template variables from the present request are automatically made
 available when expanding a redirect URL, and you don't need to explicitly add them
 through `Model` or `RedirectAttributes`. The following example shows how to define a redirect:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/files/{path}")
 	public String upload(...) {
@@ -35,8 +38,10 @@ through `Model` or `RedirectAttributes`. The following example shows how to defi
 		return "redirect:files/{path}";
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/files/{path}")
 	fun upload(...): String {
@@ -44,6 +49,7 @@ through `Model` or `RedirectAttributes`. The following example shows how to defi
 		return "redirect:files/{path}"
 	}
 ----
+======
 
 Another way of passing data to the redirect target is by using flash attributes. Unlike
 other redirect attributes, flash attributes are saved in the HTTP session (and, hence, do

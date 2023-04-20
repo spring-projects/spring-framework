@@ -8,8 +8,11 @@ it is not null before accessing methods or properties of the object. To avoid th
 safe navigation operator returns null instead of throwing an exception. The following
 example shows how to use the safe navigation operator:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
@@ -24,8 +27,10 @@ example shows how to use the safe navigation operator:
 	city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String.class);
 	System.out.println(city);  // null - does not throw NullPointerException!!!
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
@@ -40,6 +45,7 @@ example shows how to use the safe navigation operator:
 	city = parser.parseExpression("placeOfBirth?.city").getValue(context, tesla, String::class.java)
 	println(city)  // null - does not throw NullPointerException!!!
 ----
+======
 
 
 
