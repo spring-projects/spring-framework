@@ -1,4 +1,4 @@
-[[testing.appendix]]
+[[appendix]]
 = Appendix
 :page-section-summary-toc: 1
 

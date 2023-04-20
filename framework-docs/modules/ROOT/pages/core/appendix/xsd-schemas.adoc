@@ -1,11 +1,11 @@
-[[core.appendix.xsd-schemas]]
+[[xsd-schemas]]
 = XML Schemas
 
 This part of the appendix lists XML schemas related to the core container.
 
 
 
-[[core.appendix.xsd-schemas-util]]
+[[xsd-schemas-util]]
 == The `util` Schema
 
 As the name implies, the `util` tags deal with common, utility configuration
@@ -30,7 +30,7 @@ correct schema so that the tags in the `util` namespace are available to you):
 ----
 
 
-[[core.appendix.xsd-schemas-util-constant]]
+[[xsd-schemas-util-constant]]
 === Using `<util:constant/>`
 
 Consider the following bean definition:
@@ -63,7 +63,7 @@ developer's intent ("`inject this constant value`"), and it reads better:
 	</bean>
 ----
 
-[[core.appendix.xsd-schemas-util-frfb]]
+[[xsd-schemas-util-frfb]]
 ==== Setting a Bean Property or Constructor Argument from a Field Value
 
 {api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
@@ -175,7 +175,7 @@ Now consider the following setter of type `PersistenceContextType` and the corre
 ----
 
 
-[[core.appendix.xsd-schemas-util-property-path]]
+[[xsd-schemas-util-property-path]]
 === Using `<util:property-path/>`
 
 Consider the following example:
@@ -222,7 +222,7 @@ The value of the `path` attribute of the `<property-path/>` element follows the 
 `beanName.beanProperty`. In this case, it picks up the `age` property of the bean named
 `testBean`. The value of that `age` property is `10`.
 
-[[core.appendix.xsd-schemas-util-property-path-dependency]]
+[[xsd-schemas-util-property-path-dependency]]
 ==== Using `<util:property-path/>` to Set a Bean Property or Constructor Argument
 
 `PropertyPathFactoryBean` is a `FactoryBean` that evaluates a property path on a given
@@ -297,7 +297,7 @@ for most use cases, but it can sometimes be useful. See the javadoc for more inf
 this feature.
 
 
-[[core.appendix.xsd-schemas-util-properties]]
+[[xsd-schemas-util-properties]]
 === Using `<util:properties/>`
 
 Consider the following example:
@@ -323,7 +323,7 @@ The following example uses a `util:properties` element to make a more concise re
 ----
 
 
-[[core.appendix.xsd-schemas-util-list]]
+[[xsd-schemas-util-list]]
 === Using `<util:list/>`
 
 Consider the following example:
@@ -378,7 +378,7 @@ following configuration:
 If no `list-class` attribute is supplied, the container chooses a `List` implementation.
 
 
-[[core.appendix.xsd-schemas-util-map]]
+[[xsd-schemas-util-map]]
 === Using `<util:map/>`
 
 Consider the following example:
@@ -433,7 +433,7 @@ following configuration:
 If no `'map-class'` attribute is supplied, the container chooses a `Map` implementation.
 
 
-[[core.appendix.xsd-schemas-util-set]]
+[[xsd-schemas-util-set]]
 === Using `<util:set/>`
 
 Consider the following example:
@@ -489,7 +489,7 @@ If no `set-class` attribute is supplied, the container chooses a `Set` implement
 
 
 
-[[core.appendix.xsd-schemas-aop]]
+[[xsd-schemas-aop]]
 == The `aop` Schema
 
 The `aop` tags deal with configuring all things AOP in Spring, including Spring's
@@ -519,7 +519,7 @@ are available to you):
 
 
 
-[[core.appendix.xsd-schemas-context]]
+[[xsd-schemas-context]]
 == The `context` Schema
 
 The `context` tags deal with `ApplicationContext` configuration that relates to plumbing
@@ -544,7 +544,7 @@ available to you:
 ----
 
 
-[[core.appendix.xsd-schemas-context-pphc]]
+[[xsd-schemas-context-pphc]]
 === Using `<property-placeholder/>`
 
 This element activates the replacement of `${...}` placeholders, which are resolved against a
@@ -554,7 +554,7 @@ is a convenience mechanism that sets up a xref:core/beans/factory-extension.adoc
 `PropertySourcesPlaceholderConfigurer` setup, you can explicitly define it as a bean yourself.
 
 
-[[core.appendix.xsd-schemas-context-ac]]
+[[xsd-schemas-context-ac]]
 === Using `<annotation-config/>`
 
 This element activates the Spring infrastructure to detect annotations in bean classes:
@@ -577,28 +577,28 @@ xref:integration/cache/annotations.adoc[caching annotations] need to be explicit
 xref:integration/cache/annotations.adoc#cache-annotation-enable[enabled] as well.
 
 
-[[core.appendix.xsd-schemas-context-component-scan]]
+[[xsd-schemas-context-component-scan]]
 === Using `<component-scan/>`
 
 This element is detailed in the section on xref:core/beans/annotation-config.adoc[annotation-based container configuration]
 .
 
 
-[[core.appendix.xsd-schemas-context-ltw]]
+[[xsd-schemas-context-ltw]]
 === Using `<load-time-weaver/>`
 
 This element is detailed in the section on xref:core/aop/using-aspectj.adoc#aop-aj-ltw[load-time weaving with AspectJ in the Spring Framework]
 .
 
 
-[[core.appendix.xsd-schemas-context-sc]]
+[[xsd-schemas-context-sc]]
 === Using `<spring-configured/>`
 
 This element is detailed in the section on xref:core/aop/using-aspectj.adoc#aop-atconfigurable[using AspectJ to dependency inject domain objects with Spring]
 .
 
 
-[[core.appendix.xsd-schemas-context-mbe]]
+[[xsd-schemas-context-mbe]]
 === Using `<mbean-export/>`
 
 This element is detailed in the section on xref:integration/jmx/naming.adoc#jmx-context-mbeanexport[configuring annotation-based MBean export]
@@ -606,7 +606,7 @@ This element is detailed in the section on xref:integration/jmx/naming.adoc#jmx-
 
 
 
-[[core.appendix.xsd-schemas-beans]]
+[[xsd-schemas-beans]]
 == The Beans Schema
 
 Last but not least, we have the elements in the `beans` schema. These elements

@@ -182,7 +182,7 @@ use Java-based configuration, you can add `@EnableSpringConfigured` to any
 ----
 
 If you prefer XML based configuration, the Spring
-xref:core/appendix/xsd-schemas.adoc#core.appendix.xsd-schemas-context[`context` namespace]
+xref:core/appendix/xsd-schemas.adoc#context[`context` namespace]
 defines a convenient `context:spring-configured` element, which you can use as follows:
 
 [source,xml,indent=0,subs="verbatim"]

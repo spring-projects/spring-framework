@@ -1,17 +1,17 @@
-[[integration.appendix]]
+[[appendix]]
 = Appendix
 
 
 
 
-[[integration.appendix.xsd-schemas]]
+[[appendix.xsd-schemas]]
 == XML Schemas
 
 This part of the appendix lists XML schemas related to integration technologies.
 
 
 
-[[integration.appendix.xsd-schemas-jee]]
+[[appendix.xsd-schemas-jee]]
 === The `jee` Schema
 
 The `jee` elements deal with issues related to Jakarta EE (Enterprise Edition) configuration,
@@ -40,7 +40,7 @@ correct schema so that the elements in the `jee` namespace are available to you:
 
 
 
-[[integration.appendix.xsd-schemas-jee-jndi-lookup]]
+[[appendix.xsd-schemas-jee-jndi-lookup]]
 ==== <jee:jndi-lookup/> (simple)
 
 The following example shows how to use JNDI to look up a data source without the `jee` schema:
@@ -71,7 +71,7 @@ schema:
 
 
 
-[[integration.appendix.xsd-schemas-jee-jndi-lookup-environment-single]]
+[[appendix.xsd-schemas-jee-jndi-lookup-environment-single]]
 ==== `<jee:jndi-lookup/>` (with Single JNDI Environment Setting)
 
 The following example shows how to use JNDI to look up an environment variable without
@@ -99,7 +99,7 @@ The following example shows how to use JNDI to look up an environment variable w
 ----
 
 
-[[integration.appendix.xsd-schemas-jee-jndi-lookup-environment-multiple]]
+[[appendix.xsd-schemas-jee-jndi-lookup-environment-multiple]]
 ==== `<jee:jndi-lookup/>` (with Multiple JNDI Environment Settings)
 
 The following example shows how to use JNDI to look up multiple environment variables
@@ -133,7 +133,7 @@ The following example shows how to use JNDI to look up multiple environment vari
 ----
 
 
-[[integration.appendix.xsd-schemas-jee-jndi-lookup-complex]]
+[[appendix.xsd-schemas-jee-jndi-lookup-complex]]
 ==== `<jee:jndi-lookup/>` (Complex)
 
 The following example shows how to use JNDI to look up a data source and a number of
@@ -167,7 +167,7 @@ different properties with `jee`:
 
 
 
-[[integration.appendix.xsd-schemas-jee-local-slsb]]
+[[appendix.xsd-schemas-jee-local-slsb]]
 ==== `<jee:local-slsb/>` (Simple)
 
 The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless Session Bean.
@@ -195,7 +195,7 @@ with `jee`:
 
 
 
-[[integration.appendix.xsd-schemas-jee-local-slsb-complex]]
+[[appendix.xsd-schemas-jee-local-slsb-complex]]
 ==== `<jee:local-slsb/>` (Complex)
 
 The `<jee:local-slsb/>` element configures a reference to a local EJB Stateless Session Bean.
@@ -229,7 +229,7 @@ and a number of properties with `jee`:
 ----
 
 
-[[integration.appendix.xsd-schemas-jee-remote-slsb]]
+[[appendix.xsd-schemas-jee-remote-slsb]]
 ==== <jee:remote-slsb/>
 
 The `<jee:remote-slsb/>` element configures a reference to a `remote` EJB Stateless Session Bean.
@@ -268,7 +268,7 @@ with `jee`:
 
 
 
-[[integration.appendix.xsd-schemas-jms]]
+[[appendix.xsd-schemas-jms]]
 === The `jms` Schema
 
 The `jms` elements deal with configuring JMS-related beans, such as Spring's
@@ -301,7 +301,7 @@ are available to you:
 
 
 
-[[integration.appendix.xsd-schemas-context-mbe]]
+[[appendix.xsd-schemas-context-mbe]]
 === Using `<context:mbean-export/>`
 
 This element is detailed in
@@ -309,7 +309,7 @@ xref:integration/jmx/naming.adoc#jmx-context-mbeanexport[Configuring Annotation-
 
 
 
-[[integration.appendix.xsd-schemas-cache]]
+[[appendix.xsd-schemas-cache]]
 === The `cache` Schema
 
 You can use the `cache` elements to enable support for Spring's `@CacheEvict`, `@CachePut`,

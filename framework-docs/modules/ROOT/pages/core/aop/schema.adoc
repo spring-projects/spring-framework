@@ -10,7 +10,7 @@ of advice parameters.
 
 To use the aop namespace tags described in this section, you need to import the
 `spring-aop` schema, as described in xref:core/appendix/xsd-schemas.adoc[XML Schema-based configuration]
-. See xref:core/appendix/xsd-schemas.adoc#core.appendix.xsd-schemas-aop[the AOP schema]
+. See xref:core/appendix/xsd-schemas.adoc#aop[the AOP schema]
 for how to import the tags in the `aop` namespace.
 
 Within your Spring configurations, all aspect and advisor elements must be placed within
