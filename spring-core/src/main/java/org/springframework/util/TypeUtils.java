@@ -40,8 +40,10 @@ public abstract class TypeUtils {
 	 * Check if the right-hand side type may be assigned to the left-hand side
 	 * type following the Java generics rules.
 	 * @param lhsType the target type (left-hand side (LHS) type)
-	 * @param rhsType the value type (right-hand side (RHS) type) that should be assigned to the target type
-	 * @return true if rhs is assignable to lhs
+	 * @param rhsType the value type (right-hand side (RHS) type) that should
+	 * be assigned to the target type
+	 * @return {@code true} if {@code rhsType} is assignable to {@code lhsType}
+	 * @see ClassUtils#isAssignable(Class, Class)
 	 */
 	public static boolean isAssignable(Type lhsType, Type rhsType) {
 		Assert.notNull(lhsType, "Left-hand side type must not be null");

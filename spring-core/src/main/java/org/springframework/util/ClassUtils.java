@@ -43,7 +43,8 @@ import org.springframework.lang.Nullable;
 
 /**
  * Miscellaneous {@code java.lang.Class} utility methods.
- * Mainly for internal use within the framework.
+ *
+ * <p>Mainly for internal use within the framework.
  *
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -532,8 +533,9 @@ public abstract class ClassUtils {
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
 	 * @param lhsType the target type (left-hand side (LHS) type)
-	 * @param rhsType the value type (right-hand side (RHS) type) that should be assigned to the target type
-	 * @return if the target type is assignable from the value type
+	 * @param rhsType the value type (right-hand side (RHS) type) that should
+	 * be assigned to the target type
+	 * @return {@code true} if {@code rhsType} is assignable to {@code lhsType}
 	 * @see TypeUtils#isAssignable(java.lang.reflect.Type, java.lang.reflect.Type)
 	 */
 	public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
