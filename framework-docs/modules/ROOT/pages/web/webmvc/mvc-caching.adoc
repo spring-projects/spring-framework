@@ -187,8 +187,3 @@ for optimal performance. See the section on configuring xref:web/webmvc/mvc-conf
 You can use the `ShallowEtagHeaderFilter` to add "`shallow`" `eTag` values that are computed from the
 response content and, thus, save bandwidth but not CPU time. See xref:web/webmvc/filters.adoc#filters-shallow-etag[Shallow ETag].
 
-include:../:webmvc-view.adoc[leveloffset=+1]
-
-
-
-

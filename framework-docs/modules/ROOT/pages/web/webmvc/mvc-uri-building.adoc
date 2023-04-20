@@ -5,7 +5,7 @@
 
 This section describes various options available in the Spring Framework to work with URI's.
 
-include:../:web-uris.adoc[leveloffset=+2]
+include::partial$web/web-uris.adoc[leveloffset=+1]
 
 
 

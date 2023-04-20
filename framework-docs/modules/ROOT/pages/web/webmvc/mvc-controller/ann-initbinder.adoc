@@ -97,6 +97,6 @@ controller-specific `Formatter` implementations, as the following example shows:
 == Model Design
 [.small]#xref:web/webflux/controller/ann-initbinder.adoc#webflux-ann-initbinder-model-design[See equivalent in the Reactive stack]#
 
-include:../../:web-data-binding-model-design.adoc[]
+include::partial$web/web-data-binding-model-design.adoc[]
 
 

@@ -558,6 +558,3 @@ Therefore, it has limited namespace support. As a result, it is rather unsuitabl
 within Web Services.
 
 
-
-
-include:../:data-access/appendix.adoc[leveloffset=+1]

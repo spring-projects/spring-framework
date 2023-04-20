@@ -6,8 +6,6 @@
 
 This section describes various options available in the Spring Framework to prepare URIs.
 
-include:../:web-uris.adoc[leveloffset=+2]
-
-include:../:webflux-cors.adoc[leveloffset=+1]
+include::partial$web/web-uris.adoc[leveloffset=+1]
 
 

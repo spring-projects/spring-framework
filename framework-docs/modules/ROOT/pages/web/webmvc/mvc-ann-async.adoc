@@ -484,7 +484,3 @@ Note that you can also set the default timeout value on a `DeferredResult`,
 a `ResponseBodyEmitter`, and an `SseEmitter`. For a `Callable`, you can use
 `WebAsyncTask` to provide a timeout value.
 
-
-include:../:webmvc-cors.adoc[leveloffset=+1]
-
-
