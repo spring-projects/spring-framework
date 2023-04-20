@@ -15,8 +15,11 @@ The ease-of-use afforded by the use of the `@Transactional` annotation is best
 illustrated with an example, which is explained in the text that follows.
 Consider the following class definition:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// the service class that we want to make transactional
 	@Transactional
@@ -43,8 +46,10 @@ Consider the following class definition:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// the service class that we want to make transactional
 	@Transactional
@@ -67,6 +72,7 @@ Consider the following class definition:
 		}
 	}
 ----
+======
 
 Used at the class level as above, the annotation indicates a default for all methods of
 the declaring class (as well as its subclasses). Alternatively, each method can be
@@ -128,8 +134,11 @@ preceding example.
 Reactive transactional methods use reactive return types in contrast to imperative
 programming arrangements as the following listing shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// the reactive service class that we want to make transactional
 	@Transactional
@@ -156,8 +165,10 @@ programming arrangements as the following listing shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// the reactive service class that we want to make transactional
 	@Transactional
@@ -180,6 +191,7 @@ programming arrangements as the following listing shows:
 		}
 	}
 ----
+======
 
 Note that there are special considerations for the returned `Publisher` with regards to
 Reactive Streams cancellation signals. See the xref:data-access/transaction/programmatic.adoc#tx-prog-operator-cancel[Cancel Signals] section under
@@ -322,8 +334,11 @@ annotated at the class level with the settings for a read-only transaction, but 
 `@Transactional` annotation on the `updateFoo(Foo)` method in the same class takes
 precedence over the transactional settings defined at the class level.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Transactional(readOnly = true)
 	public class DefaultFooService implements FooService {
@@ -339,8 +354,10 @@ precedence over the transactional settings defined at the class level.
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Transactional(readOnly = true)
 	class DefaultFooService : FooService {
@@ -356,6 +373,7 @@ precedence over the transactional settings defined at the class level.
 		}
 	}
 ----
+======
 
 
 [[transaction-declarative-attransactional-settings]]
@@ -455,8 +473,11 @@ of the transaction manager bean. For example, using the qualifier notation, you 
 combine the following Java code with the following transaction manager bean declarations
 in the application context:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class TransactionalService {
 
@@ -470,8 +491,10 @@ in the application context:
 		public Mono<Void> doSomethingReactive() { ... }
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	class TransactionalService {
 
@@ -491,6 +514,7 @@ in the application context:
 		}
 	}
 ----
+======
 
 The following listing shows the bean declarations:
 
@@ -527,8 +551,11 @@ methods, xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[Spring's
 define custom composed annotations for your specific use cases. For example, consider the
 following annotation definitions:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -542,8 +569,10 @@ following annotation definitions:
 	public @interface AccountTx {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.FUNCTION, AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -555,11 +584,15 @@ following annotation definitions:
 	@Transactional(transactionManager = "account", label = ["retryable"])
 	annotation class AccountTx
 ----
+======
 
 The preceding annotations let us write the example from the previous section as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class TransactionalService {
 
@@ -574,8 +607,10 @@ The preceding annotations let us write the example from the previous section as 
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	class TransactionalService {
 
@@ -590,6 +625,7 @@ The preceding annotations let us write the example from the previous section as 
 		}
 	}
 ----
+======
 
 In the preceding example, we used the syntax to define the transaction manager qualifier
 and transactional labels, but we could also have included propagation behavior,

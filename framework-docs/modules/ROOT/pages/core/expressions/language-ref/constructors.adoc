@@ -6,8 +6,11 @@ qualified class name for all types except those located in the `java.lang` packa
 (`Integer`, `Float`, `String`, and so on). The following example shows how to use the
 `new` operator to invoke constructors:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Inventor einstein = p.parseExpression(
 			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
@@ -18,8 +21,10 @@ qualified class name for all types except those located in the `java.lang` packa
 			"Members.add(new org.spring.samples.spel.inventor.Inventor(
 				'Albert Einstein', 'German'))").getValue(societyContext);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val einstein = p.parseExpression(
 			"new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German')")
@@ -30,6 +35,7 @@ qualified class name for all types except those located in the `java.lang` packa
 			"Members.add(new org.spring.samples.spel.inventor.Inventor('Albert Einstein', 'German'))")
 			.getValue(societyContext)
 ----
+======
 
 
 

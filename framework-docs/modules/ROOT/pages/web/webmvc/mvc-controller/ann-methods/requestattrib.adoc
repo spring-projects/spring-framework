@@ -7,14 +7,18 @@ Similar to `@SessionAttribute`, you can use the `@RequestAttribute` annotations 
 access pre-existing request attributes created earlier (for example, by a Servlet `Filter`
 or `HandlerInterceptor`):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/")
 	public String handle(@RequestAttribute Client client) { // <1>
 		// ...
 	}
 ----
+======
 <1> Using the `@RequestAttribute` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

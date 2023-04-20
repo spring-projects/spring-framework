@@ -24,8 +24,11 @@ related to the request body.
 
 The following example shows a `@ModelAttribute` method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ModelAttribute
 	public void populateModel(@RequestParam String number, Model model) {
@@ -33,8 +36,10 @@ The following example shows a `@ModelAttribute` method:
 		// add more ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ModelAttribute
 	fun populateModel(@RequestParam number: String, model: Model) {
@@ -42,25 +47,32 @@ The following example shows a `@ModelAttribute` method:
 		// add more ...
 	}
 ----
+======
 
 The following example adds only one attribute:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ModelAttribute
 	public Account addAccount(@RequestParam String number) {
 		return accountRepository.findAccount(number);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ModelAttribute
 	fun addAccount(@RequestParam number: String): Account {
 		return accountRepository.findAccount(number)
 	}
 ----
+======
 
 
 NOTE: When a name is not explicitly specified, a default name is chosen based on the `Object`
@@ -74,8 +86,11 @@ attribute. This is typically not required, as it is the default behavior in HTML
 unless the return value is a `String` that would otherwise be interpreted as a view name.
 `@ModelAttribute` can also customize the model attribute name, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/accounts/{id}")
 	@ModelAttribute("myAccount")
@@ -84,8 +99,10 @@ unless the return value is a `String` that would otherwise be interpreted as a v
 		return account;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/accounts/{id}")
 	@ModelAttribute("myAccount")
@@ -94,6 +111,7 @@ unless the return value is a `String` that would otherwise be interpreted as a v
 		return account
 	}
 ----
+======
 
 
 

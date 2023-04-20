@@ -185,8 +185,11 @@ This tag renders an HTML `input` tag with the `type` set to `checkbox`.
 Assume that our `User` has preferences such as newsletter subscription and a list of
 hobbies. The following example shows the `Preferences` class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class Preferences {
 
@@ -219,8 +222,10 @@ hobbies. The following example shows the `Preferences` class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Preferences(
 			var receiveNewsletter: Boolean,
@@ -228,6 +233,7 @@ hobbies. The following example shows the `Preferences` class:
 			var favouriteWord: String
 	)
 ----
+======
 
 The corresponding `form.jsp` could then resemble the following:
 
@@ -582,8 +588,11 @@ Assume that we want to display all error messages for the `firstName` and `lastN
 fields once we submit the form. We have a validator for instances of the `User` class
 called `UserValidator`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class UserValidator implements Validator {
 
@@ -597,8 +606,10 @@ called `UserValidator`, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class UserValidator : Validator {
 
@@ -612,6 +623,7 @@ called `UserValidator`, as the following example shows:
 		}
 	}
 ----
+======
 
 The `form.jsp` could be as follows:
 
@@ -785,8 +797,11 @@ web.xml, as the following example shows:
 
 The following example shows the corresponding `@Controller` method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RequestMapping(method = RequestMethod.DELETE)
 	public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
@@ -794,8 +809,10 @@ The following example shows the corresponding `@Controller` method:
 		return "redirect:/owners/" + ownerId;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RequestMapping(method = [RequestMethod.DELETE])
 	fun deletePet(@PathVariable ownerId: Int, @PathVariable petId: Int): String {
@@ -803,6 +820,7 @@ The following example shows the corresponding `@Controller` method:
 		return "redirect:/owners/$ownerId"
 	}
 ----
+======
 
 [[mvc-view-jsp-formtaglib-html5]]
 === HTML5 Tags

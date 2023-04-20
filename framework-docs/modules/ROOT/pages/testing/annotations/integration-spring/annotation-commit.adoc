@@ -9,8 +9,11 @@ annotation.
 
 The following example shows how to use the `@Commit` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Commit // <1>
 	@Test
@@ -18,6 +21,7 @@ The following example shows how to use the `@Commit` annotation:
 		// ...
 	}
 ----
+======
 <1> Commit the result of the test to the database.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

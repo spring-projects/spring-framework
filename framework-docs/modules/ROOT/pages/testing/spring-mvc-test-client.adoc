@@ -6,8 +6,11 @@ idea is to declare expected requests and to provide "`stub`" responses so that y
 focus on testing the code in isolation (that is, without running a server). The following
 example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RestTemplate restTemplate = new RestTemplate();
 
@@ -18,8 +21,10 @@ example shows how to do so:
 
 	mockServer.verify();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val restTemplate = RestTemplate()
 
@@ -30,6 +35,7 @@ example shows how to do so:
 
 	mockServer.verify()
 ----
+======
 
 In the preceding example, `MockRestServiceServer` (the central class for client-side REST
 tests) configures the `RestTemplate` with a custom `ClientHttpRequestFactory` that
@@ -45,24 +51,33 @@ can set the `ignoreExpectOrder` option when building the server, in which case a
 expectations are checked (in order) to find a match for a given request. That means
 requests are allowed to come in any order. The following example uses `ignoreExpectOrder`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder(true).build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder(true).build()
 ----
+======
 
 Even with unordered requests by default, each request is allowed to run once only.
 The `expect` method provides an overloaded variant that accepts an `ExpectedCount`
 argument that specifies a count range (for example, `once`, `manyTimes`, `max`, `min`,
 `between`, and so on). The following example uses `times`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RestTemplate restTemplate = new RestTemplate();
 
@@ -74,8 +89,10 @@ argument that specifies a count range (for example, `once`, `manyTimes`, `max`, 
 
 	mockServer.verify();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val restTemplate = RestTemplate()
 
@@ -87,6 +104,7 @@ argument that specifies a count range (for example, `once`, `manyTimes`, `max`, 
 
 	mockServer.verify()
 ----
+======
 
 Note that, when `ignoreExpectOrder` is not set (the default), and, therefore, requests
 are expected in order of declaration, then that order applies only to the first of any
@@ -100,29 +118,38 @@ As an alternative to all of the above, the client-side test support also provide
 bind it to a `MockMvc` instance. That allows processing requests using actual server-side
 logic but without running a server. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	this.restTemplate = new RestTemplate(new MockMvcClientHttpRequestFactory(mockMvc));
 
 	// Test code that uses the above RestTemplate ...
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build()
 	restTemplate = RestTemplate(MockMvcClientHttpRequestFactory(mockMvc))
 
 	// Test code that uses the above RestTemplate ...
 ----
+======
 
 In some cases it may be necessary to perform an actual call to a remote service instead
 of mocking the response. The following example shows how to do that through
 `ExecutingResponseCreator`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RestTemplate restTemplate = new RestTemplate();
 
@@ -137,8 +164,10 @@ of mocking the response. The following example shows how to do that through
 
 	mockServer.verify();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val restTemplate = RestTemplate()
 
@@ -153,6 +182,7 @@ of mocking the response. The following example shows how to do that through
 
 	mockServer.verify()
 ----
+======
 
 In the preceding example, we create the `ExecutingResponseCreator` using the
 `ClientHttpRequestFactory` from the `RestTemplate` _before_ `MockRestServiceServer` replaces

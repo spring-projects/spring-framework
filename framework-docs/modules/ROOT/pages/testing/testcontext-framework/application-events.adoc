@@ -28,8 +28,11 @@ https://assertj.github.io/doc/[AssertJ] to assert the types of application event
 published while invoking a method in a Spring-managed component:
 
 // Don't use "quotes" in the "subs" section because of the asterisks in /* ... */
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(/* ... */)
 	@RecordApplicationEvents // <1>
@@ -51,6 +54,7 @@ published while invoking a method in a Spring-managed component:
 		}
 	}
 ----
+======
 <1> Annotate the test class with `@RecordApplicationEvents`.
 <2> Inject the `ApplicationEvents` instance for the current test.
 <3> Use the `ApplicationEvents` API to count how many `OrderSubmitted` events were published.

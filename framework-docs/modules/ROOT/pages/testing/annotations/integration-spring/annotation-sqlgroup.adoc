@@ -7,8 +7,11 @@ in conjunction with Java 8's support for repeatable annotations, where `@Sql` ca
 declared several times on the same class or method, implicitly generating this container
 annotation. The following example shows how to declare an SQL group:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Test
 	@SqlGroup({ // <1>
@@ -19,6 +22,7 @@ annotation. The following example shows how to declare an SQL group:
 		// run code that uses the test schema and test data
 	}
 ----
+======
 <1> Declare a group of SQL scripts.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

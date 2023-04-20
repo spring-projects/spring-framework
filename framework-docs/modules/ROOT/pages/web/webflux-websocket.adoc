@@ -23,8 +23,11 @@ server-side applications that handle WebSocket messages.
 To create a WebSocket server, you can first create a `WebSocketHandler`.
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import org.springframework.web.reactive.socket.WebSocketHandler;
 	import org.springframework.web.reactive.socket.WebSocketSession;
@@ -37,8 +40,10 @@ The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.web.reactive.socket.WebSocketHandler
 	import org.springframework.web.reactive.socket.WebSocketSession
@@ -50,11 +55,15 @@ The following example shows how to do so:
 		}
 	}
 ----
+======
 
 Then you can map it to a URL:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	class WebConfig {
@@ -69,8 +78,10 @@ Then you can map it to a URL:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class WebConfig {
@@ -84,13 +95,17 @@ Then you can map it to a URL:
 		}
 	}
 ----
+======
 
 If using the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config] there is nothing
 further to do, or otherwise if not using the WebFlux config you'll need to declare a
 `WebSocketHandlerAdapter` as shown below:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	class WebConfig {
@@ -103,8 +118,10 @@ further to do, or otherwise if not using the WebFlux config you'll need to decla
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class WebConfig {
@@ -115,6 +132,7 @@ further to do, or otherwise if not using the WebFlux config you'll need to decla
 		fun handlerAdapter() =  WebSocketHandlerAdapter()
 	}
 ----
+======
 
 
 
@@ -155,8 +173,11 @@ receives a cancellation signal.
 The most basic implementation of a handler is one that handles the inbound stream. The
 following example shows such an implementation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class ExampleHandler implements WebSocketHandler {
 
@@ -173,6 +194,7 @@ following example shows such an implementation:
 		}
 	}
 ----
+======
 <1> Access the stream of inbound messages.
 <2> Do something with each message.
 <3> Perform nested asynchronous operations that use the message content.
@@ -208,8 +230,11 @@ xref:core/databuffer-codec.adoc[Data Buffers and Codecs].
 
 The following implementation combines the inbound and outbound streams:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class ExampleHandler implements WebSocketHandler {
 
@@ -229,6 +254,7 @@ The following implementation combines the inbound and outbound streams:
 		}
 	}
 ----
+======
 <1> Handle the inbound message stream.
 <2> Create the outbound message, producing a combined flow.
 <3> Return a `Mono<Void>` that does not complete while we continue to receive.
@@ -261,8 +287,11 @@ The following implementation combines the inbound and outbound streams:
 Inbound and outbound streams can be independent and be joined only for completion,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class ExampleHandler implements WebSocketHandler {
 
@@ -285,6 +314,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 <1> Handle inbound message stream.
 <2> Send outgoing messages.
 <3> Join the streams and return a `Mono<Void>` that completes when either stream ends.
@@ -359,8 +389,11 @@ such properties as shown in the corresponding section of the
 xref:web/webflux/config.adoc#webflux-config-websocket-service[WebFlux Config], or otherwise if
 not using the WebFlux config, use the below:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	class WebConfig {
@@ -378,8 +411,10 @@ not using the WebFlux config, use the below:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class WebConfig {
@@ -397,6 +432,7 @@ not using the WebFlux config, use the below:
 		}
 	}
 ----
+======
 
 Check the upgrade strategy for your server to see what options are available. Currently,
 only Tomcat and Jetty expose such options.
@@ -429,8 +465,11 @@ API to suspend receiving messages for back pressure.
 To start a WebSocket session, you can create an instance of the client and use its `execute`
 methods:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebSocketClient client = new ReactorNettyWebSocketClient();
 
@@ -440,8 +479,10 @@ methods:
 					.doOnNext(System.out::println)
 					.then());
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val client = ReactorNettyWebSocketClient()
 
@@ -452,6 +493,7 @@ methods:
 				.then()
 			}
 ----
+======
 
 Some clients, such as Jetty, implement `Lifecycle` and need to be stopped and started
 before you can use them. All clients have constructor options related to configuration

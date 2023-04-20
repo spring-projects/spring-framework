@@ -8,8 +8,11 @@ to the response body through an
 xref:integration/rest-clients.adoc#rest-message-conversion[HttpMessageConverter].
 The following listing shows an example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/accounts/{id}")
 	@ResponseBody
@@ -17,8 +20,10 @@ The following listing shows an example:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/accounts/{id}")
 	@ResponseBody
@@ -26,6 +31,7 @@ The following listing shows an example:
 		// ...
 	}
 ----
+======
 
 `@ResponseBody` is also supported at the class level, in which case it is inherited by
 all controller methods. This is the effect of `@RestController`, which is nothing more

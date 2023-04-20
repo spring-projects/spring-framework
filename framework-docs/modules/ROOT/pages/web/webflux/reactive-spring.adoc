@@ -84,42 +84,57 @@ https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spr
 The code snippets below show using the `HttpHandler` adapters with each server API:
 
 *Reactor Netty*
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpHandler handler = ...
 	ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
 	HttpServer.create().host(host).port(port).handle(adapter).bindNow();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val handler: HttpHandler = ...
 	val adapter = ReactorHttpHandlerAdapter(handler)
 	HttpServer.create().host(host).port(port).handle(adapter).bindNow()
 ----
+======
 
 *Undertow*
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpHandler handler = ...
 	UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
 	Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build();
 	server.start();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val handler: HttpHandler = ...
 	val adapter = UndertowHttpHandlerAdapter(handler)
 	val server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build()
 	server.start()
 ----
+======
 
 *Tomcat*
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpHandler handler = ...
 	Servlet servlet = new TomcatHttpHandlerAdapter(handler);
@@ -133,8 +148,10 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 	server.setPort(port);
 	server.start();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val handler: HttpHandler = ...
 	val servlet = TomcatHttpHandlerAdapter(handler)
@@ -148,11 +165,15 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 	server.setPort(port)
 	server.start()
 ----
+======
 
 *Jetty*
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpHandler handler = ...
 	Servlet servlet = new JettyHttpHandlerAdapter(handler);
@@ -168,8 +189,10 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 	server.addConnector(connector);
 	server.start();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val handler: HttpHandler = ...
 	val servlet = JettyHttpHandlerAdapter(handler)
@@ -185,6 +208,7 @@ The code snippets below show using the `HttpHandler` adapters with each server A
 	server.addConnector(connector)
 	server.start()
 ----
+======
 
 *Servlet Container*
 
@@ -277,16 +301,22 @@ Spring ApplicationContext, or that can be registered directly with it:
 
 `ServerWebExchange` exposes the following method for accessing form data:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Mono<MultiValueMap<String, String>> getFormData();
 ----
+
+Kotlin::
++
 [source,Kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	suspend fun getFormData(): MultiValueMap<String, String>
 ----
+======
 
 The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse form data
 (`application/x-www-form-urlencoded`) into a `MultiValueMap`. By default,
@@ -300,16 +330,22 @@ The `DefaultServerWebExchange` uses the configured `HttpMessageReader` to parse 
 
 `ServerWebExchange` exposes the following method for accessing multipart data:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Mono<MultiValueMap<String, Part>> getMultipartData();
 ----
+
+Kotlin::
++
 [source,Kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	suspend fun getMultipartData(): MultiValueMap<String, Part>
 ----
+======
 
 The `DefaultServerWebExchange` uses the configured
 `HttpMessageReader<MultiValueMap<String, Part>>` to parse `multipart/form-data`,  
@@ -621,8 +657,11 @@ headers are masked by default and you must explicitly enable their logging in fu
 
 The following example shows how to do so for server-side requests:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -634,8 +673,10 @@ The following example shows how to do so for server-side requests:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -646,11 +687,15 @@ The following example shows how to do so for server-side requests:
 		}
 	}
 ----
+======
 
 The following example shows how to do so for client-side requests:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Consumer<ClientCodecConfigurer> consumer = configurer ->
 			configurer.defaultCodecs().enableLoggingRequestDetails(true);
@@ -659,8 +704,10 @@ The following example shows how to do so for client-side requests:
 			.exchangeStrategies(strategies -> strategies.codecs(consumer))
 			.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val consumer: (ClientCodecConfigurer) -> Unit  = { configurer -> configurer.defaultCodecs().enableLoggingRequestDetails(true) }
 
@@ -668,6 +715,7 @@ The following example shows how to do so for client-side requests:
 			.exchangeStrategies({ strategies -> strategies.codecs(consumer) })
 			.build()
 ----
+======
 
 
 [[webflux-logging-appenders]]
@@ -693,8 +741,11 @@ or xref:web/webflux/reactive-spring.adoc#webflux-logging-sensitive-data[logging 
 
 The following example shows how to do so for client-side requests:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient webClient = WebClient.builder()
 			.codecs(configurer -> {
@@ -703,8 +754,10 @@ The following example shows how to do so for client-side requests:
 			})
 			.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val webClient = WebClient.builder()
 			.codecs({ configurer ->
@@ -713,4 +766,5 @@ The following example shows how to do so for client-side requests:
 			 })
 			.build()
 ----
+======
 

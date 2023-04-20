@@ -44,8 +44,11 @@ The `EmbeddedDatabaseBuilder` class provides a fluent API for constructing an em
 database programmatically. You can use this when you need to create an embedded database in a
 stand-alone environment or in a stand-alone integration test, as in the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
 			.generateUniqueName(true)
@@ -60,8 +63,10 @@ stand-alone environment or in a stand-alone integration test, as in the followin
 
 	db.shutdown()
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val db = EmbeddedDatabaseBuilder()
 			.generateUniqueName(true)
@@ -76,6 +81,7 @@ stand-alone environment or in a stand-alone integration test, as in the followin
 
 	db.shutdown()
 ----
+======
 
 See the {api-spring-framework}/jdbc/datasource/embedded/EmbeddedDatabaseBuilder.html[javadoc for `EmbeddedDatabaseBuilder`]
 for further details on all supported options.
@@ -83,8 +89,11 @@ for further details on all supported options.
 You can also use the `EmbeddedDatabaseBuilder` to create an embedded database by using Java
 configuration, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class DataSourceConfig {
@@ -102,8 +111,10 @@ configuration, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class DataSourceConfig {
@@ -121,6 +132,7 @@ configuration, as the following example shows:
 		}
 	}
 ----
+======
 
 
 [[jdbc-embedded-database-types]]
@@ -168,8 +180,11 @@ configuring the embedded database as a bean in the Spring `ApplicationContext` a
 in xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-xml[Creating an Embedded Database by Using Spring XML] and xref:data-access/jdbc/embedded-database-support.adoc#jdbc-embedded-database-java[Creating an Embedded Database Programmatically]. The following listing
 shows the test template:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class DataAccessIntegrationTestTemplate {
 
@@ -198,8 +213,10 @@ shows the test template:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class DataAccessIntegrationTestTemplate {
 
@@ -227,6 +244,7 @@ shows the test template:
 		}
 	}
 ----
+======
 
 
 [[jdbc-embedded-database-unique-names]]

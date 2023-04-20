@@ -59,8 +59,11 @@ Consider two examples with XML configuration and `@Configuration` classes:
 	</beans>
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "classpath:/app-config.xml"
@@ -77,8 +80,10 @@ Consider two examples with XML configuration and `@Configuration` classes:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from "classpath:/app-config.xml"
@@ -95,6 +100,7 @@ Consider two examples with XML configuration and `@Configuration` classes:
 		}
 	}
 ----
+======
 
 When `TransferServiceTest` is run, its `ApplicationContext` is loaded from the
 `app-config.xml` configuration file in the root of the classpath. If you inspect
@@ -118,8 +124,11 @@ but define an in-memory data source as a default when neither of these is active
 The following code listings demonstrate how to implement the same configuration and
 integration test with `@Configuration` classes instead of XML:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@Profile("dev")
@@ -135,8 +144,10 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@Profile("dev")
@@ -152,9 +163,13 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@Profile("production")
@@ -167,8 +182,10 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@Profile("production")
@@ -181,9 +198,13 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@Profile("default")
@@ -198,8 +219,10 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@Profile("default")
@@ -214,9 +237,13 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class TransferServiceConfig {
@@ -239,8 +266,10 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class TransferServiceConfig {
@@ -264,9 +293,13 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig({
 			TransferServiceConfig.class,
@@ -285,8 +318,10 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(
 			TransferServiceConfig::class,
@@ -305,6 +340,7 @@ integration test with `@Configuration` classes instead of XML:
 		}
 	}
 ----
+======
 
 In this variation, we have split the XML configuration into four independent
 `@Configuration` classes:
@@ -333,8 +369,11 @@ has been moved to an abstract superclass, `AbstractIntegrationTest`:
 NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
 classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig({
 			TransferServiceConfig.class,
@@ -346,8 +385,9 @@ classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(
 			TransferServiceConfig::class,
@@ -358,9 +398,13 @@ classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext
 	abstract class AbstractIntegrationTest {
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// "dev" profile inherited from superclass
 	class TransferServiceTest extends AbstractIntegrationTest {
@@ -374,8 +418,10 @@ classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// "dev" profile inherited from superclass
 	class TransferServiceTest : AbstractIntegrationTest() {
@@ -389,12 +435,16 @@ classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext
 		}
 	}
 ----
+======
 
 `@ActiveProfiles` also supports an `inheritProfiles` attribute that can be used to
 disable the inheritance of active profiles, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// "dev" profile overridden with "production"
 	@ActiveProfiles(profiles = "production", inheritProfiles = false)
@@ -403,8 +453,9 @@ disable the inheritance of active profiles, as the following example shows:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// "dev" profile overridden with "production"
 	@ActiveProfiles("production", inheritProfiles = false)
@@ -412,6 +463,7 @@ disable the inheritance of active profiles, as the following example shows:
 		// test body
 	}
 ----
+======
 
 [[testcontext-ctx-management-env-profiles-ActiveProfilesResolver]]
 Furthermore, it is sometimes necessary to resolve active profiles for tests
@@ -430,8 +482,11 @@ attribute of `@ActiveProfiles`. For further information, see the corresponding
 The following example demonstrates how to implement and register a custom
 `OperatingSystemActiveProfilesResolver`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// "dev" profile overridden programmatically via a custom resolver
 	@ActiveProfiles(
@@ -442,8 +497,9 @@ The following example demonstrates how to implement and register a custom
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// "dev" profile overridden programmatically via a custom resolver
 	@ActiveProfiles(
@@ -453,9 +509,13 @@ The following example demonstrates how to implement and register a custom
 		// test body
 	}
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class OperatingSystemActiveProfilesResolver implements ActiveProfilesResolver {
 
@@ -467,8 +527,10 @@ The following example demonstrates how to implement and register a custom
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class OperatingSystemActiveProfilesResolver : ActiveProfilesResolver {
 
@@ -479,4 +541,5 @@ The following example demonstrates how to implement and register a custom
 		}
 	}
 ----
+======
 

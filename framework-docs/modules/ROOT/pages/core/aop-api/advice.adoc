@@ -54,8 +54,11 @@ point.
 
 The following example shows a simple `MethodInterceptor` implementation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class DebugInterceptor implements MethodInterceptor {
 
@@ -67,8 +70,10 @@ The following example shows a simple `MethodInterceptor` implementation:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class DebugInterceptor : MethodInterceptor {
 
@@ -80,6 +85,7 @@ The following example shows a simple `MethodInterceptor` implementation:
 		}
 	}
 ----
+======
 
 Note the call to the `proceed()` method of `MethodInvocation`. This proceeds down the
 interceptor chain towards the join point. Most interceptors invoke this method and
@@ -129,8 +135,11 @@ wrapped in an unchecked exception by the AOP proxy.
 
 The following example shows a before advice in Spring, which counts all method invocations:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class CountingBeforeAdvice implements MethodBeforeAdvice {
 
@@ -145,8 +154,10 @@ The following example shows a before advice in Spring, which counts all method i
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class CountingBeforeAdvice : MethodBeforeAdvice {
 
@@ -157,6 +168,7 @@ The following example shows a before advice in Spring, which counts all method i
 		}
 	}
 ----
+======
 
 TIP: Before advice can be used with any pointcut.
 
@@ -181,8 +193,11 @@ arguments. The next two listing show classes that are examples of throws advice.
 
 The following advice is invoked if a `RemoteException` is thrown (including from subclasses):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class RemoteThrowsAdvice implements ThrowsAdvice {
 
@@ -191,8 +206,10 @@ The following advice is invoked if a `RemoteException` is thrown (including from
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class RemoteThrowsAdvice : ThrowsAdvice {
 
@@ -201,13 +218,17 @@ The following advice is invoked if a `RemoteException` is thrown (including from
 		}
 	}
 ----
+======
 
 Unlike the preceding
 advice, the next example declares four arguments, so that it has access to the invoked method, method
 arguments, and target object. The following advice is invoked if a `ServletException` is thrown:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ServletThrowsAdviceWithArguments implements ThrowsAdvice {
 
@@ -216,8 +237,10 @@ arguments, and target object. The following advice is invoked if a `ServletExcep
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ServletThrowsAdviceWithArguments : ThrowsAdvice {
 
@@ -226,13 +249,17 @@ arguments, and target object. The following advice is invoked if a `ServletExcep
 		}
 	}
 ----
+======
 
 The final example illustrates how these two methods could be used in a single class
 that handles both `RemoteException` and `ServletException`. Any number of throws advice
 methods can be combined in a single class. The following listing shows the final example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static class CombinedThrowsAdvice implements ThrowsAdvice {
 
@@ -245,8 +272,10 @@ methods can be combined in a single class. The following listing shows the final
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class CombinedThrowsAdvice : ThrowsAdvice {
 
@@ -259,6 +288,7 @@ methods can be combined in a single class. The following listing shows the final
 		}
 	}
 ----
+======
 
 NOTE: If a throws-advice method throws an exception itself, it overrides the
 original exception (that is, it changes the exception thrown to the user). The overriding
@@ -292,8 +322,11 @@ the invoked method, the method's arguments, and the target.
 The following after returning advice counts all successful method invocations that have
 not thrown exceptions:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class CountingAfterReturningAdvice implements AfterReturningAdvice {
 
@@ -309,8 +342,10 @@ not thrown exceptions:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class CountingAfterReturningAdvice : AfterReturningAdvice {
 
@@ -322,6 +357,7 @@ not thrown exceptions:
 		}
 	}
 ----
+======
 
 This advice does not change the execution path. If it throws an exception, it is
 thrown up the interceptor chain instead of the return value.
@@ -380,8 +416,11 @@ introduced interfaces can be implemented by the configured `IntroductionIntercep
 Consider an example from the Spring test suite and suppose we want to
 introduce the following interface to one or more objects:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public interface Lockable {
 		void lock();
@@ -389,8 +428,10 @@ introduce the following interface to one or more objects:
 		boolean locked();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	interface Lockable {
 		fun lock()
@@ -398,6 +439,7 @@ introduce the following interface to one or more objects:
 		fun locked(): Boolean
 	}
 ----
+======
 
 This illustrates a mixin. We want to be able to cast advised objects to `Lockable`,
 whatever their type and call lock and unlock methods. If we call the `lock()` method, we
@@ -434,8 +476,11 @@ to that held in the target object.
 
 The following example shows the example `LockMixin` class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class LockMixin extends DelegatingIntroductionInterceptor implements Lockable {
 
@@ -462,8 +507,10 @@ The following example shows the example `LockMixin` class:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class LockMixin : DelegatingIntroductionInterceptor(), Lockable {
 
@@ -490,6 +537,7 @@ The following example shows the example `LockMixin` class:
 
 	}
 ----
+======
 
 Often, you need not override the `invoke()` method. The
 `DelegatingIntroductionInterceptor` implementation (which calls the `delegate` method if
@@ -504,8 +552,11 @@ interceptor (which would be defined as a prototype). In this case, there is no
 configuration relevant for a `LockMixin`, so we create it by using `new`.
 The following example shows our `LockMixinAdvisor` class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 
@@ -514,11 +565,14 @@ The following example shows our `LockMixinAdvisor` class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class LockMixinAdvisor : DefaultIntroductionAdvisor(LockMixin(), Lockable::class.java)
 ----
+======
 
 We can apply this advisor very simply, because it requires no configuration. (However, it
 is impossible to use an `IntroductionInterceptor` without an

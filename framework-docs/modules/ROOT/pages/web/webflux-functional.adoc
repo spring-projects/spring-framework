@@ -30,8 +30,11 @@ difference that router functions provide not just data, but also behavior.
 `RouterFunctions.route()` provides a router builder that facilitates the creation of routers,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import static org.springframework.http.MediaType.APPLICATION_JSON;
 	import static org.springframework.web.reactive.function.server.RequestPredicates.*;
@@ -64,6 +67,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 <1> Create router using `route()`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -133,80 +137,113 @@ while access to the body is provided through the `body` methods.
 
 The following example extracts the request body to a `Mono<String>`:
 
+[tabs]
+======
+Java::
++
 [source,java,role="primary"]
-.Java
 ----
 Mono<String> string = request.bodyToMono(String.class);
 ----
+
+Kotlin::
++
 [source,kotlin,role="secondary"]
-.Kotlin
 ----
 val string = request.awaitBody<String>()
 ----
+======
 
 
 The following example extracts the body to a `Flux<Person>` (or a `Flow<Person>` in Kotlin),
 where `Person` objects are decoded from some serialized form, such as JSON or XML:
 
+[tabs]
+======
+Java::
++
 [source,java,role="primary"]
-.Java
 ----
 Flux<Person> people = request.bodyToFlux(Person.class);
 ----
+
+Kotlin::
++
 [source,kotlin,role="secondary"]
-.Kotlin
 ----
 val people = request.bodyToFlow<Person>()
 ----
+======
 
 The preceding examples are shortcuts that use the more general `ServerRequest.body(BodyExtractor)`,
 which accepts the `BodyExtractor` functional strategy interface. The utility class
 `BodyExtractors` provides access to a number of instances. For example, the preceding examples can
 also be written as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,role="primary"]
-.Java
 ----
 Mono<String> string = request.body(BodyExtractors.toMono(String.class));
 Flux<Person> people = request.body(BodyExtractors.toFlux(Person.class));
 ----
+
+Kotlin::
++
 [source,kotlin,role="secondary"]
-.Kotlin
 ----
 	val string = request.body(BodyExtractors.toMono(String::class.java)).awaitSingle()
 	val people = request.body(BodyExtractors.toFlux(Person::class.java)).asFlow()
 ----
+======
 
 The following example shows how to access form data:
 
+[tabs]
+======
+Java::
++
 [source,java,role="primary"]
-.Java
 ----
 Mono<MultiValueMap<String, String>> map = request.formData();
 ----
+
+Kotlin::
++
 [source,kotlin,role="secondary"]
-.Kotlin
 ----
 val map = request.awaitFormData()
 ----
+======
 
 The following example shows how to access multipart data as a map:
 
+[tabs]
+======
+Java::
++
 [source,java,role="primary"]
-.Java
 ----
 Mono<MultiValueMap<String, Part>> map = request.multipartData();
 ----
+
+Kotlin::
++
 [source,kotlin,role="secondary"]
-.Kotlin
 ----
 val map = request.awaitMultipartData()
 ----
+======
 
 The following example shows how to access multipart data, one at a time, in streaming fashion:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 Flux<PartEvent> allPartEvents = request.bodyToFlux(PartEvent.class);
 allPartsEvents.windowUntil(PartEvent::isLast)
@@ -232,8 +269,9 @@ allPartsEvents.windowUntil(PartEvent::isLast)
       }));
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 val parts = request.bodyToFlux<PartEvent>()
 allPartsEvents.windowUntil(PartEvent::isLast)
@@ -258,6 +296,7 @@ allPartsEvents.windowUntil(PartEvent::isLast)
     }
 }
 ----
+======
 
 Note that the body contents of the `PartEvent` objects must be completely consumed, relayed, or released to avoid memory leaks.
 
@@ -269,47 +308,65 @@ a `build` method to create it. You can use the builder to set the response statu
 headers, or to provide a body. The following example creates a 200 (OK) response with JSON
 content:
 
+[tabs]
+======
+Java::
++
 [source,java,role="primary"]
-.Java
 ----
 Mono<Person> person = ...
 ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).body(person, Person.class);
 ----
+
+Kotlin::
++
 [source,kotlin,role="secondary"]
-.Kotlin
 ----
 val person: Person = ...
 ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(person)
 ----
+======
 
 The following example shows how to build a 201 (CREATED) response with a `Location` header and no body:
 
+[tabs]
+======
+Java::
++
 [source,java,role="primary"]
-.Java
 ----
 URI location = ...
 ServerResponse.created(location).build();
 ----
+
+Kotlin::
++
 [source,kotlin,role="secondary"]
-.Kotlin
 ----
 val location: URI = ...
 ServerResponse.created(location).build()
 ----
+======
 
 Depending on the codec used, it is possible to pass hint parameters to customize how the
 body is serialized or deserialized. For example, to specify a https://www.baeldung.com/jackson-json-view-annotation[Jackson JSON view]:
 
+[tabs]
+======
+Java::
++
 [source,java,role="primary"]
-.Java
 ----
 ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView.class).body(...);
 ----
+
+Kotlin::
++
 [source,kotlin,role="secondary"]
-.Kotlin
 ----
 ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::class.java).body(...)
 ----
+======
 
 
 [[webflux-fn-handler-classes]]
@@ -318,17 +375,23 @@ ServerResponse.ok().hint(Jackson2CodecSupport.JSON_VIEW_HINT, MyJacksonView::cla
 We can write a handler function as a lambda, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 HandlerFunction<ServerResponse> helloWorld =
   request -> ServerResponse.ok().bodyValue("Hello World");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 val helloWorld = HandlerFunction<ServerResponse> { ServerResponse.ok().bodyValue("Hello World") }
 ----
+======
 --
 
 That is convenient, but in an application we need multiple functions, and multiple inline
@@ -338,8 +401,11 @@ has a similar role as  `@Controller` in an annotation-based application.
 For example, the following class exposes a reactive `Person` repository:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
@@ -370,6 +436,7 @@ public class PersonHandler {
 	}
 }
 ----
+======
 <1> `listPeople` is a handler function that returns all `Person` objects found in the repository as
 JSON.
 <2> `createPerson` is a handler function that stores a new `Person` contained in the request body.
@@ -422,8 +489,11 @@ A functional endpoint can use Spring's xref:web/webmvc/mvc-config/validation.ado
 apply validation to the request body. For example, given a custom Spring
 xref:web/webmvc/mvc-config/validation.adoc[Validator] implementation for a `Person`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class PersonHandler {
 
@@ -445,6 +515,7 @@ xref:web/webmvc/mvc-config/validation.adoc[Validator] implementation for a `Pers
 		}
 	}
 ----
+======
 <1> Create `Validator` instance.
 <2> Apply validation.
 <3> Raise exception for a 400 response.
@@ -515,15 +586,20 @@ and so on.
 The following example uses a request predicate to create a constraint based on the `Accept`
 header:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RouterFunction<ServerResponse> route = RouterFunctions.route()
 		.GET("/hello-world", accept(MediaType.TEXT_PLAIN),
 			request -> ServerResponse.ok().bodyValue("Hello World")).build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val route = coRouter {
 		GET("/hello-world", accept(TEXT_PLAIN)) {
@@ -531,6 +607,7 @@ header:
 		}
 	}
 ----
+======
 
 You can compose multiple request predicates together by using:
 
@@ -568,8 +645,11 @@ There are also other ways to compose multiple router functions together:
 The following example shows the composition of four routes:
 
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
@@ -586,6 +666,7 @@ RouterFunction<ServerResponse> route = route()
 	.add(otherRoute) // <4>
 	.build();
 ----
+======
 <1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
 <2> `GET /person` with an `Accept` header that matches JSON is routed to
@@ -630,8 +711,11 @@ this duplication by using a type-level `@RequestMapping` annotation that maps to
 router function builder. For instance, the last few lines of the example above can be
 improved in the following way by using nested routes:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 RouterFunction<ServerResponse> route = route()
 	.path("/person", builder -> builder // <1>
@@ -640,6 +724,7 @@ RouterFunction<ServerResponse> route = route()
 		.POST(handler::createPerson))
 	.build();
 ----
+======
 <1> Note that second parameter of `path` is a consumer that takes the router builder.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -660,8 +745,11 @@ the `nest` method on the builder.
 The above still contains some duplication in the form of the shared `Accept`-header predicate.
 We can further improve by using the `nest` method together with `accept`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RouterFunction<ServerResponse> route = route()
 		.path("/person", b1 -> b1
@@ -671,8 +759,10 @@ We can further improve by using the `nest` method together with `accept`:
 			.POST(handler::createPerson))
 		.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val route = coRouter {
 		"/person".nest {
@@ -684,6 +774,7 @@ We can further improve by using the `nest` method together with `accept`:
 		}
 	}
 ----
+======
 
 
 [[webflux-fn-running]]
@@ -721,8 +812,11 @@ starter.
 The following example shows a WebFlux Java configuration (see
 xref:web/webflux/dispatcher-handler.adoc[DispatcherHandler] for how to run it):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -756,8 +850,10 @@ xref:web/webflux/dispatcher-handler.adoc[DispatcherHandler] for how to run it):
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -788,6 +884,7 @@ xref:web/webflux/dispatcher-handler.adoc[DispatcherHandler] for how to run it):
 		}
 	}
 ----
+======
 
 
 
@@ -803,8 +900,11 @@ The filter will apply to all routes that are built by the builder.
 This means that filters defined in nested routes do not apply to "top-level" routes.
 For instance, consider the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RouterFunction<ServerResponse> route = route()
 		.path("/person", b1 -> b1
@@ -818,6 +918,7 @@ For instance, consider the following example:
 		.after((request, response) -> logResponse(response)) // <2>
 		.build();
 ----
+======
 <1> The `before` filter that adds a custom request header is only applied to the two GET routes.
 <2> The `after` filter that logs the response is applied to all routes, including the nested ones.
 
@@ -853,8 +954,11 @@ Now we can add a simple security filter to our route, assuming that we have a `S
 can determine whether a particular path is allowed.
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	SecurityManager securityManager = ...
 
@@ -874,8 +978,10 @@ The following example shows how to do so:
 		})
 		.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val securityManager: SecurityManager = ...
 
@@ -895,6 +1001,7 @@ The following example shows how to do so:
 			}
 		}
 ----
+======
 
 The preceding example demonstrates that invoking the `next.handle(ServerRequest)` is optional.
 We only let the handler function be run when access is allowed.

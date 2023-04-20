@@ -4,8 +4,11 @@
 The request body can be encoded from any asynchronous type handled by `ReactiveAdapterRegistry`,
 like `Mono` or Kotlin Coroutines `Deferred` as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Mono<Person> personMono = ... ;
 
@@ -16,8 +19,10 @@ like `Mono` or Kotlin Coroutines `Deferred` as the following example shows:
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val personDeferred: Deferred<Person> = ...
 
@@ -28,11 +33,15 @@ like `Mono` or Kotlin Coroutines `Deferred` as the following example shows:
 			.retrieve()
 			.awaitBody<Unit>()
 ----
+======
 
 You can also have a stream of objects be encoded, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Flux<Person> personFlux = ... ;
 
@@ -43,8 +52,10 @@ You can also have a stream of objects be encoded, as the following example shows
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val people: Flow<Person> = ...
 
@@ -55,12 +66,16 @@ You can also have a stream of objects be encoded, as the following example shows
 			.retrieve()
 			.awaitBody<Unit>()
 ----
+======
 
 Alternatively, if you have the actual value, you can use the `bodyValue` shortcut method,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Person person = ... ;
 
@@ -71,8 +86,10 @@ as the following example shows:
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val person: Person = ...
 
@@ -83,6 +100,7 @@ as the following example shows:
 			.retrieve()
 			.awaitBody<Unit>()
 ----
+======
 
 
 
@@ -93,8 +111,11 @@ To send form data, you can provide a `MultiValueMap<String, String>` as the body
 content is automatically set to `application/x-www-form-urlencoded` by the
 `FormHttpMessageWriter`. The following example shows how to use `MultiValueMap<String, String>`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	MultiValueMap<String, String> formData = ... ;
 
@@ -104,8 +125,10 @@ content is automatically set to `application/x-www-form-urlencoded` by the
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val formData: MultiValueMap<String, String> = ...
 
@@ -115,11 +138,15 @@ content is automatically set to `application/x-www-form-urlencoded` by the
 			.retrieve()
 			.awaitBody<Unit>()
 ----
+======
 
 You can also supply form data in-line by using `BodyInserters`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import static org.springframework.web.reactive.function.BodyInserters.*;
 
@@ -129,8 +156,10 @@ You can also supply form data in-line by using `BodyInserters`, as the following
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.web.reactive.function.BodyInserters.*
 
@@ -140,6 +169,7 @@ You can also supply form data in-line by using `BodyInserters`, as the following
 			.retrieve()
 			.awaitBody<Unit>()
 ----
+======
 
 
 
@@ -151,8 +181,11 @@ either `Object` instances that represent part content or `HttpEntity` instances 
 headers for a part. `MultipartBodyBuilder` provides a convenient API to prepare a
 multipart request. The following example shows how to create a `MultiValueMap<String, ?>`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	MultipartBodyBuilder builder = new MultipartBodyBuilder();
 	builder.part("fieldPart", "fieldValue");
@@ -162,8 +195,10 @@ multipart request. The following example shows how to create a `MultiValueMap<St
 
 	MultiValueMap<String, HttpEntity<?>> parts = builder.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val builder = MultipartBodyBuilder().apply {
 		part("fieldPart", "fieldValue")
@@ -174,6 +209,7 @@ multipart request. The following example shows how to create a `MultiValueMap<St
 
 	val parts = builder.build()
 ----
+======
 
 In most cases, you do not have to specify the `Content-Type` for each part. The content
 type is determined automatically based on the `HttpMessageWriter` chosen to serialize it
@@ -184,8 +220,11 @@ builder `part` methods.
 Once a `MultiValueMap` is prepared, the easiest way to pass it to the `WebClient` is
 through the `body` method, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	MultipartBodyBuilder builder = ...;
 
@@ -195,8 +234,10 @@ through the `body` method, as the following example shows:
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val builder: MultipartBodyBuilder = ...
 
@@ -206,6 +247,7 @@ through the `body` method, as the following example shows:
 			.retrieve()
 			.awaitBody<Unit>()
 ----
+======
 
 If the `MultiValueMap` contains at least one non-`String` value, which could also
 represent regular form data (that is, `application/x-www-form-urlencoded`), you need not
@@ -215,8 +257,11 @@ set the `Content-Type` to `multipart/form-data`. This is always the case when us
 As an alternative to `MultipartBodyBuilder`, you can also provide multipart content,
 inline-style, through the built-in `BodyInserters`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import static org.springframework.web.reactive.function.BodyInserters.*;
 
@@ -226,8 +271,10 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 			.retrieve()
 			.bodyToMono(Void.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.web.reactive.function.BodyInserters.*
 
@@ -237,6 +284,7 @@ inline-style, through the built-in `BodyInserters`, as the following example sho
 			.retrieve()
 			.awaitBody<Unit>()
 ----
+======
 
 [[partevent]]
 === `PartEvent`
@@ -252,8 +300,11 @@ the `WebClient`.
 
 For instance, this sample will POST a multipart form containing a form field and a file.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 Resource resource = ...
 Mono<String> result = webClient
@@ -266,8 +317,10 @@ Mono<String> result = webClient
     .retrieve()
     .bodyToMono(String.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 var resource: Resource = ...
 var result: Mono<String> = webClient
@@ -282,6 +335,7 @@ var result: Mono<String> = webClient
 	.retrieve()
 	.bodyToMono()
 ----
+======
 
 On the server side, `PartEvent` objects that are received via `@RequestBody` or
 `ServerRequest::bodyToFlux(PartEvent.class)` can be relayed to another service

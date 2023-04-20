@@ -21,8 +21,11 @@ Keep-Alive              300
 
 The following example gets the value of the `Accept-Encoding` and `Keep-Alive` headers:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/demo")
 	public void handle(
@@ -31,6 +34,7 @@ The following example gets the value of the `Accept-Encoding` and `Keep-Alive` h
 		//...
 	}
 ----
+======
 <1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 

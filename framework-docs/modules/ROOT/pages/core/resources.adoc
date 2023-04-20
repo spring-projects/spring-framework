@@ -276,16 +276,22 @@ specified doesn't have a specific prefix, you get back a `Resource` type that is
 appropriate to that particular application context. For example, assume the following
 snippet of code was run against a `ClassPathXmlApplicationContext` instance:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Resource template = ctx.getResource("some/resource/path/myTemplate.txt");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val template = ctx.getResource("some/resource/path/myTemplate.txt")
 ----
+======
 
 Against a `ClassPathXmlApplicationContext`, that code returns a `ClassPathResource`. If
 the same method were run against a `FileSystemXmlApplicationContext` instance, it would
@@ -299,41 +305,59 @@ On the other hand, you may also force `ClassPathResource` to be used, regardless
 application context type, by specifying the special `classpath:` prefix, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Resource template = ctx.getResource("classpath:some/resource/path/myTemplate.txt");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val template = ctx.getResource("classpath:some/resource/path/myTemplate.txt")
 ----
+======
 
 Similarly, you can force a `UrlResource` to be used by specifying any of the standard
 `java.net.URL` prefixes. The following examples use the `file` and `https` prefixes:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Resource template = ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val template = ctx.getResource("file:///some/resource/path/myTemplate.txt")
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Resource template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val template = ctx.getResource("https://myhost.com/resource/path/myTemplate.txt")
 ----
+======
 
 The following table summarizes the strategy for converting `String` objects to `Resource`
 objects:
@@ -477,8 +501,11 @@ register and use a special JavaBeans `PropertyEditor`, which can convert `String
 to `Resource` objects. For example, the following `MyBean` class has a `template`
 property of type `Resource`.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	package example;
 
@@ -493,11 +520,14 @@ property of type `Resource`.
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyBean(var template: Resource)
 ----
+======
 
 In an XML configuration file, the `template` property can be configured with a simple
 string for that resource, as the following example shows:
@@ -537,8 +567,11 @@ retrieve the value of the template path as a string, and a special `PropertyEdit
 convert the string to a `Resource` object to be injected into the `MyBean` constructor.
 The following example demonstrates how to achieve this.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	public class MyBean {
@@ -552,12 +585,15 @@ The following example demonstrates how to achieve this.
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class MyBean(@Value("\${template.path}") private val template: Resource)
 ----
+======
 
 If we want to support multiple templates discovered under the same path in multiple
 locations in the classpath -- for example, in multiple jars in the classpath -- we can
@@ -566,8 +602,11 @@ use the special `classpath*:` prefix and wildcarding to define a `templates.path
 Spring will convert the template path pattern into an array of `Resource` objects that
 can be injected into the `MyBean` constructor.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	public class MyBean {
@@ -581,12 +620,15 @@ can be injected into the `MyBean` constructor.
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class MyBean(@Value("\${templates.path}") private val templates: Resource[])
 ----
+======
 
 
 
@@ -611,31 +653,43 @@ that path and used to load the bean definitions depends on and is appropriate to
 specific application context. For example, consider the following example, which creates a
 `ClassPathXmlApplicationContext`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext ctx = new ClassPathXmlApplicationContext("conf/appContext.xml");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = ClassPathXmlApplicationContext("conf/appContext.xml")
 ----
+======
 
 The bean definitions are loaded from the classpath, because a `ClassPathResource` is
 used. However, consider the following example, which creates a `FileSystemXmlApplicationContext`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("conf/appContext.xml");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = FileSystemXmlApplicationContext("conf/appContext.xml")
 ----
+======
 
 Now the bean definitions are loaded from a filesystem location (in this case, relative to
 the current working directory).
@@ -644,17 +698,23 @@ Note that the use of the special `classpath` prefix or a standard URL prefix on 
 location path overrides the default type of `Resource` created to load the bean
 definitions. Consider the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("classpath:conf/appContext.xml");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = FileSystemXmlApplicationContext("classpath:conf/appContext.xml")
 ----
+======
 
 Using `FileSystemXmlApplicationContext` loads the bean definitions from the classpath.
 However, it is still a `FileSystemXmlApplicationContext`. If it is subsequently used as a
@@ -685,17 +745,23 @@ The following example shows how a `ClassPathXmlApplicationContext` instance comp
 the beans defined in files named `services.xml` and `repositories.xml` (which are on the
 classpath) can be instantiated:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext ctx = new ClassPathXmlApplicationContext(
 		new String[] {"services.xml", "repositories.xml"}, MessengerService.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = ClassPathXmlApplicationContext(arrayOf("services.xml", "repositories.xml"), MessengerService::class.java)
 ----
+======
 
 See the {api-spring-framework}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
 javadoc for details on the various constructors.
@@ -773,17 +839,23 @@ coming from jars be thoroughly tested in your specific environment before you re
 When constructing an XML-based application context, a location string may use the
 special `classpath*:` prefix, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext ctx =
 		new ClassPathXmlApplicationContext("classpath*:conf/appContext.xml");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = ClassPathXmlApplicationContext("classpath*:conf/appContext.xml")
 ----
+======
 
 This special prefix specifies that all classpath resources that match the given name
 must be obtained (internally, this essentially happens through a call to
@@ -879,87 +951,123 @@ For backwards compatibility (historical) reasons however, this changes when the
 to treat all location paths as relative, whether they start with a leading slash or not.
 In practice, this means the following examples are equivalent:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("conf/context.xml");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = FileSystemXmlApplicationContext("conf/context.xml")
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("/conf/context.xml");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = FileSystemXmlApplicationContext("/conf/context.xml")
 ----
+======
 
 The following examples are also equivalent (even though it would make sense for them to be different, as one
 case is relative and the other absolute):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	FileSystemXmlApplicationContext ctx = ...;
 	ctx.getResource("some/resource/path/myTemplate.txt");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx: FileSystemXmlApplicationContext = ...
 	ctx.getResource("some/resource/path/myTemplate.txt")
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	FileSystemXmlApplicationContext ctx = ...;
 	ctx.getResource("/some/resource/path/myTemplate.txt");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx: FileSystemXmlApplicationContext = ...
 	ctx.getResource("/some/resource/path/myTemplate.txt")
 ----
+======
 
 In practice, if you need true absolute filesystem paths, you should avoid using
 absolute paths with `FileSystemResource` or `FileSystemXmlApplicationContext` and
 force the use of a `UrlResource` by using the `file:` URL prefix. The following examples
 show how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// actual context type doesn't matter, the Resource will always be UrlResource
 	ctx.getResource("file:///some/resource/path/myTemplate.txt");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// actual context type doesn't matter, the Resource will always be UrlResource
 	ctx.getResource("file:///some/resource/path/myTemplate.txt")
 ----
+======
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
 	ApplicationContext ctx =
 		new FileSystemXmlApplicationContext("file:///conf/context.xml");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// force this FileSystemXmlApplicationContext to load its definition via a UrlResource
 	val ctx = FileSystemXmlApplicationContext("file:///conf/context.xml")
 ----
+======

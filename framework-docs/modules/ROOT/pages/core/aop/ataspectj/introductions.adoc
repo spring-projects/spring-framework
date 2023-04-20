@@ -11,8 +11,11 @@ given an interface named `UsageTracked` and an implementation of that interface 
 `DefaultUsageTracked`, the following aspect declares that all implementors of service
 interfaces also implement the `UsageTracked` interface (e.g. for statistics via JMX):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Aspect
 	public class UsageTracking {
@@ -27,8 +30,10 @@ interfaces also implement the `UsageTracked` interface (e.g. for statistics via 
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Aspect
 	class UsageTracking {
@@ -45,6 +50,7 @@ interfaces also implement the `UsageTracked` interface (e.g. for statistics via 
 		}
 	}
 ----
+======
 
 The interface to be implemented is determined by the type of the annotated field. The
 `value` attribute of the `@DeclareParents` annotation is an AspectJ type pattern. Any
@@ -53,15 +59,21 @@ before advice of the preceding example, service beans can be directly used as
 implementations of the `UsageTracked` interface. If accessing a bean programmatically,
 you would write the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	val usageTracked = context.getBean("myService", UsageTracked.class)
 ----
+======
 
 

@@ -4,8 +4,6 @@
 antora:
   extensions:
     - '@antora/collector-extension'
-    - require: '@springio/antora-extensions/tabs-migration-extension'
-      unwrap_example_block: always
 site:
   title: Spring Framework Reference
   url: https://https://rwinch.github.io/spring-framework/

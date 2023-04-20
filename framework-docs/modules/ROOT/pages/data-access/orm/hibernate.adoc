@@ -95,8 +95,11 @@ one current `Session` per transaction. This is roughly equivalent to Spring's
 synchronization of one Hibernate `Session` per transaction. A corresponding DAO
 implementation resembles the following example, based on the plain Hibernate API:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -114,8 +117,10 @@ implementation resembles the following example, based on the plain Hibernate API
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ProductDaoImpl(private val sessionFactory: SessionFactory) : ProductDao {
 
@@ -127,6 +132,7 @@ implementation resembles the following example, based on the plain Hibernate API
 		}
 	}
 ----
+======
 
 This style is similar to that of the Hibernate reference documentation and examples,
 except for holding the `SessionFactory` in an instance variable. We strongly recommend
@@ -192,8 +198,11 @@ You can annotate the service layer with `@Transactional` annotations and instruc
 Spring container to find these annotations and provide transactional semantics for
 these annotated methods. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ProductServiceImpl implements ProductService {
 
@@ -215,8 +224,10 @@ these annotated methods. The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ProductServiceImpl(private val productDao: ProductDao) : ProductService {
 
@@ -230,6 +241,7 @@ these annotated methods. The following example shows how to do so:
 		fun findAllProducts() = productDao.findAllProducts()
 	}
 ----
+======
 
 In the container, you need to set up the `PlatformTransactionManager` implementation
 (as a bean) and a `<tx:annotation-driven/>` entry, opting into `@Transactional`
@@ -295,8 +307,11 @@ and an example for a business method implementation:
 	</beans>
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ProductServiceImpl implements ProductService {
 
@@ -321,8 +336,10 @@ and an example for a business method implementation:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ProductServiceImpl(transactionManager: PlatformTransactionManager,
 							private val productDao: ProductDao) : ProductService {
@@ -337,6 +354,7 @@ and an example for a business method implementation:
 		}
 	}
 ----
+======
 
 Spring's `TransactionInterceptor` lets any checked application exception be thrown
 with the callback code, while `TransactionTemplate` is restricted to unchecked

@@ -15,8 +15,11 @@ include::partial$web/web-uris.adoc[leveloffset=+1]
 You can use `ServletUriComponentsBuilder` to create URIs relative to the current request,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpServletRequest request = ...
 
@@ -26,8 +29,10 @@ as the following example shows:
 			.replaceQueryParam("accountId", "{id}")
 			.build("123");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val request: HttpServletRequest = ...
 
@@ -37,11 +42,15 @@ as the following example shows:
 			.replaceQueryParam("accountId", "{id}")
 			.build("123")
 ----
+======
 
 You can create URIs relative to the context path, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpServletRequest request = ...
 
@@ -52,8 +61,10 @@ You can create URIs relative to the context path, as the following example shows
 			.build()
 			.toUri();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val request: HttpServletRequest = ...
 
@@ -64,12 +75,16 @@ You can create URIs relative to the context path, as the following example shows
 			.build()
 			.toUri()
 ----
+======
 
 You can create URIs relative to a Servlet (for example, `/main/{asterisk}`),
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpServletRequest request = ...
 
@@ -80,8 +95,10 @@ as the following example shows:
 			.build()
 			.toUri();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val request: HttpServletRequest = ...
 
@@ -92,6 +109,7 @@ as the following example shows:
 			.build()
 			.toUri()
 ----
+======
 
 NOTE: As of 5.1, `ServletUriComponentsBuilder` ignores information from the `Forwarded` and
 `X-Forwarded-*` headers, which specify the client-originated address. Consider using the
@@ -106,8 +124,11 @@ such headers.
 Spring MVC provides a mechanism to prepare links to controller methods. For example,
 the following MVC controller allows for link creation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	@RequestMapping("/hotels/{hotel}")
@@ -119,8 +140,10 @@ the following MVC controller allows for link creation:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	@RequestMapping("/hotels/{hotel}")
@@ -132,25 +155,32 @@ the following MVC controller allows for link creation:
 		}
 	}
 ----
+======
 
 You can prepare a link by referring to the method by name, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	UriComponents uriComponents = MvcUriComponentsBuilder
 		.fromMethodName(BookingController.class, "getBooking", 21).buildAndExpand(42);
 
 	URI uri = uriComponents.encode().toUri();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val uriComponents = MvcUriComponentsBuilder
 		.fromMethodName(BookingController::class.java, "getBooking", 21).buildAndExpand(42)
 
 	val uri = uriComponents.encode().toUri()
 ----
+======
 
 In the preceding example, we provide actual method argument values (in this case, the long value: `21`)
 to be used as a path variable and inserted into the URL. Furthermore, we provide the
@@ -163,22 +193,28 @@ There are additional ways to use `MvcUriComponentsBuilder`. For example, you can
 akin to mock testing through proxies to avoid referring to the controller method by name, as the following example shows
 (the example assumes static import of `MvcUriComponentsBuilder.on`):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	UriComponents uriComponents = MvcUriComponentsBuilder
 		.fromMethodCall(on(BookingController.class).getBooking(21)).buildAndExpand(42);
 
 	URI uri = uriComponents.encode().toUri();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val uriComponents = MvcUriComponentsBuilder
 		.fromMethodCall(on(BookingController::class.java).getBooking(21)).buildAndExpand(42)
 
 	val uri = uriComponents.encode().toUri()
 ----
+======
 
 NOTE: Controller method signatures are limited in their design when they are supposed to be usable for
 link creation with `fromMethodCall`. Aside from needing a proper parameter signature,
@@ -200,8 +236,11 @@ For such cases, you can use the static `fromXxx` overloaded methods that accept 
 with a base URL and then use the instance-based `withXxx` methods. For example, the
 following listing uses `withMethodCall`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	UriComponentsBuilder base = ServletUriComponentsBuilder.fromCurrentContextPath().path("/en");
 	MvcUriComponentsBuilder builder = MvcUriComponentsBuilder.relativeTo(base);
@@ -209,8 +248,10 @@ following listing uses `withMethodCall`:
 
 	URI uri = uriComponents.encode().toUri();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val base = ServletUriComponentsBuilder.fromCurrentContextPath().path("/en")
 	val builder = MvcUriComponentsBuilder.relativeTo(base)
@@ -218,6 +259,7 @@ following listing uses `withMethodCall`:
 
 	val uri = uriComponents.encode().toUri()
 ----
+======
 
 NOTE: As of 5.1, `MvcUriComponentsBuilder` ignores information from the `Forwarded` and
 `X-Forwarded-*` headers, which specify the client-originated address. Consider using the
@@ -234,8 +276,11 @@ by referring to the implicitly or explicitly assigned name for each request mapp
 
 Consider the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RequestMapping("/people/{id}/addresses")
 	public class PersonAddressController {
@@ -244,8 +289,10 @@ Consider the following example:
 		public HttpEntity<PersonAddress> getAddress(@PathVariable String country) { ... }
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RequestMapping("/people/{id}/addresses")
 	class PersonAddressController {
@@ -254,6 +301,7 @@ Consider the following example:
 		fun getAddress(@PathVariable country: String): HttpEntity<PersonAddress> { ... }
 	}
 ----
+======
 
 Given the preceding controller, you can prepare a link from a JSP, as follows:
 

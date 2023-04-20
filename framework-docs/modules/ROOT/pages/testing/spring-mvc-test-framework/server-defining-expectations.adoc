@@ -5,16 +5,20 @@ You can define expectations by appending one or more `andExpect(..)` calls after
 performing a request, as the following example shows. As soon as one expectation fails,
 no other expectations will be asserted.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
 
 	mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.test.web.servlet.get
 
@@ -22,14 +26,18 @@ no other expectations will be asserted.
 		status { isOk() }
 	}
 ----
+======
 
 You can define multiple expectations by appending `andExpectAll(..)` after performing a
 request, as the following example shows. In contrast to `andExpect(..)`,
 `andExpectAll(..)` guarantees that all supplied expectations will be asserted and that
 all failures will be tracked and reported.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
 
@@ -38,8 +46,9 @@ all failures will be tracked and reported.
 		content().contentType("application/json;charset=UTF-8"));
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.test.web.servlet.get
 
@@ -48,6 +57,7 @@ all failures will be tracked and reported.
 		content { contentType(APPLICATION_JSON) }
 	}
 ----
+======
 
 `MockMvcResultMatchers.*` provides a number of expectations, some of which are further
 nested with more detailed expectations.
@@ -64,16 +74,20 @@ inspect Servlet specific aspects, such as request and session attributes.
 
 The following test asserts that binding or validation failed:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	mockMvc.perform(post("/persons"))
 		.andExpect(status().isOk())
 		.andExpect(model().attributeHasErrors("person"));
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.test.web.servlet.post
 
@@ -84,13 +98,17 @@ The following test asserts that binding or validation failed:
 		}
 	}
 ----
+======
 
 Many times, when writing tests, it is useful to dump the results of the performed
 request. You can do so as follows, where `print()` is a static import from
 `MockMvcResultHandlers`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	mockMvc.perform(post("/persons"))
 		.andDo(print())
@@ -98,8 +116,9 @@ request. You can do so as follows, where `print()` is a static import from
 		.andExpect(model().attributeHasErrors("person"));
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.test.web.servlet.post
 
@@ -112,6 +131,7 @@ request. You can do so as follows, where `print()` is a static import from
 			}
 		}
 ----
+======
 
 As long as request processing does not cause an unhandled exception, the `print()` method
 prints all the available result data to `System.out`. There is also a `log()` method and
@@ -126,36 +146,47 @@ In some cases, you may want to get direct access to the result and verify someth
 cannot be verified otherwise. This can be achieved by appending `.andReturn()` after all
 other expectations, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	MvcResult mvcResult = mockMvc.perform(post("/persons")).andExpect(status().isOk()).andReturn();
 	// ...
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	var mvcResult = mockMvc.post("/persons").andExpect { status { isOk() } }.andReturn()
 	// ...
 ----
+======
 
 If all tests repeat the same expectations, you can set up common expectations once when
 building the `MockMvc` instance, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	standaloneSetup(new SimpleController())
 		.alwaysExpect(status().isOk())
 		.alwaysExpect(content().contentType("application/json;charset=UTF-8"))
 		.build()
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Not possible in Kotlin until https://youtrack.jetbrains.com/issue/KT-22208 is fixed
 ----
+======
 
 Note that common expectations are always applied and cannot be overridden without
 creating a separate `MockMvc` instance.
@@ -164,15 +195,19 @@ When a JSON response content contains hypermedia links created with
 https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], you can verify the
 resulting links by using JsonPath expressions, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
 		.andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	mockMvc.get("/people") {
 		accept(MediaType.APPLICATION_JSON)
@@ -182,21 +217,26 @@ resulting links by using JsonPath expressions, as the following example shows:
 		}
 	}
 ----
+======
 
 When XML response content contains hypermedia links created with
 https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], you can verify the
 resulting links by using XPath expressions:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Map<String, String> ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
 	mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
 		.andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ns = mapOf("ns" to "http://www.w3.org/2005/Atom")
 	mockMvc.get("/handle") {
@@ -207,4 +247,5 @@ resulting links by using XPath expressions:
 		}
 	}
 ----
+======
 

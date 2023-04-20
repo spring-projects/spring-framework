@@ -15,18 +15,24 @@ An example may help make this distinction between a pointcut signature and a poi
 expression clear. The following example defines a pointcut named `anyOldTransfer` that
 matches the execution of any method named `transfer`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Pointcut("execution(* transfer(..))") // the pointcut expression
 	private void anyOldTransfer() {} // the pointcut signature
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Pointcut("execution(* transfer(..))") // the pointcut expression
 	private fun anyOldTransfer() {} // the pointcut signature
 ----
+======
 
 The pointcut expression that forms the value of the `@Pointcut` annotation is a regular
 AspectJ pointcut expression. For a full discussion of AspectJ's pointcut language, see
@@ -140,8 +146,11 @@ it is natural and straightforward to identify specific beans by name.
 You can combine pointcut expressions by using `&&,` `||` and `!`. You can also refer to
 pointcut expressions by name. The following example shows three pointcut expressions:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages"]
-.Java
 ----
 	package com.xyz;
 
@@ -158,6 +167,7 @@ pointcut expressions by name. The following example shows three pointcut express
 		public void tradingOperation() {} // <3>
 	}
 ----
+======
 <1> `publicMethod` matches if a method execution join point represents the execution
 of any public method.
 <2> `inTrading` matches if a method execution is in the trading module.
@@ -204,8 +214,11 @@ We recommend defining a dedicated aspect that captures commonly used _named poin
 expressions for this purpose. Such an aspect typically resembles the following
 `CommonPointcuts` example (though what you name the aspect is up to you):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages",fold="none"]
-.Java
 ----
 	package com.xyz;
 
@@ -266,8 +279,10 @@ expressions for this purpose. Such an aspect typically resembles the following
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages",fold="none"]
-.Kotlin
 ----
 	package com.xyz
 
@@ -328,6 +343,7 @@ expressions for this purpose. Such an aspect typically resembles the following
 
 	}
 ----
+======
 
 You can refer to the pointcuts defined in such an aspect anywhere you need a pointcut
 expression by referencing the fully-qualified name of the `@Aspect` class combined with

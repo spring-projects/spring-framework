@@ -6,8 +6,11 @@
 In Java configuration, you can implement the `WebMvcConfigurer` interface, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -16,8 +19,10 @@ following example shows:
 		// Implement configuration methods...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -26,6 +31,7 @@ following example shows:
 		// Implement configuration methods...
 	}
 ----
+======
 
 
 In XML, you can check attributes and sub-elements of `<mvc:annotation-driven/>`. You can

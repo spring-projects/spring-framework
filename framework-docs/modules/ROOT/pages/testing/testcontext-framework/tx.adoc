@@ -102,8 +102,11 @@ are preconfigured for transactional support at the class level.
 The following example demonstrates a common scenario for writing an integration test for
 a Hibernate-based `UserRepository`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	@Transactional
@@ -145,8 +148,9 @@ a Hibernate-based `UserRepository`:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	@Transactional
@@ -187,6 +191,7 @@ a Hibernate-based `UserRepository`:
 		}
 	}
 ----
+======
 
 As explained in xref:testing/testcontext-framework/tx.adoc#testcontext-tx-rollback-and-commit-behavior[Transaction Rollback and Commit Behavior], there is no need to
 clean up the database after the `createUser()` method runs, since any changes made to the
@@ -214,8 +219,11 @@ The following example demonstrates some of the features of `TestTransaction`. Se
 javadoc for {api-spring-framework}/test/context/transaction/TestTransaction.html[`TestTransaction`]
 for further details.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration(classes = TestConfig.class)
 	public class ProgrammaticTransactionManagementTests extends
@@ -244,8 +252,10 @@ for further details.
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration(classes = [TestConfig::class])
 	class ProgrammaticTransactionManagementTests : AbstractTransactionalJUnit4SpringContextTests() {
@@ -273,6 +283,7 @@ for further details.
 		}
 	}
 ----
+======
 
 [[testcontext-tx-before-and-after-tx]]
 == Running Code Outside of a Transaction
@@ -318,8 +329,11 @@ information and configuration examples. xref:testing/testcontext-framework/execu
 declarative SQL script execution with default transaction rollback semantics. The
 following example shows the relevant annotations:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig
 	@Transactional(transactionManager = "txMgr")
@@ -356,8 +370,9 @@ following example shows the relevant annotations:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig
 	@Transactional(transactionManager = "txMgr")
@@ -393,6 +408,7 @@ following example shows the relevant annotations:
 
 	}
 ----
+======
 
 [[testcontext-tx-false-positives]]
 .Avoid false positives when testing ORM code
@@ -407,8 +423,11 @@ of work. In the following Hibernate-based example test case, one method demonstr
 false positive, and the other method correctly exposes the results of flushing the
 session:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// ...
 
@@ -434,8 +453,9 @@ session:
 	// ...
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// ...
 
@@ -460,11 +480,15 @@ session:
 
 	// ...
 ----
+======
 
 The following example shows matching methods for JPA:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// ...
 
@@ -489,8 +513,10 @@ The following example shows matching methods for JPA:
 
 	// ...
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// ...
 
@@ -515,6 +541,7 @@ The following example shows matching methods for JPA:
 
 	// ...
 ----
+======
 =====
 
 [[testcontext-tx-orm-lifecycle-callbacks]]
@@ -539,8 +566,11 @@ The following example shows how to flush the `EntityManager` to ensure that
 a `@PostPersist` callback method has been registered for the `Person` entity used in the
 example.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// ...
 
@@ -565,8 +595,10 @@ example.
 
 	// ...
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// ...
 
@@ -591,6 +623,7 @@ example.
 
 	// ...
 ----
+======
 
 See
 https://github.com/spring-projects/spring-framework/blob/main/spring-test/src/test/java/org/springframework/test/context/junit/jupiter/orm/JpaEntityListenerTests.java[JpaEntityListenerTests]

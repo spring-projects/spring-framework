@@ -7,14 +7,18 @@ If you need access to pre-existing session attributes that are managed globally
 (that is, outside the controller -- for example, by a filter) and may or may not be present,
 you can use the `@SessionAttribute` annotation on a method parameter, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/")
 	public String handle(@SessionAttribute User user) { // <1>
 		// ...
 	}
 ----
+======
 <1> Using `@SessionAttribute`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

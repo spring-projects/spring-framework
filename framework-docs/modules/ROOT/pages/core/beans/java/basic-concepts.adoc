@@ -15,8 +15,11 @@ source of bean definitions. Furthermore, `@Configuration` classes let inter-bean
 dependencies be defined by calling other `@Bean` methods in the same class.
 The simplest possible `@Configuration` class reads as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -27,8 +30,10 @@ The simplest possible `@Configuration` class reads as follows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -39,6 +44,7 @@ The simplest possible `@Configuration` class reads as follows:
 		}
 	}
 ----
+======
 
 The preceding `AppConfig` class is equivalent to the following Spring `<beans/>` XML:
 

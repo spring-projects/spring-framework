@@ -13,8 +13,11 @@ order in which the initializers are invoked depends on whether they implement Sp
 `Ordered` interface or are annotated with Spring's `@Order` annotation or the standard
 `@Priority` annotation. The following example shows how to use initializers:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from TestConfig
@@ -26,6 +29,7 @@ order in which the initializers are invoked depends on whether they implement Sp
 		// class body...
 	}
 ----
+======
 <1> Specifying configuration by using a configuration class and an initializer.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -50,8 +54,11 @@ component classes in `@ContextConfiguration` entirely and instead declare only
 in the context -- for example, by programmatically loading bean definitions from XML
 files or configuration classes. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be initialized by EntireAppInitializer
@@ -61,6 +68,7 @@ files or configuration classes. The following example shows how to do so:
 		// class body...
 	}
 ----
+======
 <1> Specifying configuration by using only an initializer.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

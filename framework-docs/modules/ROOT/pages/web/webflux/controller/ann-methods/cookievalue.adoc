@@ -15,14 +15,18 @@ JSESSIONID=415A4AC178C59DACE0B2C9CA727CDD84
 
 The following code sample demonstrates how to get the cookie value:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/demo")
 	public void handle(@CookieValue("JSESSIONID") String cookie) { // <1>
 		//...
 	}
 ----
+======
 <1> Get the cookie value.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

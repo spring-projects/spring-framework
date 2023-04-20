@@ -8,8 +8,11 @@ The MVC configuration simplifies the registration of view resolvers.
 The following Java configuration example configures content negotiation view
 resolution by using JSP and Jackson as a default `View` for JSON rendering:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -22,8 +25,10 @@ resolution by using JSP and Jackson as a default `View` for JSON rendering:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -35,6 +40,7 @@ resolution by using JSP and Jackson as a default `View` for JSON rendering:
 		}
 	}
 ----
+======
 
 
 The following example shows how to achieve the same configuration in XML:
@@ -75,8 +81,11 @@ The MVC namespace provides dedicated elements. The following example works with 
 In Java configuration, you can add the respective `Configurer` bean,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -96,8 +105,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -114,6 +125,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 
 

@@ -4,8 +4,11 @@
 In Java configuration, you can register interceptors to apply to incoming requests, as
 the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -18,8 +21,10 @@ the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -31,6 +36,7 @@ the following example shows:
 		}
 	}
 ----
+======
 
 The following example shows how to achieve the same configuration in XML:
 

@@ -20,8 +20,11 @@ xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules
 The following code listing shows the minimal requirements for configuring a test class to
 run with the custom Spring `Runner`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RunWith(SpringRunner.class)
 	@TestExecutionListeners({})
@@ -34,8 +37,9 @@ run with the custom Spring `Runner`:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RunWith(SpringRunner::class)
 	@TestExecutionListeners
@@ -47,6 +51,7 @@ run with the custom Spring `Runner`:
 		}
 	}
 ----
+======
 
 In the preceding example, `@TestExecutionListeners` is configured with an empty list, to
 disable the default listeners, which otherwise would require an `ApplicationContext` to
@@ -74,8 +79,11 @@ To support the full functionality of the TestContext framework, you must combine
 `SpringClassRule` with a `SpringMethodRule`. The following example shows the proper way
 to declare these rules in an integration test:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Optionally specify a non-Spring Runner via @RunWith(...)
 	@ContextConfiguration
@@ -94,8 +102,9 @@ to declare these rules in an integration test:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Optionally specify a non-Spring Runner via @RunWith(...)
 	@ContextConfiguration
@@ -115,6 +124,7 @@ to declare these rules in an integration test:
 		}
 	}
 ----
+======
 
 [[testcontext-support-classes-junit4]]
 == JUnit 4 Support Classes
@@ -179,8 +189,11 @@ TestNG:
 The following code listing shows how to configure a test class to use the
 `SpringExtension` in conjunction with `@ContextConfiguration`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Instructs JUnit Jupiter to extend the test with Spring support.
 	@ExtendWith(SpringExtension.class)
@@ -195,8 +208,9 @@ The following code listing shows how to configure a test class to use the
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Instructs JUnit Jupiter to extend the test with Spring support.
 	@ExtendWith(SpringExtension::class)
@@ -210,6 +224,7 @@ The following code listing shows how to configure a test class to use the
 		}
 	}
 ----
+======
 
 Since you can also use annotations in JUnit 5 as meta-annotations, Spring provides the
 `@SpringJUnitConfig` and `@SpringJUnitWebConfig` composed annotations to simplify the
@@ -218,8 +233,11 @@ configuration of the test `ApplicationContext` and JUnit Jupiter.
 The following example uses `@SpringJUnitConfig` to reduce the amount of configuration
 used in the previous example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Instructs Spring to register the SpringExtension with JUnit
 	// Jupiter and load an ApplicationContext from TestConfig.class
@@ -233,8 +251,9 @@ used in the previous example:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Instructs Spring to register the SpringExtension with JUnit
 	// Jupiter and load an ApplicationContext from TestConfig.class
@@ -247,12 +266,16 @@ used in the previous example:
 		}
 	}
 ----
+======
 
 Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 `WebApplicationContext` for use with JUnit Jupiter:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Instructs Spring to register the SpringExtension with JUnit
 	// Jupiter and load a WebApplicationContext from TestWebConfig.class
@@ -266,8 +289,9 @@ Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Instructs Spring to register the SpringExtension with JUnit
 	// Jupiter and load a WebApplicationContext from TestWebConfig::class
@@ -280,6 +304,7 @@ Similarly, the following example uses `@SpringJUnitWebConfig` to create a
 		}
 	}
 ----
+======
 
 See the documentation for `@SpringJUnitConfig` and `@SpringJUnitWebConfig` in
 xref:testing/annotations/integration-junit-jupiter.adoc[Spring JUnit Jupiter Testing Annotations] for further details.
@@ -345,8 +370,11 @@ In the following example, Spring injects the `OrderService` bean from the
 `ApplicationContext` loaded from `TestConfig.class` into the
 `OrderServiceIntegrationTests` constructor.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class OrderServiceIntegrationTests {
@@ -362,8 +390,9 @@ In the following example, Spring injects the `OrderService` bean from the
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class OrderServiceIntegrationTests @Autowired constructor(private val orderService: OrderService){
@@ -371,6 +400,7 @@ In the following example, Spring injects the `OrderService` bean from the
 	}
 
 ----
+======
 
 Note that this feature lets test dependencies be `final` and therefore immutable.
 
@@ -378,8 +408,11 @@ If the `spring.test.constructor.autowire.mode` property is to `all` (see
 xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-testconstructor[`@TestConstructor`]), we can omit the declaration of
 `@Autowired` on the constructor in the previous example, resulting in the following.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class OrderServiceIntegrationTests {
@@ -394,14 +427,16 @@ xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-anno
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class OrderServiceIntegrationTests(val orderService:OrderService) {
 		// tests that use the injected OrderService
 	}
 ----
+======
 
 [[testcontext-junit-jupiter-di-method]]
 ==== Method Injection
@@ -414,8 +449,11 @@ parameter with the corresponding bean from the test's `ApplicationContext`.
 In the following example, Spring injects the `OrderService` from the `ApplicationContext`
 loaded from `TestConfig.class` into the `deleteOrder()` test method:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class OrderServiceIntegrationTests {
@@ -427,8 +465,9 @@ loaded from `TestConfig.class` into the `deleteOrder()` test method:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class OrderServiceIntegrationTests {
@@ -439,6 +478,7 @@ loaded from `TestConfig.class` into the `deleteOrder()` test method:
 		}
 	}
 ----
+======
 
 Due to the robustness of the `ParameterResolver` support in JUnit Jupiter, you can also
 have multiple dependencies injected into a single method, not only from Spring but also
@@ -447,8 +487,11 @@ from JUnit Jupiter itself or other third-party extensions.
 The following example shows how to have both Spring and JUnit Jupiter inject dependencies
 into the `placeOrderRepeatedly()` test method simultaneously.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class OrderServiceIntegrationTests {
@@ -463,8 +506,9 @@ into the `placeOrderRepeatedly()` test method simultaneously.
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class OrderServiceIntegrationTests {
@@ -477,6 +521,7 @@ into the `placeOrderRepeatedly()` test method simultaneously.
 		}
 	}
 ----
+======
 
 Note that the use of `@RepeatedTest` from JUnit Jupiter lets the test method gain access
 to the `RepetitionInfo`.
@@ -514,8 +559,11 @@ xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching] 
 xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-nestedtestconfiguration[supported annotations] to see
 which annotations can be inherited in `@Nested` test classes.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(TestConfig.class)
 	class GreetingServiceTests {
@@ -542,8 +590,9 @@ which annotations can be inherited in `@Nested` test classes.
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	class GreetingServiceTests {
@@ -569,6 +618,7 @@ which annotations can be inherited in `@Nested` test classes.
 		}
 	}
 ----
+======
 
 [[testcontext-support-classes-testng]]
 == TestNG Support Classes

@@ -171,8 +171,11 @@ You can use Spring's OXM for a wide variety of situations. In the following exam
 use it to marshal the settings of a Spring-managed application as an XML file. In the following example, we
 use a simple JavaBean to represent the settings:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class Settings {
 
@@ -187,21 +190,27 @@ use a simple JavaBean to represent the settings:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Settings {
 		var isFooEnabled: Boolean = false
 	}
 ----
+======
 
 The application class uses this bean to store its settings. Besides a main method, the
 class has two methods: `saveSettings()` saves the settings bean to a file named
 `settings.xml`, and `loadSettings()` loads these settings again. The following `main()` method
 constructs a Spring application context and calls these two methods:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import java.io.FileInputStream;
 	import java.io.FileOutputStream;
@@ -249,8 +258,10 @@ constructs a Spring application context and calls these two methods:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class Application {
 
@@ -276,6 +287,7 @@ constructs a Spring application context and calls these two methods:
 		application.loadSettings()
 	}
 ----
+======
 
 The `Application` requires both a `marshaller` and an `unmarshaller` property to be set. We
 can do so by using the following `applicationContext.xml`:

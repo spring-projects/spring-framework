@@ -7,8 +7,11 @@ point to Spring configuration with Spring MVC and controller infrastructure in i
 
 To set up MockMvc for testing a specific controller, use the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class MyWebTests {
 
@@ -24,8 +27,9 @@ To set up MockMvc for testing a specific controller, use the following:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyWebTests {
 
@@ -40,6 +44,7 @@ To set up MockMvc for testing a specific controller, use the following:
 
 	}
 ----
+======
 
 Or you can also use this setup when testing through the
 xref:testing/webtestclient.adoc#webtestclient-controller-config[WebTestClient] which delegates to the same builder
@@ -47,8 +52,11 @@ as shown above.
 
 To set up MockMvc through Spring configuration, use the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitWebConfig(locations = "my-servlet-context.xml")
 	class MyWebTests {
@@ -65,8 +73,9 @@ To set up MockMvc through Spring configuration, use the following:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitWebConfig(locations = ["my-servlet-context.xml"])
 	class MyWebTests {
@@ -82,6 +91,7 @@ To set up MockMvc through Spring configuration, use the following:
 
 	}
 ----
+======
 
 Or you can also use this setup when testing through the
 xref:testing/webtestclient.adoc#webtestclient-context-config[WebTestClient] which delegates to the same builder
@@ -108,8 +118,11 @@ a mock service with Mockito:
 You can then inject the mock service into the test to set up and verify your
 expectations, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitWebConfig(locations = "test-servlet-context.xml")
 	class AccountTests {
@@ -128,8 +141,10 @@ expectations, as the following example shows:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitWebConfig(locations = ["test-servlet-context.xml"])
 	class AccountTests {
@@ -148,6 +163,7 @@ expectations, as the following example shows:
 
 	}
 ----
+======
 
 The `standaloneSetup`, on the other hand, is a little closer to a unit test. It tests one
 controller at a time. You can manually inject the controller with mock dependencies, and

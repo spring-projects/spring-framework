@@ -63,8 +63,11 @@ dependency injection.
 
 The following example shows how to create and insert a BLOB:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	final File blobIn = new File("spring2004.jpg");
 	final InputStream blobIs = new FileInputStream(blobIn);
@@ -86,6 +89,7 @@ The following example shows how to create and insert a BLOB:
 	blobIs.close();
 	clobReader.close();
 ----
+======
 <1> Pass in the `lobHandler` that (in this example) is a plain `DefaultLobHandler`.
 <2> Using the method `setClobAsCharacterStream` to pass in the contents of the CLOB.
 <3> Using the method `setBlobAsBinaryStream` to pass in the contents of the BLOB.
@@ -134,8 +138,11 @@ Now it is time to read the LOB data from the database. Again, you use a `JdbcTem
 with the same instance variable `lobHandler` and a reference to a `DefaultLobHandler`.
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	List<Map<String, Object>> l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table",
 		new RowMapper<Map<String, Object>>() {
@@ -149,6 +156,7 @@ The following example shows how to do so:
 			}
 		});
 ----
+======
 <1> Using the method `getClobAsString` to retrieve the contents of the CLOB.
 <2> Using the method `getBlobAsBytes` to retrieve the contents of the BLOB.
 
@@ -203,8 +211,11 @@ implemented. This interface is used as part of the declaration of an `SqlOutPara
 The following example shows returning the value of an Oracle `STRUCT` object of the user
 declared type `ITEM_TYPE`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class TestItemStoredProcedure extends StoredProcedure {
 
@@ -223,8 +234,10 @@ declared type `ITEM_TYPE`:
 			// ...
 		}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure() {
 
@@ -239,6 +252,7 @@ declared type `ITEM_TYPE`:
 		}
 	}
 ----
+======
 
 You can use `SqlTypeValue` to pass the value of a Java object (such as `TestItem`) to a
 stored procedure. The `SqlTypeValue` interface has a single method (named
@@ -246,8 +260,11 @@ stored procedure. The `SqlTypeValue` interface has a single method (named
 can use it to create database-specific objects, such as `StructDescriptor` instances
 or `ArrayDescriptor` instances. The following example creates a `StructDescriptor` instance:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	final TestItem testItem = new TestItem(123L, "A test item",
 			new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"));
@@ -265,8 +282,10 @@ or `ArrayDescriptor` instances. The following example creates a `StructDescripto
 		}
 	};
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val (id, description, expirationDate) = TestItem(123L, "A test item",
 			SimpleDateFormat("yyyy-M-d").parse("2010-12-31"))
@@ -279,6 +298,7 @@ or `ArrayDescriptor` instances. The following example creates a `StructDescripto
 		}
 	}
 ----
+======
 
 You can now add this `SqlTypeValue` to the `Map` that contains the input parameters for the
 `execute` call of the stored procedure.
@@ -288,8 +308,11 @@ procedure. Oracle has its own internal `ARRAY` class that must be used in this c
 you can use the `SqlTypeValue` to create an instance of the Oracle `ARRAY` and populate
 it with values from the Java `ARRAY`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	final Long[] ids = new Long[] {1L, 2L};
 
@@ -301,8 +324,10 @@ it with values from the Java `ARRAY`, as the following example shows:
 		}
 	};
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class TestItemStoredProcedure(dataSource: DataSource) : StoredProcedure() {
 
@@ -317,6 +342,7 @@ it with values from the Java `ARRAY`, as the following example shows:
 		}
 	}
 ----
+======
 
 
 

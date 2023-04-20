@@ -61,8 +61,11 @@ do not need any special exception treatment (or both). However, Spring lets exce
 translation be applied transparently through the `@Repository` annotation. The following
 examples (one for Java configuration and one for XML configuration) show how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repository
 	public class ProductDaoImpl implements ProductDao {
@@ -71,8 +74,10 @@ examples (one for Java configuration and one for XML configuration) show how to 
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repository
 	class ProductDaoImpl : ProductDao {
@@ -81,6 +86,7 @@ examples (one for Java configuration and one for XML configuration) show how to 
 
 	}
 ----
+======
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----

@@ -15,8 +15,11 @@ integration for using Spring MVC with FreeMarker templates.
 
 The following example shows how to configure FreeMarker as a view technology:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 		@Configuration
 		@EnableWebMvc
@@ -37,8 +40,10 @@ The following example shows how to configure FreeMarker as a view technology:
 			}
 		}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -56,6 +61,7 @@ The following example shows how to configure FreeMarker as a view technology:
 		}
 	}
 ----
+======
 
 The following example shows how to configure the same in XML:
 
@@ -364,8 +370,11 @@ and a default value in the form backing object, the HTML resembles the following
 If your application expects to handle cities by internal codes (for example), you can create the map of
 codes with suitable keys, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	protected Map<String, ?> referenceData(HttpServletRequest request) throws Exception {
 		Map<String, String> cityMap = new LinkedHashMap<>();
@@ -378,8 +387,10 @@ codes with suitable keys, as the following example shows:
 		return model;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	protected fun referenceData(request: HttpServletRequest): Map<String, *> {
 		val cityMap = linkedMapOf(
@@ -390,6 +401,7 @@ codes with suitable keys, as the following example shows:
 		return hashMapOf("cityMap" to cityMap)
 	}
 ----
+======
 
 The code now produces output where the radio values are the relevant codes, but the
 user still sees the more user-friendly city names, as follows:

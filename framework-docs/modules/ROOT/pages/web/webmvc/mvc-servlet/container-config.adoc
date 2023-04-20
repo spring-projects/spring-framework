@@ -5,8 +5,11 @@ In a Servlet environment, you have the option of configuring the Servlet contain
 programmatically as an alternative or in combination with a `web.xml` file.
 The following example registers a `DispatcherServlet`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import org.springframework.web.WebApplicationInitializer;
 
@@ -23,8 +26,10 @@ The following example registers a `DispatcherServlet`:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.web.WebApplicationInitializer
 
@@ -40,6 +45,7 @@ The following example registers a `DispatcherServlet`:
 		}
 	}
 ----
+======
 
 
 `WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
@@ -52,8 +58,11 @@ location of the `DispatcherServlet` configuration.
 This is recommended for applications that use Java-based Spring configuration, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MyWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -73,8 +82,10 @@ following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyWebAppInitializer : AbstractAnnotationConfigDispatcherServletInitializer() {
 
@@ -91,12 +102,16 @@ following example shows:
 		}
 	}
 ----
+======
 
 If you use XML-based Spring configuration, you should extend directly from
 `AbstractDispatcherServletInitializer`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MyWebAppInitializer extends AbstractDispatcherServletInitializer {
 
@@ -118,8 +133,10 @@ If you use XML-based Spring configuration, you should extend directly from
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyWebAppInitializer : AbstractDispatcherServletInitializer() {
 
@@ -138,13 +155,17 @@ If you use XML-based Spring configuration, you should extend directly from
 		}
 	}
 ----
+======
 
 `AbstractDispatcherServletInitializer` also provides a convenient way to add `Filter`
 instances and have them be automatically mapped to the `DispatcherServlet`, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MyWebAppInitializer extends AbstractDispatcherServletInitializer {
 
@@ -157,8 +178,10 @@ following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyWebAppInitializer : AbstractDispatcherServletInitializer() {
 
@@ -169,6 +192,7 @@ following example shows:
 		}
 	}
 ----
+======
 
 Each filter is added with a default name based on its concrete type and automatically
 mapped to the `DispatcherServlet`.

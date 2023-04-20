@@ -8,8 +8,11 @@ supports paging through all messages. How would you go about testing it?
 
 With Spring MVC Test, we can easily test if we are able to create a `Message`, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	MockHttpServletRequestBuilder createMessage = post("/messages/")
 			.param("summary", "Spring Rocks")
@@ -19,8 +22,10 @@ With Spring MVC Test, we can easily test if we are able to create a `Message`, a
 			.andExpect(status().is3xxRedirection())
 			.andExpect(redirectedUrl("/messages/123"));
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Test
 	fun test() {
@@ -33,6 +38,7 @@ With Spring MVC Test, we can easily test if we are able to create a `Message`, a
 		}
 	}
 ----
+======
 
 What if we want to test the form view that lets us create the message? For example,
 assume our form looks like the following snippet:
@@ -57,31 +63,39 @@ assume our form looks like the following snippet:
 How do we ensure that our form produce the correct request to create a new message? A
 naive attempt might resemble the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	mockMvc.perform(get("/messages/form"))
 			.andExpect(xpath("//input[@name='summary']").exists())
 			.andExpect(xpath("//textarea[@name='text']").exists());
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	mockMvc.get("/messages/form").andExpect {
 		xpath("//input[@name='summary']") { exists() }
 		xpath("//textarea[@name='text']") { exists() }
 	}
 ----
+======
 
 This test has some obvious drawbacks. If we update our controller to use the parameter
 `message` instead of `text`, our form test continues to pass, even though the HTML form
 is out of synch with the controller. To resolve this we can combine our two tests, as
 follows:
 
+[tabs]
+======
+Java::
++
 [[spring-mvc-test-server-htmlunit-mock-mvc-test]]
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	String summaryParamName = "summary";
 	String textParamName = "text";
@@ -98,8 +112,9 @@ follows:
 			.andExpect(redirectedUrl("/messages/123"));
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val summaryParamName = "summary";
 	val textParamName = "text";
@@ -115,6 +130,7 @@ follows:
 		redirectedUrl("/messages/123")
 	}
 ----
+======
 
 This would reduce the risk of our test incorrectly passing, but there are still some
 problems:

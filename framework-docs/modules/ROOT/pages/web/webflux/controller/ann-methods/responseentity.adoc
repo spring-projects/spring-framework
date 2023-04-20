@@ -5,8 +5,11 @@
 
 `ResponseEntity` is like xref:web/webflux/controller/ann-methods/responsebody.adoc[`@ResponseBody`] but with status and headers. For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/something")
 	public ResponseEntity<String> handle() {
@@ -15,8 +18,10 @@
 		return ResponseEntity.ok().eTag(etag).body(body);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/something")
 	fun handle(): ResponseEntity<String> {
@@ -25,6 +30,7 @@
 		return ResponseEntity.ok().eTag(etag).build(body)
 	}
 ----
+======
 
 WebFlux supports using a single value xref:web-reactive.adoc#webflux-reactive-libraries[reactive type] to
 produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types

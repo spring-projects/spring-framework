@@ -13,8 +13,11 @@ formatters manually with the help of:
 
 For example, the following Java configuration registers a global `yyyyMMdd` format:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -44,8 +47,10 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -71,6 +76,7 @@ For example, the following Java configuration registers a global `yyyyMMdd` form
 		}
 	}
 ----
+======
 
 If you prefer XML-based configuration, you can use a
 `FormattingConversionServiceFactoryBean`. The following example shows how to do so:

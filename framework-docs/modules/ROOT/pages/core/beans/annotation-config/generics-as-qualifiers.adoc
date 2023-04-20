@@ -5,8 +5,11 @@ In addition to the `@Qualifier` annotation, you can use Java generic types
 as an implicit form of qualification. For example, suppose you have the following
 configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class MyConfiguration {
@@ -22,8 +25,10 @@ configuration:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class MyConfiguration {
@@ -35,13 +40,17 @@ configuration:
 		fun integerStore() = IntegerStore()
 	}
 ----
+======
 
 Assuming that the preceding beans implement a generic interface, (that is, `Store<String>` and
 `Store<Integer>`), you can `@Autowire` the `Store` interface and the generic is
 used as a qualifier, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Autowired
 	private Store<String> s1; // <String> qualifier, injects the stringStore bean
@@ -49,8 +58,10 @@ used as a qualifier, as the following example shows:
 	@Autowired
 	private Store<Integer> s2; // <Integer> qualifier, injects the integerStore bean
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Autowired
 	private lateinit var s1: Store<String> // <String> qualifier, injects the stringStore bean
@@ -58,26 +69,33 @@ used as a qualifier, as the following example shows:
 	@Autowired
 	private lateinit var s2: Store<Integer> // <Integer> qualifier, injects the integerStore bean
 ----
+======
 
 Generic qualifiers also apply when autowiring lists, `Map` instances and arrays. The
 following example autowires a generic `List`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Inject all Store beans as long as they have an <Integer> generic
 	// Store<String> beans will not appear in this list
 	@Autowired
 	private List<Store<Integer>> s;
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Inject all Store beans as long as they have an <Integer> generic
 	// Store<String> beans will not appear in this list
 	@Autowired
 	private lateinit var s: List<Store<Integer>>
 ----
+======
 
 
 

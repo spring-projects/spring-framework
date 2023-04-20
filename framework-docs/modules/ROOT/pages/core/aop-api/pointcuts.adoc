@@ -208,8 +208,11 @@ Because static pointcuts are most useful, you should probably subclass
 abstract method (although you can override other methods to customize behavior). The
 following example shows how to subclass `StaticMethodMatcherPointcut`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class TestStaticPointcut extends StaticMethodMatcherPointcut {
 
@@ -218,8 +221,10 @@ following example shows how to subclass `StaticMethodMatcherPointcut`:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class TestStaticPointcut : StaticMethodMatcherPointcut() {
 
@@ -228,6 +233,7 @@ following example shows how to subclass `StaticMethodMatcherPointcut`:
 		}
 	}
 ----
+======
 
 There are also superclasses for dynamic pointcuts.
 You can use custom pointcuts with any advice type.

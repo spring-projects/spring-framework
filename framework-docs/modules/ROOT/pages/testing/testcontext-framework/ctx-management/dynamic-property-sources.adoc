@@ -38,8 +38,11 @@ ensure that each subclass gets its own `ApplicationContext` with the correct dyn
 properties.
 ====
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@SpringJUnitConfig(/* ... */)
 	@Testcontainers
@@ -59,8 +62,10 @@ properties.
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(/* ... */)
 	@Testcontainers
@@ -85,6 +90,7 @@ properties.
 
 	}
 ----
+======
 
 [[precedence]]
 == Precedence

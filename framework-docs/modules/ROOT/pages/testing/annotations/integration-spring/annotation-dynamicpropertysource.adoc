@@ -10,8 +10,11 @@ https://www.testcontainers.org/[Testcontainers] project.
 
 The following example demonstrates how to register a dynamic property:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	class MyIntegrationTests {
@@ -26,6 +29,7 @@ The following example demonstrates how to register a dynamic property:
 		// tests ...
 	}
 ----
+======
 <1> Annotate a `static` method with `@DynamicPropertySource`.
 <2> Accept a `DynamicPropertyRegistry` as an argument.
 <3> Register a dynamic `server.port` property to be retrieved lazily from the server.

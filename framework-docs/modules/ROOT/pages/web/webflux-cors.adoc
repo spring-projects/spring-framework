@@ -84,8 +84,11 @@ annotation enables cross-origin requests on annotated controller methods, as the
 following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RestController
 	@RequestMapping("/account")
@@ -103,8 +106,10 @@ following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RestController
 	@RequestMapping("/account")
@@ -122,6 +127,7 @@ following example shows:
 		}
 	}
 ----
+======
 --
 
 By default, `@CrossOrigin` allows:
@@ -142,8 +148,11 @@ the `allowOriginPatterns` property may be used to match to a dynamic set of orig
 The following example specifies a certain domain and sets `maxAge` to an hour:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@CrossOrigin(origins = "https://domain2.com", maxAge = 3600)
 	@RestController
@@ -161,8 +170,10 @@ The following example specifies a certain domain and sets `maxAge` to an hour:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@CrossOrigin("https://domain2.com", maxAge = 3600)
 	@RestController
@@ -180,14 +191,18 @@ The following example specifies a certain domain and sets `maxAge` to an hour:
 		}
 	}
 ----
+======
 --
 
 You can use `@CrossOrigin` at both the class and the method level,
 as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@CrossOrigin(maxAge = 3600) // <1>
 	@RestController
@@ -206,6 +221,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 <1> Using `@CrossOrigin` at the class level.
 <2> Using `@CrossOrigin` at the method level.
 
@@ -261,8 +277,11 @@ the `allowOriginPatterns` property may be used to match to a dynamic set of orig
 To enable CORS in the WebFlux Java configuration, you can use the `CorsRegistry` callback,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -282,8 +301,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -302,6 +323,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 
 
@@ -321,8 +343,11 @@ CORS.
 To configure the filter, you can declare a `CorsWebFilter` bean and pass a
 `CorsConfigurationSource` to its constructor, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Bean
 	CorsWebFilter corsFilter() {
@@ -343,8 +368,10 @@ To configure the filter, you can declare a `CorsWebFilter` bean and pass a
 		return new CorsWebFilter(source);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Bean
 	fun corsFilter(): CorsWebFilter {
@@ -365,3 +392,4 @@ To configure the filter, you can declare a `CorsWebFilter` bean and pass a
 		return CorsWebFilter(source)
 	}
 ----
+======

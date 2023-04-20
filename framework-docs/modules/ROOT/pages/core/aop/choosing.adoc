@@ -55,8 +55,11 @@ it can express than the @AspectJ style: Only the "singleton" aspect instantiatio
 is supported, and it is not possible to combine named pointcuts declared in XML.
 For example, in the @AspectJ style you can write something like the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Pointcut("execution(* get*())")
 	public void propertyAccess() {}
@@ -67,8 +70,10 @@ For example, in the @AspectJ style you can write something like the following:
 	@Pointcut("propertyAccess() && operationReturningAnAccount()")
 	public void accountPropertyAccess() {}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Pointcut("execution(* get*())")
 	fun propertyAccess() {}
@@ -79,6 +84,7 @@ For example, in the @AspectJ style you can write something like the following:
 	@Pointcut("propertyAccess() && operationReturningAnAccount()")
 	fun accountPropertyAccess() {}
 ----
+======
 
 In the XML style you can declare the first two pointcuts:
 

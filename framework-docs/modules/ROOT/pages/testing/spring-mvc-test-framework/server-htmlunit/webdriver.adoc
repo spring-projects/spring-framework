@@ -26,25 +26,34 @@ afterwards.
 If one of the fields were named "`summary`", we might have something that resembles the
 following repeated in multiple places within our tests:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
 	summaryInput.setValueAttribute(summary);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val summaryInput = currentPage.getHtmlElementById("summary")
 	summaryInput.setValueAttribute(summary)
 ----
+======
 
 So what happens if we change the `id` to `smmry`? Doing so would force us to update all
 of our tests to incorporate this change. This violates the DRY principle, so we should
 ideally extract this code into its own method, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public HtmlPage createMessage(HtmlPage currentPage, String summary, String text) {
 		setSummary(currentPage, summary);
@@ -57,8 +66,9 @@ ideally extract this code into its own method, as follows:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun createMessage(currentPage: HtmlPage, summary:String, text:String) :HtmlPage{
 		setSummary(currentPage, summary);
@@ -70,14 +80,18 @@ ideally extract this code into its own method, as follows:
 		summaryInput.setValueAttribute(summary)
 	}
 ----
+======
 
 Doing so ensures that we do not have to update all of our tests if we change the UI.
 
 We might even take this a step further and place this logic within an `Object` that
 represents the `HtmlPage` we are currently on, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class CreateMessagePage {
 
@@ -111,8 +125,10 @@ represents the `HtmlPage` we are currently on, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class CreateMessagePage(private val currentPage: HtmlPage) {
 
@@ -139,6 +155,7 @@ represents the `HtmlPage` we are currently on, as the following example shows:
 	}
 }
 ----
+======
 
 Formerly, this pattern was known as the
 https://github.com/SeleniumHQ/selenium/wiki/PageObjects[Page Object Pattern]. While we
@@ -154,8 +171,11 @@ includes a test dependency on `org.seleniumhq.selenium:selenium-htmlunit-driver`
 We can easily create a Selenium WebDriver that integrates with MockMvc by using the
 `MockMvcHtmlUnitDriverBuilder` as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebDriver driver;
 
@@ -166,8 +186,10 @@ We can easily create a Selenium WebDriver that integrates with MockMvc by using 
 				.build();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	lateinit var driver: WebDriver
 
@@ -178,6 +200,7 @@ We can easily create a Selenium WebDriver that integrates with MockMvc by using 
 				.build()
 	}
 ----
+======
 
 NOTE: This is a simple example of using `MockMvcHtmlUnitDriverBuilder`. For more advanced
 usage, see xref:testing/spring-mvc-test-framework/server-htmlunit/webdriver.adoc#spring-mvc-test-server-htmlunit-webdriver-advanced-builder[Advanced `MockMvcHtmlUnitDriverBuilder`].
@@ -195,35 +218,45 @@ application to a Servlet container. For example, we can request the view to crea
 message with the following:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	CreateMessagePage page = CreateMessagePage.to(driver);
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val page = CreateMessagePage.to(driver)
 ----
+======
 --
 
 We can then fill out the form and submit it to create a message, as follows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ViewMessagePage viewMessagePage =
 			page.createMessage(ViewMessagePage.class, expectedSummary, expectedText);
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val viewMessagePage =
 		page.createMessage(ViewMessagePage::class, expectedSummary, expectedText)
 ----
+======
 --
 
 This improves on the design of our xref:testing/spring-mvc-test-framework/server-htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-usage[HtmlUnit test]
@@ -233,8 +266,11 @@ with HtmlUnit, but it is much easier with WebDriver. Consider the following
 `CreateMessagePage` implementation:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class CreateMessagePage extends AbstractPage { // <1>
 
@@ -262,6 +298,7 @@ with HtmlUnit, but it is much easier with WebDriver. Consider the following
 		}
 	}
 ----
+======
 <1> `CreateMessagePage` extends the `AbstractPage`. We do not go over the details of
 `AbstractPage`, but, in summary, it contains common functionality for all of our pages.
 For example, if our application has a navigational bar, global error messages, and other
@@ -327,26 +364,35 @@ Finally, we can verify that a new message was created successfully. The followin
 assertions use the https://assertj.github.io/doc/[AssertJ] assertion library:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	assertThat(viewMessagePage.getMessage()).isEqualTo(expectedMessage);
 	assertThat(viewMessagePage.getSuccess()).isEqualTo("Successfully created a new message");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	assertThat(viewMessagePage.message).isEqualTo(expectedMessage)
 	assertThat(viewMessagePage.success).isEqualTo("Successfully created a new message")
 ----
+======
 --
 
 We can see that our `ViewMessagePage` lets us interact with our custom domain model. For
 example, it exposes a method that returns a `Message` object:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public Message getMessage() throws ParseException {
 		Message message = new Message();
@@ -357,11 +403,14 @@ example, it exposes a method that returns a `Message` object:
 		return message;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun getMessage() = Message(getId(), getCreated(), getSummary(), getText())
 ----
+======
 --
 
 We can then use the rich domain objects in our assertions.
@@ -370,8 +419,11 @@ Lastly, we must not forget to close the `WebDriver` instance when the test is co
 as follows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@AfterEach
 	void destroy() {
@@ -381,8 +433,9 @@ as follows:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@AfterEach
 	fun destroy() {
@@ -391,6 +444,7 @@ as follows:
 		}
 	}
 ----
+======
 --
 
 For additional information on using WebDriver, see the Selenium
@@ -403,8 +457,11 @@ In the examples so far, we have used `MockMvcHtmlUnitDriverBuilder` in the simpl
 possible, by building a `WebDriver` based on the `WebApplicationContext` loaded for us by
 the Spring TestContext Framework. This approach is repeated here, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebDriver driver;
 
@@ -416,8 +473,9 @@ the Spring TestContext Framework. This approach is repeated here, as follows:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	lateinit var driver: WebDriver
 
@@ -428,11 +486,15 @@ the Spring TestContext Framework. This approach is repeated here, as follows:
 				.build()
 	}
 ----
+======
 
 We can also specify additional configuration options, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebDriver driver;
 
@@ -449,8 +511,10 @@ We can also specify additional configuration options, as follows:
 				.build();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	lateinit var driver: WebDriver
 
@@ -467,12 +531,16 @@ We can also specify additional configuration options, as follows:
 				.build()
 	}
 ----
+======
 
 As an alternative, we can perform the exact same setup by configuring the `MockMvc`
 instance separately and supplying it to the `MockMvcHtmlUnitDriverBuilder`, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	MockMvc mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
@@ -489,11 +557,13 @@ instance separately and supplying it to the `MockMvcHtmlUnitDriverBuilder`, as f
 			.build();
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Not possible in Kotlin until https://youtrack.jetbrains.com/issue/KT-22208 is fixed
 ----
+======
 
 This is more verbose, but, by building the `WebDriver` with a `MockMvc` instance, we have
 the full power of MockMvc at our fingertips.

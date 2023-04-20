@@ -53,8 +53,11 @@ You can declare a `ScriptTemplateConfigurer` bean to specify the script engine t
 the script files to load, what function to call to render templates, and so on.
 The following example uses Mustache templates and the Nashorn JavaScript engine:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -76,8 +79,10 @@ The following example uses Mustache templates and the Nashorn JavaScript engine:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -96,6 +101,7 @@ The following example uses Mustache templates and the Nashorn JavaScript engine:
 		}
 	}
 ----
+======
 
 The following example shows the same arrangement in XML:
 
@@ -114,8 +120,11 @@ The following example shows the same arrangement in XML:
 
 The controller would look no different for the Java and XML configurations, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class SampleController {
@@ -128,8 +137,10 @@ The controller would look no different for the Java and XML configurations, as t
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class SampleController {
@@ -142,6 +153,7 @@ The controller would look no different for the Java and XML configurations, as t
 		}
 	}
 ----
+======
 
 The following example shows the Mustache template:
 
@@ -176,8 +188,11 @@ browser facilities that are not available in the server-side script engine.
 
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -199,8 +214,10 @@ The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -219,6 +236,7 @@ The following example shows how to do so:
 		}
 	}
 ----
+======
 
 NOTE: Setting the `sharedEngine` property to `false` is required when using non-thread-safe
 script engines with templating libraries not designed for concurrency, such as Handlebars or

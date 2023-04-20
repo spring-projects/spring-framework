@@ -8,8 +8,11 @@ requests with `multipart/form-data` is parsed and accessible as regular request
 parameters. The following example accesses one regular form field and one uploaded
 file:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class FileUploadController {
@@ -27,8 +30,10 @@ file:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class FileUploadController {
@@ -46,6 +51,7 @@ file:
 		}
 	}
 ----
+======
 
 Declaring the argument type as a `List<MultipartFile>` allows for resolving multiple
 files for the same parameter name.
@@ -62,8 +68,11 @@ xref:web/webmvc/mvc-controller/ann-methods/modelattrib-method-args.adoc[command 
 and file from the preceding example could be fields on a form object,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	class MyForm {
 
@@ -88,8 +97,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyForm(val name: String, val file: MultipartFile, ...)
 
@@ -107,6 +118,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 
 Multipart requests can also be submitted from non-browser clients in a RESTful service
@@ -137,8 +149,11 @@ probably want it deserialized from JSON (similar to `@RequestBody`). Use the
 `@RequestPart` annotation to access a multipart after converting it with an
 xref:integration/rest-clients.adoc#rest-message-conversion[HttpMessageConverter]:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/")
 	public String handle(@RequestPart("meta-data") MetaData metadata,
@@ -146,8 +161,10 @@ xref:integration/rest-clients.adoc#rest-message-conversion[HttpMessageConverter]
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/")
 	fun handle(@RequestPart("meta-data") metadata: MetaData,
@@ -155,6 +172,7 @@ xref:integration/rest-clients.adoc#rest-message-conversion[HttpMessageConverter]
 		// ...
 	}
 ----
+======
 
 You can use `@RequestPart` in combination with `jakarta.validation.Valid` or use Spring's
 `@Validated` annotation, both of which cause Standard Bean Validation to be applied.
@@ -163,8 +181,11 @@ into a 400 (BAD_REQUEST) response. Alternatively, you can handle validation erro
 within the controller through an `Errors` or `BindingResult` argument,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@PostMapping("/")
 	public String handle(@Valid @RequestPart("meta-data") MetaData metadata,
@@ -172,8 +193,10 @@ as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/")
 	fun handle(@Valid @RequestPart("meta-data") metadata: MetaData,
@@ -181,6 +204,7 @@ as the following example shows:
 		// ...
 	}
 ----
+======
 
 
 

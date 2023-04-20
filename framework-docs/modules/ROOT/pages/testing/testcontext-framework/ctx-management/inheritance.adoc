@@ -26,8 +26,11 @@ Beans defined in `extended-config.xml` can, therefore, override (that is, replac
 defined in `base-config.xml`. The following example shows how one class can extend
 another and use both its own configuration file and the superclass's configuration file:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "/base-config.xml"
@@ -44,6 +47,7 @@ another and use both its own configuration file and the superclass's configurati
 		// class body...
 	}
 ----
+======
 <1> Configuration file defined in the superclass.
 <2> Configuration file defined in the subclass.
 
@@ -75,8 +79,11 @@ order. Beans defined in `ExtendedConfig` can, therefore, override (that is, repl
 those defined in `BaseConfig`. The following example shows how one class can extend
 another and use both its own configuration class and the superclass's configuration class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// ApplicationContext will be loaded from BaseConfig
 	@SpringJUnitConfig(BaseConfig.class) // <1>
@@ -90,6 +97,7 @@ another and use both its own configuration class and the superclass's configurat
 		// class body...
 	}
 ----
+======
 <1> Configuration class defined in the superclass.
 <2> Configuration class defined in the subclass.
 
@@ -119,8 +127,11 @@ implement Spring's `Ordered` interface or are annotated with Spring's `@Order` a
 or the standard `@Priority` annotation. The following example shows how one class can
 extend another and use both its own initializer and the superclass's initializer:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// ApplicationContext will be initialized by BaseInitializer
 	@SpringJUnitConfig(initializers = BaseInitializer.class) // <1>
@@ -135,6 +146,7 @@ extend another and use both its own initializer and the superclass's initializer
 		// class body...
 	}
 ----
+======
 <1> Initializer defined in the superclass.
 <2> Initializer defined in the subclass.
 

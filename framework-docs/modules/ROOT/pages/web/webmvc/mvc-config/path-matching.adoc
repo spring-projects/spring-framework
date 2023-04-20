@@ -9,8 +9,11 @@ For details on the individual options, see the
 
 The following example shows how to customize path matching in Java configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -26,8 +29,10 @@ The following example shows how to customize path matching in Java configuration
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -42,6 +47,7 @@ The following example shows how to customize path matching in Java configuration
 		}
 	}
 ----
+======
 
 The following example shows how to customize path matching in XML configuration:
 

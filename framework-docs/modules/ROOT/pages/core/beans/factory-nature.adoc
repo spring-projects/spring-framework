@@ -67,8 +67,11 @@ no-argument signature. With Java configuration, you can use the `initMethod` att
 	<bean id="exampleInitBean" class="examples.ExampleBean" init-method="init"/>
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ExampleBean {
 
@@ -77,8 +80,10 @@ no-argument signature. With Java configuration, you can use the `initMethod` att
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ExampleBean {
 
@@ -87,6 +92,7 @@ no-argument signature. With Java configuration, you can use the `initMethod` att
 		}
 	}
 ----
+======
 
 The preceding example has almost exactly the same effect as the following example
 (which consists of two listings):
@@ -96,8 +102,11 @@ The preceding example has almost exactly the same effect as the following exampl
 	<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class AnotherExampleBean implements InitializingBean {
 
@@ -107,8 +116,10 @@ The preceding example has almost exactly the same effect as the following exampl
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class AnotherExampleBean : InitializingBean {
 
@@ -117,6 +128,7 @@ The preceding example has almost exactly the same effect as the following exampl
 		}
 	}
 ----
+======
 
 However, the first of the two preceding examples does not couple the code to Spring.
 
@@ -146,8 +158,11 @@ xref:core/beans/java/bean-annotation.adoc#beans-java-lifecycle-callbacks[Receivi
 	<bean id="exampleInitBean" class="examples.ExampleBean" destroy-method="cleanup"/>
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ExampleBean {
 
@@ -156,8 +171,10 @@ xref:core/beans/java/bean-annotation.adoc#beans-java-lifecycle-callbacks[Receivi
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ExampleBean {
 
@@ -166,6 +183,7 @@ xref:core/beans/java/bean-annotation.adoc#beans-java-lifecycle-callbacks[Receivi
 		}
 	}
 ----
+======
 
 The preceding definition has almost exactly the same effect as the following definition:
 
@@ -174,8 +192,11 @@ The preceding definition has almost exactly the same effect as the following def
 	<bean id="exampleInitBean" class="examples.AnotherExampleBean"/>
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class AnotherExampleBean implements DisposableBean {
 
@@ -185,8 +206,10 @@ The preceding definition has almost exactly the same effect as the following def
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class AnotherExampleBean : DisposableBean {
 
@@ -195,6 +218,7 @@ The preceding definition has almost exactly the same effect as the following def
 		}
 	}
 ----
+======
 
 However, the first of the two preceding definitions does not couple the code to Spring.
 
@@ -229,8 +253,11 @@ Suppose that your initialization callback methods are named `init()` and your de
 callback methods are named `destroy()`. Your class then resembles the class in the
 following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class DefaultBlogService implements BlogService {
 
@@ -248,8 +275,10 @@ following example:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class DefaultBlogService : BlogService {
 
@@ -263,6 +292,7 @@ following example:
 		}
 	}
 ----
+======
 
 You could then use that class in a bean resembling the following:
 
@@ -478,8 +508,11 @@ and implement these destroy callbacks correctly.
 To register a shutdown hook, call the `registerShutdownHook()` method that is
 declared on the `ConfigurableApplicationContext` interface, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import org.springframework.context.ConfigurableApplicationContext;
 	import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -498,8 +531,10 @@ declared on the `ConfigurableApplicationContext` interface, as the following exa
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.context.support.ClassPathXmlApplicationContext
 
@@ -514,6 +549,7 @@ declared on the `ConfigurableApplicationContext` interface, as the following exa
 		// main method exits, hook is called prior to the app shutting down...
 	}
 ----
+======
 
 
 

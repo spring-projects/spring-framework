@@ -7,8 +7,11 @@ You can use the `@ResponseBody` annotation on a method to have the return serial
 to the response body through an xref:web/webflux/reactive-spring.adoc#webflux-codecs[HttpMessageWriter]. The following
 example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@GetMapping("/accounts/{id}")
 	@ResponseBody
@@ -16,8 +19,10 @@ example shows how to do so:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/accounts/{id}")
 	@ResponseBody
@@ -25,6 +30,7 @@ example shows how to do so:
 		// ...
 	}
 ----
+======
 
 `@ResponseBody` is also supported at the class level, in which case it is inherited by
 all controller methods. This is the effect of `@RestController`, which is nothing more

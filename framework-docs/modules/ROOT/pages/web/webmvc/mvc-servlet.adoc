@@ -18,8 +18,11 @@ The following example of the Java configuration registers and initializes
 the `DispatcherServlet`, which is auto-detected by the Servlet container
 (see xref:web/webmvc/mvc-servlet/container-config.adoc[Servlet Config]):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
@@ -38,8 +41,10 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MyWebApplicationInitializer : WebApplicationInitializer {
 
@@ -57,6 +62,7 @@ the `DispatcherServlet`, which is auto-detected by the Servlet container
 		}
 	}
 ----
+======
 
 NOTE: In addition to using the ServletContext API directly, you can also extend
 `AbstractAnnotationConfigDispatcherServletInitializer` and override specific methods

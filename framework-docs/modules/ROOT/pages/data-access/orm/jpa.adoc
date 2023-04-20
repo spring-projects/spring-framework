@@ -293,8 +293,11 @@ using an injected `EntityManagerFactory` or `EntityManager`. Spring can understa
 if a `PersistenceAnnotationBeanPostProcessor` is enabled. The following example shows a plain JPA DAO implementation
 that uses the `@PersistenceUnit` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -320,8 +323,10 @@ that uses the `@PersistenceUnit` annotation:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ProductDaoImpl : ProductDao {
 
@@ -340,6 +345,7 @@ that uses the `@PersistenceUnit` annotation:
 		}
 	}
 ----
+======
 
 The preceding DAO has no dependency on Spring and still fits nicely into a Spring
 application context. Moreover, the DAO takes advantage of annotations to require the
@@ -382,8 +388,11 @@ the factory. You can avoid this by requesting a transactional `EntityManager` (a
 called a "`shared EntityManager`" because it is a shared, thread-safe proxy for the actual
 transactional EntityManager) to be injected instead of the factory. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ProductDaoImpl implements ProductDao {
 
@@ -397,8 +406,10 @@ transactional EntityManager) to be injected instead of the factory. The followin
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ProductDaoImpl : ProductDao {
 
@@ -412,6 +423,7 @@ transactional EntityManager) to be injected instead of the factory. The followin
 		}
 	}
 ----
+======
 
 The `@PersistenceContext` annotation has an optional attribute called `type`, which defaults to
 `PersistenceContextType.TRANSACTION`. You can use this default to receive a shared

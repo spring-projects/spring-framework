@@ -10,8 +10,11 @@ package `org.springframework.web.servlet.view.feed`.
 optionally override the `buildFeedMetadata()` method (the default implementation is
 empty). The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SampleContentAtomView extends AbstractAtomFeedView {
 
@@ -28,8 +31,10 @@ empty). The following example shows how to do so:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SampleContentAtomView : AbstractAtomFeedView() {
 		
@@ -44,11 +49,15 @@ empty). The following example shows how to do so:
 		}
 	}
 ----
+======
 
 Similar requirements apply for implementing `AbstractRssFeedView`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SampleContentRssView extends AbstractRssFeedView {
 
@@ -65,8 +74,10 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as the follow
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SampleContentRssView : AbstractRssFeedView() {
 
@@ -81,6 +92,7 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as the follow
 		}
 	}
 ----
+======
 
 
 

@@ -13,8 +13,11 @@ as the corresponding Spring lifecycle interface method or explicitly declared ca
 method. In the following example, the cache is pre-populated upon initialization and
 cleared upon destruction:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class CachingMovieLister {
 
@@ -29,8 +32,10 @@ cleared upon destruction:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class CachingMovieLister {
 
@@ -45,6 +50,7 @@ cleared upon destruction:
 		}
 	}
 ----
+======
 
 For details about the effects of combining various lifecycle mechanisms, see
 xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-combined-effects[Combining Lifecycle Mechanisms].

@@ -16,8 +16,11 @@ first, then manually performing the async dispatch, and finally verifying the re
 Below is an example test for controller methods that return `DeferredResult`, `Callable`,
 or reactive type such as Reactor `Mono`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
 
@@ -34,6 +37,7 @@ or reactive type such as Reactor `Mono`:
                 .andExpect(content().string("body"));
     }
 ----
+======
 <1> Check response status is still unchanged
 <2> Async processing must have started
 <3> Wait and assert the async result

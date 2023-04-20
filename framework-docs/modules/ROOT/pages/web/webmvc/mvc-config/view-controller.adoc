@@ -7,8 +7,11 @@ logic to run before the view generates the response.
 
 The following example of Java configuration forwards a request for `/` to a view called `home`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -20,8 +23,10 @@ The following example of Java configuration forwards a request for `/` to a view
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -32,6 +37,7 @@ The following example of Java configuration forwards a request for `/` to a view
 		}
 	}
 ----
+======
 
 The following example achieves the same thing as the preceding example, but with XML, by
 using the `<mvc:view-controller>` element:

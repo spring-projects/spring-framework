@@ -11,8 +11,11 @@ registered as a global xref:core/validation/validator.adoc[Validator] for use wi
 In Java configuration, you can customize the global `Validator` instance, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -24,8 +27,10 @@ following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -36,6 +41,7 @@ following example shows:
 		}
 	}
 ----
+======
 
 The following example shows how to achieve the same configuration in XML:
 
@@ -59,8 +65,11 @@ The following example shows how to achieve the same configuration in XML:
 Note that you can also register `Validator` implementations locally, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class MyController {
@@ -71,8 +80,10 @@ example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class MyController {
@@ -83,6 +94,7 @@ example shows:
 		}
 	}
 ----
+======
 
 TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
 mark it with `@Primary` in order to avoid conflict with the one declared in the MVC configuration.

@@ -8,8 +8,11 @@ for customization via `@NumberFormat` and `@DateTimeFormat` on fields.
 
 To register custom formatters and converters in Java config, use the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -21,8 +24,10 @@ To register custom formatters and converters in Java config, use the following:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -33,6 +38,7 @@ To register custom formatters and converters in Java config, use the following:
 		}
 	}
 ----
+======
 
 To do the same in XML config, use the following:
 
@@ -78,8 +84,11 @@ values. This works for forms where dates are represented as Strings with "input"
 fields. For "date" and "time" form fields, however, browsers use a fixed format defined
 in the HTML spec. For such cases date and time formatting can be customized as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -93,8 +102,10 @@ in the HTML spec. For such cases date and time formatting can be customized as f
       	}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -107,6 +118,7 @@ in the HTML spec. For such cases date and time formatting can be customized as f
 		}
 	}
 ----
+======
 
 NOTE: See xref:core/validation/format.adoc#format-FormatterRegistrar-SPI[the `FormatterRegistrar` SPI]
 and the `FormattingConversionServiceFactoryBean` for more information on when to use

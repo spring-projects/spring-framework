@@ -8,8 +8,11 @@ query parameters or form data) to a method argument in a controller.
 
 The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	@RequestMapping("/pets")
@@ -28,6 +31,7 @@ The following example shows how to do so:
 
 	}
 ----
+======
 <1> Using `@RequestParam` to bind `petId`.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

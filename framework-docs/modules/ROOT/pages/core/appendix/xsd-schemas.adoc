@@ -117,8 +117,11 @@ easy to do in Spring. You do not actually have to do anything or know anything a
 the Spring internals (or even about classes such as the `FieldRetrievingFactoryBean`).
 The following example enumeration shows how easy injecting an enum value is:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package jakarta.persistence;
 
@@ -128,8 +131,10 @@ The following example enumeration shows how easy injecting an enum value is:
 		EXTENDED
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package jakarta.persistence
 
@@ -139,11 +144,15 @@ The following example enumeration shows how easy injecting an enum value is:
 		EXTENDED
 	}
 ----
+======
 
 Now consider the following setter of type `PersistenceContextType` and the corresponding bean definition:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package example;
 
@@ -156,8 +165,10 @@ Now consider the following setter of type `PersistenceContextType` and the corre
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package example
 
@@ -166,6 +177,7 @@ Now consider the following setter of type `PersistenceContextType` and the corre
 		lateinit var persistenceContextType: PersistenceContextType
 	}
 ----
+======
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----

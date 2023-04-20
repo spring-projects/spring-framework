@@ -15,8 +15,11 @@ method, potentially overriding class-level `@Rollback` or `@Commit` semantics.
 The following example causes a test method's result to not be rolled back (that is, the
 result is committed to the database):
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Rollback(false) // <1>
 	@Test
@@ -24,6 +27,7 @@ result is committed to the database):
 		// ...
 	}
 ----
+======
 <1> Do not roll back the result.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

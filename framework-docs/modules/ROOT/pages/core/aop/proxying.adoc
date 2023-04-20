@@ -65,8 +65,11 @@ Consider first the scenario where you have a plain-vanilla, un-proxied,
 nothing-special-about-it, straight object reference, as the following
 code snippet shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public class SimplePojo implements Pojo {
 
@@ -80,8 +83,10 @@ code snippet shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	class SimplePojo : Pojo {
 
@@ -95,14 +100,18 @@ code snippet shows:
 		}
 	}
 ----
+======
 
 If you invoke a method on an object reference, the method is invoked directly on
 that object reference, as the following image and listing show:
 
 image::aop-proxy-plain-pojo-call.png[]
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public class Main {
 
@@ -113,8 +122,10 @@ image::aop-proxy-plain-pojo-call.png[]
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	fun main() {
 		val pojo = SimplePojo()
@@ -122,14 +133,18 @@ image::aop-proxy-plain-pojo-call.png[]
 		pojo.foo()
 	}
 ----
+======
 
 Things change slightly when the reference that client code has is a proxy. Consider the
 following diagram and code snippet:
 
 image::aop-proxy-call.png[]
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public class Main {
 
@@ -144,8 +159,10 @@ image::aop-proxy-call.png[]
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 fun main() {
 	val factory = ProxyFactory(SimplePojo())
@@ -157,6 +174,7 @@ fun main() {
 	pojo.foo()
 }
 ----
+======
 
 The key thing to understand here is that the client code inside the `main(..)` method
 of the `Main` class has a reference to the proxy. This means that method calls on that
@@ -175,8 +193,11 @@ The next approach is absolutely horrendous, and we hesitate to point it out, pre
 because it is so horrendous. You can (painful as it is to us) totally tie the logic
 within your class to Spring AOP, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public class SimplePojo implements Pojo {
 
@@ -190,8 +211,10 @@ within your class to Spring AOP, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	class SimplePojo : Pojo {
 
@@ -205,14 +228,18 @@ within your class to Spring AOP, as the following example shows:
 		}
 	}
 ----
+======
 
 This totally couples your code to Spring AOP, and it makes the class itself aware of
 the fact that it is being used in an AOP context, which flies in the face of AOP. It
 also requires some additional configuration when the proxy is being created, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	public class Main {
 
@@ -228,8 +255,10 @@ following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	fun main() {
 		val factory = ProxyFactory(SimplePojo())
@@ -242,6 +271,7 @@ following example shows:
 		pojo.foo()
 	}
 ----
+======
 
 Finally, it must be noted that AspectJ does not have this self-invocation issue because
 it is not a proxy-based AOP framework.

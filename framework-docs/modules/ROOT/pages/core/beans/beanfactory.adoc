@@ -86,8 +86,11 @@ The following table lists features provided by the `BeanFactory` and
 To explicitly register a bean post-processor with a `DefaultListableBeanFactory`,
 you need to programmatically call `addBeanPostProcessor`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 	// populate the factory with bean definitions
@@ -98,8 +101,10 @@ you need to programmatically call `addBeanPostProcessor`, as the following examp
 
 	// now start using the factory
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val factory = DefaultListableBeanFactory()
 	// populate the factory with bean definitions
@@ -110,12 +115,16 @@ you need to programmatically call `addBeanPostProcessor`, as the following examp
 
 	// now start using the factory
 ----
+======
 
 To apply a `BeanFactoryPostProcessor` to a plain `DefaultListableBeanFactory`,
 you need to call its `postProcessBeanFactory` method, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 	XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
@@ -128,8 +137,10 @@ you need to call its `postProcessBeanFactory` method, as the following example s
 	// now actually do the replacement
 	cfg.postProcessBeanFactory(factory);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val factory = DefaultListableBeanFactory()
 	val reader = XmlBeanDefinitionReader(factory)
@@ -142,6 +153,7 @@ you need to call its `postProcessBeanFactory` method, as the following example s
 	// now actually do the replacement
 	cfg.postProcessBeanFactory(factory)
 ----
+======
 
 In both cases, the explicit registration steps are inconvenient, which is
 why the various `ApplicationContext` variants are preferred over a plain

@@ -8,8 +8,11 @@ integration test.
 
 The following example demonstrates how to declare a properties file from the classpath:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -17,6 +20,7 @@ The following example demonstrates how to declare a properties file from the cla
 		// class body...
 	}
 ----
+======
 <1> Get properties from `test.properties` in the root of the classpath.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -33,8 +37,11 @@ The following example demonstrates how to declare a properties file from the cla
 
 The following example demonstrates how to declare inlined properties:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = { "timezone = GMT", "port: 4242" }) // <1>
@@ -42,6 +49,7 @@ The following example demonstrates how to declare inlined properties:
 		// class body...
 	}
 ----
+======
 <1> Declare `timezone` and `port` properties.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

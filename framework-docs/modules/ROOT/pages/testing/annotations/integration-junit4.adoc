@@ -27,8 +27,11 @@ means the test is implicitly enabled. This is analogous to the semantics of JUni
 
 The following example shows a test that has an `@IfProfileValue` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@IfProfileValue(name="java.vendor", value="Oracle Corporation") // <1>
 	@Test
@@ -36,6 +39,7 @@ The following example shows a test that has an `@IfProfileValue` annotation:
 		// some logic that should run only on Java VMs from Oracle Corporation
 	}
 ----
+======
 <1> Run this test only when the Java vendor is "Oracle Corporation".
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -54,8 +58,11 @@ Alternatively, you can configure `@IfProfileValue` with a list of `values` (with
 semantics) to achieve TestNG-like support for test groups in a JUnit 4 environment.
 Consider the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@IfProfileValue(name="test-groups", values={"unit-tests", "integration-tests"}) // <1>
 	@Test
@@ -63,6 +70,7 @@ Consider the following example:
 		// some logic that should run only for unit and integration test groups
 	}
 ----
+======
 <1> Run this test for unit tests and integration tests.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -86,14 +94,18 @@ of `ProfileValueSource` to use when retrieving profile values configured through
 test, `SystemProfileValueSource` is used by default. The following example shows how to
 use `@ProfileValueSourceConfiguration`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ProfileValueSourceConfiguration(CustomProfileValueSource.class) // <1>
 	public class CustomProfileValueSourceTests {
 		// class body...
 	}
 ----
+======
 <1> Use a custom profile value source.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -118,14 +130,18 @@ The time period includes running the test method itself, any repetitions of the 
 `@Repeat`), as well as any setting up or tearing down of the test fixture. The following
 example shows how to use it:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Timed(millis = 1000) // <1>
 	public void testProcessWithOneSecondTimeout() {
 		// some logic that should not take longer than 1 second to run
 	}
 ----
+======
 <1> Set the time period for the test to one second.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -158,8 +174,11 @@ xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit4-rules
 preparation of the test instance by `TestExecutionListener` implementations. The
 following example shows how to use the `@Repeat` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repeat(10) // <1>
 	@Test
@@ -167,6 +186,7 @@ following example shows how to use the `@Repeat` annotation:
 		// ...
 	}
 ----
+======
 <1> Repeat this test ten times.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

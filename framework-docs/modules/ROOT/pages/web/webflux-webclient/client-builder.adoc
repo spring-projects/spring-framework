@@ -21,26 +21,35 @@ You can also use `WebClient.builder()` with further options:
 
 For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient client = WebClient.builder()
 			.codecs(configurer -> ... )
 			.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val webClient = WebClient.builder()
 			.codecs { configurer -> ... }
 			.build()
 ----
+======
 
 Once built, a `WebClient` is immutable. However, you can clone it and build a
 modified copy as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient client1 = WebClient.builder()
 			.filter(filterA).filter(filterB).build();
@@ -52,8 +61,10 @@ modified copy as follows:
 
 	// client2 has filterA, filterB, filterC, filterD
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val client1 = WebClient.builder()
 			.filter(filterA).filter(filterB).build()
@@ -65,6 +76,7 @@ modified copy as follows:
 
 	// client2 has filterA, filterB, filterC, filterD
 ----
+======
 
 [[webflux-client-builder-maxinmemorysize]]
 == MaxInMemorySize
@@ -79,20 +91,26 @@ org.springframework.core.io.buffer.DataBufferLimitException: Exceeded limit on m
 
 To change the limit for default codecs, use the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient webClient = WebClient.builder()
 			.codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024))
 			.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val webClient = WebClient.builder()
 			.codecs { configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024) }
 			.build()
 ----
+======
 
 
 
@@ -101,8 +119,11 @@ To change the limit for default codecs, use the following:
 
 To customize Reactor Netty settings, provide a pre-configured `HttpClient`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpClient httpClient = HttpClient.create().secure(sslSpec -> ...);
 
@@ -110,8 +131,10 @@ To customize Reactor Netty settings, provide a pre-configured `HttpClient`:
 			.clientConnector(new ReactorClientHttpConnector(httpClient))
 			.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val httpClient = HttpClient.create().secure { ... }
 
@@ -119,6 +142,7 @@ To customize Reactor Netty settings, provide a pre-configured `HttpClient`:
 		.clientConnector(ReactorClientHttpConnector(httpClient))
 		.build()
 ----
+======
 
 
 [[webflux-client-builder-reactor-resources]]
@@ -137,20 +161,26 @@ Netty global resources are shut down when the Spring `ApplicationContext` is clo
 as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Bean
 	public ReactorResourceFactory reactorResourceFactory() {
 		return new ReactorResourceFactory();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Bean
 	fun reactorResourceFactory() = ReactorResourceFactory()
 ----
+======
 --
 
 You can also choose not to participate in the global Reactor Netty resources. However,
@@ -158,8 +188,11 @@ in this mode, the burden is on you to ensure that all Reactor Netty client and s
 instances use shared resources, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Bean
 	public ReactorResourceFactory resourceFactory() {
@@ -181,6 +214,7 @@ instances use shared resources, as the following example shows:
 		return WebClient.builder().clientConnector(connector).build(); // <3>
 	}
 ----
+======
 <1> Create resources independent of global ones.
 <2> Use the `ReactorClientHttpConnector` constructor with resource factory.
 <3> Plug the connector into the `WebClient.Builder`.
@@ -216,8 +250,11 @@ instances use shared resources, as the following example shows:
 
 To configure a connection timeout:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import io.netty.channel.ChannelOption;
 
@@ -228,8 +265,10 @@ To configure a connection timeout:
 			.clientConnector(new ReactorClientHttpConnector(httpClient))
 			.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import io.netty.channel.ChannelOption
 
@@ -240,11 +279,15 @@ To configure a connection timeout:
 			.clientConnector(ReactorClientHttpConnector(httpClient))
 			.build();
 ----
+======
 
 To configure a read or write timeout:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import io.netty.handler.timeout.ReadTimeoutHandler;
 	import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -257,8 +300,10 @@ To configure a read or write timeout:
 	// Create WebClient...
 
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import io.netty.handler.timeout.ReadTimeoutHandler
 	import io.netty.handler.timeout.WriteTimeoutHandler
@@ -271,30 +316,40 @@ To configure a read or write timeout:
 
 	// Create WebClient...
 ----
+======
 
 To configure a response timeout for all requests:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpClient httpClient = HttpClient.create()
 			.responseTimeout(Duration.ofSeconds(2));
 
 	// Create WebClient...
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val httpClient = HttpClient.create()
 			.responseTimeout(Duration.ofSeconds(2));
 
 	// Create WebClient...
 ----
+======
 
 To configure a response timeout for a specific request:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient.create().get()
 			.uri("https://example.org/path")
@@ -305,8 +360,10 @@ To configure a response timeout for a specific request:
 			.retrieve()
 			.bodyToMono(String.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	WebClient.create().get()
 			.uri("https://example.org/path")
@@ -317,6 +374,7 @@ To configure a response timeout for a specific request:
 			.retrieve()
 			.bodyToMono(String::class.java)
 ----
+======
 
 
 
@@ -325,8 +383,11 @@ To configure a response timeout for a specific request:
 
 The following example shows how to customize the JDK `HttpClient`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
     HttpClient httpClient = HttpClient.newBuilder()
         .followRedirects(Redirect.NORMAL)
@@ -339,8 +400,9 @@ The following example shows how to customize the JDK `HttpClient`:
     WebClient webClient = WebClient.builder().clientConnector(connector).build();
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
     val httpClient = HttpClient.newBuilder()
         .followRedirects(Redirect.NORMAL)
@@ -351,6 +413,7 @@ The following example shows how to customize the JDK `HttpClient`:
 
     val webClient = WebClient.builder().clientConnector(connector).build()
 ----
+======
 
 
 
@@ -360,8 +423,11 @@ The following example shows how to customize the JDK `HttpClient`:
 The following example shows how to customize Jetty `HttpClient` settings:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpClient httpClient = new HttpClient();
 	httpClient.setCookieStore(...);
@@ -370,8 +436,10 @@ The following example shows how to customize Jetty `HttpClient` settings:
 			.clientConnector(new JettyClientHttpConnector(httpClient))
 			.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val httpClient = HttpClient()
 	httpClient.cookieStore = ...
@@ -380,6 +448,7 @@ The following example shows how to customize Jetty `HttpClient` settings:
 			.clientConnector(JettyClientHttpConnector(httpClient))
 			.build();
 ----
+======
 --
 
 By default, `HttpClient` creates its own resources (`Executor`, `ByteBufferPool`, `Scheduler`),
@@ -391,8 +460,11 @@ declaring a Spring-managed bean of type `JettyResourceFactory`, as the following
 shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Bean
 	public JettyResourceFactory resourceFactory() {
@@ -411,6 +483,7 @@ shows:
 		return WebClient.builder().clientConnector(connector).build(); <2>
 	}
 ----
+======
 <1> Use the `JettyClientHttpConnector` constructor with resource factory.
 <2> Plug the connector into the `WebClient.Builder`.
 
@@ -442,8 +515,11 @@ shows:
 
 The following example shows how to customize Apache HttpComponents `HttpClient` settings:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HttpAsyncClientBuilder clientBuilder = HttpAsyncClients.custom();
 	clientBuilder.setDefaultRequestConfig(...);
@@ -453,8 +529,10 @@ The following example shows how to customize Apache HttpComponents `HttpClient` 
 
 	WebClient webClient = WebClient.builder().clientConnector(connector).build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val client = HttpAsyncClients.custom().apply {
 		setDefaultRequestConfig(...)
@@ -462,5 +540,6 @@ The following example shows how to customize Apache HttpComponents `HttpClient` 
 	val connector = HttpComponentsClientHttpConnector(client)
 	val webClient = WebClient.builder().clientConnector(connector).build()
 ----
+======
 
 

@@ -23,8 +23,11 @@ In much the same way that Spring XML files are used as input when instantiating 
 instantiating an `AnnotationConfigApplicationContext`. This allows for completely
 XML-free usage of the Spring container, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(String[] args) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
@@ -32,8 +35,10 @@ XML-free usage of the Spring container, as the following example shows:
 		myService.doStuff();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -43,13 +48,17 @@ XML-free usage of the Spring container, as the following example shows:
 		myService.doStuff()
 	}
 ----
+======
 
 As mentioned earlier, `AnnotationConfigApplicationContext` is not limited to working only
 with `@Configuration` classes. Any `@Component` or JSR-330 annotated class may be supplied
 as input to the constructor, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(String[] args) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(MyServiceImpl.class, Dependency1.class, Dependency2.class);
@@ -57,8 +66,10 @@ as input to the constructor, as the following example shows:
 		myService.doStuff();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -68,6 +79,7 @@ as input to the constructor, as the following example shows:
 		myService.doStuff()
 	}
 ----
+======
 
 The preceding example assumes that `MyServiceImpl`, `Dependency1`, and `Dependency2` use Spring
 dependency injection annotations such as `@Autowired`.
@@ -81,8 +93,11 @@ and then configure it by using the `register()` method. This approach is particu
 when programmatically building an `AnnotationConfigApplicationContext`. The following
 example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -93,8 +108,10 @@ example shows how to do so:
 		myService.doStuff();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -107,6 +124,7 @@ example shows how to do so:
 		myService.doStuff()
 	}
 ----
+======
 
 
 [[beans-java-instantiating-container-scan]]
@@ -114,8 +132,11 @@ example shows how to do so:
 
 To enable component scanning, you can annotate your `@Configuration` class as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan(basePackages = "com.acme") // <1>
@@ -123,6 +144,7 @@ To enable component scanning, you can annotate your `@Configuration` class as fo
 		// ...
 	}
 ----
+======
 <1> This annotation enables component scanning.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -156,8 +178,11 @@ definitions within the container. `AnnotationConfigApplicationContext` exposes t
 `scan(String...)` method to allow for the same component-scanning functionality, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -166,8 +191,10 @@ following example shows:
 		MyService myService = ctx.getBean(MyService.class);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun main() {
 		val ctx = AnnotationConfigApplicationContext()
@@ -176,6 +203,7 @@ following example shows:
 		val myService = ctx.getBean<MyService>()
 	}
 ----
+======
 
 NOTE: Remember that `@Configuration` classes are xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotated]
 with `@Component`, so they are candidates for component-scanning. In the preceding example,

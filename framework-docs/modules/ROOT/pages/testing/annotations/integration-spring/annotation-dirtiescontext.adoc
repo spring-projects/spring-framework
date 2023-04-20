@@ -20,14 +20,18 @@ configuration scenarios:
 * Before the current test class, when declared on a class with class mode set to
 `BEFORE_CLASS`.
 +
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@DirtiesContext(classMode = BEFORE_CLASS) // <1>
 	class FreshContextTests {
 		// some tests that require a new Spring container
 	}
 ----
+======
 <1> Dirty the context before the current test class.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -43,14 +47,18 @@ configuration scenarios:
 * After the current test class, when declared on a class with class mode set to
 `AFTER_CLASS` (i.e., the default class mode).
 +
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@DirtiesContext // <1>
 	class ContextDirtyingTests {
 		// some tests that result in the Spring container being dirtied
 	}
 ----
+======
 <1> Dirty the context after the current test class.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -67,14 +75,18 @@ configuration scenarios:
 * Before each test method in the current test class, when declared on a class with class
 mode set to `BEFORE_EACH_TEST_METHOD.`
 +
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD) // <1>
 	class FreshContextTests {
 		// some tests that require a new Spring container
 	}
 ----
+======
 <1> Dirty the context before each test method.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -91,14 +103,18 @@ mode set to `BEFORE_EACH_TEST_METHOD.`
 * After each test method in the current test class, when declared on a class with class
 mode set to `AFTER_EACH_TEST_METHOD.`
 +
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD) // <1>
 	class ContextDirtyingTests {
 		// some tests that result in the Spring container being dirtied
 	}
 ----
+======
 <1> Dirty the context after each test method.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -115,8 +131,11 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 * Before the current test, when declared on a method with the method mode set to
 `BEFORE_METHOD`.
 +
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@DirtiesContext(methodMode = BEFORE_METHOD) // <1>
 	@Test
@@ -124,6 +143,7 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 		// some logic that requires a new Spring container
 	}
 ----
+======
 <1> Dirty the context before the current test method.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -140,8 +160,11 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 * After the current test, when declared on a method with the method mode set to
 `AFTER_METHOD` (i.e., the default method mode).
 +
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@DirtiesContext // <1>
 	@Test
@@ -149,6 +172,7 @@ mode set to `AFTER_EACH_TEST_METHOD.`
 		// some logic that results in the Spring container being dirtied
 	}
 ----
+======
 <1> Dirty the context after the current test method.
 +
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -173,8 +197,11 @@ context are removed from the context cache and closed. If the exhaustive algorit
 overkill for a particular use case, you can specify the simpler current level algorithm,
 as the following example shows.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextHierarchy({
 		@ContextConfiguration("/parent-config.xml"),
@@ -193,6 +220,7 @@ as the following example shows.
 		}
 	}
 ----
+======
 <1> Use the current-level algorithm.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

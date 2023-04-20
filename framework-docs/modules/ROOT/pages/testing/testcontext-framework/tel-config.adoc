@@ -37,8 +37,11 @@ If you extend a class that is annotated with `@TestExecutionListeners` and you n
 switch to using the default set of listeners, you can annotate your class with the
 following.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Switch to default listeners
 	@TestExecutionListeners(
@@ -50,8 +53,9 @@ following.
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Switch to default listeners
 	@TestExecutionListeners(
@@ -62,6 +66,7 @@ following.
 		// class body...
 	}
 ----
+======
 ====
 
 [[testcontext-tel-config-automatic-discovery]]
@@ -103,8 +108,11 @@ default listeners are not registered. In most common testing scenarios, this eff
 forces the developer to manually declare all default listeners in addition to any custom
 listeners. The following listing demonstrates this style of configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@TestExecutionListeners({
@@ -121,8 +129,9 @@ listeners. The following listing demonstrates this style of configuration:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@TestExecutionListeners(
@@ -138,6 +147,7 @@ listeners. The following listing demonstrates this style of configuration:
 		// class body...
 	}
 ----
+======
 
 The challenge with this approach is that it requires that the developer know exactly
 which listeners are registered by default. Moreover, the set of default listeners can
@@ -165,8 +175,11 @@ configures its `order` value (for example, `500`) to be less than the order of t
 defaults in front of the `ServletTestExecutionListener`, and the previous example could
 be replaced with the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@TestExecutionListeners(
@@ -177,8 +190,10 @@ be replaced with the following:
 		// class body...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@TestExecutionListeners(
@@ -189,4 +204,5 @@ be replaced with the following:
 		// class body...
 	}
 ----
+======
 

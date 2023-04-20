@@ -16,8 +16,11 @@ more details.
 In Java configuration, you can customize requested content type resolution, as the
 following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -30,8 +33,10 @@ following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -43,6 +48,7 @@ following example shows:
 		}
 	}
 ----
+======
 
 
 The following example shows how to achieve the same configuration in XML:

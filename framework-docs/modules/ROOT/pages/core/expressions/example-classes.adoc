@@ -3,8 +3,11 @@
 
 This section lists the classes used in the examples throughout this chapter.
 
+[tabs]
+======
+Inventor.Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Inventor.Java
 ----
 	package org.spring.samples.spel.inventor;
 
@@ -76,8 +79,10 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
+
+Inventor.kt::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Inventor.kt
 ----
 	package org.spring.samples.spel.inventor
 
@@ -88,9 +93,13 @@ This section lists the classes used in the examples throughout this chapter.
 		var birthdate: Date =  GregorianCalendar().time,
 		var placeOfBirth: PlaceOfBirth? = null)
 ----
+======
 
+[tabs]
+======
+PlaceOfBirth.java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.PlaceOfBirth.java
 ----
 	package org.spring.samples.spel.inventor;
 
@@ -125,16 +134,22 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
+
+PlaceOfBirth.kt::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.PlaceOfBirth.kt
 ----
 	package org.spring.samples.spel.inventor
 
 	class PlaceOfBirth(var city: String, var country: String? = null) {
 ----
+======
 
+[tabs]
+======
+Society.java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Society.java
 ----
 	package org.spring.samples.spel.inventor;
 
@@ -176,8 +191,10 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
+
+Society.kt::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Society.kt
 ----
 	package org.spring.samples.spel.inventor
 
@@ -203,3 +220,4 @@ This section lists the classes used in the examples throughout this chapter.
 		}
 	}
 ----
+======

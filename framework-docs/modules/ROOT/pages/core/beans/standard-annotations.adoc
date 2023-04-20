@@ -29,8 +29,11 @@ You can add the following dependency to your file pom.xml:
 
 Instead of `@Autowired`, you can use `@jakarta.inject.Inject` as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import jakarta.inject.Inject;
 
@@ -49,8 +52,10 @@ Instead of `@Autowired`, you can use `@jakarta.inject.Inject` as follows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import jakarta.inject.Inject
 
@@ -66,6 +71,7 @@ Instead of `@Autowired`, you can use `@jakarta.inject.Inject` as follows:
 		}
 	}
 ----
+======
 
 As with `@Autowired`, you can use `@Inject` at the field level, method level
 and constructor-argument level. Furthermore, you may declare your injection point as a
@@ -73,8 +79,11 @@ and constructor-argument level. Furthermore, you may declare your injection poin
 other beans through a `Provider.get()` call. The following example offers a variant of the
 preceding example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import jakarta.inject.Inject;
 	import jakarta.inject.Provider;
@@ -94,8 +103,10 @@ preceding example:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import jakarta.inject.Inject
 
@@ -111,12 +122,16 @@ preceding example:
 		}
 	}
 ----
+======
 
 If you would like to use a qualified name for the dependency that should be injected,
 you should use the `@Named` annotation, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import jakarta.inject.Inject;
 	import jakarta.inject.Named;
@@ -133,8 +148,10 @@ you should use the `@Named` annotation, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import jakarta.inject.Inject
 	import jakarta.inject.Named
@@ -151,6 +168,7 @@ you should use the `@Named` annotation, as the following example shows:
 		// ...
 	}
 ----
+======
 
 As with `@Autowired`, `@Inject` can also be used with `java.util.Optional` or
 `@Nullable`. This is even more applicable here, since `@Inject` does not have
@@ -168,8 +186,11 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 	}
 ----
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class SimpleMovieLister {
 
@@ -179,8 +200,10 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class SimpleMovieLister {
 
@@ -188,6 +211,7 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 		var movieFinder: MovieFinder? = null
 	}
 ----
+======
 
 
 
@@ -197,8 +221,11 @@ a `required` attribute. The following pair of examples show how to use `@Inject`
 Instead of `@Component`, you can use `@jakarta.inject.Named` or `jakarta.annotation.ManagedBean`,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import jakarta.inject.Inject;
 	import jakarta.inject.Named;
@@ -216,8 +243,10 @@ as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import jakarta.inject.Inject
 	import jakarta.inject.Named
@@ -231,12 +260,16 @@ as the following example shows:
 		// ...
 	}
 ----
+======
 
 It is very common to use `@Component` without specifying a name for the component.
 `@Named` can be used in a similar fashion, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import jakarta.inject.Inject;
 	import jakarta.inject.Named;
@@ -254,8 +287,10 @@ It is very common to use `@Component` without specifying a name for the componen
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import jakarta.inject.Inject
 	import jakarta.inject.Named
@@ -269,12 +304,16 @@ It is very common to use `@Component` without specifying a name for the componen
 		// ...
 	}
 ----
+======
 
 When you use `@Named` or `@ManagedBean`, you can use component scanning in the
 exact same way as when you use Spring annotations, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan(basePackages = "org.example")
@@ -282,8 +321,10 @@ exact same way as when you use Spring annotations, as the following example show
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["org.example"])
@@ -291,6 +332,7 @@ exact same way as when you use Spring annotations, as the following example show
 		// ...
 	}
 ----
+======
 
 NOTE: In contrast to `@Component`, the JSR-330 `@Named` and the JSR-250 `@ManagedBean`
 annotations are not composable. You should use Spring's stereotype model for building

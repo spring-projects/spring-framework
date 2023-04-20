@@ -52,14 +52,18 @@ lets the component scanning support find and configure your DAOs and repositorie
 without having to provide XML configuration entries for them. The following example shows
 how to use the `@Repository` annotation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repository // <1>
 	public class SomeMovieFinder implements MovieFinder {
 		// ...
 	}
 ----
+======
 <1> The `@Repository` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -80,8 +84,11 @@ needs access to a JDBC `DataSource`, and a JPA-based repository needs access to 
 injected by using one of the `@Autowired`, `@Inject`, `@Resource` or `@PersistenceContext`
 annotations. The following example works for a JPA repository:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repository
 	public class JpaMovieFinder implements MovieFinder {
@@ -93,8 +100,9 @@ annotations. The following example works for a JPA repository:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repository
 	class JpaMovieFinder : MovieFinder {
@@ -105,13 +113,17 @@ annotations. The following example works for a JPA repository:
 		// ...
 	}
 ----
+======
 
 
 If you use the classic Hibernate APIs, you can inject `SessionFactory`, as the following
 example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repository
 	public class HibernateMovieFinder implements MovieFinder {
@@ -126,22 +138,28 @@ example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repository
 	class HibernateMovieFinder(private val sessionFactory: SessionFactory) : MovieFinder {
 		// ...
 	}
 ----
+======
 
 The last example we show here is for typical JDBC support. You could have the
 `DataSource` injected into an initialization method or a constructor, where you would create a
 `JdbcTemplate` and other data access support classes (such as `SimpleJdbcCall` and others) by using
 this `DataSource`. The following example autowires a `DataSource`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repository
 	public class JdbcMovieFinder implements MovieFinder {
@@ -156,8 +174,10 @@ this `DataSource`. The following example autowires a `DataSource`:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repository
 	class JdbcMovieFinder(dataSource: DataSource) : MovieFinder {
@@ -167,6 +187,7 @@ this `DataSource`. The following example autowires a `DataSource`:
 		// ...
 	}
 ----
+======
 
 NOTE: See the specific coverage of each persistence technology for details on how to
 configure the application context to take advantage of these annotations.

@@ -8,8 +8,11 @@ xref:testing/testcontext-framework/tel-config.adoc[`TestExecutionListener` Confi
 
 The following example shows how to register two `TestExecutionListener` implementations:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ContextConfiguration
 	@TestExecutionListeners({CustomTestExecutionListener.class, AnotherTestExecutionListener.class}) // <1>
@@ -17,6 +20,7 @@ The following example shows how to register two `TestExecutionListener` implemen
 		// class body...
 	}
 ----
+======
 <1> Register two `TestExecutionListener` implementations.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

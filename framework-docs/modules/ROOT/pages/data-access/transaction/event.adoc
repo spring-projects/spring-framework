@@ -15,8 +15,11 @@ event and that we want to define a listener that should only handle that event o
 transaction in which it has been published has committed successfully. The following
 example sets up such an event listener:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Component
 	public class MyComponent {
@@ -27,8 +30,10 @@ example sets up such an event listener:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component
 	class MyComponent {
@@ -39,6 +44,7 @@ example sets up such an event listener:
 		}
 	}
 ----
+======
 
 The `@TransactionalEventListener` annotation exposes a `phase` attribute that lets you
 customize the phase of the transaction to which the listener should be bound.

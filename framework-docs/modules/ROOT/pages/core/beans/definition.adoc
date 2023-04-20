@@ -260,8 +260,11 @@ specify a factory method:
 
 The following example shows a class that would work with the preceding bean definition:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class ClientService {
 		private static ClientService clientService = new ClientService();
@@ -272,8 +275,10 @@ The following example shows a class that would work with the preceding bean defi
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ClientService private constructor() {
 		companion object {
@@ -283,6 +288,7 @@ The following example shows a class that would work with the preceding bean defi
 		}
 	}
 ----
+======
 
 For details about the mechanism for supplying (optional) arguments to the factory method
 and setting object instance properties after the object is returned from the factory,
@@ -316,8 +322,11 @@ how to configure such a bean:
 
 The following example shows the corresponding class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class DefaultServiceLocator {
 
@@ -328,8 +337,10 @@ The following example shows the corresponding class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class DefaultServiceLocator {
 		companion object {
@@ -340,6 +351,7 @@ The following example shows the corresponding class:
 		}
 	}
 ----
+======
 
 One factory class can also hold more than one factory method, as the following example shows:
 
@@ -360,8 +372,11 @@ One factory class can also hold more than one factory method, as the following e
 
 The following example shows the corresponding class:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class DefaultServiceLocator {
 
@@ -378,8 +393,10 @@ The following example shows the corresponding class:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class DefaultServiceLocator {
 		companion object {
@@ -396,6 +413,7 @@ The following example shows the corresponding class:
 		}
 	}
 ----
+======
 
 This approach shows that the factory bean itself can be managed and configured through
 dependency injection (DI). See xref:core/beans/dependencies/factory-properties-detailed.adoc[Dependencies and Configuration in Detail]

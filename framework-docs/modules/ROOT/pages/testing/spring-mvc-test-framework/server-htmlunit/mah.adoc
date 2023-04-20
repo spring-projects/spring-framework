@@ -14,8 +14,11 @@ First, make sure that you have included a test dependency on
 We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by using the
 `MockMvcWebClientBuilder`, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient webClient;
 
@@ -27,8 +30,9 @@ We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by usi
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	lateinit var webClient: WebClient
 
@@ -39,6 +43,7 @@ We can easily create an HtmlUnit `WebClient` that integrates with MockMvc by usi
 				.build()
 	}
 ----
+======
 
 NOTE: This is a simple example of using `MockMvcWebClientBuilder`. For advanced usage,
 see xref:testing/spring-mvc-test-framework/server-htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-advanced-builder[Advanced `MockMvcWebClientBuilder`].
@@ -55,17 +60,22 @@ Now we can use HtmlUnit as we normally would but without the need to deploy our
 application to a Servlet container. For example, we can request the view to create a
 message with the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HtmlPage createMsgFormPage = webClient.getPage("http://localhost/messages/form");
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val createMsgFormPage = webClient.getPage("http://localhost/messages/form")
 ----
+======
 
 NOTE: The default context path is `""`. Alternatively, we can specify the context path,
 as described in xref:testing/spring-mvc-test-framework/server-htmlunit/mah.adoc#spring-mvc-test-server-htmlunit-mah-advanced-builder[Advanced `MockMvcWebClientBuilder`].
@@ -73,8 +83,11 @@ as described in xref:testing/spring-mvc-test-framework/server-htmlunit/mah.adoc#
 Once we have a reference to the `HtmlPage`, we can then fill out the form and submit it
 to create a message, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	HtmlForm form = createMsgFormPage.getHtmlElementById("messageForm");
 	HtmlTextInput summaryInput = createMsgFormPage.getHtmlElementById("summary");
@@ -84,8 +97,10 @@ to create a message, as the following example shows:
 	HtmlSubmitInput submit = form.getOneHtmlElementByAttribute("input", "type", "submit");
 	HtmlPage newMessagePage = submit.click();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val form = createMsgFormPage.getHtmlElementById("messageForm")
 	val summaryInput = createMsgFormPage.getHtmlElementById("summary")
@@ -95,12 +110,16 @@ to create a message, as the following example shows:
 	val submit = form.getOneHtmlElementByAttribute("input", "type", "submit")
 	val newMessagePage = submit.click()
 ----
+======
 
 Finally, we can verify that a new message was created successfully. The following
 assertions use the https://assertj.github.io/doc/[AssertJ] library:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123");
 	String id = newMessagePage.getHtmlElementById("id").getTextContent();
@@ -110,8 +129,10 @@ assertions use the https://assertj.github.io/doc/[AssertJ] library:
 	String text = newMessagePage.getHtmlElementById("text").getTextContent();
 	assertThat(text).isEqualTo("In case you didn't know, Spring Rocks!");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123")
 	val id = newMessagePage.getHtmlElementById("id").getTextContent()
@@ -121,6 +142,7 @@ assertions use the https://assertj.github.io/doc/[AssertJ] library:
 	val text = newMessagePage.getHtmlElementById("text").getTextContent()
 	assertThat(text).isEqualTo("In case you didn't know, Spring Rocks!")
 ----
+======
 
 The preceding code improves on our
 xref:testing/spring-mvc-test-framework/server-htmlunit/why.adoc#spring-mvc-test-server-htmlunit-mock-mvc-test[MockMvc test] in a number of ways.
@@ -142,8 +164,11 @@ In the examples so far, we have used `MockMvcWebClientBuilder` in the simplest w
 possible, by building a `WebClient` based on the `WebApplicationContext` loaded for us by
 the Spring TestContext Framework. This approach is repeated in the following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient webClient;
 
@@ -155,8 +180,9 @@ the Spring TestContext Framework. This approach is repeated in the following exa
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	lateinit var webClient: WebClient
 
@@ -167,11 +193,15 @@ the Spring TestContext Framework. This approach is repeated in the following exa
 				.build()
 	}
 ----
+======
 
 We can also specify additional configuration options, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient webClient;
 
@@ -188,8 +218,10 @@ We can also specify additional configuration options, as the following example s
 			.build();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	lateinit var webClient: WebClient
 
@@ -206,12 +238,16 @@ We can also specify additional configuration options, as the following example s
 			.build()
 	}
 ----
+======
 
 As an alternative, we can perform the exact same setup by configuring the `MockMvc`
 instance separately and supplying it to the `MockMvcWebClientBuilder`, as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	MockMvc mockMvc = MockMvcBuilders
 			.webAppContextSetup(context)
@@ -228,11 +264,13 @@ instance separately and supplying it to the `MockMvcWebClientBuilder`, as follow
 			.build();
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Not possible in Kotlin until https://youtrack.jetbrains.com/issue/KT-22208 is fixed
 ----
+======
 
 This is more verbose, but, by building the `WebClient` with a `MockMvc` instance, we have
 the full power of MockMvc at our fingertips.

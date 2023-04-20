@@ -5,27 +5,36 @@ You can extend SpEL by registering user-defined functions that can be called wit
 expression string. The function is registered through the `EvaluationContext`. The
 following example shows how to register a user-defined function:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Method method = ...;
 
 	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 	context.setVariable("myFunction", method);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val method: Method = ...
 
 	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
 	context.setVariable("myFunction", method)
 ----
+======
 
 For example, consider the following utility method that reverses a string:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public abstract class StringUtils {
 
@@ -38,8 +47,10 @@ For example, consider the following utility method that reverses a string:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	fun reverseString(input: String): String {
 		val backwards = StringBuilder(input.length)
@@ -49,11 +60,15 @@ For example, consider the following utility method that reverses a string:
 		return backwards.toString()
 	}
 ----
+======
 
 You can then register and use the preceding method, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
@@ -64,8 +79,10 @@ You can then register and use the preceding method, as the following example sho
 	String helloWorldReversed = parser.parseExpression(
 			"#reverseString('hello')").getValue(context, String.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 
@@ -75,6 +92,7 @@ You can then register and use the preceding method, as the following example sho
 	val helloWorldReversed = parser.parseExpression(
 			"#reverseString('hello')").getValue(context, String::class.java)
 ----
+======
 
 
 

@@ -5,8 +5,11 @@ You can add attributes to a request. This is convenient if you want to pass info
 through the filter chain and influence the behavior of filters for a given request.
 For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	WebClient client = WebClient.builder()
 			.filter((request, next) -> {
@@ -22,8 +25,10 @@ For example:
 
 		}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val client = WebClient.builder()
 			.filter { request, _ ->
@@ -37,6 +42,7 @@ For example:
 				.retrieve()
 				.awaitBody<Unit>()
 ----
+======
 
 Note that you can configure a `defaultRequest` callback globally at the
 `WebClient.Builder` level which lets you insert attributes into all requests,

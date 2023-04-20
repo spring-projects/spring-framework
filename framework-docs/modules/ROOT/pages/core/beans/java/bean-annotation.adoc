@@ -21,8 +21,11 @@ method to register a bean definition within an `ApplicationContext` of the type
 specified as the method's return value. By default, the bean name is the same as
 the method name. The following example shows a `@Bean` method declaration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -33,8 +36,10 @@ the method name. The following example shows a `@Bean` method declaration:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -43,6 +48,7 @@ the method name. The following example shows a `@Bean` method declaration:
 		fun transferService() = TransferServiceImpl()
 	}
 ----
+======
 
 The preceding configuration is exactly equivalent to the following Spring XML:
 
@@ -65,8 +71,11 @@ transferService -> com.acme.TransferServiceImpl
 You can also use default methods to define beans. This allows composition of bean
 configurations by implementing interfaces with bean definitions on default methods.
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public interface BaseConfig {
 
@@ -81,12 +90,16 @@ configurations by implementing interfaces with bean definitions on default metho
 
 	}
 ----
+======
 
 You can also declare your `@Bean` method with an interface (or base class)
 return type, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -97,8 +110,10 @@ return type, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -109,6 +124,7 @@ return type, as the following example shows:
 		}
 	}
 ----
+======
 
 However, this limits the visibility for advance type prediction to the specified
 interface type (`TransferService`). Then, with the full type (`TransferServiceImpl`)
@@ -133,8 +149,11 @@ dependencies required to build that bean. For instance, if our `TransferService`
 requires an `AccountRepository`, we can materialize that dependency with a method
 parameter, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -145,8 +164,10 @@ parameter, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -157,6 +178,7 @@ parameter, as the following example shows:
 		}
 	}
 ----
+======
 
 
 The resolution mechanism is pretty much identical to constructor-based dependency
@@ -184,8 +206,11 @@ The `@Bean` annotation supports specifying arbitrary initialization and destruct
 callback methods, much like Spring XML's `init-method` and `destroy-method` attributes
 on the `bean` element, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class BeanOne {
 
@@ -215,8 +240,10 @@ on the `bean` element, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class BeanOne {
 
@@ -242,6 +269,7 @@ class AppConfig {
 	fun beanTwo() = BeanTwo()
 }
 ----
+======
 
 [NOTE]
 =====
@@ -258,22 +286,28 @@ for a `DataSource`, as it is known to be problematic on Jakarta EE application s
 The following example shows how to prevent an automatic destruction callback for a
 `DataSource`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Bean(destroyMethod = "")
 	public DataSource dataSource() throws NamingException {
 		return (DataSource) jndiTemplate.lookup("MyDS");
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Bean(destroyMethod = "")
 	fun dataSource(): DataSource {
 		return jndiTemplate.lookup("MyDS") as DataSource
 	}
 ----
+======
 
 Also, with `@Bean` methods, you typically use programmatic JNDI lookups, either by
 using Spring's `JndiTemplate` or `JndiLocatorDelegate` helpers or straight JNDI
@@ -286,8 +320,11 @@ intend to refer to the provided resource here).
 In the case of `BeanOne` from the example above the preceding note, it would be equally valid to call the `init()`
 method directly during construction, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -302,8 +339,10 @@ method directly during construction, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -316,6 +355,7 @@ method directly during construction, as the following example shows:
 		// ...
 	}
 ----
+======
 
 TIP: When you work directly in Java, you can do anything you like with your objects and do
 not always need to rely on the container lifecycle.
@@ -336,8 +376,11 @@ xref:core/beans/factory-scopes.adoc[Bean Scopes] section.
 The default scope is `singleton`, but you can override this with the `@Scope` annotation,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class MyConfiguration {
@@ -349,8 +392,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class MyConfiguration {
@@ -362,6 +407,7 @@ as the following example shows:
 		}
 	}
 ----
+======
 
 [[beans-java-scoped-proxy]]
 === `@Scope` and `scoped-proxy`
@@ -379,8 +425,11 @@ If you port the scoped proxy example from the XML reference documentation (see
 xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[scoped proxies]) to our `@Bean` using Java,
 it resembles the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// an HTTP Session-scoped bean exposed as a proxy
 	@Bean
@@ -397,8 +446,10 @@ it resembles the following:
 		return service;
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// an HTTP Session-scoped bean exposed as a proxy
 	@Bean
@@ -413,6 +464,7 @@ it resembles the following:
 		}
 	}
 ----
+======
 
 [[beans-java-customizing-bean-naming]]
 == Customizing Bean Naming
@@ -421,8 +473,11 @@ By default, configuration classes use a `@Bean` method's name as the name of the
 resulting bean. This functionality can be overridden, however, with the `name` attribute,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -433,8 +488,10 @@ as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -443,6 +500,7 @@ as the following example shows:
 		fun thing() = Thing()
 	}
 ----
+======
 
 
 [[beans-java-bean-aliasing]]
@@ -453,8 +511,11 @@ multiple names, otherwise known as bean aliasing. The `name` attribute of the `@
 annotation accepts a String array for this purpose. The following example shows how to set
 a number of aliases for a bean:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -465,8 +526,10 @@ a number of aliases for a bean:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -477,6 +540,7 @@ a number of aliases for a bean:
 		}
 	}
 ----
+======
 
 
 [[beans-java-bean-description]]
@@ -489,8 +553,11 @@ To add a description to a `@Bean`, you can use the
 {api-spring-framework}/context/annotation/Description.html[`@Description`]
 annotation, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -502,8 +569,10 @@ annotation, as the following example shows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -513,6 +582,7 @@ annotation, as the following example shows:
 		fun thing() = Thing()
 	}
 ----
+======
 
 
 

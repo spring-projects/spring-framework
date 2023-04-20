@@ -4,8 +4,11 @@
 
 `UriComponentsBuilder` helps to build URI's from URI templates with variables, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	UriComponents uriComponents = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}") // <1>
@@ -15,6 +18,7 @@
 
 	URI uri = uriComponents.expand("Westin", "123").toUri(); // <5>
 ----
+======
 <1> Static factory method with a URI template.
 <2> Add or replace URI components.
 <3> Request to have the URI template and URI variables encoded.
@@ -41,8 +45,11 @@
 The preceding example can be consolidated into one chain and shortened with `buildAndExpand`,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	URI uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}")
@@ -51,8 +58,10 @@ as the following example shows:
 			.buildAndExpand("Westin", "123")
 			.toUri();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}")
@@ -61,43 +70,56 @@ as the following example shows:
 			.buildAndExpand("Westin", "123")
 			.toUri()
 ----
+======
 
 You can shorten it further by going directly to a URI (which implies encoding),
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	URI uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}")
 			.queryParam("q", "{q}")
 			.build("Westin", "123");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}")
 			.queryParam("q", "{q}")
 			.build("Westin", "123")
 ----
+======
 
 You can shorten it further still with a full URI template, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	URI uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}?q={q}")
 			.build("Westin", "123");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val uri = UriComponentsBuilder
 			.fromUriString("https://example.com/hotels/{hotel}?q={q}")
 			.build("Westin", "123")
 ----
+======
 
 
 
@@ -117,8 +139,11 @@ exposes shared configuration options.
 
 The following example shows how to configure a `RestTemplate`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
@@ -129,8 +154,10 @@ The following example shows how to configure a `RestTemplate`:
 	RestTemplate restTemplate = new RestTemplate();
 	restTemplate.setUriTemplateHandler(factory);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode
 
@@ -141,11 +168,15 @@ The following example shows how to configure a `RestTemplate`:
 	val restTemplate = RestTemplate()
 	restTemplate.uriTemplateHandler = factory
 ----
+======
 
 The following example configures a `WebClient`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode;
 
@@ -155,8 +186,10 @@ The following example configures a `WebClient`:
 
 	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// import org.springframework.web.util.DefaultUriBuilderFactory.EncodingMode
 
@@ -166,13 +199,17 @@ The following example configures a `WebClient`:
 
 	val client = WebClient.builder().uriBuilderFactory(factory).build()
 ----
+======
 
 In addition, you can also use `DefaultUriBuilderFactory` directly. It is similar to using
 `UriComponentsBuilder` but, instead of static factory methods, it is an actual instance
 that holds configuration and preferences, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	String baseUrl = "https://example.com";
 	DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory(baseUrl);
@@ -181,8 +218,10 @@ that holds configuration and preferences, as the following example shows:
 			.queryParam("q", "{q}")
 			.build("Westin", "123");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val baseUrl = "https://example.com"
 	val uriBuilderFactory = DefaultUriBuilderFactory(baseUrl)
@@ -191,6 +230,7 @@ that holds configuration and preferences, as the following example shows:
 			.queryParam("q", "{q}")
 			.build("Westin", "123")
 ----
+======
 
 
 [[uri-encoding]]
@@ -219,8 +259,11 @@ incidentally looks like a URI variable.
 
 The following example uses the first option:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
@@ -230,8 +273,10 @@ The following example uses the first option:
 
 	// Result is "/hotel%20list/New%20York?q=foo%2Bbar"
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
@@ -241,46 +286,62 @@ The following example uses the first option:
 
 	// Result is "/hotel%20list/New%20York?q=foo%2Bbar"
 ----
+======
 
 You can shorten the preceding example by going directly to the URI (which implies encoding),
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	URI uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
 			.build("New York", "foo+bar");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val uri = UriComponentsBuilder.fromPath("/hotel list/{city}")
 			.queryParam("q", "{q}")
 			.build("New York", "foo+bar")
 ----
+======
 
 You can shorten it further still with a full URI template, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	URI uri = UriComponentsBuilder.fromUriString("/hotel list/{city}?q={q}")
 			.build("New York", "foo+bar");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val uri = UriComponentsBuilder.fromUriString("/hotel list/{city}?q={q}")
 			.build("New York", "foo+bar")
 ----
+======
 
 The `WebClient` and the `RestTemplate` expand and encode URI templates internally through
 the `UriBuilderFactory` strategy. Both can be configured with a custom strategy,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	String baseUrl = "https://example.com";
 	DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl)
@@ -293,8 +354,10 @@ as the following example shows:
 	// Customize the WebClient..
 	WebClient client = WebClient.builder().uriBuilderFactory(factory).build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val baseUrl = "https://example.com"
 	val factory = DefaultUriBuilderFactory(baseUrl).apply {
@@ -309,6 +372,7 @@ as the following example shows:
 	// Customize the WebClient..
 	val client = WebClient.builder().uriBuilderFactory(factory).build()
 ----
+======
 
 The `DefaultUriBuilderFactory` implementation uses `UriComponentsBuilder` internally to
 expand and encode URI templates. As a factory, it provides a single place to configure

@@ -19,8 +19,11 @@ that points to a bean class that is annotated with `@Aspect`:
 The second of the two examples shows the `NotVeryUsefulAspect` class definition, which is
 annotated with `@Aspect`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary",chomp="-packages",fold="none"]
-.Java
 ----
 	package com.xyz;
 
@@ -30,8 +33,10 @@ annotated with `@Aspect`:
 	public class NotVeryUsefulAspect {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages",fold="none"]
-.Kotlin
 ----
 	package com.xyz
 
@@ -40,6 +45,7 @@ annotated with `@Aspect`:
 	@Aspect
 	class NotVeryUsefulAspect
 ----
+======
 
 Aspects (classes annotated with `@Aspect`) can have methods and fields, the same as any
 other class. They can also contain pointcut, advice, and introduction (inter-type)

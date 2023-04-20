@@ -12,8 +12,11 @@ You can customize `HttpMessageConverter` in Java configuration by overriding
 The following example adds XML and Jackson JSON converters with a customized
 `ObjectMapper` instead of the default ones:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -30,8 +33,10 @@ The following example adds XML and Jackson JSON converters with a customized
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -45,6 +50,7 @@ The following example adds XML and Jackson JSON converters with a customized
 			converters.add(MappingJackson2HttpMessageConverter(builder.build()))
 			converters.add(MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()))
 ----
+======
 
 In the preceding example,
 {api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`]

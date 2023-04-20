@@ -18,8 +18,11 @@ configuration and AOP in general.
 
 The following code shows the simple profiling aspect discussed earlier:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
-.Java
 ----
 	package x.y;
 
@@ -55,8 +58,10 @@ The following code shows the simple profiling aspect discussed earlier:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package x.y
 
@@ -92,6 +97,7 @@ The following code shows the simple profiling aspect discussed earlier:
 		}
 	}
 ----
+======
 
 The ordering of advice
 is controlled through the `Ordered` interface. For full details on advice ordering, see

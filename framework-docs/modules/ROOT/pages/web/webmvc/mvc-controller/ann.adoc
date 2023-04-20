@@ -12,8 +12,11 @@ annotated class, indicating its role as a web component.
 To enable auto-detection of such `@Controller` beans, you can add component scanning to
 your Java configuration, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan("org.example.web")
@@ -22,8 +25,10 @@ your Java configuration, as the following example shows:
 		// ...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan("org.example.web")
@@ -32,6 +37,7 @@ your Java configuration, as the following example shows:
 		// ...
 	}
 ----
+======
 
 The following example shows the XML configuration equivalent of the preceding example:
 

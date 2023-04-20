@@ -12,8 +12,11 @@ a web component.
 To enable auto-detection of such `@Controller` beans, you can add component scanning to
 your Java configuration, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@ComponentScan("org.example.web") // <1>
@@ -22,6 +25,7 @@ your Java configuration, as the following example shows:
 		// ...
 	}
 ----
+======
 <1> Scan the `org.example.web` package.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

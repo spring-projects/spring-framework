@@ -39,8 +39,11 @@ B deployments.
 Consider the first use case in a practical application that requires a
 `DataSource`. In a test environment, the configuration might resemble the following:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Bean
 	public DataSource dataSource() {
@@ -51,8 +54,10 @@ Consider the first use case in a practical application that requires a
 			.build();
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Bean
 	fun dataSource(): DataSource {
@@ -63,14 +68,18 @@ Consider the first use case in a practical application that requires a
 				.build()
 	}
 ----
+======
 
 Now consider how this application can be deployed into a QA or production
 environment, assuming that the datasource for the application is registered
 with the production application server's JNDI directory. Our `dataSource` bean
 now looks like the following listing:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Bean(destroyMethod = "")
 	public DataSource dataSource() throws Exception {
@@ -78,8 +87,10 @@ now looks like the following listing:
 		return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Bean(destroyMethod = "")
 	fun dataSource(): DataSource {
@@ -87,6 +98,7 @@ now looks like the following listing:
 		return ctx.lookup("java:comp/env/jdbc/datasource") as DataSource
 	}
 ----
+======
 
 The problem is how to switch between using these two variations based on the
 current environment. Over time, Spring users have devised a number of ways to
@@ -112,8 +124,11 @@ when one or more specified profiles are active. Using our preceding example, we
 can rewrite the `dataSource` configuration as follows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@Profile("development")
@@ -129,8 +144,10 @@ can rewrite the `dataSource` configuration as follows:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@Profile("development")
@@ -146,11 +163,15 @@ can rewrite the `dataSource` configuration as follows:
 		}
 	}
 ----
+======
 --
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@Profile("production")
@@ -163,6 +184,7 @@ can rewrite the `dataSource` configuration as follows:
 		}
 	}
 ----
+======
 <1> `@Bean(destroyMethod = "")` disables default destroy method inference.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -206,8 +228,11 @@ of creating a custom composed annotation. The following example defines a custom
 `@Profile("production")`:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
@@ -215,14 +240,17 @@ of creating a custom composed annotation. The following example defines a custom
 	public @interface Production {
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.CLASS)
 	@Retention(AnnotationRetention.RUNTIME)
 	@Profile("production")
 	annotation class Production
 ----
+======
 --
 
 TIP: If a `@Configuration` class is marked with `@Profile`, all of the `@Bean` methods and
@@ -239,8 +267,11 @@ of a configuration class (for example, for alternative variants of a particular 
 the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	public class AppConfig {
@@ -263,6 +294,7 @@ the following example shows:
 		}
 	}
 ----
+======
 <1> The `standaloneDataSource` method is available only in the `development` profile.
 <2> The `jndiDataSource` method is available only in the `production` profile.
 
@@ -416,16 +448,21 @@ Activating a profile can be done in several ways, but the most straightforward i
 it programmatically against the `Environment` API which is available through an
 `ApplicationContext`. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 	ctx.getEnvironment().setActiveProfiles("development");
 	ctx.register(SomeConfig.class, StandaloneDataConfig.class, JndiDataConfig.class);
 	ctx.refresh();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = AnnotationConfigApplicationContext().apply {
 		environment.setActiveProfiles("development")
@@ -433,6 +470,7 @@ it programmatically against the `Environment` API which is available through an
 		refresh()
 	}
 ----
+======
 
 In addition, you can also declaratively activate profiles through the
 `spring.profiles.active` property, which may be specified through system environment
@@ -447,16 +485,22 @@ profiles at once. Programmatically, you can provide multiple profile names to th
 `setActiveProfiles()` method, which accepts `String...` varargs. The following example
 activates multiple profiles:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ctx.getEnvironment().setActiveProfiles("profile1", "profile2");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	ctx.getEnvironment().setActiveProfiles("profile1", "profile2")
 ----
+======
 
 Declaratively, `spring.profiles.active` may accept a comma-separated list of profile names,
 as the following example shows:
@@ -473,8 +517,11 @@ as the following example shows:
 The default profile represents the profile that is enabled by default. Consider the
 following example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@Profile("default")
@@ -489,8 +536,10 @@ following example:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@Profile("default")
@@ -505,6 +554,7 @@ following example:
 		}
 	}
 ----
+======
 
 If no profile is active, the `dataSource` is created. You can see this
 as a way to provide a default definition for one or more beans. If any
@@ -521,22 +571,28 @@ the `Environment` or, declaratively, by using the `spring.profiles.default` prop
 Spring's `Environment` abstraction provides search operations over a configurable
 hierarchy of property sources. Consider the following listing:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext ctx = new GenericApplicationContext();
 	Environment env = ctx.getEnvironment();
 	boolean containsMyProperty = env.containsProperty("my-property");
 	System.out.println("Does my environment contain the 'my-property' property? " + containsMyProperty);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = GenericApplicationContext()
 	val env = ctx.environment
 	val containsMyProperty = env.containsProperty("my-property")
 	println("Does my environment contain the 'my-property' property? $containsMyProperty")
 ----
+======
 
 In the preceding snippet, we see a high-level way of asking Spring whether the `my-property` property is
 defined for the current environment. To answer this question, the `Environment` object performs
@@ -580,20 +636,26 @@ of properties that you want to integrate into this search. To do so, implement
 and instantiate your own `PropertySource` and add it to the set of `PropertySources` for the
 current `Environment`. The following example shows how to do so:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 ConfigurableApplicationContext ctx = new GenericApplicationContext();
 MutablePropertySources sources = ctx.getEnvironment().getPropertySources();
 sources.addFirst(new MyPropertySource());
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val ctx = GenericApplicationContext()
 	val sources = ctx.environment.propertySources
 	sources.addFirst(MyPropertySource())
 ----
+======
 
 In the preceding code, `MyPropertySource` has been added with highest precedence in the
 search. If it contains a  `my-property` property, the property is detected and returned, in favor of
@@ -615,8 +677,11 @@ Given a file called `app.properties` that contains the key-value pair `testbean.
 the following `@Configuration` class uses `@PropertySource` in such a way that
 a call to `testBean.getName()` returns `myTestBean`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
    @Configuration
    @PropertySource("classpath:/com/myco/app.properties")
@@ -633,8 +698,10 @@ a call to `testBean.getName()` returns `myTestBean`:
 	   }
    }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@PropertySource("classpath:/com/myco/app.properties")
@@ -649,13 +716,17 @@ a call to `testBean.getName()` returns `myTestBean`:
 		}
 	}
 ----
+======
 
 Any `${...}` placeholders present in a `@PropertySource` resource location are
 resolved against the set of property sources already registered against the
 environment, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
    @Configuration
    @PropertySource("classpath:/com/${my.placeholder:default/path}/app.properties")
@@ -672,8 +743,10 @@ environment, as the following example shows:
 	   }
    }
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@PropertySource("classpath:/com/\${my.placeholder:default/path}/app.properties")
@@ -688,6 +761,7 @@ environment, as the following example shows:
 		}
 	}
 ----
+======
 
 Assuming that `my.placeholder` is present in one of the property sources already
 registered (for example, system properties or environment variables), the placeholder is

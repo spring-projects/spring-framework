@@ -14,8 +14,11 @@ TestContext Framework is enabled automatically if Groovy is on the classpath.
 
 The following example shows how to specify Groovy configuration files:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from "/AppConfig.groovy" and
@@ -25,6 +28,7 @@ The following example shows how to specify Groovy configuration files:
 		// class body...
 	}
 ----
+======
 <1> Specifying the location of Groovy configuration files.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -49,8 +53,11 @@ detect a default location based on the name of the test class. If your class is 
 `"classpath:com/example/MyTestContext.groovy"`. The following example shows how to use
 the default:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from
@@ -60,6 +67,7 @@ the default:
 		// class body...
 	}
 ----
+======
 <1> Loading configuration from the default location.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -87,8 +95,11 @@ configured resource location ends with `.xml`, it is loaded by using an
 
 The following listing shows how to combine both in an integration test:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ExtendWith(SpringExtension.class)
 	// ApplicationContext will be loaded from
@@ -98,8 +109,10 @@ The following listing shows how to combine both in an integration test:
 		// class body...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from
@@ -109,5 +122,6 @@ The following listing shows how to combine both in an integration test:
 		// class body...
 	}
 ----
+======
 =====
 

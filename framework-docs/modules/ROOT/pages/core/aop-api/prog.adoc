@@ -8,22 +8,28 @@ The interfaces implemented by the target object are
 automatically proxied. The following listing shows creation of a proxy for a target object, with one
 interceptor and one advisor:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ProxyFactory factory = new ProxyFactory(myBusinessInterfaceImpl);
 	factory.addAdvice(myMethodInterceptor);
 	factory.addAdvisor(myAdvisor);
 	MyBusinessInterface tb = (MyBusinessInterface) factory.getProxy();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val factory = ProxyFactory(myBusinessInterfaceImpl)
 	factory.addAdvice(myMethodInterceptor)
 	factory.addAdvisor(myAdvisor)
 	val tb = factory.proxy as MyBusinessInterface
 ----
+======
 
 The first step is to construct an object of type
 `org.springframework.aop.framework.ProxyFactory`. You can create this with a target

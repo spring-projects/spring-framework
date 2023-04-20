@@ -57,54 +57,75 @@ See the attendant {api-spring-framework}/jdbc/core/JdbcTemplate.html[javadoc] fo
 
 The following query gets the number of rows in a relation:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	int rowCount = this.jdbcTemplate.queryForObject("select count(*) from t_actor", Integer.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val rowCount = jdbcTemplate.queryForObject<Int>("select count(*) from t_actor")!!
 ----
+======
 
 The following query uses a bind variable:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	int countOfActorsNamedJoe = this.jdbcTemplate.queryForObject(
 			"select count(*) from t_actor where first_name = ?", Integer.class, "Joe");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val countOfActorsNamedJoe = jdbcTemplate.queryForObject<Int>(
 			"select count(*) from t_actor where first_name = ?", arrayOf("Joe"))!!
 ----
+======
 
 
 The following query looks for a `String`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	String lastName = this.jdbcTemplate.queryForObject(
 			"select last_name from t_actor where id = ?",
 			String.class, 1212L);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val lastName = this.jdbcTemplate.queryForObject<String>(
 			"select last_name from t_actor where id = ?",
 			arrayOf(1212L))!!
 ----
+======
 
 The following query finds and populates a single domain object:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Actor actor = jdbcTemplate.queryForObject(
 			"select first_name, last_name from t_actor where id = ?",
@@ -116,8 +137,10 @@ The following query finds and populates a single domain object:
 			},
 			1212L);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val actor = jdbcTemplate.queryForObject(
 				"select first_name, last_name from t_actor where id = ?",
@@ -125,11 +148,15 @@ The following query finds and populates a single domain object:
 			Actor(rs.getString("first_name"), rs.getString("last_name"))
 		}
 ----
+======
 
 The following query finds and populates a list of domain objects:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	List<Actor> actors = this.jdbcTemplate.query(
 			"select first_name, last_name from t_actor",
@@ -140,20 +167,26 @@ The following query finds and populates a list of domain objects:
 				return actor;
 			});
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val actors = jdbcTemplate.query("select first_name, last_name from t_actor") { rs, _ ->
 			Actor(rs.getString("first_name"), rs.getString("last_name"))
 ----
+======
 
 If the last two snippets of code actually existed in the same application, it would make
 sense to remove the duplication present in the two `RowMapper` lambda expressions and
 extract them out into a single field that could then be referenced by DAO methods as needed.
 For example, it may be better to write the preceding code snippet as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	private final RowMapper<Actor> actorRowMapper = (resultSet, rowNum) -> {
 		Actor actor = new Actor();
@@ -166,8 +199,10 @@ For example, it may be better to write the preceding code snippet as follows:
 		return this.jdbcTemplate.query("select first_name, last_name from t_actor", actorRowMapper);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val actorMapper = RowMapper<Actor> { rs: ResultSet, rowNum: Int ->
 		Actor(rs.getString("first_name"), rs.getString("last_name"))
@@ -177,6 +212,7 @@ For example, it may be better to write the preceding code snippet as follows:
 		return jdbcTemplate.query("select first_name, last_name from t_actor", actorMapper)
 	}
 ----
+======
 
 [[jdbc-JdbcTemplate-examples-update]]
 === Updating (`INSERT`, `UPDATE`, and `DELETE`) with `JdbcTemplate`
@@ -186,52 +222,70 @@ Parameter values are usually provided as variable arguments or, alternatively, a
 
 The following example inserts a new entry:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	this.jdbcTemplate.update(
 			"insert into t_actor (first_name, last_name) values (?, ?)",
 			"Leonor", "Watling");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	jdbcTemplate.update(
 			"insert into t_actor (first_name, last_name) values (?, ?)",
 			"Leonor", "Watling")
 ----
+======
 
 The following example updates an existing entry:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	this.jdbcTemplate.update(
 			"update t_actor set last_name = ? where id = ?",
 			"Banjo", 5276L);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	jdbcTemplate.update(
 			"update t_actor set last_name = ? where id = ?",
 			"Banjo", 5276L)
 ----
+======
 
 The following example deletes an entry:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	this.jdbcTemplate.update(
 			"delete from t_actor where id = ?",
 			Long.valueOf(actorId));
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	jdbcTemplate.update("delete from t_actor where id = ?", actorId.toLong())
 ----
+======
 
 [[jdbc-JdbcTemplate-examples-other]]
 === Other `JdbcTemplate` Operations
@@ -241,33 +295,45 @@ method is often used for DDL statements. It is heavily overloaded with variants 
 callback interfaces, binding variable arrays, and so on. The following example creates a
 table:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	jdbcTemplate.execute("create table mytable (id integer, name varchar(100))")
 ----
+======
 
 The following example invokes a stored procedure:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	this.jdbcTemplate.update(
 			"call SUPPORT.REFRESH_ACTORS_SUMMARY(?)",
 			Long.valueOf(unionId));
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	jdbcTemplate.update(
 			"call SUPPORT.REFRESH_ACTORS_SUMMARY(?)",
 			unionId.toLong())
 ----
+======
 
 
 More sophisticated stored procedure support is xref:data-access/jdbc/object.adoc#jdbc-StoredProcedure[covered later].
@@ -288,8 +354,11 @@ that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is creat
 the setter for the `DataSource`. This leads to DAOs that resemble the following:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class JdbcCorporateEventDao implements CorporateEventDao {
 
@@ -302,8 +371,10 @@ the setter for the `DataSource`. This leads to DAOs that resemble the following:
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao {
 
@@ -312,6 +383,7 @@ the setter for the `DataSource`. This leads to DAOs that resemble the following:
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
+======
 --
 
 The following example shows the corresponding XML configuration:
@@ -350,8 +422,11 @@ support for dependency injection. In this case, you can annotate the class with 
 method with `@Autowired`. The following example shows how to do so:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Repository // <1>
 	public class JdbcCorporateEventDao implements CorporateEventDao {
@@ -366,6 +441,7 @@ method with `@Autowired`. The following example shows how to do so:
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
+======
 <1> Annotate the class with `@Repository`.
 <2> Annotate the `DataSource` setter method with `@Autowired`.
 <3> Create a new `JdbcTemplate` with the `DataSource`.
@@ -440,8 +516,11 @@ section describes only those areas of the `NamedParameterJdbcTemplate` class tha
 from the `JdbcTemplate` itself -- namely, programming JDBC statements by using named
 parameters. The following example shows how to use `NamedParameterJdbcTemplate`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// some JDBC-backed DAO class...
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -460,8 +539,9 @@ parameters. The following example shows how to use `NamedParameterJdbcTemplate`:
 	}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
 
@@ -471,6 +551,7 @@ parameters. The following example shows how to use `NamedParameterJdbcTemplate`:
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
 ----
+======
 
 Notice the use of the named parameter notation in the value assigned to the `sql`
 variable and the corresponding value that is plugged into the `namedParameters`
@@ -483,8 +564,11 @@ methods exposed by the `NamedParameterJdbcOperations` and implemented by the
 
 The following example shows the use of the `Map`-based style:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// some JDBC-backed DAO class...
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -502,8 +586,10 @@ The following example shows the use of the `Map`-based style:
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters,  Integer.class);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// some JDBC-backed DAO class...
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
@@ -514,6 +600,7 @@ The following example shows the use of the `Map`-based style:
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
 ----
+======
 
 One nice feature related to the `NamedParameterJdbcTemplate` (and existing in the same
 Java package) is the `SqlParameterSource` interface. You have already seen an example of
@@ -531,8 +618,11 @@ of named parameter values.
 
 The following example shows a typical JavaBean:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class Actor {
 
@@ -556,17 +646,23 @@ The following example shows a typical JavaBean:
 
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	data class Actor(val id: Long, val firstName: String, val lastName: String)
 ----
+======
 
 The following example uses a `NamedParameterJdbcTemplate` to return the count of the
 members of the class shown in the preceding example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// some JDBC-backed DAO class...
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -585,8 +681,10 @@ members of the class shown in the preceding example:
 		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// some JDBC-backed DAO class...
 	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
@@ -600,6 +698,7 @@ members of the class shown in the preceding example:
 		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
 	}
 ----
+======
 
 Remember that the `NamedParameterJdbcTemplate` class wraps a classic `JdbcTemplate`
 template. If you need access to the wrapped `JdbcTemplate` instance to access
@@ -651,8 +750,11 @@ name from the database metadata of the database in use.
 
 You can extend `SQLErrorCodeSQLExceptionTranslator`, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	public class CustomSQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
 
@@ -664,8 +766,10 @@ You can extend `SQLErrorCodeSQLExceptionTranslator`, as the following example sh
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class CustomSQLErrorCodesTranslator : SQLErrorCodeSQLExceptionTranslator() {
 
@@ -677,6 +781,7 @@ You can extend `SQLErrorCodeSQLExceptionTranslator`, as the following example sh
 		}
 	}
 ----
+======
 
 In the preceding example, the specific error code (`-12345`) is translated, while other errors are
 left to be translated by the default translator implementation. To use this custom
@@ -685,8 +790,11 @@ translator, you must pass it to the `JdbcTemplate` through the method
 processing where this translator is needed. The following example shows how you can use this custom
 translator:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	private JdbcTemplate jdbcTemplate;
 
@@ -710,8 +818,10 @@ translator:
 			" where id = ?", pct, orderId);
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// create a JdbcTemplate and set data source
 	private val jdbcTemplate = JdbcTemplate(dataSource).apply {
@@ -728,6 +838,7 @@ translator:
 				" where id = ?", pct, orderId)
 	}
 ----
+======
 
 The custom translator is passed a data source in order to look up the error codes in
 `sql-error-codes.xml`.
@@ -741,8 +852,11 @@ Running an SQL statement requires very little code. You need a `DataSource` and 
 `JdbcTemplate`. The following example shows what you need to include for a minimal but
 fully functional class that creates a new table:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import javax.sql.DataSource;
 	import org.springframework.jdbc.core.JdbcTemplate;
@@ -760,8 +874,10 @@ fully functional class that creates a new table:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import javax.sql.DataSource
 	import org.springframework.jdbc.core.JdbcTemplate
@@ -775,6 +891,7 @@ fully functional class that creates a new table:
 		}
 	}
 ----
+======
 
 
 [[jdbc-statements-querying]]
@@ -786,8 +903,11 @@ Java class that is passed in as an argument. If the type conversion is invalid, 
 `InvalidDataAccessApiUsageException` is thrown. The following example contains two
 query methods, one for an `int` and one that queries for a `String`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import javax.sql.DataSource;
 	import org.springframework.jdbc.core.JdbcTemplate;
@@ -809,8 +929,10 @@ query methods, one for an `int` and one that queries for a `String`:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 import javax.sql.DataSource
 import org.springframework.jdbc.core.JdbcTemplate
@@ -826,6 +948,7 @@ class RunAQuery(dataSource: DataSource) {
 		get() = jdbcTemplate.queryForObject("select name from mytable")
 }
 ----
+======
 
 In addition to the single result query methods, several methods return a list with an
 entry for each row that the query returned. The most generic method is `queryForList(..)`,
@@ -833,8 +956,11 @@ which returns a `List` where each element is a `Map` containing one entry for ea
 using the column name as the key. If you add a method to the preceding example to retrieve a
 list of all the rows, it might be as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	private JdbcTemplate jdbcTemplate;
 
@@ -846,8 +972,10 @@ list of all the rows, it might be as follows:
 		return this.jdbcTemplate.queryForList("select * from mytable");
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	private val jdbcTemplate = JdbcTemplate(dataSource)
 
@@ -855,6 +983,7 @@ list of all the rows, it might be as follows:
 		return jdbcTemplate.queryForList("select * from mytable")
 	}
 ----
+======
 
 The returned list would resemble the following:
 
@@ -869,8 +998,11 @@ The returned list would resemble the following:
 
 The following example updates a column for a certain primary key:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	import javax.sql.DataSource;
 	import org.springframework.jdbc.core.JdbcTemplate;
@@ -888,8 +1020,10 @@ The following example updates a column for a certain primary key:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import javax.sql.DataSource
 	import org.springframework.jdbc.core.JdbcTemplate
@@ -903,6 +1037,7 @@ The following example updates a column for a certain primary key:
 		}
 	}
 ----
+======
 
 In the preceding example,
 an SQL statement has placeholders for row parameters. You can pass the parameter values
@@ -922,8 +1057,11 @@ update. There is no standard single way to create an appropriate `PreparedStatem
 (which explains why the method signature is the way it is). The following example works
 on Oracle but may not work on other platforms:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	final String INSERT_SQL = "insert into my_test (name) values(?)";
 	final String name = "Rob";
@@ -937,8 +1075,10 @@ on Oracle but may not work on other platforms:
 
 	// keyHolder.getKey() now contains the generated key
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val INSERT_SQL = "insert into my_test (name) values(?)"
 	val name = "Rob"
@@ -950,6 +1090,7 @@ on Oracle but may not work on other platforms:
 
 	// keyHolder.getKey() now contains the generated key
 ----
+======
 
 
 

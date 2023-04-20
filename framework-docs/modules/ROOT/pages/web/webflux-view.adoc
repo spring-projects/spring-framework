@@ -47,8 +47,11 @@ integration for using Spring WebFlux with FreeMarker templates.
 
 The following example shows how to configure FreeMarker as a view technology:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -69,8 +72,10 @@ The following example shows how to configure FreeMarker as a view technology:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -88,6 +93,7 @@ The following example shows how to configure FreeMarker as a view technology:
 		}
 	}
 ----
+======
 
 Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`,
 shown in the preceding example. Given the preceding configuration, if your controller
@@ -106,8 +112,11 @@ properties on the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property
 a `java.util.Properties` object, and the `freemarkerVariables` property requires a
 `java.util.Map`. The following example shows how to use a `FreeMarkerConfigurer`:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -127,8 +136,10 @@ a `java.util.Properties` object, and the `freemarkerVariables` property requires
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -143,6 +154,7 @@ a `java.util.Properties` object, and the `freemarkerVariables` property requires
 		}
 	}
 ----
+======
 
 See the FreeMarker documentation for details of settings and variables as they apply to
 the `Configuration` object.
@@ -245,8 +257,11 @@ You can declare a `ScriptTemplateConfigurer` bean to specify the script engine t
 the script files to load, what function to call to render templates, and so on.
 The following example uses Mustache templates and the Nashorn JavaScript engine:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -268,8 +283,10 @@ The following example uses Mustache templates and the Nashorn JavaScript engine:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -288,6 +305,7 @@ The following example uses Mustache templates and the Nashorn JavaScript engine:
 		}
 	}
 ----
+======
 
 The `render` function is called with the following parameters:
 
@@ -307,8 +325,11 @@ https://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
 browser facilities not available in the server-side script engine.
 The following example shows how to set a custom render function:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebFlux
@@ -330,8 +351,10 @@ The following example shows how to set a custom render function:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebFlux
@@ -350,6 +373,7 @@ The following example shows how to set a custom render function:
 		}
 	}
 ----
+======
 
 NOTE: Setting the `sharedEngine` property to `false` is required when using non-thread-safe
 script engines with templating libraries not designed for concurrency, such as Handlebars or

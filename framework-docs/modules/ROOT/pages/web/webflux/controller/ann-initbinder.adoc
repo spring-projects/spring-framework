@@ -22,8 +22,11 @@ with a `WebDataBinder` argument, for registrations, and a `void` return value.
 The following example uses the `@InitBinder` annotation:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class FormController {
@@ -38,6 +41,7 @@ The following example uses the `@InitBinder` annotation:
 		// ...
 	}
 ----
+======
 <1> Using the `@InitBinder` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
@@ -64,8 +68,11 @@ Alternatively, when using a `Formatter`-based setup through a shared
 controller-specific `Formatter` instances, as the following example shows:
 
 --
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class FormController {
@@ -78,6 +85,7 @@ controller-specific `Formatter` instances, as the following example shows:
 		// ...
 	}
 ----
+======
 <1> Adding a custom formatter (a `DateFormatter`, in this case).
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

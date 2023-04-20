@@ -15,8 +15,11 @@ so that HTTP conditional requests are supported with `"Last-Modified"` headers.
 
 The following listing shows how to do so with Java configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -30,8 +33,10 @@ The following listing shows how to do so with Java configuration:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -44,6 +49,7 @@ The following listing shows how to do so with Java configuration:
 		}
 	}
 ----
+======
 
 The following example shows how to achieve the same configuration in XML:
 
@@ -69,8 +75,11 @@ JavaScript resources used with a module loader.
 
 The following example shows how to use `VersionResourceResolver` in Java configuration:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim",role="primary"]
-.Java
 ----
 	@Configuration
 	@EnableWebMvc
@@ -85,8 +94,10 @@ The following example shows how to use `VersionResourceResolver` in Java configu
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@EnableWebMvc
@@ -100,6 +111,7 @@ The following example shows how to use `VersionResourceResolver` in Java configu
 		}
 	}
 ----
+======
 
 The following example shows how to achieve the same configuration in XML:
 

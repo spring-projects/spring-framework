@@ -25,8 +25,11 @@ By default, `@ControllerAdvice` methods apply to every request (that is, all con
 but you can narrow that down to a subset of controllers by using attributes on the
 annotation, as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	// Target all Controllers annotated with @RestController
 	@ControllerAdvice(annotations = RestController.class)
@@ -41,8 +44,9 @@ annotation, as the following example shows:
 	public class ExampleAdvice3 {}
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// Target all Controllers annotated with @RestController
 	@ControllerAdvice(annotations = [RestController::class])
@@ -56,6 +60,7 @@ annotation, as the following example shows:
 	@ControllerAdvice(assignableTypes = [ControllerInterface::class, AbstractController::class])
 	public class ExampleAdvice3 {}
 ----
+======
 
 The selectors in the preceding example are evaluated at runtime and may negatively impact
 performance if used extensively. See the

@@ -8,14 +8,18 @@ If you need access to pre-existing session attributes that are managed globally
 you can use the `@SessionAttribute` annotation on a method parameter,
 as the following example shows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@RequestMapping("/")
 	public String handle(@SessionAttribute User user) { <1>
 		// ...
 	}
 ----
+======
 <1> Using a `@SessionAttribute` annotation.
 
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]

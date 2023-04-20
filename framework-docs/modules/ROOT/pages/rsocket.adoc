@@ -180,8 +180,11 @@ settings for the `SETUP` frame.
 
 This is the most basic way to connect with default settings:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RSocketRequester requester = RSocketRequester.builder().tcp("localhost", 7000);
 
@@ -189,14 +192,16 @@ This is the most basic way to connect with default settings:
 	RSocketRequester requester = RSocketRequester.builder().webSocket(url);
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val requester = RSocketRequester.builder().tcp("localhost", 7000)
 
 	URI url = URI.create("https://example.org:8080/rsocket");
 	val requester = RSocketRequester.builder().webSocket(url)
 ----
+======
 
 The above does not connect immediately. When requests are made, a shared connection is
 established transparently and used.
@@ -233,8 +238,11 @@ metadata values. By default only the basic codecs from `spring-core` for `String
 `byte[]`, and `ByteBuffer` are registered. Adding `spring-web` provides access to more that
 can be registered as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RSocketStrategies strategies = RSocketStrategies.builder()
 		.encoders(encoders -> encoders.add(new Jackson2CborEncoder()))
@@ -246,8 +254,9 @@ can be registered as follows:
 		.tcp("localhost", 7000);
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val strategies = RSocketStrategies.builder()
 			.encoders { it.add(Jackson2CborEncoder()) }
@@ -258,6 +267,7 @@ can be registered as follows:
 			.rsocketStrategies(strategies)
 			.tcp("localhost", 7000)
 ----
+======
 
 `RSocketStrategies` is designed for re-use. In some scenarios, e.g. client and server in
 the same application, it may be preferable to declare it in Spring configuration.
@@ -272,8 +282,11 @@ server.
 You can use annotated handlers for client-side responding based on the same
 infrastructure that's used on a server, but registered programmatically as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RSocketStrategies strategies = RSocketStrategies.builder()
 		.routeMatcher(new PathPatternRouteMatcher())  // <1>
@@ -286,6 +299,7 @@ infrastructure that's used on a server, but registered programmatically as follo
 		.rsocketConnector(connector -> connector.acceptor(responder)) // <3>
 		.tcp("localhost", 7000);
 ----
+======
 <1> Use `PathPatternRouteMatcher`, if `spring-web` is present, for efficient
     route matching.
 <2> Create a responder from a class with `@MessageMapping` and/or `@ConnectMapping` methods.
@@ -314,8 +328,11 @@ Note the above is only a shortcut designed for programmatic registration of clie
 responders. For alternative scenarios, where client responders are in Spring configuration,
 you can still declare `RSocketMessageHandler` as a Spring bean and then apply as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext context = ... ;
 	RSocketMessageHandler handler = context.getBean(RSocketMessageHandler.class);
@@ -325,8 +342,9 @@ you can still declare `RSocketMessageHandler` as a Spring bean and then apply as
 		.tcp("localhost", 7000);
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -337,6 +355,7 @@ you can still declare `RSocketMessageHandler` as a Spring bean and then apply as
 			.rsocketConnector { it.acceptor(handler.responder()) }
 			.tcp("localhost", 7000)
 ----
+======
 
 For the above you may also need to use `setHandlerPredicate` in `RSocketMessageHandler` to
 switch to a different strategy for detecting client responders, e.g. based on a custom
@@ -355,8 +374,11 @@ See also xref:rsocket.adoc#rsocket-annot-responders[Annotated Responders], for m
 intervals, session resumption, interceptors, and more. You can configure options
 at that level as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RSocketRequester requester = RSocketRequester.builder()
 		.rsocketConnector(connector -> {
@@ -365,8 +387,9 @@ at that level as follows:
 		.tcp("localhost", 7000);
 ----
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val requester = RSocketRequester.builder()
 			.rsocketConnector {
@@ -374,6 +397,7 @@ at that level as follows:
 			}
 			.tcp("localhost", 7000)
 ----
+======
 
 
 [[rsocket-requester-server]]
@@ -388,8 +412,11 @@ mind that `@ConnectMapping` methods are essentially handlers of the `SETUP` fram
 must be handled before requests can begin. Therefore, requests at the very start must be
 decoupled from handling. For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@ConnectMapping
 	Mono<Void> handle(RSocketRequester requester) {
@@ -401,6 +428,7 @@ decoupled from handling. For example:
 		return ... // <2>
 	}
 ----
+======
 <1> Start the request asynchronously, independent from handling.
 <2> Perform handling and return completion `Mono<Void>`.
 
@@ -428,8 +456,11 @@ decoupled from handling. For example:
 Once you have a xref:rsocket.adoc#rsocket-requester-client[client] or
 xref:rsocket.adoc#rsocket-requester-server[server] requester, you can make requests as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ViewBox viewBox = ... ;
 
@@ -438,6 +469,7 @@ xref:rsocket.adoc#rsocket-requester-server[server] requester, you can make reque
 			.retrieveFlux(AirportLocation.class); // <3>
 
 ----
+======
 <1> Specify a route to include in the metadata of the request message.
 <2> Provide data for the request message.
 <3> Declare the expected response.
@@ -475,27 +507,36 @@ data(Object producer, ParameterizedTypeReference<?> elementTypeRef);
 
 The `data(Object)` step is optional. Skip it for requests that don't send data:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	Mono<AirportLocation> location = requester.route("find.radar.EWR"))
 		.retrieveMono(AirportLocation.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.messaging.rsocket.retrieveAndAwait
 
 	val location = requester.route("find.radar.EWR")
 		.retrieveAndAwait<AirportLocation>()
 ----
+======
 
 Extra metadata values can be added if using
 {gh-rsocket-extensions}/CompositeMetadata.md[composite metadata] (the default) and if the
 values are supported by a registered `Encoder`. For example:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	String securityToken = ... ;
 	ViewBox viewBox = ... ;
@@ -506,8 +547,10 @@ values are supported by a registered `Encoder`. For example:
 			.data(viewBox)
 			.retrieveFlux(AirportLocation.class);
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.messaging.rsocket.retrieveFlow
 
@@ -522,6 +565,7 @@ values are supported by a registered `Encoder`. For example:
 			.data(viewBox)
 			.retrieveFlow<AirportLocation>()
 ----
+======
 
 For `Fire-and-Forget` use the `send()` method that returns `Mono<Void>`. Note that the `Mono`
 indicates only that the message was successfully sent, and not that it was handled.
@@ -547,8 +591,11 @@ To use annotated responders on the server side, add `RSocketMessageHandler` to y
 configuration to detect `@Controller` beans with `@MessageMapping` and `@ConnectMapping`
 methods:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	static class ServerConfig {
@@ -561,8 +608,10 @@ methods:
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class ServerConfig {
@@ -573,12 +622,16 @@ methods:
 		}
 	}
 ----
+======
 
 Then start an RSocket server through the Java RSocket API and plug the
 `RSocketMessageHandler` for the responder as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	ApplicationContext context = ... ;
 	RSocketMessageHandler handler = context.getBean(RSocketMessageHandler.class);
@@ -588,8 +641,10 @@ Then start an RSocket server through the Java RSocket API and plug the
 			.bind(TcpServerTransport.create("localhost", 7000))
 			.block();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.beans.factory.getBean
 
@@ -600,6 +655,7 @@ Then start an RSocket server through the Java RSocket API and plug the
 			.bind(TcpServerTransport.create("localhost", 7000))
 			.awaitSingle()
 ----
+======
 
 `RSocketMessageHandler` supports
 {gh-rsocket-extensions}/CompositeMetadata.md[composite] and
@@ -619,8 +675,11 @@ decoding as with HTTP URLs.
 `RSocketMessageHandler` can be configured via `RSocketStrategies` which may be useful if
 you need to share configuration between a client and a server in the same process:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Configuration
 	static class ServerConfig {
@@ -642,8 +701,10 @@ you need to share configuration between a client and a server in the same proces
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class ServerConfig {
@@ -661,6 +722,7 @@ you need to share configuration between a client and a server in the same proces
 				.build()
 	}
 ----
+======
 
 
 
@@ -680,8 +742,11 @@ Once xref:rsocket.adoc#rsocket-annot-responders-server[server] or
 xref:rsocket.adoc#rsocket-annot-responders-client[client] responder configuration is in place,
 `@MessageMapping` methods can be used as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	@Controller
 	public class RadarsController {
@@ -692,8 +757,10 @@ xref:rsocket.adoc#rsocket-annot-responders-client[client] responder configuratio
 		}
 	}
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 @Controller
 class RadarsController {
@@ -704,6 +771,7 @@ class RadarsController {
 	}
 }
 ----
+======
 
 The above `@MessageMapping` method responds to a Request-Stream interaction having the
 route "locate.radars.within". It supports a flexible method signature with the option to
@@ -833,28 +901,37 @@ the box it has built-in support for
 `String` and saves under the "route" key. For any other mime type you'll need to provide
 a `Decoder` and register the mime type as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(metadataDecoders);
 	extractor.metadataToExtract(fooMimeType, Foo.class, "foo");
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.messaging.rsocket.metadataToExtract
 
 	val extractor = DefaultMetadataExtractor(metadataDecoders)
 	extractor.metadataToExtract<Foo>(fooMimeType, "foo")
 ----
+======
 
 Composite metadata works well to combine independent metadata values. However the
 requester might not support composite metadata, or may choose not to use it. For this,
 `DefaultMetadataExtractor` may needs custom logic to map the decoded value to the output
 map. Here is an example where JSON is used for metadata:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	DefaultMetadataExtractor extractor = new DefaultMetadataExtractor(metadataDecoders);
 	extractor.metadataToExtract(
@@ -864,8 +941,10 @@ map. Here is an example where JSON is used for metadata:
 			outputMap.putAll(jsonMap);
 		});
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.messaging.rsocket.metadataToExtract
 
@@ -874,13 +953,17 @@ map. Here is an example where JSON is used for metadata:
 		outputMap.putAll(jsonMap)
 	}
 ----
+======
 
 When configuring `MetadataExtractor` through `RSocketStrategies`, you can let
 `RSocketStrategies.Builder` create the extractor with the configured decoders, and
 simply use a callback to customize registrations as follows:
 
+[tabs]
+======
+Java::
++
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
-.Java
 ----
 	RSocketStrategies strategies = RSocketStrategies.builder()
 		.metadataExtractorRegistry(registry -> {
@@ -889,8 +972,10 @@ simply use a callback to customize registrations as follows:
 		})
 		.build();
 ----
+
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.messaging.rsocket.metadataToExtract
 
@@ -901,6 +986,7 @@ simply use a callback to customize registrations as follows:
 			}
 			.build()
 ----
+======
 
 
 
