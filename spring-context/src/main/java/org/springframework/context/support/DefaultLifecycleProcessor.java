@@ -307,6 +307,8 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	/**
 	 * Helper class for maintaining a group of Lifecycle beans that should be started
 	 * and stopped together based on their 'phase' value (or the default value of 0).
+	 * The group is expected to be created in an ad-hoc fashion and group members are
+	 * expected to always have the same 'phase' value.
 	 */
 	private class LifecycleGroup {
 
@@ -385,7 +387,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 
 	/**
-	 * Adapts the Comparable interface onto the lifecycle phase model.
+	 * A simple record of a LifecycleGroup member.
 	 */
 	private record LifecycleGroupMember(String name, Lifecycle bean) {}
 
