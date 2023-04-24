@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,30 +40,30 @@ class ProfilesTests {
 
 	@Test
 	void ofWhenNullThrowsException() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of((String[]) null))
-			.withMessageContaining("Must specify at least one profile");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> Profiles.of((String[]) null))
+			.withMessage("Must specify at least one profile expression");
 	}
 
 	@Test
 	void ofWhenEmptyThrowsException() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(Profiles::of)
-			.withMessageContaining("Must specify at least one profile");
+			.withMessage("Must specify at least one profile expression");
 	}
 
 	@Test
 	void ofNullElement() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of((String) null))
-			.withMessageContaining("must contain text");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> Profiles.of((String) null))
+			.withMessage("Invalid profile expression [null]: must contain text");
 	}
 
 	@Test
 	void ofEmptyElement() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				Profiles.of("  "))
-			.withMessageContaining("must contain text");
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> Profiles.of("  "))
+			.withMessage("Invalid profile expression [  ]: must contain text");
 	}
 
 	@Test
@@ -356,7 +356,7 @@ class ProfilesTests {
 	private static void assertMalformed(Supplier<Profiles> supplier) {
 		assertThatIllegalArgumentException()
 			.isThrownBy(supplier::get)
-			.withMessageContaining("Malformed");
+			.withMessageStartingWith("Malformed profile expression");
 	}
 
 	private static Predicate<String> activeProfiles(String... profiles) {
