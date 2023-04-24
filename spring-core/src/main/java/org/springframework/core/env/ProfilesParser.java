@@ -43,7 +43,7 @@ final class ProfilesParser {
 
 
 	static Profiles parse(String... expressions) {
-		Assert.notEmpty(expressions, "Must specify at least one profile");
+		Assert.notEmpty(expressions, "Must specify at least one profile expression");
 		Profiles[] parsed = new Profiles[expressions.length];
 		for (int i = 0; i < expressions.length; i++) {
 			parsed[i] = parseExpression(expressions[i]);
@@ -136,8 +136,8 @@ final class ProfilesParser {
 		return activeProfile -> activeProfile.test(profile);
 	}
 
-	private static Predicate<Profiles> isMatch(Predicate<String> activeProfile) {
-		return profiles -> profiles.matches(activeProfile);
+	private static Predicate<Profiles> isMatch(Predicate<String> activeProfiles) {
+		return profiles -> profiles.matches(activeProfiles);
 	}
 
 
