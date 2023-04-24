@@ -66,10 +66,8 @@ class ScheduledAnnotationReactiveSupportTests {
 	void rejectReactiveAdaptableButNotDeferred() {
 		Method future = ReflectionUtils.findMethod(ReactiveMethods.class, "future");
 
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> isReactive(future)
-		)
-						.withMessage("Reactive methods may only be annotated with @Scheduled if the return type supports deferred execution");
+		assertThatIllegalArgumentException().isThrownBy(() -> isReactive(future))
+				.withMessage("Reactive methods may only be annotated with @Scheduled if the return type supports deferred execution");
 	}
 
 	static class ReactiveMethods {
@@ -204,7 +202,7 @@ class ScheduledAnnotationReactiveSupportTests {
 			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
 					m, target, Duration.ZERO, Duration.ZERO, false);
 
-		assertThat(reactiveTask).hasToString("@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
+			assertThat(reactiveTask).hasToString("@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
 		}
 
 		@Test
