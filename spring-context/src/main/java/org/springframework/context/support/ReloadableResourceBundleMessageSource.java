@@ -399,6 +399,38 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	}
 
 	/**
+	 * Select a concrete existing {@link Resource} from a {@code bundleName}, potentially
+	 * checking multiple source (eg. file extensions). In case no suitable concrete
+	 * Resource exists this method returns a Resource for which {@link Resource#exists()}
+	 * returns {@code false}, which gets subsequently ignored.
+	 * <p>This can be leveraged to check the last modification timestamp and to load
+	 * properties from alternative sources. For example an XML blob in a database, or
+	 * properties serialized in a custom format like JSON...
+	 * <p>The default implementation first checks for an existing file Resource with the
+	 * {@code .properties} extension, and otherwise returns a file Resource with the
+	 * {@code .xml} extension.
+	 * <p>When overriding this method, {@link #loadProperties(Resource, String)} MUST be
+	 * capable of loading properties from any of the {@link Resource} this method can return.
+	 * As a consequence, implementors are strongly encouraged to also override
+	 * {@link #loadProperties(Resource, String)}.
+	 * <p>As an alternative, one could set the {@link #setPropertiesPersister(PropertiesPersister)}
+	 * with an instance capable of dealing with all resources returned by this method.
+	 * Please note however that the default {@code loadProperties} detects XML resource
+	 * filenames and uses {@link PropertiesPersister#loadFromXml(Properties, InputStream)},
+	 * and the two {@link PropertiesPersister#load(Properties, InputStream) load} methods
+	 * otherwise.
+	 * @return the {@code Resource} to use
+	 * @since 6.1.0
+	 */
+	protected Resource determineResource(String filename) {
+		Resource propertiesResource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
+		if (propertiesResource.exists()) {
+			return propertiesResource;
+		}
+		return this.resourceLoader.getResource(filename + XML_SUFFIX);
+	}
+
+	/**
 	 * Refresh the PropertiesHolder for the given bundle filename.
 	 * The holder can be {@code null} if not cached before, or a timed-out cache entry
 	 * (potentially getting re-validated against the current last-modified timestamp).
@@ -408,11 +440,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	protected PropertiesHolder refreshProperties(String filename, @Nullable PropertiesHolder propHolder) {
 		long refreshTimestamp = (getCacheMillis() < 0 ? -1 : System.currentTimeMillis());
 
-		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
-		if (!resource.exists()) {
-			resource = this.resourceLoader.getResource(filename + XML_SUFFIX);
-		}
-
+		Resource resource = determineResource(filename);
 		if (resource.exists()) {
 			long fileTimestamp = -1;
 			if (getCacheMillis() >= 0) {
@@ -451,7 +479,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		else {
 			// Resource does not exist.
 			if (logger.isDebugEnabled()) {
-				logger.debug("No properties file found for [" + filename + "] - neither plain properties nor XML");
+				logger.debug("No properties file found for [" + filename + "]");
 			}
 			// Empty holder representing "not found".
 			propHolder = new PropertiesHolder();
