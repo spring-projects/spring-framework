@@ -404,12 +404,12 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * (potentially getting re-validated against the current last-modified timestamp).
 	 * @param filename the bundle filename (basename + Locale)
 	 * @param propHolder the current PropertiesHolder for the bundle
-	 * @see #determineResource(String)
+	 * @see #resolveResource(String)
 	 */
 	protected PropertiesHolder refreshProperties(String filename, @Nullable PropertiesHolder propHolder) {
 		long refreshTimestamp = (getCacheMillis() < 0 ? -1 : System.currentTimeMillis());
 
-		Resource resource = determineResource(filename);
+		Resource resource = resolveResource(filename);
 		if (resource.exists()) {
 			long fileTimestamp = -1;
 			if (getCacheMillis() >= 0) {
@@ -490,7 +490,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * @return the {@code Resource} to use
 	 * @since 6.1
 	 */
-	protected Resource determineResource(String filename) {
+	protected Resource resolveResource(String filename) {
 		Resource propertiesResource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
 		if (propertiesResource.exists()) {
 			return propertiesResource;
