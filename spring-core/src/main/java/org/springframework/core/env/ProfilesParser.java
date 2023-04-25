@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Internal parser used by {@link Profiles#of}.
@@ -189,7 +189,14 @@ final class ProfilesParser {
 
 		@Override
 		public String toString() {
-			return StringUtils.collectionToDelimitedString(this.expressions, " or ");
+			if (this.expressions.size() == 1) {
+				return this.expressions.iterator().next();
+			}
+			return this.expressions.stream().map(this::wrap).collect(Collectors.joining(" | "));
+		}
+
+		private String wrap(String str) {
+			return "(" + str + ")";
 		}
 
 	}
