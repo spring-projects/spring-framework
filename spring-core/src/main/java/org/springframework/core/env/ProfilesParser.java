@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,8 @@ final class ProfilesParser {
 			}
 			switch (token) {
 				case "(":
-					Profiles contents = parseTokens(expression, tokens, Context.BRACKET);
-					if (context == Context.INVERT) {
+					Profiles contents = parseTokens(expression, tokens, Context.PARENTHESIS);
+					if (context == Context.NEGATE) {
 						return contents;
 					}
 					elements.add(contents);
@@ -86,11 +86,11 @@ final class ProfilesParser {
 					operator = Operator.OR;
 					break;
 				case "!":
-					elements.add(not(parseTokens(expression, tokens, Context.INVERT)));
+					elements.add(not(parseTokens(expression, tokens, Context.NEGATE)));
 					break;
 				case ")":
 					Profiles merged = merge(expression, elements, operator);
-					if (context == Context.BRACKET) {
+					if (context == Context.PARENTHESIS) {
 						return merged;
 					}
 					elements.clear();
@@ -99,7 +99,7 @@ final class ProfilesParser {
 					break;
 				default:
 					Profiles value = equals(token);
-					if (context == Context.INVERT) {
+					if (context == Context.NEGATE) {
 						return value;
 					}
 					elements.add(value);
@@ -142,10 +142,9 @@ final class ProfilesParser {
 	}
 
 
-	private enum Operator {AND, OR}
+	private enum Operator { AND, OR }
 
-
-	private enum Context {NONE, INVERT, BRACKET}
+	private enum Context { NONE, NEGATE, PARENTHESIS }
 
 
 	private static class ParsedProfiles implements Profiles {
