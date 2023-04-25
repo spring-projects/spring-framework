@@ -704,6 +704,31 @@ public class HttpHeadersTests {
 		assertThat(readOnlyHttpHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
 	}
 
+	@Test
+	void readOnlyHttpHeadersCopyOrderTest() {
+		headers.add("aardvark", "enigma");
+		headers.add("beaver", "enigma");
+		headers.add("cat", "enigma");
+		headers.add("dog", "enigma");
+		headers.add("elephant", "enigma");
+
+		String[] expectedKeys = new String[] { "aardvark", "beaver", "cat", "dog", "elephant" };
+
+		HttpHeaders readOnlyHttpHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+
+		HttpHeaders forEachHeaders = new HttpHeaders();
+		readOnlyHttpHeaders.forEach(forEachHeaders::putIfAbsent);
+		assertThat(forEachHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
+
+		HttpHeaders putAllHeaders = new HttpHeaders();
+		putAllHeaders.putAll(readOnlyHttpHeaders);
+		assertThat(putAllHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
+
+		HttpHeaders addAllHeaders = new HttpHeaders();
+		addAllHeaders.addAll(readOnlyHttpHeaders);
+		assertThat(addAllHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
+	}
+
 	@Test // gh-25034
 	void equalsUnwrapsHttpHeaders() {
 		HttpHeaders headers1 = new HttpHeaders();
