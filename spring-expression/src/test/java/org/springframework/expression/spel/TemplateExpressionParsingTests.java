@@ -40,26 +40,26 @@ class TemplateExpressionParsingTests extends AbstractExpressionTests {
 
 	static final ParserContext DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT = new TemplateParserContext("${", "}");
 
+	private final SpelExpressionParser parser = new SpelExpressionParser();
+
+
 
 	@Test
-	void parsingSimpleTemplateExpression01() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+	void parsingSimpleTemplateExpression01() {
 		Expression expr = parser.parseExpression("hello ${'world'}", DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		Object o = expr.getValue();
 		assertThat(o.toString()).isEqualTo("hello world");
 	}
 
 	@Test
-	void parsingSimpleTemplateExpression02() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+	void parsingSimpleTemplateExpression02() {
 		Expression expr = parser.parseExpression("hello ${'to'} you", DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		Object o = expr.getValue();
 		assertThat(o.toString()).isEqualTo("hello to you");
 	}
 
 	@Test
-	void parsingSimpleTemplateExpression03() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+	void parsingSimpleTemplateExpression03() {
 		Expression expr = parser.parseExpression("The quick ${'brown'} fox jumped over the ${'lazy'} dog",
 				DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		Object o = expr.getValue();
@@ -67,8 +67,7 @@ class TemplateExpressionParsingTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void parsingSimpleTemplateExpression04() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+	void parsingSimpleTemplateExpression04() {
 		Expression expr = parser.parseExpression("${'hello'} world", DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		Object o = expr.getValue();
 		assertThat(o.toString()).isEqualTo("hello world");
@@ -87,8 +86,7 @@ class TemplateExpressionParsingTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void compositeStringExpression() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+	void compositeStringExpression() {
 		Expression ex = parser.parseExpression("hello ${'world'}", DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		assertThat(ex.getValue()).isInstanceOf(String.class).isEqualTo("hello world");
 		assertThat(ex.getValue(String.class)).isInstanceOf(String.class).isEqualTo("hello world");
@@ -127,8 +125,7 @@ class TemplateExpressionParsingTests extends AbstractExpressionTests {
 	static class Rooty {}
 
 	@Test
-	void nestedExpressions() throws Exception {
-		SpelExpressionParser parser = new SpelExpressionParser();
+	void nestedExpressions() {
 		// treat the nested ${..} as a part of the expression
 		Expression ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#this<5]} world",DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		String s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
@@ -158,7 +155,7 @@ class TemplateExpressionParsingTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void clashingWithSuffixes() throws Exception {
+	void clashingWithSuffixes() {
 		// Just wanting to use the prefix or suffix within the template:
 		Expression ex = parser.parseExpression("hello ${3+4} world",DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT);
 		String s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
@@ -174,13 +171,13 @@ class TemplateExpressionParsingTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	void parsingNormalExpressionThroughTemplateParser() throws Exception {
+	void parsingNormalExpressionThroughTemplateParser() {
 		Expression expr = parser.parseExpression("1+2+3");
 		assertThat(expr.getValue()).isEqualTo(6);
 	}
 
 	@Test
-	void errorCases() throws Exception {
+	void errorCases() {
 		assertThatExceptionOfType(ParseException.class).isThrownBy(() ->
 				parser.parseExpression("hello ${'world'", DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT))
 			.satisfies(pex -> {
