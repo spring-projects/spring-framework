@@ -18,6 +18,7 @@ package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.logging.Log;
@@ -32,9 +33,11 @@ import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Helper class for @{@link ScheduledAnnotationBeanPostProcessor} to support reactive cases
@@ -148,33 +151,16 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * (i.e. the task blocks until completion of the Publisher, then the delay is applied
 	 * until next iteration).
 	 */
-	static Runnable createSubscriptionRunnable(Method method, Object targetBean, boolean isFixedDelaySpecialCase) {
+	static Runnable createSubscriptionRunnable(Method method, Object targetBean, Scheduled scheduled,
+			List<Runnable> subscriptionTrackerRegistry) {
+		boolean shouldBlock = scheduled.fixedDelay() > 0 || StringUtils.hasText(scheduled.fixedDelayString());
 		final Publisher<?> publisher = getPublisherFor(method, targetBean);
-		if (isFixedDelaySpecialCase) {
+		if (shouldBlock) {
 			return () -> {
 				final CountDownLatch latch = new CountDownLatch(1);
-				publisher.subscribe(new Subscriber<Object>() {
-					@Override
-					public void onSubscribe(Subscription s) {
-						s.request(Integer.MAX_VALUE);
-					}
-
-					@Override
-					public void onNext(Object o) {
-						// NO-OP
-					}
-
-					@Override
-					public void onError(Throwable ex) {
-						LOGGER.warn("Unexpected error occurred in scheduled reactive task", ex);
-						latch.countDown();
-					}
-
-					@Override
-					public void onComplete() {
-						latch.countDown();
-					}
-				});
+				TrackingSubscriber subscriber = new TrackingSubscriber(subscriptionTrackerRegistry, latch);
+				subscriptionTrackerRegistry.add(subscriber);
+				publisher.subscribe(subscriber);
 				try {
 					latch.await();
 				}
@@ -183,27 +169,80 @@ abstract class ScheduledAnnotationReactiveSupport {
 				}
 			};
 		}
-		return () -> publisher.subscribe(new Subscriber<Object>() {
-			@Override
-			public void onSubscribe(Subscription s) {
-				s.request(Integer.MAX_VALUE);
-			}
+		return () -> {
+			final TrackingSubscriber subscriber = new TrackingSubscriber(subscriptionTrackerRegistry);
+			subscriptionTrackerRegistry.add(subscriber);
+			publisher.subscribe(subscriber);
+		};
+	}
 
-			@Override
-			public void onNext(Object o) {
-				// NO-OP
-			}
+	/**
+	 * A {@code Subscriber} which keeps track of its {@code Subscription} and exposes the
+	 * capacity to cancel the subscription as a {@code Runnable}. Can optionally support
+	 * blocking if a {@code CountDownLatch} is passed at construction.
+	 */
+	private static final class TrackingSubscriber implements Subscriber<Object>, Runnable {
 
-			@Override
-			public void onError(Throwable ex) {
-				LOGGER.warn("Unexpected error occurred in scheduled reactive task", ex);
-			}
+		private final List<Runnable> subscriptionTrackerRegistry;
 
-			@Override
-			public void onComplete() {
-				// NO-OP
+		@Nullable
+		private final CountDownLatch blockingLatch;
+
+		/*
+		Implementation note: since this is created last minute when subscribing,
+		there shouldn't be a way to cancel the tracker externally from the
+		ScheduledAnnotationBeanProcessor before the #setSubscription(Subscription)
+		 method is called.
+		 */
+		@Nullable
+		private Subscription s;
+
+		TrackingSubscriber(List<Runnable> subscriptionTrackerRegistry) {
+			this(subscriptionTrackerRegistry, null);
+		}
+
+		TrackingSubscriber(List<Runnable> subscriptionTrackerRegistry, @Nullable CountDownLatch latch) {
+			this.subscriptionTrackerRegistry = subscriptionTrackerRegistry;
+			this.blockingLatch = latch;
+		}
+
+		@Override
+		public void run() {
+			if (this.s != null) {
+				this.s.cancel();
 			}
-		});
+			if (this.blockingLatch != null) {
+				this.blockingLatch.countDown();
+			}
+		}
+
+		@Override
+		public void onSubscribe(Subscription s) {
+			this.s = s;
+			s.request(Integer.MAX_VALUE);
+		}
+
+		@Override
+		public void onNext(Object o) {
+			// NO-OP
+		}
+
+		@Override
+		public void onError(Throwable ex) {
+			this.subscriptionTrackerRegistry.remove(this);
+			LOGGER.warn("Unexpected error occurred in scheduled reactive task", ex);
+			if (this.blockingLatch != null) {
+				this.blockingLatch.countDown();
+			}
+		}
+
+		@Override
+		public void onComplete() {
+			this.subscriptionTrackerRegistry.remove(this);
+			if (this.blockingLatch != null) {
+				this.blockingLatch.countDown();
+			}
+		}
 	}
 
 }

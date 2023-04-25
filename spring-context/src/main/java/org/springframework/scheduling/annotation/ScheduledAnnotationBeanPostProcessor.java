@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -143,6 +144,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
+
+	private final Map<Object, List<Runnable>> reactiveSubscriptions = new IdentityHashMap<>(16);
 
 
 	/**
@@ -573,8 +576,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	protected void processScheduledAsync(Scheduled scheduled, Method method, Object bean) {
 		Runnable task;
 		try {
-			boolean isFixedDelaySpecialCase = scheduled.fixedDelay() > 0 || StringUtils.hasText(scheduled.fixedDelayString());
-			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, isFixedDelaySpecialCase);
+			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, scheduled,
+					this.reactiveSubscriptions.computeIfAbsent(bean, k -> new CopyOnWriteArrayList<>()));
 		}
 		catch (IllegalArgumentException ex) {
 			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" + method.getName() + "': " + ex.getMessage());
@@ -620,7 +623,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	/**
 	 * Return all currently scheduled tasks, from {@link Scheduled} methods
 	 * as well as from programmatic {@link SchedulingConfigurer} interaction.
-	 * <p>Note this doesn't include scheduled reactive methods.
+	 * <p>Note this includes upcoming scheduled subscriptions for reactive methods,
+	 * but doesn't cover any currently active subscription for such methods.
 	 * @since 5.0.2
 	 */
 	@Override
@@ -639,12 +643,19 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		Set<ScheduledTask> tasks;
+		List<Runnable> liveSubscriptions;
 		synchronized (this.scheduledTasks) {
 			tasks = this.scheduledTasks.remove(bean);
+			liveSubscriptions = this.reactiveSubscriptions.remove(bean);
 		}
 		if (tasks != null) {
 			for (ScheduledTask task : tasks) {
 				task.cancel();
+			}
+		}
+		if (liveSubscriptions != null) {
+			for (Runnable subscription : liveSubscriptions) {
+				subscription.run(); // equivalent to cancelling the subscription
 			}
 		}
 	}
@@ -652,7 +663,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public boolean requiresDestruction(Object bean) {
 		synchronized (this.scheduledTasks) {
-			return this.scheduledTasks.containsKey(bean);
+			return this.scheduledTasks.containsKey(bean) || this.reactiveSubscriptions.containsKey(bean);
 		}
 	}
 
@@ -666,6 +677,12 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 			}
 			this.scheduledTasks.clear();
+			Collection<List<Runnable>> allLiveSubscriptions = this.reactiveSubscriptions.values();
+			for (List<Runnable> liveSubscriptions : allLiveSubscriptions) {
+				for (Runnable liveSubscription : liveSubscriptions) {
+					liveSubscription.run(); //equivalent to cancelling the subscription
+				}
+			}
 		}
 		this.registrar.destroy();
 	}
