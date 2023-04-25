@@ -57,6 +57,7 @@ package org.springframework.core.env;
  *
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.1
  * @see PropertyResolver
  * @see EnvironmentCapable
@@ -108,20 +109,42 @@ public interface Environment extends PropertyResolver {
 	 * whitespace only
 	 * @see #getActiveProfiles
 	 * @see #getDefaultProfiles
+	 * @see #matchesProfiles(String...)
 	 * @see #acceptsProfiles(Profiles)
-	 * @deprecated as of 5.1 in favor of {@link #acceptsProfiles(Profiles)}
+	 * @deprecated as of 5.1 in favor of {@link #acceptsProfiles(Profiles)} or
+	 * {@link #matchesProfiles(String...)}
 	 */
 	@Deprecated
 	boolean acceptsProfiles(String... profiles);
+
+	/**
+	 * Determine whether one of the given profile expressions matches the
+	 * {@linkplain #getActiveProfiles() active profiles} &mdash; or in the case
+	 * of no explicit active profiles, whether one of the given profile expressions
+	 * matches the {@linkplain #getDefaultProfiles() default profiles}.
+	 * <p>Profile expressions allow for complex, boolean profile logic to be
+	 * expressed &mdash; for example {@code "p1 & p2"}, {@code "(p1 & p2) | p3"},
+	 * etc. See {@link Profiles#of(String...)} for details on the supported
+	 * expression syntax.
+	 * <p>This method is a convenient shortcut for
+	 * {@code env.acceptsProfiles(Profiles.of(profileExpressions))}.
+	 * @since 5.3.28
+	 * @see Profiles#of(String...)
+	 * @see #acceptsProfiles(Profiles)
+	 */
+	default boolean matchesProfiles(String... profileExpressions) {
+		return acceptsProfiles(Profiles.of(profileExpressions));
+	}
 
 	/**
 	 * Determine whether the given {@link Profiles} predicate matches the
 	 * {@linkplain #getActiveProfiles() active profiles} &mdash; or in the case
 	 * of no explicit active profiles, whether the given {@code Profiles} predicate
 	 * matches the {@linkplain #getDefaultProfiles() default profiles}.
-	 * <p>If you wish to check a single profile expression, consider using
-	 * {@link #acceptsProfiles(String)} instead.
+	 * <p>If you wish provide profile expressions directly as strings, use
+	 * {@link #matchesProfiles(String...)} instead.
 	 * @since 5.1
+	 * @see #matchesProfiles(String...)
 	 * @see Profiles#of(String...)
 	 */
 	boolean acceptsProfiles(Profiles profiles);

@@ -450,4 +450,116 @@ class StandardEnvironmentTests {
 
 	}
 
+	@Nested
+	class MatchesProfilesTests {
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void withEmptyArgumentList() {
+			assertThatIllegalArgumentException().isThrownBy(environment::matchesProfiles);
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void withNullArgumentList() {
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles((String[]) null));
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void withNullArgument() {
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles((String) null));
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", null));
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void withEmptyArgument() {
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles(""));
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", ""));
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", "      "));
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void withInvalidNotOperator() {
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1", "!"));
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void withInvalidCompoundExpressionGrouping() {
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1 | p2 & p3"));
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1 & p2 | p3"));
+			assertThatIllegalArgumentException().isThrownBy(() -> environment.matchesProfiles("p1 & (p2 | p3) | p4"));
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void activeProfileSetProgrammatically() {
+			assertThat(environment.matchesProfiles("p1", "p2")).isFalse();
+
+			environment.setActiveProfiles("p1");
+			assertThat(environment.matchesProfiles("p1", "p2")).isTrue();
+
+			environment.setActiveProfiles("p2");
+			assertThat(environment.matchesProfiles("p1", "p2")).isTrue();
+
+			environment.setActiveProfiles("p1", "p2");
+			assertThat(environment.matchesProfiles("p1", "p2")).isTrue();
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void activeProfileSetViaProperty() {
+			assertThat(environment.matchesProfiles("p1")).isFalse();
+
+			environment.getPropertySources().addFirst(new MockPropertySource().withProperty(ACTIVE_PROFILES_PROPERTY_NAME, "p1"));
+			assertThat(environment.matchesProfiles("p1")).isTrue();
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void defaultProfile() {
+			assertThat(environment.matchesProfiles("pd")).isFalse();
+
+			environment.setDefaultProfiles("pd");
+			assertThat(environment.matchesProfiles("pd")).isTrue();
+
+			environment.setActiveProfiles("p1");
+			assertThat(environment.matchesProfiles("pd")).isFalse();
+			assertThat(environment.matchesProfiles("p1")).isTrue();
+		}
+
+		@Test
+		@SuppressWarnings("deprecation")
+		void withNotOperator() {
+			assertThat(environment.matchesProfiles("p1")).isFalse();
+			assertThat(environment.matchesProfiles("!p1")).isTrue();
+
+			environment.addActiveProfile("p1");
+			assertThat(environment.matchesProfiles("p1")).isTrue();
+			assertThat(environment.matchesProfiles("!p1")).isFalse();
+		}
+
+		@Test
+		void withProfileExpressions() {
+			assertThat(environment.matchesProfiles("p1 & p2")).isFalse();
+
+			environment.addActiveProfile("p1");
+			assertThat(environment.matchesProfiles("p1 | p2")).isTrue();
+			assertThat(environment.matchesProfiles("p1 & p2")).isFalse();
+
+			environment.addActiveProfile("p2");
+			assertThat(environment.matchesProfiles("p1 & p2")).isTrue();
+			assertThat(environment.matchesProfiles("p1 | p2")).isTrue();
+			assertThat(environment.matchesProfiles("foo | p1", "p2")).isTrue();
+			assertThat(environment.matchesProfiles("foo | p2", "p1")).isTrue();
+			assertThat(environment.matchesProfiles("foo | (p2 & p1)")).isTrue();
+			assertThat(environment.matchesProfiles("p2 & (foo | p1)")).isTrue();
+			assertThat(environment.matchesProfiles("foo", "(p2 & p1)")).isTrue();
+		}
+
+	}
+
 }
