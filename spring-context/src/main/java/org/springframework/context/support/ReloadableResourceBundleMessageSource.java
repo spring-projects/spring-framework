@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -399,28 +399,35 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	}
 
 	/**
-	 * Select a concrete existing {@link Resource} from a {@code bundleName}, potentially
-	 * checking multiple source (eg. file extensions). In case no suitable concrete
-	 * Resource exists this method returns a Resource for which {@link Resource#exists()}
-	 * returns {@code false}, which gets subsequently ignored.
-	 * <p>This can be leveraged to check the last modification timestamp and to load
-	 * properties from alternative sources. For example an XML blob in a database, or
-	 * properties serialized in a custom format like JSON...
-	 * <p>The default implementation first checks for an existing file Resource with the
-	 * {@code .properties} extension, and otherwise returns a file Resource with the
-	 * {@code .xml} extension.
-	 * <p>When overriding this method, {@link #loadProperties(Resource, String)} MUST be
-	 * capable of loading properties from any of the {@link Resource} this method can return.
-	 * As a consequence, implementors are strongly encouraged to also override
-	 * {@link #loadProperties(Resource, String)}.
-	 * <p>As an alternative, one could set the {@link #setPropertiesPersister(PropertiesPersister)}
-	 * with an instance capable of dealing with all resources returned by this method.
-	 * Please note however that the default {@code loadProperties} detects XML resource
-	 * filenames and uses {@link PropertiesPersister#loadFromXml(Properties, InputStream)},
-	 * and the two {@link PropertiesPersister#load(Properties, InputStream) load} methods
-	 * otherwise.
+	 * Resolve the specified bundle {@code filename} into a concrete {@link Resource},
+	 * potentially checking multiple sources or file extensions.
+	 * <p>If no suitable concrete {@code Resource} can be resolved, this method
+	 * returns a {@code Resource} for which {@link Resource#exists()} returns
+	 * {@code false}, which gets subsequently ignored.
+	 * <p>This can be leveraged to check the last modification timestamp or to load
+	 * properties from alternative sources &mdash; for example, from an XML BLOB
+	 * in a database, or from properties serialized using a custom format such as
+	 * JSON.
+	 * <p>The default implementation delegates to the configured
+	 * {@link #setResourceLoader(ResourceLoader) ResourceLoader} to resolve
+	 * resources, first checking for an existing {@code Resource} with a
+	 * {@code .properties} extension, and otherwise returning a {@code Resource}
+	 * with a {@code .xml} extension.
+	 * <p>When overriding this method, {@link #loadProperties(Resource, String)}
+	 * <strong>must</strong> be capable of loading properties from any type of
+	 * {@code Resource} returned by this method. As a consequence, implementors
+	 * are strongly encouraged to also override {@code loadProperties()}.
+	 * <p>As an alternative to overriding this method, you can configure a
+	 * {@link #setPropertiesPersister(PropertiesPersister) PropertiesPersister}
+	 * that is capable of dealing with all resources returned by this method.
+	 * Please note, however, that the default {@code loadProperties()} implementation
+	 * uses {@link PropertiesPersister#loadFromXml(Properties, InputStream) loadFromXml}
+	 * for XML resources and otherwise uses the two
+	 * {@link PropertiesPersister#load(Properties, InputStream) load} methods
+	 * for other types of resources.
+	 * @param filename the bundle filename (basename + Locale)
 	 * @return the {@code Resource} to use
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	protected Resource determineResource(String filename) {
 		Resource propertiesResource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
@@ -432,10 +439,11 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 
 	/**
 	 * Refresh the PropertiesHolder for the given bundle filename.
-	 * The holder can be {@code null} if not cached before, or a timed-out cache entry
+	 * <p>The holder can be {@code null} if not cached before, or a timed-out cache entry
 	 * (potentially getting re-validated against the current last-modified timestamp).
 	 * @param filename the bundle filename (basename + Locale)
 	 * @param propHolder the current PropertiesHolder for the bundle
+	 * @see #determineResource(String)
 	 */
 	protected PropertiesHolder refreshProperties(String filename, @Nullable PropertiesHolder propHolder) {
 		long refreshTimestamp = (getCacheMillis() < 0 ? -1 : System.currentTimeMillis());
