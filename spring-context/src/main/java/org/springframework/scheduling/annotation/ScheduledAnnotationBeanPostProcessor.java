@@ -143,7 +143,6 @@ public class ScheduledAnnotationBeanPostProcessor
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
-	private final Map<Object, Set<ScheduledAnnotationReactiveSupport.ReactiveTask>> scheduledReactiveTasks = new IdentityHashMap<>(16);
 
 
 	/**
@@ -318,15 +317,6 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 
 		this.registrar.afterPropertiesSet();
-		// Start the reactive tasks (we synchronize on the common scheduledTasks on purpose)
-		synchronized (this.scheduledTasks) {
-			for (Set<ScheduledAnnotationReactiveSupport.ReactiveTask> reactiveTasks : this.scheduledReactiveTasks.values()) {
-				for (ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask : reactiveTasks) {
-					reactiveTask.subscribe();
-				}
-			}
-		}
-
 	}
 
 	private <T> T resolveSchedulerBean(BeanFactory beanFactory, Class<T> schedulerType, boolean byName) {
@@ -397,37 +387,32 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	/**
 	 * Process the given {@code @Scheduled} method declaration on the given bean,
-	 * attempting to distinguish {@link #processScheduledReactive(Scheduled, Method, Object) reactive}
-	 * method from {@link #processScheduledSync(Scheduled, Method, Object) synchronous} methods.
+	 * attempting to distinguish {@link #processScheduledAsync(Scheduled, Method, Object) reactive}
+	 * methods from {@link #processScheduledSync(Scheduled, Method, Object) synchronous} methods.
 	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on
 	 * @param bean the target bean instance
 	 * @see #processScheduledSync(Scheduled, Method, Object)
-	 * @see #processScheduledReactive(Scheduled, Method, Object)
+	 * @see #processScheduledAsync(Scheduled, Method, Object)
 	 */
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		// Is method a Kotlin suspending function? Throws if true but reactor bridge isn't on the classpath.
-		// Is method returning a Publisher instance? Throws if true but Reactor isn't on the classpath.
+		// Is method returning a reactive type? Throws if true, but it isn't a deferred Publisher type.
 		if (ScheduledAnnotationReactiveSupport.isReactive(method)) {
-			processScheduledReactive(scheduled, method, bean);
+			processScheduledAsync(scheduled, method, bean);
 			return;
 		}
 		processScheduledSync(scheduled, method, bean);
 	}
 
 	/**
-	 * Process the given {@code @Scheduled} method declaration on the given bean,
-	 * as a synchronous method. The method MUST take no arguments. Its return value
-	 * is ignored (if any) and the scheduled invocations of the method take place
-	 * using the underlying {@link TaskScheduler} infrastructure.
-	 * @param scheduled the {@code @Scheduled} annotation
-	 * @param method the method that the annotation has been declared on
-	 * @param bean the target bean instance
-	 * @see #createRunnable(Object, Method)
+	 * Parse the {@code Scheduled} annotation and schedule the provided {@code Runnable}
+	 * accordingly. The Runnable can represent either a synchronous method invocation
+	 * (see {@link #processScheduledSync(Scheduled, Method, Object)}) or an asynchronous
+	 * one (see {@link #processScheduledAsync(Scheduled, Method, Object)}).
 	 */
-	protected void processScheduledSync(Scheduled scheduled, Method method, Object bean) {
+	protected void processScheduledTask(Scheduled scheduled, Runnable runnable, Method method, Object bean) {
 		try {
-			Runnable runnable = createRunnable(bean, method);
 			boolean processedSchedule = false;
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
@@ -551,117 +536,50 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	/**
+	 * Process the given {@code @Scheduled} method declaration on the given bean,
+	 * as a synchronous method. The method MUST take no arguments. Its return value
+	 * is ignored (if any) and the scheduled invocations of the method take place
+	 * using the underlying {@link TaskScheduler} infrastructure.
+	 * @param scheduled the {@code @Scheduled} annotation
+	 * @param method the method that the annotation has been declared on
+	 * @param bean the target bean instance
+	 * @see #createRunnable(Object, Method)
+	 */
+	protected void processScheduledSync(Scheduled scheduled, Method method, Object bean) {
+		Runnable task;
+		try {
+			task = createRunnable(bean, method);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" + method.getName() + "': " + ex.getMessage());
+		}
+		processScheduledTask(scheduled, task, method, bean);
+	}
+
+	/**
 	 * Process the given {@code @Scheduled} bean method declaration which returns
 	 * a {@code Publisher}, or the given Kotlin suspending function converted to a
-	 * Publisher. The publisher is then repeatedly subscribed to, according to the
-	 * fixedDelay/fixedRate configuration. Cron configuration isn't supported,nor
-	 * is non-Publisher return types (even if a {@code ReactiveAdapter} is registered).
+	 * Publisher. A {@code Runnable} which subscribes to that publisher is then repeatedly
+	 * scheduled according to the annotation configuration.
+	 * <p>Note that for fixed delay configuration, the subscription is turned into a blocking
+	 * call instead. Types for which a {@code ReactiveAdapter} is registered but which cannot
+	 * be deferred (i.e. not  a {@code Publisher}) are not supported.
 	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on, which
-	 * MUST either return a Publisher or be a Kotlin suspending function
+	 * MUST either return a Publisher-adaptable type or be a Kotlin suspending function
 	 * @param bean the target bean instance
 	 * @see ScheduledAnnotationReactiveSupport
 	 */
-	protected void processScheduledReactive(Scheduled scheduled, Method method, Object bean) {
+	protected void processScheduledAsync(Scheduled scheduled, Method method, Object bean) {
+		Runnable task;
 		try {
-			boolean processedSchedule = false;
-			String errorMessage =
-					"Exactly one of the 'fixedDelay(String)' or 'fixedRate(String)' attributes is required";
-
-			Set<ScheduledAnnotationReactiveSupport.ReactiveTask> reactiveTasks = new LinkedHashSet<>(4);
-
-			// Determine initial delay
-			Duration initialDelay = toDuration(scheduled.initialDelay(), scheduled.timeUnit());
-			String initialDelayString = scheduled.initialDelayString();
-			if (StringUtils.hasText(initialDelayString)) {
-				Assert.isTrue(initialDelay.isNegative(), "Specify 'initialDelay' or 'initialDelayString', not both");
-				if (this.embeddedValueResolver != null) {
-					initialDelayString = this.embeddedValueResolver.resolveStringValue(initialDelayString);
-				}
-				if (StringUtils.hasLength(initialDelayString)) {
-					try {
-						initialDelay = toDuration(initialDelayString, scheduled.timeUnit());
-					}
-					catch (RuntimeException ex) {
-						throw new IllegalArgumentException(
-								"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into long");
-					}
-				}
-			}
-
-			// Reject cron expression
-			Assert.state(!StringUtils.hasText(scheduled.cron()), "'cron' not supported for reactive @Scheduled");
-
-			// At this point we don't need to differentiate between initial delay set or not anymore
-			if (initialDelay.isNegative()) {
-				initialDelay = Duration.ZERO;
-			}
-
-			// Check fixed delay
-			Duration fixedDelay = toDuration(scheduled.fixedDelay(), scheduled.timeUnit());
-			if (!fixedDelay.isNegative()) {
-				processedSchedule = true;
-				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false));
-			}
-
-			String fixedDelayString = scheduled.fixedDelayString();
-			if (StringUtils.hasText(fixedDelayString)) {
-				if (this.embeddedValueResolver != null) {
-					fixedDelayString = this.embeddedValueResolver.resolveStringValue(fixedDelayString);
-				}
-				if (StringUtils.hasLength(fixedDelayString)) {
-					Assert.isTrue(!processedSchedule, errorMessage);
-					processedSchedule = true;
-					try {
-						fixedDelay = toDuration(fixedDelayString, scheduled.timeUnit());
-					}
-					catch (RuntimeException ex) {
-						throw new IllegalArgumentException(
-								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
-					}
-					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedDelay, false));
-				}
-			}
-
-			// Check fixed rate
-			Duration fixedRate = toDuration(scheduled.fixedRate(), scheduled.timeUnit());
-			if (!fixedRate.isNegative()) {
-				Assert.isTrue(!processedSchedule, errorMessage);
-				processedSchedule = true;
-				reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true));
-			}
-			String fixedRateString = scheduled.fixedRateString();
-			if (StringUtils.hasText(fixedRateString)) {
-				if (this.embeddedValueResolver != null) {
-					fixedRateString = this.embeddedValueResolver.resolveStringValue(fixedRateString);
-				}
-				if (StringUtils.hasLength(fixedRateString)) {
-					Assert.isTrue(!processedSchedule, errorMessage);
-					processedSchedule = true;
-					try {
-						fixedRate = toDuration(fixedRateString, scheduled.timeUnit());
-					}
-					catch (RuntimeException ex) {
-						throw new IllegalArgumentException(
-								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
-					}
-					reactiveTasks.add(new ScheduledAnnotationReactiveSupport.ReactiveTask(method, bean, initialDelay, fixedRate, true));
-				}
-			}
-
-			// Check whether we had any attribute set
-			Assert.isTrue(processedSchedule, errorMessage);
-
-			// Finally register the scheduled tasks (we synchronize on scheduledTasks on purpose)
-			synchronized (this.scheduledTasks) {
-				Set<ScheduledAnnotationReactiveSupport.ReactiveTask> subscriptionTasks = this.scheduledReactiveTasks.computeIfAbsent(bean, key -> new LinkedHashSet<>(4));
-				subscriptionTasks.addAll(reactiveTasks);
-			}
+			boolean isFixedDelaySpecialCase = scheduled.fixedDelay() > 0 || StringUtils.hasText(scheduled.fixedDelayString());
+			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, isFixedDelaySpecialCase);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new IllegalStateException(
-					"Encountered invalid reactive @Scheduled method '" + method.getName() + "': " + ex.getMessage(), ex);
+			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" + method.getName() + "': " + ex.getMessage());
 		}
+		processScheduledTask(scheduled, task, method, bean);
 	}
 
 	/**
@@ -721,18 +639,11 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		Set<ScheduledTask> tasks;
-		Set<ScheduledAnnotationReactiveSupport.ReactiveTask> reactiveTasks;
 		synchronized (this.scheduledTasks) {
 			tasks = this.scheduledTasks.remove(bean);
-			reactiveTasks = this.scheduledReactiveTasks.remove(bean);
 		}
 		if (tasks != null) {
 			for (ScheduledTask task : tasks) {
-				task.cancel();
-			}
-		}
-		if (reactiveTasks != null) {
-			for (ScheduledAnnotationReactiveSupport.ReactiveTask task : reactiveTasks) {
 				task.cancel();
 			}
 		}
@@ -741,7 +652,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public boolean requiresDestruction(Object bean) {
 		synchronized (this.scheduledTasks) {
-			return this.scheduledTasks.containsKey(bean) || this.scheduledReactiveTasks.containsKey(bean);
+			return this.scheduledTasks.containsKey(bean);
 		}
 	}
 
@@ -755,13 +666,6 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 			}
 			this.scheduledTasks.clear();
-			Collection<Set<ScheduledAnnotationReactiveSupport.ReactiveTask>> allReactiveTasks = this.scheduledReactiveTasks.values();
-			for (Set<ScheduledAnnotationReactiveSupport.ReactiveTask> tasks : allReactiveTasks) {
-				for (ScheduledAnnotationReactiveSupport.ReactiveTask task : tasks) {
-					task.cancel();
-				}
-			}
-			this.scheduledReactiveTasks.clear();
 		}
 		this.registrar.destroy();
 	}

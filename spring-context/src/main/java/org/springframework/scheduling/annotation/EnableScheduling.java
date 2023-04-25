@@ -188,11 +188,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * application context and any separate {@code DispatcherServlet} application contexts,
  * if you need to apply its behavior at multiple levels.
  *
- * <p><b>Note: {@code @EnableScheduling} and {@code @Scheduled} support of reactive methods
- * and Kotlin suspending functions uses Reactor infrastructure</b> instead of the
- * {@code ScheduledTaskRegistrar} infrastructure, so previously discussed task-related
- * aspects like {@code SchedulingConfigurer} don't apply to these two cases.
- *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.1

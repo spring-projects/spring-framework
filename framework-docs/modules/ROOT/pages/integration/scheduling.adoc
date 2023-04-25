@@ -452,17 +452,13 @@ registry denotes that by having the `getDescriptor().isDeferred()` method return
 	}
 ----
 
-All these types of methods must be declared without any arguments. Additionally, the `cron`
-configuration elements are not supported for these cases.
-
-Note that the `TaskExecutor`/`TaskScheduler` infrastructure is not used and the scheduling
-is instead performed by the Reactor library, which must be present at runtime.
-In the case of Kotlin suspending functions the `kotlinx.coroutines.reactor` bridge must
-also be present.
+All these types of methods must be declared without any arguments. In the case of Kotlin
+suspending functions the `kotlinx.coroutines.reactor` bridge must also be present to allow
+the framework to invoke a suspending function as a `Publisher`.
 
 The Spring Framework will obtain a `Publisher` out of the annotated method once and will
-create a timed `Flux` which regularly subscribes to said `Publisher`. These inner regular
-subscriptions happen according to the `fixedDelay`/`fixedRate` configuration.
+schedule a `Runnable` in which it subscribes to said `Publisher`. These inner regular
+subscriptions happen according to the `cron`/fixedDelay`/`fixedRate` configuration.
 
 If the `Publisher` emits `onNext` signal(s), these are ignored and discarded (the same way
 return values from synchronous `@Scheduled` methods are ignored).
@@ -502,8 +498,11 @@ seconds:
 
 [NOTE]
 ====
-The Spring Framework subscribes once to the underlying scheduling `Flux`, which can be
-cancelled by destroying the annotated bean or closing the application context.
+When destroying the annotated bean or closing the application context Spring Framework cancels
+scheduled tasks, which includes the next scheduled subscription to the `Publisher`.
+However, there is no tracking of individual subscriptions: once a subscription has started
+it can't be cancelled. For that reason, it is a pre-requisite that the `Publisher` is finite
+in addition to supporting multiple subsequent subscriptions.
 ====
 
 

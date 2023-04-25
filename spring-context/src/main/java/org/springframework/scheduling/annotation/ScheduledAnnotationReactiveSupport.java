@@ -18,15 +18,14 @@ package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.core.Disposable;
-import reactor.core.Disposables;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.CoroutinesUtils;
@@ -51,14 +50,16 @@ abstract class ScheduledAnnotationReactiveSupport {
 	static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
 			"kotlinx.coroutines.reactor.MonoKt", ScheduledAnnotationReactiveSupport.class.getClassLoader());
 
+	private static final Log LOGGER = LogFactory.getLog(ScheduledAnnotationReactiveSupport.class);
+
 	/**
 	 * Checks that if the method is reactive, it can be scheduled. Methods are considered
 	 * eligible for reactive scheduling if they either return an instance of a type that
 	 * can be converted to {@code Publisher} or are a Kotlin Suspending Function.
 	 * If the method isn't matching these criteria then this check returns {@code false}.
-	 * <p>For reactive scheduling, Reactor MUST be present at runtime. In the case of
-	 * Kotlin, the Coroutine {@code kotlinx.coroutines.reactor} bridge MUST also be
-	 * present at runtime (in order to invoke suspending functions as a {@code Mono}).
+	 * <p>For scheduling of Kotlin Suspending Functions, the Coroutine-Reactor bridge
+	 * {@code kotlinx.coroutines.reactor} MUST be present at runtime (in order to invoke
+	 * suspending functions as a {@code Publisher}).
 	 * Provided that is the case, this method returns {@code true}. Otherwise, it throws
 	 * an {@code IllegalStateException}.
 	 * @throws IllegalStateException if the method is reactive but Reactor and/or the
@@ -70,7 +71,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 			Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be"
 					+ " annotated with @Scheduled if declared without arguments");
 			Assert.isTrue(coroutinesReactorPresent, "Kotlin suspending functions may only be annotated with"
-					+ " @Scheduled if Reactor and the Reactor-Coroutine bridge (kotlinx.coroutines.reactor) are present at runtime");
+					+ " @Scheduled if the Coroutine-Reactor bridge (kotlinx.coroutines.reactive) is present at runtime");
 			return true;
 		}
 		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
@@ -86,8 +87,6 @@ abstract class ScheduledAnnotationReactiveSupport {
 				+ " @Scheduled if declared without arguments");
 		Assert.isTrue(candidateAdapter.getDescriptor().isDeferred(), "Reactive methods may only be annotated with"
 				+ " @Scheduled if the return type supports deferred execution");
-		Assert.isTrue(reactorPresent, "Reactive methods may only be annotated with @Scheduled if Reactor is"
-				+ " present at runtime");
 		return true;
 	}
 
@@ -97,6 +96,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * via {@link ReactiveAdapterRegistry} or by converting a Kotlin suspending function
 	 * into a {@code Publisher} via {@link CoroutinesUtils}.
 	 * The {@link #isReactive(Method)} check is a precondition to calling this method.
+	 * If Reactor is present at runtime, the Publisher is additionally converted to a {@code Flux}
+	 * with a checkpoint String, allowing for better debugging.
 	 */
 	static Publisher<?> getPublisherFor(Method method, Object bean) {
 		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
@@ -117,7 +118,17 @@ abstract class ScheduledAnnotationReactiveSupport {
 		try {
 			ReflectionUtils.makeAccessible(invocableMethod);
 			Object r = invocableMethod.invoke(bean);
-			return adapter.toPublisher(r);
+
+			Publisher<?> publisher = adapter.toPublisher(r);
+			//if Reactor is on the classpath, we could benefit from having a checkpoint for debuggability
+			if (reactorPresent) {
+				final String checkpoint = "@Scheduled '"+ method.getName() + "()' in bean '"
+						+ method.getDeclaringClass().getName() + "'";
+				return Flux.from(publisher).checkpoint(checkpoint);
+			}
+			else {
+				return publisher;
+			}
 		}
 		catch (InvocationTargetException ex) {
 			throw new IllegalArgumentException("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex.getTargetException());
@@ -128,88 +139,71 @@ abstract class ScheduledAnnotationReactiveSupport {
 	}
 
 	/**
-	 * Encapsulates the logic of {@code @Scheduled} on reactive types, using Reactor.
-	 * The {@link ScheduledAnnotationReactiveSupport#isReactive(Method)} check is a
-	 * precondition to instantiating this class.
+	 * Create a {@link Runnable} for the Scheduled infrastructure, allowing for scheduled
+	 * subscription to the publisher produced by a reactive method.
+	 * <p>Note that the reactive method is invoked once, but the resulting {@code Publisher}
+	 * is subscribed to repeatedly, once per each invocation of the {@code Runnable}.
+	 * <p>In the case of a {@code fixed delay} configuration, the subscription inside the
+	 * Runnable is turned into a blocking call in order to maintain fixedDelay semantics
+	 * (i.e. the task blocks until completion of the Publisher, then the delay is applied
+	 * until next iteration).
 	 */
-	static class ReactiveTask {
+	static Runnable createSubscriptionRunnable(Method method, Object targetBean, boolean isFixedDelaySpecialCase) {
+		final Publisher<?> publisher = getPublisherFor(method, targetBean);
+		if (isFixedDelaySpecialCase) {
+			return () -> {
+				final CountDownLatch latch = new CountDownLatch(1);
+				publisher.subscribe(new Subscriber<Object>() {
+					@Override
+					public void onSubscribe(Subscription s) {
+						s.request(Integer.MAX_VALUE);
+					}
 
-		private final Publisher<?> publisher;
-		private final Duration initialDelay;
-		private final Duration otherDelay;
-		private final boolean isFixedRate;
-		protected final String checkpoint;
-		private final Disposable.Swap disposable;
+					@Override
+					public void onNext(Object o) {
+						// NO-OP
+					}
 
-		private final Log logger = LogFactory.getLog(getClass());
+					@Override
+					public void onError(Throwable e) {
+						LOGGER.warn("Unexpected error occurred in scheduled reactive task", e);
+						latch.countDown();
+					}
 
-
-		protected ReactiveTask(Method method, Object bean, Duration initialDelay, Duration otherDelay, boolean isFixedRate) {
-			this.publisher = getPublisherFor(method, bean);
-
-			this.initialDelay = initialDelay;
-			this.otherDelay = otherDelay;
-			this.isFixedRate = isFixedRate;
-
-			this.disposable = Disposables.swap();
-			this.checkpoint = "@Scheduled '"+ method.getName() + "()' in bean '"
-					+ method.getDeclaringClass().getName() + "'";
-		}
-
-		private Mono<Void> safeExecutionMono() {
-			Mono<Void> executionMono;
-			if (this.publisher instanceof Mono) {
-				executionMono = Mono.from(this.publisher).then();
-			}
-			else {
-				executionMono = Flux.from(this.publisher).then();
-			}
-			if (logger.isWarnEnabled()) {
-				executionMono = executionMono.doOnError(ex -> logger.warn(
-						"Ignored error in publisher from " + this.checkpoint, ex));
-			}
-			executionMono = executionMono.onErrorComplete();
-			return executionMono;
-		}
-
-		public void subscribe() {
-			if (this.disposable.isDisposed()) {
-				return;
-			}
-
-			final Mono<Void> executionMono = safeExecutionMono();
-			Flux<Void> scheduledFlux;
-			if (this.isFixedRate) {
-				scheduledFlux = Flux.interval(this.initialDelay, this.otherDelay)
-						.flatMap(it -> executionMono);
-			}
-			else {
-				scheduledFlux = Mono.delay(this.otherDelay).then(executionMono).repeat();
-				if (!this.initialDelay.isZero()) {
-					scheduledFlux = Flux.concat(
-							Mono.delay(this.initialDelay).then(executionMono),
-							scheduledFlux
-					);
+					@Override
+					public void onComplete() {
+						latch.countDown();
+					}
+				});
+				try {
+					latch.await();
 				}
-				else {
-					scheduledFlux = Flux.concat(executionMono, scheduledFlux);
+				catch (InterruptedException e) {
+					throw new RuntimeException(e);
 				}
+			};
+		}
+		return () -> publisher.subscribe(new Subscriber<Object>() {
+			@Override
+			public void onSubscribe(Subscription s) {
+				s.request(Integer.MAX_VALUE);
 			}
-			// Subscribe and ensure that errors can be traced back to the @Scheduled via a checkpoint
-			if (this.disposable.isDisposed()) {
-				return;
+
+			@Override
+			public void onNext(Object o) {
+				// NO-OP
 			}
-			this.disposable.update(scheduledFlux.checkpoint(this.checkpoint)
-					.subscribe(it -> {}, ex -> ReactiveTask.this.logger.error("Unexpected error occurred in scheduled reactive task", ex)));
-		}
 
-		public void cancel() {
-			this.disposable.dispose();
-		}
+			@Override
+			public void onError(Throwable e) {
+				LOGGER.warn("Unexpected error occurred in scheduled reactive task", e);
+			}
 
-		@Override
-		public String toString() {
-			return this.checkpoint;
-		}
+			@Override
+			public void onComplete() {
+				// NO-OP
+			}
+		});
 	}
+
 }

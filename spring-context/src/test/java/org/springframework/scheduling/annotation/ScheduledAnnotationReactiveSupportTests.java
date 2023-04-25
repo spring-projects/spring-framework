@@ -17,14 +17,11 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -68,6 +65,48 @@ class ScheduledAnnotationReactiveSupportTests {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> isReactive(future))
 				.withMessage("Reactive methods may only be annotated with @Scheduled if the return type supports deferred execution");
+	}
+
+	@Test
+	void isReactiveRejectsWithParams() {
+		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoWithParam", String.class);
+
+		//isReactive rejects with context
+		assertThatIllegalArgumentException().isThrownBy(() -> isReactive(m))
+				.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
+				.withNoCause();
+	}
+
+	@Test
+	void rejectCantProducePublisher() {
+		ReactiveMethods target = new ReactiveMethods();
+		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoThrows");
+
+		//static helper method
+		assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
+				.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
+				.withCause(new IllegalStateException("expected"));
+	}
+
+	@Test
+	void rejectCantAccessMethod() {
+		ReactiveMethods target = new ReactiveMethods();
+		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoThrowsIllegalAccess");
+
+		//static helper method
+		assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
+				.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
+				.withCause(new IllegalAccessException("expected"));
+	}
+
+	//FIXME find a way to test the case with fixedDelay effectively turning into a fixedRate ?
+
+	//FIXME test createCheckpointPublisherFor uses Reactor and checkpoint operator
+
+	@Test
+	void hasCheckpointToString() {
+		//FIXME test checkpointing
+		assertThat("FIXME").isEqualTo("@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
 	}
 
 	static class ReactiveMethods {
@@ -134,144 +173,6 @@ class ScheduledAnnotationReactiveSupportTests {
 
 		public Mono<Void> monoError() {
 			return Mono.error(new IllegalStateException("expected"));
-		}
-
-	}
-
-	@Nested
-	class ReactiveTaskTests {
-
-		private ReactiveMethods target;
-
-		@BeforeEach
-		void init() {
-			this.target = new ReactiveMethods();
-		}
-
-		@Test
-		void isReactiveRejectsWithParams() {
-			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoWithParam", String.class);
-
-			//isReactive rejects with context
-			assertThatIllegalArgumentException().isThrownBy(() -> isReactive(m))
-					.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
-					.withNoCause();
-
-			//constructor of task doesn't provide the context isReactive does
-			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
-							m, target, Duration.ZERO, Duration.ZERO, false))
-					.withMessage("wrong number of arguments")
-					.withNoCause();
-		}
-
-		@Test
-		void rejectCantProducePublisher() {
-			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoThrows");
-
-			//static helper method
-			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
-					.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
-					.withCause(new IllegalStateException("expected"));
-
-			//constructor of task
-			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
-							m, target, Duration.ZERO, Duration.ZERO, false))
-					.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
-					.withCause(new IllegalStateException("expected"));
-		}
-
-		@Test
-		void rejectCantAccessMethod() {
-			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoThrowsIllegalAccess");
-
-			//static helper method
-			assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
-					.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
-					.withCause(new IllegalAccessException("expected"));
-
-			//constructor of task
-			assertThatIllegalArgumentException().isThrownBy(() -> new ScheduledAnnotationReactiveSupport.ReactiveTask(
-							m, target, Duration.ZERO, Duration.ZERO, false))
-					.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
-					.withCause(new IllegalAccessException("expected"));
-		}
-
-		@Test
-		void hasCheckpointToString() {
-			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "mono");
-			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ZERO, false);
-
-			assertThat(reactiveTask).hasToString("@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
-		}
-
-		@Test
-		void cancelledEarlyPreventsSubscription() {
-			Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "trackingMono");
-			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ofSeconds(10), false);
-			reactiveTask.cancel();
-			reactiveTask.subscribe();
-
-			assertThat(target.subscription).hasValue(0);
-		}
-
-		@Test
-		void noInitialDelayFixedDelay() throws InterruptedException {
-			Method m = ReflectionUtils.findMethod(target.getClass(), "trackingMono");
-			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ofSeconds(10), false);
-			reactiveTask.subscribe();
-			Thread.sleep(500);
-			reactiveTask.cancel();
-
-			assertThat(target.subscription).hasValue(1);
-		}
-
-		@Test
-		void noInitialDelayFixedRate() throws InterruptedException {
-			Method m = ReflectionUtils.findMethod(target.getClass(), "trackingMono");
-			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ofSeconds(10), true);
-			reactiveTask.subscribe();
-			Thread.sleep(500);
-			reactiveTask.cancel();
-
-			assertThat(target.subscription).hasValue(1);
-		}
-
-		@Test
-		void initialDelayFixedDelay() throws InterruptedException {
-			Method m = ReflectionUtils.findMethod(target.getClass(), "trackingMono");
-			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ofSeconds(10), Duration.ofMillis(500), false);
-			reactiveTask.subscribe();
-			Thread.sleep(500);
-			reactiveTask.cancel();
-
-			assertThat(target.subscription).hasValue(0);
-		}
-
-		@Test
-		void initialDelayFixedRate() throws InterruptedException {
-			Method m = ReflectionUtils.findMethod(target.getClass(), "trackingMono");
-			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ofSeconds(10), Duration.ofMillis(500), true);
-			reactiveTask.subscribe();
-			Thread.sleep(500);
-			reactiveTask.cancel();
-
-			assertThat(target.subscription).hasValue(0);
-		}
-
-		@Test
-		void monoErrorHasCheckpoint() throws InterruptedException {
-			Method m = ReflectionUtils.findMethod(target.getClass(), "monoError");
-			final ScheduledAnnotationReactiveSupport.ReactiveTask reactiveTask = new ScheduledAnnotationReactiveSupport.ReactiveTask(
-					m, target, Duration.ZERO, Duration.ofSeconds(10), true);
-
-			assertThat(reactiveTask.checkpoint).isEqualTo("@Scheduled 'monoError()' in bean "
-					+ "'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
 		}
 
 	}

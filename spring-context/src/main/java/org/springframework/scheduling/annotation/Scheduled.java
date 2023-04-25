@@ -37,17 +37,18 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * when called through the scheduler.
  *
  * <p>Methods that return a reactive {@code Publisher} or a type which can be adapted
- * to {@code Publisher} by the default {@code ReactiveAdapterRegistry} are supported
- * provided the Reactor library is present at runtime. Reactor is used to implement
- * the scheduling by repeatedly subscribing to the returned Publisher, which is only
- * produced once.
- * The cron configuration is not supported for this type of method. Values emitted by
- * the publisher are ignored and discarded. Errors are logged at WARN level, which
- * doesn't prevent further iterations.
+ * to {@code Publisher} by the default {@code ReactiveAdapterRegistry} are supported.
+ * The {@code Publisher} MUST be finite and MUST support multiple subsequent subscriptions
+ * (i.e. be cold).
+ * The returned Publisher is only produced once, and the scheduling infrastructure
+ * then periodically {@code subscribe()} to it according to configuration.
+ * Values emitted by the publisher are ignored. Errors are logged at WARN level, which
+ * doesn't prevent further iterations. If a {@code fixed delay} is configured, the
+ * subscription is blocked upon in order to respect the fixed delay semantics.
  *
- * <p>Kotlin suspending functions are also supported, provided the coroutine-Reactor
+ * <p>Kotlin suspending functions are also supported, provided the coroutine-reactor
  * bridge ({@code kotlinx.coroutine.reactor}) is present at runtime. This bridge is
- * used to adapt the suspending function into a Reactor {@code Mono} which is treated
+ * used to adapt the suspending function into a {@code Publisher} which is treated
  * the same way as in the reactive method case (see above).
  *
  * <p>Processing of {@code @Scheduled} annotations is performed by
