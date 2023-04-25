@@ -99,9 +99,7 @@ class ScheduledAnnotationReactiveSupportTests {
 				.withCause(new IllegalAccessException("expected"));
 	}
 
-	//FIXME find a way to test the case with fixedDelay effectively turning into a fixedRate ?
-
-	//FIXME test createCheckpointPublisherFor uses Reactor and checkpoint operator
+	//TODO find a way to test the case with fixedDelay effectively turning into a fixedRate ?
 
 	@Test
 	void hasCheckpointToString() {

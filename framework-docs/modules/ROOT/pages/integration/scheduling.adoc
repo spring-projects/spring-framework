@@ -499,10 +499,9 @@ seconds:
 [NOTE]
 ====
 When destroying the annotated bean or closing the application context Spring Framework cancels
-scheduled tasks, which includes the next scheduled subscription to the `Publisher`.
-However, there is no tracking of individual subscriptions: once a subscription has started
-it can't be cancelled. For that reason, it is a pre-requisite that the `Publisher` is finite
-in addition to supporting multiple subsequent subscriptions.
+scheduled tasks, which includes the next scheduled subscription to the `Publisher` as well
+as any past subscription that is still currently active (e.g. for long-running publishers,
+or even infinite publishers).
 ====
 
 

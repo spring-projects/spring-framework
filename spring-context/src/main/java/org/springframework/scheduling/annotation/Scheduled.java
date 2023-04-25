@@ -38,8 +38,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *
  * <p>Methods that return a reactive {@code Publisher} or a type which can be adapted
  * to {@code Publisher} by the default {@code ReactiveAdapterRegistry} are supported.
- * The {@code Publisher} MUST be finite and MUST support multiple subsequent subscriptions
- * (i.e. be cold).
+ * The {@code Publisher} MUST support multiple subsequent subscriptions (i.e. be cold).
  * The returned Publisher is only produced once, and the scheduling infrastructure
  * then periodically {@code subscribe()} to it according to configuration.
  * Values emitted by the publisher are ignored. Errors are logged at WARN level, which
