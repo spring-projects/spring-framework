@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -40,6 +41,7 @@ import org.springframework.aop.framework.autoproxy.AutoProxyUtils;
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ResourceHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
@@ -650,11 +652,19 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanFactoryInitializationCode beanFactoryInitializationCode) {
+			registerRuntimeHints(generationContext.getRuntimeHints());
 			GeneratedMethod generatedMethod = beanFactoryInitializationCode
 					.getMethods()
 					.add("processPropertySources", this::generateAddPropertySourceProcessorMethod);
 			beanFactoryInitializationCode
 					.addInitializer(generatedMethod.toMethodReference());
+		}
+
+		private void registerRuntimeHints(RuntimeHints hints) {
+			this.descriptors.stream().map(PropertySourceDescriptor::propertySourceFactory)
+					.filter(Objects::nonNull).distinct()
+					.forEach(factory -> hints.reflection()
+							.registerType(factory, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
 		}
 
 		private void generateAddPropertySourceProcessorMethod(MethodSpec.Builder method) {
