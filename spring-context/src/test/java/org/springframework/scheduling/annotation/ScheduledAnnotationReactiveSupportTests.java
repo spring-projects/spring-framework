@@ -105,8 +105,15 @@ class ScheduledAnnotationReactiveSupportTests {
 
 	@Test
 	void hasCheckpointToString() {
-		//FIXME test checkpointing
-		assertThat("FIXME").isEqualTo("@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'");
+		ReactiveMethods target = new ReactiveMethods();
+		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "mono");
+		Publisher<?> p = getPublisherFor(m, target);
+
+		assertThat(p.getClass().getName())
+				.as("checkpoint class")
+				.isEqualTo("reactor.core.publisher.FluxOnAssembly");
+
+		assertThat(p).hasToString("checkpoint(\"@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'\")");
 	}
 
 	static class ReactiveMethods {

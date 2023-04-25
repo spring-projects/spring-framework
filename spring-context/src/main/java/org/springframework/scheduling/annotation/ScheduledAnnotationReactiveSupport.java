@@ -71,7 +71,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 			Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be"
 					+ " annotated with @Scheduled if declared without arguments");
 			Assert.isTrue(coroutinesReactorPresent, "Kotlin suspending functions may only be annotated with"
-					+ " @Scheduled if the Coroutine-Reactor bridge (kotlinx.coroutines.reactive) is present at runtime");
+					+ " @Scheduled if the Coroutine-Reactor bridge (kotlinx.coroutines.reactor) is present at runtime");
 			return true;
 		}
 		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
@@ -165,8 +165,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 					}
 
 					@Override
-					public void onError(Throwable e) {
-						LOGGER.warn("Unexpected error occurred in scheduled reactive task", e);
+					public void onError(Throwable ex) {
+						LOGGER.warn("Unexpected error occurred in scheduled reactive task", ex);
 						latch.countDown();
 					}
 
@@ -178,8 +178,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 				try {
 					latch.await();
 				}
-				catch (InterruptedException e) {
-					throw new RuntimeException(e);
+				catch (InterruptedException ex) {
+					throw new RuntimeException(ex);
 				}
 			};
 		}
@@ -195,8 +195,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 			}
 
 			@Override
-			public void onError(Throwable e) {
-				LOGGER.warn("Unexpected error occurred in scheduled reactive task", e);
+			public void onError(Throwable ex) {
+				LOGGER.warn("Unexpected error occurred in scheduled reactive task", ex);
 			}
 
 			@Override
