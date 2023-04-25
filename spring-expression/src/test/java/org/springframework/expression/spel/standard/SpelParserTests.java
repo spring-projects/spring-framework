@@ -33,6 +33,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.expression.spel.SpelMessage.MISSING_CONSTRUCTOR_ARGS;
 import static org.springframework.expression.spel.SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING;
 import static org.springframework.expression.spel.SpelMessage.NON_TERMINATING_QUOTED_STRING;
@@ -52,6 +53,32 @@ class SpelParserTests {
 
 	private final SpelExpressionParser parser = new SpelExpressionParser();
 
+
+	@Test
+	void nullExpressionIsRejected() {
+		assertNullOrEmptyExpressionIsRejected(() -> parser.parseExpression(null));
+		assertNullOrEmptyExpressionIsRejected(() -> parser.parseRaw(null));
+	}
+
+	@Test
+	void emptyExpressionIsRejected() {
+		assertNullOrEmptyExpressionIsRejected(() -> parser.parseExpression(""));
+		assertNullOrEmptyExpressionIsRejected(() -> parser.parseRaw(""));
+	}
+
+	@Test
+	void blankExpressionIsRejected() {
+		assertNullOrEmptyExpressionIsRejected(() -> parser.parseExpression("     "));
+		assertNullOrEmptyExpressionIsRejected(() -> parser.parseExpression("\t\n"));
+		assertNullOrEmptyExpressionIsRejected(() -> parser.parseRaw("     "));
+		assertNullOrEmptyExpressionIsRejected(() -> parser.parseRaw("\t\n"));
+	}
+
+	private static void assertNullOrEmptyExpressionIsRejected(ThrowingCallable throwingCallable) {
+		assertThatIllegalArgumentException()
+			.isThrownBy(throwingCallable)
+			.withMessage("'expressionString' must not be null or blank");
+	}
 
 	@Test
 	void theMostBasic() {

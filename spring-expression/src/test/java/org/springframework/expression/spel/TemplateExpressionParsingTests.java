@@ -30,6 +30,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * @author Andy Clement
@@ -43,6 +44,12 @@ class TemplateExpressionParsingTests extends AbstractExpressionTests {
 	private final SpelExpressionParser parser = new SpelExpressionParser();
 
 
+	@Test
+	void nullTemplateExpressionIsRejected() {
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> parser.parseExpression(null, DOLLAR_SIGN_TEMPLATE_PARSER_CONTEXT))
+			.withMessage("'expressionString' must not be null");
+	}
 
 	@Test
 	void parsingSimpleTemplateExpression01() {
