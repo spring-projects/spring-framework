@@ -38,6 +38,7 @@ include "framework-bom"
 include "framework-docs"
 include "framework-platform"
 include "integration-tests"
+include 'spring-test-lh'
 
 rootProject.name = "spring"
 rootProject.children.each {project ->
@@ -58,5 +59,4 @@ settings.gradle.projectsLoaded {
 		}
 	}
 }
-include 'test'
 
