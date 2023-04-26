@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,31 +66,31 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	public static final String IGNORE_GETENV_PROPERTY_NAME = "spring.getenv.ignore";
 
 	/**
-	 * Name of property to set to specify active profiles: {@value}. Value may be comma
-	 * delimited.
+	 * Name of the property to set to specify active profiles: {@value}.
+	 * <p>The value may be comma delimited.
 	 * <p>Note that certain shell environments such as Bash disallow the use of the period
 	 * character in variable names. Assuming that Spring's {@link SystemEnvironmentPropertySource}
-	 * is in use, this property may be specified as an environment variable as
+	 * is in use, this property may be specified as an environment variable named
 	 * {@code SPRING_PROFILES_ACTIVE}.
 	 * @see ConfigurableEnvironment#setActiveProfiles
 	 */
 	public static final String ACTIVE_PROFILES_PROPERTY_NAME = "spring.profiles.active";
 
 	/**
-	 * Name of property to set to specify profiles active by default: {@value}. Value may
-	 * be comma delimited.
+	 * Name of the property to set to specify profiles that are active by default: {@value}.
+	 * <p>The value may be comma delimited.
 	 * <p>Note that certain shell environments such as Bash disallow the use of the period
 	 * character in variable names. Assuming that Spring's {@link SystemEnvironmentPropertySource}
-	 * is in use, this property may be specified as an environment variable as
+	 * is in use, this property may be specified as an environment variable named
 	 * {@code SPRING_PROFILES_DEFAULT}.
 	 * @see ConfigurableEnvironment#setDefaultProfiles
 	 */
 	public static final String DEFAULT_PROFILES_PROPERTY_NAME = "spring.profiles.default";
 
 	/**
-	 * Name of reserved default profile name: {@value}. If no default profile names are
-	 * explicitly and no active profile names are explicitly set, this profile will
-	 * automatically be activated by default.
+	 * Name of the reserved default profile name: {@value}.
+	 * <p>If no default profile names are explicitly set and no active profile names
+	 * are explicitly set, this profile will automatically be activated by default.
 	 * @see #getReservedDefaultProfiles
 	 * @see ConfigurableEnvironment#setDefaultProfiles
 	 * @see ConfigurableEnvironment#setActiveProfiles
