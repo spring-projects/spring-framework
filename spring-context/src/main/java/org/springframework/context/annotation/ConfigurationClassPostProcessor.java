@@ -27,8 +27,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -84,7 +84,9 @@ import org.springframework.core.PriorityOrdered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PropertySourceDescriptor;
 import org.springframework.core.io.support.PropertySourceProcessor;
@@ -328,7 +330,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (hasPropertySourceDescriptors || hasImportRegistry) {
 			return (generationContext, code) -> {
 				if (hasPropertySourceDescriptors) {
-					new PropertySourcesAotContribution(this.propertySourceDescriptors).applyTo(generationContext, code);
+					new PropertySourcesAotContribution(this.propertySourceDescriptors, this::resolvePropertySourceLocation)
+							.applyTo(generationContext, code);
 				}
 				if (hasImportRegistry) {
 					new ImportAwareAotContribution(beanFactory).applyTo(generationContext, code);
@@ -336,6 +339,18 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			};
 		}
 		return null;
+	}
+
+	@Nullable
+	private Resource resolvePropertySourceLocation(String location) {
+		try {
+			String resolvedLocation = (this.environment != null
+					? this.environment.resolveRequiredPlaceholders(location) : location);
+			return this.resourceLoader.getResource(resolvedLocation);
+		}
+		catch (Exception ex) {
+			return null;
+		}
 	}
 
 	/**
@@ -646,8 +661,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		private final List<PropertySourceDescriptor> descriptors;
 
-		PropertySourcesAotContribution(List<PropertySourceDescriptor> descriptors) {
+		private final Function<String, Resource> resourceResolver;
+
+		PropertySourcesAotContribution(List<PropertySourceDescriptor> descriptors, Function<String, Resource> resourceResolver) {
 			this.descriptors = descriptors;
+			this.resourceResolver = resourceResolver;
 		}
 
 		@Override
@@ -661,10 +679,18 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		private void registerRuntimeHints(RuntimeHints hints) {
-			this.descriptors.stream().map(PropertySourceDescriptor::propertySourceFactory)
-					.filter(Objects::nonNull).distinct()
-					.forEach(factory -> hints.reflection()
-							.registerType(factory, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+			for (PropertySourceDescriptor descriptor : this.descriptors) {
+				Class<?> factory = descriptor.propertySourceFactory();
+				if (factory != null) {
+					hints.reflection().registerType(factory, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+				}
+				for (String location : descriptor.locations()) {
+					Resource resource = this.resourceResolver.apply(location);
+					if (resource != null && resource.exists() && resource instanceof ClassPathResource classpathResource) {
+						hints.resources().registerPattern(classpathResource.getPath());
+					}
+				}
+			}
 		}
 
 		private void generateAddPropertySourceProcessorMethod(MethodSpec.Builder method) {

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.lang.model.element.Modifier;
 
@@ -31,6 +32,7 @@ import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ResourcePatternHint;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.BeansException;
@@ -249,6 +251,8 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			BeanFactoryInitializationAotContribution contribution = getContribution(
 					PropertySourceConfiguration.class);
 			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			assertThat(resource("org/springframework/context/annotation/p1.properties"))
+					.accepts(generationContext.getRuntimeHints());
 			compile((initializer, compiled) -> {
 				GenericApplicationContext freshContext = new GenericApplicationContext();
 				ConfigurableEnvironment environment = freshContext.getEnvironment();
@@ -265,6 +269,9 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			BeanFactoryInitializationAotContribution contribution = getContribution(
 					PropertySourceConfiguration.class, PropertySourceDependentConfiguration.class);
 			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			assertThat(resource("org/springframework/context/annotation/p1.properties")
+					.and(resource("org/springframework/context/annotation/p2.properties")))
+					.accepts(generationContext.getRuntimeHints());
 			compile((initializer, compiled) -> {
 				GenericApplicationContext freshContext = new GenericApplicationContext();
 				ConfigurableEnvironment environment = freshContext.getEnvironment();
@@ -302,6 +309,10 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			assertThat(RuntimeHintsPredicates.reflection().onType(CustomPropertySourcesFactory.class)
 					.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
 					.accepts(generationContext.getRuntimeHints());
+		}
+
+		private Predicate<RuntimeHints> resource(String location) {
+			return RuntimeHintsPredicates.resource().forResource(location);
 		}
 
 		@SuppressWarnings("unchecked")
