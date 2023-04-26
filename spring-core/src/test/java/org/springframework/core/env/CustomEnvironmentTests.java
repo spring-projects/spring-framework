@@ -16,8 +16,6 @@
 
 package org.springframework.core.env;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +49,7 @@ class CustomEnvironmentTests {
 		class CustomEnvironment extends AbstractEnvironment {
 			@Override
 			protected Set<String> getReservedDefaultProfiles() {
-				return Collections.emptySet();
+				return Set.of();
 			}
 		}
 
@@ -64,7 +62,7 @@ class CustomEnvironmentTests {
 		class CustomEnvironment extends AbstractEnvironment {
 			@Override
 			protected Set<String> getReservedDefaultProfiles() {
-				return Collections.singleton("rd1");
+				return Set.of("rd1");
 			}
 		}
 
@@ -79,10 +77,7 @@ class CustomEnvironmentTests {
 			@Override
 			@SuppressWarnings("serial")
 			protected Set<String> getReservedDefaultProfiles() {
-				return new HashSet<>() {{
-						add("rd1");
-						add("rd2");
-				}};
+				return Set.of("rd1", "rd2");
 			}
 		}
 
@@ -151,7 +146,7 @@ class CustomEnvironmentTests {
 			@Override
 			@Nullable
 			public String getProperty(String key) {
-				return super.getProperty(key)+"-test";
+				return super.getProperty(key) + "-test";
 			}
 		}
 

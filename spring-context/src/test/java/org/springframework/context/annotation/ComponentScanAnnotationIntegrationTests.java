@@ -21,7 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.HashSet;
+import java.util.Set;
 
 import example.scannable.CustomComponent;
 import example.scannable.CustomStereotype;
@@ -396,9 +396,7 @@ class ComponentScanWithCustomTypeFilter {
 	@SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 	public static CustomAutowireConfigurer customAutowireConfigurer() {
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
-		cac.setCustomQualifierTypes(new HashSet() {{
-				add(ComponentScanParserTests.CustomAnnotation.class);
-		}});
+		cac.setCustomQualifierTypes(Set.of(ComponentScanParserTests.CustomAnnotation.class));
 		return cac;
 	}
 
