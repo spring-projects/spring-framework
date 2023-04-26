@@ -100,8 +100,11 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param basePackages the packages to scan for component classes
 	 */
 	public AnnotationConfigApplicationContext(String... basePackages) {
+		// 第一步
 		this();
+		// 第二步
 		scan(basePackages);
+		// 第三步
 		refresh();
 	}
 
