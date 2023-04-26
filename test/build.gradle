@@ -1,0 +1,16 @@
+
+version = "6.0.9-SNAPSHOT"
+
+
+dependencies {
+    implementation(testFixtures(project(":spring-core")))
+    implementation(project(":spring-beans"))
+    implementation(project(":spring-context-support"))
+    implementation(testFixtures(project(":spring-web")))
+    implementation("org.apache.tomcat.embed:tomcat-embed-core")
+    implementation("org.apache.tomcat.embed:tomcat-embed-websocket")
+    implementation("io.projectreactor.netty:reactor-netty-http")
+    testImplementation(platform("org.junit:junit-bom:5.9.1"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+
+}
