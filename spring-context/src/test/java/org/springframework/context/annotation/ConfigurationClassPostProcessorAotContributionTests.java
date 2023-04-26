@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import javax.lang.model.element.Modifier;
 
@@ -29,7 +30,10 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ResourcePatternHint;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -50,6 +54,7 @@ import org.springframework.context.testfixture.context.generator.SimpleComponent
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.DefaultPropertySourceFactory;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.core.type.AnnotationMetadata;
@@ -246,6 +251,8 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			BeanFactoryInitializationAotContribution contribution = getContribution(
 					PropertySourceConfiguration.class);
 			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			assertThat(resource("org/springframework/context/annotation/p1.properties"))
+					.accepts(generationContext.getRuntimeHints());
 			compile((initializer, compiled) -> {
 				GenericApplicationContext freshContext = new GenericApplicationContext();
 				ConfigurableEnvironment environment = freshContext.getEnvironment();
@@ -262,6 +269,9 @@ class ConfigurationClassPostProcessorAotContributionTests {
 			BeanFactoryInitializationAotContribution contribution = getContribution(
 					PropertySourceConfiguration.class, PropertySourceDependentConfiguration.class);
 			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			assertThat(resource("org/springframework/context/annotation/p1.properties")
+					.and(resource("org/springframework/context/annotation/p2.properties")))
+					.accepts(generationContext.getRuntimeHints());
 			compile((initializer, compiled) -> {
 				GenericApplicationContext freshContext = new GenericApplicationContext();
 				ConfigurableEnvironment environment = freshContext.getEnvironment();
@@ -289,6 +299,20 @@ class ConfigurationClassPostProcessorAotContributionTests {
 				assertThat(environment.getPropertySources().get("testp1")).isNotNull();
 				freshContext.close();
 			});
+		}
+
+		@Test
+		void applyToWhenHasCustomFactoryRegistersHints() {
+			BeanFactoryInitializationAotContribution contribution = getContribution(
+					PropertySourceWithCustomFactoryConfiguration.class);
+			contribution.applyTo(generationContext, beanFactoryInitializationCode);
+			assertThat(RuntimeHintsPredicates.reflection().onType(CustomPropertySourcesFactory.class)
+					.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS))
+					.accepts(generationContext.getRuntimeHints());
+		}
+
+		private Predicate<RuntimeHints> resource(String location) {
+			return RuntimeHintsPredicates.resource().forResource(location);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -329,6 +353,13 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		@PropertySource(name = "testp1", value = "classpath:org/springframework/context/annotation/p1.properties",
 				ignoreResourceNotFound = true)
 		static class PropertySourceWithDetailsConfiguration {
+
+		}
+
+		@Configuration(proxyBeanMethods = false)
+		@PropertySource(value = "classpath:org/springframework/context/annotation/p1.properties",
+				factory = CustomPropertySourcesFactory.class)
+		static class PropertySourceWithCustomFactoryConfiguration {
 
 		}
 
@@ -377,6 +408,10 @@ class ConfigurationClassPostProcessorAotContributionTests {
 		assertThat(postProcessor).extracting("importsMapping")
 				.asInstanceOf(InstanceOfAssertFactories.MAP)
 				.containsExactly(entry(key.getName(), value.getName()));
+	}
+
+	static class CustomPropertySourcesFactory extends DefaultPropertySourceFactory {
+
 	}
 
 }
