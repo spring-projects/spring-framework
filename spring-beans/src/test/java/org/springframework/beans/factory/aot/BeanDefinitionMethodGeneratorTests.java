@@ -138,7 +138,7 @@ class BeanDefinitionMethodGeneratorTests {
 		compile(method, (actual, compiled) -> {
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
 			assertThat(sourceFile.getClassName()).endsWith("InnerBeanConfiguration__BeanDefinitions");
-			assertThat(sourceFile).contains("public static class Simple__BeanDefinitions")
+			assertThat(sourceFile).contains("public static class Simple")
 					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple}")
 					.doesNotContain("Another__BeanDefinitions");
 
@@ -161,9 +161,9 @@ class BeanDefinitionMethodGeneratorTests {
 		compile(method, (actual, compiled) -> {
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
 			assertThat(sourceFile.getClassName()).endsWith("InnerBeanConfiguration__BeanDefinitions");
-			assertThat(sourceFile).contains("public static class Simple__BeanDefinitions")
+			assertThat(sourceFile).contains("public static class Simple")
 					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple}")
-					.contains("public static class Another__BeanDefinitions")
+					.contains("public static class Another")
 					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple.Another}");
 		});
 	}
