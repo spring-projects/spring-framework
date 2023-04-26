@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests covering the extensibility of {@link AbstractEnvironment}.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1
  */
 class CustomEnvironmentTests {
 
+	private static final String DEFAULT_PROFILE = AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME;
+
+
 	@Test
 	void control() {
 		Environment env = new AbstractEnvironment() { };
-		assertThat(env.acceptsProfiles(defaultProfile())).isTrue();
+		assertThat(env.matchesProfiles(DEFAULT_PROFILE)).isTrue();
 	}
 
 	@Test
@@ -52,7 +56,7 @@ class CustomEnvironmentTests {
 		}
 
 		Environment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(defaultProfile())).isFalse();
+		assertThat(env.matchesProfiles(DEFAULT_PROFILE)).isFalse();
 	}
 
 	@Test
@@ -65,8 +69,8 @@ class CustomEnvironmentTests {
 		}
 
 		Environment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(defaultProfile())).isFalse();
-		assertThat(env.acceptsProfiles(Profiles.of("rd1"))).isTrue();
+		assertThat(env.matchesProfiles(DEFAULT_PROFILE)).isFalse();
+		assertThat(env.matchesProfiles("rd1")).isTrue();
 	}
 
 	@Test
@@ -83,28 +87,28 @@ class CustomEnvironmentTests {
 		}
 
 		ConfigurableEnvironment env = new CustomEnvironment();
-		assertThat(env.acceptsProfiles(defaultProfile())).isFalse();
-		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2"))).isTrue();
+		assertThat(env.matchesProfiles(DEFAULT_PROFILE)).isFalse();
+		assertThat(env.matchesProfiles("rd1 | rd2")).isTrue();
 
 		// finally, issue additional assertions to cover all combinations of calling these
 		// methods, however unlikely.
 		env.setDefaultProfiles("d1");
-		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2"))).isFalse();
-		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isTrue();
+		assertThat(env.matchesProfiles("rd1 | rd2")).isFalse();
+		assertThat(env.matchesProfiles("d1")).isTrue();
 
 		env.setActiveProfiles("a1", "a2");
-		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isFalse();
-		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2"))).isTrue();
+		assertThat(env.matchesProfiles("d1")).isFalse();
+		assertThat(env.matchesProfiles("a1 | a2")).isTrue();
 
 		env.setActiveProfiles();
-		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isTrue();
-		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2"))).isFalse();
+		assertThat(env.matchesProfiles("d1")).isTrue();
+		assertThat(env.matchesProfiles("a1 | a2")).isFalse();
 
 		env.setDefaultProfiles();
-		assertThat(env.acceptsProfiles(defaultProfile())).isFalse();
-		assertThat(env.acceptsProfiles(Profiles.of("rd1 | rd2"))).isFalse();
-		assertThat(env.acceptsProfiles(Profiles.of("d1"))).isFalse();
-		assertThat(env.acceptsProfiles(Profiles.of("a1 | a2"))).isFalse();
+		assertThat(env.matchesProfiles(DEFAULT_PROFILE)).isFalse();
+		assertThat(env.matchesProfiles("rd1 | rd2")).isFalse();
+		assertThat(env.matchesProfiles("d1")).isFalse();
+		assertThat(env.matchesProfiles("a1 | a2")).isFalse();
 	}
 
 	@Test
@@ -127,7 +131,7 @@ class CustomEnvironmentTests {
 		PropertySource<?> propertySource = new MapPropertySource("test", values);
 		env.getPropertySources().addFirst(propertySource);
 		assertThat(env.getActiveProfiles()).isEmpty();
-		assertThat(env.getDefaultProfiles()).containsExactly(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
+		assertThat(env.getDefaultProfiles()).containsExactly(DEFAULT_PROFILE);
 	}
 
 	@Test
@@ -163,10 +167,6 @@ class CustomEnvironmentTests {
 		PropertySource<?> propertySource = new MapPropertySource("test", values);
 		env.getPropertySources().addFirst(propertySource);
 		assertThat(env.getProperty("spring")).isEqualTo("framework-test");
-	}
-
-	private Profiles defaultProfile() {
-		return Profiles.of(AbstractEnvironment.RESERVED_DEFAULT_PROFILE_NAME);
 	}
 
 }
