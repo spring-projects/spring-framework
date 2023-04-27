@@ -931,6 +931,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		synchronized (this.beanPostProcessors) {
 			// Remove from old position, if any
 			this.beanPostProcessors.remove(beanPostProcessor);
+
+			logger.warn("添加❤新的 beanPostProcessor");
 			// Add to end of list
 			this.beanPostProcessors.add(beanPostProcessor);
 		}

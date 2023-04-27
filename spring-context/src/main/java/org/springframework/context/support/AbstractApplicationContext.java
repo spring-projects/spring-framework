@@ -547,27 +547,32 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
+			logger.warn("1、prepare refresh");
 			// Prepare this context for refreshing. 准备要刷新的内容
 			prepareRefresh();
 
-			// Tell the subclass to refresh the internal bean factory. 让子类刷新内部的 beanFactory
+			logger.warn("2、创建一个对象，一个fresh的 ConfigurableListableBeanFactory");
+			// Tell the subclass to refresh the internal bean factory. 让子类刷新内部的 beanFactory DefaultListableBeanFactory
 			// 其实这里就是创建了一个 beanFactory
 			// tip： factoryBean 返回的是 其 getObject 方法返回的对象；区分二者，用开头的字母来区分就可以。
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
-			logger.warn("此时的beanFactory");
-
+			logger.warn("prepare 这个beanFactory对象");
 			// Prepare the bean factory for use in this context.
 			prepareBeanFactory(beanFactory);
 
 			try {
+				logger.warn("是一个拓展功能");
 				// Allows post-processing of the bean factory in context subclasses.
 				postProcessBeanFactory(beanFactory);
 
 				StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
+
+				logger.warn("invoke 容器中的 工厂处理器，其实就是往 这个 beanFactory里放入了一些postProcessor");
 				// Invoke factory processors registered as beans in the context.
 				invokeBeanFactoryPostProcessors(beanFactory);
 
+				logger.warn("注册bean处理器，用于拦截bean的创建！");
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
@@ -584,6 +589,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Check for listener beans and register them.
 				registerListeners();
 
+				// Bean 的初始化，属性填充，Aop
 				// Instantiate all remaining (non-lazy-init) singletons.
 				finishBeanFactoryInitialization(beanFactory);
 

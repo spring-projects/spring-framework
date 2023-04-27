@@ -89,9 +89,11 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		// 初始化了reader和scanner
 		this();
-		// 类似 scan(basePackages);
+		// 类似 scan(basePackages); 主要做的是 读配置类上面的注解，然后做一些初期的准备工作。
 		register(componentClasses);
+		logger.warn("开始刷新，执行refresh()方法============》");
 		refresh();
 	}
 
