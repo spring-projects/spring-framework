@@ -332,6 +332,7 @@ jobs:
         RELEASE_TYPE: M
         <<: *github-task-params
         <<: *docker-resource-source
+        <<: *sonatype-task-params
     - put: github-pre-release
       params:
         <<: *changelog-task-params
@@ -372,6 +373,7 @@ jobs:
         RELEASE_TYPE: RC
         <<: *docker-resource-source
         <<: *artifactory-task-params
+        <<: *sonatype-task-params
     - task: generate-changelog
       file: git-repo/ci/tasks/generate-changelog.yml
       params:
