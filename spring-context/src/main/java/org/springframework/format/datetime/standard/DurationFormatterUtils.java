@@ -131,7 +131,20 @@ public abstract class DurationFormatterUtils {
 		if (SIMPLE_PATTERN.matcher(value).matches()) {
 			return DurationFormat.Style.SIMPLE;
 		}
-		throw new IllegalArgumentException("'" + value + "' is not a valid duration");
+		throw new IllegalArgumentException("'" + value + "' is not a valid duration, cannot detect any known style");
+	}
+
+	public static long longValueFromUnit(Duration duration, ChronoUnit unit) {
+		return switch (unit) {
+			case NANOS -> duration.toNanos();
+			case MICROS -> duration.toNanos() / 1000L;
+			case MILLIS -> duration.toMillis();
+			case SECONDS -> duration.toSeconds();
+			case MINUTES -> duration.toMinutes();
+			case HOURS -> duration.toHours();
+			case DAYS -> duration.toDays();
+			default -> throw new IllegalArgumentException("'" + unit.name() + "' is not a supported ChronoUnit for simple duration representation");
+		};
 	}
 
 	private static final Pattern ISO_8601_PATTERN = Pattern.compile("^[+-]?[pP].*$");
@@ -162,6 +175,11 @@ public abstract class DurationFormatterUtils {
 		}
 	}
 
+	private static String printSimple(Duration duration, @Nullable ChronoUnit unit) {
+		unit = (unit == null ? ChronoUnit.MILLIS : unit);
+		return longValueFromUnit(duration, unit) + suffixFromUnit(unit);
+	}
+
 	/* package-private */ static ChronoUnit unitFromSuffix(String suffix) {
 		return switch (suffix.toLowerCase()) {
 			case "ns" -> ChronoUnit.NANOS;
@@ -184,22 +202,8 @@ public abstract class DurationFormatterUtils {
 			case MINUTES -> "m";
 			case HOURS -> "h";
 			case DAYS -> "d";
-			default -> throw new IllegalArgumentException("'" + unit + "' is not a supported ChronoUnit for simple duration representation");
+			default -> throw new IllegalArgumentException("'" + unit.name() + "' is not a supported ChronoUnit for simple duration representation");
 		};
 	}
 
-	private static String printSimple(Duration duration, ChronoUnit unit) {
-		long longValue = switch (unit) {
-			case NANOS -> duration.toNanos();
-			case MICROS -> duration.toNanos() / 1000L;
-			case MILLIS -> duration.toMillis();
-			case SECONDS -> duration.toSeconds();
-			case MINUTES -> duration.toMinutes();
-			case HOURS -> duration.toHours();
-			case DAYS -> duration.toDays();
-			default -> throw new IllegalArgumentException("'" + unit + "' is not a supported ChronoUnit for simple duration representation");
-		};
-
-		return longValue + suffixFromUnit(unit);
-	}
 }
