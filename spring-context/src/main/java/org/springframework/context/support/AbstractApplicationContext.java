@@ -547,11 +547,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		synchronized (this.startupShutdownMonitor) {
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
-			logger.warn("1、prepare refresh");
+			logger.warn("prepare refresh");
 			// Prepare this context for refreshing. 准备要刷新的内容
 			prepareRefresh();
 
-			logger.warn("2、创建一个对象，一个fresh的 ConfigurableListableBeanFactory");
+			logger.warn("创建一个对象，一个fresh的 ConfigurableListableBeanFactory");
 			// Tell the subclass to refresh the internal bean factory. 让子类刷新内部的 beanFactory DefaultListableBeanFactory
 			// 其实这里就是创建了一个 beanFactory
 			// tip： factoryBean 返回的是 其 getObject 方法返回的对象；区分二者，用开头的字母来区分就可以。
