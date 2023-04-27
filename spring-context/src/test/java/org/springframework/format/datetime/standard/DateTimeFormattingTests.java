@@ -52,6 +52,9 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.format.annotation.DurationFormat;
+import org.springframework.format.annotation.DurationFormat.Style;
+import org.springframework.format.annotation.DurationFormat.Unit;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
@@ -476,6 +479,17 @@ class DateTimeFormattingTests {
 	}
 
 	@Test
+	void testBindDurationAnnotated() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("styleDuration", "2ms");
+		binder.bind(propertyValues);
+		assertThat(binder.getBindingResult().getFieldValue("styleDuration"))
+				.isNotNull()
+				.isEqualTo("2000us");
+		assertThat(binder.getBindingResult().getAllErrors()).isEmpty();
+	}
+
+	@Test
 	void testBindYear() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("year", "2007");
@@ -674,6 +688,9 @@ class DateTimeFormattingTests {
 
 		private Duration duration;
 
+		@DurationFormat(style = Style.SIMPLE, defaultUnit = Unit.MICROS)
+		private Duration styleDuration;
+
 		private Year year;
 
 		private Month month;
@@ -832,6 +849,14 @@ class DateTimeFormattingTests {
 
 		public void setDuration(Duration duration) {
 			this.duration = duration;
+		}
+
+		public Duration getStyleDuration() {
+			return this.styleDuration;
+		}
+
+		public void setStyleDuration(Duration styleDuration) {
+			this.styleDuration = styleDuration;
 		}
 
 		public Year getYear() {
