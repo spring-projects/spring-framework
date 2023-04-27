@@ -18,6 +18,7 @@ package org.springframework.format.datetime.standard;
 
 import java.text.ParseException;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import org.springframework.format.Formatter;
@@ -27,18 +28,18 @@ import org.springframework.lang.Nullable;
 /**
  * {@link Formatter} implementation for a JSR-310 {@link Duration},
  * following JSR-310's parsing rules for a Duration by default and
- * supporting additional {@code DurationStyle} styles.
+ * supporting additional {@code DurationFormat.Style} styles.
  *
  * @author Juergen Hoeller
  * @since 4.2.4
- * @see Duration#parse
+ * @see DurationFormatterUtils
  * @see DurationFormat.Style
  */
 class DurationFormatter implements Formatter<Duration> { //TODO why is this one package-private ? make public and change since taglet ?
 
 	private final DurationFormat.Style style;
 	@Nullable
-	private final DurationFormat.Unit defaultUnit;
+	private final ChronoUnit defaultUnit;
 
 	/**
 	 * Create a {@code DurationFormatter} following JSR-310's parsing rules for a Duration
@@ -59,7 +60,7 @@ class DurationFormatter implements Formatter<Duration> { //TODO why is this one 
 
 	/**
 	 * Create a {@code DurationFormatter} in a specific {@link DurationFormat.Style} with an
-	 * optional {@code DurationFormat.Unit}.
+	 * optional {@code ChronoUnit}.
 	 * <p>If a {@code defaultUnit} is specified, it may be used in parsing cases when no
 	 * unit is present in the string (provided the style allows for such a case). It will
 	 * also be used as the representation's resolution when printing in the
@@ -67,9 +68,9 @@ class DurationFormatter implements Formatter<Duration> { //TODO why is this one 
 	 * unit.
 	 *
 	 * @param style the {@code DurationStyle} to use
-	 * @param defaultUnit the {@code DurationFormat.Unit} to fall back to when parsing and printing
+	 * @param defaultUnit the {@code ChronoUnit} to fall back to when parsing and printing
 	 */
-	public DurationFormatter(DurationFormat.Style style, @Nullable DurationFormat.Unit defaultUnit) {
+	public DurationFormatter(DurationFormat.Style style, @Nullable ChronoUnit defaultUnit) {
 		this.style = style;
 		this.defaultUnit = defaultUnit;
 	}
@@ -78,18 +79,18 @@ class DurationFormatter implements Formatter<Duration> { //TODO why is this one 
 	public Duration parse(String text, Locale locale) throws ParseException {
 		if (this.defaultUnit == null) {
 			//delegate to the style
-			return this.style.parse(text);
+			return DurationFormatterUtils.parse(text, this.style);
 		}
-		return this.style.parse(text, this.defaultUnit);
+		return DurationFormatterUtils.parse(text, this.style, this.defaultUnit);
 	}
 
 	@Override
 	public String print(Duration object, Locale locale) {
 		if (this.defaultUnit == null) {
 			//delegate the ultimate of the default unit to the style
-			return this.style.print(object);
+			return DurationFormatterUtils.print(object, this.style);
 		}
-		return this.style.print(object, this.defaultUnit);
+		return DurationFormatterUtils.print(object, this.style, this.defaultUnit);
 	}
 
 }

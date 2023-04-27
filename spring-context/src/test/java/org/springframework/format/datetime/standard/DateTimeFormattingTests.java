@@ -31,6 +31,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -54,7 +55,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.annotation.DurationFormat;
 import org.springframework.format.annotation.DurationFormat.Style;
-import org.springframework.format.annotation.DurationFormat.Unit;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
@@ -688,7 +688,7 @@ class DateTimeFormattingTests {
 
 		private Duration duration;
 
-		@DurationFormat(style = Style.SIMPLE, defaultUnit = Unit.MICROS)
+		@DurationFormat(style = Style.SIMPLE, defaultUnit = ChronoUnit.MICROS)
 		private Duration styleDuration;
 
 		private Year year;
