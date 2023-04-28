@@ -497,6 +497,11 @@ Annotated, HTTP exchange methods support the following return values:
 TIP: You can also use any other async or reactive types registered in the
 `ReactiveAdapterRegistry`.
 
+TIP: For non-reactive types, blocking from a reactive publisher is performed
+under the hood by the framework. By default, it is done without a timeout.
+You can set a timeout for blocking by calling `blockTimeout(Duration blockTimeout)`
+on `HttpServiceProxyFactory.Builder`.
+
 
 [[rest-http-interface-exceptions]]
 === Exception Handling

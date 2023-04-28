@@ -71,7 +71,7 @@ final class HttpServiceMethod {
 	HttpServiceMethod(
 			Method method, Class<?> containingClass, List<HttpServiceArgumentResolver> argumentResolvers,
 			HttpClientAdapter client, @Nullable StringValueResolver embeddedValueResolver,
-			ReactiveAdapterRegistry reactiveRegistry, Duration blockTimeout) {
+			ReactiveAdapterRegistry reactiveRegistry, @Nullable Duration blockTimeout) {
 
 		this.method = method;
 		this.parameters = initMethodParameters(method);
@@ -129,7 +129,8 @@ final class HttpServiceMethod {
 
 	private static String formatArgumentError(MethodParameter param, String message) {
 		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
-				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
+				param.getExecutable()
+						.toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
 	}
 
 
@@ -275,7 +276,7 @@ final class HttpServiceMethod {
 	private record ResponseFunction(
 			Function<HttpRequestValues, Publisher<?>> responseFunction,
 			@Nullable ReactiveAdapter returnTypeAdapter,
-			boolean blockForOptional, Duration blockTimeout) {
+			boolean blockForOptional, @Nullable Duration blockTimeout) {
 
 		private ResponseFunction(
 				Function<HttpRequestValues, Publisher<?>> responseFunction,
@@ -298,8 +299,10 @@ final class HttpServiceMethod {
 			}
 
 			return (this.blockForOptional ?
-					((Mono<?>) responsePublisher).blockOptional(this.blockTimeout) :
-					((Mono<?>) responsePublisher).block(this.blockTimeout));
+					(this.blockTimeout != null ? ((Mono<?>) responsePublisher).blockOptional(this.blockTimeout) :
+							((Mono<?>) responsePublisher).blockOptional()) :
+					(this.blockTimeout != null ? ((Mono<?>) responsePublisher).block(this.blockTimeout) :
+							((Mono<?>) responsePublisher).block()));
 		}
 
 
@@ -364,7 +367,8 @@ final class HttpServiceMethod {
 					"ResponseEntity body must be a concrete value or a multi-value Publisher");
 
 			ParameterizedTypeReference<?> bodyType =
-					ParameterizedTypeReference.forType(isSuspending ? methodParam.nested().getGenericParameterType() :
+					ParameterizedTypeReference.forType(isSuspending ? methodParam.nested()
+							.getGenericParameterType() :
 							methodParam.nested().getNestedGenericParameterType());
 
 			// Shortcut for Flux
