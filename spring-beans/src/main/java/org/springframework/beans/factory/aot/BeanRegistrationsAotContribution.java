@@ -27,6 +27,7 @@ import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.javapoet.ClassName;
@@ -109,8 +110,15 @@ class BeanRegistrationsAotContribution
 	}
 
 	private void generateRegisterHints(RuntimeHints runtimeHints, Map<BeanRegistrationKey, Registration> registrations) {
-		registrations.keySet().forEach(beanRegistrationKey -> runtimeHints.reflection()
-				.registerType(beanRegistrationKey.beanClass(), MemberCategory.INTROSPECT_DECLARED_METHODS));
+		registrations.keySet().forEach(beanRegistrationKey -> {
+			ReflectionHints hints = runtimeHints.reflection();
+			Class<?> beanClass = beanRegistrationKey.beanClass();
+			hints.registerType(beanClass, MemberCategory.INTROSPECT_DECLARED_METHODS);
+			// Workaround for https://github.com/oracle/graal/issues/6510
+			if (beanClass.isRecord()) {
+				hints.registerType(beanClass, MemberCategory.INVOKE_DECLARED_METHODS);
+			}
+		});
 	}
 
 	/**
