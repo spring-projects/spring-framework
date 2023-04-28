@@ -66,13 +66,14 @@ public final class HttpServiceProxyFactory {
 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
+	@Nullable
 	private final Duration blockTimeout;
 
 
 	private HttpServiceProxyFactory(
 			HttpClientAdapter clientAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
 			@Nullable StringValueResolver embeddedValueResolver,
-			ReactiveAdapterRegistry reactiveAdapterRegistry, Duration blockTimeout) {
+			ReactiveAdapterRegistry reactiveAdapterRegistry, @Nullable Duration blockTimeout) {
 
 		this.clientAdapter = clientAdapter;
 		this.argumentResolvers = argumentResolvers;
@@ -208,7 +209,8 @@ public final class HttpServiceProxyFactory {
 		/**
 		 * Configure how long to wait for a response for an HTTP service method
 		 * with a synchronous (blocking) method signature.
-		 * <p>By default this is 5 seconds.
+		 * <p>By default this is {@code null},
+		 * in which case means blocking on publishers is done without a timeout.
 		 * @param blockTimeout the timeout value
 		 * @return this same builder instance
 		 */
@@ -226,7 +228,7 @@ public final class HttpServiceProxyFactory {
 			return new HttpServiceProxyFactory(
 					this.clientAdapter, initArgumentResolvers(),
 					this.embeddedValueResolver, this.reactiveAdapterRegistry,
-					(this.blockTimeout != null ? this.blockTimeout : Duration.ofSeconds(5)));
+					this.blockTimeout);
 		}
 
 		private List<HttpServiceArgumentResolver> initArgumentResolvers() {

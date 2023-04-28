@@ -71,7 +71,7 @@ final class HttpServiceMethod {
 	HttpServiceMethod(
 			Method method, Class<?> containingClass, List<HttpServiceArgumentResolver> argumentResolvers,
 			HttpClientAdapter client, @Nullable StringValueResolver embeddedValueResolver,
-			ReactiveAdapterRegistry reactiveRegistry, Duration blockTimeout) {
+			ReactiveAdapterRegistry reactiveRegistry, @Nullable Duration blockTimeout) {
 
 		this.method = method;
 		this.parameters = initMethodParameters(method);
@@ -275,7 +275,7 @@ final class HttpServiceMethod {
 	private record ResponseFunction(
 			Function<HttpRequestValues, Publisher<?>> responseFunction,
 			@Nullable ReactiveAdapter returnTypeAdapter,
-			boolean blockForOptional, Duration blockTimeout) {
+			boolean blockForOptional, @Nullable Duration blockTimeout) {
 
 		private ResponseFunction(
 				Function<HttpRequestValues, Publisher<?>> responseFunction,
@@ -298,8 +298,10 @@ final class HttpServiceMethod {
 			}
 
 			return (this.blockForOptional ?
-					((Mono<?>) responsePublisher).blockOptional(this.blockTimeout) :
-					((Mono<?>) responsePublisher).block(this.blockTimeout));
+					(this.blockTimeout != null ? ((Mono<?>) responsePublisher).blockOptional(this.blockTimeout) :
+							((Mono<?>) responsePublisher).blockOptional()) :
+					(this.blockTimeout != null ? ((Mono<?>) responsePublisher).block(this.blockTimeout) :
+							((Mono<?>) responsePublisher).block()));
 		}
 
 

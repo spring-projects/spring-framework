@@ -67,7 +67,7 @@ final class RSocketServiceMethod {
 	RSocketServiceMethod(
 			Method method, Class<?> containingClass, List<RSocketServiceArgumentResolver> argumentResolvers,
 			RSocketRequester rsocketRequester, @Nullable StringValueResolver embeddedValueResolver,
-			ReactiveAdapterRegistry reactiveRegistry, Duration blockTimeout) {
+			ReactiveAdapterRegistry reactiveRegistry, @Nullable Duration blockTimeout) {
 
 		this.method = method;
 		this.parameters = initMethodParameters(method);
@@ -125,7 +125,7 @@ final class RSocketServiceMethod {
 
 	private static Function<RSocketRequestValues, Object> initResponseFunction(
 			RSocketRequester requester, Method method,
-			ReactiveAdapterRegistry reactiveRegistry, Duration blockTimeout) {
+			ReactiveAdapterRegistry reactiveRegistry, @Nullable Duration blockTimeout) {
 
 		MethodParameter returnParam = new MethodParameter(method, -1);
 		Class<?> returnType = returnParam.getParameterType();
@@ -164,8 +164,10 @@ final class RSocketServiceMethod {
 				return reactiveAdapter.fromPublisher(responsePublisher);
 			}
 			return (blockForOptional ?
-					((Mono<?>) responsePublisher).blockOptional(blockTimeout) :
-					((Mono<?>) responsePublisher).block(blockTimeout));
+					(blockTimeout != null ? ((Mono<?>) responsePublisher).blockOptional(blockTimeout) :
+							((Mono<?>) responsePublisher).blockOptional()) :
+					(blockTimeout != null ? ((Mono<?>) responsePublisher).block(blockTimeout) :
+							((Mono<?>) responsePublisher).block()));
 		});
 	}
 

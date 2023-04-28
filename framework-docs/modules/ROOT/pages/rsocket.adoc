@@ -1063,3 +1063,8 @@ method parameters:
 Annotated, RSocket exchange methods support return values that are concrete value(s), or
 any producer of value(s) that can be adapted to a Reactive Streams `Publisher` via
 `ReactiveAdapterRegistry`.
+
+TIP: For non-reactive types, blocking from a reactive publisher is performed
+under the hood by the framework. By default, it is done without a timeout.
+You can set a timeout for blocking by calling `blockTimeout(Duration blockTimeout)`
+on `RSocketServiceProxyFactory.Builder`.
