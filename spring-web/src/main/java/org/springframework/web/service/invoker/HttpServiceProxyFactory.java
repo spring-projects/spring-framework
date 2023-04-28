@@ -93,8 +93,7 @@ public final class HttpServiceProxyFactory {
 	public <S> S createClient(Class<S> serviceType) {
 
 		List<HttpServiceMethod> httpServiceMethods =
-				MethodIntrospector.selectMethods(serviceType, this::isExchangeMethod)
-						.stream()
+				MethodIntrospector.selectMethods(serviceType, this::isExchangeMethod).stream()
 						.map(method -> createHttpServiceMethod(serviceType, method))
 						.toList();
 
@@ -210,7 +209,8 @@ public final class HttpServiceProxyFactory {
 		/**
 		 * Configure how long to wait for a response for an HTTP service method
 		 * with a synchronous (blocking) method signature.
-		 * <p>By default this is {@code null}, in which case means blocking on publishers is done without a timeout.
+		 * <p>By default this is {@code null},
+		 * in which case means blocking on publishers is done without a timeout.
 		 * @param blockTimeout the timeout value
 		 * @return this same builder instance
 		 */

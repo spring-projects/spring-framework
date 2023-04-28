@@ -129,8 +129,7 @@ final class HttpServiceMethod {
 
 	private static String formatArgumentError(MethodParameter param, String message) {
 		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
-				param.getExecutable()
-						.toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
+				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
 	}
 
 
@@ -367,8 +366,7 @@ final class HttpServiceMethod {
 					"ResponseEntity body must be a concrete value or a multi-value Publisher");
 
 			ParameterizedTypeReference<?> bodyType =
-					ParameterizedTypeReference.forType(isSuspending ? methodParam.nested()
-							.getGenericParameterType() :
+					ParameterizedTypeReference.forType(isSuspending ? methodParam.nested().getGenericParameterType() :
 							methodParam.nested().getNestedGenericParameterType());
 
 			// Shortcut for Flux
