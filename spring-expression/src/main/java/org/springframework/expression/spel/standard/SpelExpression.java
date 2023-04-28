@@ -125,7 +125,7 @@ public class SpelExpression implements Expression {
 				EvaluationContext context = getEvaluationContext();
 				return compiledAst.getValue(context.getRootObject().getValue(), context);
 			}
-			catch (Throwable ex) {
+			catch (RuntimeException ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
 					this.compiledAst = null;
@@ -161,7 +161,7 @@ public class SpelExpression implements Expression {
 							getEvaluationContext(), new TypedValue(result), expectedResultType);
 				}
 			}
-			catch (Throwable ex) {
+			catch (RuntimeException ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
 					this.compiledAst = null;
@@ -189,7 +189,7 @@ public class SpelExpression implements Expression {
 			try {
 				return compiledAst.getValue(rootObject, getEvaluationContext());
 			}
-			catch (Throwable ex) {
+			catch (RuntimeException ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
 					this.compiledAst = null;
@@ -225,7 +225,7 @@ public class SpelExpression implements Expression {
 							getEvaluationContext(), new TypedValue(result), expectedResultType);
 				}
 			}
-			catch (Throwable ex) {
+			catch (RuntimeException ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
 					this.compiledAst = null;
@@ -256,7 +256,7 @@ public class SpelExpression implements Expression {
 			try {
 				return compiledAst.getValue(context.getRootObject().getValue(), context);
 			}
-			catch (Throwable ex) {
+			catch (RuntimeException ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
 					this.compiledAst = null;
@@ -292,7 +292,7 @@ public class SpelExpression implements Expression {
 					return (T) result;
 				}
 			}
-			catch (Throwable ex) {
+			catch (RuntimeException ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
 					this.compiledAst = null;
@@ -321,7 +321,7 @@ public class SpelExpression implements Expression {
 			try {
 				return compiledAst.getValue(rootObject, context);
 			}
-			catch (Throwable ex) {
+			catch (RuntimeException ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
 					this.compiledAst = null;
@@ -359,7 +359,7 @@ public class SpelExpression implements Expression {
 					return (T) result;
 				}
 			}
-			catch (Throwable ex) {
+			catch (RuntimeException ex) {
 				// If running in mixed mode, revert to interpreted
 				if (this.configuration.getCompilerMode() == SpelCompilerMode.MIXED) {
 					this.compiledAst = null;
