@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Implementation-Title: spring-example
+Automatic-Module-Name: spring.example
+Implementation-Version: 5.2.25.BUILD-SNAPSHOT
+Created-By: 1.8.0_321 (Oracle Corporation)
+
