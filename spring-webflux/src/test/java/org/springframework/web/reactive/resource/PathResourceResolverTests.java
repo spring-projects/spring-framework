@@ -40,7 +40,6 @@ public class PathResourceResolverTests {
 
 	private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
-
 	private final PathResourceResolver resolver = new PathResourceResolver();
 
 
@@ -64,7 +63,7 @@ public class PathResourceResolverTests {
 		assertThat(actual).isNotNull();
 	}
 
-	@Test // gh-22272
+	@Test  // gh-22272
 	public void resolveWithEncodedPath() throws IOException {
 		Resource classpathLocation = new ClassPathResource("test/", PathResourceResolver.class);
 		testWithEncodedPath(classpathLocation);
@@ -108,10 +107,14 @@ public class PathResourceResolverTests {
 		assertThat(actual).isNull();
 	}
 
-	@Test // gh-23463
+	@Test  // gh-23463
 	public void ignoreInvalidEscapeSequence() throws IOException {
 		UrlResource location = new UrlResource(getClass().getResource("./test/"));
-		Resource resource = location.createRelative("test%file.txt");
+
+		Resource resource = new UrlResource(location.getURL() + "test%file.txt");
+		assertThat(this.resolver.checkResource(resource, location)).isTrue();
+
+		resource = location.createRelative("test%file.txt");
 		assertThat(this.resolver.checkResource(resource, location)).isTrue();
 	}
 
@@ -129,7 +132,7 @@ public class PathResourceResolverTests {
 		assertThat(actual).isEqualTo("../testalternatepath/bar.css");
 	}
 
-	@Test // SPR-12624
+	@Test  // SPR-12624
 	public void checkRelativeLocation() throws Exception {
 		String location= new UrlResource(getClass().getResource("./test/")).getURL().toExternalForm();
 		location = location.replace("/test/org/springframework","/test/org/../org/springframework");
@@ -140,13 +143,13 @@ public class PathResourceResolverTests {
 		assertThat(resourceMono.block(TIMEOUT)).isNotNull();
 	}
 
-	@Test // SPR-12747
+	@Test  // SPR-12747
 	public void checkFileLocation() throws Exception {
 		Resource resource = getResource("main.css");
 		assertThat(this.resolver.checkResource(resource, resource)).isTrue();
 	}
 
-	@Test // SPR-13241
+	@Test  // SPR-13241
 	public void resolvePathRootResource() {
 		Resource webjarsLocation = new ClassPathResource("/META-INF/resources/webjars/", PathResourceResolver.class);
 		String path = this.resolver.resolveUrlPathInternal(
