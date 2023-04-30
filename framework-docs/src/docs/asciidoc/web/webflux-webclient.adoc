@@ -1032,6 +1032,7 @@ any response content, whether expected or not, is released:
 			mono {
 				val response = next.exchange(request).awaitSingle()
 				if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
+					response.releaseBody().awaitSingleOrNull()
 					val token = renewToken()
 					val newRequest = ClientRequest.from(request).build()
 					next.exchange(newRequest).awaitSingle()
