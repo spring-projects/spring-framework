@@ -1027,19 +1027,15 @@ any response content, whether expected or not, is released:
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 .Kotlin
 ----
-	fun renewTokenFilter(): ExchangeFilterFunction? {
-		return ExchangeFilterFunction { request: ClientRequest?, next: ExchangeFunction ->
-			next.exchange(request!!).flatMap { response: ClientResponse ->
+	fun renewTokenFilter(): ExchangeFilterFunction {
+		return ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
+			mono {
+				val response = next.exchange(request).awaitSingle()
 				if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
-					return@flatMap response.releaseBody()
-							.then(renewToken())
-							.flatMap { token: String? ->
-								val newRequest = ClientRequest.from(request).build()
-								next.exchange(newRequest)
-							}
-				} else {
-					return@flatMap Mono.just(response)
-				}
+					val token = renewToken()
+					val newRequest = ClientRequest.from(request).build()
+					next.exchange(newRequest).awaitSingle()
+				} else response
 			}
 		}
 	}
