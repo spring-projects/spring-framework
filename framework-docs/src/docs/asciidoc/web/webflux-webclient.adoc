@@ -1029,7 +1029,7 @@ any response content, whether expected or not, is released:
 ----
 	fun renewTokenFilter(): ExchangeFilterFunction {
 		return ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
-			mono {
+			mono (Dispatchers.Unconfined){
 				val response = next.exchange(request).awaitSingle()
 				if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
 					response.releaseBody().awaitSingleOrNull()
