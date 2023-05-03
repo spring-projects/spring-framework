@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@ package org.springframework.beans.factory.aot;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -40,6 +43,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.CodeBlock;
@@ -119,6 +123,7 @@ class BeanDefinitionPropertiesCodeGenerator {
 		addConstructorArgumentValues(code, beanDefinition);
 		addPropertyValues(code, beanDefinition);
 		addAttributes(code, beanDefinition);
+		addQualifiers(code, beanDefinition);
 		return code.build();
 	}
 
@@ -176,6 +181,24 @@ class BeanDefinitionPropertiesCodeGenerator {
 						this.hints.reflection().registerMethod(writeMethod, ExecutableMode.INVOKE);
 					}
 				}
+			}
+		}
+	}
+
+	private void addQualifiers(CodeBlock.Builder code,
+			RootBeanDefinition beanDefinition) {
+
+		Set<AutowireCandidateQualifier> qualifiers = beanDefinition.getQualifiers();
+		if (!qualifiers.isEmpty()) {
+			for (AutowireCandidateQualifier qualifier : qualifiers) {
+				Collection<CodeBlock> arguments = new ArrayList<>();
+				arguments.add(CodeBlock.of("$S", qualifier.getTypeName()));
+				Object qualifierValue = qualifier.getAttribute(AutowireCandidateQualifier.VALUE_KEY);
+				if (qualifierValue != null) {
+					arguments.add(generateValue("value", qualifierValue));
+				}
+				code.addStatement("$L.addQualifier(new $T($L))", BEAN_DEFINITION_VARIABLE,
+						AutowireCandidateQualifier.class, CodeBlock.join(arguments, ", "));
 			}
 		}
 	}
