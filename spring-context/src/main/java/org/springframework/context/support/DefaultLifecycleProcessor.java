@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -471,8 +472,24 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class CracResourceAdapter implements org.crac.Resource {
 
+		@Nullable
+		private CyclicBarrier barrier;
+
 		@Override
 		public void beforeCheckpoint(org.crac.Context<? extends org.crac.Resource> context) {
+			// A non-daemon thread for preventing an accidental JVM shutdown before the checkpoint
+			this.barrier = new CyclicBarrier(2);
+
+			Thread thread = new Thread(() -> {
+				awaitPreventShutdownBarrier();
+				// Checkpoint happens here
+				awaitPreventShutdownBarrier();
+			}, "prevent-shutdown");
+
+			thread.setDaemon(false);
+			thread.start();
+			awaitPreventShutdownBarrier();
+
 			logger.debug("Stopping Spring-managed lifecycle beans before JVM snapshot checkpoint");
 			stopForRestart();
 		}
@@ -481,6 +498,21 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		public void afterRestore(org.crac.Context<? extends org.crac.Resource> context) {
 			logger.debug("Restarting Spring-managed lifecycle beans after JVM snapshot restore");
 			restartAfterStop();
+
+			// Barrier for prevent-shutdown thread not needed anymore
+			awaitPreventShutdownBarrier();
+			this.barrier = null;
+		}
+
+		private void awaitPreventShutdownBarrier() {
+			try {
+				if (this.barrier != null) {
+					this.barrier.await();
+				}
+			}
+			catch (Exception ex) {
+				logger.trace("Exception from prevent-shutdown barrier", ex);
+			}
 		}
 	}
 
