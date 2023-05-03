@@ -868,6 +868,7 @@ public abstract class StringUtils {
 	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
+	@SuppressWarnings("deprecation")  // for Locale constructors on JDK 19
 	@Nullable
 	public static Locale parseLocaleString(String localeString) {
 		if (localeString.equals("")) {
@@ -877,25 +878,25 @@ public abstract class StringUtils {
 		if (!localeString.contains("_") && localeString.contains(" ")) {
 			delimiter = " ";
 		}
-		final String[] tokens = localeString.split(delimiter, -1);
+		String[] tokens = localeString.split(delimiter, -1);
 		if (tokens.length == 1) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
 			return new Locale(language);
 		}
 		else if (tokens.length == 2) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
-			final String country = tokens[1];
+			String country = tokens[1];
 			validateLocalePart(country);
 			return new Locale(language, country);
 		}
 		else if (tokens.length > 2) {
-			final String language = tokens[0];
+			String language = tokens[0];
 			validateLocalePart(language);
-			final String country = tokens[1];
+			String country = tokens[1];
 			validateLocalePart(country);
-			final String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
+			String variant = Arrays.stream(tokens).skip(2).collect(Collectors.joining(delimiter));
 			return new Locale(language, country, variant);
 		}
 		throw new IllegalArgumentException("Invalid locale format: '" + localeString + "'");

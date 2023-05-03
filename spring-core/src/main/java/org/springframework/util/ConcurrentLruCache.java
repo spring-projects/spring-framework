@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -401,6 +401,7 @@ public final class ConcurrentLruCache<K, V> {
 			}
 		}
 
+		@SuppressWarnings("deprecation")  // for Thread.getId() on JDK 19
 		private static int getBufferIndex() {
 			return ((int) Thread.currentThread().getId()) & BUFFERS_MASK;
 		}
@@ -415,6 +416,7 @@ public final class ConcurrentLruCache<K, V> {
 			return (pending < MAX_PENDING_OPERATIONS);
 		}
 
+		@SuppressWarnings("deprecation")  // for Thread.getId() on JDK 19
 		void drain() {
 			final int start = (int) Thread.currentThread().getId();
 			final int end = start + BUFFER_COUNT;
