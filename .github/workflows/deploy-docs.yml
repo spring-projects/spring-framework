@@ -13,7 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # if: github.repository_owner == 'spring-projects'
+    if: github.repository_owner == 'spring-projects'
     steps:
     - name: Checkout
       uses: actions/checkout@v3
