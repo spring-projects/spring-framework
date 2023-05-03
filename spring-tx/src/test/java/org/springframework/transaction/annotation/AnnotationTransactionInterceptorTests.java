@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.transaction.annotation;
 
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 
 import io.vavr.control.Try;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestClassLevelOnly());
 		proxyFactory.addAdvice(this.ti);
-
 		TestClassLevelOnly proxy = (TestClassLevelOnly) proxyFactory.getProxy();
 
 		proxy.doSomething();
@@ -78,7 +78,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithSingleMethodOverride());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithSingleMethodOverride proxy = (TestWithSingleMethodOverride) proxyFactory.getProxy();
 
 		proxy.doSomething();
@@ -99,7 +98,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithSingleMethodOverrideInverted());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithSingleMethodOverrideInverted proxy = (TestWithSingleMethodOverrideInverted) proxyFactory.getProxy();
 
 		proxy.doSomething();
@@ -120,7 +118,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithMultiMethodOverride());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithMultiMethodOverride proxy = (TestWithMultiMethodOverride) proxyFactory.getProxy();
 
 		proxy.doSomething();
@@ -141,7 +138,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithExceptions());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithExceptions proxy = (TestWithExceptions) proxyFactory.getProxy();
 
 		assertThatIllegalStateException().isThrownBy(
@@ -158,7 +154,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithExceptions());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithExceptions proxy = (TestWithExceptions) proxyFactory.getProxy();
 
 		assertThatException()
@@ -171,7 +166,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithExceptions());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithExceptions proxy = (TestWithExceptions) proxyFactory.getProxy();
 
 		assertThatException()
@@ -184,7 +178,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithReactive());
 		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
-
 		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
 
 		StepVerifier.withVirtualTime(proxy::monoSuccess).thenAwait(Duration.ofSeconds(10)).verifyComplete();
@@ -196,7 +189,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithReactive());
 		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
-
 		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
 
 		proxy.monoFailure().as(StepVerifier::create).verifyError();
@@ -208,7 +200,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithReactive());
 		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
-
 		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
 
 		StepVerifier.withVirtualTime(proxy::monoSuccess).thenAwait(Duration.ofSeconds(1)).thenCancel().verify();
@@ -220,7 +211,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithReactive());
 		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
-
 		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
 
 		StepVerifier.withVirtualTime(proxy::fluxSuccess).thenAwait(Duration.ofSeconds(10)).expectNextCount(1).verifyComplete();
@@ -232,7 +222,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithReactive());
 		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
-
 		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
 
 		proxy.fluxFailure().as(StepVerifier::create).verifyError();
@@ -244,7 +233,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithReactive());
 		proxyFactory.addAdvice(new TransactionInterceptor(rtm, this.source));
-
 		TestWithReactive proxy = (TestWithReactive) proxyFactory.getProxy();
 
 		StepVerifier.withVirtualTime(proxy::fluxSuccess).thenAwait(Duration.ofSeconds(1)).thenCancel().verify();
@@ -252,11 +240,54 @@ public class AnnotationTransactionInterceptorTests {
 	}
 
 	@Test
+	public void withCompletableFutureSuccess() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithCompletableFuture());
+		proxyFactory.addAdvice(this.ti);
+		TestWithCompletableFuture proxy = (TestWithCompletableFuture) proxyFactory.getProxy();
+
+		proxy.doSomething();
+		assertGetTransactionAndCommitCount(1);
+	}
+
+	@Test
+	public void withCompletableFutureRuntimeException() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithCompletableFuture());
+		proxyFactory.addAdvice(this.ti);
+		TestWithCompletableFuture proxy = (TestWithCompletableFuture) proxyFactory.getProxy();
+
+		proxy.doSomethingErroneous();
+		assertGetTransactionAndRollbackCount(1);
+	}
+
+	@Test
+	public void withCompletableFutureCheckedException() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithCompletableFuture());
+		proxyFactory.addAdvice(this.ti);
+		TestWithCompletableFuture proxy = (TestWithCompletableFuture) proxyFactory.getProxy();
+
+		proxy.doSomethingErroneousWithCheckedException();
+		assertGetTransactionAndCommitCount(1);
+	}
+
+	@Test
+	public void withCompletableFutureCheckedExceptionAndRollbackRule() {
+		ProxyFactory proxyFactory = new ProxyFactory();
+		proxyFactory.setTarget(new TestWithCompletableFuture());
+		proxyFactory.addAdvice(this.ti);
+		TestWithCompletableFuture proxy = (TestWithCompletableFuture) proxyFactory.getProxy();
+
+		proxy.doSomethingErroneousWithCheckedExceptionAndRollbackRule();
+		assertGetTransactionAndRollbackCount(1);
+	}
+
+	@Test
 	public void withVavrTrySuccess() {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithVavrTry());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithVavrTry proxy = (TestWithVavrTry) proxyFactory.getProxy();
 
 		proxy.doSomething();
@@ -268,7 +299,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithVavrTry());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithVavrTry proxy = (TestWithVavrTry) proxyFactory.getProxy();
 
 		proxy.doSomethingErroneous();
@@ -280,7 +310,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithVavrTry());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithVavrTry proxy = (TestWithVavrTry) proxyFactory.getProxy();
 
 		proxy.doSomethingErroneousWithCheckedException();
@@ -292,7 +321,6 @@ public class AnnotationTransactionInterceptorTests {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithVavrTry());
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithVavrTry proxy = (TestWithVavrTry) proxyFactory.getProxy();
 
 		proxy.doSomethingErroneousWithCheckedExceptionAndRollbackRule();
@@ -305,7 +333,6 @@ public class AnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(new TestWithInterfaceImpl());
 		proxyFactory.addInterface(TestWithInterface.class);
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithInterface proxy = (TestWithInterface) proxyFactory.getProxy();
 
 		proxy.doSomething();
@@ -330,7 +357,6 @@ public class AnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(new SomeServiceImpl());
 		proxyFactory.addInterface(SomeService.class);
 		proxyFactory.addAdvice(this.ti);
-
 		SomeService someService = (SomeService) proxyFactory.getProxy();
 
 		someService.bar();
@@ -349,7 +375,6 @@ public class AnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(new OtherServiceImpl());
 		proxyFactory.addInterface(OtherService.class);
 		proxyFactory.addAdvice(this.ti);
-
 		OtherService otherService = (OtherService) proxyFactory.getProxy();
 
 		otherService.foo();
@@ -366,7 +391,6 @@ public class AnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(targetFactory.getProxy());
 		proxyFactory.addInterface(TestWithInterface.class);
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithInterface proxy = (TestWithInterface) proxyFactory.getProxy();
 
 		proxy.doSomething();
@@ -395,7 +419,6 @@ public class AnnotationTransactionInterceptorTests {
 		proxyFactory.setTarget(targetFactory.getProxy());
 		proxyFactory.addInterface(TestWithInterface.class);
 		proxyFactory.addAdvice(this.ti);
-
 		TestWithInterface proxy = (TestWithInterface) proxyFactory.getProxy();
 
 		proxy.doSomething();
@@ -544,6 +567,7 @@ public class AnnotationTransactionInterceptorTests {
 		}
 	}
 
+
 	@Transactional
 	public static class TestWithReactive {
 
@@ -563,6 +587,37 @@ public class AnnotationTransactionInterceptorTests {
 			return Flux.error(new IllegalStateException());
 		}
 	}
+
+
+	@Transactional
+	public static class TestWithCompletableFuture {
+
+		public CompletableFuture<String> doSomething() {
+			assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+			assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+			return CompletableFuture.completedFuture("ok");
+		}
+
+		public CompletableFuture<String> doSomethingErroneous() {
+			assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+			assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+			return CompletableFuture.failedFuture(new IllegalStateException());
+		}
+
+		public CompletableFuture<String> doSomethingErroneousWithCheckedException() {
+			assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+			assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+			return CompletableFuture.failedFuture(new Exception());
+		}
+
+		@Transactional(rollbackFor = Exception.class)
+		public CompletableFuture<String> doSomethingErroneousWithCheckedExceptionAndRollbackRule() {
+			assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+			assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
+			return CompletableFuture.failedFuture(new Exception());
+		}
+	}
+
 
 	@Transactional
 	public static class TestWithVavrTry {
