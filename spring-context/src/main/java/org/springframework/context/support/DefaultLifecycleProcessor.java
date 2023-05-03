@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -43,15 +44,24 @@ import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Default implementation of the {@link LifecycleProcessor} strategy.
+ *
+ * <p>Provides interaction with {@link Lifecycle} and {@link SmartLifecycle} beans in
+ * groups for specific phases, on startup/shutdown as well as for explicit start/stop
+ * interactions on a {@link org.springframework.context.ConfigurableApplicationContext}.
+ * As of 6.1, this also includes support for JVM snapshot checkpoints (Project CRaC).
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 3.0
  */
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
+
+	private static final boolean cracPresent =
+			ClassUtils.isPresent("org.crac.Core", DefaultLifecycleProcessor.class.getClassLoader());
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -61,6 +71,16 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	@Nullable
 	private volatile ConfigurableListableBeanFactory beanFactory;
+
+	@Nullable
+	private volatile Set<String> stoppedBeans;
+
+
+	public DefaultLifecycleProcessor() {
+		if (cracPresent) {
+			new CracDelegate().registerResource();
+		}
+	}
 
 
 	/**
@@ -100,6 +120,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	@Override
 	public void start() {
+		this.stoppedBeans = null;
 		startBeans(false);
 		this.running = true;
 	}
@@ -120,6 +141,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	@Override
 	public void onRefresh() {
+		this.stoppedBeans = null;
 		startBeans(true);
 		this.running = true;
 	}
@@ -138,12 +160,28 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	// Internal helpers
 
+	void stopForRestart() {
+		if (this.running) {
+			this.stoppedBeans = Collections.newSetFromMap(new ConcurrentHashMap<>());
+			stopBeans();
+			this.running = false;
+		}
+	}
+
+	void restartAfterStop() {
+		if (this.stoppedBeans != null) {
+			startBeans(true);
+			this.stoppedBeans = null;
+			this.running = true;
+		}
+	}
+
 	private void startBeans(boolean autoStartupOnly) {
 		Map<String, Lifecycle> lifecycleBeans = getLifecycleBeans();
 		Map<Integer, LifecycleGroup> phases = new TreeMap<>();
 
 		lifecycleBeans.forEach((beanName, bean) -> {
-			if (!autoStartupOnly || (bean instanceof SmartLifecycle smartLifecycle && smartLifecycle.isAutoStartup())) {
+			if (!autoStartupOnly || isAutoStartupCandidate(beanName, bean)) {
 				int phase = getPhase(bean);
 				phases.computeIfAbsent(
 						phase,
@@ -154,6 +192,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		if (!phases.isEmpty()) {
 			phases.values().forEach(LifecycleGroup::start);
 		}
+	}
+
+	private boolean isAutoStartupCandidate(String beanName, Lifecycle bean) {
+		Set<String> stoppedBeans = this.stoppedBeans;
+		return (stoppedBeans != null ? stoppedBeans.contains(beanName) :
+				(bean instanceof SmartLifecycle smartLifecycle && smartLifecycle.isAutoStartup()));
 	}
 
 	/**
@@ -169,8 +213,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			for (String dependency : dependenciesForBean) {
 				doStart(lifecycleBeans, dependency, autoStartupOnly);
 			}
-			if (!bean.isRunning() &&
-					(!autoStartupOnly || !(bean instanceof SmartLifecycle smartLifecycle) || smartLifecycle.isAutoStartup())) {
+			if (!bean.isRunning() && (!autoStartupOnly || toBeStarted(beanName, bean))) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Starting bean '" + beanName + "' of type [" + bean.getClass().getName() + "]");
 				}
@@ -185,6 +228,12 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 				}
 			}
 		}
+	}
+
+	private boolean toBeStarted(String beanName, Lifecycle bean) {
+		Set<String> stoppedBeans = this.stoppedBeans;
+		return (stoppedBeans != null ? stoppedBeans.contains(beanName) :
+				(!(bean instanceof SmartLifecycle smartLifecycle) || smartLifecycle.isAutoStartup()));
 	}
 
 	private void stopBeans() {
@@ -219,6 +268,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			}
 			try {
 				if (bean.isRunning()) {
+					Set<String> stoppedBeans = this.stoppedBeans;
+					if (stoppedBeans != null) {
+						stoppedBeans.add(beanName);
+					}
 					if (bean instanceof SmartLifecycle smartLifecycle) {
 						if (logger.isTraceEnabled()) {
 							logger.trace("Asking bean '" + beanName + "' of type [" +
@@ -390,5 +443,42 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * A simple record of a LifecycleGroup member.
 	 */
 	private record LifecycleGroupMember(String name, Lifecycle bean) {}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Project CRaC at runtime.
+	 * @since 6.1
+	 * @see org.crac.Core
+	 */
+	private class CracDelegate {
+
+		public void registerResource() {
+			logger.debug("Registering JVM snapshot callback for Spring-managed lifecycle beans");
+			org.crac.Core.getGlobalContext().register(new CracResourceAdapter());
+		}
+	}
+
+
+	/**
+	 * Resource adapter for Project CRaC, triggering a stop-and-restart cycle
+	 * for Spring-managed lifecycle beans around a JVM snapshot checkpoint.
+	 * @since 6.1
+	 * @see #stopForRestart()
+	 * @see #restartAfterStop()
+	 */
+	private class CracResourceAdapter implements org.crac.Resource {
+
+		@Override
+		public void beforeCheckpoint(org.crac.Context<? extends org.crac.Resource> context) {
+			logger.debug("Stopping Spring-managed lifecycle beans before JVM snapshot checkpoint");
+			stopForRestart();
+		}
+
+		@Override
+		public void afterRestore(org.crac.Context<? extends org.crac.Resource> context) {
+			logger.debug("Restarting Spring-managed lifecycle beans after JVM snapshot restore");
+			restartAfterStop();
+		}
+	}
 
 }
