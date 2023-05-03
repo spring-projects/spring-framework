@@ -390,36 +390,54 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param eventType the resolved event type, if known
 	 * @since 4.2
 	 */
-	protected void publishEvent(Object event, @Nullable ResolvableType eventType) {
+	protected void publishEvent(Object event, @Nullable final ResolvableType eventType) {
 		Assert.notNull(event, "Event must not be null");
 
 		// Decorate event as an ApplicationEvent if necessary
 		ApplicationEvent applicationEvent;
-		if (event instanceof ApplicationEvent applEvent) {
+		ResolvableType multicastType;
+		if (event instanceof PayloadApplicationEvent<?> payloadEvent) {
+			Assert.isTrue(eventType == null || eventType.equals(payloadEvent.getResolvableType()),
+					"Cannot publish a PayloadApplicationEvent with a non-matching eventType, got " + eventType);
+			applicationEvent = payloadEvent;
+			multicastType = payloadEvent.getResolvableType();
+		}
+		else if (event instanceof ApplicationEvent applEvent) {
 			applicationEvent = applEvent;
+			multicastType = eventType;
 		}
 		else {
 			applicationEvent = new PayloadApplicationEvent<>(this, event, eventType);
-			if (eventType == null) {
-				eventType = ((PayloadApplicationEvent<?>) applicationEvent).getResolvableType();
-			}
+			//always derive the multicastType from the PayloadApplicationEvent, since it is guaranteed
+			//to have an inner payloadType after construction (covering eventType == null case)
+			multicastType = ((PayloadApplicationEvent<?>) applicationEvent).getResolvableType();
 		}
 
 		// Multicast right now if possible - or lazily once the multicaster is initialized
 		if (this.earlyApplicationEvents != null) {
-			this.earlyApplicationEvents.add(applicationEvent);
+			this.earlyApplicationEvents.add(applicationEvent); //we loose the eventType for applicationEvents at this point
 		}
 		else {
-			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
+			getApplicationEventMulticaster().multicastEvent(applicationEvent, multicastType);
 		}
 
 		// Publish event via parent context as well...
 		if (this.parent != null) {
-			if (this.parent instanceof AbstractApplicationContext abstractApplicationContext) {
-				abstractApplicationContext.publishEvent(event, eventType);
+			/*
+			If we just created a PayloadApplicationEvent out of an arbitrary object,
+			it wraps the event type (which could be important if the type has been provided
+			by the user and contains generics).
+			In that case, we can simply propagate only the payloadApplicationEvent. We can also do so
+			if the parent doesn't have a publishEvent method which accepts a ResolvableType.
+			The corner case is if the original event was an ApplicationEvent (not a PayloadApplicationEvent)
+			and an eventType was provided, in which case we must make an effort to propagate it as well.
+			 */
+			if (!(this.parent instanceof AbstractApplicationContext abstractApplicationContext)
+					|| event != applicationEvent) {
+				this.parent.publishEvent(applicationEvent);
 			}
 			else {
-				this.parent.publishEvent(event);
+				abstractApplicationContext.publishEvent(event, eventType);
 			}
 		}
 	}
