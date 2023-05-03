@@ -123,13 +123,11 @@ final class HttpServiceMethod {
 				}
 			}
 			int index = i;
-			Assert.state(resolved, () -> formatArgumentError(this.parameters[index], "No suitable resolver"));
+			Assert.state(resolved, () ->
+					"Could not resolve parameter [" + this.parameters[index].getParameterIndex() + "] in " +
+							this.parameters[index].getExecutable().toGenericString() +
+							(StringUtils.hasText("No suitable resolver") ? ": " + "No suitable resolver" : ""));
 		}
-	}
-
-	private static String formatArgumentError(MethodParameter param, String message) {
-		return "Could not resolve parameter [" + param.getParameterIndex() + "] in " +
-				param.getExecutable().toGenericString() + (StringUtils.hasText(message) ? ": " + message : "");
 	}
 
 
@@ -277,17 +275,6 @@ final class HttpServiceMethod {
 			@Nullable ReactiveAdapter returnTypeAdapter,
 			boolean blockForOptional, @Nullable Duration blockTimeout) {
 
-		private ResponseFunction(
-				Function<HttpRequestValues, Publisher<?>> responseFunction,
-				@Nullable ReactiveAdapter returnTypeAdapter,
-				boolean blockForOptional, Duration blockTimeout) {
-
-			this.responseFunction = responseFunction;
-			this.returnTypeAdapter = returnTypeAdapter;
-			this.blockForOptional = blockForOptional;
-			this.blockTimeout = blockTimeout;
-		}
-
 		@Nullable
 		public Object execute(HttpRequestValues requestValues) {
 
@@ -297,11 +284,16 @@ final class HttpServiceMethod {
 				return this.returnTypeAdapter.fromPublisher(responsePublisher);
 			}
 
-			return (this.blockForOptional ?
-					(this.blockTimeout != null ? ((Mono<?>) responsePublisher).blockOptional(this.blockTimeout) :
-							((Mono<?>) responsePublisher).blockOptional()) :
-					(this.blockTimeout != null ? ((Mono<?>) responsePublisher).block(this.blockTimeout) :
-							((Mono<?>) responsePublisher).block()));
+			if (this.blockForOptional) {
+				return (this.blockTimeout != null ?
+						((Mono<?>) responsePublisher).blockOptional(this.blockTimeout) :
+						((Mono<?>) responsePublisher).blockOptional());
+			}
+			else {
+				return (this.blockTimeout != null ?
+						((Mono<?>) responsePublisher).block(this.blockTimeout) :
+						((Mono<?>) responsePublisher).block());
+			}
 		}
 
 
@@ -310,7 +302,7 @@ final class HttpServiceMethod {
 		 */
 		public static ResponseFunction create(
 				HttpClientAdapter client, Method method, ReactiveAdapterRegistry reactiveRegistry,
-				Duration blockTimeout) {
+				@Nullable Duration blockTimeout) {
 
 			MethodParameter returnParam = new MethodParameter(method, -1);
 			Class<?> returnType = returnParam.getParameterType();

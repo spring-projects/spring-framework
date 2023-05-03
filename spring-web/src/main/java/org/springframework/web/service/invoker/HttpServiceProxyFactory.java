@@ -207,14 +207,16 @@ public final class HttpServiceProxyFactory {
 		}
 
 		/**
-		 * Configure how long to wait for a response for an HTTP service method
+		 * Configure how long to block for the response of an HTTP service method
 		 * with a synchronous (blocking) method signature.
-		 * <p>By default this is {@code null},
-		 * in which case means blocking on publishers is done without a timeout.
+		 * <p>By default this is not set, in which case the behavior depends on
+		 * connection and request timeout settings of the underlying HTTP client.
+		 * We recommend configuring timeout values directly on the underlying HTTP
+		 * client, which provides more control over such settings.
 		 * @param blockTimeout the timeout value
 		 * @return this same builder instance
 		 */
-		public Builder blockTimeout(Duration blockTimeout) {
+		public Builder blockTimeout(@Nullable Duration blockTimeout) {
 			this.blockTimeout = blockTimeout;
 			return this;
 		}
@@ -227,8 +229,7 @@ public final class HttpServiceProxyFactory {
 
 			return new HttpServiceProxyFactory(
 					this.clientAdapter, initArgumentResolvers(),
-					this.embeddedValueResolver, this.reactiveAdapterRegistry,
-					this.blockTimeout);
+					this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
 		}
 
 		private List<HttpServiceArgumentResolver> initArgumentResolvers() {

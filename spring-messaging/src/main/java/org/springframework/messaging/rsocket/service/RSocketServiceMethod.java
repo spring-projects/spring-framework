@@ -73,8 +73,7 @@ final class RSocketServiceMethod {
 		this.parameters = initMethodParameters(method);
 		this.argumentResolvers = argumentResolvers;
 		this.route = initRoute(method, containingClass, rsocketRequester.strategies(), embeddedValueResolver);
-		this.responseFunction = initResponseFunction(
-				rsocketRequester, method, reactiveRegistry, blockTimeout);
+		this.responseFunction = initResponseFunction(rsocketRequester, method, reactiveRegistry, blockTimeout);
 	}
 
 	private static MethodParameter[] initMethodParameters(Method method) {
@@ -163,11 +162,16 @@ final class RSocketServiceMethod {
 			if (reactiveAdapter != null) {
 				return reactiveAdapter.fromPublisher(responsePublisher);
 			}
-			return (blockForOptional ?
-					(blockTimeout != null ? ((Mono<?>) responsePublisher).blockOptional(blockTimeout) :
-							((Mono<?>) responsePublisher).blockOptional()) :
-					(blockTimeout != null ? ((Mono<?>) responsePublisher).block(blockTimeout) :
-							((Mono<?>) responsePublisher).block()));
+			if (blockForOptional) {
+				return (blockTimeout != null ?
+						((Mono<?>) responsePublisher).blockOptional(blockTimeout) :
+						((Mono<?>) responsePublisher).blockOptional());
+			}
+			else {
+				return (blockTimeout != null ?
+						((Mono<?>) responsePublisher).block(blockTimeout) :
+						((Mono<?>) responsePublisher).block());
+			}
 		});
 	}
 
