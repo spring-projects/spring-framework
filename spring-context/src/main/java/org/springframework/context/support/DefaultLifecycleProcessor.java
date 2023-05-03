@@ -60,9 +60,6 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
 
-	private static final boolean cracPresent =
-			ClassUtils.isPresent("org.crac.Core", DefaultLifecycleProcessor.class.getClassLoader());
-
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private volatile long timeoutPerShutdownPhase = 30000;
@@ -75,10 +72,14 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	@Nullable
 	private volatile Set<String> stoppedBeans;
 
+	// Just for keeping a strong reference to the registered CRaC Resource, if any
+	@Nullable
+	private Object cracResource;
+
 
 	public DefaultLifecycleProcessor() {
-		if (cracPresent) {
-			new CracDelegate().registerResource();
+		if (ClassUtils.isPresent("org.crac.Core", getClass().getClassLoader())) {
+			this.cracResource = new CracDelegate().registerResource();
 		}
 	}
 
@@ -452,9 +453,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 */
 	private class CracDelegate {
 
-		public void registerResource() {
+		public Object registerResource() {
 			logger.debug("Registering JVM snapshot callback for Spring-managed lifecycle beans");
-			org.crac.Core.getGlobalContext().register(new CracResourceAdapter());
+			CracResourceAdapter resourceAdapter = new CracResourceAdapter();
+			org.crac.Core.getGlobalContext().register(resourceAdapter);
+			return resourceAdapter;
 		}
 	}
 
