@@ -98,6 +98,16 @@ public abstract class CommonsFileUploadSupport {
 	}
 
 	/**
+	 * Sets the maximum number of files allowed per request.
+     * -1 indicates no limit (the default).
+	 * @param fileCountMax the maximum upload size allowed
+	 * @see org.apache.commons.fileupload.FileUploadBase#setFileCountMax
+	 */
+	public void setFileCountMax(long fileCountMax) {
+		this.fileUpload.setFileCountMax(fileCountMax);
+	}
+
+	/**
 	 * Set the maximum allowed size (in bytes) before an upload gets rejected.
 	 * -1 indicates no limit (the default).
 	 * @param maxUploadSize the maximum upload size allowed
@@ -117,6 +127,7 @@ public abstract class CommonsFileUploadSupport {
 	public void setMaxUploadSizePerFile(long maxUploadSizePerFile) {
 		this.fileUpload.setFileSizeMax(maxUploadSizePerFile);
 	}
+
 
 	/**
 	 * Set the maximum allowed size (in bytes) before uploads are written to disk.
@@ -232,6 +243,7 @@ public abstract class CommonsFileUploadSupport {
 			actualFileUpload = newFileUpload(getFileItemFactory());
 			actualFileUpload.setSizeMax(fileUpload.getSizeMax());
 			actualFileUpload.setFileSizeMax(fileUpload.getFileSizeMax());
+			actualFileUpload.setFileCountMax(fileUpload.getFileCountMax());
 			actualFileUpload.setHeaderEncoding(encoding);
 		}
 

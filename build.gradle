@@ -168,7 +168,7 @@ configure(allprojects) { project ->
 			dependency "org.python:jython-standalone:2.7.1"
 			dependency "org.mozilla:rhino:1.7.11"
 
-			dependency "commons-fileupload:commons-fileupload:1.4"
+			dependency "commons-fileupload:commons-fileupload:1.5"
 			dependency "org.synchronoss.cloud:nio-multipart-parser:1.1.0"
 
 			dependency("org.dom4j:dom4j:2.1.3") {

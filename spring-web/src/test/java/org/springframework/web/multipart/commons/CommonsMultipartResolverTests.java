@@ -147,6 +147,7 @@ public class CommonsMultipartResolverTests {
 		wac.getServletContext().setAttribute(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File("mytemp"));
 		wac.refresh();
 		MockCommonsMultipartResolver resolver = new MockCommonsMultipartResolver();
+		resolver.setFileCountMax(10);
 		resolver.setMaxUploadSize(1000);
 		resolver.setMaxInMemorySize(100);
 		resolver.setDefaultEncoding("enc");
@@ -154,6 +155,7 @@ public class CommonsMultipartResolverTests {
 			resolver.setResolveLazily(false);
 		}
 		resolver.setServletContext(wac.getServletContext());
+		assertThat(resolver.getFileUpload().getFileCountMax()).isEqualTo(10);
 		assertThat(resolver.getFileUpload().getSizeMax()).isEqualTo(1000);
 		assertThat(resolver.getFileItemFactory().getSizeThreshold()).isEqualTo(100);
 		assertThat(resolver.getFileUpload().getHeaderEncoding()).isEqualTo("enc");

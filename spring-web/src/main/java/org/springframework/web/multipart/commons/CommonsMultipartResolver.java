@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.fileupload.FileCountLimitExceededException;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
@@ -197,6 +198,9 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		}
 		catch (FileUploadBase.FileSizeLimitExceededException ex) {
 			throw new MaxUploadSizeExceededException(fileUpload.getFileSizeMax(), ex);
+		}
+		catch (FileCountLimitExceededException ex) {
+			throw new MaxUploadSizeExceededException(fileUpload.getFileCountMax(), ex);
 		}
 		catch (FileUploadException ex) {
 			throw new MultipartException("Failed to parse multipart servlet request", ex);
