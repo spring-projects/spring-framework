@@ -70,7 +70,7 @@ public enum Isolation {
 	/**
 	 * A constant indicating that dirty reads, non-repeatable reads, and phantom
 	 * reads are prevented.
-	 * <p>This level includes the prohibitions in {@link #ISOLATION_REPEATABLE_READ}
+	 * <p>This level includes the prohibitions in {@link #REPEATABLE_READ}
 	 * and further prohibits the situation where one transaction reads all rows that
 	 * satisfy a {@code WHERE} condition, a second transaction inserts a row
 	 * that satisfies that {@code WHERE} condition, and the first transaction

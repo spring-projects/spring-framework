@@ -102,7 +102,7 @@ task api(type: Javadoc) {
 		overview = "framework-docs/src/docs/api/overview.html"
 		splitIndex = true
 		links(project.ext.javadocLinks)
-		addBooleanOption('Xdoclint:syntax', true) // only check syntax with doclint
+		addBooleanOption('Xdoclint:syntax,reference', true) // only check syntax and reference with doclint
 		addBooleanOption('Werror', true) // fail build on Javadoc warnings
 	}
 	source moduleProjects.collect { project ->
