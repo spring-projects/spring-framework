@@ -43,6 +43,7 @@ import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.core.NativeDetector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -79,7 +80,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 
 	public DefaultLifecycleProcessor() {
-		if (ClassUtils.isPresent("org.crac.Core", getClass().getClassLoader())) {
+		if (!NativeDetector.inNativeImage() && ClassUtils.isPresent("org.crac.Core", getClass().getClassLoader())) {
 			this.cracResource = new CracDelegate().registerResource();
 		}
 	}
