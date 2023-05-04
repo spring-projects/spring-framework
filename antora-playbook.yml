@@ -15,7 +15,7 @@ git:
 content:
   sources:
   - url: https://github.com/rwinch/spring-framework
-    branches: [6.0.x]
+    branches: [6.0.x,main]
     start_path: framework-docs
 asciidoc:
   extensions:
