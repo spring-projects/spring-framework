@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -510,7 +511,7 @@ public class CorsConfiguration {
 	 * @since 5.3
 	 */
 	public void validateAllowCredentials() {
-		if (this.allowCredentials == Boolean.TRUE &&
+		if (Objects.equals(this.allowCredentials, Boolean.TRUE) &&
 				this.allowedOrigins != null && this.allowedOrigins.contains(ALL)) {
 
 			throw new IllegalArgumentException(
