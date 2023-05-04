@@ -13,7 +13,7 @@ xref:data-access.adoc[Data Access] :: Transactions, DAO Support,
 JDBC, R2DBC, O/R Mapping, XML Marshalling.
 xref:web.adoc[Web Servlet] :: Spring MVC, WebSocket, SockJS,
 STOMP Messaging.
-xref:testing/unit.adoc#mock-objects-web-reactive[Web Reactive] :: Spring WebFlux, WebClient,
+xref:web-reactive.adoc[Web Reactive] :: Spring WebFlux, WebClient,
 WebSocket, RSocket.
 xref:integration.adoc[Integration] :: REST Clients, JMS, JCA, JMX,
 Email, Tasks, Scheduling, Caching, Observability.
