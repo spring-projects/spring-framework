@@ -13,7 +13,7 @@ antora {
 	version = '3.2.0-alpha.2'
 	playbook = 'cached-antora-playbook.yml'
 	playbookProvider {
-		repository = 'rwinch/spring-framework'
+		repository = 'spring-projects/spring-framework'
 		branch = 'docs-build'
 		path = 'lib/antora/templates/per-branch-antora-playbook.yml'
 		checkLocalBranch = true
