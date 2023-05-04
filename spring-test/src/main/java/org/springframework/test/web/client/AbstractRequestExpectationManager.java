@@ -110,7 +110,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	/**
 	 * As of 5.0.3 subclasses should implement this method instead of
-	 * {@link #validateRequestInternal(ClientHttpRequest)} in order to match the
+	 * {@code #validateRequestInternal(ClientHttpRequest)} in order to match the
 	 * request to an expectation, leaving the call to create the response as a separate step
 	 * (to be invoked by this class).
 	 * @param request the current request

@@ -66,7 +66,7 @@ public abstract class HttpAccessor {
 	 * Configure the Apache HttpComponents or OkHttp request factory to enable PATCH.</b>
 	 * @see #createRequest(URI, HttpMethod)
 	 * @see SimpleClientHttpRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	public void setRequestFactory(ClientHttpRequestFactory requestFactory) {

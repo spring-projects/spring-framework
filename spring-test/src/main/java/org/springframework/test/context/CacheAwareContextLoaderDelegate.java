@@ -81,7 +81,6 @@ public interface CacheAwareContextLoaderDelegate {
 	 * the application context
 	 * @see #isContextLoaded
 	 * @see #closeContext
-	 * @see #setContextFailureProcessor
 	 */
 	ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration);
 
