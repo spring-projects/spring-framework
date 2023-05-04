@@ -1,0 +1,79 @@
+[[websocket-stomp-handle-broker-relay]]
+= External Broker
+
+The simple broker is great for getting started but supports only a subset of
+STOMP commands (it does not support acks, receipts, and some other features),
+relies on a simple message-sending loop, and is not suitable for clustering.
+As an alternative, you can upgrade your applications to use a full-featured
+message broker.
+
+See the STOMP documentation for your message broker of choice (such as
+https://www.rabbitmq.com/stomp.html[RabbitMQ],
+https://activemq.apache.org/stomp.html[ActiveMQ], and others), install the broker,
+and run it with STOMP support enabled. Then you can enable the STOMP broker relay
+(instead of the simple broker) in the Spring configuration.
+
+The following example configuration enables a full-featured broker:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void registerStompEndpoints(StompEndpointRegistry registry) {
+			registry.addEndpoint("/portfolio").withSockJS();
+		}
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.enableStompBrokerRelay("/topic", "/queue");
+			registry.setApplicationDestinationPrefixes("/app");
+		}
+
+	}
+----
+
+The following example shows the XML configuration equivalent of the preceding example:
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:message-broker application-destination-prefix="/app">
+			<websocket:stomp-endpoint path="/portfolio" />
+				<websocket:sockjs/>
+			</websocket:stomp-endpoint>
+			<websocket:stomp-broker-relay prefix="/topic,/queue" />
+		</websocket:message-broker>
+
+	</beans>
+----
+
+The STOMP broker relay in the preceding configuration is a Spring
+{api-spring-framework}/messaging/MessageHandler.html[`MessageHandler`]
+that handles messages by forwarding them to an external message broker.
+To do so, it establishes TCP connections to the broker, forwards all messages to it,
+and then forwards all messages received from the broker to clients through their
+WebSocket sessions. Essentially, it acts as a "`relay`" that forwards messages
+in both directions.
+
+NOTE: Add `io.projectreactor.netty:reactor-netty` and `io.netty:netty-all`
+dependencies to your project for TCP connection management.
+
+Furthermore, application components (such as HTTP request handling methods,
+business services, and others) can also send messages to the broker relay, as described
+in xref:web/websocket/stomp/handle-send.adoc[Sending Messages], to broadcast messages to subscribed WebSocket clients.
+
+In effect, the broker relay enables robust and scalable message broadcasting.
+
+
+

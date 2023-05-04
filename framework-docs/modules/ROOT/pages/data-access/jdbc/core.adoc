@@ -1,0 +1,1096 @@
+[[jdbc-core]]
+= Using the JDBC Core Classes to Control Basic JDBC Processing and Error Handling
+
+This section covers how to use the JDBC core classes to control basic JDBC processing,
+including error handling. It includes the following topics:
+
+* xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate[Using `JdbcTemplate`]
+* xref:data-access/jdbc/core.adoc#jdbc-NamedParameterJdbcTemplate[Using `NamedParameterJdbcTemplate`]
+* xref:data-access/jdbc/core.adoc#jdbc-SQLExceptionTranslator[Using `SQLExceptionTranslator`]
+* xref:data-access/jdbc/core.adoc#jdbc-statements-executing[Running Statements]
+* xref:data-access/jdbc/core.adoc#jdbc-statements-querying[Running Queries]
+* xref:data-access/jdbc/core.adoc#jdbc-updates[Updating the Database]
+* xref:data-access/jdbc/core.adoc#jdbc-auto-generated-keys[Retrieving Auto-generated Keys]
+
+
+[[jdbc-JdbcTemplate]]
+== Using `JdbcTemplate`
+
+`JdbcTemplate` is the central class in the JDBC core package. It handles the
+creation and release of resources, which helps you avoid common errors, such as
+forgetting to close the connection. It performs the basic tasks of the core JDBC
+workflow (such as statement creation and execution), leaving application code to provide
+SQL and extract results. The `JdbcTemplate` class:
+
+* Runs SQL queries
+* Updates statements and stored procedure calls
+* Performs iteration over `ResultSet` instances and extraction of returned parameter values.
+* Catches JDBC exceptions and translates them to the generic, more informative, exception
+hierarchy defined in the `org.springframework.dao` package. (See xref:data-access/dao.adoc#dao-exceptions[Consistent Exception Hierarchy].)
+
+When you use the `JdbcTemplate` for your code, you need only to implement callback
+interfaces, giving them a clearly defined contract. Given a `Connection` provided by the
+`JdbcTemplate` class, the `PreparedStatementCreator` callback interface creates a prepared
+statement, providing SQL and any necessary parameters. The same is true for the
+`CallableStatementCreator` interface, which creates callable statements. The
+`RowCallbackHandler` interface extracts values from each row of a `ResultSet`.
+
+You can use `JdbcTemplate` within a DAO implementation through direct instantiation
+with a `DataSource` reference, or you can configure it in a Spring IoC container and give it to
+DAOs as a bean reference.
+
+NOTE: The `DataSource` should always be configured as a bean in the Spring IoC container. In
+the first case the bean is given to the service directly; in the second case it is given
+to the prepared template.
+
+All SQL issued by this class is logged at the `DEBUG` level under the category
+corresponding to the fully qualified class name of the template instance (typically
+`JdbcTemplate`, but it may be different if you use a custom subclass of the
+`JdbcTemplate` class).
+
+The following sections provide some examples of `JdbcTemplate` usage. These examples
+are not an exhaustive list of all of the functionality exposed by the `JdbcTemplate`.
+See the attendant {api-spring-framework}/jdbc/core/JdbcTemplate.html[javadoc] for that.
+
+[[jdbc-JdbcTemplate-examples-query]]
+=== Querying (`SELECT`)
+
+The following query gets the number of rows in a relation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	int rowCount = this.jdbcTemplate.queryForObject("select count(*) from t_actor", Integer.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val rowCount = jdbcTemplate.queryForObject<Int>("select count(*) from t_actor")!!
+----
+======
+
+The following query uses a bind variable:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	int countOfActorsNamedJoe = this.jdbcTemplate.queryForObject(
+			"select count(*) from t_actor where first_name = ?", Integer.class, "Joe");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val countOfActorsNamedJoe = jdbcTemplate.queryForObject<Int>(
+			"select count(*) from t_actor where first_name = ?", arrayOf("Joe"))!!
+----
+======
+
+
+The following query looks for a `String`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	String lastName = this.jdbcTemplate.queryForObject(
+			"select last_name from t_actor where id = ?",
+			String.class, 1212L);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val lastName = this.jdbcTemplate.queryForObject<String>(
+			"select last_name from t_actor where id = ?",
+			arrayOf(1212L))!!
+----
+======
+
+The following query finds and populates a single domain object:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	Actor actor = jdbcTemplate.queryForObject(
+			"select first_name, last_name from t_actor where id = ?",
+			(resultSet, rowNum) -> {
+				Actor newActor = new Actor();
+				newActor.setFirstName(resultSet.getString("first_name"));
+				newActor.setLastName(resultSet.getString("last_name"));
+				return newActor;
+			},
+			1212L);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val actor = jdbcTemplate.queryForObject(
+				"select first_name, last_name from t_actor where id = ?",
+				arrayOf(1212L)) { rs, _ ->
+			Actor(rs.getString("first_name"), rs.getString("last_name"))
+		}
+----
+======
+
+The following query finds and populates a list of domain objects:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	List<Actor> actors = this.jdbcTemplate.query(
+			"select first_name, last_name from t_actor",
+			(resultSet, rowNum) -> {
+				Actor actor = new Actor();
+				actor.setFirstName(resultSet.getString("first_name"));
+				actor.setLastName(resultSet.getString("last_name"));
+				return actor;
+			});
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val actors = jdbcTemplate.query("select first_name, last_name from t_actor") { rs, _ ->
+			Actor(rs.getString("first_name"), rs.getString("last_name"))
+----
+======
+
+If the last two snippets of code actually existed in the same application, it would make
+sense to remove the duplication present in the two `RowMapper` lambda expressions and
+extract them out into a single field that could then be referenced by DAO methods as needed.
+For example, it may be better to write the preceding code snippet as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	private final RowMapper<Actor> actorRowMapper = (resultSet, rowNum) -> {
+		Actor actor = new Actor();
+		actor.setFirstName(resultSet.getString("first_name"));
+		actor.setLastName(resultSet.getString("last_name"));
+		return actor;
+	};
+
+	public List<Actor> findAllActors() {
+		return this.jdbcTemplate.query("select first_name, last_name from t_actor", actorRowMapper);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val actorMapper = RowMapper<Actor> { rs: ResultSet, rowNum: Int ->
+		Actor(rs.getString("first_name"), rs.getString("last_name"))
+	}
+
+	fun findAllActors(): List<Actor> {
+		return jdbcTemplate.query("select first_name, last_name from t_actor", actorMapper)
+	}
+----
+======
+
+[[jdbc-JdbcTemplate-examples-update]]
+=== Updating (`INSERT`, `UPDATE`, and `DELETE`) with `JdbcTemplate`
+
+You can use the `update(..)` method to perform insert, update, and delete operations.
+Parameter values are usually provided as variable arguments or, alternatively, as an object array.
+
+The following example inserts a new entry:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	this.jdbcTemplate.update(
+			"insert into t_actor (first_name, last_name) values (?, ?)",
+			"Leonor", "Watling");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	jdbcTemplate.update(
+			"insert into t_actor (first_name, last_name) values (?, ?)",
+			"Leonor", "Watling")
+----
+======
+
+The following example updates an existing entry:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	this.jdbcTemplate.update(
+			"update t_actor set last_name = ? where id = ?",
+			"Banjo", 5276L);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	jdbcTemplate.update(
+			"update t_actor set last_name = ? where id = ?",
+			"Banjo", 5276L)
+----
+======
+
+The following example deletes an entry:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	this.jdbcTemplate.update(
+			"delete from t_actor where id = ?",
+			Long.valueOf(actorId));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	jdbcTemplate.update("delete from t_actor where id = ?", actorId.toLong())
+----
+======
+
+[[jdbc-JdbcTemplate-examples-other]]
+=== Other `JdbcTemplate` Operations
+
+You can use the `execute(..)` method to run any arbitrary SQL. Consequently, the
+method is often used for DDL statements. It is heavily overloaded with variants that take
+callback interfaces, binding variable arrays, and so on. The following example creates a
+table:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	jdbcTemplate.execute("create table mytable (id integer, name varchar(100))")
+----
+======
+
+The following example invokes a stored procedure:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	this.jdbcTemplate.update(
+			"call SUPPORT.REFRESH_ACTORS_SUMMARY(?)",
+			Long.valueOf(unionId));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	jdbcTemplate.update(
+			"call SUPPORT.REFRESH_ACTORS_SUMMARY(?)",
+			unionId.toLong())
+----
+======
+
+
+More sophisticated stored procedure support is xref:data-access/jdbc/object.adoc#jdbc-StoredProcedure[covered later].
+
+[[jdbc-JdbcTemplate-idioms]]
+=== `JdbcTemplate` Best Practices
+
+Instances of the `JdbcTemplate` class are thread-safe, once configured. This is
+important because it means that you can configure a single instance of a `JdbcTemplate`
+and then safely inject this shared reference into multiple DAOs (or repositories).
+The `JdbcTemplate` is stateful, in that it maintains a reference to a `DataSource`, but
+this state is not conversational state.
+
+A common practice when using the `JdbcTemplate` class (and the associated
+xref:data-access/jdbc/core.adoc#jdbc-NamedParameterJdbcTemplate[`NamedParameterJdbcTemplate`] class) is to
+configure a `DataSource` in your Spring configuration file and then dependency-inject
+that shared `DataSource` bean into your DAO classes. The `JdbcTemplate` is created in
+the setter for the `DataSource`. This leads to DAOs that resemble the following:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class JdbcCorporateEventDao implements CorporateEventDao {
+
+		private JdbcTemplate jdbcTemplate;
+
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
+	}
+----
+======
+--
+
+The following example shows the corresponding XML configuration:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+		<bean id="corporateEventDao" class="com.example.JdbcCorporateEventDao">
+			<property name="dataSource" ref="dataSource"/>
+		</bean>
+
+		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+			<property name="driverClassName" value="${jdbc.driverClassName}"/>
+			<property name="url" value="${jdbc.url}"/>
+			<property name="username" value="${jdbc.username}"/>
+			<property name="password" value="${jdbc.password}"/>
+		</bean>
+
+		<context:property-placeholder location="jdbc.properties"/>
+
+	</beans>
+----
+
+An alternative to explicit configuration is to use component-scanning and annotation
+support for dependency injection. In this case, you can annotate the class with `@Repository`
+(which makes it a candidate for component-scanning) and annotate the `DataSource` setter
+method with `@Autowired`. The following example shows how to do so:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Repository // <1>
+	public class JdbcCorporateEventDao implements CorporateEventDao {
+
+		private JdbcTemplate jdbcTemplate;
+
+		@Autowired // <2>
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource); // <3>
+		}
+
+		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
+	}
+----
+======
+<1> Annotate the class with `@Repository`.
+<2> Annotate the `DataSource` setter method with `@Autowired`.
+<3> Create a new `JdbcTemplate` with the `DataSource`.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Repository // <1>
+	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao { // <2>
+
+		private val jdbcTemplate = JdbcTemplate(dataSource) // <3>
+
+		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
+	}
+----
+<1> Annotate the class with `@Repository`.
+<2> Constructor injection of the `DataSource`.
+<3> Create a new `JdbcTemplate` with the `DataSource`.
+--
+
+
+The following example shows the corresponding XML configuration:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			https://www.springframework.org/schema/context/spring-context.xsd">
+
+		<!-- Scans within the base package of the application for @Component classes to configure as beans -->
+		<context:component-scan base-package="org.springframework.docs.test" />
+
+		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+			<property name="driverClassName" value="${jdbc.driverClassName}"/>
+			<property name="url" value="${jdbc.url}"/>
+			<property name="username" value="${jdbc.username}"/>
+			<property name="password" value="${jdbc.password}"/>
+		</bean>
+
+		<context:property-placeholder location="jdbc.properties"/>
+
+	</beans>
+----
+
+If you use Spring's `JdbcDaoSupport` class and your various JDBC-backed DAO classes
+extend from it, your sub-class inherits a `setDataSource(..)` method from the
+`JdbcDaoSupport` class. You can choose whether to inherit from this class. The
+`JdbcDaoSupport` class is provided as a convenience only.
+
+Regardless of which of the above template initialization styles you choose to use (or
+not), it is seldom necessary to create a new instance of a `JdbcTemplate` class each
+time you want to run SQL. Once configured, a `JdbcTemplate` instance is thread-safe.
+If your application accesses multiple
+databases, you may want multiple `JdbcTemplate` instances, which requires multiple `DataSources` and, subsequently, multiple differently
+configured `JdbcTemplate` instances.
+
+
+[[jdbc-NamedParameterJdbcTemplate]]
+== Using `NamedParameterJdbcTemplate`
+
+The `NamedParameterJdbcTemplate` class adds support for programming JDBC statements
+by using named parameters, as opposed to programming JDBC statements using only classic
+placeholder ( `'?'`) arguments. The `NamedParameterJdbcTemplate` class wraps a
+`JdbcTemplate` and delegates to the wrapped `JdbcTemplate` to do much of its work. This
+section describes only those areas of the `NamedParameterJdbcTemplate` class that differ
+from the `JdbcTemplate` itself -- namely, programming JDBC statements by using named
+parameters. The following example shows how to use `NamedParameterJdbcTemplate`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// some JDBC-backed DAO class...
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+	public void setDataSource(DataSource dataSource) {
+		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	}
+
+	public int countOfActorsByFirstName(String firstName) {
+
+		String sql = "select count(*) from T_ACTOR where first_name = :first_name";
+
+		SqlParameterSource namedParameters = new MapSqlParameterSource("first_name", firstName);
+
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+	fun countOfActorsByFirstName(firstName: String): Int {
+		val sql = "select count(*) from T_ACTOR where first_name = :first_name"
+		val namedParameters = MapSqlParameterSource("first_name", firstName)
+		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
+	}
+----
+======
+
+Notice the use of the named parameter notation in the value assigned to the `sql`
+variable and the corresponding value that is plugged into the `namedParameters`
+variable (of type `MapSqlParameterSource`).
+
+Alternatively, you can pass along named parameters and their corresponding values to a
+`NamedParameterJdbcTemplate` instance by using the `Map`-based style. The remaining
+methods exposed by the `NamedParameterJdbcOperations` and implemented by the
+`NamedParameterJdbcTemplate` class follow a similar pattern and are not covered here.
+
+The following example shows the use of the `Map`-based style:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// some JDBC-backed DAO class...
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+	public void setDataSource(DataSource dataSource) {
+		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	}
+
+	public int countOfActorsByFirstName(String firstName) {
+
+		String sql = "select count(*) from T_ACTOR where first_name = :first_name";
+
+		Map<String, String> namedParameters = Collections.singletonMap("first_name", firstName);
+
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters,  Integer.class);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// some JDBC-backed DAO class...
+	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+	fun countOfActorsByFirstName(firstName: String): Int {
+		val sql = "select count(*) from T_ACTOR where first_name = :first_name"
+		val namedParameters = mapOf("first_name" to firstName)
+		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
+	}
+----
+======
+
+One nice feature related to the `NamedParameterJdbcTemplate` (and existing in the same
+Java package) is the `SqlParameterSource` interface. You have already seen an example of
+an implementation of this interface in one of the previous code snippets (the
+`MapSqlParameterSource` class). An `SqlParameterSource` is a source of named parameter
+values to a `NamedParameterJdbcTemplate`. The `MapSqlParameterSource` class is a
+simple implementation that is an adapter around a `java.util.Map`, where the keys
+are the parameter names and the values are the parameter values.
+
+Another `SqlParameterSource` implementation is the `BeanPropertySqlParameterSource`
+class. This class wraps an arbitrary JavaBean (that is, an instance of a class that
+adheres to https://www.oracle.com/technetwork/java/javase/documentation/spec-136004.html[the
+JavaBean conventions]) and uses the properties of the wrapped JavaBean as the source
+of named parameter values.
+
+The following example shows a typical JavaBean:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class Actor {
+
+		private Long id;
+		private String firstName;
+		private String lastName;
+
+		public String getFirstName() {
+			return this.firstName;
+		}
+
+		public String getLastName() {
+			return this.lastName;
+		}
+
+		public Long getId() {
+			return this.id;
+		}
+
+		// setters omitted...
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	data class Actor(val id: Long, val firstName: String, val lastName: String)
+----
+======
+
+The following example uses a `NamedParameterJdbcTemplate` to return the count of the
+members of the class shown in the preceding example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// some JDBC-backed DAO class...
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+	public void setDataSource(DataSource dataSource) {
+		this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+	}
+
+	public int countOfActors(Actor exampleActor) {
+
+		// notice how the named parameters match the properties of the above 'Actor' class
+		String sql = "select count(*) from T_ACTOR where first_name = :firstName and last_name = :lastName";
+
+		SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
+
+		return this.namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Integer.class);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// some JDBC-backed DAO class...
+	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+	private val namedParameterJdbcTemplate = NamedParameterJdbcTemplate(dataSource)
+
+	fun countOfActors(exampleActor: Actor): Int {
+		// notice how the named parameters match the properties of the above 'Actor' class
+		val sql = "select count(*) from T_ACTOR where first_name = :firstName and last_name = :lastName"
+		val namedParameters = BeanPropertySqlParameterSource(exampleActor)
+		return namedParameterJdbcTemplate.queryForObject(sql, namedParameters, Int::class.java)!!
+	}
+----
+======
+
+Remember that the `NamedParameterJdbcTemplate` class wraps a classic `JdbcTemplate`
+template. If you need access to the wrapped `JdbcTemplate` instance to access
+functionality that is present only in the `JdbcTemplate` class, you can use the
+`getJdbcOperations()` method to access the wrapped `JdbcTemplate` through the
+`JdbcOperations` interface.
+
+See also xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate-idioms[`JdbcTemplate` Best Practices] for guidelines on using the
+`NamedParameterJdbcTemplate` class in the context of an application.
+
+
+[[jdbc-SQLExceptionTranslator]]
+== Using `SQLExceptionTranslator`
+
+`SQLExceptionTranslator` is an interface to be implemented by classes that can translate
+between ``SQLException``s and Spring's own `org.springframework.dao.DataAccessException`,
+which is agnostic in regard to data access strategy. Implementations can be generic (for
+example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error
+codes) for greater precision.
+
+`SQLErrorCodeSQLExceptionTranslator` is the implementation of `SQLExceptionTranslator`
+that is used by default. This implementation uses specific vendor codes. It is more
+precise than the `SQLState` implementation. The error code translations are based on
+codes held in a JavaBean type class called `SQLErrorCodes`. This class is created and
+populated by an `SQLErrorCodesFactory`, which (as the name suggests) is a factory for
+creating `SQLErrorCodes` based on the contents of a configuration file named
+`sql-error-codes.xml`. This file is populated with vendor codes and based on the
+`DatabaseProductName` taken from `DatabaseMetaData`. The codes for the actual
+database you are using are used.
+
+The `SQLErrorCodeSQLExceptionTranslator` applies matching rules in the following sequence:
+
+. Any custom translation implemented by a subclass. Normally, the provided concrete
+  `SQLErrorCodeSQLExceptionTranslator` is used, so this rule does not apply. It
+  applies only if you have actually provided a subclass implementation.
+. Any custom implementation of the `SQLExceptionTranslator` interface that is provided
+  as the `customSqlExceptionTranslator` property of the `SQLErrorCodes` class.
+. The list of instances of the `CustomSQLErrorCodesTranslation` class (provided for the
+  `customTranslations` property of the `SQLErrorCodes` class) are searched for a match.
+. Error code matching is applied.
+. Use the fallback translator. `SQLExceptionSubclassTranslator` is the default fallback
+  translator. If this translation is not available, the next fallback translator is
+  the `SQLStateSQLExceptionTranslator`.
+
+NOTE: The `SQLErrorCodesFactory` is used by default to define `Error` codes and custom exception
+translations. They are looked up in a file named `sql-error-codes.xml` from the
+classpath, and the matching `SQLErrorCodes` instance is located based on the database
+name from the database metadata of the database in use.
+
+You can extend `SQLErrorCodeSQLExceptionTranslator`, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class CustomSQLErrorCodesTranslator extends SQLErrorCodeSQLExceptionTranslator {
+
+		protected DataAccessException customTranslate(String task, String sql, SQLException sqlEx) {
+			if (sqlEx.getErrorCode() == -12345) {
+				return new DeadlockLoserDataAccessException(task, sqlEx);
+			}
+			return null;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class CustomSQLErrorCodesTranslator : SQLErrorCodeSQLExceptionTranslator() {
+
+		override fun customTranslate(task: String, sql: String?, sqlEx: SQLException): DataAccessException? {
+			if (sqlEx.errorCode == -12345) {
+				return DeadlockLoserDataAccessException(task, sqlEx)
+			}
+			return null
+		}
+	}
+----
+======
+
+In the preceding example, the specific error code (`-12345`) is translated, while other errors are
+left to be translated by the default translator implementation. To use this custom
+translator, you must pass it to the `JdbcTemplate` through the method
+`setExceptionTranslator`, and you must use this `JdbcTemplate` for all of the data access
+processing where this translator is needed. The following example shows how you can use this custom
+translator:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	private JdbcTemplate jdbcTemplate;
+
+	public void setDataSource(DataSource dataSource) {
+
+		// create a JdbcTemplate and set data source
+		this.jdbcTemplate = new JdbcTemplate();
+		this.jdbcTemplate.setDataSource(dataSource);
+
+		// create a custom translator and set the DataSource for the default translation lookup
+		CustomSQLErrorCodesTranslator tr = new CustomSQLErrorCodesTranslator();
+		tr.setDataSource(dataSource);
+		this.jdbcTemplate.setExceptionTranslator(tr);
+
+	}
+
+	public void updateShippingCharge(long orderId, long pct) {
+		// use the prepared JdbcTemplate for this update
+		this.jdbcTemplate.update("update orders" +
+			" set shipping_charge = shipping_charge * ? / 100" +
+			" where id = ?", pct, orderId);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// create a JdbcTemplate and set data source
+	private val jdbcTemplate = JdbcTemplate(dataSource).apply {
+		// create a custom translator and set the DataSource for the default translation lookup
+		exceptionTranslator = CustomSQLErrorCodesTranslator().apply {
+			this.dataSource = dataSource
+		}
+	}
+
+	fun updateShippingCharge(orderId: Long, pct: Long) {
+		// use the prepared JdbcTemplate for this update
+		this.jdbcTemplate!!.update("update orders" +
+				" set shipping_charge = shipping_charge * ? / 100" +
+				" where id = ?", pct, orderId)
+	}
+----
+======
+
+The custom translator is passed a data source in order to look up the error codes in
+`sql-error-codes.xml`.
+
+
+[[jdbc-statements-executing]]
+== Running Statements
+
+Running an SQL statement requires very little code. You need a `DataSource` and a
+`JdbcTemplate`, including the convenience methods that are provided with the
+`JdbcTemplate`. The following example shows what you need to include for a minimal but
+fully functional class that creates a new table:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import javax.sql.DataSource;
+	import org.springframework.jdbc.core.JdbcTemplate;
+
+	public class ExecuteAStatement {
+
+		private JdbcTemplate jdbcTemplate;
+
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		public void doExecute() {
+			this.jdbcTemplate.execute("create table mytable (id integer, name varchar(100))");
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import javax.sql.DataSource
+	import org.springframework.jdbc.core.JdbcTemplate
+
+	class ExecuteAStatement(dataSource: DataSource) {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun doExecute() {
+			jdbcTemplate.execute("create table mytable (id integer, name varchar(100))")
+		}
+	}
+----
+======
+
+
+[[jdbc-statements-querying]]
+== Running Queries
+
+Some query methods return a single value. To retrieve a count or a specific value from
+one row, use `queryForObject(..)`. The latter converts the returned JDBC `Type` to the
+Java class that is passed in as an argument. If the type conversion is invalid, an
+`InvalidDataAccessApiUsageException` is thrown. The following example contains two
+query methods, one for an `int` and one that queries for a `String`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import javax.sql.DataSource;
+	import org.springframework.jdbc.core.JdbcTemplate;
+
+	public class RunAQuery {
+
+		private JdbcTemplate jdbcTemplate;
+
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		public int getCount() {
+			return this.jdbcTemplate.queryForObject("select count(*) from mytable", Integer.class);
+		}
+
+		public String getName() {
+			return this.jdbcTemplate.queryForObject("select name from mytable", String.class);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+import javax.sql.DataSource
+import org.springframework.jdbc.core.JdbcTemplate
+
+class RunAQuery(dataSource: DataSource) {
+
+	private val jdbcTemplate = JdbcTemplate(dataSource)
+
+	val count: Int
+		get() = jdbcTemplate.queryForObject("select count(*) from mytable")!!
+
+	val name: String?
+		get() = jdbcTemplate.queryForObject("select name from mytable")
+}
+----
+======
+
+In addition to the single result query methods, several methods return a list with an
+entry for each row that the query returned. The most generic method is `queryForList(..)`,
+which returns a `List` where each element is a `Map` containing one entry for each column,
+using the column name as the key. If you add a method to the preceding example to retrieve a
+list of all the rows, it might be as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	private JdbcTemplate jdbcTemplate;
+
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
+
+	public List<Map<String, Object>> getList() {
+		return this.jdbcTemplate.queryForList("select * from mytable");
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	private val jdbcTemplate = JdbcTemplate(dataSource)
+
+	fun getList(): List<Map<String, Any>> {
+		return jdbcTemplate.queryForList("select * from mytable")
+	}
+----
+======
+
+The returned list would resemble the following:
+
+[literal,subs="verbatim,quotes"]
+----
+[{name=Bob, id=1}, {name=Mary, id=2}]
+----
+
+
+[[jdbc-updates]]
+== Updating the Database
+
+The following example updates a column for a certain primary key:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import javax.sql.DataSource;
+	import org.springframework.jdbc.core.JdbcTemplate;
+
+	public class ExecuteAnUpdate {
+
+		private JdbcTemplate jdbcTemplate;
+
+		public void setDataSource(DataSource dataSource) {
+			this.jdbcTemplate = new JdbcTemplate(dataSource);
+		}
+
+		public void setName(int id, String name) {
+			this.jdbcTemplate.update("update mytable set name = ? where id = ?", name, id);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import javax.sql.DataSource
+	import org.springframework.jdbc.core.JdbcTemplate
+
+	class ExecuteAnUpdate(dataSource: DataSource) {
+
+		private val jdbcTemplate = JdbcTemplate(dataSource)
+
+		fun setName(id: Int, name: String) {
+			jdbcTemplate.update("update mytable set name = ? where id = ?", name, id)
+		}
+	}
+----
+======
+
+In the preceding example,
+an SQL statement has placeholders for row parameters. You can pass the parameter values
+in as varargs or, alternatively, as an array of objects. Thus, you should explicitly wrap primitives
+in the primitive wrapper classes, or you should use auto-boxing.
+
+
+[[jdbc-auto-generated-keys]]
+== Retrieving Auto-generated Keys
+
+An `update()` convenience method supports the retrieval of primary keys generated by the
+database. This support is part of the JDBC 3.0 standard. See Chapter 13.6 of the
+specification for details. The method takes a `PreparedStatementCreator` as its first
+argument, and this is the way the required insert statement is specified. The other
+argument is a `KeyHolder`, which contains the generated key on successful return from the
+update. There is no standard single way to create an appropriate `PreparedStatement`
+(which explains why the method signature is the way it is). The following example works
+on Oracle but may not work on other platforms:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	final String INSERT_SQL = "insert into my_test (name) values(?)";
+	final String name = "Rob";
+
+	KeyHolder keyHolder = new GeneratedKeyHolder();
+	jdbcTemplate.update(connection -> {
+		PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[] { "id" });
+		ps.setString(1, name);
+		return ps;
+	}, keyHolder);
+
+	// keyHolder.getKey() now contains the generated key
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val INSERT_SQL = "insert into my_test (name) values(?)"
+	val name = "Rob"
+
+	val keyHolder = GeneratedKeyHolder()
+	jdbcTemplate.update({
+		it.prepareStatement (INSERT_SQL, arrayOf("id")).apply { setString(1, name) }
+	}, keyHolder)
+
+	// keyHolder.getKey() now contains the generated key
+----
+======
+
+
+

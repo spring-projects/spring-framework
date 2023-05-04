@@ -1,0 +1,80 @@
+[[websocket-stomp-destination-separator]]
+= Dots as Separators
+
+When messages are routed to `@MessageMapping` methods, they are matched with
+`AntPathMatcher`. By default, patterns are expected to use slash (`/`) as the separator.
+This is a good convention in web applications and similar to HTTP URLs. However, if
+you are more used to messaging conventions, you can switch to using dot (`.`) as the separator.
+
+The following example shows how to do so in Java configuration:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		// ...
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry registry) {
+			registry.setPathMatcher(new AntPathMatcher("."));
+			registry.enableStompBrokerRelay("/queue", "/topic");
+			registry.setApplicationDestinationPrefixes("/app");
+		}
+	}
+----
+
+The following example shows the XML configuration equivalent of the preceding example:
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:websocket="http://www.springframework.org/schema/websocket"
+			xsi:schemaLocation="
+					http://www.springframework.org/schema/beans
+					https://www.springframework.org/schema/beans/spring-beans.xsd
+					http://www.springframework.org/schema/websocket
+					https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:message-broker application-destination-prefix="/app" path-matcher="pathMatcher">
+			<websocket:stomp-endpoint path="/stomp"/>
+			<websocket:stomp-broker-relay prefix="/topic,/queue" />
+		</websocket:message-broker>
+
+		<bean id="pathMatcher" class="org.springframework.util.AntPathMatcher">
+			<constructor-arg index="0" value="."/>
+		</bean>
+
+	</beans>
+----
+
+After that, a controller can use a dot (`.`) as the separator in `@MessageMapping` methods,
+as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Controller
+	@MessageMapping("red")
+	public class RedController {
+
+		@MessageMapping("blue.{green}")
+		public void handleGreen(@DestinationVariable String green) {
+			// ...
+		}
+	}
+----
+
+The client can now send a message to `/app/red.blue.green123`.
+
+In the preceding example, we did not change the prefixes on the "`broker relay`", because those
+depend entirely on the external message broker. See the STOMP documentation pages for
+the broker you use to see what conventions it supports for the destination header.
+
+The "`simple broker`", on the other hand, does rely on the configured `PathMatcher`, so, if
+you switch the separator, that change also applies to the broker and the way the broker matches
+destinations from a message to patterns in subscriptions.
+
+
+

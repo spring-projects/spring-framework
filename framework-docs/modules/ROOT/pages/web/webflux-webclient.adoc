@@ -1,0 +1,23 @@
+[[webflux-client]]
+= WebClient
+:page-section-summary-toc: 1
+
+Spring WebFlux includes a client to perform HTTP requests with. `WebClient` has a
+functional, fluent API based on Reactor, see xref:web-reactive.adoc#webflux-reactive-libraries[Reactive Libraries],
+which enables declarative composition of asynchronous logic without the need to deal with
+threads or concurrency. It is fully non-blocking, it supports streaming, and relies on
+the same xref:web/webflux/reactive-spring.adoc#webflux-codecs[codecs] that are also used to encode and
+decode request and response content on the server side.
+
+`WebClient` needs an HTTP client library to perform requests with. There is built-in
+support for the following:
+
+* https://github.com/reactor/reactor-netty[Reactor Netty]
+* https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html[JDK HttpClient]
+* https://github.com/jetty-project/jetty-reactive-httpclient[Jetty Reactive HttpClient]
+* https://hc.apache.org/index.html[Apache HttpComponents]
+* Others can be plugged via `ClientHttpConnector`.
+
+
+
+

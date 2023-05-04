@@ -1,0 +1,457 @@
+[[mvc-view-freemarker]]
+= FreeMarker
+
+[.small]#xref:web/webflux-view.adoc#webflux-view-freemarker[See equivalent in the Reactive stack]#
+
+https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
+kind of text output from HTML to email and others. The Spring Framework has built-in
+integration for using Spring MVC with FreeMarker templates.
+
+
+
+[[mvc-view-freemarker-contextconfig]]
+== View Configuration
+[.small]#xref:web/webflux-view.adoc#webflux-view-freemarker-contextconfig[See equivalent in the Reactive stack]#
+
+The following example shows how to configure FreeMarker as a view technology:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+		@Configuration
+		@EnableWebMvc
+		public class WebConfig implements WebMvcConfigurer {
+
+			@Override
+			public void configureViewResolvers(ViewResolverRegistry registry) {
+				registry.freeMarker();
+			}
+
+			// Configure FreeMarker...
+
+			@Bean
+			public FreeMarkerConfigurer freeMarkerConfigurer() {
+				FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+				configurer.setTemplateLoaderPath("/WEB-INF/freemarker");
+				return configurer;
+			}
+		}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebMvc
+	class WebConfig : WebMvcConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.freeMarker()
+		}
+
+		// Configure FreeMarker...
+
+		@Bean
+		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
+			setTemplateLoaderPath("/WEB-INF/freemarker")
+		}
+	}
+----
+======
+
+The following example shows how to configure the same in XML:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<mvc:annotation-driven/>
+
+	<mvc:view-resolvers>
+		<mvc:freemarker/>
+	</mvc:view-resolvers>
+
+	<!-- Configure FreeMarker... -->
+	<mvc:freemarker-configurer>
+		<mvc:template-loader-path location="/WEB-INF/freemarker"/>
+	</mvc:freemarker-configurer>
+----
+
+Alternatively, you can also declare the `FreeMarkerConfigurer` bean for full control over all
+properties, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
+	</bean>
+----
+
+Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
+shown in the preceding example. Given the preceding configuration, if your controller
+returns a view name of `welcome`, the resolver looks for the
+`/WEB-INF/freemarker/welcome.ftl` template.
+
+
+
+[[mvc-views-freemarker]]
+== FreeMarker Configuration
+[.small]#xref:web/webflux-view.adoc#webflux-views-freemarker[See equivalent in the Reactive stack]#
+
+You can pass FreeMarker 'Settings' and 'SharedVariables' directly to the FreeMarker
+`Configuration` object (which is managed by Spring) by setting the appropriate bean
+properties on the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires
+a `java.util.Properties` object, and the `freemarkerVariables` property requires a
+`java.util.Map`. The following example shows how to use a `FreeMarkerConfigurer`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="/WEB-INF/freemarker/"/>
+		<property name="freemarkerVariables">
+			<map>
+				<entry key="xml_escape" value-ref="fmXmlEscape"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="fmXmlEscape" class="freemarker.template.utility.XmlEscape"/>
+----
+
+See the FreeMarker documentation for details of settings and variables as they apply to
+the `Configuration` object.
+
+
+
+[[mvc-view-freemarker-forms]]
+== Form Handling
+
+Spring provides a tag library for use in JSPs that contains, among others, a
+`<spring:bind/>` element. This element primarily lets forms display values from
+form-backing objects and show the results of failed validations from a `Validator` in the
+web or business tier. Spring also has support for the same functionality in FreeMarker,
+with additional convenience macros for generating form input elements themselves.
+
+
+[[mvc-view-bind-macros]]
+=== The Bind Macros
+[.small]#xref:web/webflux-view.adoc#webflux-view-bind-macros[See equivalent in the Reactive stack]#
+
+A standard set of macros are maintained within the `spring-webmvc.jar` file for
+FreeMarker, so they are always available to a suitably configured application.
+
+Some of the macros defined in the Spring templating libraries are considered internal
+(private), but no such scoping exists in the macro definitions, making all macros visible
+to calling code and user templates. The following sections concentrate only on the macros
+you need to directly call from within your templates. If you wish to view the macro code
+directly, the file is called `spring.ftl` and is in the
+`org.springframework.web.servlet.view.freemarker` package.
+
+
+[[mvc-view-simple-binding]]
+=== Simple Binding
+
+In your HTML forms based on FreeMarker templates that act as a form view for a Spring MVC
+controller, you can use code similar to the next example to bind to field values and
+display error messages for each input field in similar fashion to the JSP equivalent. The
+following example shows a `personForm` view:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<!-- FreeMarker macros have to be imported into a namespace.
+		We strongly recommend sticking to 'spring'. -->
+	<#import "/spring.ftl" as spring/>
+	<html>
+		...
+		<form action="" method="POST">
+			Name:
+			<@spring.bind "personForm.name"/>
+			<input type="text"
+				name="${spring.status.expression}"
+				value="${spring.status.value?html}"/><br />
+			<#list spring.status.errorMessages as error> <b>${error}</b> <br /> </#list>
+			<br />
+			...
+			<input type="submit" value="submit"/>
+		</form>
+		...
+	</html>
+----
+
+`<@spring.bind>` requires a 'path' argument, which consists of the name of your command
+object (it is 'command', unless you changed it in your controller configuration) followed
+by a period and the name of the field on the command object to which you wish to bind. You
+can also use nested fields, such as `command.address.street`. The `bind` macro assumes the
+default HTML escaping behavior specified by the `ServletContext` parameter
+`defaultHtmlEscape` in `web.xml`.
+
+An alternative form of the macro called `<@spring.bindEscaped>` takes a second argument
+that explicitly specifies whether HTML escaping should be used in the status error
+messages or values. You can set it to `true` or `false` as required. Additional form
+handling macros simplify the use of HTML escaping, and you should use these macros
+wherever possible. They are explained in the next section.
+
+
+[[mvc-views-form-macros]]
+=== Input Macros
+
+Additional convenience macros for FreeMarker simplify both binding and form generation
+(including validation error display). It is never necessary to use these macros to
+generate form input fields, and you can mix and match them with simple HTML or direct
+calls to the Spring bind macros that we highlighted previously.
+
+The following table of available macros shows the FreeMarker Template (FTL) definitions
+and the parameter list that each takes:
+
+[[views-macros-defs-tbl]]
+.Table of macro definitions
+[cols="3,1"]
+|===
+| macro | FTL definition
+
+| `message` (output a string from a resource bundle based on the code parameter)
+| <@spring.message code/>
+
+| `messageText` (output a string from a resource bundle based on the code parameter,
+  falling back to the value of the default parameter)
+| <@spring.messageText code, text/>
+
+| `url` (prefix a relative URL with the application's context root)
+| <@spring.url relativeUrl/>
+
+| `formInput` (standard input field for gathering user input)
+| <@spring.formInput path, attributes, fieldType/>
+
+| `formHiddenInput` (hidden input field for submitting non-user input)
+| <@spring.formHiddenInput path, attributes/>
+
+| `formPasswordInput` (standard input field for gathering passwords. Note that no
+  value is ever populated in fields of this type.)
+| <@spring.formPasswordInput path, attributes/>
+
+| `formTextarea` (large text field for gathering long, freeform text input)
+| <@spring.formTextarea path, attributes/>
+
+| `formSingleSelect` (drop down box of options that let a single required value be
+  selected)
+| <@spring.formSingleSelect path, options, attributes/>
+
+| `formMultiSelect` (a list box of options that let the user select 0 or more values)
+| <@spring.formMultiSelect path, options, attributes/>
+
+| `formRadioButtons` (a set of radio buttons that let a single selection be made
+  from the available choices)
+| <@spring.formRadioButtons path, options separator, attributes/>
+
+| `formCheckboxes` (a set of checkboxes that let 0 or more values be selected)
+| <@spring.formCheckboxes path, options, separator, attributes/>
+
+| `formCheckbox` (a single checkbox)
+| <@spring.formCheckbox path, attributes/>
+
+| `showErrors` (simplify display of validation errors for the bound field)
+| <@spring.showErrors separator, classOrStyle/>
+|===
+
+NOTE: In FreeMarker templates, `formHiddenInput` and `formPasswordInput` are not actually
+required, as you can use the normal `formInput` macro, specifying `hidden` or `password`
+as the value for the `fieldType` parameter.
+
+The parameters to any of the above macros have consistent meanings:
+
+* `path`: The name of the field to bind to (for example, "command.name")
+* `options`: A `Map` of all the available values that can be selected from in the input
+  field. The keys to the map represent the values that are POSTed back from the form
+  and bound to the command object. Map objects stored against the keys are the labels
+  displayed on the form to the user and may be different from the corresponding values
+  posted back by the form. Usually, such a map is supplied as reference data by the
+  controller. You can use any `Map` implementation, depending on required behavior.
+  For strictly sorted maps, you can use a `SortedMap` (such as a `TreeMap`) with a
+  suitable `Comparator` and, for arbitrary Maps that should return values in insertion
+  order, use a `LinkedHashMap` or a `LinkedMap` from `commons-collections`.
+* `separator`: Where multiple options are available as discreet elements (radio buttons
+  or checkboxes), the sequence of characters used to separate each one in the list
+  (such as `<br>`).
+* `attributes`: An additional string of arbitrary tags or text to be included within
+  the HTML tag itself. This string is echoed literally by the macro. For example, in a
+  `textarea` field, you may supply attributes (such as 'rows="5" cols="60"'), or you
+  could pass style information such as 'style="border:1px solid silver"'.
+* `classOrStyle`: For the `showErrors` macro, the name of the CSS class that the `span`
+  element that wraps each error uses. If no information is supplied (or the value is
+  empty), the errors are wrapped in `<b></b>` tags.
+
+The following sections outline examples of the macros.
+
+[[mvc-views-form-macros-input]]
+==== Input Fields
+
+The `formInput` macro takes the `path` parameter (`command.name`) and an additional `attributes`
+parameter (which is empty in the upcoming example). The macro, along with all other form
+generation macros, performs an implicit Spring bind on the path parameter. The binding
+remains valid until a new bind occurs, so the `showErrors` macro does not need to pass the
+path parameter again -- it operates on the field for which a binding was last created.
+
+The `showErrors` macro takes a separator parameter (the characters that are used to
+separate multiple errors on a given field) and also accepts a second parameter -- this
+time, a class name or style attribute. Note that FreeMarker can specify default
+values for the attributes parameter. The following example shows how to use the `formInput`
+and `showErrors` macros:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<@spring.formInput "command.name"/>
+	<@spring.showErrors "<br>"/>
+----
+
+The next example shows the output of the form fragment, generating the name field and displaying a
+validation error after the form was submitted with no value in the field. Validation
+occurs through Spring's Validation framework.
+
+The generated HTML resembles the following example:
+
+[source,jsp,indent=0,subs="verbatim,quotes"]
+----
+	Name:
+	<input type="text" name="name" value="">
+	<br>
+		<b>required</b>
+	<br>
+	<br>
+----
+
+The `formTextarea` macro works the same way as the `formInput` macro and accepts the same
+parameter list. Commonly, the second parameter (`attributes`) is used to pass style
+information or `rows` and `cols` attributes for the `textarea`.
+
+[[mvc-views-form-macros-select]]
+==== Selection Fields
+
+You can use four selection field macros to generate common UI value selection inputs in
+your HTML forms:
+
+* `formSingleSelect`
+* `formMultiSelect`
+* `formRadioButtons`
+* `formCheckboxes`
+
+Each of the four macros accepts a `Map` of options that contains the value for the form
+field and the label that corresponds to that value. The value and the label can be the
+same.
+
+The next example is for radio buttons in FTL. The form-backing object specifies a default
+value of 'London' for this field, so no validation is necessary. When the form is
+rendered, the entire list of cities to choose from is supplied as reference data in the
+model under the name 'cityMap'. The following listing shows the example:
+
+[source,jsp,indent=0,subs="verbatim,quotes"]
+----
+	...
+	Town:
+	<@spring.formRadioButtons "command.address.town", cityMap, ""/><br><br>
+----
+
+The preceding listing renders a line of radio buttons, one for each value in `cityMap`, and uses a
+separator of `""`. No additional attributes are supplied (the last parameter to the macro is
+missing). The `cityMap` uses the same `String` for each key-value pair in the map. The map's
+keys are what the form actually submits as `POST` request parameters. The map values are the
+labels that the user sees. In the preceding example, given a list of three well known cities
+and a default value in the form backing object, the HTML resembles the following:
+
+[source,jsp,indent=0,subs="verbatim,quotes"]
+----
+	Town:
+	<input type="radio" name="address.town" value="London">London</input>
+	<input type="radio" name="address.town" value="Paris" checked="checked">Paris</input>
+	<input type="radio" name="address.town" value="New York">New York</input>
+----
+
+If your application expects to handle cities by internal codes (for example), you can create the map of
+codes with suitable keys, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	protected Map<String, ?> referenceData(HttpServletRequest request) throws Exception {
+		Map<String, String> cityMap = new LinkedHashMap<>();
+		cityMap.put("LDN", "London");
+		cityMap.put("PRS", "Paris");
+		cityMap.put("NYC", "New York");
+
+		Map<String, Object> model = new HashMap<>();
+		model.put("cityMap", cityMap);
+		return model;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	protected fun referenceData(request: HttpServletRequest): Map<String, *> {
+		val cityMap = linkedMapOf(
+				"LDN" to "London",
+				"PRS" to "Paris",
+				"NYC" to "New York"
+		)
+		return hashMapOf("cityMap" to cityMap)
+	}
+----
+======
+
+The code now produces output where the radio values are the relevant codes, but the
+user still sees the more user-friendly city names, as follows:
+
+[source,jsp,indent=0,subs="verbatim,quotes"]
+----
+	Town:
+	<input type="radio" name="address.town" value="LDN">London</input>
+	<input type="radio" name="address.town" value="PRS" checked="checked">Paris</input>
+	<input type="radio" name="address.town" value="NYC">New York</input>
+----
+
+
+[[mvc-views-form-macros-html-escaping]]
+=== HTML Escaping
+
+Default usage of the form macros described earlier results in HTML elements that are HTML 4.01
+compliant and that use the default value for HTML escaping defined in your `web.xml` file, as
+used by Spring's bind support. To make the elements be XHTML compliant or to override
+the default HTML escaping value, you can specify two variables in your template (or in
+your model, where they are visible to your templates). The advantage of specifying
+them in the templates is that they can be changed to different values later in the
+template processing to provide different behavior for different fields in your form.
+
+To switch to XHTML compliance for your tags, specify a value of `true` for a
+model or context variable named `xhtmlCompliant`, as the following example shows:
+
+[source,jsp,indent=0,subs="verbatim,quotes"]
+----
+	<#-- for FreeMarker -->
+	<#assign xhtmlCompliant = true>
+----
+
+After processing this directive, any elements generated by the Spring macros are now XHTML
+compliant.
+
+In similar fashion, you can specify HTML escaping per field, as the following example shows:
+
+[source,jsp,indent=0,subs="verbatim,quotes"]
+----
+	<#-- until this point, default HTML escaping is used -->
+
+	<#assign htmlEscape = true>
+	<#-- next field will use HTML escaping -->
+	<@spring.formInput "command.name"/>
+
+	<#assign htmlEscape = false in spring>
+	<#-- all future fields will be bound with HTML escaping off -->
+----
+
+
+
+

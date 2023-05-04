@@ -1,0 +1,66 @@
+[[mvc-config-interceptors]]
+= Interceptors
+
+In Java configuration, you can register interceptors to apply to incoming requests, as
+the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig implements WebMvcConfigurer {
+
+		@Override
+		public void addInterceptors(InterceptorRegistry registry) {
+			registry.addInterceptor(new LocaleChangeInterceptor());
+			registry.addInterceptor(new ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Configuration
+	@EnableWebMvc
+	class WebConfig : WebMvcConfigurer {
+
+		override fun addInterceptors(registry: InterceptorRegistry) {
+			registry.addInterceptor(LocaleChangeInterceptor())
+			registry.addInterceptor(ThemeChangeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**")
+		}
+	}
+----
+======
+
+The following example shows how to achieve the same configuration in XML:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<mvc:interceptors>
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<mvc:exclude-mapping path="/admin/**"/>
+			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+----
+
+NOTE: Mapped interceptors are not ideally suited as a security layer due to the potential
+for a mismatch with annotated controller path matching, which can also match trailing
+slashes and path extensions transparently, along with other path matching options. Many
+of these options have been deprecated but the potential for a mismatch remains.
+Generally, we recommend using Spring Security which includes a dedicated
+https://docs.spring.io/spring-security/reference/servlet/integrations/mvc.html#mvc-requestmatcher[MvcRequestMatcher]
+to align with Spring MVC path matching and also has a security firewall that blocks many
+unwanted characters in URL paths.
+
+
+
+

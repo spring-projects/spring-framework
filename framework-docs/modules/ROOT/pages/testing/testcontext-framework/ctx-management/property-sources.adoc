@@ -1,0 +1,293 @@
+[[testcontext-ctx-management-property-sources]]
+= Context Configuration with Test Property Sources
+
+The Spring Framework has first-class support for the notion of an environment with a
+hierarchy of property sources, and you can configure integration tests with test-specific
+property sources. In contrast to the `@PropertySource` annotation used on
+`@Configuration` classes, you can declare the `@TestPropertySource` annotation on a test
+class to declare resource locations for test properties files or inlined properties.
+These test property sources are added to the set of `PropertySources` in the
+`Environment` for the `ApplicationContext` loaded for the annotated integration test.
+
+[NOTE]
+====
+You can use `@TestPropertySource` with any implementation of the `SmartContextLoader`
+SPI, but `@TestPropertySource` is not supported with implementations of the older
+`ContextLoader` SPI.
+
+Implementations of `SmartContextLoader` gain access to merged test property source values
+through the `getPropertySourceLocations()` and `getPropertySourceProperties()` methods in
+`MergedContextConfiguration`.
+====
+
+[[declaring-test-property-sources]]
+== Declaring Test Property Sources
+
+You can configure test properties files by using the `locations` or `value` attribute of
+`@TestPropertySource`.
+
+Both traditional and XML-based properties file formats are supported -- for example,
+`"classpath:/com/example/test.properties"` or `"file:///path/to/file.xml"`.
+
+Each path is interpreted as a Spring `Resource`. A plain path (for example,
+`"test.properties"`) is treated as a classpath resource that is relative to the package
+in which the test class is defined. A path starting with a slash is treated as an
+absolute classpath resource (for example: `"/org/example/test.xml"`). A path that
+references a URL (for example, a path prefixed with `classpath:`, `file:`, or `http:`) is
+loaded by using the specified resource protocol. Resource location wildcards (such as
+`**/*.properties`) are not permitted: Each location must evaluate to exactly one
+`.properties` or `.xml` resource.
+
+The following example uses a test properties file:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@TestPropertySource("/test.properties") // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+======
+<1> Specifying a properties file with an absolute path.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@ContextConfiguration
+	@TestPropertySource("/test.properties") // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+<1> Specifying a properties file with an absolute path.
+
+
+You can configure inlined properties in the form of key-value pairs by using the
+`properties` attribute of `@TestPropertySource`, as shown in the next example. All
+key-value pairs are added to the enclosing `Environment` as a single test
+`PropertySource` with the highest precedence.
+
+The supported syntax for key-value pairs is the same as the syntax defined for entries in
+a Java properties file:
+
+* `key=value`
+* `key:value`
+* `key value`
+
+The following example sets two inlined properties:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@TestPropertySource(properties = {"timezone = GMT", "port: 4242"}) // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+======
+<1> Setting two properties by using two variations of the key-value syntax.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@ContextConfiguration
+	@TestPropertySource(properties = ["timezone = GMT", "port: 4242"]) // <1>
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+<1> Setting two properties by using two variations of the key-value syntax.
+
+[NOTE]
+====
+As of Spring Framework 5.2, `@TestPropertySource` can be used as _repeatable annotation_.
+That means that you can have multiple declarations of `@TestPropertySource` on a single
+test class, with the `locations` and `properties` from later `@TestPropertySource`
+annotations overriding those from previous `@TestPropertySource` annotations.
+
+In addition, you may declare multiple composed annotations on a test class that are each
+meta-annotated with `@TestPropertySource`, and all of those `@TestPropertySource`
+declarations will contribute to your test property sources.
+
+Directly present `@TestPropertySource` annotations always take precedence over
+meta-present `@TestPropertySource` annotations. In other words, `locations` and
+`properties` from a directly present `@TestPropertySource` annotation will override the
+`locations` and `properties` from a `@TestPropertySource` annotation used as a
+meta-annotation.
+====
+
+
+[[default-properties-file-detection]]
+== Default Properties File Detection
+
+If `@TestPropertySource` is declared as an empty annotation (that is, without explicit
+values for the `locations` or `properties` attributes), an attempt is made to detect a
+default properties file relative to the class that declared the annotation. For example,
+if the annotated test class is `com.example.MyTest`, the corresponding default properties
+file is `classpath:com/example/MyTest.properties`. If the default cannot be detected, an
+`IllegalStateException` is thrown.
+
+[[precedence]]
+== Precedence
+
+Test properties have higher precedence than those defined in the operating system's
+environment, Java system properties, or property sources added by the application
+declaratively by using `@PropertySource` or programmatically. Thus, test properties can
+be used to selectively override properties loaded from system and application property
+sources. Furthermore, inlined properties have higher precedence than properties loaded
+from resource locations. Note, however, that properties registered via
+xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[`@DynamicPropertySource`] have
+higher precedence than those loaded via `@TestPropertySource`.
+
+In the next example, the `timezone` and `port` properties and any properties defined in
+`"/test.properties"` override any properties of the same name that are defined in system
+and application property sources. Furthermore, if the `"/test.properties"` file defines
+entries for the `timezone` and `port` properties those are overridden by the inlined
+properties declared by using the `properties` attribute. The following example shows how
+to specify properties both in a file and inline:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ContextConfiguration
+	@TestPropertySource(
+		locations = "/test.properties",
+		properties = {"timezone = GMT", "port: 4242"}
+	)
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ContextConfiguration
+	@TestPropertySource("/test.properties",
+			properties = ["timezone = GMT", "port: 4242"]
+	)
+	class MyIntegrationTests {
+		// class body...
+	}
+----
+======
+
+[[inheriting-and-overriding-test-property-sources]]
+== Inheriting and Overriding Test Property Sources
+
+`@TestPropertySource` supports boolean `inheritLocations` and `inheritProperties`
+attributes that denote whether resource locations for properties files and inlined
+properties declared by superclasses should be inherited. The default value for both flags
+is `true`. This means that a test class inherits the locations and inlined properties
+declared by any superclasses. Specifically, the locations and inlined properties for a
+test class are appended to the locations and inlined properties declared by superclasses.
+Thus, subclasses have the option of extending the locations and inlined properties. Note
+that properties that appear later shadow (that is, override) properties of the same name
+that appear earlier. In addition, the aforementioned precedence rules apply for inherited
+test property sources as well.
+
+If the `inheritLocations` or `inheritProperties` attribute in `@TestPropertySource` is
+set to `false`, the locations or inlined properties, respectively, for the test class
+shadow and effectively replace the configuration defined by superclasses.
+
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
+
+In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
+`base.properties` file as a test property source. In contrast, the `ApplicationContext`
+for `ExtendedTest` is loaded by using the `base.properties` and `extended.properties`
+files as test property source locations. The following example shows how to define
+properties in both a subclass and its superclass by using `properties` files:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@TestPropertySource("base.properties")
+	@ContextConfiguration
+	class BaseTest {
+		// ...
+	}
+
+	@TestPropertySource("extended.properties")
+	@ContextConfiguration
+	class ExtendedTest extends BaseTest {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@TestPropertySource("base.properties")
+	@ContextConfiguration
+	open class BaseTest {
+		// ...
+	}
+
+	@TestPropertySource("extended.properties")
+	@ContextConfiguration
+	class ExtendedTest : BaseTest() {
+		// ...
+	}
+----
+======
+
+In the next example, the `ApplicationContext` for `BaseTest` is loaded by using only the
+inlined `key1` property. In contrast, the `ApplicationContext` for `ExtendedTest` is
+loaded by using the inlined `key1` and `key2` properties. The following example shows how
+to define properties in both a subclass and its superclass by using inline properties:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@TestPropertySource(properties = "key1 = value1")
+	@ContextConfiguration
+	class BaseTest {
+		// ...
+	}
+
+	@TestPropertySource(properties = "key2 = value2")
+	@ContextConfiguration
+	class ExtendedTest extends BaseTest {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@TestPropertySource(properties = ["key1 = value1"])
+	@ContextConfiguration
+	open class BaseTest {
+		// ...
+	}
+
+	@TestPropertySource(properties = ["key2 = value2"])
+	@ContextConfiguration
+	class ExtendedTest : BaseTest() {
+		// ...
+	}
+----
+======
+

@@ -1,0 +1,941 @@
+[[aop-advice]]
+= Declaring Advice
+
+Advice is associated with a pointcut expression and runs before, after, or around method
+executions matched by the pointcut. The pointcut expression may be either an _inline
+pointcut_ or a reference to a xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[_named pointcut_].
+
+
+[[aop-advice-before]]
+== Before Advice
+
+You can declare before advice in an aspect by using the `@Before` annotation.
+
+The following example uses an inline pointcut expression.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Before;
+
+	@Aspect
+	public class BeforeExample {
+
+		@Before("execution(* com.xyz.dao.*.*(..))")
+		public void doAccessCheck() {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Before
+
+	@Aspect
+	class BeforeExample {
+
+		@Before("execution(* com.xyz.dao.*.*(..))")
+		fun doAccessCheck() {
+			// ...
+		}
+	}
+----
+======
+
+If we use a xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[named pointcut], we can rewrite the preceding example
+as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Before;
+
+	@Aspect
+	public class BeforeExample {
+
+		@Before("com.xyz.CommonPointcuts.dataAccessOperation()")
+		public void doAccessCheck() {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Before
+
+	@Aspect
+	class BeforeExample {
+
+		@Before("com.xyz.CommonPointcuts.dataAccessOperation()")
+		fun doAccessCheck() {
+			// ...
+		}
+	}
+----
+======
+
+
+[[aop-advice-after-returning]]
+== After Returning Advice
+
+After returning advice runs when a matched method execution returns normally.
+You can declare it by using the `@AfterReturning` annotation.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.AfterReturning;
+
+	@Aspect
+	public class AfterReturningExample {
+
+		@AfterReturning("execution(* com.xyz.dao.*.*(..))")
+		public void doAccessCheck() {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.AfterReturning
+
+	@Aspect
+	class AfterReturningExample {
+
+		@AfterReturning("execution(* com.xyz.dao.*.*(..))")
+		fun doAccessCheck() {
+			// ...
+		}
+	}
+----
+======
+
+NOTE: You can have multiple advice declarations (and other members as well),
+all inside the same aspect. We show only a single advice declaration in these
+examples to focus the effect of each one.
+
+Sometimes, you need access in the advice body to the actual value that was returned.
+You can use the form of `@AfterReturning` that binds the return value to get that
+access, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.AfterReturning;
+
+	@Aspect
+	public class AfterReturningExample {
+
+		@AfterReturning(
+			pointcut="execution(* com.xyz.dao.*.*(..))",
+			returning="retVal")
+		public void doAccessCheck(Object retVal) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.AfterReturning
+
+	@Aspect
+	class AfterReturningExample {
+
+		@AfterReturning(
+			pointcut = "execution(* com.xyz.dao.*.*(..))",
+			returning = "retVal")
+		fun doAccessCheck(retVal: Any) {
+			// ...
+		}
+	}
+----
+======
+
+The name used in the `returning` attribute must correspond to the name of a parameter
+in the advice method. When a method execution returns, the return value is passed to
+the advice method as the corresponding argument value. A `returning` clause also
+restricts matching to only those method executions that return a value of the
+specified type (in this case, `Object`, which matches any return value).
+
+Please note that it is not possible to return a totally different reference when
+using after returning advice.
+
+
+[[aop-advice-after-throwing]]
+== After Throwing Advice
+
+After throwing advice runs when a matched method execution exits by throwing an
+exception. You can declare it by using the `@AfterThrowing` annotation, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.AfterThrowing;
+
+	@Aspect
+	public class AfterThrowingExample {
+
+		@AfterThrowing("execution(* com.xyz.dao.*.*(..))")
+		public void doRecoveryActions() {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.AfterThrowing
+
+	@Aspect
+	class AfterThrowingExample {
+
+		@AfterThrowing("execution(* com.xyz.dao.*.*(..))")
+		fun doRecoveryActions() {
+			// ...
+		}
+	}
+----
+======
+
+Often, you want the advice to run only when exceptions of a given type are thrown,
+and you also often need access to the thrown exception in the advice body. You can
+use the `throwing` attribute to both restrict matching (if desired -- use `Throwable`
+as the exception type otherwise) and bind the thrown exception to an advice parameter.
+The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.AfterThrowing;
+
+	@Aspect
+	public class AfterThrowingExample {
+
+		@AfterThrowing(
+			pointcut="execution(* com.xyz.dao.*.*(..))",
+			throwing="ex")
+		public void doRecoveryActions(DataAccessException ex) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.AfterThrowing
+
+	@Aspect
+	class AfterThrowingExample {
+
+		@AfterThrowing(
+			pointcut = "execution(* com.xyz.dao.*.*(..))",
+			throwing = "ex")
+		fun doRecoveryActions(ex: DataAccessException) {
+			// ...
+		}
+	}
+----
+======
+
+The name used in the `throwing` attribute must correspond to the name of a parameter in
+the advice method. When a method execution exits by throwing an exception, the exception
+is passed to the advice method as the corresponding argument value. A `throwing` clause
+also restricts matching to only those method executions that throw an exception of the
+specified type (`DataAccessException`, in this case).
+
+[NOTE]
+====
+Note that `@AfterThrowing` does not indicate a general exception handling callback.
+Specifically, an `@AfterThrowing` advice method is only supposed to receive exceptions
+from the join point (user-declared target method) itself but not from an accompanying
+`@After`/`@AfterReturning` method.
+====
+
+
+[[aop-advice-after-finally]]
+== After (Finally) Advice
+
+After (finally) advice runs when a matched method execution exits. It is declared by
+using the `@After` annotation. After advice must be prepared to handle both normal and
+exception return conditions. It is typically used for releasing resources and similar
+purposes. The following example shows how to use after finally advice:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.After;
+
+	@Aspect
+	public class AfterFinallyExample {
+
+		@After("execution(* com.xyz.dao.*.*(..))")
+		public void doReleaseLock() {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.After
+
+	@Aspect
+	class AfterFinallyExample {
+
+		@After("execution(* com.xyz.dao.*.*(..))")
+		fun doReleaseLock() {
+			// ...
+		}
+	}
+----
+======
+
+[NOTE]
+====
+Note that `@After` advice in AspectJ is defined as "after finally advice", analogous
+to a finally block in a try-catch statement. It will be invoked for any outcome,
+normal return or exception thrown from the join point (user-declared target method),
+in contrast to `@AfterReturning` which only applies to successful normal returns.
+====
+
+
+[[aop-ataspectj-around-advice]]
+== Around Advice
+
+The last kind of advice is _around_ advice. Around advice runs "around" a matched
+method's execution. It has the opportunity to do work both before and after the method
+runs and to determine when, how, and even if the method actually gets to run at all.
+Around advice is often used if you need to share state before and after a method
+execution in a thread-safe manner – for example, starting and stopping a timer.
+
+[TIP]
+====
+Always use the least powerful form of advice that meets your requirements.
+
+For example, do not use _around_ advice if _before_ advice is sufficient for your needs.
+====
+
+Around advice is declared by annotating a method with the `@Around` annotation. The
+method should declare `Object` as its return type, and the first parameter of the method
+must be of type `ProceedingJoinPoint`. Within the body of the advice method, you must
+invoke `proceed()` on the `ProceedingJoinPoint` in order for the underlying method to
+run. Invoking `proceed()` without arguments will result in the caller's original
+arguments being supplied to the underlying method when it is invoked. For advanced use
+cases, there is an overloaded variant of the `proceed()` method which accepts an array of
+arguments (`Object[]`). The values in the array will be used as the arguments to the
+underlying method when it is invoked.
+
+[NOTE]
+====
+The behavior of `proceed` when called with an `Object[]` is a little different than the
+behavior of `proceed` for around advice compiled by the AspectJ compiler. For around
+advice written using the traditional AspectJ language, the number of arguments passed to
+`proceed` must match the number of arguments passed to the around advice (not the number
+of arguments taken by the underlying join point), and the value passed to proceed in a
+given argument position supplants the original value at the join point for the entity the
+value was bound to (do not worry if this does not make sense right now).
+
+The approach taken by Spring is simpler and a better match to its proxy-based,
+execution-only semantics. You only need to be aware of this difference if you compile
+`@AspectJ` aspects written for Spring and use `proceed` with arguments with the AspectJ
+compiler and weaver. There is a way to write such aspects that is 100% compatible across
+both Spring AOP and AspectJ, and this is discussed in the
+xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-proceeding-with-the-call[following section on advice parameters].
+====
+
+The value returned by the around advice is the return value seen by the caller of the
+method. For example, a simple caching aspect could return a value from a cache if it has
+one or invoke `proceed()` (and return that value) if it does not. Note that `proceed`
+may be invoked once, many times, or not at all within the body of the around advice. All
+of these are legal.
+
+WARNING: If you declare the return type of your around advice method as `void`, `null`
+will always be returned to the caller, effectively ignoring the result of any invocation
+of `proceed()`. It is therefore recommended that an around advice method declare a return
+type of `Object`. The advice method should typically return the value returned from an
+invocation of `proceed()`, even if the underlying method has a `void` return type.
+However, the advice may optionally return a cached value, a wrapped value, or some other
+value depending on the use case.
+
+The following example shows how to use around advice:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	import org.aspectj.lang.annotation.Aspect;
+	import org.aspectj.lang.annotation.Around;
+	import org.aspectj.lang.ProceedingJoinPoint;
+
+	@Aspect
+	public class AroundExample {
+
+		@Around("execution(* com.xyz..service.*.*(..))")
+		public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+			// start stopwatch
+			Object retVal = pjp.proceed();
+			// stop stopwatch
+			return retVal;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	import org.aspectj.lang.annotation.Aspect
+	import org.aspectj.lang.annotation.Around
+	import org.aspectj.lang.ProceedingJoinPoint
+
+	@Aspect
+	class AroundExample {
+
+		@Around("execution(* com.xyz..service.*.*(..))")
+		fun doBasicProfiling(pjp: ProceedingJoinPoint): Any {
+			// start stopwatch
+			val retVal = pjp.proceed()
+			// stop stopwatch
+			return retVal
+		}
+	}
+----
+======
+
+[[aop-ataspectj-advice-params]]
+== Advice Parameters
+
+Spring offers fully typed advice, meaning that you declare the parameters you need in the
+advice signature (as we saw earlier for the returning and throwing examples) rather than
+work with `Object[]` arrays all the time. We see how to make argument and other contextual
+values available to the advice body later in this section. First, we take a look at how to
+write generic advice that can find out about the method the advice is currently advising.
+
+[[aop-ataspectj-advice-params-the-joinpoint]]
+=== Access to the Current `JoinPoint`
+
+Any advice method may declare, as its first parameter, a parameter of type
+`org.aspectj.lang.JoinPoint`. Note that around advice is required to declare a first
+parameter of type `ProceedingJoinPoint`, which is a subclass of `JoinPoint`.
+
+The `JoinPoint` interface provides a number of useful methods:
+
+* `getArgs()`: Returns the method arguments.
+* `getThis()`: Returns the proxy object.
+* `getTarget()`: Returns the target object.
+* `getSignature()`: Returns a description of the method that is being advised.
+* `toString()`: Prints a useful description of the method being advised.
+
+See the https://www.eclipse.org/aspectj/doc/released/runtime-api/org/aspectj/lang/JoinPoint.html[javadoc] for more detail.
+
+[[aop-ataspectj-advice-params-passing]]
+=== Passing Parameters to Advice
+
+We have already seen how to bind the returned value or exception value (using after
+returning and after throwing advice). To make argument values available to the advice
+body, you can use the binding form of `args`. If you use a parameter name in place of a
+type name in an `args` expression, the value of the corresponding argument is passed as
+the parameter value when the advice is invoked. An example should make this clearer.
+Suppose you want to advise the execution of DAO operations that take an `Account`
+object as the first parameter, and you need access to the account in the advice body.
+You could write the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Before("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
+	public void validateAccount(Account account) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Before("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
+	fun validateAccount(account: Account) {
+		// ...
+	}
+----
+======
+
+The `args(account,..)` part of the pointcut expression serves two purposes. First, it
+restricts matching to only those method executions where the method takes at least one
+parameter, and the argument passed to that parameter is an instance of `Account`.
+Second, it makes the actual `Account` object available to the advice through the `account`
+parameter.
+
+Another way of writing this is to declare a pointcut that "provides" the `Account`
+object value when it matches a join point, and then refer to the named pointcut
+from the advice. This would look as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Pointcut("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
+	private void accountDataAccessOperation(Account account) {}
+
+	@Before("accountDataAccessOperation(account)")
+	public void validateAccount(Account account) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Pointcut("execution(* com.xyz.dao.*.*(..)) && args(account,..)")
+	private fun accountDataAccessOperation(account: Account) {
+	}
+
+	@Before("accountDataAccessOperation(account)")
+	fun validateAccount(account: Account) {
+		// ...
+	}
+----
+======
+
+See the AspectJ programming guide for more details.
+
+The proxy object (`this`), target object (`target`), and annotations (`@within`,
+`@target`, `@annotation`, and `@args`) can all be bound in a similar fashion. The next
+set of examples shows how to match the execution of methods annotated with an
+`@Auditable` annotation and extract the audit code:
+
+The following shows the definition of the `@Auditable` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	public @interface Auditable {
+		AuditCode value();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Retention(AnnotationRetention.RUNTIME)
+	@Target(AnnotationTarget.FUNCTION)
+	annotation class Auditable(val value: AuditCode)
+----
+======
+
+The following shows the advice that matches the execution of `@Auditable` methods:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Before("com.xyz.Pointcuts.publicMethod() && @annotation(auditable)") // <1>
+	public void audit(Auditable auditable) {
+		AuditCode code = auditable.value();
+		// ...
+	}
+----
+======
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Before("com.xyz.Pointcuts.publicMethod() && @annotation(auditable)") // <1>
+	fun audit(auditable: Auditable) {
+		val code = auditable.value()
+		// ...
+	}
+----
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+
+[[aop-ataspectj-advice-params-generics]]
+=== Advice Parameters and Generics
+
+Spring AOP can handle generics used in class declarations and method parameters. Suppose
+you have a generic type like the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	public interface Sample<T> {
+		void sampleGenericMethod(T param);
+		void sampleGenericCollectionMethod(Collection<T> param);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	interface Sample<T> {
+		fun sampleGenericMethod(param: T)
+		fun sampleGenericCollectionMethod(param: Collection<T>)
+	}
+----
+======
+
+You can restrict interception of method types to certain parameter types by
+tying the advice parameter to the parameter type for which you want to intercept the method:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
+	public void beforeSampleMethod(MyType param) {
+		// Advice implementation
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Before("execution(* ..Sample+.sampleGenericMethod(*)) && args(param)")
+	fun beforeSampleMethod(param: MyType) {
+		// Advice implementation
+	}
+----
+======
+
+This approach does not work for generic collections. So you cannot define a
+pointcut as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
+	public void beforeSampleMethod(Collection<MyType> param) {
+		// Advice implementation
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Before("execution(* ..Sample+.sampleGenericCollectionMethod(*)) && args(param)")
+	fun beforeSampleMethod(param: Collection<MyType>) {
+		// Advice implementation
+	}
+----
+======
+
+To make this work, we would have to inspect every element of the collection, which is not
+reasonable, as we also cannot decide how to treat `null` values in general. To achieve
+something similar to this, you have to type the parameter to `Collection<?>` and manually
+check the type of the elements.
+
+[[aop-ataspectj-advice-params-names]]
+=== Determining Argument Names
+
+Parameter binding in advice invocations relies on matching the names used in pointcut
+expressions to the parameter names declared in advice and pointcut method signatures.
+
+NOTE: This section uses the terms _argument_ and _parameter_ interchangeably, since
+AspectJ APIs refer to parameter names as argument names.
+
+Spring AOP uses the following `ParameterNameDiscoverer` implementations to determine
+parameter names. Each discoverer will be given a chance to discover parameter names, and
+the first successful discoverer wins. If none of the registered discoverers is capable
+of determining parameter names, an exception will be thrown.
+
+`AspectJAnnotationParameterNameDiscoverer` :: Uses parameter names that have been explicitly
+  specified by the user via the `argNames` attribute in the corresponding advice or
+  pointcut annotation. See xref:core/aop/ataspectj/advice.adoc#aop-ataspectj-advice-params-names-explicit[Explicit Argument Names] for details.
+`KotlinReflectionParameterNameDiscoverer` :: Uses Kotlin reflection APIs to determine
+  parameter names. This discoverer is only used if such APIs are present on the classpath.
+`StandardReflectionParameterNameDiscoverer` :: Uses the standard `java.lang.reflect.Parameter`
+  API to determine parameter names. Requires that code be compiled with the `-parameters`
+  flag for `javac`. Recommended approach on Java 8+.
+`LocalVariableTableParameterNameDiscoverer` :: Analyzes the local variable table available
+  in the byte code of the advice class to determine parameter names from debug information.
+  Requires that code be compiled with debug symbols (`-g:vars` at a minimum). Deprecated
+  as of Spring Framework 6.0 for removal in Spring Framework 6.1 in favor of compiling
+  code with `-parameters`. Not supported in a GraalVM native image.
+`AspectJAdviceParameterNameDiscoverer` :: Deduces parameter names from the pointcut
+  expression, `returning`, and `throwing` clauses. See the
+  {api-spring-framework}/aop/aspectj/AspectJAdviceParameterNameDiscoverer.html[javadoc]
+  for details on the algorithm used.
+
+[[aop-ataspectj-advice-params-names-explicit]]
+=== Explicit Argument Names
+
+@AspectJ advice and pointcut annotations have an optional `argNames` attribute that you
+can use to specify the argument names of the annotated method.
+
+[TIP]
+====
+If an @AspectJ aspect has been compiled by the AspectJ compiler (`ajc`) even without
+debug information, you do not need to add the `argNames` attribute, since the compiler
+retains the needed information.
+
+Similarly, if an @AspectJ aspect has been compiled with `javac` using the `-parameters`
+flag, you do not need to add the `argNames` attribute, since the compiler retains the
+needed information.
+====
+
+The following example shows how to use the `argNames` attribute:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Before(
+		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
+		argNames = "bean,auditable") // <2>
+	public void audit(Object bean, Auditable auditable) {
+		AuditCode code = auditable.value();
+		// ... use code and bean
+	}
+----
+======
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+<2> Declares `bean` and `auditable` as the argument names.
+
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Before(
+		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
+		argNames = "bean,auditable") // <2>
+	fun audit(bean: Any, auditable: Auditable) {
+		val code = auditable.value()
+		// ... use code and bean
+	}
+----
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+<2> Declares `bean` and `auditable` as the argument names.
+
+If the first parameter is of type `JoinPoint`, `ProceedingJoinPoint`, or
+`JoinPoint.StaticPart`, you can omit the name of the parameter from the value of the
+`argNames` attribute. For example, if you modify the preceding advice to receive the join
+point object, the `argNames` attribute does not need to include it:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Before(
+		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
+		argNames = "bean,auditable") // <2>
+	public void audit(JoinPoint jp, Object bean, Auditable auditable) {
+		AuditCode code = auditable.value();
+		// ... use code, bean, and jp
+	}
+----
+======
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+<2> Declares `bean` and `auditable` as the argument names.
+
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Before(
+		value = "com.xyz.Pointcuts.publicMethod() && target(bean) && @annotation(auditable)", // <1>
+		argNames = "bean,auditable") // <2>
+	fun audit(jp: JoinPoint, bean: Any, auditable: Auditable) {
+		val code = auditable.value()
+		// ... use code, bean, and jp
+	}
+----
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+<2> Declares `bean` and `auditable` as the argument names.
+
+The special treatment given to the first parameter of type `JoinPoint`,
+`ProceedingJoinPoint`, or `JoinPoint.StaticPart` is particularly convenient for advice
+methods that do not collect any other join point context. In such situations, you may
+omit the `argNames` attribute. For example, the following advice does not need to declare
+the `argNames` attribute:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Before("com.xyz.Pointcuts.publicMethod()") // <1>
+	public void audit(JoinPoint jp) {
+		// ... use jp
+	}
+----
+======
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Before("com.xyz.Pointcuts.publicMethod()") // <1>
+	fun audit(jp: JoinPoint) {
+		// ... use jp
+	}
+----
+<1> References the `publicMethod` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-pointcuts-combining[Combining Pointcut Expressions].
+
+
+[[aop-ataspectj-advice-proceeding-with-the-call]]
+=== Proceeding with Arguments
+
+We remarked earlier that we would describe how to write a `proceed` call with
+arguments that works consistently across Spring AOP and AspectJ. The solution is
+to ensure that the advice signature binds each of the method parameters in order.
+The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Around("execution(List<Account> find*(..)) && " +
+			"com.xyz.CommonPointcuts.inDataAccessLayer() && " +
+			"args(accountHolderNamePattern)") // <1>
+	public Object preProcessQueryPattern(ProceedingJoinPoint pjp,
+			String accountHolderNamePattern) throws Throwable {
+		String newPattern = preProcess(accountHolderNamePattern);
+		return pjp.proceed(new Object[] {newPattern});
+	}
+----
+======
+<1> References the `inDataAccessLayer` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
+
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+.Kotlin
+----
+	@Around("execution(List<Account> find*(..)) && " +
+			"com.xyz.CommonPointcuts.inDataAccessLayer() && " +
+			"args(accountHolderNamePattern)") // <1>
+	fun preProcessQueryPattern(pjp: ProceedingJoinPoint,
+							accountHolderNamePattern: String): Any {
+		val newPattern = preProcess(accountHolderNamePattern)
+		return pjp.proceed(arrayOf<Any>(newPattern))
+	}
+----
+<1> References the `inDataAccessLayer` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
+
+In many cases, you do this binding anyway (as in the preceding example).
+
+
+[[aop-ataspectj-advice-ordering]]
+== Advice Ordering
+
+What happens when multiple pieces of advice all want to run at the same join point?
+Spring AOP follows the same precedence rules as AspectJ to determine the order of advice
+execution. The highest precedence advice runs first "on the way in" (so, given two pieces
+of before advice, the one with highest precedence runs first). "On the way out" from a
+join point, the highest precedence advice runs last (so, given two pieces of after
+advice, the one with the highest precedence will run second).
+
+When two pieces of advice defined in different aspects both need to run at the same
+join point, unless you specify otherwise, the order of execution is undefined. You can
+control the order of execution by specifying precedence. This is done in the normal
+Spring way by either implementing the `org.springframework.core.Ordered` interface in
+the aspect class or annotating it with the `@Order` annotation. Given two aspects, the
+aspect returning the lower value from `Ordered.getOrder()` (or the annotation value) has
+the higher precedence.
+
+[NOTE]
+====
+Each of the distinct advice types of a particular aspect is conceptually meant to apply
+to the join point directly. As a consequence, an `@AfterThrowing` advice method is not
+supposed to receive an exception from an accompanying `@After`/`@AfterReturning` method.
+
+As of Spring Framework 5.2.7, advice methods defined in the same `@Aspect` class that
+need to run at the same join point are assigned precedence based on their advice type in
+the following order, from highest to lowest precedence: `@Around`, `@Before`, `@After`,
+`@AfterReturning`, `@AfterThrowing`. Note, however, that an `@After` advice method will
+effectively be invoked after any `@AfterReturning` or `@AfterThrowing` advice methods
+in the same aspect, following AspectJ's "after finally advice" semantics for `@After`.
+
+When two pieces of the same type of advice (for example, two `@After` advice methods)
+defined in the same `@Aspect` class both need to run at the same join point, the ordering
+is undefined (since there is no way to retrieve the source code declaration order through
+reflection for javac-compiled classes). Consider collapsing such advice methods into one
+advice method per join point in each `@Aspect` class or refactor the pieces of advice into
+separate `@Aspect` classes that you can order at the aspect level via `Ordered` or `@Order`.
+====
+
+

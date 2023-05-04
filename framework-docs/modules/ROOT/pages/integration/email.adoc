@@ -1,0 +1,303 @@
+[[mail]]
+= Email
+
+This section describes how to send email with the Spring Framework.
+
+.Library dependencies
+****
+The following JAR needs to be on the classpath of your application in order to use the
+Spring Framework's email support:
+
+* The https://jakartaee.github.io/mail-api/[Jakarta Mail] library
+
+This library is freely available on the web -- for example, in Maven Central as
+`com.sun.mail:jakarta.mail`. Please make sure to use the latest 2.x version (which uses
+the `jakarta.mail` package namespace) rather than Jakarta Mail 1.6.x (which uses the
+`javax.mail` package namespace).
+****
+
+The Spring Framework provides a helpful utility library for sending email that shields
+you from the specifics of the underlying mailing system and is responsible for
+low-level resource handling on behalf of the client.
+
+The `org.springframework.mail` package is the root level package for the Spring
+Framework's email support. The central interface for sending emails is the `MailSender`
+interface. A simple value object that encapsulates the properties of a simple mail such
+as `from` and `to` (plus many others) is the `SimpleMailMessage` class. This package
+also contains a hierarchy of checked exceptions that provide a higher level of
+abstraction over the lower level mail system exceptions, with the root exception being
+`MailException`. See the {api-spring-framework}/mail/MailException.html[javadoc]
+for more information on the rich mail exception hierarchy.
+
+The `org.springframework.mail.javamail.JavaMailSender` interface adds specialized
+JavaMail features, such as MIME message support to the `MailSender` interface
+(from which it inherits). `JavaMailSender` also provides a callback interface called
+`org.springframework.mail.javamail.MimeMessagePreparator` for preparing a `MimeMessage`.
+
+
+
+[[mail-usage]]
+== Usage
+
+Assume that we have a business interface called `OrderManager`, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface OrderManager {
+
+		void placeOrder(Order order);
+
+	}
+----
+
+Further assume that we have a requirement stating that an email message with an
+order number needs to be generated and sent to a customer who placed the relevant order.
+
+
+[[mail-usage-simple]]
+=== Basic `MailSender` and `SimpleMailMessage` Usage
+
+The following example shows how to use `MailSender` and `SimpleMailMessage` to send an
+email when someone places an order:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import org.springframework.mail.MailException;
+	import org.springframework.mail.MailSender;
+	import org.springframework.mail.SimpleMailMessage;
+
+	public class SimpleOrderManager implements OrderManager {
+
+		private MailSender mailSender;
+		private SimpleMailMessage templateMessage;
+
+		public void setMailSender(MailSender mailSender) {
+			this.mailSender = mailSender;
+		}
+
+		public void setTemplateMessage(SimpleMailMessage templateMessage) {
+			this.templateMessage = templateMessage;
+		}
+
+		public void placeOrder(Order order) {
+
+			// Do the business calculations...
+
+			// Call the collaborators to persist the order...
+
+			// Create a thread safe "copy" of the template message and customize it
+			SimpleMailMessage msg = new SimpleMailMessage(this.templateMessage);
+			msg.setTo(order.getCustomer().getEmailAddress());
+			msg.setText(
+				"Dear " + order.getCustomer().getFirstName()
+					+ order.getCustomer().getLastName()
+					+ ", thank you for placing order. Your order number is "
+					+ order.getOrderNumber());
+			try {
+				this.mailSender.send(msg);
+			}
+			catch (MailException ex) {
+				// simply log it and go on...
+				System.err.println(ex.getMessage());
+			}
+		}
+
+	}
+----
+
+The following example shows the bean definitions for the preceding code:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="mail.mycompany.example"/>
+	</bean>
+
+	<!-- this is a template message that we can pre-load with default state -->
+	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
+		<property name="from" value="customerservice@mycompany.example"/>
+		<property name="subject" value="Your order"/>
+	</bean>
+
+	<bean id="orderManager" class="com.mycompany.businessapp.support.SimpleOrderManager">
+		<property name="mailSender" ref="mailSender"/>
+		<property name="templateMessage" ref="templateMessage"/>
+	</bean>
+----
+
+
+[[mail-usage-mime]]
+=== Using `JavaMailSender` and `MimeMessagePreparator`
+
+This section describes another implementation of `OrderManager` that uses the `MimeMessagePreparator`
+callback interface. In the following example, the `mailSender` property is of type
+`JavaMailSender` so that we are able to use the JavaMail `MimeMessage` class:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import jakarta.mail.Message;
+	import jakarta.mail.MessagingException;
+	import jakarta.mail.internet.InternetAddress;
+	import jakarta.mail.internet.MimeMessage;
+
+	import jakarta.mail.internet.MimeMessage;
+	import org.springframework.mail.MailException;
+	import org.springframework.mail.javamail.JavaMailSender;
+	import org.springframework.mail.javamail.MimeMessagePreparator;
+
+	public class SimpleOrderManager implements OrderManager {
+
+		private JavaMailSender mailSender;
+
+		public void setMailSender(JavaMailSender mailSender) {
+			this.mailSender = mailSender;
+		}
+
+		public void placeOrder(final Order order) {
+			// Do the business calculations...
+			// Call the collaborators to persist the order...
+
+			MimeMessagePreparator preparator = new MimeMessagePreparator() {
+				public void prepare(MimeMessage mimeMessage) throws Exception {
+					mimeMessage.setRecipient(Message.RecipientType.TO,
+							new InternetAddress(order.getCustomer().getEmailAddress()));
+					mimeMessage.setFrom(new InternetAddress("mail@mycompany.example"));
+					mimeMessage.setText("Dear " + order.getCustomer().getFirstName() + " " +
+							order.getCustomer().getLastName() + ", thanks for your order. " +
+							"Your order number is " + order.getOrderNumber() + ".");
+				}
+			};
+
+			try {
+				this.mailSender.send(preparator);
+			}
+			catch (MailException ex) {
+				// simply log it and go on...
+				System.err.println(ex.getMessage());
+			}
+		}
+
+	}
+----
+
+NOTE: The mail code is a crosscutting concern and could well be a candidate for
+refactoring into a xref:core/aop.adoc[custom Spring AOP aspect], which could then
+be run at appropriate joinpoints on the `OrderManager` target.
+
+The Spring Framework's mail support ships with the standard JavaMail implementation.
+See the relevant javadoc for more information.
+
+
+
+[[mail-javamail-mime]]
+== Using the JavaMail `MimeMessageHelper`
+
+A class that comes in pretty handy when dealing with JavaMail messages is
+`org.springframework.mail.javamail.MimeMessageHelper`, which shields you from
+having to use the verbose JavaMail API. Using the `MimeMessageHelper`, it is
+pretty easy to create a `MimeMessage`, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	// of course you would use DI in any real-world cases
+	JavaMailSenderImpl sender = new JavaMailSenderImpl();
+	sender.setHost("mail.host.com");
+
+	MimeMessage message = sender.createMimeMessage();
+	MimeMessageHelper helper = new MimeMessageHelper(message);
+	helper.setTo("test@host.com");
+	helper.setText("Thank you for ordering!");
+
+	sender.send(message);
+----
+
+
+[[mail-javamail-mime-attachments]]
+=== Sending Attachments and Inline Resources
+
+Multipart email messages allow for both attachments and inline resources. Examples of
+inline resources include an image or a stylesheet that you want to use in your message but
+that you do not want displayed as an attachment.
+
+[[mail-javamail-mime-attachments-attachment]]
+==== Attachments
+
+The following example shows you how to use the `MimeMessageHelper` to send an email
+with a single JPEG image attachment:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	JavaMailSenderImpl sender = new JavaMailSenderImpl();
+	sender.setHost("mail.host.com");
+
+	MimeMessage message = sender.createMimeMessage();
+
+	// use the true flag to indicate you need a multipart message
+	MimeMessageHelper helper = new MimeMessageHelper(message, true);
+	helper.setTo("test@host.com");
+
+	helper.setText("Check out this image!");
+
+	// let's attach the infamous windows Sample file (this time copied to c:/)
+	FileSystemResource file = new FileSystemResource(new File("c:/Sample.jpg"));
+	helper.addAttachment("CoolImage.jpg", file);
+
+	sender.send(message);
+----
+
+[[mail-javamail-mime-attachments-inline]]
+==== Inline Resources
+
+The following example shows you how to use the `MimeMessageHelper` to send an email
+with an inline image:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	JavaMailSenderImpl sender = new JavaMailSenderImpl();
+	sender.setHost("mail.host.com");
+
+	MimeMessage message = sender.createMimeMessage();
+
+	// use the true flag to indicate you need a multipart message
+	MimeMessageHelper helper = new MimeMessageHelper(message, true);
+	helper.setTo("test@host.com");
+
+	// use the true flag to indicate the text included is HTML
+	helper.setText("<html><body><img src='cid:identifier1234'></body></html>", true);
+
+	// let's include the infamous windows Sample file (this time copied to c:/)
+	FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
+	helper.addInline("identifier1234", res);
+
+	sender.send(message);
+----
+
+WARNING: Inline resources are added to the `MimeMessage` by using the specified `Content-ID`
+(`identifier1234` in the above example). The order in which you add the text
+and the resource are very important. Be sure to first add the text and then
+the resources. If you are doing it the other way around, it does not work.
+
+
+[[mail-templates]]
+=== Creating Email Content by Using a Templating Library
+
+The code in the examples shown in the previous sections explicitly created the content of the email message,
+by using methods calls such as `message.setText(..)`. This is fine for simple cases, and it
+is okay in the context of the aforementioned examples, where the intent was to show you
+the very basics of the API.
+
+In your typical enterprise application, though, developers often do not create the content
+of email messages by using the previously shown approach for a number of reasons:
+
+* Creating HTML-based email content in Java code is tedious and error prone.
+* There is no clear separation between display logic and business logic.
+* Changing the display structure of the email content requires writing Java code,
+  recompiling, redeploying, and so on.
+
+Typically, the approach taken to address these issues is to use a template library (such
+as FreeMarker) to define the display structure of email content. This leaves your code
+tasked only with creating the data that is to be rendered in the email template and
+sending the email. It is definitely a best practice when the content of your email messages
+becomes even moderately complex, and, with the Spring Framework's support classes for
+FreeMarker, it becomes quite easy to do.
+

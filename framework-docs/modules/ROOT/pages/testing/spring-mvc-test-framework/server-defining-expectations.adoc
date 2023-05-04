@@ -1,0 +1,251 @@
+[[spring-mvc-test-server-defining-expectations]]
+= Defining Expectations
+
+You can define expectations by appending one or more `andExpect(..)` calls after
+performing a request, as the following example shows. As soon as one expectation fails,
+no other expectations will be asserted.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
+
+	mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.test.web.servlet.get
+
+	mockMvc.get("/accounts/1").andExpect {
+		status { isOk() }
+	}
+----
+======
+
+You can define multiple expectations by appending `andExpectAll(..)` after performing a
+request, as the following example shows. In contrast to `andExpect(..)`,
+`andExpectAll(..)` guarantees that all supplied expectations will be asserted and that
+all failures will be tracked and reported.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// static import of MockMvcRequestBuilders.* and MockMvcResultMatchers.*
+
+	mockMvc.perform(get("/accounts/1")).andExpectAll(
+		status().isOk(),
+		content().contentType("application/json;charset=UTF-8"));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.test.web.servlet.get
+
+	mockMvc.get("/accounts/1").andExpectAll {
+		status { isOk() }
+		content { contentType(APPLICATION_JSON) }
+	}
+----
+======
+
+`MockMvcResultMatchers.*` provides a number of expectations, some of which are further
+nested with more detailed expectations.
+
+Expectations fall in two general categories. The first category of assertions verifies
+properties of the response (for example, the response status, headers, and content).
+These are the most important results to assert.
+
+The second category of assertions goes beyond the response. These assertions let you
+inspect Spring MVC specific aspects, such as which controller method processed the
+request, whether an exception was raised and handled, what the content of the model is,
+what view was selected, what flash attributes were added, and so on. They also let you
+inspect Servlet specific aspects, such as request and session attributes.
+
+The following test asserts that binding or validation failed:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	mockMvc.perform(post("/persons"))
+		.andExpect(status().isOk())
+		.andExpect(model().attributeHasErrors("person"));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.test.web.servlet.post
+
+	mockMvc.post("/persons").andExpect {
+		status { isOk() }
+		model {
+			attributeHasErrors("person")
+		}
+	}
+----
+======
+
+Many times, when writing tests, it is useful to dump the results of the performed
+request. You can do so as follows, where `print()` is a static import from
+`MockMvcResultHandlers`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	mockMvc.perform(post("/persons"))
+		.andDo(print())
+		.andExpect(status().isOk())
+		.andExpect(model().attributeHasErrors("person"));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.test.web.servlet.post
+
+	mockMvc.post("/persons").andDo {
+			print()
+		}.andExpect {
+			status { isOk() }
+			model {
+				attributeHasErrors("person")
+			}
+		}
+----
+======
+
+As long as request processing does not cause an unhandled exception, the `print()` method
+prints all the available result data to `System.out`. There is also a `log()` method and
+two additional variants of the `print()` method, one that accepts an `OutputStream` and
+one that accepts a `Writer`. For example, invoking `print(System.err)` prints the result
+data to `System.err`, while invoking `print(myWriter)` prints the result data to a custom
+writer. If you want to have the result data logged instead of printed, you can invoke the
+`log()` method, which logs the result data as a single `DEBUG` message under the
+`org.springframework.test.web.servlet.result` logging category.
+
+In some cases, you may want to get direct access to the result and verify something that
+cannot be verified otherwise. This can be achieved by appending `.andReturn()` after all
+other expectations, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	MvcResult mvcResult = mockMvc.perform(post("/persons")).andExpect(status().isOk()).andReturn();
+	// ...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	var mvcResult = mockMvc.post("/persons").andExpect { status { isOk() } }.andReturn()
+	// ...
+----
+======
+
+If all tests repeat the same expectations, you can set up common expectations once when
+building the `MockMvc` instance, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	standaloneSetup(new SimpleController())
+		.alwaysExpect(status().isOk())
+		.alwaysExpect(content().contentType("application/json;charset=UTF-8"))
+		.build()
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// Not possible in Kotlin until https://youtrack.jetbrains.com/issue/KT-22208 is fixed
+----
+======
+
+Note that common expectations are always applied and cannot be overridden without
+creating a separate `MockMvc` instance.
+
+When a JSON response content contains hypermedia links created with
+https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], you can verify the
+resulting links by using JsonPath expressions, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
+		.andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	mockMvc.get("/people") {
+		accept(MediaType.APPLICATION_JSON)
+	}.andExpect {
+		jsonPath("$.links[?(@.rel == 'self')].href") {
+			value("http://localhost:8080/people")
+		}
+	}
+----
+======
+
+When XML response content contains hypermedia links created with
+https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], you can verify the
+resulting links by using XPath expressions:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	Map<String, String> ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
+	mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
+		.andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val ns = mapOf("ns" to "http://www.w3.org/2005/Atom")
+	mockMvc.get("/handle") {
+		accept(MediaType.APPLICATION_XML)
+	}.andExpect {
+		xpath("/person/ns:link[@rel='self']/@href", ns) {
+			string("http://localhost:8080/people")
+		}
+	}
+----
+======
+

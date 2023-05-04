@@ -1,0 +1,545 @@
+[[testcontext-ctx-management-env-profiles]]
+= Context Configuration with Environment Profiles
+
+The Spring Framework has first-class support for the notion of environments and profiles
+(AKA "bean definition profiles"), and integration tests can be configured to activate
+particular bean definition profiles for various testing scenarios. This is achieved by
+annotating a test class with the `@ActiveProfiles` annotation and supplying a list of
+profiles that should be activated when loading the `ApplicationContext` for the test.
+
+NOTE: You can use `@ActiveProfiles` with any implementation of the `SmartContextLoader`
+SPI, but `@ActiveProfiles` is not supported with implementations of the older
+`ContextLoader` SPI.
+
+Consider two examples with XML configuration and `@Configuration` classes:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<!-- app-config.xml -->
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="...">
+
+		<bean id="transferService"
+				class="com.bank.service.internal.DefaultTransferService">
+			<constructor-arg ref="accountRepository"/>
+			<constructor-arg ref="feePolicy"/>
+		</bean>
+
+		<bean id="accountRepository"
+				class="com.bank.repository.internal.JdbcAccountRepository">
+			<constructor-arg ref="dataSource"/>
+		</bean>
+
+		<bean id="feePolicy"
+			class="com.bank.service.internal.ZeroFeePolicy"/>
+
+		<beans profile="dev">
+			<jdbc:embedded-database id="dataSource">
+				<jdbc:script
+					location="classpath:com/bank/config/sql/schema.sql"/>
+				<jdbc:script
+					location="classpath:com/bank/config/sql/test-data.sql"/>
+			</jdbc:embedded-database>
+		</beans>
+
+		<beans profile="production">
+			<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/datasource"/>
+		</beans>
+
+		<beans profile="default">
+			<jdbc:embedded-database id="dataSource">
+				<jdbc:script
+					location="classpath:com/bank/config/sql/schema.sql"/>
+			</jdbc:embedded-database>
+		</beans>
+
+	</beans>
+----
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@ExtendWith(SpringExtension.class)
+	// ApplicationContext will be loaded from "classpath:/app-config.xml"
+	@ContextConfiguration("/app-config.xml")
+	@ActiveProfiles("dev")
+	class TransferServiceTest {
+
+		@Autowired
+		TransferService transferService;
+
+		@Test
+		void testTransferService() {
+			// test the transferService
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@ExtendWith(SpringExtension::class)
+	// ApplicationContext will be loaded from "classpath:/app-config.xml"
+	@ContextConfiguration("/app-config.xml")
+	@ActiveProfiles("dev")
+	class TransferServiceTest {
+
+		@Autowired
+		lateinit var transferService: TransferService
+
+		@Test
+		fun testTransferService() {
+			// test the transferService
+		}
+	}
+----
+======
+
+When `TransferServiceTest` is run, its `ApplicationContext` is loaded from the
+`app-config.xml` configuration file in the root of the classpath. If you inspect
+`app-config.xml`, you can see that the `accountRepository` bean has a dependency on a
+`dataSource` bean. However, `dataSource` is not defined as a top-level bean. Instead,
+`dataSource` is defined three times: in the `production` profile, in the `dev` profile,
+and in the `default` profile.
+
+By annotating `TransferServiceTest` with `@ActiveProfiles("dev")`, we instruct the Spring
+TestContext Framework to load the `ApplicationContext` with the active profiles set to
+`{"dev"}`. As a result, an embedded database is created and populated with test data, and
+the `accountRepository` bean is wired with a reference to the development `DataSource`.
+That is likely what we want in an integration test.
+
+It is sometimes useful to assign beans to a `default` profile. Beans within the default
+profile are included only when no other profile is specifically activated. You can use
+this to define "`fallback`" beans to be used in the application's default state. For
+example, you may explicitly provide a data source for `dev` and `production` profiles,
+but define an in-memory data source as a default when neither of these is active.
+
+The following code listings demonstrate how to implement the same configuration and
+integration test with `@Configuration` classes instead of XML:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@Profile("dev")
+	public class StandaloneDataConfig {
+
+		@Bean
+		public DataSource dataSource() {
+			return new EmbeddedDatabaseBuilder()
+				.setType(EmbeddedDatabaseType.HSQL)
+				.addScript("classpath:com/bank/config/sql/schema.sql")
+				.addScript("classpath:com/bank/config/sql/test-data.sql")
+				.build();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@Profile("dev")
+	class StandaloneDataConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			return EmbeddedDatabaseBuilder()
+					.setType(EmbeddedDatabaseType.HSQL)
+					.addScript("classpath:com/bank/config/sql/schema.sql")
+					.addScript("classpath:com/bank/config/sql/test-data.sql")
+					.build()
+		}
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@Profile("production")
+	public class JndiDataConfig {
+
+		@Bean(destroyMethod="")
+		public DataSource dataSource() throws Exception {
+			Context ctx = new InitialContext();
+			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@Profile("production")
+	class JndiDataConfig {
+
+		@Bean(destroyMethod = "")
+		fun dataSource(): DataSource {
+			val ctx = InitialContext()
+			return ctx.lookup("java:comp/env/jdbc/datasource") as DataSource
+		}
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@Profile("default")
+	public class DefaultDataConfig {
+
+		@Bean
+		public DataSource dataSource() {
+			return new EmbeddedDatabaseBuilder()
+				.setType(EmbeddedDatabaseType.HSQL)
+				.addScript("classpath:com/bank/config/sql/schema.sql")
+				.build();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@Profile("default")
+	class DefaultDataConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			return EmbeddedDatabaseBuilder()
+					.setType(EmbeddedDatabaseType.HSQL)
+					.addScript("classpath:com/bank/config/sql/schema.sql")
+					.build()
+		}
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class TransferServiceConfig {
+
+		@Autowired DataSource dataSource;
+
+		@Bean
+		public TransferService transferService() {
+			return new DefaultTransferService(accountRepository(), feePolicy());
+		}
+
+		@Bean
+		public AccountRepository accountRepository() {
+			return new JdbcAccountRepository(dataSource);
+		}
+
+		@Bean
+		public FeePolicy feePolicy() {
+			return new ZeroFeePolicy();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class TransferServiceConfig {
+
+		@Autowired
+		lateinit var dataSource: DataSource
+
+		@Bean
+		fun transferService(): TransferService {
+			return DefaultTransferService(accountRepository(), feePolicy())
+		}
+
+		@Bean
+		fun accountRepository(): AccountRepository {
+			return JdbcAccountRepository(dataSource)
+		}
+
+		@Bean
+		fun feePolicy(): FeePolicy {
+			return ZeroFeePolicy()
+		}
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitConfig({
+			TransferServiceConfig.class,
+			StandaloneDataConfig.class,
+			JndiDataConfig.class,
+			DefaultDataConfig.class})
+	@ActiveProfiles("dev")
+	class TransferServiceTest {
+
+		@Autowired
+		TransferService transferService;
+
+		@Test
+		void testTransferService() {
+			// test the transferService
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitConfig(
+			TransferServiceConfig::class,
+			StandaloneDataConfig::class,
+			JndiDataConfig::class,
+			DefaultDataConfig::class)
+	@ActiveProfiles("dev")
+	class TransferServiceTest {
+
+		@Autowired
+		lateinit var transferService: TransferService
+
+		@Test
+		fun testTransferService() {
+			// test the transferService
+		}
+	}
+----
+======
+
+In this variation, we have split the XML configuration into four independent
+`@Configuration` classes:
+
+* `TransferServiceConfig`: Acquires a `dataSource` through dependency injection by using
+  `@Autowired`.
+* `StandaloneDataConfig`: Defines a `dataSource` for an embedded database suitable for
+  developer tests.
+* `JndiDataConfig`: Defines a `dataSource` that is retrieved from JNDI in a production
+  environment.
+* `DefaultDataConfig`: Defines a `dataSource` for a default embedded database, in case no
+  profile is active.
+
+As with the XML-based configuration example, we still annotate `TransferServiceTest` with
+`@ActiveProfiles("dev")`, but this time we specify all four configuration classes by
+using the `@ContextConfiguration` annotation. The body of the test class itself remains
+completely unchanged.
+
+It is often the case that a single set of profiles is used across multiple test classes
+within a given project. Thus, to avoid duplicate declarations of the `@ActiveProfiles`
+annotation, you can declare `@ActiveProfiles` once on a base class, and subclasses
+automatically inherit the `@ActiveProfiles` configuration from the base class. In the
+following example, the declaration of `@ActiveProfiles` (as well as other annotations)
+has been moved to an abstract superclass, `AbstractIntegrationTest`:
+
+NOTE: As of Spring Framework 5.3, test configuration may also be inherited from enclosing
+classes. See xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] for details.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@SpringJUnitConfig({
+			TransferServiceConfig.class,
+			StandaloneDataConfig.class,
+			JndiDataConfig.class,
+			DefaultDataConfig.class})
+	@ActiveProfiles("dev")
+	abstract class AbstractIntegrationTest {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@SpringJUnitConfig(
+			TransferServiceConfig::class,
+			StandaloneDataConfig::class,
+			JndiDataConfig::class,
+			DefaultDataConfig::class)
+	@ActiveProfiles("dev")
+	abstract class AbstractIntegrationTest {
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// "dev" profile inherited from superclass
+	class TransferServiceTest extends AbstractIntegrationTest {
+
+		@Autowired
+		TransferService transferService;
+
+		@Test
+		void testTransferService() {
+			// test the transferService
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// "dev" profile inherited from superclass
+	class TransferServiceTest : AbstractIntegrationTest() {
+
+		@Autowired
+		lateinit var transferService: TransferService
+
+		@Test
+		fun testTransferService() {
+			// test the transferService
+		}
+	}
+----
+======
+
+`@ActiveProfiles` also supports an `inheritProfiles` attribute that can be used to
+disable the inheritance of active profiles, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// "dev" profile overridden with "production"
+	@ActiveProfiles(profiles = "production", inheritProfiles = false)
+	class ProductionTransferServiceTest extends AbstractIntegrationTest {
+		// test body
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// "dev" profile overridden with "production"
+	@ActiveProfiles("production", inheritProfiles = false)
+	class ProductionTransferServiceTest : AbstractIntegrationTest() {
+		// test body
+	}
+----
+======
+
+[[testcontext-ctx-management-env-profiles-ActiveProfilesResolver]]
+Furthermore, it is sometimes necessary to resolve active profiles for tests
+programmatically instead of declaratively -- for example, based on:
+
+* The current operating system.
+* Whether tests are being run on a continuous integration build server.
+* The presence of certain environment variables.
+* The presence of custom class-level annotations.
+* Other concerns.
+
+To resolve active bean definition profiles programmatically, you can implement
+a custom `ActiveProfilesResolver` and register it by using the `resolver`
+attribute of `@ActiveProfiles`. For further information, see the corresponding
+{api-spring-framework}/test/context/ActiveProfilesResolver.html[javadoc].
+The following example demonstrates how to implement and register a custom
+`OperatingSystemActiveProfilesResolver`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// "dev" profile overridden programmatically via a custom resolver
+	@ActiveProfiles(
+			resolver = OperatingSystemActiveProfilesResolver.class,
+			inheritProfiles = false)
+	class TransferServiceTest extends AbstractIntegrationTest {
+		// test body
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// "dev" profile overridden programmatically via a custom resolver
+	@ActiveProfiles(
+			resolver = OperatingSystemActiveProfilesResolver::class,
+			inheritProfiles = false)
+	class TransferServiceTest : AbstractIntegrationTest() {
+		// test body
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class OperatingSystemActiveProfilesResolver implements ActiveProfilesResolver {
+
+		@Override
+		public String[] resolve(Class<?> testClass) {
+			String profile = ...;
+			// determine the value of profile based on the operating system
+			return new String[] {profile};
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class OperatingSystemActiveProfilesResolver : ActiveProfilesResolver {
+
+		override fun resolve(testClass: Class<*>): Array<String> {
+			val profile: String = ...
+			// determine the value of profile based on the operating system
+			return arrayOf(profile)
+		}
+	}
+----
+======
+

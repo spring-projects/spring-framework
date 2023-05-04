@@ -1,0 +1,49 @@
+[[jmx-proxy]]
+= Accessing MBeans through Proxies
+
+Spring JMX lets you create proxies that re-route calls to MBeans that are registered in a
+local or remote `MBeanServer`. These proxies provide you with a standard Java interface,
+through which you can interact with your MBeans. The following code shows how to configure a
+proxy for an MBean running in a local `MBeanServer`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
+		<property name="objectName" value="bean:name=testBean"/>
+		<property name="proxyInterface" value="org.springframework.jmx.IJmxTestBean"/>
+	</bean>
+----
+
+In the preceding example, you can see that a proxy is created for the MBean registered under the
+`ObjectName` of `bean:name=testBean`. The set of interfaces that the proxy implements
+is controlled by the `proxyInterfaces` property, and the rules for mapping methods and
+properties on these interfaces to operations and attributes on the MBean are the same
+rules used by the `InterfaceBasedMBeanInfoAssembler`.
+
+The `MBeanProxyFactoryBean` can create a proxy to any MBean that is accessible through an
+`MBeanServerConnection`. By default, the local `MBeanServer` is located and used, but
+you can override this and provide an `MBeanServerConnection` that points to a remote
+`MBeanServer` to cater for proxies that point to remote MBeans:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="clientConnector"
+			class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+		<property name="serviceUrl" value="service:jmx:rmi://remotehost:9875"/>
+	</bean>
+
+	<bean id="proxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
+		<property name="objectName" value="bean:name=testBean"/>
+		<property name="proxyInterface" value="org.springframework.jmx.IJmxTestBean"/>
+		<property name="server" ref="clientConnector"/>
+	</bean>
+----
+
+In the preceding example, we create an `MBeanServerConnection` that points to a remote machine
+that uses the `MBeanServerConnectionFactoryBean`. This `MBeanServerConnection` is then
+passed to the `MBeanProxyFactoryBean` through the `server` property. The proxy that is
+created forwards all invocations to the `MBeanServer` through this
+`MBeanServerConnection`.
+
+
+

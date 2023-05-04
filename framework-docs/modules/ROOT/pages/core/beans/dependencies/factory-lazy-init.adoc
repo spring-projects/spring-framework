@@ -1,0 +1,42 @@
+[[beans-factory-lazy-init]]
+= Lazy-initialized Beans
+
+By default, `ApplicationContext` implementations eagerly create and configure all
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singleton] beans as part of the initialization
+process. Generally, this pre-instantiation is desirable, because errors in the
+configuration or surrounding environment are discovered immediately, as opposed to hours
+or even days later. When this behavior is not desirable, you can prevent
+pre-instantiation of a singleton bean by marking the bean definition as being
+lazy-initialized. A lazy-initialized bean tells the IoC container to create a bean
+instance when it is first requested, rather than at startup.
+
+In XML, this behavior is controlled by the `lazy-init` attribute on the `<bean/>`
+element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="lazy" class="com.something.ExpensiveToCreateBean" lazy-init="true"/>
+	<bean name="not.lazy" class="com.something.AnotherBean"/>
+----
+
+When the preceding configuration is consumed by an `ApplicationContext`, the `lazy` bean
+is not eagerly pre-instantiated when the `ApplicationContext` starts,
+whereas the `not.lazy` bean is eagerly pre-instantiated.
+
+However, when a lazy-initialized bean is a dependency of a singleton bean that is
+not lazy-initialized, the `ApplicationContext` creates the lazy-initialized bean at
+startup, because it must satisfy the singleton's dependencies. The lazy-initialized bean
+is injected into a singleton bean elsewhere that is not lazy-initialized.
+
+You can also control lazy-initialization at the container level by using the
+`default-lazy-init` attribute on the `<beans/>` element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans default-lazy-init="true">
+		<!-- no beans will be pre-instantiated... -->
+	</beans>
+----
+
+
+

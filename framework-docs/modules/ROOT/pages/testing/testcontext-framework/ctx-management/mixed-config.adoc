@@ -1,0 +1,33 @@
+[[testcontext-ctx-management-mixed-config]]
+= Mixing XML, Groovy Scripts, and Component Classes
+
+It may sometimes be desirable to mix XML configuration files, Groovy scripts, and
+component classes (typically `@Configuration` classes) to configure an
+`ApplicationContext` for your tests. For example, if you use XML configuration in
+production, you may decide that you want to use `@Configuration` classes to configure
+specific Spring-managed components for your tests, or vice versa.
+
+Furthermore, some third-party frameworks (such as Spring Boot) provide first-class
+support for loading an `ApplicationContext` from different types of resources
+simultaneously (for example, XML configuration files, Groovy scripts, and
+`@Configuration` classes). The Spring Framework, historically, has not supported this for
+standard deployments. Consequently, most of the `SmartContextLoader` implementations that
+the Spring Framework delivers in the `spring-test` module support only one resource type
+for each test context. However, this does not mean that you cannot use both. One
+exception to the general rule is that the `GenericGroovyXmlContextLoader` and
+`GenericGroovyXmlWebContextLoader` support both XML configuration files and Groovy
+scripts simultaneously. Furthermore, third-party frameworks may choose to support the
+declaration of both `locations` and `classes` through `@ContextConfiguration`, and, with
+the standard testing support in the TestContext framework, you have the following options.
+
+If you want to use resource locations (for example, XML or Groovy) and `@Configuration`
+classes to configure your tests, you must pick one as the entry point, and that one must
+include or import the other. For example, in XML or Groovy scripts, you can include
+`@Configuration` classes by using component scanning or defining them as normal Spring
+beans, whereas, in a `@Configuration` class, you can use `@ImportResource` to import XML
+configuration files or Groovy scripts. Note that this behavior is semantically equivalent
+to how you configure your application in production: In production configuration, you
+define either a set of XML or Groovy resource locations or a set of `@Configuration`
+classes from which your production `ApplicationContext` is loaded, but you still have the
+freedom to include or import the other type of configuration.
+

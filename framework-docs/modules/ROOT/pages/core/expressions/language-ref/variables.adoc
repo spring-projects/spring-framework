@@ -1,0 +1,101 @@
+[[expressions-ref-variables]]
+= Variables
+
+You can reference variables in the expression by using the `#variableName` syntax. Variables
+are set by using the `setVariable` method on `EvaluationContext` implementations.
+
+[NOTE]
+====
+Valid variable names must be composed of one or more of the following supported
+characters.
+
+* letters: `A` to `Z` and `a` to `z`
+* digits: `0` to `9`
+* underscore: `_`
+* dollar sign: `$`
+====
+
+The following example shows how to use variables.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	Inventor tesla = new Inventor("Nikola Tesla", "Serbian");
+
+	EvaluationContext context = SimpleEvaluationContext.forReadWriteDataBinding().build();
+	context.setVariable("newName", "Mike Tesla");
+
+	parser.parseExpression("name = #newName").getValue(context, tesla);
+	System.out.println(tesla.getName())  // "Mike Tesla"
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val tesla = Inventor("Nikola Tesla", "Serbian")
+
+	val context = SimpleEvaluationContext.forReadWriteDataBinding().build()
+	context.setVariable("newName", "Mike Tesla")
+
+	parser.parseExpression("name = #newName").getValue(context, tesla)
+	println(tesla.name)  // "Mike Tesla"
+----
+======
+
+
+[[expressions-this-root]]
+== The `#this` and `#root` Variables
+
+The `#this` variable is always defined and refers to the current evaluation object
+(against which unqualified references are resolved). The `#root` variable is always
+defined and refers to the root context object. Although `#this` may vary as components of
+an expression are evaluated, `#root` always refers to the root. The following examples
+show how to use the `#this` and `#root` variables:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	// create an array of integers
+	List<Integer> primes = new ArrayList<>();
+	primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
+
+	// create parser and set variable 'primes' as the array of integers
+	ExpressionParser parser = new SpelExpressionParser();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataAccess();
+	context.setVariable("primes", primes);
+
+	// all prime numbers > 10 from the list (using selection ?{...})
+	// evaluates to [11, 13, 17]
+	List<Integer> primesGreaterThanTen = (List<Integer>) parser.parseExpression(
+			"#primes.?[#this>10]").getValue(context);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	// create an array of integers
+	val primes = ArrayList<Int>()
+	primes.addAll(listOf(2, 3, 5, 7, 11, 13, 17))
+
+	// create parser and set variable 'primes' as the array of integers
+	val parser = SpelExpressionParser()
+	val context = SimpleEvaluationContext.forReadOnlyDataAccess()
+	context.setVariable("primes", primes)
+
+	// all prime numbers > 10 from the list (using selection ?{...})
+	// evaluates to [11, 13, 17]
+	val primesGreaterThanTen = parser.parseExpression(
+			"#primes.?[#this>10]").getValue(context) as List<Int>
+----
+======
+
+
+

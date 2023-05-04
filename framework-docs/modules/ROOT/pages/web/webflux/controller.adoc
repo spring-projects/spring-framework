@@ -1,0 +1,45 @@
+[[webflux-controller]]
+= Annotated Controllers
+
+[.small]#xref:web/webmvc/mvc-controller.adoc[See equivalent in the Servlet stack]#
+
+Spring WebFlux provides an annotation-based programming model, where `@Controller` and
+`@RestController` components use annotations to express request mappings, request input,
+handle exceptions, and more. Annotated controllers have flexible method signatures and
+do not have to extend base classes nor implement specific interfaces.
+
+The following listing shows a basic example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@RestController
+	public class HelloController {
+
+		@GetMapping("/hello")
+		public String handle() {
+			return "Hello WebFlux";
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@RestController
+	class HelloController {
+
+		@GetMapping("/hello")
+		fun handle() = "Hello WebFlux"
+	}
+----
+======
+
+In the preceding example, the method returns a `String` to be written to the response body.
+
+
+

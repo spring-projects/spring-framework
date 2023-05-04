@@ -1,0 +1,71 @@
+[[aop-concise-proxy]]
+= Concise Proxy Definitions
+
+Especially when defining transactional proxies, you may end up with many similar proxy
+definitions. The use of parent and child bean definitions, along with inner bean
+definitions, can result in much cleaner and more concise proxy definitions.
+
+First, we create a parent, template, bean definition for the proxy, as follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="txProxyTemplate" abstract="true"
+			class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+----
+
+This is never instantiated itself, so it can actually be incomplete. Then, each proxy
+that needs to be created is a child bean definition, which wraps the target of the
+proxy as an inner bean definition, since the target is never used on its own anyway.
+The following example shows such a child bean:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="myService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="org.springframework.samples.MyServiceImpl">
+			</bean>
+		</property>
+	</bean>
+----
+
+You can override properties from the parent template. In the following example,
+we override the transaction propagation settings:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="mySpecialService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="org.springframework.samples.MySpecialServiceImpl">
+			</bean>
+		</property>
+		<property name="transactionAttributes">
+			<props>
+				<prop key="get*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="find*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="load*">PROPAGATION_REQUIRED,readOnly</prop>
+				<prop key="store*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</property>
+	</bean>
+----
+
+Note that in the parent bean example, we explicitly marked the parent bean definition as
+being abstract by setting the `abstract` attribute to `true`, as described
+xref:core/beans/child-bean-definitions.adoc[previously], so that it may not actually ever be
+instantiated. Application contexts (but not simple bean factories), by default,
+pre-instantiate all singletons. Therefore, it is important (at least for singleton beans)
+that, if you have a (parent) bean definition that you intend to use only as a template,
+and this definition specifies a class, you must make sure to set the `abstract`
+attribute to `true`. Otherwise, the application context actually tries to
+pre-instantiate it.
+
+
+
+

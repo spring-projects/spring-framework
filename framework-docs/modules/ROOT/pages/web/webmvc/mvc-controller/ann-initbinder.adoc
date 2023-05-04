@@ -1,0 +1,110 @@
+[[mvc-ann-initbinder]]
+= `DataBinder`
+
+[.small]#xref:web/webflux/controller/ann-initbinder.adoc[See equivalent in the Reactive stack]#
+
+`@Controller` or `@ControllerAdvice` classes can have `@InitBinder` methods that
+initialize instances of `WebDataBinder`, and those, in turn, can:
+
+* Bind request parameters (that is, form or query data) to a model object.
+* Convert String-based request values (such as request parameters, path variables,
+headers, cookies, and others) to the target type of controller method arguments.
+* Format model object values as `String` values when rendering HTML forms.
+
+`@InitBinder` methods can register controller-specific `java.beans.PropertyEditor` or
+Spring `Converter` and `Formatter` components. In addition, you can use the
+xref:web/webmvc/mvc-config/conversion.adoc[MVC config] to register `Converter` and `Formatter`
+types in a globally shared `FormattingConversionService`.
+
+`@InitBinder` methods support many of the same arguments that `@RequestMapping` methods
+do, except for `@ModelAttribute` (command object) arguments. Typically, they are declared
+with a `WebDataBinder` argument (for registrations) and a `void` return value.
+The following listing shows an example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class FormController {
+
+		@InitBinder // <1>
+		public void initBinder(WebDataBinder binder) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dateFormat.setLenient(false);
+			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+		}
+
+		// ...
+	}
+----
+======
+<1> Defining an `@InitBinder` method.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	class FormController {
+
+		@InitBinder // <1>
+		fun initBinder(binder: WebDataBinder) {
+			val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+			dateFormat.isLenient = false
+			binder.registerCustomEditor(Date::class.java, CustomDateEditor(dateFormat, false))
+		}
+
+		// ...
+	}
+----
+<1> Defining an `@InitBinder` method.
+
+Alternatively, when you use a `Formatter`-based setup through a shared
+`FormattingConversionService`, you can re-use the same approach and register
+controller-specific `Formatter` implementations, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class FormController {
+
+		@InitBinder // <1>
+		protected void initBinder(WebDataBinder binder) {
+			binder.addCustomFormatter(new DateFormatter("yyyy-MM-dd"));
+		}
+
+		// ...
+	}
+----
+======
+<1> Defining an `@InitBinder` method on a custom formatter.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Controller
+	class FormController {
+
+		@InitBinder // <1>
+		protected fun initBinder(binder: WebDataBinder) {
+			binder.addCustomFormatter(DateFormatter("yyyy-MM-dd"))
+		}
+
+		// ...
+	}
+----
+<1> Defining an `@InitBinder` method on a custom formatter.
+
+[[mvc-ann-initbinder-model-design]]
+== Model Design
+[.small]#xref:web/webflux/controller/ann-initbinder.adoc#webflux-ann-initbinder-model-design[See equivalent in the Reactive stack]#
+
+include::partial$web/web-data-binding-model-design.adoc[]
+
+

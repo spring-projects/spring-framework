@@ -1,0 +1,264 @@
+[[beans-java-configuration-annotation]]
+= Using the `@Configuration` annotation
+
+`@Configuration` is a class-level annotation indicating that an object is a source of
+bean definitions. `@Configuration` classes declare beans through `@Bean`-annotated
+methods. Calls to `@Bean` methods on `@Configuration` classes can also be used to define
+inter-bean dependencies. See xref:core/beans/java/basic-concepts.adoc[Basic Concepts: `@Bean` and `@Configuration`] for a general introduction.
+
+
+[[beans-java-injecting-dependencies]]
+== Injecting Inter-bean Dependencies
+
+When beans have dependencies on one another, expressing that dependency is as simple
+as having one bean method call another, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public BeanOne beanOne() {
+			return new BeanOne(beanTwo());
+		}
+
+		@Bean
+		public BeanTwo beanTwo() {
+			return new BeanTwo();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun beanOne() = BeanOne(beanTwo())
+
+		@Bean
+		fun beanTwo() = BeanTwo()
+	}
+----
+======
+
+In the preceding example, `beanOne` receives a reference to `beanTwo` through constructor
+injection.
+
+NOTE: This method of declaring inter-bean dependencies works only when the `@Bean` method
+is declared within a `@Configuration` class. You cannot declare inter-bean dependencies
+by using plain `@Component` classes.
+
+
+
+[[beans-java-method-injection]]
+== Lookup Method Injection
+
+As noted earlier, xref:core/beans/dependencies/factory-method-injection.adoc[lookup method injection] is an
+advanced feature that you should use rarely. It is useful in cases where a
+singleton-scoped bean has a dependency on a prototype-scoped bean. Using Java for this
+type of configuration provides a natural means for implementing this pattern. The
+following example shows how to use lookup method injection:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public abstract class CommandManager {
+		public Object process(Object commandState) {
+			// grab a new instance of the appropriate Command interface
+			Command command = createCommand();
+			// set the state on the (hopefully brand new) Command instance
+			command.setState(commandState);
+			return command.execute();
+		}
+
+		// okay... but where is the implementation of this method?
+		protected abstract Command createCommand();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	abstract class CommandManager {
+		fun process(commandState: Any): Any {
+			// grab a new instance of the appropriate Command interface
+			val command = createCommand()
+			// set the state on the (hopefully brand new) Command instance
+			command.setState(commandState)
+			return command.execute()
+		}
+
+		// okay... but where is the implementation of this method?
+		protected abstract fun createCommand(): Command
+	}
+----
+======
+
+By using Java configuration, you can create a subclass of `CommandManager` where
+the abstract `createCommand()` method is overridden in such a way that it looks up a new
+(prototype) command object. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Bean
+	@Scope("prototype")
+	public AsyncCommand asyncCommand() {
+		AsyncCommand command = new AsyncCommand();
+		// inject dependencies here as required
+		return command;
+	}
+
+	@Bean
+	public CommandManager commandManager() {
+		// return new anonymous implementation of CommandManager with createCommand()
+		// overridden to return a new prototype Command object
+		return new CommandManager() {
+			protected Command createCommand() {
+				return asyncCommand();
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Bean
+	@Scope("prototype")
+	fun asyncCommand(): AsyncCommand {
+		val command = AsyncCommand()
+		// inject dependencies here as required
+		return command
+	}
+
+	@Bean
+	fun commandManager(): CommandManager {
+		// return new anonymous implementation of CommandManager with createCommand()
+		// overridden to return a new prototype Command object
+		return object : CommandManager() {
+			override fun createCommand(): Command {
+				return asyncCommand()
+			}
+		}
+	}
+----
+======
+
+
+[[beans-java-further-information-java-config]]
+== Further Information About How Java-based Configuration Works Internally
+
+Consider the following example, which shows a `@Bean` annotated method being called twice:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public ClientService clientService1() {
+			ClientServiceImpl clientService = new ClientServiceImpl();
+			clientService.setClientDao(clientDao());
+			return clientService;
+		}
+
+		@Bean
+		public ClientService clientService2() {
+			ClientServiceImpl clientService = new ClientServiceImpl();
+			clientService.setClientDao(clientDao());
+			return clientService;
+		}
+
+		@Bean
+		public ClientDao clientDao() {
+			return new ClientDaoImpl();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun clientService1(): ClientService {
+			return ClientServiceImpl().apply {
+				clientDao = clientDao()
+			}
+		}
+
+		@Bean
+		fun clientService2(): ClientService {
+			return ClientServiceImpl().apply {
+				clientDao = clientDao()
+			}
+		}
+
+		@Bean
+		fun clientDao(): ClientDao {
+			return ClientDaoImpl()
+		}
+	}
+----
+======
+
+`clientDao()` has been called once in `clientService1()` and once in `clientService2()`.
+Since this method creates a new instance of `ClientDaoImpl` and returns it, you would
+normally expect to have two instances (one for each service). That definitely would be
+problematic: In Spring, instantiated beans have a `singleton` scope by default. This is
+where the magic comes in: All `@Configuration` classes are subclassed at startup-time
+with `CGLIB`. In the subclass, the child method checks the container first for any
+cached (scoped) beans before it calls the parent method and creates a new instance.
+
+NOTE: The behavior could be different according to the scope of your bean. We are talking
+about singletons here.
+
+[NOTE]
+====
+It is not necessary to add CGLIB to your classpath because CGLIB classes are repackaged
+under the `org.springframework.cglib` package and included directly within the
+`spring-core` JAR.
+====
+
+[TIP]
+====
+There are a few restrictions due to the fact that CGLIB dynamically adds features at
+startup-time. In particular, configuration classes must not be final. However, any
+constructors are allowed on configuration classes, including the use of `@Autowired` or a
+single non-default constructor declaration for default injection.
+
+If you prefer to avoid any CGLIB-imposed limitations, consider declaring your `@Bean`
+methods on non-`@Configuration` classes (for example, on plain `@Component` classes
+instead) or by annotating your configuration class with
+`@Configuration(proxyBeanMethods = false)`. Cross-method calls between `@Bean` methods
+are then not intercepted, so you have to exclusively rely on dependency injection at the
+constructor or method level there.
+====
+
+
+

@@ -1,0 +1,493 @@
+[[beans-factory-extension]]
+= Container Extension Points
+
+Typically, an application developer does not need to subclass `ApplicationContext`
+implementation classes. Instead, the Spring IoC container can be extended by plugging in
+implementations of special integration interfaces. The next few sections describe these
+integration interfaces.
+
+
+
+[[beans-factory-extension-bpp]]
+== Customizing Beans by Using a `BeanPostProcessor`
+
+The `BeanPostProcessor` interface defines callback methods that you can implement to
+provide your own (or override the container's default) instantiation logic, dependency
+resolution logic, and so forth. If you want to implement some custom logic after the
+Spring container finishes instantiating, configuring, and initializing a bean, you can
+plug in one or more custom `BeanPostProcessor` implementations.
+
+You can configure multiple `BeanPostProcessor` instances, and you can control the order
+in which these `BeanPostProcessor` instances run by setting the `order` property.
+You can set this property only if the `BeanPostProcessor` implements the `Ordered`
+interface. If you write your own `BeanPostProcessor`, you should consider implementing
+the `Ordered` interface, too. For further details, see the javadoc of the
+{api-spring-framework}/beans/factory/config/BeanPostProcessor.html[`BeanPostProcessor`]
+and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces. See also the note
+on xref:core/beans/factory-extension.adoc#beans-factory-programmatically-registering-beanpostprocessors[programmatic registration of `BeanPostProcessor` instances]
+.
+
+[NOTE]
+====
+`BeanPostProcessor` instances operate on bean (or object) instances. That is,
+the Spring IoC container instantiates a bean instance and then `BeanPostProcessor`
+instances do their work.
+
+`BeanPostProcessor` instances are scoped per-container. This is relevant only if you
+use container hierarchies. If you define a `BeanPostProcessor` in one container,
+it post-processes only the beans in that container. In other words, beans that are
+defined in one container are not post-processed by a `BeanPostProcessor` defined in
+another container, even if both containers are part of the same hierarchy.
+
+To change the actual bean definition (that is, the blueprint that defines the bean),
+you instead need to use a `BeanFactoryPostProcessor`, as described in
+xref:core/beans/factory-extension.adoc#beans-factory-extension-factory-postprocessors[Customizing Configuration Metadata with a `BeanFactoryPostProcessor`].
+====
+
+The `org.springframework.beans.factory.config.BeanPostProcessor` interface consists of
+exactly two callback methods. When such a class is registered as a post-processor with
+the container, for each bean instance that is created by the container, the
+post-processor gets a callback from the container both before container
+initialization methods (such as `InitializingBean.afterPropertiesSet()` or any
+declared `init` method) are called, and after any bean initialization callbacks.
+The post-processor can take any action with the bean instance, including ignoring the
+callback completely. A bean post-processor typically checks for callback interfaces,
+or it may wrap a bean with a proxy. Some Spring AOP infrastructure classes are
+implemented as bean post-processors in order to provide proxy-wrapping logic.
+
+An `ApplicationContext` automatically detects any beans that are defined in the
+configuration metadata that implement the `BeanPostProcessor` interface. The
+`ApplicationContext` registers these beans as post-processors so that they can be called
+later, upon bean creation. Bean post-processors can be deployed in the container in the
+same fashion as any other beans.
+
+Note that, when declaring a `BeanPostProcessor` by using an `@Bean` factory method on a
+configuration class, the return type of the factory method should be the implementation
+class itself or at least the `org.springframework.beans.factory.config.BeanPostProcessor`
+interface, clearly indicating the post-processor nature of that bean. Otherwise, the
+`ApplicationContext` cannot autodetect it by type before fully creating it.
+Since a `BeanPostProcessor` needs to be instantiated early in order to apply to the
+initialization of other beans in the context, this early type detection is critical.
+
+[[beans-factory-programmatically-registering-beanpostprocessors]]
+.Programmatically registering `BeanPostProcessor` instances
+NOTE: While the recommended approach for `BeanPostProcessor` registration is through
+`ApplicationContext` auto-detection (as described earlier), you can register them
+programmatically against a `ConfigurableBeanFactory` by using the `addBeanPostProcessor`
+method. This can be useful when you need to evaluate conditional logic before
+registration or even for copying bean post processors across contexts in a hierarchy.
+Note, however, that `BeanPostProcessor` instances added programmatically do not respect
+the `Ordered` interface. Here, it is the order of registration that dictates the order
+of execution. Note also that `BeanPostProcessor` instances registered programmatically
+are always processed before those registered through auto-detection, regardless of any
+explicit ordering.
+
+.`BeanPostProcessor` instances and AOP auto-proxying
+[NOTE]
+====
+Classes that implement the `BeanPostProcessor` interface are special and are treated
+differently by the container. All `BeanPostProcessor` instances and beans that they
+directly reference are instantiated on startup, as part of the special startup phase
+of the `ApplicationContext`. Next, all `BeanPostProcessor` instances are registered
+in a sorted fashion and applied to all further beans in the container. Because AOP
+auto-proxying is implemented as a `BeanPostProcessor` itself, neither `BeanPostProcessor`
+instances nor the beans they directly reference are eligible for auto-proxying and,
+thus, do not have aspects woven into them.
+
+For any such bean, you should see an informational log message: `Bean someBean is not
+eligible for getting processed by all BeanPostProcessor interfaces (for example: not
+eligible for auto-proxying)`.
+
+If you have beans wired into your `BeanPostProcessor` by using autowiring or
+`@Resource` (which may fall back to autowiring), Spring might access unexpected beans
+when searching for type-matching dependency candidates and, therefore, make them
+ineligible for auto-proxying or other kinds of bean post-processing. For example, if you
+have a dependency annotated with `@Resource` where the field or setter name does not
+directly correspond to the declared name of a bean and no name attribute is used,
+Spring accesses other beans for matching them by type.
+====
+
+The following examples show how to write, register, and use `BeanPostProcessor` instances
+in an `ApplicationContext`.
+
+
+[[beans-factory-extension-bpp-examples-hw]]
+=== Example: Hello World, `BeanPostProcessor`-style
+
+This first example illustrates basic usage. The example shows a custom
+`BeanPostProcessor` implementation that invokes the `toString()` method of each bean as
+it is created by the container and prints the resulting string to the system console.
+
+The following listing shows the custom `BeanPostProcessor` implementation class definition:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	package scripting;
+
+	import org.springframework.beans.factory.config.BeanPostProcessor;
+
+	public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor {
+
+		// simply return the instantiated bean as-is
+		public Object postProcessBeforeInitialization(Object bean, String beanName) {
+			return bean; // we could potentially return any object reference here...
+		}
+
+		public Object postProcessAfterInitialization(Object bean, String beanName) {
+			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
+			return bean;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	package scripting
+
+	import org.springframework.beans.factory.config.BeanPostProcessor
+
+	class InstantiationTracingBeanPostProcessor : BeanPostProcessor {
+
+		// simply return the instantiated bean as-is
+		override fun postProcessBeforeInitialization(bean: Any, beanName: String): Any? {
+			return bean // we could potentially return any object reference here...
+		}
+
+		override fun postProcessAfterInitialization(bean: Any, beanName: String): Any? {
+			println("Bean '$beanName' created : $bean")
+			return bean
+		}
+	}
+----
+======
+
+The following `beans` element uses the `InstantiationTracingBeanPostProcessor`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:lang="http://www.springframework.org/schema/lang"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/lang
+			https://www.springframework.org/schema/lang/spring-lang.xsd">
+
+		<lang:groovy id="messenger"
+				script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
+			<lang:property name="message" value="Fiona Apple Is Just So Dreamy."/>
+		</lang:groovy>
+
+		<!--
+		when the above bean (messenger) is instantiated, this custom
+		BeanPostProcessor implementation will output the fact to the system console
+		-->
+		<bean class="scripting.InstantiationTracingBeanPostProcessor"/>
+
+	</beans>
+----
+
+Notice how the `InstantiationTracingBeanPostProcessor` is merely defined. It does not
+even have a name, and, because it is a bean, it can be dependency-injected as you would any
+other bean. (The preceding configuration also defines a bean that is backed by a Groovy
+script. The Spring dynamic language support is detailed in the chapter entitled
+xref:languages/dynamic.adoc[Dynamic Language Support].)
+
+The following Java application runs the preceding code and configuration:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import org.springframework.context.ApplicationContext;
+	import org.springframework.context.support.ClassPathXmlApplicationContext;
+	import org.springframework.scripting.Messenger;
+
+	public final class Boot {
+
+		public static void main(final String[] args) throws Exception {
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("scripting/beans.xml");
+			Messenger messenger = ctx.getBean("messenger", Messenger.class);
+			System.out.println(messenger);
+		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+    import org.springframework.beans.factory.getBean
+
+	fun main() {
+		val ctx = ClassPathXmlApplicationContext("scripting/beans.xml")
+		val messenger = ctx.getBean<Messenger>("messenger")
+		println(messenger)
+	}
+----
+======
+
+The output of the preceding application resembles the following:
+
+[literal,subs="verbatim,quotes"]
+----
+Bean 'messenger' created : org.springframework.scripting.groovy.GroovyMessenger@272961
+org.springframework.scripting.groovy.GroovyMessenger@272961
+----
+
+
+[[beans-factory-extension-bpp-examples-aabpp]]
+=== Example: The `AutowiredAnnotationBeanPostProcessor`
+
+Using callback interfaces or annotations in conjunction with a custom `BeanPostProcessor`
+implementation is a common means of extending the Spring IoC container. An example is
+Spring's `AutowiredAnnotationBeanPostProcessor` -- a `BeanPostProcessor` implementation
+that ships with the Spring distribution and autowires annotated fields, setter methods,
+and arbitrary config methods.
+
+
+
+[[beans-factory-extension-factory-postprocessors]]
+== Customizing Configuration Metadata with a `BeanFactoryPostProcessor`
+
+The next extension point that we look at is the
+`org.springframework.beans.factory.config.BeanFactoryPostProcessor`. The semantics of
+this interface are similar to those of the `BeanPostProcessor`, with one major
+difference: `BeanFactoryPostProcessor` operates on the bean configuration metadata.
+That is, the Spring IoC container lets a `BeanFactoryPostProcessor` read the
+configuration metadata and potentially change it _before_ the container instantiates
+any beans other than `BeanFactoryPostProcessor` instances.
+
+You can configure multiple `BeanFactoryPostProcessor` instances, and you can control the order in
+which these `BeanFactoryPostProcessor` instances run by setting the `order` property.
+However, you can only set this property if the `BeanFactoryPostProcessor` implements the
+`Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
+consider implementing the `Ordered` interface, too. See the javadoc of the
+{api-spring-framework}/beans/factory/config/BeanFactoryPostProcessor.html[`BeanFactoryPostProcessor`]
+and {api-spring-framework}/core/Ordered.html[`Ordered`] interfaces for more details.
+
+[NOTE]
+====
+If you want to change the actual bean instances (that is, the objects that are created
+from the configuration metadata), then you instead need to use a `BeanPostProcessor`
+(described earlier in xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[Customizing Beans by Using a `BeanPostProcessor`]). While it is technically possible
+to work with bean instances within a `BeanFactoryPostProcessor` (for example, by using
+`BeanFactory.getBean()`), doing so causes premature bean instantiation, violating the
+standard container lifecycle. This may cause negative side effects, such as bypassing
+bean post processing.
+
+Also, `BeanFactoryPostProcessor` instances are scoped per-container. This is only relevant
+if you use container hierarchies. If you define a `BeanFactoryPostProcessor` in one
+container, it is applied only to the bean definitions in that container. Bean definitions
+in one container are not post-processed by `BeanFactoryPostProcessor` instances in another
+container, even if both containers are part of the same hierarchy.
+====
+
+A bean factory post-processor is automatically run when it is declared inside an
+`ApplicationContext`, in order to apply changes to the configuration metadata that
+define the container. Spring includes a number of predefined bean factory
+post-processors, such as `PropertyOverrideConfigurer` and
+`PropertySourcesPlaceholderConfigurer`. You can also use a custom `BeanFactoryPostProcessor`
+-- for example, to register custom property editors.
+
+An `ApplicationContext` automatically detects any beans that are deployed into it that
+implement the `BeanFactoryPostProcessor` interface. It uses these beans as bean factory
+post-processors, at the appropriate time. You can deploy these post-processor beans as
+you would any other bean.
+
+NOTE: As with ``BeanPostProcessor``s , you typically do not want to configure
+``BeanFactoryPostProcessor``s for lazy initialization. If no other bean references a
+`Bean(Factory)PostProcessor`, that post-processor will not get instantiated at all.
+Thus, marking it for lazy initialization will be ignored, and the
+`Bean(Factory)PostProcessor` will be instantiated eagerly even if you set the
+`default-lazy-init` attribute to `true` on the declaration of your `<beans />` element.
+
+
+[[beans-factory-placeholderconfigurer]]
+=== Example: The Class Name Substitution `PropertySourcesPlaceholderConfigurer`
+
+You can use the `PropertySourcesPlaceholderConfigurer` to externalize property values
+from a bean definition in a separate file by using the standard Java `Properties` format.
+Doing so enables the person deploying an application to customize environment-specific
+properties, such as database URLs and passwords, without the complexity or risk of
+modifying the main XML definition file or files for the container.
+
+Consider the following XML-based configuration metadata fragment, where a `DataSource`
+with placeholder values is defined:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+		<property name="locations" value="classpath:com/something/jdbc.properties"/>
+	</bean>
+
+	<bean id="dataSource" destroy-method="close"
+			class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+	</bean>
+----
+
+The example shows properties configured from an external `Properties` file. At runtime,
+a `PropertySourcesPlaceholderConfigurer` is applied to the metadata that replaces some
+properties of the DataSource. The values to replace are specified as placeholders of the
+form pass:q[`${property-name}`], which follows the Ant and log4j and JSP EL style.
+
+The actual values come from another file in the standard Java `Properties` format:
+
+[literal,subs="verbatim,quotes"]
+----
+jdbc.driverClassName=org.hsqldb.jdbcDriver
+jdbc.url=jdbc:hsqldb:hsql://production:9002
+jdbc.username=sa
+jdbc.password=root
+----
+
+Therefore, the `${jdbc.username}` string is replaced at runtime with the value, 'sa', and
+the same applies for other placeholder values that match keys in the properties file.
+The `PropertySourcesPlaceholderConfigurer` checks for placeholders in most properties and
+attributes of a bean definition. Furthermore, you can customize the placeholder prefix and suffix.
+
+With the `context` namespace introduced in Spring 2.5, you can configure property placeholders
+with a dedicated configuration element. You can provide one or more locations as a
+comma-separated list in the `location` attribute, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<context:property-placeholder location="classpath:com/something/jdbc.properties"/>
+----
+
+The `PropertySourcesPlaceholderConfigurer` not only looks for properties in the `Properties`
+file you specify. By default, if it cannot find a property in the specified properties files,
+it checks against Spring `Environment` properties and regular Java `System` properties.
+
+[TIP]
+=====
+You can use the `PropertySourcesPlaceholderConfigurer` to substitute class names, which
+is sometimes useful when you have to pick a particular implementation class at runtime.
+The following example shows how to do so:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="org.springframework.beans.factory.config.PropertySourcesPlaceholderConfigurer">
+		<property name="locations">
+			<value>classpath:com/something/strategy.properties</value>
+		</property>
+		<property name="properties">
+			<value>custom.strategy.class=com.something.DefaultStrategy</value>
+		</property>
+	</bean>
+
+	<bean id="serviceStrategy" class="${custom.strategy.class}"/>
+----
+
+If the class cannot be resolved at runtime to a valid class, resolution of the bean
+fails when it is about to be created, which is during the `preInstantiateSingletons()`
+phase of an `ApplicationContext` for a non-lazy-init bean.
+=====
+
+
+[[beans-factory-overrideconfigurer]]
+=== Example: The `PropertyOverrideConfigurer`
+
+The `PropertyOverrideConfigurer`, another bean factory post-processor, resembles the
+`PropertySourcesPlaceholderConfigurer`, but unlike the latter, the original definitions
+can have default values or no values at all for bean properties. If an overriding
+`Properties` file does not have an entry for a certain bean property, the default
+context definition is used.
+
+Note that the bean definition is not aware of being overridden, so it is not
+immediately obvious from the XML definition file that the override configurer is being
+used. In case of multiple `PropertyOverrideConfigurer` instances that define different
+values for the same bean property, the last one wins, due to the overriding mechanism.
+
+Properties file configuration lines take the following format:
+
+[literal,subs="verbatim,quotes"]
+----
+beanName.property=value
+----
+
+The following listing shows an example of the format:
+
+[literal,subs="verbatim,quotes"]
+----
+dataSource.driverClassName=com.mysql.jdbc.Driver
+dataSource.url=jdbc:mysql:mydb
+----
+
+This example file can be used with a container definition that contains a bean called
+`dataSource` that has `driver` and `url` properties.
+
+Compound property names are also supported, as long as every component of the path
+except the final property being overridden is already non-null (presumably initialized
+by the constructors). In the following example, the `sammy` property of the `bob` property of the `fred` property of the `tom` bean
+is set to the scalar value `123`:
+
+[literal,subs="verbatim,quotes"]
+----
+tom.fred.bob.sammy=123
+----
+
+
+NOTE: Specified override values are always literal values. They are not translated into
+bean references. This convention also applies when the original value in the XML bean
+definition specifies a bean reference.
+
+With the `context` namespace introduced in Spring 2.5, it is possible to configure
+property overriding with a dedicated configuration element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<context:property-override location="classpath:override.properties"/>
+----
+
+
+
+[[beans-factory-extension-factorybean]]
+== Customizing Instantiation Logic with a `FactoryBean`
+
+You can implement the `org.springframework.beans.factory.FactoryBean` interface for objects that
+are themselves factories.
+
+The `FactoryBean` interface is a point of pluggability into the Spring IoC container's
+instantiation logic. If you have complex initialization code that is better expressed in
+Java as opposed to a (potentially) verbose amount of XML, you can create your own
+`FactoryBean`, write the complex initialization inside that class, and then plug your
+custom `FactoryBean` into the container.
+
+The `FactoryBean<T>` interface provides three methods:
+
+* `T getObject()`: Returns an instance of the object this factory creates. The
+  instance can possibly be shared, depending on whether this factory returns singletons
+  or prototypes.
+* `boolean isSingleton()`: Returns `true` if this `FactoryBean` returns singletons or
+  `false` otherwise. The default implementation of this method returns `true`.
+* `Class<?> getObjectType()`: Returns the object type returned by the `getObject()` method
+  or `null` if the type is not known in advance.
+
+The `FactoryBean` concept and interface are used in a number of places within the Spring
+Framework. More than 50 implementations of the `FactoryBean` interface ship with Spring
+itself.
+
+When you need to ask a container for an actual `FactoryBean` instance itself instead of
+the bean it produces, prefix the bean's `id` with the ampersand symbol (`&`) when
+calling the `getBean()` method of the `ApplicationContext`. So, for a given `FactoryBean`
+with an `id` of `myBean`, invoking `getBean("myBean")` on the container returns the
+product of the `FactoryBean`, whereas invoking `getBean("&myBean")` returns the
+`FactoryBean` instance itself.
+
+
+

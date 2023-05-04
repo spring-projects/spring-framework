@@ -1,0 +1,329 @@
+[[aop-pfb]]
+= Using the `ProxyFactoryBean` to Create AOP Proxies
+
+If you use the Spring IoC container (an `ApplicationContext` or `BeanFactory`) for your
+business objects (and you should be!), you want to use one of Spring's AOP
+`FactoryBean` implementations. (Remember that a factory bean introduces a layer of indirection, letting
+it create objects of a different type.)
+
+NOTE: The Spring AOP support also uses factory beans under the covers.
+
+The basic way to create an AOP proxy in Spring is to use the
+`org.springframework.aop.framework.ProxyFactoryBean`. This gives complete control over
+the pointcuts, any advice that applies, and their ordering. However, there are simpler
+options that are preferable if you do not need such control.
+
+
+
+[[aop-pfb-1]]
+== Basics
+
+The `ProxyFactoryBean`, like other Spring `FactoryBean` implementations, introduces a
+level of indirection. If you define a `ProxyFactoryBean` named `foo`, objects that
+reference `foo` do not see the `ProxyFactoryBean` instance itself but an object
+created by the implementation of the `getObject()` method in the `ProxyFactoryBean` . This
+method creates an AOP proxy that wraps a target object.
+
+One of the most important benefits of using a `ProxyFactoryBean` or another IoC-aware
+class to create AOP proxies is that advice and pointcuts can also be
+managed by IoC. This is a powerful feature, enabling certain approaches that are hard to
+achieve with other AOP frameworks. For example, an advice may itself reference
+application objects (besides the target, which should be available in any AOP
+framework), benefiting from all the pluggability provided by Dependency Injection.
+
+
+
+[[aop-pfb-2]]
+== JavaBean Properties
+
+In common with most `FactoryBean` implementations provided with Spring, the
+`ProxyFactoryBean` class is itself a JavaBean. Its properties are used to:
+
+* Specify the target you want to proxy.
+* Specify whether to use CGLIB (described later and see also xref:core/aop-api/pfb.adoc#aop-pfb-proxy-types[JDK- and CGLIB-based proxies]).
+
+Some key properties are inherited from `org.springframework.aop.framework.ProxyConfig`
+(the superclass for all AOP proxy factories in Spring). These key properties include
+the following:
+
+* `proxyTargetClass`: `true` if the target class is to be proxied, rather than the
+  target class's interfaces. If this property value is set to `true`, then CGLIB proxies
+  are created (but see also xref:core/aop-api/pfb.adoc#aop-pfb-proxy-types[JDK- and CGLIB-based proxies]).
+* `optimize`: Controls whether or not aggressive optimizations are applied to proxies
+  created through CGLIB. You should not blithely use this setting unless you fully
+  understand how the relevant AOP proxy handles optimization. This is currently used
+  only for CGLIB proxies. It has no effect with JDK dynamic proxies.
+* `frozen`: If a proxy configuration is `frozen`, changes to the configuration are
+  no longer allowed. This is useful both as a slight optimization and for those cases
+  when you do not want callers to be able to manipulate the proxy (through the `Advised`
+  interface) after the proxy has been created. The default value of this property is
+  `false`, so changes (such as adding additional advice) are allowed.
+* `exposeProxy`: Determines whether or not the current proxy should be exposed in a
+  `ThreadLocal` so that it can be accessed by the target. If a target needs to obtain
+  the proxy and the `exposeProxy` property is set to `true`, the target can use the
+  `AopContext.currentProxy()` method.
+
+Other properties specific to `ProxyFactoryBean` include the following:
+
+* `proxyInterfaces`: An array of `String` interface names. If this is not supplied, a CGLIB
+  proxy for the target class is used (but see also xref:core/aop-api/pfb.adoc#aop-pfb-proxy-types[JDK- and CGLIB-based proxies]).
+* `interceptorNames`: A `String` array of `Advisor`, interceptor, or other advice names to
+  apply. Ordering is significant, on a first come-first served basis. That is to say
+  that the first interceptor in the list is the first to be able to intercept the
+  invocation.
++
+The names are bean names in the current factory, including bean names from ancestor
+factories. You cannot mention bean references here, since doing so results in the
+`ProxyFactoryBean` ignoring the singleton setting of the advice.
++
+You can append an interceptor name with an asterisk (`*`). Doing so results in the
+application of all advisor beans with names that start with the part before the asterisk
+to be applied. You can find an example of using this feature in xref:core/aop-api/pfb.adoc#aop-global-advisors[Using "`Global`" Advisors].
+
+* singleton: Whether or not the factory should return a single object, no matter how
+  often the `getObject()` method is called. Several `FactoryBean` implementations offer
+  such a method. The default value is `true`. If you want to use stateful advice - for
+  example, for stateful mixins - use prototype advice along with a singleton value of
+  `false`.
+
+
+
+[[aop-pfb-proxy-types]]
+== JDK- and CGLIB-based proxies
+
+This section serves as the definitive documentation on how the `ProxyFactoryBean`
+chooses to create either a JDK-based proxy or a CGLIB-based proxy for a particular target
+object (which is to be proxied).
+
+NOTE: The behavior of the `ProxyFactoryBean` with regard to creating JDK- or CGLIB-based
+proxies changed between versions 1.2.x and 2.0 of Spring. The `ProxyFactoryBean` now
+exhibits similar semantics with regard to auto-detecting interfaces as those of the
+`TransactionProxyFactoryBean` class.
+
+If the class of a target object that is to be proxied (hereafter simply referred to as
+the target class) does not implement any interfaces, a CGLIB-based proxy is
+created. This is the easiest scenario, because JDK proxies are interface-based, and no
+interfaces means JDK proxying is not even possible. You can plug in the target bean
+and specify the list of interceptors by setting the `interceptorNames` property. Note that a
+CGLIB-based proxy is created even if the `proxyTargetClass` property of the
+`ProxyFactoryBean` has been set to `false`. (Doing so makes no sense and is best
+removed from the bean definition, because it is, at best, redundant, and, at worst
+confusing.)
+
+If the target class implements one (or more) interfaces, the type of proxy that is
+created depends on the configuration of the `ProxyFactoryBean`.
+
+If the `proxyTargetClass` property of the `ProxyFactoryBean` has been set to `true`,
+a CGLIB-based proxy is created. This makes sense and is in keeping with the
+principle of least surprise. Even if the `proxyInterfaces` property of the
+`ProxyFactoryBean` has been set to one or more fully qualified interface names, the fact
+that the `proxyTargetClass` property is set to `true` causes CGLIB-based
+proxying to be in effect.
+
+If the `proxyInterfaces` property of the `ProxyFactoryBean` has been set to one or more
+fully qualified interface names, a JDK-based proxy is created. The created
+proxy implements all of the interfaces that were specified in the `proxyInterfaces`
+property. If the target class happens to implement a whole lot more interfaces than
+those specified in the `proxyInterfaces` property, that is all well and good, but those
+additional interfaces are not implemented by the returned proxy.
+
+If the `proxyInterfaces` property of the `ProxyFactoryBean` has not been set, but
+the target class does implement one (or more) interfaces, the
+`ProxyFactoryBean` auto-detects the fact that the target class does actually
+implement at least one interface, and a JDK-based proxy is created. The interfaces
+that are actually proxied are all of the interfaces that the target class
+implements. In effect, this is the same as supplying a list of each and every
+interface that the target class implements to the `proxyInterfaces` property. However,
+it is significantly less work and less prone to typographical errors.
+
+
+
+[[aop-api-proxying-intf]]
+== Proxying Interfaces
+
+Consider a simple example of `ProxyFactoryBean` in action. This example involves:
+
+* A target bean that is proxied. This is the `personTarget` bean definition in
+  the example.
+* An `Advisor` and an `Interceptor` used to provide advice.
+* An AOP proxy bean definition to specify the target object (the `personTarget` bean),
+  the interfaces to proxy, and the advice to apply.
+
+The following listing shows the example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="personTarget" class="com.mycompany.PersonImpl">
+		<property name="name" value="Tony"/>
+		<property name="age" value="51"/>
+	</bean>
+
+	<bean id="myAdvisor" class="com.mycompany.MyAdvisor">
+		<property name="someProperty" value="Custom string property value"/>
+	</bean>
+
+	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor">
+	</bean>
+
+	<bean id="person"
+		class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces" value="com.mycompany.Person"/>
+
+		<property name="target" ref="personTarget"/>
+		<property name="interceptorNames">
+			<list>
+				<value>myAdvisor</value>
+				<value>debugInterceptor</value>
+			</list>
+		</property>
+	</bean>
+----
+
+Note that the `interceptorNames` property takes a list of `String`, which holds the bean names of the
+interceptors or advisors in the current factory. You can use advisors, interceptors, before, after
+returning, and throws advice objects. The ordering of advisors is significant.
+
+NOTE: You might be wondering why the list does not hold bean references. The reason for this is
+that, if the singleton property of the `ProxyFactoryBean` is set to `false`, it must be able to
+return independent proxy instances. If any of the advisors is itself a prototype, an
+independent instance would need to be returned, so it is necessary to be able to obtain
+an instance of the prototype from the factory. Holding a reference is not sufficient.
+
+The `person` bean definition shown earlier can be used in place of a `Person` implementation, as
+follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	Person person = (Person) factory.getBean("person");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val person = factory.getBean("person") as Person;
+----
+======
+
+Other beans in the same IoC context can express a strongly typed dependency on it, as
+with an ordinary Java object. The following example shows how to do so:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="personUser" class="com.mycompany.PersonUser">
+		<property name="person"><ref bean="person"/></property>
+	</bean>
+----
+
+The `PersonUser` class in this example exposes a property of type `Person`. As far as
+it is concerned, the AOP proxy can be used transparently in place of a "`real`" person
+implementation. However, its class would be a dynamic proxy class. It would be possible
+to cast it to the `Advised` interface (discussed later).
+
+You can conceal the distinction between target and proxy by using an anonymous
+inner bean. Only the `ProxyFactoryBean` definition is different. The
+advice is included only for completeness. The following example shows how to use an
+anonymous inner bean:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="myAdvisor" class="com.mycompany.MyAdvisor">
+		<property name="someProperty" value="Custom string property value"/>
+	</bean>
+
+	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
+
+	<bean id="person" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces" value="com.mycompany.Person"/>
+		<!-- Use inner bean, not local reference to target -->
+		<property name="target">
+			<bean class="com.mycompany.PersonImpl">
+				<property name="name" value="Tony"/>
+				<property name="age" value="51"/>
+			</bean>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>myAdvisor</value>
+				<value>debugInterceptor</value>
+			</list>
+		</property>
+	</bean>
+----
+
+Using an anonymous inner bean has the advantage that there is only one object of type `Person`. This is useful if we want
+to prevent users of the application context from obtaining a reference to the un-advised
+object or need to avoid any ambiguity with Spring IoC autowiring. There is also,
+arguably, an advantage in that the `ProxyFactoryBean` definition is self-contained.
+However, there are times when being able to obtain the un-advised target from the
+factory might actually be an advantage (for example, in certain test scenarios).
+
+
+
+[[aop-api-proxying-class]]
+== Proxying Classes
+
+What if you need to proxy a class, rather than one or more interfaces?
+
+Imagine that in our earlier example, there was no `Person` interface. We needed to advise
+a class called `Person` that did not implement any business interface. In this case, you
+can configure Spring to use CGLIB proxying rather than dynamic proxies. To do so, set the
+`proxyTargetClass` property on the `ProxyFactoryBean` shown earlier to `true`. While it is best to
+program to interfaces rather than classes, the ability to advise classes that do not
+implement interfaces can be useful when working with legacy code. (In general, Spring
+is not prescriptive. While it makes it easy to apply good practices, it avoids forcing a
+particular approach.)
+
+If you want to, you can force the use of CGLIB in any case, even if you do have
+interfaces.
+
+CGLIB proxying works by generating a subclass of the target class at runtime. Spring
+configures this generated subclass to delegate method calls to the original target. The
+subclass is used to implement the Decorator pattern, weaving in the advice.
+
+CGLIB proxying should generally be transparent to users. However, there are some issues
+to consider:
+
+* `final` classes cannot be proxied, because they cannot be extended.
+* `final` methods cannot be advised, because they cannot be overridden.
+* `private` methods cannot be advised, because they cannot be overridden.
+
+NOTE: There is no need to add CGLIB to your classpath. CGLIB is repackaged and included
+in the `spring-core` JAR. In other words, CGLIB-based AOP works "out of the box", as do
+JDK dynamic proxies.
+
+There is little performance difference between CGLIB proxies and dynamic proxies.
+Performance should not be a decisive consideration in this case.
+
+
+
+[[aop-global-advisors]]
+== Using "`Global`" Advisors
+
+By appending an asterisk to an interceptor name, all advisors with bean names that match
+the part before the asterisk are added to the advisor chain. This can come in handy
+if you need to add a standard set of "`global`" advisors. The following example defines
+two global advisors:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target" ref="service"/>
+		<property name="interceptorNames">
+			<list>
+				<value>global*</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="global_debug" class="org.springframework.aop.interceptor.DebugInterceptor"/>
+	<bean id="global_performance" class="org.springframework.aop.interceptor.PerformanceMonitorInterceptor"/>
+----
+
+
+
+

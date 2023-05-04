@@ -1,0 +1,280 @@
+[[jms-annotated]]
+= Annotation-driven Listener Endpoints
+
+The easiest way to receive a message asynchronously is to use the annotated listener
+endpoint infrastructure. In a nutshell, it lets you expose a method of a managed
+bean as a JMS listener endpoint. The following example shows how to use it:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Component
+	public class MyService {
+
+		@JmsListener(destination = "myDestination")
+		public void processOrder(String data) { ... }
+	}
+----
+
+The idea of the preceding example is that, whenever a message is available on the
+`jakarta.jms.Destination` `myDestination`, the `processOrder` method is invoked
+accordingly (in this case, with the content of the JMS message, similar to
+what the xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[`MessageListenerAdapter`]
+provides).
+
+The annotated endpoint infrastructure creates a message listener container
+behind the scenes for each annotated method, by using a `JmsListenerContainerFactory`.
+Such a container is not registered against the application context but can be easily
+located for management purposes by using the `JmsListenerEndpointRegistry` bean.
+
+TIP: `@JmsListener` is a repeatable annotation on Java 8, so you can associate
+several JMS destinations with the same method by adding additional `@JmsListener`
+declarations to it.
+
+
+[[jms-annotated-support]]
+== Enable Listener Endpoint Annotations
+
+To enable support for `@JmsListener` annotations, you can add `@EnableJms` to one of
+your `@Configuration` classes, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig {
+
+		@Bean
+		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+			DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+			factory.setConnectionFactory(connectionFactory());
+			factory.setDestinationResolver(destinationResolver());
+			factory.setSessionTransacted(true);
+			factory.setConcurrency("3-10");
+			return factory;
+		}
+	}
+----
+
+By default, the infrastructure looks for a bean named `jmsListenerContainerFactory`
+as the source for the factory to use to create message listener containers. In this
+case (and ignoring the JMS infrastructure setup), you can invoke the `processOrder`
+method with a core poll size of three threads and a maximum pool size of ten threads.
+
+You can customize the listener container factory to use for each annotation or you can
+configure an explicit default by implementing the `JmsListenerConfigurer` interface.
+The default is required only if at least one endpoint is registered without a specific
+container factory. See the javadoc of classes that implement
+{api-spring-framework}/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`]
+for details and examples.
+
+If you prefer xref:integration/jms/namespace.adoc[XML configuration], you can use the `<jms:annotation-driven>`
+element, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<jms:annotation-driven/>
+
+	<bean id="jmsListenerContainerFactory"
+			class="org.springframework.jms.config.DefaultJmsListenerContainerFactory">
+		<property name="connectionFactory" ref="connectionFactory"/>
+		<property name="destinationResolver" ref="destinationResolver"/>
+		<property name="sessionTransacted" value="true"/>
+		<property name="concurrency" value="3-10"/>
+	</bean>
+----
+
+
+[[jms-annotated-programmatic-registration]]
+== Programmatic Endpoint Registration
+
+`JmsListenerEndpoint` provides a model of a JMS endpoint and is responsible for configuring
+the container for that model. The infrastructure lets you programmatically configure endpoints
+in addition to the ones that are detected by the `JmsListener` annotation.
+The following example shows how to do so:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig implements JmsListenerConfigurer {
+
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();
+			endpoint.setId("myJmsEndpoint");
+			endpoint.setDestination("anotherQueue");
+			endpoint.setMessageListener(message -> {
+				// processing
+			});
+			registrar.registerEndpoint(endpoint);
+		}
+	}
+----
+
+In the preceding example, we used `SimpleJmsListenerEndpoint`, which provides the actual
+`MessageListener` to invoke. However, you could also build your own endpoint variant
+to describe a custom invocation mechanism.
+
+Note that you could skip the use of `@JmsListener` altogether
+and programmatically register only your endpoints through `JmsListenerConfigurer`.
+
+
+[[jms-annotated-method-signature]]
+== Annotated Endpoint Method Signature
+
+So far, we have been injecting a simple `String` in our endpoint, but it can actually
+have a very flexible method signature. In the following example, we rewrite it to inject the `Order` with
+a custom header:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Component
+	public class MyService {
+
+		@JmsListener(destination = "myDestination")
+		public void processOrder(Order order, @Header("order_type") String orderType) {
+			...
+		}
+	}
+----
+
+The main elements you can inject in JMS listener endpoints are as follows:
+
+* The raw `jakarta.jms.Message` or any of its subclasses (provided that it
+  matches the incoming message type).
+* The `jakarta.jms.Session` for optional access to the native JMS API (for example, for sending
+  a custom reply).
+* The `org.springframework.messaging.Message` that represents the incoming JMS message.
+  Note that this message holds both the custom and the standard headers (as defined
+  by `JmsHeaders`).
+* `@Header`-annotated method arguments to extract a specific header value, including
+  standard JMS headers.
+* A `@Headers`-annotated argument that must also be assignable to `java.util.Map` for
+  getting access to all headers.
+* A non-annotated element that is not one of the supported types (`Message` or
+  `Session`) is considered to be the payload. You can make that explicit by annotating
+  the parameter with `@Payload`. You can also turn on validation by adding an extra
+  `@Valid`.
+
+The ability to inject Spring's `Message` abstraction is particularly useful to benefit
+from all the information stored in the transport-specific message without relying on
+transport-specific API. The following example shows how to do so:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	public void processOrder(Message<Order> order) { ... }
+----
+
+Handling of method arguments is provided by `DefaultMessageHandlerMethodFactory`, which you can
+further customize to support additional method arguments. You can customize the conversion and validation
+support there as well.
+
+For instance, if we want to make sure our `Order` is valid before processing it, we can
+annotate the payload with `@Valid` and configure the necessary validator, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig implements JmsListenerConfigurer {
+
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			registrar.setMessageHandlerMethodFactory(myJmsHandlerMethodFactory());
+		}
+
+		@Bean
+		public DefaultMessageHandlerMethodFactory myHandlerMethodFactory() {
+			DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
+			factory.setValidator(myValidator());
+			return factory;
+		}
+	}
+----
+
+
+[[jms-annotated-response]]
+== Response Management
+
+The existing support in xref:integration/jms/receiving.adoc#jms-receiving-async-message-listener-adapter[`MessageListenerAdapter`]
+already lets your method have a non-`void` return type. When that is the case, the result of
+the invocation is encapsulated in a `jakarta.jms.Message`, sent either in the destination specified
+in the `JMSReplyTo` header of the original message or in the default destination configured on
+the listener. You can now set that default destination by using the `@SendTo` annotation of the
+messaging abstraction.
+
+Assuming that our `processOrder` method should now return an `OrderStatus`, we can write it
+to automatically send a response, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	@SendTo("status")
+	public OrderStatus processOrder(Order order) {
+		// order processing
+		return status;
+	}
+----
+
+TIP: If you have several `@JmsListener`-annotated methods, you can also place the `@SendTo`
+annotation at the class level to share a default reply destination.
+
+If you need to set additional headers in a transport-independent manner, you can return a
+`Message` instead, with a method similar to the following:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	@SendTo("status")
+	public Message<OrderStatus> processOrder(Order order) {
+		// order processing
+		return MessageBuilder
+				.withPayload(status)
+				.setHeader("code", 1234)
+				.build();
+	}
+----
+
+If you need to compute the response destination at runtime, you can encapsulate your response
+in a `JmsResponse` instance that also provides the destination to use at runtime. We can rewrite the previous
+example as follows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	public JmsResponse<Message<OrderStatus>> processOrder(Order order) {
+		// order processing
+		Message<OrderStatus> response = MessageBuilder
+				.withPayload(status)
+				.setHeader("code", 1234)
+				.build();
+		return JmsResponse.forQueue(response, "status");
+	}
+----
+
+Finally, if you need to specify some QoS values for the response such as the priority or
+the time to live, you can configure the `JmsListenerContainerFactory` accordingly,
+as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableJms
+	public class AppConfig {
+
+		@Bean
+		public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+			DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+			factory.setConnectionFactory(connectionFactory());
+			QosSettings replyQosSettings = new QosSettings();
+			replyQosSettings.setPriority(2);
+			replyQosSettings.setTimeToLive(10000);
+			factory.setReplyQosSettings(replyQosSettings);
+			return factory;
+		}
+	}
+----
+
+
+

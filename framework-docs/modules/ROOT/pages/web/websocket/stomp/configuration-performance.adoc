@@ -1,0 +1,163 @@
+[[websocket-stomp-configuration-performance]]
+= Performance
+
+There is no silver bullet when it comes to performance. Many factors
+affect it, including the size and volume of messages, whether application
+methods perform work that requires blocking, and external factors
+(such as network speed and other issues). The goal of this section is to provide
+an overview of the available configuration options along with some thoughts
+on how to reason about scaling.
+
+In a messaging application, messages are passed through channels for asynchronous
+executions that are backed by thread pools. Configuring such an application requires
+good knowledge of the channels and the flow of messages. Therefore, it is
+recommended to review xref:web/websocket/stomp/message-flow.adoc[Flow of Messages].
+
+The obvious place to start is to configure the thread pools that back the
+`clientInboundChannel` and the `clientOutboundChannel`. By default, both
+are configured at twice the number of available processors.
+
+If the handling of messages in annotated methods is mainly CPU-bound, the
+number of threads for the `clientInboundChannel` should remain close to the
+number of processors. If the work they do is more IO-bound and requires blocking
+or waiting on a database or other external system, the thread pool size
+probably needs to be increased.
+
+[NOTE]
+====
+`ThreadPoolExecutor` has three important properties: the core thread pool size,
+the max thread pool size, and the capacity for the queue to store
+tasks for which there are no available threads.
+
+A common point of confusion is that configuring the core pool size (for example, 10)
+and max pool size (for example, 20) results in a thread pool with 10 to 20 threads.
+In fact, if the capacity is left at its default value of Integer.MAX_VALUE,
+the thread pool never increases beyond the core pool size, since
+all additional tasks are queued.
+
+See the javadoc of `ThreadPoolExecutor` to learn how these properties work and
+understand the various queuing strategies.
+====
+
+On the `clientOutboundChannel` side, it is all about sending messages to WebSocket
+clients. If clients are on a fast network, the number of threads should
+remain close to the number of available processors. If they are slow or on
+low bandwidth, they take longer to consume messages and put a burden on the
+thread pool. Therefore, increasing the thread pool size becomes necessary.
+
+While the workload for the `clientInboundChannel` is possible to predict --
+after all, it is based on what the application does -- how to configure the
+"clientOutboundChannel" is harder, as it is based on factors beyond
+the control of the application. For this reason, two additional
+properties relate to the sending of messages: `sendTimeLimit`
+and `sendBufferSizeLimit`. You can use those methods to configure how long a
+send is allowed to take and how much data can be buffered when sending
+messages to a client.
+
+The general idea is that, at any given time, only a single thread can be used
+to send to a client. All additional messages, meanwhile, get buffered, and you
+can use these properties to decide how long sending a message is allowed to
+take and how much data can be buffered in the meantime. See the javadoc and
+documentation of the XML schema for important additional details.
+
+The following example shows a possible configuration:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+			registration.setSendTimeLimit(15 * 1000).setSendBufferSizeLimit(512 * 1024);
+		}
+
+		// ...
+
+	}
+----
+
+The following example shows the XML configuration equivalent of the preceding example:
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:message-broker>
+			<websocket:transport send-timeout="15000" send-buffer-size="524288" />
+			<!-- ... -->
+		</websocket:message-broker>
+
+	</beans>
+----
+
+You can also use the WebSocket transport configuration shown earlier to configure the
+maximum allowed size for incoming STOMP messages. In theory, a WebSocket
+message can be almost unlimited in size. In practice, WebSocket servers impose
+limits -- for example, 8K on Tomcat and 64K on Jetty. For this reason, STOMP clients
+(such as the JavaScript https://github.com/JSteunou/webstomp-client[webstomp-client]
+and others) split larger STOMP messages at 16K boundaries and send them as multiple
+WebSocket  messages, which requires the server to buffer and re-assemble.
+
+Spring's STOMP-over-WebSocket support does this ,so applications can configure the
+maximum size for STOMP messages irrespective of WebSocket server-specific message
+sizes. Keep in mind that the WebSocket message size is automatically
+adjusted, if necessary, to ensure they can carry 16K WebSocket messages at a
+minimum.
+
+The following example shows one possible configuration:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+			registration.setMessageSizeLimit(128 * 1024);
+		}
+
+		// ...
+
+	}
+----
+
+The following example shows the XML configuration equivalent of the preceding example:
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:message-broker>
+			<websocket:transport message-size="131072" />
+			<!-- ... -->
+		</websocket:message-broker>
+
+	</beans>
+----
+
+An important point about scaling involves using multiple application instances.
+Currently, you cannot do that with the simple broker.
+However, when you use a full-featured broker (such as RabbitMQ), each application
+instance connects to the broker, and messages broadcast from one application
+instance can be broadcast through the broker to WebSocket clients connected
+through any other application instances.
+
+
+

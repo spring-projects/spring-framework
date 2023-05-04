@@ -1,0 +1,232 @@
+[[aop-targetsource]]
+= Using `TargetSource` Implementations
+
+Spring offers the concept of a `TargetSource`, expressed in the
+`org.springframework.aop.TargetSource` interface. This interface is responsible for
+returning the "`target object`" that implements the join point. The `TargetSource`
+implementation is asked for a target instance each time the AOP proxy handles a method
+invocation.
+
+Developers who use Spring AOP do not normally need to work directly with `TargetSource` implementations, but
+this provides a powerful means of supporting pooling, hot swappable, and other
+sophisticated targets. For example, a pooling `TargetSource` can return a different target
+instance for each invocation, by using a pool to manage instances.
+
+If you do not specify a `TargetSource`, a default implementation is used to wrap a
+local object. The same target is returned for each invocation (as you would expect).
+
+The rest of this section describes the standard target sources provided with Spring and how you can use them.
+
+TIP: When using a custom target source, your target will usually need to be a prototype
+rather than a singleton bean definition. This allows Spring to create a new target
+instance when required.
+
+
+
+[[aop-ts-swap]]
+== Hot-swappable Target Sources
+
+The `org.springframework.aop.target.HotSwappableTargetSource` exists to let the target
+of an AOP proxy be switched while letting callers keep their references to it.
+
+Changing the target source's target takes effect immediately. The
+`HotSwappableTargetSource` is thread-safe.
+
+You can change the target by using the `swap()` method on HotSwappableTargetSource, as the follow example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	HotSwappableTargetSource swapper = (HotSwappableTargetSource) beanFactory.getBean("swapper");
+	Object oldTarget = swapper.swap(newTarget);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val swapper = beanFactory.getBean("swapper") as HotSwappableTargetSource
+	val oldTarget = swapper.swap(newTarget)
+----
+======
+
+The following example shows the required XML definitions:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="initialTarget" class="mycompany.OldTarget"/>
+
+	<bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource">
+		<constructor-arg ref="initialTarget"/>
+	</bean>
+
+	<bean id="swappable" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="targetSource" ref="swapper"/>
+	</bean>
+----
+
+The preceding `swap()` call changes the target of the swappable bean. Clients that hold a
+reference to that bean are unaware of the change but immediately start hitting
+the new target.
+
+Although this example does not add any advice (it is not necessary to add advice to
+use a `TargetSource`), any `TargetSource` can be used in conjunction with
+arbitrary advice.
+
+
+
+[[aop-ts-pool]]
+== Pooling Target Sources
+
+Using a pooling target source provides a similar programming model to stateless session
+EJBs, in which a pool of identical instances is maintained, with method invocations
+going to free objects in the pool.
+
+A crucial difference between Spring pooling and SLSB pooling is that Spring pooling can
+be applied to any POJO. As with Spring in general, this service can be applied in a
+non-invasive way.
+
+Spring provides support for Commons Pool 2.2, which provides a
+fairly efficient pooling implementation. You need the `commons-pool` Jar on your
+application's classpath to use this feature. You can also subclass
+`org.springframework.aop.target.AbstractPoolingTargetSource` to support any other
+pooling API.
+
+NOTE: Commons Pool 1.5+ is also supported but is deprecated as of Spring Framework 4.2.
+
+The following listing shows an example configuration:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="businessObjectTarget" class="com.mycompany.MyBusinessObject"
+			scope="prototype">
+		... properties omitted
+	</bean>
+
+	<bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
+		<property name="targetBeanName" value="businessObjectTarget"/>
+		<property name="maxSize" value="25"/>
+	</bean>
+
+	<bean id="businessObject" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="targetSource" ref="poolTargetSource"/>
+		<property name="interceptorNames" value="myInterceptor"/>
+	</bean>
+----
+
+Note that the target object (`businessObjectTarget` in the preceding example) must be a
+prototype. This lets the `PoolingTargetSource` implementation create new instances
+of the target to grow the pool as necessary. See the {api-spring-framework}/aop/target/AbstractPoolingTargetSource.html[javadoc of
+`AbstractPoolingTargetSource`] and the concrete subclass you wish to use for information
+about its properties. `maxSize` is the most basic and is always guaranteed to be present.
+
+In this case, `myInterceptor` is the name of an interceptor that would need to be
+defined in the same IoC context. However, you need not specify interceptors to
+use pooling. If you want only pooling and no other advice, do not set the
+`interceptorNames` property at all.
+
+You can configure Spring to be able to cast any pooled object to the
+`org.springframework.aop.target.PoolingConfig` interface, which exposes information
+about the configuration and current size of the pool through an introduction. You
+need to define an advisor similar to the following:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetObject" ref="poolTargetSource"/>
+		<property name="targetMethod" value="getPoolingConfigMixin"/>
+	</bean>
+----
+
+This advisor is obtained by calling a convenience method on the
+`AbstractPoolingTargetSource` class, hence the use of `MethodInvokingFactoryBean`. This
+advisor's name (`poolConfigAdvisor`, here) must be in the list of interceptors names in
+the `ProxyFactoryBean` that exposes the pooled object.
+
+The cast is defined as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	PoolingConfig conf = (PoolingConfig) beanFactory.getBean("businessObject");
+	System.out.println("Max pool size is " + conf.getMaxSize());
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val conf = beanFactory.getBean("businessObject") as PoolingConfig
+	println("Max pool size is " + conf.maxSize)
+----
+======
+
+NOTE: Pooling stateless service objects is not usually necessary. We do not believe it should
+be the default choice, as most stateless objects are naturally thread safe, and instance
+pooling is problematic if resources are cached.
+
+Simpler pooling is available by using auto-proxying. You can set the `TargetSource` implementations
+used by any auto-proxy creator.
+
+
+
+[[aop-ts-prototype]]
+== Prototype Target Sources
+
+Setting up a "`prototype`" target source is similar to setting up a pooling `TargetSource`. In this
+case, a new instance of the target is created on every method invocation. Although
+the cost of creating a new object is not high in a modern JVM, the cost of wiring up the
+new object (satisfying its IoC dependencies) may be more expensive. Thus, you should not
+use this approach without very good reason.
+
+To do this, you could modify the `poolTargetSource` definition shown earlier as follows
+(we also changed the name, for clarity):
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="prototypeTargetSource" class="org.springframework.aop.target.PrototypeTargetSource">
+		<property name="targetBeanName" ref="businessObjectTarget"/>
+	</bean>
+----
+
+The only property is the name of the target bean. Inheritance is used in the
+`TargetSource` implementations to ensure consistent naming. As with the pooling target
+source, the target bean must be a prototype bean definition.
+
+
+
+[[aop-ts-threadlocal]]
+== `ThreadLocal` Target Sources
+
+`ThreadLocal` target sources are useful if you need an object to be created for each
+incoming request (per thread that is). The concept of a `ThreadLocal` provides a JDK-wide
+facility to transparently store a resource alongside a thread. Setting up a
+`ThreadLocalTargetSource` is pretty much the same as was explained for the other types
+of target source, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="threadlocalTargetSource" class="org.springframework.aop.target.ThreadLocalTargetSource">
+		<property name="targetBeanName" value="businessObjectTarget"/>
+	</bean>
+----
+
+NOTE: `ThreadLocal` instances come with serious issues (potentially resulting in memory leaks) when
+incorrectly using them in multi-threaded and multi-classloader environments. You
+should always consider wrapping a `ThreadLocal` in some other class and never directly use
+the `ThreadLocal` itself (except in the wrapper class). Also, you should
+always remember to correctly set and unset (where the latter simply involves a call to
+`ThreadLocal.set(null)`) the resource local to the thread. Unsetting should be done in
+any case, since not unsetting it might result in problematic behavior. Spring's
+`ThreadLocal` support does this for you and should always be considered in favor of using
+`ThreadLocal` instances without other proper handling code.
+
+
+
+

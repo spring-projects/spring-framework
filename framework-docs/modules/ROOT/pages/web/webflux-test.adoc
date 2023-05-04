@@ -1,0 +1,12 @@
+[[webflux-test]]
+= Testing
+[.small]#xref:web/webmvc-test.adoc[Same in Spring MVC]#
+
+The `spring-test` module provides mock implementations of `ServerHttpRequest`,
+`ServerHttpResponse`, and `ServerWebExchange`.
+See xref:testing/unit.adoc#mock-objects-web-reactive[Spring Web Reactive] for a
+discussion of mock objects.
+
+xref:testing/webtestclient.adoc[`WebTestClient`] builds on these mock request and
+response objects to provide support for testing WebFlux applications without an HTTP
+server. You can use the `WebTestClient` for end-to-end integration tests, too.

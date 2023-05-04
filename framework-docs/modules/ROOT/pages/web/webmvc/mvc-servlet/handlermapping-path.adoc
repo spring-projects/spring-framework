@@ -1,0 +1,52 @@
+[[mvc-handlermapping-path]]
+= Path Matching
+
+The Servlet API exposes the full request path as `requestURI` and further sub-divides it
+into `contextPath`, `servletPath`, and `pathInfo` whose values vary depending on how a
+Servlet is mapped. From these inputs, Spring MVC needs to determine the lookup path to
+use for mapping handlers, which should exclude the `contextPath` and any `servletMapping`
+prefix, if applicable.
+
+The `servletPath` and `pathInfo` are decoded and that makes them impossible to compare
+directly to the full `requestURI` in order to derive the lookupPath and that makes it
+necessary to decode the `requestURI`. However this introduces its own issues because the
+path may contain encoded reserved characters such as `"/"` or `";"` that can in turn
+alter the structure of the path after they are decoded which can also lead to security
+issues. In addition, Servlet containers may normalize the `servletPath` to varying
+degrees which makes it further impossible to perform `startsWith` comparisons against
+the `requestURI`.
+
+This is why it is best to avoid reliance on the `servletPath` which comes with the
+prefix-based `servletPath` mapping type. If the `DispatcherServlet` is mapped as the
+default Servlet with `"/"` or otherwise without a prefix with `"/*"` and the Servlet
+container is 4.0+ then Spring MVC is able to detect the Servlet mapping type and avoid
+use of the `servletPath` and `pathInfo` altogether. On a 3.1 Servlet container,
+assuming the same Servlet mapping types, the equivalent can be achieved by providing
+a `UrlPathHelper` with `alwaysUseFullPath=true` via xref:web/webmvc/mvc-config/path-matching.adoc[Path Matching] in
+the MVC config.
+
+Fortunately the default Servlet mapping `"/"` is a good choice. However, there is still
+an issue in that the `requestURI` needs to be decoded to make it possible to compare to
+controller mappings. This is again undesirable because of the potential to decode
+reserved characters that alter the path structure. If such characters are not expected,
+then you can reject them (like the Spring Security HTTP firewall), or you can configure
+`UrlPathHelper` with `urlDecode=false` but controller mappings will need to match to the
+encoded path which may not always work well. Furthermore, sometimes the
+`DispatcherServlet` needs to share the URL space with another Servlet and may need to
+be mapped by prefix.
+
+The above issues are addressed when using `PathPatternParser` and parsed patterns, as
+an alternative to String path matching with `AntPathMatcher`. The `PathPatternParser` has
+been available for use in Spring MVC from version 5.3, and is enabled by default from
+version 6.0. Unlike `AntPathMatcher` which needs either the lookup path decoded or the
+controller mapping encoded, a parsed `PathPattern` matches to a parsed representation
+of the path called `RequestPath`, one path segment at a time. This allows decoding and
+sanitizing path segment values individually without the risk of altering the structure
+of the path. Parsed `PathPattern` also supports the use of `servletPath` prefix mapping
+as long as a Servlet path mapping is used and the prefix is kept simple, i.e. it has no
+encoded characters. For pattern syntax details and comparison, see
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-pattern-comparison[Pattern Comparison].
+
+
+
+

@@ -1,0 +1,843 @@
+[[beans-java-composing-configuration-classes]]
+= Composing Java-based Configurations
+
+Spring's Java-based configuration feature lets you compose annotations, which can reduce
+the complexity of your configuration.
+
+
+[[beans-java-using-import]]
+== Using the `@Import` Annotation
+
+Much as the `<import/>` element is used within Spring XML files to aid in modularizing
+configurations, the `@Import` annotation allows for loading `@Bean` definitions from
+another configuration class, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class ConfigA {
+
+		@Bean
+		public A a() {
+			return new A();
+		}
+	}
+
+	@Configuration
+	@Import(ConfigA.class)
+	public class ConfigB {
+
+		@Bean
+		public B b() {
+			return new B();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class ConfigA {
+
+		@Bean
+		fun a() = A()
+	}
+
+	@Configuration
+	@Import(ConfigA::class)
+	class ConfigB {
+
+		@Bean
+		fun b() = B()
+	}
+----
+======
+
+Now, rather than needing to specify both `ConfigA.class` and `ConfigB.class` when
+instantiating the context, only `ConfigB` needs to be supplied explicitly, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigB.class);
+
+		// now both beans A and B will be available...
+		A a = ctx.getBean(A.class);
+		B b = ctx.getBean(B.class);
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext(ConfigB::class.java)
+
+		// now both beans A and B will be available...
+		val a = ctx.getBean<A>()
+		val b = ctx.getBean<B>()
+	}
+----
+======
+
+This approach simplifies container instantiation, as only one class needs to be dealt
+with, rather than requiring you to remember a potentially large number of
+`@Configuration` classes during construction.
+
+TIP: As of Spring Framework 4.2, `@Import` also supports references to regular component
+classes, analogous to the `AnnotationConfigApplicationContext.register` method.
+This is particularly useful if you want to avoid component scanning, by using a few
+configuration classes as entry points to explicitly define all your components.
+
+[[beans-java-injecting-imported-beans]]
+=== Injecting Dependencies on Imported `@Bean` Definitions
+
+The preceding example works but is simplistic. In most practical scenarios, beans have
+dependencies on one another across configuration classes. When using XML, this is not an
+issue, because no compiler is involved, and you can declare
+`ref="someBean"` and trust Spring to work it out during container initialization.
+When using `@Configuration` classes, the Java compiler places constraints on
+the configuration model, in that references to other beans must be valid Java syntax.
+
+Fortunately, solving this problem is simple. As xref:core/beans/java/bean-annotation.adoc#beans-java-dependencies[we already discussed],
+a `@Bean` method can have an arbitrary number of parameters that describe the bean
+dependencies. Consider the following more real-world scenario with several `@Configuration`
+classes, each depending on beans declared in the others:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class ServiceConfig {
+
+		@Bean
+		public TransferService transferService(AccountRepository accountRepository) {
+			return new TransferServiceImpl(accountRepository);
+		}
+	}
+
+	@Configuration
+	public class RepositoryConfig {
+
+		@Bean
+		public AccountRepository accountRepository(DataSource dataSource) {
+			return new JdbcAccountRepository(dataSource);
+		}
+	}
+
+	@Configuration
+	@Import({ServiceConfig.class, RepositoryConfig.class})
+	public class SystemTestConfig {
+
+		@Bean
+		public DataSource dataSource() {
+			// return new DataSource
+		}
+	}
+
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(SystemTestConfig.class);
+		// everything wires up across configuration classes...
+		TransferService transferService = ctx.getBean(TransferService.class);
+		transferService.transfer(100.00, "A123", "C456");
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	@Configuration
+	class ServiceConfig {
+
+		@Bean
+		fun transferService(accountRepository: AccountRepository): TransferService {
+			return TransferServiceImpl(accountRepository)
+		}
+	}
+
+	@Configuration
+	class RepositoryConfig {
+
+		@Bean
+		fun accountRepository(dataSource: DataSource): AccountRepository {
+			return JdbcAccountRepository(dataSource)
+		}
+	}
+
+	@Configuration
+	@Import(ServiceConfig::class, RepositoryConfig::class)
+	class SystemTestConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			// return new DataSource
+		}
+	}
+
+
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext(SystemTestConfig::class.java)
+		// everything wires up across configuration classes...
+		val transferService = ctx.getBean<TransferService>()
+		transferService.transfer(100.00, "A123", "C456")
+	}
+----
+======
+
+
+There is another way to achieve the same result. Remember that `@Configuration` classes are
+ultimately only another bean in the container: This means that they can take advantage of
+`@Autowired` and `@Value` injection and other features the same as any other bean.
+
+[WARNING]
+====
+Make sure that the dependencies you inject that way are of the simplest kind only. `@Configuration`
+classes are processed quite early during the initialization of the context, and forcing a dependency
+to be injected this way may lead to unexpected early initialization. Whenever possible, resort to
+parameter-based injection, as in the preceding example.
+
+Also, be particularly careful with `BeanPostProcessor` and `BeanFactoryPostProcessor` definitions
+through `@Bean`. Those should usually be declared as `static @Bean` methods, not triggering the
+instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` may not
+work on the configuration class itself, since it is possible to create it as a bean instance earlier than
+{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`].
+====
+
+The following example shows how one bean can be autowired to another bean:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class ServiceConfig {
+
+		@Autowired
+		private AccountRepository accountRepository;
+
+		@Bean
+		public TransferService transferService() {
+			return new TransferServiceImpl(accountRepository);
+		}
+	}
+
+	@Configuration
+	public class RepositoryConfig {
+
+		private final DataSource dataSource;
+
+		public RepositoryConfig(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
+
+		@Bean
+		public AccountRepository accountRepository() {
+			return new JdbcAccountRepository(dataSource);
+		}
+	}
+
+	@Configuration
+	@Import({ServiceConfig.class, RepositoryConfig.class})
+	public class SystemTestConfig {
+
+		@Bean
+		public DataSource dataSource() {
+			// return new DataSource
+		}
+	}
+
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(SystemTestConfig.class);
+		// everything wires up across configuration classes...
+		TransferService transferService = ctx.getBean(TransferService.class);
+		transferService.transfer(100.00, "A123", "C456");
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	@Configuration
+	class ServiceConfig {
+
+		@Autowired
+		lateinit var accountRepository: AccountRepository
+
+		@Bean
+		fun transferService(): TransferService {
+			return TransferServiceImpl(accountRepository)
+		}
+	}
+
+	@Configuration
+	class RepositoryConfig(private val dataSource: DataSource) {
+
+		@Bean
+		fun accountRepository(): AccountRepository {
+			return JdbcAccountRepository(dataSource)
+		}
+	}
+
+	@Configuration
+	@Import(ServiceConfig::class, RepositoryConfig::class)
+	class SystemTestConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			// return new DataSource
+		}
+	}
+
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext(SystemTestConfig::class.java)
+		// everything wires up across configuration classes...
+		val transferService = ctx.getBean<TransferService>()
+		transferService.transfer(100.00, "A123", "C456")
+	}
+----
+======
+
+TIP: Constructor injection in `@Configuration` classes is only supported as of Spring
+Framework 4.3. Note also that there is no need to specify `@Autowired` if the target
+bean defines only one constructor.
+
+.[[beans-java-injecting-imported-beans-fq]]Fully-qualifying imported beans for ease of navigation
+--
+In the preceding scenario, using `@Autowired` works well and provides the desired
+modularity, but determining exactly where the autowired bean definitions are declared is
+still somewhat ambiguous. For example, as a developer looking at `ServiceConfig`, how do
+you know exactly where the `@Autowired AccountRepository` bean is declared? It is not
+explicit in the code, and this may be just fine. Remember that the
+https://spring.io/tools[Spring Tools for Eclipse] provides tooling that
+can render graphs showing how everything is wired, which may be all you need. Also,
+your Java IDE can easily find all declarations and uses of the `AccountRepository` type
+and quickly show you the location of `@Bean` methods that return that type.
+
+In cases where this ambiguity is not acceptable and you wish to have direct navigation
+from within your IDE from one `@Configuration` class to another, consider autowiring the
+configuration classes themselves. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class ServiceConfig {
+
+		@Autowired
+		private RepositoryConfig repositoryConfig;
+
+		@Bean
+		public TransferService transferService() {
+			// navigate 'through' the config class to the @Bean method!
+			return new TransferServiceImpl(repositoryConfig.accountRepository());
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+@Configuration
+class ServiceConfig {
+
+	@Autowired
+	private lateinit var repositoryConfig: RepositoryConfig
+
+	@Bean
+	fun transferService(): TransferService {
+		// navigate 'through' the config class to the @Bean method!
+		return TransferServiceImpl(repositoryConfig.accountRepository())
+	}
+}
+----
+======
+
+In the preceding situation, where `AccountRepository` is defined is completely explicit.
+However, `ServiceConfig` is now tightly coupled to `RepositoryConfig`. That is the
+tradeoff. This tight coupling can be somewhat mitigated by using interface-based or
+abstract class-based `@Configuration` classes. Consider the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class ServiceConfig {
+
+		@Autowired
+		private RepositoryConfig repositoryConfig;
+
+		@Bean
+		public TransferService transferService() {
+			return new TransferServiceImpl(repositoryConfig.accountRepository());
+		}
+	}
+
+	@Configuration
+	public interface RepositoryConfig {
+
+		@Bean
+		AccountRepository accountRepository();
+	}
+
+	@Configuration
+	public class DefaultRepositoryConfig implements RepositoryConfig {
+
+		@Bean
+		public AccountRepository accountRepository() {
+			return new JdbcAccountRepository(...);
+		}
+	}
+
+	@Configuration
+	@Import({ServiceConfig.class, DefaultRepositoryConfig.class})  // import the concrete config!
+	public class SystemTestConfig {
+
+		@Bean
+		public DataSource dataSource() {
+			// return DataSource
+		}
+
+	}
+
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(SystemTestConfig.class);
+		TransferService transferService = ctx.getBean(TransferService.class);
+		transferService.transfer(100.00, "A123", "C456");
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	@Configuration
+	class ServiceConfig {
+
+		@Autowired
+		private lateinit var repositoryConfig: RepositoryConfig
+
+		@Bean
+		fun transferService(): TransferService {
+			return TransferServiceImpl(repositoryConfig.accountRepository())
+		}
+	}
+
+	@Configuration
+	interface RepositoryConfig {
+
+		@Bean
+		fun accountRepository(): AccountRepository
+	}
+
+	@Configuration
+	class DefaultRepositoryConfig : RepositoryConfig {
+
+		@Bean
+		fun accountRepository(): AccountRepository {
+			return JdbcAccountRepository(...)
+		}
+	}
+
+	@Configuration
+	@Import(ServiceConfig::class, DefaultRepositoryConfig::class)  // import the concrete config!
+	class SystemTestConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			// return DataSource
+		}
+
+	}
+
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext(SystemTestConfig::class.java)
+		val transferService = ctx.getBean<TransferService>()
+		transferService.transfer(100.00, "A123", "C456")
+	}
+----
+======
+
+Now `ServiceConfig` is loosely coupled with respect to the concrete
+`DefaultRepositoryConfig`, and built-in IDE tooling is still useful: You can easily
+get a type hierarchy of `RepositoryConfig` implementations. In this
+way, navigating `@Configuration` classes and their dependencies becomes no different
+than the usual process of navigating interface-based code.
+--
+
+TIP: If you want to influence the startup creation order of certain beans, consider
+declaring some of them as `@Lazy` (for creation on first access instead of on startup)
+or as `@DependsOn` certain other beans (making sure that specific other beans are
+created before the current bean, beyond what the latter's direct dependencies imply).
+
+
+[[beans-java-conditional]]
+== Conditionally Include `@Configuration` Classes or `@Bean` Methods
+
+It is often useful to conditionally enable or disable a complete `@Configuration` class
+or even individual `@Bean` methods, based on some arbitrary system state. One common
+example of this is to use the `@Profile` annotation to activate beans only when a specific
+profile has been enabled in the Spring `Environment` (see xref:core/beans/environment.adoc#beans-definition-profiles[Bean Definition Profiles]
+for details).
+
+The `@Profile` annotation is actually implemented by using a much more flexible annotation
+called {api-spring-framework}/context/annotation/Conditional.html[`@Conditional`].
+The `@Conditional` annotation indicates specific
+`org.springframework.context.annotation.Condition` implementations that should be
+consulted before a `@Bean` is registered.
+
+Implementations of the `Condition` interface provide a `matches(...)`
+method that returns `true` or `false`. For example, the following listing shows the actual
+`Condition` implementation used for `@Profile`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Override
+	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+		// Read the @Profile annotation attributes
+		MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
+		if (attrs != null) {
+			for (Object value : attrs.get("value")) {
+				if (context.getEnvironment().acceptsProfiles(((String[]) value))) {
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	override fun matches(context: ConditionContext, metadata: AnnotatedTypeMetadata): Boolean {
+		// Read the @Profile annotation attributes
+		val attrs = metadata.getAllAnnotationAttributes(Profile::class.java.name)
+		if (attrs != null) {
+			for (value in attrs["value"]!!) {
+				if (context.environment.acceptsProfiles(Profiles.of(*value as Array<String>))) {
+					return true
+				}
+			}
+			return false
+		}
+		return true
+	}
+----
+======
+
+See the {api-spring-framework}/context/annotation/Conditional.html[`@Conditional`]
+javadoc for more detail.
+
+
+[[beans-java-combining]]
+== Combining Java and XML Configuration
+
+Spring's `@Configuration` class support does not aim to be a 100% complete replacement
+for Spring XML. Some facilities, such as Spring XML namespaces, remain an ideal way to
+configure the container. In cases where XML is convenient or necessary, you have a
+choice: either instantiate the container in an "`XML-centric`" way by using, for example,
+`ClassPathXmlApplicationContext`, or instantiate it in a "`Java-centric`" way by using
+`AnnotationConfigApplicationContext` and the `@ImportResource` annotation to import XML
+as needed.
+
+[[beans-java-combining-xml-centric]]
+=== XML-centric Use of `@Configuration` Classes
+
+It may be preferable to bootstrap the Spring container from XML and include
+`@Configuration` classes in an ad-hoc fashion. For example, in a large existing codebase
+that uses Spring XML, it is easier to create `@Configuration` classes on an
+as-needed basis and include them from the existing XML files. Later in this section, we cover the
+options for using `@Configuration` classes in this kind of "`XML-centric`" situation.
+
+.[[beans-java-combining-xml-centric-declare-as-bean]]Declaring `@Configuration` classes as plain Spring `<bean/>` elements
+--
+Remember that `@Configuration` classes are ultimately bean definitions in the
+container. In this series examples, we create a `@Configuration` class named `AppConfig` and
+include it within `system-test-config.xml` as a `<bean/>` definition. Because
+`<context:annotation-config/>` is switched on, the container recognizes the
+`@Configuration` annotation and processes the `@Bean` methods declared in `AppConfig`
+properly.
+
+The following example shows an ordinary configuration class in Java:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Autowired
+		private DataSource dataSource;
+
+		@Bean
+		public AccountRepository accountRepository() {
+			return new JdbcAccountRepository(dataSource);
+		}
+
+		@Bean
+		public TransferService transferService() {
+			return new TransferService(accountRepository());
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Autowired
+		private lateinit var dataSource: DataSource
+
+		@Bean
+		fun accountRepository(): AccountRepository {
+			return JdbcAccountRepository(dataSource)
+		}
+
+		@Bean
+		fun transferService() = TransferService(accountRepository())
+	}
+----
+======
+
+The following example shows part of a sample `system-test-config.xml` file:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<!-- enable processing of annotations such as @Autowired and @Configuration -->
+		<context:annotation-config/>
+		<context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
+
+		<bean class="com.acme.AppConfig"/>
+
+		<bean class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+			<property name="url" value="${jdbc.url}"/>
+			<property name="username" value="${jdbc.username}"/>
+			<property name="password" value="${jdbc.password}"/>
+		</bean>
+	</beans>
+----
+
+The following example shows a possible `jdbc.properties` file:
+
+[literal,subs="verbatim,quotes"]
+----
+jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
+jdbc.username=sa
+jdbc.password=
+----
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(String[] args) {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("classpath:/com/acme/system-test-config.xml");
+		TransferService transferService = ctx.getBean(TransferService.class);
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun main() {
+		val ctx = ClassPathXmlApplicationContext("classpath:/com/acme/system-test-config.xml")
+		val transferService = ctx.getBean<TransferService>()
+		// ...
+	}
+----
+======
+
+
+NOTE: In `system-test-config.xml` file, the `AppConfig` `<bean/>` does not declare an `id`
+element. While it would be acceptable to do so, it is unnecessary, given that no other bean
+ever refers to it, and it is unlikely to be explicitly fetched from the container by name.
+Similarly, the `DataSource` bean is only ever autowired by type, so an explicit bean `id`
+is not strictly required.
+--
+
+.[[beans-java-combining-xml-centric-component-scan]] Using <context:component-scan/> to pick up `@Configuration` classes
+--
+Because `@Configuration` is meta-annotated with `@Component`, `@Configuration`-annotated
+classes are automatically candidates for component scanning. Using the same scenario as
+described in the previous example, we can redefine `system-test-config.xml` to take advantage of component-scanning.
+Note that, in this case, we need not explicitly declare
+`<context:annotation-config/>`, because `<context:component-scan/>` enables the same
+functionality.
+
+The following example shows the modified `system-test-config.xml` file:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<!-- picks up and registers AppConfig as a bean definition -->
+		<context:component-scan base-package="com.acme"/>
+		<context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
+
+		<bean class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+			<property name="url" value="${jdbc.url}"/>
+			<property name="username" value="${jdbc.username}"/>
+			<property name="password" value="${jdbc.password}"/>
+		</bean>
+	</beans>
+----
+--
+
+[[beans-java-combining-java-centric]]
+=== `@Configuration` Class-centric Use of XML with `@ImportResource`
+
+In applications where `@Configuration` classes are the primary mechanism for configuring
+the container, it is still likely necessary to use at least some XML. In these
+scenarios, you can use `@ImportResource` and define only as much XML as you need. Doing
+so achieves a "`Java-centric`" approach to configuring the container and keeps XML to a
+bare minimum. The following example (which includes a configuration class, an XML file
+that defines a bean, a properties file, and the `main` class) shows how to use
+the `@ImportResource` annotation to achieve "`Java-centric`" configuration that uses XML
+as needed:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@ImportResource("classpath:/com/acme/properties-config.xml")
+	public class AppConfig {
+
+		@Value("${jdbc.url}")
+		private String url;
+
+		@Value("${jdbc.username}")
+		private String username;
+
+		@Value("${jdbc.password}")
+		private String password;
+
+		@Bean
+		public DataSource dataSource() {
+			return new DriverManagerDataSource(url, username, password);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@ImportResource("classpath:/com/acme/properties-config.xml")
+	class AppConfig {
+
+		@Value("\${jdbc.url}")
+		private lateinit var url: String
+
+		@Value("\${jdbc.username}")
+		private lateinit var username: String
+
+		@Value("\${jdbc.password}")
+		private lateinit var password: String
+
+		@Bean
+		fun dataSource(): DataSource {
+			return DriverManagerDataSource(url, username, password)
+		}
+	}
+----
+======
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	properties-config.xml
+	<beans>
+		<context:property-placeholder location="classpath:/com/acme/jdbc.properties"/>
+	</beans>
+----
+
+[literal,subs="verbatim,quotes"]
+----
+jdbc.properties
+jdbc.url=jdbc:hsqldb:hsql://localhost/xdb
+jdbc.username=sa
+jdbc.password=
+----
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public static void main(String[] args) {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+		TransferService transferService = ctx.getBean(TransferService.class);
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.beans.factory.getBean
+
+	fun main() {
+		val ctx = AnnotationConfigApplicationContext(AppConfig::class.java)
+		val transferService = ctx.getBean<TransferService>()
+		// ...
+	}
+----
+======
+
+
+

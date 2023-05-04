@@ -1,0 +1,56 @@
+[[mvc-config-enable]]
+= Enable MVC Configuration
+
+[.small]#xref:web/webflux/config.adoc#webflux-config-enable[See equivalent in the Reactive stack]#
+
+In Java configuration, you can use the `@EnableWebMvc` annotation to enable MVC
+configuration, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebMvc
+	class WebConfig
+----
+======
+
+In XML configuration, you can use the `<mvc:annotation-driven>` element to enable MVC
+configuration, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+		<mvc:annotation-driven/>
+
+	</beans>
+----
+
+The preceding example registers a number of Spring MVC
+xref:web/webmvc/mvc-servlet/special-bean-types.adoc[infrastructure beans] and adapts to dependencies
+available on the classpath (for example, payload converters for JSON, XML, and others).
+
+
+

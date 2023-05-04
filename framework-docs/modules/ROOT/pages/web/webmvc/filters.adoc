@@ -1,0 +1,102 @@
+[[filters]]
+= Filters
+
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-filters[See equivalent in the Reactive stack]#
+
+The `spring-web` module provides some useful filters:
+
+* xref:web/webmvc/filters.adoc#filters-http-put[Form Data]
+* xref:web/webmvc/filters.adoc#filters-forwarded-headers[Forwarded Headers]
+* xref:web/webmvc/filters.adoc#filters-shallow-etag[Shallow ETag]
+* xref:web/webmvc/filters.adoc#filters-cors[CORS]
+
+
+
+[[filters-http-put]]
+== Form Data
+
+Browsers can submit form data only through HTTP GET or HTTP POST but non-browser clients can also
+use HTTP PUT, PATCH, and DELETE. The Servlet API requires `ServletRequest.getParameter{asterisk}()`
+methods to support form field access only for HTTP POST.
+
+The `spring-web` module provides `FormContentFilter` to intercept HTTP PUT, PATCH, and DELETE
+requests with a content type of `application/x-www-form-urlencoded`, read the form data from
+the body of the request, and wrap the `ServletRequest` to make the form data
+available through the `ServletRequest.getParameter{asterisk}()` family of methods.
+
+
+
+[[filters-forwarded-headers]]
+== Forwarded Headers
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-forwarded-headers[See equivalent in the Reactive stack]#
+
+As a request goes through proxies (such as load balancers) the host, port, and
+scheme may change, and that makes it a challenge to create links that point to the correct
+host, port, and scheme from a client perspective.
+
+https://tools.ietf.org/html/rfc7239[RFC 7239] defines the `Forwarded` HTTP header
+that proxies can use to provide information about the original request. There are other
+non-standard headers, too, including `X-Forwarded-Host`, `X-Forwarded-Port`,
+`X-Forwarded-Proto`, `X-Forwarded-Ssl`, and `X-Forwarded-Prefix`.
+
+`ForwardedHeaderFilter` is a Servlet filter that modifies the request in order to
+a) change the host, port, and scheme based on `Forwarded` headers, and b) to remove those
+headers to eliminate further impact. The filter relies on wrapping the request, and
+therefore it must be ordered ahead of other filters, such as `RequestContextFilter`, that
+should work with the modified and not the original request.
+
+There are security considerations for forwarded headers since an application cannot know
+if the headers were added by a proxy, as intended, or by a malicious client. This is why
+a proxy at the boundary of trust should be configured to remove untrusted `Forwarded`
+headers that come from the outside. You can also configure the `ForwardedHeaderFilter`
+with `removeOnly=true`, in which case it removes but does not use the headers.
+
+In order to support xref:web/webmvc/mvc-ann-async.adoc[asynchronous requests] and error dispatches this
+filter should be mapped with `DispatcherType.ASYNC` and also `DispatcherType.ERROR`.
+If using Spring Framework's `AbstractAnnotationConfigDispatcherServletInitializer`
+(see xref:web/webmvc/mvc-servlet/container-config.adoc[Servlet Config]) all filters are automatically registered for all dispatch
+types. However if registering the filter via `web.xml` or in Spring Boot via a
+`FilterRegistrationBean` be sure to include `DispatcherType.ASYNC` and
+`DispatcherType.ERROR` in addition to `DispatcherType.REQUEST`.
+
+
+
+[[filters-shallow-etag]]
+== Shallow ETag
+
+The `ShallowEtagHeaderFilter` filter creates a "`shallow`" ETag by caching the content
+written to the response and computing an MD5 hash from it. The next time a client sends,
+it does the same, but it also compares the computed value against the `If-None-Match`
+request header and, if the two are equal, returns a 304 (NOT_MODIFIED).
+
+This strategy saves network bandwidth but not CPU, as the full response must be computed
+for each request. Other strategies at the controller level, described earlier, can avoid
+the computation. See xref:web/webmvc/mvc-caching.adoc[HTTP Caching].
+
+This filter has a `writeWeakETag` parameter that configures the filter to write weak ETags
+similar to the following: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"` (as defined in
+https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3]).
+
+In order to support xref:web/webmvc/mvc-ann-async.adoc[asynchronous requests] this filter must be mapped
+with `DispatcherType.ASYNC` so that the filter can delay and successfully generate an
+ETag to the end of the last async dispatch. If using Spring Framework's
+`AbstractAnnotationConfigDispatcherServletInitializer` (see xref:web/webmvc/mvc-servlet/container-config.adoc[Servlet Config])
+all filters are automatically registered for all dispatch types. However if registering
+the filter via `web.xml` or in Spring Boot via a `FilterRegistrationBean` be sure to include
+`DispatcherType.ASYNC`.
+
+
+
+[[filters-cors]]
+== CORS
+[.small]#xref:web/webflux/reactive-spring.adoc#webflux-filters-cors[See equivalent in the Reactive stack]#
+
+Spring MVC provides fine-grained support for CORS configuration through annotations on
+controllers. However, when used with Spring Security, we advise relying on the built-in
+`CorsFilter` that must be ordered ahead of Spring Security's chain of filters.
+
+See the sections on xref:web/webmvc-cors.adoc[CORS] and the xref:web/webmvc-cors.adoc#mvc-cors-filter[CORS Filter] for more details.
+
+
+
+

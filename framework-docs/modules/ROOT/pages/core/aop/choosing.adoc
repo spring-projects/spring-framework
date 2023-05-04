@@ -1,0 +1,113 @@
+[[aop-choosing]]
+= Choosing which AOP Declaration Style to Use
+
+Once you have decided that an aspect is the best approach for implementing a given
+requirement, how do you decide between using Spring AOP or AspectJ and between the
+Aspect language (code) style, the @AspectJ annotation style, or the Spring XML style? These
+decisions are influenced by a number of factors including application requirements,
+development tools, and team familiarity with AOP.
+
+
+
+[[aop-spring-or-aspectj]]
+== Spring AOP or Full AspectJ?
+
+Use the simplest thing that can work. Spring AOP is simpler than using full AspectJ, as
+there is no requirement to introduce the AspectJ compiler / weaver into your development
+and build processes. If you only need to advise the execution of operations on Spring
+beans, Spring AOP is the right choice. If you need to advise objects not managed by
+the Spring container (such as domain objects, typically), you need to use
+AspectJ. You also need to use AspectJ if you wish to advise join points other than
+simple method executions (for example, field get or set join points and so on).
+
+When you use AspectJ, you have the choice of the AspectJ language syntax (also known as
+the "code style") or the @AspectJ annotation style. If aspects play a large
+role in your design, and you are able to use the https://www.eclipse.org/ajdt/[AspectJ
+Development Tools (AJDT)] plugin for Eclipse, the AspectJ language syntax is the
+preferred option. It is cleaner and simpler because the language was purposefully
+designed for writing aspects. If you do not use Eclipse or have only a few aspects
+that do not play a major role in your application, you may want to consider using
+the @AspectJ style, sticking with regular Java compilation in your IDE, and adding
+an aspect weaving phase to your build script.
+
+
+
+[[aop-ataspectj-or-xml]]
+== @AspectJ or XML for Spring AOP?
+
+If you have chosen to use Spring AOP, you have a choice of @AspectJ or XML style.
+There are various tradeoffs to consider.
+
+The XML style may be most familiar to existing Spring users, and it is backed by genuine
+POJOs. When using AOP as a tool to configure enterprise services, XML can be a good
+choice (a good test is whether you consider the pointcut expression to be a part of your
+configuration that you might want to change independently). With the XML style, it is
+arguably clearer from your configuration which aspects are present in the system.
+
+The XML style has two disadvantages. First, it does not fully encapsulate the
+implementation of the requirement it addresses in a single place. The DRY principle says
+that there should be a single, unambiguous, authoritative representation of any piece of
+knowledge within a system. When using the XML style, the knowledge of how a requirement
+is implemented is split across the declaration of the backing bean class and the XML in
+the configuration file. When you use the @AspectJ style, this information is encapsulated
+in a single module: the aspect. Secondly, the XML style is slightly more limited in what
+it can express than the @AspectJ style: Only the "singleton" aspect instantiation model
+is supported, and it is not possible to combine named pointcuts declared in XML.
+For example, in the @AspectJ style you can write something like the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Pointcut("execution(* get*())")
+	public void propertyAccess() {}
+
+	@Pointcut("execution(com.xyz.Account+ *(..))")
+	public void operationReturningAnAccount() {}
+
+	@Pointcut("propertyAccess() && operationReturningAnAccount()")
+	public void accountPropertyAccess() {}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Pointcut("execution(* get*())")
+	fun propertyAccess() {}
+
+	@Pointcut("execution(com.xyz.Account+ *(..))")
+	fun operationReturningAnAccount() {}
+
+	@Pointcut("propertyAccess() && operationReturningAnAccount()")
+	fun accountPropertyAccess() {}
+----
+======
+
+In the XML style you can declare the first two pointcuts:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<aop:pointcut id="propertyAccess"
+			expression="execution(* get*())"/>
+
+	<aop:pointcut id="operationReturningAnAccount"
+			expression="execution(com.xyz.Account+ *(..))"/>
+----
+
+The downside of the XML approach is that you cannot define the
+`accountPropertyAccess` pointcut by combining these definitions.
+
+The @AspectJ style supports additional instantiation models and richer pointcut
+composition. It has the advantage of keeping the aspect as a modular unit. It also has
+the advantage that the @AspectJ aspects can be understood (and thus consumed) both by
+Spring AOP and by AspectJ. So, if you later decide you need the capabilities of AspectJ
+to implement additional requirements, you can easily migrate to a classic AspectJ setup.
+In general, the Spring team prefers the @AspectJ style for custom aspects beyond simple
+configuration of enterprise services.
+
+
+
+
