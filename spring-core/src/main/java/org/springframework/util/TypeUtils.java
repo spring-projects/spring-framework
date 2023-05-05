@@ -37,6 +37,7 @@ import org.springframework.lang.Nullable;
 public abstract class TypeUtils {
 
 	private static final Type[] IMPLICIT_LOWER_BOUNDS = { null };
+
 	private static final Type[] IMPLICIT_UPPER_BOUNDS = { Object.class };
 
 	/**
