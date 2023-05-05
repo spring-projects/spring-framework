@@ -36,6 +36,8 @@ import org.springframework.beans.factory.aot.BeanRegistrationsAotContribution.Re
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.testfixture.beans.GenericBeanWithBounds;
+import org.springframework.beans.testfixture.beans.Person;
 import org.springframework.beans.testfixture.beans.RecordBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.beans.testfixture.beans.factory.aot.MockBeanFactoryInitializationCode;
@@ -159,6 +161,16 @@ class BeanRegistrationsAotContributionTests {
 		assertThat(reflection().onType(RecordBean.class)
 				.withMemberCategories(MemberCategory.INTROSPECT_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_METHODS))
 				.accepts(this.generationContext.getRuntimeHints());
+	}
+
+	@Test
+	void applyToRegisterReflectionHintsOnGenericBeanWithBounds() {
+		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(GenericBeanWithBounds.class));
+		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(this.methodGeneratorFactory,
+				registeredBean, null, List.of());
+		BeanRegistrationsAotContribution contribution = createContribution(GenericBeanWithBounds.class, generator);
+		contribution.applyTo(this.generationContext, this.beanFactoryInitializationCode);
+		assertThat(reflection().onType(Person[].class)).accepts(this.generationContext.getRuntimeHints());
 	}
 
 	private RegisteredBean registerBean(RootBeanDefinition rootBeanDefinition) {
