@@ -25,6 +25,7 @@ asciidoc:
   attributes:
     page-pagination: ''
     hide-uri-scheme: '@'
+    tabs-sync-option: '@'
     include-java: 'example$docs-src/main/java/org/springframework/docs'
 urls:
   latest_version_segment_strategy: redirect:to
