@@ -267,8 +267,8 @@ class StompSubProtocolHandlerTests {
 
 		assertThat(this.session.getSentMessages()).hasSize(1);
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
-		assertThat(((String) textMessage.getPayload()).contains("destination:/user/queue/foo\n")).isTrue();
-		assertThat(((String) textMessage.getPayload()).contains(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION)).isFalse();
+		assertThat(((String) textMessage.getPayload())).contains("destination:/user/queue/foo\n");
+		assertThat(((String) textMessage.getPayload())).doesNotContain(SimpMessageHeaderAccessor.ORIGINAL_DESTINATION);
 	}
 
 	// SPR-12475
@@ -289,7 +289,7 @@ class StompSubProtocolHandlerTests {
 
 		assertThat(this.session.getSentMessages()).hasSize(1);
 		WebSocketMessage<?> webSocketMessage = this.session.getSentMessages().get(0);
-		assertThat(webSocketMessage instanceof BinaryMessage).isTrue();
+		assertThat(webSocketMessage).isInstanceOf(BinaryMessage.class);
 
 		// Empty payload
 
@@ -299,7 +299,7 @@ class StompSubProtocolHandlerTests {
 
 		assertThat(this.session.getSentMessages()).hasSize(2);
 		webSocketMessage = this.session.getSentMessages().get(1);
-		assertThat(webSocketMessage instanceof TextMessage).isTrue();
+		assertThat(webSocketMessage).isInstanceOf(TextMessage.class);
 	}
 
 	@Test
@@ -417,7 +417,7 @@ class StompSubProtocolHandlerTests {
 		verifyNoInteractions(this.channel);
 		assertThat(this.session.getSentMessages()).hasSize(1);
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
-		assertThat(actual.getPayload().startsWith("ERROR")).isTrue();
+		assertThat(actual.getPayload()).startsWith("ERROR");
 	}
 
 	@Test

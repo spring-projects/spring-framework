@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.validation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
-import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -34,6 +33,10 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  */
 public class ValidationUtilsTests {
 
+	private final Validator emptyValidator = Validator.forInstanceOf(TestBean.class, (testBean, errors) -> ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!"));
+
+	private final Validator emptyOrWhitespaceValidator = Validator.forInstanceOf(TestBean.class, (testBean, errors) -> ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", "You must enter a name!"));
+
 	@Test
 	public void testInvokeValidatorWithNullValidator() throws Exception {
 		TestBean tb = new TestBean();
@@ -46,14 +49,14 @@ public class ValidationUtilsTests {
 	public void testInvokeValidatorWithNullErrors() throws Exception {
 		TestBean tb = new TestBean();
 		assertThatIllegalArgumentException().isThrownBy(() ->
-				ValidationUtils.invokeValidator(new EmptyValidator(), tb, null));
+				ValidationUtils.invokeValidator(emptyValidator, tb, null));
 	}
 
 	@Test
 	public void testInvokeValidatorSunnyDay() throws Exception {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		ValidationUtils.invokeValidator(new EmptyValidator(), tb, errors);
+		ValidationUtils.invokeValidator(emptyValidator, tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
 		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY");
 	}
@@ -62,15 +65,14 @@ public class ValidationUtilsTests {
 	public void testValidationUtilsSunnyDay() throws Exception {
 		TestBean tb = new TestBean("");
 
-		Validator testValidator = new EmptyValidator();
 		tb.setName(" ");
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		testValidator.validate(tb, errors);
+		emptyValidator.validate(tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isFalse();
 
 		tb.setName("Roddy");
 		errors = new BeanPropertyBindingResult(tb, "tb");
-		testValidator.validate(tb, errors);
+		emptyValidator.validate(tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isFalse();
 	}
 
@@ -78,8 +80,7 @@ public class ValidationUtilsTests {
 	public void testValidationUtilsNull() throws Exception {
 		TestBean tb = new TestBean();
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		Validator testValidator = new EmptyValidator();
-		testValidator.validate(tb, errors);
+		emptyValidator.validate(tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
 		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY");
 	}
@@ -88,8 +89,7 @@ public class ValidationUtilsTests {
 	public void testValidationUtilsEmpty() throws Exception {
 		TestBean tb = new TestBean("");
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		Validator testValidator = new EmptyValidator();
-		testValidator.validate(tb, errors);
+		emptyValidator.validate(tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
 		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY");
 	}
@@ -115,32 +115,31 @@ public class ValidationUtilsTests {
 	@Test
 	public void testValidationUtilsEmptyOrWhitespace() throws Exception {
 		TestBean tb = new TestBean();
-		Validator testValidator = new EmptyOrWhitespaceValidator();
 
 		// Test null
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		testValidator.validate(tb, errors);
+		emptyOrWhitespaceValidator.validate(tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
 		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
 
 		// Test empty String
 		tb.setName("");
 		errors = new BeanPropertyBindingResult(tb, "tb");
-		testValidator.validate(tb, errors);
+		emptyOrWhitespaceValidator.validate(tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
 		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
 
 		// Test whitespace String
 		tb.setName(" ");
 		errors = new BeanPropertyBindingResult(tb, "tb");
-		testValidator.validate(tb, errors);
+		emptyOrWhitespaceValidator.validate(tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isTrue();
 		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
 
 		// Test OK
 		tb.setName("Roddy");
 		errors = new BeanPropertyBindingResult(tb, "tb");
-		testValidator.validate(tb, errors);
+		emptyOrWhitespaceValidator.validate(tb, errors);
 		assertThat(errors.hasFieldErrors("name")).isFalse();
 	}
 
@@ -161,34 +160,6 @@ public class ValidationUtilsTests {
 		assertThat(errors.getFieldError("name").getCode()).isEqualTo("EMPTY_OR_WHITESPACE");
 		assertThat(errors.getFieldError("name").getArguments()[0]).isEqualTo("arg");
 		assertThat(errors.getFieldError("name").getDefaultMessage()).isEqualTo("msg");
-	}
-
-
-	private static class EmptyValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return TestBean.class.isAssignableFrom(clazz);
-		}
-
-		@Override
-		public void validate(@Nullable Object obj, Errors errors) {
-			ValidationUtils.rejectIfEmpty(errors, "name", "EMPTY", "You must enter a name!");
-		}
-	}
-
-
-	private static class EmptyOrWhitespaceValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return TestBean.class.isAssignableFrom(clazz);
-		}
-
-		@Override
-		public void validate(@Nullable Object obj, Errors errors) {
-			ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "EMPTY_OR_WHITESPACE", "You must enter a name!");
-		}
 	}
 
 }

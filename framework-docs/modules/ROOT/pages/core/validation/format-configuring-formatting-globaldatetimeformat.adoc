@@ -1,0 +1,121 @@
+[[format-configuring-formatting-globaldatetimeformat]]
+= Configuring a Global Date and Time Format
+
+By default, date and time fields not annotated with `@DateTimeFormat` are converted from
+strings by using the `DateFormat.SHORT` style. If you prefer, you can change this by
+defining your own global format.
+
+To do that, ensure that Spring does not register default formatters. Instead, register
+formatters manually with the help of:
+
+* `org.springframework.format.datetime.standard.DateTimeFormatterRegistrar`
+* `org.springframework.format.datetime.DateFormatterRegistrar`
+
+For example, the following Java configuration registers a global `yyyyMMdd` format:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean
+		public FormattingConversionService conversionService() {
+
+			// Use the DefaultFormattingConversionService but do not register defaults
+			DefaultFormattingConversionService conversionService =
+				new DefaultFormattingConversionService(false);
+
+			// Ensure @NumberFormat is still supported
+			conversionService.addFormatterForFieldAnnotation(
+				new NumberFormatAnnotationFormatterFactory());
+
+			// Register JSR-310 date conversion with a specific global format
+			DateTimeFormatterRegistrar dateTimeRegistrar = new DateTimeFormatterRegistrar();
+			dateTimeRegistrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			dateTimeRegistrar.registerFormatters(conversionService);
+
+			// Register date conversion with a specific global format
+			DateFormatterRegistrar dateRegistrar = new DateFormatterRegistrar();
+			dateRegistrar.setFormatter(new DateFormatter("yyyyMMdd"));
+			dateRegistrar.registerFormatters(conversionService);
+
+			return conversionService;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean
+		fun conversionService(): FormattingConversionService {
+			// Use the DefaultFormattingConversionService but do not register defaults
+			return DefaultFormattingConversionService(false).apply {
+
+				// Ensure @NumberFormat is still supported
+				addFormatterForFieldAnnotation(NumberFormatAnnotationFormatterFactory())
+
+				// Register JSR-310 date conversion with a specific global format
+				val dateTimeRegistrar = DateTimeFormatterRegistrar()
+				dateTimeRegistrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyyMMdd"))
+				dateTimeRegistrar.registerFormatters(this)
+
+				// Register date conversion with a specific global format
+				val dateRegistrar = DateFormatterRegistrar()
+				dateRegistrar.setFormatter(DateFormatter("yyyyMMdd"))
+				dateRegistrar.registerFormatters(this)
+			}
+		}
+	}
+----
+======
+
+If you prefer XML-based configuration, you can use a
+`FormattingConversionServiceFactoryBean`. The following example shows how to do so:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+		<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+			<property name="registerDefaultFormatters" value="false" />
+			<property name="formatters">
+				<set>
+					<bean class="org.springframework.format.number.NumberFormatAnnotationFormatterFactory" />
+				</set>
+			</property>
+			<property name="formatterRegistrars">
+				<set>
+					<bean class="org.springframework.format.datetime.standard.DateTimeFormatterRegistrar">
+						<property name="dateFormatter">
+							<bean class="org.springframework.format.datetime.standard.DateTimeFormatterFactoryBean">
+								<property name="pattern" value="yyyyMMdd"/>
+							</bean>
+						</property>
+					</bean>
+				</set>
+			</property>
+		</bean>
+	</beans>
+----
+
+Note there are extra considerations when configuring date and time formats in web
+applications. Please see
+xref:web/webmvc/mvc-config/conversion.adoc[WebMVC Conversion and Formatting] or
+xref:web/webflux/config.adoc#webflux-config-conversion[WebFlux Conversion and Formatting].
+
+
+

@@ -374,7 +374,7 @@ public abstract class AbstractTransactionAspectTests {
 		TransactionAttribute txatt = new DefaultTransactionAttribute() {
 			@Override
 			public boolean rollbackOn(Throwable t) {
-				assertThat(t == ex).isTrue();
+				assertThat(t).isSameAs(ex);
 				return shouldRollback;
 			}
 		};
@@ -454,7 +454,7 @@ public abstract class AbstractTransactionAspectTests {
 		ITestBean itb = (ITestBean) advised(tb, ptm, tas);
 
 		// verification!?
-		assertThat(name.equals(itb.getName())).isTrue();
+		assertThat(itb.getName()).isEqualTo(name);
 
 		verify(ptm).commit(status);
 	}
@@ -490,7 +490,7 @@ public abstract class AbstractTransactionAspectTests {
 			fail("Shouldn't have invoked method");
 		}
 		catch (CannotCreateTransactionException thrown) {
-			assertThat(thrown == ex).isTrue();
+			assertThat(thrown).isSameAs(ex);
 		}
 	}
 
@@ -525,11 +525,11 @@ public abstract class AbstractTransactionAspectTests {
 			fail("Shouldn't have succeeded");
 		}
 		catch (UnexpectedRollbackException thrown) {
-			assertThat(thrown == ex).isTrue();
+			assertThat(thrown).isSameAs(ex);
 		}
 
 		// Should have invoked target and changed name
-		assertThat(itb.getName() == name).isTrue();
+		assertThat(itb.getName()).isSameAs(name);
 	}
 
 	protected void checkTransactionStatus(boolean expected) {

@@ -660,7 +660,7 @@ class WebClientIntegrationTests {
 					UnknownHttpStatusCodeException ex = (UnknownHttpStatusCodeException) throwable;
 					assertThat(ex.getMessage()).isEqualTo(("Unknown status code ["+errorStatus+"]"));
 					assertThat(ex.getRawStatusCode()).isEqualTo(errorStatus);
-					assertThat(ex.getStatusText()).isEqualTo("");
+					assertThat(ex.getStatusText()).isEmpty();
 					assertThat(ex.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
 					assertThat(ex.getResponseBodyAsString()).isEqualTo(errorMessage);
 				})

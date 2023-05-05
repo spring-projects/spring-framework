@@ -66,7 +66,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 	protected void testFlights(Object o) {
 		Flights flights = (Flights) o;
 		assertThat(flights).as("Flights is null").isNotNull();
-		assertThat(flights.getFlight().size()).as("Invalid amount of flight elements").isEqualTo(1);
+		assertThat(flights.getFlight()).as("Invalid amount of flight elements").hasSize(1);
 		testFlight(flights.getFlight().get(0));
 	}
 
@@ -106,7 +106,7 @@ public class Jaxb2UnmarshallerTests extends AbstractUnmarshallerTests<Jaxb2Marsh
 		assertThat(condition).as("Result is not a BinaryObject").isTrue();
 		BinaryObject object = (BinaryObject) result;
 		assertThat(object.getBytes()).as("bytes property not set").isNotNull();
-		assertThat(object.getBytes().length > 0).as("bytes property not set").isTrue();
+		assertThat(object.getBytes()).as("bytes property not set").isNotEmpty();
 		assertThat(object.getSwaDataHandler()).as("datahandler property not set").isNotNull();
 	}
 

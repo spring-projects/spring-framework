@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,9 +137,9 @@ class ModelFactoryOrderingTests {
 	private void assertInvokedBefore(String beforeMethod, String... afterMethods) {
 		List<String> actual = getInvokedMethods();
 		for (String afterMethod : afterMethods) {
-			assertThat(actual.indexOf(beforeMethod) < actual.indexOf(afterMethod))
+			assertThat(actual.indexOf(beforeMethod))
 				.as(beforeMethod + " should be before " + afterMethod + ". Actual order: " + actual.toString())
-				.isTrue();
+					.isLessThan(actual.indexOf(afterMethod));
 		}
 	}
 

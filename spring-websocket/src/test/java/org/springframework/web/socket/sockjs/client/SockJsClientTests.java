@@ -88,7 +88,7 @@ class SockJsClientTests {
 		this.sockJsClient.doHandshake(handler, URL);
 		assertThat(this.webSocketTransport.invoked()).isFalse();
 		assertThat(this.xhrTransport.invoked()).isTrue();
-		assertThat(this.xhrTransport.getRequest().getTransportUrl().toString().endsWith("xhr_streaming")).isTrue();
+		assertThat(this.xhrTransport.getRequest().getTransportUrl().toString()).endsWith("xhr_streaming");
 	}
 
 	@Test
@@ -99,7 +99,7 @@ class SockJsClientTests {
 		this.sockJsClient.doHandshake(handler, URL).addCallback(this.connectCallback);
 		assertThat(this.webSocketTransport.invoked()).isFalse();
 		assertThat(this.xhrTransport.invoked()).isTrue();
-		assertThat(this.xhrTransport.getRequest().getTransportUrl().toString().endsWith("xhr")).isTrue();
+		assertThat(this.xhrTransport.getRequest().getTransportUrl().toString()).endsWith("xhr");
 	}
 
 	@Test  // SPR-13254

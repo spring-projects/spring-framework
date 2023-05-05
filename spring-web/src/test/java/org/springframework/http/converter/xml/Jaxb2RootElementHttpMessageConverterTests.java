@@ -132,7 +132,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		converter.setSupportDtd(true);
 		RootElement rootElement = (RootElement) converter.read(RootElement.class, inputMessage);
 
-		assertThat(rootElement.external).isEqualTo("");
+		assertThat(rootElement.external).isEmpty();
 	}
 
 	@Test

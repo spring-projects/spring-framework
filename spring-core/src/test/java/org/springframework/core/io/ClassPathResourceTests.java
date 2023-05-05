@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ class ClassPathResourceTests {
 	void emptyFileReadable(@TempDir(cleanup = NEVER) File tempDir) throws IOException {
 		File file = new File(tempDir, "empty.txt");
 		assertThat(file.createNewFile()).isTrue();
-		assertThat(file.isFile());
+		assertThat(file.isFile()).isTrue();
 
 		try (URLClassLoader fileClassLoader = new URLClassLoader(new URL[]{tempDir.toURI().toURL()})) {
 			Resource emptyFile = new ClassPathResource("empty.txt", fileClassLoader);
@@ -246,7 +246,7 @@ class ClassPathResourceTests {
 			zipOut.putNextEntry(new ZipEntry("empty2.txt"));
 			zipOut.closeEntry();
 		}
-		assertThat(jarFile.isFile());
+		assertThat(jarFile.isFile()).isTrue();
 
 		try (URLClassLoader jarClassLoader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()})) {
 			Resource emptyJarEntry = new ClassPathResource("empty2.txt", jarClassLoader);

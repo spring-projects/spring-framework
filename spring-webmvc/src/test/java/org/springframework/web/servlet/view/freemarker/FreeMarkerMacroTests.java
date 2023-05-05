@@ -249,17 +249,19 @@ public class FreeMarkerMacroTests {
 	@Test
 	public void testForm15() throws Exception {
 		String output = getMacroOutput("FORM15");
-		assertThat(output.startsWith("<input type=\"hidden\" name=\"_name\" value=\"on\"/>")).as("Wrong output: " + output).isTrue();
-		assertThat(output.contains("<input type=\"checkbox\" id=\"name\" name=\"name\" />")).as("Wrong output: " + output).isTrue();
+		assertThat(output).as("Wrong output: " + output)
+				.startsWith("<input type=\"hidden\" name=\"_name\" value=\"on\"/>");
+		assertThat(output).as("Wrong output: " + output)
+				.contains("<input type=\"checkbox\" id=\"name\" name=\"name\" />");
 	}
 
 	@Test
 	public void testForm16() throws Exception {
 		String output = getMacroOutput("FORM16");
-		assertThat(output.startsWith(
-				"<input type=\"hidden\" name=\"_jedi\" value=\"on\"/>")).as("Wrong output: " + output).isTrue();
-		assertThat(output.contains(
-				"<input type=\"checkbox\" id=\"jedi\" name=\"jedi\" checked=\"checked\" />")).as("Wrong output: " + output).isTrue();
+		assertThat(output).as("Wrong output: " + output)
+				.startsWith("<input type=\"hidden\" name=\"_jedi\" value=\"on\"/>");
+		assertThat(output).as("Wrong output: " + output)
+				.contains("<input type=\"checkbox\" id=\"jedi\" name=\"jedi\" checked=\"checked\" />");
 	}
 
 	@Test
@@ -270,10 +272,10 @@ public class FreeMarkerMacroTests {
 	@Test
 	public void testForm18() throws Exception {
 		String output = getMacroOutput("FORM18");
-		assertThat(output.startsWith(
-				"<input type=\"hidden\" name=\"_spouses[0].jedi\" value=\"on\"/>")).as("Wrong output: " + output).isTrue();
-		assertThat(output.contains(
-				"<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />")).as("Wrong output: " + output).isTrue();
+		assertThat(output).as("Wrong output: " + output)
+				.startsWith("<input type=\"hidden\" name=\"_spouses[0].jedi\" value=\"on\"/>");
+		assertThat(output).as("Wrong output: " + output)
+				.contains("<input type=\"checkbox\" id=\"spouses0.jedi\" name=\"spouses[0].jedi\" checked=\"checked\" />");
 	}
 
 

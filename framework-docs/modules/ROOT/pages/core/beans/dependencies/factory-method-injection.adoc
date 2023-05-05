@@ -1,0 +1,434 @@
+[[beans-factory-method-injection]]
+= Method Injection
+
+In most application scenarios, most beans in the container are
+xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singletons]. When a singleton bean needs to
+collaborate with another singleton bean or a non-singleton bean needs to collaborate
+with another non-singleton bean, you typically handle the dependency by defining one
+bean as a property of the other. A problem arises when the bean lifecycles are
+different. Suppose singleton bean A needs to use non-singleton (prototype) bean B,
+perhaps on each method invocation on A. The container creates the singleton bean A only
+once, and thus only gets one opportunity to set the properties. The container cannot
+provide bean A with a new instance of bean B every time one is needed.
+
+A solution is to forego some inversion of control. You can xref:core/beans/factory-nature.adoc#beans-factory-aware[make bean A aware of the container]
+ by implementing the `ApplicationContextAware` interface,
+and by xref:core/beans/basics.adoc#beans-factory-client[making a `getBean("B")` call to the container] ask for (a
+typically new) bean B instance every time bean A needs it. The following example
+shows this approach:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages",fold="none"]
+----
+	package fiona.apple;
+
+	// Spring-API imports
+	import org.springframework.beans.BeansException;
+	import org.springframework.context.ApplicationContext;
+	import org.springframework.context.ApplicationContextAware;
+
+	/**
+	 * A class that uses a stateful Command-style class to perform
+	 * some processing.
+	 */
+	public class CommandManager implements ApplicationContextAware {
+
+		private ApplicationContext applicationContext;
+
+		public Object process(Map commandState) {
+			// grab a new instance of the appropriate Command
+			Command command = createCommand();
+			// set the state on the (hopefully brand new) Command instance
+			command.setState(commandState);
+			return command.execute();
+		}
+
+		protected Command createCommand() {
+			// notice the Spring API dependency!
+			return this.applicationContext.getBean("command", Command.class);
+		}
+
+		public void setApplicationContext(
+				ApplicationContext applicationContext) throws BeansException {
+			this.applicationContext = applicationContext;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages",fold="none"]
+----
+	package fiona.apple
+
+	// Spring-API imports
+	import org.springframework.context.ApplicationContext
+	import org.springframework.context.ApplicationContextAware
+
+	// A class that uses a stateful Command-style class to perform
+	// some processing.
+	class CommandManager : ApplicationContextAware {
+
+		private lateinit var applicationContext: ApplicationContext
+
+		fun process(commandState: Map<*, *>): Any {
+			// grab a new instance of the appropriate Command
+			val command = createCommand()
+			// set the state on the (hopefully brand new) Command instance
+			command.state = commandState
+			return command.execute()
+		}
+
+		// notice the Spring API dependency!
+		protected fun createCommand() =
+				applicationContext.getBean("command", Command::class.java)
+
+		override fun setApplicationContext(applicationContext: ApplicationContext) {
+			this.applicationContext = applicationContext
+		}
+	}
+----
+======
+
+The preceding is not desirable, because the business code is aware of and coupled to the
+Spring Framework. Method Injection, a somewhat advanced feature of the Spring IoC
+container, lets you handle this use case cleanly.
+
+****
+You can read more about the motivation for Method Injection in
+https://spring.io/blog/2004/08/06/method-injection/[this blog entry].
+****
+
+
+
+[[beans-factory-lookup-method-injection]]
+== Lookup Method Injection
+
+Lookup method injection is the ability of the container to override methods on
+container-managed beans and return the lookup result for another named bean in the
+container. The lookup typically involves a prototype bean, as in the scenario described
+in xref:core/beans/dependencies/factory-method-injection.adoc[the preceding section]. The Spring Framework
+implements this method injection by using bytecode generation from the CGLIB library to
+dynamically generate a subclass that overrides the method.
+
+[NOTE]
+====
+* For this dynamic subclassing to work, the class that the Spring bean container
+  subclasses cannot be `final`, and the method to be overridden cannot be `final`, either.
+* Unit-testing a class that has an `abstract` method requires you to subclass the class
+  yourself and to supply a stub implementation of the `abstract` method.
+* Concrete methods are also necessary for component scanning, which requires concrete
+  classes to pick up.
+* A further key limitation is that lookup methods do not work with factory methods and
+  in particular not with `@Bean` methods in configuration classes, since, in that case,
+  the container is not in charge of creating the instance and therefore cannot create
+  a runtime-generated subclass on the fly.
+====
+
+In the case of the `CommandManager` class in the previous code snippet, the
+Spring container dynamically overrides the implementation of the `createCommand()`
+method. The `CommandManager` class does not have any Spring dependencies, as
+the reworked example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages",fold="none"]
+----
+	package fiona.apple;
+
+	// no more Spring imports!
+
+	public abstract class CommandManager {
+
+		public Object process(Object commandState) {
+			// grab a new instance of the appropriate Command interface
+			Command command = createCommand();
+			// set the state on the (hopefully brand new) Command instance
+			command.setState(commandState);
+			return command.execute();
+		}
+
+		// okay... but where is the implementation of this method?
+		protected abstract Command createCommand();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages",fold="none"]
+----
+	package fiona.apple
+
+	// no more Spring imports!
+
+	abstract class CommandManager {
+
+		fun process(commandState: Any): Any {
+			// grab a new instance of the appropriate Command interface
+			val command = createCommand()
+			// set the state on the (hopefully brand new) Command instance
+			command.state = commandState
+			return command.execute()
+		}
+
+		// okay... but where is the implementation of this method?
+		protected abstract fun createCommand(): Command
+	}
+----
+======
+
+In the client class that contains the method to be injected (the `CommandManager` in this
+case), the method to be injected requires a signature of the following form:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<public|protected> [abstract] <return-type> theMethodName(no-arguments);
+----
+
+If the method is `abstract`, the dynamically-generated subclass implements the method.
+Otherwise, the dynamically-generated subclass overrides the concrete method defined in
+the original class. Consider the following example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<!-- a stateful bean deployed as a prototype (non-singleton) -->
+	<bean id="myCommand" class="fiona.apple.AsyncCommand" scope="prototype">
+		<!-- inject dependencies here as required -->
+	</bean>
+
+	<!-- commandProcessor uses statefulCommandHelper -->
+	<bean id="commandManager" class="fiona.apple.CommandManager">
+		<lookup-method name="createCommand" bean="myCommand"/>
+	</bean>
+----
+
+The bean identified as `commandManager` calls its own `createCommand()` method
+whenever it needs a new instance of the `myCommand` bean. You must be careful to deploy
+the `myCommand` bean as a prototype if that is actually what is needed. If it is
+a xref:core/beans/factory-scopes.adoc#beans-factory-scopes-singleton[singleton], the same instance of the `myCommand`
+bean is returned each time.
+
+Alternatively, within the annotation-based component model, you can declare a lookup
+method through the `@Lookup` annotation, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public abstract class CommandManager {
+
+		public Object process(Object commandState) {
+			Command command = createCommand();
+			command.setState(commandState);
+			return command.execute();
+		}
+
+		@Lookup("myCommand")
+		protected abstract Command createCommand();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	abstract class CommandManager {
+
+		fun process(commandState: Any): Any {
+			val command = createCommand()
+			command.state = commandState
+			return command.execute()
+		}
+
+		@Lookup("myCommand")
+		protected abstract fun createCommand(): Command
+	}
+----
+======
+
+Or, more idiomatically, you can rely on the target bean getting resolved against the
+declared return type of the lookup method:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public abstract class CommandManager {
+
+		public Object process(Object commandState) {
+			Command command = createCommand();
+			command.setState(commandState);
+			return command.execute();
+		}
+
+		@Lookup
+		protected abstract Command createCommand();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	abstract class CommandManager {
+
+		fun process(commandState: Any): Any {
+			val command = createCommand()
+			command.state = commandState
+			return command.execute()
+		}
+
+		@Lookup
+		protected abstract fun createCommand(): Command
+	}
+----
+======
+
+Note that you should typically declare such annotated lookup methods with a concrete
+stub implementation, in order for them to be compatible with Spring's component
+scanning rules where abstract classes get ignored by default. This limitation does not
+apply to explicitly registered or explicitly imported bean classes.
+
+[TIP]
+====
+Another way of accessing differently scoped target beans is an `ObjectFactory`/
+`Provider` injection point. See xref:core/beans/factory-scopes.adoc#beans-factory-scopes-other-injection[Scoped Beans as Dependencies].
+
+You may also find the `ServiceLocatorFactoryBean` (in the
+`org.springframework.beans.factory.config` package) to be useful.
+====
+
+
+
+[[beans-factory-arbitrary-method-replacement]]
+== Arbitrary Method Replacement
+
+A less useful form of method injection than lookup method injection is the ability to
+replace arbitrary methods in a managed bean with another method implementation. You
+can safely skip the rest of this section until you actually need this functionality.
+
+With XML-based configuration metadata, you can use the `replaced-method` element to
+replace an existing method implementation with another, for a deployed bean. Consider
+the following class, which has a method called `computeValue` that we want to override:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class MyValueCalculator {
+
+		public String computeValue(String input) {
+			// some real code...
+		}
+
+		// some other methods...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class MyValueCalculator {
+
+		fun computeValue(input: String): String {
+			// some real code...
+		}
+
+		// some other methods...
+	}
+----
+======
+
+A class that implements the `org.springframework.beans.factory.support.MethodReplacer`
+interface provides the new method definition, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	/**
+	 * meant to be used to override the existing computeValue(String)
+	 * implementation in MyValueCalculator
+	 */
+	public class ReplacementComputeValue implements MethodReplacer {
+
+		public Object reimplement(Object o, Method m, Object[] args) throws Throwable {
+			// get the input value, work with it, and return a computed result
+			String input = (String) args[0];
+			...
+			return ...;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	/**
+	 * meant to be used to override the existing computeValue(String)
+	 * implementation in MyValueCalculator
+	 */
+	class ReplacementComputeValue : MethodReplacer {
+
+		override fun reimplement(obj: Any, method: Method, args: Array<out Any>): Any {
+			// get the input value, work with it, and return a computed result
+			val input = args[0] as String;
+			...
+			return ...;
+		}
+	}
+----
+======
+
+
+
+The bean definition to deploy the original class and specify the method override would
+resemble the following example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="myValueCalculator" class="x.y.z.MyValueCalculator">
+		<!-- arbitrary method replacement -->
+		<replaced-method name="computeValue" replacer="replacementComputeValue">
+			<arg-type>String</arg-type>
+		</replaced-method>
+	</bean>
+
+	<bean id="replacementComputeValue" class="a.b.c.ReplacementComputeValue"/>
+----
+
+You can use one or more `<arg-type/>` elements within the `<replaced-method/>`
+element to indicate the method signature of the method being overridden. The signature
+for the arguments is necessary only if the method is overloaded and multiple variants
+exist within the class. For convenience, the type string for an argument may be a
+substring of the fully qualified type name. For example, the following all match
+`java.lang.String`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	java.lang.String
+	String
+	Str
+----
+
+Because the number of arguments is often enough to distinguish between each possible
+choice, this shortcut can save a lot of typing, by letting you type only the
+shortest string that matches an argument type.
+
+
+

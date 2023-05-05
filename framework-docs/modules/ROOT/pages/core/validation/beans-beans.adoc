@@ -1,0 +1,660 @@
+[[beans-beans]]
+= Bean Manipulation and the `BeanWrapper`
+
+The `org.springframework.beans` package adheres to the JavaBeans standard.
+A JavaBean is a class with a default no-argument constructor and that follows
+a naming convention where (for example) a property named `bingoMadness` would
+have a setter method `setBingoMadness(..)` and a getter method `getBingoMadness()`. For
+more information about JavaBeans and the specification, see
+https://docs.oracle.com/javase/8/docs/api/java/beans/package-summary.html[javabeans].
+
+One quite important class in the beans package is the `BeanWrapper` interface and its
+corresponding implementation (`BeanWrapperImpl`). As quoted from the javadoc, the
+`BeanWrapper` offers functionality to set and get property values (individually or in
+bulk), get property descriptors, and query properties to determine if they are
+readable or writable. Also, the `BeanWrapper` offers support for nested properties,
+enabling the setting of properties on sub-properties to an unlimited depth. The
+`BeanWrapper` also supports the ability to add standard JavaBeans `PropertyChangeListeners`
+and `VetoableChangeListeners`, without the need for supporting code in the target class.
+Last but not least, the `BeanWrapper` provides support for setting indexed properties.
+The `BeanWrapper` usually is not used by application code directly but is used by the
+`DataBinder` and the `BeanFactory`.
+
+The way the `BeanWrapper` works is partly indicated by its name: it wraps a bean to
+perform actions on that bean, such as setting and retrieving properties.
+
+
+
+[[beans-beans-conventions]]
+== Setting and Getting Basic and Nested Properties
+
+Setting and getting properties is done through the `setPropertyValue` and
+`getPropertyValue` overloaded method variants of `BeanWrapper`. See their Javadoc for
+details. The below table shows some examples of these conventions:
+
+[[beans-beans-conventions-properties-tbl]]
+.Examples of properties
+|===
+| Expression| Explanation
+
+| `name`
+| Indicates the property `name` that corresponds to the `getName()` or `isName()`
+  and `setName(..)` methods.
+
+| `account.name`
+| Indicates the nested property `name` of the property `account` that corresponds to
+  (for example) the `getAccount().setName()` or `getAccount().getName()` methods.
+
+| `account[2]`
+| Indicates the _third_ element of the indexed property `account`. Indexed properties
+  can be of type `array`, `list`, or other naturally ordered collection.
+
+| `account[COMPANYNAME]`
+| Indicates the value of the map entry indexed by the `COMPANYNAME` key of the `account` `Map`
+  property.
+|===
+
+(This next section is not vitally important to you if you do not plan to work with
+the `BeanWrapper` directly. If you use only the `DataBinder` and the `BeanFactory`
+and their default implementations, you should skip ahead to the
+xref:core/validation/beans-beans.adoc#beans-beans-conversion[section on `PropertyEditors`].)
+
+The following two example classes use the `BeanWrapper` to get and set
+properties:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class Company {
+
+		private String name;
+		private Employee managingDirector;
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public Employee getManagingDirector() {
+			return this.managingDirector;
+		}
+
+		public void setManagingDirector(Employee managingDirector) {
+			this.managingDirector = managingDirector;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class Company {
+		var name: String? = null
+		var managingDirector: Employee? = null
+	}
+----
+======
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class Employee {
+
+		private String name;
+
+		private float salary;
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public float getSalary() {
+			return salary;
+		}
+
+		public void setSalary(float salary) {
+			this.salary = salary;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class Employee {
+		var name: String? = null
+		var salary: Float? = null
+	}
+----
+======
+
+The following code snippets show some examples of how to retrieve and manipulate some of
+the properties of instantiated ``Company``s and ``Employee``s:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	BeanWrapper company = new BeanWrapperImpl(new Company());
+	// setting the company name..
+	company.setPropertyValue("name", "Some Company Inc.");
+	// ... can also be done like this:
+	PropertyValue value = new PropertyValue("name", "Some Company Inc.");
+	company.setPropertyValue(value);
+
+	// ok, let's create the director and tie it to the company:
+	BeanWrapper jim = new BeanWrapperImpl(new Employee());
+	jim.setPropertyValue("name", "Jim Stravinsky");
+	company.setPropertyValue("managingDirector", jim.getWrappedInstance());
+
+	// retrieving the salary of the managingDirector through the company
+	Float salary = (Float) company.getPropertyValue("managingDirector.salary");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val company = BeanWrapperImpl(Company())
+	// setting the company name..
+	company.setPropertyValue("name", "Some Company Inc.")
+	// ... can also be done like this:
+	val value = PropertyValue("name", "Some Company Inc.")
+	company.setPropertyValue(value)
+
+	// ok, let's create the director and tie it to the company:
+	val jim = BeanWrapperImpl(Employee())
+	jim.setPropertyValue("name", "Jim Stravinsky")
+	company.setPropertyValue("managingDirector", jim.wrappedInstance)
+
+	// retrieving the salary of the managingDirector through the company
+	val salary = company.getPropertyValue("managingDirector.salary") as Float?
+----
+======
+
+
+
+[[beans-beans-conversion]]
+== Built-in `PropertyEditor` Implementations
+
+Spring uses the concept of a `PropertyEditor` to effect the conversion between an
+`Object` and a `String`. It can be handy
+to represent properties in a different way than the object itself. For example, a `Date`
+can be represented in a human readable way (as the `String`: `'2007-14-09'`), while
+we can still convert the human readable form back to the original date (or, even
+better, convert any date entered in a human readable form back to `Date` objects). This
+behavior can be achieved by registering custom editors of type
+`java.beans.PropertyEditor`. Registering custom editors on a `BeanWrapper` or,
+alternatively, in a specific IoC container (as mentioned in the previous chapter), gives it
+the knowledge of how to convert properties to the desired type. For more about
+`PropertyEditor`, see https://docs.oracle.com/javase/8/docs/api/java/beans/package-summary.html[the javadoc of the `java.beans` package from Oracle].
+
+A couple of examples where property editing is used in Spring:
+
+* Setting properties on beans is done by using `PropertyEditor` implementations.
+  When you use `String` as the value of a property of some bean that you declare
+  in an XML file, Spring (if the setter of the corresponding property has a `Class`
+  parameter) uses `ClassEditor` to try to resolve the parameter to a `Class` object.
+* Parsing HTTP request parameters in Spring's MVC framework is done by using all kinds
+  of `PropertyEditor` implementations that you can manually bind in all subclasses of the
+  `CommandController`.
+
+Spring has a number of built-in `PropertyEditor` implementations to make life easy.
+They are all located in the `org.springframework.beans.propertyeditors`
+package. Most, (but not all, as indicated in the following table) are, by default, registered by
+`BeanWrapperImpl`. Where the property editor is configurable in some fashion, you can
+still register your own variant to override the default one. The following table describes
+the various `PropertyEditor` implementations that Spring provides:
+
+[[beans-beans-property-editors-tbl]]
+.Built-in `PropertyEditor` Implementations
+[cols="30%,70%"]
+|===
+| Class| Explanation
+
+| `ByteArrayPropertyEditor`
+| Editor for byte arrays. Converts strings to their corresponding byte
+  representations. Registered by default by `BeanWrapperImpl`.
+
+| `ClassEditor`
+| Parses Strings that represent classes to actual classes and vice-versa. When a
+  class is not found, an `IllegalArgumentException` is thrown. By default, registered by
+  `BeanWrapperImpl`.
+
+| `CustomBooleanEditor`
+| Customizable property editor for `Boolean` properties. By default, registered by
+  `BeanWrapperImpl` but can be overridden by registering a custom instance of it as a
+  custom editor.
+
+| `CustomCollectionEditor`
+| Property editor for collections, converting any source `Collection` to a given target
+  `Collection` type.
+
+| `CustomDateEditor`
+| Customizable property editor for `java.util.Date`, supporting a custom `DateFormat`. NOT
+  registered by default. Must be user-registered with the appropriate format as needed.
+
+| `CustomNumberEditor`
+| Customizable property editor for any `Number` subclass, such as `Integer`, `Long`, `Float`, or
+  `Double`. By default, registered by `BeanWrapperImpl` but can be overridden by
+  registering a custom instance of it as a custom editor.
+
+| `FileEditor`
+| Resolves strings to `java.io.File` objects. By default, registered by
+  `BeanWrapperImpl`.
+
+| `InputStreamEditor`
+| One-way property editor that can take a string and produce (through an
+  intermediate `ResourceEditor` and `Resource`) an `InputStream` so that `InputStream`
+  properties may be directly set as strings. Note that the default usage does not close
+  the `InputStream` for you. By default, registered by `BeanWrapperImpl`.
+
+| `LocaleEditor`
+| Can resolve strings to `Locale` objects and vice-versa (the string format is
+  `[language]\_[country]_[variant]`, same as the `toString()` method of
+  `Locale`). Also accepts spaces as separators, as an alternative to underscores.
+  By default, registered by `BeanWrapperImpl`.
+
+| `PatternEditor`
+| Can resolve strings to `java.util.regex.Pattern` objects and vice-versa.
+
+| `PropertiesEditor`
+| Can convert strings (formatted with the format defined in the javadoc of the
+  `java.util.Properties` class) to `Properties` objects. By default, registered
+  by `BeanWrapperImpl`.
+
+| `StringTrimmerEditor`
+| Property editor that trims strings. Optionally allows transforming an empty string
+  into a `null` value. NOT registered by default -- must be user-registered.
+
+| `URLEditor`
+| Can resolve a string representation of a URL to an actual `URL` object.
+  By default, registered by `BeanWrapperImpl`.
+|===
+
+Spring uses the `java.beans.PropertyEditorManager` to set the search path for property
+editors that might be needed. The search path also includes `sun.bean.editors`, which
+includes `PropertyEditor` implementations for types such as `Font`, `Color`, and most of
+the primitive types. Note also that the standard JavaBeans infrastructure
+automatically discovers `PropertyEditor` classes (without you having to register them
+explicitly) if they are in the same package as the class they handle and have the same
+name as that class, with `Editor` appended. For example, one could have the following
+class and package structure, which would be sufficient for the `SomethingEditor` class to be
+recognized and used as the `PropertyEditor` for `Something`-typed properties.
+
+[literal,subs="verbatim,quotes"]
+----
+com
+  chank
+    pop
+      Something
+      SomethingEditor // the PropertyEditor for the Something class
+----
+
+Note that you can also use the standard `BeanInfo` JavaBeans mechanism here as well
+(described to some extent
+https://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[here]). The
+following example uses the `BeanInfo` mechanism to explicitly register one or more
+`PropertyEditor` instances with the properties of an associated class:
+
+[literal,subs="verbatim,quotes"]
+----
+com
+  chank
+    pop
+      Something
+      SomethingBeanInfo // the BeanInfo for the Something class
+----
+
+The following Java source code for the referenced `SomethingBeanInfo` class
+associates a `CustomNumberEditor` with the `age` property of the `Something` class:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class SomethingBeanInfo extends SimpleBeanInfo {
+
+		public PropertyDescriptor[] getPropertyDescriptors() {
+			try {
+				final PropertyEditor numberPE = new CustomNumberEditor(Integer.class, true);
+				PropertyDescriptor ageDescriptor = new PropertyDescriptor("age", Something.class) {
+					@Override
+					public PropertyEditor createPropertyEditor(Object bean) {
+						return numberPE;
+					}
+				};
+				return new PropertyDescriptor[] { ageDescriptor };
+			}
+			catch (IntrospectionException ex) {
+				throw new Error(ex.toString());
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class SomethingBeanInfo : SimpleBeanInfo() {
+
+		override fun getPropertyDescriptors(): Array<PropertyDescriptor> {
+			try {
+				val numberPE = CustomNumberEditor(Int::class.java, true)
+				val ageDescriptor = object : PropertyDescriptor("age", Something::class.java) {
+					override fun createPropertyEditor(bean: Any): PropertyEditor {
+						return numberPE
+					}
+				}
+				return arrayOf(ageDescriptor)
+			} catch (ex: IntrospectionException) {
+				throw Error(ex.toString())
+			}
+
+		}
+	}
+----
+======
+
+
+[[beans-beans-conversion-customeditor-registration]]
+=== Registering Additional Custom `PropertyEditor` Implementations
+
+When setting bean properties as string values, a Spring IoC container ultimately uses
+standard JavaBeans `PropertyEditor` implementations to convert these strings to the complex type of the
+property. Spring pre-registers a number of custom `PropertyEditor` implementations (for example, to
+convert a class name expressed as a string into a `Class` object). Additionally,
+Java's standard JavaBeans `PropertyEditor` lookup mechanism lets a `PropertyEditor`
+for a class be named appropriately and placed in the same package as the class
+for which it provides support, so that it can be found automatically.
+
+If there is a need to register other custom `PropertyEditors`, several mechanisms are
+available. The most manual approach, which is not normally convenient or
+recommended, is to use the `registerCustomEditor()` method of the
+`ConfigurableBeanFactory` interface, assuming you have a `BeanFactory` reference.
+Another (slightly more convenient) mechanism is to use a special bean factory
+post-processor called `CustomEditorConfigurer`. Although you can use bean factory post-processors
+with `BeanFactory` implementations, the `CustomEditorConfigurer` has a
+nested property setup, so we strongly recommend that you use it with the
+`ApplicationContext`, where you can deploy it in similar fashion to any other bean and
+where it can be automatically detected and applied.
+
+Note that all bean factories and application contexts automatically use a number of
+built-in property editors, through their use of a `BeanWrapper` to
+handle property conversions. The standard property editors that the `BeanWrapper`
+registers are listed in the xref:core/validation/beans-beans.adoc#beans-beans-conversion[previous section].
+Additionally, ``ApplicationContext``s also override or add additional editors to handle
+resource lookups in a manner appropriate to the specific application context type.
+
+Standard JavaBeans `PropertyEditor` instances are used to convert property values
+expressed as strings to the actual complex type of the property. You can use
+`CustomEditorConfigurer`, a bean factory post-processor, to conveniently add
+support for additional `PropertyEditor` instances to an `ApplicationContext`.
+
+Consider the following example, which defines a user class called `ExoticType` and
+another class called `DependsOnExoticType`, which needs `ExoticType` set as a property:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	package example;
+
+	public class ExoticType {
+
+		private String name;
+
+		public ExoticType(String name) {
+			this.name = name;
+		}
+	}
+
+	public class DependsOnExoticType {
+
+		private ExoticType type;
+
+		public void setType(ExoticType type) {
+			this.type = type;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	package example
+
+	class ExoticType(val name: String)
+
+	class DependsOnExoticType {
+
+		var type: ExoticType? = null
+	}
+----
+======
+
+When things are properly set up, we want to be able to assign the type property as a
+string, which a `PropertyEditor` converts into an actual
+`ExoticType` instance. The following bean definition shows how to set up this relationship:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="sample" class="example.DependsOnExoticType">
+		<property name="type" value="aNameForExoticType"/>
+	</bean>
+----
+
+The `PropertyEditor` implementation could look similar to the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	package example;
+
+	import java.beans.PropertyEditorSupport;
+
+	// converts string representation to ExoticType object
+	public class ExoticTypeEditor extends PropertyEditorSupport {
+
+		public void setAsText(String text) {
+			setValue(new ExoticType(text.toUpperCase()));
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	package example
+
+	import java.beans.PropertyEditorSupport
+
+	// converts string representation to ExoticType object
+	class ExoticTypeEditor : PropertyEditorSupport() {
+
+		override fun setAsText(text: String) {
+			value = ExoticType(text.toUpperCase())
+		}
+	}
+----
+======
+
+Finally, the following example shows how to use `CustomEditorConfigurer` to register the new `PropertyEditor` with the
+`ApplicationContext`, which will then be able to use it as needed:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+		<property name="customEditors">
+			<map>
+				<entry key="example.ExoticType" value="example.ExoticTypeEditor"/>
+			</map>
+		</property>
+	</bean>
+----
+
+[[beans-beans-conversion-customeditor-registration-per]]
+==== Using `PropertyEditorRegistrar`
+
+Another mechanism for registering property editors with the Spring container is to
+create and use a `PropertyEditorRegistrar`. This interface is particularly useful when
+you need to use the same set of property editors in several different situations.
+You can write a corresponding registrar and reuse it in each case.
+`PropertyEditorRegistrar` instances work in conjunction with an interface called
+`PropertyEditorRegistry`, an interface that is implemented by the Spring `BeanWrapper`
+(and `DataBinder`). `PropertyEditorRegistrar` instances are particularly convenient
+when used in conjunction with `CustomEditorConfigurer` (described
+xref:core/validation/beans-beans.adoc#beans-beans-conversion-customeditor-registration[here]), which exposes a property
+called `setPropertyEditorRegistrars(..)`. `PropertyEditorRegistrar` instances added
+to a `CustomEditorConfigurer` in this fashion can easily be shared with `DataBinder` and
+Spring MVC controllers. Furthermore, it avoids the need for synchronization on custom
+editors: A `PropertyEditorRegistrar` is expected to create fresh `PropertyEditor`
+instances for each bean creation attempt.
+
+The following example shows how to create your own `PropertyEditorRegistrar` implementation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary",chomp="-packages"]
+----
+	package com.foo.editors.spring;
+
+	public final class CustomPropertyEditorRegistrar implements PropertyEditorRegistrar {
+
+		public void registerCustomEditors(PropertyEditorRegistry registry) {
+
+			// it is expected that new PropertyEditor instances are created
+			registry.registerCustomEditor(ExoticType.class, new ExoticTypeEditor());
+
+			// you could register as many custom property editors as are required here...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
+----
+	package com.foo.editors.spring
+
+	import org.springframework.beans.PropertyEditorRegistrar
+	import org.springframework.beans.PropertyEditorRegistry
+
+	class CustomPropertyEditorRegistrar : PropertyEditorRegistrar {
+
+		override fun registerCustomEditors(registry: PropertyEditorRegistry) {
+
+			// it is expected that new PropertyEditor instances are created
+			registry.registerCustomEditor(ExoticType::class.java, ExoticTypeEditor())
+
+			// you could register as many custom property editors as are required here...
+		}
+	}
+----
+======
+
+See also the `org.springframework.beans.support.ResourceEditorRegistrar` for an example
+`PropertyEditorRegistrar` implementation. Notice how in its implementation of the
+`registerCustomEditors(..)` method, it creates new instances of each property editor.
+
+The next example shows how to configure a `CustomEditorConfigurer` and inject an instance
+of our `CustomPropertyEditorRegistrar` into it:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+		<property name="propertyEditorRegistrars">
+			<list>
+				<ref bean="customPropertyEditorRegistrar"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="customPropertyEditorRegistrar"
+		class="com.foo.editors.spring.CustomPropertyEditorRegistrar"/>
+----
+
+Finally (and in a bit of a departure from the focus of this chapter) for those of you
+using xref:web/webmvc.adoc#mvc[Spring's MVC web framework], using a `PropertyEditorRegistrar` in
+conjunction with data-binding web controllers can be very convenient. The following
+example uses a `PropertyEditorRegistrar` in the implementation of an `@InitBinder` method:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class RegisterUserController {
+
+		private final PropertyEditorRegistrar customPropertyEditorRegistrar;
+
+		RegisterUserController(PropertyEditorRegistrar propertyEditorRegistrar) {
+			this.customPropertyEditorRegistrar = propertyEditorRegistrar;
+		}
+
+		@InitBinder
+		void initBinder(WebDataBinder binder) {
+			this.customPropertyEditorRegistrar.registerCustomEditors(binder);
+		}
+
+		// other methods related to registering a User
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Controller
+	class RegisterUserController(
+		private val customPropertyEditorRegistrar: PropertyEditorRegistrar) {
+
+		@InitBinder
+		fun initBinder(binder: WebDataBinder) {
+			this.customPropertyEditorRegistrar.registerCustomEditors(binder)
+		}
+
+		// other methods related to registering a User
+	}
+----
+======
+
+This style of `PropertyEditor` registration can lead to concise code (the implementation
+of the `@InitBinder` method is only one line long) and lets common `PropertyEditor`
+registration code be encapsulated in a class and then shared amongst as many controllers
+as needed.
+
+
+
+

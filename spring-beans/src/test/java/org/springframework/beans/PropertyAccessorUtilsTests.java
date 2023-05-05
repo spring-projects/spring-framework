@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ public class PropertyAccessorUtilsTests {
 
 	@Test
 	public void getPropertyName() {
-		assertThat(PropertyAccessorUtils.getPropertyName("")).isEqualTo("");
-		assertThat(PropertyAccessorUtils.getPropertyName("[user]")).isEqualTo("");
+		assertThat(PropertyAccessorUtils.getPropertyName("")).isEmpty();
+		assertThat(PropertyAccessorUtils.getPropertyName("[user]")).isEmpty();
 		assertThat(PropertyAccessorUtils.getPropertyName("user")).isEqualTo("user");
 	}
 
@@ -69,7 +69,7 @@ public class PropertyAccessorUtilsTests {
 
 	@Test
 	public void canonicalPropertyName() {
-		assertThat(PropertyAccessorUtils.canonicalPropertyName(null)).isEqualTo("");
+		assertThat(PropertyAccessorUtils.canonicalPropertyName(null)).isEmpty();
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map")).isEqualTo("map");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map[key1]")).isEqualTo("map[key1]");
 		assertThat(PropertyAccessorUtils.canonicalPropertyName("map['key1']")).isEqualTo("map[key1]");

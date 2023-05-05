@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public class NameMatchMethodPointcutTests {
 
 		pc1.setMappedName(foo);
 		assertThat(pc1.equals(pc2)).isFalse();
-		assertThat(pc1.hashCode() != pc2.hashCode()).isTrue();
+		assertThat(pc1.hashCode()).isNotEqualTo(pc2.hashCode());
 
 		pc2.setMappedName(foo);
 		assertThat(pc2).isEqualTo(pc1);

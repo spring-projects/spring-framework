@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,14 +70,14 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		sendBlockingMessage(decorator);
 
 		Thread.sleep(50);
-		assertThat(decorator.getTimeSinceSendStarted() > 0).isTrue();
+		assertThat(decorator.getTimeSinceSendStarted()).isGreaterThan(0);
 
 		TextMessage payload = new TextMessage("payload");
 		for (int i = 0; i < 5; i++) {
 			decorator.sendMessage(payload);
 		}
 
-		assertThat(decorator.getTimeSinceSendStarted() > 0).isTrue();
+		assertThat(decorator.getTimeSinceSendStarted()).isGreaterThan(0);
 		assertThat(decorator.getBufferSize()).isEqualTo((5 * payload.getPayloadLength()));
 		assertThat(session.isOpen()).isTrue();
 	}

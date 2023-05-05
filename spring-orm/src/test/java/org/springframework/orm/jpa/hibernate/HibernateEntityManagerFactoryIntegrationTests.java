@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class HibernateEntityManagerFactoryIntegrationTests extends AbstractConta
 		assertThat(condition).isTrue();
 		boolean condition1 = proxy instanceof org.hibernate.jpa.HibernateEntityManager;
 		assertThat(condition1).isFalse();
-		assertThat(proxy.unwrap(org.hibernate.jpa.HibernateEntityManager.class) != null).isTrue();
+		assertThat(proxy.unwrap(org.hibernate.jpa.HibernateEntityManager.class)).isNotNull();
 		assertThat(proxy.unwrap(org.hibernate.jpa.HibernateEntityManager.class)).isSameAs(em);
 		assertThat(proxy.getDelegate()).isSameAs(em.getDelegate());
 	}

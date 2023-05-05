@@ -1,0 +1,191 @@
+[[expressions-ref-functions]]
+= Functions
+
+You can extend SpEL by registering user-defined functions that can be called within the
+expression string. The function is registered through the `EvaluationContext`. The
+following example shows how to register a user-defined function to be invoked via reflection
+(i.e. a `Method`):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	Method method = ...;
+
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+	context.setVariable("myFunction", method);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val method: Method = ...
+
+	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
+	context.setVariable("myFunction", method)
+----
+======
+
+For example, consider the following utility method that reverses a string:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public abstract class StringUtils {
+
+		public static String reverseString(String input) {
+			StringBuilder backwards = new StringBuilder(input.length());
+			for (int i = 0; i < input.length(); i++) {
+				backwards.append(input.charAt(input.length() - 1 - i));
+			}
+			return backwards.toString();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun reverseString(input: String): String {
+		val backwards = StringBuilder(input.length)
+		for (i in 0 until input.length) {
+			backwards.append(input[input.length - 1 - i])
+		}
+		return backwards.toString()
+	}
+----
+======
+
+You can then register and use the preceding method, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	ExpressionParser parser = new SpelExpressionParser();
+
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+	context.setVariable("reverseString",
+			StringUtils.class.getDeclaredMethod("reverseString", String.class));
+
+	String helloWorldReversed = parser.parseExpression(
+			"#reverseString('hello')").getValue(context, String.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val parser = SpelExpressionParser()
+
+	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
+	context.setVariable("reverseString", ::reverseString::javaMethod)
+
+	val helloWorldReversed = parser.parseExpression(
+			"#reverseString('hello')").getValue(context, String::class.java)
+----
+======
+
+The use of `MethodHandle` is also supported. This enables potentially more efficient use
+cases if the `MethodHandle` target and parameters have been fully bound prior to
+registration, but partially bound handles are also supported.
+
+Consider the `String#formatted(String, Object...)` instance method, which produces a
+message according to a template and a variable number of arguments.
+
+You can register and use the `formatted` method as a `MethodHandle`, as the following
+example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	ExpressionParser parser = new SpelExpressionParser();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+
+	MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
+			MethodType.methodType(String.class, Object[].class));
+	context.setVariable("message", mh);
+
+	String message = parser.parseExpression("#message('Simple message: <%s>', 'Hello World', 'ignored')")
+			.getValue(context, String.class);
+	//returns "Simple message: <Hello World>"
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val parser = SpelExpressionParser()
+	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
+
+	val mh = MethodHandles.lookup().findVirtual(String::class.java, "formatted",
+			MethodType.methodType(String::class.java, Array<Any>::class.java))
+	context.setVariable("message", mh)
+
+	val message = parser.parseExpression("#message('Simple message: <%s>', 'Hello World', 'ignored')")
+			.getValue(context, String::class.java)
+----
+======
+
+As hinted above, binding a `MethodHandle` and registering the bound `MethodHandle` is also
+supported. This is likely to be more performant if both the target and all the arguments
+are bound. In that case no arguments are necessary in the SpEL expression, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	ExpressionParser parser = new SpelExpressionParser();
+	EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+
+	String template = "This is a %s message with %s words: <%s>";
+	Object varargs = new Object[] { "prerecorded", 3, "Oh Hello World!", "ignored" };
+	MethodHandle mh = MethodHandles.lookup().findVirtual(String.class, "formatted",
+			MethodType.methodType(String.class, Object[].class))
+			.bindTo(template)
+			.bindTo(varargs); //here we have to provide arguments in a single array binding
+	context.setVariable("message", mh);
+
+	String message = parser.parseExpression("#message()")
+			.getValue(context, String.class);
+	//returns "This is a prerecorded message with 3 words: <Oh Hello World!>"
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val parser = SpelExpressionParser()
+	val context = SimpleEvaluationContext.forReadOnlyDataBinding().build()
+
+	val template = "This is a %s message with %s words: <%s>"
+	val varargs = arrayOf("prerecorded", 3, "Oh Hello World!", "ignored")
+
+	val mh = MethodHandles.lookup().findVirtual(String::class.java, "formatted",
+			MethodType.methodType(String::class.java, Array<Any>::class.java))
+			.bindTo(template)
+			.bindTo(varargs) //here we have to provide arguments in a single array binding
+	context.setVariable("message", mh)
+
+	val message = parser.parseExpression("#message()")
+			.getValue(context, String::class.java)
+----
+======
+
+
+

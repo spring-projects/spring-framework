@@ -1,0 +1,10 @@
+[[webflux-ann-methods]]
+= Handler Methods
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webmvc/mvc-controller/ann-methods.adoc[See equivalent in the Servlet stack]#
+
+`@RequestMapping` handler methods have a flexible signature and can choose from a range of
+supported controller method arguments and return values.
+
+

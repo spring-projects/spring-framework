@@ -1,0 +1,79 @@
+[[aop-introductions]]
+= Introductions
+
+Introductions (known as inter-type declarations in AspectJ) enable an aspect to declare
+that advised objects implement a given interface, and to provide an implementation of
+that interface on behalf of those objects.
+
+You can make an introduction by using the `@DeclareParents` annotation. This annotation
+is used to declare that matching types have a new parent (hence the name). For example,
+given an interface named `UsageTracked` and an implementation of that interface named
+`DefaultUsageTracked`, the following aspect declares that all implementors of service
+interfaces also implement the `UsageTracked` interface (e.g. for statistics via JMX):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Aspect
+	public class UsageTracking {
+
+		@DeclareParents(value="com.xyz.service.*+", defaultImpl=DefaultUsageTracked.class)
+		public static UsageTracked mixin;
+
+		@Before("execution(* com.xyz..service.*.*(..)) && this(usageTracked)")
+		public void recordUsage(UsageTracked usageTracked) {
+			usageTracked.incrementUseCount();
+		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Aspect
+	class UsageTracking {
+
+		companion object {
+			@DeclareParents(value = "com.xyz.service.*+",
+				defaultImpl = DefaultUsageTracked::class)
+			lateinit var mixin: UsageTracked
+		}
+
+		@Before("execution(* com.xyz..service.*.*(..)) && this(usageTracked)")
+		fun recordUsage(usageTracked: UsageTracked) {
+			usageTracked.incrementUseCount()
+		}
+	}
+----
+======
+
+The interface to be implemented is determined by the type of the annotated field. The
+`value` attribute of the `@DeclareParents` annotation is an AspectJ type pattern. Any
+bean of a matching type implements the `UsageTracked` interface. Note that, in the
+before advice of the preceding example, service beans can be directly used as
+implementations of the `UsageTracked` interface. If accessing a bean programmatically,
+you would write the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	UsageTracked usageTracked = context.getBean("myService", UsageTracked.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	val usageTracked = context.getBean("myService", UsageTracked.class)
+----
+======
+
+

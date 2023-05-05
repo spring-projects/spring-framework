@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,8 +98,9 @@ abstract class AbstractHttpRequestFactoryTests extends AbstractMockWebServerTest
 
 		try (ClientHttpResponse response = request.execute()) {
 			assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
-			assertThat(response.getHeaders().containsKey(headerName)).as("Header not found").isTrue();
-			assertThat(response.getHeaders().get(headerName)).as("Header value not found").isEqualTo(Arrays.asList(headerValue1, headerValue2));
+			assertThat(response.getHeaders()).as("Header not found").containsKey(headerName);
+			assertThat(response.getHeaders()).as("Header value not found")
+					.containsEntry(headerName, Arrays.asList(headerValue1, headerValue2));
 			byte[] result = FileCopyUtils.copyToByteArray(response.getBody());
 			assertThat(Arrays.equals(body, result)).as("Invalid body").isTrue();
 		}

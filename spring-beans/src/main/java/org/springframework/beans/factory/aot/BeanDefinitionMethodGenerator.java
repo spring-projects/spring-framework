@@ -152,7 +152,7 @@ class BeanDefinitionMethodGenerator {
 		GeneratedClass tmp = generatedClass;
 		for (String nameToProcess : namesToProcess) {
 			currentTargetClassName = currentTargetClassName.nestedClass(nameToProcess);
-			tmp = createInnerClass(tmp, nameToProcess + "__BeanDefinitions", currentTargetClassName);
+			tmp = createInnerClass(tmp, nameToProcess, currentTargetClassName);
 		}
 		return tmp;
 	}

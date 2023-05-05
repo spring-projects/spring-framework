@@ -69,7 +69,7 @@ class BshScriptFactoryTests {
 		assertThat(messenger).isEqualTo(messenger);
 		boolean condition1 = !messenger.equals(calc);
 		assertThat(condition1).isTrue();
-		assertThat(messenger.hashCode() != calc.hashCode()).isTrue();
+		assertThat(messenger.hashCode()).isNotEqualTo(calc.hashCode());
 		boolean condition = !messenger.toString().equals(calc.toString());
 		assertThat(condition).isTrue();
 

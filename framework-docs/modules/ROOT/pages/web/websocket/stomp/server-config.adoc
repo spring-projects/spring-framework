@@ -1,0 +1,33 @@
+[[websocket-stomp-server-config]]
+= WebSocket Server
+
+To configure the underlying WebSocket server, the information in
+xref:web/websocket/server.adoc#websocket-server-runtime-configuration[Server Configuration] applies. For Jetty, however you need to set
+the `HandshakeHandler` and `WebSocketPolicy` through the `StompEndpointRegistry`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void registerStompEndpoints(StompEndpointRegistry registry) {
+			registry.addEndpoint("/portfolio").setHandshakeHandler(handshakeHandler());
+		}
+
+		@Bean
+		public DefaultHandshakeHandler handshakeHandler() {
+
+			WebSocketPolicy policy = new WebSocketPolicy(WebSocketBehavior.SERVER);
+			policy.setInputBufferSize(8192);
+			policy.setIdleTimeout(600000);
+
+			return new DefaultHandshakeHandler(
+					new JettyRequestUpgradeStrategy(new WebSocketServerFactory(policy)));
+		}
+	}
+----
+
+
+

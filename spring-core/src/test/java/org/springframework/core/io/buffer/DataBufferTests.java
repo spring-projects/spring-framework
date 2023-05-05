@@ -393,7 +393,7 @@ class DataBufferTests extends AbstractDataBufferAllocatingTests {
 		assertThat(buffer.capacity()).isEqualTo(1);
 		buffer.write((byte) 'b');
 
-		assertThat(buffer.capacity() > 1).isTrue();
+		assertThat(buffer.capacity()).isGreaterThan(1);
 
 		release(buffer);
 	}

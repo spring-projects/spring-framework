@@ -56,7 +56,7 @@ public class OpMultiply extends Operator {
 
 	/**
 	 * Maximum number of characters permitted in repeated text.
-	 * @since 5.3.26
+	 * @since 5.2.23
 	 */
 	private static final int MAX_REPEATED_TEXT_SIZE = 256;
 

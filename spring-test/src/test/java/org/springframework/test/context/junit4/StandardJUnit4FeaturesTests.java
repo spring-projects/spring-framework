@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class StandardJUnit4FeaturesTests {
 
 	@Test
 	public void verifyBeforeAnnotation() {
-		assertThat(this.beforeCounter).isEqualTo(1);
+		assertThat(this.beforeCounter).isOne();
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class StandardJUnit4FeaturesTests {
 		// Instead of testing for equality to 1, we just assert that the value
 		// was incremented at least once, since this test class may serve as a
 		// parent class to other tests in a suite, etc.
-		assertThat(StandardJUnit4FeaturesTests.staticBeforeCounter > 0).isTrue();
+		assertThat(StandardJUnit4FeaturesTests.staticBeforeCounter).isGreaterThan(0);
 	}
 
 }

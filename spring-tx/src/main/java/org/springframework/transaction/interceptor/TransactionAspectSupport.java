@@ -19,6 +19,8 @@ package org.springframework.transaction.interceptor;
 import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import io.vavr.control.Try;
 import kotlin.coroutines.Continuation;
@@ -399,11 +401,26 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				cleanupTransactionInfo(txInfo);
 			}
 
-			if (retVal != null && vavrPresent && VavrDelegate.isVavrTry(retVal)) {
-				// Set rollback-only in case of Vavr failure matching our rollback rules...
+			if (retVal != null && txAttr != null) {
 				TransactionStatus status = txInfo.getTransactionStatus();
-				if (status != null && txAttr != null) {
-					retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
+				if (status != null) {
+					if (retVal instanceof Future<?> future && future.isDone()) {
+						try {
+							future.get();
+						}
+						catch (ExecutionException ex) {
+							if (txAttr.rollbackOn(ex.getCause())) {
+								status.setRollbackOnly();
+							}
+						}
+						catch (InterruptedException ex) {
+							Thread.currentThread().interrupt();
+						}
+					}
+					else if (vavrPresent && VavrDelegate.isVavrTry(retVal)) {
+						// Set rollback-only in case of Vavr failure matching our rollback rules...
+						retVal = VavrDelegate.evaluateTryFailure(retVal, txAttr, status);
+					}
 				}
 			}
 

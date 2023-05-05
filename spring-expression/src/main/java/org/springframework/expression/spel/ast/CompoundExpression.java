@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
@@ -24,13 +25,13 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.lang.Nullable;
 
 /**
  * Represents a DOT separated expression sequence, such as
  * {@code 'property1.property2.methodOne()'}.
  *
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 3.0
  */
 public class CompoundExpression extends SpelNodeImpl {
@@ -95,8 +96,12 @@ public class CompoundExpression extends SpelNodeImpl {
 	}
 
 	@Override
-	public void setValue(ExpressionState state, @Nullable Object value) throws EvaluationException {
-		getValueRef(state).setValue(value);
+	public TypedValue setValueInternal(ExpressionState state, Supplier<TypedValue> valueSupplier)
+			throws EvaluationException {
+
+		TypedValue typedValue = valueSupplier.get();
+		getValueRef(state).setValue(typedValue.getValue());
+		return typedValue;
 	}
 
 	@Override

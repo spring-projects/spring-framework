@@ -915,12 +915,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * Create a default strategy.
 	 * <p>The default implementation uses
-	 * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean}.
+	 * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean(Class)}.
 	 * @param context the current WebApplicationContext
 	 * @param clazz the strategy implementation class to instantiate
 	 * @return the fully configured strategy instance
 	 * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
-	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean
+	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean(Class)
 	 */
 	protected Object createDefaultStrategy(ApplicationContext context, Class<?> clazz) {
 		return context.getAutowireCapableBeanFactory().createBean(clazz);

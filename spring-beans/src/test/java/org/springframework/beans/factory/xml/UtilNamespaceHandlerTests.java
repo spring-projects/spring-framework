@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class UtilNamespaceHandlerTests {
 	void testNestedProperties() {
 		TestBean bean = (TestBean) this.beanFactory.getBean("testBean");
 		Properties props = bean.getSomeProperties();
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
+		assertThat(props).as("Incorrect property value").containsEntry("foo", "bar");
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class UtilNamespaceHandlerTests {
 		Map<?, ?> map = (Map) this.beanFactory.getBean("simpleMap");
 		assertThat(map.get("foo")).isEqualTo("bar");
 		Map<?, ?> map2 = (Map) this.beanFactory.getBean("simpleMap");
-		assertThat(map == map2).isTrue();
+		assertThat(map).isSameAs(map2);
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class UtilNamespaceHandlerTests {
 		assertThat(map.get("foo")).isEqualTo("bar");
 		Map<?, ?> map2 = (Map) this.beanFactory.getBean("scopedMap");
 		assertThat(map2.get("foo")).isEqualTo("bar");
-		assertThat(map != map2).isTrue();
+		assertThat(map).isNotSameAs(map2);
 	}
 
 	@Test
@@ -128,7 +128,7 @@ public class UtilNamespaceHandlerTests {
 		List<?> list = (List) this.beanFactory.getBean("simpleList");
 		assertThat(list.get(0)).isEqualTo("Rob Harrop");
 		List<?> list2 = (List) this.beanFactory.getBean("simpleList");
-		assertThat(list == list2).isTrue();
+		assertThat(list).isSameAs(list2);
 	}
 
 	@Test
@@ -137,7 +137,7 @@ public class UtilNamespaceHandlerTests {
 		assertThat(list.get(0)).isEqualTo("Rob Harrop");
 		List<?> list2 = (List) this.beanFactory.getBean("scopedList");
 		assertThat(list2.get(0)).isEqualTo("Rob Harrop");
-		assertThat(list != list2).isTrue();
+		assertThat(list).isNotSameAs(list2);
 	}
 
 	@Test
@@ -145,7 +145,7 @@ public class UtilNamespaceHandlerTests {
 		Set<?> set = (Set) this.beanFactory.getBean("simpleSet");
 		assertThat(set.contains("Rob Harrop")).isTrue();
 		Set<?> set2 = (Set) this.beanFactory.getBean("simpleSet");
-		assertThat(set == set2).isTrue();
+		assertThat(set).isSameAs(set2);
 	}
 
 	@Test
@@ -154,7 +154,7 @@ public class UtilNamespaceHandlerTests {
 		assertThat(set.contains("Rob Harrop")).isTrue();
 		Set<?> set2 = (Set) this.beanFactory.getBean("scopedSet");
 		assertThat(set2.contains("Rob Harrop")).isTrue();
-		assertThat(set != set2).isTrue();
+		assertThat(set).isNotSameAs(set2);
 	}
 
 	@Test
@@ -194,9 +194,9 @@ public class UtilNamespaceHandlerTests {
 		assertThat(bean2.getSomeList()).isEqualTo(list);
 		assertThat(bean2.getSomeSet()).isEqualTo(set);
 		assertThat(bean2.getSomeMap()).isEqualTo(map);
-		assertThat(list == bean2.getSomeList()).isFalse();
-		assertThat(set == bean2.getSomeSet()).isFalse();
-		assertThat(map == bean2.getSomeMap()).isFalse();
+		assertThat(list).isNotSameAs(bean2.getSomeList());
+		assertThat(set).isNotSameAs(bean2.getSomeSet());
+		assertThat(map).isNotSameAs(bean2.getSomeMap());
 	}
 
 	@Test
@@ -216,11 +216,11 @@ public class UtilNamespaceHandlerTests {
 
 		TestBean bean2 = (TestBean) this.beanFactory.getBean("nestedShortcutCollections");
 		assertThat(Arrays.equals(bean.getStringArray(), bean2.getStringArray())).isTrue();
-		assertThat(bean.getStringArray() == bean2.getStringArray()).isFalse();
+		assertThat(bean.getStringArray()).isNotSameAs(bean2.getStringArray());
 		assertThat(bean2.getSomeList()).isEqualTo(list);
 		assertThat(bean2.getSomeSet()).isEqualTo(set);
-		assertThat(list == bean2.getSomeList()).isFalse();
-		assertThat(set == bean2.getSomeSet()).isFalse();
+		assertThat(list).isNotSameAs(bean2.getSomeList());
+		assertThat(set).isNotSameAs(bean2.getSomeSet());
 	}
 
 	@Test
@@ -244,9 +244,9 @@ public class UtilNamespaceHandlerTests {
 		assertThat(bean2.getSomeList()).isEqualTo(list);
 		assertThat(bean2.getSomeSet()).isEqualTo(set);
 		assertThat(bean2.getSomeMap()).isEqualTo(map);
-		assertThat(list == bean2.getSomeList()).isFalse();
-		assertThat(set == bean2.getSomeSet()).isFalse();
-		assertThat(map == bean2.getSomeMap()).isFalse();
+		assertThat(list).isNotSameAs(bean2.getSomeList());
+		assertThat(set).isNotSameAs(bean2.getSomeSet());
+		assertThat(map).isNotSameAs(bean2.getSomeMap());
 	}
 
 	@Test
@@ -338,56 +338,56 @@ public class UtilNamespaceHandlerTests {
 	@Test
 	void testLoadProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isNull();
+		assertThat(props).as("Incorrect property value").containsEntry("foo", "bar");
+		assertThat(props).as("Incorrect property value").doesNotContainKey("foo2");
 		Properties props2 = (Properties) this.beanFactory.getBean("myProperties");
-		assertThat(props == props2).isTrue();
+		assertThat(props).isSameAs(props2);
 	}
 
 	@Test
 	void testScopedProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myScopedProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isNull();
+		assertThat(props).as("Incorrect property value").containsEntry("foo", "bar");
+		assertThat(props).as("Incorrect property value").doesNotContainKey("foo2");
 		Properties props2 = (Properties) this.beanFactory.getBean("myScopedProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isNull();
-		assertThat(props != props2).isTrue();
+		assertThat(props).as("Incorrect property value").containsEntry("foo", "bar");
+		assertThat(props).as("Incorrect property value").doesNotContainKey("foo2");
+		assertThat(props).isNotSameAs(props2);
 	}
 
 	@Test
 	void testLocalProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myLocalProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isNull();
-		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo("bar2");
+		assertThat(props).as("Incorrect property value").doesNotContainKey("foo");
+		assertThat(props).as("Incorrect property value").containsEntry("foo2", "bar2");
 	}
 
 	@Test
 	void testMergedProperties() {
 		Properties props = (Properties) this.beanFactory.getBean("myMergedProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo("bar2");
+		assertThat(props).as("Incorrect property value").containsEntry("foo", "bar");
+		assertThat(props).as("Incorrect property value").containsEntry("foo2", "bar2");
 	}
 
 	@Test
 	void testLocalOverrideDefault() {
 		Properties props = (Properties) this.beanFactory.getBean("defaultLocalOverrideProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo("local2");
+		assertThat(props).as("Incorrect property value").containsEntry("foo", "bar");
+		assertThat(props).as("Incorrect property value").containsEntry("foo2", "local2");
 	}
 
 	@Test
 	void testLocalOverrideFalse() {
 		Properties props = (Properties) this.beanFactory.getBean("falseLocalOverrideProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("bar");
-		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo("local2");
+		assertThat(props).as("Incorrect property value").containsEntry("foo", "bar");
+		assertThat(props).as("Incorrect property value").containsEntry("foo2", "local2");
 	}
 
 	@Test
 	void testLocalOverrideTrue() {
 		Properties props = (Properties) this.beanFactory.getBean("trueLocalOverrideProperties");
-		assertThat(props.get("foo")).as("Incorrect property value").isEqualTo("local");
-		assertThat(props.get("foo2")).as("Incorrect property value").isEqualTo("local2");
+		assertThat(props).as("Incorrect property value").containsEntry("foo", "local");
+		assertThat(props).as("Incorrect property value").containsEntry("foo2", "local2");
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.beans.factory.aot;
 
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -36,6 +39,7 @@ import org.springframework.beans.factory.config.BeanReference;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
+import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -390,6 +394,43 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getAttribute("a")).isEqualTo("A");
 			assertThat(actual.getAttribute("b")).isNull();
 		});
+	}
+
+	@Test
+	void qualifiersWhenQualifierHasNoValue() {
+		this.beanDefinition.addQualifier(new AutowireCandidateQualifier("com.example.Qualifier"));
+		compile((actual, compiled) -> {
+			assertThat(actual.getQualifiers()).singleElement().satisfies(isQualifierFor("com.example.Qualifier", null));
+			assertThat(this.beanDefinition.getQualifiers()).isEqualTo(actual.getQualifiers());
+		});
+	}
+
+	@Test
+	void qualifiersWhenQualifierHasStringValue() {
+		this.beanDefinition.addQualifier(new AutowireCandidateQualifier("com.example.Qualifier", "id"));
+		compile((actual, compiled) -> {
+			assertThat(actual.getQualifiers()).singleElement().satisfies(isQualifierFor("com.example.Qualifier", "id"));
+			assertThat(this.beanDefinition.getQualifiers()).isEqualTo(actual.getQualifiers());
+		});
+	}
+
+	@Test
+	void qualifiersWhenMultipleQualifiers() {
+		this.beanDefinition.addQualifier(new AutowireCandidateQualifier("com.example.Qualifier", "id"));
+		this.beanDefinition.addQualifier(new AutowireCandidateQualifier("com.example.Another", ChronoUnit.SECONDS));
+		compile((actual, compiled) -> {
+			List<AutowireCandidateQualifier> qualifiers = new ArrayList<>(actual.getQualifiers());
+			assertThat(qualifiers.get(0)).satisfies(isQualifierFor("com.example.Qualifier", "id"));
+			assertThat(qualifiers.get(1)).satisfies(isQualifierFor("com.example.Another", ChronoUnit.SECONDS));
+			assertThat(qualifiers).hasSize(2);
+		});
+	}
+
+	private Consumer<AutowireCandidateQualifier> isQualifierFor(String typeName, Object value) {
+		return qualifier -> {
+			assertThat(qualifier.getTypeName()).isEqualTo(typeName);
+			assertThat(qualifier.getAttribute(AutowireCandidateQualifier.VALUE_KEY)).isEqualTo(value);
+		};
 	}
 
 	@Test

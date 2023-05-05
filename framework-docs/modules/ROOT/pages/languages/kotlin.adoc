@@ -1,0 +1,26 @@
+[[kotlin]]
+= Kotlin
+:page-section-summary-toc: 1
+
+https://kotlinlang.org[Kotlin] is a statically typed language that targets the JVM
+(and other platforms) which allows writing concise and elegant code while providing
+very good https://kotlinlang.org/docs/reference/java-interop.html[interoperability]
+with existing libraries written in Java.
+
+The Spring Framework provides first-class support for Kotlin and lets developers write
+Kotlin applications almost as if the Spring Framework was a native Kotlin framework.
+Most of the code samples of the reference documentation are
+provided in Kotlin in addition to Java.
+
+The easiest way to build a Spring application with Kotlin is to leverage Spring Boot and
+its https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-kotlin.html[dedicated Kotlin support].
+https://spring.io/guides/tutorials/spring-boot-kotlin/[This comprehensive tutorial]
+will teach you how to build Spring Boot applications with Kotlin using https://start.spring.io/#!language=kotlin&type=gradle-project[start.spring.io].
+
+Feel free to join the #spring channel of https://slack.kotlinlang.org/[Kotlin Slack]
+or ask a question with `spring` and `kotlin` as tags on
+https://stackoverflow.com/questions/tagged/spring+kotlin[Stackoverflow] if you need support.
+
+
+
+

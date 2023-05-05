@@ -1,0 +1,26 @@
+[[jmx]]
+= JMX
+
+The JMX (Java Management Extensions) support in Spring provides features that let you
+easily and transparently integrate your Spring application into a JMX infrastructure.
+
+.JMX?
+****
+This chapter is not an introduction to JMX. It does not try to explain why you might want
+to use JMX. If you are new to JMX, see xref:integration/jmx/resources.adoc[Further Resources] at the end of this chapter.
+****
+
+Specifically, Spring's JMX support provides four core features:
+
+* The automatic registration of any Spring bean as a JMX MBean.
+* A flexible mechanism for controlling the management interface of your beans.
+* The declarative exposure of MBeans over remote, JSR-160 connectors.
+* The simple proxying of both local and remote MBean resources.
+
+These features are designed to work without coupling your application components to
+either Spring or JMX interfaces and classes. Indeed, for the most part, your application
+classes need not be aware of either Spring or JMX in order to take advantage of the
+Spring JMX features.
+
+
+

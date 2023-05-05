@@ -554,7 +554,7 @@ public class HttpHeadersTests {
 		headers.setBasicAuth(username, password);
 		String authorization = headers.getFirst(HttpHeaders.AUTHORIZATION);
 		assertThat(authorization).isNotNull();
-		assertThat(authorization.startsWith("Basic ")).isTrue();
+		assertThat(authorization).startsWith("Basic ");
 		byte[] result = Base64.getDecoder().decode(authorization.substring(6).getBytes(StandardCharsets.ISO_8859_1));
 		assertThat(new String(result, StandardCharsets.ISO_8859_1)).isEqualTo("foo:bar");
 	}
@@ -702,6 +702,31 @@ public class HttpHeadersTests {
 
 		HttpHeaders readOnlyHttpHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
 		assertThat(readOnlyHttpHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
+	}
+
+	@Test
+	void readOnlyHttpHeadersCopyOrderTest() {
+		headers.add("aardvark", "enigma");
+		headers.add("beaver", "enigma");
+		headers.add("cat", "enigma");
+		headers.add("dog", "enigma");
+		headers.add("elephant", "enigma");
+
+		String[] expectedKeys = new String[] { "aardvark", "beaver", "cat", "dog", "elephant" };
+
+		HttpHeaders readOnlyHttpHeaders = HttpHeaders.readOnlyHttpHeaders(headers);
+
+		HttpHeaders forEachHeaders = new HttpHeaders();
+		readOnlyHttpHeaders.forEach(forEachHeaders::putIfAbsent);
+		assertThat(forEachHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
+
+		HttpHeaders putAllHeaders = new HttpHeaders();
+		putAllHeaders.putAll(readOnlyHttpHeaders);
+		assertThat(putAllHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
+
+		HttpHeaders addAllHeaders = new HttpHeaders();
+		addAllHeaders.addAll(readOnlyHttpHeaders);
+		assertThat(addAllHeaders.entrySet()).extracting(Entry::getKey).containsExactly(expectedKeys);
 	}
 
 	@Test // gh-25034

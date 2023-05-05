@@ -1,0 +1,589 @@
+[[orm-jpa]]
+= JPA
+
+The Spring JPA, available under the `org.springframework.orm.jpa` package, offers
+comprehensive support for the
+https://www.oracle.com/technetwork/articles/javaee/jpa-137156.html[Java Persistence
+API] in a manner similar to the integration with Hibernate while being aware of
+the underlying implementation in order to provide additional features.
+
+
+[[orm-jpa-setup]]
+== Three Options for JPA Setup in a Spring Environment
+
+The Spring JPA support offers three ways of setting up the JPA `EntityManagerFactory`
+that is used by the application to obtain an entity manager.
+
+* xref:data-access/orm/jpa.adoc#orm-jpa-setup-lemfb[Using `LocalEntityManagerFactoryBean`]
+* xref:data-access/orm/jpa.adoc#orm-jpa-setup-jndi[Obtaining an EntityManagerFactory from JNDI]
+* xref:data-access/orm/jpa.adoc#orm-jpa-setup-lcemfb[Using `LocalContainerEntityManagerFactoryBean`]
+
+[[orm-jpa-setup-lemfb]]
+=== Using `LocalEntityManagerFactoryBean`
+
+You can use this option only in simple deployment environments such as stand-alone
+applications and integration tests.
+
+The `LocalEntityManagerFactoryBean` creates an `EntityManagerFactory` suitable for
+simple deployment environments where the application uses only JPA for data access.
+The factory bean uses the JPA `PersistenceProvider` auto-detection mechanism (according
+to JPA's Java SE bootstrapping) and, in most cases, requires you to specify only the
+persistence unit name. The following XML example configures such a bean:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<bean id="myEmf" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
+			<property name="persistenceUnitName" value="myPersistenceUnit"/>
+		</bean>
+	</beans>
+----
+
+This form of JPA deployment is the simplest and the most limited. You cannot refer to an
+existing JDBC `DataSource` bean definition, and no support for global transactions
+exists. Furthermore, weaving (byte-code transformation) of persistent classes is
+provider-specific, often requiring a specific JVM agent to be specified on startup. This
+option is sufficient only for stand-alone applications and test environments, for which
+the JPA specification is designed.
+
+[[orm-jpa-setup-jndi]]
+=== Obtaining an EntityManagerFactory from JNDI
+
+You can use this option when deploying to a Jakarta EE server. Check your server's documentation
+on how to deploy a custom JPA provider into your server, allowing for a different
+provider than the server's default.
+
+Obtaining an `EntityManagerFactory` from JNDI (for example in a Jakarta EE environment),
+is a matter of changing the XML configuration, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<jee:jndi-lookup id="myEmf" jndi-name="persistence/myPersistenceUnit"/>
+	</beans>
+----
+
+This action assumes standard Jakarta EE bootstrapping. The Jakarta EE server auto-detects
+persistence units (in effect, `META-INF/persistence.xml` files in application jars) and
+`persistence-unit-ref` entries in the Jakarta EE deployment descriptor (for example,
+`web.xml`) and defines environment naming context locations for those persistence units.
+
+In such a scenario, the entire persistence unit deployment, including the weaving
+(byte-code transformation) of persistent classes, is up to the Jakarta EE server. The JDBC
+`DataSource` is defined through a JNDI location in the `META-INF/persistence.xml` file.
+`EntityManager` transactions are integrated with the server's JTA subsystem. Spring merely
+uses the obtained `EntityManagerFactory`, passing it on to application objects through
+dependency injection and managing transactions for the persistence unit (typically
+through `JtaTransactionManager`).
+
+If you use multiple persistence units in the same application, the bean names of such
+JNDI-retrieved persistence units should match the persistence unit names that the
+application uses to refer to them (for example, in `@PersistenceUnit` and
+`@PersistenceContext` annotations).
+
+[[orm-jpa-setup-lcemfb]]
+=== Using `LocalContainerEntityManagerFactoryBean`
+
+You can use this option for full JPA capabilities in a Spring-based application environment.
+This includes web containers such as Tomcat, stand-alone applications, and
+integration tests with sophisticated persistence requirements.
+
+NOTE: If you want to specifically configure a Hibernate setup, an immediate alternative
+is to set up a native Hibernate `LocalSessionFactoryBean` instead of a plain JPA
+`LocalContainerEntityManagerFactoryBean`, letting it interact with JPA access code
+as well as native Hibernate access code.
+See xref:data-access/orm/jpa.adoc#orm-jpa-hibernate[Native Hibernate setup for JPA interaction] for details.
+
+The `LocalContainerEntityManagerFactoryBean` gives full control over
+`EntityManagerFactory` configuration and is appropriate for environments where
+fine-grained customization is required. The `LocalContainerEntityManagerFactoryBean`
+creates a `PersistenceUnitInfo` instance based on the `persistence.xml` file, the
+supplied `dataSourceLookup` strategy, and the specified `loadTimeWeaver`. It is, thus,
+possible to work with custom data sources outside of JNDI and to control the weaving
+process. The following example shows a typical bean definition for a
+`LocalContainerEntityManagerFactoryBean`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<bean id="myEmf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+			<property name="dataSource" ref="someDataSource"/>
+			<property name="loadTimeWeaver">
+				<bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
+			</property>
+		</bean>
+	</beans>
+----
+
+The following example shows a typical `persistence.xml` file:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+		<persistence-unit name="myUnit" transaction-type="RESOURCE_LOCAL">
+			<mapping-file>META-INF/orm.xml</mapping-file>
+			<exclude-unlisted-classes/>
+		</persistence-unit>
+	</persistence>
+----
+
+NOTE: The `<exclude-unlisted-classes/>` shortcut indicates that no scanning for
+annotated entity classes is supposed to occur. An explicit 'true' value
+(`<exclude-unlisted-classes>true</exclude-unlisted-classes/>`) also means no scan.
+`<exclude-unlisted-classes>false</exclude-unlisted-classes/>` does trigger a scan.
+However, we recommend omitting the `exclude-unlisted-classes` element
+if you want entity class scanning to occur.
+
+Using the `LocalContainerEntityManagerFactoryBean` is the most powerful JPA setup
+option, allowing for flexible local configuration within the application. It supports
+links to an existing JDBC `DataSource`, supports both local and global transactions, and
+so on. However, it also imposes requirements on the runtime environment, such as the
+availability of a weaving-capable class loader if the persistence provider demands
+byte-code transformation.
+
+This option may conflict with the built-in JPA capabilities of a Jakarta EE server. In a
+full Jakarta EE environment, consider obtaining your `EntityManagerFactory` from JNDI.
+Alternatively, specify a custom `persistenceXmlLocation` on your
+`LocalContainerEntityManagerFactoryBean` definition (for example,
+META-INF/my-persistence.xml) and include only a descriptor with that name in your
+application jar files. Because the Jakarta EE server looks only for default
+`META-INF/persistence.xml` files, it ignores such custom persistence units and, hence,
+avoids conflicts with a Spring-driven JPA setup upfront. (This applies to Resin 3.1, for
+example.)
+
+.When is load-time weaving required?
+****
+Not all JPA providers require a JVM agent. Hibernate is an example of one that does not.
+If your provider does not require an agent or you have other alternatives, such as
+applying enhancements at build time through a custom compiler or an Ant task, you should not use the
+load-time weaver.
+****
+
+The `LoadTimeWeaver` interface is a Spring-provided class that lets JPA
+`ClassTransformer` instances be plugged in a specific manner, depending on whether the
+environment is a web container or application server. Hooking `ClassTransformers`
+through an
+https://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html[agent]
+is typically not efficient. The agents work against the entire virtual machine and
+inspect every class that is loaded, which is usually undesirable in a production
+server environment.
+
+Spring provides a number of `LoadTimeWeaver` implementations for various environments,
+letting `ClassTransformer` instances be applied only for each class loader and not
+for each VM.
+
+See the xref:core/aop/using-aspectj.adoc#aop-aj-ltw-spring[Spring configuration] in the AOP chapter for
+more insight regarding the `LoadTimeWeaver` implementations and their setup, either
+generic or customized to various platforms (such as Tomcat, JBoss and WebSphere).
+
+As described in xref:core/aop/using-aspectj.adoc#aop-aj-ltw-spring[Spring configuration], you can configure
+a context-wide `LoadTimeWeaver` by using the `@EnableLoadTimeWeaving` annotation or the
+`context:load-time-weaver` XML element. Such a global weaver is automatically picked up
+by all JPA `LocalContainerEntityManagerFactoryBean` instances. The following example
+shows the preferred way of setting up a load-time weaver, delivering auto-detection
+of the platform (e.g. Tomcat's weaving-capable class loader or Spring's JVM agent)
+and automatic propagation of the weaver to all weaver-aware beans:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<context:load-time-weaver/>
+	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		...
+	</bean>
+----
+
+However, you can, if needed, manually specify a dedicated weaver through the
+`loadTimeWeaver` property, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="loadTimeWeaver">
+			<bean class="org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver"/>
+		</property>
+	</bean>
+----
+
+No matter how the LTW is configured, by using this technique, JPA applications relying on
+instrumentation can run in the target platform (for example, Tomcat) without needing an agent.
+This is especially important when the hosting applications rely on different JPA
+implementations, because the JPA transformers are applied only at the class-loader level and
+are, thus, isolated from each other.
+
+[[orm-jpa-setup-multiple]]
+=== Dealing with Multiple Persistence Units
+
+For applications that rely on multiple persistence units locations (stored in various
+JARS in the classpath, for example), Spring offers the `PersistenceUnitManager` to act as
+a central repository and to avoid the persistence units discovery process, which can be
+expensive. The default implementation lets multiple locations be specified. These locations are
+parsed and later retrieved through the persistence unit name. (By default, the classpath
+is searched for `META-INF/persistence.xml` files.) The following example configures
+multiple locations:
+
+[source,xml,indent=0,subs="verbatim"]
+----
+	<bean id="pum" class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+		<property name="persistenceXmlLocations">
+			<list>
+				<value>org/springframework/orm/jpa/domain/persistence-multi.xml</value>
+				<value>classpath:/my/package/**/custom-persistence.xml</value>
+				<value>classpath*:META-INF/persistence.xml</value>
+			</list>
+		</property>
+		<property name="dataSources">
+			<map>
+				<entry key="localDataSource" value-ref="local-db"/>
+				<entry key="remoteDataSource" value-ref="remote-db"/>
+			</map>
+		</property>
+		<!-- if no datasource is specified, use this one -->
+		<property name="defaultDataSource" ref="remoteDataSource"/>
+	</bean>
+
+	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitManager" ref="pum"/>
+		<property name="persistenceUnitName" value="myCustomUnit"/>
+	</bean>
+----
+
+The default implementation allows customization of the `PersistenceUnitInfo` instances
+(before they are fed to the JPA provider) either declaratively (through its properties, which
+affect all hosted units) or programmatically (through the
+`PersistenceUnitPostProcessor`, which allows persistence unit selection). If no
+`PersistenceUnitManager` is specified, one is created and used internally by
+`LocalContainerEntityManagerFactoryBean`.
+
+[[orm-jpa-setup-background]]
+=== Background Bootstrapping
+
+`LocalContainerEntityManagerFactoryBean` supports background bootstrapping through
+the `bootstrapExecutor` property, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="bootstrapExecutor">
+			<bean class="org.springframework.core.task.SimpleAsyncTaskExecutor"/>
+		</property>
+	</bean>
+----
+
+The actual JPA provider bootstrapping is handed off to the specified executor and then,
+running in parallel, to the application bootstrap thread. The exposed `EntityManagerFactory`
+proxy can be injected into other application components and is even able to respond to
+`EntityManagerFactoryInfo` configuration inspection. However, once the actual JPA provider
+is being accessed by other components (for example, calling `createEntityManager`), those calls
+block until the background bootstrapping has completed. In particular, when you use
+Spring Data JPA, make sure to set up deferred bootstrapping for its repositories as well.
+
+
+[[orm-jpa-dao]]
+== Implementing DAOs Based on JPA: `EntityManagerFactory` and `EntityManager`
+
+NOTE: Although `EntityManagerFactory` instances are thread-safe, `EntityManager` instances are
+not. The injected JPA `EntityManager` behaves like an `EntityManager` fetched from an
+application server's JNDI environment, as defined by the JPA specification. It delegates
+all calls to the current transactional `EntityManager`, if any. Otherwise, it falls back
+to a newly created `EntityManager` per operation, in effect making its usage thread-safe.
+
+It is possible to write code against the plain JPA without any Spring dependencies, by
+using an injected `EntityManagerFactory` or `EntityManager`. Spring can understand the
+`@PersistenceUnit` and `@PersistenceContext` annotations both at the field and the method level
+if a `PersistenceAnnotationBeanPostProcessor` is enabled. The following example shows a plain JPA DAO implementation
+that uses the `@PersistenceUnit` annotation:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class ProductDaoImpl implements ProductDao {
+
+		private EntityManagerFactory emf;
+
+		@PersistenceUnit
+		public void setEntityManagerFactory(EntityManagerFactory emf) {
+			this.emf = emf;
+		}
+
+		public Collection loadProductsByCategory(String category) {
+			EntityManager em = this.emf.createEntityManager();
+			try {
+				Query query = em.createQuery("from Product as p where p.category = ?1");
+				query.setParameter(1, category);
+				return query.getResultList();
+			}
+			finally {
+				if (em != null) {
+					em.close();
+				}
+			}
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class ProductDaoImpl : ProductDao {
+
+		private lateinit var emf: EntityManagerFactory
+
+		@PersistenceUnit
+		fun setEntityManagerFactory(emf: EntityManagerFactory) {
+			this.emf = emf
+		}
+
+		fun loadProductsByCategory(category: String): Collection<*> {
+			val em = this.emf.createEntityManager()
+			val query = em.createQuery("from Product as p where p.category = ?1");
+			query.setParameter(1, category);
+			return query.resultList;
+		}
+	}
+----
+======
+
+The preceding DAO has no dependency on Spring and still fits nicely into a Spring
+application context. Moreover, the DAO takes advantage of annotations to require the
+injection of the default `EntityManagerFactory`, as the following example bean definition shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+
+		<!-- bean post-processor for JPA annotations -->
+		<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/>
+
+		<bean id="myProductDao" class="product.ProductDaoImpl"/>
+
+	</beans>
+----
+
+As an alternative to explicitly defining a `PersistenceAnnotationBeanPostProcessor`,
+consider using the Spring `context:annotation-config` XML element in your application
+context configuration. Doing so automatically registers all Spring standard
+post-processors for annotation-based configuration, including
+`CommonAnnotationBeanPostProcessor` and so on.
+
+Consider the following example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+
+		<!-- post-processors for all standard config annotations -->
+		<context:annotation-config/>
+
+		<bean id="myProductDao" class="product.ProductDaoImpl"/>
+
+	</beans>
+----
+
+The main problem with such a DAO is that it always creates a new `EntityManager` through
+the factory. You can avoid this by requesting a transactional `EntityManager` (also
+called a "`shared EntityManager`" because it is a shared, thread-safe proxy for the actual
+transactional EntityManager) to be injected instead of the factory. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class ProductDaoImpl implements ProductDao {
+
+		@PersistenceContext
+		private EntityManager em;
+
+		public Collection loadProductsByCategory(String category) {
+			Query query = em.createQuery("from Product as p where p.category = :category");
+			query.setParameter("category", category);
+			return query.getResultList();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	class ProductDaoImpl : ProductDao {
+
+		@PersistenceContext
+		private lateinit var em: EntityManager
+
+		fun loadProductsByCategory(category: String): Collection<*> {
+			val query = em.createQuery("from Product as p where p.category = :category")
+			query.setParameter("category", category)
+			return query.resultList
+		}
+	}
+----
+======
+
+The `@PersistenceContext` annotation has an optional attribute called `type`, which defaults to
+`PersistenceContextType.TRANSACTION`. You can use this default to receive a shared
+`EntityManager` proxy. The alternative, `PersistenceContextType.EXTENDED`, is a completely
+different affair. This results in a so-called extended `EntityManager`, which is not
+thread-safe and, hence, must not be used in a concurrently accessed component, such as a
+Spring-managed singleton bean. Extended `EntityManager` instances are only supposed to be used in
+stateful components that, for example, reside in a session, with the lifecycle of the
+`EntityManager` not tied to a current transaction but rather being completely up to the
+application.
+
+.Method- and field-level Injection
+****
+You can apply annotations that indicate dependency injections (such as `@PersistenceUnit` and
+`@PersistenceContext`) on field or methods inside a class -- hence the
+expressions "`method-level injection`" and "`field-level injection`". Field-level
+annotations are concise and easier to use while method-level annotations allow for further
+processing of the injected dependency. In both cases, the member visibility (public,
+protected, or private) does not matter.
+
+What about class-level annotations?
+
+On the Jakarta EE platform, they are used for dependency declaration and not for resource
+injection.
+****
+
+The injected `EntityManager` is Spring-managed (aware of the ongoing transaction).
+Even though the new DAO implementation uses method-level
+injection of an `EntityManager` instead of an `EntityManagerFactory`, no change is
+required in the application context XML, due to annotation usage.
+
+The main advantage of this DAO style is that it depends only on the Java Persistence API.
+No import of any Spring class is required. Moreover, as the JPA annotations are understood,
+the injections are applied automatically by the Spring container. This is appealing from
+a non-invasiveness perspective and can feel more natural to JPA developers.
+
+
+[[orm-jpa-tx]]
+== Spring-driven JPA transactions
+
+NOTE: We strongly encourage you to read xref:data-access/transaction/declarative.adoc[Declarative Transaction Management], if you have not
+already done so, to get more detailed coverage of Spring's declarative transaction support.
+
+The recommended strategy for JPA is local transactions through JPA's native transaction
+support. Spring's `JpaTransactionManager` provides many capabilities known from local
+JDBC transactions (such as transaction-specific isolation levels and resource-level
+read-only optimizations) against any regular JDBC connection pool (no XA requirement).
+
+Spring JPA also lets a configured `JpaTransactionManager` expose a JPA transaction
+to JDBC access code that accesses the same `DataSource`, provided that the registered
+`JpaDialect` supports retrieval of the underlying JDBC `Connection`.
+Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
+See the xref:data-access/orm/jpa.adoc#orm-jpa-dialect[next section] for details on the `JpaDialect` mechanism.
+
+NOTE: As an immediate alternative, Spring's native `HibernateTransactionManager` is capable
+of interacting with JPA access code, adapting to several Hibernate specifics and providing
+JDBC interaction. This makes particular sense in combination with `LocalSessionFactoryBean`
+setup. See xref:data-access/orm/jpa.adoc#orm-jpa-hibernate[Native Hibernate Setup for JPA Interaction] for details.
+
+
+[[orm-jpa-dialect]]
+== Understanding `JpaDialect` and `JpaVendorAdapter`
+
+As an advanced feature, `JpaTransactionManager` and subclasses of
+`AbstractEntityManagerFactoryBean` allow a custom `JpaDialect` to be passed into the
+`jpaDialect` bean property. A `JpaDialect` implementation can enable the following advanced
+features supported by Spring, usually in a vendor-specific manner:
+
+* Applying specific transaction semantics (such as custom isolation level or transaction
+  timeout)
+* Retrieving the transactional JDBC `Connection` (for exposure to JDBC-based DAOs)
+* Advanced translation of `PersistenceExceptions` to Spring `DataAccessExceptions`
+
+This is particularly valuable for special transaction semantics and for advanced
+translation of exception. The default implementation (`DefaultJpaDialect`) does
+not provide any special abilities and, if the features listed earlier are required, you have
+to specify the appropriate dialect.
+
+TIP: As an even broader provider adaptation facility primarily for Spring's full-featured
+`LocalContainerEntityManagerFactoryBean` setup, `JpaVendorAdapter` combines the
+capabilities of `JpaDialect` with other provider-specific defaults. Specifying a
+`HibernateJpaVendorAdapter` or `EclipseLinkJpaVendorAdapter` is the most convenient
+way of auto-configuring an `EntityManagerFactory` setup for Hibernate or EclipseLink,
+respectively. Note that those provider adapters are primarily designed for use with
+Spring-driven transaction management (that is, for use with `JpaTransactionManager`).
+
+See the {api-spring-framework}/orm/jpa/JpaDialect.html[`JpaDialect`] and
+{api-spring-framework}/orm/jpa/JpaVendorAdapter.html[`JpaVendorAdapter`] javadoc for
+more details of its operations and how they are used within Spring's JPA support.
+
+
+[[orm-jpa-jta]]
+== Setting up JPA with JTA Transaction Management
+
+As an alternative to `JpaTransactionManager`, Spring also allows for multi-resource
+transaction coordination through JTA, either in a Jakarta EE environment or with a
+stand-alone transaction coordinator, such as Atomikos. Aside from choosing Spring's
+`JtaTransactionManager` instead of `JpaTransactionManager`, you need to take few further
+steps:
+
+* The underlying JDBC connection pools need to be XA-capable and be integrated with
+your transaction coordinator. This is usually straightforward in a Jakarta EE environment,
+exposing a different kind of `DataSource` through JNDI. See your application server
+documentation for details. Analogously, a standalone transaction coordinator usually
+comes with special XA-integrated `DataSource` variants. Again, check its documentation.
+
+* The JPA `EntityManagerFactory` setup needs to be configured for JTA. This is
+provider-specific, typically through special properties to be specified as `jpaProperties`
+on `LocalContainerEntityManagerFactoryBean`. In the case of Hibernate, these properties
+are even version-specific. See your Hibernate documentation for details.
+
+* Spring's `HibernateJpaVendorAdapter` enforces certain Spring-oriented defaults, such
+as the connection release mode, `on-close`, which matches Hibernate's own default in
+Hibernate 5.0 but not any more in Hibernate 5.1+. For a JTA setup, make sure to declare
+your persistence unit transaction type as "JTA". Alternatively, set Hibernate 5.2's
+`hibernate.connection.handling_mode` property to
+`DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT` to restore Hibernate's own default.
+See xref:data-access/orm/hibernate.adoc#orm-hibernate-invalid-jdbc-access-error[Spurious Application Server Warnings with Hibernate] for related notes.
+
+* Alternatively, consider obtaining the `EntityManagerFactory` from your application
+server itself (that is, through a JNDI lookup instead of a locally declared
+`LocalContainerEntityManagerFactoryBean`). A server-provided `EntityManagerFactory`
+might require special definitions in your server configuration (making the deployment
+less portable) but is set up for the server's JTA environment.
+
+
+[[orm-jpa-hibernate]]
+== Native Hibernate Setup and Native Hibernate Transactions for JPA Interaction
+
+A native `LocalSessionFactoryBean` setup in combination with `HibernateTransactionManager`
+allows for interaction with `@PersistenceContext` and other JPA access code. A Hibernate
+`SessionFactory` natively implements JPA's `EntityManagerFactory` interface now
+and a Hibernate `Session` handle natively is a JPA `EntityManager`.
+Spring's JPA support facilities automatically detect native Hibernate sessions.
+
+Such native Hibernate setup can, therefore, serve as a replacement for a standard JPA
+`LocalContainerEntityManagerFactoryBean` and `JpaTransactionManager` combination
+in many scenarios, allowing for interaction with `SessionFactory.getCurrentSession()`
+(and also `HibernateTemplate`) next to `@PersistenceContext EntityManager` within
+the same local transaction. Such a setup also provides stronger Hibernate integration
+and more configuration flexibility, because it is not constrained by JPA bootstrap contracts.
+
+You do not need `HibernateJpaVendorAdapter` configuration in such a scenario,
+since Spring's native Hibernate setup provides even more features
+(for example, custom Hibernate Integrator setup, Hibernate 5.3 bean container integration,
+and stronger optimizations for read-only transactions). Last but not least, you can also
+express native Hibernate setup through `LocalSessionFactoryBuilder`,
+seamlessly integrating with `@Bean` style configuration (no `FactoryBean` involved).
+
+[NOTE]
+====
+`LocalSessionFactoryBean` and `LocalSessionFactoryBuilder` support background
+bootstrapping, just as the JPA `LocalContainerEntityManagerFactoryBean` does.
+See xref:data-access/orm/jpa.adoc#orm-jpa-setup-background[Background Bootstrapping] for an introduction.
+
+On `LocalSessionFactoryBean`, this is available through the `bootstrapExecutor`
+property. On the programmatic `LocalSessionFactoryBuilder`, an overloaded
+`buildSessionFactory` method takes a bootstrap executor argument.
+====
+
+
+
+

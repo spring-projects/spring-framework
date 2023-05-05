@@ -38,7 +38,8 @@ import org.springframework.util.ObjectUtils;
  * additional properties. Subclasses can use the protected copy constructor to
  * re-create an existing {@code ProblemDetail} instance as the subclass, e.g.
  * from an {@code @ControllerAdvice} such as
- * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler}.
+ * {@link org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler} or
+ * {@link org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler}.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -238,8 +239,8 @@ public class ProblemDetail {
 		if (!(other instanceof ProblemDetail otherDetail)) {
 			return false;
 		}
-		return (this.type.equals(otherDetail.type) &&
-				ObjectUtils.nullSafeEquals(this.title, otherDetail.title) &&
+		return (getType().equals(otherDetail.getType()) &&
+				ObjectUtils.nullSafeEquals(getTitle(), otherDetail.getTitle()) &&
 				this.status == otherDetail.status &&
 				ObjectUtils.nullSafeEquals(this.detail, otherDetail.detail) &&
 				ObjectUtils.nullSafeEquals(this.instance, otherDetail.instance) &&
@@ -249,7 +250,7 @@ public class ProblemDetail {
 	@Override
 	public int hashCode() {
 		int result = this.type.hashCode();
-		result = 31 * result + ObjectUtils.nullSafeHashCode(this.title);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(getTitle());
 		result = 31 * result + this.status;
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.detail);
 		result = 31 * result + ObjectUtils.nullSafeHashCode(this.instance);

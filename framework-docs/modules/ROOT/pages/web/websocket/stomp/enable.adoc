@@ -1,0 +1,109 @@
+[[websocket-stomp-enable]]
+= Enable STOMP
+
+STOMP over WebSocket support is available in the `spring-messaging` and
+`spring-websocket` modules. Once you have those dependencies, you can expose a STOMP
+endpoints, over WebSocket with xref:web/websocket/fallback.adoc[SockJS Fallback], as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+	import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+
+	@Configuration
+	@EnableWebSocketMessageBroker
+	public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+		@Override
+		public void registerStompEndpoints(StompEndpointRegistry registry) {
+			registry.addEndpoint("/portfolio").withSockJS(); // <1>
+		}
+
+		@Override
+		public void configureMessageBroker(MessageBrokerRegistry config) {
+			config.setApplicationDestinationPrefixes("/app"); // <2>
+			config.enableSimpleBroker("/topic", "/queue"); // <3>
+		}
+	}
+----
+
+<1> `/portfolio` is the HTTP URL for the endpoint to which a WebSocket (or SockJS)
+client needs to connect for the WebSocket handshake.
+<2> STOMP messages whose destination header begins with `/app` are routed to
+`@MessageMapping` methods in `@Controller` classes.
+<3> Use the built-in message broker for subscriptions and broadcasting and
+route messages whose destination header begins with `/topic `or `/queue` to the broker.
+
+
+The following example shows the XML configuration equivalent of the preceding example:
+
+[source,xml,indent=0,subs="verbatim,quotes,attributes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:websocket="http://www.springframework.org/schema/websocket"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/websocket
+			https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+		<websocket:message-broker application-destination-prefix="/app">
+			<websocket:stomp-endpoint path="/portfolio">
+				<websocket:sockjs/>
+			</websocket:stomp-endpoint>
+			<websocket:simple-broker prefix="/topic, /queue"/>
+		</websocket:message-broker>
+
+	</beans>
+----
+
+NOTE: For the built-in simple broker, the `/topic` and `/queue` prefixes do not have any special
+meaning. They are merely a convention to differentiate between pub-sub versus point-to-point
+messaging (that is, many subscribers versus one consumer). When you use an external broker,
+check the STOMP page of the broker to understand what kind of STOMP destinations and
+prefixes it supports.
+
+To connect from a browser, for SockJS, you can use the
+https://github.com/sockjs/sockjs-client[`sockjs-client`]. For STOMP, many applications have
+used the https://github.com/jmesnil/stomp-websocket[jmesnil/stomp-websocket] library
+(also known as stomp.js), which is feature-complete and has been used in production for
+years but is no longer maintained. At present the
+https://github.com/JSteunou/webstomp-client[JSteunou/webstomp-client] is the most
+actively maintained and evolving successor of that library. The following example code
+is based on it:
+
+[source,javascript,indent=0,subs="verbatim,quotes"]
+----
+	var socket = new SockJS("/spring-websocket-portfolio/portfolio");
+	var stompClient = webstomp.over(socket);
+
+	stompClient.connect({}, function(frame) {
+	}
+----
+
+Alternatively, if you connect through WebSocket (without SockJS), you can use the following code:
+
+[source,javascript,indent=0,subs="verbatim,quotes"]
+----
+	var socket = new WebSocket("/spring-websocket-portfolio/portfolio");
+	var stompClient = Stomp.over(socket);
+
+	stompClient.connect({}, function(frame) {
+	}
+----
+
+Note that `stompClient` in the preceding example does not need to specify `login`
+and `passcode` headers. Even if it did, they would be ignored (or, rather,
+overridden) on the server side. See xref:web/websocket/stomp/handle-broker-relay-configure.adoc[Connecting to a Broker]
+and xref:web/websocket/stomp/authentication.adoc[Authentication] for more information on authentication.
+
+For more example code see:
+
+* https://spring.io/guides/gs/messaging-stomp-websocket/[Using WebSocket to build an
+interactive web application] -- a getting started guide.
+* https://github.com/rstoyanchev/spring-websocket-portfolio[Stock Portfolio] -- a sample
+application.
+
+
+

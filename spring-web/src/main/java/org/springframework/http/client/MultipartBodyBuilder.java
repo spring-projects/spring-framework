@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.springframework.util.MultiValueMap;
  * others registered in the
  * {@link org.springframework.core.ReactiveAdapterRegistry ReactiveAdapterRegistry}.
  *
- * <p>This builder is intended for use with the reactive
+ * <p>This builder is intended to POST {@code multipart/form-data} using the reactive
  * {@link org.springframework.web.reactive.function.client.WebClient WebClient}.
  * For multipart requests with the {@code RestTemplate}, simply create and
  * populate a {@code MultiValueMap<String, HttpEntity>} as shown in the Javadoc for

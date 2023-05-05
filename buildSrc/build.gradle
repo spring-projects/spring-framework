@@ -1,5 +1,7 @@
 plugins {
 	id 'java-gradle-plugin'
+	id 'checkstyle'
+	id 'io.spring.javaformat' version "${javaFormatVersion}"
 }
 
 repositories {
@@ -17,10 +19,13 @@ ext {
 }
 
 dependencies {
-	implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
-	implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:${kotlinVersion}")
+	checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:${javaFormatVersion}"
+	implementation "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+	implementation "org.jetbrains.kotlin:kotlin-compiler-embeddable:${kotlinVersion}"
 	implementation "me.champeau.gradle:japicmp-gradle-plugin:0.3.0"
 	implementation "org.gradle:test-retry-gradle-plugin:1.4.1"
+	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:${javaFormatVersion}"
+	implementation "io.spring.nohttp:nohttp-gradle:0.0.11"
 }
 
 gradlePlugin {

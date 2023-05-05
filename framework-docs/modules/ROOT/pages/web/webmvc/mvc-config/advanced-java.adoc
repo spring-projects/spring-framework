@@ -1,0 +1,45 @@
+[[mvc-config-advanced-java]]
+= Advanced Java Config
+
+[.small]#xref:web/webflux/config.adoc#webflux-config-advanced-java[See equivalent in the Reactive stack]#
+
+`@EnableWebMvc` imports `DelegatingWebMvcConfiguration`, which:
+
+* Provides default Spring configuration for Spring MVC applications
+* Detects and delegates to `WebMvcConfigurer` implementations to customize that configuration.
+
+For advanced mode, you can remove `@EnableWebMvc` and extend directly from
+`DelegatingWebMvcConfiguration` instead of implementing `WebMvcConfigurer`,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class WebConfig extends DelegatingWebMvcConfiguration {
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class WebConfig : DelegatingWebMvcConfiguration() {
+
+		// ...
+	}
+----
+======
+
+You can keep existing methods in `WebConfig`, but you can now also override bean declarations
+from the base class, and you can still have any number of other `WebMvcConfigurer` implementations on
+the classpath.
+
+
+

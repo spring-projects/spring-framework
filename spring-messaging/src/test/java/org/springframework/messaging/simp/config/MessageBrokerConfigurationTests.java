@@ -442,7 +442,7 @@ public class MessageBrokerConfigurationTests {
 		ApplicationContext context = loadConfig(CustomConfig.class);
 
 		SimpUserRegistry registry = context.getBean(SimpUserRegistry.class);
-		assertThat(registry instanceof TestUserRegistry).isTrue();
+		assertThat(registry).isInstanceOf(TestUserRegistry.class);
 		assertThat(((TestUserRegistry) registry).getOrder()).isEqualTo(99);
 	}
 

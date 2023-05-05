@@ -1,0 +1,59 @@
+[[expressions]]
+= Spring Expression Language (SpEL)
+
+The Spring Expression Language ("`SpEL`" for short) is a powerful expression language that
+supports querying and manipulating an object graph at runtime. The language syntax is
+similar to Unified EL but offers additional features, most notably method invocation and
+basic string templating functionality.
+
+While there are several other Java expression languages available -- OGNL, MVEL, and JBoss
+EL, to name a few -- the Spring Expression Language was created to provide the Spring
+community with a single well supported expression language that can be used across all
+the products in the Spring portfolio. Its language features are driven by the
+requirements of the projects in the Spring portfolio, including tooling requirements
+for code completion support within the https://spring.io/tools[Spring Tools for Eclipse].
+That said, SpEL is based on a technology-agnostic API that lets other expression language
+implementations be integrated, should the need arise.
+
+While SpEL serves as the foundation for expression evaluation within the Spring
+portfolio, it is not directly tied to Spring and can be used independently. To
+be self contained, many of the examples in this chapter use SpEL as if it were an
+independent expression language. This requires creating a few bootstrapping
+infrastructure classes, such as the parser. Most Spring users need not deal with
+this infrastructure and can, instead, author only expression strings for evaluation.
+An example of this typical use is the integration of SpEL into creating XML or
+annotation-based bean definitions, as shown in
+xref:core/expressions/beandef.adoc[Expression support for defining bean definitions].
+
+This chapter covers the features of the expression language, its API, and its language
+syntax. In several places, `Inventor` and `Society` classes are used as the target
+objects for expression evaluation. These class declarations and the data used to
+populate them are listed at the end of the chapter.
+
+The expression language supports the following functionality:
+
+* Literal expressions
+* Boolean and relational operators
+* Regular expressions
+* Class expressions
+* Accessing properties, arrays, lists, and maps
+* Method invocation
+* Relational operators
+* Assignment
+* Calling constructors
+* Bean references
+* Array construction
+* Inline lists
+* Inline maps
+* Ternary operator
+* Variables
+* User-defined functions added to the context
+  * reflective invocation of `Method`
+  * various cases of `MethodHandle`
+* Collection projection
+* Collection selection
+* Templated expressions
+
+
+
+

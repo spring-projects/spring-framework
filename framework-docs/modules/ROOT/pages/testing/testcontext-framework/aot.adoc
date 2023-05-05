@@ -1,0 +1,58 @@
+[[testcontext-aot]]
+= Ahead of Time Support for Tests
+
+This chapter covers Spring's Ahead of Time (AOT) support for integration tests using the
+Spring TestContext Framework.
+
+The testing support extends Spring's xref:core/aot.adoc[core AOT support] with the
+following features.
+
+* Build-time detection of all integration tests in the current project that use the
+  TestContext framework to load an `ApplicationContext`.
+  - Provides explicit support for test classes based on JUnit Jupiter and JUnit 4 as well
+    as implicit support for TestNG and other testing frameworks that use Spring's core
+    testing annotations -- as long as the tests are run using a JUnit Platform
+    `TestEngine` that is registered for the current project.
+* Build-time AOT processing: each unique test `ApplicationContext` in the current project
+  will be xref:core/aot.adoc#refresh[refreshed for AOT processing].
+* Runtime AOT support: when executing in AOT runtime mode, a Spring integration test will
+  use an AOT-optimized `ApplicationContext` that participates transparently with the
+  xref:testing/testcontext-framework/ctx-management/caching.adoc[context cache].
+
+[WARNING]
+====
+The `@ContextHierarchy` annotation is currently not supported in AOT mode.
+====
+
+To provide test-specific runtime hints for use within a GraalVM native image, you have
+the following options.
+
+* Implement a custom
+  {api-spring-framework}/test/context/aot/TestRuntimeHintsRegistrar.html[`TestRuntimeHintsRegistrar`]
+  and register it globally via `META-INF/spring/aot.factories`.
+* Implement a custom {api-spring-framework}/aot/hint/RuntimeHintsRegistrar.html[`RuntimeHintsRegistrar`]
+  and register it globally via `META-INF/spring/aot.factories` or locally on a test class
+  via {api-spring-framework}/context/annotation/ImportRuntimeHints.html[`@ImportRuntimeHints`].
+* Annotate a test class with {api-spring-framework}/aot/hint/annotation/Reflective.html[`@Reflective`] or
+  {api-spring-framework}/aot/hint/annotation/RegisterReflectionForBinding.html[`@RegisterReflectionForBinding`].
+* See xref:core/aot.adoc#hints[Runtime Hints] for details on Spring's core runtime hints
+  and annotation support.
+
+[TIP]
+====
+The `TestRuntimeHintsRegistrar` API serves as a companion to the core
+`RuntimeHintsRegistrar` API. If you need to register global hints for testing support
+that are not specific to particular test classes, favor implementing
+`RuntimeHintsRegistrar` over the test-specific API.
+====
+
+If you implement a custom `ContextLoader`, it must implement
+{api-spring-framework}/test/context/aot/AotContextLoader.html[`AotContextLoader`] in
+order to provide AOT build-time processing and AOT runtime execution support. Note,
+however, that all context loader implementations provided by the Spring Framework and
+Spring Boot already implement `AotContextLoader`.
+
+If you implement a custom `TestExecutionListener`, it must implement
+{api-spring-framework}/test/context/aot/AotTestExecutionListener.html[`AotTestExecutionListener`]
+in order to participate in AOT processing. See the `SqlScriptsTestExecutionListener` in
+the `spring-test` module for an example.

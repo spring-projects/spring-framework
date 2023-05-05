@@ -97,12 +97,12 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		body.setBytes(new byte[]{0x1, 0x2});
 		converter.write(body, null, outputMessage);
 		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
-		assertThat(result.contains("<string>Foo</string>")).isTrue();
-		assertThat(result.contains("<number>42</number>")).isTrue();
-		assertThat(result.contains("<fraction>42.0</fraction>")).isTrue();
-		assertThat(result.contains("<array><array>Foo</array><array>Bar</array></array>")).isTrue();
-		assertThat(result.contains("<bool>true</bool>")).isTrue();
-		assertThat(result.contains("<bytes>AQI=</bytes>")).isTrue();
+		assertThat(result).contains("<string>Foo</string>");
+		assertThat(result).contains("<number>42</number>");
+		assertThat(result).contains("<fraction>42.0</fraction>");
+		assertThat(result).contains("<array><array>Foo</array><array>Bar</array></array>");
+		assertThat(result).contains("<bool>true</bool>");
+		assertThat(result).contains("<bytes>AQI=</bytes>");
 		assertThat(outputMessage.getHeaders().getContentType())
 				.as("Invalid content-type").isEqualTo(new MediaType("application", "xml", StandardCharsets.UTF_8));
 	}

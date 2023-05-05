@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,29 +43,29 @@ public class ComparatorTests {
 	void testPrimitives() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
 		// primitive int
-		assertThat(comparator.compare(1, 2) < 0).isTrue();
-		assertThat(comparator.compare(1, 1) == 0).isTrue();
-		assertThat(comparator.compare(2, 1) > 0).isTrue();
+		assertThat(comparator.compare(1, 2)).isLessThan(0);
+		assertThat(comparator.compare(1, 1)).isEqualTo(0);
+		assertThat(comparator.compare(2, 1)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1.0d, 2) < 0).isTrue();
-		assertThat(comparator.compare(1.0d, 1) == 0).isTrue();
-		assertThat(comparator.compare(2.0d, 1) > 0).isTrue();
+		assertThat(comparator.compare(1.0d, 2)).isLessThan(0);
+		assertThat(comparator.compare(1.0d, 1)).isEqualTo(0);
+		assertThat(comparator.compare(2.0d, 1)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1.0f, 2) < 0).isTrue();
-		assertThat(comparator.compare(1.0f, 1) == 0).isTrue();
-		assertThat(comparator.compare(2.0f, 1) > 0).isTrue();
+		assertThat(comparator.compare(1.0f, 2)).isLessThan(0);
+		assertThat(comparator.compare(1.0f, 1)).isEqualTo(0);
+		assertThat(comparator.compare(2.0f, 1)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1L, 2) < 0).isTrue();
-		assertThat(comparator.compare(1L, 1) == 0).isTrue();
-		assertThat(comparator.compare(2L, 1) > 0).isTrue();
+		assertThat(comparator.compare(1L, 2)).isLessThan(0);
+		assertThat(comparator.compare(1L, 1)).isEqualTo(0);
+		assertThat(comparator.compare(2L, 1)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1, 2L) < 0).isTrue();
-		assertThat(comparator.compare(1, 1L) == 0).isTrue();
-		assertThat(comparator.compare(2, 1L) > 0).isTrue();
+		assertThat(comparator.compare(1, 2L)).isLessThan(0);
+		assertThat(comparator.compare(1, 1L)).isEqualTo(0);
+		assertThat(comparator.compare(2, 1L)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1L, 2L) < 0).isTrue();
-		assertThat(comparator.compare(1L, 1L) == 0).isTrue();
-		assertThat(comparator.compare(2L, 1L) > 0).isTrue();
+		assertThat(comparator.compare(1L, 2L)).isLessThan(0);
+		assertThat(comparator.compare(1L, 1L)).isEqualTo(0);
+		assertThat(comparator.compare(2L, 1L)).isGreaterThan(0);
 	}
 
 	@Test
@@ -75,42 +75,42 @@ public class ComparatorTests {
 		BigDecimal bdOne = new BigDecimal("1");
 		BigDecimal bdTwo = new BigDecimal("2");
 
-		assertThat(comparator.compare(bdOne, bdTwo) < 0).isTrue();
-		assertThat(comparator.compare(bdOne, new BigDecimal("1")) == 0).isTrue();
-		assertThat(comparator.compare(bdTwo, bdOne) > 0).isTrue();
+		assertThat(comparator.compare(bdOne, bdTwo)).isLessThan(0);
+		assertThat(comparator.compare(bdOne, new BigDecimal("1"))).isEqualTo(0);
+		assertThat(comparator.compare(bdTwo, bdOne)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1, bdTwo) < 0).isTrue();
-		assertThat(comparator.compare(1, bdOne) == 0).isTrue();
-		assertThat(comparator.compare(2, bdOne) > 0).isTrue();
+		assertThat(comparator.compare(1, bdTwo)).isLessThan(0);
+		assertThat(comparator.compare(1, bdOne)).isEqualTo(0);
+		assertThat(comparator.compare(2, bdOne)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1.0d, bdTwo) < 0).isTrue();
-		assertThat(comparator.compare(1.0d, bdOne) == 0).isTrue();
-		assertThat(comparator.compare(2.0d, bdOne) > 0).isTrue();
+		assertThat(comparator.compare(1.0d, bdTwo)).isLessThan(0);
+		assertThat(comparator.compare(1.0d, bdOne)).isEqualTo(0);
+		assertThat(comparator.compare(2.0d, bdOne)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1.0f, bdTwo) < 0).isTrue();
-		assertThat(comparator.compare(1.0f, bdOne) == 0).isTrue();
-		assertThat(comparator.compare(2.0f, bdOne) > 0).isTrue();
+		assertThat(comparator.compare(1.0f, bdTwo)).isLessThan(0);
+		assertThat(comparator.compare(1.0f, bdOne)).isEqualTo(0);
+		assertThat(comparator.compare(2.0f, bdOne)).isGreaterThan(0);
 
-		assertThat(comparator.compare(1L, bdTwo) < 0).isTrue();
-		assertThat(comparator.compare(1L, bdOne) == 0).isTrue();
-		assertThat(comparator.compare(2L, bdOne) > 0).isTrue();
+		assertThat(comparator.compare(1L, bdTwo)).isLessThan(0);
+		assertThat(comparator.compare(1L, bdOne)).isEqualTo(0);
+		assertThat(comparator.compare(2L, bdOne)).isGreaterThan(0);
 
 	}
 
 	@Test
 	void testNulls() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
-		assertThat(comparator.compare(null,"abc")<0).isTrue();
-		assertThat(comparator.compare(null,null)==0).isTrue();
-		assertThat(comparator.compare("abc",null)>0).isTrue();
+		assertThat(comparator.compare(null,"abc")).isLessThan(0);
+		assertThat(comparator.compare(null,null)).isEqualTo(0);
+		assertThat(comparator.compare("abc",null)).isGreaterThan(0);
 	}
 
 	@Test
 	void testObjects() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
-		assertThat(comparator.compare("a","a")==0).isTrue();
-		assertThat(comparator.compare("a","b")<0).isTrue();
-		assertThat(comparator.compare("b","a")>0).isTrue();
+		assertThat(comparator.compare("a","a")).isEqualTo(0);
+		assertThat(comparator.compare("a","b")).isLessThan(0);
+		assertThat(comparator.compare("b","a")).isGreaterThan(0);
 	}
 
 	@Test

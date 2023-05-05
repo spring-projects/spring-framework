@@ -1,0 +1,15 @@
+[[integration-testing-annotations]]
+= Annotations
+:page-section-summary-toc: 1
+
+This section covers annotations that you can use when you test Spring applications.
+It includes the following topics:
+
+* xref:testing/annotations/integration-standard.adoc[Standard Annotation Support]
+* xref:testing/annotations/integration-spring.adoc[Spring Testing Annotations]
+* xref:testing/annotations/integration-junit4.adoc[Spring JUnit 4 Testing Annotations]
+* xref:testing/annotations/integration-junit-jupiter.adoc[Spring JUnit Jupiter Testing Annotations]
+* xref:testing/annotations/integration-meta.adoc[Meta-Annotation Support for Testing]
+
+
+

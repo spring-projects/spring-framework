@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
@@ -293,6 +294,16 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
 		return this.headers.entrySet();
+	}
+
+	@Override
+	public void forEach(BiConsumer<? super String, ? super List<String>> action) {
+		this.headers.forEach(action);
+	}
+
+	@Override
+	public List<String> putIfAbsent(String key, List<String> value) {
+		return this.headers.putIfAbsent(key, value);
 	}
 
 

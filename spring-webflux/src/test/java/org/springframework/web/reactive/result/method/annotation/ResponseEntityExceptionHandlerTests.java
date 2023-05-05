@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public class ResponseEntityExceptionHandlerTests {
 		ResponseEntity<?> entity = this.exceptionHandler.handleException(exception, this.exchange).block();
 		assertThat(entity).isNotNull();
 		assertThat(entity.getStatusCode()).isEqualTo(exception.getStatusCode());
-		assertThat(entity.getBody()).isNotNull().isInstanceOf(ProblemDetail.class);
+		assertThat(entity.getBody()).isInstanceOf(ProblemDetail.class);
 		return (ResponseEntity<ProblemDetail>) entity;
 	}
 

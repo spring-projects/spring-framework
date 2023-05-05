@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ class JdbcNamespaceIntegrationTests {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
 				assertNumRowsInTestTable(new JdbcTemplate(dataSource), count);
-				assertThat(dataSource instanceof AbstractDriverBasedDataSource).isTrue();
+				assertThat(dataSource).isInstanceOf(AbstractDriverBasedDataSource.class);
 				AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
 				assertThat(adbDataSource.getUrl()).contains(dataSourceName);
 			}
@@ -195,7 +195,7 @@ class JdbcNamespaceIntegrationTests {
 		try (ConfigurableApplicationContext context = context(file)) {
 			DataSource dataSource = context.getBean(DataSource.class);
 			assertNumRowsInTestTable(new JdbcTemplate(dataSource), 1);
-			assertThat(dataSource instanceof AbstractDriverBasedDataSource).isTrue();
+			assertThat(dataSource).isInstanceOf(AbstractDriverBasedDataSource.class);
 			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
 			assertThat(urlPredicate.test(adbDataSource.getUrl())).isTrue();
 		}

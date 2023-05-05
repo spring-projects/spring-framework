@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class CookieAssertionTests {
 		CookieLocaleResolver localeResolver = new CookieLocaleResolver();
 		localeResolver.setCookieDomain("domain");
 		localeResolver.setCookieHttpOnly(true);
+		localeResolver.setCookieSameSite("Strict");
 
 		client = MockMvcWebTestClient.bindToController(new SimpleController())
 				.interceptors(new LocaleChangeInterceptor())
@@ -107,6 +108,10 @@ public class CookieAssertionTests {
 		client.get().uri("/").exchange().expectCookie().httpOnly(COOKIE_NAME, true);
 	}
 
+	@Test
+	public void testSameSite() {
+		client.get().uri("/").exchange().expectCookie().sameSite(COOKIE_NAME, "Strict");
+	}
 
 	@Controller
 	private static class SimpleController {

@@ -87,7 +87,7 @@ public class GroovyScriptFactoryTests {
 		assertThat(messenger).isEqualTo(messenger);
 		boolean condition1 = !messenger.equals(calc);
 		assertThat(condition1).isTrue();
-		assertThat(messenger.hashCode() != calc.hashCode()).isTrue();
+		assertThat(messenger.hashCode()).isNotEqualTo(calc.hashCode());
 		boolean condition = !messenger.toString().equals(calc.toString());
 		assertThat(condition).isTrue();
 
@@ -120,7 +120,7 @@ public class GroovyScriptFactoryTests {
 		assertThat(messenger).isEqualTo(messenger);
 		boolean condition1 = !messenger.equals(calc);
 		assertThat(condition1).isTrue();
-		assertThat(messenger.hashCode() != calc.hashCode()).isTrue();
+		assertThat(messenger.hashCode()).isNotEqualTo(calc.hashCode());
 		boolean condition = !messenger.toString().equals(calc.toString());
 		assertThat(condition).isTrue();
 
@@ -455,7 +455,7 @@ public class GroovyScriptFactoryTests {
 			new ClassPathXmlApplicationContext("groovy-with-xsd-proxy-target-class.xml", getClass());
 		}
 		catch (BeanCreationException ex) {
-			assertThat(ex.getMessage().contains("Cannot use proxyTargetClass=true")).isTrue();
+			assertThat(ex.getMessage()).contains("Cannot use proxyTargetClass=true");
 		}
 	}
 

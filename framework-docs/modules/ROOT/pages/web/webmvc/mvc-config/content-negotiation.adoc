@@ -1,0 +1,71 @@
+[[mvc-config-content-negotiation]]
+= Content Types
+
+[.small]#xref:web/webflux/config.adoc#webflux-config-content-negotiation[See equivalent in the Reactive stack]#
+
+You can configure how Spring MVC determines the requested media types from the request
+(for example, `Accept` header, URL path extension, query parameter, and others).
+
+By default, only the `Accept` header is checked.
+
+If you must use URL-based content type resolution, consider using the query parameter
+strategy over path extensions. See
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-suffix-pattern-match[Suffix Match] and xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-rfd[Suffix Match and RFD] for
+more details.
+
+In Java configuration, you can customize requested content type resolution, as the
+following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig implements WebMvcConfigurer {
+
+		@Override
+		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+			configurer.mediaType("json", MediaType.APPLICATION_JSON);
+			configurer.mediaType("xml", MediaType.APPLICATION_XML);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebMvc
+	class WebConfig : WebMvcConfigurer {
+
+		override fun configureContentNegotiation(configurer: ContentNegotiationConfigurer) {
+			configurer.mediaType("json", MediaType.APPLICATION_JSON)
+			configurer.mediaType("xml", MediaType.APPLICATION_XML)
+		}
+	}
+----
+======
+
+
+The following example shows how to achieve the same configuration in XML:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
+
+	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="mediaTypes">
+			<value>
+				json=application/json
+				xml=application/xml
+			</value>
+		</property>
+	</bean>
+----
+
+
+

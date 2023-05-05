@@ -231,8 +231,8 @@ public class MethodReference extends SpelNodeImpl {
 	 * if the cause was a RuntimeException, throw the RuntimeException directly.
 	 */
 	private void throwSimpleExceptionIfPossible(Object value, AccessException ex) {
-		if (ex.getCause() instanceof InvocationTargetException) {
-			Throwable rootCause = ex.getCause().getCause();
+		if (ex.getCause() instanceof InvocationTargetException cause) {
+			Throwable rootCause = cause.getCause();
 			if (rootCause instanceof RuntimeException runtimeException) {
 				throw runtimeException;
 			}

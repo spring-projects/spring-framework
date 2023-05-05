@@ -138,7 +138,7 @@ class BeanDefinitionMethodGeneratorTests {
 		compile(method, (actual, compiled) -> {
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
 			assertThat(sourceFile.getClassName()).endsWith("InnerBeanConfiguration__BeanDefinitions");
-			assertThat(sourceFile).contains("public static class Simple__BeanDefinitions")
+			assertThat(sourceFile).contains("public static class Simple")
 					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple}")
 					.doesNotContain("Another__BeanDefinitions");
 
@@ -161,9 +161,9 @@ class BeanDefinitionMethodGeneratorTests {
 		compile(method, (actual, compiled) -> {
 			SourceFile sourceFile = compiled.getSourceFile(".*BeanDefinitions");
 			assertThat(sourceFile.getClassName()).endsWith("InnerBeanConfiguration__BeanDefinitions");
-			assertThat(sourceFile).contains("public static class Simple__BeanDefinitions")
+			assertThat(sourceFile).contains("public static class Simple")
 					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple}")
-					.contains("public static class Another__BeanDefinitions")
+					.contains("public static class Another")
 					.contains("Bean definitions for {@link InnerBeanConfiguration.Simple.Another}");
 		});
 	}
@@ -406,7 +406,7 @@ class BeanDefinitionMethodGeneratorTests {
 		compile(method, (actual, compiled) -> {
 			ManagedList<RootBeanDefinition> actualPropertyValue = (ManagedList<RootBeanDefinition>) actual
 					.getPropertyValues().get("someList");
-			assertThat(actualPropertyValue).isNotNull().hasSize(2);
+			assertThat(actualPropertyValue).hasSize(2);
 			assertThat(actualPropertyValue.get(0).getPropertyValues().get("name")).isEqualTo("one");
 			assertThat(actualPropertyValue.get(1).getPropertyValues().get("name")).isEqualTo("two");
 			assertThat(compiled.getSourceFileFromPackage(TestBean.class.getPackageName()))

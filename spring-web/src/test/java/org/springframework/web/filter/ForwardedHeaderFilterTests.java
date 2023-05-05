@@ -214,7 +214,7 @@ public class ForwardedHeaderFilterTests {
 		@Test
 		public void contextPathEmpty() throws Exception {
 			request.addHeader(X_FORWARDED_PREFIX, "");
-			assertThat(filterAndGetContextPath()).isEqualTo("");
+			assertThat(filterAndGetContextPath()).isEmpty();
 		}
 
 		@Test
@@ -269,7 +269,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/path");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path");
 		}
 
@@ -280,7 +280,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/path/");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path/");
 		}
 
@@ -302,7 +302,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/");
 		}
 
@@ -313,7 +313,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/app/");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/");
 		}
 
@@ -323,7 +323,7 @@ public class ForwardedHeaderFilterTests {
 			request.setRequestURI("/path;a=b/with/semicolon");
 			HttpServletRequest actual = filterAndGetWrappedRequest();
 
-			assertThat(actual.getContextPath()).isEqualTo("");
+			assertThat(actual.getContextPath()).isEmpty();
 			assertThat(actual.getRequestURI()).isEqualTo("/path;a=b/with/semicolon");
 			assertThat(actual.getRequestURL().toString()).isEqualTo("http://localhost/path;a=b/with/semicolon");
 		}

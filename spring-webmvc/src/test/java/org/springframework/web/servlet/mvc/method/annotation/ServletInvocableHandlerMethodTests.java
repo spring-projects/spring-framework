@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -333,7 +333,7 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
 		assertThat(this.response.getStatus()).isEqualTo(200);
-		assertThat(this.response.getContentAsString()).isEqualTo("");
+		assertThat(this.response.getContentAsString()).isEmpty();
 	}
 
 	@Test
@@ -344,7 +344,7 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
 		assertThat(this.response.getStatus()).isEqualTo(200);
-		assertThat(this.response.getContentAsString()).isEqualTo("");
+		assertThat(this.response.getContentAsString()).isEmpty();
 	}
 
 	@Test
@@ -357,7 +357,7 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
 		assertThat(this.response.getStatus()).isEqualTo(200);
-		assertThat(this.response.getContentAsString()).isEqualTo("");
+		assertThat(this.response.getContentAsString()).isEmpty();
 	}
 
 	@Test
@@ -368,7 +368,7 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
 		assertThat(this.response.getStatus()).isEqualTo(200);
-		assertThat(this.response.getContentAsString()).isEqualTo("");
+		assertThat(this.response.getContentAsString()).isEmpty();
 	}
 
 	@Test
@@ -414,7 +414,7 @@ public class ServletInvocableHandlerMethodTests {
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
 		assertThat(this.response.getStatus()).isEqualTo(200);
-		assertThat(this.response.getContentAsString()).isEqualTo("");
+		assertThat(this.response.getContentAsString()).isEmpty();
 	}
 
 	private ServletInvocableHandlerMethod getHandlerMethod(Object controller,

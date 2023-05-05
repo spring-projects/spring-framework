@@ -91,17 +91,17 @@ public class CallMetaDataContextTests {
 		context.processParameters(parameters);
 
 		Map<String, Object> inParameters = context.matchInParameterValuesWithCallParameters(parameterSource);
-		assertThat(inParameters.size()).as("Wrong number of matched in parameter values").isEqualTo(2);
+		assertThat(inParameters).as("Wrong number of matched in parameter values").hasSize(2);
 		assertThat(inParameters.containsKey("id")).as("in parameter value missing").isTrue();
 		assertThat(inParameters.containsKey("name")).as("in out parameter value missing").isTrue();
 		boolean condition = !inParameters.containsKey("customer_no");
 		assertThat(condition).as("out parameter value matched").isTrue();
 
 		List<String> names = context.getOutParameterNames();
-		assertThat(names.size()).as("Wrong number of out parameters").isEqualTo(2);
+		assertThat(names).as("Wrong number of out parameters").hasSize(2);
 
 		List<SqlParameter> callParameters = context.getCallParameters();
-		assertThat(callParameters.size()).as("Wrong number of call parameters").isEqualTo(3);
+		assertThat(callParameters).as("Wrong number of call parameters").hasSize(3);
 	}
 
 }

@@ -128,7 +128,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		Object actual = testResolveArgument(param, factory);
 		assertThat(actual).isNotNull();
 		assertThat(actual.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional<?>) actual).isPresent()).isFalse();
+		assertThat(((Optional<?>) actual)).isNotPresent();
 
 		Foo foo = new Foo();
 		this.webRequest.setAttribute("foo", foo, getScope());
@@ -136,7 +136,7 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		actual = testResolveArgument(param, factory);
 		assertThat(actual).isNotNull();
 		assertThat(actual.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional<?>) actual).isPresent()).isTrue();
+		assertThat(((Optional<?>) actual)).isPresent();
 		assertThat(((Optional<?>) actual).get()).isSameAs(foo);
 	}
 

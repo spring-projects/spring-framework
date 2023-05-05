@@ -1,0 +1,76 @@
+[[cache-strategies]]
+= Understanding the Cache Abstraction
+
+.Cache vs Buffer
+****
+
+The terms, "`buffer`" and "`cache,`" tend to be used interchangeably. Note, however,
+that they represent different things. Traditionally, a buffer is used as an intermediate
+temporary store for data between a fast and a slow entity. As one party would have to wait
+for the other (which affects performance), the buffer alleviates this by allowing entire
+blocks of data to move at once rather than in small chunks. The data is written and read
+only once from the buffer. Furthermore, the buffers are visible to at least one party
+that is aware of it.
+
+A cache, on the other hand, is, by definition, hidden, and neither party is aware that
+caching occurs. It also improves performance but does so by letting the same data be
+read multiple times in a fast fashion.
+
+You can find a further explanation of the differences between a buffer and a cache
+https://en.wikipedia.org/wiki/Cache_(computing)#The_difference_between_buffer_and_cache[here].
+****
+
+At its core, the cache abstraction applies caching to Java methods, thus reducing the
+number of executions based on the information available in the cache. That is, each time
+a targeted method is invoked, the abstraction applies a caching behavior that checks
+whether the method has been already invoked for the given arguments. If it has been
+invoked, the cached result is returned without having to invoke the actual method.
+If the method has not been invoked, then it is invoked, and the result is cached and
+returned to the user so that, the next time the method is invoked, the cached result is
+returned. This way, expensive methods (whether CPU- or IO-bound) can be invoked only
+once for a given set of parameters and the result reused without having to actually
+invoke the method again. The caching logic is applied transparently without any
+interference to the invoker.
+
+IMPORTANT: This approach works only for methods that are guaranteed to return the same
+output (result) for a given input (or arguments) no matter how many times they are invoked.
+
+The caching abstraction provides other cache-related operations, such as the ability
+to update the content of the cache or to remove one or all entries. These are useful if
+the cache deals with data that can change during the course of the application.
+
+As with other services in the Spring Framework, the caching service is an abstraction
+(not a cache implementation) and requires the use of actual storage to store the cache data --
+that is, the abstraction frees you from having to write the caching logic but does not
+provide the actual data store. This abstraction is materialized by the
+`org.springframework.cache.Cache` and `org.springframework.cache.CacheManager` interfaces.
+
+Spring provides xref:integration/cache/store-configuration.adoc[a few implementations] of that abstraction:
+JDK `java.util.concurrent.ConcurrentMap` based caches, Gemfire cache,
+https://github.com/ben-manes/caffeine/wiki[Caffeine], and JSR-107 compliant caches (such
+as Ehcache 3.x). See xref:integration/cache/plug.adoc[Plugging-in Different Back-end Caches] for more information on plugging in other cache
+stores and providers.
+
+IMPORTANT: The caching abstraction has no special handling for multi-threaded and
+multi-process environments, as such features are handled by the cache implementation.
+
+If you have a multi-process environment (that is, an application deployed on several nodes),
+you need to configure your cache provider accordingly. Depending on your use cases, a copy
+of the same data on several nodes can be enough. However, if you change the data during
+the course of the application, you may need to enable other propagation mechanisms.
+
+Caching a particular item is a direct equivalent of the typical
+get-if-not-found-then-proceed-and-put-eventually code blocks
+found with programmatic cache interaction.
+No locks are applied, and several threads may try to load the same item concurrently.
+The same applies to eviction. If several threads are trying to update or evict data
+concurrently, you may use stale data. Certain cache providers offer advanced features
+in that area. See the documentation of your cache provider for more details.
+
+To use the cache abstraction, you need to take care of two aspects:
+
+* Caching declaration: Identify the methods that need to be cached and their policies.
+* Cache configuration: The backing cache where the data is stored and from which it is read.
+
+
+

@@ -102,8 +102,7 @@ public interface ErrorResponse {
 	/**
 	 * Return a code to use to resolve the problem "title" for this exception
 	 * through a {@link MessageSource}.
-	 * <p>By default this is initialized via
-	 * {@link #getDefaultTitleMessageCode(Class, String)}.
+	 * <p>By default this is initialized via {@link #getDefaultTitleMessageCode(Class)}.
 	 */
 	default String getTitleMessageCode() {
 		return getDefaultTitleMessageCode(getClass());

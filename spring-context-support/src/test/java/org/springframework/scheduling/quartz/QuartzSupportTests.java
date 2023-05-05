@@ -126,7 +126,7 @@ class QuartzSupportTests {
 		bean.start();
 
 		Thread.sleep(500);
-		assertThat(DummyJob.count > 0).as("DummyJob should have been executed at least once.").isTrue();
+		assertThat(DummyJob.count).as("DummyJob should have been executed at least once.").isGreaterThan(0);
 		assertThat(taskExecutor.count).isEqualTo(DummyJob.count);
 
 		bean.destroy();
@@ -168,7 +168,7 @@ class QuartzSupportTests {
 
 		Thread.sleep(500);
 		assertThat(DummyJobBean.param).isEqualTo(10);
-		assertThat(DummyJobBean.count > 0).isTrue();
+		assertThat(DummyJobBean.count).isGreaterThan(0);
 
 		bean.destroy();
 	}
@@ -203,7 +203,7 @@ class QuartzSupportTests {
 
 		Thread.sleep(500);
 		assertThat(DummyJob.param).isEqualTo(10);
-		assertThat(DummyJob.count > 0).as("DummyJob should have been executed at least once.").isTrue();
+		assertThat(DummyJob.count).as("DummyJob should have been executed at least once.").isGreaterThan(0);
 
 		bean.destroy();
 	}
@@ -239,7 +239,7 @@ class QuartzSupportTests {
 
 		Thread.sleep(500);
 		assertThat(DummyJob.param).isEqualTo(0);
-		assertThat(DummyJob.count == 0).isTrue();
+		assertThat(DummyJob.count).isEqualTo(0);
 
 		bean.destroy();
 	}
@@ -273,7 +273,7 @@ class QuartzSupportTests {
 
 		Thread.sleep(500);
 		assertThat(DummyJobBean.param).isEqualTo(10);
-		assertThat(DummyJobBean.count > 0).isTrue();
+		assertThat(DummyJobBean.count).isGreaterThan(0);
 
 		bean.destroy();
 	}
@@ -292,7 +292,7 @@ class QuartzSupportTests {
 
 		Thread.sleep(500);
 		assertThat(DummyJob.param).isEqualTo(10);
-		assertThat(DummyJob.count > 0).as("DummyJob should have been executed at least once.").isTrue();
+		assertThat(DummyJob.count).as("DummyJob should have been executed at least once.").isGreaterThan(0);
 
 		bean.destroy();
 	}

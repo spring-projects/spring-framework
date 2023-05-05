@@ -181,7 +181,7 @@ public abstract class MimeTypeUtils {
 
 	static {
 		// Not using "parseMimeType" to avoid static init cost
-		ALL = new MimeType("*", "*");
+		ALL = new MimeType(MimeType.WILDCARD_TYPE, MimeType.WILDCARD_TYPE);
 		APPLICATION_GRAPHQL = new MimeType("application", "graphql+json");
 		APPLICATION_JSON = new MimeType("application", "json");
 		APPLICATION_OCTET_STREAM = new MimeType("application", "octet-stream");

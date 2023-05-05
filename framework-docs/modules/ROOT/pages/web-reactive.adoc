@@ -1,0 +1,11 @@
+[[spring-web-reactive]]
+= Web on Reactive Stack
+
+This part of the documentation covers support for reactive-stack web applications built
+on a https://www.reactive-streams.org/[Reactive Streams] API to run on non-blocking
+servers, such as Netty, Undertow, and Servlet containers. Individual chapters cover
+the xref:web/webflux.adoc#webflux[Spring WebFlux] framework,
+the reactive xref:web/webflux-webclient.adoc[`WebClient`], support for xref:web-reactive.adoc#webflux-test[testing],
+and xref:web-reactive.adoc#webflux-reactive-libraries[reactive libraries]. For Servlet-stack web applications,
+see xref:web.adoc[Web on Servlet Stack].
+

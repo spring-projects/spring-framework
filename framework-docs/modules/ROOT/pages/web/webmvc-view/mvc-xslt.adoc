@@ -1,0 +1,195 @@
+[[mvc-view-xslt]]
+= XSLT Views
+
+XSLT is a transformation language for XML and is popular as a view technology within web
+applications. XSLT can be a good choice as a view technology if your application
+naturally deals with XML or if your model can easily be converted to XML. The following
+section shows how to produce an XML document as model data and have it transformed with
+XSLT in a Spring Web MVC application.
+
+This example is a trivial Spring application that creates a list of words in the
+`Controller` and adds them to the model map. The map is returned, along with the view
+name of our XSLT view. See xref:web/webmvc/mvc-controller.adoc[Annotated Controllers] for details of Spring Web MVC's
+`Controller` interface. The XSLT controller turns the list of words into a simple XML
+document ready for transformation.
+
+
+
+[[mvc-view-xslt-beandefs]]
+== Beans
+
+Configuration is standard for a simple Spring web application: The MVC configuration
+has to define an `XsltViewResolver` bean and regular MVC annotation configuration.
+The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@EnableWebMvc
+	@ComponentScan
+	@Configuration
+	public class WebConfig implements WebMvcConfigurer {
+
+		@Bean
+		public XsltViewResolver xsltViewResolver() {
+			XsltViewResolver viewResolver = new XsltViewResolver();
+			viewResolver.setPrefix("/WEB-INF/xsl/");
+			viewResolver.setSuffix(".xslt");
+			return viewResolver;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@EnableWebMvc
+	@ComponentScan
+	@Configuration
+	class WebConfig : WebMvcConfigurer {
+
+		@Bean
+		fun xsltViewResolver() = XsltViewResolver().apply {
+			setPrefix("/WEB-INF/xsl/")
+			setSuffix(".xslt")	
+		}
+	}
+----
+======
+
+
+[[mvc-view-xslt-controllercode]]
+== Controller
+
+We also need a Controller that encapsulates our word-generation logic.
+
+The controller logic is encapsulated in a `@Controller` class, with the
+handler method being defined as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class XsltController {
+
+		@RequestMapping("/")
+		public String home(Model model) throws Exception {
+			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+			Element root = document.createElement("wordList");
+
+			List<String> words = Arrays.asList("Hello", "Spring", "Framework");
+			for (String word : words) {
+				Element wordNode = document.createElement("word");
+				Text textNode = document.createTextNode(word);
+				wordNode.appendChild(textNode);
+				root.appendChild(wordNode);
+			}
+
+			model.addAttribute("wordList", root);
+			return "home";
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.ui.set
+
+	@Controller
+	class XsltController {
+
+		@RequestMapping("/")
+		fun home(model: Model): String {
+			val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()
+			val root = document.createElement("wordList")
+
+			val words = listOf("Hello", "Spring", "Framework")
+			for (word in words) {
+				val wordNode = document.createElement("word")
+				val textNode = document.createTextNode(word)
+				wordNode.appendChild(textNode)
+				root.appendChild(wordNode)
+			}
+
+			model["wordList"] = root
+			return "home"
+		}
+	}
+----
+======
+
+So far, we have only created a DOM document and added it to the Model map. Note that you
+can also load an XML file as a `Resource` and use it instead of a custom DOM document.
+
+There are software packages available that automatically 'domify'
+an object graph, but, within Spring, you have complete flexibility to create the DOM
+from your model in any way you choose. This prevents the transformation of XML playing
+too great a part in the structure of your model data, which is a danger when using tools
+to manage the DOMification process.
+
+
+
+[[mvc-view-xslt-transforming]]
+== Transformation
+
+Finally, the `XsltViewResolver` resolves the "`home`" XSLT template file and merges the
+DOM document into it to generate our view. As shown in the `XsltViewResolver`
+configuration, XSLT templates live in the `war` file in the `WEB-INF/xsl` directory
+and end with an `xslt` file extension.
+
+The following example shows an XSLT transform:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="utf-8"?>
+	<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+		<xsl:output method="html" omit-xml-declaration="yes"/>
+
+		<xsl:template match="/">
+			<html>
+				<head><title>Hello!</title></head>
+				<body>
+					<h1>My First Words</h1>
+					<ul>
+						<xsl:apply-templates/>
+					</ul>
+				</body>
+			</html>
+		</xsl:template>
+
+		<xsl:template match="word">
+			<li><xsl:value-of select="."/></li>
+		</xsl:template>
+
+	</xsl:stylesheet>
+----
+
+The preceding transform is rendered as the following HTML:
+
+[source,html,indent=0,subs="verbatim,quotes"]
+----
+<html>
+	<head>
+		<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Hello!</title>
+	</head>
+	<body>
+		<h1>My First Words</h1>
+		<ul>
+			<li>Hello</li>
+			<li>Spring</li>
+			<li>Framework</li>
+		</ul>
+	</body>
+</html>
+----

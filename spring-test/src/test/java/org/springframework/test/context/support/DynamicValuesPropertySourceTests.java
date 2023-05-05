@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.test.context.support;
 
-import java.util.HashMap;
-import java.util.function.Supplier;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -33,10 +32,7 @@ class DynamicValuesPropertySourceTests {
 
 	@SuppressWarnings("serial")
 	private final DynamicValuesPropertySource source = new DynamicValuesPropertySource("test",
-		new HashMap<String, Supplier<Object>>() {{
-			put("a", () -> "A");
-			put("b", () -> "B");
-		}});
+			Map.of("a", () -> "A", "b", () -> "B"));
 
 
 	@Test
@@ -63,7 +59,7 @@ class DynamicValuesPropertySourceTests {
 
 	@Test
 	void getPropertyNamesReturnsNames() {
-		assertThat(this.source.getPropertyNames()).containsExactly("a", "b");
+		assertThat(this.source.getPropertyNames()).containsExactlyInAnyOrder("a", "b");
 	}
 
 }

@@ -44,7 +44,6 @@ import org.springframework.web.testfixture.servlet.MockServletContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -173,7 +172,8 @@ class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertThat(this.response.getHeader("Cache-Control")).isEqualTo("max-age=3600, must-revalidate");
-		assertThat(this.response.getDateHeader("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000)).isTrue();
+		assertThat(this.response.getDateHeader("Expires")).isGreaterThanOrEqualTo(
+				System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertThat(this.response.containsHeader("Last-Modified")).isTrue();
 		assertThat(this.response.getDateHeader("Last-Modified") / 1000).isEqualTo(resourceLastModified("test/foo.css") / 1000);
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
@@ -193,7 +193,7 @@ class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getHeader("Pragma")).isEqualTo("no-cache");
 		assertThat(this.response.getHeaderValues("Cache-Control")).hasSize(1);
 		assertThat(this.response.getHeader("Cache-Control")).isEqualTo("no-cache");
-		assertThat(this.response.getDateHeader("Expires") <= System.currentTimeMillis()).isTrue();
+		assertThat(this.response.getDateHeader("Expires")).isLessThanOrEqualTo(System.currentTimeMillis());
 		assertThat(this.response.containsHeader("Last-Modified")).isTrue();
 		assertThat(this.response.getDateHeader("Last-Modified") / 1000).isEqualTo(resourceLastModified("test/foo.css") / 1000);
 		assertThat(this.response.getHeader("Accept-Ranges")).isEqualTo("bytes");
@@ -413,9 +413,6 @@ class ResourceHttpRequestHandlerTests {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, requestPath);
 		this.response = new MockHttpServletResponse();
 		this.handler.handleRequest(this.request, this.response);
-		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
-			fail(requestPath + " doesn't actually exist as a relative path");
-		}
 		assertThat(this.response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
 	}
 
@@ -451,7 +448,7 @@ class ResourceHttpRequestHandlerTests {
 		assertThat(this.handler.processPath((char) 1 + " / " + (char) 127 + " // foo/bar")).isEqualTo("/foo/bar");
 
 		// root or empty path
-		assertThat(this.handler.processPath("   ")).isEqualTo("");
+		assertThat(this.handler.processPath("   ")).isEmpty();
 		assertThat(this.handler.processPath("/")).isEqualTo("/");
 		assertThat(this.handler.processPath("///")).isEqualTo("/");
 		assertThat(this.handler.processPath("/ /   / ")).isEqualTo("/");
@@ -651,7 +648,7 @@ class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertThat(this.response.getStatus()).isEqualTo(206);
-		assertThat(this.response.getContentType().startsWith("multipart/byteranges; boundary=")).isTrue();
+		assertThat(this.response.getContentType()).startsWith("multipart/byteranges; boundary=");
 
 		String boundary = "--" + this.response.getContentType().substring(31);
 

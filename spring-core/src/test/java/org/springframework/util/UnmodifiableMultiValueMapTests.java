@@ -62,7 +62,7 @@ class UnmodifiableMultiValueMapTests {
 		list.add("bar");
 		given(mock.get("foo")).willReturn(list);
 		List<String> result = map.get("foo");
-		assertThat(result).isNotNull().containsExactly("bar");
+		assertThat(result).containsExactly("bar");
 		assertThatUnsupportedOperationException().isThrownBy(() -> result.add("baz"));
 
 		given(mock.getOrDefault("foo", List.of("bar"))).willReturn(List.of("baz"));

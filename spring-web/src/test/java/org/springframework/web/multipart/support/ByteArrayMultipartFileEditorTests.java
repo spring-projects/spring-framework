@@ -66,7 +66,7 @@ public class ByteArrayMultipartFileEditorTests {
 	@Test
 	public void setValueAsNullGetsBackEmptyString() throws Exception {
 		editor.setValue(null);
-		assertThat(editor.getAsText()).isEqualTo("");
+		assertThat(editor.getAsText()).isEmpty();
 	}
 
 	@Test

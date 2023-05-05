@@ -1,0 +1,841 @@
+[[webflux-config]]
+= WebFlux Config
+
+[.small]#xref:web/webmvc/mvc-config.adoc[See equivalent in the Servlet stack]#
+
+The WebFlux Java configuration declares the components that are required to process
+requests with annotated controllers or functional endpoints, and it offers an API to
+customize the configuration. That means you do not need to understand the underlying
+beans created by the Java configuration. However, if you want to understand them,
+you can see them in `WebFluxConfigurationSupport` or read more about what they are
+in xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[Special Bean Types].
+
+For more advanced customizations, not available in the configuration API, you can
+gain full control over the configuration through the
+xref:web/webflux/config.adoc#webflux-config-advanced-java[Advanced Configuration Mode].
+
+
+
+[[webflux-config-enable]]
+== Enabling WebFlux Config
+[.small]#xref:web/webmvc/mvc-config/enable.adoc[See equivalent in the Servlet stack]#
+
+You can use the `@EnableWebFlux` annotation in your Java config, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig
+----
+======
+
+The preceding example registers a number of Spring WebFlux
+xref:web/webflux/dispatcher-handler.adoc#webflux-special-bean-types[infrastructure beans] and adapts to dependencies
+available on the classpath -- for JSON, XML, and others.
+
+
+
+[[webflux-config-customize]]
+== WebFlux config API
+[.small]#xref:web/webmvc/mvc-config/customize.adoc[See equivalent in the Servlet stack]#
+
+In your Java configuration, you can implement the `WebFluxConfigurer` interface,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		// Implement configuration methods...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+@Configuration
+@EnableWebFlux
+class WebConfig : WebFluxConfigurer {
+
+	// Implement configuration methods...
+}
+----
+======
+
+
+
+[[webflux-config-conversion]]
+== Conversion, formatting
+[.small]#xref:web/webmvc/mvc-config/conversion.adoc[See equivalent in the Servlet stack]#
+
+By default, formatters for various number and date types are installed, along with support
+for customization via `@NumberFormat` and `@DateTimeFormat` on fields.
+
+To register custom formatters and converters in Java config, use the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void addFormatters(FormatterRegistry registry) {
+			// ...
+		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addFormatters(registry: FormatterRegistry) {
+			// ...
+		}
+	}
+----
+======
+
+By default Spring WebFlux considers the request Locale when parsing and formatting date
+values. This works for forms where dates are represented as Strings with "input" form
+fields. For "date" and "time" form fields, however, browsers use a fixed format defined
+in the HTML spec. For such cases date and time formatting can be customized as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void addFormatters(FormatterRegistry registry) {
+			DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+			registrar.setUseIsoFormat(true);
+			registrar.registerFormatters(registry);
+      	}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addFormatters(registry: FormatterRegistry) {
+			val registrar = DateTimeFormatterRegistrar()
+			registrar.setUseIsoFormat(true)
+			registrar.registerFormatters(registry)
+		}
+	}
+----
+======
+
+NOTE: See xref:core/validation/format.adoc#format-FormatterRegistrar-SPI[`FormatterRegistrar` SPI]
+and the `FormattingConversionServiceFactoryBean` for more information on when to
+use `FormatterRegistrar` implementations.
+
+
+
+[[webflux-config-validation]]
+== Validation
+[.small]#xref:web/webmvc/mvc-config/validation.adoc[See equivalent in the Servlet stack]#
+
+By default, if xref:core/validation/beanvalidation.adoc#validation-beanvalidation-overview[Bean Validation] is present
+on the classpath (for example, the Hibernate Validator), the `LocalValidatorFactoryBean`
+is registered as a global xref:core/validation/validator.adoc[validator] for use with `@Valid` and
+`@Validated` on `@Controller` method arguments.
+
+In your Java configuration, you can customize the global `Validator` instance,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public Validator getValidator() {
+			// ...
+		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun getValidator(): Validator {
+			// ...
+		}
+
+	}
+----
+======
+
+Note that you can also register `Validator` implementations locally,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	public class MyController {
+
+		@InitBinder
+		protected void initBinder(WebDataBinder binder) {
+			binder.addValidators(new FooValidator());
+		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Controller
+	class MyController {
+
+		@InitBinder
+		protected fun initBinder(binder: WebDataBinder) {
+			binder.addValidators(FooValidator())
+		}
+	}
+----
+======
+
+
+TIP: If you need to have a `LocalValidatorFactoryBean` injected somewhere, create a bean and
+mark it with `@Primary` in order to avoid conflict with the one declared in the MVC config.
+
+
+
+[[webflux-config-content-negotiation]]
+== Content Type Resolvers
+[.small]#xref:web/webmvc/mvc-config/content-negotiation.adoc[See equivalent in the Servlet stack]#
+
+You can configure how Spring WebFlux determines the requested media types for
+`@Controller` instances from the request. By default, only the `Accept` header is checked,
+but you can also enable a query parameter-based strategy.
+
+The following example shows how to customize the requested content type resolution:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void configureContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureContentTypeResolver(builder: RequestedContentTypeResolverBuilder) {
+			// ...
+		}
+	}
+----
+======
+
+
+
+[[webflux-config-message-codecs]]
+== HTTP message codecs
+[.small]#xref:web/webmvc/mvc-config/message-converters.adoc[See equivalent in the Servlet stack]#
+
+The following example shows how to customize how the request and response body are read and written:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
+			configurer.defaultCodecs().maxInMemorySize(512 * 1024);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureHttpMessageCodecs(configurer: ServerCodecConfigurer) {
+			// ...
+		}
+	}
+----
+======
+
+`ServerCodecConfigurer` provides a set of default readers and writers. You can use it to add
+more readers and writers, customize the default ones, or replace the default ones completely.
+
+For Jackson JSON and XML, consider using
+{api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`],
+which customizes Jackson's default properties with the following ones:
+
+* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+* https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+
+It also automatically registers the following well-known modules if they are detected on the classpath:
+
+* https://github.com/FasterXML/jackson-datatype-joda[`jackson-datatype-joda`]: Support for Joda-Time types.
+* https://github.com/FasterXML/jackson-datatype-jsr310[`jackson-datatype-jsr310`]: Support for Java 8 Date and Time API types.
+* https://github.com/FasterXML/jackson-datatype-jdk8[`jackson-datatype-jdk8`]: Support for other Java 8 types, such as `Optional`.
+* https://github.com/FasterXML/jackson-module-kotlin[`jackson-module-kotlin`]: Support for Kotlin classes and data classes.
+
+
+
+[[webflux-config-view-resolvers]]
+== View Resolvers
+[.small]#xref:web/webmvc/mvc-config/view-resolvers.adoc[See equivalent in the Servlet stack]#
+
+The following example shows how to configure view resolution:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			// ...
+		}
+	}
+----
+======
+
+The `ViewResolverRegistry` has shortcuts for view technologies with which the Spring Framework
+integrates. The following example uses FreeMarker (which also requires configuring the
+underlying FreeMarker view technology):
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
+		}
+
+		// Configure Freemarker...
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setTemplateLoaderPath("classpath:/templates");
+			return configurer;
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.freeMarker()
+		}
+
+		// Configure Freemarker...
+
+		@Bean
+		fun freeMarkerConfigurer() = FreeMarkerConfigurer().apply {
+			setTemplateLoaderPath("classpath:/templates")
+		}
+	}
+----
+======
+
+You can also plug in any `ViewResolver` implementation, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			ViewResolver resolver = ... ;
+			registry.viewResolver(resolver);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			val resolver: ViewResolver = ...
+			registry.viewResolver(resolver
+		}
+	}
+----
+======
+
+To support xref:web/webflux/dispatcher-handler.adoc#webflux-multiple-representations[Content Negotiation] and rendering other formats
+through view resolution (besides HTML), you can configure one or more default views based
+on the `HttpMessageWriterView` implementation, which accepts any of the available
+xref:web/webflux/reactive-spring.adoc#webflux-codecs[Codecs] from `spring-web`. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+
+		@Override
+		public void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
+
+			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+			registry.defaultViews(new HttpMessageWriterView(encoder));
+		}
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+
+		override fun configureViewResolvers(registry: ViewResolverRegistry) {
+			registry.freeMarker()
+
+			val encoder = Jackson2JsonEncoder()
+			registry.defaultViews(HttpMessageWriterView(encoder))
+		}
+
+		// ...
+	}
+----
+======
+
+See xref:web/webflux-view.adoc[View Technologies] for more on the view technologies that are integrated with Spring WebFlux.
+
+
+
+[[webflux-config-static-resources]]
+== Static Resources
+[.small]#xref:web/webmvc/mvc-config/static-resources.adoc[See equivalent in the Servlet stack]#
+
+This option provides a convenient way to serve static resources from a list of
+{api-spring-framework}/core/io/Resource.html[`Resource`]-based locations.
+
+In the next example, given a request that starts with `/resources`, the relative path is
+used to find and serve static resources relative to `/static` on the classpath. Resources
+are served with a one-year future expiration to ensure maximum use of the browser cache
+and a reduction in HTTP requests made by the browser. The `Last-Modified` header is also
+evaluated and, if present, a `304` status code is returned. The following listing shows
+the example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void addResourceHandlers(ResourceHandlerRegistry registry) {
+			registry.addResourceHandler("/resources/**")
+					.addResourceLocations("/public", "classpath:/static/")
+					.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
+		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+			registry.addResourceHandler("/resources/**")
+					.addResourceLocations("/public", "classpath:/static/")
+					.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+		}
+	}
+----
+======
+
+See also xref:web/webflux/caching.adoc#webflux-caching-static-resources[HTTP caching support for static resources].
+
+The resource handler also supports a chain of
+{api-spring-framework}/web/reactive/resource/ResourceResolver.html[`ResourceResolver`] implementations and
+{api-spring-framework}/web/reactive/resource/ResourceTransformer.html[`ResourceTransformer`] implementations,
+which can be used to create a toolchain for working with optimized resources.
+
+You can use the `VersionResourceResolver` for versioned resource URLs based on an MD5 hash
+computed from the content, a fixed application version, or other information. A
+`ContentVersionStrategy` (MD5 hash) is a good choice with some notable exceptions (such as
+JavaScript resources used with a module loader).
+
+The following example shows how to use `VersionResourceResolver` in your Java configuration:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void addResourceHandlers(ResourceHandlerRegistry registry) {
+			registry.addResourceHandler("/resources/**")
+					.addResourceLocations("/public/")
+					.resourceChain(true)
+					.addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
+		}
+
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+			registry.addResourceHandler("/resources/**")
+					.addResourceLocations("/public/")
+					.resourceChain(true)
+					.addResolver(VersionResourceResolver().addContentVersionStrategy("/**"))
+		}
+
+	}
+----
+======
+
+You can use `ResourceUrlProvider` to rewrite URLs and apply the full chain of resolvers and
+transformers (for example, to insert versions). The WebFlux configuration provides a `ResourceUrlProvider`
+so that it can be injected into others.
+
+Unlike Spring MVC, at present, in WebFlux, there is no way to transparently rewrite static
+resource URLs, since there are no view technologies that can make use of a non-blocking chain
+of resolvers and transformers. When serving only local resources, the workaround is to use
+`ResourceUrlProvider` directly (for example, through a custom element) and block.
+
+Note that, when using both `EncodedResourceResolver` (for example, Gzip, Brotli encoded) and
+`VersionedResourceResolver`, they must be registered in that order, to ensure content-based
+versions are always computed reliably based on the unencoded file.
+
+For https://www.webjars.org/documentation[WebJars], versioned URLs like
+`/webjars/jquery/1.2.0/jquery.min.js` are the recommended and most efficient way to use them.
+The related resource location is configured out of the box with Spring Boot (or can be configured
+manually via `ResourceHandlerRegistry`) and does not require to add the
+`org.webjars:webjars-locator-core` dependency.
+
+Version-less URLs like `/webjars/jquery/jquery.min.js` are supported through the
+`WebJarsResourceResolver` which is automatically registered when the
+`org.webjars:webjars-locator-core` library is present on the classpath, at the cost of a
+classpath scanning that could slow down application startup. The resolver can re-write URLs to
+include the version of the jar and can also match against incoming URLs without versions
+-- for example, from `/webjars/jquery/jquery.min.js` to `/webjars/jquery/1.2.0/jquery.min.js`.
+
+TIP: The Java configuration based on `ResourceHandlerRegistry` provides further options
+for fine-grained control, e.g. last-modified behavior and optimized resource resolution.
+
+
+
+[[webflux-config-path-matching]]
+== Path Matching
+[.small]#xref:web/webmvc/mvc-config/path-matching.adoc[See equivalent in the Servlet stack]#
+
+You can customize options related to path matching. For details on the individual options, see the
+{api-spring-framework}/web/reactive/config/PathMatchConfigurer.html[`PathMatchConfigurer`] javadoc.
+The following example shows how to use `PathMatchConfigurer`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public void configurePathMatch(PathMatchConfigurer configurer) {
+			configurer
+				.setUseCaseSensitiveMatch(true)
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController.class));
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		@Override
+		fun configurePathMatch(configurer: PathMatchConfigurer) {
+			configurer
+				.setUseCaseSensitiveMatch(true)
+				.addPathPrefix("/api", HandlerTypePredicate.forAnnotation(RestController::class.java))
+		}
+	}
+----
+======
+
+[TIP]
+====
+Spring WebFlux relies on a parsed representation of the request path called
+`RequestPath` for access to decoded path segment values, with semicolon content removed
+(that is, path or matrix variables). That means, unlike in Spring MVC, you need not indicate
+whether to decode the request path nor whether to remove semicolon content for
+path matching purposes.
+
+Spring WebFlux also does not support suffix pattern matching, unlike in Spring MVC, where we
+are also xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-suffix-pattern-match[recommend] moving away from
+reliance on it.
+====
+
+
+
+[[webflux-config-websocket-service]]
+== WebSocketService
+
+The WebFlux Java config declares of a `WebSocketHandlerAdapter` bean which provides
+support for the invocation of WebSocket handlers. That means all that remains to do in
+order to handle a WebSocket handshake request is to map a `WebSocketHandler` to a URL
+via `SimpleUrlHandlerMapping`.
+
+In some cases it may be necessary to create the `WebSocketHandlerAdapter` bean with a
+provided `WebSocketService` service which allows configuring WebSocket server properties.
+For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@EnableWebFlux
+	public class WebConfig implements WebFluxConfigurer {
+
+		@Override
+		public WebSocketService getWebSocketService() {
+			TomcatRequestUpgradeStrategy strategy = new TomcatRequestUpgradeStrategy();
+			strategy.setMaxSessionIdleTimeout(0L);
+			return new HandshakeWebSocketService(strategy);
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@EnableWebFlux
+	class WebConfig : WebFluxConfigurer {
+
+		@Override
+		fun webSocketService(): WebSocketService {
+			val strategy = TomcatRequestUpgradeStrategy().apply {
+				setMaxSessionIdleTimeout(0L)
+			}
+			return HandshakeWebSocketService(strategy)
+		}
+	}
+----
+======
+
+
+
+
+[[webflux-config-advanced-java]]
+== Advanced Configuration Mode
+[.small]#xref:web/webmvc/mvc-config/advanced-java.adoc[See equivalent in the Servlet stack]#
+
+`@EnableWebFlux` imports `DelegatingWebFluxConfiguration` that:
+
+*  Provides default Spring configuration for WebFlux applications
+
+* detects and delegates to `WebFluxConfigurer` implementations to customize that configuration.
+
+For advanced mode, you can remove `@EnableWebFlux` and extend directly from
+`DelegatingWebFluxConfiguration` instead of implementing `WebFluxConfigurer`,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class WebConfig extends DelegatingWebFluxConfiguration {
+
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	class WebConfig : DelegatingWebFluxConfiguration {
+
+		// ...
+	}
+----
+======
+
+You can keep existing methods in `WebConfig`, but you can now also override bean declarations
+from the base class and still have any number of other `WebMvcConfigurer` implementations on
+the classpath.
+
+
+
+

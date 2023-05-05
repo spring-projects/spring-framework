@@ -1,0 +1,803 @@
+[[beans-environment]]
+= Environment Abstraction
+
+The {api-spring-framework}/core/env/Environment.html[`Environment`] interface
+is an abstraction integrated in the container that models two key
+aspects of the application environment: xref:core/beans/environment.adoc#beans-definition-profiles[profiles]
+and xref:core/beans/environment.adoc#beans-property-source-abstraction[properties].
+
+A profile is a named, logical group of bean definitions to be registered with the
+container only if the given profile is active. Beans may be assigned to a profile
+whether defined in XML or with annotations. The role of the `Environment` object with
+relation to profiles is in determining which profiles (if any) are currently active,
+and which profiles (if any) should be active by default.
+
+Properties play an important role in almost all applications and may originate from
+a variety of sources: properties files, JVM system properties, system environment
+variables, JNDI, servlet context parameters, ad-hoc `Properties` objects, `Map` objects, and so
+on. The role of the `Environment` object with relation to properties is to provide the
+user with a convenient service interface for configuring property sources and resolving
+properties from them.
+
+
+
+[[beans-definition-profiles]]
+== Bean Definition Profiles
+
+Bean definition profiles provide a mechanism in the core container that allows for
+registration of different beans in different environments. The word, "`environment,`"
+can mean different things to different users, and this feature can help with many
+use cases, including:
+
+* Working against an in-memory datasource in development versus looking up that same
+datasource from JNDI when in QA or production.
+* Registering monitoring infrastructure only when deploying an application into a
+performance environment.
+* Registering customized implementations of beans for customer A versus customer
+B deployments.
+
+Consider the first use case in a practical application that requires a
+`DataSource`. In a test environment, the configuration might resemble the following:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Bean
+	public DataSource dataSource() {
+		return new EmbeddedDatabaseBuilder()
+			.setType(EmbeddedDatabaseType.HSQL)
+			.addScript("my-schema.sql")
+			.addScript("my-test-data.sql")
+			.build();
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Bean
+	fun dataSource(): DataSource {
+		return EmbeddedDatabaseBuilder()
+				.setType(EmbeddedDatabaseType.HSQL)
+				.addScript("my-schema.sql")
+				.addScript("my-test-data.sql")
+				.build()
+	}
+----
+======
+
+Now consider how this application can be deployed into a QA or production
+environment, assuming that the datasource for the application is registered
+with the production application server's JNDI directory. Our `dataSource` bean
+now looks like the following listing:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Bean(destroyMethod = "")
+	public DataSource dataSource() throws Exception {
+		Context ctx = new InitialContext();
+		return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Bean(destroyMethod = "")
+	fun dataSource(): DataSource {
+		val ctx = InitialContext()
+		return ctx.lookup("java:comp/env/jdbc/datasource") as DataSource
+	}
+----
+======
+
+The problem is how to switch between using these two variations based on the
+current environment. Over time, Spring users have devised a number of ways to
+get this done, usually relying on a combination of system environment variables
+and XML `<import/>` statements containing pass:q[`${placeholder}`] tokens that resolve
+to the correct configuration file path depending on the value of an environment
+variable. Bean definition profiles is a core container feature that provides a
+solution to this problem.
+
+If we generalize the use case shown in the preceding example of environment-specific bean
+definitions, we end up with the need to register certain bean definitions in
+certain contexts but not in others. You could say that you want to register a
+certain profile of bean definitions in situation A and a different profile in
+situation B. We start by updating our configuration to reflect this need.
+
+
+[[beans-definition-profiles-java]]
+=== Using `@Profile`
+
+The {api-spring-framework}/context/annotation/Profile.html[`@Profile`]
+annotation lets you indicate that a component is eligible for registration
+when one or more specified profiles are active. Using our preceding example, we
+can rewrite the `dataSource` configuration as follows:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@Profile("development")
+	public class StandaloneDataConfig {
+
+		@Bean
+		public DataSource dataSource() {
+			return new EmbeddedDatabaseBuilder()
+				.setType(EmbeddedDatabaseType.HSQL)
+				.addScript("classpath:com/bank/config/sql/schema.sql")
+				.addScript("classpath:com/bank/config/sql/test-data.sql")
+				.build();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@Profile("development")
+	class StandaloneDataConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			return EmbeddedDatabaseBuilder()
+					.setType(EmbeddedDatabaseType.HSQL)
+					.addScript("classpath:com/bank/config/sql/schema.sql")
+					.addScript("classpath:com/bank/config/sql/test-data.sql")
+					.build()
+		}
+	}
+----
+======
+--
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@Profile("production")
+	public class JndiDataConfig {
+
+		@Bean(destroyMethod = "") // <1>
+		public DataSource dataSource() throws Exception {
+			Context ctx = new InitialContext();
+			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
+		}
+	}
+----
+======
+<1> `@Bean(destroyMethod = "")` disables default destroy method inference.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	@Profile("production")
+	class JndiDataConfig {
+
+		@Bean(destroyMethod = "") // <1>
+		fun dataSource(): DataSource {
+			val ctx = InitialContext()
+			return ctx.lookup("java:comp/env/jdbc/datasource") as DataSource
+		}
+	}
+----
+<1> `@Bean(destroyMethod = "")` disables default destroy method inference.
+--
+
+NOTE: As mentioned earlier, with `@Bean` methods, you typically choose to use programmatic
+JNDI lookups, by using either Spring's `JndiTemplate`/`JndiLocatorDelegate` helpers or the
+straight JNDI `InitialContext` usage shown earlier but not the `JndiObjectFactoryBean`
+variant, which would force you to declare the return type as the `FactoryBean` type.
+
+The profile string may contain a simple profile name (for example, `production`) or a
+profile expression. A profile expression allows for more complicated profile logic to be
+expressed (for example, `production & us-east`). The following operators are supported in
+profile expressions:
+
+* `!`: A logical `NOT` of the profile
+* `&`: A logical `AND` of the profiles
+* `|`: A logical `OR` of the profiles
+
+NOTE: You cannot mix the `&` and `|` operators without using parentheses. For example,
+`production & us-east | eu-central` is not a valid expression. It must be expressed as
+`production & (us-east | eu-central)`.
+
+You can use `@Profile` as a xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[meta-annotation] for the purpose
+of creating a custom composed annotation. The following example defines a custom
+`@Production` annotation that you can use as a drop-in replacement for
+`@Profile("production")`:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Target(ElementType.TYPE)
+	@Retention(RetentionPolicy.RUNTIME)
+	@Profile("production")
+	public @interface Production {
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Target(AnnotationTarget.CLASS)
+	@Retention(AnnotationRetention.RUNTIME)
+	@Profile("production")
+	annotation class Production
+----
+======
+--
+
+TIP: If a `@Configuration` class is marked with `@Profile`, all of the `@Bean` methods and
+`@Import` annotations associated with that class are bypassed unless one or more of
+the specified profiles are active. If a `@Component` or `@Configuration` class is marked
+with `@Profile({"p1", "p2"})`, that class is not registered or processed unless
+profiles 'p1' or 'p2' have been activated. If a given profile is prefixed with the
+NOT operator (`!`), the annotated element is registered only if the profile is not
+active. For example, given `@Profile({"p1", "!p2"})`, registration will occur if profile
+'p1' is active or if profile 'p2' is not active.
+
+`@Profile` can also be declared at the method level to include only one particular bean
+of a configuration class (for example, for alternative variants of a particular bean), as
+the following example shows:
+
+--
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class AppConfig {
+
+		@Bean("dataSource")
+		@Profile("development") // <1>
+		public DataSource standaloneDataSource() {
+			return new EmbeddedDatabaseBuilder()
+				.setType(EmbeddedDatabaseType.HSQL)
+				.addScript("classpath:com/bank/config/sql/schema.sql")
+				.addScript("classpath:com/bank/config/sql/test-data.sql")
+				.build();
+		}
+
+		@Bean("dataSource")
+		@Profile("production") // <2>
+		public DataSource jndiDataSource() throws Exception {
+			Context ctx = new InitialContext();
+			return (DataSource) ctx.lookup("java:comp/env/jdbc/datasource");
+		}
+	}
+----
+======
+<1> The `standaloneDataSource` method is available only in the `development` profile.
+<2> The `jndiDataSource` method is available only in the `production` profile.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class AppConfig {
+
+		@Bean("dataSource")
+		@Profile("development") // <1>
+		fun standaloneDataSource(): DataSource {
+			return EmbeddedDatabaseBuilder()
+					.setType(EmbeddedDatabaseType.HSQL)
+					.addScript("classpath:com/bank/config/sql/schema.sql")
+					.addScript("classpath:com/bank/config/sql/test-data.sql")
+					.build()
+		}
+
+		@Bean("dataSource")
+		@Profile("production") // <2>
+		fun jndiDataSource() =
+			InitialContext().lookup("java:comp/env/jdbc/datasource") as DataSource
+	}
+----
+<1> The `standaloneDataSource` method is available only in the `development` profile.
+<2> The `jndiDataSource` method is available only in the `production` profile.
+--
+
+[NOTE]
+====
+With `@Profile` on `@Bean` methods, a special scenario may apply: In the case of
+overloaded `@Bean` methods of the same Java method name (analogous to constructor
+overloading), a `@Profile` condition needs to be consistently declared on all
+overloaded methods. If the conditions are inconsistent, only the condition on the
+first declaration among the overloaded methods matters. Therefore, `@Profile` can
+not be used to select an overloaded method with a particular argument signature over
+another. Resolution between all factory methods for the same bean follows Spring's
+constructor resolution algorithm at creation time.
+
+If you want to define alternative beans with different profile conditions,
+use distinct Java method names that point to the same bean name by using the `@Bean` name
+attribute, as shown in the preceding example. If the argument signatures are all
+the same (for example, all of the variants have no-arg factory methods), this is the only
+way to represent such an arrangement in a valid Java class in the first place
+(since there can only be one method of a particular name and argument signature).
+====
+
+
+[[beans-definition-profiles-xml]]
+=== XML Bean Definition Profiles
+
+The XML counterpart is the `profile` attribute of the `<beans>` element. Our preceding sample
+configuration can be rewritten in two XML files, as follows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans profile="development"
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+		xsi:schemaLocation="...">
+
+		<jdbc:embedded-database id="dataSource">
+			<jdbc:script location="classpath:com/bank/config/sql/schema.sql"/>
+			<jdbc:script location="classpath:com/bank/config/sql/test-data.sql"/>
+		</jdbc:embedded-database>
+	</beans>
+----
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans profile="production"
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="...">
+
+		<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/datasource"/>
+	</beans>
+----
+
+It is also possible to avoid that split and nest `<beans/>` elements within the same file,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="...">
+
+		<!-- other bean definitions -->
+
+		<beans profile="development">
+			<jdbc:embedded-database id="dataSource">
+				<jdbc:script location="classpath:com/bank/config/sql/schema.sql"/>
+				<jdbc:script location="classpath:com/bank/config/sql/test-data.sql"/>
+			</jdbc:embedded-database>
+		</beans>
+
+		<beans profile="production">
+			<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/datasource"/>
+		</beans>
+	</beans>
+----
+
+The `spring-bean.xsd` has been constrained to allow such elements only as the
+last ones in the file. This should help provide flexibility without incurring
+clutter in the XML files.
+
+[NOTE]
+=====
+The XML counterpart does not support the profile expressions described earlier. It is possible,
+however, to negate a profile by using the `!` operator. It is also possible to apply a logical
+"`and`" by nesting the profiles, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="...">
+
+		<!-- other bean definitions -->
+
+		<beans profile="production">
+			<beans profile="us-east">
+				<jee:jndi-lookup id="dataSource" jndi-name="java:comp/env/jdbc/datasource"/>
+			</beans>
+		</beans>
+	</beans>
+----
+
+In the preceding example, the `dataSource` bean is exposed if both the `production` and
+`us-east` profiles are active.
+=====
+
+
+[[beans-definition-profiles-enable]]
+=== Activating a Profile
+
+Now that we have updated our configuration, we still need to instruct Spring which
+profile is active. If we started our sample application right now, we would see
+a `NoSuchBeanDefinitionException` thrown, because the container could not find
+the Spring bean named `dataSource`.
+
+Activating a profile can be done in several ways, but the most straightforward is to do
+it programmatically against the `Environment` API which is available through an
+`ApplicationContext`. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+	ctx.getEnvironment().setActiveProfiles("development");
+	ctx.register(SomeConfig.class, StandaloneDataConfig.class, JndiDataConfig.class);
+	ctx.refresh();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val ctx = AnnotationConfigApplicationContext().apply {
+		environment.setActiveProfiles("development")
+		register(SomeConfig::class.java, StandaloneDataConfig::class.java, JndiDataConfig::class.java)
+		refresh()
+	}
+----
+======
+
+In addition, you can also declaratively activate profiles through the
+`spring.profiles.active` property, which may be specified through system environment
+variables, JVM system properties, servlet context parameters in `web.xml`, or even as an
+entry in JNDI (see xref:core/beans/environment.adoc#beans-property-source-abstraction[`PropertySource` Abstraction]). In integration tests, active
+profiles can be declared by using the `@ActiveProfiles` annotation in the `spring-test`
+module (see xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[context configuration with environment profiles]
+).
+
+Note that profiles are not an "`either-or`" proposition. You can activate multiple
+profiles at once. Programmatically, you can provide multiple profile names to the
+`setActiveProfiles()` method, which accepts `String...` varargs. The following example
+activates multiple profiles:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	ctx.getEnvironment().setActiveProfiles("profile1", "profile2");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	ctx.getEnvironment().setActiveProfiles("profile1", "profile2")
+----
+======
+
+Declaratively, `spring.profiles.active` may accept a comma-separated list of profile names,
+as the following example shows:
+
+[literal,indent=0,subs="verbatim,quotes"]
+----
+	-Dspring.profiles.active="profile1,profile2"
+----
+
+
+[[beans-definition-profiles-default]]
+=== Default Profile
+
+The default profile represents the profile that is enabled by default. Consider the
+following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	@Profile("default")
+	public class DefaultDataConfig {
+
+		@Bean
+		public DataSource dataSource() {
+			return new EmbeddedDatabaseBuilder()
+				.setType(EmbeddedDatabaseType.HSQL)
+				.addScript("classpath:com/bank/config/sql/schema.sql")
+				.build();
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@Profile("default")
+	class DefaultDataConfig {
+
+		@Bean
+		fun dataSource(): DataSource {
+			return EmbeddedDatabaseBuilder()
+					.setType(EmbeddedDatabaseType.HSQL)
+					.addScript("classpath:com/bank/config/sql/schema.sql")
+					.build()
+		}
+	}
+----
+======
+
+If no profile is active, the `dataSource` is created. You can see this
+as a way to provide a default definition for one or more beans. If any
+profile is enabled, the default profile does not apply.
+
+You can change the name of the default profile by using `setDefaultProfiles()` on
+the `Environment` or, declaratively, by using the `spring.profiles.default` property.
+
+
+
+[[beans-property-source-abstraction]]
+== `PropertySource` Abstraction
+
+Spring's `Environment` abstraction provides search operations over a configurable
+hierarchy of property sources. Consider the following listing:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	ApplicationContext ctx = new GenericApplicationContext();
+	Environment env = ctx.getEnvironment();
+	boolean containsMyProperty = env.containsProperty("my-property");
+	System.out.println("Does my environment contain the 'my-property' property? " + containsMyProperty);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val ctx = GenericApplicationContext()
+	val env = ctx.environment
+	val containsMyProperty = env.containsProperty("my-property")
+	println("Does my environment contain the 'my-property' property? $containsMyProperty")
+----
+======
+
+In the preceding snippet, we see a high-level way of asking Spring whether the `my-property` property is
+defined for the current environment. To answer this question, the `Environment` object performs
+a search over a set of {api-spring-framework}/core/env/PropertySource.html[`PropertySource`]
+objects. A `PropertySource` is a simple abstraction over any source of key-value pairs, and
+Spring's {api-spring-framework}/core/env/StandardEnvironment.html[`StandardEnvironment`]
+is configured with two PropertySource objects -- one representing the set of JVM system properties
+(`System.getProperties()`) and one representing the set of system environment variables
+(`System.getenv()`).
+
+NOTE: These default property sources are present for `StandardEnvironment`, for use in standalone
+applications. {api-spring-framework}/web/context/support/StandardServletEnvironment.html[`StandardServletEnvironment`]
+is populated with additional default property sources including servlet config, servlet
+context parameters, and a {api-spring-framework}/jndi/JndiPropertySource.html[`JndiPropertySource`]
+if JNDI is available.
+
+Concretely, when you use the `StandardEnvironment`, the call to `env.containsProperty("my-property")`
+returns true if a `my-property` system property or `my-property` environment variable is present at
+runtime.
+
+[TIP]
+====
+The search performed is hierarchical. By default, system properties have precedence over
+environment variables. So, if the `my-property` property happens to be set in both places during
+a call to `env.getProperty("my-property")`, the system property value "`wins`" and is returned.
+Note that property values are not merged
+but rather completely overridden by a preceding entry.
+
+For a common `StandardServletEnvironment`, the full hierarchy is as follows, with the
+highest-precedence entries at the top:
+
+. ServletConfig parameters (if applicable -- for example, in case of a `DispatcherServlet` context)
+. ServletContext parameters (web.xml context-param entries)
+. JNDI environment variables (`java:comp/env/` entries)
+. JVM system properties (`-D` command-line arguments)
+. JVM system environment (operating system environment variables)
+====
+
+Most importantly, the entire mechanism is configurable. Perhaps you have a custom source
+of properties that you want to integrate into this search. To do so, implement
+and instantiate your own `PropertySource` and add it to the set of `PropertySources` for the
+current `Environment`. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+ConfigurableApplicationContext ctx = new GenericApplicationContext();
+MutablePropertySources sources = ctx.getEnvironment().getPropertySources();
+sources.addFirst(new MyPropertySource());
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val ctx = GenericApplicationContext()
+	val sources = ctx.environment.propertySources
+	sources.addFirst(MyPropertySource())
+----
+======
+
+In the preceding code, `MyPropertySource` has been added with highest precedence in the
+search. If it contains a  `my-property` property, the property is detected and returned, in favor of
+any `my-property` property in any other `PropertySource`. The
+{api-spring-framework}/core/env/MutablePropertySources.html[`MutablePropertySources`]
+API exposes a number of methods that allow for precise manipulation of the set of
+property sources.
+
+
+
+[[beans-using-propertysource]]
+== Using `@PropertySource`
+
+The {api-spring-framework}/context/annotation/PropertySource.html[`@PropertySource`]
+annotation provides a convenient and declarative mechanism for adding a `PropertySource`
+to Spring's `Environment`.
+
+Given a file called `app.properties` that contains the key-value pair `testbean.name=myTestBean`,
+the following `@Configuration` class uses `@PropertySource` in such a way that
+a call to `testBean.getName()` returns `myTestBean`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+   @Configuration
+   @PropertySource("classpath:/com/myco/app.properties")
+   public class AppConfig {
+
+	   @Autowired
+	   Environment env;
+
+	   @Bean
+	   public TestBean testBean() {
+		   TestBean testBean = new TestBean();
+		   testBean.setName(env.getProperty("testbean.name"));
+		   return testBean;
+	   }
+   }
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@PropertySource("classpath:/com/myco/app.properties")
+	class AppConfig {
+
+		@Autowired
+		private lateinit var env: Environment
+
+		@Bean
+		fun testBean() = TestBean().apply {
+			name = env.getProperty("testbean.name")!!
+		}
+	}
+----
+======
+
+Any `${...}` placeholders present in a `@PropertySource` resource location are
+resolved against the set of property sources already registered against the
+environment, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+   @Configuration
+   @PropertySource("classpath:/com/${my.placeholder:default/path}/app.properties")
+   public class AppConfig {
+
+	   @Autowired
+	   Environment env;
+
+	   @Bean
+	   public TestBean testBean() {
+		   TestBean testBean = new TestBean();
+		   testBean.setName(env.getProperty("testbean.name"));
+		   return testBean;
+	   }
+   }
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Configuration
+	@PropertySource("classpath:/com/\${my.placeholder:default/path}/app.properties")
+	class AppConfig {
+
+		@Autowired
+		private lateinit var env: Environment
+
+		@Bean
+		fun testBean() = TestBean().apply {
+			name = env.getProperty("testbean.name")!!
+		}
+	}
+----
+======
+
+Assuming that `my.placeholder` is present in one of the property sources already
+registered (for example, system properties or environment variables), the placeholder is
+resolved to the corresponding value. If not, then `default/path` is used
+as a default. If no default is specified and a property cannot be resolved, an
+`IllegalArgumentException` is thrown.
+
+NOTE: The `@PropertySource` annotation is repeatable, according to Java 8 conventions.
+However, all such `@PropertySource` annotations need to be declared at the same
+level, either directly on the configuration class or as meta-annotations within the
+same custom annotation. Mixing direct annotations and meta-annotations is not
+recommended, since direct annotations effectively override meta-annotations.
+
+
+
+[[beans-placeholder-resolution-in-statements]]
+== Placeholder Resolution in Statements
+
+Historically, the value of placeholders in elements could be resolved only against
+JVM system properties or environment variables. This is no longer the case. Because
+the `Environment` abstraction is integrated throughout the container, it is easy to
+route resolution of placeholders through it. This means that you may configure the
+resolution process in any way you like. You can change the precedence of searching through
+system properties and environment variables or remove them entirely. You can also add your
+own property sources to the mix, as appropriate.
+
+Concretely, the following statement works regardless of where the `customer`
+property is defined, as long as it is available in the `Environment`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<beans>
+		<import resource="com/bank/service/${customer}-config.xml"/>
+	</beans>
+----
+
+
+
+

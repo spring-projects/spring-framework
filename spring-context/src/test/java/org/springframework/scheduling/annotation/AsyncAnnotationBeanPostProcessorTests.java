@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		testBean.test();
 		testBean.await(3000);
 		Thread asyncThread = testBean.getThread();
-		assertThat(asyncThread.getName().startsWith("testExecutor")).isTrue();
+		assertThat(asyncThread.getName()).startsWith("testExecutor");
 		context.close();
 	}
 
@@ -131,7 +131,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		testBean.test();
 		testBean.await(3000);
 		Thread asyncThread = testBean.getThread();
-		assertThat(asyncThread.getName().startsWith("testExecutor")).isTrue();
+		assertThat(asyncThread.getName()).startsWith("testExecutor");
 		context.close();
 	}
 
@@ -160,7 +160,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		testBean.test();
 		testBean.await(3000);
 		Thread asyncThread = testBean.getThread();
-		assertThat(asyncThread.getName().startsWith("testExecutor2")).isTrue();
+		assertThat(asyncThread.getName()).startsWith("testExecutor2");
 		context.close();
 	}
 
@@ -173,7 +173,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		testBean.test();
 		testBean.await(3000);
 		Thread asyncThread = testBean.getThread();
-		assertThat(asyncThread.getName().startsWith("testExecutor")).isTrue();
+		assertThat(asyncThread.getName()).startsWith("testExecutor");
 
 		TestableAsyncUncaughtExceptionHandler exceptionHandler =
 				context.getBean("exceptionHandler", TestableAsyncUncaughtExceptionHandler.class);

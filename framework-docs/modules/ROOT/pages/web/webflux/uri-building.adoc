@@ -1,0 +1,11 @@
+[[webflux-uri-building]]
+= URI Links
+:page-section-summary-toc: 1
+
+[.small]#xref:web/webmvc/mvc-uri-building.adoc[See equivalent in the Servlet stack]#
+
+This section describes various options available in the Spring Framework to prepare URIs.
+
+include::partial$web/web-uris.adoc[leveloffset=+1]
+
+

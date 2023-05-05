@@ -1,0 +1,971 @@
+[[scheduling]]
+= Task Execution and Scheduling
+
+The Spring Framework provides abstractions for the asynchronous execution and scheduling of
+tasks with the `TaskExecutor` and `TaskScheduler` interfaces, respectively. Spring also
+features implementations of those interfaces that support thread pools or delegation to
+CommonJ within an application server environment. Ultimately, the use of these
+implementations behind the common interfaces abstracts away the differences between Java
+SE 5, Java SE 6, and Jakarta EE environments.
+
+Spring also features integration classes to support scheduling with the `Timer`
+(part of the JDK since 1.3) and the https://www.quartz-scheduler.org/[Quartz Scheduler].
+You can set up both of those schedulers by using a `FactoryBean` with optional references to
+`Timer` or `Trigger` instances, respectively. Furthermore, a convenience class for both
+the Quartz Scheduler and the `Timer` is available that lets you invoke a method of
+an existing target object (analogous to the normal `MethodInvokingFactoryBean`
+operation).
+
+
+
+[[scheduling-task-executor]]
+== The Spring `TaskExecutor` Abstraction
+
+Executors are the JDK name for the concept of thread pools. The "`executor`" naming is
+due to the fact that there is no guarantee that the underlying implementation is
+actually a pool. An executor may be single-threaded or even synchronous. Spring's
+abstraction hides implementation details between the Java SE and Jakarta EE environments.
+
+Spring's `TaskExecutor` interface is identical to the `java.util.concurrent.Executor`
+interface. In fact, originally, its primary reason for existence was to abstract away
+the need for Java 5 when using thread pools. The interface has a single method
+(`execute(Runnable task)`) that accepts a task for execution based on the semantics
+and configuration of the thread pool.
+
+The `TaskExecutor` was originally created to give other Spring components an abstraction
+for thread pooling where needed. Components such as the `ApplicationEventMulticaster`,
+JMS's `AbstractMessageListenerContainer`, and Quartz integration all use the
+`TaskExecutor` abstraction to pool threads. However, if your beans need thread pooling
+behavior, you can also use this abstraction for your own needs.
+
+
+[[scheduling-task-executor-types]]
+=== `TaskExecutor` Types
+
+Spring includes a number of pre-built implementations of `TaskExecutor`.
+In all likelihood, you should never need to implement your own.
+The variants that Spring provides are as follows:
+
+* `SyncTaskExecutor`:
+  This implementation does not run invocations asynchronously. Instead, each
+  invocation takes place in the calling thread. It is primarily used in situations
+  where multi-threading is not necessary, such as in simple test cases.
+* `SimpleAsyncTaskExecutor`:
+  This implementation does not reuse any threads. Rather, it starts up a new thread
+  for each invocation. However, it does support a concurrency limit that blocks
+  any invocations that are over the limit until a slot has been freed up. If you
+  are looking for true pooling, see `ThreadPoolTaskExecutor`, later in this list.
+* `ConcurrentTaskExecutor`:
+  This implementation is an adapter for a `java.util.concurrent.Executor` instance.
+  There is an alternative (`ThreadPoolTaskExecutor`) that exposes the `Executor`
+  configuration parameters as bean properties. There is rarely a need to use
+  `ConcurrentTaskExecutor` directly. However, if the `ThreadPoolTaskExecutor` is not
+  flexible enough for your needs, `ConcurrentTaskExecutor` is an alternative.
+* `ThreadPoolTaskExecutor`:
+  This implementation is most commonly used. It exposes bean properties for
+  configuring a `java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
+  If you need to adapt to a different kind of `java.util.concurrent.Executor`, we
+  recommend that you use a `ConcurrentTaskExecutor` instead.
+* `DefaultManagedTaskExecutor`:
+  This implementation uses a JNDI-obtained `ManagedExecutorService` in a JSR-236
+  compatible runtime environment (such as a Jakarta EE application server),
+  replacing a CommonJ WorkManager for that purpose.
+
+
+[[scheduling-task-executor-usage]]
+=== Using a `TaskExecutor`
+
+Spring's `TaskExecutor` implementations are used as simple JavaBeans. In the following example,
+we define a bean that uses the `ThreadPoolTaskExecutor` to asynchronously print
+out a set of messages:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	import org.springframework.core.task.TaskExecutor;
+
+	public class TaskExecutorExample {
+
+		private class MessagePrinterTask implements Runnable {
+
+			private String message;
+
+			public MessagePrinterTask(String message) {
+				this.message = message;
+			}
+
+			public void run() {
+				System.out.println(message);
+			}
+		}
+
+		private TaskExecutor taskExecutor;
+
+		public TaskExecutorExample(TaskExecutor taskExecutor) {
+			this.taskExecutor = taskExecutor;
+		}
+
+		public void printMessages() {
+			for(int i = 0; i < 25; i++) {
+				taskExecutor.execute(new MessagePrinterTask("Message" + i));
+			}
+		}
+	}
+----
+
+As you can see, rather than retrieving a thread from the pool and executing it yourself,
+you add your `Runnable` to the queue. Then the `TaskExecutor` uses its internal rules to
+decide when the task gets run.
+
+To configure the rules that the `TaskExecutor` uses, we expose simple bean properties:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="5"/>
+		<property name="maxPoolSize" value="10"/>
+		<property name="queueCapacity" value="25"/>
+	</bean>
+
+	<bean id="taskExecutorExample" class="TaskExecutorExample">
+		<constructor-arg ref="taskExecutor"/>
+	</bean>
+----
+
+
+
+[[scheduling-task-scheduler]]
+== The Spring `TaskScheduler` Abstraction
+
+In addition to the `TaskExecutor` abstraction, Spring has a `TaskScheduler` SPI with a
+variety of methods for scheduling tasks to run at some point in the future. The following
+listing shows the `TaskScheduler` interface definition:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface TaskScheduler {
+
+		Clock getClock();
+
+		ScheduledFuture schedule(Runnable task, Trigger trigger);
+
+		ScheduledFuture schedule(Runnable task, Instant startTime);
+
+		ScheduledFuture scheduleAtFixedRate(Runnable task, Instant startTime, Duration period);
+
+		ScheduledFuture scheduleAtFixedRate(Runnable task, Duration period);
+
+		ScheduledFuture scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay);
+
+		ScheduledFuture scheduleWithFixedDelay(Runnable task, Duration delay);
+
+----
+
+The simplest method is the one named `schedule` that takes only a `Runnable` and an `Instant`.
+That causes the task to run once after the specified time. All of the other methods
+are capable of scheduling tasks to run repeatedly. The fixed-rate and fixed-delay
+methods are for simple, periodic execution, but the method that accepts a `Trigger` is
+much more flexible.
+
+
+[[scheduling-trigger-interface]]
+=== `Trigger` Interface
+
+The `Trigger` interface is essentially inspired by JSR-236. The basic idea of the
+`Trigger` is that execution times may be determined based on past execution outcomes or
+even arbitrary conditions. If these determinations take into account the outcome of the
+preceding execution, that information is available within a `TriggerContext`. The
+`Trigger` interface itself is quite simple, as the following listing shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface Trigger {
+
+		Instant nextExecution(TriggerContext triggerContext);
+	}
+----
+
+The `TriggerContext` is the most important part. It encapsulates all of
+the relevant data and is open for extension in the future, if necessary. The
+`TriggerContext` is an interface (a `SimpleTriggerContext` implementation is used by
+default). The following listing shows the available methods for `Trigger` implementations.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface TriggerContext {
+
+		Clock getClock();
+
+		Instant lastScheduledExecution();
+
+		Instant lastActualExecution();
+
+		Instant lastCompletion();
+	}
+----
+
+
+[[scheduling-trigger-implementations]]
+=== `Trigger` Implementations
+
+Spring provides two implementations of the `Trigger` interface. The most interesting one
+is the `CronTrigger`. It enables the scheduling of tasks based on
+xref:integration/scheduling.adoc#scheduling-cron-expression[cron expressions].
+For example, the following task is scheduled to run 15 minutes past each hour but only
+during the 9-to-5 "business hours" on weekdays:
+
+[source,java,indent=0]
+[subs="verbatim"]
+----
+	scheduler.schedule(task, new CronTrigger("0 15 9-17 * * MON-FRI"));
+----
+
+The other implementation is a `PeriodicTrigger` that accepts a fixed
+period, an optional initial delay value, and a boolean to indicate whether the period
+should be interpreted as a fixed-rate or a fixed-delay. Since the `TaskScheduler`
+interface already defines methods for scheduling tasks at a fixed rate or with a
+fixed delay, those methods should be used directly whenever possible. The value of the
+`PeriodicTrigger` implementation is that you can use it within components that rely on
+the `Trigger` abstraction. For example, it may be convenient to allow periodic triggers,
+cron-based triggers, and even custom trigger implementations to be used interchangeably.
+Such a component could take advantage of dependency injection so that you can configure such `Triggers`
+externally and, therefore, easily modify or extend them.
+
+
+[[scheduling-task-scheduler-implementations]]
+=== `TaskScheduler` implementations
+
+As with Spring's `TaskExecutor` abstraction, the primary benefit of the `TaskScheduler`
+arrangement is that an application's scheduling needs are decoupled from the deployment
+environment. This abstraction level is particularly relevant when deploying to an
+application server environment where threads should not be created directly by the
+application itself. For such scenarios, Spring provides a `TimerManagerTaskScheduler`
+that delegates to a CommonJ `TimerManager` on WebLogic or WebSphere as well as a more recent
+`DefaultManagedTaskScheduler` that delegates to a JSR-236 `ManagedScheduledExecutorService`
+in a Jakarta EE environment. Both are typically configured with a JNDI lookup.
+
+Whenever external thread management is not a requirement, a simpler alternative is
+a local `ScheduledExecutorService` setup within the application, which can be adapted
+through Spring's `ConcurrentTaskScheduler`. As a convenience, Spring also provides a
+`ThreadPoolTaskScheduler`, which internally delegates to a `ScheduledExecutorService`
+to provide common bean-style configuration along the lines of `ThreadPoolTaskExecutor`.
+These variants work perfectly fine for locally embedded thread pool setups in lenient
+application server environments, as well -- in particular on Tomcat and Jetty.
+
+
+
+[[scheduling-annotation-support]]
+== Annotation Support for Scheduling and Asynchronous Execution
+
+Spring provides annotation support for both task scheduling and asynchronous method
+execution.
+
+
+[[scheduling-enable-annotation-support]]
+=== Enable Scheduling Annotations
+
+To enable support for `@Scheduled` and `@Async` annotations, you can add `@EnableScheduling` and
+`@EnableAsync` to one of your `@Configuration` classes, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableAsync
+	@EnableScheduling
+	public class AppConfig {
+	}
+----
+
+You can pick and choose the relevant annotations for your application. For example,
+if you need only support for `@Scheduled`, you can omit `@EnableAsync`. For more
+fine-grained control, you can additionally implement the `SchedulingConfigurer`
+interface, the `AsyncConfigurer` interface, or both. See the
+{api-spring-framework}/scheduling/annotation/SchedulingConfigurer.html[`SchedulingConfigurer`]
+and {api-spring-framework}/scheduling/annotation/AsyncConfigurer.html[`AsyncConfigurer`]
+javadoc for full details.
+
+If you prefer XML configuration, you can use the `<task:annotation-driven>` element,
+as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
+	<task:executor id="myExecutor" pool-size="5"/>
+	<task:scheduler id="myScheduler" pool-size="10"/>
+----
+
+Note that, with the preceding XML, an executor reference is provided for handling those
+tasks that correspond to methods with the `@Async` annotation, and the scheduler
+reference is provided for managing those methods annotated with `@Scheduled`.
+
+NOTE: The default advice mode for processing `@Async` annotations is `proxy` which allows
+for interception of calls through the proxy only. Local calls within the same class
+cannot get intercepted that way. For a more advanced mode of interception, consider
+switching to `aspectj` mode in combination with compile-time or load-time weaving.
+
+
+[[scheduling-annotation-support-scheduled]]
+=== The `@Scheduled` annotation
+
+You can add the `@Scheduled` annotation to a method, along with trigger metadata. For
+example, the following method is invoked every five seconds (5000 milliseconds) with a
+fixed delay, meaning that the period is measured from the completion time of each
+preceding invocation.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedDelay = 5000)
+	public void doSomething() {
+		// something that should run periodically
+	}
+----
+
+[NOTE]
+====
+By default, milliseconds will be used as the time unit for fixed delay, fixed rate, and
+initial delay values. If you would like to use a different time unit such as seconds or
+minutes, you can configure this via the `timeUnit` attribute in `@Scheduled`.
+
+For example, the previous example can also be written as follows.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedDelay = 5, timeUnit = TimeUnit.SECONDS)
+	public void doSomething() {
+		// something that should run periodically
+	}
+----
+====
+
+If you need a fixed-rate execution, you can use the `fixedRate` attribute within the
+annotation. The following method is invoked every five seconds (measured between the
+successive start times of each invocation).
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedRate = 5, timeUnit = TimeUnit.SECONDS)
+	public void doSomething() {
+		// something that should run periodically
+	}
+----
+
+For fixed-delay and fixed-rate tasks, you can specify an initial delay by indicating the
+amount of time to wait before the first execution of the method, as the following
+`fixedRate` example shows.
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(initialDelay = 1000, fixedRate = 5000)
+	public void doSomething() {
+		// something that should run periodically
+	}
+----
+
+If simple periodic scheduling is not expressive enough, you can provide a
+xref:integration/scheduling.adoc#scheduling-cron-expression[cron expression].
+The following example runs only on weekdays:
+
+[source,java,indent=0]
+[subs="verbatim"]
+----
+	@Scheduled(cron="*/5 * * * * MON-FRI")
+	public void doSomething() {
+		// something that should run on weekdays only
+	}
+----
+
+TIP: You can also use the `zone` attribute to specify the time zone in which the cron
+expression is resolved.
+
+Notice that the methods to be scheduled must have void returns and must not accept any
+arguments. If the method needs to interact with other objects from the application
+context, those would typically have been provided through dependency injection.
+
+[NOTE]
+====
+As of Spring Framework 4.3, `@Scheduled` methods are supported on beans of any scope.
+
+Make sure that you are not initializing multiple instances of the same `@Scheduled`
+annotation class at runtime, unless you do want to schedule callbacks to each such
+instance. Related to this, make sure that you do not use `@Configurable` on bean
+classes that are annotated with `@Scheduled` and registered as regular Spring beans
+with the container. Otherwise, you would get double initialization (once through the
+container and once through the `@Configurable` aspect), with the consequence of each
+`@Scheduled` method being invoked twice.
+====
+
+
+[[scheduling-annotation-support-async]]
+=== The `@Async` annotation
+
+You can provide the `@Async` annotation on a method so that invocation of that method
+occurs asynchronously. In other words, the caller returns immediately upon
+invocation, while the actual execution of the method occurs in a task that has been
+submitted to a Spring `TaskExecutor`. In the simplest case, you can apply the annotation
+to a method that returns `void`, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Async
+	void doSomething() {
+		// this will be run asynchronously
+	}
+----
+
+Unlike the methods annotated with the `@Scheduled` annotation, these methods can expect
+arguments, because they are invoked in the "`normal`" way by callers at runtime rather
+than from a scheduled task being managed by the container. For example, the following code is
+a legitimate application of the `@Async` annotation:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Async
+	void doSomething(String s) {
+		// this will be run asynchronously
+	}
+----
+
+Even methods that return a value can be invoked asynchronously. However, such methods
+are required to have a `Future`-typed return value. This still provides the benefit of
+asynchronous execution so that the caller can perform other tasks prior to calling
+`get()` on that `Future`. The following example shows how to use `@Async` on a method
+that returns a value:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Async
+	Future<String> returnSomething(int i) {
+		// this will be run asynchronously
+	}
+----
+
+TIP: `@Async` methods may not only declare a regular `java.util.concurrent.Future` return type
+but also Spring's `org.springframework.util.concurrent.ListenableFuture` or, as of Spring
+4.2, JDK 8's `java.util.concurrent.CompletableFuture`, for richer interaction with the
+asynchronous task and for immediate composition with further processing steps.
+
+You can not use `@Async` in conjunction with lifecycle callbacks such as
+`@PostConstruct`. To asynchronously initialize Spring beans, you currently have to use
+a separate initializing Spring bean that then invokes the `@Async` annotated method on the
+target, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class SampleBeanImpl implements SampleBean {
+
+		@Async
+		void doSomething() {
+			// ...
+		}
+
+	}
+
+	public class SampleBeanInitializer {
+
+		private final SampleBean bean;
+
+		public SampleBeanInitializer(SampleBean bean) {
+			this.bean = bean;
+		}
+
+		@PostConstruct
+		public void initialize() {
+			bean.doSomething();
+		}
+
+	}
+----
+
+NOTE: There is no direct XML equivalent for `@Async`, since such methods should be designed
+for asynchronous execution in the first place, not externally re-declared to be asynchronous.
+However, you can manually set up Spring's `AsyncExecutionInterceptor` with Spring AOP,
+in combination with a custom pointcut.
+
+
+[[scheduling-annotation-support-qualification]]
+=== Executor Qualification with `@Async`
+
+By default, when specifying `@Async` on a method, the executor that is used is the
+one xref:integration/scheduling.adoc#scheduling-enable-annotation-support[configured when enabling async support],
+i.e. the "`annotation-driven`" element if you are using XML or your `AsyncConfigurer`
+implementation, if any. However, you can use the `value` attribute of the `@Async`
+annotation when you need to indicate that an executor other than the default should be
+used when executing a given method. The following example shows how to do so:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Async("otherExecutor")
+	void doSomething(String s) {
+		// this will be run asynchronously by "otherExecutor"
+	}
+----
+
+In this case, `"otherExecutor"` can be the name of any `Executor` bean in the Spring
+container, or it may be the name of a qualifier associated with any `Executor` (for example, as
+specified with the `<qualifier>` element or Spring's `@Qualifier` annotation).
+
+
+[[scheduling-annotation-support-exception]]
+=== Exception Management with `@Async`
+
+When an `@Async` method has a `Future`-typed return value, it is easy to manage
+an exception that was thrown during the method execution, as this exception is
+thrown when calling `get` on the `Future` result. With a `void` return type,
+however, the exception is uncaught and cannot be transmitted. You can provide an
+`AsyncUncaughtExceptionHandler` to handle such exceptions. The following example shows
+how to do so:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class MyAsyncUncaughtExceptionHandler implements AsyncUncaughtExceptionHandler {
+
+		@Override
+		public void handleUncaughtException(Throwable ex, Method method, Object... params) {
+			// handle exception
+		}
+	}
+----
+
+By default, the exception is merely logged. You can define a custom `AsyncUncaughtExceptionHandler`
+by using `AsyncConfigurer` or the `<task:annotation-driven/>` XML element.
+
+
+
+[[scheduling-task-namespace]]
+== The `task` Namespace
+
+As of version 3.0, Spring includes an XML namespace for configuring `TaskExecutor` and
+`TaskScheduler` instances. It also provides a convenient way to configure tasks to be
+scheduled with a trigger.
+
+
+[[scheduling-task-namespace-scheduler]]
+=== The 'scheduler' Element
+
+The following element creates a `ThreadPoolTaskScheduler` instance with the
+specified thread pool size:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<task:scheduler id="scheduler" pool-size="10"/>
+----
+
+The value provided for the `id` attribute is used as the prefix for thread names
+within the pool. The `scheduler` element is relatively straightforward. If you do not
+provide a `pool-size` attribute, the default thread pool has only a single thread.
+There are no other configuration options for the scheduler.
+
+
+[[scheduling-task-namespace-executor]]
+=== The `executor` Element
+
+The following creates a `ThreadPoolTaskExecutor` instance:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<task:executor id="executor" pool-size="10"/>
+----
+
+As with the scheduler shown in the xref:integration/scheduling.adoc#scheduling-task-namespace-scheduler[previous section],
+the value provided for the `id` attribute is used as the prefix for thread names within
+the pool. As far as the pool size is concerned, the `executor` element supports more
+configuration options than the `scheduler` element. For one thing, the thread pool for
+a `ThreadPoolTaskExecutor` is itself more configurable. Rather than only a single size,
+an executor's thread pool can have different values for the core and the max size.
+If you provide a single value, the executor has a fixed-size thread pool (the core and
+max sizes are the same). However, the `executor` element's `pool-size` attribute also
+accepts a range in the form of `min-max`. The following example sets a minimum value of
+`5` and a maximum value of `25`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<task:executor
+			id="executorWithPoolSizeRange"
+			pool-size="5-25"
+			queue-capacity="100"/>
+----
+
+In the preceding configuration, a `queue-capacity` value has also been provided.
+The configuration of the thread pool should also be considered in light of the
+executor's queue capacity. For the full description of the relationship between pool
+size and queue capacity, see the documentation for
+https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html[`ThreadPoolExecutor`].
+The main idea is that, when a task is submitted, the executor first tries to use a
+free thread if the number of active threads is currently less than the core size.
+If the core size has been reached, the task is added to the queue, as long as its
+capacity has not yet been reached. Only then, if the queue's capacity has been
+reached, does the executor create a new thread beyond the core size. If the max size
+has also been reached, then the executor rejects the task.
+
+By default, the queue is unbounded, but this is rarely the desired configuration,
+because it can lead to `OutOfMemoryErrors` if enough tasks are added to that queue while
+all pool threads are busy. Furthermore, if the queue is unbounded, the max size has
+no effect at all. Since the executor always tries the queue before creating a new
+thread beyond the core size, a queue must have a finite capacity for the thread pool to
+grow beyond the core size (this is why a fixed-size pool is the only sensible case
+when using an unbounded queue).
+
+Consider the case, as mentioned above, when a task is rejected. By default, when a
+task is rejected, a thread pool executor throws a `TaskRejectedException`. However,
+the rejection policy is actually configurable. The exception is thrown when using
+the default rejection policy, which is the `AbortPolicy` implementation.
+For applications where some tasks can be skipped under heavy load, you can instead
+configure either `DiscardPolicy` or `DiscardOldestPolicy`. Another option that works
+well for applications that need to throttle the submitted tasks under heavy load is
+the `CallerRunsPolicy`. Instead of throwing an exception or discarding tasks,
+that policy forces the thread that is calling the submit method to run the task itself.
+The idea is that such a caller is busy while running that task and not able to submit
+other tasks immediately. Therefore, it provides a simple way to throttle the incoming
+load while maintaining the limits of the thread pool and queue. Typically, this allows
+the executor to "`catch up`" on the tasks it is handling and thereby frees up some
+capacity on the queue, in the pool, or both. You can choose any of these options from an
+enumeration of values available for the `rejection-policy` attribute on the `executor`
+element.
+
+The following example shows an `executor` element with a number of attributes to specify
+various behaviors:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<task:executor
+			id="executorWithCallerRunsPolicy"
+			pool-size="5-25"
+			queue-capacity="100"
+			rejection-policy="CALLER_RUNS"/>
+----
+
+Finally, the `keep-alive` setting determines the time limit (in seconds) for which threads
+may remain idle before being stopped. If there are more than the core number of threads
+currently in the pool, after waiting this amount of time without processing a task, excess
+threads get stopped. A time value of zero causes excess threads to stop
+immediately after executing a task without remaining follow-up work in the task queue.
+The following example sets the `keep-alive` value to two minutes:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<task:executor
+			id="executorWithKeepAlive"
+			pool-size="5-25"
+			keep-alive="120"/>
+----
+
+
+[[scheduling-task-namespace-scheduled-tasks]]
+=== The 'scheduled-tasks' Element
+
+The most powerful feature of Spring's task namespace is the support for configuring
+tasks to be scheduled within a Spring Application Context. This follows an approach
+similar to other "`method-invokers`" in Spring, such as that provided by the JMS namespace
+for configuring message-driven POJOs. Basically, a `ref` attribute can point to any
+Spring-managed object, and the `method` attribute provides the name of a method to be
+invoked on that object. The following listing shows a simple example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<task:scheduled-tasks scheduler="myScheduler">
+		<task:scheduled ref="beanA" method="methodA" fixed-delay="5000"/>
+	</task:scheduled-tasks>
+
+	<task:scheduler id="myScheduler" pool-size="10"/>
+----
+
+The scheduler is referenced by the outer element, and each individual
+task includes the configuration of its trigger metadata. In the preceding example, that
+metadata defines a periodic trigger with a fixed delay indicating the number of
+milliseconds to wait after each task execution has completed. Another option is
+`fixed-rate`, indicating how often the method should be run regardless of how long
+any previous execution takes. Additionally, for both `fixed-delay` and `fixed-rate` tasks, you can specify an
+'initial-delay' parameter, indicating the number of milliseconds to wait
+before the first execution of the method. For more control, you can instead provide a `cron` attribute
+to provide a xref:integration/scheduling.adoc#scheduling-cron-expression[cron expression].
+The following example shows these other options:
+
+[source,xml,indent=0]
+[subs="verbatim"]
+----
+	<task:scheduled-tasks scheduler="myScheduler">
+		<task:scheduled ref="beanA" method="methodA" fixed-delay="5000" initial-delay="1000"/>
+		<task:scheduled ref="beanB" method="methodB" fixed-rate="5000"/>
+		<task:scheduled ref="beanC" method="methodC" cron="*/5 * * * * MON-FRI"/>
+	</task:scheduled-tasks>
+
+	<task:scheduler id="myScheduler" pool-size="10"/>
+----
+
+
+
+[[scheduling-cron-expression]]
+== Cron Expressions
+
+All Spring cron expressions have to conform to the same format, whether you are using them in
+xref:integration/scheduling.adoc#scheduling-annotation-support-scheduled[`@Scheduled` annotations],
+xref:integration/scheduling.adoc#scheduling-task-namespace-scheduled-tasks[`task:scheduled-tasks` elements],
+or someplace else.
+A well-formed cron expression, such as `* * * * * *`, consists of six space-separated time and date
+fields, each with its own range of valid values:
+
+
+....
+ ┌───────────── second (0-59)
+ │ ┌───────────── minute (0 - 59)
+ │ │ ┌───────────── hour (0 - 23)
+ │ │ │ ┌───────────── day of the month (1 - 31)
+ │ │ │ │ ┌───────────── month (1 - 12) (or JAN-DEC)
+ │ │ │ │ │ ┌───────────── day of the week (0 - 7)
+ │ │ │ │ │ │          (0 or 7 is Sunday, or MON-SUN)
+ │ │ │ │ │ │
+ * * * * * *
+....
+
+There are some rules that apply:
+
+* A field may be an asterisk (`*`), which always stands for "`first-last`".
+For the day-of-the-month or day-of-the-week fields, a question mark (`?`) may be used instead of an
+asterisk.
+* Commas (`,`) are used to separate items of a list.
+* Two numbers separated with a hyphen (`-`) express a range of numbers.
+The specified range is inclusive.
+* Following a range (or `*`) with `/` specifies the interval of the number's value through the range.
+* English names can also be used for the month and day-of-week fields.
+Use the first three letters of the particular day or month (case does not matter).
+* The day-of-month and day-of-week fields can contain an `L` character, which has a different meaning.
+** In the day-of-month field, `L` stands for _the last day of the month_.
+If followed by a negative offset (that is, `L-n`), it means _``n``th-to-last day of the month_.
+** In the day-of-week field, `L` stands for _the last day of the week_.
+If prefixed by a number or three-letter name (`dL` or `DDDL`), it means _the last day of week (`d`
+or `DDD`) in the month_.
+* The day-of-month field can be `nW`, which stands for _the nearest weekday to day of the month ``n``_.
+If `n` falls on Saturday, this yields the Friday before it.
+If `n` falls on Sunday, this yields the Monday after, which also happens if `n` is `1` and falls on
+a Saturday (that is: `1W` stands for _the first weekday of the month_).
+* If the day-of-month field is `LW`, it means _the last weekday of the month_.
+* The day-of-week field can be `d#n` (or `DDD#n`), which stands for _the ``n``th day of week `d`
+(or ``DDD``) in the month_.
+
+Here are some examples:
+
+|===
+| Cron Expression       | Meaning
+
+|`0 0 * * * *`          | top of every hour of every day
+|`*/10 * * * * *`       | every ten seconds
+| `0 0 8-10 * * *`      | 8, 9 and 10 o'clock of every day
+| `0 0 6,19 * * *`      | 6:00 AM and 7:00 PM every day
+| `0 0/30 8-10 * * *`   | 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day
+| `0 0 9-17 * * MON-FRI`| on the hour nine-to-five weekdays
+| `0 0 0 25 DEC ?`       | every Christmas Day at midnight
+| `0 0 0 L * *`         | last day of the month at midnight
+| `0 0 0 L-3 * *`       | third-to-last day of the month at midnight
+| `0 0 0 * * 5L`        | last Friday of the month at midnight
+| `0 0 0 * * THUL`      | last Thursday of the month at midnight
+| `0 0 0 1W * *`        | first weekday of the month at midnight
+| `0 0 0 LW * *`        | last weekday of the month at midnight
+| `0 0 0 ? * 5#2`       | the second Friday in the month at midnight
+| `0 0 0 ? * MON#1`     | the first Monday in the month at midnight
+|===
+
+[[macros]]
+=== Macros
+
+Expressions such as `0 0 * * * *` are hard for humans to parse and are, therefore, hard to fix in case of bugs.
+To improve readability, Spring supports the following macros, which represent commonly used sequences.
+You can use these macros instead of the six-digit value, thus: `@Scheduled(cron = "@hourly")`.
+
+|===
+|Macro                          | Meaning
+
+| `@yearly` (or `@annually`)    | once a year (`0 0 0 1 1 *`)
+| `@monthly`                    | once a month (`0 0 0 1 * *`)
+| `@weekly`                     | once a week (`0 0 0 * * 0`)
+| `@daily` (or `@midnight`)     | once a day (`0 0 0 * * *`), or
+| `@hourly`                     | once an hour, (`0 0 * * * *`)
+|===
+
+
+
+[[scheduling-quartz]]
+== Using the Quartz Scheduler
+
+Quartz uses `Trigger`, `Job`, and `JobDetail` objects to realize scheduling of all kinds
+of jobs. For the basic concepts behind Quartz, see the
+https://www.quartz-scheduler.org/[Quartz Web site]. For convenience purposes, Spring
+offers a couple of classes that simplify using Quartz within Spring-based applications.
+
+
+[[scheduling-quartz-jobdetail]]
+=== Using the `JobDetailFactoryBean`
+
+Quartz `JobDetail` objects contain all the information needed to run a job. Spring provides a
+`JobDetailFactoryBean`, which provides bean-style properties for XML configuration purposes.
+Consider the following example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="example.ExampleJob"/>
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="timeout" value="5"/>
+			</map>
+		</property>
+	</bean>
+----
+
+The job detail configuration has all the information it needs to run the job (`ExampleJob`).
+The timeout is specified in the job data map. The job data map is available through the
+`JobExecutionContext` (passed to you at execution time), but the `JobDetail` also gets
+its properties from the job data mapped to properties of the job instance. So, in the following example,
+the `ExampleJob` contains a bean property named `timeout`, and the `JobDetail`
+has it applied automatically:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package example;
+
+	public class ExampleJob extends QuartzJobBean {
+
+		private int timeout;
+
+		/**
+		 * Setter called after the ExampleJob is instantiated
+		 * with the value from the JobDetailFactoryBean.
+		 */
+		public void setTimeout(int timeout) {
+			this.timeout = timeout;
+		}
+
+		protected void executeInternal(JobExecutionContext ctx) throws JobExecutionException {
+			// do the actual work
+		}
+	}
+----
+
+All additional properties from the job data map are available to you as well.
+
+NOTE: By using the `name` and `group` properties, you can modify the name and the group
+of the job, respectively. By default, the name of the job matches the bean name
+of the `JobDetailFactoryBean` (`exampleJob` in the preceding example above).
+
+
+[[scheduling-quartz-method-invoking-job]]
+=== Using the `MethodInvokingJobDetailFactoryBean`
+
+Often you merely need to invoke a method on a specific object. By using the
+`MethodInvokingJobDetailFactoryBean`, you can do exactly this, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="exampleBusinessObject"/>
+		<property name="targetMethod" value="doIt"/>
+	</bean>
+----
+
+The preceding example results in the `doIt` method being called on the
+`exampleBusinessObject` method, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public class ExampleBusinessObject {
+
+		// properties and collaborators
+
+		public void doIt() {
+			// do the actual work
+		}
+	}
+----
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="exampleBusinessObject" class="examples.ExampleBusinessObject"/>
+----
+
+By using the `MethodInvokingJobDetailFactoryBean`, you need not create one-line jobs
+that merely invoke a method. You need only create the actual business object and
+wire up the detail object.
+
+By default, Quartz Jobs are stateless, resulting in the possibility of jobs interfering
+with each other. If you specify two triggers for the same `JobDetail`, it is possible
+that the second one starts before the first job has finished. If `JobDetail` classes
+implement the `Stateful` interface, this does not happen: the second job does not start
+before the first one has finished.
+
+To make jobs resulting from the `MethodInvokingJobDetailFactoryBean` be non-concurrent,
+set the `concurrent` flag to `false`, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="exampleBusinessObject"/>
+		<property name="targetMethod" value="doIt"/>
+		<property name="concurrent" value="false"/>
+	</bean>
+----
+
+NOTE: By default, jobs will run in a concurrent fashion.
+
+
+[[scheduling-quartz-cron]]
+=== Wiring up Jobs by Using Triggers and `SchedulerFactoryBean`
+
+We have created job details and jobs. We have also reviewed the convenience bean that lets
+you invoke a method on a specific object. Of course, we still need to schedule the
+jobs themselves. This is done by using triggers and a `SchedulerFactoryBean`. Several
+triggers are available within Quartz, and Spring offers two Quartz `FactoryBean`
+implementations with convenient defaults: `CronTriggerFactoryBean` and
+`SimpleTriggerFactoryBean`.
+
+Triggers need to be scheduled. Spring offers a `SchedulerFactoryBean` that exposes
+triggers to be set as properties. `SchedulerFactoryBean` schedules the actual jobs with
+those triggers.
+
+The following listing uses both a `SimpleTriggerFactoryBean` and a `CronTriggerFactoryBean`:
+
+[source,xml,indent=0]
+[subs="verbatim"]
+----
+	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<!-- see the example of method invoking job above -->
+		<property name="jobDetail" ref="jobDetail"/>
+		<!-- 10 seconds -->
+		<property name="startDelay" value="10000"/>
+		<!-- repeat every 50 seconds -->
+		<property name="repeatInterval" value="50000"/>
+	</bean>
+
+	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="exampleJob"/>
+		<!-- run every morning at 6 AM -->
+		<property name="cronExpression" value="0 0 6 * * ?"/>
+	</bean>
+----
+
+The preceding example sets up two triggers, one running every 50 seconds with a starting delay of 10
+seconds and one running every morning at 6 AM. To finalize everything, we need to set up the
+`SchedulerFactoryBean`, as the following example shows:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="cronTrigger"/>
+				<ref bean="simpleTrigger"/>
+			</list>
+		</property>
+	</bean>
+----
+
+More properties are available for the `SchedulerFactoryBean`, such as the calendars used by the
+job details, properties to customize Quartz with, and a Spring-provided JDBC DataSource. See
+the {api-spring-framework}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`]
+javadoc for more information.
+
+NOTE: `SchedulerFactoryBean` also recognizes a `quartz.properties` file in the classpath,
+based on Quartz property keys, as with regular Quartz configuration. Please note that many
+`SchedulerFactoryBean` settings interact with common Quartz settings in the properties file;
+it is therefore not recommended to specify values at both levels. For example, do not set
+an "org.quartz.jobStore.class" property if you mean to rely on a Spring-provided DataSource,
+or specify an `org.springframework.scheduling.quartz.LocalDataSourceJobStore` variant which
+is a full-fledged replacement for the standard `org.quartz.impl.jdbcjobstore.JobStoreTX`.
+

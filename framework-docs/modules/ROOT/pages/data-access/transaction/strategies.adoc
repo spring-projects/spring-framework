@@ -1,0 +1,284 @@
+[[transaction-strategies]]
+= Understanding the Spring Framework Transaction Abstraction
+
+The key to the Spring transaction abstraction is the notion of a transaction strategy. A
+transaction strategy is defined by a `TransactionManager`, specifically the
+`org.springframework.transaction.PlatformTransactionManager` interface for imperative
+transaction management and the
+`org.springframework.transaction.ReactiveTransactionManager` interface for reactive
+transaction management. The following listing shows the definition of the
+`PlatformTransactionManager` API:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface PlatformTransactionManager extends TransactionManager {
+
+		TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException;
+
+		void commit(TransactionStatus status) throws TransactionException;
+
+		void rollback(TransactionStatus status) throws TransactionException;
+	}
+----
+
+This is primarily a service provider interface (SPI), although you can use it
+xref:data-access/transaction/programmatic.adoc#transaction-programmatic-ptm[programmatically] from your application code. Because
+`PlatformTransactionManager` is an interface, it can be easily mocked or stubbed as
+necessary. It is not tied to a lookup strategy, such as JNDI.
+`PlatformTransactionManager` implementations are defined like any other object (or bean)
+in the Spring Framework IoC container. This benefit alone makes Spring Framework
+transactions a worthwhile abstraction, even when you work with JTA. You can test
+transactional code much more easily than if it used JTA directly.
+
+Again, in keeping with Spring's philosophy, the `TransactionException` that can be thrown
+by any of the `PlatformTransactionManager` interface's methods is unchecked (that
+is, it extends the `java.lang.RuntimeException` class). Transaction infrastructure
+failures are almost invariably fatal. In rare cases where application code can actually
+recover from a transaction failure, the application developer can still choose to catch
+and handle `TransactionException`. The salient point is that developers are not
+_forced_ to do so.
+
+The `getTransaction(..)` method returns a `TransactionStatus` object, depending on a
+`TransactionDefinition` parameter. The returned `TransactionStatus` might represent a
+new transaction or can represent an existing transaction, if a matching transaction
+exists in the current call stack. The implication in this latter case is that, as with
+Jakarta EE transaction contexts, a `TransactionStatus` is associated with a thread of
+execution.
+
+As of Spring Framework 5.2, Spring also provides a transaction management abstraction for
+reactive applications that make use of reactive types or Kotlin Coroutines. The following
+listing shows the transaction strategy defined by
+`org.springframework.transaction.ReactiveTransactionManager`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface ReactiveTransactionManager extends TransactionManager {
+
+		Mono<ReactiveTransaction> getReactiveTransaction(TransactionDefinition definition) throws TransactionException;
+
+		Mono<Void> commit(ReactiveTransaction status) throws TransactionException;
+
+		Mono<Void> rollback(ReactiveTransaction status) throws TransactionException;
+	}
+----
+
+The reactive transaction manager is primarily a service provider interface (SPI),
+although you can use it xref:data-access/transaction/programmatic.adoc#transaction-programmatic-rtm[programmatically] from your
+application code. Because `ReactiveTransactionManager` is an interface, it can be easily
+mocked or stubbed as necessary.
+
+The `TransactionDefinition` interface specifies:
+
+* Propagation: Typically, all code within a transaction scope runs in
+  that transaction. However, you can specify the behavior if
+  a transactional method is run when a transaction context already exists. For
+  example, code can continue running in the existing transaction (the common case), or
+  the existing transaction can be suspended and a new transaction created. Spring
+  offers all of the transaction propagation options familiar from EJB CMT. To read
+  about the semantics of transaction propagation in Spring, see xref:data-access/transaction/declarative/tx-propagation.adoc[Transaction Propagation].
+* Isolation: The degree to which this transaction is isolated from the work of other
+  transactions. For example, can this transaction see uncommitted writes from other
+  transactions?
+* Timeout: How long this transaction runs before timing out and being automatically rolled back
+  by the underlying transaction infrastructure.
+* Read-only status: You can use a read-only transaction when your code reads but
+  does not modify data. Read-only transactions can be a useful optimization in some
+  cases, such as when you use Hibernate.
+
+These settings reflect standard transactional concepts. If necessary, refer to resources
+that discuss transaction isolation levels and other core transaction concepts.
+Understanding these concepts is essential to using the Spring Framework or any
+transaction management solution.
+
+The `TransactionStatus` interface provides a simple way for transactional code to
+control transaction execution and query transaction status. The concepts should be
+familiar, as they are common to all transaction APIs. The following listing shows the
+`TransactionStatus` interface:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface TransactionStatus extends TransactionExecution, SavepointManager, Flushable {
+
+		@Override
+		boolean isNewTransaction();
+
+		boolean hasSavepoint();
+
+		@Override
+		void setRollbackOnly();
+
+		@Override
+		boolean isRollbackOnly();
+
+		void flush();
+
+		@Override
+		boolean isCompleted();
+	}
+----
+
+Regardless of whether you opt for declarative or programmatic transaction management in
+Spring, defining the correct `TransactionManager` implementation is absolutely essential.
+You typically define this implementation through dependency injection.
+
+`TransactionManager` implementations normally require knowledge of the environment in
+which they work: JDBC, JTA, Hibernate, and so on. The following examples show how you can
+define a local `PlatformTransactionManager` implementation (in this case, with plain
+JDBC.)
+
+You can define a JDBC `DataSource` by creating a bean similar to the following:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+----
+
+The related `PlatformTransactionManager` bean definition then has a reference to the
+`DataSource` definition. It should resemble the following example:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+----
+
+If you use JTA in a Jakarta EE container, then you use a container `DataSource`, obtained
+through JNDI, in conjunction with Spring's `JtaTransactionManager`. The following example
+shows what the JTA and JNDI lookup version would look like:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:jee="http://www.springframework.org/schema/jee"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			https://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/jee
+			https://www.springframework.org/schema/jee/spring-jee.xsd">
+
+		<jee:jndi-lookup id="dataSource" jndi-name="jdbc/jpetstore"/>
+
+		<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager" />
+
+		<!-- other <bean/> definitions here -->
+
+	</beans>
+----
+
+The `JtaTransactionManager` does not need to know about the `DataSource` (or any other
+specific resources) because it uses the container's global transaction management
+infrastructure.
+
+NOTE: The preceding definition of the `dataSource` bean uses the `<jndi-lookup/>` tag
+from the `jee` namespace. For more information see
+xref:integration/appendix.adoc#xsd-schemas-jee[The JEE Schema].
+
+NOTE: If you use JTA, your transaction manager definition should look the same, regardless
+of what data access technology you use, be it JDBC, Hibernate JPA, or any other supported
+technology. This is due to the fact that JTA transactions are global transactions, which
+can enlist any transactional resource.
+
+In all Spring transaction setups, application code does not need to change. You can change
+how transactions are managed merely by changing configuration, even if that change means
+moving from local to global transactions or vice versa.
+
+
+[[transaction-strategies-hibernate]]
+== Hibernate Transaction Setup
+
+You can also easily use Hibernate local transactions, as shown in the following examples.
+In this case, you need to define a Hibernate `LocalSessionFactoryBean`, which your
+application code can use to obtain Hibernate `Session` instances.
+
+The `DataSource` bean definition is similar to the local JDBC example shown previously
+and, thus, is not shown in the following example.
+
+NOTE: If the `DataSource` (used by any non-JTA transaction manager) is looked up through
+JNDI and managed by a Jakarta EE container, it should be non-transactional, because the
+Spring Framework (rather than the Jakarta EE container) manages the transactions.
+
+The `txManager` bean in this case is of the `HibernateTransactionManager` type. In the
+same way as the `DataSourceTransactionManager` needs a reference to the `DataSource`, the
+`HibernateTransactionManager` needs a reference to the `SessionFactory`. The following
+example declares `sessionFactory` and `txManager` beans:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mappingResources">
+			<list>
+				<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=${hibernate.dialect}
+			</value>
+		</property>
+	</bean>
+
+	<bean id="txManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"/>
+	</bean>
+----
+
+If you use Hibernate and Jakarta EE container-managed JTA transactions, you should use the
+same `JtaTransactionManager` as in the previous JTA example for JDBC, as the following
+example shows. Also, it is recommended to make Hibernate aware of JTA through its
+transaction coordinator and possibly also its connection release mode configuration:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mappingResources">
+			<list>
+				<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=${hibernate.dialect}
+				hibernate.transaction.coordinator_class=jta
+				hibernate.connection.handling_mode=DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT
+			</value>
+		</property>
+	</bean>
+
+	<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+----
+
+Or alternatively, you may pass the `JtaTransactionManager` into your `LocalSessionFactoryBean`
+for enforcing the same defaults:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mappingResources">
+			<list>
+				<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=${hibernate.dialect}
+			</value>
+		</property>
+		<property name="jtaTransactionManager" ref="txManager"/>
+	</bean>
+
+	<bean id="txManager" class="org.springframework.transaction.jta.JtaTransactionManager"/>
+----
+
+
+

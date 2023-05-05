@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -350,30 +350,30 @@ class CustomEditorTests {
 		bw.setPropertyValue("double2", "6.1");
 		bw.setPropertyValue("bigDecimal", "4.5");
 
-		assertThat(Short.valueOf("1").equals(bw.getPropertyValue("short1"))).as("Correct short1 value").isTrue();
-		assertThat(tb.getShort1() == 1).as("Correct short1 value").isTrue();
-		assertThat(Short.valueOf("2").equals(bw.getPropertyValue("short2"))).as("Correct short2 value").isTrue();
-		assertThat(Short.valueOf("2").equals(tb.getShort2())).as("Correct short2 value").isTrue();
-		assertThat(Integer.valueOf("7").equals(bw.getPropertyValue("int1"))).as("Correct int1 value").isTrue();
-		assertThat(tb.getInt1() == 7).as("Correct int1 value").isTrue();
-		assertThat(Integer.valueOf("8").equals(bw.getPropertyValue("int2"))).as("Correct int2 value").isTrue();
-		assertThat(Integer.valueOf("8").equals(tb.getInt2())).as("Correct int2 value").isTrue();
-		assertThat(Long.valueOf("5").equals(bw.getPropertyValue("long1"))).as("Correct long1 value").isTrue();
-		assertThat(tb.getLong1() == 5).as("Correct long1 value").isTrue();
-		assertThat(Long.valueOf("6").equals(bw.getPropertyValue("long2"))).as("Correct long2 value").isTrue();
-		assertThat(Long.valueOf("6").equals(tb.getLong2())).as("Correct long2 value").isTrue();
-		assertThat(new BigInteger("3").equals(bw.getPropertyValue("bigInteger"))).as("Correct bigInteger value").isTrue();
-		assertThat(new BigInteger("3").equals(tb.getBigInteger())).as("Correct bigInteger value").isTrue();
-		assertThat(Float.valueOf("7.1").equals(bw.getPropertyValue("float1"))).as("Correct float1 value").isTrue();
-		assertThat(Float.valueOf("7.1").equals(tb.getFloat1())).as("Correct float1 value").isTrue();
-		assertThat(Float.valueOf("8.1").equals(bw.getPropertyValue("float2"))).as("Correct float2 value").isTrue();
-		assertThat(Float.valueOf("8.1").equals(tb.getFloat2())).as("Correct float2 value").isTrue();
-		assertThat(Double.valueOf("5.1").equals(bw.getPropertyValue("double1"))).as("Correct double1 value").isTrue();
-		assertThat(tb.getDouble1() == 5.1).as("Correct double1 value").isTrue();
-		assertThat(Double.valueOf("6.1").equals(bw.getPropertyValue("double2"))).as("Correct double2 value").isTrue();
-		assertThat(Double.valueOf("6.1").equals(tb.getDouble2())).as("Correct double2 value").isTrue();
-		assertThat(new BigDecimal("4.5").equals(bw.getPropertyValue("bigDecimal"))).as("Correct bigDecimal value").isTrue();
-		assertThat(new BigDecimal("4.5").equals(tb.getBigDecimal())).as("Correct bigDecimal value").isTrue();
+		assertThat(Short.valueOf("1")).as("Correct short1 value").isEqualTo(bw.getPropertyValue("short1"));
+		assertThat(tb.getShort1()).as("Correct short1 value").isOne();
+		assertThat(Short.valueOf("2")).as("Correct short2 value").isEqualTo(bw.getPropertyValue("short2"));
+		assertThat(Short.valueOf("2")).as("Correct short2 value").isEqualTo(tb.getShort2());
+		assertThat(Integer.valueOf("7")).as("Correct int1 value").isEqualTo(bw.getPropertyValue("int1"));
+		assertThat(tb.getInt1()).as("Correct int1 value").isEqualTo(7);
+		assertThat(Integer.valueOf("8")).as("Correct int2 value").isEqualTo(bw.getPropertyValue("int2"));
+		assertThat(Integer.valueOf("8")).as("Correct int2 value").isEqualTo(tb.getInt2());
+		assertThat(Long.valueOf("5")).as("Correct long1 value").isEqualTo(bw.getPropertyValue("long1"));
+		assertThat(tb.getLong1()).as("Correct long1 value").isEqualTo(5);
+		assertThat(Long.valueOf("6")).as("Correct long2 value").isEqualTo(bw.getPropertyValue("long2"));
+		assertThat(Long.valueOf("6")).as("Correct long2 value").isEqualTo(tb.getLong2());
+		assertThat(new BigInteger("3")).as("Correct bigInteger value").isEqualTo(bw.getPropertyValue("bigInteger"));
+		assertThat(new BigInteger("3")).as("Correct bigInteger value").isEqualTo(tb.getBigInteger());
+		assertThat(Float.valueOf("7.1")).as("Correct float1 value").isEqualTo(bw.getPropertyValue("float1"));
+		assertThat(Float.valueOf("7.1")).as("Correct float1 value").isEqualTo(tb.getFloat1());
+		assertThat(Float.valueOf("8.1")).as("Correct float2 value").isEqualTo(bw.getPropertyValue("float2"));
+		assertThat(Float.valueOf("8.1")).as("Correct float2 value").isEqualTo(tb.getFloat2());
+		assertThat(Double.valueOf("5.1")).as("Correct double1 value").isEqualTo(bw.getPropertyValue("double1"));
+		assertThat(tb.getDouble1()).as("Correct double1 value").isEqualTo(5.1);
+		assertThat(Double.valueOf("6.1")).as("Correct double2 value").isEqualTo(bw.getPropertyValue("double2"));
+		assertThat(Double.valueOf("6.1")).as("Correct double2 value").isEqualTo(tb.getDouble2());
+		assertThat(new BigDecimal("4.5")).as("Correct bigDecimal value").isEqualTo(bw.getPropertyValue("bigDecimal"));
+		assertThat(new BigDecimal("4.5")).as("Correct bigDecimal value").isEqualTo(tb.getBigDecimal());
 	}
 
 	@Test
@@ -408,29 +408,29 @@ class CustomEditorTests {
 		bw.setPropertyValue("bigDecimal", "4,5");
 
 		assertThat(bw.getPropertyValue("short1")).as("Correct short1 value").isEqualTo(Short.valueOf("1"));
-		assertThat(tb.getShort1() == 1).as("Correct short1 value").isTrue();
+		assertThat(tb.getShort1()).as("Correct short1 value").isOne();
 		assertThat(bw.getPropertyValue("short2")).as("Correct short2 value").isEqualTo(Short.valueOf("2"));
 		assertThat(tb.getShort2()).as("Correct short2 value").isEqualTo(Short.valueOf("2"));
 		assertThat(bw.getPropertyValue("int1")).as("Correct int1 value").isEqualTo(Integer.valueOf("7"));
-		assertThat(tb.getInt1() == 7).as("Correct int1 value").isTrue();
+		assertThat(tb.getInt1()).as("Correct int1 value").isEqualTo(7);
 		assertThat(bw.getPropertyValue("int2")).as("Correct int2 value").isEqualTo(Integer.valueOf("8"));
 		assertThat(tb.getInt2()).as("Correct int2 value").isEqualTo(Integer.valueOf("8"));
 		assertThat(bw.getPropertyValue("long1")).as("Correct long1 value").isEqualTo(Long.valueOf("5"));
-		assertThat(tb.getLong1() == 5).as("Correct long1 value").isTrue();
+		assertThat(tb.getLong1()).as("Correct long1 value").isEqualTo(5);
 		assertThat(bw.getPropertyValue("long2")).as("Correct long2 value").isEqualTo(Long.valueOf("6"));
 		assertThat(tb.getLong2()).as("Correct long2 value").isEqualTo(Long.valueOf("6"));
-		assertThat(new BigInteger("3").equals(bw.getPropertyValue("bigInteger"))).as("Correct bigInteger value").isTrue();
-		assertThat(new BigInteger("3").equals(tb.getBigInteger())).as("Correct bigInteger value").isTrue();
+		assertThat(new BigInteger("3")).as("Correct bigInteger value").isEqualTo(bw.getPropertyValue("bigInteger"));
+		assertThat(new BigInteger("3")).as("Correct bigInteger value").isEqualTo(tb.getBigInteger());
 		assertThat(bw.getPropertyValue("float1")).as("Correct float1 value").isEqualTo(Float.valueOf("7.1"));
 		assertThat(Float.valueOf(tb.getFloat1())).as("Correct float1 value").isEqualTo(Float.valueOf("7.1"));
 		assertThat(bw.getPropertyValue("float2")).as("Correct float2 value").isEqualTo(Float.valueOf("8.1"));
 		assertThat(tb.getFloat2()).as("Correct float2 value").isEqualTo(Float.valueOf("8.1"));
 		assertThat(bw.getPropertyValue("double1")).as("Correct double1 value").isEqualTo(Double.valueOf("5.1"));
-		assertThat(tb.getDouble1() == 5.1).as("Correct double1 value").isTrue();
+		assertThat(tb.getDouble1()).as("Correct double1 value").isEqualTo(5.1);
 		assertThat(bw.getPropertyValue("double2")).as("Correct double2 value").isEqualTo(Double.valueOf("6.1"));
 		assertThat(tb.getDouble2()).as("Correct double2 value").isEqualTo(Double.valueOf("6.1"));
-		assertThat(new BigDecimal("4.5").equals(bw.getPropertyValue("bigDecimal"))).as("Correct bigDecimal value").isTrue();
-		assertThat(new BigDecimal("4.5").equals(tb.getBigDecimal())).as("Correct bigDecimal value").isTrue();
+		assertThat(new BigDecimal("4.5")).as("Correct bigDecimal value").isEqualTo(bw.getPropertyValue("bigDecimal"));
+		assertThat(new BigDecimal("4.5")).as("Correct bigDecimal value").isEqualTo(tb.getBigDecimal());
 	}
 
 	@Test
@@ -444,13 +444,13 @@ class CustomEditorTests {
 		bw.setPropertyValue("long1", "5");
 		bw.setPropertyValue("long2", "6");
 		assertThat(Long.valueOf("5").equals(bw.getPropertyValue("long1"))).as("Correct long1 value").isTrue();
-		assertThat(tb.getLong1() == 5).as("Correct long1 value").isTrue();
+		assertThat(tb.getLong1()).as("Correct long1 value").isEqualTo(5);
 		assertThat(Long.valueOf("6").equals(bw.getPropertyValue("long2"))).as("Correct long2 value").isTrue();
 		assertThat(Long.valueOf("6").equals(tb.getLong2())).as("Correct long2 value").isTrue();
 
 		bw.setPropertyValue("long2", "");
-		assertThat(bw.getPropertyValue("long2") == null).as("Correct long2 value").isTrue();
-		assertThat(tb.getLong2() == null).as("Correct long2 value").isTrue();
+		assertThat(bw.getPropertyValue("long2")).as("Correct long2 value").isNull();
+		assertThat(tb.getLong2()).as("Correct long2 value").isNull();
 		assertThatExceptionOfType(BeansException.class).isThrownBy(() ->
 				bw.setPropertyValue("long1", ""));
 		assertThat(bw.getPropertyValue("long1")).isEqualTo(5L);

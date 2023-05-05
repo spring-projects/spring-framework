@@ -1,0 +1,546 @@
+[[mvc-ann-requestmapping]]
+= Request Mapping
+
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc[See equivalent in the Reactive stack]#
+
+You can use the `@RequestMapping` annotation to map requests to controllers methods. It has
+various attributes to match by URL, HTTP method, request parameters, headers, and media
+types. You can use it at the class level to express shared mappings or at the method level
+to narrow down to a specific endpoint mapping.
+
+There are also HTTP method specific shortcut variants of `@RequestMapping`:
+
+* `@GetMapping`
+* `@PostMapping`
+* `@PutMapping`
+* `@DeleteMapping`
+* `@PatchMapping`
+
+The shortcuts are xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-composed[Custom Annotations] that are provided because,
+arguably, most controller methods should be mapped to a specific HTTP method versus
+using `@RequestMapping`, which, by default, matches to all HTTP methods.
+A `@RequestMapping` is still needed at the class level to express shared mappings.
+
+The following example has type and method level mappings:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@RestController
+	@RequestMapping("/persons")
+	class PersonController {
+
+		@GetMapping("/{id}")
+		public Person getPerson(@PathVariable Long id) {
+			// ...
+		}
+
+		@PostMapping
+		@ResponseStatus(HttpStatus.CREATED)
+		public void add(@RequestBody Person person) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@RestController
+	@RequestMapping("/persons")
+	class PersonController {
+
+		@GetMapping("/{id}")
+		fun getPerson(@PathVariable id: Long): Person {
+			// ...
+		}
+
+		@PostMapping
+		@ResponseStatus(HttpStatus.CREATED)
+		fun add(@RequestBody person: Person) {
+			// ...
+		}
+	}
+----
+======
+
+
+
+[[mvc-ann-requestmapping-uri-templates]]
+== URI patterns
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-uri-templates[See equivalent in the Reactive stack]#
+
+`@RequestMapping` methods can be mapped using URL patterns. There are two alternatives:
+
+* `PathPattern` -- a pre-parsed pattern matched against the URL path also pre-parsed as
+`PathContainer`. Designed for web use, this solution deals effectively with encoding and
+path parameters, and matches efficiently.
+* `AntPathMatcher` -- match String patterns against a String path. This is the original
+solution also used in Spring configuration to select resources on the classpath, on the
+filesystem, and other locations. It is less efficient and the String path input is a
+challenge for dealing effectively with encoding and other issues with URLs.
+
+`PathPattern` is the recommended solution for web applications and it is the only choice in
+Spring WebFlux. It was enabled for use in Spring MVC from version 5.3 and is enabled by
+default from version 6.0. See xref:web/webmvc/mvc-config/path-matching.adoc[MVC config] for
+customizations of path matching options.
+
+`PathPattern` supports the same pattern syntax as `AntPathMatcher`. In addition, it also
+supports the capturing pattern, e.g. `+{*spring}+`, for matching 0 or more path segments
+at the end of a path. `PathPattern` also restricts the use of `+**+` for matching multiple
+path segments such that it's only allowed at the end of a pattern. This eliminates many
+cases of ambiguity when choosing the best matching pattern for a given request.
+For full pattern syntax please refer to
+{api-spring-framework}/web/util/pattern/PathPattern.html[PathPattern] and
+{api-spring-framework}/util/AntPathMatcher.html[AntPathMatcher].
+
+Some example patterns:
+
+* `+"/resources/ima?e.png"+` - match one character in a path segment
+* `+"/resources/*.png"+` - match zero or more characters in a path segment
+* `+"/resources/**"+` - match multiple path segments
+* `+"/projects/{project}/versions"+` - match a path segment and capture it as a variable
+* `+"/projects/{project:[a-z]+}/versions"+` - match and capture a variable with a regex
+
+Captured URI variables can be accessed with `@PathVariable`. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	fun findPet(@PathVariable ownerId: Long, @PathVariable petId: Long): Pet {
+		// ...
+	}
+----
+======
+
+
+You can declare URI variables at the class and method levels, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Controller
+	@RequestMapping("/owners/{ownerId}")
+	public class OwnerController {
+
+		@GetMapping("/pets/{petId}")
+		public Pet findPet(@PathVariable Long ownerId, @PathVariable Long petId) {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Controller
+	@RequestMapping("/owners/{ownerId}")
+	class OwnerController {
+
+		@GetMapping("/pets/{petId}")
+		fun findPet(@PathVariable ownerId: Long, @PathVariable petId: Long): Pet {
+			// ...
+		}
+	}
+----
+======
+
+URI variables are automatically converted to the appropriate type, or `TypeMismatchException`
+is raised. Simple types (`int`, `long`, `Date`, and so on) are supported by default and you can
+register support for any other data type.
+See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion] and xref:web/webmvc/mvc-controller/ann-initbinder.adoc[`DataBinder`].
+
+You can explicitly name URI variables (for example, `@PathVariable("customId")`), but you can
+leave that detail out if the names are the same and your code is compiled with the `-parameters`
+compiler flag.
+
+The syntax `{varName:regex}` declares a URI variable with a regular expression that has
+syntax of `{varName:regex}`. For example, given URL `"/spring-web-3.0.5.jar"`, the following method
+extracts the name, version, and file extension:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
+	public void handle(@PathVariable String name, @PathVariable String version, @PathVariable String ext) {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@GetMapping("/{name:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{ext:\\.[a-z]+}")
+	fun handle(@PathVariable name: String, @PathVariable version: String, @PathVariable ext: String) {
+		// ...
+	}
+----
+======
+
+URI path patterns can also have embedded `${...}` placeholders that are resolved on startup
+by using `PropertySourcesPlaceholderConfigurer` against local, system, environment, and
+other property sources. You can use this, for example, to parameterize a base URL based on
+some external configuration.
+
+
+
+[[mvc-ann-requestmapping-pattern-comparison]]
+== Pattern Comparison
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-pattern-comparison[See equivalent in the Reactive stack]#
+
+When multiple patterns match a URL, the best match must be selected. This is done with
+one of the following depending on whether use of parsed `PathPattern` is enabled for use or not:
+
+* {api-spring-framework}/web/util/pattern/PathPattern.html#SPECIFICITY_COMPARATOR[`PathPattern.SPECIFICITY_COMPARATOR`]
+* {api-spring-framework}/util/AntPathMatcher.html#getPatternComparator-java.lang.String-[`AntPathMatcher.getPatternComparator(String path)`]
+
+Both help to sort patterns with more specific ones on top. A pattern is less specific if
+it has a lower count of URI variables (counted as 1), single wildcards (counted as 1),
+and double wildcards (counted as 2). Given an equal score, the longer pattern is chosen.
+Given the same score and length, the pattern with more URI variables than wildcards is
+chosen.
+
+The default mapping pattern (`/{asterisk}{asterisk}`) is excluded from scoring and always
+sorted last. Also, prefix patterns (such as `/public/{asterisk}{asterisk}`) are considered less
+specific than other pattern that do not have double wildcards.
+
+For the full details, follow the above links to the pattern Comparators.
+
+
+[[mvc-ann-requestmapping-suffix-pattern-match]]
+== Suffix Match
+
+Starting in 5.3, by default Spring MVC no longer performs `.{asterisk}` suffix pattern
+matching where a controller mapped to `/person` is also implicitly mapped to
+`/person.{asterisk}`. As a consequence path extensions are no longer used to interpret
+the requested content type for the response -- for example, `/person.pdf`, `/person.xml`,
+and so on.
+
+Using file extensions in this way was necessary when browsers used to send `Accept` headers
+that were hard to interpret consistently. At present, that is no longer a necessity and
+using the `Accept` header should be the preferred choice.
+
+Over time, the use of file name extensions has proven problematic in a variety of ways.
+It can cause ambiguity when overlain with the use of URI variables, path parameters, and
+URI encoding. Reasoning about URL-based authorization
+and security (see next section for more details) also becomes more difficult.
+
+To completely disable the use of path extensions in versions prior to 5.3, set the following:
+
+* `useSuffixPatternMatching(false)`, see xref:web/webmvc/mvc-config/path-matching.adoc[PathMatchConfigurer]
+* `favorPathExtension(false)`, see xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer]
+
+Having a way to request content types other than through the `"Accept"` header can still
+be useful, e.g. when typing a URL in a browser. A safe alternative to path extensions is
+to use the query parameter strategy. If you must use file extensions, consider restricting
+them to a list of explicitly registered extensions through the `mediaTypes` property of
+xref:web/webmvc/mvc-config/content-negotiation.adoc[ContentNegotiationConfigurer].
+
+
+[[mvc-ann-requestmapping-rfd]]
+== Suffix Match and RFD
+
+A reflected file download (RFD) attack is similar to XSS in that it relies on request input
+(for example, a query parameter and a URI variable) being reflected in the response. However, instead of
+inserting JavaScript into HTML, an RFD attack relies on the browser switching to perform a
+download and treating the response as an executable script when double-clicked later.
+
+In Spring MVC, `@ResponseBody` and `ResponseEntity` methods are at risk, because
+they can render different content types, which clients can request through URL path extensions.
+Disabling suffix pattern matching and using path extensions for content negotiation
+lower the risk but are not sufficient to prevent RFD attacks.
+
+To prevent RFD attacks, prior to rendering the response body, Spring MVC adds a
+`Content-Disposition:inline;filename=f.txt` header to suggest a fixed and safe download
+file. This is done only if the URL path contains a file extension that is neither
+allowed as safe nor explicitly registered for content negotiation. However, it can
+potentially have side effects when URLs are typed directly into a browser.
+
+Many common path extensions are allowed as safe by default. Applications with custom
+`HttpMessageConverter` implementations can explicitly register file extensions for content
+negotiation to avoid having a `Content-Disposition` header added for those extensions.
+See xref:web/webmvc/mvc-config/content-negotiation.adoc[Content Types].
+
+See https://pivotal.io/security/cve-2015-5211[CVE-2015-5211] for additional
+recommendations related to RFD.
+
+
+[[mvc-ann-requestmapping-consumes]]
+== Consumable Media Types
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-consumes[See equivalent in the Reactive stack]#
+
+You can narrow the request mapping based on the `Content-Type` of the request,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping(path = "/pets", consumes = "application/json") // <1>
+	public void addPet(@RequestBody Pet pet) {
+		// ...
+	}
+----
+======
+<1> Using a `consumes` attribute to narrow the mapping by the content type.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@PostMapping("/pets", consumes = ["application/json"]) // <1>
+	fun addPet(@RequestBody pet: Pet) {
+		// ...
+	}
+----
+<1> Using a `consumes` attribute to narrow the mapping by the content type.
+
+The `consumes` attribute also supports negation expressions -- for example, `!text/plain` means any
+content type other than `text/plain`.
+
+You can declare a shared `consumes` attribute at the class level. Unlike most other
+request-mapping attributes, however, when used at the class level, a method-level `consumes` attribute
+overrides rather than extends the class-level declaration.
+
+TIP: `MediaType` provides constants for commonly used media types, such as
+`APPLICATION_JSON_VALUE` and `APPLICATION_XML_VALUE`.
+
+
+[[mvc-ann-requestmapping-produces]]
+== Producible Media Types
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-produces[See equivalent in the Reactive stack]#
+
+You can narrow the request mapping based on the `Accept` request header and the list of
+content types that a controller method produces, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping(path = "/pets/{petId}", produces = "application/json") // <1>
+	@ResponseBody
+	public Pet getPet(@PathVariable String petId) {
+		// ...
+	}
+----
+======
+<1> Using a `produces` attribute to narrow the mapping by the content type.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/pets/{petId}", produces = ["application/json"]) // <1>
+	@ResponseBody
+	fun getPet(@PathVariable petId: String): Pet {
+		// ...
+	}
+----
+<1> Using a `produces` attribute to narrow the mapping by the content type.
+
+The media type can specify a character set. Negated expressions are supported -- for example,
+`!text/plain` means any content type other than "text/plain".
+
+You can declare a shared `produces` attribute at the class level. Unlike most other
+request-mapping attributes, however, when used at the class level, a method-level `produces` attribute
+overrides rather than extends the class-level declaration.
+
+TIP: `MediaType` provides constants for commonly used media types, such as
+`APPLICATION_JSON_VALUE` and `APPLICATION_XML_VALUE`.
+
+
+[[mvc-ann-requestmapping-params-and-headers]]
+== Parameters, headers
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-params-and-headers[See equivalent in the Reactive stack]#
+
+You can narrow request mappings based on request parameter conditions. You can test for the
+presence of a request parameter (`myParam`), for the absence of one (`!myParam`), or for a
+specific value (`myParam=myValue`). The following example shows how to test for a specific value:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping(path = "/pets/{petId}", params = "myParam=myValue") // <1>
+	public void findPet(@PathVariable String petId) {
+		// ...
+	}
+----
+======
+<1> Testing whether `myParam` equals `myValue`.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/pets/{petId}", params = ["myParam=myValue"]) // <1>
+	fun findPet(@PathVariable petId: String) {
+		// ...
+	}
+----
+<1> Testing whether `myParam` equals `myValue`.
+
+You can also use the same with request header conditions, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping(path = "/pets/{petId}", headers = "myHeader=myValue") // <1>
+	public void findPet(@PathVariable String petId) {
+		// ...
+	}
+----
+======
+<1> Testing whether `myHeader` equals `myValue`.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@GetMapping("/pets/{petId}", headers = ["myHeader=myValue"]) // <1>
+	fun findPet(@PathVariable petId: String) {
+		// ...
+	}
+----
+<1> Testing whether `myHeader` equals `myValue`.
+
+TIP: You can match `Content-Type` and `Accept` with the headers condition, but it is better to use
+xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-consumes[consumes] and xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-produces[produces]
+instead.
+
+
+[[mvc-ann-requestmapping-head-options]]
+== HTTP HEAD, OPTIONS
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-head-options[See equivalent in the Reactive stack]#
+
+`@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) support HTTP HEAD
+transparently for request mapping. Controller methods do not need to change.
+A response wrapper, applied in `jakarta.servlet.http.HttpServlet`, ensures a `Content-Length`
+header is set to the number of bytes written (without actually writing to the response).
+
+`@GetMapping` (and `@RequestMapping(method=HttpMethod.GET)`) are implicitly mapped to
+and support HTTP HEAD. An HTTP HEAD request is processed as if it were HTTP GET except
+that, instead of writing the body, the number of bytes are counted and the `Content-Length`
+header is set.
+
+By default, HTTP OPTIONS is handled by setting the `Allow` response header to the list of HTTP
+methods listed in all `@RequestMapping` methods that have matching URL patterns.
+
+For a `@RequestMapping` without HTTP method declarations, the `Allow` header is set to
+`GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS`. Controller methods should always declare the
+supported HTTP methods (for example, by using the HTTP method specific variants:
+`@GetMapping`, `@PostMapping`, and others).
+
+You can explicitly map the `@RequestMapping` method to HTTP HEAD and HTTP OPTIONS, but that
+is not necessary in the common case.
+
+
+[[mvc-ann-requestmapping-composed]]
+== Custom Annotations
+[.small]#xref:web/webmvc/mvc-controller/ann-requestmapping.adoc#mvc-ann-requestmapping-head-options[See equivalent in the Reactive stack]#
+
+Spring MVC supports the use of xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[composed annotations]
+for request mapping. Those are annotations that are themselves meta-annotated with
+`@RequestMapping` and composed to redeclare a subset (or all) of the `@RequestMapping`
+attributes with a narrower, more specific purpose.
+
+`@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping` are
+examples of composed annotations. They are provided because, arguably, most
+controller methods should be mapped to a specific HTTP method versus using `@RequestMapping`,
+which, by default, matches to all HTTP methods. If you need an example of composed
+annotations, look at how those are declared.
+
+Spring MVC also supports custom request-mapping attributes with custom request-matching
+logic. This is a more advanced option that requires subclassing
+`RequestMappingHandlerMapping` and overriding the `getCustomMethodCondition` method, where
+you can check the custom attribute and return your own `RequestCondition`.
+
+
+[[mvc-ann-requestmapping-registration]]
+== Explicit Registrations
+[.small]#xref:web/webflux/controller/ann-requestmapping.adoc#webflux-ann-requestmapping-registration[See equivalent in the Reactive stack]#
+
+You can programmatically register handler methods, which you can use for dynamic
+registrations or for advanced cases, such as different instances of the same handler
+under different URLs. The following example registers a handler method:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration
+	public class MyConfig {
+
+		@Autowired
+		public void setHandlerMapping(RequestMappingHandlerMapping mapping, UserHandler handler) // <1>
+				throws NoSuchMethodException {
+
+			RequestMappingInfo info = RequestMappingInfo
+					.paths("/user/{id}").methods(RequestMethod.GET).build(); // <2>
+
+			Method method = UserHandler.class.getMethod("getUser", Long.class); // <3>
+
+			mapping.registerMapping(info, handler, method); // <4>
+		}
+	}
+----
+======
+<1> Inject the target handler and the handler mapping for controllers.
+<2> Prepare the request mapping meta data.
+<3> Get the handler method.
+<4> Add the registration.
+
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+.Kotlin
+----
+	@Configuration
+	class MyConfig {
+
+		@Autowired
+		fun setHandlerMapping(mapping: RequestMappingHandlerMapping, handler: UserHandler) { // <1>
+			val info = RequestMappingInfo.paths("/user/{id}").methods(RequestMethod.GET).build() // <2>
+			val method = UserHandler::class.java.getMethod("getUser", Long::class.java) // <3>
+			mapping.registerMapping(info, handler, method) // <4>
+		}
+	}
+----
+<1> Inject the target handler and the handler mapping for controllers.
+<2> Prepare the request mapping meta data.
+<3> Get the handler method.
+<4> Add the registration.
+
+
+

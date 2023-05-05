@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public class ObjectToStringHttpMessageConverterTests {
 		this.converter.write((byte) -8, null, this.response);
 
 		assertThat(this.servletResponse.getCharacterEncoding()).isEqualTo("ISO-8859-1");
-		assertThat(this.servletResponse.getContentType().startsWith(MediaType.TEXT_PLAIN_VALUE)).isTrue();
+		assertThat(this.servletResponse.getContentType()).startsWith(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(this.servletResponse.getContentLength()).isEqualTo(2);
 		assertThat(this.servletResponse.getContentAsByteArray()).isEqualTo(new byte[] { '-', '8' });
 	}
@@ -161,7 +161,7 @@ public class ObjectToStringHttpMessageConverterTests {
 		this.converter.write(958, contentType, this.response);
 
 		assertThat(this.servletResponse.getCharacterEncoding()).isEqualTo("UTF-16");
-		assertThat(this.servletResponse.getContentType().startsWith(MediaType.TEXT_PLAIN_VALUE)).isTrue();
+		assertThat(this.servletResponse.getContentType()).startsWith(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(this.servletResponse.getContentLength()).isEqualTo(8);
 		// First two bytes: byte order mark
 		assertThat(this.servletResponse.getContentAsByteArray()).isEqualTo(new byte[] { -2, -1, 0, '9', 0, '5', 0, '8' });

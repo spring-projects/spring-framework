@@ -1,0 +1,342 @@
+[[core-convert]]
+= Spring Type Conversion
+
+The `core.convert` package provides a general type conversion system. The system defines
+an SPI to implement type conversion logic and an API to perform type conversions at
+runtime. Within a Spring container, you can use this system as an alternative to
+`PropertyEditor` implementations to convert externalized bean property value strings to
+the required property types. You can also use the public API anywhere in your application
+where type conversion is needed.
+
+
+
+[[core-convert-Converter-API]]
+== Converter SPI
+
+The SPI to implement type conversion logic is simple and strongly typed, as the following
+interface definition shows:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.core.convert.converter;
+
+	public interface Converter<S, T> {
+
+		T convert(S source);
+	}
+----
+
+To create your own converter, implement the `Converter` interface and parameterize `S`
+as the type you are converting from and `T` as the type you are converting to. You can also transparently apply such a
+converter if a collection or array of `S` needs to be
+converted to an array or collection of `T`, provided that a delegating array or collection
+converter has been registered as well (which `DefaultConversionService` does by default).
+
+For each call to `convert(S)`, the source argument is guaranteed to not be null. Your
+`Converter` may throw any unchecked exception if conversion fails. Specifically, it should throw an
+`IllegalArgumentException` to report an invalid source value.
+Take care to ensure that your `Converter` implementation is thread-safe.
+
+Several converter implementations are provided in the `core.convert.support` package as
+a convenience. These include converters from strings to numbers and other common types.
+The following listing shows the `StringToInteger` class, which is a typical `Converter` implementation:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.core.convert.support;
+
+	final class StringToInteger implements Converter<String, Integer> {
+
+		public Integer convert(String source) {
+			return Integer.valueOf(source);
+		}
+	}
+----
+
+
+
+[[core-convert-ConverterFactory-SPI]]
+== Using `ConverterFactory`
+
+When you need to centralize the conversion logic for an entire class hierarchy
+(for example, when converting from `String` to `Enum` objects), you can implement
+`ConverterFactory`, as the following example shows:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.core.convert.converter;
+
+	public interface ConverterFactory<S, R> {
+
+		<T extends R> Converter<S, T> getConverter(Class<T> targetType);
+	}
+----
+
+Parameterize S to be the type you are converting from and R to be the base type defining
+the __range__ of classes you can convert to. Then implement `getConverter(Class<T>)`,
+where T is a subclass of R.
+
+Consider the `StringToEnumConverterFactory` as an example:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.core.convert.support;
+
+	final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
+
+		public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
+			return new StringToEnumConverter(targetType);
+		}
+
+		private final class StringToEnumConverter<T extends Enum> implements Converter<String, T> {
+
+			private Class<T> enumType;
+
+			public StringToEnumConverter(Class<T> enumType) {
+				this.enumType = enumType;
+			}
+
+			public T convert(String source) {
+				return (T) Enum.valueOf(this.enumType, source.trim());
+			}
+		}
+	}
+----
+
+
+[[core-convert-GenericConverter-SPI]]
+== Using `GenericConverter`
+
+When you require a sophisticated `Converter` implementation, consider using the
+`GenericConverter` interface. With a more flexible but less strongly typed signature
+than `Converter`, a `GenericConverter` supports converting between multiple source and
+target types. In addition, a `GenericConverter` makes available source and target field
+context that you can use when you implement your conversion logic. Such context lets a
+type conversion be driven by a field annotation or by generic information declared on a
+field signature. The following listing shows the interface definition of `GenericConverter`:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.core.convert.converter;
+
+	public interface GenericConverter {
+
+		public Set<ConvertiblePair> getConvertibleTypes();
+
+		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+	}
+----
+
+To implement a `GenericConverter`, have `getConvertibleTypes()` return the supported
+source->target type pairs. Then implement `convert(Object, TypeDescriptor,
+TypeDescriptor)` to contain your conversion logic. The source `TypeDescriptor` provides
+access to the source field that holds the value being converted. The target `TypeDescriptor`
+provides access to the target field where the converted value is to be set.
+
+A good example of a `GenericConverter` is a converter that converts between a Java array
+and a collection. Such an `ArrayToCollectionConverter` introspects the field that declares
+the target collection type to resolve the collection's element type. This lets each
+element in the source array be converted to the collection element type before the
+collection is set on the target field.
+
+NOTE: Because `GenericConverter` is a more complex SPI interface, you should use
+it only when you need it. Favor `Converter` or `ConverterFactory` for basic type
+conversion needs.
+
+
+[[core-convert-ConditionalGenericConverter-SPI]]
+=== Using `ConditionalGenericConverter`
+
+Sometimes, you want a `Converter` to run only if a specific condition holds true. For
+example, you might want to run a `Converter` only if a specific annotation is present
+on the target field, or you might want to run a `Converter` only if a specific method
+(such as a `static valueOf` method) is defined on the target class.
+`ConditionalGenericConverter` is the union of the `GenericConverter` and
+`ConditionalConverter` interfaces that lets you define such custom matching criteria:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	public interface ConditionalConverter {
+
+		boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
+	}
+
+	public interface ConditionalGenericConverter extends GenericConverter, ConditionalConverter {
+	}
+----
+
+A good example of a `ConditionalGenericConverter` is an `IdToEntityConverter` that converts
+between a persistent entity identifier and an entity reference. Such an `IdToEntityConverter`
+might match only if the target entity type declares a static finder method (for example,
+`findAccount(Long)`). You might perform such a finder method check in the implementation of
+`matches(TypeDescriptor, TypeDescriptor)`.
+
+
+
+[[core-convert-ConversionService-API]]
+== The `ConversionService` API
+
+`ConversionService` defines a unified API for executing type conversion logic at
+runtime. Converters are often run behind the following facade interface:
+
+[source,java,indent=0,subs="verbatim,quotes",chomp="-packages"]
+----
+	package org.springframework.core.convert;
+
+	public interface ConversionService {
+
+		boolean canConvert(Class<?> sourceType, Class<?> targetType);
+
+		<T> T convert(Object source, Class<T> targetType);
+
+		boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+
+		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
+	}
+----
+
+Most `ConversionService` implementations also implement `ConverterRegistry`, which
+provides an SPI for registering converters. Internally, a `ConversionService`
+implementation delegates to its registered converters to carry out type conversion logic.
+
+A robust `ConversionService` implementation is provided in the `core.convert.support`
+package. `GenericConversionService` is the general-purpose implementation suitable for
+use in most environments. `ConversionServiceFactory` provides a convenient factory for
+creating common `ConversionService` configurations.
+
+
+
+[[core-convert-Spring-config]]
+== Configuring a `ConversionService`
+
+A `ConversionService` is a stateless object designed to be instantiated at application
+startup and then shared between multiple threads. In a Spring application, you typically
+configure a `ConversionService` instance for each Spring container (or `ApplicationContext`).
+Spring picks up that `ConversionService` and uses it whenever a type
+conversion needs to be performed by the framework. You can also inject this
+`ConversionService` into any of your beans and invoke it directly.
+
+NOTE: If no `ConversionService` is registered with Spring, the original `PropertyEditor`-based
+system is used.
+
+To register a default `ConversionService` with Spring, add the following bean definition
+with an `id` of `conversionService`:
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="conversionService"
+		class="org.springframework.context.support.ConversionServiceFactoryBean"/>
+----
+
+A default `ConversionService` can convert between strings, numbers, enums, collections,
+maps, and other common types. To supplement or override the default converters with your
+own custom converters, set the `converters` property. Property values can implement
+any of the `Converter`, `ConverterFactory`, or `GenericConverter` interfaces.
+
+[source,xml,indent=0,subs="verbatim,quotes"]
+----
+	<bean id="conversionService"
+			class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<bean class="example.MyCustomConverter"/>
+			</set>
+		</property>
+	</bean>
+----
+
+It is also common to use a `ConversionService` within a Spring MVC application. See
+xref:web/webmvc/mvc-config/conversion.adoc[Conversion and Formatting] in the Spring MVC chapter.
+
+In certain situations, you may wish to apply formatting during conversion. See
+xref:core/validation/format.adoc#format-FormatterRegistry-SPI[The `FormatterRegistry` SPI] for details on using `FormattingConversionServiceFactoryBean`.
+
+
+
+[[core-convert-programmatic-usage]]
+== Using a `ConversionService` Programmatically
+
+To work with a `ConversionService` instance programmatically, you can inject a reference to
+it like you would for any other bean. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Service
+	public class MyService {
+
+		public MyService(ConversionService conversionService) {
+			this.conversionService = conversionService;
+		}
+
+		public void doIt() {
+			this.conversionService.convert(...)
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Service
+	class MyService(private val conversionService: ConversionService) {
+
+		fun doIt() {
+			conversionService.convert(...)
+		}
+	}
+----
+======
+
+For most use cases, you can use the `convert` method that specifies the `targetType`, but it
+does not work with more complex types, such as a collection of a parameterized element.
+For example, if you want to convert a `List` of `Integer` to a `List` of `String` programmatically,
+you need to provide a formal definition of the source and target types.
+
+Fortunately, `TypeDescriptor` provides various options to make doing so straightforward,
+as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	DefaultConversionService cs = new DefaultConversionService();
+
+	List<Integer> input = ...
+	cs.convert(input,
+		TypeDescriptor.forObject(input), // List<Integer> type descriptor
+		TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(String.class)));
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val cs = DefaultConversionService()
+
+	val input: List<Integer> = ...
+	cs.convert(input,
+			TypeDescriptor.forObject(input), // List<Integer> type descriptor
+			TypeDescriptor.collection(List::class.java, TypeDescriptor.valueOf(String::class.java)))
+----
+======
+
+Note that `DefaultConversionService` automatically registers converters that are
+appropriate for most environments. This includes collection converters, scalar
+converters, and basic `Object`-to-`String` converters. You can register the same converters
+with any `ConverterRegistry` by using the static `addDefaultConverters`
+method on the `DefaultConversionService` class.
+
+Converters for value types are reused for arrays and collections, so there is
+no need to create a specific converter to convert from a `Collection` of `S` to a
+`Collection` of `T`, assuming that standard collection handling is appropriate.
+
+
+
+

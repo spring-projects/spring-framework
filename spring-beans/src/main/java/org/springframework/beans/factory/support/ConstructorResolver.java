@@ -294,7 +294,9 @@ class ConstructorResolver {
 				}
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Could not resolve matching constructor on bean class [" + mbd.getBeanClassName() + "] " +
-						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
+						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities. " +
+						"You should also check the consistency of arguments when mixing indexed and named arguments, " +
+						"especially in case of bean definition inheritance)");
 			}
 			else if (ambiguousConstructors != null && !mbd.isLenientConstructorResolution()) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,6 +147,24 @@ public class CookieResultMatchers {
 	}
 
 	/**
+	 * Assert a cookie's SameSite attribute with a Hamcrest {@link Matcher}.
+	 * @since 6.0.8
+	 * @see #attribute(String, String, Matcher)
+	 */
+	public ResultMatcher sameSite(String name, Matcher<? super String> matcher) {
+		return attribute(name, "SameSite", matcher);
+	}
+
+	/**
+	 * Assert a cookie's SameSite attribute.
+	 * @since 6.0.8
+	 * @see #attribute(String, String, String)
+	 */
+	public ResultMatcher sameSite(String name, String sameSite) {
+		return attribute(name, "SameSite", sameSite);
+	}
+
+	/**
 	 * Assert a cookie's comment with a Hamcrest {@link Matcher}.
 	 */
 	@SuppressWarnings("removal")
@@ -208,6 +226,34 @@ public class CookieResultMatchers {
 		return result -> {
 			Cookie cookie = getCookie(result, name);
 			assertEquals("Response cookie '" + name + "' httpOnly", httpOnly, cookie.isHttpOnly());
+		};
+	}
+
+	/**
+	 * Assert a cookie's specified attribute with a Hamcrest {@link Matcher}.
+	 * @param cookieAttribute the name of the Cookie attribute (case-insensitive)
+	 * @since 6.0.8
+	 */
+	public ResultMatcher attribute(String cookieName, String cookieAttribute, Matcher<? super String> matcher) {
+		return result -> {
+			Cookie cookie = getCookie(result, cookieName);
+			String attribute = cookie.getAttribute(cookieAttribute);
+			assertNotNull("Response cookie '" + cookieName + "' doesn't have attribute '" + cookieAttribute + "'", attribute);
+			assertThat("Response cookie '" + cookieName + "' attribute '" + cookieAttribute + "'",
+					attribute, matcher);
+		};
+	}
+
+	/**
+	 * Assert a cookie's specified attribute.
+	 * @param cookieAttribute the name of the Cookie attribute (case-insensitive)
+	 * @since 6.0.8
+	 */
+	public ResultMatcher attribute(String cookieName, String cookieAttribute, String attributeValue) {
+		return result -> {
+			Cookie cookie = getCookie(result, cookieName);
+			assertEquals("Response cookie '" + cookieName + "' attribute '" + cookieAttribute + "'",
+					attributeValue, cookie.getAttribute(cookieAttribute));
 		};
 	}
 

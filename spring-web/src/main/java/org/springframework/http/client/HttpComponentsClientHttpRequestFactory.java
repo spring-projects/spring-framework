@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -41,7 +39,6 @@ import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.protocol.HttpContext;
-import org.apache.hc.core5.util.Timeout;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpMethod;
@@ -65,9 +62,6 @@ import org.springframework.util.Assert;
  * @since 3.1
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
-
-	private static final Log logger = LogFactory.getLog(HttpComponentsClientHttpRequestFactory.class);
-
 
 	private HttpClient httpClient;
 
@@ -145,21 +139,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
 		Assert.isTrue(connectionRequestTimeout >= 0, "Timeout must be a non-negative value");
 		this.connectionRequestTimeout = connectionRequestTimeout;
-	}
-
-	/**
-	 * As of version 6.0, setting this property has no effect.
-	 * <p>To change the socket read timeout, use {@link SocketConfig.Builder#setSoTimeout(Timeout)},
-	 * supply the resulting {@link SocketConfig} to
-	 * {@link org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder#setDefaultSocketConfig(SocketConfig)},
-	 * use the resulting connection manager for
-	 * {@link org.apache.hc.client5.http.impl.classic.HttpClientBuilder#setConnectionManager(HttpClientConnectionManager)},
-	 * and supply the built {@link HttpClient} to {@link #HttpComponentsClientHttpRequestFactory(HttpClient)}.
-	 * @deprecated as of 6.0, in favor of {@link SocketConfig.Builder#setSoTimeout(Timeout)}, see above.
-	 */
-	@Deprecated(since = "6.0", forRemoval = true)
-	public void setReadTimeout(int timeout) {
-		logger.warn("HttpComponentsClientHttpRequestFactory.setReadTimeout has no effect");
 	}
 
 	/**

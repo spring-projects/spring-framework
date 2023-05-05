@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,10 +44,7 @@ import static org.mockito.Mockito.verify;
 public class InternalResourceViewTests {
 
 	@SuppressWarnings("serial")
-	private static final Map<String, Object> model = Collections.unmodifiableMap(new HashMap<String, Object>() {{
-		put("foo", "bar");
-		put("I", 1L);
-	}});
+	private static final Map<String, Object> model = Map.of("foo", "bar", "I", 1L);
 
 	private static final String url = "forward-to";
 

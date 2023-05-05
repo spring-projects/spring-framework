@@ -1,0 +1,88 @@
+[[testcontext-test-execution-events]]
+= Test Execution Events
+
+The `EventPublishingTestExecutionListener` introduced in Spring Framework 5.2 offers an
+alternative approach to implementing a custom `TestExecutionListener`. Components in the
+test's `ApplicationContext` can listen to the following events published by the
+`EventPublishingTestExecutionListener`, each of which corresponds to a method in the
+`TestExecutionListener` API.
+
+* `BeforeTestClassEvent`
+* `PrepareTestInstanceEvent`
+* `BeforeTestMethodEvent`
+* `BeforeTestExecutionEvent`
+* `AfterTestExecutionEvent`
+* `AfterTestMethodEvent`
+* `AfterTestClassEvent`
+
+These events may be consumed for various reasons, such as resetting mock beans or tracing
+test execution. One advantage of consuming test execution events rather than implementing
+a custom `TestExecutionListener` is that test execution events may be consumed by any
+Spring bean registered in the test `ApplicationContext`, and such beans may benefit
+directly from dependency injection and other features of the `ApplicationContext`. In
+contrast, a `TestExecutionListener` is not a bean in the `ApplicationContext`.
+
+[NOTE]
+====
+The `EventPublishingTestExecutionListener` is registered by default; however, it only
+publishes events if the `ApplicationContext` has _already been loaded_. This prevents the
+`ApplicationContext` from being loaded unnecessarily or too early.
+
+Consequently, a `BeforeTestClassEvent` will not be published until after the
+`ApplicationContext` has been loaded by another `TestExecutionListener`. For example, with
+the default set of `TestExecutionListener` implementations registered, a
+`BeforeTestClassEvent` will not be published for the first test class that uses a
+particular test `ApplicationContext`, but a `BeforeTestClassEvent` _will_ be published for
+any subsequent test class in the same test suite that uses the same test
+`ApplicationContext` since the context will already have been loaded when subsequent test
+classes run (as long as the context has not been removed from the `ContextCache` via
+`@DirtiesContext` or the max-size eviction policy).
+
+If you wish to ensure that a `BeforeTestClassEvent` is always published for every test
+class, you need to register a `TestExecutionListener` that loads the `ApplicationContext`
+in the `beforeTestClass` callback, and that `TestExecutionListener` must be registered
+_before_ the `EventPublishingTestExecutionListener`.
+
+Similarly, if `@DirtiesContext` is used to remove the `ApplicationContext` from the
+context cache after the last test method in a given test class, the `AfterTestClassEvent`
+will not be published for that test class.
+====
+
+In order to listen to test execution events, a Spring bean may choose to implement the
+`org.springframework.context.ApplicationListener` interface. Alternatively, listener
+methods can be annotated with `@EventListener` and configured to listen to one of the
+particular event types listed above (see
+xref:core/beans/context-introduction.adoc#context-functionality-events-annotation[Annotation-based Event Listeners]).
+Due to the popularity of this approach, Spring provides the following dedicated
+`@EventListener` annotations to simplify registration of test execution event listeners.
+These annotations reside in the `org.springframework.test.context.event.annotation`
+package.
+
+* `@BeforeTestClass`
+* `@PrepareTestInstance`
+* `@BeforeTestMethod`
+* `@BeforeTestExecution`
+* `@AfterTestExecution`
+* `@AfterTestMethod`
+* `@AfterTestClass`
+
+[[testcontext-test-execution-events-exception-handling]]
+== Exception Handling
+
+By default, if a test execution event listener throws an exception while consuming an
+event, that exception will propagate to the underlying testing framework in use (such as
+JUnit or TestNG). For example, if the consumption of a `BeforeTestMethodEvent` results in
+an exception, the corresponding test method will fail as a result of the exception. In
+contrast, if an asynchronous test execution event listener throws an exception, the
+exception will not propagate to the underlying testing framework. For further details on
+asynchronous exception handling, consult the class-level javadoc for `@EventListener`.
+
+[[testcontext-test-execution-events-async]]
+== Asynchronous Listeners
+
+If you want a particular test execution event listener to process events asynchronously,
+you can use Spring's xref:integration/scheduling.adoc#scheduling-annotation-support-async[regular `@Async` support]
+. For further details, consult the class-level javadoc for
+`@EventListener`.
+
+

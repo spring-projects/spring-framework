@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +119,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 	public Object getProxy(@Nullable ClassLoader classLoader) {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Creating JDK dynamic proxy: " + this.advised.getTargetSource());
+		}
+		if (classLoader == null || classLoader.getParent() == null) {
+			// JDK bootstrap loader or platform loader suggested ->
+			// use higher-level loader which can see Spring infrastructure classes
+			classLoader = getClass().getClassLoader();
 		}
 		return Proxy.newProxyInstance(classLoader, this.proxiedInterfaces, this);
 	}

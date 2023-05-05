@@ -1,0 +1,58 @@
+[[mvc-redirecting-passing-data]]
+= Redirect Attributes
+
+By default, all model attributes are considered to be exposed as URI template variables in
+the redirect URL. Of the remaining attributes, those that are primitive types or
+collections or arrays of primitive types are automatically appended as query parameters.
+
+Appending primitive type attributes as query parameters can be the desired result if a
+model instance was prepared specifically for the redirect. However, in annotated
+controllers, the model can contain additional attributes added for rendering purposes (for example,
+drop-down field values). To avoid the possibility of having such attributes appear in the
+URL, a `@RequestMapping` method can declare an argument of type `RedirectAttributes` and
+use it to specify the exact attributes to make available to `RedirectView`. If the method
+does redirect, the content of `RedirectAttributes` is used.  Otherwise, the content of the
+model is used.
+
+The `RequestMappingHandlerAdapter` provides a flag called
+`ignoreDefaultModelOnRedirect`, which you can use to indicate that the content of the default
+`Model` should never be used if a controller method redirects. Instead, the controller
+method should declare an attribute of type `RedirectAttributes` or, if it does not do so,
+no attributes should be passed on to `RedirectView`. Both the MVC namespace and the MVC
+Java configuration keep this flag set to `false`, to maintain backwards compatibility.
+However, for new applications, we recommend setting it to `true`.
+
+Note that URI template variables from the present request are automatically made
+available when expanding a redirect URL, and you don't need to explicitly add them
+through `Model` or `RedirectAttributes`. The following example shows how to define a redirect:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@PostMapping("/files/{path}")
+	public String upload(...) {
+		// ...
+		return "redirect:files/{path}";
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@PostMapping("/files/{path}")
+	fun upload(...): String {
+		// ...
+		return "redirect:files/{path}"
+	}
+----
+======
+
+Another way of passing data to the redirect target is by using flash attributes. Unlike
+other redirect attributes, flash attributes are saved in the HTTP session (and, hence, do
+not appear in the URL). See xref:web/webmvc/mvc-controller/ann-methods/flash-attributes.adoc[Flash Attributes] for more information.
+
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Collection;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -129,9 +128,10 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 	@Override
 	protected void applyCookies() {
-		getCookies().values().stream().flatMap(Collection::stream)
-				.map(cookie -> new DefaultCookie(cookie.getName(), cookie.getValue()))
-				.forEach(this.request::addCookie);
+		getCookies().values().forEach(values -> values.forEach(value -> {
+			DefaultCookie cookie = new DefaultCookie(value.getName(), value.getValue());
+			this.request.addCookie(cookie);
+		}));
 	}
 
 	@Override

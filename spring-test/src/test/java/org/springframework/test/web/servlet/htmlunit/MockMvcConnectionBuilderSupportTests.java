@@ -115,7 +115,7 @@ public class MockMvcConnectionBuilderSupportTests {
 	@Test
 	public void defaultContextPathEmpty() throws Exception {
 		WebConnection conn = this.builder.createConnection(this.client);
-		assertThat(getResponse(conn, "http://localhost/abc").getContentAsString()).isEqualTo("");
+		assertThat(getResponse(conn, "http://localhost/abc").getContentAsString()).isEmpty();
 	}
 
 	@Test

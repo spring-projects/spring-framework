@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class AnnotationAsyncExecutionInterceptorTests {
 		}
 		{ // method and class level -> method value, even if empty, overrides
 			@Async("qClass") class C { @Async void m() { } }
-			assertThat(i.getExecutorQualifier(C.class.getDeclaredMethod("m"))).isEqualTo("");
+			assertThat(i.getExecutorQualifier(C.class.getDeclaredMethod("m"))).isEmpty();
 		}
 		{ // meta annotation with qualifier
 			@MyAsync class C { void m() { } }

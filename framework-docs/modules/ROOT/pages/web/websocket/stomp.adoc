@@ -1,0 +1,13 @@
+[[websocket-stomp]]
+= STOMP
+:page-section-summary-toc: 1
+
+The WebSocket protocol defines two types of messages (text and binary), but their
+content is undefined. The protocol defines a mechanism for client and server to negotiate a
+sub-protocol (that is, a higher-level messaging protocol) to use on top of WebSocket to
+define what kind of messages each can send, what the format is, the content of each
+message, and so on. The use of a sub-protocol is optional but, either way, the client and
+the server need to agree on some protocol that defines message content.
+
+
+

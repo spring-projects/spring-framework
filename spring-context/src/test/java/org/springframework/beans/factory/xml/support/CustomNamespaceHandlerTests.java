@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class CustomNamespaceHandlerTests {
 		assertTestBean(bean);
 		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
-		assertThat(advisors.length).as("Incorrect number of advisors").isEqualTo(1);
+		assertThat(advisors).as("Incorrect number of advisors").hasSize(1);
 		assertThat(advisors[0].getAdvice().getClass()).as("Incorrect advice class").isEqualTo(DebugInterceptor.class);
 	}
 
@@ -136,7 +136,7 @@ public class CustomNamespaceHandlerTests {
 		assertTestBean(bean);
 		assertThat(AopUtils.isAopProxy(bean)).isTrue();
 		Advisor[] advisors = ((Advised) bean).getAdvisors();
-		assertThat(advisors.length).as("Incorrect number of advisors").isEqualTo(2);
+		assertThat(advisors).as("Incorrect number of advisors").hasSize(2);
 		assertThat(advisors[0].getAdvice().getClass()).as("Incorrect advice class").isEqualTo(DebugInterceptor.class);
 		assertThat(advisors[1].getAdvice().getClass()).as("Incorrect advice class").isEqualTo(NopInterceptor.class);
 	}

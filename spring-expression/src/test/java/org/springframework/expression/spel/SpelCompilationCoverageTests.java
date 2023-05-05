@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	 *   them to be their boxed or unboxed variants) or compare object references. It does not
 	 *   compile expressions where numbers are of different types or when objects implement
 	 *   Comparable.
-     *
+	 *
 	 * Compiled nodes:
 	 *
 	 * TypeReference
@@ -1071,10 +1071,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(context).toString()).isEqualTo("a");
 
 		expression = parser.parseExpression("#append()");
-		assertThat(expression.getValue(context).toString()).isEqualTo("");
+		assertThat(expression.getValue(context).toString()).isEmpty();
 		assertThat(((SpelNodeImpl)((SpelExpression) expression).getAST()).isCompilable()).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(context).toString()).isEqualTo("");
+		assertThat(expression.getValue(context).toString()).isEmpty();
 
 		expression = parser.parseExpression("#append(#stringArray)");
 		assertThat(expression.getValue(context).toString()).isEqualTo("xyz");
@@ -1108,10 +1108,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(context).toString()).isEqualTo("ab");
 
 		expression = parser.parseExpression("#append2()");
-		assertThat(expression.getValue(context).toString()).isEqualTo("");
+		assertThat(expression.getValue(context).toString()).isEmpty();
 		assertThat(((SpelNodeImpl)((SpelExpression) expression).getAST()).isCompilable()).isTrue();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(context).toString()).isEqualTo("");
+		assertThat(expression.getValue(context).toString()).isEmpty();
 
 		expression = parser.parseExpression("#append3(#stringArray)");
 		assertThat(expression.getValue(context, new SomeCompareMethod2()).toString()).isEqualTo("xyz");
@@ -3383,9 +3383,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(String.class)).isEqualTo("foo");
 
 		expression = parser.parseExpression(prefix + "2().output");
-		assertThat(expression.getValue(String.class)).isEqualTo("");
+		assertThat(expression.getValue(String.class)).isEmpty();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(String.class)).isEqualTo("");
+		assertThat(expression.getValue(String.class)).isEmpty();
 
 		expression = parser.parseExpression(prefix + "3(1,2,3).output");
 		assertThat(expression.getValue(String.class)).isEqualTo("123");
@@ -3398,9 +3398,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertThat(expression.getValue(String.class)).isEqualTo("1");
 
 		expression = parser.parseExpression(prefix + "3().output");
-		assertThat(expression.getValue(String.class)).isEqualTo("");
+		assertThat(expression.getValue(String.class)).isEmpty();
 		assertCanCompile(expression);
-		assertThat(expression.getValue(String.class)).isEqualTo("");
+		assertThat(expression.getValue(String.class)).isEmpty();
 
 		expression = parser.parseExpression(prefix + "3('abc',5.0f,1,2,3).output");
 		assertThat(expression.getValue(String.class)).isEqualTo("abc:5.0:123");
@@ -5095,7 +5095,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			classloadersUsed.add(cEx.getClass().getClassLoader());
 			assertThat((int) expression.getValue(Integer.class)).isEqualTo(9);
 		}
-		assertThat(classloadersUsed.size() > 1).isTrue();
+		assertThat(classloadersUsed.size()).isGreaterThan(1);
 	}
 
 

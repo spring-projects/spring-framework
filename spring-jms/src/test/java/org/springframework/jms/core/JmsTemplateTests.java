@@ -138,7 +138,7 @@ class JmsTemplateTests {
 		PrintWriter out = new PrintWriter(sw);
 		springJmsEx.printStackTrace(out);
 		String trace = sw.toString();
-		assertThat(trace.indexOf("host not found") > 0).as("inner jms exception not found").isTrue();
+		assertThat(trace.indexOf("host not found")).as("inner jms exception not found").isGreaterThan(0);
 	}
 
 	@Test

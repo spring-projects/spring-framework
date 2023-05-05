@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -174,7 +174,7 @@ class AsyncTests {
 				.andExpect(request().asyncStarted())
 				.andReturn();
 
-		assertThat(writer.toString().contains("Async started = true")).isTrue();
+		assertThat(writer.toString()).contains("Async started = true");
 		writer = new StringWriter();
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
@@ -183,7 +183,7 @@ class AsyncTests {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 
-		assertThat(writer.toString().contains("Async started = false")).isTrue();
+		assertThat(writer.toString()).contains("Async started = false");
 	}
 
 

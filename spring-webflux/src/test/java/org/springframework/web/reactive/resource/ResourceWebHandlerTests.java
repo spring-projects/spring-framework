@@ -63,7 +63,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -412,9 +411,6 @@ class ResourceWebHandlerTests {
 					assertThat(((ResponseStatusException) err).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 				})
 				.verify(TIMEOUT);
-		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
-			fail(requestPath + " doesn't actually exist as a relative path");
-		}
 	}
 
 	@Test
@@ -440,7 +436,7 @@ class ResourceWebHandlerTests {
 		assertThat(this.handler.processPath((char) 1 + " / " + (char) 127 + " // foo/bar")).isEqualTo("/foo/bar");
 
 		// root or empty path
-		assertThat(this.handler.processPath("   ")).isEqualTo("");
+		assertThat(this.handler.processPath("   ")).isEmpty();
 		assertThat(this.handler.processPath("/")).isEqualTo("/");
 		assertThat(this.handler.processPath("///")).isEqualTo("/");
 		assertThat(this.handler.processPath("/ /   / ")).isEqualTo("/");
@@ -677,8 +673,8 @@ class ResourceWebHandlerTests {
 		this.handler.handle(exchange).block(TIMEOUT);
 
 		assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.PARTIAL_CONTENT);
-		assertThat(exchange.getResponse().getHeaders().getContentType().toString()
-		.startsWith("multipart/byteranges;boundary=")).isTrue();
+		assertThat(exchange.getResponse().getHeaders().getContentType().toString()).startsWith(
+				"multipart/byteranges;boundary=");
 
 		String boundary = "--" + exchange.getResponse().getHeaders().getContentType().toString().substring(30);
 

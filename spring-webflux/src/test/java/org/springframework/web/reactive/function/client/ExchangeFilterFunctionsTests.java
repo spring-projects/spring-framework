@@ -105,7 +105,7 @@ public class ExchangeFilterFunctionsTests {
 
 		ExchangeFunction exchange = r -> {
 			assertThat(r.headers().containsKey(HttpHeaders.AUTHORIZATION)).isTrue();
-			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION).startsWith("Basic ")).isTrue();
+			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION)).startsWith("Basic ");
 			return Mono.just(response);
 		};
 
@@ -135,7 +135,7 @@ public class ExchangeFilterFunctionsTests {
 
 		ExchangeFunction exchange = r -> {
 			assertThat(r.headers().containsKey(HttpHeaders.AUTHORIZATION)).isTrue();
-			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION).startsWith("Basic ")).isTrue();
+			assertThat(r.headers().getFirst(HttpHeaders.AUTHORIZATION)).startsWith("Basic ");
 			return Mono.just(response);
 		};
 

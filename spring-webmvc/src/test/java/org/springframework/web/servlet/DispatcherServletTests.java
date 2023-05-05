@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,16 +118,18 @@ public class DispatcherServletTests {
 
 	@Test
 	public void configuredDispatcherServlets() {
-		assertThat(("simple" + FrameworkServlet.DEFAULT_NAMESPACE_SUFFIX).equals(simpleDispatcherServlet.getNamespace())).as("Correct namespace").isTrue();
-		assertThat((FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple").equals(
-		simpleDispatcherServlet.getServletContextAttributeName())).as("Correct attribute").isTrue();
-		assertThat(simpleDispatcherServlet.getWebApplicationContext() ==
-		getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple")).as("Context published").isTrue();
+		assertThat((simpleDispatcherServlet.getNamespace())).as("Correct namespace")
+				.isEqualTo("simple" + FrameworkServlet.DEFAULT_NAMESPACE_SUFFIX);
+		assertThat((FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple")).as("Correct attribute")
+				.isEqualTo(simpleDispatcherServlet.getServletContextAttributeName());
+		assertThat(simpleDispatcherServlet.getWebApplicationContext()).as("Context published")
+				.isSameAs(getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple"));
 
-		assertThat("test".equals(complexDispatcherServlet.getNamespace())).as("Correct namespace").isTrue();
-		assertThat((FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex").equals(
-		complexDispatcherServlet.getServletContextAttributeName())).as("Correct attribute").isTrue();
-		assertThat(getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex") == null).as("Context not published").isTrue();
+		assertThat(complexDispatcherServlet.getNamespace()).as("Correct namespace").isEqualTo("test");
+		assertThat((FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex")).as("Correct attribute")
+				.isEqualTo(complexDispatcherServlet.getServletContextAttributeName());
+		assertThat(getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex")).as("Context not published")
+				.isNull();
 
 		simpleDispatcherServlet.destroy();
 		complexDispatcherServlet.destroy();
@@ -138,8 +140,8 @@ public class DispatcherServletTests {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/invalid.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl() == null).as("Not forwarded").isTrue();
-		assertThat(response.getStatus() == HttpServletResponse.SC_NOT_FOUND).as("correct error code").isTrue();
+		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
+		assertThat(response.getStatus()).as("correct error code").isEqualTo(HttpServletResponse.SC_NOT_FOUND);
 	}
 
 	@Test
@@ -150,7 +152,7 @@ public class DispatcherServletTests {
 		ComplexWebApplicationContext.TestApplicationListener listener =
 				(ComplexWebApplicationContext.TestApplicationListener) complexDispatcherServlet
 						.getWebApplicationContext().getBean("testListener");
-		assertThat(listener.counter).isEqualTo(1);
+		assertThat(listener.counter).isOne();
 	}
 
 	@Test
@@ -181,7 +183,7 @@ public class DispatcherServletTests {
 		request.addParameter("noView", "true");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl() == null).as("Not forwarded").isTrue();
+		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
 	}
 
 	@Test
@@ -190,7 +192,7 @@ public class DispatcherServletTests {
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		simpleDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl() == null).as("Not forwarded").isTrue();
+		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
 		assertThat(response.getHeader("Last-Modified")).isEqualTo("Wed, 01 Apr 2015 00:00:00 GMT");
 	}
 
@@ -211,16 +213,16 @@ public class DispatcherServletTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
 
-		assertThat(response.getForwardedUrl() == null).as("Not forwarded").isTrue();
-		assertThat(request.getAttribute("test1") != null).isTrue();
-		assertThat(request.getAttribute("test1x") == null).isTrue();
-		assertThat(request.getAttribute("test1y") == null).isTrue();
-		assertThat(request.getAttribute("test2") != null).isTrue();
-		assertThat(request.getAttribute("test2x") == null).isTrue();
-		assertThat(request.getAttribute("test2y") == null).isTrue();
-		assertThat(request.getAttribute("test3") != null).isTrue();
-		assertThat(request.getAttribute("test3x") != null).isTrue();
-		assertThat(request.getAttribute("test3y") != null).isTrue();
+		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
+		assertThat(request.getAttribute("test1")).isNotNull();
+		assertThat(request.getAttribute("test1x")).isNull();
+		assertThat(request.getAttribute("test1y")).isNull();
+		assertThat(request.getAttribute("test2")).isNotNull();
+		assertThat(request.getAttribute("test2x")).isNull();
+		assertThat(request.getAttribute("test2y")).isNull();
+		assertThat(request.getAttribute("test3")).isNotNull();
+		assertThat(request.getAttribute("test3x")).isNotNull();
+		assertThat(request.getAttribute("test3y")).isNotNull();
 		assertThat(response.getHeader("Last-Modified")).isEqualTo("Wed, 01 Apr 2015 00:00:01 GMT");
 	}
 
@@ -278,13 +280,13 @@ public class DispatcherServletTests {
 		request.addUserRole("role1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl() == null).as("Not forwarded").isTrue();
-		assertThat(request.getAttribute("test1") != null).isTrue();
-		assertThat(request.getAttribute("test1x") != null).isTrue();
-		assertThat(request.getAttribute("test1y") == null).isTrue();
-		assertThat(request.getAttribute("test2") == null).isTrue();
-		assertThat(request.getAttribute("test2x") == null).isTrue();
-		assertThat(request.getAttribute("test2y") == null).isTrue();
+		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
+		assertThat(request.getAttribute("test1")).isNotNull();
+		assertThat(request.getAttribute("test1x")).isNotNull();
+		assertThat(request.getAttribute("test1y")).isNull();
+		assertThat(request.getAttribute("test2")).isNull();
+		assertThat(request.getAttribute("test2x")).isNull();
+		assertThat(request.getAttribute("test2y")).isNull();
 	}
 
 	@Test
@@ -309,7 +311,8 @@ public class DispatcherServletTests {
 		complexDispatcherServlet.service(request, response);
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getForwardedUrl()).as("forwarded URL").isEqualTo("failed2.jsp");
-		assertThat(request.getAttribute("exception") instanceof IllegalAccessException).as("Exception exposed").isTrue();
+		assertThat(request.getAttribute("exception")).as("Exception exposed")
+				.isInstanceOf(IllegalAccessException.class);
 	}
 
 	@Test
@@ -322,7 +325,7 @@ public class DispatcherServletTests {
 		complexDispatcherServlet.service(request, response);
 		assertThat(response.getStatus()).isEqualTo(200);
 		assertThat(response.getForwardedUrl()).as("forwarded URL").isEqualTo("failed3.jsp");
-		assertThat(request.getAttribute("exception") instanceof ServletException).as("Exception exposed").isTrue();
+		assertThat(request.getAttribute("exception")).as("Exception exposed").isInstanceOf(ServletException.class);
 	}
 
 	@Test
@@ -335,7 +338,8 @@ public class DispatcherServletTests {
 		complexDispatcherServlet.service(request, response);
 		assertThat(response.getStatus()).isEqualTo(500);
 		assertThat(response.getForwardedUrl()).as("forwarded URL").isEqualTo("failed1.jsp");
-		assertThat(request.getAttribute("exception") instanceof IllegalAccessException).as("Exception exposed").isTrue();
+		assertThat(request.getAttribute("exception")).as("Exception exposed")
+				.isInstanceOf(IllegalAccessException.class);
 	}
 
 	@Test
@@ -348,7 +352,7 @@ public class DispatcherServletTests {
 		complexDispatcherServlet.service(request, response);
 		assertThat(response.getStatus()).isEqualTo(500);
 		assertThat(response.getForwardedUrl()).as("forwarded URL").isEqualTo("failed1.jsp");
-		assertThat(request.getAttribute("exception") instanceof ServletException).as("Exception exposed").isTrue();
+		assertThat(request.getAttribute("exception")).as("Exception exposed").isInstanceOf(ServletException.class);
 	}
 
 	@Test
@@ -386,7 +390,7 @@ public class DispatcherServletTests {
 		request.addParameter("locale2", "en_CA");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl() == null).as("Not forwarded").isTrue();
+		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
 	}
 
 	@Test
@@ -411,7 +415,7 @@ public class DispatcherServletTests {
 		request.addParameter("theme2", "theme");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getForwardedUrl() == null).as("Not forwarded").isTrue();
+		assertThat(response.getForwardedUrl()).as("Not forwarded").isNull();
 	}
 
 	@Test
@@ -420,7 +424,7 @@ public class DispatcherServletTests {
 		request.addPreferredLocale(Locale.CANADA);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getStatus() == HttpServletResponse.SC_FORBIDDEN).as("Correct response").isTrue();
+		assertThat(response.getStatus()).as("Correct response").isEqualTo(HttpServletResponse.SC_FORBIDDEN);
 	}
 
 	@Test
@@ -433,7 +437,7 @@ public class DispatcherServletTests {
 		request = new MockHttpServletRequest(getServletContext(), "GET", "/head.do");
 		response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getContentAsString()).isEqualTo("");
+		assertThat(response.getContentAsString()).isEmpty();
 	}
 
 	@Test
@@ -460,7 +464,7 @@ public class DispatcherServletTests {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/unknown.do");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getStatus() == HttpServletResponse.SC_NOT_FOUND).isTrue();
+		assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
 	}
 
 	@Test
@@ -503,7 +507,8 @@ public class DispatcherServletTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		complexDispatcherServlet.service(request, response);
 
-		assertThat(response.getStatus() == HttpServletResponse.SC_NOT_FOUND).as("Matched through parent controller/handler pair: not response=" + response.getStatus()).isFalse();
+		assertThat(response.getStatus()).as("Matched through parent controller/handler pair: not response=" + response.getStatus())
+				.isNotEqualTo(HttpServletResponse.SC_NOT_FOUND);
 	}
 
 	@Test
@@ -593,7 +598,7 @@ public class DispatcherServletTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		complexDispatcherServlet.service(request, response);
-		assertThat(response.getStatus() == HttpServletResponse.SC_NOT_FOUND).as("correct error code").isTrue();
+		assertThat(response.getStatus()).as("correct error code").isEqualTo(HttpServletResponse.SC_NOT_FOUND);
 	}
 
 	// SPR-12984
@@ -603,8 +608,8 @@ public class DispatcherServletTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 		NoHandlerFoundException ex = new NoHandlerFoundException("GET", "/foo", headers);
-		assertThat(!ex.getMessage().contains("bar")).isTrue();
-		assertThat(!ex.toString().contains("bar")).isTrue();
+		assertThat(ex.getMessage()).doesNotContain("bar");
+		assertThat(ex.toString()).doesNotContain("bar");
 	}
 
 	@Test
@@ -791,10 +796,10 @@ public class DispatcherServletTests {
 				(ServletConfigAwareBean) servlet.getWebApplicationContext().getBean("servletConfigAwareBean");
 		assertThat(contextBean2.getServletContext()).isSameAs(servletContext);
 		assertThat(configBean2.getServletConfig()).isSameAs(servlet.getServletConfig());
-		assertThat(contextBean != contextBean2).isTrue();
-		assertThat(configBean != configBean2).isTrue();
+		assertThat(contextBean).isNotSameAs(contextBean2);
+		assertThat(configBean).isNotSameAs(configBean2);
 		MultipartResolver multipartResolver2 = servlet.getMultipartResolver();
-		assertThat(multipartResolver != multipartResolver2).isTrue();
+		assertThat(multipartResolver).isNotSameAs(multipartResolver2);
 
 		servlet.destroy();
 	}

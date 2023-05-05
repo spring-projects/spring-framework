@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,8 +188,8 @@ class AnnotationMetadataTests {
 	 * 'true' as is done in the main test above.
 	 */
 	@Test
-	@Deprecated
 	void standardAnnotationMetadata_nestedAnnotationsAsMap_false() {
+		@SuppressWarnings("deprecation")
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(AnnotatedComponent.class);
 		AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(SpecialAttr.class.getName());
 		Annotation[] nestedAnnoArray = (Annotation[]) specialAttrs.get("nestedAnnoArray");
@@ -197,8 +197,8 @@ class AnnotationMetadataTests {
 	}
 
 	@Test
-	@Deprecated
 	void metaAnnotationOverridesUsingStandardAnnotationMetadata() {
+		@SuppressWarnings("deprecation")
 		AnnotationMetadata metadata = new StandardAnnotationMetadata(ComposedConfigurationWithAttributeOverridesClass.class);
 		assertMetaAnnotationOverrides(metadata);
 	}
@@ -330,7 +330,7 @@ class AnnotationMetadataTests {
 			assertThat(specialAttrs.getEnum("state").equals(Thread.State.NEW)).isTrue();
 
 			AnnotationAttributes nestedAnno = specialAttrs.getAnnotation("nestedAnno");
-			assertThat("na").isEqualTo(nestedAnno.getString("value"));
+			assertThat(nestedAnno.getString("value")).isEqualTo("na");
 			assertThat(nestedAnno.getEnum("anEnum").equals(SomeEnum.LABEL1)).isTrue();
 			assertThat((Class<?>[]) nestedAnno.get("classArray")).isEqualTo(new Class<?>[] {String.class});
 

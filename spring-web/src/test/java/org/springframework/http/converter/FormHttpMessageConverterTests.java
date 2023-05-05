@@ -124,10 +124,10 @@ public class FormHttpMessageConverterTests {
 				new MediaType("application", "x-www-form-urlencoded", StandardCharsets.ISO_8859_1));
 		MultiValueMap<String, String> result = this.converter.read(null, inputMessage);
 
-		assertThat(result.size()).as("Invalid result").isEqualTo(3);
+		assertThat(result).as("Invalid result").hasSize(3);
 		assertThat(result.getFirst("name 1")).as("Invalid result").isEqualTo("value 1");
 		List<String> values = result.get("name 2");
-		assertThat(values.size()).as("Invalid result").isEqualTo(2);
+		assertThat(values).as("Invalid result").hasSize(2);
 		assertThat(values.get(0)).as("Invalid result").isEqualTo("value 2+1");
 		assertThat(values.get(1)).as("Invalid result").isEqualTo("value 2+2");
 		assertThat(result.getFirst("name 3")).as("Invalid result").isNull();

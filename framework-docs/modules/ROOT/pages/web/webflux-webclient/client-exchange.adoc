@@ -1,0 +1,53 @@
+[[webflux-client-exchange]]
+= Exchange
+
+The `exchangeToMono()` and `exchangeToFlux()` methods (or `awaitExchange { }` and `exchangeToFlow { }` in Kotlin)
+are useful for more advanced cases that require more control, such as to decode the response differently
+depending on the response status:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	Mono<Person> entityMono = client.get()
+			.uri("/persons/1")
+			.accept(MediaType.APPLICATION_JSON)
+			.exchangeToMono(response -> {
+				if (response.statusCode().equals(HttpStatus.OK)) {
+					return response.bodyToMono(Person.class);
+				}
+				else {
+					// Turn to error
+					return response.createError();
+				}
+			});
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+val entity = client.get()
+  .uri("/persons/1")
+  .accept(MediaType.APPLICATION_JSON)
+  .awaitExchange {
+		if (response.statusCode() == HttpStatus.OK) {
+			 return response.awaitBody<Person>()
+		}
+		else {
+			 throw response.createExceptionAndAwait()
+		}
+  }
+----
+======
+
+When using the above, after the returned `Mono` or `Flux` completes, the response body
+is checked and if not consumed it is released to prevent memory and connection leaks.
+Therefore the response cannot be decoded further downstream. It is up to the provided
+function to declare how to decode the response if needed.
+
+
+
+

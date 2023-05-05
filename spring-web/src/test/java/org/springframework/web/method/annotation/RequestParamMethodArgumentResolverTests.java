@@ -505,7 +505,7 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void resolveOptionalParamValue() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -518,11 +518,11 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addParameter("name", "123");
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).get()).isEqualTo(123);
+		assertThat(((Optional) result)).contains(123);
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void missingOptionalParamValue() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -534,7 +534,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).isPresent()).isFalse();
+		assertThat(((Optional) result)).isNotPresent();
 	}
 
 	@Test
@@ -555,7 +555,7 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void missingOptionalParamArray() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -567,11 +567,11 @@ public class RequestParamMethodArgumentResolverTests {
 
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).isPresent()).isFalse();
+		assertThat(((Optional) result)).isNotPresent();
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void resolveOptionalParamList() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -584,11 +584,11 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addParameter("name", "123", "456");
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).get()).isEqualTo(Arrays.asList("123", "456"));
+		assertThat(((Optional) result)).contains(Arrays.asList("123", "456"));
 	}
 
 	@Test
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void missingOptionalParamList() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -600,7 +600,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 		result = resolver.resolveArgument(param, null, webRequest, binderFactory);
 		assertThat(result.getClass()).isEqualTo(Optional.class);
-		assertThat(((Optional) result).isPresent()).isFalse();
+		assertThat(((Optional) result)).isNotPresent();
 	}
 
 	@Test

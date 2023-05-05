@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,7 +278,8 @@ public class PersistenceXmlParsingTests {
 		assertThat(url).isNull();
 
 		url = PersistenceUnitReader.determinePersistenceUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
-		assertThat(url.toString().endsWith("/org/springframework/orm/jpa")).as("the containing folder should have been returned").isTrue();
+		assertThat(url.toString()).as("the containing folder should have been returned")
+				.endsWith("/org/springframework/orm/jpa");
 	}
 
 	@Test

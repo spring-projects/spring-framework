@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ class BeanUtilsTests {
 		PropertyDescriptor[] actual = Introspector.getBeanInfo(TestBean.class).getPropertyDescriptors();
 		PropertyDescriptor[] descriptors = BeanUtils.getPropertyDescriptors(TestBean.class);
 		assertThat(descriptors).as("Descriptors should not be null").isNotNull();
-		assertThat(descriptors.length).as("Invalid number of descriptors returned").isEqualTo(actual.length);
+		assertThat(descriptors).as("Invalid number of descriptors returned").hasSameSizeAs(actual);
 	}
 
 	@Test
@@ -161,13 +161,13 @@ class BeanUtilsTests {
 		tb.setAge(32);
 		tb.setTouchy("touchy");
 		TestBean tb2 = new TestBean();
-		assertThat(tb2.getName() == null).as("Name empty").isTrue();
-		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
-		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
+		assertThat(tb2.getName()).as("Name empty").isNull();
+		assertThat(tb2.getAge()).as("Age empty").isEqualTo(0);
+		assertThat(tb2.getTouchy()).as("Touchy empty").isNull();
 		BeanUtils.copyProperties(tb, tb2);
-		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
-		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
+		assertThat(tb2.getName()).as("Name copied").isEqualTo(tb.getName());
+		assertThat(tb2.getAge()).as("Age copied").isEqualTo(tb.getAge());
+		assertThat(tb2.getTouchy()).as("Touchy copied").isEqualTo(tb.getTouchy());
 	}
 
 	@Test
@@ -177,13 +177,13 @@ class BeanUtilsTests {
 		tb.setAge(32);
 		tb.setTouchy("touchy");
 		TestBean tb2 = new TestBean();
-		assertThat(tb2.getName() == null).as("Name empty").isTrue();
-		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
-		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
+		assertThat(tb2.getName()).as("Name empty").isNull();
+		assertThat(tb2.getAge()).as("Age empty").isEqualTo(0);
+		assertThat(tb2.getTouchy()).as("Touchy empty").isNull();
 		BeanUtils.copyProperties(tb, tb2);
-		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
-		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
+		assertThat(tb2.getName()).as("Name copied").isEqualTo(tb.getName());
+		assertThat(tb2.getAge()).as("Age copied").isEqualTo(tb.getAge());
+		assertThat(tb2.getTouchy()).as("Touchy copied").isEqualTo(tb.getTouchy());
 	}
 
 	@Test
@@ -193,13 +193,13 @@ class BeanUtilsTests {
 		tb.setAge(32);
 		tb.setTouchy("touchy");
 		DerivedTestBean tb2 = new DerivedTestBean();
-		assertThat(tb2.getName() == null).as("Name empty").isTrue();
-		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
-		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
+		assertThat(tb2.getName()).as("Name empty").isNull();
+		assertThat(tb2.getAge()).as("Age empty").isEqualTo(0);
+		assertThat(tb2.getTouchy()).as("Touchy empty").isNull();
 		BeanUtils.copyProperties(tb, tb2);
-		assertThat(tb2.getName().equals(tb.getName())).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == tb.getAge()).as("Age copied").isTrue();
-		assertThat(tb2.getTouchy().equals(tb.getTouchy())).as("Touchy copied").isTrue();
+		assertThat(tb2.getName()).as("Name copied").isEqualTo(tb.getName());
+		assertThat(tb2.getAge()).as("Age copied").isEqualTo(tb.getAge());
+		assertThat(tb2.getTouchy()).as("Touchy copied").isEqualTo(tb.getTouchy());
 	}
 
 	/**
@@ -342,37 +342,37 @@ class BeanUtilsTests {
 	@Test
 	void copyPropertiesWithEditable() throws Exception {
 		TestBean tb = new TestBean();
-		assertThat(tb.getName() == null).as("Name empty").isTrue();
+		assertThat(tb.getName()).as("Name empty").isNull();
 		tb.setAge(32);
 		tb.setTouchy("bla");
 		TestBean tb2 = new TestBean();
 		tb2.setName("rod");
-		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
-		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
+		assertThat(tb2.getAge()).as("Age empty").isEqualTo(0);
+		assertThat(tb2.getTouchy()).as("Touchy empty").isNull();
 
 		// "touchy" should not be copied: it's not defined in ITestBean
 		BeanUtils.copyProperties(tb, tb2, ITestBean.class);
-		assertThat(tb2.getName() == null).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == 32).as("Age copied").isTrue();
-		assertThat(tb2.getTouchy() == null).as("Touchy still empty").isTrue();
+		assertThat(tb2.getName()).as("Name copied").isNull();
+		assertThat(tb2.getAge()).as("Age copied").isEqualTo(32);
+		assertThat(tb2.getTouchy()).as("Touchy still empty").isNull();
 	}
 
 	@Test
 	void copyPropertiesWithIgnore() throws Exception {
 		TestBean tb = new TestBean();
-		assertThat(tb.getName() == null).as("Name empty").isTrue();
+		assertThat(tb.getName()).as("Name empty").isNull();
 		tb.setAge(32);
 		tb.setTouchy("bla");
 		TestBean tb2 = new TestBean();
 		tb2.setName("rod");
-		assertThat(tb2.getAge() == 0).as("Age empty").isTrue();
-		assertThat(tb2.getTouchy() == null).as("Touchy empty").isTrue();
+		assertThat(tb2.getAge()).as("Age empty").isEqualTo(0);
+		assertThat(tb2.getTouchy()).as("Touchy empty").isNull();
 
 		// "spouse", "touchy", "age" should not be copied
 		BeanUtils.copyProperties(tb, tb2, "spouse", "touchy", "age");
-		assertThat(tb2.getName() == null).as("Name copied").isTrue();
-		assertThat(tb2.getAge() == 0).as("Age still empty").isTrue();
-		assertThat(tb2.getTouchy() == null).as("Touchy still empty").isTrue();
+		assertThat(tb2.getName()).as("Name copied").isNull();
+		assertThat(tb2.getAge()).as("Age still empty").isEqualTo(0);
+		assertThat(tb2.getTouchy()).as("Touchy still empty").isNull();
 	}
 
 	@Test
@@ -381,7 +381,7 @@ class BeanUtilsTests {
 		source.setName("name");
 		TestBean target = new TestBean();
 		BeanUtils.copyProperties(source, target, "specialProperty");
-		assertThat("name").isEqualTo(target.getName());
+		assertThat(target.getName()).isEqualTo("name");
 	}
 
 	@Test

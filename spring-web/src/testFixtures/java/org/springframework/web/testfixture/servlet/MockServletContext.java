@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,13 +111,13 @@ public class MockServletContext implements ServletContext {
 
 	private final Map<String, ServletContext> contexts = new HashMap<>();
 
-	private int majorVersion = 3;
+	private int majorVersion = 6;
 
-	private int minorVersion = 1;
+	private int minorVersion = 0;
 
-	private int effectiveMajorVersion = 3;
+	private int effectiveMajorVersion = 6;
 
-	private int effectiveMinorVersion = 1;
+	private int effectiveMinorVersion = 0;
 
 	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<>();
 

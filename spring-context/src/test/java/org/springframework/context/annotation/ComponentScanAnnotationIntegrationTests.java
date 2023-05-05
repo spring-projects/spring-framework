@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.HashSet;
+import java.util.Set;
 
 import example.scannable.CustomComponent;
 import example.scannable.CustomStereotype;
@@ -55,7 +55,6 @@ import org.springframework.context.testfixture.SimpleMapScope;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -198,7 +197,7 @@ public class ComponentScanAnnotationIntegrationTests {
 	@Test
 	public void withAwareTypeFilter() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithAwareTypeFilter.class);
-		assertThat(ctx.getEnvironment().acceptsProfiles(Profiles.of("the-filter-ran"))).isTrue();
+		assertThat(ctx.getEnvironment().matchesProfiles("the-filter-ran")).isTrue();
 	}
 
 	@Test
@@ -397,9 +396,7 @@ class ComponentScanWithCustomTypeFilter {
 	@SuppressWarnings({ "rawtypes", "serial", "unchecked" })
 	public static CustomAutowireConfigurer customAutowireConfigurer() {
 		CustomAutowireConfigurer cac = new CustomAutowireConfigurer();
-		cac.setCustomQualifierTypes(new HashSet() {{
-				add(ComponentScanParserTests.CustomAnnotation.class);
-		}});
+		cac.setCustomQualifierTypes(Set.of(ComponentScanParserTests.CustomAnnotation.class));
 		return cac;
 	}
 

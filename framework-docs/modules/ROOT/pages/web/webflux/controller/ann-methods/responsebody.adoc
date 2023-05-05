@@ -1,0 +1,50 @@
+[[webflux-ann-responsebody]]
+= `@ResponseBody`
+
+[.small]#xref:web/webmvc/mvc-controller/ann-methods/responsebody.adoc[See equivalent in the Servlet stack]#
+
+You can use the `@ResponseBody` annotation on a method to have the return serialized
+to the response body through an xref:web/webflux/reactive-spring.adoc#webflux-codecs[HttpMessageWriter]. The following
+example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@GetMapping("/accounts/{id}")
+	@ResponseBody
+	public Account handle() {
+		// ...
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@GetMapping("/accounts/{id}")
+	@ResponseBody
+	fun handle(): Account {
+		// ...
+	}
+----
+======
+
+`@ResponseBody` is also supported at the class level, in which case it is inherited by
+all controller methods. This is the effect of `@RestController`, which is nothing more
+than a meta-annotation marked with `@Controller` and `@ResponseBody`.
+
+`@ResponseBody` supports reactive types, which means you can return Reactor or RxJava
+types and have the asynchronous values they produce rendered to the response.
+For additional details, see xref:web/webflux/reactive-spring.adoc#webflux-codecs-streaming[Streaming] and
+xref:web/webflux/reactive-spring.adoc#webflux-codecs-jackson[JSON rendering].
+
+You can combine `@ResponseBody` methods with JSON serialization views.
+See xref:web/webflux/controller/ann-methods/jackson.adoc[Jackson JSON] for details.
+
+You can use the xref:web/webflux/config.adoc#webflux-config-message-codecs[HTTP message codecs] option of the xref:web/webflux/dispatcher-handler.adoc#webflux-framework-config[WebFlux Config] to
+configure or customize message writing.
+
+

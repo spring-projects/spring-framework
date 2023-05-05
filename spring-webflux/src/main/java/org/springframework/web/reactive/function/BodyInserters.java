@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -373,12 +373,13 @@ public abstract class BodyInserters {
 			publisher = Mono.just(body);
 		}
 		MediaType mediaType = outputMessage.getHeaders().getContentType();
-		return context.messageWriters().stream()
-				.filter(messageWriter -> messageWriter.canWrite(bodyType, mediaType))
-				.findFirst()
-				.map(BodyInserters::cast)
-				.map(writer -> write(publisher, bodyType, mediaType, outputMessage, context, writer))
-				.orElseGet(() -> Mono.error(unsupportedError(bodyType, context, mediaType)));
+		for (HttpMessageWriter<?> messageWriter : context.messageWriters()) {
+			if (messageWriter.canWrite(bodyType, mediaType)) {
+				HttpMessageWriter<Object> typedMessageWriter = cast(messageWriter);
+				return write(publisher, bodyType, mediaType, outputMessage, context, typedMessageWriter);
+			}
+		}
+		return Mono.error(unsupportedError(bodyType, context, mediaType));
 	}
 
 	private static UnsupportedMediaTypeException unsupportedError(ResolvableType bodyType,
@@ -406,12 +407,13 @@ public abstract class BodyInserters {
 	private static <T> HttpMessageWriter<T> findWriter(
 			BodyInserter.Context context, ResolvableType elementType, @Nullable MediaType mediaType) {
 
-		return context.messageWriters().stream()
-				.filter(messageWriter -> messageWriter.canWrite(elementType, mediaType))
-				.findFirst()
-				.map(BodyInserters::<T>cast)
-				.orElseThrow(() -> new IllegalStateException(
-						"No HttpMessageWriter for \"" + mediaType + "\" and \"" + elementType + "\""));
+		for (HttpMessageWriter<?> messageWriter : context.messageWriters()) {
+			if (messageWriter.canWrite(elementType, mediaType)) {
+				return cast(messageWriter);
+			}
+		}
+		throw new IllegalStateException(
+						"No HttpMessageWriter for \"" + mediaType + "\" and \"" + elementType + "\"");
 	}
 
 	@SuppressWarnings("unchecked")

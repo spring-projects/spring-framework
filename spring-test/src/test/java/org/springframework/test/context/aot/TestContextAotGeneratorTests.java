@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.springframework.aot.test.generate.CompilerFiles;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.Profiles;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.ClassName;
@@ -263,7 +262,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 
 		MessageService messageService = context.getBean(MessageService.class);
 		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
-		String expectedMessage = cac.getEnvironment().acceptsProfiles(Profiles.of("spanish")) ?
+		String expectedMessage = cac.getEnvironment().matchesProfiles("spanish") ?
 				"¡Hola, AOT!" : "Hello, AOT!";
 		assertThat(messageService.generateMessage()).isEqualTo(expectedMessage);
 	}

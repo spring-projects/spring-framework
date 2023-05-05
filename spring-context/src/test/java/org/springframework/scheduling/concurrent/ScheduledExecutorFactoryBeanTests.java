@@ -183,7 +183,9 @@ class ScheduledExecutorFactoryBeanTests {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			@Override
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
-				assertThat("Bah; the setThreadFactory(..) method must use a default ThreadFactory if a null arg is passed in.").isNotNull();
+				assertThat(threadFactory)
+						.withFailMessage("Bah; the setThreadFactory(..) method must use a default ThreadFactory if a null arg is passed in.")
+						.isNotNull();
 				return super.createExecutor(poolSize, threadFactory, rejectedExecutionHandler);
 			}
 		};
@@ -199,7 +201,6 @@ class ScheduledExecutorFactoryBeanTests {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			@Override
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
-				assertThat("Bah; the setRejectedExecutionHandler(..) method must use a default RejectedExecutionHandler if a null arg is passed in.").isNotNull();
 				return super.createExecutor(poolSize, threadFactory, rejectedExecutionHandler);
 			}
 		};

@@ -16,6 +16,8 @@
 
 package org.springframework.build;
 
+import java.util.Map;
+
 import org.gradle.api.Project;
 import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.tasks.testing.Test;
@@ -26,8 +28,8 @@ import org.gradle.testretry.TestRetryTaskExtension;
  * Conventions that are applied in the presence of the {@link JavaBasePlugin}. When the
  * plugin is applied:
  * <ul>
- * <li>The {@link TestRetryPlugin Test Retry} plugins is applied so that flaky tests
- * are retried 3 times when running on the CI.
+ * <li>The {@link TestRetryPlugin Test Retry} plugin is applied so that flaky tests
+ * are retried 3 times when running on the CI server.
  * </ul>
  *
  * @author Brian Clozel
@@ -41,11 +43,36 @@ class TestConventions {
 
 	private void configureTestConventions(Project project) {
 		project.getTasks().withType(Test.class,
-				(test) -> project.getPlugins().withType(TestRetryPlugin.class, (testRetryPlugin) -> {
-					TestRetryTaskExtension testRetry = test.getExtensions().getByType(TestRetryTaskExtension.class);
-					testRetry.getFailOnPassedAfterRetry().set(true);
-					testRetry.getMaxRetries().set(isCi() ? 3 : 0);
-				}));
+				test -> {
+					configureTests(project, test);
+					configureTestRetryPlugin(project, test);
+				});
+	}
+
+	private void configureTests(Project project, Test test) {
+		test.useJUnitPlatform();
+		test.include("**/*Tests.class", "**/*Test.class");
+		test.setSystemProperties(Map.of(
+				"java.awt.headless", "true",
+				"io.netty.leakDetection.level", "paranoid",
+				"io.netty5.leakDetectionLevel", "paranoid",
+				"io.netty5.leakDetection.targetRecords", "32",
+				"io.netty5.buffer.lifecycleTracingEnabled", "true"
+		));
+		if (project.hasProperty("testGroups")) {
+			test.systemProperty("testGroups", project.getProperties().get("testGroups"));
+		}
+		test.jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED",
+				"--add-opens=java.base/java.util=ALL-UNNAMED",
+				"-Djava.locale.providers=COMPAT");
+	}
+
+	private void configureTestRetryPlugin(Project project, Test test) {
+		project.getPlugins().withType(TestRetryPlugin.class, testRetryPlugin -> {
+			TestRetryTaskExtension testRetry = test.getExtensions().getByType(TestRetryTaskExtension.class);
+			testRetry.getFailOnPassedAfterRetry().set(true);
+			testRetry.getMaxRetries().set(isCi() ? 3 : 0);
+		});
 	}
 
 	private boolean isCi() {

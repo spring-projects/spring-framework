@@ -1,0 +1,43 @@
+[[mvc-config-advanced-xml]]
+= Advanced XML Config
+
+The MVC namespace does not have an advanced mode. If you need to customize a property on
+a bean that you cannot change otherwise, you can use the `BeanPostProcessor` lifecycle
+hook of the Spring `ApplicationContext`, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Component
+	public class MyPostProcessor implements BeanPostProcessor {
+
+		public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
+			// ...
+		}
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Component
+	class MyPostProcessor : BeanPostProcessor {
+
+		override fun postProcessBeforeInitialization(bean: Any, name: String): Any {
+			// ...
+		}
+	}
+----
+======
+
+
+Note that you need to declare `MyPostProcessor` as a bean, either explicitly in XML or
+by letting it be detected through a `<component-scan/>` declaration.
+
+
+
+

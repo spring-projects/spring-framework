@@ -57,19 +57,19 @@ class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSession> {
 		Thread.sleep(1);
 
 		long time1 = this.session.getTimeSinceLastActive();
-		assertThat(time1 > 0).isTrue();
+		assertThat(time1).isGreaterThan(0);
 
 		Thread.sleep(1);
 
 		long time2 = this.session.getTimeSinceLastActive();
-		assertThat(time2 > time1).isTrue();
+		assertThat(time2).isGreaterThan(time1);
 
 		this.session.delegateConnectionEstablished();
 
 		Thread.sleep(1);
 
 		this.session.setActive(false);
-		assertThat(this.session.getTimeSinceLastActive() > 0).isTrue();
+		assertThat(this.session.getTimeSinceLastActive()).isGreaterThan(0);
 
 		this.session.setActive(true);
 		assertThat(this.session.getTimeSinceLastActive()).isEqualTo(0);

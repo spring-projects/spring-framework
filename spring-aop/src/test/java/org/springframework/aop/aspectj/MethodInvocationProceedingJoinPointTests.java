@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class MethodInvocationProceedingJoinPointTests {
 		AtomicInteger depth = new AtomicInteger();
 		pf.addAdvice((MethodBeforeAdvice) (method, args, target) -> {
 			JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
-			assertThat(jp.toString().contains(method.getName())).as("Method named in toString").isTrue();
+			assertThat(jp.toString()).as("Method named in toString").contains(method.getName());
 			// Ensure that these don't cause problems
 			jp.toShortString();
 			jp.toLongString();

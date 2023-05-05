@@ -266,13 +266,25 @@ public enum SpelMessage {
 	MAX_ARRAY_ELEMENTS_THRESHOLD_EXCEEDED(Kind.ERROR, 1075,
 			"Array declares too many elements, exceeding the threshold of ''{0}''"),
 
-	/** @since 5.3.26 */
+	/** @since 5.2.23 */
 	MAX_REPEATED_TEXT_SIZE_EXCEEDED(Kind.ERROR, 1076,
-			"Repeated text results in too many characters, exceeding the threshold of ''{0}''"),
+			"Repeated text is too long, exceeding the threshold of ''{0}'' characters"),
 
-	/** @since 5.3.26 */
+	/** @since 5.2.23 */
 	MAX_REGEX_LENGTH_EXCEEDED(Kind.ERROR, 1077,
-			"Regular expression contains too many characters, exceeding the threshold of ''{0}''");
+			"Regular expression is too long, exceeding the threshold of ''{0}'' characters"),
+
+	/** @since 5.2.24 */
+	MAX_CONCATENATED_STRING_LENGTH_EXCEEDED(Kind.ERROR, 1078,
+			"Concatenated string is too long, exceeding the threshold of ''{0}'' characters"),
+
+	/** @since 5.2.24 */
+	MAX_EXPRESSION_LENGTH_EXCEEDED(Kind.ERROR, 1079,
+			"SpEL expression is too long, exceeding the threshold of ''{0}'' characters"),
+
+	/** @since 5.2.24 */
+	VARIABLE_ASSIGNMENT_NOT_SUPPORTED(Kind.ERROR, 1080,
+			"Assignment to variable ''{0}'' is not supported");
 
 
 	private final Kind kind;

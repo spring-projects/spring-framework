@@ -472,11 +472,11 @@ class OptionTagTests extends AbstractHtmlElementTagTests {
 
 
 	private void assertOptionTagOpened(String output) {
-		assertThat(output.startsWith("<option")).isTrue();
+		assertThat(output).startsWith("<option");
 	}
 
 	private void assertOptionTagClosed(String output) {
-		assertThat(output.endsWith("</option>")).isTrue();
+		assertThat(output).endsWith("</option>");
 	}
 
 	@Override

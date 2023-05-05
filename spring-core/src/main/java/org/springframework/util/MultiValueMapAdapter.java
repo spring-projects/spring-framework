@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.springframework.lang.Nullable;
 
@@ -69,15 +70,13 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 
 	@Override
 	public void addAll(K key, List<? extends V> values) {
-		List<V> currentValues = this.targetMap.computeIfAbsent(key, k -> new ArrayList<>(1));
+		List<V> currentValues = this.targetMap.computeIfAbsent(key, k -> new ArrayList<>(values.size()));
 		currentValues.addAll(values);
 	}
 
 	@Override
 	public void addAll(MultiValueMap<K, V> values) {
-		for (Entry<K, List<V>> entry : values.entrySet()) {
-			addAll(entry.getKey(), entry.getValue());
-		}
+		values.forEach(this::addAll);
 	}
 
 	@Override
@@ -140,6 +139,12 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 
 	@Override
 	@Nullable
+	public List<V> putIfAbsent(K key, List<V> value) {
+		return this.targetMap.putIfAbsent(key, value);
+	}
+
+	@Override
+	@Nullable
 	public List<V> remove(Object key) {
 		return this.targetMap.remove(key);
 	}
@@ -167,6 +172,11 @@ public class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializ
 	@Override
 	public Set<Entry<K, List<V>>> entrySet() {
 		return this.targetMap.entrySet();
+	}
+
+	@Override
+	public void forEach(BiConsumer<? super K, ? super List<V>> action) {
+		this.targetMap.forEach(action);
 	}
 
 	@Override

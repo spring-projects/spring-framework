@@ -1,0 +1,171 @@
+[[beans-beanfactory]]
+= The `BeanFactory` API
+
+The `BeanFactory` API provides the underlying basis for Spring's IoC functionality.
+Its specific contracts are mostly used in integration with other parts of Spring and
+related third-party frameworks, and its `DefaultListableBeanFactory` implementation
+is a key delegate within the higher-level `GenericApplicationContext` container.
+
+`BeanFactory` and related interfaces (such as `BeanFactoryAware`, `InitializingBean`,
+`DisposableBean`) are important integration points for other framework components.
+By not requiring any annotations or even reflection, they allow for very efficient
+interaction between the container and its components. Application-level beans may
+use the same callback interfaces but typically prefer declarative dependency
+injection instead, either through annotations or through programmatic configuration.
+
+Note that the core `BeanFactory` API level and its `DefaultListableBeanFactory`
+implementation do not make assumptions about the configuration format or any
+component annotations to be used. All of these flavors come in through extensions
+(such as `XmlBeanDefinitionReader` and `AutowiredAnnotationBeanPostProcessor`) and
+operate on shared `BeanDefinition` objects as a core metadata representation.
+This is the essence of what makes Spring's container so flexible and extensible.
+
+
+
+[[context-introduction-ctx-vs-beanfactory]]
+== `BeanFactory` or `ApplicationContext`?
+
+This section explains the differences between the `BeanFactory` and
+`ApplicationContext` container levels and the implications on bootstrapping.
+
+You should use an `ApplicationContext` unless you have a good reason for not doing so, with
+`GenericApplicationContext` and its subclass `AnnotationConfigApplicationContext`
+as the common implementations for custom bootstrapping. These are the primary entry
+points to Spring's core container for all common purposes: loading of configuration
+files, triggering a classpath scan, programmatically registering bean definitions
+and annotated classes, and (as of 5.0) registering functional bean definitions.
+
+Because an `ApplicationContext` includes all the functionality of a `BeanFactory`, it is
+generally recommended over a plain `BeanFactory`, except for scenarios where full
+control over bean processing is needed. Within an `ApplicationContext` (such as the
+`GenericApplicationContext` implementation), several kinds of beans are detected
+by convention (that is, by bean name or by bean type -- in particular, post-processors),
+while a plain `DefaultListableBeanFactory` is agnostic about any special beans.
+
+For many extended container features, such as annotation processing and AOP proxying,
+the xref:core/beans/factory-extension.adoc#beans-factory-extension-bpp[`BeanPostProcessor` extension point] is essential.
+If you use only a plain `DefaultListableBeanFactory`, such post-processors do not
+get detected and activated by default. This situation could be confusing, because
+nothing is actually wrong with your bean configuration. Rather,  in such a scenario,
+the container needs to be fully bootstrapped through additional setup.
+
+The following table lists features provided by the `BeanFactory` and
+`ApplicationContext` interfaces and implementations.
+
+[[context-introduction-ctx-vs-beanfactory-feature-matrix]]
+.Feature Matrix
+[cols="50%,25%,25%"]
+|===
+| Feature | `BeanFactory` | `ApplicationContext`
+
+| Bean instantiation/wiring
+| Yes
+| Yes
+
+| Integrated lifecycle management
+| No
+| Yes
+
+| Automatic `BeanPostProcessor` registration
+| No
+| Yes
+
+| Automatic `BeanFactoryPostProcessor` registration
+| No
+| Yes
+
+| Convenient `MessageSource` access (for internationalization)
+| No
+| Yes
+
+| Built-in `ApplicationEvent` publication mechanism
+| No
+| Yes
+|===
+
+To explicitly register a bean post-processor with a `DefaultListableBeanFactory`,
+you need to programmatically call `addBeanPostProcessor`, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+	// populate the factory with bean definitions
+
+	// now register any needed BeanPostProcessor instances
+	factory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+	factory.addBeanPostProcessor(new MyBeanPostProcessor());
+
+	// now start using the factory
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val factory = DefaultListableBeanFactory()
+	// populate the factory with bean definitions
+
+	// now register any needed BeanPostProcessor instances
+	factory.addBeanPostProcessor(AutowiredAnnotationBeanPostProcessor())
+	factory.addBeanPostProcessor(MyBeanPostProcessor())
+
+	// now start using the factory
+----
+======
+
+To apply a `BeanFactoryPostProcessor` to a plain `DefaultListableBeanFactory`,
+you need to call its `postProcessBeanFactory` method, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+	XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+	reader.loadBeanDefinitions(new FileSystemResource("beans.xml"));
+
+	// bring in some property values from a Properties file
+	PropertySourcesPlaceholderConfigurer cfg = new PropertySourcesPlaceholderConfigurer();
+	cfg.setLocation(new FileSystemResource("jdbc.properties"));
+
+	// now actually do the replacement
+	cfg.postProcessBeanFactory(factory);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val factory = DefaultListableBeanFactory()
+	val reader = XmlBeanDefinitionReader(factory)
+	reader.loadBeanDefinitions(FileSystemResource("beans.xml"))
+
+	// bring in some property values from a Properties file
+	val cfg = PropertySourcesPlaceholderConfigurer()
+	cfg.setLocation(FileSystemResource("jdbc.properties"))
+
+	// now actually do the replacement
+	cfg.postProcessBeanFactory(factory)
+----
+======
+
+In both cases, the explicit registration steps are inconvenient, which is
+why the various `ApplicationContext` variants are preferred over a plain
+`DefaultListableBeanFactory` in Spring-backed applications, especially when
+relying on `BeanFactoryPostProcessor` and `BeanPostProcessor` instances for extended
+container functionality in a typical enterprise setup.
+
+[NOTE]
+====
+An `AnnotationConfigApplicationContext` has all common annotation post-processors
+registered and may bring in additional processors underneath the
+covers through configuration annotations, such as `@EnableTransactionManagement`.
+At the abstraction level of Spring's annotation-based configuration model,
+the notion of bean post-processors becomes a mere internal container detail.
+====

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility methods for formatting and logging messages.
@@ -78,7 +79,7 @@ public abstract class LogFormatUtils {
 			result = ObjectUtils.nullSafeToString(ex);
 		}
 		if (maxLength != -1) {
-			result = (result.length() > maxLength ? result.substring(0, maxLength) + " (truncated)..." : result);
+			result = StringUtils.truncate(result, maxLength);
 		}
 		if (replaceNewlinesAndControlCharacters) {
 			result = NEWLINE_PATTERN.matcher(result).replaceAll("<EOL>");

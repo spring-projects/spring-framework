@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,18 +84,20 @@ public class DefaultServerRequestObservationConvention implements ServerRequestO
 	public String getContextualName(ServerRequestObservationContext context) {
 		String httpMethod = context.getCarrier().getMethod().toLowerCase();
 		if (context.getPathPattern() != null) {
-			return "http %s %s".formatted(httpMethod, context.getPathPattern());
+			return "http " + httpMethod + " " + context.getPathPattern();
 		}
 		return "http " + httpMethod;
 	}
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(ServerRequestObservationContext context) {
-		return KeyValues.of(method(context), uri(context), status(context), exception(context), outcome(context));
+		// Make sure that KeyValues entries are already sorted by name for better performance
+		return KeyValues.of(exception(context), method(context), outcome(context), status(context), uri(context));
 	}
 
 	@Override
 	public KeyValues getHighCardinalityKeyValues(ServerRequestObservationContext context) {
+		// Make sure that KeyValues entries are already sorted by name for better performance
 		return KeyValues.of(httpUrl(context));
 	}
 

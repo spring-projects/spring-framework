@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import org.springframework.util.StringUtils;
  * Extension of {@code Cookie} with extra attributes, as defined in
  * <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>.
  *
+ * <p>As of Spring 6.0, this set of mocks is designed on a Servlet 6.0 baseline.
+ *
  * @author Vedran Pavic
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -41,12 +43,11 @@ public class MockCookie extends Cookie {
 
 	private static final long serialVersionUID = 4312531139502726325L;
 
+	private static final String SAME_SITE = "SameSite";
+	private static final String EXPIRES = "Expires";
 
 	@Nullable
 	private ZonedDateTime expires;
-
-	@Nullable
-	private String sameSite;
 
 
 	/**
@@ -64,7 +65,7 @@ public class MockCookie extends Cookie {
 	 * @since 5.1.11
 	 */
 	public void setExpires(@Nullable ZonedDateTime expires) {
-		this.expires = expires;
+		setAttribute(EXPIRES, (expires != null ? expires.format(DateTimeFormatter.RFC_1123_DATE_TIME) : null));
 	}
 
 	/**
@@ -85,7 +86,7 @@ public class MockCookie extends Cookie {
 	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis#section-4.1.2.7">RFC6265 bis</a>
 	 */
 	public void setSameSite(@Nullable String sameSite) {
-		this.sameSite = sameSite;
+		setAttribute(SAME_SITE, sameSite);
 	}
 
 	/**
@@ -94,9 +95,8 @@ public class MockCookie extends Cookie {
 	 */
 	@Nullable
 	public String getSameSite() {
-		return this.sameSite;
+		return getAttribute(SAME_SITE);
 	}
-
 
 	/**
 	 * Factory method that parses the value of the supplied "Set-Cookie" header.
@@ -122,7 +122,7 @@ public class MockCookie extends Cookie {
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Max-Age")) {
 				cookie.setMaxAge(Integer.parseInt(extractAttributeValue(attribute, setCookieHeader)));
 			}
-			else if (StringUtils.startsWithIgnoreCase(attribute, "Expires")) {
+			else if (StringUtils.startsWithIgnoreCase(attribute, EXPIRES)) {
 				try {
 					cookie.setExpires(ZonedDateTime.parse(extractAttributeValue(attribute, setCookieHeader),
 							DateTimeFormatter.RFC_1123_DATE_TIME));
@@ -140,7 +140,7 @@ public class MockCookie extends Cookie {
 			else if (StringUtils.startsWithIgnoreCase(attribute, "HttpOnly")) {
 				cookie.setHttpOnly(true);
 			}
-			else if (StringUtils.startsWithIgnoreCase(attribute, "SameSite")) {
+			else if (StringUtils.startsWithIgnoreCase(attribute, SAME_SITE)) {
 				cookie.setSameSite(extractAttributeValue(attribute, setCookieHeader));
 			}
 			else if (StringUtils.startsWithIgnoreCase(attribute, "Comment")) {
@@ -158,6 +158,14 @@ public class MockCookie extends Cookie {
 	}
 
 	@Override
+	public void setAttribute(String name, @Nullable String value) {
+		if (EXPIRES.equalsIgnoreCase(name)) {
+			this.expires = (value != null ? ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME) : null);
+		}
+		super.setAttribute(name, value);
+	}
+
+	@Override
 	public String toString() {
 		return new ToStringCreator(this)
 				.append("name", getName())
@@ -168,10 +176,9 @@ public class MockCookie extends Cookie {
 				.append("Comment", getComment())
 				.append("Secure", getSecure())
 				.append("HttpOnly", isHttpOnly())
-				.append("SameSite", this.sameSite)
+				.append(SAME_SITE, getSameSite())
 				.append("Max-Age", getMaxAge())
-				.append("Expires", (this.expires != null ?
-						DateTimeFormatter.RFC_1123_DATE_TIME.format(this.expires) : null))
+				.append(EXPIRES, getAttribute(EXPIRES))
 				.toString();
 	}
 

@@ -116,7 +116,7 @@ class SessionAttributeMethodArgumentResolverTests {
 				.resolveArgument(param, new BindingContext(), this.exchange).block();
 
 		assertThat(actual).isNotNull();
-		assertThat(actual.isPresent()).isFalse();
+		assertThat(actual).isNotPresent();
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultFormattingConversionService());

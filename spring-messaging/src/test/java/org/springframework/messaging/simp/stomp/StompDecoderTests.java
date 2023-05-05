@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class StompDecoderTests {
 		assertThat(headers.getContentLength()).isEqualTo(Integer.valueOf(0));
 
 		String bodyText = new String(frame.getPayload());
-		assertThat(bodyText).isEqualTo("");
+		assertThat(bodyText).isEmpty();
 	}
 
 	@Test
@@ -218,7 +218,7 @@ public class StompDecoderTests {
 
 		assertThat(headers.toNativeHeaderMap()).hasSize(2);
 		assertThat(headers.getFirstNativeHeader("accept-version")).isEqualTo("1.1");
-		assertThat(headers.getFirstNativeHeader("key")).isEqualTo("");
+		assertThat(headers.getFirstNativeHeader("key")).isEmpty();
 
 		assertThat(frame.getPayload()).isEmpty();
 	}

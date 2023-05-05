@@ -1,0 +1,152 @@
+[[webflux-client-filter]]
+= Filters
+
+You can register a client filter (`ExchangeFilterFunction`) through the `WebClient.Builder`
+in order to intercept and modify requests, as the following example shows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	WebClient client = WebClient.builder()
+			.filter((request, next) -> {
+
+				ClientRequest filtered = ClientRequest.from(request)
+						.header("foo", "bar")
+						.build();
+
+				return next.exchange(filtered);
+			})
+			.build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val client = WebClient.builder()
+			.filter { request, next ->
+
+				val filtered = ClientRequest.from(request)
+						.header("foo", "bar")
+						.build()
+
+				next.exchange(filtered)
+			}
+			.build()
+----
+======
+
+This can be used for cross-cutting concerns, such as authentication. The following example uses
+a filter for basic authentication through a static factory method:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
+
+	WebClient client = WebClient.builder()
+			.filter(basicAuthentication("user", "password"))
+			.build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	import org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication
+
+	val client = WebClient.builder()
+			.filter(basicAuthentication("user", "password"))
+			.build()
+----
+======
+
+Filters can be added or removed by mutating an existing `WebClient` instance, resulting
+in a new `WebClient` instance that does not affect the original one. For example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	import static org.springframework.web.reactive.function.client.ExchangeFilterFunctions.basicAuthentication;
+
+	WebClient client = webClient.mutate()
+			.filters(filterList -> {
+				filterList.add(0, basicAuthentication("user", "password"));
+			})
+			.build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val client = webClient.mutate()
+			.filters { it.add(0, basicAuthentication("user", "password")) }
+			.build()
+----
+======
+
+`WebClient` is a thin facade around the chain of filters followed by an
+`ExchangeFunction`. It provides a workflow to make requests, to encode to and from higher
+level objects, and it helps to ensure that response content is always consumed.
+When filters handle the response in some way, extra care must be taken to always consume
+its content or to otherwise propagate it downstream to the `WebClient` which will ensure
+the same. Below is a filter that handles the `UNAUTHORIZED` status code but ensures that
+any response content, whether expected or not, is released:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public ExchangeFilterFunction renewTokenFilter() {
+		return (request, next) -> next.exchange(request).flatMap(response -> {
+			if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
+				return response.releaseBody()
+						.then(renewToken())
+						.flatMap(token -> {
+							ClientRequest newRequest = ClientRequest.from(request).build();
+							return next.exchange(newRequest);
+						});
+			} else {
+				return Mono.just(response);
+			}
+		});
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	fun renewTokenFilter(): ExchangeFilterFunction? {
+		return ExchangeFilterFunction { request: ClientRequest?, next: ExchangeFunction ->
+			next.exchange(request!!).flatMap { response: ClientResponse ->
+				if (response.statusCode().value() == HttpStatus.UNAUTHORIZED.value()) {
+					return@flatMap response.releaseBody()
+							.then(renewToken())
+							.flatMap { token: String? ->
+								val newRequest = ClientRequest.from(request).build()
+								next.exchange(newRequest)
+							}
+				} else {
+					return@flatMap Mono.just(response)
+				}
+			}
+		}
+	}
+----
+======
+
+
+

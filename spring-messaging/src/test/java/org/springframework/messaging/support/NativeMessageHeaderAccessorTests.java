@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,7 +236,7 @@ public class NativeMessageHeaderAccessorTests {
 		Message<?> target = MessageBuilder.createMessage(source.getPayload(), targetAccessor.getMessageHeaders());
 
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(target);
-		assertThat(accessor.isMutable());
+		assertThat(accessor.isMutable()).isTrue();
 		((NativeMessageHeaderAccessor) accessor).addNativeHeader("foo", "baz");
 		assertThat(((NativeMessageHeaderAccessor) accessor).getNativeHeader("foo")).containsExactly("bar", "baz");
 	}
@@ -253,7 +253,7 @@ public class NativeMessageHeaderAccessorTests {
 		Message<?> target = MessageBuilder.createMessage(source.getPayload(), targetAccessor.getMessageHeaders());
 
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getMutableAccessor(target);
-		assertThat(accessor.isMutable());
+		assertThat(accessor.isMutable()).isTrue();
 		((NativeMessageHeaderAccessor) accessor).addNativeHeader("foo", "baz");
 		assertThat(((NativeMessageHeaderAccessor) accessor).getNativeHeader("foo")).containsExactly("bar", "baz");
 	}

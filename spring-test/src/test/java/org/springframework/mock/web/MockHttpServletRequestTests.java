@@ -382,7 +382,7 @@ class MockHttpServletRequestTests {
 	void emptyAcceptLanguageHeader() {
 		request.addHeader("Accept-Language", "");
 		assertThat(request.getLocale()).isEqualTo(Locale.ENGLISH);
-		assertThat(request.getHeader("Accept-Language")).isEqualTo("");
+		assertThat(request.getHeader("Accept-Language")).isEmpty();
 	}
 
 	@Test

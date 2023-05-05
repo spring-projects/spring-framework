@@ -1,22 +1,52 @@
+plugins {
+	id 'kotlin'
+	id 'io.spring.antora.generate-antora-yml' version '0.0.1'
+	id 'org.antora' version '1.0.0'
+}
+
 description = "Spring Framework Docs"
 
-apply plugin: 'kotlin'
-apply plugin: 'org.asciidoctor.jvm.convert'
-apply plugin: 'org.asciidoctor.jvm.pdf'
 apply from: "${rootDir}/gradle/publications.gradle"
 
 
-configurations {
-	asciidoctorExtensions
+antora {
+	version = '3.2.0-alpha.2'
+	playbook = 'cached-antora-playbook.yml'
+	playbookProvider {
+		repository = 'spring-projects/spring-framework'
+		branch = 'docs-build'
+		path = 'lib/antora/templates/per-branch-antora-playbook.yml'
+		checkLocalBranch = true
+	}
+	options = ['--clean', '--stacktrace']
+	environment = [
+			'ALGOLIA_API_KEY': '82c7ead946afbac3cf98c32446154691',
+			'ALGOLIA_APP_ID': '244V8V9FGG',
+			'ALGOLIA_INDEX_NAME': 'framework-docs'
+	]
+	dependencies = [
+			'@antora/atlas-extension': '1.0.0-alpha.1',
+			'@antora/collector-extension': '1.0.0-alpha.3',
+			'@asciidoctor/tabs': '1.0.0-beta.3',
+			'@opendevise/antora-release-line-extension': '1.0.0-alpha.2',
+			'@springio/antora-extensions': '1.3.0',
+			'@springio/asciidoctor-extensions': '1.0.0-alpha.9'
+	]
 }
 
-dependencies {
-	api(project(":spring-context"))
-	api(project(":spring-web"))
-	api("jakarta.servlet:jakarta.servlet-api")
 
-	implementation(project(":spring-core-test"))
-	implementation("org.assertj:assertj-core")
+tasks.named("generateAntoraYml") {
+	asciidocAttributes = project.provider( {
+		return  ["spring-version": project.version ]
+	} )
+}
+
+tasks.create("generateAntoraResources") {
+	dependsOn 'generateAntoraYml'
+}
+
+tasks.named("check") {
+	dependsOn 'antora'
 }
 
 jar {
@@ -27,8 +57,19 @@ javadoc {
 	enabled = false
 }
 
+repositories {
+	maven {
+		url "https://repo.spring.io/release"
+	}
+}
+
 dependencies {
-	asciidoctorExtensions "io.spring.asciidoctor.backends:spring-asciidoctor-backends:0.0.5"
+	api(project(":spring-context"))
+	api(project(":spring-web"))
+	api("jakarta.servlet:jakarta.servlet-api")
+
+	implementation(project(":spring-core-test"))
+	implementation("org.assertj:assertj-core")
 }
 
 /**
@@ -82,69 +123,10 @@ rootProject.tasks.dokkaHtmlMultiModule.configure {
 	outputDirectory.set(project.file("$buildDir/docs/kdoc"))
 }
 
-asciidoctorj {
-	version = '2.4.3'
-	fatalWarnings ".*"
-	options doctype: 'book', eruby: 'erubis'
-	attributes([
-			icons: 'font',
-			idprefix: '',
-			idseparator: '-',
-			revnumber: project.version,
-			sectanchors: '',
-			sectnums: '',
-			'spring-version': project.version
-	])
-}
-
 /**
- * Generate the Spring Framework Reference documentation from
- * "src/docs/asciidoc" in "build/docs/ref-docs/html5".
+ * Zip all Java docs (javadoc & kdoc) into a single archive
  */
-asciidoctor {
-	baseDirFollowsSourceDir()
-	configurations "asciidoctorExtensions"
-	sources {
-		include '*.adoc'
-	}
-	resources {
-		from(sourceDir) {
-			include 'images/*.png'
-		}
-	}
-	outputDir "$buildDir/docs/ref-docs/html5"
-	outputOptions {
-		backends "spring-html"
-	}
-	forkOptions {
-		jvmArgs += ["--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"]
-	}
-	logDocuments = true
-}
-
-asciidoctor.mustRunAfter "check"
-
-/**
- * Generate the Spring Framework Reference documentation from "src/docs/asciidoc"
- * in "build/docs/ref-docs/pdf".
- */
-asciidoctorPdf {
-	baseDirFollowsSourceDir()
-	configurations 'asciidoctorExtensions'
-	sources {
-		include 'spring-framework.adocbook'
-	}
-	outputDir "$buildDir/docs/ref-docs/pdf"
-	forkOptions {
-		jvmArgs += ["--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"]
-	}
-	logDocuments = true
-}
-
-/**
- * Zip all docs (API and reference) into a single archive
- */
-task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', rootProject.tasks.dokkaHtmlMultiModule]) {
+task docsZip(type: Zip, dependsOn: ['api', rootProject.tasks.dokkaHtmlMultiModule]) {
 	group = "Distribution"
 	description = "Builds -${archiveClassifier} archive containing api and reference " +
 			"for deployment at https://docs.spring.io/spring-framework/docs/."
@@ -156,12 +138,6 @@ task docsZip(type: Zip, dependsOn: ['api', 'asciidoctor', 'asciidoctorPdf', root
 	}
 	from (api) {
 		into "javadoc-api"
-	}
-	from ("$asciidoctor.outputDir") {
-		into "reference/html"
-	}
-	from ("$asciidoctorPdf.outputDir") {
-		into "reference/pdf"
 	}
 	from (rootProject.tasks.dokkaHtmlMultiModule.outputDirectory) {
 		into "kdoc-api"

@@ -111,7 +111,7 @@ class DefaultServerRequestTests {
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.attribute("foo")).isEqualTo(Optional.of("bar"));
+		assertThat(request.attribute("foo")).contains("bar");
 	}
 
 	@Test
@@ -121,7 +121,7 @@ class DefaultServerRequestTests {
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.param("foo")).isEqualTo(Optional.of("bar"));
+		assertThat(request.param("foo")).contains("bar");
 	}
 
 	@Test
@@ -149,7 +149,7 @@ class DefaultServerRequestTests {
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.param("foo")).isEqualTo(Optional.of(""));
+		assertThat(request.param("foo")).contains("");
 	}
 
 	@Test
@@ -159,7 +159,7 @@ class DefaultServerRequestTests {
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.param("bar")).isEqualTo(Optional.empty());
+		assertThat(request.param("bar")).isNotPresent();
 	}
 
 	@Test
@@ -221,7 +221,7 @@ class DefaultServerRequestTests {
 		assertThat(headers.accept()).isEqualTo(accept);
 		assertThat(headers.acceptCharset()).isEqualTo(acceptCharset);
 		assertThat(headers.contentLength()).isEqualTo(OptionalLong.of(contentLength));
-		assertThat(headers.contentType()).isEqualTo(Optional.of(contentType));
+		assertThat(headers.contentType()).contains(contentType);
 		assertThat(headers.header(HttpHeaders.CONTENT_TYPE)).containsExactly(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(headers.firstHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo(MediaType.TEXT_PLAIN_VALUE);
 		assertThat(headers.asHttpHeaders()).isEqualTo(httpHeaders);
@@ -301,7 +301,7 @@ class DefaultServerRequestTests {
 
 		DefaultServerRequest request = new DefaultServerRequest(servletRequest, this.messageConverters);
 
-		assertThat(request.principal().get()).isEqualTo(principal);
+		assertThat(request.principal()).contains(principal);
 	}
 
 	@ParameterizedHttpMethodTest

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,7 +407,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setEnvironment(env);
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(OptionalTestBean.class).getName()).isEqualTo(Optional.of("myValue"));
+		assertThat(bf.getBean(OptionalTestBean.class).getName()).contains("myValue");
 	}
 
 	@Test
@@ -427,7 +427,7 @@ public class PropertySourcesPlaceholderConfigurerTests {
 		ppc.setIgnoreUnresolvablePlaceholders(true);
 		ppc.setNullValue("");
 		ppc.postProcessBeanFactory(bf);
-		assertThat(bf.getBean(OptionalTestBean.class).getName()).isEqualTo(Optional.empty());
+		assertThat(bf.getBean(OptionalTestBean.class).getName()).isNotPresent();
 	}
 
 

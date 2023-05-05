@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,7 +202,7 @@ public class AdvisorAutoProxyCreatorTests {
 
 
 		ITestBean test2 = (ITestBean) bf.getBean("!test");
-		assertThat(test == test2).as("Prototypes cannot be the same object").isFalse();
+		assertThat(test).as("Prototypes cannot be the same object").isNotSameAs(test2);
 		assertThat(test2.getName()).isEqualTo("Rod");
 		assertThat(test2.getSpouse().getName()).isEqualTo("Kerry");
 		bf.close();

@@ -1923,8 +1923,8 @@ class MergedAnnotationsTests {
 		MergedAnnotation<TestConfiguration> annotation = MergedAnnotation.of(
 				TestConfiguration.class);
 		TestConfiguration synthesized = annotation.synthesize();
-		assertThat(synthesized.value()).isEqualTo("");
-		assertThat(synthesized.location()).isEqualTo("");
+		assertThat(synthesized.value()).isEmpty();
+		assertThat(synthesized.location()).isEmpty();
 	}
 
 	@Test

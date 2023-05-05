@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,15 +97,17 @@ public abstract class AbstractJackson2Decoder extends Jackson2CodecSupport imple
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, @Nullable MimeType mimeType) {
+		if (!supportsMimeType(mimeType)) {
+			return false;
+		}
 		ObjectMapper mapper = selectObjectMapper(elementType, mimeType);
 		if (mapper == null) {
 			return false;
 		}
-		JavaType javaType = mapper.constructType(elementType.getType());
-		// Skip String: CharSequenceDecoder + "*/*" comes after
-		if (CharSequence.class.isAssignableFrom(elementType.toClass()) || !supportsMimeType(mimeType)) {
+		if (CharSequence.class.isAssignableFrom(elementType.toClass())) {
 			return false;
 		}
+		JavaType javaType = mapper.constructType(elementType.getType());
 		if (!logger.isDebugEnabled()) {
 			return mapper.canDeserialize(javaType);
 		}

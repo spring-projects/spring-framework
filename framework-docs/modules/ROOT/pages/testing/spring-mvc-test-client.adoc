@@ -1,0 +1,215 @@
+[[spring-mvc-test-client]]
+= Testing Client Applications
+
+You can use client-side tests to test code that internally uses the `RestTemplate`. The
+idea is to declare expected requests and to provide "`stub`" responses so that you can
+focus on testing the code in isolation (that is, without running a server). The following
+example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	RestTemplate restTemplate = new RestTemplate();
+
+	MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+	mockServer.expect(requestTo("/greeting")).andRespond(withSuccess());
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val restTemplate = RestTemplate()
+
+	val mockServer = MockRestServiceServer.bindTo(restTemplate).build()
+	mockServer.expect(requestTo("/greeting")).andRespond(withSuccess())
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify()
+----
+======
+
+In the preceding example, `MockRestServiceServer` (the central class for client-side REST
+tests) configures the `RestTemplate` with a custom `ClientHttpRequestFactory` that
+asserts actual requests against expectations and returns "`stub`" responses. In this
+case, we expect a request to `/greeting` and want to return a 200 response with
+`text/plain` content. We can define additional expected requests and stub responses as
+needed. When we define expected requests and stub responses, the `RestTemplate` can be
+used in client-side code as usual. At the end of testing, `mockServer.verify()` can be
+used to verify that all expectations have been satisfied.
+
+By default, requests are expected in the order in which expectations were declared. You
+can set the `ignoreExpectOrder` option when building the server, in which case all
+expectations are checked (in order) to find a match for a given request. That means
+requests are allowed to come in any order. The following example uses `ignoreExpectOrder`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder(true).build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder(true).build()
+----
+======
+
+Even with unordered requests by default, each request is allowed to run once only.
+The `expect` method provides an overloaded variant that accepts an `ExpectedCount`
+argument that specifies a count range (for example, `once`, `manyTimes`, `max`, `min`,
+`between`, and so on). The following example uses `times`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	RestTemplate restTemplate = new RestTemplate();
+
+	MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+	mockServer.expect(times(2), requestTo("/something")).andRespond(withSuccess());
+	mockServer.expect(times(3), requestTo("/somewhere")).andRespond(withSuccess());
+
+	// ...
+
+	mockServer.verify();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val restTemplate = RestTemplate()
+
+	val mockServer = MockRestServiceServer.bindTo(restTemplate).build()
+	mockServer.expect(times(2), requestTo("/something")).andRespond(withSuccess())
+	mockServer.expect(times(3), requestTo("/somewhere")).andRespond(withSuccess())
+
+	// ...
+
+	mockServer.verify()
+----
+======
+
+Note that, when `ignoreExpectOrder` is not set (the default), and, therefore, requests
+are expected in order of declaration, then that order applies only to the first of any
+expected request. For example if "/something" is expected two times followed by
+"/somewhere" three times, then there should be a request to "/something" before there is
+a request to "/somewhere", but, aside from that subsequent "/something" and "/somewhere",
+requests can come at any time.
+
+As an alternative to all of the above, the client-side test support also provides a
+`ClientHttpRequestFactory` implementation that you can configure into a `RestTemplate` to
+bind it to a `MockMvc` instance. That allows processing requests using actual server-side
+logic but without running a server. The following example shows how to do so:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	this.restTemplate = new RestTemplate(new MockMvcClientHttpRequestFactory(mockMvc));
+
+	// Test code that uses the above RestTemplate ...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build()
+	restTemplate = RestTemplate(MockMvcClientHttpRequestFactory(mockMvc))
+
+	// Test code that uses the above RestTemplate ...
+----
+======
+
+In some cases it may be necessary to perform an actual call to a remote service instead
+of mocking the response. The following example shows how to do that through
+`ExecutingResponseCreator`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	RestTemplate restTemplate = new RestTemplate();
+
+	// Create ExecutingResponseCreator with the original request factory
+	ExecutingResponseCreator withActualResponse = new ExecutingResponseCreator(restTemplate.getRequestFactory());
+
+	MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+	mockServer.expect(requestTo("/profile")).andRespond(withSuccess());
+	mockServer.expect(requestTo("/quoteOfTheDay")).andRespond(withActualResponse);
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	val restTemplate = RestTemplate()
+
+	// Create ExecutingResponseCreator with the original request factory
+	val withActualResponse = new ExecutingResponseCreator(restTemplate.getRequestFactory())
+
+	val mockServer = MockRestServiceServer.bindTo(restTemplate).build()
+	mockServer.expect(requestTo("/profile")).andRespond(withSuccess())
+	mockServer.expect(requestTo("/quoteOfTheDay")).andRespond(withActualResponse)
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify()
+----
+======
+
+In the preceding example, we create the `ExecutingResponseCreator` using the
+`ClientHttpRequestFactory` from the `RestTemplate` _before_ `MockRestServiceServer` replaces
+it with a different one that mocks responses.
+Then we define expectations with two kinds of responses:
+
+ * a stub `200` response for the `/profile` endpoint (no actual request will be executed)
+ * a response obtained through a call to the `/quoteOfTheDay` endpoint
+
+In the second case, the request is executed through the `ClientHttpRequestFactory` that was
+captured earlier. This generates a response that could e.g. come from an actual remote server,
+depending on how the `RestTemplate` was originally configured.
+
+[[spring-mvc-test-client-static-imports]]
+== Static Imports
+
+As with server-side tests, the fluent API for client-side tests requires a few static
+imports. Those are easy to find by searching for `MockRest*`. Eclipse users should add
+`MockRestRequestMatchers.{asterisk}` and `MockRestResponseCreators.{asterisk}` as
+"`favorite static members`" in the Eclipse preferences under Java -> Editor -> Content
+Assist -> Favorites. That allows using content assist after typing the first character of
+the static method name. Other IDEs (such IntelliJ) may not require any additional
+configuration. Check for the support for code completion on static members.
+
+[[spring-mvc-test-client-resources]]
+== Further Examples of Client-side REST Tests
+
+Spring MVC Test's own tests include
+{spring-framework-main-code}/spring-test/src/test/java/org/springframework/test/web/client/samples[example
+tests] of client-side REST tests.

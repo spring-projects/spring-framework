@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,16 @@ import static org.assertj.core.api.Assertions.entry;
  */
 class DataBinderTests {
 
+	private final Validator spouseValidator = Validator.forInstanceOf(TestBean.class, (tb, errors) -> {
+				if (tb == null || "XXX".equals(tb.getName())) {
+					errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");
+					return;
+				}
+				if (tb.getAge() < 32) {
+					errors.rejectValue("age", "TOO_YOUNG", "simply too young");
+				}
+			});
+
 	@Test
 	void bindingNoErrors() throws BindException {
 		TestBean rod = new TestBean();
@@ -95,11 +105,11 @@ class DataBinderTests {
 		binder.bind(pvs);
 		binder.close();
 
-		assertThat(rod.getName().equals("Rod")).as("changed name correctly").isTrue();
-		assertThat(rod.getAge() == 32).as("changed age correctly").isTrue();
+		assertThat(rod.getName()).as("changed name correctly").isEqualTo("Rod");
+		assertThat(rod.getAge()).as("changed age correctly").isEqualTo(32);
 
 		Map<?, ?> map = binder.getBindingResult().getModel();
-		assertThat(map.size() == 2).as("There is one element in map").isTrue();
+		assertThat(map).as("There is one element in map").hasSize(2);
 		TestBean tb = (TestBean) map.get("person");
 		assertThat(tb.equals(rod)).as("Same object").isTrue();
 
@@ -576,7 +586,7 @@ class DataBinderTests {
 			editor = binder.getBindingResult().findEditor("myFloat", null);
 			assertThat(editor).isNotNull();
 			editor.setAsText("1,6");
-			assertThat(((Number) editor.getValue()).floatValue() == 1.6f).isTrue();
+			assertThat(((Number) editor.getValue()).floatValue()).isEqualTo(1.6f);
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -752,15 +762,15 @@ class DataBinderTests {
 		binder.bind(pvs);
 		binder.close();
 
-		assertThat("Rod".equals(rod.getName())).as("changed name correctly").isTrue();
-		assertThat("Rod".equals(rod.getTouchy())).as("changed touchy correctly").isTrue();
-		assertThat(rod.getAge() == 0).as("did not change age").isTrue();
+		assertThat(rod.getName()).as("changed name correctly").isEqualTo("Rod");
+		assertThat(rod.getTouchy()).as("changed touchy correctly").isEqualTo("Rod");
+		assertThat(rod.getAge()).as("did not change age").isEqualTo(0);
 		String[] disallowedFields = binder.getBindingResult().getSuppressedFields();
 		assertThat(disallowedFields).hasSize(1);
 		assertThat(disallowedFields[0]).isEqualTo("age");
 
 		Map<?,?> m = binder.getBindingResult().getModel();
-		assertThat(m.size() == 2).as("There is one element in map").isTrue();
+		assertThat(m).as("There is one element in map").hasSize(2);
 		TestBean tb = (TestBean) m.get("person");
 		assertThat(tb.equals(rod)).as("Same object").isTrue();
 	}
@@ -914,7 +924,7 @@ class DataBinderTests {
 		binder.getBindingResult().rejectValue("touchy", "someCode", "someMessage");
 		binder.getBindingResult().rejectValue("spouse.name", "someCode", "someMessage");
 
-		assertThat(binder.getBindingResult().getNestedPath()).isEqualTo("");
+		assertThat(binder.getBindingResult().getNestedPath()).isEmpty();
 		assertThat(binder.getBindingResult().getFieldValue("name")).isEqualTo("value");
 		assertThat(binder.getBindingResult().getFieldError("name").getRejectedValue()).isEqualTo("prefixvalue");
 		assertThat(tb.getName()).isEqualTo("prefixvalue");
@@ -1010,7 +1020,7 @@ class DataBinderTests {
 		binder.getBindingResult().rejectValue("touchy", "someCode", "someMessage");
 		binder.getBindingResult().rejectValue("spouse.name", "someCode", "someMessage");
 
-		assertThat(binder.getBindingResult().getNestedPath()).isEqualTo("");
+		assertThat(binder.getBindingResult().getNestedPath()).isEmpty();
 		assertThat(binder.getBindingResult().getFieldValue("name")).isEqualTo("value");
 		assertThat(binder.getBindingResult().getFieldError("name").getRejectedValue()).isEqualTo("prefixvalue");
 		assertThat(tb.getName()).isEqualTo("prefixvalue");
@@ -1144,11 +1154,10 @@ class DataBinderTests {
 		errors.setNestedPath("spouse");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
 		assertThat(errors.getFieldValue("age")).isEqualTo("argh");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
-		assertThat(errors.getNestedPath()).isEqualTo("");
+		assertThat(errors.getNestedPath()).isEmpty();
 		errors.pushNestedPath("spouse");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
 		errors.pushNestedPath("spouse");
@@ -1156,7 +1165,7 @@ class DataBinderTests {
 		errors.popNestedPath();
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
 		errors.popNestedPath();
-		assertThat(errors.getNestedPath()).isEqualTo("");
+		assertThat(errors.getNestedPath()).isEmpty();
 		try {
 			errors.popNestedPath();
 		}
@@ -1166,7 +1175,7 @@ class DataBinderTests {
 		errors.pushNestedPath("spouse");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
 		errors.setNestedPath("");
-		assertThat(errors.getNestedPath()).isEqualTo("");
+		assertThat(errors.getNestedPath()).isEmpty();
 		try {
 			errors.popNestedPath();
 		}
@@ -1195,7 +1204,6 @@ class DataBinderTests {
 
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
@@ -1267,7 +1275,6 @@ class DataBinderTests {
 
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 
 		errors.setNestedPath("");
@@ -1332,7 +1339,6 @@ class DataBinderTests {
 		testValidator.validate(tb, errors);
 		errors.setNestedPath("spouse.");
 		assertThat(errors.getNestedPath()).isEqualTo("spouse.");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb.getSpouse(), errors);
 		errors.setNestedPath("");
 
@@ -1348,7 +1354,6 @@ class DataBinderTests {
 		TestBean tb = new TestBean();
 		tb.setName("XXX");
 		Errors errors = new BeanPropertyBindingResult(tb, "tb");
-		Validator spouseValidator = new SpouseValidator();
 		spouseValidator.validate(tb, errors);
 
 		assertThat(errors.hasGlobalErrors()).isTrue();
@@ -2159,28 +2164,6 @@ class DataBinderTests {
 			}
 		}
 	}
-
-
-	private static class SpouseValidator implements Validator {
-
-		@Override
-		public boolean supports(Class<?> clazz) {
-			return TestBean.class.isAssignableFrom(clazz);
-		}
-
-		@Override
-		public void validate(@Nullable Object obj, Errors errors) {
-			TestBean tb = (TestBean) obj;
-			if (tb == null || "XXX".equals(tb.getName())) {
-				errors.rejectValue("", "SPOUSE_NOT_AVAILABLE");
-				return;
-			}
-			if (tb.getAge() < 32) {
-				errors.rejectValue("age", "TOO_YOUNG", "simply too young");
-			}
-		}
-	}
-
 
 	@SuppressWarnings("unused")
 	private static class GrowingList<E> extends AbstractList<E> {

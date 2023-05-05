@@ -57,7 +57,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("java:comp/env/foo");
 		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("java:comp/env/foo");
 		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("java:foo");
 		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("java:foo");
 		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("foo");
 		jof.setResourceRef(true);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("foo");
 		jof.setResourceRef(false);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == o).isTrue();
+		assertThat(jof.getObject()).isSameAs(o);
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class JndiObjectFactoryBeanTests {
 		jof.setJndiName("foo");
 		jof.setExpectedType(String.class);
 		jof.afterPropertiesSet();
-		assertThat(jof.getObject() == s).isTrue();
+		assertThat(jof.getObject()).isSameAs(s);
 	}
 
 	@Test
