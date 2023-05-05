@@ -26,9 +26,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents the elvis operator <code>?:</code>. For an expression <code>a?:b</code> if <code>a</code> is not null,
- * the value of the expression is <code>a</code>, if <code>a</code> is null then the value of the expression is
- * <code>b</code>.
+ * Represents the Elvis operator <code>?:</code>. For an expression <code>a?:b</code> if <code>a</code> is neither null
+ * nor an empty String, the value of the expression is <code>a</code>.
+ * If <code>a</code> is null or the empty String, then the value of the expression is <code>b</code>.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -43,8 +43,8 @@ public class Elvis extends SpelNodeImpl {
 
 
 	/**
-	 * Evaluate the condition and if not null, return it.
-	 * If it is null, return the other value.
+	 * Evaluate the condition and if neither null nor an empty String, return it.
+	 * If it is null or an empty String, return the other value.
 	 * @param state the expression state
 	 * @throws EvaluationException if the condition does not evaluate correctly
 	 * to a boolean or there is a problem executing the chosen alternative

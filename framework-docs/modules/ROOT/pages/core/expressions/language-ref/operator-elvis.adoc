@@ -38,6 +38,10 @@ Kotlin::
 ----
 ======
 
+NOTE: The SpEL Elvis operator also checks for _empty_ Strings in addition to `null` objects.
+The original snippet is thus only close to emulating the semantics of the operator (it would need an
+additional `!name.isEmpty()` check).
+
 The following listing shows a more complex example:
 
 [tabs]
@@ -53,7 +57,7 @@ Java::
 	String name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String.class);
 	System.out.println(name);  // Nikola Tesla
 
-	tesla.setName(null);
+	tesla.setName("");
 	name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String.class);
 	System.out.println(name);  // Elvis Presley
 ----
@@ -69,7 +73,7 @@ Kotlin::
 	var name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
 	println(name)  // Nikola Tesla
 
-	tesla.setName(null)
+	tesla.setName("")
 	name = parser.parseExpression("name?:'Elvis Presley'").getValue(context, tesla, String::class.java)
 	println(name)  // Elvis Presley
 ----
