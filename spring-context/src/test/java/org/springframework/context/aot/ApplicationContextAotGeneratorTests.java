@@ -59,6 +59,7 @@ import org.springframework.context.testfixture.context.annotation.CglibConfigura
 import org.springframework.context.testfixture.context.annotation.ConfigurableCglibConfiguration;
 import org.springframework.context.testfixture.context.annotation.GenericTemplateConfiguration;
 import org.springframework.context.testfixture.context.annotation.InitDestroyComponent;
+import org.springframework.context.testfixture.context.annotation.InjectionPointConfiguration;
 import org.springframework.context.testfixture.context.annotation.LazyAutowiredFieldComponent;
 import org.springframework.context.testfixture.context.annotation.LazyAutowiredMethodComponent;
 import org.springframework.context.testfixture.context.annotation.LazyConstructorArgumentComponent;
@@ -312,6 +313,17 @@ class ApplicationContextAotGeneratorTests {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			QualifierConfiguration configuration = freshApplicationContext.getBean(QualifierConfiguration.class);
 			assertThat(configuration).hasFieldOrPropertyWithValue("bean", "one");
+		});
+	}
+
+	@Test
+	void processAheadOfTimeWithInjectionPoint() {
+		GenericApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+		applicationContext.registerBean(InjectionPointConfiguration.class);
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
+			assertThat(freshApplicationContext.getBean("classToString"))
+					.isEqualTo(InjectionPointConfiguration.class.getName());
 		});
 	}
 
