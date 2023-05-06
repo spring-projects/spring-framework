@@ -22,11 +22,11 @@ Java::
 		// run code that uses the test schema and test data
 	}
 ----
-======
 <1> Declare a group of SQL scripts.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Test
 	@SqlGroup( // <1>
@@ -37,6 +37,7 @@ Java::
 	}
 ----
 <1> Declare a group of SQL scripts.
+======
 
 
 

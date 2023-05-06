@@ -19,11 +19,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Indicate that the `dev` profile should be active.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@ActiveProfiles("dev") // <1>
@@ -32,6 +32,7 @@ Java::
 	}
 ----
 <1> Indicate that the `dev` profile should be active.
+======
 
 
 The following example indicates that both the `dev` and the `integration` profiles should
@@ -49,11 +50,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Indicate that the `dev` and `integration` profiles should be active.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@ActiveProfiles(["dev", "integration"]) // <1>
@@ -62,6 +63,7 @@ Java::
 	}
 ----
 <1> Indicate that the `dev` and `integration` profiles should be active.
+======
 
 
 NOTE: `@ActiveProfiles` provides support for inheriting active bean definition profiles

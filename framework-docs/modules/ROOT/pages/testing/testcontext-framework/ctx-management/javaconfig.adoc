@@ -19,11 +19,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Specifying component classes.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from AppConfig and TestConfig
@@ -33,6 +33,7 @@ Java::
 	}
 ----
 <1> Specifying component classes.
+======
 
 
 [[testcontext-ctx-management-javaconfig-component-classes]]
@@ -100,11 +101,11 @@ Java::
 
 	}
 ----
-======
 <1> Loading configuration information from the nested `Config` class.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig <1>
 	// ApplicationContext will be loaded from the nested Config class
@@ -131,5 +132,6 @@ Java::
 	}
 ----
 <1> Loading configuration information from the nested `Config` class.
+======
 
 

@@ -29,11 +29,11 @@ Java::
 		}
 	}
 ----
-======
 <1> Set the `@Sql` merge mode to `MERGE` for all test methods in the class.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	@Sql("/test-schema.sql")
@@ -48,6 +48,7 @@ Java::
 	}
 ----
 <1> Set the `@Sql` merge mode to `MERGE` for all test methods in the class.
+======
 
 The following example shows how to use `@SqlMergeMode` at the method level.
 
@@ -69,11 +70,11 @@ Java::
 		}
 	}
 ----
-======
 <1> Set the `@Sql` merge mode to `MERGE` for a specific test method.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(TestConfig::class)
 	@Sql("/test-schema.sql")
@@ -88,5 +89,6 @@ Java::
 	}
 ----
 <1> Set the `@Sql` merge mode to `MERGE` for a specific test method.
+======
 
 

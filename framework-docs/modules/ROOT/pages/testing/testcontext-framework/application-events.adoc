@@ -54,14 +54,13 @@ Java::
 		}
 	}
 ----
-======
 <1> Annotate the test class with `@RecordApplicationEvents`.
 <2> Inject the `ApplicationEvents` instance for the current test.
 <3> Use the `ApplicationEvents` API to count how many `OrderSubmitted` events were published.
 
-// Don't use "quotes" in the "subs" section because of the asterisks in /* ... */
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(/* ... */)
 	@RecordApplicationEvents // <1>
@@ -86,6 +85,7 @@ Java::
 <1> Annotate the test class with `@RecordApplicationEvents`.
 <2> Inject the `ApplicationEvents` instance for the current test.
 <3> Use the `ApplicationEvents` API to count how many `OrderSubmitted` events were published.
+======
 
 See the
 {api-spring-framework}/test/context/event/ApplicationEvents.html[`ApplicationEvents`

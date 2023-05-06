@@ -167,15 +167,15 @@ Java::
 		public void tradingOperation() {} // <3>
 	}
 ----
-======
 <1> `publicMethod` matches if a method execution join point represents the execution
 of any public method.
 <2> `inTrading` matches if a method execution is in the trading module.
 <3> `tradingOperation` matches if a method execution represents any public method in the
 trading module.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package com.xyz
 
@@ -197,6 +197,7 @@ of any public method.
 <2> `inTrading` matches if a method execution is in the trading module.
 <3> `tradingOperation` matches if a method execution represents any public method in the
 trading module.
+======
 
 It is a best practice to build more complex pointcut expressions out of smaller _named
 pointcuts_, as shown above. When referring to pointcuts by name, normal Java visibility

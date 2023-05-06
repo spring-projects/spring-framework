@@ -25,11 +25,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Scan the `org.example.web` package.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan("org.example.web") // <1>
@@ -39,6 +39,7 @@ Java::
 	}
 ----
 <1> Scan the `org.example.web` package.
+======
 
 `@RestController` is a xref:core/beans/classpath-scanning.adoc#beans-meta-annotations[composed annotation] that is
 itself meta-annotated with `@Controller` and `@ResponseBody`, indicating a controller whose

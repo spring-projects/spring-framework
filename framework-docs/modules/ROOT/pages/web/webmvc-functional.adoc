@@ -67,11 +67,11 @@ Java::
 		}
 	}
 ----
-======
 <1> Create router using `route()`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.web.servlet.function.router
 
@@ -105,6 +105,7 @@ Java::
 	}
 ----
 <1> Create router using the router DSL.
+======
 
 
 If you register the `RouterFunction` as a bean, for instance by exposing it in a
@@ -409,7 +410,6 @@ public class PersonHandler {
 
 }
 ----
-======
 <1> `listPeople` is a handler function that returns all `Person` objects found in the repository as
 JSON.
 <2> `createPerson` is a handler function that stores a new `Person` contained in the request body.
@@ -417,8 +417,9 @@ JSON.
 variable. We retrieve that `Person` from the repository and create a JSON response, if it is
 found. If it is not found, we return a 404 Not Found response.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class PersonHandler(private val repository: PersonRepository) {
 
@@ -447,6 +448,7 @@ JSON.
 <3> `getPerson` is a handler function that returns a single person, identified by the `id` path
 variable. We retrieve that `Person` from the repository and create a JSON response, if it is
 found. If it is not found, we return a 404 Not Found response.
+======
 --
 
 
@@ -485,13 +487,13 @@ Java::
 		}
 	}
 ----
-======
 <1> Create `Validator` instance.
 <2> Apply validation.
 <3> Raise exception for a 400 response.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class PersonHandler(private val repository: PersonRepository) {
 
@@ -518,6 +520,7 @@ Java::
 <1> Create `Validator` instance.
 <2> Apply validation.
 <3> Raise exception for a 400 response.
+======
 
 Handlers can also use the standard bean validation API (JSR-303) by creating and injecting
 a global `Validator` instance based on `LocalValidatorFactoryBean`.
@@ -638,7 +641,6 @@ Java::
 		.add(otherRoute) // <4>
 		.build();
 ----
-======
 <1> pass:q[`GET /person/{id}`] with an `Accept` header that matches JSON is routed to
 `PersonHandler.getPerson`
 <2> `GET /person` with an `Accept` header that matches JSON is routed to
@@ -647,8 +649,9 @@ Java::
 `PersonHandler.createPerson`, and
 <4> `otherRoute` is a router function that is created elsewhere, and added to the route built.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.http.MediaType.APPLICATION_JSON
 	import org.springframework.web.servlet.function.router
@@ -671,6 +674,7 @@ Java::
 <3> `POST /person` with no additional predicates is mapped to
 `PersonHandler.createPerson`, and
 <4> `otherRoute` is a router function that is created elsewhere, and added to the route built.
+======
 
 
 [[nested-routes]]
@@ -698,11 +702,11 @@ RouterFunction<ServerResponse> route = route()
 		.POST(handler::createPerson))
 	.build();
 ----
-======
 <1> Note that second parameter of `path` is a consumer that takes the router builder.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.web.servlet.function.router
 
@@ -715,6 +719,7 @@ RouterFunction<ServerResponse> route = route()
 	}
 ----
 <1> Using `nest` DSL.
+======
 
 Though path-based nesting is the most common, you can nest on any kind of predicate by using
 the `nest` method on the builder.
@@ -883,12 +888,12 @@ Java::
 		.after((request, response) -> logResponse(response)) // <2>
 		.build();
 ----
-======
 <1> The `before` filter that adds a custom request header is only applied to the two GET routes.
 <2> The `after` filter that logs the response is applied to all routes, including the nested ones.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.web.servlet.function.router
 
@@ -909,6 +914,7 @@ Java::
 ----
 <1> The `before` filter that adds a custom request header is only applied to the two GET routes.
 <2> The `after` filter that logs the response is applied to all routes, including the nested ones.
+======
 
 
 The `filter` method on the router builder takes a `HandlerFilterFunction`: a

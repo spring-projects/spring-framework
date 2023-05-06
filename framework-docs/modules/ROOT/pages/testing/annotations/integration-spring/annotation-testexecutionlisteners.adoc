@@ -20,11 +20,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Register two `TestExecutionListener` implementations.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@TestExecutionListeners(CustomTestExecutionListener::class, AnotherTestExecutionListener::class) // <1>
@@ -33,11 +33,12 @@ Java::
 	}
 ----
 <1> Register two `TestExecutionListener` implementations.
+======
 
 
 By default, `@TestExecutionListeners` provides support for inheriting listeners from
 superclasses or enclosing classes. See
-xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] and the 
+xref:testing/testcontext-framework/support-classes.adoc#testcontext-junit-jupiter-nested-test-configuration[`@Nested` test class configuration] and the
 {api-spring-framework}/test/context/TestExecutionListeners.html[`@TestExecutionListeners`
 javadoc] for an example and further details. If you discover that you need to switch
 back to using the default `TestExecutionListener` implementations, see the note

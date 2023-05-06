@@ -29,13 +29,13 @@ Java::
 		// tests ...
 	}
 ----
-======
 <1> Annotate a `static` method with `@DynamicPropertySource`.
 <2> Accept a `DynamicPropertyRegistry` as an argument.
 <3> Register a dynamic `server.port` property to be retrieved lazily from the server.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	class MyIntegrationTests {
@@ -58,6 +58,7 @@ Java::
 <1> Annotate a `static` method with `@DynamicPropertySource`.
 <2> Accept a `DynamicPropertyRegistry` as an argument.
 <3> Register a dynamic `server.port` property to be retrieved lazily from the server.
+======
 
 See xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[Context Configuration with Dynamic Property Sources] for further details.
 

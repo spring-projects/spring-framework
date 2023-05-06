@@ -17,11 +17,11 @@ Java::
 		// run code that relies on the test schema and test data
 	}
 ----
-======
 <1> Run two scripts for this test.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Test
 	@Sql("/test-schema.sql", "/test-user-data.sql") // <1>
@@ -30,6 +30,7 @@ Java::
 	}
 ----
 <1> Run two scripts for this test.
+======
 
 See xref:testing/testcontext-framework/executing-sql.adoc#testcontext-executing-sql-declaratively[Executing SQL scripts declaratively with @Sql] for further details.
 

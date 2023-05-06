@@ -31,11 +31,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Injecting the `ApplicationContext`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig
 	class MyTest {
@@ -47,6 +47,7 @@ Java::
 	}
 ----
 <1> Injecting the `ApplicationContext`.
+======
 
 
 Similarly, if your test is configured to load a `WebApplicationContext`, you can inject
@@ -67,12 +68,12 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Configuring the `WebApplicationContext`.
 <2> Injecting the `WebApplicationContext`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitWebConfig // <1>
 	class MyWebAppTest {
@@ -84,6 +85,7 @@ Java::
 ----
 <1> Configuring the `WebApplicationContext`.
 <2> Injecting the `WebApplicationContext`.
+======
 
 
 Dependency injection by using `@Autowired` is provided by the

@@ -29,11 +29,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Specifying configuration by using a configuration class and an initializer.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from TestConfig
@@ -46,6 +46,7 @@ Java::
 	}
 ----
 <1> Specifying configuration by using a configuration class and an initializer.
+======
 
 
 You can also omit the declaration of XML configuration files, Groovy scripts, or
@@ -68,11 +69,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Specifying configuration by using only an initializer.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be initialized by EntireAppInitializer
@@ -83,5 +84,6 @@ Java::
 	}
 ----
 <1> Specifying configuration by using only an initializer.
+======
 
 

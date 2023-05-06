@@ -18,11 +18,11 @@ Java::
 		// logic to be run after a transaction has ended
 	}
 ----
-======
 <1> Run this method after a transaction.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@AfterTransaction // <1>
 	fun afterTransaction() {
@@ -30,5 +30,6 @@ Java::
 	}
 ----
 <1> Run this method after a transaction.
+======
 
 

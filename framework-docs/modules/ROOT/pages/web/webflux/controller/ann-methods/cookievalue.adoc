@@ -26,11 +26,11 @@ Java::
 		//...
 	}
 ----
-======
 <1> Get the cookie value.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/demo")
 	fun handle(@CookieValue("JSESSIONID") cookie: String) { // <1>
@@ -38,6 +38,7 @@ Java::
 	}
 ----
 <1> Get the cookie value.
+======
 
 
 Type conversion is applied automatically if the target method parameter type is not

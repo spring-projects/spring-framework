@@ -34,12 +34,12 @@ Java::
 		//...
 	}
 ----
-======
 <1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/demo")
 	fun handle(
@@ -50,6 +50,7 @@ Java::
 ----
 <1> Get the value of the `Accept-Encoding` header.
 <2> Get the value of the `Keep-Alive` header.
+======
 
 If the target method parameter type is not
 `String`, type conversion is automatically applied. See xref:web/webmvc/mvc-controller/ann-methods/typeconversion.adoc[Type Conversion].

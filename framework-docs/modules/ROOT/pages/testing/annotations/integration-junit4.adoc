@@ -39,11 +39,11 @@ Java::
 		// some logic that should run only on Java VMs from Oracle Corporation
 	}
 ----
-======
 <1> Run this test only when the Java vendor is "Oracle Corporation".
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@IfProfileValue(name="java.vendor", value="Oracle Corporation") // <1>
 	@Test
@@ -52,6 +52,7 @@ Java::
 	}
 ----
 <1> Run this test only when the Java vendor is "Oracle Corporation".
+======
 
 
 Alternatively, you can configure `@IfProfileValue` with a list of `values` (with `OR`
@@ -70,11 +71,11 @@ Java::
 		// some logic that should run only for unit and integration test groups
 	}
 ----
-======
 <1> Run this test for unit tests and integration tests.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@IfProfileValue(name="test-groups", values=["unit-tests", "integration-tests"]) // <1>
 	@Test
@@ -83,6 +84,7 @@ Java::
 	}
 ----
 <1> Run this test for unit tests and integration tests.
+======
 
 
 [[integration-testing-annotations-junit4-profilevaluesourceconfiguration]]
@@ -105,11 +107,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Use a custom profile value source.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ProfileValueSourceConfiguration(CustomProfileValueSource::class) // <1>
 	class CustomProfileValueSourceTests {
@@ -117,6 +119,7 @@ Java::
 	}
 ----
 <1> Use a custom profile value source.
+======
 
 
 [[integration-testing-annotations-junit4-timed]]
@@ -141,11 +144,11 @@ Java::
 		// some logic that should not take longer than 1 second to run
 	}
 ----
-======
 <1> Set the time period for the test to one second.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Timed(millis = 1000) // <1>
 	fun testProcessWithOneSecondTimeout() {
@@ -153,6 +156,7 @@ Java::
 	}
 ----
 <1> Set the time period for the test to one second.
+======
 
 
 Spring's `@Timed` annotation has different semantics than JUnit 4's `@Test(timeout=...)`
@@ -186,11 +190,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Repeat this test ten times.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repeat(10) // <1>
 	@Test
@@ -199,6 +203,7 @@ Java::
 	}
 ----
 <1> Repeat this test ten times.
+======
 
 
 

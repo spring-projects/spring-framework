@@ -37,15 +37,15 @@ Java::
                 .andExpect(content().string("body"));
     }
 ----
-======
 <1> Check response status is still unchanged
 <2> Async processing must have started
 <3> Wait and assert the async result
 <4> Manually perform an ASYNC dispatch (as there is no running container)
 <5> Verify the final response
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Test
 	fun test() {
@@ -69,5 +69,6 @@ Java::
 <3> Wait and assert the async result
 <4> Manually perform an ASYNC dispatch (as there is no running container)
 <5> Verify the final response
+======
 
 

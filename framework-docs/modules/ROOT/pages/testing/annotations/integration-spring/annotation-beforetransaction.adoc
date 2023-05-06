@@ -20,11 +20,11 @@ Java::
 		// logic to be run before a transaction is started
 	}
 ----
-======
 <1> Run this method before a transaction.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@BeforeTransaction // <1>
 	fun beforeTransaction() {
@@ -32,5 +32,6 @@ Java::
 	}
 ----
 <1> Run this method before a transaction.
+======
 
 
