@@ -23,11 +23,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using the `@SessionAttributes` annotation.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	@SessionAttributes("pet") // <1>
@@ -36,6 +36,7 @@ Java::
 	}
 ----
 <1> Using the `@SessionAttributes` annotation.
+======
 
 On the first request, when a model attribute with the name, `pet`, is added to the model,
 it is automatically promoted to and saved in the `WebSession`. It remains there until
@@ -65,12 +66,12 @@ Java::
 		}
 	}
 ----
-======
 <1> Using the `@SessionAttributes` annotation.
 <2> Using a `SessionStatus` variable.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	@SessionAttributes("pet") // <1>
@@ -90,5 +91,6 @@ Java::
 ----
 <1> Using the `@SessionAttributes` annotation.
 <2> Using a `SessionStatus` variable.
+======
 
 

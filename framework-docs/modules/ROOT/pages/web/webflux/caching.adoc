@@ -145,13 +145,13 @@ Java::
 		return "myViewName";
 	}
 ----
-======
 <1> Application-specific calculation.
 <2> Response has been set to 304 (NOT_MODIFIED). No further processing.
 <3> Continue with request processing.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RequestMapping
 	fun myHandleMethod(exchange: ServerWebExchange, model: Model): String? {
@@ -169,6 +169,7 @@ Java::
 <1> Application-specific calculation.
 <2> Response has been set to 304 (NOT_MODIFIED). No further processing.
 <3> Continue with request processing.
+======
 --
 
 There are three variants for checking conditional requests against `eTag` values, `lastModified`

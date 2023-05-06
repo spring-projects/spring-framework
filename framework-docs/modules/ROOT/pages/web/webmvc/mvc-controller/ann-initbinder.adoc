@@ -40,11 +40,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Defining an `@InitBinder` method.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class FormController {
@@ -60,6 +60,7 @@ Java::
 	}
 ----
 <1> Defining an `@InitBinder` method.
+======
 
 Alternatively, when you use a `Formatter`-based setup through a shared
 `FormattingConversionService`, you can re-use the same approach and register
@@ -82,11 +83,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Defining an `@InitBinder` method on a custom formatter.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class FormController {
@@ -100,6 +101,7 @@ Java::
 	}
 ----
 <1> Defining an `@InitBinder` method on a custom formatter.
+======
 
 [[mvc-ann-initbinder-model-design]]
 == Model Design

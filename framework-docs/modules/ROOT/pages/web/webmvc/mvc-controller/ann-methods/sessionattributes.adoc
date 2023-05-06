@@ -23,11 +23,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using the `@SessionAttributes` annotation.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	@SessionAttributes("pet") // <1>
@@ -36,6 +36,7 @@ Java::
 	}
 ----
 <1> Using the `@SessionAttributes` annotation.
+======
 
 On the first request, when a model attribute with the name, `pet`, is added to the model,
 it is automatically promoted to and saved in the HTTP Servlet session. It remains there
@@ -64,12 +65,12 @@ Java::
 		}
 	}
 ----
-======
 <1> Storing the `Pet` value in the Servlet session.
 <2> Clearing the `Pet` value from the Servlet session.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 @Controller
 @SessionAttributes("pet") // <1>
@@ -89,5 +90,6 @@ class EditPetForm {
 ----
 <1> Storing the `Pet` value in the Servlet session.
 <2> Clearing the `Pet` value from the Servlet session.
+======
 
 

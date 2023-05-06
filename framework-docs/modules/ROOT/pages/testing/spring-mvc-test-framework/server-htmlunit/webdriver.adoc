@@ -298,7 +298,6 @@ Java::
 		}
 	}
 ----
-======
 <1> `CreateMessagePage` extends the `AbstractPage`. We do not go over the details of
 `AbstractPage`, but, in summary, it contains common functionality for all of our pages.
 For example, if our application has a navigational bar, global error messages, and other
@@ -316,8 +315,9 @@ https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-
 to override the default lookup behavior. Our example shows how to use the `@FindBy`
 annotation to look up our submit button with a `css` selector (`input[type=submit]`).
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class CreateMessagePage(private val driver: WebDriver) : AbstractPage(driver) { // <1>
 
@@ -358,6 +358,7 @@ by the `id` or `name` of the element within the HTML page.
 https://github.com/SeleniumHQ/selenium/wiki/PageFactory#making-the-example-work-using-annotations[`@FindBy` annotation]
 to override the default lookup behavior. Our example shows how to use the `@FindBy`
 annotation to look up our submit button with a `css` selector (*input[type=submit]*).
+======
 --
 
 Finally, we can verify that a new message was created successfully. The following

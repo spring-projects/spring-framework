@@ -63,11 +63,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> The `@Repository` annotation.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repository // <1>
 	class SomeMovieFinder : MovieFinder {
@@ -75,6 +75,7 @@ Java::
 	}
 ----
 <1> The `@Repository` annotation.
+======
 
 
 Any DAO or repository implementation needs access to a persistence resource,

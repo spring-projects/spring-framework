@@ -95,12 +95,12 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using `@RequestPart` to get the metadata.
 <2> Using `@RequestPart` to get the file.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/")
 	fun handle(@RequestPart("meta-data") Part metadata, // <1>
@@ -110,6 +110,7 @@ Java::
 ----
 <1> Using `@RequestPart` to get the metadata.
 <2> Using `@RequestPart` to get the file.
+======
 --
 
 
@@ -128,11 +129,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using `@RequestPart` to get the metadata.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/")
 	fun handle(@RequestPart("meta-data") metadata: MetaData): String { // <1>
@@ -140,6 +141,7 @@ Java::
 	}
 ----
 <1> Using `@RequestPart` to get the metadata.
+======
 --
 
 You can use `@RequestPart` in combination with `jakarta.validation.Valid` or Spring's
@@ -189,11 +191,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using `@RequestBody`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/")
 	fun handle(@RequestBody parts: MultiValueMap<String, Part>): String { // <1>
@@ -201,6 +203,7 @@ Java::
 	}
 ----
 <1> Using `@RequestBody`.
+======
 --
 
 [[partevent]]
@@ -250,7 +253,6 @@ Java::
               }));
   }
 ----
-======
 <1> Using `@RequestBody`.
 <2> The final `PartEvent` for a particular part will have `isLast()` set to `true`, and can be
 followed by additional events belonging to subsequent parts.
@@ -262,8 +264,9 @@ file upload.
 <5> Handling the file upload.
 <6> The body contents must be completely consumed, relayed, or released to avoid memory leaks.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/")
 	fun handle(@RequestBody allPartsEvents: Flux<PartEvent>) = { // <1>
@@ -299,6 +302,7 @@ file upload.
 <4> Handling the form field.
 <5> Handling the file upload.
 <6> The body contents must be completely consumed, relayed, or released to avoid memory leaks.
+======
 
 Received part events can also be relayed to another service by using the `WebClient`.
 See xref:web/webflux-webclient/client-body.adoc#webflux-client-body-multipart[Multipart Data].

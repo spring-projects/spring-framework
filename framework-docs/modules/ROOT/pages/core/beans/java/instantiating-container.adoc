@@ -144,11 +144,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> This annotation enables component scanning.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@ComponentScan(basePackages = ["com.acme"]) // <1>
@@ -157,6 +157,7 @@ Java::
 	}
 ----
 <1> This annotation enables component scanning.
+======
 
 
 [TIP]

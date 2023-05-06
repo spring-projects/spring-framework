@@ -194,14 +194,14 @@ Java::
 		}
 	}
 ----
-======
 <1> Access the stream of inbound messages.
 <2> Do something with each message.
 <3> Perform nested asynchronous operations that use the message content.
 <4> Return a `Mono<Void>` that completes when receiving completes.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ExampleHandler : WebSocketHandler {
 
@@ -221,6 +221,7 @@ Java::
 <2> Do something with each message.
 <3> Perform nested asynchronous operations that use the message content.
 <4> Return a `Mono<Void>` that completes when receiving completes.
+======
 
 
 TIP: For nested, asynchronous operations, you may need to call `message.retain()` on underlying
@@ -254,13 +255,13 @@ Java::
 		}
 	}
 ----
-======
 <1> Handle the inbound message stream.
 <2> Create the outbound message, producing a combined flow.
 <3> Return a `Mono<Void>` that does not complete while we continue to receive.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ExampleHandler : WebSocketHandler {
 
@@ -282,6 +283,7 @@ Java::
 <1> Handle the inbound message stream.
 <2> Create the outbound message, producing a combined flow.
 <3> Return a `Mono<Void>` that does not complete while we continue to receive.
+======
 
 
 Inbound and outbound streams can be independent and be joined only for completion,
@@ -314,13 +316,13 @@ Java::
 		}
 	}
 ----
-======
 <1> Handle inbound message stream.
 <2> Send outgoing messages.
 <3> Join the streams and return a `Mono<Void>` that completes when either stream ends.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class ExampleHandler : WebSocketHandler {
 
@@ -345,6 +347,7 @@ Java::
 <1> Handle inbound message stream.
 <2> Send outgoing messages.
 <3> Join the streams and return a `Mono<Void>` that completes when either stream ends.
+======
 
 
 

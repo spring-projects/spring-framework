@@ -547,13 +547,13 @@ Java::
 		// R2DBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
-======
 <1> Annotate the class with `@Component`.
 <2> Annotate the `ConnectionFactory` setter method with `@Autowired`.
 <3> Create a new `DatabaseClient` with the `ConnectionFactory`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Component // <1>
 	class R2dbcCorporateEventDao(connectionFactory: ConnectionFactory) : CorporateEventDao { // <2>
@@ -566,6 +566,7 @@ Java::
 <1> Annotate the class with `@Component`.
 <2> Constructor injection of the `ConnectionFactory`.
 <3> Create a new `DatabaseClient` with the `ConnectionFactory`.
+======
 --
 
 Regardless of which of the above template initialization styles you choose to use (or

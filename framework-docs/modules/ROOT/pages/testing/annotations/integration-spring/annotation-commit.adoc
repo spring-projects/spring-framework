@@ -21,11 +21,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Commit the result of the test to the database.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Commit // <1>
 	@Test
@@ -34,5 +34,6 @@ Java::
 	}
 ----
 <1> Commit the result of the test to the database.
+======
 
 

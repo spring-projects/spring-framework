@@ -70,11 +70,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Target(AnnotationTarget.TYPE)
 	@Retention(AnnotationRetention.RUNTIME)
@@ -86,6 +86,7 @@ Java::
 	}
 ----
 <1> The `@Component` causes `@Service` to be treated in the same way as `@Component`.
+======
 
 You can also combine meta-annotations to create "`composed annotations`". For example,
 the `@RestController` annotation from Spring MVC is composed of `@Controller` and

@@ -441,13 +441,13 @@ Java::
 		// JDBC-backed implementations of the methods on the CorporateEventDao follow...
 	}
 ----
-======
 <1> Annotate the class with `@Repository`.
 <2> Annotate the `DataSource` setter method with `@Autowired`.
 <3> Create a new `JdbcTemplate` with the `DataSource`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Repository // <1>
 	class JdbcCorporateEventDao(dataSource: DataSource) : CorporateEventDao { // <2>
@@ -460,6 +460,7 @@ Java::
 <1> Annotate the class with `@Repository`.
 <2> Constructor injection of the `DataSource`.
 <3> Create a new `JdbcTemplate` with the `DataSource`.
+======
 --
 
 

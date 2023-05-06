@@ -89,13 +89,13 @@ Java::
 	blobIs.close();
 	clobReader.close();
 ----
-======
 <1> Pass in the `lobHandler` that (in this example) is a plain `DefaultLobHandler`.
 <2> Using the method `setClobAsCharacterStream` to pass in the contents of the CLOB.
 <3> Using the method `setBlobAsBinaryStream` to pass in the contents of the BLOB.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val blobIn = File("spring2004.jpg")
 	val blobIs = FileInputStream(blobIn)
@@ -119,6 +119,7 @@ Java::
 <1> Pass in the `lobHandler` that (in this example) is a plain `DefaultLobHandler`.
 <2> Using the method `setClobAsCharacterStream` to pass in the contents of the CLOB.
 <3> Using the method `setBlobAsBinaryStream` to pass in the contents of the BLOB.
+======
 
 
 [NOTE]
@@ -156,12 +157,12 @@ Java::
 			}
 		});
 ----
-======
 <1> Using the method `getClobAsString` to retrieve the contents of the CLOB.
 <2> Using the method `getBlobAsBytes` to retrieve the contents of the BLOB.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val l = jdbcTemplate.query("select id, a_clob, a_blob from lob_table") { rs, _ ->
 		val clobText = lobHandler.getClobAsString(rs, "a_clob")  // <1>
@@ -171,6 +172,7 @@ Java::
 ----
 <1> Using the method `getClobAsString` to retrieve the contents of the CLOB.
 <2> Using the method `getBlobAsBytes` to retrieve the contents of the BLOB.
+======
 
 
 [[jdbc-in-clause]]

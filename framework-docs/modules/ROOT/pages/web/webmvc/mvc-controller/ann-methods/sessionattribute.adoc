@@ -19,18 +19,19 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using a `@SessionAttribute` annotation.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@RequestMapping("/")
 	fun handle(@SessionAttribute user: User): String { // <1>
 		// ...
 	}
 ----
-<1> Using a `@SessionAttribute` annotation.
+<1> Using a `@SessionAttribute` annotation.======
+======
 
 For use cases that require adding or removing session attributes, consider injecting
 `org.springframework.web.context.request.WebRequest` or

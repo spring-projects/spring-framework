@@ -18,17 +18,18 @@ Java::
 	Expression exp = parser.parseExpression("'Hello World'"); // <1>
 	String message = (String) exp.getValue();
 ----
-======
 <1> The value of the message variable is `'Hello World'`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 	val exp = parser.parseExpression("'Hello World'") // <1>
 	val message = exp.value as String
 ----
 <1> The value of the message variable is `'Hello World'`.
+======
 
 
 The SpEL classes and interfaces you are most likely to use are located in the
@@ -56,17 +57,18 @@ Java::
 	Expression exp = parser.parseExpression("'Hello World'.concat('!')"); // <1>
 	String message = (String) exp.getValue();
 ----
-======
 <1> The value of `message` is now 'Hello World!'.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 	val exp = parser.parseExpression("'Hello World'.concat('!')") // <1>
 	val message = exp.value as String
 ----
 <1> The value of `message` is now 'Hello World!'.
+======
 
 The following example of calling a JavaBean property calls the `String` property `Bytes`:
 
@@ -82,11 +84,11 @@ Java::
 	Expression exp = parser.parseExpression("'Hello World'.bytes"); // <1>
 	byte[] bytes = (byte[]) exp.getValue();
 ----
-======
 <1> This line converts the literal to a byte array.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 
@@ -95,6 +97,7 @@ Java::
 	val bytes = exp.value as ByteArray
 ----
 <1> This line converts the literal to a byte array.
+======
 
 SpEL also supports nested properties by using the standard dot notation (such as
 `prop1.prop2.prop3`) and also the corresponding setting of property values.
@@ -114,11 +117,11 @@ Java::
 	Expression exp = parser.parseExpression("'Hello World'.bytes.length"); // <1>
 	int length = (Integer) exp.getValue();
 ----
-======
 <1> `'Hello World'.bytes.length` gives the length of the literal.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 
@@ -127,6 +130,7 @@ Java::
 	val length = exp.value as Int
 ----
 <1> `'Hello World'.bytes.length` gives the length of the literal.
+======
 
 The String's constructor can be called instead of using a string literal, as the following
 example shows:
@@ -141,17 +145,18 @@ Java::
 	Expression exp = parser.parseExpression("new String('hello world').toUpperCase()"); // <1>
 	String message = exp.getValue(String.class);
 ----
-======
 <1> Construct a new `String` from the literal and make it be upper case.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	val parser = SpelExpressionParser()
 	val exp = parser.parseExpression("new String('hello world').toUpperCase()")  // <1>
 	val message = exp.getValue(String::class.java)
 ----
 <1> Construct a new `String` from the literal and make it be upper case.
+======
 
 
 Note the use of the generic method: `public <T> T getValue(Class<T> desiredResultType)`.

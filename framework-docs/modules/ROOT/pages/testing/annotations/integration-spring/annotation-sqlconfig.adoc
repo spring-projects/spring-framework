@@ -19,11 +19,11 @@ Java::
 		// run code that relies on the test data
 	}
 ----
-======
 <1> Set the comment prefix and the separator in SQL scripts.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Test
 	@Sql("/test-user-data.sql", config = SqlConfig(commentPrefix = "`", separator = "@@")) // <1>
@@ -32,4 +32,5 @@ Java::
 	}
 ----
 <1> Set the comment prefix and the separator in SQL scripts.
+======
 

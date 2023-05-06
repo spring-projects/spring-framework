@@ -18,11 +18,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using the `@RequestAttribute` annotation.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/")
 	fun handle(@RequestAttribute client: Client): String { // <1>
@@ -30,5 +30,6 @@ Java::
 	}
 ----
 <1> Using the `@RequestAttribute` annotation.
+======
 
 
