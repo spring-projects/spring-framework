@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,11 +73,13 @@ public final class CollectionFactory {
 	private static final Set<Class<?>> approximableMapTypes = Set.of(
 			// Standard map interfaces
 			Map.class,
+			MultiValueMap.class,
 			SortedMap.class,
 			NavigableMap.class,
 			// Common concrete map classes
 			HashMap.class,
 			LinkedHashMap.class,
+			LinkedMultiValueMap.class,
 			TreeMap.class,
 			EnumMap.class);
 
@@ -118,19 +120,19 @@ public final class CollectionFactory {
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <E> Collection<E> createApproximateCollection(@Nullable Object collection, int capacity) {
-		if (collection instanceof LinkedList) {
-			return new LinkedList<>();
-		}
-		else if (collection instanceof List) {
-			return new ArrayList<>(capacity);
-		}
-		else if (collection instanceof EnumSet enumSet) {
+		if (collection instanceof EnumSet enumSet) {
 			Collection<E> copy = EnumSet.copyOf(enumSet);
 			copy.clear();
 			return copy;
 		}
 		else if (collection instanceof SortedSet sortedSet) {
 			return new TreeSet<>(sortedSet.comparator());
+		}
+		else if (collection instanceof LinkedList) {
+			return new LinkedList<>();
+		}
+		else if (collection instanceof List) {
+			return new ArrayList<>(capacity);
 		}
 		else {
 			return new LinkedHashSet<>(capacity);
@@ -187,8 +189,8 @@ public final class CollectionFactory {
 		else if (LinkedList.class == collectionType) {
 			return new LinkedList<>();
 		}
-		else if (TreeSet.class == collectionType || NavigableSet.class == collectionType
-				|| SortedSet.class == collectionType) {
+		else if (TreeSet.class == collectionType || NavigableSet.class == collectionType ||
+				SortedSet.class == collectionType) {
 			return new TreeSet<>();
 		}
 		else if (EnumSet.class.isAssignableFrom(collectionType)) {
@@ -246,6 +248,9 @@ public final class CollectionFactory {
 		else if (map instanceof SortedMap sortedMap) {
 			return new TreeMap<>(sortedMap.comparator());
 		}
+		else if (map instanceof MultiValueMap) {
+			return new LinkedMultiValueMap(capacity);
+		}
 		else {
 			return new LinkedHashMap<>(capacity);
 		}
@@ -292,26 +297,21 @@ public final class CollectionFactory {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
-		if (mapType.isInterface()) {
-			if (Map.class == mapType) {
-				return new LinkedHashMap<>(capacity);
-			}
-			else if (SortedMap.class == mapType || NavigableMap.class == mapType) {
-				return new TreeMap<>();
-			}
-			else if (MultiValueMap.class == mapType) {
-				return new LinkedMultiValueMap();
-			}
-			else {
-				throw new IllegalArgumentException("Unsupported Map interface: " + mapType.getName());
-			}
+		if (LinkedHashMap.class == mapType || HashMap.class == mapType || Map.class == mapType) {
+			return new LinkedHashMap<>(capacity);
+		}
+		else if (LinkedMultiValueMap.class == mapType || MultiValueMap.class == mapType) {
+			return new LinkedMultiValueMap();
+		}
+		else if (TreeMap.class == mapType || SortedMap.class == mapType || NavigableMap.class == mapType) {
+			return new TreeMap<>();
 		}
 		else if (EnumMap.class == mapType) {
 			Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
 			return new EnumMap(asEnumType(keyType));
 		}
 		else {
-			if (!Map.class.isAssignableFrom(mapType)) {
+			if (mapType.isInterface() || !Map.class.isAssignableFrom(mapType)) {
 				throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
 			}
 			try {
