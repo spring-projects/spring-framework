@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.scheduling.concurrent;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -26,6 +27,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.NoOpRunnable;
+import org.springframework.core.task.TaskDecorator;
+import org.springframework.util.Assert;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -69,10 +72,40 @@ class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 	}
 
 	@Test
-	void passingNullExecutorToSetterResultsInDefaultTaskExecutorBeingUsed() {
+	void earlySetConcurrentExecutorCallRespectsConfiguredTaskDecorator() {
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
-		executor.setConcurrentExecutor(null);
+		executor.setConcurrentExecutor(new DecoratedExecutor());
+		executor.setTaskDecorator(new RunnableDecorator());
 		assertThatCode(() -> executor.execute(new NoOpRunnable())).doesNotThrowAnyException();
+	}
+
+	@Test
+	void lateSetConcurrentExecutorCallRespectsConfiguredTaskDecorator() {
+		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
+		executor.setTaskDecorator(new RunnableDecorator());
+		executor.setConcurrentExecutor(new DecoratedExecutor());
+		assertThatCode(() -> executor.execute(new NoOpRunnable())).doesNotThrowAnyException();
+	}
+
+
+	private static class DecoratedRunnable implements Runnable {
+		@Override
+		public void run() {
+		}
+	}
+
+	private static class RunnableDecorator implements TaskDecorator {
+		@Override
+		public Runnable decorate(Runnable runnable) {
+			return new DecoratedRunnable();
+		}
+	}
+
+	private static class DecoratedExecutor implements Executor {
+		@Override
+		public void execute(Runnable command) {
+			Assert.state(command instanceof DecoratedRunnable, "TaskDecorator not applied");
+		}
 	}
 
 }
