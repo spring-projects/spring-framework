@@ -260,9 +260,10 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		if (this.virtualThreadDelegate != null) {
 			this.virtualThreadDelegate.startVirtualThread(nextThreadName(), task);
 		}
-
-		Thread thread = (this.threadFactory != null ? this.threadFactory.newThread(task) : createThread(task));
-		thread.start();
+		else {
+			Thread thread = (this.threadFactory != null ? this.threadFactory.newThread(task) : createThread(task));
+			thread.start();
+		}
 	}
 
 

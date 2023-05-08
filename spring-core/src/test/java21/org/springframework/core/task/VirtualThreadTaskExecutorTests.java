@@ -16,6 +16,8 @@
 
 package org.springframework.core.task;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +36,7 @@ class VirtualThreadTaskExecutorTests {
 		executeAndWait(executor, task, monitor);
 		assertThat(task.getThreadName()).isEmpty();
 		assertThat(task.isVirtual()).isTrue();
+		assertThat(task.runtCount()).isOne();
 	}
 
 	@Test
@@ -44,6 +47,7 @@ class VirtualThreadTaskExecutorTests {
 		executeAndWait(executor, task, monitor);
 		assertThat(task.getThreadName()).isEqualTo("test-0");
 		assertThat(task.isVirtual()).isTrue();
+		assertThat(task.runtCount()).isOne();
 	}
 
 	@Test
@@ -54,6 +58,7 @@ class VirtualThreadTaskExecutorTests {
 		executeAndWait(executor, task, monitor);
 		assertThat(task.getThreadName()).isEqualTo("test");
 		assertThat(task.isVirtual()).isTrue();
+		assertThat(task.runtCount()).isOne();
 	}
 
 	@Test
@@ -66,6 +71,7 @@ class VirtualThreadTaskExecutorTests {
 		executeAndWait(executor, task, monitor);
 		assertThat(task.getThreadName()).startsWith(customPrefix);
 		assertThat(task.isVirtual()).isTrue();
+		assertThat(task.runtCount()).isOne();
 	}
 
 	private void executeAndWait(TaskExecutor executor, Runnable task, Object monitor) {
@@ -115,6 +121,8 @@ class VirtualThreadTaskExecutorTests {
 
 	private static final class ThreadNameHarvester extends AbstractNotifyingRunnable {
 
+		private final AtomicInteger runCount = new AtomicInteger();
+
 		private String threadName;
 
 		private boolean virtual;
@@ -131,11 +139,16 @@ class VirtualThreadTaskExecutorTests {
 			return this.virtual;
 		}
 
+		public int runtCount() {
+			return this.runCount.get();
+		}
+
 		@Override
 		protected void doRun() {
 			Thread thread = Thread.currentThread();
 			this.threadName = thread.getName();
 			this.virtual = thread.isVirtual();
+			runCount.incrementAndGet();
 		}
 	}
 
