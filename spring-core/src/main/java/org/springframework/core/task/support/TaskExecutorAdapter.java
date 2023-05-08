@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,12 +96,6 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			throw new TaskRejectedException(
 					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
 		}
-	}
-
-	@Deprecated
-	@Override
-	public void execute(Runnable task, long startTimeout) {
-		execute(task);
 	}
 
 	@Override

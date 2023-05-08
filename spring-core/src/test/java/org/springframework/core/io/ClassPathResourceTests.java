@@ -214,7 +214,7 @@ class ClassPathResourceTests {
 
 	@Test
 	void directoryNotReadable() throws Exception {
-		Resource fileDir = new ClassPathResource("org/springframework/core");
+		Resource fileDir = new ClassPathResource("example/type");
 		assertThat(fileDir.getURL()).asString().startsWith("file:");
 		assertThat(fileDir.exists()).isTrue();
 		assertThat(fileDir.isReadable()).isFalse();

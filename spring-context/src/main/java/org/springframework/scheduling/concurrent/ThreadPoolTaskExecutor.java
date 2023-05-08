@@ -364,12 +364,6 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 		}
 	}
 
-	@Deprecated
-	@Override
-	public void execute(Runnable task, long startTimeout) {
-		execute(task);
-	}
-
 	@Override
 	public Future<?> submit(Runnable task) {
 		ExecutorService executor = getThreadPoolExecutor();

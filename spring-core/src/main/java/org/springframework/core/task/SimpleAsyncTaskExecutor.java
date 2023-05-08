@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,9 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	private final ConcurrencyThrottleAdapter concurrencyThrottle = new ConcurrencyThrottleAdapter();
 
 	@Nullable
+	private VirtualThreadDelegate virtualThreadDelegate;
+
+	@Nullable
 	private ThreadFactory threadFactory;
 
 	@Nullable
@@ -96,6 +99,16 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 		this.threadFactory = threadFactory;
 	}
 
+
+	/**
+	 * Switch this executor to virtual threads. Requires Java 21 or higher.
+	 * <p>The default is {@code false}, indicating platform threads.
+	 * Set this flag to {@code true} in order to create virtual threads instead.
+	 * @since 6.1
+	 */
+	public void setVirtualThreads(boolean virtual) {
+		this.virtualThreadDelegate = (virtual ? new VirtualThreadDelegate() : null);
+	}
 
 	/**
 	 * Specify an external factory to use for creating new Threads,
@@ -238,11 +251,16 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator
 	 * Template method for the actual execution of a task.
 	 * <p>The default implementation creates a new Thread and starts it.
 	 * @param task the Runnable to execute
+	 * @see #setVirtualThreads
 	 * @see #setThreadFactory
 	 * @see #createThread
 	 * @see java.lang.Thread#start()
 	 */
 	protected void doExecute(Runnable task) {
+		if (this.virtualThreadDelegate != null) {
+			this.virtualThreadDelegate.startVirtualThread(nextThreadName(), task);
+		}
+
 		Thread thread = (this.threadFactory != null ? this.threadFactory.newThread(task) : createThread(task));
 		thread.start();
 	}
