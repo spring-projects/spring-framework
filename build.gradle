@@ -62,7 +62,6 @@ configure([rootProject] + javaProjects) { project ->
 		matching { it.name.endsWith("Classpath") }.all { it.extendsFrom(dependencyManagement) }
 	}
 
-
 	dependencies {
 		dependencyManagement(enforcedPlatform(dependencies.project(path: ":framework-platform")))
 		testImplementation("org.junit.jupiter:junit-jupiter-api")
