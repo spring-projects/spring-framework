@@ -92,6 +92,9 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	@Nullable
 	private TaskDecorator taskDecorator;
 
+	@Nullable
+	private TaskDecorator taskDecorator;
+
 
 	/**
 	 * Create a new ConcurrentTaskExecutor, using a single thread executor as default.
