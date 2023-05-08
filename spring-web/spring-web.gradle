@@ -37,8 +37,10 @@ dependencies {
 	optional("org.eclipse.jetty:jetty-servlet") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	optional("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.0.beta0") {
+	optional("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.0.beta1") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
+		exclude group: "org.eclipse.jetty", module: "jetty-ee"
+		exclude group: "org.eclipse.jetty", module: "jetty-security"
 		exclude group: "org.eclipse.jetty", module: "jetty-server"
 		exclude group: "org.eclipse.jetty", module: "jetty-servlet"
 	}
