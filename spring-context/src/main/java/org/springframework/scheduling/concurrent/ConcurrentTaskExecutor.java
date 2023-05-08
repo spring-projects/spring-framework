@@ -84,6 +84,9 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 
 	private TaskExecutorAdapter adaptedExecutor;
 
+	@Nullable
+	private TaskDecorator taskDecorator;
+
 
 	/**
 	 * Create a new ConcurrentTaskExecutor, using a single thread executor as default.
@@ -139,6 +142,7 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	 * @since 4.3
 	 */
 	public final void setTaskDecorator(TaskDecorator taskDecorator) {
+		this.taskDecorator = taskDecorator;
 		this.adaptedExecutor.setTaskDecorator(taskDecorator);
 	}
 
@@ -175,11 +179,15 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	}
 
 
-	private static TaskExecutorAdapter getAdaptedExecutor(Executor concurrentExecutor) {
+	private TaskExecutorAdapter getAdaptedExecutor(Executor concurrentExecutor) {
 		if (managedExecutorServiceClass != null && managedExecutorServiceClass.isInstance(concurrentExecutor)) {
 			return new ManagedTaskExecutorAdapter(concurrentExecutor);
 		}
-		return new TaskExecutorAdapter(concurrentExecutor);
+		TaskExecutorAdapter adapter = new TaskExecutorAdapter(concurrentExecutor);
+		if (this.taskDecorator != null) {
+			adapter.setTaskDecorator(this.taskDecorator);
+		}
+		return adapter;
 	}
 
 

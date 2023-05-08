@@ -103,7 +103,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	public ConcurrentTaskScheduler() {
 		super();
-		this.scheduledExecutor = initScheduledExecutor(null);
+		initScheduledExecutor(null);
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	public ConcurrentTaskScheduler(ScheduledExecutorService scheduledExecutor) {
 		super(scheduledExecutor);
-		this.scheduledExecutor = initScheduledExecutor(scheduledExecutor);
+		initScheduledExecutor(scheduledExecutor);
 	}
 
 	/**
@@ -134,11 +134,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	 */
 	public ConcurrentTaskScheduler(Executor concurrentExecutor, ScheduledExecutorService scheduledExecutor) {
 		super(concurrentExecutor);
-		this.scheduledExecutor = initScheduledExecutor(scheduledExecutor);
+		initScheduledExecutor(scheduledExecutor);
 	}
 
 
-	private ScheduledExecutorService initScheduledExecutor(@Nullable ScheduledExecutorService scheduledExecutor) {
+	private void initScheduledExecutor(@Nullable ScheduledExecutorService scheduledExecutor) {
 		if (scheduledExecutor != null) {
 			this.scheduledExecutor = scheduledExecutor;
 			this.enterpriseConcurrentScheduler = (managedScheduledExecutorServiceClass != null &&
@@ -148,7 +148,6 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 			this.scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 			this.enterpriseConcurrentScheduler = false;
 		}
-		return this.scheduledExecutor;
 	}
 
 	/**
