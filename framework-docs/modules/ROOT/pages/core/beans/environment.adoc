@@ -184,11 +184,11 @@ Java::
 		}
 	}
 ----
-======
 <1> `@Bean(destroyMethod = "")` disables default destroy method inference.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	@Profile("production")
@@ -202,6 +202,7 @@ Java::
 	}
 ----
 <1> `@Bean(destroyMethod = "")` disables default destroy method inference.
+======
 --
 
 NOTE: As mentioned earlier, with `@Bean` methods, you typically choose to use programmatic
@@ -294,12 +295,12 @@ Java::
 		}
 	}
 ----
-======
 <1> The `standaloneDataSource` method is available only in the `development` profile.
 <2> The `jndiDataSource` method is available only in the `production` profile.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Configuration
 	class AppConfig {
@@ -322,6 +323,7 @@ Java::
 ----
 <1> The `standaloneDataSource` method is available only in the `development` profile.
 <2> The `jndiDataSource` method is available only in the `production` profile.
+======
 --
 
 [NOTE]

@@ -41,11 +41,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using the `@InitBinder` annotation.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class FormController {
@@ -61,6 +61,7 @@ Java::
 	}
 ----
 <1> Using the `@InitBinder` annotation.
+======
 --
 
 Alternatively, when using a `Formatter`-based setup through a shared
@@ -85,11 +86,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Adding a custom formatter (a `DateFormatter`, in this case).
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class FormController {
@@ -103,6 +104,7 @@ Java::
 	}
 ----
 <1> Adding a custom formatter (a `DateFormatter`, in this case).
+======
 --
 
 

@@ -25,11 +25,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> The `@WebAppConfiguration` annotation.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@WebAppConfiguration // <1>
@@ -38,6 +38,7 @@ Java::
 	}
 ----
 <1> The `@WebAppConfiguration` annotation.
+======
 --
 
 
@@ -59,11 +60,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Specifying a classpath resource.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@WebAppConfiguration("classpath:test-web-resources") // <1>
@@ -72,6 +73,7 @@ Java::
 	}
 ----
 <1> Specifying a classpath resource.
+======
 --
 
 

@@ -374,11 +374,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> This line adds the `@Offline` annotation.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class MovieRecommender {
 
@@ -390,6 +390,7 @@ class MovieRecommender {
 }
 ----
 <1> This line adds the `@Offline` annotation.
+======
 --
 
 Now the bean definition only needs a qualifier `type`, as shown in the following example:

@@ -31,11 +31,11 @@ Java::
 
 	}
 ----
-======
 <1> Using `@RequestParam` to bind `petId`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	import org.springframework.ui.set
 
@@ -57,6 +57,7 @@ Java::
 	}
 ----
 <1> Using `@RequestParam` to bind `petId`.
+======
 
 By default, method parameters that use this annotation are required, but you can specify that
 a method parameter is optional by setting the `@RequestParam` annotation's `required` flag to

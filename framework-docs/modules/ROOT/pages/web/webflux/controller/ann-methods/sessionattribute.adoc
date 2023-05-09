@@ -18,11 +18,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Using `@SessionAttribute`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@GetMapping("/")
 	fun handle(@SessionAttribute user: User): String { // <1>
@@ -30,6 +30,7 @@ Java::
 	}
 ----
 <1> Using `@SessionAttribute`.
+======
 
 For use cases that require adding or removing session attributes, consider injecting
 `WebSession` into the controller method.

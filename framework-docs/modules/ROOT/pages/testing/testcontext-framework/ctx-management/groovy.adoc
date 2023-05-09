@@ -28,11 +28,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Specifying the location of Groovy configuration files.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from "/AppConfig.groovy" and
@@ -43,6 +43,7 @@ Java::
 	}
 ----
 <1> Specifying the location of Groovy configuration files.
+======
 
 
 If you omit both the `locations` and `value` attributes from the `@ContextConfiguration`
@@ -67,11 +68,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Loading configuration from the default location.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from
@@ -82,6 +83,7 @@ Java::
 	}
 ----
 <1> Loading configuration from the default location.
+======
 
 
 .Declaring XML configuration and Groovy scripts simultaneously

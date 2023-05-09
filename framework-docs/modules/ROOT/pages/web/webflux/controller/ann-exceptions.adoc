@@ -24,11 +24,11 @@ Java::
 		}
 	}
 ----
-======
 <1> Declaring an `@ExceptionHandler`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Controller
 	class SimpleController {
@@ -42,6 +42,8 @@ Java::
 	}
 ----
 <1> Declaring an `@ExceptionHandler`.
+======
+
 
 
 The exception can match against a top-level exception being propagated (that is, a direct

@@ -214,13 +214,13 @@ Java::
 		return WebClient.builder().clientConnector(connector).build(); // <3>
 	}
 ----
-======
 <1> Create resources independent of global ones.
 <2> Use the `ReactorClientHttpConnector` constructor with resource factory.
 <3> Plug the connector into the `WebClient.Builder`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Bean
 	fun resourceFactory() = ReactorResourceFactory().apply {
@@ -242,6 +242,7 @@ Java::
 <1> Create resources independent of global ones.
 <2> Use the `ReactorClientHttpConnector` constructor with resource factory.
 <3> Plug the connector into the `WebClient.Builder`.
+======
 --
 
 
@@ -483,12 +484,12 @@ Java::
 		return WebClient.builder().clientConnector(connector).build(); <2>
 	}
 ----
-======
 <1> Use the `JettyClientHttpConnector` constructor with resource factory.
 <2> Plug the connector into the `WebClient.Builder`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Bean
 	fun resourceFactory() = JettyResourceFactory()
@@ -506,6 +507,7 @@ Java::
 ----
 <1> Use the `JettyClientHttpConnector` constructor with resource factory.
 <2> Plug the connector into the `WebClient.Builder`.
+======
 --
 
 

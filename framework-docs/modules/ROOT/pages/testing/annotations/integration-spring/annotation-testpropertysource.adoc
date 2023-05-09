@@ -20,11 +20,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Get properties from `test.properties` in the root of the classpath.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -33,6 +33,7 @@ Java::
 	}
 ----
 <1> Get properties from `test.properties` in the root of the classpath.
+======
 
 
 The following example demonstrates how to declare inlined properties:
@@ -49,11 +50,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Declare `timezone` and `port` properties.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = ["timezone = GMT", "port: 4242"]) // <1>
@@ -62,6 +63,7 @@ Java::
 	}
 ----
 <1> Declare `timezone` and `port` properties.
+======
 
 See xref:testing/testcontext-framework/ctx-management/property-sources.adoc[Context Configuration with Test Property Sources] for examples and further details.
 

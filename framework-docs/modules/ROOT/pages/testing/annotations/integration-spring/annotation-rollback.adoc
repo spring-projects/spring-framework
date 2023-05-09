@@ -27,11 +27,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Do not roll back the result.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@Rollback(false) // <1>
 	@Test
@@ -40,5 +40,6 @@ Java::
 	}
 ----
 <1> Do not roll back the result.
+======
 
 

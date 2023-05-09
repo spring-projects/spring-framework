@@ -24,11 +24,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Setting the locations attribute to a list of XML files.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from "/app-config.xml" and
@@ -39,6 +39,7 @@ Java::
 	}
 ----
 <1> Setting the locations attribute to a list of XML files.
+======
 
 
 `@ContextConfiguration` supports an alias for the `locations` attribute through the
@@ -59,11 +60,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Specifying XML files without using the `locations` attribute.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	@ContextConfiguration("/app-config.xml", "/test-config.xml") // <1>
@@ -72,6 +73,7 @@ Java::
 	}
 ----
 <1> Specifying XML files without using the `locations` attribute.
+======
 
 
 If you omit both the `locations` and the `value` attributes from the
@@ -96,11 +98,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Loading configuration from the default location.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from
@@ -111,5 +113,6 @@ Java::
 	}
 ----
 <1> Loading configuration from the default location.
+======
 
 

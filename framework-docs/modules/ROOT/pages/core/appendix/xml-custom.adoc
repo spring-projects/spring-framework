@@ -233,14 +233,14 @@ Java::
 
 	}
 ----
-======
 <1> We use the Spring-provided `AbstractSingleBeanDefinitionParser` to handle a lot of
 the basic grunt work of creating a single `BeanDefinition`.
 <2> We supply the `AbstractSingleBeanDefinitionParser` superclass with the type that our
 single `BeanDefinition` represents.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary",chomp="-packages"]
-.Kotlin
 ----
 	package org.springframework.samples.xml
 
@@ -274,6 +274,7 @@ single `BeanDefinition` represents.
 the basic grunt work of creating a single `BeanDefinition`.
 <2> We supply the `AbstractSingleBeanDefinitionParser` superclass with the type that our
 single `BeanDefinition` represents.
+======
 
 
 In this simple case, this is all that we need to do. The creation of our single
@@ -540,7 +541,7 @@ Kotlin::
 		fun setChildren(children: List<Component>) {
 			this.children = children
 		}
-		
+
 		override fun getObject(): Component? {
 			if (this.children != null && this.children!!.isNotEmpty()) {
 				for (child in children!!) {

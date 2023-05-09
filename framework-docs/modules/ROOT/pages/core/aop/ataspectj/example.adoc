@@ -59,11 +59,11 @@ Java::
 		}
 	}
 ----
-======
 <1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim",role="secondary"]
-.Kotlin
 ----
 	@Aspect
 	class ConcurrentOperationExecutor : Ordered {
@@ -102,6 +102,7 @@ Java::
 	}
 ----
 <1> References the `businessService` named pointcut defined in xref:core/aop/ataspectj/pointcuts.adoc#aop-common-pointcuts[Sharing Named Pointcut Definitions].
+======
 
 Note that the aspect implements the `Ordered` interface so that we can set the precedence of
 the aspect higher than the transaction advice (we want a fresh transaction each time we

@@ -105,13 +105,13 @@ Java::
 		}
 	}
 ----
-======
 <1> Specify the configuration to load
 <2> Inject the configuration
 <3> Create the `WebTestClient`
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@SpringJUnitConfig(WebConfig::class) // <1>
 	class MyTests {
@@ -127,6 +127,7 @@ Java::
 <1> Specify the configuration to load
 <2> Inject the configuration
 <3> Create the `WebTestClient`
+======
 
 For Spring MVC, use the following where the Spring `ApplicationContext` is passed to
 {api-spring-framework}/test/web/servlet/setup/MockMvcBuilders.html#webAppContextSetup-org.springframework.web.context.WebApplicationContext-[MockMvcBuilders.webAppContextSetup]
@@ -158,13 +159,13 @@ Java::
 		}
 	}
 ----
-======
 <1> Specify the configuration to load
 <2> Inject the configuration
 <3> Create the `WebTestClient`
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension.class)
 	@WebAppConfiguration("classpath:META-INF/web-resources") // <1>
@@ -188,6 +189,7 @@ Java::
 <1> Specify the configuration to load
 <2> Inject the configuration
 <3> Create the `WebTestClient`
+======
 
 
 

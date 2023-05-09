@@ -20,11 +20,11 @@ Java::
 		// method logic...
 	}
 ----
-======
 <1> Bind an instance of `Pet`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 @PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 fun processSubmit(@ModelAttribute pet: Pet): String { // <1>
@@ -32,6 +32,7 @@ fun processSubmit(@ModelAttribute pet: Pet): String { // <1>
 }
 ----
 <1> Bind an instance of `Pet`.
+======
 
 The `Pet` instance above is sourced in one of the following ways:
 
@@ -66,11 +67,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Bind an instance of `Account` using an explicit attribute name.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PutMapping("/accounts/{account}")
 	fun save(@ModelAttribute("account") account: Account): String { // <1>
@@ -78,6 +79,7 @@ Java::
 	}
 ----
 <1> Bind an instance of `Account` using an explicit attribute name.
+======
 
 After the model attribute instance is obtained, data binding is applied. The
 `WebDataBinder` class matches Servlet request parameter names (query parameters and form
@@ -104,11 +106,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Adding a `BindingResult` next to the `@ModelAttribute`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	fun processSubmit(@ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
@@ -119,6 +121,7 @@ Java::
 	}
 ----
 <1> Adding a `BindingResult` next to the `@ModelAttribute`.
+======
 
 In some cases, you may want access to a model attribute without data binding. For such
 cases, you can inject the `Model` into the controller and access it directly or,
@@ -146,11 +149,11 @@ Java::
 		// ...
 	}
 ----
-======
 <1> Setting `@ModelAttribute(binding=false)`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ModelAttribute
 	fun setUpForm(): AccountForm {
@@ -169,6 +172,7 @@ Java::
 	}
 ----
 <1> Setting `@ModelAttribute(binding=false)`.
+======
 
 You can automatically apply validation after data binding by adding the
 `jakarta.validation.Valid` annotation or Spring's `@Validated` annotation
@@ -189,11 +193,11 @@ Java::
 			// ...
 		}
 ----
-======
 <1> Validate the `Pet` instance.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	fun processSubmit(@Valid @ModelAttribute("pet") pet: Pet, result: BindingResult): String { // <1>
@@ -204,6 +208,7 @@ Java::
 	}
 ----
 <1> Validate the `Pet` instance.
+======
 
 Note that using `@ModelAttribute` is optional (for example, to set its attributes).
 By default, any argument that is not a simple value type (as determined by

@@ -26,11 +26,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Referring to an XML file.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration("/test-config.xml") // <1>
 	class XmlApplicationContextTests {
@@ -38,6 +38,7 @@ Java::
 	}
 ----
 <1> Referring to an XML file.
+======
 
 
 The following example shows a `@ContextConfiguration` annotation that refers to a class:
@@ -53,11 +54,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Referring to a class.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration(classes = [TestConfig::class]) // <1>
 	class ConfigClassApplicationContextTests {
@@ -65,6 +66,7 @@ Java::
 	}
 ----
 <1> Referring to a class.
+======
 
 
 As an alternative or in addition to declaring resource locations or component classes,
@@ -82,11 +84,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Declaring an initializer class.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration(initializers = [CustomContextInitializer::class]) // <1>
 	class ContextInitializerTests {
@@ -94,6 +96,7 @@ Java::
 	}
 ----
 <1> Declaring an initializer class.
+======
 
 
 You can optionally use `@ContextConfiguration` to declare the `ContextLoader` strategy as
@@ -114,11 +117,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Configuring both a location and a custom loader.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration("/test-context.xml", loader = CustomContextLoader::class) // <1>
 	class CustomLoaderXmlApplicationContextTests {
@@ -126,6 +129,7 @@ Java::
 	}
 ----
 <1> Configuring both a location and a custom loader.
+======
 
 
 NOTE: `@ContextConfiguration` provides support for inheriting resource locations or

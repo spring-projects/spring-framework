@@ -52,11 +52,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Specifying a properties file with an absolute path.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@TestPropertySource("/test.properties") // <1>
@@ -65,6 +65,7 @@ Java::
 	}
 ----
 <1> Specifying a properties file with an absolute path.
+======
 
 
 You can configure inlined properties in the form of key-value pairs by using the
@@ -93,11 +94,11 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Setting two properties by using two variations of the key-value syntax.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ContextConfiguration
 	@TestPropertySource(properties = ["timezone = GMT", "port: 4242"]) // <1>
@@ -106,6 +107,7 @@ Java::
 	}
 ----
 <1> Setting two properties by using two variations of the key-value syntax.
+======
 
 [NOTE]
 ====

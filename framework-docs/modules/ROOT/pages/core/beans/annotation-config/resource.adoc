@@ -27,11 +27,11 @@ Java::
 		}
 	}
 ----
-======
 <1> This line injects a `@Resource`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 class SimpleMovieLister {
 
@@ -40,6 +40,7 @@ class SimpleMovieLister {
 }
 ----
 <1> This line injects a `@Resource`.
+======
 --
 
 
@@ -118,12 +119,12 @@ Java::
 		// ...
 	}
 ----
-======
 <1> The `context` field is injected based on the known resolvable dependency type:
 `ApplicationContext`.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	class MovieRecommender {
 
@@ -139,5 +140,6 @@ Java::
 ----
 <1> The `context` field is injected based on the known resolvable dependency type:
 `ApplicationContext`.
+======
 --
 

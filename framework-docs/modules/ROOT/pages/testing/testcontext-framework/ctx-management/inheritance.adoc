@@ -47,12 +47,12 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Configuration file defined in the superclass.
 <2> Configuration file defined in the subclass.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	@ExtendWith(SpringExtension::class)
 	// ApplicationContext will be loaded from "/base-config.xml"
@@ -71,6 +71,7 @@ Java::
 ----
 <1> Configuration file defined in the superclass.
 <2> Configuration file defined in the subclass.
+======
 
 
 Similarly, in the next example, which uses component classes, the `ApplicationContext`
@@ -97,12 +98,12 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Configuration class defined in the superclass.
 <2> Configuration class defined in the subclass.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// ApplicationContext will be loaded from BaseConfig
 	@SpringJUnitConfig(BaseConfig::class) // <1>
@@ -118,6 +119,7 @@ Java::
 ----
 <1> Configuration class defined in the superclass.
 <2> Configuration class defined in the subclass.
+======
 
 
 In the next example, which uses context initializers, the `ApplicationContext` for
@@ -146,12 +148,12 @@ Java::
 		// class body...
 	}
 ----
-======
 <1> Initializer defined in the superclass.
 <2> Initializer defined in the subclass.
 
+Kotlin::
++
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-.Kotlin
 ----
 	// ApplicationContext will be initialized by BaseInitializer
 	@SpringJUnitConfig(initializers = [BaseInitializer::class]) // <1>
@@ -168,5 +170,6 @@ Java::
 ----
 <1> Initializer defined in the superclass.
 <2> Initializer defined in the subclass.
+======
 
 
