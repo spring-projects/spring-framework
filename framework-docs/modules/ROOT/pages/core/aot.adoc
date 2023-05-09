@@ -18,7 +18,9 @@ Applying such optimizations early implies the following restrictions:
 ** `@Profile`, in particular profile-specific configuration needs to be chosen at build time.
 ** `Environment` properties that impact the presence of a bean (`@Conditional`) are only considered at build time.
 * Bean definitions with instance suppliers (lambdas or method references) cannot be transformed ahead-of-time (see related https://github.com/spring-projects/spring-framework/issues/29555[spring-framework#29555] issue).
-* The return type of methods annotated with `@Bean` should be the most specific type possible (typically the concrete class, not an interface) in order to support proper type inference without invoking the corresponding `@Bean` method at build time.
+* Make sure that the bean type is as precise as possible.
+
+TIP: See also the xref:core/aot.adoc#aot.bestpractices[] section.
 
 When these restrictions are in place, it becomes possible to perform ahead-of-time processing at build time and generate additional assets.
 A Spring AOT processed application typically generates:
@@ -192,6 +194,129 @@ The generated code above creates bean definitions equivalent to the `@Configurat
 There is a bean definition for `dataSourceConfiguration` and one for `dataSourceBean`.
 When a `datasource` instance is required, a `BeanInstanceSupplier` is called.
 This supplier invokes the `dataSource()` method on the `dataSourceConfiguration` bean.
+
+[[aot.bestpractices]]
+== Best Practices
+
+The AOT engine is designed to handle as many use cases as possible, with no code change in applications.
+However, keep in mind that some optimizations are made at build time based on a static definition of the beans.
+
+This section lists the best practices that make sure your application is ready for AOT.
+
+[[aot.bestpractices.bean-type]]
+=== Expose The Most Precise Bean Type
+
+While your application may interact with an interface that a bean implements, it is still very important to declare the most precise type.
+The AOT engine performs additional checks on the bean type, such as detecting the presence of `@Autowired` members, or lifecycle callback methods.
+
+For `@Configuration` classes, make sure that the return type of the factory `@Bean` method is as precise as possible.
+Consider the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration(proxyBeanMethods = false)
+	public class UserConfiguration {
+
+		@Bean
+		public MyInterface myInterface() {
+			return new MyImplementation();
+		}
+
+	}
+----
+======
+
+In the example above, the declared  type for the `myInterface` bean is `MyInterface`.
+None of the usual post-processing will take `MyImplementation` into account.
+For instance, if there is an annotated handler method on `MyImplementation` that the context should register, it won’t be detected upfront.
+
+The example above should be rewritten as follows:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration(proxyBeanMethods = false)
+	public class UserConfiguration {
+
+		@Bean
+		public MyImplementation myInterface() {
+			return new MyImplementation();
+		}
+
+	}
+----
+======
+
+If you are registering bean definitions programmatically, consider using `RootBeanBefinition` as it allows to specify a `ResolvableType` that handles generics.
+
+[[aot.bestpractices.factory-bean]]
+=== FactoryBean
+
+`FactoryBean` should be used with care as it introduces an intermediate layer in terms of bean type resolution that may not be conceptually necessary.
+As a rule of thumb, if the `FactoryBean` instance does not hold long-term state and is not needed at a later point in time at runtime, it should be replaced by a regular factory method, possibly with a `FactoryBean` adapter layer on top (for declarative configuration purposes).
+
+If your `FactoryBean` implementation does not resolve the object type (i.e. `T`), extra care is necessary.
+Consider the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	public class ClientFactoryBean<T extends AbstractClient> implements FactoryBean<T> {
+
+	}
+----
+======
+
+A concrete client declaration should provide a resolved generic for the client, as shown in the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Configuration(proxyBeanMethods = false)
+	public class UserConfiguration {
+
+		@Bean
+		public ClientFactoryBean<MyClient> myClient() {
+			return new ClientFactoryBean<>(...);
+		}
+
+	}
+----
+======
+
+If the `FactoryBean` bean definition is registered programmatically, make sure to follow these steps:
+
+1. Use `RootBeanDefinition`.
+2. Set the `beanClass` to the `FactoryBean` class so that AOT knows that it is an intermediate layer.
+3. Set the `ResolvableType` to a resolved generic, which makes sure the most precise type is exposed.
+
+The following example showcases a basic definition:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+    RootBeanDefinition beanDefinition = new RootBeanDefinition(ClientFactoryBean.class);
+    beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(ClientFactoryBean.class, MyClient.class));
+    // ...
+    registry.registerBeanDefinition("myClient", beanDefinition);
+----
+======
 
 
 [[aot.hints]]
