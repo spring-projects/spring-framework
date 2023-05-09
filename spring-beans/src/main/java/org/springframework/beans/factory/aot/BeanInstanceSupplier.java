@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.aot;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
@@ -31,8 +30,6 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.InjectionPoint;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -44,7 +41,6 @@ import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
-import org.springframework.core.CollectionFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -239,7 +235,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 		return resolveArguments(registeredBean, this.lookup.get(registeredBean));
 	}
 
-	private AutowiredArguments resolveArguments(RegisteredBean registeredBean,Executable executable) {
+	private AutowiredArguments resolveArguments(RegisteredBean registeredBean, Executable executable) {
 		Assert.isInstanceOf(AbstractAutowireCapableBeanFactory.class, registeredBean.getBeanFactory());
 		String beanName = registeredBean.getBeanName();
 		Class<?> beanClass = registeredBean.getBeanClass();
@@ -264,8 +260,8 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 						dependencyDescriptor, shortcut, beanClass);
 			}
 			ValueHolder argumentValue = argumentValues.getIndexedArgumentValue(i, null);
-			resolved[i - startIndex] = resolveArgument(beanFactory, beanName,
-					autowiredBeans, parameter, dependencyDescriptor, argumentValue);
+			resolved[i - startIndex] = resolveArgument(registeredBean,autowiredBeans,
+					dependencyDescriptor, argumentValue);
 		}
 		registerDependentBeans(beanFactory, beanName, autowiredBeans);
 		return AutowiredArguments.of(resolved);
@@ -311,36 +307,21 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 	}
 
 	@Nullable
-	private Object resolveArgument(AbstractAutowireCapableBeanFactory beanFactory,
-			String beanName, Set<String> autowiredBeans, MethodParameter parameter,
+	private Object resolveArgument(RegisteredBean registeredBean, Set<String> autowiredBeans,
 			DependencyDescriptor dependencyDescriptor, @Nullable ValueHolder argumentValue) {
 
-		TypeConverter typeConverter = beanFactory.getTypeConverter();
-		Class<?> parameterType = parameter.getParameterType();
+		TypeConverter typeConverter = registeredBean.getBeanFactory().getTypeConverter();
+		Class<?> parameterType = dependencyDescriptor.getMethodParameter().getParameterType();
 		if (argumentValue != null) {
 			return (!argumentValue.isConverted()) ?
 					typeConverter.convertIfNecessary(argumentValue.getValue(), parameterType) :
 					argumentValue.getConvertedValue();
 		}
 		try {
-			try {
-				return beanFactory.resolveDependency(dependencyDescriptor, beanName, autowiredBeans, typeConverter);
-			}
-			catch (NoSuchBeanDefinitionException ex) {
-				if (parameterType.isArray()) {
-					return Array.newInstance(parameterType.getComponentType(), 0);
-				}
-				if (CollectionFactory.isApproximableCollectionType(parameterType)) {
-					return CollectionFactory.createCollection(parameterType, 0);
-				}
-				if (CollectionFactory.isApproximableMapType(parameterType)) {
-					return CollectionFactory.createMap(parameterType, 0);
-				}
-				throw ex;
-			}
+			return registeredBean.resolveAutowiredArgument(dependencyDescriptor, typeConverter, autowiredBeans);
 		}
 		catch (BeansException ex) {
-			throw new UnsatisfiedDependencyException(null, beanName, new InjectionPoint(parameter), ex);
+			throw new UnsatisfiedDependencyException(null, registeredBean.getBeanName(), dependencyDescriptor, ex);
 		}
 	}
 

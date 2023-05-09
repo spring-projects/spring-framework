@@ -17,13 +17,16 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Executable;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
@@ -207,6 +210,13 @@ public final class RegisteredBean {
 	public Executable resolveConstructorOrFactoryMethod() {
 		return new ConstructorResolver((AbstractAutowireCapableBeanFactory) getBeanFactory())
 				.resolveConstructorOrFactoryMethod(getBeanName(), getMergedBeanDefinition());
+	}
+
+	@Nullable
+	public Object resolveAutowiredArgument(DependencyDescriptor descriptor, TypeConverter typeConverter,
+			Set<String> autowiredBeans) {
+		return new ConstructorResolver((AbstractAutowireCapableBeanFactory) getBeanFactory())
+				.resolveAutowiredArgument(descriptor, getBeanName(), autowiredBeans, typeConverter, true);
 	}
 
 
