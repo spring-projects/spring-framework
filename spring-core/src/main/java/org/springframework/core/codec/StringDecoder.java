@@ -124,7 +124,7 @@ public final class StringDecoder extends AbstractDataBufferDecoder<String> {
 					chunks.clear();
 					return Mono.just(lastBuffer);
 				}))
-				.doOnTerminate(chunks::releaseAndClear)
+				.doFinally(signalType -> chunks.releaseAndClear())
 				.doOnDiscard(DataBuffer.class, DataBufferUtils::release)
 				.map(buffer -> decode(buffer, elementType, mimeType, hints));
 	}
