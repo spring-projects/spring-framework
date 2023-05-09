@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,9 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Stephane Nicoll
  * @since 5.0
+ * @deprecated as of 6.1, in favor of the AOT engine.
  */
+@Deprecated(since = "6.1", forRemoval = true)
 public class CandidateComponentsIndex {
 
 	private static final AntPathMatcher pathMatcher = new AntPathMatcher(".");

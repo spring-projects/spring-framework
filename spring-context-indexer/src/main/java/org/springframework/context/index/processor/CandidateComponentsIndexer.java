@@ -42,7 +42,9 @@ import javax.lang.model.element.TypeElement;
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @since 5.0
+ * @deprecated as of 6.1, in favor of the AOT engine.
  */
+@Deprecated(since = "6.1", forRemoval = true)
 public class CandidateComponentsIndexer implements Processor {
 
 	private MetadataStore metadataStore;

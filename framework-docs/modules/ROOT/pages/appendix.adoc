@@ -39,11 +39,6 @@ resolvable otherwise. See
 {api-spring-framework}++/core/env/AbstractEnvironment.html#IGNORE_GETENV_PROPERTY_NAME++[`AbstractEnvironment`]
 for details.
 
-| `spring.index.ignore`
-| Instructs Spring to ignore the components index located in
-`META-INF/spring.components`. See xref:core/beans/classpath-scanning.adoc#beans-scanning-index[Generating an Index of Candidate Components]
-.
-
 | `spring.jdbc.getParameterType.ignore`
 | Instructs Spring to ignore `java.sql.ParameterMetaData.getParameterType` completely.
 See the note in xref:data-access/jdbc/advanced.adoc#jdbc-batch-list[Batch Operations with a List of Objects].
