@@ -86,9 +86,6 @@ name (such as `redirect:/myapp/some/resource`) redirects relative to the current
 Servlet context, while a name such as `redirect:https://myhost.com/some/arbitrary/path`
 redirects to an absolute URL.
 
-Note that, if a controller method is annotated with the `@ResponseStatus`, the annotation
-value takes precedence over the response status set by `RedirectView`.
-
 
 [[mvc-redirecting-forward-prefix]]
 == Forwarding
