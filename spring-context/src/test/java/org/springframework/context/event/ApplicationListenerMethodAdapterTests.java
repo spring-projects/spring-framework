@@ -19,6 +19,7 @@ package org.springframework.context.event;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -325,6 +326,77 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		verify(this.context, times(2)).getBean("testBean");
 	}
 
+	// see https://github.com/spring-projects/spring-framework/issues/30399
+	@Test
+	void simplePayloadDoesNotSupportArbitraryGenericEventType() throws Exception {
+		var method = SampleEvents.class.getDeclaredMethod("handleString", String.class);
+		var adapter = new ApplicationListenerMethodAdapter(null, ApplicationListenerMethodAdapterTests.class, method);
+
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(EntityWrapper.class, Integer.class)))
+				.as("handleString(String) with EntityWrapper<Integer>").isFalse();
+		assertThat(adapter.supportsEventType(ResolvableType.forClass(EntityWrapper.class)))
+				.as("handleString(String) with EntityWrapper<?>").isFalse();
+		assertThat(adapter.supportsEventType(ResolvableType.forClass(String.class)))
+				.as("handleString(String) with String").isTrue();
+	}
+
+	// see https://github.com/spring-projects/spring-framework/issues/30399
+	@Test
+	void genericPayloadDoesNotSupportArbitraryGenericEventType() throws Exception {
+		var method = SampleEvents.class.getDeclaredMethod("handleGenericStringPayload", EntityWrapper.class);
+		var adapter = new ApplicationListenerMethodAdapter(null, ApplicationListenerMethodAdapterTests.class, method);
+
+		assertThat(adapter.supportsEventType(ResolvableType.forClass(EntityWrapper.class)))
+				.as("handleGenericStringPayload(EntityWrapper<String>) with EntityWrapper<?>").isFalse();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(EntityWrapper.class, Integer.class)))
+				.as("handleGenericStringPayload(EntityWrapper<String>) with EntityWrapper<Integer>").isFalse();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(EntityWrapper.class, String.class)))
+				.as("handleGenericStringPayload(EntityWrapper<String>) with EntityWrapper<String>").isTrue();
+	}
+
+	// see https://github.com/spring-projects/spring-framework/issues/30399
+	@Test
+	void rawGenericPayloadDoesNotSupportArbitraryGenericEventType() throws Exception {
+		var method = SampleEvents.class.getDeclaredMethod("handleGenericAnyPayload", EntityWrapper.class);
+		var adapter = new ApplicationListenerMethodAdapter(null, ApplicationListenerMethodAdapterTests.class, method);
+
+		assertThat(adapter.supportsEventType(ResolvableType.forClass(EntityWrapper.class)))
+				.as("handleGenericAnyPayload(EntityWrapper<?>) with EntityWrapper<?>").isTrue();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(EntityWrapper.class, Integer.class)))
+				.as("handleGenericAnyPayload(EntityWrapper<?>) with EntityWrapper<Integer>").isTrue();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(EntityWrapper.class, String.class)))
+				.as("handleGenericAnyPayload(EntityWrapper<?>) with EntityWrapper<String>").isTrue();
+		assertThat(adapter.supportsEventType(ResolvableType.forClass(List.class)))
+				.as("handleGenericAnyPayload(EntityWrapper<?>) with List<?>").isFalse();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(List.class, String.class)))
+				.as("handleGenericAnyPayload(EntityWrapper<?>) with List<String>").isFalse();
+	}
+
+	@Test
+	void genericApplicationEventSupportsSpecificType() throws Exception {
+		var method = SampleEvents.class.getDeclaredMethod("handleGenericString", GenericTestEvent.class);
+		var adapter = new ApplicationListenerMethodAdapter(null, ApplicationListenerMethodAdapterTests.class, method);
+
+		assertThat(adapter.supportsEventType(ResolvableType.forClass(GenericTestEvent.class)))
+				.as("handleGenericString(GenericTestEvent<String>) with GenericTestEvent<?>").isFalse();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(GenericTestEvent.class, Integer.class)))
+				.as("handleGenericString(GenericTestEvent<String>) with GenericTestEvent<Integer>").isFalse();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(GenericTestEvent.class, String.class)))
+				.as("handleGenericString(GenericTestEvent<String>) with GenericTestEvent<String>").isTrue();
+	}
+
+	@Test
+	void genericRawApplicationEventSupportsRawTypeAndAnySpecificType() throws Exception {
+		var method = SampleEvents.class.getDeclaredMethod("handleGenericRaw", GenericTestEvent.class);
+		var adapter = new ApplicationListenerMethodAdapter(null, ApplicationListenerMethodAdapterTests.class, method);
+
+		assertThat(adapter.supportsEventType(ResolvableType.forClass(GenericTestEvent.class)))
+				.as("handleGenericRaw(GenericTestEvent<?>) with GenericTestEvent<?>").isTrue();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(GenericTestEvent.class, String.class)))
+				.as("handleGenericRaw(GenericTestEvent<?>) with GenericTestEvent<String>").isTrue();
+		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(GenericTestEvent.class, Integer.class)))
+				.as("handleGenericRaw(GenericTestEvent<?>) with GenericTestEvent<Integer>").isTrue();
+	}
 
 	private void supportsEventType(boolean match, Method method, ResolvableType eventType) {
 		ApplicationListenerMethodAdapter adapter = createTestInstance(method);
@@ -371,6 +443,10 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 
 		@EventListener
 		public void handleGenericString(GenericTestEvent<String> event) {
+		}
+
+		@EventListener
+		public void handleGenericRaw(GenericTestEvent<?> event) {
 		}
 
 		@EventListener

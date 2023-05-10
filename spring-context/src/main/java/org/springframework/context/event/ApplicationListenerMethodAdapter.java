@@ -173,12 +173,12 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 			}
 			if (PayloadApplicationEvent.class.isAssignableFrom(eventType.toClass())) {
 				ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
-				if (declaredEventType.isAssignableFrom(payloadType)) {
+				if (declaredEventType.isAssignableFrom(payloadType) || eventType.hasUnresolvableGenerics()) {
 					return true;
 				}
 			}
 		}
-		return eventType.hasUnresolvableGenerics();
+		return false;
 	}
 
 	@Override
