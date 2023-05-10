@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.test.context.aot.samples.basic;
 
 import org.junit.runner.RunWith;
 
-import org.springframework.aot.AotDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -28,6 +27,7 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.AotTestAttributes;
+import org.springframework.test.context.aot.TestAotDetector;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -78,7 +78,7 @@ public class BasicSpringVintageTests {
 			String booleanKey1 = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active1";
 			String booleanKey2 = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active2";
 			AotTestAttributes aotAttributes = AotTestAttributes.getInstance();
-			if (AotDetector.useGeneratedArtifacts()) {
+			if (TestAotDetector.useGeneratedArtifacts()) {
 				assertThat(aotAttributes.getString(stringKey))
 					.as("AOT String attribute must already be present during AOT run-time execution")
 					.isEqualTo("org.example.Main");
