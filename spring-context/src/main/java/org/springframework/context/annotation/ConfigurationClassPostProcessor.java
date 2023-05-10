@@ -490,7 +490,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				// or component class without @Bean methods.
 				boolean liteConfigurationCandidateWithoutBeanMethods =
 						(ConfigurationClassUtils.CONFIGURATION_CLASS_LITE.equals(configClassAttr) &&
-							annotationMetadata != null && !ConfigurationClassUtils.hasBeanMethods(annotationMetadata));
+							annotationMetadata != null && !ConfigurationClassUtils.hasBeanMethods(annotationMetadata, this.metadataReaderFactory));
 				if (!liteConfigurationCandidateWithoutBeanMethods) {
 					try {
 						abd.resolveBeanClass(this.beanClassLoader);

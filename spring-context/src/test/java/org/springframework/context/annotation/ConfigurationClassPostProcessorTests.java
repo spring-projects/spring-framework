@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,11 +69,13 @@ import org.springframework.util.Assert;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Yanming Zhou
  */
 class ConfigurationClassPostProcessorTests {
 
@@ -1125,6 +1127,13 @@ class ConfigurationClassPostProcessorTests {
 	}
 
 
+	@Test
+	void testBeanNotDeclaredLocallyWithLiteMode() { // GH-30449
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(LiteConfiguration.class);
+		assertThatNoException().isThrownBy(() -> ctx.getBean("myTestBean"));
+		ctx.close();
+	}
+
 	// -------------------------------------------------------------------------
 
 	@Configuration
@@ -2036,6 +2045,18 @@ class ConfigurationClassPostProcessorTests {
 				}
 			};
 		}
+	}
+
+	static class LiteConfiguration extends BaseLiteConfiguration {
+
+	}
+
+	static class BaseLiteConfiguration {
+		@Bean
+		TestBean myTestBean() {
+			return new TestBean();
+		}
+
 	}
 
 }

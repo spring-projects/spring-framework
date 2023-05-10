@@ -36,6 +36,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.lang.Nullable;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Component;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Stephane Nicoll
+ * @author Yanming Zhou
  * @since 6.0
  */
 public abstract class ConfigurationClassUtils {
@@ -71,6 +73,7 @@ public abstract class ConfigurationClassUtils {
 			Import.class.getName(),
 			ImportResource.class.getName());
 
+	private static final MetadataReaderFactory defaultMetadataReaderFactory = new CachingMetadataReaderFactory();
 
 	/**
 	 * Initialize a configuration class proxy for the specified class.
@@ -136,7 +139,7 @@ public abstract class ConfigurationClassUtils {
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
-		else if (config != null || isConfigurationCandidate(metadata)) {
+		else if (config != null || isConfigurationCandidate(metadata, metadataReaderFactory)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
@@ -160,6 +163,18 @@ public abstract class ConfigurationClassUtils {
 	 * configuration class processing; {@code false} otherwise
 	 */
 	static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
+		return isConfigurationCandidate(metadata, defaultMetadataReaderFactory);
+	}
+
+	/**
+	 * Check the given metadata for a configuration class candidate
+	 * (or nested component class declared within a configuration/component class).
+	 * @param metadata the metadata of the annotated class
+	 * @param metadataReaderFactory the current factory in use by the caller
+	 * @return {@code true} if the given class is to be registered for
+	 * configuration class processing; {@code false} otherwise
+	 */
+	static boolean isConfigurationCandidate(AnnotationMetadata metadata, MetadataReaderFactory metadataReaderFactory) {
 		// Do not consider an interface or an annotation...
 		if (metadata.isInterface()) {
 			return false;
@@ -173,19 +188,30 @@ public abstract class ConfigurationClassUtils {
 		}
 
 		// Finally, let's look for @Bean methods...
-		return hasBeanMethods(metadata);
+		return hasBeanMethods(metadata, metadataReaderFactory);
 	}
 
-	static boolean hasBeanMethods(AnnotationMetadata metadata) {
+	static boolean hasBeanMethods(AnnotationMetadata metadata, MetadataReaderFactory metadataReaderFactory) {
 		try {
-			return metadata.hasAnnotatedMethods(Bean.class.getName());
+			AnnotationMetadata md = metadata;
+			while (true) {
+				if (md.hasAnnotatedMethods(Bean.class.getName())) {
+					return true;
+				}
+				if (md.hasSuperClass()) {
+					md = metadataReaderFactory.getMetadataReader(md.getSuperClassName()).getAnnotationMetadata();
+				}
+				else {
+					break;
+				}
+			}
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to introspect @Bean methods on class [" + metadata.getClassName() + "]: " + ex);
 			}
-			return false;
 		}
+		return false;
 	}
 
 	/**
