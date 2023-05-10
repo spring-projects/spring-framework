@@ -228,13 +228,14 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 		this.relay.handleMessage(subscribe.message);
 		this.responseHandler.expectMessages(subscribe);
 
-		MessageExchange error = MessageExchangeBuilder.error(sess1).build();
 		stopActiveMqBrokerAndAwait();
-		this.responseHandler.expectMessages(error);
 
+		MessageExchange error = MessageExchangeBuilder.error(sess1).build();
+		this.responseHandler.expectMessages(error);
 		this.eventPublisher.expectBrokerAvailabilityEvent(false);
 
 		startActiveMQBroker();
+
 		this.eventPublisher.expectBrokerAvailabilityEvent(true);
 	}
 
