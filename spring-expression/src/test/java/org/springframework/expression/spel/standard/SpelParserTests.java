@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionException;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
@@ -35,8 +37,18 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 /**
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class SpelParserTests {
+
+	@Test  // gh-30464
+	public void nullExpression() {
+		ExpressionParser parser = new SpelExpressionParser();
+		String expression = null;
+		Expression expr = parser.parseExpression(expression);
+		Object result = expr.getValue();
+		assertThat(result).isNull();
+	}
 
 	@Test
 	public void theMostBasic() {

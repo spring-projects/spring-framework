@@ -158,7 +158,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	private void checkExpressionLength(String string) {
-		if (string.length() > MAX_EXPRESSION_LENGTH) {
+		if (string != null && string.length() > MAX_EXPRESSION_LENGTH) {
 			throw new SpelEvaluationException(SpelMessage.MAX_EXPRESSION_LENGTH_EXCEEDED, MAX_EXPRESSION_LENGTH);
 		}
 	}
