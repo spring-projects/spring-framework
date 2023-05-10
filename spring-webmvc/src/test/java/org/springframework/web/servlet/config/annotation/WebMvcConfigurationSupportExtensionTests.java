@@ -393,12 +393,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 			configurer.setDefaultTimeout(2500).setTaskExecutor(new ConcurrentTaskExecutor())
-					.registerCallableInterceptors(new CallableProcessingInterceptor() {
-					})
-					.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptor() {
-					});
+					.registerCallableInterceptors(new CallableProcessingInterceptor() {})
+					.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptor() {});
 		}
 
 		@Override

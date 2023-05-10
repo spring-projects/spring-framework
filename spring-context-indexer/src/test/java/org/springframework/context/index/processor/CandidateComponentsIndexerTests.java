@@ -231,12 +231,14 @@ class CandidateComponentsIndexerTests {
 		assertThat(metadata.getItems()).hasSize(1);
 	}
 
+	@SuppressWarnings("removal")
 	private CandidateComponentsMetadata compile(Class<?>... types) {
 		CandidateComponentsIndexer processor = new CandidateComponentsIndexer();
 		this.compiler.getTask(types).call(processor);
 		return readGeneratedMetadata(this.compiler.getOutputLocation());
 	}
 
+	@SuppressWarnings("removal")
 	private CandidateComponentsMetadata compile(String... types) {
 		CandidateComponentsIndexer processor = new CandidateComponentsIndexer();
 		this.compiler.getTask(types).call(processor);

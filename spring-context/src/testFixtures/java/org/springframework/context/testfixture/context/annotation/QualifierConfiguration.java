@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 public class QualifierConfiguration {
 
+	@SuppressWarnings("unused")
 	private String bean;
 
 	@Autowired
@@ -48,4 +49,5 @@ public class QualifierConfiguration {
 		}
 
 	}
+
 }

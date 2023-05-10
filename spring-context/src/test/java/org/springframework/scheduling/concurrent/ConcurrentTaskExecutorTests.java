@@ -61,6 +61,7 @@ class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 	@Test
 	void zeroArgCtorResultsInDefaultTaskExecutorBeingUsed() {
+		@SuppressWarnings("deprecation")
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
 		assertThatCode(() -> executor.execute(new NoOpRunnable())).doesNotThrowAnyException();
 	}
@@ -73,6 +74,7 @@ class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 	@Test
 	void earlySetConcurrentExecutorCallRespectsConfiguredTaskDecorator() {
+		@SuppressWarnings("deprecation")
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
 		executor.setConcurrentExecutor(new DecoratedExecutor());
 		executor.setTaskDecorator(new RunnableDecorator());
@@ -81,6 +83,7 @@ class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 	@Test
 	void lateSetConcurrentExecutorCallRespectsConfiguredTaskDecorator() {
+		@SuppressWarnings("deprecation")
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
 		executor.setTaskDecorator(new RunnableDecorator());
 		executor.setConcurrentExecutor(new DecoratedExecutor());
