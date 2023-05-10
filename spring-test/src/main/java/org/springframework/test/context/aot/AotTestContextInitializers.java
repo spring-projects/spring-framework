@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.context.aot;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
@@ -30,7 +29,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Intended solely for internal use within the framework.
  *
- * <p>If we are not running in {@linkplain AotDetector#useGeneratedArtifacts()
+ * <p>If we are not running in {@linkplain TestAotDetector#useGeneratedArtifacts()
  * AOT mode} or if a test class is not {@linkplain #isSupportedTestClass(Class)
  * supported} in AOT mode, {@link #getContextInitializer(Class)} and
  * {@link #getContextInitializerClass(Class)} will return {@code null}.

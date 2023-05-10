@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -36,6 +35,7 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.aot.AotContextLoader;
 import org.springframework.test.context.aot.AotTestContextInitializers;
+import org.springframework.test.context.aot.TestAotDetector;
 import org.springframework.test.context.aot.TestContextAotException;
 import org.springframework.test.context.util.TestContextSpringFactoriesUtils;
 import org.springframework.util.Assert;
@@ -248,7 +248,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 */
 	@SuppressWarnings("unchecked")
 	private MergedContextConfiguration replaceIfNecessary(MergedContextConfiguration mergedConfig) {
-		if (AotDetector.useGeneratedArtifacts()) {
+		if (TestAotDetector.useGeneratedArtifacts()) {
 			Class<?> testClass = mergedConfig.getTestClass();
 			Class<? extends ApplicationContextInitializer<?>> contextInitializerClass =
 					this.aotTestContextInitializers.getContextInitializerClass(testClass);
