@@ -199,8 +199,7 @@ public class FunctionReference extends SpelNodeImpl {
 			varArgPosition = declaredParamCount - 1;
 		}
 		TypeConverter converter = state.getEvaluationContext().getTypeConverter();
-		boolean conversionOccurred = ReflectionHelper.convertAllMethodHandleArguments(converter,
-				functionArgs, methodHandle, varArgPosition);
+		ReflectionHelper.convertAllMethodHandleArguments(converter, functionArgs, methodHandle, varArgPosition);
 
 		if (isSuspectedVarargs && declaredParamCount == 1) {
 			//we only repack the varargs if it is the ONLY argument
