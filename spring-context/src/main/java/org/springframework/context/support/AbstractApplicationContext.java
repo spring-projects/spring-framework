@@ -385,23 +385,47 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Publish the given event to all listeners.
+	 * <p>This is the internal delegate that all other {@code publishEvent}
+	 * methods refer to. It is not meant to be called directly but rather serves
+	 * as a propagation mechanism between application contexts in a hierarchy,
+	 * potentially overridden in subclasses for a custom propagation arrangement.
 	 * @param event the event to publish (may be an {@link ApplicationEvent}
 	 * or a payload object to be turned into a {@link PayloadApplicationEvent})
-	 * @param eventType the resolved event type, if known
+	 * @param typeHint the resolved event type, if known.
+	 * The implementation of this method also tolerates a payload type hint for
+	 * a payload object to be turned into a {@link PayloadApplicationEvent}.
+	 * However, the recommended way is to construct an actual event object via
+	 * {@link PayloadApplicationEvent#PayloadApplicationEvent(Object, Object, ResolvableType)}
+	 * instead for such scenarios.
 	 * @since 4.2
+	 * @see ApplicationEventMulticaster#multicastEvent(ApplicationEvent, ResolvableType)
 	 */
-	protected void publishEvent(Object event, @Nullable ResolvableType eventType) {
+	protected void publishEvent(Object event, @Nullable ResolvableType typeHint) {
 		Assert.notNull(event, "Event must not be null");
+		ResolvableType eventType = null;
 
 		// Decorate event as an ApplicationEvent if necessary
 		ApplicationEvent applicationEvent;
 		if (event instanceof ApplicationEvent applEvent) {
 			applicationEvent = applEvent;
+			eventType = typeHint;
 		}
 		else {
-			applicationEvent = new PayloadApplicationEvent<>(this, event, eventType);
-			if (eventType == null) {
-				eventType = ((PayloadApplicationEvent<?>) applicationEvent).getResolvableType();
+			ResolvableType payloadType = null;
+			if (typeHint != null && ApplicationEvent.class.isAssignableFrom(typeHint.toClass())) {
+				eventType = typeHint;
+			}
+			else {
+				payloadType = typeHint;
+			}
+			applicationEvent = new PayloadApplicationEvent<>(this, event, payloadType);
+		}
+
+		// Determine event type only once (for multicast and parent publish)
+		if (eventType == null) {
+			eventType = ResolvableType.forInstance(applicationEvent);
+			if (typeHint == null) {
+				typeHint = eventType;
 			}
 		}
 
@@ -416,7 +440,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Publish event via parent context as well...
 		if (this.parent != null) {
 			if (this.parent instanceof AbstractApplicationContext abstractApplicationContext) {
-				abstractApplicationContext.publishEvent(event, eventType);
+				abstractApplicationContext.publishEvent(event, typeHint);
 			}
 			else {
 				this.parent.publishEvent(event);

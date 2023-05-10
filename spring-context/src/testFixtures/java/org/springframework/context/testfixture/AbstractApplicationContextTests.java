@@ -57,8 +57,9 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 
 	protected TestApplicationListener parentListener = new TestApplicationListener();
 
+
 	@BeforeEach
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.applicationContext = createContext();
 	}
 
@@ -78,6 +79,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	 * and father with name Albert.
 	 */
 	protected abstract ConfigurableApplicationContext createContext() throws Exception;
+
 
 	@Test
 	public void contextAwareSingletonWasCalledBack() throws Exception {
