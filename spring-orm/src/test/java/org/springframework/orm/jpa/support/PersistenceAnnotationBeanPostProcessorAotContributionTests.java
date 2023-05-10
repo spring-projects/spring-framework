@@ -32,6 +32,7 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.FieldHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
@@ -160,6 +161,28 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		});
 	}
 
+	@Test
+	void processAheadOfTimeWhenPersistenceContextOnPrivateFields() {
+		RegisteredBean registeredBean = registerBean(
+				SeveralPersistenceContextField.class);
+		testCompile(registeredBean, (actual, compiled) -> {
+			EntityManagerFactory entityManagerFactory = mock();
+			this.beanFactory.registerSingleton("custom", entityManagerFactory);
+			this.beanFactory.registerAlias("custom", "another");
+			SeveralPersistenceContextField instance = new SeveralPersistenceContextField();
+			actual.accept(registeredBean, instance);
+			assertThat(instance).extracting("customEntityManager").isNotNull();
+			assertThat(instance).extracting("anotherEntityManager").isNotNull();
+			assertThat(this.generationContext.getRuntimeHints().reflection().typeHints())
+					.singleElement().satisfies(typeHint -> {
+						assertThat(typeHint.getType()).isEqualTo(
+								TypeReference.of(SeveralPersistenceContextField.class));
+						assertThat(typeHint.fields().map(FieldHint::getName))
+								.containsOnly("customEntityManager", "anotherEntityManager");
+					});
+		});
+	}
+
 	private RegisteredBean registerBean(Class<?> beanClass) {
 		String beanName = "testBean";
 		this.beanFactory.registerBeanDefinition(beanName,
@@ -253,6 +276,18 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 		public void setEntityManager(EntityManager entityManager) {
 			this.entityManager = entityManager;
 		}
+
+	}
+
+	static class SeveralPersistenceContextField {
+
+		@SuppressWarnings("unused")
+		@PersistenceContext(name = "custom")
+		private EntityManager customEntityManager;
+
+		@SuppressWarnings("unused")
+		@PersistenceContext(name = "another")
+		private EntityManager anotherEntityManager;
 
 	}
 
