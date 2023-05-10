@@ -93,13 +93,6 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	private static final Pattern VALID_QUALIFIED_ID_PATTERN = Pattern.compile("[\\p{L}\\p{N}_$]+");
 
-	/**
-	 * Maximum length permitted for a SpEL expression.
-	 * @since 5.2.24
-	 */
-	private static final int MAX_EXPRESSION_LENGTH = 10_000;
-
-
 	private final SpelParserConfiguration configuration;
 
 	// For rules that build nodes, they are stacked here for return
@@ -158,8 +151,9 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	}
 
 	private void checkExpressionLength(String string) {
-		if (string.length() > MAX_EXPRESSION_LENGTH) {
-			throw new SpelEvaluationException(SpelMessage.MAX_EXPRESSION_LENGTH_EXCEEDED, MAX_EXPRESSION_LENGTH);
+		int maxLength = this.configuration.getMaximumExpressionLength();
+		if (string.length() > maxLength) {
+			throw new SpelEvaluationException(SpelMessage.MAX_EXPRESSION_LENGTH_EXCEEDED, maxLength);
 		}
 	}
 
