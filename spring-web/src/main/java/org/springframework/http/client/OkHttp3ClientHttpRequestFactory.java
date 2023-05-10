@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,15 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses
@@ -116,30 +110,6 @@ public class OkHttp3ClientHttpRequestFactory implements ClientHttpRequestFactory
 			this.client.dispatcher().executorService().shutdown();
 			this.client.connectionPool().evictAll();
 		}
-	}
-
-
-	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri, HttpMethod method)
-			throws MalformedURLException {
-
-		okhttp3.MediaType contentType = getContentType(headers);
-		RequestBody body = (content.length > 0 ||
-				okhttp3.internal.http.HttpMethod.requiresRequestBody(method.name()) ?
-				RequestBody.create(contentType, content) : null);
-
-		Request.Builder builder = new Request.Builder().url(uri.toURL()).method(method.name(), body);
-		headers.forEach((headerName, headerValues) -> {
-			for (String headerValue : headerValues) {
-				builder.addHeader(headerName, headerValue);
-			}
-		});
-		return builder.build();
-	}
-
-	@Nullable
-	private static okhttp3.MediaType getContentType(HttpHeaders headers) {
-		String rawContentType = headers.getFirst(HttpHeaders.CONTENT_TYPE);
-		return (StringUtils.hasText(rawContentType) ? okhttp3.MediaType.parse(rawContentType) : null);
 	}
 
 }

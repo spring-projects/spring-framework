@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,34 +17,34 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequest} implementation that uses standard JDK facilities to
- * execute buffered requests. Created via the {@link SimpleClientHttpRequestFactory}.
+ * execute streaming requests. Created via the {@link SimpleClientHttpRequestFactory}.
  *
  * @author Arjen Poutsma
- * @author Juergen Hoeller
- * @since 3.0
- * @see SimpleClientHttpRequestFactory#createRequest(java.net.URI, HttpMethod)
+ * @since 6.1
+ * @see SimpleClientHttpRequestFactory#createRequest(URI, HttpMethod)
  */
-final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttpRequest {
+final class SimpleClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final HttpURLConnection connection;
 
-	private final boolean outputStreaming;
+	private final int chunkSize;
 
 
-	SimpleBufferingClientHttpRequest(HttpURLConnection connection, boolean outputStreaming) {
+	SimpleClientHttpRequest(HttpURLConnection connection, int chunkSize) {
 		this.connection = connection;
-		this.outputStreaming = outputStreaming;
+		this.chunkSize = chunkSize;
 	}
 
 	@Override
@@ -63,18 +63,25 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 	}
 
 	@Override
-	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
-		addHeaders(this.connection, headers);
-		// JDK <1.8 doesn't support getOutputStream with HTTP DELETE
-		if (getMethod() == HttpMethod.DELETE && bufferedOutput.length == 0) {
-			this.connection.setDoOutput(false);
-		}
-		if (this.connection.getDoOutput() && this.outputStreaming) {
-			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
-		}
-		this.connection.connect();
+	protected ClientHttpResponse executeInternal(HttpHeaders headers, @Nullable Body body) throws IOException {
 		if (this.connection.getDoOutput()) {
-			FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
+			long contentLength = headers.getContentLength();
+			if (contentLength >= 0) {
+				this.connection.setFixedLengthStreamingMode(contentLength);
+			}
+			else {
+				this.connection.setChunkedStreamingMode(this.chunkSize);
+			}
+		}
+
+		addHeaders(this.connection, headers);
+
+		this.connection.connect();
+
+		if (this.connection.getDoOutput() && body != null) {
+			try (OutputStream os = this.connection.getOutputStream()) {
+				body.writeTo(os);
+			}
 		}
 		else {
 			// Immediately trigger the request in a no-output scenario as well

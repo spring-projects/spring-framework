@@ -65,8 +65,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	private HttpClient httpClient;
 
-	private boolean bufferRequestBody = true;
-
 	@Nullable
 	private BiFunction<HttpMethod, URI, HttpContext> httpContextFactory;
 
@@ -146,9 +144,11 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * <p>Default is {@code true}. When sending large amounts of data via POST or PUT, it is
 	 * recommended to change this property to {@code false}, so as not to run out of memory.
 	 * @since 4.0
+	 * @deprecated since 6.1 requests are never buffered, as if this property is {@code false}
 	 */
+	@Deprecated(since = "6.1", forRemoval = true)
 	public void setBufferRequestBody(boolean bufferRequestBody) {
-		this.bufferRequestBody = bufferRequestBody;
+		// no-op
 	}
 
 	/**
@@ -190,13 +190,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
 			}
 		}
-
-		if (this.bufferRequestBody) {
-			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
-		}
-		else {
-			return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
-		}
+		return new HttpComponentsClientHttpRequest(client, httpRequest, context);
 	}
 
 
