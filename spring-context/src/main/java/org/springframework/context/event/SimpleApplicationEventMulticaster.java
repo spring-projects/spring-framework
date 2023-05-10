@@ -128,12 +128,12 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 	@Override
 	public void multicastEvent(ApplicationEvent event) {
-		multicastEvent(event, resolveDefaultEventType(event));
+		multicastEvent(event, null);
 	}
 
 	@Override
 	public void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType) {
-		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
+		ResolvableType type = (eventType != null ? eventType : ResolvableType.forInstance(event));
 		Executor executor = getTaskExecutor();
 		for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			if (executor != null) {
@@ -143,10 +143,6 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 				invokeListener(listener, event);
 			}
 		}
-	}
-
-	private ResolvableType resolveDefaultEventType(ApplicationEvent event) {
-		return ResolvableType.forInstance(event);
 	}
 
 	/**
