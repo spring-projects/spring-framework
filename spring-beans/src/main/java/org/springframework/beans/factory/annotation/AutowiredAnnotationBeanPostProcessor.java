@@ -286,7 +286,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		String beanName = registeredBean.getBeanName();
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
 		InjectionMetadata metadata = findInjectionMetadata(beanName, beanClass, beanDefinition);
-		Collection<AutowiredElement> autowiredElements = getAutowiredElements(metadata);
+		Collection<AutowiredElement> autowiredElements = getAutowiredElements(metadata,
+				registeredBean.getMergedBeanDefinition().getPropertyValues());
 		if (!ObjectUtils.isEmpty(autowiredElements)) {
 			return new AotContribution(beanClass, autowiredElements, getAutowireCandidateResolver());
 		}
@@ -295,8 +296,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Collection<AutowiredElement> getAutowiredElements(InjectionMetadata metadata) {
-		return (Collection) metadata.getInjectedElements();
+	private Collection<AutowiredElement> getAutowiredElements(InjectionMetadata metadata, PropertyValues propertyValues) {
+		return (Collection) metadata.getInjectedElements(propertyValues);
 	}
 
 	@Nullable
@@ -752,7 +753,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 		@Override
 		protected void inject(Object bean, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
-			if (checkPropertySkipping(pvs)) {
+			if (!shouldInject(pvs)) {
 				return;
 			}
 			Method method = (Method) this.member;

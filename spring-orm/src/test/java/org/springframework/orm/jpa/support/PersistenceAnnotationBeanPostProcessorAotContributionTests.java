@@ -43,6 +43,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.Compiled;
 import org.springframework.core.test.tools.TestCompiler;
+import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,6 +66,20 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 	void setup() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.generationContext = new TestGenerationContext();
+	}
+
+	@Test
+	void processAheadOfTimeWhenPersistenceUnitOnFieldAndPropertyValueSet() {
+		RegisteredBean registeredBean = registerBean(DefaultPersistenceUnitField.class);
+		registeredBean.getMergedBeanDefinition().getPropertyValues().add("emf", "myEntityManagerFactory");
+		assertThat(processAheadOfTime(registeredBean)).isNotNull(); // Field not handled by property values
+	}
+
+	@Test
+	void processAheadOfTimeWhenPersistenceUnitOnMethodAndPropertyValueSet() {
+		RegisteredBean registeredBean = registerBean(DefaultPersistenceUnitMethod.class);
+		registeredBean.getMergedBeanDefinition().getPropertyValues().add("emf", "myEntityManagerFactory");
+		assertThat(processAheadOfTime(registeredBean)).isNull();
 	}
 
 	@Test
@@ -192,14 +207,18 @@ class PersistenceAnnotationBeanPostProcessorAotContributionTests {
 
 	private void testCompile(RegisteredBean registeredBean,
 			BiConsumer<BiConsumer<RegisteredBean, Object>, Compiled> result) {
-		PersistenceAnnotationBeanPostProcessor postProcessor = new PersistenceAnnotationBeanPostProcessor();
-		BeanRegistrationAotContribution contribution = postProcessor
-				.processAheadOfTime(registeredBean);
+		BeanRegistrationAotContribution contribution = processAheadOfTime(registeredBean);
 		BeanRegistrationCode beanRegistrationCode = mock();
 		contribution.applyTo(generationContext, beanRegistrationCode);
 		generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().with(generationContext)
 				.compile(compiled -> result.accept(new Invoker(compiled), compiled));
+	}
+
+	@Nullable
+	private BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+		PersistenceAnnotationBeanPostProcessor postProcessor = new PersistenceAnnotationBeanPostProcessor();
+		return postProcessor.processAheadOfTime(registeredBean);
 	}
 
 	static class Invoker implements BiConsumer<RegisteredBean, Object> {
