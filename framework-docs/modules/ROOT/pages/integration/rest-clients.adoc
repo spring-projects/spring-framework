@@ -3,7 +3,7 @@
 
 The Spring Framework provides the following choices for making calls to REST endpoints:
 
-* xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] - non-blocking, reactive client w fluent API.
+* xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] - non-blocking, reactive client with fluent API.
 * xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] - synchronous client with template method API.
 * xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] - annotated interface with generated, dynamic proxy implementation.
 
