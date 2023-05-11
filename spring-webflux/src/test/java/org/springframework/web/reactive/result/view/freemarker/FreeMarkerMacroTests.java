@@ -28,6 +28,8 @@ import java.util.Map;
 import freemarker.template.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.testfixture.beans.TestBean;
@@ -116,6 +118,7 @@ public class FreeMarkerMacroTests {
 	}
 
 	@Test
+	@DisabledForJreRange(min = JRE.JAVA_21)
 	public void age() throws Exception {
 		assertThat(getMacroOutput("AGE")).containsExactly("99");
 	}
