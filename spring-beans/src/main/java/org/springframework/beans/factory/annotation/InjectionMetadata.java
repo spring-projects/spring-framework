@@ -98,6 +98,19 @@ public class InjectionMetadata {
 	}
 
 	/**
+	 * Return the {@link InjectedElement elements} to inject based on the
+	 * specified {@link PropertyValues}. If a property is already defined
+	 * for an {@link InjectedElement}, it is excluded.
+	 * @param pvs the property values to consider
+	 * @return the elements to inject
+	 * @since 6.0.10
+	 */
+	public Collection<InjectedElement> getInjectedElements(@Nullable PropertyValues pvs) {
+		return this.injectedElements.stream()
+				.filter(candidate -> candidate.shouldInject(pvs)).toList();
+	}
+
+	/**
 	 * Determine whether this metadata instance needs to be refreshed.
 	 * @param clazz the current target class
 	 * @return {@code true} indicating a refresh, {@code false} otherwise
@@ -230,21 +243,28 @@ public class InjectionMetadata {
 			}
 		}
 
+		protected boolean shouldInject(@Nullable PropertyValues pvs) {
+			if (this.isField) {
+				return true;
+			}
+			return !checkPropertySkipping(pvs);
+		}
+
 		/**
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
 		protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
 				throws Throwable {
 
+			if (!shouldInject(pvs)) {
+				return;
+			}
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
 				field.set(target, getResourceToInject(target, requestingBeanName));
 			}
 			else {
-				if (checkPropertySkipping(pvs)) {
-					return;
-				}
 				try {
 					Method method = (Method) this.member;
 					ReflectionUtils.makeAccessible(method);
