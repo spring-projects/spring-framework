@@ -124,6 +124,7 @@ public abstract class DurationFormatterUtils {
 	 */
 	public static DurationFormat.Style detect(String value) {
 		Assert.notNull(value, "Value must not be null");
+		// warning: the order of parsing starts to matter if multiple patterns accept a plain integer (no unit suffix)
 		if (ISO_8601_PATTERN.matcher(value).matches()) {
 			return DurationFormat.Style.ISO8601;
 		}

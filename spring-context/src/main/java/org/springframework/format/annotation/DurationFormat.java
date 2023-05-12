@@ -130,26 +130,59 @@ public @interface DurationFormat {
 			this.longValue = toUnit;
 		}
 
+		/**
+		 * Convert this {@code DurationFormat.Unit} to its {@link ChronoUnit} equivalent.
+		 */
 		public ChronoUnit asChronoUnit() {
 			return this.chronoUnit;
 		}
 
+		/**
+		 * Convert this {@code DurationFormat.Unit} to a simple {@code String} suffix,
+		 * suitable for the {@link Style#SIMPLE} style.
+		 */
 		public String asSuffix() {
 			return this.suffix;
 		}
 
+		/**
+		 * Parse a {@code long} from a {@code String} and interpret it to be a {@code Duration}
+		 * in the current unit.
+		 * @param value the String representation of the long
+		 * @return the corresponding {@code Duration}
+		 */
 		public Duration parse(String value) {
 			return Duration.of(Long.parseLong(value), asChronoUnit());
 		}
 
+		/**
+		 * Print a {@code Duration} as a {@code String}, converting it to a long value
+		 * using this unit's precision via {@link #longValue(Duration)} and appending
+		 * this unit's simple {@link #asSuffix() suffix}.
+		 * @param value the {@code Duration} to convert to String
+		 * @return the String representation of the {@code Duration} in the {@link Style#SIMPLE SIMPLE style}
+		 */
 		public String print(Duration value) {
 			return longValue(value) + asSuffix();
 		}
 
+		/**
+		 * Convert the given {@code Duration} to a long value in the resolution of this
+		 * unit. Note that this can be lossy if the current unit is bigger than the
+		 * actual resolution of the duration.
+		 * <p>For example, {@code Duration.ofMillis(5).plusNanos(1234)} would get truncated
+		 * to {@code 5} for unit {@code MILLIS}.
+		 * @param value the {@code Duration} to convert to long
+		 * @return the long value for the Duration in this Unit
+		 */
 		public long longValue(Duration value) {
 			return this.longValue.apply(value);
 		}
 
+		/**
+		 * Get the {@code Unit} corresponding to the given {@code ChronoUnit}.
+		 * @throws IllegalArgumentException if that particular ChronoUnit isn't supported
+		 */
 		public static Unit fromChronoUnit(@Nullable ChronoUnit chronoUnit) {
 			if (chronoUnit == null) {
 				return Unit.MILLIS;
@@ -162,6 +195,10 @@ public @interface DurationFormat {
 			throw new IllegalArgumentException("No matching Unit for ChronoUnit." + chronoUnit.name());
 		}
 
+		/**
+		 * Get the {@code Unit} corresponding to the given {@code String} suffix.
+		 * @throws IllegalArgumentException if that particular suffix is unknown
+		 */
 		public static Unit fromSuffix(String suffix) {
 			for (Unit candidate : values()) {
 				if (candidate.suffix.equalsIgnoreCase(suffix)) {
