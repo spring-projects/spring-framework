@@ -19,8 +19,12 @@ package org.springframework.format.datetime.standard;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import org.springframework.format.annotation.DurationFormat.Unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -31,13 +35,13 @@ class DurationFormatterUtilsTests {
 
 	@Test
 	void parseSimpleWithUnits() {
-		Duration nanos = DurationFormatterUtils.parse("1ns", SIMPLE, ChronoUnit.SECONDS);
-		Duration micros = DurationFormatterUtils.parse("-2us", SIMPLE, ChronoUnit.SECONDS);
-		Duration millis = DurationFormatterUtils.parse("+3ms", SIMPLE, ChronoUnit.SECONDS);
-		Duration seconds = DurationFormatterUtils.parse("4s", SIMPLE, ChronoUnit.SECONDS);
-		Duration minutes = DurationFormatterUtils.parse("5m", SIMPLE, ChronoUnit.SECONDS);
-		Duration hours = DurationFormatterUtils.parse("6h", SIMPLE, ChronoUnit.SECONDS);
-		Duration days = DurationFormatterUtils.parse("-10d", SIMPLE, ChronoUnit.SECONDS);
+		Duration nanos = DurationFormatterUtils.parse("1ns", SIMPLE, Unit.SECONDS);
+		Duration micros = DurationFormatterUtils.parse("-2us", SIMPLE, Unit.SECONDS);
+		Duration millis = DurationFormatterUtils.parse("+3ms", SIMPLE, Unit.SECONDS);
+		Duration seconds = DurationFormatterUtils.parse("4s", SIMPLE, Unit.SECONDS);
+		Duration minutes = DurationFormatterUtils.parse("5m", SIMPLE, Unit.SECONDS);
+		Duration hours = DurationFormatterUtils.parse("6h", SIMPLE, Unit.SECONDS);
+		Duration days = DurationFormatterUtils.parse("-10d", SIMPLE, Unit.SECONDS);
 
 		assertThat(nanos).hasNanos(1);
 		assertThat(micros).hasNanos(-2 * 1000);
@@ -50,9 +54,9 @@ class DurationFormatterUtilsTests {
 
 	@Test
 	void parseSimpleWithoutUnits() {
-		assertThat(DurationFormatterUtils.parse("-123", SIMPLE, ChronoUnit.SECONDS))
+		assertThat(DurationFormatterUtils.parse("-123", SIMPLE, Unit.SECONDS))
 				.hasSeconds(-123);
-		assertThat(DurationFormatterUtils.parse("456", SIMPLE, ChronoUnit.SECONDS))
+		assertThat(DurationFormatterUtils.parse("456", SIMPLE, Unit.SECONDS))
 				.hasSeconds(456);
 	}
 
@@ -80,7 +84,7 @@ class DurationFormatterUtilsTests {
 
 		assertThatIllegalArgumentException().isThrownBy(() -> DurationFormatterUtils.parse("+23y", SIMPLE))
 				.withMessage("'+23y' is not a valid simple duration")
-				.withCause(new IllegalArgumentException("'y' is not a valid simple duration unit"));
+				.withCause(new IllegalArgumentException("'y' is not a valid simple duration Unit"));
 	}
 
 	@Test
@@ -114,7 +118,7 @@ class DurationFormatterUtilsTests {
 
 	@Test
 	void parseIsoIgnoresFallbackChronoUnit() {
-		assertThat(DurationFormatterUtils.parse("P2DT3H4M", ISO8601, ChronoUnit.NANOS))
+		assertThat(DurationFormatterUtils.parse("P2DT3H4M", ISO8601, Unit.NANOS))
 				.isEqualTo(Duration.ofDays(2).plusHours(3).plusMinutes(4));
 	}
 
@@ -127,9 +131,9 @@ class DurationFormatterUtilsTests {
 
 	@Test
 	void printSimple() {
-		assertThat(DurationFormatterUtils.print(Duration.ofNanos(12345), SIMPLE, ChronoUnit.NANOS))
+		assertThat(DurationFormatterUtils.print(Duration.ofNanos(12345), SIMPLE, Unit.NANOS))
 				.isEqualTo("12345ns");
-		assertThat(DurationFormatterUtils.print(Duration.ofNanos(-12345), SIMPLE, ChronoUnit.MICROS))
+		assertThat(DurationFormatterUtils.print(Duration.ofNanos(-12345), SIMPLE, Unit.MICROS))
 				.isEqualTo("-12us");
 	}
 
@@ -151,23 +155,23 @@ class DurationFormatterUtilsTests {
 
 	@Test
 	void printIsoIgnoresChronoUnit() {
-		assertThat(DurationFormatterUtils.print(Duration.ofNanos(12345), ISO8601, ChronoUnit.HOURS))
+		assertThat(DurationFormatterUtils.print(Duration.ofNanos(12345), ISO8601, Unit.HOURS))
 				.isEqualTo("PT0.000012345S");
-		assertThat(DurationFormatterUtils.print(Duration.ofSeconds(-3), ISO8601, ChronoUnit.HOURS))
+		assertThat(DurationFormatterUtils.print(Duration.ofSeconds(-3), ISO8601, Unit.HOURS))
 				.isEqualTo("PT-3S");
 	}
 
 	@Test
 	void detectAndParse() {
-		assertThat(DurationFormatterUtils.detectAndParse("PT1.234S", ChronoUnit.NANOS))
+		assertThat(DurationFormatterUtils.detectAndParse("PT1.234S", Unit.NANOS))
 				.as("iso")
 				.isEqualTo(Duration.ofMillis(1234));
 
-		assertThat(DurationFormatterUtils.detectAndParse("1234ms", ChronoUnit.NANOS))
+		assertThat(DurationFormatterUtils.detectAndParse("1234ms", Unit.NANOS))
 				.as("simple with explicit unit")
 				.isEqualTo(Duration.ofMillis(1234));
 
-		assertThat(DurationFormatterUtils.detectAndParse("1234", ChronoUnit.NANOS))
+		assertThat(DurationFormatterUtils.detectAndParse("1234", Unit.NANOS))
 				.as("simple without suffix")
 				.isEqualTo(Duration.ofNanos(1234));
 	}
@@ -208,74 +212,83 @@ class DurationFormatterUtilsTests {
 				.withNoCause();
 	}
 
-	@Test
-	void longValueFromUnit() {
-		Duration nanos = Duration.ofSeconds(3).plusMillis(22).plusNanos(1111);
-		assertThat(DurationFormatterUtils.longValueFromUnit(nanos, ChronoUnit.NANOS))
-				.as("NANOS")
-				.isEqualTo(3022001111L);
-		assertThat(DurationFormatterUtils.longValueFromUnit(nanos, ChronoUnit.MICROS))
-				.as("MICROS")
-				.isEqualTo(3022001);
-		assertThat(DurationFormatterUtils.longValueFromUnit(nanos, ChronoUnit.MILLIS))
-				.as("MILLIS")
-				.isEqualTo(3022);
-		assertThat(DurationFormatterUtils.longValueFromUnit(nanos, ChronoUnit.SECONDS))
-				.as("SECONDS")
-				.isEqualTo(3);
+	@Nested
+	class DurationFormatUnit {
 
-		Duration minutes = Duration.ofHours(1).plusMinutes(23);
-		assertThat(DurationFormatterUtils.longValueFromUnit(minutes, ChronoUnit.MINUTES))
-				.as("MINUTES")
-				.isEqualTo(83);
-		assertThat(DurationFormatterUtils.longValueFromUnit(minutes, ChronoUnit.HOURS))
-				.as("HOURS")
-				.isEqualTo(1);
+		@Test
+		void longValueFromUnit() {
+			Duration nanos = Duration.ofSeconds(3).plusMillis(22).plusNanos(1111);
+			assertThat(Unit.NANOS.longValue(nanos))
+					.as("NANOS")
+					.isEqualTo(3022001111L);
+			assertThat(Unit.MICROS.longValue(nanos))
+					.as("MICROS")
+					.isEqualTo(3022001);
+			assertThat(Unit.MILLIS.longValue(nanos))
+					.as("MILLIS")
+					.isEqualTo(3022);
+			assertThat(Unit.SECONDS.longValue(nanos))
+					.as("SECONDS")
+					.isEqualTo(3);
 
-		Duration days = Duration.ofHours(48 + 5);
-		assertThat(DurationFormatterUtils.longValueFromUnit(days, ChronoUnit.HOURS))
-				.as("HOURS in days")
-				.isEqualTo(53);
-		assertThat(DurationFormatterUtils.longValueFromUnit(days, ChronoUnit.DAYS))
-				.as("DAYS")
-				.isEqualTo(2);
+			Duration minutes = Duration.ofHours(1).plusMinutes(23);
+			assertThat(Unit.MINUTES.longValue(minutes))
+					.as("MINUTES")
+					.isEqualTo(83);
+			assertThat(Unit.HOURS.longValue(minutes))
+					.as("HOURS")
+					.isEqualTo(1);
+
+			Duration days = Duration.ofHours(48 + 5);
+			assertThat(Unit.HOURS.longValue(days))
+					.as("HOURS in days")
+					.isEqualTo(53);
+			assertThat(Unit.DAYS.longValue(days))
+					.as("DAYS")
+					.isEqualTo(2);
+		}
+
+		@Test
+		void unitFromSuffix() {
+			assertThat(Unit.fromSuffix("ns")).as("ns").isEqualTo(Unit.NANOS);
+			assertThat(Unit.fromSuffix("us")).as("us").isEqualTo(Unit.MICROS);
+			assertThat(Unit.fromSuffix("ms")).as("ms").isEqualTo(Unit.MILLIS);
+			assertThat(Unit.fromSuffix("s")).as("s").isEqualTo(Unit.SECONDS);
+			assertThat(Unit.fromSuffix("m")).as("m").isEqualTo(Unit.MINUTES);
+			assertThat(Unit.fromSuffix("h")).as("h").isEqualTo(Unit.HOURS);
+			assertThat(Unit.fromSuffix("d")).as("d").isEqualTo(Unit.DAYS);
+
+			assertThatIllegalArgumentException().isThrownBy(() -> Unit.fromSuffix("ws"))
+					.withMessage("'ws' is not a valid simple duration Unit");
+		}
+
+		@Test
+		void unitFromChronoUnit() {
+			assertThat(Unit.fromChronoUnit(ChronoUnit.NANOS)).as("ns").isEqualTo(Unit.NANOS);
+			assertThat(Unit.fromChronoUnit(ChronoUnit.MICROS)).as("us").isEqualTo(Unit.MICROS);
+			assertThat(Unit.fromChronoUnit(ChronoUnit.MILLIS)).as("ms").isEqualTo(Unit.MILLIS);
+			assertThat(Unit.fromChronoUnit(ChronoUnit.SECONDS)).as("s").isEqualTo(Unit.SECONDS);
+			assertThat(Unit.fromChronoUnit(ChronoUnit.MINUTES)).as("m").isEqualTo(Unit.MINUTES);
+			assertThat(Unit.fromChronoUnit(ChronoUnit.HOURS)).as("h").isEqualTo(Unit.HOURS);
+			assertThat(Unit.fromChronoUnit(ChronoUnit.DAYS)).as("d").isEqualTo(Unit.DAYS);
+
+			assertThatIllegalArgumentException().isThrownBy(() -> Unit.fromChronoUnit(ChronoUnit.CENTURIES))
+					.withMessage("No matching Unit for ChronoUnit.CENTURIES");
+		}
+
+		@Test
+		void unitSuffixSmokeTest() {
+			assertThat(Arrays.stream(Unit.values()).map(u -> u.name() + "->" + u.asSuffix()))
+					.containsExactly("NANOS->ns", "MICROS->us", "MILLIS->ms", "SECONDS->s",
+							"MINUTES->m", "HOURS->h", "DAYS->d");
+		}
+
+		@Test
+		void chronoUnitSmokeTest() {
+			assertThat(Arrays.stream(Unit.values()).map(Unit::asChronoUnit))
+					.containsExactly(ChronoUnit.NANOS, ChronoUnit.MICROS, ChronoUnit.MILLIS,
+							ChronoUnit.SECONDS, ChronoUnit.MINUTES, ChronoUnit.HOURS, ChronoUnit.DAYS);
+		}
 	}
 
-	@Test
-	void longValueFromUnsupportedUnit() {
-		assertThatIllegalArgumentException().isThrownBy(() -> DurationFormatterUtils.longValueFromUnit(Duration.ofDays(3),
-						ChronoUnit.HALF_DAYS)).as("HALF_DAYS")
-				.withMessage("'HALF_DAYS' is not a supported ChronoUnit for simple duration representation");
-		assertThatIllegalArgumentException().isThrownBy(() -> DurationFormatterUtils.longValueFromUnit(Duration.ofDays(23),
-						ChronoUnit.WEEKS)).as("WEEKS")
-				.withMessage("'WEEKS' is not a supported ChronoUnit for simple duration representation");
-	}
-
-	@Test
-	void unitFromSuffix() {
-		assertThat(DurationFormatterUtils.unitFromSuffix("ns")).as("ns").isEqualTo(ChronoUnit.NANOS);
-		assertThat(DurationFormatterUtils.unitFromSuffix("us")).as("us").isEqualTo(ChronoUnit.MICROS);
-		assertThat(DurationFormatterUtils.unitFromSuffix("ms")).as("ms").isEqualTo(ChronoUnit.MILLIS);
-		assertThat(DurationFormatterUtils.unitFromSuffix("s")).as("s").isEqualTo(ChronoUnit.SECONDS);
-		assertThat(DurationFormatterUtils.unitFromSuffix("m")).as("m").isEqualTo(ChronoUnit.MINUTES);
-		assertThat(DurationFormatterUtils.unitFromSuffix("h")).as("h").isEqualTo(ChronoUnit.HOURS);
-		assertThat(DurationFormatterUtils.unitFromSuffix("d")).as("d").isEqualTo(ChronoUnit.DAYS);
-
-		assertThatIllegalArgumentException().isThrownBy(() -> DurationFormatterUtils.unitFromSuffix("ws"))
-				.withMessage("'ws' is not a valid simple duration unit");
-	}
-
-	@Test
-	void suffixFromUnit() {
-		assertThat(DurationFormatterUtils.suffixFromUnit(ChronoUnit.NANOS)).as("NANOS").isEqualTo("ns");
-		assertThat(DurationFormatterUtils.suffixFromUnit(ChronoUnit.MICROS)).as("MICROS").isEqualTo("us");
-		assertThat(DurationFormatterUtils.suffixFromUnit(ChronoUnit.MILLIS)).as("MILLIS").isEqualTo("ms");
-		assertThat(DurationFormatterUtils.suffixFromUnit(ChronoUnit.SECONDS)).as("SECONDS").isEqualTo("s");
-		assertThat(DurationFormatterUtils.suffixFromUnit(ChronoUnit.MINUTES)).as("MINUTES").isEqualTo("m");
-		assertThat(DurationFormatterUtils.suffixFromUnit(ChronoUnit.HOURS)).as("HOURS").isEqualTo("h");
-		assertThat(DurationFormatterUtils.suffixFromUnit(ChronoUnit.DAYS)).as("DAYS").isEqualTo("d");
-
-		assertThatIllegalArgumentException().isThrownBy(() -> DurationFormatterUtils.suffixFromUnit(ChronoUnit.MILLENNIA))
-				.withMessage("'MILLENNIA' is not a supported ChronoUnit for simple duration representation");
-	}
 }

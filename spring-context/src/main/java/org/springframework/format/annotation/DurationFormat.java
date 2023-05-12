@@ -23,6 +23,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.function.Function;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Declares that a field or method parameter should be formatted as a {@link java.time.Duration},
@@ -43,11 +46,11 @@ public @interface DurationFormat {
 	Style style() default Style.ISO8601;
 
 	/**
-	 * Define which {@code ChronoUnit} to fall back to in case the {@code style()}
+	 * Define which {@link Unit} to fall back to in case the {@code style()}
 	 * needs a unit for either parsing or printing, and none is explicitly provided in
-	 * the input.
+	 * the input ({@code Unit.MILLIS} if unspecified).
 	 */
-	ChronoUnit defaultUnit() default ChronoUnit.MILLIS;
+	Unit defaultUnit() default Unit.MILLIS;
 
 	/**
 	 * Duration format styles.
@@ -72,6 +75,102 @@ public @interface DurationFormat {
 		 * and {@link Duration#toString()}.
 		 */
 		ISO8601;
+	}
+
+	/**
+	 * Duration format unit, which mirrors a subset of {@link ChronoUnit} and allows conversion to and from
+	 * supported {@code ChronoUnit} as well as converting durations to longs.
+	 * The enum includes its corresponding suffix in the {@link Style#SIMPLE simple} Duration format style.
+	 */
+	enum Unit {
+		/**
+		 * Nanoseconds ({@code "ns"}).
+		 */
+		NANOS(ChronoUnit.NANOS, "ns", Duration::toNanos),
+
+		/**
+		 * Microseconds ({@code "us"}).
+		 */
+		MICROS(ChronoUnit.MICROS, "us", duration -> duration.toNanos() / 1000L),
+
+		/**
+		 * Milliseconds ({@code "ms"}).
+		 */
+		MILLIS(ChronoUnit.MILLIS, "ms", Duration::toMillis),
+
+		/**
+		 * Seconds ({@code "s"}).
+		 */
+		SECONDS(ChronoUnit.SECONDS, "s", Duration::getSeconds),
+
+		/**
+		 * Minutes ({@code "m"}).
+		 */
+		MINUTES(ChronoUnit.MINUTES, "m", Duration::toMinutes),
+
+		/**
+		 * Hours ({@code "h"}).
+		 */
+		HOURS(ChronoUnit.HOURS, "h", Duration::toHours),
+
+		/**
+		 * Days ({@code "d"}).
+		 */
+		DAYS(ChronoUnit.DAYS, "d", Duration::toDays);
+
+		private final ChronoUnit chronoUnit;
+
+		private final String suffix;
+
+		private final Function<Duration, Long> longValue;
+
+		Unit(ChronoUnit chronoUnit, String suffix, Function<Duration, Long> toUnit) {
+			this.chronoUnit = chronoUnit;
+			this.suffix = suffix;
+			this.longValue = toUnit;
+		}
+
+		public ChronoUnit asChronoUnit() {
+			return this.chronoUnit;
+		}
+
+		public String asSuffix() {
+			return this.suffix;
+		}
+
+		public Duration parse(String value) {
+			return Duration.of(Long.parseLong(value), asChronoUnit());
+		}
+
+		public String print(Duration value) {
+			return longValue(value) + asSuffix();
+		}
+
+		public long longValue(Duration value) {
+			return this.longValue.apply(value);
+		}
+
+		public static Unit fromChronoUnit(@Nullable ChronoUnit chronoUnit) {
+			if (chronoUnit == null) {
+				return Unit.MILLIS;
+			}
+			for (Unit candidate : values()) {
+				if (candidate.chronoUnit == chronoUnit) {
+					return candidate;
+				}
+			}
+			throw new IllegalArgumentException("No matching Unit for ChronoUnit." + chronoUnit.name());
+		}
+
+		public static Unit fromSuffix(String suffix) {
+			for (Unit candidate : values()) {
+				if (candidate.suffix.equalsIgnoreCase(suffix)) {
+					return candidate;
+				}
+			}
+			throw new IllegalArgumentException("'" + suffix + "' is not a valid simple duration Unit");
+		}
+
 	}
 
 }

@@ -17,7 +17,6 @@
 package org.springframework.format.datetime.standard;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,8 +28,8 @@ import org.springframework.util.StringUtils;
 /**
  * Support {@code Duration} parsing and printing in several styles, as listed in
  * {@link DurationFormat.Style}.
- * <p>Some styles may not enforce any unit to be present, defaulting to {@code ChronoUnit#MILLIS}
- * in that case. Methods in this class offer overloads that take a {@code ChronoUnit} to
+ * <p>Some styles may not enforce any unit to be present, defaulting to {@code DurationFormat.Unit#MILLIS}
+ * in that case. Methods in this class offer overloads that take a {@link DurationFormat.Unit} to
  * be used as a fall-back instead of the ultimate MILLIS default.
  *
  * @author Phillip Webb
@@ -61,7 +60,7 @@ public abstract class DurationFormatterUtils {
 	 * will default to ms)
 	 * @return a duration
 	 */
-	public static Duration parse(String value, DurationFormat.Style style, @Nullable ChronoUnit unit) {
+	public static Duration parse(String value, DurationFormat.Style style, @Nullable DurationFormat.Unit unit) {
 		return switch (style) {
 			case ISO8601 -> parseIso8601(value);
 			case SIMPLE -> parseSimple(value, unit);
@@ -86,7 +85,7 @@ public abstract class DurationFormatterUtils {
 	 * to ms)
 	 * @return the printed result
 	 */
-	public static String print(Duration value, DurationFormat.Style style, @Nullable ChronoUnit unit) {
+	public static String print(Duration value, DurationFormat.Style style, @Nullable DurationFormat.Unit unit) {
 		return switch (style) {
 			case ISO8601 -> value.toString();
 			case SIMPLE -> printSimple(value, unit);
@@ -113,7 +112,7 @@ public abstract class DurationFormatterUtils {
 	 * @throws IllegalArgumentException if the value is not a known style or cannot be
 	 * parsed
 	 */
-	public static Duration detectAndParse(String value, @Nullable ChronoUnit unit) {
+	public static Duration detectAndParse(String value, @Nullable DurationFormat.Unit unit) {
 		return parse(value, detect(value), unit);
 	}
 
@@ -134,19 +133,6 @@ public abstract class DurationFormatterUtils {
 		throw new IllegalArgumentException("'" + value + "' is not a valid duration, cannot detect any known style");
 	}
 
-	public static long longValueFromUnit(Duration duration, ChronoUnit unit) {
-		return switch (unit) {
-			case NANOS -> duration.toNanos();
-			case MICROS -> duration.toNanos() / 1000L;
-			case MILLIS -> duration.toMillis();
-			case SECONDS -> duration.toSeconds();
-			case MINUTES -> duration.toMinutes();
-			case HOURS -> duration.toHours();
-			case DAYS -> duration.toDays();
-			default -> throw new IllegalArgumentException("'" + unit.name() + "' is not a supported ChronoUnit for simple duration representation");
-		};
-	}
-
 	private static final Pattern ISO_8601_PATTERN = Pattern.compile("^[+-]?[pP].*$");
 	private static final Pattern SIMPLE_PATTERN = Pattern.compile("^([+-]?\\d+)([a-zA-Z]{0,2})$");
 
@@ -159,51 +145,25 @@ public abstract class DurationFormatterUtils {
 		}
 	}
 
-	private static Duration parseSimple(String text, @Nullable ChronoUnit fallbackUnit) {
+	private static Duration parseSimple(String text, @Nullable DurationFormat.Unit fallbackUnit) {
 		try {
 			Matcher matcher = SIMPLE_PATTERN.matcher(text);
 			Assert.state(matcher.matches(), "Does not match simple duration pattern");
 			String suffix = matcher.group(2);
-			ChronoUnit parsingUnit = (fallbackUnit == null ? ChronoUnit.MILLIS : fallbackUnit);
+			DurationFormat.Unit parsingUnit = (fallbackUnit == null ? DurationFormat.Unit.MILLIS : fallbackUnit);
 			if (StringUtils.hasLength(suffix)) {
-				parsingUnit = unitFromSuffix(suffix);
+				parsingUnit = DurationFormat.Unit.fromSuffix(suffix);
 			}
-			return Duration.of(Long.parseLong(matcher.group(1)), parsingUnit);
+			return parsingUnit.parse(matcher.group(1));
 		}
 		catch (Exception ex) {
 			throw new IllegalArgumentException("'" + text + "' is not a valid simple duration", ex);
 		}
 	}
 
-	private static String printSimple(Duration duration, @Nullable ChronoUnit unit) {
-		unit = (unit == null ? ChronoUnit.MILLIS : unit);
-		return longValueFromUnit(duration, unit) + suffixFromUnit(unit);
-	}
-
-	/* package-private */ static ChronoUnit unitFromSuffix(String suffix) {
-		return switch (suffix.toLowerCase()) {
-			case "ns" -> ChronoUnit.NANOS;
-			case "us" -> ChronoUnit.MICROS;
-			case "ms" -> ChronoUnit.MILLIS;
-			case "s" -> ChronoUnit.SECONDS;
-			case "m" -> ChronoUnit.MINUTES;
-			case "h" -> ChronoUnit.HOURS;
-			case "d" -> ChronoUnit.DAYS;
-			default -> throw new IllegalArgumentException("'" + suffix + "' is not a valid simple duration unit");
-		};
-	}
-
-	/* package-private */ static String suffixFromUnit(ChronoUnit unit) {
-		return switch (unit) {
-			case NANOS -> "ns";
-			case MICROS -> "us";
-			case MILLIS -> "ms";
-			case SECONDS -> "s";
-			case MINUTES -> "m";
-			case HOURS -> "h";
-			case DAYS -> "d";
-			default -> throw new IllegalArgumentException("'" + unit.name() + "' is not a supported ChronoUnit for simple duration representation");
-		};
+	private static String printSimple(Duration duration, @Nullable DurationFormat.Unit unit) {
+		unit = (unit == null ? DurationFormat.Unit.MILLIS : unit);
+		return unit.print(duration);
 	}
 
 }

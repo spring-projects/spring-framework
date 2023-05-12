@@ -31,7 +31,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.FormatStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -688,7 +687,7 @@ class DateTimeFormattingTests {
 
 		private Duration duration;
 
-		@DurationFormat(style = Style.SIMPLE, defaultUnit = ChronoUnit.MICROS)
+		@DurationFormat(style = Style.SIMPLE, defaultUnit = DurationFormat.Unit.MICROS)
 		private Duration styleDuration;
 
 		private Year year;

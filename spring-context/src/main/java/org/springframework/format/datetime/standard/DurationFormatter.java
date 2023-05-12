@@ -18,7 +18,6 @@ package org.springframework.format.datetime.standard;
 
 import java.text.ParseException;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import org.springframework.format.Formatter;
@@ -39,7 +38,7 @@ class DurationFormatter implements Formatter<Duration> { //TODO why is this one 
 
 	private final DurationFormat.Style style;
 	@Nullable
-	private final ChronoUnit defaultUnit;
+	private final DurationFormat.Unit defaultUnit;
 
 	/**
 	 * Create a {@code DurationFormatter} following JSR-310's parsing rules for a Duration
@@ -52,7 +51,7 @@ class DurationFormatter implements Formatter<Duration> { //TODO why is this one 
 	/**
 	 * Create a {@code DurationFormatter} in a specific {@link DurationFormat.Style}.
 	 * <p>When a unit is needed but cannot be determined (e.g. printing a Duration in the
-	 * {@code SIMPLE} style), {@code ChronoUnit#MILLIS} is used.
+	 * {@code SIMPLE} style), {@code DurationFormat.Unit#MILLIS} is used.
 	 */
 	public DurationFormatter(DurationFormat.Style style) {
 		this(style, null);
@@ -60,7 +59,7 @@ class DurationFormatter implements Formatter<Duration> { //TODO why is this one 
 
 	/**
 	 * Create a {@code DurationFormatter} in a specific {@link DurationFormat.Style} with an
-	 * optional {@code ChronoUnit}.
+	 * optional {@code DurationFormat.Unit}.
 	 * <p>If a {@code defaultUnit} is specified, it may be used in parsing cases when no
 	 * unit is present in the string (provided the style allows for such a case). It will
 	 * also be used as the representation's resolution when printing in the
@@ -68,9 +67,9 @@ class DurationFormatter implements Formatter<Duration> { //TODO why is this one 
 	 * unit.
 	 *
 	 * @param style the {@code DurationStyle} to use
-	 * @param defaultUnit the {@code ChronoUnit} to fall back to when parsing and printing
+	 * @param defaultUnit the {@code DurationFormat.Unit} to fall back to when parsing and printing
 	 */
-	public DurationFormatter(DurationFormat.Style style, @Nullable ChronoUnit defaultUnit) {
+	public DurationFormatter(DurationFormat.Style style, @Nullable DurationFormat.Unit defaultUnit) {
 		this.style = style;
 		this.defaultUnit = defaultUnit;
 	}
