@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -54,7 +55,7 @@ import org.springframework.util.ClassUtils;
  * <p>Provides interaction with {@link Lifecycle} and {@link SmartLifecycle} beans in
  * groups for specific phases, on startup/shutdown as well as for explicit start/stop
  * interactions on a {@link org.springframework.context.ConfigurableApplicationContext}.
- * As of 6.1, this also includes support for JVM snapshot checkpoints (Project CRaC).
+ * As of 6.1, this also includes support for JVM checkpoint/restore (Project CRaC).
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -456,7 +457,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	private class CracDelegate {
 
 		public Object registerResource() {
-			logger.debug("Registering JVM snapshot callback for Spring-managed lifecycle beans");
+			logger.debug("Registering JVM checkpoint/restore callback for Spring-managed lifecycle beans");
 			CracResourceAdapter resourceAdapter = new CracResourceAdapter();
 			org.crac.Core.getGlobalContext().register(resourceAdapter);
 			return resourceAdapter;
@@ -466,7 +467,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	/**
 	 * Resource adapter for Project CRaC, triggering a stop-and-restart cycle
-	 * for Spring-managed lifecycle beans around a JVM snapshot checkpoint.
+	 * for Spring-managed lifecycle beans around a JVM checkpoint/restore.
 	 * @since 6.1
 	 * @see #stopForRestart()
 	 * @see #restartAfterStop()
@@ -491,18 +492,21 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			thread.start();
 			awaitPreventShutdownBarrier();
 
-			logger.debug("Stopping Spring-managed lifecycle beans before JVM snapshot checkpoint");
+			logger.debug("Stopping Spring-managed lifecycle beans before JVM checkpoint");
 			stopForRestart();
 		}
 
 		@Override
 		public void afterRestore(org.crac.Context<? extends org.crac.Resource> context) {
-			logger.debug("Restarting Spring-managed lifecycle beans after JVM snapshot restore");
+			long restartTime = System.nanoTime();
+			logger.debug("Restarting Spring-managed lifecycle beans after JVM restore");
 			restartAfterStop();
 
 			// Barrier for prevent-shutdown thread not needed anymore
-			awaitPreventShutdownBarrier();
 			this.barrier = null;
+
+			Duration timeTakenToRestart = Duration.ofNanos(System.nanoTime() - restartTime);
+			logger.debug("Restart complete in " + timeTakenToRestart.toMillis() + " ms");
 		}
 
 		private void awaitPreventShutdownBarrier() {
