@@ -244,6 +244,7 @@ class AutowiredAnnotationBeanRegistrationAotContributionTests {
 
 	static class InjectionBean {
 
+		@SuppressWarnings("unused")
 		private Integer counter;
 
 		@Autowired
