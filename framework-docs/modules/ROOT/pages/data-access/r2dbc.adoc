@@ -417,7 +417,7 @@ Do not pass `Collection<String>` or the like as an array parameter.
 [[r2dbc-DatabaseClient-filter]]
 ==== Statement Filters
 
-Sometimes if you need to fine-tune options on the actual `Statement`
+Sometimes you need to fine-tune options on the actual `Statement`
 before it gets run. Register a `Statement` filter
 (`StatementFilterFunction`) through `DatabaseClient` to intercept and
 modify statements in their execution, as the following example shows:
