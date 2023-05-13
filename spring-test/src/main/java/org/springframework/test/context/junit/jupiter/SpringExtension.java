@@ -152,6 +152,32 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	}
 
 	/**
+	 * Validate that test methods and test lifecycle methods in the supplied
+	 * test class are not annotated with {@link Autowired @Autowired}.
+	 * @since 5.3.2
+	 */
+	private void validateAutowiredConfig(ExtensionContext context) {
+		// We save the result in the ExtensionContext.Store so that we don't
+		// re-validate all methods for the same test class multiple times.
+		Store store = context.getStore(AUTOWIRED_VALIDATION_NAMESPACE);
+
+		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(), testClass -> {
+				Method[] methodsWithErrors =
+						ReflectionUtils.getUniqueDeclaredMethods(testClass, autowiredTestOrLifecycleMethodFilter);
+				return (methodsWithErrors.length == 0 ? NO_VIOLATIONS_DETECTED :
+						String.format(
+								"Test methods and test lifecycle methods must not be annotated with @Autowired. " +
+								"You should instead annotate individual method parameters with @Autowired, " +
+								"@Qualifier, or @Value. Offending methods in test class %s: %s",
+								testClass.getName(), Arrays.toString(methodsWithErrors)));
+			}, String.class);
+
+		if (errorMessage != NO_VIOLATIONS_DETECTED) {
+			throw new IllegalStateException(errorMessage);
+		}
+	}
+
+	/**
 	 * Validate that the test class or its enclosing class doesn't attempt to record
 	 * application events in a parallel mode that makes it non-deterministic
 	 * ({@code @TestInstance(PER_CLASS)} and {@code @Execution(CONCURRENT)}
@@ -160,7 +186,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 */
 	private void validateRecordApplicationEventsConfig(ExtensionContext context) {
 		// We save the result in the ExtensionContext.Store so that we don't
-		// re-validate all methods for the same test class multiple times.
+		// re-validate the configuration for the same test class multiple times.
 		Store store = context.getStore(RECORD_APPLICATION_EVENTS_VALIDATION_NAMESPACE);
 
 		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(), testClass -> {
@@ -184,32 +210,6 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 					execution altogether. Note that when recording events in parallel, one might see events \
 					published by other tests since the application context may be shared.""";
 		}, String.class);
-
-		if (errorMessage != NO_VIOLATIONS_DETECTED) {
-			throw new IllegalStateException(errorMessage);
-		}
-	}
-
-	/**
-	 * Validate that test methods and test lifecycle methods in the supplied
-	 * test class are not annotated with {@link Autowired @Autowired}.
-	 * @since 5.3.2
-	 */
-	private void validateAutowiredConfig(ExtensionContext context) {
-		// We save the result in the ExtensionContext.Store so that we don't
-		// re-validate all methods for the same test class multiple times.
-		Store store = context.getStore(AUTOWIRED_VALIDATION_NAMESPACE);
-
-		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(), testClass -> {
-				Method[] methodsWithErrors =
-						ReflectionUtils.getUniqueDeclaredMethods(testClass, autowiredTestOrLifecycleMethodFilter);
-				return (methodsWithErrors.length == 0 ? NO_VIOLATIONS_DETECTED :
-						String.format(
-								"Test methods and test lifecycle methods must not be annotated with @Autowired. " +
-								"You should instead annotate individual method parameters with @Autowired, " +
-								"@Qualifier, or @Value. Offending methods in test class %s: %s",
-								testClass.getName(), Arrays.toString(methodsWithErrors)));
-			}, String.class);
 
 		if (errorMessage != NO_VIOLATIONS_DETECTED) {
 			throw new IllegalStateException(errorMessage);
