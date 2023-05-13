@@ -29,7 +29,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
@@ -42,7 +42,6 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
-import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.annotation.Testable;
 
@@ -98,7 +97,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	private static final Namespace AUTOWIRED_VALIDATION_NAMESPACE =
 			Namespace.create(SpringExtension.class.getName() + "#autowired.validation");
 
-	private static final String NO_AUTOWIRED_VIOLATIONS_DETECTED = "NO AUTOWIRED VIOLATIONS DETECTED";
+	private static final String NO_VIOLATIONS_DETECTED = "NO VIOLATIONS DETECTED";
 
 	/**
 	 * {@link Namespace} in which {@code @RecordApplicationEvents} validation error messages
@@ -153,8 +152,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	}
 
 	/**
-	 * Validate that test class or its enclosing class doesn't attempt to record
-	 * application events in a parallel mode that makes it un-deterministic
+	 * Validate that the test class or its enclosing class doesn't attempt to record
+	 * application events in a parallel mode that makes it non-deterministic
 	 * ({@code @TestInstance(PER_CLASS)} and {@code @Execution(CONCURRENT)}
 	 * combination).
 	 * @since 6.1.0
@@ -165,30 +164,28 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Store store = context.getStore(RECORD_APPLICATION_EVENTS_VALIDATION_NAMESPACE);
 
 		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(), testClass -> {
-			boolean record = TestContextAnnotationUtils.hasAnnotation(testClass, RecordApplicationEvents.class);
-			if (!record) {
-				return NO_AUTOWIRED_VIOLATIONS_DETECTED;
-			}
-			final TestInstance testInstance = TestContextAnnotationUtils.findMergedAnnotation(testClass, TestInstance.class);
-
-			if (testInstance == null || testInstance.value() != TestInstance.Lifecycle.PER_CLASS) {
-				return NO_AUTOWIRED_VIOLATIONS_DETECTED;
+			boolean recording = TestContextAnnotationUtils.hasAnnotation(testClass, RecordApplicationEvents.class);
+			if (!recording) {
+				return NO_VIOLATIONS_DETECTED;
 			}
 
-			final Execution execution = TestContextAnnotationUtils.findMergedAnnotation(testClass, Execution.class);
-
-			if (execution == null || execution.value() != ExecutionMode.CONCURRENT) {
-				return NO_AUTOWIRED_VIOLATIONS_DETECTED;
+			if (context.getTestInstanceLifecycle().orElse(Lifecycle.PER_METHOD) == Lifecycle.PER_METHOD) {
+				return NO_VIOLATIONS_DETECTED;
 			}
 
-			return "Test classes or inner classes that @RecordApplicationEvents must not be run in parallel "
-					+ "with the @TestInstance(Lifecycle.PER_CLASS) configuration. Use either @Execution(SAME_THREAD), "
-					+ "@TestInstance(PER_METHOD) or disable parallel execution altogether. Note that when recording "
-					+ "events in parallel, one might see events published by other tests as the application context "
-					+ "can be common.";
+			if (context.getExecutionMode() == ExecutionMode.SAME_THREAD) {
+				return NO_VIOLATIONS_DETECTED;
+			}
+
+			return """
+					Test classes or @Nested test classes that @RecordApplicationEvents must not be run \
+					in parallel with the @TestInstance(PER_CLASS) lifecycle mode. Configure either \
+					@Execution(SAME_THREAD) or @TestInstance(PER_METHOD) semantics, or disable parallel \
+					execution altogether. Note that when recording events in parallel, one might see events \
+					published by other tests since the application context may be shared.""";
 		}, String.class);
 
-		if (errorMessage != NO_AUTOWIRED_VIOLATIONS_DETECTED) {
+		if (errorMessage != NO_VIOLATIONS_DETECTED) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
@@ -206,7 +203,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		String errorMessage = store.getOrComputeIfAbsent(context.getRequiredTestClass(), testClass -> {
 				Method[] methodsWithErrors =
 						ReflectionUtils.getUniqueDeclaredMethods(testClass, autowiredTestOrLifecycleMethodFilter);
-				return (methodsWithErrors.length == 0 ? NO_AUTOWIRED_VIOLATIONS_DETECTED :
+				return (methodsWithErrors.length == 0 ? NO_VIOLATIONS_DETECTED :
 						String.format(
 								"Test methods and test lifecycle methods must not be annotated with @Autowired. " +
 								"You should instead annotate individual method parameters with @Autowired, " +
@@ -214,7 +211,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 								testClass.getName(), Arrays.toString(methodsWithErrors)));
 			}, String.class);
 
-		if (errorMessage != NO_AUTOWIRED_VIOLATIONS_DETECTED) {
+		if (errorMessage != NO_VIOLATIONS_DETECTED) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
