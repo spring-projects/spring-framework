@@ -22,6 +22,7 @@ import java.util.Map;
 
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.spi.PersistenceUnitInfo;
+import org.hibernate.bytecode.enhance.spi.EnhancementContext;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -62,6 +63,13 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 					@Override
 					public List<String> getManagedClassNames() {
 						return mergedClassesAndPackages;
+					}
+
+					@Override
+					public void pushClassTransformer(EnhancementContext enhancementContext) {
+						if (!NativeDetector.inNativeImage()) {
+							super.pushClassTransformer(enhancementContext);
+						}
 					}
 				}, properties).build();
 	}
