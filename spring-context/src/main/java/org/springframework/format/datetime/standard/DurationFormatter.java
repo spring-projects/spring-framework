@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ import org.springframework.lang.Nullable;
  * supporting additional {@code DurationFormat.Style} styles.
  *
  * @author Juergen Hoeller
- * @since 4.2.4
+ * @since 6.1
  * @see DurationFormatterUtils
  * @see DurationFormat.Style
- */
-class DurationFormatter implements Formatter<Duration> { //TODO why is this one package-private ? make public and change since taglet ?
+ */ //introduced as package-private in 4.2.4
+public class DurationFormatter implements Formatter<Duration> {
 
 	private final DurationFormat.Style style;
 	@Nullable
