@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import jakarta.persistence.spi.PersistenceUnitInfo;
 import jakarta.persistence.spi.PersistenceUnitTransactionType;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Version;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.dialect.DB2Dialect;
 import org.hibernate.dialect.DerbyTenSevenDialect;
@@ -64,6 +65,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Yanming Zhou
  * @since 2.0
  * @see HibernateJpaDialect
  */
@@ -77,11 +79,15 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	private final Class<? extends EntityManager> entityManagerInterface;
 
+	private final int hibernateMajorVersion;
+
 
 	public HibernateJpaVendorAdapter() {
 		this.persistenceProvider = new SpringHibernateJpaPersistenceProvider();
 		this.entityManagerFactoryInterface = SessionFactory.class;  // as of Spring 5.3
 		this.entityManagerInterface = Session.class;  // as of Spring 5.3
+		String version = Version.getVersionString();
+		this.hibernateMajorVersion = Integer.parseInt(version.substring(0, version.indexOf('.')));
 	}
 
 
@@ -137,13 +143,15 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private Map<String, Object> buildJpaPropertyMap(boolean connectionReleaseOnClose) {
 		Map<String, Object> jpaProperties = new HashMap<>();
 
-		if (getDatabasePlatform() != null) {
-			jpaProperties.put(AvailableSettings.DIALECT, getDatabasePlatform());
-		}
-		else {
-			Class<?> databaseDialectClass = determineDatabaseDialectClass(getDatabase());
-			if (databaseDialectClass != null) {
-				jpaProperties.put(AvailableSettings.DIALECT, databaseDialectClass.getName());
+		if (this.hibernateMajorVersion < 6) {
+			if (getDatabasePlatform() != null) {
+				jpaProperties.put(AvailableSettings.DIALECT, getDatabasePlatform());
+			}
+			else {
+				Class<?> databaseDialectClass = determineDatabaseDialectClass(getDatabase());
+				if (databaseDialectClass != null) {
+					jpaProperties.put(AvailableSettings.DIALECT, databaseDialectClass.getName());
+				}
 			}
 		}
 
