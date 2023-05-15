@@ -61,6 +61,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.format.annotation.DurationFormat;
+import org.springframework.format.datetime.standard.DurationFormatterUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -414,7 +416,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
-								"Invalid initialDelayString value \"" + initialDelayString + "\" - cannot parse into long");
+								"Invalid initialDelayString value \"" + initialDelayString + "\"", ex);
 					}
 				}
 			}
@@ -469,7 +471,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
-								"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into long");
+								"Invalid fixedDelayString value \"" + fixedDelayString + "\"", ex);
 					}
 					tasks.add(this.registrar.scheduleFixedDelayTask(new FixedDelayTask(runnable, fixedDelay, initialDelay)));
 				}
@@ -495,7 +497,7 @@ public class ScheduledAnnotationBeanPostProcessor
 					}
 					catch (RuntimeException ex) {
 						throw new IllegalArgumentException(
-								"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into long");
+								"Invalid fixedRateString value \"" + fixedRateString + "\"", ex);
 					}
 					tasks.add(this.registrar.scheduleFixedRateTask(new FixedRateTask(runnable, fixedRate, initialDelay)));
 				}
@@ -536,20 +538,9 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	private static Duration toDuration(String value, TimeUnit timeUnit) {
-		if (isDurationString(value)) {
-			return Duration.parse(value);
-		}
-		return toDuration(Long.parseLong(value), timeUnit);
+		DurationFormat.Unit unit = DurationFormat.Unit.fromChronoUnit(timeUnit.toChronoUnit());
+		return DurationFormatterUtils.detectAndParse(value, unit); // interpreting as long as fallback already
 	}
-
-	private static boolean isDurationString(String value) {
-		return (value.length() > 1 && (isP(value.charAt(0)) || isP(value.charAt(1))));
-	}
-
-	private static boolean isP(char ch) {
-		return (ch == 'P' || ch == 'p');
-	}
-
 
 	/**
 	 * Return all currently scheduled tasks, from {@link Scheduled} methods
