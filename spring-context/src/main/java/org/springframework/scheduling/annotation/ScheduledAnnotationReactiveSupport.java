@@ -155,25 +155,45 @@ abstract class ScheduledAnnotationReactiveSupport {
 			List<Runnable> subscriptionTrackerRegistry) {
 		boolean shouldBlock = scheduled.fixedDelay() > 0 || StringUtils.hasText(scheduled.fixedDelayString());
 		final Publisher<?> publisher = getPublisherFor(method, targetBean);
-		if (shouldBlock) {
-			return () -> {
+		return new SubscribingRunnable(publisher, shouldBlock, subscriptionTrackerRegistry);
+	}
+
+	/**
+	 * Utility implementation of {@code Runnable} that subscribes to a {@code Publisher}
+	 * or subscribes-then-blocks if {@code shouldBlock} is set to {@code true}.
+	 */
+	static final class SubscribingRunnable implements Runnable {
+
+		final Publisher<?> publisher;
+		final boolean shouldBlock;
+		final List<Runnable> subscriptionTrackerRegistry;
+
+		SubscribingRunnable(Publisher<?> publisher, boolean shouldBlock, List<Runnable> subscriptionTrackerRegistry) {
+			this.publisher = publisher;
+			this.shouldBlock = shouldBlock;
+			this.subscriptionTrackerRegistry = subscriptionTrackerRegistry;
+		}
+
+		@Override
+		public void run() {
+			if (this.shouldBlock) {
 				final CountDownLatch latch = new CountDownLatch(1);
-				TrackingSubscriber subscriber = new TrackingSubscriber(subscriptionTrackerRegistry, latch);
-				subscriptionTrackerRegistry.add(subscriber);
-				publisher.subscribe(subscriber);
+				TrackingSubscriber subscriber = new TrackingSubscriber(this.subscriptionTrackerRegistry, latch);
+				this.subscriptionTrackerRegistry.add(subscriber);
+				this.publisher.subscribe(subscriber);
 				try {
 					latch.await();
 				}
 				catch (InterruptedException ex) {
 					throw new RuntimeException(ex);
 				}
-			};
+			}
+			else {
+				final TrackingSubscriber subscriber = new TrackingSubscriber(this.subscriptionTrackerRegistry);
+				this.subscriptionTrackerRegistry.add(subscriber);
+				this.publisher.subscribe(subscriber);
+			}
 		}
-		return () -> {
-			final TrackingSubscriber subscriber = new TrackingSubscriber(subscriptionTrackerRegistry);
-			subscriptionTrackerRegistry.add(subscriber);
-			publisher.subscribe(subscriber);
-		};
 	}
 
 	/**

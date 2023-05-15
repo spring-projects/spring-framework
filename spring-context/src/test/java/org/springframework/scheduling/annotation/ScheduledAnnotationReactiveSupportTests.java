@@ -17,6 +17,9 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,10 +32,12 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.createSubscriptionRunnable;
 import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.getPublisherFor;
 import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.isReactive;
 
@@ -99,7 +104,56 @@ class ScheduledAnnotationReactiveSupportTests {
 				.withCause(new IllegalAccessException("expected"));
 	}
 
-	//TODO find a way to test the case with fixedDelay effectively turning into a fixedRate ?
+	@Test
+	void fixedDelayIsBlocking() {
+		ReactiveMethods target = new ReactiveMethods();
+		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "mono");
+		Scheduled fixedDelayString = AnnotationUtils.synthesizeAnnotation(Map.of("fixedDelayString", "123"), Scheduled.class, null);
+		Scheduled fixedDelayLong = AnnotationUtils.synthesizeAnnotation(Map.of("fixedDelay", 123L), Scheduled.class, null);
+		List<Runnable> tracker = new ArrayList<>();
+
+		assertThat(createSubscriptionRunnable(m, target, fixedDelayString, tracker))
+				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
+						assertThat(sr.shouldBlock).as("fixedDelayString.shouldBlock").isTrue()
+				);
+
+		assertThat(createSubscriptionRunnable(m, target, fixedDelayLong, tracker))
+				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
+						assertThat(sr.shouldBlock).as("fixedDelayLong.shouldBlock").isTrue()
+				);
+	}
+
+	@Test
+	void fixedRateIsNotBlocking() {
+		ReactiveMethods target = new ReactiveMethods();
+		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "mono");
+		Scheduled fixedRateString = AnnotationUtils.synthesizeAnnotation(Map.of("fixedRateString", "123"), Scheduled.class, null);
+		Scheduled fixedRateLong = AnnotationUtils.synthesizeAnnotation(Map.of("fixedRate", 123L), Scheduled.class, null);
+		List<Runnable> tracker = new ArrayList<>();
+
+		assertThat(createSubscriptionRunnable(m, target, fixedRateString, tracker))
+				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
+						assertThat(sr.shouldBlock).as("fixedRateString.shouldBlock").isFalse()
+				);
+
+		assertThat(createSubscriptionRunnable(m, target, fixedRateLong, tracker))
+				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
+						assertThat(sr.shouldBlock).as("fixedRateLong.shouldBlock").isFalse()
+				);
+	}
+
+	@Test
+	void cronIsNotBlocking() {
+		ReactiveMethods target = new ReactiveMethods();
+		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "mono");
+		Scheduled cron = AnnotationUtils.synthesizeAnnotation(Map.of("cron", "-"), Scheduled.class, null);
+		List<Runnable> tracker = new ArrayList<>();
+
+		assertThat(createSubscriptionRunnable(m, target, cron, tracker))
+				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
+						assertThat(sr.shouldBlock).as("cron.shouldBlock").isFalse()
+				);
+	}
 
 	@Test
 	void hasCheckpointToString() {
