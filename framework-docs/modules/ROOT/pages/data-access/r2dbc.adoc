@@ -417,9 +417,9 @@ Do not pass `Collection<String>` or the like as an array parameter.
 [[r2dbc-DatabaseClient-filter]]
 ==== Statement Filters
 
-Sometimes it you need to fine-tune options on the actual `Statement`
-before it gets run. Register a `Statement` filter
-(`StatementFilterFunction`) through `DatabaseClient` to intercept and
+Sometimes you need to fine-tune options on the actual `Statement`
+before it gets run. To do so, register a `Statement` filter
+(`StatementFilterFunction`) with the `DatabaseClient` to intercept and
 modify statements in their execution, as the following example shows:
 
 [tabs]
@@ -445,7 +445,8 @@ Kotlin::
 ----
 ======
 
-`DatabaseClient` exposes also simplified `filter(…)` overload accepting `Function<Statement, Statement>`:
+`DatabaseClient` also exposes a simplified `filter(…)` overload that accepts
+a `Function<Statement, Statement>`:
 
 [tabs]
 ======
