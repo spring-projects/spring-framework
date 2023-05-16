@@ -25,7 +25,7 @@ The following table lists all currently supported Spring properties.
 | `spring.beaninfo.ignore`
 | Instructs Spring to use the `Introspector.IGNORE_ALL_BEANINFO` mode when calling the
 JavaBeans `Introspector`. See
-{api-spring-framework}++/beans/CachedIntrospectionResults.html#IGNORE_BEANINFO_PROPERTY_NAME++[`CachedIntrospectionResults`]
+{api-spring-framework}++/beans/StandardBeanInfoFactory.html#IGNORE_BEANINFO_PROPERTY_NAME++[`CachedIntrospectionResults`]
 for details.
 
 | `spring.expression.compiler.mode`

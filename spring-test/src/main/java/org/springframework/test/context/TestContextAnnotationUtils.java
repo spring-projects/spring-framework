@@ -66,7 +66,7 @@ import org.springframework.util.ObjectUtils;
  * example, {@link ContextConfiguration#inheritLocations}.
  *
  * @author Sam Brannen
- * @since 5.3, though originally since 4.0 as {@link org.springframework.test.util.MetaAnnotationUtils}
+ * @since 5.3, though originally since 4.0 as {@code org.springframework.test.util.MetaAnnotationUtils}
  * @see AnnotationUtils
  * @see AnnotatedElementUtils
  * @see AnnotationDescriptor

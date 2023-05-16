@@ -383,7 +383,7 @@ public interface RestOperations {
 	 * @since 4.3.5
 	 * @see HttpEntity
 	 * @see RestTemplate#setRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	@Nullable
@@ -406,7 +406,7 @@ public interface RestOperations {
 	 * @since 4.3.5
 	 * @see HttpEntity
 	 * @see RestTemplate#setRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	@Nullable
@@ -427,7 +427,7 @@ public interface RestOperations {
 	 * @since 4.3.5
 	 * @see HttpEntity
 	 * @see RestTemplate#setRequestFactory
-	 * @see org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory
+	 * @see org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 	 * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
 	 */
 	@Nullable

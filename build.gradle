@@ -86,10 +86,10 @@ configure([rootProject] + javaProjects) { project ->
 	ext.javadocLinks = [
 			"https://docs.oracle.com/en/java/javase/17/docs/api/",
 			"https://jakarta.ee/specifications/platform/9/apidocs/",
-			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ
-			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/",
-			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
-			"https://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
+			"https://docs.oracle.com/cd/E13222_01/wls/docs90/javadocs/",  // CommonJ and weblogic.* packages
+			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/", // com.ibm.*
+			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/", // org.jboss.resource.*
+			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
 			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-core/2.14.1/",
@@ -105,11 +105,9 @@ configure([rootProject] + javaProjects) { project ->
 			"https://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
 			"https://javadoc.io/static/io.rsocket/rsocket-core/1.1.1/",
 			"https://r2dbc.io/spec/1.0.0.RELEASE/api/",
-			// The external Javadoc link for JSR 305 must come last to ensure that types from
-			// JSR 250 (such as @PostConstruct) are still supported. This is due to the fact
-			// that JSR 250 and JSR 305 both define types in javax.annotation, which results
-			// in a split package, and the javadoc tool does not support split packages
-			// across multiple external Javadoc sites.
+			// Previously there could be a split-package issue between JSR250 and JSR305 javax.annotation packages,
+			// but since 6.0 JSR 250 annotations such as @Resource and @PostConstruct have been replaced by their
+			// JakartaEE equivalents in the jakarta.annotation package.
 			"https://www.javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/"
 	] as String[]
 }
