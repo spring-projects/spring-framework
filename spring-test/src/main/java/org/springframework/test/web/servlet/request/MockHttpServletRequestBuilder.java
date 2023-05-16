@@ -532,10 +532,10 @@ public class MockHttpServletRequestBuilder
 	/**
 	 * Set the remote address of the request.
 	 * @param remoteAddress the remote address (IP)
-	 * @Since 6.1.0
+	 * @since 6.1
 	 */
 	public MockHttpServletRequestBuilder remoteAddress(String remoteAddress) {
-		Assert.notNull(remoteAddress, "'remoteAddress' must not be null");
+		Assert.hasText(remoteAddress, "'remoteAddress' must not be null or blank");
 		this.remoteAddress = remoteAddress;
 		return this;
 	}

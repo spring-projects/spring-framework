@@ -560,7 +560,7 @@ class MockHttpServletRequestBuilderTests {
 
 	@Test
 	void remoteAddress() {
-		final String ip = "10.0.0.1";
+		String ip = "10.0.0.1";
 		this.builder.remoteAddress(ip);
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
