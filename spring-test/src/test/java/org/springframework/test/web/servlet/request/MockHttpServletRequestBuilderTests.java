@@ -31,7 +31,6 @@ import java.util.Map;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -557,6 +556,15 @@ class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertThat(request.getUserPrincipal()).isEqualTo(user);
+	}
+
+	@Test
+	void remoteAddress() {
+		final String ip = "10.0.0.1";
+		this.builder.remoteAddress(ip);
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertThat(request.getRemoteAddr()).isEqualTo(ip);
 	}
 
 	@Test  // SPR-12945
