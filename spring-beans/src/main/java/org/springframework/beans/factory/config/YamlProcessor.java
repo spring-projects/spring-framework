@@ -34,6 +34,8 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.inspector.TagInspector;
+import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.reader.UnicodeReader;
 import org.yaml.snakeyaml.representer.Representer;
 
@@ -184,8 +186,9 @@ public abstract class YamlProcessor {
 	protected Yaml createYaml() {
 		LoaderOptions loaderOptions = new LoaderOptions();
 		loaderOptions.setAllowDuplicateKeys(false);
+		loaderOptions.setTagInspector(new SupportedTagInspector());
 		DumperOptions dumperOptions = new DumperOptions();
-		return new Yaml(new FilteringConstructor(loaderOptions), new Representer(dumperOptions),
+		return new Yaml(new Constructor(loaderOptions), new Representer(dumperOptions),
 				dumperOptions, loaderOptions);
 	}
 
@@ -425,23 +428,11 @@ public abstract class YamlProcessor {
 		FIRST_FOUND
 	}
 
-
-	/**
-	 * {@link Constructor} that supports filtering of unsupported types.
-	 * <p>If an unsupported type is encountered in a YAML document, an
-	 * {@link IllegalStateException} will be thrown from {@link #getClassForName}.
-	 */
-	private class FilteringConstructor extends Constructor {
-
-		FilteringConstructor(LoaderOptions loaderOptions) {
-			super(loaderOptions);
-		}
+	private class SupportedTagInspector implements TagInspector {
 
 		@Override
-		protected Class<?> getClassForName(String name) throws ClassNotFoundException {
-			Assert.state(YamlProcessor.this.supportedTypes.contains(name),
-					() -> "Unsupported type encountered in YAML document: " + name);
-			return super.getClassForName(name);
+		public boolean isGlobalTagAllowed(Tag tag) {
+			return supportedTypes.contains(tag.getClassName());
 		}
 	}
 
