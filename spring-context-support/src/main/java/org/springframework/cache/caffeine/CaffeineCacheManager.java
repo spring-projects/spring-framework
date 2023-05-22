@@ -155,6 +155,9 @@ public class CaffeineCacheManager implements CacheManager {
 	/**
 	 * Set the Caffeine CacheLoader to use for building each individual
 	 * {@link CaffeineCache} instance, turning it into a LoadingCache.
+	 * <p>This manager is marked as synchronous, and any previously configured
+	 * {@link #setAsyncCacheLoader(AsyncCacheLoader) AsyncCacheLoader} is
+	 * discarded.
 	 * @see #createNativeCaffeineCache
 	 * @see com.github.benmanes.caffeine.cache.Caffeine#build(CacheLoader)
 	 * @see com.github.benmanes.caffeine.cache.LoadingCache
@@ -163,21 +166,26 @@ public class CaffeineCacheManager implements CacheManager {
 		if (!ObjectUtils.nullSafeEquals(this.cacheLoader, cacheLoader)) {
 			this.cacheLoader = cacheLoader;
 			this.async = false;
+			this.asyncCacheLoader = null;
 			refreshCommonCaches();
 		}
 	}
 
 	/**
-	 * Set the Caffeine CacheLoader to use for building each individual
-	 * {@link CaffeineCache} instance, turning it into a LoadingCache.
+	 * Set the Caffeine AsyncCacheLoader to use for building each individual
+	 * {@link CaffeineCache} instance, turning it into an AsyncLoadingCache
+	 * and exposing its {@code synchronous()} view.
+	 * <p>This manager is marked as asynchronous, and any previously configured
+	 * {@link #setCacheLoader(CacheLoader) CacheLoader} is discarded.
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.Caffeine#build(CacheLoader)
-	 * @see com.github.benmanes.caffeine.cache.LoadingCache
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#buildAsync(AsyncCacheLoader)
+	 * @see com.github.benmanes.caffeine.cache.AsyncLoadingCache
 	 */
 	public void setAsyncCacheLoader(AsyncCacheLoader<Object, Object> asyncCacheLoader) {
 		if (!ObjectUtils.nullSafeEquals(this.asyncCacheLoader, asyncCacheLoader)) {
 			this.asyncCacheLoader = asyncCacheLoader;
 			this.async = true;
+			this.cacheLoader = null;
 			refreshCommonCaches();
 		}
 	}

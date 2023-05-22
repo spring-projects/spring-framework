@@ -17,9 +17,6 @@
 package org.springframework.cache.caffeine;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -123,14 +120,8 @@ public class CaffeineCacheManagerTests {
 
 	@Test
 	public void testAsyncMode() {
-		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
 		CaffeineCacheManager cm = new CaffeineCacheManager();
-		cm.setAsyncCacheLoader((key, executor) -> {
-			CompletableFuture<Object> future = new CompletableFuture<>();
-			scheduler.schedule(() -> future.complete("async_" + key), 1, TimeUnit.SECONDS);
-			return future;
-		});
+		cm.setAsyncCacheLoader((key, executor) -> CompletableFuture.supplyAsync(() -> "async_" + key, executor));
 
 		Cache cache1 = cm.getCache("c1");
 		boolean condition2 = cache1 instanceof CaffeineCache;
@@ -155,9 +146,7 @@ public class CaffeineCacheManagerTests {
 		cache1.put("key3", null);
 		assertThat(cache1.get("key3").get()).isNull();
 		cache1.evict("key3");
-		long startMillis = System.currentTimeMillis();
 		assertThat(cache1.get("key3").get()).isEqualTo("async_key3");
-		assertThat(System.currentTimeMillis() - startMillis).isGreaterThanOrEqualTo(1000);
 	}
 
 	@Test
