@@ -243,6 +243,12 @@ public class InjectionMetadata {
 			}
 		}
 
+		/**
+		 * Whether the property values should be injected.
+		 * @param pvs property values to check
+		 * @return whether the property values should be injected
+		 * @since 6.0.10
+		 */
 		protected boolean shouldInject(@Nullable PropertyValues pvs) {
 			if (this.isField) {
 				return true;
