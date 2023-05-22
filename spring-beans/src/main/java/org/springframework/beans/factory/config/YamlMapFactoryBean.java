@@ -64,7 +64,7 @@ import org.springframework.lang.Nullable;
  * Note that the value of "foo" in the first document is not simply replaced
  * with the value in the second, but its nested values are merged.
  *
- * <p>Requires SnakeYAML 1.18 or higher, as of Spring Framework 5.0.6.
+ * <p>Requires SnakeYAML 2.0 or higher, as of Spring Framework 6.1.0.
  *
  * @author Dave Syer
  * @author Juergen Hoeller
