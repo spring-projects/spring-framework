@@ -45,12 +45,6 @@ tasks.create("generateAntoraResources") {
 	dependsOn 'generateAntoraYml'
 }
 
-// Commented out for now:
-// https://github.com/spring-projects/spring-framework/issues/30481
-// tasks.named("check") {
-//	dependsOn 'antora'
-// }
-
 jar {
 	enabled = false
 }
