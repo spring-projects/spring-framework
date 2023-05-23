@@ -3,8 +3,6 @@ plugins {
 	// kotlinVersion is managed in gradle.properties
 	id 'org.jetbrains.kotlin.plugin.serialization' version "${kotlinVersion}" apply false
 	id 'org.jetbrains.dokka' version '1.8.10'
-	id 'org.asciidoctor.jvm.convert' version '3.3.2' apply false
-	id 'org.asciidoctor.jvm.pdf' version '3.3.2'  apply false
 	id 'org.unbroken-dome.xjc' version '2.0.0' apply false
 	id 'com.github.ben-manes.versions' version '0.46.0'
 	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
