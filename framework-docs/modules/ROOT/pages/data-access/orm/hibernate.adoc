@@ -8,10 +8,16 @@ implementations and transaction demarcation. Most of these patterns can be direc
 translated to all other supported ORM tools. The later sections in this chapter then
 cover the other ORM technologies and show brief examples.
 
-NOTE: As of Spring Framework 5.3, Spring requires Hibernate ORM 5.2+ for Spring's
+[NOTE]
+====
+As of Spring Framework 6.0, Spring requires Hibernate ORM 5.5+ for Spring's
 `HibernateJpaVendorAdapter` as well as for a native Hibernate `SessionFactory` setup.
-It is strongly recommended to go with Hibernate ORM 5.4 for a newly started application.
-For use with `HibernateJpaVendorAdapter`, Hibernate Search needs to be upgraded to 5.11.6.
+We recommend Hibernate ORM 5.6 as the last feature branch in that Hibernate generation.
+
+Hibernate ORM 6.x is only supported as a JPA provider (`HibernateJpaVendorAdapter`).
+Plain `SessionFactory` setup with the `orm.hibernate5` package is not supported anymore.
+We recommend Hibernate ORM 6.1/6.2 with JPA-style setup for new development projects.
+====
 
 
 [[orm-session-factory-setup]]

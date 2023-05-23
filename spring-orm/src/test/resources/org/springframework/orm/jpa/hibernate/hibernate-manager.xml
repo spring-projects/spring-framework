@@ -28,9 +28,7 @@
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 	</bean>
 
-	<bean id="sessionFactory" factory-bean="entityManagerFactory" factory-method="getSessionFactory"/>
-
-	<bean id="hibernateStatistics" factory-bean="sessionFactory" factory-method="getStatistics"/>
+	<bean id="hibernateStatistics" factory-bean="entityManagerFactory" factory-method="getStatistics"/>
 
 	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
 
