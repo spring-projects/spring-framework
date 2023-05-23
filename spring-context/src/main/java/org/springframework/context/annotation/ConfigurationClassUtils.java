@@ -56,6 +56,17 @@ public abstract class ConfigurationClassUtils {
 
 	static final String CONFIGURATION_CLASS_LITE = "lite";
 
+	/**
+	 * When set to {@link Boolean#TRUE}, this attribute signals that the bean class
+	 * for the given {@link BeanDefinition} should be considered as a candidate
+	 * configuration class in 'lite' mode by default.
+	 * <p>For example, a class registered directly with an {@code ApplicationContext}
+	 * should always be considered a configuration class candidate.
+	 * @since 6.0.10
+	 */
+	static final String CANDIDATE_ATTRIBUTE =
+			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "candidate");
+
 	static final String CONFIGURATION_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
 
@@ -136,7 +147,8 @@ public abstract class ConfigurationClassUtils {
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
-		else if (config != null || isConfigurationCandidate(metadata)) {
+		else if (config != null || Boolean.TRUE.equals(beanDef.getAttribute(CANDIDATE_ATTRIBUTE)) ||
+				isConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
