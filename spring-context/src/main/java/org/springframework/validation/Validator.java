@@ -92,9 +92,8 @@ public interface Validator {
 	/**
 	 * Return a {@code Validator} that checks whether the target object
 	 * {@linkplain Class#isAssignableFrom(Class) is an instance of}
-	 * {@code targetClass}, resorting to {@code delegate} to populate
+	 * {@code targetClass}, applying the given {@code delegate} to populate
 	 * {@link Errors} if it is.
-	 *
 	 * <p>For instance:
 	 * <pre class="code">Validator passwordEqualsValidator = Validator.forInstanceOf(PasswordResetForm.class, (form, errors) -> {
 	 *   if (!Objects.equals(form.getPassword(), form.getConfirmPassword())) {
@@ -116,9 +115,8 @@ public interface Validator {
 
 	/**
 	 * Return a {@code Validator} that checks whether the target object's class
-	 * is identical to {@code targetClass}, resorting to {@code delegate} to
-	 * populate {@link Errors} if it is.
-	 *
+	 * is identical to {@code targetClass}, applying the given {@code delegate}
+	 * to populate {@link Errors} if it is.
 	 * <p>For instance:
 	 * <pre class="code">Validator passwordEqualsValidator = Validator.forType(PasswordResetForm.class, (form, errors) -> {
 	 *   if (!Objects.equals(form.getPassword(), form.getConfirmPassword())) {

@@ -85,7 +85,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS =
 			Set.of("AbortedException", "ClientAbortException", "EOFException", "EofException");
 
-	private static final ServerRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultServerRequestObservationConvention();
+	private static final ServerRequestObservationConvention DEFAULT_OBSERVATION_CONVENTION =
+			new DefaultServerRequestObservationConvention();
 
 
 	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
@@ -103,11 +104,9 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	@Nullable
 	private ForwardedHeaderTransformer forwardedHeaderTransformer;
 
-	@Nullable
-	private ObservationRegistry observationRegistry;
+	private ObservationRegistry observationRegistry = ObservationRegistry.NOOP;
 
-	@Nullable
-	private ServerRequestObservationConvention observationConvention;
+	private ServerRequestObservationConvention observationConvention = DEFAULT_OBSERVATION_CONVENTION;
 
 	@Nullable
 	private ApplicationContext applicationContext;
@@ -196,8 +195,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * @param transformer the transformer to use
 	 * @since 5.1
 	 */
-	public void setForwardedHeaderTransformer(ForwardedHeaderTransformer transformer) {
-		Assert.notNull(transformer, "ForwardedHeaderTransformer is required");
+	public void setForwardedHeaderTransformer(@Nullable ForwardedHeaderTransformer transformer) {
 		this.forwardedHeaderTransformer = transformer;
 	}
 
@@ -214,7 +212,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Configure a {@link ObservationRegistry} for recording server exchange observations.
 	 * By default, a {@link ObservationRegistry#NOOP no-op} instance will be used.
 	 * @param observationRegistry the observation registry to use
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public void setObservationRegistry(ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
@@ -222,9 +220,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	/**
 	 * Return the configured {@link ObservationRegistry}.
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
-	@Nullable
 	public ObservationRegistry getObservationRegistry() {
 		return this.observationRegistry;
 	}
@@ -233,7 +230,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * Configure a {@link ServerRequestObservationConvention} for server exchanges observations.
 	 * By default, a {@link DefaultServerRequestObservationConvention} instance will be used.
 	 * @param observationConvention the observation convention to use
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public void setObservationConvention(ServerRequestObservationConvention observationConvention) {
 		this.observationConvention = observationConvention;
@@ -241,9 +238,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 
 	/**
 	 * Return the Observation convention configured for server exchanges observations.
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
-	@Nullable
 	public ServerRequestObservationConvention getObservationConvention() {
 		return this.observationConvention;
 	}
@@ -331,8 +327,8 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	private Publisher<Void> transform(ServerWebExchange exchange, ServerRequestObservationContext observationContext, Mono<Void> call) {
-		Observation observation = ServerHttpObservationDocumentation.HTTP_REACTIVE_SERVER_REQUESTS.observation(this.observationConvention,
-				DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry);
+		Observation observation = ServerHttpObservationDocumentation.HTTP_REACTIVE_SERVER_REQUESTS.observation(
+				this.observationConvention, DEFAULT_OBSERVATION_CONVENTION, () -> observationContext, this.observationRegistry);
 		observation.start();
 		return call
 				.doOnSuccess(aVoid -> {
@@ -438,6 +434,5 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 					return Mono.empty();
 				});
 	}
-
 
 }

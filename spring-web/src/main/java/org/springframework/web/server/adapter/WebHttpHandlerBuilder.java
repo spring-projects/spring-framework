@@ -374,7 +374,7 @@ public final class WebHttpHandlerBuilder {
 	 * Configure a {@link ObservationRegistry} for recording server exchange observations.
 	 * By default, a {@link ObservationRegistry#NOOP no-op} registry will be configured.
 	 * @param observationRegistry the observation registry
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public WebHttpHandlerBuilder observationRegistry(ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
@@ -385,7 +385,7 @@ public final class WebHttpHandlerBuilder {
 	 * Configure a {@link ServerRequestObservationConvention} to use for server observations.
 	 * By default, a {@link DefaultServerRequestObservationConvention} will be used.
 	 * @param observationConvention the convention to use for all recorded observations
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public WebHttpHandlerBuilder observationConvention(ServerRequestObservationConvention observationConvention) {
 		this.observationConvention = observationConvention;

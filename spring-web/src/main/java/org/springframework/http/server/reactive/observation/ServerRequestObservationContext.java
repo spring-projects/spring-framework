@@ -40,9 +40,10 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 
 	/**
 	 * Name of the request attribute holding the {@link ServerRequestObservationContext context} for the current observation.
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public static final String CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE = ServerRequestObservationContext.class.getName() + ".context";
+
 
 	private final Map<String, Object> attributes;
 
@@ -51,6 +52,7 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 
 	private boolean connectionAborted;
 
+
 	public ServerRequestObservationContext(ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> attributes) {
 		super((req, key) -> req.getHeaders().getFirst(key));
 		setCarrier(request);
@@ -58,15 +60,6 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 		this.attributes = Collections.unmodifiableMap(attributes);
 	}
 
-	/**
-	 * Get the current {@link ServerRequestObservationContext observation context} from the given exchange, if available.
-	 * @param exchange the current exchange
-	 * @return the current observation context
-	 * @since 6.1.0
-	 */
-	public static Optional<ServerRequestObservationContext> findCurrent(ServerWebExchange exchange) {
-		return Optional.ofNullable(exchange.getAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
-	}
 
 	/**
 	 * Return an immutable map of the current request attributes.
@@ -113,6 +106,17 @@ public class ServerRequestObservationContext extends RequestReplyReceiverContext
 	 */
 	public void setConnectionAborted(boolean connectionAborted) {
 		this.connectionAborted = connectionAborted;
+	}
+
+
+	/**
+	 * Get the current {@link ServerRequestObservationContext observation context} from the given exchange, if available.
+	 * @param exchange the current exchange
+	 * @return the current observation context
+	 * @since 6.1
+	 */
+	public static Optional<ServerRequestObservationContext> findCurrent(ServerWebExchange exchange) {
+		return Optional.ofNullable(exchange.getAttribute(CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE));
 	}
 
 }

@@ -159,7 +159,7 @@ public class FunctionReference extends SpelNodeImpl {
 	 * @param methodHandle the method to invoke
 	 * @return the return value of the invoked Java method
 	 * @throws EvaluationException if there is any problem invoking the method
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	private TypedValue executeFunctionBoundMethodHandle(ExpressionState state, MethodHandle methodHandle) throws EvaluationException {
 		Object[] functionArgs = getArguments(state);

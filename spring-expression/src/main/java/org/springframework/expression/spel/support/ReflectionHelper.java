@@ -343,10 +343,11 @@ public abstract class ReflectionHelper {
 	 * ({@code null} if not varargs)
 	 * @return {@code true} if some kind of conversion occurred on an argument
 	 * @throws EvaluationException if a problem occurs during conversion
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public static boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,
 			MethodHandle methodHandle, @Nullable Integer varargsPosition) throws EvaluationException {
+
 		boolean conversionOccurred = false;
 		final MethodType methodHandleArgumentTypes = methodHandle.type();
 		if (varargsPosition == null) {

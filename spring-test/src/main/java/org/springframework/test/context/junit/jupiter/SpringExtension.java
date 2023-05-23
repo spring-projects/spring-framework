@@ -182,7 +182,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * application events in a parallel mode that makes it non-deterministic
 	 * ({@code @TestInstance(PER_CLASS)} and {@code @Execution(CONCURRENT)}
 	 * combination).
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	private void validateRecordApplicationEventsConfig(ExtensionContext context) {
 		// We save the result in the ExtensionContext.Store so that we don't
