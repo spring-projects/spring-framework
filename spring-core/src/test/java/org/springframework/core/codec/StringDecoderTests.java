@@ -25,8 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscription;
-import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -266,15 +264,6 @@ class StringDecoderTests extends AbstractDecoderTests<StringDecoder> {
 		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
 		buffer.write(bytes);
 		return buffer;
-	}
-
-
-	private static class SingleRequestSubscriber extends BaseSubscriber<String> {
-
-		@Override
-		protected void hookOnSubscribe(Subscription subscription) {
-			subscription.request(1);
-		}
 	}
 
 }
