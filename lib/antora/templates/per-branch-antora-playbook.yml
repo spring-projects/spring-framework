@@ -14,7 +14,7 @@ site:
   title: Spring Framework Reference
 content:
   sources:
-  - url: ./../..
+  - url: ./..
     branches: HEAD
     start_path: framework-docs
     worktrees: true
