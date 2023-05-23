@@ -43,6 +43,7 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  * @since 4.1
  * @see Configuration#addPackage
  */
+@SuppressWarnings("removal")  // for Environment properties on Hibernate 6.2
 class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider {
 
 	static {
@@ -53,7 +54,7 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({"rawtypes", "unchecked"})  // on Hibernate 6
 	public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map properties) {
 		final List<String> mergedClassesAndPackages = new ArrayList<>(info.getManagedClassNames());
 		if (info instanceof SmartPersistenceUnitInfo smartInfo) {
@@ -65,7 +66,6 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 					public List<String> getManagedClassNames() {
 						return mergedClassesAndPackages;
 					}
-
 					@Override
 					public void pushClassTransformer(EnhancementContext enhancementContext) {
 						if (!NativeDetector.inNativeImage()) {

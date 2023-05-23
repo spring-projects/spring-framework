@@ -49,32 +49,19 @@ public class HibernateEntityManagerFactoryIntegrationTests extends AbstractConta
 	@Test
 	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
-		boolean condition1 = emfi.getNativeEntityManagerFactory() instanceof org.hibernate.jpa.HibernateEntityManagerFactory;
-		assertThat(condition1).isTrue();
-		// as of Hibernate 5.2
-		boolean condition = emfi.getNativeEntityManagerFactory() instanceof SessionFactory;
-		assertThat(condition).isTrue();
+		assertThat(emfi.getNativeEntityManagerFactory() instanceof SessionFactory).isTrue();
 	}
 
 	@Test
 	public void testCanCastSharedEntityManagerProxyToHibernateEntityManager() {
-		boolean condition1 = sharedEntityManager instanceof org.hibernate.jpa.HibernateEntityManager;
-		assertThat(condition1).isTrue();
-		// as of Hibernate 5.2
-		boolean condition = ((EntityManagerProxy) sharedEntityManager).getTargetEntityManager() instanceof Session;
-		assertThat(condition).isTrue();
+		assertThat(((EntityManagerProxy) sharedEntityManager).getTargetEntityManager() instanceof Session).isTrue();
 	}
 
 	@Test
 	public void testCanUnwrapAopProxy() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		EntityManager proxy = ProxyFactory.getProxy(EntityManager.class, new SingletonTargetSource(em));
-		boolean condition = em instanceof org.hibernate.jpa.HibernateEntityManager;
-		assertThat(condition).isTrue();
-		boolean condition1 = proxy instanceof org.hibernate.jpa.HibernateEntityManager;
-		assertThat(condition1).isFalse();
-		assertThat(proxy.unwrap(org.hibernate.jpa.HibernateEntityManager.class)).isNotNull();
-		assertThat(proxy.unwrap(org.hibernate.jpa.HibernateEntityManager.class)).isSameAs(em);
+		assertThat(proxy.unwrap(Session.class)).isSameAs(em);
 		assertThat(proxy.getDelegate()).isSameAs(em.getDelegate());
 	}
 
