@@ -124,7 +124,7 @@ By default, the following `KeyValues` are created:
 Applications need to configure the `WebHttpHandlerBuilder` with a `MeterRegistry` to enable server instrumentation.
 This can be done on the `WebHttpHandlerBuilder`, as follows:
 
-include::code:HttpHandlerConfiguration[]
+include-code::./HttpHandlerConfiguration[]
 
 It is using the `org.springframework.http.server.reactive.observation.DefaultServerRequestObservationConvention` by default, backed by the `ServerRequestObservationContext`.
 
