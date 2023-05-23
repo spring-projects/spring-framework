@@ -41,3 +41,5 @@ out
 test-output
 atlassian-ide-plugin.xml
 .gradletasknamecache
+
+cached-antora-playbook.yml
