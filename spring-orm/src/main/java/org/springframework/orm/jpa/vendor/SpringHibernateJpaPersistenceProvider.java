@@ -48,6 +48,7 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 	static {
 		if (NativeDetector.inNativeImage()) {
 			System.setProperty(Environment.BYTECODE_PROVIDER, Environment.BYTECODE_PROVIDER_NAME_NONE);
+			System.setProperty(Environment.USE_REFLECTION_OPTIMIZER, Boolean.FALSE.toString());
 		}
 	}
 
