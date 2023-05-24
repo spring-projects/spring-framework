@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  * @author Rob Harrop
  * @author Rod Johnson
  * @author Chris Beams
+ * @author Yanming Zhou
  */
 public class AspectJExpressionPointcutTests {
 
@@ -424,6 +425,19 @@ public class AspectJExpressionPointcutTests {
 		assertThat(ajexp.matches(BeanA.class.getMethod("getAge"), proxy.getClass())).isTrue();
 	}
 
+
+	@Test
+	public void testNotAnnotationOnCglibProxyMethod() throws Exception {
+		String expression = "!@annotation(test.annotation.transaction.Tx)";
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
+		ajexp.setExpression(expression);
+
+		ProxyFactory factory = new ProxyFactory(new BeanA());
+		factory.setProxyTargetClass(true);
+		BeanA proxy = (BeanA) factory.getProxy();
+		assertThat(ajexp.matches(BeanA.class.getMethod("getAge"), proxy.getClass())).isFalse();
+	}
+
 	@Test
 	public void testAnnotationOnDynamicProxyMethod() throws Exception {
 		String expression = "@annotation(test.annotation.transaction.Tx)";
@@ -434,6 +448,18 @@ public class AspectJExpressionPointcutTests {
 		factory.setProxyTargetClass(false);
 		IBeanA proxy = (IBeanA) factory.getProxy();
 		assertThat(ajexp.matches(IBeanA.class.getMethod("getAge"), proxy.getClass())).isTrue();
+	}
+
+	@Test
+	public void testNotAnnotationOnDynamicProxyMethod() throws Exception {
+		String expression = "!@annotation(test.annotation.transaction.Tx)";
+		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
+		ajexp.setExpression(expression);
+
+		ProxyFactory factory = new ProxyFactory(new BeanA());
+		factory.setProxyTargetClass(false);
+		IBeanA proxy = (IBeanA) factory.getProxy();
+		assertThat(ajexp.matches(IBeanA.class.getMethod("getAge"), proxy.getClass())).isFalse();
 	}
 
 	@Test
