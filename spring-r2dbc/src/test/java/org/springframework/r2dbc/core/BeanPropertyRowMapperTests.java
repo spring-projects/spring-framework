@@ -16,28 +16,47 @@
 
 package org.springframework.r2dbc.core;
 
+import io.r2dbc.spi.OutParameters;
+import io.r2dbc.spi.OutParametersMetadata;
+import io.r2dbc.spi.Readable;
 import io.r2dbc.spi.test.MockColumnMetadata;
+import io.r2dbc.spi.test.MockOutParameters;
 import io.r2dbc.spi.test.MockRow;
 import io.r2dbc.spi.test.MockRowMetadata;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mockito;
 
-import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 class BeanPropertyRowMapperTests {
+
+	@Test
+	void mappingUnknownReadableRejected() {
+		final BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
+		assertThatIllegalArgumentException().isThrownBy(() -> mapper.apply(Mockito.mock(Readable.class)))
+				.withMessageStartingWith("Can only map Readable Row or OutParameters, got io.r2dbc.spi.Readable$MockitoMock$");
+	}
+
+	@Test
+	void mappingOutParametersAccepted() {
+		final BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
+		assertThatNoException().isThrownBy(() -> mapper.apply(MockOutParameters.empty()));
+	}
 
 	@Test
 	void mappingRowSimpleObject() {
 		MockRow mockRow = SIMPLE_PERSON_ROW;
 		final BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 
-		Person result = mapper.apply(mockRow, mockRow.getMetadata());
+		Person result = mapper.apply(mockRow);
 
 		assertThat(result.firstName).as("firstName").isEqualTo("John");
 		assertThat(result.lastName).as("lastName").isEqualTo("Doe");
@@ -49,7 +68,7 @@ class BeanPropertyRowMapperTests {
 		MockRow mockRow = SIMPLE_PERSON_ROW;
 		final BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(ExtendedPerson.class);
 
-		ExtendedPerson result = mapper.apply(mockRow, mockRow.getMetadata());
+		ExtendedPerson result = mapper.apply(mockRow);
 
 		assertThat(result.firstName).as("firstName").isEqualTo("John");
 		assertThat(result.lastName).as("lastName").isEqualTo("Doe");
@@ -62,7 +81,7 @@ class BeanPropertyRowMapperTests {
 		MockRow mockRow = EMAIL_PERSON_ROW;
 		final BeanPropertyRowMapper<EmailPerson> mapper = new BeanPropertyRowMapper<>(EmailPerson.class);
 
-		EmailPerson result = mapper.apply(mockRow, mockRow.getMetadata());
+		EmailPerson result = mapper.apply(mockRow);
 
 		assertThat(result.firstName).as("firstName").isEqualTo("John");
 		assertThat(result.lastName).as("lastName").isEqualTo("Doe");
@@ -76,8 +95,8 @@ class BeanPropertyRowMapperTests {
 		final BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(ExtendedPerson.class, true);
 
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-				.isThrownBy(() -> mapper.apply(mockRow, mockRow.getMetadata()))
-				.withMessage("Given row does not contain all properties necessary to populate object of class org.springframework."
+				.isThrownBy(() -> mapper.apply(mockRow))
+				.withMessage("Given readable does not contain all items necessary to populate object of class org.springframework."
 						+ "r2dbc.core.BeanPropertyRowMapperTests$ExtendedPerson: [firstName, lastName, address, age]");
 	}
 
@@ -89,7 +108,7 @@ class BeanPropertyRowMapperTests {
 		final BeanPropertyRowMapper<TypeMismatchExtendedPerson> mapper = new BeanPropertyRowMapper<>(TypeMismatchExtendedPerson.class);
 
 		assertThatExceptionOfType(TypeMismatchException.class)
-				.isThrownBy(() -> mapper.apply(mockRow, mockRow.getMetadata()))
+				.isThrownBy(() -> mapper.apply(mockRow))
 				.withMessage("Failed to convert property value of type 'java.lang.String' to required type "
 						+ "'java.lang.String' for property 'address'; simulating type mismatch for address");
 	}
@@ -110,7 +129,7 @@ class BeanPropertyRowMapperTests {
 		final BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 		mapper.setPrimitivesDefaultedForNullValue(true);
 
-		Person result = mapper.apply(mockRow, mockRow.getMetadata());
+		Person result = mapper.apply(mockRow);
 
 		assertThat(result.getAge()).isZero();
 	}

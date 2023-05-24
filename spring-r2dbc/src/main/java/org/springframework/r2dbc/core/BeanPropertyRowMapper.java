@@ -19,12 +19,16 @@ package org.springframework.r2dbc.core;
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import io.r2dbc.spi.ColumnMetadata;
+import io.r2dbc.spi.OutParameters;
+import io.r2dbc.spi.OutParametersMetadata;
+import io.r2dbc.spi.Readable;
+import io.r2dbc.spi.ReadableMetadata;
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
 import org.apache.commons.logging.Log;
@@ -33,12 +37,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -46,39 +48,44 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Mapping {@code BiFunction} implementation that converts a row into a new instance
- * of the specified mapped target class. The mapped target class must be a
- * top-level class or {@code static} nested class, and it must have a default or
- * no-arg constructor.
+ * Mapping {@code Function} implementation that converts an R2DBC {@code Readable}
+ * (a {@code Row} or {@code OutParameters}) into a new instance of the specified mapped
+ * target class. The mapped target class must be a top-level class or {@code static}
+ * nested class, and it must have a default or no-arg constructor.
  *
- * <p>Column values are mapped based on matching the column name (as obtained from
- * R2DBC meta-data) to public setters in the target class for the corresponding
- * properties. The names are matched either directly or by transforming a name
- * separating the parts with underscores to the same name using "camel" case.
+ * <p>
+ * Readable component values are mapped based on matching the name (as obtained from R2DBC
+ * meta-data) to public setters in the target class for the corresponding properties. The
+ * names are matched either directly or by transforming a name separating the parts with
+ * underscores to the same name using "camel" case.
  *
- * <p>Mapping is provided for properties in the target class for many common types &mdash;
- * for example: String, boolean, Boolean, byte, Byte, short, Short, int, Integer,
- * long, Long, float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
+ * <p>
+ * Mapping is provided for properties in the target class for many common types &mdash;
+ * for example: String, boolean, Boolean, byte, Byte, short, Short, int, Integer, long,
+ * Long, float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
  *
- * <p>To facilitate mapping between columns and properties that don't have matching
- * names, try using column aliases in the SQL statement like
- * {@code "select fname as first_name from customer"}, where {@code first_name}
- * can be mapped to a {@code setFirstName(String)} method in the target class.
+ * <p>
+ * To facilitate mapping between columns and properties that don't have matching names,
+ * try using column aliases in the SQL statement like
+ * {@code "select fname as first_name from customer"}, where {@code first_name} can be
+ * mapped to a {@code setFirstName(String)} method in the target class.
  *
- * <p>For a {@code NULL} value read from the database, an attempt will be made to
- * call the corresponding setter method with {@code null}, but in the case of
- * Java primitives this will result in a {@link TypeMismatchException} by default.
- * To ignore {@code NULL} database values for all primitive properties in the
- * target class, set the {@code primitivesDefaultedForNullValue} flag to
- * {@code true}. See {@link #setPrimitivesDefaultedForNullValue(boolean)} for
- * details.
+ * <p>
+ * For a {@code NULL} value read from the database, an attempt will be made to call the
+ * corresponding setter method with {@code null}, but in the case of Java primitives this
+ * will result in a {@link TypeMismatchException} by default. To ignore {@code NULL}
+ * database values for all primitive properties in the target class, set the
+ * {@code primitivesDefaultedForNullValue} flag to {@code true}. See
+ * {@link #setPrimitivesDefaultedForNullValue(boolean)} for details.
  *
- * <p>If you need to map to a target class which has a <em>data class</em> constructor
- * &mdash; for example, a Java {@code record} or a Kotlin {@code data} class &mdash;
- * use {@link DataClassRowMapper} instead.
+ * <p>
+ * If you need to map to a target class which has a <em>data class</em> constructor
+ * &mdash; for example, a Java {@code record} or a Kotlin {@code data} class &mdash; use
+ * {@link DataClassRowMapper} instead.
  *
- * <p>Please note that this class is designed to provide convenience rather than
- * high performance. For best performance, consider using a custom mapping function
+ * <p>
+ * Please note that this class is designed to provide convenience rather than high
+ * performance. For best performance, consider using a custom mapping function
  * implementation.
  *
  * @author Thomas Risberg
@@ -89,7 +96,7 @@ import org.springframework.util.StringUtils;
  * @param <T> the result type
  * @see DataClassRowMapper
  */
-public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T> {
+public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -123,7 +130,7 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 	/**
 	 * Create a new {@code BeanPropertyRowMapper}, accepting unpopulated
 	 * properties in the target bean.
-	 * @param mappedClass the class that each row should be mapped to
+	 * @param mappedClass the class that each row/outParameters should be mapped to
 	 */
 	public BeanPropertyRowMapper(Class<T> mappedClass) {
 		initialize(mappedClass);
@@ -133,7 +140,8 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 	 * Create a new {@code BeanPropertyRowMapper}.
 	 * @param mappedClass the class that each row should be mapped to
 	 * @param checkFullyPopulated whether we're strictly validating that
-	 * all bean properties have been mapped from corresponding database columns
+	 * all bean properties have been mapped from corresponding database columns or
+	 * out-parameters
 	 */
 	public BeanPropertyRowMapper(Class<T> mappedClass, boolean checkFullyPopulated) {
 		initialize(mappedClass);
@@ -151,7 +159,7 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 
 	/**
 	 * Set whether we're strictly validating that all bean properties have been mapped
-	 * from corresponding database columns.
+	 * from corresponding database columns or out-parameters.
 	 * <p>Default is {@code false}, accepting unpopulated properties in the target bean.
 	 */
 	public void setCheckFullyPopulated(boolean checkFullyPopulated) {
@@ -160,15 +168,15 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 
 	/**
 	 * Return whether we're strictly validating that all bean properties have been
-	 * mapped from corresponding database columns.
+	 * mapped from corresponding database columns or out-parameters.
 	 */
 	public boolean isCheckFullyPopulated() {
 		return this.checkFullyPopulated;
 	}
 
 	/**
-	 * Set whether a {@code NULL} database column value should be ignored when
-	 * mapping to a corresponding primitive property in the target class.
+	 * Set whether a {@code NULL} database column or out-parameter value should
+	 * be ignored when mapping to a corresponding primitive property in the target class.
 	 * <p>Default is {@code false}, throwing an exception when nulls are mapped
 	 * to Java primitives.
 	 * <p>If this flag is set to {@code true} and you use an <em>ignored</em>
@@ -282,29 +290,44 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 		return result.toString();
 	}
 
-
 	/**
-	 * Extract the values for all columns in the current row.
-	 * <p>Utilizes public setters and row meta-data.
+	 * Extract the values for the current {@code Readable} :
+	 * all columns in case of a {@code Row} or all parameters in
+	 * case of an {@code OutParameters}.
+	 * <p>Utilizes public setters and derives meta-data from the
+	 * concrete type.
 	 * @see RowMetadata
+	 * @see OutParametersMetadata
+	 * @throws UnsupportedOperationException in case the concrete type
+	 * is neither {@code Row} nor {@code OutParameters}
 	 */
 	@Override
-	public T apply(Row row, RowMetadata rowMetadata) {
+	public T apply(Readable readable) {
+		if (readable instanceof Row row) {
+			return mapForReadable(row, row.getMetadata().getColumnMetadatas());
+		}
+		if (readable instanceof OutParameters out) {
+			return mapForReadable(out, out.getMetadata().getParameterMetadatas());
+		}
+		throw new IllegalArgumentException("Can only map Readable Row or OutParameters, got " + readable.getClass().getName());
+	}
+
+	private <R extends Readable> T mapForReadable(R readable, List<? extends ReadableMetadata> readableMetadatas) {
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		initBeanWrapper(bw);
 
-		T mappedObject = constructMappedInstance(row, bw);
+		T mappedObject = constructMappedInstance(readable, readableMetadatas, bw);
 		bw.setBeanInstance(mappedObject);
 
 		Set<String> populatedProperties = (isCheckFullyPopulated() ? new HashSet<>() : null);
-		int columnCount = rowMetadata.getColumnMetadatas().size();
-		for(int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
-			ColumnMetadata columnMetadata = rowMetadata.getColumnMetadata(columnIndex);
-			String column = columnMetadata.getName();
-			String property = lowerCaseName(StringUtils.delete(column, " "));
+		int readableItemCount = readableMetadatas.size();
+		for(int itemIndex = 0; itemIndex < readableItemCount; itemIndex++) {
+			ReadableMetadata itemMetadata = readableMetadatas.get(itemIndex);
+			String itemName = itemMetadata.getName();
+			String property = lowerCaseName(StringUtils.delete(itemName, " "));
 			PropertyDescriptor pd = (this.mappedProperties != null ? this.mappedProperties.get(property) : null);
 			if (pd != null) {
-				Object value = getColumnValue(row, columnIndex, pd);
+				Object value = getItemValue(readable, itemIndex, pd);
 				//Implementation note: the JDBC mapper can log the column mapping details each time row 0 is encountered
 				// but unfortunately this is not possible in R2DBC as row number is not provided. The BiFunction#apply
 				// cannot be stateful as it could be applied to a different row set, e.g. when resubscribing.
@@ -317,9 +340,9 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 							String propertyType = ClassUtils.getQualifiedName(pd.getPropertyType());
 							//here too, we miss the rowNumber information
 							logger.debug("""
-										Ignoring intercepted TypeMismatchException for column '%s' \
+										Ignoring intercepted TypeMismatchException for item '%s' \
 										with null value when setting property '%s' of type '%s' on object: %s"
-										""".formatted(column, pd.getName(), propertyType, mappedObject), ex);
+										""".formatted(itemName, pd.getName(), propertyType, mappedObject), ex);
 						}
 					}
 					else {
@@ -333,7 +356,7 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 		}
 
 		if (populatedProperties != null && !populatedProperties.equals(this.mappedPropertyNames)) {
-			throw new InvalidDataAccessApiUsageException("Given row does not contain all properties " +
+			throw new InvalidDataAccessApiUsageException("Given readable does not contain all items " +
 					"necessary to populate object of " + this.mappedClass + ": " + this.mappedPropertyNames);
 		}
 
@@ -341,21 +364,25 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 	}
 
 	/**
-	 * Construct an instance of the mapped class for the current row.
-	 * <p>The default implementation simply instantiates the mapped class.
-	 * Can be overridden in subclasses.
-	 * @param row the {@code Row} being mapped
+	 * Construct an instance of the mapped class for the current {@code Readable}.
+	 * <p>
+	 * The default implementation simply instantiates the mapped class. Can be overridden
+	 * in subclasses.
+	 * @param readable the {@code Readable} being mapped (a {@code Row} or {@code OutParameters})
+	 * @param itemMetadatas the list of item {@code ReadableMetadata} (either
+	 * {@code ColumnMetadata} or {@code OutParameterMetadata})
 	 * @param tc a TypeConverter with this row mapper's conversion service
 	 * @return a corresponding instance of the mapped class
 	 */
-	protected T constructMappedInstance(Row row, TypeConverter tc) {
+	protected T constructMappedInstance(Readable readable, List<? extends ReadableMetadata> itemMetadatas, TypeConverter tc) {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
 		return BeanUtils.instantiateClass(this.mappedClass);
 	}
 
 	/**
-	 * Initialize the given BeanWrapper to be used for row mapping.
-	 * To be called for each row.
+	 * Initialize the given BeanWrapper to be used for row mapping or outParameters
+	 * mapping.
+	 * To be called for each Readable.
 	 * <p>The default implementation applies the configured {@link ConversionService},
 	 * if any. Can be overridden in subclasses.
 	 * @param bw the BeanWrapper to initialize
@@ -370,40 +397,42 @@ public class BeanPropertyRowMapper<T> implements BiFunction<Row, RowMetadata, T>
 	}
 
 	/**
-	 * Retrieve a R2DBC object value for the specified column.
+	 * Retrieve a R2DBC object value for the specified item index (a column or an
+	 * out-parameter).
 	 * <p>The default implementation delegates to
-	 * {@link #getColumnValue(Row, int, Class)}.
-	 * @param row is the {@code Row} holding the data
-	 * @param index is the column index
+	 * {@link #getItemValue(Readable, int, Class)}.
+	 * @param readable is the {@code Row} or {@code OutParameters} holding the data
+	 * @param itemIndex is the column index or out-parameter index
 	 * @param pd the bean property that each result object is expected to match
 	 * @return the Object value
-	 * @see #getColumnValue(Row, int, Class)
+	 * @see #getItemValue(Readable, int, Class)
 	 */
 	@Nullable
-	protected Object getColumnValue(Row row, int index, PropertyDescriptor pd) {
-		return getColumnValue(row, index, pd.getPropertyType());
+	protected Object getItemValue(Readable readable, int itemIndex, PropertyDescriptor pd) {
+		return getItemValue(readable, itemIndex, pd.getPropertyType());
 	}
 
 	/**
-	 * Retrieve a R2DBC object value for the specified column.
-	 * <p>The default implementation calls {@link Row#get(int, Class)} then
-	 * falls back to {@link Row#get(int)} in case of an exception.
+	 * Retrieve a R2DBC object value for the specified item index (a column or
+	 * an out-parameter).
+	 * <p>The default implementation calls {@link Readable#get(int, Class)} then
+	 * falls back to {@link Readable#get(int)} in case of an exception.
 	 * Subclasses may override this to check specific value types upfront,
 	 * or to post-process values return from {@code get}.
-	 * @param row is the {@code Row} holding the data
-	 * @param index is the column index
+	 * @param readable is the {@code Row} or {@code OutParameters} holding the data
+	 * @param itemIndex is the column index or out-parameter index
 	 * @param paramType the target parameter type
 	 * @return the Object value
-	 * @see Row#get(int, Class)
-	 * @see Row#get(int)
+	 * @see Readable#get(int, Class)
+	 * @see Readable#get(int)
 	 */
 	@Nullable
-	protected Object getColumnValue(Row row, int index, Class<?> paramType) {
+	protected Object getItemValue(Readable readable, int itemIndex, Class<?> paramType) {
 		try {
-			return row.get(index, paramType);
+			return readable.get(itemIndex, paramType);
 		}
 		catch (Throwable e) {
-			return row.get(index);
+			return readable.get(itemIndex);
 		}
 	}
 

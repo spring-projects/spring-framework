@@ -17,9 +17,10 @@
 package org.springframework.r2dbc.core;
 
 import java.lang.reflect.Constructor;
+import java.util.List;
 
-import io.r2dbc.spi.ColumnMetadata;
-import io.r2dbc.spi.Row;
+import io.r2dbc.spi.Readable;
+import io.r2dbc.spi.ReadableMetadata;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.TypeConverter;
@@ -31,12 +32,12 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Mapping {@code BiFunction} implementation that converts a row into a new instance of the
- * specified mapped target class. The mapped target class must be a top-level class or
- * {@code static} nested class, and it may expose either a <em>data class</em> constructor
- * with named parameters corresponding to column names or classic bean property setter
- * methods with property names corresponding to column names (or even a combination of
- * both).
+ * Mapping {@code Function} implementation that converts an R2DBC {@code Readable}
+ * (a {@code Row} or {@code OutParameters}) into a new instance of the specified mapped
+ * target class. The mapped target class must be a top-level class or {@code static}
+ * nested class, and it may expose either a <em>data class</em> constructor with named
+ * parameters corresponding to column names or classic bean property setter methods
+ * with property names corresponding to column names (or even a combination of both).
  *
  * <p>
  * The term "data class" applies to Java <em>records</em>, Kotlin <em>data classes</em>,
@@ -56,8 +57,8 @@ import org.springframework.util.Assert;
  *
  * <p>
  * Please note that this class is designed to provide convenience rather than high
- * performance. For best performance, consider using a custom row mapping {@code BiFunction}
- * implementation.
+ * performance. For best performance, consider using a custom readable mapping
+ * {@code Function} implementation.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -105,7 +106,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	}
 
 	@Override
-	protected T constructMappedInstance(Row row, TypeConverter tc) {
+	protected T constructMappedInstance(Readable readable, List<? extends ReadableMetadata> itemMetadatas, TypeConverter tc) {
 		Assert.state(this.mappedConstructor != null, "Mapped constructor was not initialized");
 
 		Object[] args;
@@ -113,15 +114,15 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 			args = new Object[this.constructorParameterNames.length];
 			for (int i = 0; i < args.length; i++) {
 				String name = this.constructorParameterNames[i];
-				int index = findIndex(row, lowerCaseName(name));
+				int index = findIndex(readable, itemMetadatas, lowerCaseName(name));
 				if (index == -1) {
-					index = findIndex(row, underscoreName(name));
+					index = findIndex(readable, itemMetadatas, underscoreName(name));
 				}
 				if (index == -1) {
-					throw new DataRetrievalFailureException("Unable to map constructor parameter '" + name + "' to a column");
+					throw new DataRetrievalFailureException("Unable to map constructor parameter '" + name + "' to a column or out-parameter");
 				}
 				TypeDescriptor td = this.constructorParameterTypes[i];
-				Object value = getColumnValue(row, index, td.getType());
+				Object value = getItemValue(readable, index, td.getType());
 				args[i] = tc.convertIfNecessary(value, td.getType(), td);
 			}
 		}
@@ -132,11 +133,11 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 		return BeanUtils.instantiateClass(this.mappedConstructor, args);
 	}
 
-	private int findIndex(Row row, String name) {
+	private int findIndex(Readable readable, List<? extends ReadableMetadata> itemMetadatas, String name) {
 		int index = 0;
-		for (ColumnMetadata columnMetadata : row.getMetadata().getColumnMetadatas()) {
+		for (ReadableMetadata itemMetadata : itemMetadatas) {
 			//we use equalsIgnoreCase, similarly to RowMetadata#contains(String)
-			if (columnMetadata.getName().equalsIgnoreCase(name)) {
+			if (itemMetadata.getName().equalsIgnoreCase(name)) {
 				return index;
 			}
 			index++;

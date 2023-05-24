@@ -34,7 +34,7 @@ class DataClassRowMapperTests {
 		MockRow mockRow = MOCK_ROW; // uses name, age, birth_date
 		final DataClassRowMapper<ConstructorPerson> mapper = new DataClassRowMapper<>(ConstructorPerson.class);
 
-		ConstructorPerson person = mapper.apply(mockRow, mockRow.getMetadata());
+		ConstructorPerson person = mapper.apply(mockRow);
 
 		assertThat(person.name).as("name").isEqualTo("Bubba");
 		assertThat(person.age).as("age").isEqualTo(22L);
@@ -46,7 +46,7 @@ class DataClassRowMapperTests {
 		MockRow mockRow = buildMockRow("birth_date", true); // uses name, age, birth_date, balance (as list)
 		//TODO validate actual R2DBC Row implementations would return something for balance if asking a List
 		final DataClassRowMapper<ConstructorPersonWithGenerics> mapper = new DataClassRowMapper<>(ConstructorPersonWithGenerics.class);
-		ConstructorPersonWithGenerics person = mapper.apply(mockRow, mockRow.getMetadata());
+		ConstructorPersonWithGenerics person = mapper.apply(mockRow);
 
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
@@ -58,7 +58,7 @@ class DataClassRowMapperTests {
 	void staticQueryWithDataRecord() {
 		MockRow mockRow = MOCK_ROW; // uses name, age, birth_date, balance
 		final DataClassRowMapper<RecordPerson> mapper = new DataClassRowMapper<>(RecordPerson.class);
-		RecordPerson person = mapper.apply(mockRow, mockRow.getMetadata());
+		RecordPerson person = mapper.apply(mockRow);
 
 		assertThat(person.name()).isEqualTo("Bubba");
 		assertThat(person.age()).isEqualTo(22L);
@@ -70,7 +70,7 @@ class DataClassRowMapperTests {
 	void staticQueryWithDataClassAndSetters() {
 		MockRow mockRow = buildMockRow("birthdate", false); // uses name, age, birthdate (no underscore), balance
 		final DataClassRowMapper<ConstructorPersonWithSetters> mapper = new DataClassRowMapper<>(ConstructorPersonWithSetters.class);
-		ConstructorPersonWithSetters person = mapper.apply(mockRow, mockRow.getMetadata());
+		ConstructorPersonWithSetters person = mapper.apply(mockRow);
 
 		assertThat(person.name()).isEqualTo("BUBBA");
 		assertThat(person.age()).isEqualTo(22L);

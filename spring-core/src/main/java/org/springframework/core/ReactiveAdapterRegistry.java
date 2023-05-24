@@ -167,7 +167,6 @@ public class ReactiveAdapterRegistry {
 		return null;
 	}
 
-
 	/**
 	 * Return a shared default {@code ReactiveAdapterRegistry} instance,
 	 * lazily building it once needed.
