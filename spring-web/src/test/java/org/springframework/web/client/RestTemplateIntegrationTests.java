@@ -48,6 +48,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.JettyClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -88,12 +89,12 @@ class RestTemplateIntegrationTests extends AbstractMockWebServerTests {
 	@interface ParameterizedRestTemplateTest {
 	}
 
-	@SuppressWarnings("deprecation")
 	static Stream<Named<ClientHttpRequestFactory>> clientHttpRequestFactories() {
 		return Stream.of(
 			named("JDK", new SimpleClientHttpRequestFactory()),
 			named("HttpComponents", new HttpComponentsClientHttpRequestFactory()),
-			named("OkHttp", new OkHttp3ClientHttpRequestFactory())
+			named("OkHttp", new OkHttp3ClientHttpRequestFactory()),
+			named("Jetty", new JettyClientHttpRequestFactory())
 		);
 	}
 

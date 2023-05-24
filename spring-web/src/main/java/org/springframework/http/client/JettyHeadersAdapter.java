@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client.reactive;
+package org.springframework.http.client;
 
 import java.util.AbstractSet;
 import java.util.Collection;
@@ -28,6 +28,7 @@ import org.eclipse.jetty.http.HttpFields;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
@@ -41,13 +42,20 @@ import org.springframework.util.MultiValueMap;
  * @author Sam Brannen
  * @since 5.3
  */
-class JettyHeadersAdapter implements MultiValueMap<String, String> {
+public final class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpFields headers;
 
 	private static final String IMMUTABLE_HEADER_ERROR = "Immutable headers";
 
-	JettyHeadersAdapter(HttpFields headers) {
+
+	/**
+	 * Creates a new {@code JettyHeadersAdapter} based on the given
+	 * {@code HttpFields} instance.
+	 * @param headers the {@code HttpFields} to base this adapter on
+	 */
+	public JettyHeadersAdapter(HttpFields headers) {
+		Assert.notNull(headers, "Headers must not be null");
 		this.headers = headers;
 	}
 
