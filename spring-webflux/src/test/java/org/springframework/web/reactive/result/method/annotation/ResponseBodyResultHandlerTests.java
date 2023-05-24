@@ -139,9 +139,9 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 	private void testProblemDetailMediaType(MockServerWebExchange exchange, MediaType expectedMediaType) {
-		ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+		MyProblemDetail problemDetail = new MyProblemDetail(HttpStatus.BAD_REQUEST);
 
-		Method method = on(TestRestController.class).returning(ProblemDetail.class).resolveMethod();
+		Method method = on(TestRestController.class).returning(MyProblemDetail.class).resolveMethod();
 		HandlerResult result = getHandlerResult(new TestRestController(), problemDetail, method);
 
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
@@ -196,7 +196,7 @@ public class ResponseBodyResultHandlerTests {
 			return null;
 		}
 
-		public ProblemDetail handleToProblemDetail() {
+		public MyProblemDetail handleToProblemDetail() {
 			return null;
 		}
 
@@ -215,6 +215,15 @@ public class ResponseBodyResultHandlerTests {
 		public String doWork() {
 			return null;
 		}
+	}
+
+
+	private static class MyProblemDetail extends ProblemDetail {
+
+		public MyProblemDetail(HttpStatus status) {
+			super(status.value());
+		}
+
 	}
 
 }
