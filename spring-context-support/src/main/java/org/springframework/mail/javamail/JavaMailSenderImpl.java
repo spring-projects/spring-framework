@@ -200,7 +200,7 @@ public class JavaMailSenderImpl implements JavaMailSender {
 	 * Set the mail server port.
 	 * <p>Default is {@link #DEFAULT_PORT}, letting JavaMail use the default
 	 * SMTP port (25).
-	*/
+	 */
 	public void setPort(int port) {
 		this.port = port;
 	}
