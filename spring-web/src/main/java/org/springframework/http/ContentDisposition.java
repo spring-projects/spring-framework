@@ -807,14 +807,12 @@ public final class ContentDisposition {
 
 		@Override
 		public Builder filename(String filename) {
-			Assert.hasText(filename, "No filename");
 			this.filename = filename;
 			return this;
 		}
 
 		@Override
 		public Builder filename(String filename, Charset charset) {
-			Assert.hasText(filename, "No filename");
 			this.filename = filename;
 			this.charset = charset;
 			return this;
