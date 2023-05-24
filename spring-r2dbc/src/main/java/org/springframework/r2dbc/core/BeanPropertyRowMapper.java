@@ -296,10 +296,10 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	 * case of an {@code OutParameters}.
 	 * <p>Utilizes public setters and derives meta-data from the
 	 * concrete type.
-	 * @see RowMetadata
-	 * @see OutParametersMetadata
 	 * @throws UnsupportedOperationException in case the concrete type
 	 * is neither {@code Row} nor {@code OutParameters}
+	 * @see RowMetadata
+	 * @see OutParametersMetadata
 	 */
 	@Override
 	public T apply(Readable readable) {
@@ -431,7 +431,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 		try {
 			return readable.get(itemIndex, paramType);
 		}
-		catch (Throwable e) {
+		catch (Throwable ex) {
 			return readable.get(itemIndex);
 		}
 	}

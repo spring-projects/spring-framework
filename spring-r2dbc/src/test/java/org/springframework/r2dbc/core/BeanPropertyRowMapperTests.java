@@ -16,8 +16,6 @@
 
 package org.springframework.r2dbc.core;
 
-import io.r2dbc.spi.OutParameters;
-import io.r2dbc.spi.OutParametersMetadata;
 import io.r2dbc.spi.Readable;
 import io.r2dbc.spi.test.MockColumnMetadata;
 import io.r2dbc.spi.test.MockOutParameters;
