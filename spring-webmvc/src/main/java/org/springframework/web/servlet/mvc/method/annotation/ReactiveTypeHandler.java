@@ -80,7 +80,8 @@ class ReactiveTypeHandler {
 
 	@SuppressWarnings("deprecation")
 	private static final List<MediaType> JSON_STREAMING_MEDIA_TYPES =
-			Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON);
+			Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON,
+					MediaType.valueOf("application/*+x-ndjson"));
 
 	private static final boolean isContextPropagationPresent = ClassUtils.isPresent(
 			"io.micrometer.context.ContextSnapshot", ReactiveTypeHandler.class.getClassLoader());
@@ -165,7 +166,7 @@ class ReactiveTypeHandler {
 				for (MediaType streamingType : JSON_STREAMING_MEDIA_TYPES) {
 					if (streamingType.includes(type)) {
 						logExecutorWarning(returnType);
-						ResponseBodyEmitter emitter = getEmitter(streamingType);
+						ResponseBodyEmitter emitter = getEmitter(type);
 						new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 						return emitter;
 					}

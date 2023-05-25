@@ -256,6 +256,32 @@ public class ReactiveTypeHandlerTests {
 	}
 
 	@Test
+	public void writeStreamJsonWithVendorSubtype() throws Exception {
+		this.servletRequest.addHeader("Accept", "application/vnd.myapp.v1+x-ndjson");
+
+		Sinks.Many<Bar> sink = Sinks.many().unicast().onBackpressureBuffer();
+		ResponseBodyEmitter emitter = handleValue(sink.asFlux(), Flux.class, forClass(Bar.class));
+
+		assertThat(emitter).as("emitter").isNotNull();
+
+		EmitterHandler emitterHandler = new EmitterHandler();
+		emitter.initialize(emitterHandler);
+
+		ServletServerHttpResponse message = new ServletServerHttpResponse(this.servletResponse);
+		emitter.extendResponse(message);
+
+		Bar bar1 = new Bar("foo");
+		Bar bar2 = new Bar("bar");
+
+		sink.tryEmitNext(bar1);
+		sink.tryEmitNext(bar2);
+		sink.tryEmitComplete();
+
+		assertThat(message.getHeaders().getContentType().toString()).isEqualTo("application/vnd.myapp.v1+x-ndjson");
+		assertThat(emitterHandler.getValues()).isEqualTo(Arrays.asList(bar1, "\n", bar2, "\n"));
+	}
+
+	@Test
 	public void writeText() throws Exception {
 
 		Sinks.Many<String> sink = Sinks.many().unicast().onBackpressureBuffer();
