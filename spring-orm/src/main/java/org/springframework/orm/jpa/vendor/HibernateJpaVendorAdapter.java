@@ -163,6 +163,9 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 					PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
 		}
 
+		// For SpringBeanContainer to be called on Hibernate 6.2
+		jpaProperties.put("hibernate.cdi.extensions", "true");
+
 		return jpaProperties;
 	}
 
