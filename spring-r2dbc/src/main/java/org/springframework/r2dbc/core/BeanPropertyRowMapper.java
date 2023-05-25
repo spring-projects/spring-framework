@@ -88,14 +88,12 @@ import org.springframework.util.StringUtils;
  * performance. For best performance, consider using a custom mapping function
  * implementation.
  *
- * @author Thomas Risberg
- * @author Juergen Hoeller
- * @author Sam Brannen
  * @author Simon Baslé
  * @since 6.1
  * @param <T> the result type
  * @see DataClassRowMapper
  */
+// Note: this class is adapted from the BeanPropertyRowMapper in spring-jdbc
 public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 
 	/** Logger available to subclasses. */

@@ -60,12 +60,11 @@ import org.springframework.util.Assert;
  * performance. For best performance, consider using a custom readable mapping
  * {@code Function} implementation.
  *
- * @author Juergen Hoeller
- * @author Sam Brannen
  * @author Simon Baslé
  * @since 6.1
  * @param <T> the result type
  */
+// Note: this class is adapted from the DataClassRowMapper in spring-jdbc
 public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 
 	@Nullable
