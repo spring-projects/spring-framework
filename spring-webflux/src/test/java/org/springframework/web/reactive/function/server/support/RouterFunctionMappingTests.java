@@ -23,7 +23,6 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
-import org.springframework.web.filter.reactive.ServerHttpObservationFilter;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -136,7 +135,7 @@ class RouterFunctionMappingTests {
 		PathPattern matchingPattern = exchange.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
 		assertThat(matchingPattern).isNotNull();
 		assertThat(matchingPattern.getPatternString()).isEqualTo("/match");
-		assertThat(ServerHttpObservationFilter.findObservationContext(exchange))
+		assertThat(org.springframework.web.filter.reactive.ServerHttpObservationFilter.findObservationContext(exchange))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
 		assertThat(ServerRequestObservationContext.findCurrent(exchange))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
@@ -152,7 +151,7 @@ class RouterFunctionMappingTests {
 	private ServerWebExchange createExchange(String urlTemplate) {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(urlTemplate));
 		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
-		exchange.getAttributes().put(ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		exchange.getAttributes().put(org.springframework.web.filter.reactive.ServerHttpObservationFilter.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		exchange.getAttributes().put(ServerRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 		return exchange;
 	}

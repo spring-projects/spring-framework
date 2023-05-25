@@ -31,7 +31,6 @@ import org.springframework.http.server.reactive.observation.ServerRequestObserva
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.reactive.ServerHttpObservationFilter;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.pattern.PathPattern;
 
@@ -168,7 +167,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 		exchange.getAttributes().put(BEST_MATCHING_HANDLER_ATTRIBUTE, handler);
 		exchange.getAttributes().put(BEST_MATCHING_PATTERN_ATTRIBUTE, pattern);
-		ServerHttpObservationFilter.findObservationContext(exchange)
+		org.springframework.web.filter.reactive.ServerHttpObservationFilter
+				.findObservationContext(exchange)
 				.ifPresent(context -> context.setPathPattern(pattern.toString()));
 		ServerRequestObservationContext.findCurrent(exchange)
 				.ifPresent(context -> context.setPathPattern(pattern.toString()));

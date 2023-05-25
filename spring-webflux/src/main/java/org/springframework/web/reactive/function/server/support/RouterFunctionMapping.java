@@ -29,7 +29,6 @@ import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.server.reactive.observation.ServerRequestObservationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.filter.reactive.ServerHttpObservationFilter;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -172,7 +171,8 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 		PathPattern matchingPattern = (PathPattern) attributes.get(RouterFunctions.MATCHING_PATTERN_ATTRIBUTE);
 		if (matchingPattern != null) {
 			attributes.put(BEST_MATCHING_PATTERN_ATTRIBUTE, matchingPattern);
-			ServerHttpObservationFilter.findObservationContext(serverRequest.exchange())
+			org.springframework.web.filter.reactive.ServerHttpObservationFilter
+					.findObservationContext(serverRequest.exchange())
 					.ifPresent(context -> context.setPathPattern(matchingPattern.toString()));
 			ServerRequestObservationContext.findCurrent(serverRequest.exchange())
 					.ifPresent(context -> context.setPathPattern(matchingPattern.toString()));
