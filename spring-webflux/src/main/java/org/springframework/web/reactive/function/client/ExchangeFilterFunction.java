@@ -37,7 +37,7 @@ public interface ExchangeFilterFunction {
 	 * Apply this filter to the given request and exchange function.
 	 * <p>The given {@linkplain ExchangeFunction} represents the next entity
 	 * in the chain, to be invoked via
-	 * {@linkplain ExchangeFunction#exchange(ClientRequest) invoked} in order to
+	 * {@linkplain ExchangeFunction#exchange(ClientRequest) exchange} in order to
 	 * proceed with the exchange, or not invoked to shortcut the chain.
 	 *
 	 * <p><strong>Note:</strong> When a filter handles the response after the
