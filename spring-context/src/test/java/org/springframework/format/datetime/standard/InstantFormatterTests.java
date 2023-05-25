@@ -140,7 +140,7 @@ class InstantFormatterTests {
 
 		@Override
 		public Stream<Arguments> provideArguments(ExtensionContext context) {
-			return random.longs(DATA_SET_SIZE, Instant.ofEpochMilli(Long.MIN_VALUE).toEpochMilli(), Instant.ofEpochMilli(Long.MAX_VALUE).toEpochMilli())
+			return random.longs(DATA_SET_SIZE, Long.MIN_VALUE, Long.MAX_VALUE)
 					.mapToObj(Instant::ofEpochMilli)
 					.map(instant -> instant.truncatedTo(ChronoUnit.MILLIS))
 					.map(Arguments::of);
