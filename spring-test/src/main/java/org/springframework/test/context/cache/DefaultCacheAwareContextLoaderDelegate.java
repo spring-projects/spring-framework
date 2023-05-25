@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -35,7 +36,6 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.aot.AotContextLoader;
 import org.springframework.test.context.aot.AotTestContextInitializers;
-import org.springframework.test.context.aot.TestAotDetector;
 import org.springframework.test.context.aot.TestContextAotException;
 import org.springframework.test.context.util.TestContextSpringFactoriesUtils;
 import org.springframework.util.Assert;
@@ -248,7 +248,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 */
 	@SuppressWarnings("unchecked")
 	private MergedContextConfiguration replaceIfNecessary(MergedContextConfiguration mergedConfig) {
-		if (TestAotDetector.useGeneratedArtifacts()) {
+		if (AotDetector.useGeneratedArtifacts()) {
 			Class<?> testClass = mergedConfig.getTestClass();
 			Class<? extends ApplicationContextInitializer<?>> contextInitializerClass =
 					this.aotTestContextInitializers.getContextInitializerClass(testClass);

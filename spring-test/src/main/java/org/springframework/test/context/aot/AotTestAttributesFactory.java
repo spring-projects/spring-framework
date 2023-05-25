@@ -19,6 +19,7 @@ package org.springframework.test.context.aot;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.lang.Nullable;
 
 /**
@@ -39,7 +40,7 @@ final class AotTestAttributesFactory {
 	/**
 	 * Get the underlying attributes map.
 	 * <p>If the map is not already loaded, this method loads the map from the
-	 * generated class when running in {@linkplain TestAotDetector#useGeneratedArtifacts()
+	 * generated class when running in {@linkplain AotDetector#useGeneratedArtifacts()
 	 * AOT execution mode} and otherwise creates a new map for storing attributes
 	 * during the AOT processing phase.
 	 */
@@ -49,7 +50,7 @@ final class AotTestAttributesFactory {
 			synchronized (AotTestAttributesFactory.class) {
 				attrs = attributes;
 				if (attrs == null) {
-					attrs = (TestAotDetector.useGeneratedArtifacts() ? loadAttributesMap() : new ConcurrentHashMap<>());
+					attrs = (AotDetector.useGeneratedArtifacts() ? loadAttributesMap() : new ConcurrentHashMap<>());
 					attributes = attrs;
 				}
 			}

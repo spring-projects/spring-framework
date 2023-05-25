@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedClasses;
@@ -122,7 +123,7 @@ public class TestContextAotGenerator {
 	 * @throws TestContextAotException if an error occurs during AOT processing
 	 */
 	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
-		Assert.state(!TestAotDetector.useGeneratedArtifacts(), "Cannot perform AOT processing during AOT run-time execution");
+		Assert.state(!AotDetector.useGeneratedArtifacts(), "Cannot perform AOT processing during AOT run-time execution");
 		try {
 			resetAotFactories();
 

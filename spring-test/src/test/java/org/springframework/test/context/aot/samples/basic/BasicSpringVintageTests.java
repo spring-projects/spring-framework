@@ -18,6 +18,7 @@ package org.springframework.test.context.aot.samples.basic;
 
 import org.junit.runner.RunWith;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -27,7 +28,6 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.AotTestAttributes;
-import org.springframework.test.context.aot.TestAotDetector;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -78,7 +78,7 @@ public class BasicSpringVintageTests {
 			String booleanKey1 = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active1";
 			String booleanKey2 = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active2";
 			AotTestAttributes aotAttributes = AotTestAttributes.getInstance();
-			if (TestAotDetector.useGeneratedArtifacts()) {
+			if (AotDetector.useGeneratedArtifacts()) {
 				assertThat(aotAttributes.getString(stringKey))
 					.as("AOT String attribute must already be present during AOT run-time execution")
 					.isEqualTo("org.example.Main");
