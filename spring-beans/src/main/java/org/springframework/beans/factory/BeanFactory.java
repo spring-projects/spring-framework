@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,10 @@ public interface BeanFactory {
 	 * <p>Translates aliases back to the corresponding canonical bean name.
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to retrieve
-	 * @return an instance of the bean
+	 * @return an instance of the bean.
+	 * Note that the return value will never be {@code null} but possibly a stub for
+	 * {@code null} returned from a factory method, to be checked via {@code equals(null)}.
+	 * Consider using {@link #getBeanProvider(Class)} for resolving optional dependencies.
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the specified name
 	 * @throws BeansException if the bean could not be obtained
 	 */
@@ -152,7 +155,11 @@ public interface BeanFactory {
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
 	 * @param name the name of the bean to retrieve
 	 * @param requiredType type the bean must match; can be an interface or superclass
-	 * @return an instance of the bean
+	 * @return an instance of the bean.
+	 * Note that the return value will never be {@code null}. In case of a stub for
+	 * {@code null} from a factory method having been resolved for the requested bean, a
+	 * {@code BeanNotOfRequiredTypeException} against the NullBean stub will be raised.
+	 * Consider using {@link #getBeanProvider(Class)} for resolving optional dependencies.
 	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws BeansException if the bean could not be created
