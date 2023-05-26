@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -78,10 +77,7 @@ class ReactiveTypeHandler {
 
 	private static final long STREAMING_TIMEOUT_VALUE = -1;
 
-	@SuppressWarnings("deprecation")
-	private static final List<MediaType> JSON_STREAMING_MEDIA_TYPES =
-			Arrays.asList(MediaType.APPLICATION_NDJSON, MediaType.APPLICATION_STREAM_JSON,
-					MediaType.valueOf("application/*+x-ndjson"));
+	private static final MediaType WILDCARD_SUBTYPE_SUFFIXED_BY_NDJSON = MediaType.valueOf("application/*+x-ndjson");
 
 	private static final boolean isContextPropagationPresent = ClassUtils.isPresent(
 			"io.micrometer.context.ContextSnapshot", ReactiveTypeHandler.class.getClassLoader());
@@ -162,15 +158,12 @@ class ReactiveTypeHandler {
 				new TextEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
 				return emitter;
 			}
-			for (MediaType type : mediaTypes) {
-				for (MediaType streamingType : JSON_STREAMING_MEDIA_TYPES) {
-					if (streamingType.includes(type)) {
-						logExecutorWarning(returnType);
-						ResponseBodyEmitter emitter = getEmitter(type);
-						new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
-						return emitter;
-					}
-				}
+			MediaType streamingResponseType = findConcreteStreamingMediaType(mediaTypes);
+			if (streamingResponseType != null) {
+				logExecutorWarning(returnType);
+				ResponseBodyEmitter emitter = getEmitter(streamingResponseType);
+				new JsonEmitterSubscriber(emitter, this.taskExecutor).connect(adapter, returnValue);
+				return emitter;
 			}
 		}
 
@@ -180,6 +173,45 @@ class ReactiveTypeHandler {
 		WebAsyncUtils.getAsyncManager(request).startDeferredResultProcessing(result, mav);
 
 		return null;
+	}
+
+	/**
+	 * Attempts to find a concrete {@code MediaType} that can be streamed (as json separated
+	 * by newlines in the response body). This method considers two concrete types
+	 * {@code APPLICATION_NDJSON} and {@code APPLICATION_STREAM_JSON}) as well as any
+	 * subtype of application that has the {@code +x-ndjson} suffix. In the later case,
+	 * the media type MUST be concrete for it to be considered.
+	 *
+	 * <p>For example {@code application/vnd.myapp+x-ndjson} is considered a streaming type
+	 * while {@code application/*+x-ndjson} isn't.
+	 * @param acceptedMediaTypes the collection of acceptable media types in the request
+	 * @return the concrete streaming {@code MediaType} if one could be found or {@code null}
+	 * if none could be found
+	 */
+	@SuppressWarnings("deprecation")
+	@Nullable
+	static MediaType findConcreteStreamingMediaType(Collection<MediaType> acceptedMediaTypes) {
+		for (MediaType acceptedType : acceptedMediaTypes) {
+			if (WILDCARD_SUBTYPE_SUFFIXED_BY_NDJSON.includes(acceptedType)) {
+				if (acceptedType.isConcrete()) {
+					return acceptedType;
+				}
+				else {
+					// if not concrete, it must be application/*+x-ndjson: we assume
+					// that the requester is only interested in the ndjson nature of
+					// the underlying representation and can parse any example of that
+					// underlying representation, so we use the ndjson media type.
+					return MediaType.APPLICATION_NDJSON;
+				}
+			}
+			else if (MediaType.APPLICATION_NDJSON.includes(acceptedType)) {
+				return MediaType.APPLICATION_NDJSON;
+			}
+			else if (MediaType.APPLICATION_STREAM_JSON.includes(acceptedType)) {
+				return MediaType.APPLICATION_STREAM_JSON;
+			}
+		}
+		return null; // not a concrete streaming type
 	}
 
 	@SuppressWarnings("unchecked")
