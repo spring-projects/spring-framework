@@ -719,7 +719,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 					if (value != null || this.required) {
 						cachedFieldValue = desc;
 						registerDependentBeans(beanName, autowiredBeanNames);
-						if (autowiredBeanNames.size() == 1) {
+						if (value != null && autowiredBeanNames.size() == 1) {
 							String autowiredBeanName = autowiredBeanNames.iterator().next();
 							if (beanFactory.containsBean(autowiredBeanName) &&
 									beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
@@ -829,7 +829,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 							Class<?>[] paramTypes = method.getParameterTypes();
 							for (int i = 0; i < paramTypes.length; i++) {
 								String autowiredBeanName = it.next();
-								if (beanFactory.containsBean(autowiredBeanName) &&
+								if (arguments[i] != null && beanFactory.containsBean(autowiredBeanName) &&
 										beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
 									cachedMethodArguments[i] = new ShortcutDependencyDescriptor(
 											descriptors[i], autowiredBeanName, paramTypes[i]);
