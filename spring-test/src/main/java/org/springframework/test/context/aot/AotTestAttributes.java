@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.aot;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.lang.Nullable;
 
 /**
@@ -26,7 +27,7 @@ import org.springframework.lang.Nullable;
  * and run-time. At build time, test components can {@linkplain #setAttribute contribute}
  * attributes during the AOT processing phase. At run time, test components can
  * {@linkplain #getString(String) retrieve} attributes that were contributed at
- * build time. If {@link TestAotDetector#useGeneratedArtifacts()} returns {@code true},
+ * build time. If {@link AotDetector#useGeneratedArtifacts()} returns {@code true},
  * run-time mode applies.
  *
  * <p>For example, if a test component computes something at build time that
@@ -43,7 +44,7 @@ import org.springframework.lang.Nullable;
  * &mdash; can choose to contribute an attribute at any point in time. Note that
  * contributing an attribute during standard JVM test execution will not have any
  * adverse side effect since AOT attributes will be ignored in that scenario. In
- * any case, you should use {@link TestAotDetector#useGeneratedArtifacts()} to determine
+ * any case, you should use {@link AotDetector#useGeneratedArtifacts()} to determine
  * if invocations of {@link #setAttribute(String, String)} and
  * {@link #removeAttribute(String)} are permitted.
  *
@@ -70,12 +71,12 @@ public interface AotTestAttributes {
 	 * @param name the unique attribute name
 	 * @param value the associated attribute value
 	 * @throws UnsupportedOperationException if invoked during
-	 * {@linkplain TestAotDetector#useGeneratedArtifacts() AOT run-time execution}
+	 * {@linkplain AotDetector#useGeneratedArtifacts() AOT run-time execution}
 	 * @throws IllegalArgumentException if the provided value is {@code null} or
 	 * if an attempt is made to override an existing attribute
 	 * @see #setAttribute(String, boolean)
 	 * @see #removeAttribute(String)
-	 * @see TestAotDetector#useGeneratedArtifacts()
+	 * @see AotDetector#useGeneratedArtifacts()
 	 */
 	void setAttribute(String name, String value);
 
@@ -87,13 +88,13 @@ public interface AotTestAttributes {
 	 * @param name the unique attribute name
 	 * @param value the associated attribute value
 	 * @throws UnsupportedOperationException if invoked during
-	 * {@linkplain TestAotDetector#useGeneratedArtifacts() AOT run-time execution}
+	 * {@linkplain AotDetector#useGeneratedArtifacts() AOT run-time execution}
 	 * @throws IllegalArgumentException if an attempt is made to override an
 	 * existing attribute
 	 * @see #setAttribute(String, String)
 	 * @see #removeAttribute(String)
 	 * @see Boolean#toString(boolean)
-	 * @see TestAotDetector#useGeneratedArtifacts()
+	 * @see AotDetector#useGeneratedArtifacts()
 	 */
 	default void setAttribute(String name, boolean value) {
 		setAttribute(name, Boolean.toString(value));
@@ -103,8 +104,8 @@ public interface AotTestAttributes {
 	 * Remove the attribute stored under the provided name.
 	 * @param name the unique attribute name
 	 * @throws UnsupportedOperationException if invoked during
-	 * {@linkplain TestAotDetector#useGeneratedArtifacts() AOT run-time execution}
-	 * @see TestAotDetector#useGeneratedArtifacts()
+	 * {@linkplain AotDetector#useGeneratedArtifacts() AOT run-time execution}
+	 * @see AotDetector#useGeneratedArtifacts()
 	 * @see #setAttribute(String, String)
 	 */
 	void removeAttribute(String name);

@@ -19,6 +19,7 @@ package org.springframework.test.context.aot;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
@@ -29,7 +30,7 @@ import org.springframework.lang.Nullable;
  *
  * <p>Intended solely for internal use within the framework.
  *
- * <p>If we are not running in {@linkplain TestAotDetector#useGeneratedArtifacts()
+ * <p>If we are not running in {@linkplain AotDetector#useGeneratedArtifacts()
  * AOT mode} or if a test class is not {@linkplain #isSupportedTestClass(Class)
  * supported} in AOT mode, {@link #getContextInitializer(Class)} and
  * {@link #getContextInitializerClass(Class)} will return {@code null}.

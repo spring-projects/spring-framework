@@ -19,6 +19,7 @@ package org.springframework.test.context.aot.samples.basic;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.Import;
@@ -27,7 +28,6 @@ import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.test.context.aot.TestAotDetector;
 
 /**
  * Emulates {@code ImportsContextCustomizerFactory} from Spring Boot's testing support.
@@ -41,7 +41,7 @@ class ImportsContextCustomizerFactory implements ContextCustomizerFactory {
 	public ContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
-		if (TestAotDetector.useGeneratedArtifacts()) {
+		if (AotDetector.useGeneratedArtifacts()) {
 			return null;
 		}
 		if (testClass.getName().startsWith("org.springframework.test.context.aot.samples") &&

@@ -18,6 +18,7 @@ package org.springframework.test.context.aot;
 
 import java.util.Map;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -60,7 +61,7 @@ class DefaultAotTestAttributes implements AotTestAttributes {
 
 
 	private static void assertNotInAotRuntime() {
-		if (TestAotDetector.useGeneratedArtifacts()) {
+		if (AotDetector.useGeneratedArtifacts()) {
 			throw new UnsupportedOperationException(
 				"AOT attributes cannot be modified during AOT run-time execution");
 		}
