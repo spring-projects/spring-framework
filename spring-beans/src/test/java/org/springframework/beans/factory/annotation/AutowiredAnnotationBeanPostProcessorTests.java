@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,26 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
 		assertThat(bean.getTestBean()).isSameAs(tb);
 		assertThat(bean.getTestBean2()).isSameAs(tb);
+	}
+
+	@Test
+	public void testResourceInjectionWithNullBean() {
+		RootBeanDefinition bd = new RootBeanDefinition(NonPublicResourceInjectionBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		RootBeanDefinition tb = new RootBeanDefinition(NullFactoryMethods.class);
+		tb.setFactoryMethodName("createTestBean");
+		bf.registerBeanDefinition("testBean", tb);
+
+		NonPublicResourceInjectionBean bean = (NonPublicResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean()).isNull();
+		assertThat(bean.getTestBean2()).isNull();
+		assertThat(bean.getTestBean3()).isNull();
+
+		bean = (NonPublicResourceInjectionBean) bf.getBean("annotatedBean");
+		assertThat(bean.getTestBean()).isNull();
+		assertThat(bean.getTestBean2()).isNull();
+		assertThat(bean.getTestBean3()).isNull();
 	}
 
 	@Test
