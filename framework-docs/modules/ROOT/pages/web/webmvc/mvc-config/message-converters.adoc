@@ -3,11 +3,18 @@
 
 [.small]#xref:web/webflux/config.adoc#webflux-config-message-codecs[See equivalent in the Reactive stack]#
 
-You can customize `HttpMessageConverter` in Java configuration by overriding
-{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`]
-(to replace the default converters created by Spring MVC) or by overriding
-{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`]
-(to customize the default converters or add additional converters to the default ones).
+You can set the `HttpMessageConverter` instances to use in Java configuration,
+replacing the ones used by default, by overriding
+{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`].
+You can also customize the list of configured message converters at the end by overriding
+{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurer.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`].
+
+TIP: In a Spring Boot application, the `WebMvcAutoConfiguration` adds any
+`HttpMessageConverter` beans it detects, in addition to default converters. Hence, in a
+Boot application, prefer to use the
+https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-config/message-converters.html[HttpMessageConverters]
+mechanism. Or alternatively, use `extendMessageConverters` to modify message converters
+at the end.
 
 The following example adds XML and Jackson JSON converters with a customized
 `ObjectMapper` instead of the default ones:
