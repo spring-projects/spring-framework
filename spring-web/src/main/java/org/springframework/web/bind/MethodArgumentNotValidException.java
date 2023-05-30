@@ -75,7 +75,9 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	 * @param executable the executable that failed validation
 	 * @param bindingResult the results of the validation
 	 * @since 6.0.5
+	 * @deprecated in favor of {@link #MethodArgumentNotValidException(MethodParameter, BindingResult)}
 	 */
+	@Deprecated(since = "6.0.10", forRemoval = true)
 	public MethodArgumentNotValidException(Executable executable, BindingResult bindingResult) {
 		super(bindingResult);
 		this.parameter = null;
