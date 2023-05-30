@@ -16,7 +16,6 @@
 
 package org.springframework.web.bind;
 
-import java.lang.reflect.Executable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,11 +48,7 @@ import org.springframework.web.ErrorResponse;
 @SuppressWarnings("serial")
 public class MethodArgumentNotValidException extends BindException implements ErrorResponse {
 
-	@Nullable
 	private final MethodParameter parameter;
-
-	@Nullable
-	private final Executable executable;
 
 	private final ProblemDetail body;
 
@@ -66,22 +61,6 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	public MethodArgumentNotValidException(MethodParameter parameter, BindingResult bindingResult) {
 		super(bindingResult);
 		this.parameter = parameter;
-		this.executable = null;
-		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), "Invalid request content.");
-	}
-
-	/**
-	 * Constructor for {@link MethodArgumentNotValidException}.
-	 * @param executable the executable that failed validation
-	 * @param bindingResult the results of the validation
-	 * @since 6.0.5
-	 * @deprecated in favor of {@link #MethodArgumentNotValidException(MethodParameter, BindingResult)}
-	 */
-	@Deprecated(since = "6.0.10", forRemoval = true)
-	public MethodArgumentNotValidException(Executable executable, BindingResult bindingResult) {
-		super(bindingResult);
-		this.parameter = null;
-		this.executable = executable;
 		this.body = ProblemDetail.forStatusAndDetail(getStatusCode(), "Invalid request content.");
 	}
 
@@ -105,16 +84,9 @@ public class MethodArgumentNotValidException extends BindException implements Er
 
 	@Override
 	public String getMessage() {
-		StringBuilder sb = new StringBuilder("Validation failed ");
-		if (this.parameter != null) {
-			sb.append("for argument [")
-					.append(this.parameter.getParameterIndex()).append("] in ")
-					.append(this.parameter.getExecutable().toGenericString());
-		}
-		else {
-			sb.append("in ")
-					.append(this.executable.toGenericString());
-		}
+		StringBuilder sb = new StringBuilder("Validation failed for argument [")
+				.append(this.parameter.getParameterIndex()).append("] in ")
+				.append(this.parameter.getExecutable().toGenericString());
 		BindingResult bindingResult = getBindingResult();
 		if (bindingResult.getErrorCount() > 1) {
 			sb.append(" with ").append(bindingResult.getErrorCount()).append(" errors");
