@@ -389,14 +389,15 @@ public final class HttpRequestValues {
 			Map<String, String> uriVars = (this.uriVars != null ? new HashMap<>(this.uriVars) : Collections.emptyMap());
 
 			Object bodyValue = this.bodyValue;
+			if (this.multipartBuilder != null) {
+				Assert.isTrue(bodyValue == null && this.body == null, "Expected body or request parts, not both");
+				bodyValue = this.multipartBuilder.build();
+			}
 
 			if (!CollectionUtils.isEmpty(this.requestParams)) {
-
-				boolean isFormData = (this.headers != null &&
-						MediaType.APPLICATION_FORM_URLENCODED.equals(this.headers.getContentType()));
-
-				if (isFormData) {
-					Assert.isTrue(bodyValue == null && this.body == null, "Expected body or request params, not both");
+				if (hasContentType(MediaType.APPLICATION_FORM_URLENCODED)) {
+					Assert.isTrue(this.multipartBuilder == null, "Cannot add parts to form data request");
+					Assert.isTrue(bodyValue == null && this.body == null, "Cannot set body of form data request");
 					bodyValue = new LinkedMultiValueMap<>(this.requestParams);
 				}
 				else if (uri != null) {
@@ -411,10 +412,6 @@ public final class HttpRequestValues {
 					uriVars = (uriVars.isEmpty() ? new HashMap<>() : uriVars);
 					uriTemplate = appendQueryParams(uriTemplate, uriVars, this.requestParams);
 				}
-			}
-			else if (this.multipartBuilder != null) {
-				Assert.isTrue(bodyValue == null && this.body == null, "Expected body or request parts, not both");
-				bodyValue = this.multipartBuilder.build();
 			}
 
 			HttpHeaders headers = HttpHeaders.EMPTY;
@@ -432,6 +429,10 @@ public final class HttpRequestValues {
 			return new HttpRequestValues(
 					this.httpMethod, uri, uriTemplate, uriVars, headers, cookies, attributes,
 					bodyValue, this.body, this.bodyElementType);
+		}
+
+		private boolean hasContentType(MediaType mediaType) {
+			return (this.headers != null && mediaType.equals(this.headers.getContentType()));
 		}
 
 		private String appendQueryParams(

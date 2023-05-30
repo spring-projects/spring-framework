@@ -131,4 +131,24 @@ class HttpRequestValuesTests {
 		assertThat(map.getFirst("entity")).isEqualTo(entity);
 	}
 
+	@Test
+	void requestPartAndRequestParam() {
+
+		HttpRequestValues requestValues = HttpRequestValues.builder()
+				.setUriTemplate("/path")
+				.addRequestPart("form field", "form value")
+				.addRequestParameter("query param", "query value")
+				.build();
+
+		String uriTemplate = requestValues.getUriTemplate();
+		assertThat(uriTemplate).isNotNull();
+
+		assertThat(uriTemplate).isEqualTo("/path?{queryParam0}={queryParam0[0]}");
+
+		@SuppressWarnings("unchecked")
+		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) requestValues.getBodyValue();
+		assertThat(map).hasSize(1);
+		assertThat(map.getFirst("form field").getBody()).isEqualTo("form value");
+	}
+
 }
