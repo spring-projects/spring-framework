@@ -175,7 +175,7 @@ public abstract class AbstractMessageWriterResultHandler extends HandlerResultHa
 		}
 
 		// For ProblemDetail, fall back on RFC 7807 format
-		if (bestMediaType == null && elementType.toClass().equals(ProblemDetail.class)) {
+		if (bestMediaType == null && ProblemDetail.class.isAssignableFrom(elementType.toClass())) {
 			bestMediaType = selectMediaType(exchange, () -> getMediaTypesFor(elementType), this.problemMediaTypes);
 		}
 
