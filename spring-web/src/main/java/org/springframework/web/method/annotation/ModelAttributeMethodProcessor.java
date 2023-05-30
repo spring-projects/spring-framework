@@ -233,6 +233,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * after constructor resolution.
 	 * @param ctor the constructor to use
 	 * @param attributeName the name of the attribute (never {@code null})
+	 * @param parameter the method parameter declaration
 	 * @param binderFactory for creating WebDataBinder instance
 	 * @param webRequest the current request
 	 * @return the created model attribute (never {@code null})
