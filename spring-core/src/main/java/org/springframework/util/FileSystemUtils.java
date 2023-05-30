@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,10 @@ public abstract class FileSystemUtils {
 	}
 
 	/**
-	 * Delete the supplied {@link File} &mdash; for directories,
+	 * Delete the supplied {@link Path} &mdash; for directories,
 	 * recursively delete any nested directories or files as well.
-	 * @param root the root {@code File} to delete
-	 * @return {@code true} if the {@code File} existed and was deleted,
+	 * @param root the root {@code Path} to delete
+	 * @return {@code true} if the {@code Path} existed and was deleted,
 	 * or {@code false} if it did not exist
 	 * @throws IOException in the case of I/O errors
 	 * @since 5.0
