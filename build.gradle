@@ -26,7 +26,6 @@ configure(allprojects) { project ->
 				includeGroup 'io.projectreactor.netty'
 			}
 		}
-		maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		if (version.contains('-')) {
 			maven { url "https://repo.spring.io/milestone" }
 		}
