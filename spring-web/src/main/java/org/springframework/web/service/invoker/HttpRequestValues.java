@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -400,12 +400,14 @@ public final class HttpRequestValues {
 					bodyValue = new LinkedMultiValueMap<>(this.requestParams);
 				}
 				else if (uri != null) {
+					// insert into prepared URI
 					uri = UriComponentsBuilder.fromUri(uri)
 							.queryParams(UriUtils.encodeQueryParams(this.requestParams))
 							.build(true)
 							.toUri();
 				}
 				else {
+					// append to URI template
 					uriVars = (uriVars.isEmpty() ? new HashMap<>() : uriVars);
 					uriTemplate = appendQueryParams(uriTemplate, uriVars, this.requestParams);
 				}
