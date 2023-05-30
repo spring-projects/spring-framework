@@ -341,7 +341,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				BindingResult result = binder.getBindingResult();
 				ObjectError error = new ObjectError(ctor.getName(), cause.getMessage());
 				result.addError(error);
-				throw new MethodArgumentNotValidException(ctor, result);
+				throw new MethodArgumentNotValidException(parameter, result);
 			}
 			else {
 				throw ex;
