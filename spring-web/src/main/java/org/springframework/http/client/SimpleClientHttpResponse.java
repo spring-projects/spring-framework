@@ -56,12 +56,6 @@ final class SimpleClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
-	@Deprecated
-	public int getRawStatusCode() throws IOException {
-		return this.connection.getResponseCode();
-	}
-
-	@Override
 	public String getStatusText() throws IOException {
 		String result = this.connection.getResponseMessage();
 		return (result != null) ? result : "";

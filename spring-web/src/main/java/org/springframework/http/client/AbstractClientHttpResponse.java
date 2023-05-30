@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ import org.springframework.http.HttpStatusCode;
  * @since 3.1.1
  * @deprecated as of 6.0, with no direct replacement
  */
-@Deprecated(since = "6.0")
+@Deprecated(since = "6.0", forRemoval = true)
 public abstract class AbstractClientHttpResponse implements ClientHttpResponse {
 
 	@Override
+	@SuppressWarnings("removal")
 	public HttpStatusCode getStatusCode() throws IOException {
 		return HttpStatusCode.valueOf(getRawStatusCode());
 	}

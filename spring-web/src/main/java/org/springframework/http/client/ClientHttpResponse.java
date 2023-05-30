@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,10 @@ public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 	 * @see #getStatusCode()
 	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
 	 */
-	@Deprecated(since = "6.0")
-	int getRawStatusCode() throws IOException;
+	@Deprecated(since = "6.0", forRemoval = true)
+	default int getRawStatusCode() throws IOException {
+		return getStatusCode().value();
+	}
 
 	/**
 	 * Get the HTTP status text of the response.
