@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
 /**
- * Represent predefined {@linkplain Member members} groups.
+ * Predefined {@link Member} categories.
  *
  * @author Andy Clement
  * @author Sebastien Deleuze
@@ -39,14 +39,14 @@ public enum MemberCategory {
 
 	/**
 	 * A category that represents {@linkplain Class#getDeclaredFields() declared
-	 * fields}, that is all fields defined by the class, but not inherited ones.
+	 * fields}: all fields defined by the class but not inherited fields.
 	 * @see Class#getDeclaredFields()
 	 */
 	DECLARED_FIELDS,
 
 	/**
 	 * A category that defines public {@linkplain Constructor constructors} can
-	 * be introspected, but not invoked.
+	 * be introspected but not invoked.
 	 * @see Class#getConstructors()
 	 * @see ExecutableMode#INTROSPECT
 	 */
@@ -54,7 +54,7 @@ public enum MemberCategory {
 
 	/**
 	 * A category that defines {@linkplain Class#getDeclaredConstructors() all
-	 * constructors} can be introspected, but not invoked.
+	 * constructors} can be introspected but not invoked.
 	 * @see Class#getDeclaredConstructors()
 	 * @see ExecutableMode#INTROSPECT
 	 */
@@ -78,7 +78,7 @@ public enum MemberCategory {
 
 	/**
 	 * A category that defines public {@linkplain Method methods}, including
-	 * inherited ones can be introspect, but not invoked.
+	 * inherited ones, can be introspected but not invoked.
 	 * @see Class#getMethods()
 	 * @see ExecutableMode#INTROSPECT
 	 */
@@ -86,7 +86,7 @@ public enum MemberCategory {
 
 	/**
 	 * A category that defines {@linkplain Class#getDeclaredMethods() all
-	 * methods}, excluding inherited ones can be introspected, but not invoked.
+	 * methods}, excluding inherited ones, can be introspected but not invoked.
 	 * @see Class#getDeclaredMethods()
 	 * @see ExecutableMode#INTROSPECT
 	 */
@@ -94,7 +94,7 @@ public enum MemberCategory {
 
 	/**
 	 * A category that defines public {@linkplain Method methods}, including
-	 * inherited ones can be invoked.
+	 * inherited ones, can be invoked.
 	 * @see Class#getMethods()
 	 * @see ExecutableMode#INVOKE
 	 */
@@ -102,7 +102,7 @@ public enum MemberCategory {
 
 	/**
 	 * A category that defines {@linkplain Class#getDeclaredMethods() all
-	 * methods}, excluding inherited ones can be invoked.
+	 * methods}, excluding inherited ones, can be invoked.
 	 * @see Class#getDeclaredMethods()
 	 * @see ExecutableMode#INVOKE
 	 */
@@ -110,16 +110,18 @@ public enum MemberCategory {
 
 	/**
 	 * A category that represents public {@linkplain Class#getClasses() inner
-	 * classes}. Contrary to other categories, this does not register any
-	 * particular reflection for them but rather make sure they are available
+	 * classes}.
+	 * <p>Contrary to other categories, this does not register any particular
+	 * reflection for inner classes but rather makes sure they are available
 	 * via a call to {@link Class#getClasses}.
 	 */
 	PUBLIC_CLASSES,
 
 	/**
 	 * A category that represents all {@linkplain Class#getDeclaredClasses()
-	 * inner classes}. Contrary to other categories, this does not register any
-	 * particular reflection for them but rather make sure they are available
+	 * inner classes}.
+	 * <p>Contrary to other categories, this does not register any particular
+	 * reflection for inner classes but rather makes sure they are available
 	 * via a call to {@link Class#getDeclaredClasses}.
 	 */
 	DECLARED_CLASSES;
