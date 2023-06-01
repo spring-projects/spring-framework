@@ -3,7 +3,7 @@
 
 STOMP over WebSocket support is available in the `spring-messaging` and
 `spring-websocket` modules. Once you have those dependencies, you can expose a STOMP
-endpoints, over WebSocket with xref:web/websocket/fallback.adoc[SockJS Fallback], as the following example shows:
+endpoint over WebSocket with xref:web/websocket/fallback.adoc[SockJS Fallback], as the following example shows:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
@@ -32,7 +32,7 @@ client needs to connect for the WebSocket handshake.
 <2> STOMP messages whose destination header begins with `/app` are routed to
 `@MessageMapping` methods in `@Controller` classes.
 <3> Use the built-in message broker for subscriptions and broadcasting and
-route messages whose destination header begins with `/topic `or `/queue` to the broker.
+route messages whose destination header begins with `/topic` or `/queue` to the broker.
 
 
 The following example shows the XML configuration equivalent of the preceding example:
