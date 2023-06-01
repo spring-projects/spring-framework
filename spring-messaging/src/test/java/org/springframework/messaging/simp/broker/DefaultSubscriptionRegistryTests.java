@@ -254,14 +254,24 @@ class DefaultSubscriptionRegistryTests {
 
 	@Test
 	void registerSubscriptionWithSelector() {
-		String sessionId = "sess01";
-		String subscriptionId = "subs01";
+		String sessionId1 = "sess01";
+		String sessionId2 = "sess02";
+		String sessionId3 = "sess03";
+		String subscriptionId1 = "subs01";
+		String subscriptionId2 = "subs02";
+		String subscriptionId3 = "subs02";
 		String destination = "/foo";
-		String selector = "headers.foo == 'bar'";
+		String selector1 = "headers.foo == 'bar'";
+		String selector2 = "headers.foo == 'enigma'";
 
-		this.registry.registerSubscription(subscribeMessage(sessionId, subscriptionId, destination, selector));
+		// Register subscription with matching selector header
+		this.registry.registerSubscription(subscribeMessage(sessionId1, subscriptionId1, destination, selector1));
+		// Register subscription with non-matching selector header
+		this.registry.registerSubscription(subscribeMessage(sessionId2, subscriptionId2, destination, selector2));
+		// Register subscription without a selector header
+		this.registry.registerSubscription(subscribeMessage(sessionId3, subscriptionId3, destination, null));
 
-		// First, try with selector header
+		// First, try with message WITH selected 'foo' header present
 
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
 		accessor.setDestination(destination);
@@ -269,13 +279,20 @@ class DefaultSubscriptionRegistryTests {
 		Message<?> message = MessageBuilder.createMessage("", accessor.getMessageHeaders());
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message);
-		assertThat(actual).hasSize(1);
-		assertThat(actual.get(sessionId)).containsExactly(subscriptionId);
+		assertThat(actual).hasSize(2);
 
-		// Then without selector header
+		// Subscription #1 has a 'selector' header that DOES match.
+		assertThat(actual.get(sessionId1)).containsExactly(subscriptionId1);
+		// Subscription #2 has a 'selector' header that does NOT match.
+		assertThat(actual.get(sessionId2)).isNull();
+		// Subscription #3 does NOT have a 'selector' header, so it matches anyway.
+		assertThat(actual.get(sessionId3)).containsExactly(subscriptionId3);
+
+		// Then try with message WITHOUT selected 'foo' header present
 
 		actual = this.registry.findSubscriptions(createMessage(destination));
-		assertThat(actual).isEmpty();
+		// Subscription #3 does NOT have a 'selector' header, so it matches anyway.
+		assertThat(actual.get(sessionId3)).containsExactly(subscriptionId3);
 	}
 
 	@Test
