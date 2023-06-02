@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 
 	private ConnectionFactory connectionFactory;
 
+
 	@BeforeEach
 	public void before() {
 		connectionFactory = createConnectionFactory();
@@ -52,8 +53,7 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 	}
 
 	/**
-	 * Creates a {@link ConnectionFactory} to be used in this test.
-	 *
+	 * Create a {@link ConnectionFactory} to be used in this test.
 	 * @return the {@link ConnectionFactory} to be used in this test
 	 */
 	protected abstract ConnectionFactory createConnectionFactory();
@@ -66,10 +66,10 @@ public abstract class AbstractDatabaseClientIntegrationTests {
 	 * <li>name varchar(255), nullable</li>
 	 * <li>manual integer, nullable</li>
 	 * </ul>
-	 *
 	 * @return the CREATE TABLE statement for table {@code legoset} with three columns.
 	 */
 	protected abstract String getCreateTableStatement();
+
 
 	@Test
 	public void executeInsert() {

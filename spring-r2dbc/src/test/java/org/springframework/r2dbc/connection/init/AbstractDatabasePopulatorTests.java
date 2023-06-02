@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,7 @@ abstract class AbstractDatabasePopulatorTests {
 		databasePopulator.setIgnoreFailedDrops(true);
 
 		runPopulator();
-
 		assertUsersDatabaseCreated("Heisenberg");
-	}
-
-	private void runPopulator() {
-		databasePopulator.populate(getConnectionFactory()) //
-				.as(StepVerifier::create) //
-				.verifyComplete();
 	}
 
 	@Test
@@ -62,7 +55,6 @@ abstract class AbstractDatabasePopulatorTests {
 		databasePopulator.addScript(resource("db-test-data-escaped-literal.sql"));
 
 		runPopulator();
-
 		assertUsersDatabaseCreated("'Heisenberg'");
 	}
 
@@ -72,7 +64,6 @@ abstract class AbstractDatabasePopulatorTests {
 		databasePopulator.addScript(resource("db-test-data-mysql-escaped-literal.sql"));
 
 		runPopulator();
-
 		assertUsersDatabaseCreated("\\$Heisenberg\\$");
 	}
 
@@ -82,7 +73,6 @@ abstract class AbstractDatabasePopulatorTests {
 		databasePopulator.addScript(resource("db-test-data-multiple.sql"));
 
 		runPopulator();
-
 		assertUsersDatabaseCreated("Heisenberg", "Jesse");
 	}
 
@@ -93,9 +83,35 @@ abstract class AbstractDatabasePopulatorTests {
 		databasePopulator.setSeparator("@@");
 
 		runPopulator();
-
 		assertUsersDatabaseCreated("Heisenberg", "Jesse");
 	}
+
+
+	private void runPopulator() {
+		databasePopulator.populate(getConnectionFactory()) //
+				.as(StepVerifier::create) //
+				.verifyComplete();
+	}
+
+	void assertUsersDatabaseCreated(String... lastNames) {
+		assertUsersDatabaseCreated(getConnectionFactory(), lastNames);
+	}
+
+	void assertUsersDatabaseCreated(ConnectionFactory connectionFactory,String... lastNames) {
+		DatabaseClient client = DatabaseClient.create(connectionFactory);
+
+		for (String lastName : lastNames) {
+			client.sql("select count(0) from users where last_name = :name") //
+					.bind("name", lastName) //
+					.map((row, metadata) -> row.get(0)) //
+					.first() //
+					.map(number -> ((Number) number).intValue()) //
+					.as(StepVerifier::create) //
+					.expectNext(1).as("Did not find user with last name [" + lastName + "].") //
+					.verifyComplete();
+		}
+	}
+
 
 	abstract ConnectionFactory getConnectionFactory();
 
@@ -109,27 +125,6 @@ abstract class AbstractDatabasePopulatorTests {
 
 	Resource usersSchema() {
 		return resource("users-schema.sql");
-	}
-
-	void assertUsersDatabaseCreated(String... lastNames) {
-		assertUsersDatabaseCreated(getConnectionFactory(), lastNames);
-	}
-
-	void assertUsersDatabaseCreated(ConnectionFactory connectionFactory,
-			String... lastNames) {
-
-		DatabaseClient client = DatabaseClient.create(connectionFactory);
-
-		for (String lastName : lastNames) {
-			client.sql("select count(0) from users where last_name = :name") //
-					.bind("name", lastName) //
-					.map((row, metadata) -> row.get(0)) //
-					.first() //
-					.map(number -> ((Number) number).intValue()) //
-					.as(StepVerifier::create) //
-					.expectNext(1).as("Did not find user with last name [" + lastName + "].") //
-					.verifyComplete();
-		}
 	}
 
 }

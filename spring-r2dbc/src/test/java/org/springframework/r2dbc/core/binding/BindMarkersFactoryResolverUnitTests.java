@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ class BindMarkersFactoryResolverUnitTests {
 
 	@Test
 	void shouldReturnBindMarkersFactoryForH2() {
-
 		BindMarkers bindMarkers = BindMarkersFactoryResolver
 				.resolve(new MockConnectionFactory("H2")).create();
 
@@ -42,7 +41,6 @@ class BindMarkersFactoryResolverUnitTests {
 
 	@Test
 	void shouldReturnBindMarkersFactoryForMariaDB() {
-
 		BindMarkers bindMarkers = BindMarkersFactoryResolver
 				.resolve(new MockConnectionFactory("MariaDB")).create();
 
@@ -51,7 +49,6 @@ class BindMarkersFactoryResolverUnitTests {
 
 	@Test
 	void shouldReturnBindMarkersFactoryForMicrosoftSQLServer() {
-
 		BindMarkers bindMarkers = BindMarkersFactoryResolver
 				.resolve(new MockConnectionFactory("Microsoft SQL Server")).create();
 
@@ -60,7 +57,6 @@ class BindMarkersFactoryResolverUnitTests {
 
 	@Test
 	void shouldReturnBindMarkersFactoryForMySQL() {
-
 		BindMarkers bindMarkers = BindMarkersFactoryResolver
 				.resolve(new MockConnectionFactory("MySQL")).create();
 
@@ -69,7 +65,6 @@ class BindMarkersFactoryResolverUnitTests {
 
 	@Test
 	void shouldReturnBindMarkersFactoryForOracle() {
-
 		BindMarkers bindMarkers = BindMarkersFactoryResolver
 				.resolve(new MockConnectionFactory("Oracle Database")).create();
 
@@ -78,12 +73,12 @@ class BindMarkersFactoryResolverUnitTests {
 
 	@Test
 	void shouldReturnBindMarkersFactoryForPostgreSQL() {
-
 		BindMarkers bindMarkers = BindMarkersFactoryResolver
 				.resolve(new MockConnectionFactory("PostgreSQL")).create();
 
 		assertThat(bindMarkers.next().getPlaceholder()).isEqualTo("$1");
 	}
+
 
 	static class MockConnectionFactory implements ConnectionFactory {
 
@@ -102,7 +97,6 @@ class BindMarkersFactoryResolverUnitTests {
 		public ConnectionFactoryMetadata getMetadata() {
 			return () -> driverName;
 		}
-
 	}
 
 }

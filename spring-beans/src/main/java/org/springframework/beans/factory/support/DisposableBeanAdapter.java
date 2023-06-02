@@ -65,8 +65,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	private static final String SHUTDOWN_METHOD_NAME = "shutdown";
 
-	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
+	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
 
 	private final Object bean;
 
@@ -240,7 +240,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		else if (this.destroyMethodNames != null) {
-			for (String destroyMethodName: this.destroyMethodNames) {
+			for (String destroyMethodName : this.destroyMethodNames) {
 				Method destroyMethod = determineDestroyMethod(destroyMethodName);
 				if (destroyMethod != null) {
 					invokeCustomDestroyMethod(
@@ -288,7 +288,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 */
 	private void invokeCustomDestroyMethod(Method destroyMethod) {
 		int paramCount = destroyMethod.getParameterCount();
-		final Object[] args = new Object[paramCount];
+		Object[] args = new Object[paramCount];
 		if (paramCount == 1) {
 			args[0] = Boolean.TRUE;
 		}
