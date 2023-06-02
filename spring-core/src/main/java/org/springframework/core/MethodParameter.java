@@ -20,12 +20,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -93,7 +97,7 @@ public class MethodParameter {
 	private volatile ParameterNameDiscoverer parameterNameDiscoverer;
 
 	@Nullable
-	private volatile String parameterName;
+	volatile String parameterName;
 
 	@Nullable
 	private volatile MethodParameter nestedMethodParameter;
@@ -780,6 +784,7 @@ public class MethodParameter {
 		return new MethodParameter(this);
 	}
 
+
 	/**
 	 * Create a new MethodParameter for the given method or constructor.
 	 * <p>This is a convenience factory method for scenarios where a
@@ -856,6 +861,74 @@ public class MethodParameter {
 		Assert.isTrue(parameterIndex >= -1 && parameterIndex < count,
 				() -> "Parameter index needs to be between -1 and " + (count - 1));
 		return parameterIndex;
+	}
+
+	/**
+	 * Create a new MethodParameter for the given field-aware constructor,
+	 * e.g. on a data class or record type.
+	 * <p>A field-aware method parameter will detect field annotations as well,
+	 * as long as the field name matches the parameter name.
+	 * @param ctor the Constructor to specify a parameter for
+	 * @param parameterIndex the index of the parameter
+	 * @param fieldName the name of the underlying field,
+	 * matching the constructor's parameter name
+	 * @return the corresponding MethodParameter instance
+	 * @since 6.1
+	 */
+	public static MethodParameter forFieldAwareConstructor(Constructor<?> ctor, int parameterIndex, String fieldName) {
+		return new FieldAwareConstructorParameter(ctor, parameterIndex, fieldName);
+	}
+
+
+	/**
+	 * {@link MethodParameter} subclass which detects field annotations as well.
+	 */
+	private static class FieldAwareConstructorParameter extends MethodParameter {
+
+		@Nullable
+		private volatile Annotation[] combinedAnnotations;
+
+		public FieldAwareConstructorParameter(Constructor<?> constructor, int parameterIndex, String fieldName) {
+			super(constructor, parameterIndex);
+			this.parameterName = fieldName;
+		}
+
+		@Override
+		public Annotation[] getParameterAnnotations() {
+			String parameterName = this.parameterName;
+			Assert.state(parameterName != null, "Parameter name not initialized");
+
+			Annotation[] anns = this.combinedAnnotations;
+			if (anns == null) {
+				anns = super.getParameterAnnotations();
+				try {
+					Field field = getDeclaringClass().getDeclaredField(parameterName);
+					Annotation[] fieldAnns = field.getAnnotations();
+					if (fieldAnns.length > 0) {
+						List<Annotation> merged = new ArrayList<>(anns.length + fieldAnns.length);
+						merged.addAll(Arrays.asList(anns));
+						for (Annotation fieldAnn : fieldAnns) {
+							boolean existingType = false;
+							for (Annotation ann : anns) {
+								if (ann.annotationType() == fieldAnn.annotationType()) {
+									existingType = true;
+									break;
+								}
+							}
+							if (!existingType) {
+								merged.add(fieldAnn);
+							}
+						}
+						anns = merged.toArray(new Annotation[0]);
+					}
+				}
+				catch (NoSuchFieldException | SecurityException ex) {
+					// ignore
+				}
+				this.combinedAnnotations = anns;
+			}
+			return anns;
+		}
 	}
 
 

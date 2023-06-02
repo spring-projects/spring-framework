@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
@@ -64,6 +65,8 @@ class ModelAttributeMethodArgumentResolverTests {
 		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 		validator.afterPropertiesSet();
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setPropertyEditorRegistrar(registry ->
+				registry.registerCustomEditor(String.class, "name", new StringTrimmerEditor(true)));
 		initializer.setValidator(validator);
 		this.bindContext = new BindingContext(initializer);
 	}
@@ -268,7 +271,7 @@ class ModelAttributeMethodArgumentResolverTests {
 			throws Exception {
 
 		Object value = createResolver()
-				.resolveArgument(param, this.bindContext, postForm("name=Robert&age=25"))
+				.resolveArgument(param, this.bindContext, postForm("name= Robert&age=25"))
 				.block(Duration.ZERO);
 
 		Pojo pojo = valueExtractor.apply(value);
@@ -377,7 +380,7 @@ class ModelAttributeMethodArgumentResolverTests {
 		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(DataClass.class);
 
 		Object value = createResolver()
-				.resolveArgument(parameter, this.bindContext, postForm("name=Robert&age=25&count=1"))
+				.resolveArgument(parameter, this.bindContext, postForm("name= Robert&age=25&count=1"))
 				.block(Duration.ZERO);
 
 		DataClass dataClass = (DataClass) value;

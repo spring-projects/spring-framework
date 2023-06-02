@@ -250,7 +250,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 					}
 				}
 				value = (value instanceof List<?> list ? list.toArray() : value);
-				MethodParameter methodParam = new MethodParameter(ctor, i);
+				MethodParameter methodParam = MethodParameter.forFieldAwareConstructor(ctor, i, paramName);
 				if (value == null && methodParam.isOptional()) {
 					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
 				}

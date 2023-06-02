@@ -19,9 +19,6 @@ package org.springframework.web.method.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -287,7 +284,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			}
 
 			try {
-				MethodParameter methodParam = new FieldAwareConstructorParameter(ctor, i, paramName);
+				MethodParameter methodParam = MethodParameter.forFieldAwareConstructor(ctor, i, paramName);
 				if (value == null && methodParam.isOptional()) {
 					args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
 				}
@@ -484,63 +481,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		if (returnValue != null) {
 			String name = ModelFactory.getNameForReturnValue(returnValue, returnType);
 			mavContainer.addAttribute(name, returnValue);
-		}
-	}
-
-
-	/**
-	 * {@link MethodParameter} subclass which detects field annotations as well.
-	 * @since 5.1
-	 */
-	private static class FieldAwareConstructorParameter extends MethodParameter {
-
-		private final String parameterName;
-
-		@Nullable
-		private volatile Annotation[] combinedAnnotations;
-
-		public FieldAwareConstructorParameter(Constructor<?> constructor, int parameterIndex, String parameterName) {
-			super(constructor, parameterIndex);
-			this.parameterName = parameterName;
-		}
-
-		@Override
-		public Annotation[] getParameterAnnotations() {
-			Annotation[] anns = this.combinedAnnotations;
-			if (anns == null) {
-				anns = super.getParameterAnnotations();
-				try {
-					Field field = getDeclaringClass().getDeclaredField(this.parameterName);
-					Annotation[] fieldAnns = field.getAnnotations();
-					if (fieldAnns.length > 0) {
-						List<Annotation> merged = new ArrayList<>(anns.length + fieldAnns.length);
-						merged.addAll(Arrays.asList(anns));
-						for (Annotation fieldAnn : fieldAnns) {
-							boolean existingType = false;
-							for (Annotation ann : anns) {
-								if (ann.annotationType() == fieldAnn.annotationType()) {
-									existingType = true;
-									break;
-								}
-							}
-							if (!existingType) {
-								merged.add(fieldAnn);
-							}
-						}
-						anns = merged.toArray(new Annotation[0]);
-					}
-				}
-				catch (NoSuchFieldException | SecurityException ex) {
-					// ignore
-				}
-				this.combinedAnnotations = anns;
-			}
-			return anns;
-		}
-
-		@Override
-		public String getParameterName() {
-			return this.parameterName;
 		}
 	}
 

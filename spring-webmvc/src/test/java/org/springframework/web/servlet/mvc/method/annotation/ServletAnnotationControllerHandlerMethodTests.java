@@ -70,6 +70,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.testfixture.beans.DerivedTestBean;
 import org.springframework.beans.testfixture.beans.GenericBean;
 import org.springframework.beans.testfixture.beans.ITestBean;
@@ -2051,7 +2052,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		initDispatcherServlet(ValidatedDataClassController.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
-		request.addParameter("param1", "value1");
+		request.addParameter("param1", " value1");
 		request.addParameter("param2", "true");
 		request.addParameter("param3", "3");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -2064,7 +2065,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		initDispatcherServlet(ValidatedDataClassController.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
-		request.addParameter("param1", "value1");
+		request.addParameter("param1", " value1");
 		request.addParameter("param2", "true");
 		request.addParameter("optionalParam", "8");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -2077,7 +2078,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		initDispatcherServlet(ValidatedDataClassController.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
-		request.addParameter("param1", "value1");
+		request.addParameter("param1", " value1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("1:value1-null-null");
@@ -2088,7 +2089,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		initDispatcherServlet(ValidatedDataClassController.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
-		request.addParameter("param1", "value1");
+		request.addParameter("param1", " value1");
 		request.addParameter("param2", "x");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
@@ -2104,7 +2105,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		request.addParameter("param3", "0");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertThat(response.getContentAsString()).isEqualTo("1:null-true-0");
+		assertThat(response.getContentAsString()).isEqualTo("1:-true-0");
 	}
 
 	@PathPatternsParameterizedTest
@@ -3990,6 +3991,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
 			binder.setConversionService(new DefaultFormattingConversionService());
+			binder.registerCustomEditor(String.class, "param1", new StringTrimmerEditor(true));
 			LocalValidatorFactoryBean vf = new LocalValidatorFactoryBean();
 			vf.afterPropertiesSet();
 			binder.setValidator(vf);
