@@ -9,6 +9,7 @@ dependencies {
 	optional("org.apache.groovy:groovy-xml")
 	optional("org.jetbrains.kotlin:kotlin-reflect")
 	optional("org.jetbrains.kotlin:kotlin-stdlib")
+	optional("org.reactivestreams:reactive-streams")
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(project(":spring-core-test"))
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
