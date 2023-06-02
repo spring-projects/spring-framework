@@ -65,6 +65,7 @@ class R2dbcTransactionManagerUnitTests {
 
 	private R2dbcTransactionManager tm;
 
+
 	@BeforeEach
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	void before() {
@@ -73,6 +74,7 @@ class R2dbcTransactionManagerUnitTests {
 		when(connectionMock.close()).thenReturn(Mono.empty());
 		tm = new R2dbcTransactionManager(connectionFactoryMock);
 	}
+
 
 	@Test
 	void testSimpleTransaction() {
@@ -445,8 +447,7 @@ class R2dbcTransactionManagerUnitTests {
 	}
 
 
-	private static class TestTransactionSynchronization
-			implements TransactionSynchronization {
+	private static class TestTransactionSynchronization implements TransactionSynchronization {
 
 		private int status;
 
@@ -519,7 +520,6 @@ class R2dbcTransactionManagerUnitTests {
 			this.afterCompletionCalled = true;
 			assertThat(status).isEqualTo(this.status);
 		}
-
 	}
 
 }

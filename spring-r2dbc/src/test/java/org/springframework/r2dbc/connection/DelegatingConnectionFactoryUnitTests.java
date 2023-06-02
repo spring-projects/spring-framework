@@ -40,7 +40,7 @@ class DelegatingConnectionFactoryUnitTests {
 
 
 	@Test
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void shouldDelegateGetConnection() {
 		Mono<Connection> connectionMono = Mono.just(connectionMock);
 		when(delegate.create()).thenReturn((Mono) connectionMono);
@@ -52,6 +52,7 @@ class DelegatingConnectionFactoryUnitTests {
 	void shouldDelegateUnwrapWithoutImplementing() {
 		assertThat(connectionFactory.unwrap()).isSameAs(delegate);
 	}
+
 
 	static class ExampleConnectionFactory extends DelegatingConnectionFactory {
 

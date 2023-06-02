@@ -25,6 +25,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -58,16 +59,18 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	protected final transient Log logger = LogFactory.getLog(getClass());
 
 	/** Name of the target bean we will create on each invocation. */
+	@Nullable
 	private String targetBeanName;
 
 	/** Class of the target. */
+	@Nullable
 	private volatile Class<?> targetClass;
 
 	/**
 	 * BeanFactory that owns this TargetSource. We need to hold onto this
 	 * reference so that we can create new prototype instances as necessary.
 	 */
-	@SuppressWarnings("serial")
+	@Nullable
 	private BeanFactory beanFactory;
 
 
@@ -88,6 +91,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	 * Return the name of the target bean in the factory.
 	 */
 	public String getTargetBeanName() {
+		Assert.state(this.targetBeanName != null, "Target bean name not set");
 		return this.targetBeanName;
 	}
 
@@ -117,11 +121,13 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 	 * Return the owning BeanFactory.
 	 */
 	public BeanFactory getBeanFactory() {
+		Assert.state(this.beanFactory != null, "BeanFactory not set");
 		return this.beanFactory;
 	}
 
 
 	@Override
+	@Nullable
 	public Class<?> getTargetClass() {
 		Class<?> targetClass = this.targetClass;
 		if (targetClass != null) {
@@ -130,7 +136,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 		synchronized (this) {
 			// Full check within synchronization, entering the BeanFactory interaction algorithm only once...
 			targetClass = this.targetClass;
-			if (targetClass == null && this.beanFactory != null) {
+			if (targetClass == null && this.beanFactory != null && this.targetBeanName != null) {
 				// Determine type of the target bean.
 				targetClass = this.beanFactory.getType(this.targetBeanName);
 				if (targetClass == null) {
@@ -184,18 +190,16 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 
 	@Override
 	public int hashCode() {
-		int hashCode = getClass().hashCode();
-		hashCode = 13 * hashCode + ObjectUtils.nullSafeHashCode(this.beanFactory);
-		hashCode = 13 * hashCode + ObjectUtils.nullSafeHashCode(this.targetBeanName);
-		return hashCode;
+		return getClass().hashCode() * 13 + ObjectUtils.nullSafeHashCode(this.targetBeanName);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getSimpleName());
 		sb.append(" for target bean '").append(this.targetBeanName).append('\'');
-		if (this.targetClass != null) {
-			sb.append(" of type [").append(this.targetClass.getName()).append(']');
+		Class<?> targetClass = this.targetClass;
+		if (targetClass != null) {
+			sb.append(" of type [").append(targetClass.getName()).append(']');
 		}
 		return sb.toString();
 	}

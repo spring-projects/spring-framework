@@ -302,7 +302,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 
-	private void bindParameterName(int index, String name) {
+	private void bindParameterName(int index, @Nullable String name) {
 		this.parameterNameBindings[index] = name;
 		this.numberOfRemainingUnboundArguments--;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,12 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	 * is meant to be per thread per instance of the ThreadLocalTargetSource class.
 	 */
 	private final ThreadLocal<Object> targetInThread =
-			new NamedThreadLocal<>("Thread-local instance of bean '" + getTargetBeanName() + "'");
+			new NamedThreadLocal<>("Thread-local instance of bean") {
+				@Override
+				public String toString() {
+					return super.toString() + " '" + getTargetBeanName() + "'";
+				}
+			};
 
 	/**
 	 * Set of managed targets, enabling us to keep track of the targets we've created.

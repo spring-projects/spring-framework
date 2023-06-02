@@ -75,7 +75,7 @@ public class ConnectionFactoryUtilsUnitTests {
 	@Test
 	public void shouldNotTranslateUnknownExceptions() {
 		Exception exception = ConnectionFactoryUtils.convertR2dbcException("", "",
-				new MyTransientExceptions());
+				new MyTransientException());
 		assertThat(exception).isExactlyInstanceOf(UncategorizedR2dbcException.class);
 	}
 
@@ -153,7 +153,7 @@ public class ConnectionFactoryUtilsUnitTests {
 
 
 	@SuppressWarnings("serial")
-	private static class MyTransientExceptions extends R2dbcException {
+	private static class MyTransientException extends R2dbcException {
 	}
 
 }

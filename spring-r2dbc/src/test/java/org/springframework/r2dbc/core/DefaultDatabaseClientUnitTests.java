@@ -77,7 +77,7 @@ class DefaultDatabaseClientUnitTests {
 
 
 	@BeforeEach
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	void before() {
 		ConnectionFactory connectionFactory = mock();
 

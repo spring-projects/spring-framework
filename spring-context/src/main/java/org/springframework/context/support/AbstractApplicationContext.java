@@ -1049,7 +1049,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #close()
 	 * @see #registerShutdownHook()
 	 */
-	@SuppressWarnings("deprecation")
 	protected void doClose() {
 		// Check whether an actual close attempt is necessary...
 		if (this.active.get() && this.closed.compareAndSet(false, true)) {

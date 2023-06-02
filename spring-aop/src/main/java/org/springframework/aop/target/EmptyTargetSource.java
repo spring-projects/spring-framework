@@ -70,6 +70,7 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 	// Instance implementation
 	//---------------------------------------------------------------------
 
+	@Nullable
 	private final Class<?> targetClass;
 
 	private final boolean isStatic;
