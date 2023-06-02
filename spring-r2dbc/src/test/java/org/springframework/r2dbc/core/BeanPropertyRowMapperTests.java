@@ -147,11 +147,12 @@ class BeanPropertyRowMapperTests {
 	}
 
 
-
 	private static class Person {
 
 		String firstName;
+
 		String lastName;
+
 		int age;
 
 		public String getFirstName() {
@@ -179,6 +180,7 @@ class BeanPropertyRowMapperTests {
 		}
 	}
 
+
 	private static class ExtendedPerson extends Person {
 
 		String address;
@@ -192,6 +194,7 @@ class BeanPropertyRowMapperTests {
 		}
 	}
 
+
 	private static class TypeMismatchExtendedPerson extends ExtendedPerson {
 
 		@Override
@@ -199,6 +202,7 @@ class BeanPropertyRowMapperTests {
 			throw new ClassCastException("simulating type mismatch for address");
 		}
 	}
+
 
 	private static class EmailPerson extends Person {
 
@@ -212,6 +216,7 @@ class BeanPropertyRowMapperTests {
 			this.email = email;
 		}
 	}
+
 
 	private static final MockRow SIMPLE_PERSON_ROW = MockRow.builder()
 			.metadata(MockRowMetadata.builder()
@@ -237,10 +242,12 @@ class BeanPropertyRowMapperTests {
 			.identified(3, String.class, "123 Sesame Street")
 			.build();
 
-	private static final MockRow EMAIL_PERSON_ROW = buildRowWithExtraColum("EMail", String.class,
+	private static final MockRow EMAIL_PERSON_ROW = buildRowWithExtraColumn("EMail", String.class,
 			String.class, "mail@example.org");
 
-	private static final MockRow buildRowWithExtraColum(String extraColumnName, Class<?> extraColumnClass, Class<?> identifiedClass, Object value) {
+	private static MockRow buildRowWithExtraColumn(
+			String extraColumnName, Class<?> extraColumnClass, Class<?> identifiedClass, Object value) {
+
 		return MockRow.builder()
 				.metadata(MockRowMetadata.builder()
 						.columnMetadata(MockColumnMetadata.builder().name("firstName").javaType(String.class).build())

@@ -78,6 +78,7 @@ class DataClassRowMapperTests {
 		assertThat(person.balance()).isEqualTo(new BigDecimal("1234.56"));
 	}
 
+
 	static class ConstructorPerson {
 
 		final String name;
@@ -105,6 +106,7 @@ class DataClassRowMapperTests {
 		}
 	}
 
+
 	static class ConstructorPersonWithGenerics extends ConstructorPerson {
 
 		private final List<BigDecimal> balance;
@@ -119,6 +121,7 @@ class DataClassRowMapperTests {
 		}
 	}
 
+
 	static class ConstructorPersonWithSetters {
 
 		private String name;
@@ -129,14 +132,12 @@ class DataClassRowMapperTests {
 
 		private BigDecimal balance;
 
-
 		public ConstructorPersonWithSetters(String name, long age, Date birthDate, BigDecimal balance) {
 			this.name = name.toUpperCase();
 			this.age = age;
 			this.birthDate = birthDate;
 			this.balance = balance;
 		}
-
 
 		public void setName(String name) {
 			this.name = name;
@@ -171,8 +172,10 @@ class DataClassRowMapperTests {
 		}
 	}
 
-	static record RecordPerson(String name, long age, Date birth_date, BigDecimal balance) {
+
+	record RecordPerson(String name, long age, Date birth_date, BigDecimal balance) {
 	}
+
 
 	static MockRow MOCK_ROW = buildMockRow("birth_date", false);
 
