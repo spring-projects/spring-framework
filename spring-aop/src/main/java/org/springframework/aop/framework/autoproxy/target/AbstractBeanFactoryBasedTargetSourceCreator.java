@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Convenient superclass for
@@ -81,6 +82,11 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 		return this.beanFactory;
 	}
 
+	private ConfigurableBeanFactory getConfigurableBeanFactory() {
+		Assert.state(this.beanFactory != null, "BeanFactory not set");
+		return this.beanFactory;
+	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of the TargetSourceCreator interface
@@ -104,7 +110,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 		// We need to override just this bean definition, as it may reference other beans
 		// and we're happy to take the parent's definition for those.
 		// Always use prototype scope if demanded.
-		BeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);
+		BeanDefinition bd = getConfigurableBeanFactory().getMergedBeanDefinition(beanName);
 		GenericBeanDefinition bdCopy = new GenericBeanDefinition(bd);
 		if (isPrototypeBased()) {
 			bdCopy.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -126,7 +132,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	protected DefaultListableBeanFactory getInternalBeanFactoryForBean(String beanName) {
 		synchronized (this.internalBeanFactories) {
 			return this.internalBeanFactories.computeIfAbsent(beanName,
-					name -> buildInternalBeanFactory(this.beanFactory));
+					name -> buildInternalBeanFactory(getConfigurableBeanFactory()));
 		}
 	}
 
