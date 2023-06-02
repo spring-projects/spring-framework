@@ -17,38 +17,28 @@
 package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
-import java.util.Set;
 import java.util.function.Supplier;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import jakarta.validation.executable.ExecutableValidator;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.ProxyMethodInvocation;
-import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.SmartFactoryBean;
-import org.springframework.core.BridgeMethodResolver;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.annotation.Validated;
 
 /**
  * An AOP Alliance {@link MethodInterceptor} implementation that delegates to a
  * JSR-303 provider for performing method-level validation on annotated methods.
  *
- * <p>Applicable methods have JSR-303 constraint annotations on their parameters
- * and/or on their return value (in the latter case specified at the method level,
- * typically as inline annotation).
+ * <p>Applicable methods have {@link jakarta.validation.Constraint} annotations on
+ * their parameters and/or on their return value (in the latter case specified at
+ * the method level, typically as inline annotation).
  *
  * <p>E.g.: {@code public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)}
  *
@@ -65,14 +55,14 @@ import org.springframework.validation.annotation.Validated;
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private final Supplier<Validator> validator;
+	private final MethodValidationDelegate delegate;
 
 
 	/**
 	 * Create a new MethodValidationInterceptor using a default JSR-303 validator underneath.
 	 */
 	public MethodValidationInterceptor() {
-		this.validator = SingletonSupplier.of(() -> Validation.buildDefaultValidatorFactory().getValidator());
+		this.delegate = new MethodValidationDelegate();
 	}
 
 	/**
@@ -80,7 +70,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validatorFactory the JSR-303 ValidatorFactory to use
 	 */
 	public MethodValidationInterceptor(ValidatorFactory validatorFactory) {
-		this.validator = SingletonSupplier.of(validatorFactory::getValidator);
+		this.delegate = new MethodValidationDelegate(validatorFactory);
 	}
 
 	/**
@@ -88,7 +78,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validator the JSR-303 Validator to use
 	 */
 	public MethodValidationInterceptor(Validator validator) {
-		this.validator = () -> validator;
+		this.delegate = new MethodValidationDelegate(validator);
 	}
 
 	/**
@@ -98,7 +88,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @since 6.0
 	 */
 	public MethodValidationInterceptor(Supplier<Validator> validator) {
-		this.validator = validator;
+		this.delegate = new MethodValidationDelegate(validator);
 	}
 
 
@@ -110,42 +100,25 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 			return invocation.proceed();
 		}
 
+		Object target = getTarget(invocation);
+		Method method = invocation.getMethod();
 		Class<?>[] groups = determineValidationGroups(invocation);
+		this.delegate.validateMethodArguments(target, method, invocation.getArguments(), groups);
 
-		// Standard Bean Validation 1.1 API
-		ExecutableValidator execVal = this.validator.get().forExecutables();
-		Method methodToValidate = invocation.getMethod();
-		Set<ConstraintViolation<Object>> result;
+		Object returnValue = invocation.proceed();
 
+		this.delegate.validateMethodReturnValue(target, method, returnValue, groups);
+		return returnValue;
+	}
+
+	private static Object getTarget(MethodInvocation invocation) {
 		Object target = invocation.getThis();
 		if (target == null && invocation instanceof ProxyMethodInvocation methodInvocation) {
 			// Allow validation for AOP proxy without a target
 			target = methodInvocation.getProxy();
 		}
 		Assert.state(target != null, "Target must not be null");
-
-		try {
-			result = execVal.validateParameters(target, methodToValidate, invocation.getArguments(), groups);
-		}
-		catch (IllegalArgumentException ex) {
-			// Probably a generic type mismatch between interface and impl as reported in SPR-12237 / HV-1011
-			// Let's try to find the bridged method on the implementation class...
-			methodToValidate = BridgeMethodResolver.findBridgedMethod(
-					ClassUtils.getMostSpecificMethod(invocation.getMethod(), target.getClass()));
-			result = execVal.validateParameters(target, methodToValidate, invocation.getArguments(), groups);
-		}
-		if (!result.isEmpty()) {
-			throw new ConstraintViolationException(result);
-		}
-
-		Object returnValue = invocation.proceed();
-
-		result = execVal.validateReturnValue(target, methodToValidate, returnValue, groups);
-		if (!result.isEmpty()) {
-			throw new ConstraintViolationException(result);
-		}
-
-		return returnValue;
+		return target;
 	}
 
 	private boolean isFactoryBeanMetadataMethod(Method method) {
@@ -178,25 +151,9 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @return the applicable validation groups as a Class array
 	 */
 	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
-		Validated validatedAnn = AnnotationUtils.findAnnotation(invocation.getMethod(), Validated.class);
-		if (validatedAnn == null) {
-			Object target = invocation.getThis();
-			if (target != null) {
-				validatedAnn = AnnotationUtils.findAnnotation(target.getClass(), Validated.class);
-			}
-			else if (invocation instanceof ProxyMethodInvocation methodInvocation) {
-				Object proxy = methodInvocation.getProxy();
-				if (AopUtils.isAopProxy(proxy)) {
-					for (Class<?> type : AopProxyUtils.proxiedUserInterfaces(proxy)) {
-						validatedAnn = AnnotationUtils.findAnnotation(type, Validated.class);
-						if (validatedAnn != null) {
-							break;
-						}
-					}
-				}
-			}
-		}
-		return (validatedAnn != null ? validatedAnn.value() : new Class<?>[0]);
+		Object target = getTarget(invocation);
+		Method method = invocation.getMethod();
+		return this.delegate.determineValidationGroups(target, method);
 	}
 
 }
