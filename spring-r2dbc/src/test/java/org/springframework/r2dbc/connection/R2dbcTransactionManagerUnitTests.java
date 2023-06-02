@@ -500,28 +500,6 @@ class R2dbcTransactionManagerUnitTests {
 	void testPropagationSupportsAndRequiresNewWithRollback() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
 
-		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
-
-		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
-		operator.execute(tx1 -> {
-					assertThat(tx1.isNewTransaction()).isFalse();
-					DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
-					innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-					TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
-					return inner.execute(tx2 -> {
-						assertThat(tx2.isNewTransaction()).isTrue();
-						tx2.setRollbackOnly();
-						return Mono.empty();
-					});
-				}).as(StepVerifier::create)
-				.verifyComplete();
-
-		verify(connectionMock).rollbackTransaction();
-		verify(connectionMock).close();
-	}
-
-
 	private static class TestTransactionSynchronization implements TransactionSynchronization {
 
 		private int status;
