@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LogFactoryService extends LogFactory {
 
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+
+
+	public LogFactoryService() {
+		System.out.println("Standard Commons Logging discovery in action with spring-jcl: " +
+				"please remove commons-logging.jar from classpath in order to avoid potential conflicts");
+	}
 
 
 	@Override
