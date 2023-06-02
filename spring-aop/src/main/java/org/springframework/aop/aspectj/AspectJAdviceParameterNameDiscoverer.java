@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,14 @@ import org.springframework.util.StringUtils;
  * for an advice method from the pointcut expression, returning, and throwing clauses.
  * If an unambiguous interpretation is not available, it returns {@code null}.
  *
+ * <h3>Algorithm Summary</h3>
+ * <p>If an unambiguous binding can be deduced, then it is.
+ * If the advice requirements cannot possibly be satisfied, then {@code null}
+ * is returned. By setting the {@link #setRaiseExceptions(boolean) raiseExceptions}
+ * property to {@code true}, descriptive exceptions will be thrown instead of
+ * returning {@code null} in the case that the parameter names cannot be discovered.
+ *
+ * <h3>Algorithm Details</h3>
  * <p>This class interprets arguments in the following way:
  * <ol>
  * <li>If the first parameter of the method is of type {@link JoinPoint}
@@ -65,15 +73,15 @@ import org.springframework.util.StringUtils;
  * zero we proceed to the next stage. If {@code a} &gt; 1 then an
  * {@code AmbiguousBindingException} is raised. If {@code a} == 1,
  * and there are no unbound arguments of type {@code Annotation+},
- * then an {@code IllegalArgumentException} is raised. if there is
+ * then an {@code IllegalArgumentException} is raised. If there is
  * exactly one such argument, then the corresponding parameter name is
  * assigned the value from the pointcut expression.</li>
- * <li>If a returningName has been set, and there are no unbound arguments
+ * <li>If a {@code returningName} has been set, and there are no unbound arguments
  * then an {@code IllegalArgumentException} is raised. If there is
  * more than one unbound argument then an
  * {@code AmbiguousBindingException} is raised. If there is exactly
  * one unbound argument then the corresponding parameter name is assigned
- * the value &lt;returningName&gt;.</li>
+ * the value of the {@code returningName}.</li>
  * <li>If there remain unbound arguments, then the pointcut expression is
  * examined once more for {@code this}, {@code target}, and
  * {@code args} pointcut expressions used in the binding form (binding
@@ -99,19 +107,11 @@ import org.springframework.util.StringUtils;
  * <p>The behavior on raising an {@code IllegalArgumentException} or
  * {@code AmbiguousBindingException} is configurable to allow this discoverer
  * to be used as part of a chain-of-responsibility. By default the condition will
- * be logged and the {@code getParameterNames(..)} method will simply return
+ * be logged and the {@link #getParameterNames(Method)} method will simply return
  * {@code null}. If the {@link #setRaiseExceptions(boolean) raiseExceptions}
  * property is set to {@code true}, the conditions will be thrown as
  * {@code IllegalArgumentException} and {@code AmbiguousBindingException},
  * respectively.
- *
- * <p>Was that perfectly clear? ;)
- *
- * <p>Short version: If an unambiguous binding can be deduced, then it is.
- * If the advice requirements cannot possibly be satisfied, then {@code null}
- * is returned. By setting the {@link #setRaiseExceptions(boolean) raiseExceptions}
- * property to {@code true}, descriptive exceptions will be thrown instead of
- * returning {@code null} in the case that the parameter names cannot be discovered.
  *
  * @author Adrian Colyer
  * @author Juergen Hoeller
@@ -158,7 +158,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 	/** The pointcut expression associated with the advice, as a simple String. */
 	@Nullable
-	private String pointcutExpression;
+	private final String pointcutExpression;
 
 	private boolean raiseExceptions;
 
@@ -197,7 +197,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 	/**
 	 * If {@code afterReturning} advice binds the return value, the
-	 * returning variable name must be specified.
+	 * {@code returning} variable name must be specified.
 	 * @param returningName the name of the returning variable
 	 */
 	public void setReturningName(@Nullable String returningName) {
@@ -206,18 +206,17 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 
 	/**
 	 * If {@code afterThrowing} advice binds the thrown value, the
-	 * throwing variable name must be specified.
+	 * {@code throwing} variable name must be specified.
 	 * @param throwingName the name of the throwing variable
 	 */
 	public void setThrowingName(@Nullable String throwingName) {
 		this.throwingName = throwingName;
 	}
 
-
 	/**
 	 * Deduce the parameter names for an advice method.
-	 * <p>See the {@link AspectJAdviceParameterNameDiscoverer class level javadoc}
-	 * for this class for details of the algorithm used.
+	 * <p>See the {@link AspectJAdviceParameterNameDiscoverer class-level javadoc}
+	 * for this class for details on the algorithm used.
 	 * @param method the target {@link Method}
 	 * @return the parameter names
 	 */
@@ -316,13 +315,13 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	}
 
 
-	private void bindParameterName(int index, String name) {
+	private void bindParameterName(int index, @Nullable String name) {
 		this.parameterNameBindings[index] = name;
 		this.numberOfRemainingUnboundArguments--;
 	}
 
 	/**
-	 * If the first parameter is of type JoinPoint or ProceedingJoinPoint,bind "thisJoinPoint" as
+	 * If the first parameter is of type JoinPoint or ProceedingJoinPoint, bind "thisJoinPoint" as
 	 * parameter name and return true, else return false.
 	 */
 	private boolean maybeBindThisJoinPoint() {
@@ -367,8 +366,8 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 
 		if (throwableIndex == -1) {
-			throw new IllegalStateException("Binding of throwing parameter '" + this.throwingName
-					+ "' could not be completed as no available arguments are a subtype of Throwable");
+			throw new IllegalStateException("Binding of throwing parameter '" + this.throwingName +
+					"' could not be completed as no available arguments are a subtype of Throwable");
 		}
 		else {
 			bindParameterName(throwableIndex, this.throwingName);
@@ -399,7 +398,6 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 			}
 		}
 	}
-
 
 	/**
 	 * Parse the string pointcut expression looking for:
@@ -465,7 +463,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		}
 	}
 
-	/*
+	/**
 	 * If the token starts meets Java identifier conventions, it's in.
 	 */
 	@Nullable
@@ -532,7 +530,6 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 				}
 			}
 		}
-
 
 		if (varNames.size() > 1) {
 			throw new AmbiguousBindingException("Found " + varNames.size() +
@@ -609,7 +606,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		// else varNames.size must be 0 and we have nothing to bind.
 	}
 
-	/*
+	/**
 	 * We've found the start of a binding pointcut at the given index into the
 	 * token array. Now we need to extract the pointcut body and return it.
 	 */
@@ -709,7 +706,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		return false;
 	}
 
-	/*
+	/**
 	 * Return {@code true} if the given argument type is a subclass
 	 * of the given supertype.
 	 */
@@ -737,7 +734,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 		return count;
 	}
 
-	/*
+	/**
 	 * Find the argument index with the given type, and bind the given
 	 * {@code varName} in that position.
 	 */
