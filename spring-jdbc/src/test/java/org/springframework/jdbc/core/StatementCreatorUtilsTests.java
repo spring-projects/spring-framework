@@ -21,10 +21,12 @@ import java.sql.DatabaseMetaData;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.GregorianCalendar;
 import java.util.stream.Stream;
@@ -36,6 +38,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Named.named;
+import static org.mockito.BDDMockito.doThrow;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -213,7 +216,6 @@ public class StatementCreatorUtilsTests {
 		verify(preparedStatement).setTimestamp(1, new java.sql.Timestamp(cal.getTime().getTime()), cal);
 	}
 
-
 	@ParameterizedTest
 	@MethodSource("javaTimeTypes")
 	public void testSetParameterValueWithJavaTimeTypes(Object o, int sqlType) throws SQLException {
@@ -240,6 +242,23 @@ public class StatementCreatorUtilsTests {
 				Arguments.of(named("OffsetDateTime", now.atOffset(PLUS_NINE)),
 						named("TIMESTAMP_WITH_TIMEZONE", Types.TIMESTAMP_WITH_TIMEZONE))
 		);
+	}
+
+	@Test  // gh-30556
+	public void testSetParameterValueWithOffsetDateTimeAndNotSupported() throws SQLException {
+		OffsetDateTime time = OffsetDateTime.now();
+		doThrow(new SQLFeatureNotSupportedException()).when(preparedStatement).setObject(1, time, Types.TIMESTAMP_WITH_TIMEZONE);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP_WITH_TIMEZONE, null, time);
+		verify(preparedStatement).setObject(1, time, Types.TIMESTAMP_WITH_TIMEZONE);
+		verify(preparedStatement).setObject(1, time);
+	}
+
+	@Test  // gh-30556
+	public void testSetParameterValueWithNullAndNotSupported() throws SQLException {
+		doThrow(new SQLFeatureNotSupportedException()).when(preparedStatement).setNull(1, Types.TIMESTAMP_WITH_TIMEZONE);
+		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.TIMESTAMP_WITH_TIMEZONE, null, null);
+		verify(preparedStatement).setNull(1, Types.TIMESTAMP_WITH_TIMEZONE);
+		verify(preparedStatement).setNull(1, Types.NULL);
 	}
 
 	@Test  // SPR-8571

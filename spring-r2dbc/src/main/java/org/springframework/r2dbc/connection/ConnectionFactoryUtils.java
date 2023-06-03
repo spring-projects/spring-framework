@@ -87,7 +87,7 @@ public abstract class ConnectionFactoryUtils {
 	 */
 	public static Mono<Connection> getConnection(ConnectionFactory connectionFactory) {
 		return doGetConnection(connectionFactory)
-				.onErrorMap(e -> new DataAccessResourceFailureException("Failed to obtain R2DBC Connection", e));
+				.onErrorMap(ex -> new DataAccessResourceFailureException("Failed to obtain R2DBC Connection", ex));
 	}
 
 	/**
@@ -133,10 +133,10 @@ public abstract class ConnectionFactoryUtils {
 						synchronizationManager.bindResource(connectionFactory, holderToUse);
 					}
 				})      // Unexpected exception from external delegation call -> close Connection and rethrow.
-				.onErrorResume(e -> releaseConnection(connection, connectionFactory).then(Mono.error(e))));
+				.onErrorResume(ex -> releaseConnection(connection, connectionFactory).then(Mono.error(ex))));
 			}
 			return con;
-		}).onErrorResume(NoTransactionException.class, e -> Mono.from(connectionFactory.create()));
+		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connectionFactory.create()));
 	}
 
 	/**
@@ -161,7 +161,7 @@ public abstract class ConnectionFactoryUtils {
 	 */
 	public static Mono<Void> releaseConnection(Connection con, ConnectionFactory connectionFactory) {
 		return doReleaseConnection(con, connectionFactory)
-				.onErrorMap(e -> new DataAccessResourceFailureException("Failed to close R2DBC Connection", e));
+				.onErrorMap(ex -> new DataAccessResourceFailureException("Failed to close R2DBC Connection", ex));
 	}
 
 	/**
@@ -181,7 +181,7 @@ public abstract class ConnectionFactoryUtils {
 				conHolder.released();
 			}
 			return Mono.from(connection.close());
-		}).onErrorResume(NoTransactionException.class, e -> Mono.from(connection.close()));
+		}).onErrorResume(NoTransactionException.class, ex -> Mono.from(connection.close()));
 	}
 
 	/**
