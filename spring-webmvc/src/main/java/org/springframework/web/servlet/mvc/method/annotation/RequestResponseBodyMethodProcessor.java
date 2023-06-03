@@ -156,9 +156,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter parameter,
 			Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
-		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		Assert.state(servletRequest != null, "No HttpServletRequest");
-		ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(servletRequest);
+		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 
 		Object arg = readWithMessageConverters(inputMessage, parameter, paramType);
 		if (arg == null && checkRequired(parameter)) {
