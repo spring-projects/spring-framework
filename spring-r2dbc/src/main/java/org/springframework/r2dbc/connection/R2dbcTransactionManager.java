@@ -210,8 +210,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 				connectionMono = Mono.just(txObject.getConnectionHolder().getConnection());
 			}
 
-			return connectionMono.flatMap(con -> switchAutoCommitIfNecessary(con, transaction)
-					.then(Mono.from(doBegin(definition, con)))
+			return connectionMono.flatMap(con -> Mono.from(doBegin(definition, con))
 					.then(prepareTransactionalConnection(con, definition))
 					.doOnSuccess(v -> {
 						txObject.getConnectionHolder().setTransactionActive(true);
@@ -223,18 +222,15 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 						if (txObject.isNewConnectionHolder()) {
 							synchronizationManager.bindResource(obtainConnectionFactory(), txObject.getConnectionHolder());
 						}
-					}).thenReturn(con).onErrorResume(e -> {
+					}).thenReturn(con).onErrorResume(ex -> {
 						if (txObject.isNewConnectionHolder()) {
 							return ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory())
 									.doOnTerminate(() -> txObject.setConnectionHolder(null, false))
-									.then(Mono.error(e));
+									.then(Mono.error(ex));
 						}
-						return Mono.error(e);
-					})).onErrorResume(e -> {
-						CannotCreateTransactionException ex = new CannotCreateTransactionException(
-								"Could not open R2DBC Connection for transaction", e);
 						return Mono.error(ex);
-					});
+					})).onErrorResume(ex -> Mono.error(new CannotCreateTransactionException(
+							"Could not open R2DBC Connection for transaction", ex)));
 		}).then();
 	}
 
@@ -356,20 +352,18 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 			Mono<Void> afterCleanup = Mono.empty();
 
-			if (txObject.isMustRestoreAutoCommit()) {
-				Mono<Void> restoreAutoCommitStep = safeCleanupStep(
-						"doCleanupAfterCompletion when restoring autocommit", Mono.from(con.setAutoCommit(true)));
-				afterCleanup = afterCleanup.then(restoreAutoCommitStep);
-			}
-
 			Mono<Void> releaseConnectionStep = Mono.defer(() -> {
 				try {
 					if (txObject.isNewConnectionHolder()) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Releasing R2DBC Connection [" + con + "] after transaction");
 						}
-						return safeCleanupStep("doCleanupAfterCompletion when releasing R2DBC Connection",
-								ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory()));
+						Mono<Void> releaseMono = ConnectionFactoryUtils.releaseConnection(con, obtainConnectionFactory());
+						if (logger.isDebugEnabled()) {
+							releaseMono = releaseMono.doOnError(
+									ex -> logger.debug(String.format("Error ignored during cleanup: %s", ex)));
+						}
+						return releaseMono.onErrorComplete();
 					}
 				}
 				finally {
@@ -379,35 +373,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 			});
 			return afterCleanup.then(releaseConnectionStep);
 		});
-	}
-
-	private Mono<Void> safeCleanupStep(String stepDescription, Mono<Void> stepMono) {
-		if (!logger.isDebugEnabled()) {
-			return stepMono.onErrorComplete();
-		}
-		else {
-			return stepMono.doOnError(e ->
-							logger.debug(String.format("Error ignored during %s: %s", stepDescription, e)))
-					.onErrorComplete();
-		}
-	}
-
-	private Mono<Void> switchAutoCommitIfNecessary(Connection con, Object transaction) {
-		ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) transaction;
-		Mono<Void> prepare = Mono.empty();
-
-		// Switch to manual commit if necessary. This is very expensive in some R2DBC drivers,
-		// so we don't want to do it unnecessarily (for example if we've explicitly
-		// configured the connection pool to set it already).
-		if (con.isAutoCommit()) {
-			txObject.setMustRestoreAutoCommit(true);
-			if (logger.isDebugEnabled()) {
-				logger.debug("Switching R2DBC Connection [" + con + "] to manual commit");
-			}
-			prepare = prepare.then(Mono.from(con.setAutoCommit(false)));
-		}
-
-		return prepare;
 	}
 
 	/**
@@ -531,8 +496,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		private boolean newConnectionHolder;
 
-		private boolean mustRestoreAutoCommit;
-
 		void setConnectionHolder(@Nullable ConnectionHolder connectionHolder, boolean newConnectionHolder) {
 			setConnectionHolder(connectionHolder);
 			this.newConnectionHolder = newConnectionHolder;
@@ -557,14 +520,6 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 		public boolean hasConnectionHolder() {
 			return (this.connectionHolder != null);
-		}
-
-		public void setMustRestoreAutoCommit(boolean mustRestoreAutoCommit) {
-			this.mustRestoreAutoCommit = mustRestoreAutoCommit;
-		}
-
-		public boolean isMustRestoreAutoCommit() {
-			return this.mustRestoreAutoCommit;
 		}
 	}
 

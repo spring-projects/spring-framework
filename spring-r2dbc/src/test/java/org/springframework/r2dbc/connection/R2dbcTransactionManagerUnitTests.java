@@ -23,7 +23,6 @@ import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.IsolationLevel;
 import io.r2dbc.spi.R2dbcBadGrammarException;
-import io.r2dbc.spi.R2dbcTimeoutException;
 import io.r2dbc.spi.Statement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,6 +55,7 @@ import static org.mockito.BDDMockito.when;
  * Unit tests for {@link R2dbcTransactionManager}.
  *
  * @author Mark Paluch
+ * @author Juergen Hoeller
  */
 class R2dbcTransactionManagerUnitTests {
 
@@ -67,7 +67,7 @@ class R2dbcTransactionManagerUnitTests {
 
 
 	@BeforeEach
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	void before() {
 		when(connectionFactoryMock.create()).thenReturn((Mono) Mono.just(connectionMock));
 		when(connectionMock.beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class))).thenReturn(Mono.empty());
@@ -96,7 +96,6 @@ class R2dbcTransactionManagerUnitTests {
 				.verifyComplete();
 
 		assertThat(commits).hasValue(1);
-		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).commitTransaction();
 		verify(connectionMock).close();
@@ -185,7 +184,6 @@ class R2dbcTransactionManagerUnitTests {
 
 	@Test
 	void doesNotSetAutoCommitDisabled() {
-		when(connectionMock.isAutoCommit()).thenReturn(false);
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -201,29 +199,6 @@ class R2dbcTransactionManagerUnitTests {
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock, never()).setAutoCommit(anyBoolean());
 		verify(connectionMock).commitTransaction();
-	}
-
-	@Test
-	void restoresAutoCommit() {
-		when(connectionMock.isAutoCommit()).thenReturn(true);
-		when(connectionMock.setAutoCommit(anyBoolean())).thenReturn(Mono.empty());
-		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
-
-		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-
-		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
-
-		ConnectionFactoryUtils.getConnection(connectionFactoryMock).as(
-				operator::transactional)
-				.as(StepVerifier::create)
-				.expectNextCount(1)
-				.verifyComplete();
-
-		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
-		verify(connectionMock).setAutoCommit(false);
-		verify(connectionMock).setAutoCommit(true);
-		verify(connectionMock).commitTransaction();
-		verify(connectionMock).close();
 	}
 
 	@Test
@@ -246,7 +221,6 @@ class R2dbcTransactionManagerUnitTests {
 				.expectNextCount(1)
 				.verifyComplete();
 
-		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).createStatement("SET TRANSACTION READ ONLY");
 		verify(connectionMock).commitTransaction();
@@ -268,7 +242,6 @@ class R2dbcTransactionManagerUnitTests {
 				.as(StepVerifier::create)
 				.verifyError(BadSqlGrammarException.class);
 
-		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).createStatement("foo");
 		verify(connectionMock).commitTransaction();
@@ -299,7 +272,6 @@ class R2dbcTransactionManagerUnitTests {
 
 		assertThat(commits).hasValue(0);
 		assertThat(rollbacks).hasValue(1);
-		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).rollbackTransaction();
 		verify(connectionMock).close();
@@ -322,7 +294,6 @@ class R2dbcTransactionManagerUnitTests {
 		}).as(StepVerifier::create)
 				.verifyError(BadSqlGrammarException.class);
 
-		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).createStatement("foo");
 		verify(connectionMock, never()).commitTransaction();
@@ -338,10 +309,7 @@ class R2dbcTransactionManagerUnitTests {
 
 		TransactionalOperator operator = TransactionalOperator.create(tm);
 
-		when(connectionMock.isAutoCommit()).thenReturn(true);
-		when(connectionMock.setAutoCommit(true)).thenReturn(Mono.defer(() -> Mono.error(new R2dbcTimeoutException("SET AUTOCOMMIT = 1 timed out"))));
 		when(connectionMock.setTransactionIsolationLevel(any())).thenReturn(Mono.empty());
-		when(connectionMock.setAutoCommit(false)).thenReturn(Mono.empty());
 
 		operator.execute(reactiveTransaction -> ConnectionFactoryUtils.getConnection(connectionFactoryMock)
 						.doOnNext(connection -> {
@@ -352,7 +320,6 @@ class R2dbcTransactionManagerUnitTests {
 						.hasCause(new R2dbcBadGrammarException("Rollback should fail"))
 				);
 
-		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock, never()).commitTransaction();
 		verify(connectionMock).rollbackTransaction();
@@ -380,7 +347,6 @@ class R2dbcTransactionManagerUnitTests {
 		}).as(StepVerifier::create)
 				.verifyComplete();
 
-		verify(connectionMock).isAutoCommit();
 		verify(connectionMock).beginTransaction(any(io.r2dbc.spi.TransactionDefinition.class));
 		verify(connectionMock).rollbackTransaction();
 		verify(connectionMock).close();
