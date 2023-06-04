@@ -42,10 +42,11 @@ import org.springframework.util.PathMatcher;
 /**
  * A "simple" message broker that recognizes the message types defined in
  * {@link SimpMessageType}, keeps track of subscriptions with the help of a
- * {@link SubscriptionRegistry} and sends messages to subscribers.
+ * {@link SubscriptionRegistry}, and sends messages to subscribers.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  */
 public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
@@ -97,11 +98,12 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 
 	/**
-	 * Configure a custom SubscriptionRegistry to use for storing subscriptions.
-	 * <p><strong>Note</strong> that when a custom PathMatcher is configured via
-	 * {@link #setPathMatcher}, if the custom registry is not an instance of
-	 * {@link DefaultSubscriptionRegistry}, the provided PathMatcher is not used
-	 * and must be configured directly on the custom registry.
+	 * Configure a custom {@link SubscriptionRegistry} to use for storing subscriptions.
+	 * <p><strong>NOTE</strong>: If the custom registry is not an instance of
+	 * {@link DefaultSubscriptionRegistry}, the configured {@link #setPathMatcher
+	 * PathMatcher}, {@linkplain #setCacheLimit cache limit}, and
+	 * {@linkplain #setSelectorHeaderName selector header name} are not used and
+	 * must be configured directly on the custom registry.
 	 */
 	public void setSubscriptionRegistry(SubscriptionRegistry subscriptionRegistry) {
 		Assert.notNull(subscriptionRegistry, "SubscriptionRegistry must not be null");
@@ -119,6 +121,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * When configured, the given PathMatcher is passed down to the underlying
 	 * SubscriptionRegistry to use for matching destination to subscriptions.
 	 * <p>Default is a standard {@link org.springframework.util.AntPathMatcher}.
+	 * <p>Setting this property has no effect if the underlying SubscriptionRegistry
+	 * is not an instance of {@link DefaultSubscriptionRegistry}.
 	 * @since 4.1
 	 * @see #setSubscriptionRegistry
 	 * @see DefaultSubscriptionRegistry#setPathMatcher
@@ -140,6 +144,8 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * underlying SubscriptionRegistry, overriding any default there.
 	 * <p>With a standard {@link DefaultSubscriptionRegistry}, the default
 	 * cache limit is 1024.
+	 * <p>Setting this property has no effect if the underlying SubscriptionRegistry
+	 * is not an instance of {@link DefaultSubscriptionRegistry}.
 	 * @since 4.3.2
 	 * @see #setSubscriptionRegistry
 	 * @see DefaultSubscriptionRegistry#setCacheLimit
@@ -158,15 +164,18 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	/**
 	 * Configure the name of a header that a subscription message can have for
-	 * the purpose of filtering messages matched to the subscription. The header
-	 * value is expected to be a Spring EL boolean expression to be applied to
-	 * the headers of messages matched to the subscription.
+	 * the purpose of filtering messages matched to the subscription.
+	 * <p>The header value is expected to be a Spring Expression Language (SpEL)
+	 * boolean expression to be applied to the headers of messages matched to the
+	 * subscription.
 	 * <p>For example:
-	 * <pre>
+	 * <pre style="code">
 	 * headers.foo == 'bar'
 	 * </pre>
 	 * <p>By default this is set to "selector". You can set it to a different
 	 * name, or to {@code null} to turn off support for a selector header.
+	 * <p>Setting this property has no effect if the underlying SubscriptionRegistry
+	 * is not an instance of {@link DefaultSubscriptionRegistry}.
 	 * @param selectorHeaderName the name to use for a selector header
 	 * @since 4.3.17
 	 * @see #setSubscriptionRegistry
