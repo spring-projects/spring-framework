@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import jakarta.persistence.Query;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.testfixture.io.SerializationTestUtils;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.orm.jpa.domain.DriversLicense;
 import org.springframework.orm.jpa.domain.Person;
+import org.springframework.transaction.TransactionDefinition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
@@ -113,24 +115,34 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	}
 
 	@Test
-	public void testLazyLoading() {
+	public void testLazyLoading() throws Exception {
 		try {
 			Person tony = new Person();
 			tony.setFirstName("Tony");
 			tony.setLastName("Blair");
 			tony.setDriversLicense(new DriversLicense("8439DK"));
 			sharedEntityManager.persist(tony);
+			assertThat(DataSourceUtils.getConnection(jdbcTemplate.getDataSource()).getTransactionIsolation())
+					.isEqualTo(TransactionDefinition.ISOLATION_READ_COMMITTED);
 			setComplete();
 			endTransaction();
 
+			transactionDefinition.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 			startNewTransaction();
+			assertThat(DataSourceUtils.getConnection(jdbcTemplate.getDataSource()).getTransactionIsolation())
+					.isEqualTo(TransactionDefinition.ISOLATION_SERIALIZABLE);
 			sharedEntityManager.clear();
 			Person newTony = entityManagerFactory.createEntityManager().getReference(Person.class, tony.getId());
 			assertThat(tony).isNotSameAs(newTony);
 			endTransaction();
 
-			assertThat(newTony.getDriversLicense()).isNotNull();
+			transactionDefinition.setIsolationLevel(TransactionDefinition.ISOLATION_DEFAULT);
+			startNewTransaction();
+			assertThat(DataSourceUtils.getConnection(jdbcTemplate.getDataSource()).getTransactionIsolation())
+					.isEqualTo(TransactionDefinition.ISOLATION_READ_COMMITTED);
+			endTransaction();
 
+			assertThat(newTony.getDriversLicense()).isNotNull();
 			newTony.getDriversLicense().getSerialNumber();
 		}
 		finally {

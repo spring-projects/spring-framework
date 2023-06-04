@@ -110,7 +110,7 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 			}
 		}
 
-		return entityManager;
+		return null;
 	}
 
 	@Override
