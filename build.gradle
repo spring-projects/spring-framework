@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	dependencyManagement {
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.12.7"
-			mavenBom "io.netty:netty-bom:4.1.91.Final"
+			mavenBom "io.netty:netty-bom:4.1.93.Final"
 			mavenBom "io.projectreactor:reactor-bom:2020.0.31"
 			mavenBom "io.r2dbc:r2dbc-bom:Arabba-SR13"
 			mavenBom "io.rsocket:rsocket-bom:1.1.3"
@@ -128,18 +128,18 @@ configure(allprojects) { project ->
 			dependency "org.webjars:webjars-locator-core:0.48"
 			dependency "org.webjars:underscorejs:1.8.3"
 
-			dependencySet(group: 'org.apache.tomcat', version: '9.0.73') {
+			dependencySet(group: 'org.apache.tomcat', version: '9.0.75') {
 				entry 'tomcat-util'
 				entry('tomcat-websocket') {
 					exclude group: "org.apache.tomcat", name: "tomcat-servlet-api"
 					exclude group: "org.apache.tomcat", name: "tomcat-websocket-api"
 				}
 			}
-			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.73') {
+			dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.75') {
 				entry 'tomcat-embed-core'
 				entry 'tomcat-embed-websocket'
 			}
-			dependencySet(group: 'io.undertow', version: '2.2.23.Final') {
+			dependencySet(group: 'io.undertow', version: '2.2.24.Final') {
 				entry 'undertow-core'
 				entry('undertow-servlet') {
 					exclude group: "org.jboss.spec.javax.servlet", name: "jboss-servlet-api_4.0_spec"
@@ -238,7 +238,7 @@ configure(allprojects) { project ->
 			dependency "com.ibm.websphere:uow:6.0.2.17"
 			dependency "com.jamonapi:jamon:2.82"
 			dependency "joda-time:joda-time:2.10.13"
-			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.10"
+			dependency "org.eclipse.persistence:org.eclipse.persistence.jpa:2.7.12"
 			dependency "org.javamoney:moneta:1.3"
 
 			dependency "com.sun.activation:javax.activation:1.2.0"
