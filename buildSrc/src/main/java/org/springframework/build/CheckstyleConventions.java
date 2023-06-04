@@ -16,6 +16,10 @@
 
 package org.springframework.build;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
+
 import io.spring.javaformat.gradle.SpringJavaFormatPlugin;
 import io.spring.nohttp.gradle.NoHttpExtension;
 import io.spring.nohttp.gradle.NoHttpPlugin;
@@ -27,12 +31,9 @@ import org.gradle.api.plugins.quality.Checkstyle;
 import org.gradle.api.plugins.quality.CheckstyleExtension;
 import org.gradle.api.plugins.quality.CheckstylePlugin;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.util.List;
-
 /**
  * {@link Plugin} that applies conventions for checkstyle.
+ *
  * @author Brian Clozel
  */
 public class CheckstyleConventions {
@@ -49,7 +50,7 @@ public class CheckstyleConventions {
 			project.getPlugins().apply(CheckstylePlugin.class);
 			project.getTasks().withType(Checkstyle.class).forEach(checkstyle -> checkstyle.getMaxHeapSize().set("1g"));
 			CheckstyleExtension checkstyle = project.getExtensions().getByType(CheckstyleExtension.class);
-			checkstyle.setToolVersion("10.10.0");
+			checkstyle.setToolVersion("10.12.0");
 			checkstyle.getConfigDirectory().set(project.getRootProject().file("src/checkstyle"));
 			String version = SpringJavaFormatPlugin.class.getPackage().getImplementationVersion();
 			DependencySet checkstyleDependencies = project.getConfigurations().getByName("checkstyle").getDependencies();
