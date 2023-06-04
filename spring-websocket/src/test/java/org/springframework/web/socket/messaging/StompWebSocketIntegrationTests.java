@@ -105,12 +105,15 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 	}
 
 	@ParameterizedWebSocketTest  // SPR-10930
-	void sendMessageToBrokerAndReceiveReplyViaTopic(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
+	void sendMessageToBrokerAndReceiveReplyViaTopicWithSelectorHeader(WebSocketTestServer server, WebSocketClient webSocketClient, TestInfo testInfo) throws Exception {
 		super.setup(server, webSocketClient, testInfo);
 
+		String destination = "destination:/topic/foo";
+		String selector = "selector:headers.foo == 'bar'";
+
 		TextMessage m0 = create(StompCommand.CONNECT).headers("accept-version:1.1").build();
-		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", "destination:/topic/foo").build();
-		TextMessage m2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
+		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", destination, selector).build();
+		TextMessage m2 = create(StompCommand.SEND).headers(destination, "foo:bar").body("5").build();
 
 		TestClientWebSocketHandler clientHandler = new TestClientWebSocketHandler(2, m0, m1, m2);
 
