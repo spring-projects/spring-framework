@@ -38,7 +38,7 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	private long[] heartbeat;
 
 	@Nullable
-	private String selectorHeaderName = "selector";
+	private String selectorHeaderName;
 
 
 	/**
@@ -90,9 +90,11 @@ public class SimpleBrokerRegistration extends AbstractBrokerRegistration {
 	 * <pre style="code">
 	 * headers.foo == 'bar'
 	 * </pre>
-	 * <p>By default this is set to "selector". You can set it to a different
-	 * name, or to {@code null} to turn off support for a selector header.
-	 * @param selectorHeaderName the name to use for a selector header
+	 * <p>By default the selector header name is set to {@code null} which disables
+	 * this feature. You can set it to {@code "selector"} or a different name to
+	 * enable support for a selector header.
+	 * @param selectorHeaderName the name to use for a selector header, or {@code null}
+	 * or blank to disable selector header support
 	 * @since 4.3.17
 	 */
 	public void setSelectorHeaderName(@Nullable String selectorHeaderName) {

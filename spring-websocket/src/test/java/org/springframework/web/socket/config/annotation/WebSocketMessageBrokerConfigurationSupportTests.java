@@ -165,8 +165,8 @@ class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	void selectorHeaderEnabledByDefault() {
-		ApplicationContext context = createContext(TestChannelConfig.class, TestConfigurer.class);
+	void selectorHeaderEnabled() {
+		ApplicationContext context = createContext(TestChannelConfig.class, SelectorHeaderConfigurer.class);
 		SimpleBrokerMessageHandler simpleBrokerMessageHandler = simpleBrokerMessageHandler(context);
 
 		assertThat(simpleBrokerMessageHandler.getSubscriptionRegistry())
@@ -176,8 +176,8 @@ class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	void selectorHeaderDisabled() {
-		ApplicationContext context = createContext(TestChannelConfig.class, SelectorHeaderConfigurer.class);
+	void selectorHeaderDisabledByDefault() {
+		ApplicationContext context = createContext(TestChannelConfig.class, TestConfigurer.class);
 		SimpleBrokerMessageHandler simpleBrokerMessageHandler = simpleBrokerMessageHandler(context);
 
 		assertThat(simpleBrokerMessageHandler.getSubscriptionRegistry())
@@ -282,8 +282,8 @@ class WebSocketMessageBrokerConfigurationSupportTests {
 
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			// Explicitly disable selector header support
-			registry.enableSimpleBroker().setSelectorHeaderName(null);
+			// Explicitly enable selector header support
+			registry.enableSimpleBroker().setSelectorHeaderName("selector");
 		}
 
 	}

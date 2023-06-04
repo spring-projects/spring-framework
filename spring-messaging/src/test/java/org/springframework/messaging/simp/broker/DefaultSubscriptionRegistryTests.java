@@ -253,7 +253,7 @@ class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	void registerSubscriptionWithSelectorHeaderEnabledByDefault() {
+	void registerSubscriptionWithSelectorHeaderEnabled() {
 		String sessionId1 = "sess01";
 		String sessionId2 = "sess02";
 		String sessionId3 = "sess03";
@@ -263,6 +263,9 @@ class DefaultSubscriptionRegistryTests {
 		String destination = "/foo";
 		String selector1 = "headers.foo == 'bar'";
 		String selector2 = "headers.foo == 'enigma'";
+
+		// Explicitly enable selector support
+		this.registry.setSelectorHeaderName("selector");
 
 		// Register subscription with matching selector header
 		this.registry.registerSubscription(subscribeMessage(sessionId1, subscriptionId1, destination, selector1));
@@ -297,7 +300,7 @@ class DefaultSubscriptionRegistryTests {
 	}
 
 	@Test
-	void registerSubscriptionWithSelectorHeaderDisabled() {
+	void registerSubscriptionWithSelectorHeaderDisabledByDefault() {
 		String sessionId1 = "sess01";
 		String sessionId2 = "sess02";
 		String sessionId3 = "sess03";
@@ -307,9 +310,6 @@ class DefaultSubscriptionRegistryTests {
 		String destination = "/foo";
 		String selector1 = "headers.foo == 'bar'";
 		String selector2 = "headers.foo == 'enigma'";
-
-		// Explicitly disable selector header support
-		this.registry.setSelectorHeaderName(null);
 
 		// Register subscription with matching selector header
 		this.registry.registerSubscription(subscribeMessage(sessionId1, subscriptionId1, destination, selector1));

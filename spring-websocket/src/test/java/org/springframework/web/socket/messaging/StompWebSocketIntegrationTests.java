@@ -320,7 +320,7 @@ class StompWebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry configurer) {
 			configurer.setApplicationDestinationPrefixes("/app");
-			configurer.enableSimpleBroker("/topic", "/queue");
+			configurer.enableSimpleBroker("/topic", "/queue").setSelectorHeaderName("selector");
 		}
 
 		@Bean
