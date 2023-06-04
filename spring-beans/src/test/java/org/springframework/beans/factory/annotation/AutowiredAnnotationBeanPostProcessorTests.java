@@ -131,6 +131,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	void resourceInjectionWithNullBean() {
 		RootBeanDefinition bd = new RootBeanDefinition(NonPublicResourceInjectionBean.class);
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
