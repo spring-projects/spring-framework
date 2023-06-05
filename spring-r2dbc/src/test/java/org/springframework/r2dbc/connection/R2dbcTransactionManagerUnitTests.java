@@ -231,7 +231,6 @@ class R2dbcTransactionManagerUnitTests {
 	@Test
 	void testCommitFails() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.defer(() -> Mono.error(new R2dbcBadGrammarException("Commit should fail"))));
-
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
 
 		TransactionalOperator operator = TransactionalOperator.create(tm);
@@ -252,7 +251,6 @@ class R2dbcTransactionManagerUnitTests {
 
 	@Test
 	void testRollback() {
-
 		AtomicInteger commits = new AtomicInteger();
 		when(connectionMock.commitTransaction()).thenReturn(
 				Mono.fromRunnable(commits::incrementAndGet));
@@ -284,11 +282,8 @@ class R2dbcTransactionManagerUnitTests {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.defer(() -> Mono.error(new R2dbcBadGrammarException("Commit should fail"))), Mono.empty());
 
 		TransactionalOperator operator = TransactionalOperator.create(tm);
-
 		operator.execute(reactiveTransaction -> {
-
 			reactiveTransaction.setRollbackOnly();
-
 			return ConnectionFactoryUtils.getConnection(connectionFactoryMock)
 					.doOnNext(connection -> connection.createStatement("foo")).then();
 		}).as(StepVerifier::create)
@@ -306,11 +301,9 @@ class R2dbcTransactionManagerUnitTests {
 	@SuppressWarnings("unchecked")
 	void testConnectionReleasedWhenRollbackFails() {
 		when(connectionMock.rollbackTransaction()).thenReturn(Mono.defer(() -> Mono.error(new R2dbcBadGrammarException("Rollback should fail"))), Mono.empty());
-
-		TransactionalOperator operator = TransactionalOperator.create(tm);
-
 		when(connectionMock.setTransactionIsolationLevel(any())).thenReturn(Mono.empty());
 
+		TransactionalOperator operator = TransactionalOperator.create(tm);
 		operator.execute(reactiveTransaction -> ConnectionFactoryUtils.getConnection(connectionFactoryMock)
 						.doOnNext(connection -> {
 							throw new IllegalStateException("Intentional error to trigger rollback");
@@ -333,12 +326,9 @@ class R2dbcTransactionManagerUnitTests {
 				TransactionSynchronization.STATUS_ROLLED_BACK);
 
 		TransactionalOperator operator = TransactionalOperator.create(tm);
-
 		operator.execute(tx -> {
-
 			tx.setRollbackOnly();
 			assertThat(tx.isNewTransaction()).isTrue();
-
 			return TransactionSynchronizationManager.forCurrentTransaction().doOnNext(
 					synchronizationManager -> {
 						assertThat(synchronizationManager.hasResource(connectionFactoryMock)).isTrue();
@@ -364,15 +354,12 @@ class R2dbcTransactionManagerUnitTests {
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
-
 		operator.execute(tx1 -> {
-
 			assertThat(tx1.isNewTransaction()).isTrue();
-
 			definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_NEVER);
 			return operator.execute(tx2 -> {
-
 				fail("Should have thrown IllegalTransactionStateException");
 				return Mono.empty();
 			});
@@ -384,24 +371,121 @@ class R2dbcTransactionManagerUnitTests {
 	}
 
 	@Test
+	void testPropagationNestedWithExistingTransaction() {
+		when(connectionMock.createSavepoint("SAVEPOINT_1")).thenReturn(Mono.empty());
+		when(connectionMock.releaseSavepoint("SAVEPOINT_1")).thenReturn(Mono.empty());
+		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
+
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
+		operator.execute(tx1 -> {
+					assertThat(tx1.isNewTransaction()).isTrue();
+					definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+					return operator.execute(tx2 -> {
+						assertThat(tx2.isNewTransaction()).isTrue();
+						return Mono.empty();
+					});
+				}).as(StepVerifier::create)
+				.verifyComplete();
+
+		verify(connectionMock).createSavepoint("SAVEPOINT_1");
+		verify(connectionMock).releaseSavepoint("SAVEPOINT_1");
+		verify(connectionMock).commitTransaction();
+		verify(connectionMock).close();
+	}
+
+	@Test
+	void testPropagationNestedWithExistingTransactionAndRollback() {
+		when(connectionMock.createSavepoint("SAVEPOINT_1")).thenReturn(Mono.empty());
+		when(connectionMock.rollbackTransactionToSavepoint("SAVEPOINT_1")).thenReturn(Mono.empty());
+		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
+
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
+		operator.execute(tx1 -> {
+					assertThat(tx1.isNewTransaction()).isTrue();
+					definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+					return operator.execute(tx2 -> {
+						assertThat(tx2.isNewTransaction()).isTrue();
+						tx2.setRollbackOnly();
+						return Mono.empty();
+					});
+				}).as(StepVerifier::create)
+				.verifyComplete();
+
+		verify(connectionMock).createSavepoint("SAVEPOINT_1");
+		verify(connectionMock).rollbackTransactionToSavepoint("SAVEPOINT_1");
+		verify(connectionMock).commitTransaction();
+		verify(connectionMock).close();
+	}
+
+	@Test
+	void testPropagationSupportsAndNested() {
+		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
+
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
+		operator.execute(tx1 -> {
+					assertThat(tx1.isNewTransaction()).isFalse();
+					DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
+					innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+					TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
+					return inner.execute(tx2 -> {
+						assertThat(tx2.isNewTransaction()).isTrue();
+						return Mono.empty();
+					});
+				}).as(StepVerifier::create)
+				.verifyComplete();
+
+		verify(connectionMock).commitTransaction();
+		verify(connectionMock).close();
+	}
+
+	@Test
+	void testPropagationSupportsAndNestedWithRollback() {
+		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
+
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
+		operator.execute(tx1 -> {
+					assertThat(tx1.isNewTransaction()).isFalse();
+					DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
+					innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_NESTED);
+					TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
+					return inner.execute(tx2 -> {
+						assertThat(tx2.isNewTransaction()).isTrue();
+						tx2.setRollbackOnly();
+						return Mono.empty();
+					});
+				}).as(StepVerifier::create)
+				.verifyComplete();
+
+		verify(connectionMock).rollbackTransaction();
+		verify(connectionMock).close();
+	}
+
+	@Test
 	void testPropagationSupportsAndRequiresNew() {
 		when(connectionMock.commitTransaction()).thenReturn(Mono.empty());
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
 		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
-
 		operator.execute(tx1 -> {
-
 			assertThat(tx1.isNewTransaction()).isFalse();
-
 			DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
-			innerDef.setPropagationBehavior(
-					TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+			innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
-
 			return inner.execute(tx2 -> {
-
 				assertThat(tx2.isNewTransaction()).isTrue();
 				return Mono.empty();
 			});
@@ -409,6 +493,31 @@ class R2dbcTransactionManagerUnitTests {
 				.verifyComplete();
 
 		verify(connectionMock).commitTransaction();
+		verify(connectionMock).close();
+	}
+
+	@Test
+	void testPropagationSupportsAndRequiresNewWithRollback() {
+		when(connectionMock.rollbackTransaction()).thenReturn(Mono.empty());
+
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_SUPPORTS);
+
+		TransactionalOperator operator = TransactionalOperator.create(tm, definition);
+		operator.execute(tx1 -> {
+					assertThat(tx1.isNewTransaction()).isFalse();
+					DefaultTransactionDefinition innerDef = new DefaultTransactionDefinition();
+					innerDef.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+					TransactionalOperator inner = TransactionalOperator.create(tm, innerDef);
+					return inner.execute(tx2 -> {
+						assertThat(tx2.isNewTransaction()).isTrue();
+						tx2.setRollbackOnly();
+						return Mono.empty();
+					});
+				}).as(StepVerifier::create)
+				.verifyComplete();
+
+		verify(connectionMock).rollbackTransaction();
 		verify(connectionMock).close();
 	}
 
