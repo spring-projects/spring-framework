@@ -32,6 +32,7 @@ public abstract class NativeDetector {
 
 	private static final boolean inNativeImage = (imageCode != null);
 
+
 	/**
 	 * Returns {@code true} if running in a native image context (for example
 	 * {@code buildtime}, {@code runtime}, or {@code agent}) expressed by setting the
@@ -55,10 +56,10 @@ public abstract class NativeDetector {
 		return false;
 	}
 
+
 	/**
 	 * Native image context as defined in GraalVM's
 	 * <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo</a>.
-	 *
 	 * @since 6.0.10
 	 */
 	public enum Context {
@@ -66,12 +67,12 @@ public abstract class NativeDetector {
 		/**
 		 * The code is executing in the context of image building.
 		 */
-		BUILD_TIME("buildtime"),
+		BUILD("buildtime"),
 
 		/**
 		 * The code is executing at image runtime.
 		 */
-		RUNTIME("runtime");
+		RUN("runtime");
 
 		private final String key;
 
@@ -83,7 +84,6 @@ public abstract class NativeDetector {
 		public String toString() {
 			return this.key;
 		}
-
 	}
 
 }
