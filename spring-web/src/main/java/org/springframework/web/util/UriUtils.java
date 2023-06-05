@@ -307,7 +307,7 @@ public abstract class UriUtils {
 	 * meaning, anywhere within a URI, as defined in
 	 * <a href="https://tools.ietf.org/html/rfc3986">RFC 3986</a>.
 	 * This is useful to ensure that the given String will be preserved as-is
-	 * and will not have any o impact on the structure or meaning of the URI.
+	 * and will not have any impact on the structure or meaning of the URI.
 	 * @param source the String to be encoded
 	 * @param charset the character encoding to encode to
 	 * @return the encoded String
