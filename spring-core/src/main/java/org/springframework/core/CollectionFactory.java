@@ -183,7 +183,7 @@ public final class CollectionFactory {
 	@SuppressWarnings({"unchecked", "cast"})
 	public static <E> Collection<E> createCollection(Class<?> collectionType, @Nullable Class<?> elementType, int capacity) {
 		Assert.notNull(collectionType, "Collection type must not be null");
-		if (LinkedHashSet.class == collectionType || HashSet.class == collectionType ||
+		if (LinkedHashSet.class == collectionType ||
 				Set.class == collectionType || Collection.class == collectionType) {
 			return new LinkedHashSet<>(capacity);
 		}
@@ -201,6 +201,9 @@ public final class CollectionFactory {
 			Assert.notNull(elementType, "Cannot create EnumSet for unknown element type");
 			// Cast is necessary for compilation in Eclipse 4.4.1.
 			return (Collection<E>) EnumSet.noneOf(asEnumType(elementType));
+		}
+		else if (HashSet.class == collectionType) {
+			return new HashSet<>(capacity);
 		}
 		else {
 			if (collectionType.isInterface() || !Collection.class.isAssignableFrom(collectionType)) {
@@ -302,7 +305,7 @@ public final class CollectionFactory {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public static <K, V> Map<K, V> createMap(Class<?> mapType, @Nullable Class<?> keyType, int capacity) {
 		Assert.notNull(mapType, "Map type must not be null");
-		if (LinkedHashMap.class == mapType || HashMap.class == mapType || Map.class == mapType) {
+		if (LinkedHashMap.class == mapType || Map.class == mapType) {
 			return new LinkedHashMap<>(capacity);
 		}
 		else if (LinkedMultiValueMap.class == mapType || MultiValueMap.class == mapType) {
@@ -314,6 +317,9 @@ public final class CollectionFactory {
 		else if (EnumMap.class == mapType) {
 			Assert.notNull(keyType, "Cannot create EnumMap for unknown key type");
 			return new EnumMap(asEnumType(keyType));
+		}
+		else if (HashMap.class == mapType) {
+			return new HashMap<>(capacity);
 		}
 		else {
 			if (mapType.isInterface() || !Map.class.isAssignableFrom(mapType)) {
