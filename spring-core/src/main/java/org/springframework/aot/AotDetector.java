@@ -39,7 +39,8 @@ public abstract class AotDetector {
 	 */
 	public static final String AOT_ENABLED = "spring.aot.enabled";
 
-	private static final boolean inNativeImage = NativeDetector.inNativeImage(Context.RUNTIME, Context.BUILD_TIME);
+	private static final boolean inNativeImage = NativeDetector.inNativeImage(Context.RUN, Context.BUILD);
+
 
 	/**
 	 * Determine whether AOT optimizations must be considered at runtime. This
