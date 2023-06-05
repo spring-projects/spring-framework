@@ -33,9 +33,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.Assert;
 
 /**
- * Helper class that provides static methods for obtaining JDBC Connections from
- * a {@link javax.sql.DataSource}. Includes special support for Spring-managed
- * transactional Connections, e.g. managed by {@link DataSourceTransactionManager}
+ * Helper class that provides static methods for obtaining JDBC {@code Connection}s
+ * from a {@link javax.sql.DataSource}. Includes special support for Spring-managed
+ * transactional {@code Connection}s, e.g. managed by {@link DataSourceTransactionManager}
  * or {@link org.springframework.transaction.jta.JtaTransactionManager}.
  *
  * <p>Used internally by Spring's {@link org.springframework.jdbc.core.JdbcTemplate},
@@ -46,7 +46,8 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @see #getConnection
  * @see #releaseConnection
- * @see DataSourceTransactionManager
+ * @see org.springframework.jdbc.core.JdbcTemplate
+ * @see org.springframework.jdbc.support.JdbcTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
@@ -474,7 +475,7 @@ public abstract class DataSourceUtils {
 
 		private final DataSource dataSource;
 
-		private int order;
+		private final int order;
 
 		private boolean holderActive = true;
 
