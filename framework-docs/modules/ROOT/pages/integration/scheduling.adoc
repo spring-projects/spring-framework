@@ -475,6 +475,10 @@ seconds, but these values are unused:
 ----
 
 If the `Publisher` emits an `onError` signal, it is logged at WARN level and recovered.
+Because of the asynchronous and lazy nature of `Publisher` instances, exceptions are
+not thrown from the Runnable task: this means that the `ErrorHandler` contract is not
+involved for Reactive methods.
+
 As a result, further scheduled subscription do happen despite the error.
 
 In the following example, the `Mono` subscription fails twice in the first five seconds
