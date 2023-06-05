@@ -393,6 +393,117 @@ container and once through the `@Configurable` aspect), with the consequence of 
 `@Scheduled` method being invoked twice.
 ====
 
+[[scheduling-annotation-support-scheduled-reactive]]
+=== The `@Scheduled` annotation on Reactive methods or Kotlin suspending functions
+
+As of Spring Framework 6.1, `@Scheduled` methods are also supported on several types
+of reactive methods:
+
+ - methods with a `Publisher` return type (or any concrete implementation of `Publisher`)
+like in the following example:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedDelay = 500)
+	public Publisher<Void> reactiveSomething() {
+		// return an instance of Publisher
+	}
+----
+
+ - methods with a return type that can be adapted to `Publisher` via the shared instance
+of the `ReactiveAdapterRegistry`, provided the type supports _deferred subscription_ like
+in the following example:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedDelay = 500)
+	public Single<String> rxjavaNonPublisher() {
+		return Single.just("example");
+	}
+----
+
+[NOTE]
+====
+The `CompletableFuture` class is an example of a type that can typically be adapted
+to `Publisher` but doesn't support deferred subscription. Its `ReactiveAdapter` in the
+registry denotes that by having the `getDescriptor().isDeferred()` method return `false`.
+====
+
+
+ - Kotlin suspending functions, like in the following example:
+
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedDelay = 500)
+	suspend fun something() {
+		// do something asynchronous
+	}
+----
+
+ - methods that return a Kotlin `Flow` or `Deferred` instance, like in the following example:
+
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(fixedDelay = 500)
+	fun something(): Flow<Void> {
+		flow {
+			// do something asynchronous
+		}
+	}
+----
+
+All these types of methods must be declared without any arguments. In the case of Kotlin
+suspending functions the `kotlinx.coroutines.reactor` bridge must also be present to allow
+the framework to invoke a suspending function as a `Publisher`.
+
+The Spring Framework will obtain a `Publisher` out of the annotated method once and will
+schedule a `Runnable` in which it subscribes to said `Publisher`. These inner regular
+subscriptions happen according to the `cron`/fixedDelay`/`fixedRate` configuration.
+
+If the `Publisher` emits `onNext` signal(s), these are ignored and discarded (the same way
+return values from synchronous `@Scheduled` methods are ignored).
+
+In the following example, the `Flux` emits `onNext("Hello"), onNext("World")` every 5
+seconds, but these values are unused:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(initialDelay = 5000, fixedRate = 5000)
+	public Flux<String> reactiveSomething() {
+		return Flux.just("Hello", "World");
+	}
+----
+
+If the `Publisher` emits an `onError` signal, it is logged at WARN level and recovered.
+As a result, further scheduled subscription do happen despite the error.
+
+In the following example, the `Mono` subscription fails twice in the first five seconds
+then subscriptions start succeeding, printing a message to the standard output every five
+seconds:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	@Scheduled(initialDelay = 0, fixedRate = 5000)
+	public Mono<Void> reactiveSomething() {
+		AtomicInteger countdown = new AtomicInteger(2);
+
+		return Mono.defer(() -> {
+			if (countDown.get() == 0 || countDown.decrementAndGet() == 0) {
+				return Mono.fromRunnable(() -> System.out.println("Message"));
+			}
+			return Mono.error(new IllegalStateException("Cannot deliver message"));
+		})
+	}
+----
+
+[NOTE]
+====
+When destroying the annotated bean or closing the application context Spring Framework cancels
+scheduled tasks, which includes the next scheduled subscription to the `Publisher` as well
+as any past subscription that is still currently active (e.g. for long-running publishers,
+or even infinite publishers).
+====
+
 
 [[scheduling-annotation-support-async]]
 === The `@Async` annotation

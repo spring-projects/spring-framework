@@ -36,6 +36,20 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * a {@code void} return type; if not, the returned value will be ignored
  * when called through the scheduler.
  *
+ * <p>Methods that return a reactive {@code Publisher} or a type which can be adapted
+ * to {@code Publisher} by the default {@code ReactiveAdapterRegistry} are supported.
+ * The {@code Publisher} MUST support multiple subsequent subscriptions (i.e. be cold).
+ * The returned Publisher is only produced once, and the scheduling infrastructure
+ * then periodically {@code subscribe()} to it according to configuration.
+ * Values emitted by the publisher are ignored. Errors are logged at WARN level, which
+ * doesn't prevent further iterations. If a {@code fixed delay} is configured, the
+ * subscription is blocked upon in order to respect the fixed delay semantics.
+ *
+ * <p>Kotlin suspending functions are also supported, provided the coroutine-reactor
+ * bridge ({@code kotlinx.coroutine.reactor}) is present at runtime. This bridge is
+ * used to adapt the suspending function into a {@code Publisher} which is treated
+ * the same way as in the reactive method case (see above).
+ *
  * <p>Processing of {@code @Scheduled} annotations is performed by
  * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
  * done manually or, more conveniently, through the {@code <task:annotation-driven/>}

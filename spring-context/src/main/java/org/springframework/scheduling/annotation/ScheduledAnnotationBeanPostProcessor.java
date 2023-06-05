@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -98,6 +99,7 @@ import org.springframework.util.StringValueResolver;
  * @author Elizabeth Chatman
  * @author Victor Brown
  * @author Sam Brannen
+ * @author Simon Baslé
  * @since 3.0
  * @see Scheduled
  * @see EnableScheduling
@@ -142,6 +144,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
+
+	private final Map<Object, List<Runnable>> reactiveSubscriptions = new IdentityHashMap<>(16);
 
 
 	/**
@@ -385,15 +389,33 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Process the given {@code @Scheduled} method declaration on the given bean.
+	 * Process the given {@code @Scheduled} method declaration on the given bean,
+	 * attempting to distinguish {@link #processScheduledAsync(Scheduled, Method, Object) reactive}
+	 * methods from {@link #processScheduledSync(Scheduled, Method, Object) synchronous} methods.
 	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on
 	 * @param bean the target bean instance
-	 * @see #createRunnable(Object, Method)
+	 * @see #processScheduledSync(Scheduled, Method, Object)
+	 * @see #processScheduledAsync(Scheduled, Method, Object)
 	 */
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
+		// Is method a Kotlin suspending function? Throws if true but reactor bridge isn't on the classpath.
+		// Is method returning a reactive type? Throws if true, but it isn't a deferred Publisher type.
+		if (ScheduledAnnotationReactiveSupport.isReactive(method)) {
+			processScheduledAsync(scheduled, method, bean);
+			return;
+		}
+		processScheduledSync(scheduled, method, bean);
+	}
+
+	/**
+	 * Parse the {@code Scheduled} annotation and schedule the provided {@code Runnable}
+	 * accordingly. The Runnable can represent either a synchronous method invocation
+	 * (see {@link #processScheduledSync(Scheduled, Method, Object)}) or an asynchronous
+	 * one (see {@link #processScheduledAsync(Scheduled, Method, Object)}).
+	 */
+	protected void processScheduledTask(Scheduled scheduled, Runnable runnable, Method method, Object bean) {
 		try {
-			Runnable runnable = createRunnable(bean, method);
 			boolean processedSchedule = false;
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
@@ -517,6 +539,53 @@ public class ScheduledAnnotationBeanPostProcessor
 	}
 
 	/**
+	 * Process the given {@code @Scheduled} method declaration on the given bean,
+	 * as a synchronous method. The method MUST take no arguments. Its return value
+	 * is ignored (if any) and the scheduled invocations of the method take place
+	 * using the underlying {@link TaskScheduler} infrastructure.
+	 * @param scheduled the {@code @Scheduled} annotation
+	 * @param method the method that the annotation has been declared on
+	 * @param bean the target bean instance
+	 * @see #createRunnable(Object, Method)
+	 */
+	protected void processScheduledSync(Scheduled scheduled, Method method, Object bean) {
+		Runnable task;
+		try {
+			task = createRunnable(bean, method);
+		}
+		catch (IllegalArgumentException ex) {
+			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" + method.getName() + "': " + ex.getMessage());
+		}
+		processScheduledTask(scheduled, task, method, bean);
+	}
+
+	/**
+	 * Process the given {@code @Scheduled} bean method declaration which returns
+	 * a {@code Publisher}, or the given Kotlin suspending function converted to a
+	 * Publisher. A {@code Runnable} which subscribes to that publisher is then repeatedly
+	 * scheduled according to the annotation configuration.
+	 * <p>Note that for fixed delay configuration, the subscription is turned into a blocking
+	 * call instead. Types for which a {@code ReactiveAdapter} is registered but which cannot
+	 * be deferred (i.e. not  a {@code Publisher}) are not supported.
+	 * @param scheduled the {@code @Scheduled} annotation
+	 * @param method the method that the annotation has been declared on, which
+	 * MUST either return a Publisher-adaptable type or be a Kotlin suspending function
+	 * @param bean the target bean instance
+	 * @see ScheduledAnnotationReactiveSupport
+	 */
+	protected void processScheduledAsync(Scheduled scheduled, Method method, Object bean) {
+		Runnable task;
+		try {
+			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, scheduled,
+					this.reactiveSubscriptions.computeIfAbsent(bean, k -> new CopyOnWriteArrayList<>()));
+		}
+		catch (IllegalArgumentException ex) {
+			throw new IllegalStateException("Could not create recurring task for @Scheduled method '" + method.getName() + "': " + ex.getMessage());
+		}
+		processScheduledTask(scheduled, task, method, bean);
+	}
+
+	/**
 	 * Create a {@link Runnable} for the given bean instance,
 	 * calling the specified scheduled method.
 	 * <p>The default implementation creates a {@link ScheduledMethodRunnable}.
@@ -554,6 +623,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	/**
 	 * Return all currently scheduled tasks, from {@link Scheduled} methods
 	 * as well as from programmatic {@link SchedulingConfigurer} interaction.
+	 * <p>Note this includes upcoming scheduled subscriptions for reactive methods,
+	 * but doesn't cover any currently active subscription for such methods.
 	 * @since 5.0.2
 	 */
 	@Override
@@ -572,12 +643,19 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		Set<ScheduledTask> tasks;
+		List<Runnable> liveSubscriptions;
 		synchronized (this.scheduledTasks) {
 			tasks = this.scheduledTasks.remove(bean);
+			liveSubscriptions = this.reactiveSubscriptions.remove(bean);
 		}
 		if (tasks != null) {
 			for (ScheduledTask task : tasks) {
 				task.cancel();
+			}
+		}
+		if (liveSubscriptions != null) {
+			for (Runnable subscription : liveSubscriptions) {
+				subscription.run(); // equivalent to cancelling the subscription
 			}
 		}
 	}
@@ -585,7 +663,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public boolean requiresDestruction(Object bean) {
 		synchronized (this.scheduledTasks) {
-			return this.scheduledTasks.containsKey(bean);
+			return this.scheduledTasks.containsKey(bean) || this.reactiveSubscriptions.containsKey(bean);
 		}
 	}
 
@@ -599,6 +677,12 @@ public class ScheduledAnnotationBeanPostProcessor
 				}
 			}
 			this.scheduledTasks.clear();
+			Collection<List<Runnable>> allLiveSubscriptions = this.reactiveSubscriptions.values();
+			for (List<Runnable> liveSubscriptions : allLiveSubscriptions) {
+				for (Runnable liveSubscription : liveSubscriptions) {
+					liveSubscription.run(); //equivalent to cancelling the subscription
+				}
+			}
 		}
 		this.registrar.destroy();
 	}
