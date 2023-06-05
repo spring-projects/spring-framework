@@ -219,15 +219,15 @@ class CollectionFactoryTests {
 
 		// concrete types
 		testCollection(ArrayList.class, ArrayList.class);
-		testCollection(HashSet.class, LinkedHashSet.class);
+		testCollection(HashSet.class, HashSet.class);
 		testCollection(LinkedHashSet.class, LinkedHashSet.class);
 		testCollection(TreeSet.class, TreeSet.class);
 	}
 
 	private void testCollection(Class<?> collectionType, Class<?> resultType) {
 		assertThat(CollectionFactory.isApproximableCollectionType(collectionType)).isTrue();
-		assertThat(createCollection(collectionType, 0)).isInstanceOf(resultType);
-		assertThat(createCollection(collectionType, String.class, 0)).isInstanceOf(resultType);
+		assertThat(createCollection(collectionType, 0)).isExactlyInstanceOf(resultType);
+		assertThat(createCollection(collectionType, String.class, 0)).isExactlyInstanceOf(resultType);
 	}
 
 	@Test
@@ -269,7 +269,7 @@ class CollectionFactoryTests {
 		testMap(MultiValueMap.class, LinkedMultiValueMap.class);
 
 		// concrete types
-		testMap(HashMap.class, LinkedHashMap.class);
+		testMap(HashMap.class, HashMap.class);
 		testMap(LinkedHashMap.class, LinkedHashMap.class);
 		testMap(TreeMap.class, TreeMap.class);
 		testMap(LinkedMultiValueMap.class, LinkedMultiValueMap.class);
@@ -277,8 +277,8 @@ class CollectionFactoryTests {
 
 	private void testMap(Class<?> mapType, Class<?> resultType) {
 		assertThat(CollectionFactory.isApproximableMapType(mapType)).isTrue();
-		assertThat(createMap(mapType, 0)).isInstanceOf(resultType);
-		assertThat(createMap(mapType, String.class, 0)).isInstanceOf(resultType);
+		assertThat(createMap(mapType, 0)).isExactlyInstanceOf(resultType);
+		assertThat(createMap(mapType, String.class, 0)).isExactlyInstanceOf(resultType);
 	}
 
 	@Test
