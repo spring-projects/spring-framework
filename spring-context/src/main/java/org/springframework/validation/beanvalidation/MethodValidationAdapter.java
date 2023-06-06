@@ -350,7 +350,7 @@ public class MethodValidationAdapter {
 
 		private final List<MessageSourceResolvable> resolvableErrors = new ArrayList<>();
 
-		private final Set<ConstraintViolation<Object>> violations = new LinkedHashSet<>();
+		private final List<ConstraintViolation<Object>> violations = new ArrayList<>();
 
 		public ValueResultBuilder(Object target, MethodParameter parameter, @Nullable Object argument) {
 			this.target = target;
@@ -359,8 +359,8 @@ public class MethodValidationAdapter {
 		}
 
 		public void addViolation(ConstraintViolation<Object> violation) {
-			this.violations.add(violation);
 			this.resolvableErrors.add(createMessageSourceResolvable(this.target, this.parameter, violation));
+			this.violations.add(violation);
 		}
 
 		public ParameterValidationResult build() {
@@ -449,8 +449,22 @@ public class MethodValidationAdapter {
 				Integer containerIndex2 = errors2.getContainerIndex();
 				if (containerIndex1 != null && containerIndex2 != null) {
 					i = Integer.compare(containerIndex1, containerIndex2);
-					return i;
+					if (i != 0) {
+						return i;
+					}
 				}
+				i = compareKeys(errors1, errors2);
+				return i;
+			}
+			return 0;
+		}
+
+		@SuppressWarnings("unchecked")
+		private <E> int compareKeys(ParameterErrors errors1, ParameterErrors errors2) {
+			Object key1 = errors1.getContainerKey();
+			Object key2 = errors2.getContainerKey();
+			if (key1 instanceof Comparable<?> && key2 instanceof Comparable<?>) {
+				return ((Comparable<E>) key1).compareTo((E) key2);
 			}
 			return 0;
 		}

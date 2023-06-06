@@ -16,8 +16,8 @@
 
 package org.springframework.validation.beanvalidation;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.validation.ConstraintViolation;
 
@@ -51,23 +51,24 @@ public class ParameterValidationResult {
 
 	private final List<MessageSourceResolvable> resolvableErrors;
 
-	private final Set<ConstraintViolation<Object>> violations;
+	private final List<ConstraintViolation<Object>> violations;
 
 
 	/**
 	 * Create a {@code ParameterValidationResult}.
 	 */
 	public ParameterValidationResult(
-			MethodParameter methodParameter, @Nullable Object argument, List<MessageSourceResolvable> errors,
-			Set<ConstraintViolation<Object>> violations) {
+			MethodParameter methodParameter, @Nullable Object argument,
+			Collection<? extends MessageSourceResolvable> resolvableErrors,
+			Collection<ConstraintViolation<Object>> violations) {
 
-		Assert.notNull(methodParameter, "`MethodParameter` is required");
-		Assert.notEmpty(errors, "`resolvableErrors` must not be empty");
+		Assert.notNull(methodParameter, "MethodParameter is required");
+		Assert.notEmpty(resolvableErrors, "`resolvableErrors` must not be empty");
 		Assert.notEmpty(violations, "'violations' must not be empty");
 		this.methodParameter = methodParameter;
 		this.argument = argument;
-		this.resolvableErrors = List.copyOf(errors);
-		this.violations = violations;
+		this.resolvableErrors = List.copyOf(resolvableErrors);
+		this.violations = List.copyOf(violations);
 	}
 
 
@@ -110,9 +111,10 @@ public class ParameterValidationResult {
 	}
 
 	/**
-	 * The violations associated with the method parameter.
+	 * The violations associated with the method parameter, in the same order
+	 * as {@link #getResolvableErrors()}.
 	 */
-	public Set<ConstraintViolation<Object>> getViolations() {
+	public List<ConstraintViolation<Object>> getViolations() {
 		return this.violations;
 	}
 

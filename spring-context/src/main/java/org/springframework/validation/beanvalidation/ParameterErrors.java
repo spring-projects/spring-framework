@@ -16,9 +16,8 @@
 
 package org.springframework.validation.beanvalidation;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.validation.ConstraintViolation;
 
@@ -66,10 +65,10 @@ public class ParameterErrors extends ParameterValidationResult implements Errors
 	 */
 	public ParameterErrors(
 			MethodParameter parameter, @Nullable Object argument, Errors errors,
-			Set<ConstraintViolation<Object>> violations,
+			Collection<ConstraintViolation<Object>> violations,
 			@Nullable Object container, @Nullable Integer index, @Nullable Object key) {
 
-		super(parameter, argument, new ArrayList<>(errors.getAllErrors()), violations);
+		super(parameter, argument, errors.getAllErrors(), violations);
 
 		this.errors = errors;
 		this.container = container;
