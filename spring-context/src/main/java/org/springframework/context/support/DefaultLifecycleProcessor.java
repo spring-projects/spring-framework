@@ -34,6 +34,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.crac.CheckpointException;
+import org.crac.Core;
+import org.crac.RestoreException;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -45,6 +48,7 @@ import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.Phased;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.NativeDetector;
+import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -62,6 +66,26 @@ import org.springframework.util.ClassUtils;
  * @since 3.0
  */
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
+
+	/**
+	 * Property name for checkpoint restore: "spring.checkpoint.restore".
+	 * @since 6.1
+	 * @see #CHECKPOINT_RESTORE_ON_REFRESH
+	 * @see org.crac.Core#checkpointRestore()
+	 */
+	public static final String CHECKPOINT_RESTORE_PROPERTY_NAME = "spring.checkpoint.restore";
+
+	/**
+	 * Recognized value for checkpoint restore property: "onRefresh".
+	 * @since 6.1
+	 * @see #CHECKPOINT_RESTORE_PROPERTY_NAME
+	 * @see org.crac.Core#checkpointRestore()
+	 */
+	public static final String CHECKPOINT_RESTORE_ON_REFRESH = "onRefresh";
+
+
+	private final static boolean checkpointRestoreOnRefresh = CHECKPOINT_RESTORE_ON_REFRESH.equalsIgnoreCase(
+			SpringProperties.getProperty(CHECKPOINT_RESTORE_PROPERTY_NAME));
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -145,6 +169,10 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	@Override
 	public void onRefresh() {
+		if (checkpointRestoreOnRefresh) {
+			new CracDelegate().checkpointRestore();
+		}
+
 		this.stoppedBeans = null;
 		startBeans(true);
 		this.running = true;
@@ -461,6 +489,22 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 			CracResourceAdapter resourceAdapter = new CracResourceAdapter();
 			org.crac.Core.getGlobalContext().register(resourceAdapter);
 			return resourceAdapter;
+		}
+
+		public void checkpointRestore() {
+			logger.info("Triggering JVM checkpoint/restore");
+			try {
+				Core.checkpointRestore();
+			}
+			catch (UnsupportedOperationException ex) {
+				throw new ApplicationContextException("CRaC checkpoint not supported on current JVM", ex);
+			}
+			catch (CheckpointException ex) {
+				throw new ApplicationContextException("Failed to take CRaC checkpoint on refresh", ex);
+			}
+			catch (RestoreException ex) {
+				throw new ApplicationContextException("Failed to restore CRaC checkpoint on refresh", ex);
+			}
 		}
 	}
 
