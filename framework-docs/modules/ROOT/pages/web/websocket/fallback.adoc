@@ -103,6 +103,14 @@ You can enable SockJS through Java configuration, as the following example shows
 	}
 ----
 
+[IMPORTANT]
+
+====
+If SockJS is not used, please do not use `withSockJS()`, as this will cause websocket to be unable to connect.
+====
+
+
+
 The following example shows the XML configuration equivalent of the preceding example:
 
 [source,xml,indent=0,subs="verbatim,quotes,attributes"]
