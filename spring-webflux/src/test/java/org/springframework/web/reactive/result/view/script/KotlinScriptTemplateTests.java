@@ -33,14 +33,14 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.condition.JRE.JAVA_19;
+import static org.junit.jupiter.api.condition.JRE.JAVA_20;
 
 /**
  * Unit tests for Kotlin script templates running on Kotlin JSR-223 support.
  *
  * @author Sebastien Deleuze
  */
-@DisabledForJreRange(min = JAVA_19, disabledReason = "Kotlin doesn't support Java 19+ yet")
+@DisabledForJreRange(min = JAVA_20, disabledReason = "Kotlin doesn't support Java 20+ yet")
 public class KotlinScriptTemplateTests {
 
 	@Test
