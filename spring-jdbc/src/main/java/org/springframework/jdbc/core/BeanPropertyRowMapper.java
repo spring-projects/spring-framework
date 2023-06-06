@@ -274,7 +274,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/**
 	 * Convert the given name to lower case.
-	 * By default, conversions will happen within the US locale.
+	 * <p>By default, conversions will happen within the US locale.
 	 * @param name the original name
 	 * @return the converted name
 	 * @since 4.2
@@ -285,7 +285,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/**
 	 * Convert a name in camelCase to an underscored name in lower case.
-	 * Any upper case letters are converted to lower case with a preceding underscore.
+	 * <p>Any upper case letters are converted to lower case with a preceding underscore.
 	 * @param name the original name
 	 * @return the converted name
 	 * @since 4.2
@@ -390,7 +390,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/**
 	 * Initialize the given BeanWrapper to be used for row mapping.
-	 * To be called for each row.
+	 * <p>To be called for each row.
 	 * <p>The default implementation applies the configured {@link ConversionService},
 	 * if any. Can be overridden in subclasses.
 	 * @param bw the BeanWrapper to initialize

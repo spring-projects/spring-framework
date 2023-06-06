@@ -27,12 +27,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DataClassRowMapperTests {
+/**
+ * Test for R2DBC-based {@link DataClassRowMapper}.
+ *
+ * @since 6.1
+ */
+class R2dbcDataClassRowMapperTests {
 
 	@Test
 	void staticQueryWithDataClass() {
 		MockRow mockRow = MOCK_ROW; // uses name, age, birth_date
-		final DataClassRowMapper<ConstructorPerson> mapper = new DataClassRowMapper<>(ConstructorPerson.class);
+		DataClassRowMapper<ConstructorPerson> mapper = new DataClassRowMapper<>(ConstructorPerson.class);
 
 		ConstructorPerson person = mapper.apply(mockRow);
 
@@ -44,8 +49,8 @@ class DataClassRowMapperTests {
 	@Test
 	void staticQueryWithDataClassAndGenerics() {
 		MockRow mockRow = buildMockRow("birth_date", true); // uses name, age, birth_date, balance (as list)
-		//TODO validate actual R2DBC Row implementations would return something for balance if asking a List
-		final DataClassRowMapper<ConstructorPersonWithGenerics> mapper = new DataClassRowMapper<>(ConstructorPersonWithGenerics.class);
+		// TODO validate actual R2DBC Row implementations would return something for balance if requesting a List
+		DataClassRowMapper<ConstructorPersonWithGenerics> mapper = new DataClassRowMapper<>(ConstructorPersonWithGenerics.class);
 		ConstructorPersonWithGenerics person = mapper.apply(mockRow);
 
 		assertThat(person.name()).isEqualTo("Bubba");
@@ -57,7 +62,7 @@ class DataClassRowMapperTests {
 	@Test
 	void staticQueryWithDataRecord() {
 		MockRow mockRow = MOCK_ROW; // uses name, age, birth_date, balance
-		final DataClassRowMapper<RecordPerson> mapper = new DataClassRowMapper<>(RecordPerson.class);
+		DataClassRowMapper<RecordPerson> mapper = new DataClassRowMapper<>(RecordPerson.class);
 		RecordPerson person = mapper.apply(mockRow);
 
 		assertThat(person.name()).isEqualTo("Bubba");
@@ -69,7 +74,7 @@ class DataClassRowMapperTests {
 	@Test
 	void staticQueryWithDataClassAndSetters() {
 		MockRow mockRow = buildMockRow("birthdate", false); // uses name, age, birthdate (no underscore), balance
-		final DataClassRowMapper<ConstructorPersonWithSetters> mapper = new DataClassRowMapper<>(ConstructorPersonWithSetters.class);
+		DataClassRowMapper<ConstructorPersonWithSetters> mapper = new DataClassRowMapper<>(ConstructorPersonWithSetters.class);
 		ConstructorPersonWithSetters person = mapper.apply(mockRow);
 
 		assertThat(person.name()).isEqualTo("BUBBA");
@@ -177,10 +182,10 @@ class DataClassRowMapperTests {
 	}
 
 
-	static MockRow MOCK_ROW = buildMockRow("birth_date", false);
+	static final MockRow MOCK_ROW = buildMockRow("birth_date", false);
 
 	private static MockRow buildMockRow(String birthDateColumnName, boolean balanceObjectIdentifier) {
-		final MockRow.Builder builder = MockRow.builder();
+		MockRow.Builder builder = MockRow.builder();
 		builder.metadata(MockRowMetadata.builder()
 						.columnMetadata(MockColumnMetadata.builder().name("name").javaType(String.class).build())
 						.columnMetadata(MockColumnMetadata.builder().name("age").javaType(long.class).build())

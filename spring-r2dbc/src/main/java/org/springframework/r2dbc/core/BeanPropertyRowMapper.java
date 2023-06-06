@@ -48,47 +48,46 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Mapping {@code Function} implementation that converts an R2DBC {@code Readable}
- * (a {@code Row} or {@code OutParameters}) into a new instance of the specified mapped
+ * Mapping {@code Function} implementation that converts an R2DBC {@link Readable}
+ * (a {@link Row} or {@link OutParameters}) into a new instance of the specified mapped
  * target class. The mapped target class must be a top-level class or {@code static}
  * nested class, and it must have a default or no-arg constructor.
  *
- * <p>
- * Readable component values are mapped based on matching the name (as obtained from R2DBC
- * meta-data) to public setters in the target class for the corresponding properties. The
- * names are matched either directly or by transforming a name separating the parts with
- * underscores to the same name using "camel" case.
+ * <p>{@code Readable} component values are mapped based on matching the column
+ * name (as obtained from R2DBC meta-data) to public setters in the target class
+ * for the corresponding properties. The names are matched either directly or by
+ * transforming a name separating the parts with underscores to the same name using
+ * "camel" case.
  *
- * <p>
- * Mapping is provided for properties in the target class for many common types &mdash;
- * for example: String, boolean, Boolean, byte, Byte, short, Short, int, Integer, long,
- * Long, float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
+ * <p>Mapping is provided for properties in the target class for many common types &mdash;
+ * for example: String, boolean, Boolean, byte, Byte, short, Short, int, Integer,
+ * long, Long, float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
  *
- * <p>
- * To facilitate mapping between columns and properties that don't have matching names,
- * try using column aliases in the SQL statement like
- * {@code "select fname as first_name from customer"}, where {@code first_name} can be
- * mapped to a {@code setFirstName(String)} method in the target class.
+ * <p>To facilitate mapping between columns and properties that don't have matching
+ * names, try using column aliases in the SQL statement like
+ * {@code "select fname as first_name from customer"}, where {@code first_name}
+ * can be mapped to a {@code setFirstName(String)} method in the target class.
  *
- * <p>
- * For a {@code NULL} value read from the database, an attempt will be made to call the
- * corresponding setter method with {@code null}, but in the case of Java primitives this
- * will result in a {@link TypeMismatchException} by default. To ignore {@code NULL}
- * database values for all primitive properties in the target class, set the
- * {@code primitivesDefaultedForNullValue} flag to {@code true}. See
- * {@link #setPrimitivesDefaultedForNullValue(boolean)} for details.
+ * <p>For a {@code NULL} value read from the database, an attempt will be made to
+ * call the corresponding setter method with {@code null}, but in the case of
+ * Java primitives this will result in a {@link TypeMismatchException} by default.
+ * To ignore {@code NULL} database values for all primitive properties in the
+ * target class, set the {@code primitivesDefaultedForNullValue} flag to
+ * {@code true}. See {@link #setPrimitivesDefaultedForNullValue(boolean)} for
+ * details.
  *
- * <p>
- * If you need to map to a target class which has a <em>data class</em> constructor
- * &mdash; for example, a Java {@code record} or a Kotlin {@code data} class &mdash; use
- * {@link DataClassRowMapper} instead.
+ * <p>If you need to map to a target class which has a <em>data class</em> constructor
+ * &mdash; for example, a Java {@code record} or a Kotlin {@code data} class &mdash;
+ * use {@link DataClassRowMapper} instead.
  *
- * <p>
- * Please note that this class is designed to provide convenience rather than high
- * performance. For best performance, consider using a custom mapping function
+ * <p>Please note that this class is designed to provide convenience rather than
+ * high performance. For best performance, consider using a custom mapping function
  * implementation.
  *
  * @author Simon Baslé
+ * @author Thomas Risberg
+ * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 6.1
  * @param <T> the result type
  * @see DataClassRowMapper
@@ -254,7 +253,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 
 	/**
 	 * Convert the given name to lower case.
-	 * By default, conversions will happen within the US locale.
+	 * <p>By default, conversions will happen within the US locale.
 	 * @param name the original name
 	 * @return the converted name
 	 */
@@ -264,7 +263,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 
 	/**
 	 * Convert a name in camelCase to an underscored name in lower case.
-	 * Any upper case letters are converted to lower case with a preceding underscore.
+	 * <p>Any upper case letters are converted to lower case with a preceding underscore.
 	 * @param name the original name
 	 * @return the converted name
 	 * @see #lowerCaseName
@@ -289,13 +288,11 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	}
 
 	/**
-	 * Extract the values for the current {@code Readable} :
-	 * all columns in case of a {@code Row} or all parameters in
-	 * case of an {@code OutParameters}.
-	 * <p>Utilizes public setters and derives meta-data from the
-	 * concrete type.
-	 * @throws UnsupportedOperationException in case the concrete type
-	 * is neither {@code Row} nor {@code OutParameters}
+	 * Extract the values for the current {@link Readable}: all columns in case
+	 * of a {@link Row} or all parameters in case of an {@link OutParameters}.
+	 * <p>Utilizes public setters and derives meta-data from the concrete type.
+	 * @throws IllegalArgumentException in case the concrete type is neither
+	 * {@code Row} nor {@code OutParameters}
 	 * @see RowMetadata
 	 * @see OutParametersMetadata
 	 */
@@ -326,7 +323,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 			PropertyDescriptor pd = (this.mappedProperties != null ? this.mappedProperties.get(property) : null);
 			if (pd != null) {
 				Object value = getItemValue(readable, itemIndex, pd);
-				//Implementation note: the JDBC mapper can log the column mapping details each time row 0 is encountered
+				// Implementation note: the JDBC mapper can log the column mapping details each time row 0 is encountered
 				// but unfortunately this is not possible in R2DBC as row number is not provided. The BiFunction#apply
 				// cannot be stateful as it could be applied to a different row set, e.g. when resubscribing.
 				try {
@@ -363,9 +360,8 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 
 	/**
 	 * Construct an instance of the mapped class for the current {@code Readable}.
-	 * <p>
-	 * The default implementation simply instantiates the mapped class. Can be overridden
-	 * in subclasses.
+	 * <p>The default implementation simply instantiates the mapped class. Can be
+	 * overridden in subclasses.
 	 * @param readable the {@code Readable} being mapped (a {@code Row} or {@code OutParameters})
 	 * @param itemMetadatas the list of item {@code ReadableMetadata} (either
 	 * {@code ColumnMetadata} or {@code OutParameterMetadata})
@@ -380,7 +376,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	/**
 	 * Initialize the given BeanWrapper to be used for row mapping or outParameters
 	 * mapping.
-	 * To be called for each Readable.
+	 * <p>To be called for each Readable.
 	 * <p>The default implementation applies the configured {@link ConversionService},
 	 * if any. Can be overridden in subclasses.
 	 * @param bw the BeanWrapper to initialize
@@ -395,7 +391,7 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	}
 
 	/**
-	 * Retrieve a R2DBC object value for the specified item index (a column or an
+	 * Retrieve an R2DBC object value for the specified item index (a column or an
 	 * out-parameter).
 	 * <p>The default implementation delegates to
 	 * {@link #getItemValue(Readable, int, Class)}.
@@ -411,12 +407,12 @@ public class BeanPropertyRowMapper<T> implements Function<Readable, T> {
 	}
 
 	/**
-	 * Retrieve a R2DBC object value for the specified item index (a column or
+	 * Retrieve an R2DBC object value for the specified item index (a column or
 	 * an out-parameter).
 	 * <p>The default implementation calls {@link Readable#get(int, Class)} then
 	 * falls back to {@link Readable#get(int)} in case of an exception.
 	 * Subclasses may override this to check specific value types upfront,
-	 * or to post-process values return from {@code get}.
+	 * or to post-process values returned from {@code get}.
 	 * @param readable is the {@code Row} or {@code OutParameters} holding the data
 	 * @param itemIndex is the column index or out-parameter index
 	 * @param paramType the target parameter type

@@ -32,35 +32,34 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Mapping {@code Function} implementation that converts an R2DBC {@code Readable}
- * (a {@code Row} or {@code OutParameters}) into a new instance of the specified mapped
- * target class. The mapped target class must be a top-level class or {@code static}
- * nested class, and it may expose either a <em>data class</em> constructor with named
- * parameters corresponding to column names or classic bean property setter methods
- * with property names corresponding to column names (or even a combination of both).
+ * Mapping {@code Function} implementation that converts an R2DBC {@link Readable}
+ * (a {@link io.r2dbc.spi.Row Row} or {@link io.r2dbc.spi.OutParameters OutParameters})
+ * into a new instance of the specified mapped target class. The mapped target class
+ * must be a top-level class or {@code static} nested class, and it may expose either
+ * a <em>data class</em> constructor with named parameters corresponding to column
+ * names or classic bean property setter methods with property names corresponding
+ * to column names (or even a combination of both).
  *
- * <p>
- * The term "data class" applies to Java <em>records</em>, Kotlin <em>data classes</em>,
- * and any class which has a constructor with named parameters that are intended to be
- * mapped to corresponding column names.
+ * <p>The term "data class" applies to Java <em>records</em>, Kotlin <em>data
+ * classes</em>, and any class which has a constructor with named parameters
+ * that are intended to be mapped to corresponding column names.
  *
- * <p>
- * When combining a data class constructor with setter methods, any property mapped
- * successfully via a constructor argument will not be mapped additionally via a
- * corresponding setter method. This means that constructor arguments take precedence over
- * property setter methods.
+ * <p>When combining a data class constructor with setter methods, any property
+ * mapped successfully via a constructor argument will not be mapped additionally
+ * via a corresponding setter method. This means that constructor arguments take
+ * precedence over property setter methods.
  *
- * <p>
- * Note that this class extends {@link BeanPropertyRowMapper} and can therefore serve as a
- * common choice for any mapped target class, flexibly adapting to constructor style
- * versus setter methods in the mapped class.
+ * <p>Note that this class extends {@link BeanPropertyRowMapper} and can
+ * therefore serve as a common choice for any mapped target class, flexibly
+ * adapting to constructor style versus setter methods in the mapped class.
  *
- * <p>
- * Please note that this class is designed to provide convenience rather than high
- * performance. For best performance, consider using a custom readable mapping
+ * <p>Please note that this class is designed to provide convenience rather than
+ * high performance. For best performance, consider using a custom readable mapping
  * {@code Function} implementation.
  *
  * @author Simon Baslé
+ * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 6.1
  * @param <T> the result type
  */
@@ -135,7 +134,7 @@ public class DataClassRowMapper<T> extends BeanPropertyRowMapper<T> {
 	private int findIndex(Readable readable, List<? extends ReadableMetadata> itemMetadatas, String name) {
 		int index = 0;
 		for (ReadableMetadata itemMetadata : itemMetadatas) {
-			//we use equalsIgnoreCase, similarly to RowMetadata#contains(String)
+			// we use equalsIgnoreCase, similar to RowMetadata#contains(String)
 			if (itemMetadata.getName().equalsIgnoreCase(name)) {
 				return index;
 			}

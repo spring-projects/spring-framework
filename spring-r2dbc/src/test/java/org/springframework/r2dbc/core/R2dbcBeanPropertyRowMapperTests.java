@@ -34,25 +34,30 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
-class BeanPropertyRowMapperTests {
+/**
+ * Tests for R2DBC-based {@link BeanPropertyRowMapper}.
+ *
+ * @since 6.1
+ */
+class R2dbcBeanPropertyRowMapperTests {
 
 	@Test
 	void mappingUnknownReadableRejected() {
-		final BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
+		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 		assertThatIllegalArgumentException().isThrownBy(() -> mapper.apply(Mockito.mock(Readable.class)))
 				.withMessageStartingWith("Can only map Readable Row or OutParameters, got io.r2dbc.spi.Readable$MockitoMock$");
 	}
 
 	@Test
 	void mappingOutParametersAccepted() {
-		final BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
+		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 		assertThatNoException().isThrownBy(() -> mapper.apply(MockOutParameters.empty()));
 	}
 
 	@Test
 	void mappingRowSimpleObject() {
 		MockRow mockRow = SIMPLE_PERSON_ROW;
-		final BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
+		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 
 		Person result = mapper.apply(mockRow);
 
@@ -64,7 +69,7 @@ class BeanPropertyRowMapperTests {
 	@Test
 	void mappingRowMissingAttributeAccepted() {
 		MockRow mockRow = SIMPLE_PERSON_ROW;
-		final BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(ExtendedPerson.class);
+		BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(ExtendedPerson.class);
 
 		ExtendedPerson result = mapper.apply(mockRow);
 
@@ -77,7 +82,7 @@ class BeanPropertyRowMapperTests {
 	@Test
 	void mappingRowWithDifferentName() {
 		MockRow mockRow = EMAIL_PERSON_ROW;
-		final BeanPropertyRowMapper<EmailPerson> mapper = new BeanPropertyRowMapper<>(EmailPerson.class);
+		BeanPropertyRowMapper<EmailPerson> mapper = new BeanPropertyRowMapper<>(EmailPerson.class);
 
 		EmailPerson result = mapper.apply(mockRow);
 
@@ -89,21 +94,22 @@ class BeanPropertyRowMapperTests {
 
 	@Test
 	void mappingRowMissingAttributeRejected() {
+		Class<ExtendedPerson> mappedClass = ExtendedPerson.class;
 		MockRow mockRow = SIMPLE_PERSON_ROW;
-		final BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(ExtendedPerson.class, true);
+		BeanPropertyRowMapper<ExtendedPerson> mapper = new BeanPropertyRowMapper<>(mappedClass, true);
 
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
 				.isThrownBy(() -> mapper.apply(mockRow))
-				.withMessage("Given readable does not contain all items necessary to populate object of class org.springframework."
-						+ "r2dbc.core.BeanPropertyRowMapperTests$ExtendedPerson: [firstName, lastName, address, age]");
+				.withMessage("Given readable does not contain all items necessary to populate object of %s"
+						+ ": [firstName, lastName, address, age]", mappedClass);
 	}
 
-	//TODO cannot trigger a mapping of a read-only property, as mappedProperties don't include properties without a setter.
+	// TODO cannot trigger a mapping of a read-only property, as mappedProperties don't include properties without a setter.
 
 	@Test
 	void rowTypeAndMappingTypeMisaligned() {
 		MockRow mockRow = EXTENDED_PERSON_ROW;
-		final BeanPropertyRowMapper<TypeMismatchExtendedPerson> mapper = new BeanPropertyRowMapper<>(TypeMismatchExtendedPerson.class);
+		BeanPropertyRowMapper<TypeMismatchExtendedPerson> mapper = new BeanPropertyRowMapper<>(TypeMismatchExtendedPerson.class);
 
 		assertThatExceptionOfType(TypeMismatchException.class)
 				.isThrownBy(() -> mapper.apply(mockRow))
@@ -124,7 +130,7 @@ class BeanPropertyRowMapperTests {
 				.identified(2, int.class, null)
 				.identified(3, String.class, "123 Sesame Street")
 				.build();
-		final BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
+		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<>(Person.class);
 		mapper.setPrimitivesDefaultedForNullValue(true);
 
 		Person result = mapper.apply(mockRow);
@@ -147,6 +153,7 @@ class BeanPropertyRowMapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class Person {
 
 		String firstName;
@@ -181,6 +188,7 @@ class BeanPropertyRowMapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ExtendedPerson extends Person {
 
 		String address;
@@ -204,6 +212,7 @@ class BeanPropertyRowMapperTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class EmailPerson extends Person {
 
 		String email;
