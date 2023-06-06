@@ -133,6 +133,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
+	@Nullable
 	protected Resource resolveResourceInternal(@Nullable HttpServletRequest request, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
@@ -140,6 +141,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
+	@Nullable
 	protected String resolveUrlPathInternal(String resourcePath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
