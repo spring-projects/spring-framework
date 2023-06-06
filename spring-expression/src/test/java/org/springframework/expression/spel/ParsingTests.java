@@ -67,6 +67,20 @@ class ParsingTests {
 			parseCheck("person_1.Age");
 			parseCheck("person_1.__age");
 			parseCheck("Person_1.get__age()");
+
+			// German characters
+			parseCheck("begrüssung");
+			parseCheck("#begrüssung");
+			parseCheck("begrüssung[1]", "begrüssung.[1]"); // extra "." is needed due to erroneous logic in CompoundExpression.toStringAST()
+			parseCheck("service.begrüssung");
+			parseCheck("service.getBegrüssung()");
+			parseCheck("Spaß");
+
+			// Spanish characters
+			parseCheck("buenos_sueños");
+
+			// Chinese characters
+			parseCheck("have乐趣()");
 		}
 
 		@Test
@@ -75,24 +89,6 @@ class ParsingTests {
 			assertThatIllegalStateException()
 					.isThrownBy(() -> parser.parseRaw("apple~banana"))
 					.withMessage("Unsupported character '~' (126) encountered at position 6 in expression.");
-
-			// German characters
-			assertThatIllegalStateException()
-					.isThrownBy(() -> parser.parseRaw("begrüssung"))
-					.withMessage("Unsupported character 'ü' (252) encountered at position 5 in expression.");
-			assertThatIllegalStateException()
-					.isThrownBy(() -> parser.parseRaw("Spaß"))
-					.withMessage("Unsupported character 'ß' (223) encountered at position 4 in expression.");
-
-			// Spanish characters
-			assertThatIllegalStateException()
-					.isThrownBy(() -> parser.parseRaw("buenos_sueños"))
-					.withMessage("Unsupported character 'ñ' (241) encountered at position 11 in expression.");
-
-			// Chinese characters
-			assertThatIllegalStateException()
-					.isThrownBy(() -> parser.parseRaw("have乐趣()"))
-					.withMessage("Unsupported character '乐' (20048) encountered at position 5 in expression.");
 		}
 
 		@Test
