@@ -38,6 +38,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -201,7 +202,7 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
 		for (Path.Node node : path) {
-			if (node.isInIterable()) {
+			if (node.isInIterable() && !first) {
 				sb.append('[');
 				Object index = node.getIndex();
 				if (index == null) {
@@ -286,7 +287,9 @@ public class SpringValidatorAdapter implements SmartValidator, jakarta.validatio
 	 * @see #getArgumentsForConstraint
 	 */
 	protected MessageSourceResolvable getResolvableField(String objectName, String field) {
-		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
+		String[] codes = (StringUtils.hasText(field) ?
+				new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field} :
+				new String[] {objectName});
 		return new DefaultMessageSourceResolvable(codes, field);
 	}
 

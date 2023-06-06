@@ -55,14 +55,14 @@ import org.springframework.validation.annotation.Validated;
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private final MethodValidationDelegate delegate;
+	private final MethodValidationAdapter delegate;
 
 
 	/**
 	 * Create a new MethodValidationInterceptor using a default JSR-303 validator underneath.
 	 */
 	public MethodValidationInterceptor() {
-		this.delegate = new MethodValidationDelegate();
+		this.delegate = new MethodValidationAdapter();
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validatorFactory the JSR-303 ValidatorFactory to use
 	 */
 	public MethodValidationInterceptor(ValidatorFactory validatorFactory) {
-		this.delegate = new MethodValidationDelegate(validatorFactory);
+		this.delegate = new MethodValidationAdapter(validatorFactory);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validator the JSR-303 Validator to use
 	 */
 	public MethodValidationInterceptor(Validator validator) {
-		this.delegate = new MethodValidationDelegate(validator);
+		this.delegate = new MethodValidationAdapter(validator);
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @since 6.0
 	 */
 	public MethodValidationInterceptor(Supplier<Validator> validator) {
-		this.delegate = new MethodValidationDelegate(validator);
+		this.delegate = new MethodValidationAdapter(validator);
 	}
 
 
@@ -153,7 +153,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
 		Object target = getTarget(invocation);
 		Method method = invocation.getMethod();
-		return this.delegate.determineValidationGroups(target, method);
+		return MethodValidationAdapter.determineValidationGroups(target, method);
 	}
 
 }
