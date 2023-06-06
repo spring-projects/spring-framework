@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -34,6 +33,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.Continuation
 
 class KotlinScheduledAnnotationReactiveSupportTests {
+
+	private var target: SuspendingFunctions? = SuspendingFunctions()
+
 
 	@Test
 	fun ensureReactor() {
@@ -63,44 +65,6 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 	fun isNotReactive() {
 		val method = ReflectionUtils.findMethod(SuspendingFunctions::class.java, "notSuspending")!!
 		assertThat(isReactive(method)).isFalse
-	}
-
-	internal class SuspendingFunctions {
-		suspend fun suspending() {
-		}
-
-		suspend fun suspendingReturns(): String = "suspended"
-
-		suspend fun withParam(param: String): String {
-			return param
-		}
-
-		suspend fun throwsIllegalState() {
-			throw IllegalStateException("expected")
-		}
-
-		var subscription = AtomicInteger()
-		suspend fun suspendingTracking() {
-			subscription.incrementAndGet()
-		}
-
-		fun notSuspending() { }
-
-		fun flow(): Flow<Void> {
-			return flowOf()
-		}
-
-		fun deferred(): Deferred<Void> {
-			return CompletableDeferred()
-		}
-	}
-
-
-	private var target: SuspendingFunctions? = null
-
-	@BeforeEach
-	fun init() {
-		target = SuspendingFunctions()
 	}
 
 	@Test
@@ -152,4 +116,36 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 		mono.block()
 		assertThat(target!!.subscription).describedAs("after subscription").hasValue(1)
 	}
+
+
+	internal class SuspendingFunctions {
+		suspend fun suspending() {
+		}
+
+		suspend fun suspendingReturns(): String = "suspended"
+
+		suspend fun withParam(param: String): String {
+			return param
+		}
+
+		suspend fun throwsIllegalState() {
+			throw IllegalStateException("expected")
+		}
+
+		var subscription = AtomicInteger()
+		suspend fun suspendingTracking() {
+			subscription.incrementAndGet()
+		}
+
+		fun notSuspending() { }
+
+		fun flow(): Flow<Void> {
+			return flowOf()
+		}
+
+		fun deferred(): Deferred<Void> {
+			return CompletableDeferred()
+		}
+	}
+
 }

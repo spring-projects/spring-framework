@@ -429,7 +429,6 @@ to `Publisher` but doesn't support deferred subscription. Its `ReactiveAdapter` 
 registry denotes that by having the `getDescriptor().isDeferred()` method return `false`.
 ====
 
-
  - Kotlin suspending functions, like in the following example:
 
 [source,kotlin,indent=0,subs="verbatim,quotes"]
@@ -453,12 +452,12 @@ registry denotes that by having the `getDescriptor().isDeferred()` method return
 ----
 
 All these types of methods must be declared without any arguments. In the case of Kotlin
-suspending functions the `kotlinx.coroutines.reactor` bridge must also be present to allow
+suspending functions, the `kotlinx.coroutines.reactor` bridge must also be present to allow
 the framework to invoke a suspending function as a `Publisher`.
 
-The Spring Framework will obtain a `Publisher` out of the annotated method once and will
+The Spring Framework will obtain a `Publisher` for the annotated method once and will
 schedule a `Runnable` in which it subscribes to said `Publisher`. These inner regular
-subscriptions happen according to the `cron`/fixedDelay`/`fixedRate` configuration.
+subscriptions occur according to the corresponding `cron`/fixedDelay`/`fixedRate` configuration.
 
 If the `Publisher` emits `onNext` signal(s), these are ignored and discarded (the same way
 return values from synchronous `@Scheduled` methods are ignored).
@@ -474,15 +473,15 @@ seconds, but these values are unused:
 	}
 ----
 
-If the `Publisher` emits an `onError` signal, it is logged at WARN level and recovered.
+If the `Publisher` emits an `onError` signal, it is logged at `WARN` level and recovered.
 Because of the asynchronous and lazy nature of `Publisher` instances, exceptions are
-not thrown from the Runnable task: this means that the `ErrorHandler` contract is not
-involved for Reactive methods.
+not thrown from the `Runnable` task: this means that the `ErrorHandler` contract is not
+involved for reactive methods.
 
-As a result, further scheduled subscription do happen despite the error.
+As a result, further scheduled subscription occurs despite the error.
 
-In the following example, the `Mono` subscription fails twice in the first five seconds
-then subscriptions start succeeding, printing a message to the standard output every five
+In the following example, the `Mono` subscription fails twice in the first five seconds.
+Then subscriptions start succeeding, printing a message to the standard output every five
 seconds:
 
 [source,java,indent=0,subs="verbatim,quotes"]
@@ -502,9 +501,9 @@ seconds:
 
 [NOTE]
 ====
-When destroying the annotated bean or closing the application context Spring Framework cancels
+When destroying the annotated bean or closing the application context, Spring Framework cancels
 scheduled tasks, which includes the next scheduled subscription to the `Publisher` as well
-as any past subscription that is still currently active (e.g. for long-running publishers,
+as any past subscription that is still currently active (e.g. for long-running publishers
 or even infinite publishers).
 ====
 

@@ -49,8 +49,9 @@ class ScheduledAnnotationReactiveSupportTests {
 	}
 
 	@ParameterizedTest
+	// Note: monoWithParams can't be found by this test.
 	@ValueSource(strings = { "mono", "flux", "monoString", "fluxString", "publisherMono",
-			"publisherString", "monoThrows", "flowable", "completable" }) //note: monoWithParams can't be found by this test
+			"publisherString", "monoThrows", "flowable", "completable" })
 	void checkIsReactive(String method) {
 		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, method);
 		assertThat(isReactive(m)).as(m.getName()).isTrue();
@@ -60,8 +61,7 @@ class ScheduledAnnotationReactiveSupportTests {
 	void checkNotReactive() {
 		Method string = ReflectionUtils.findMethod(ReactiveMethods.class, "oops");
 
-		assertThat(isReactive(string))
-				.as("String-returning").isFalse();
+		assertThat(isReactive(string)).as("String-returning").isFalse();
 	}
 
 	@Test
@@ -235,4 +235,5 @@ class ScheduledAnnotationReactiveSupportTests {
 		}
 
 	}
+
 }

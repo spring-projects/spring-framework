@@ -40,8 +40,9 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Helper class for @{@link ScheduledAnnotationBeanPostProcessor} to support reactive cases
- * without a dependency on optional classes.
+ * Helper class for @{@link ScheduledAnnotationBeanPostProcessor} to support reactive
+ * cases without a dependency on optional classes.
+ *
  * @author Simon Baslé
  * @since 6.1.0
  */
@@ -58,23 +59,23 @@ abstract class ScheduledAnnotationReactiveSupport {
 	/**
 	 * Checks that if the method is reactive, it can be scheduled. Methods are considered
 	 * eligible for reactive scheduling if they either return an instance of a type that
-	 * can be converted to {@code Publisher} or are a Kotlin Suspending Function.
-	 * If the method isn't matching these criteria then this check returns {@code false}.
-	 * <p>For scheduling of Kotlin Suspending Functions, the Coroutine-Reactor bridge
-	 * {@code kotlinx.coroutines.reactor} MUST be present at runtime (in order to invoke
-	 * suspending functions as a {@code Publisher}).
-	 * Provided that is the case, this method returns {@code true}. Otherwise, it throws
-	 * an {@code IllegalStateException}.
+	 * can be converted to {@code Publisher} or are a Kotlin suspending function.
+	 * If the method doesn't match these criteria, this check returns {@code false}.
+	 * <p>For scheduling of Kotlin suspending functions, the Coroutine-Reactor bridge
+	 * {@code kotlinx.coroutines.reactor} must be present at runtime (in order to invoke
+	 * suspending functions as a {@code Publisher}). Provided that is the case, this
+	 * method returns {@code true}. Otherwise, it throws an {@code IllegalStateException}.
 	 * @throws IllegalStateException if the method is reactive but Reactor and/or the
 	 * Kotlin coroutines bridge are not present at runtime
 	 */
 	static boolean isReactive(Method method) {
 		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
-			//Note that suspending functions declared without args have a single Continuation parameter in reflective inspection
-			Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be"
-					+ " annotated with @Scheduled if declared without arguments");
-			Assert.isTrue(coroutinesReactorPresent, "Kotlin suspending functions may only be annotated with"
-					+ " @Scheduled if the Coroutine-Reactor bridge (kotlinx.coroutines.reactor) is present at runtime");
+			// Note that suspending functions declared without args have a single Continuation
+			// parameter in reflective inspection
+			Assert.isTrue(method.getParameterCount() == 1,"Kotlin suspending functions may only be "
+					+ "annotated with @Scheduled if declared without arguments");
+			Assert.isTrue(coroutinesReactorPresent, "Kotlin suspending functions may only be annotated with "
+					+ "@Scheduled if the Coroutine-Reactor bridge (kotlinx.coroutines.reactor) is present at runtime");
 			return true;
 		}
 		ReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();
@@ -86,10 +87,10 @@ abstract class ScheduledAnnotationReactiveSupport {
 		if (candidateAdapter == null) {
 			return false;
 		}
-		Assert.isTrue(method.getParameterCount() == 0, "Reactive methods may only be annotated with"
-				+ " @Scheduled if declared without arguments");
-		Assert.isTrue(candidateAdapter.getDescriptor().isDeferred(), "Reactive methods may only be annotated with"
-				+ " @Scheduled if the return type supports deferred execution");
+		Assert.isTrue(method.getParameterCount() == 0, "Reactive methods may only be annotated with "
+				+ "@Scheduled if declared without arguments");
+		Assert.isTrue(candidateAdapter.getDescriptor().isDeferred(), "Reactive methods may only be annotated with "
+				+ "@Scheduled if the return type supports deferred execution");
 		return true;
 	}
 
@@ -98,9 +99,9 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * either by reflectively invoking it and converting the result to a {@code Publisher}
 	 * via {@link ReactiveAdapterRegistry} or by converting a Kotlin suspending function
 	 * into a {@code Publisher} via {@link CoroutinesUtils}.
-	 * The {@link #isReactive(Method)} check is a precondition to calling this method.
-	 * If Reactor is present at runtime, the Publisher is additionally converted to a {@code Flux}
-	 * with a checkpoint String, allowing for better debugging.
+	 * <p>The {@link #isReactive(Method)} check is a precondition to calling this method.
+	 * If Reactor is present at runtime, the {@code Publisher} is additionally converted
+	 * to a {@code Flux} with a checkpoint String, allowing for better debugging.
 	 */
 	static Publisher<?> getPublisherFor(Method method, Object bean) {
 		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
@@ -114,7 +115,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 			throw new IllegalArgumentException("Cannot convert the @Scheduled reactive method return type to Publisher");
 		}
 		if (!adapter.getDescriptor().isDeferred()) {
-			throw new IllegalArgumentException("Cannot convert the @Scheduled reactive method return type to Publisher, "
+			throw new IllegalArgumentException("Cannot convert the @Scheduled reactive method return type to Publisher: "
 					+ returnType.getSimpleName() + " is not a deferred reactive type");
 		}
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
@@ -123,7 +124,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 			Object r = invocableMethod.invoke(bean);
 
 			Publisher<?> publisher = adapter.toPublisher(r);
-			//if Reactor is on the classpath, we could benefit from having a checkpoint for debuggability
+			// If Reactor is on the classpath, we could benefit from having a checkpoint for debuggability
 			if (reactorPresent) {
 				final String checkpoint = "@Scheduled '"+ method.getName() + "()' in bean '"
 						+ method.getDeclaringClass().getName() + "'";
@@ -134,10 +135,13 @@ abstract class ScheduledAnnotationReactiveSupport {
 			}
 		}
 		catch (InvocationTargetException ex) {
-			throw new IllegalArgumentException("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex.getTargetException());
+			throw new IllegalArgumentException(
+				"Cannot obtain a Publisher-convertible value from the @Scheduled reactive method",
+				ex.getTargetException());
 		}
 		catch (IllegalAccessException ex) {
-			throw new IllegalArgumentException("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex);
+			throw new IllegalArgumentException(
+				"Cannot obtain a Publisher-convertible value from the @Scheduled reactive method", ex);
 		}
 	}
 
@@ -146,10 +150,10 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * subscription to the publisher produced by a reactive method.
 	 * <p>Note that the reactive method is invoked once, but the resulting {@code Publisher}
 	 * is subscribed to repeatedly, once per each invocation of the {@code Runnable}.
-	 * <p>In the case of a {@code fixed delay} configuration, the subscription inside the
-	 * Runnable is turned into a blocking call in order to maintain fixedDelay semantics
-	 * (i.e. the task blocks until completion of the Publisher, then the delay is applied
-	 * until next iteration).
+	 * <p>In the case of a fixed-delay configuration, the subscription inside the
+	 * {@link Runnable} is turned into a blocking call in order to maintain fixed-delay
+	 * semantics (i.e. the task blocks until completion of the Publisher, and the
+	 * delay is applied until the next iteration).
 	 */
 	static Runnable createSubscriptionRunnable(Method method, Object targetBean, Scheduled scheduled,
 			List<Runnable> subscriptionTrackerRegistry) {
@@ -199,7 +203,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 	/**
 	 * A {@code Subscriber} which keeps track of its {@code Subscription} and exposes the
 	 * capacity to cancel the subscription as a {@code Runnable}. Can optionally support
-	 * blocking if a {@code CountDownLatch} is passed at construction.
+	 * blocking if a {@code CountDownLatch} is supplied during construction.
 	 */
 	private static final class TrackingSubscriber implements Subscriber<Object>, Runnable {
 
@@ -208,14 +212,12 @@ abstract class ScheduledAnnotationReactiveSupport {
 		@Nullable
 		private final CountDownLatch blockingLatch;
 
-		/*
-		Implementation note: since this is created last minute when subscribing,
-		there shouldn't be a way to cancel the tracker externally from the
-		ScheduledAnnotationBeanProcessor before the #setSubscription(Subscription)
-		 method is called.
-		 */
+		// Implementation note: since this is created last-minute when subscribing,
+		// there shouldn't be a way to cancel the tracker externally from the
+		// ScheduledAnnotationBeanProcessor before the #setSubscription(Subscription)
+		// method is called.
 		@Nullable
-		private Subscription s;
+		private Subscription subscription;
 
 		TrackingSubscriber(List<Runnable> subscriptionTrackerRegistry) {
 			this(subscriptionTrackerRegistry, null);
@@ -228,8 +230,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 		@Override
 		public void run() {
-			if (this.s != null) {
-				this.s.cancel();
+			if (this.subscription != null) {
+				this.subscription.cancel();
 			}
 			if (this.blockingLatch != null) {
 				this.blockingLatch.countDown();
@@ -237,13 +239,13 @@ abstract class ScheduledAnnotationReactiveSupport {
 		}
 
 		@Override
-		public void onSubscribe(Subscription s) {
-			this.s = s;
-			s.request(Integer.MAX_VALUE);
+		public void onSubscribe(Subscription subscription) {
+			this.subscription = subscription;
+			subscription.request(Integer.MAX_VALUE);
 		}
 
 		@Override
-		public void onNext(Object o) {
+		public void onNext(Object obj) {
 			// NO-OP
 		}
 

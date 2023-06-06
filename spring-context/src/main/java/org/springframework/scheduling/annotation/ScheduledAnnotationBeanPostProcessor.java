@@ -84,7 +84,7 @@ import org.springframework.util.StringValueResolver;
  * "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * <p>This post-processor is automatically registered by Spring's
- * {@code <task:annotation-driven>} XML element, and also by the
+ * {@code <task:annotation-driven>} XML element and also by the
  * {@link EnableScheduling @EnableScheduling} annotation.
  *
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
@@ -390,8 +390,9 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	/**
 	 * Process the given {@code @Scheduled} method declaration on the given bean,
-	 * attempting to distinguish {@link #processScheduledAsync(Scheduled, Method, Object) reactive}
-	 * methods from {@link #processScheduledSync(Scheduled, Method, Object) synchronous} methods.
+	 * attempting to distinguish {@linkplain #processScheduledAsync(Scheduled, Method, Object)
+	 * reactive} methods from {@linkplain #processScheduledSync(Scheduled, Method, Object)
+	 * synchronous} methods.
 	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on
 	 * @param bean the target bean instance
@@ -399,8 +400,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * @see #processScheduledAsync(Scheduled, Method, Object)
 	 */
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
-		// Is method a Kotlin suspending function? Throws if true but reactor bridge isn't on the classpath.
-		// Is method returning a reactive type? Throws if true, but it isn't a deferred Publisher type.
+		// Is the method a Kotlin suspending function? Throws if true and the reactor bridge isn't on the classpath.
+		// Does the method return a reactive type? Throws if true and it isn't a deferred Publisher type.
 		if (ScheduledAnnotationReactiveSupport.isReactive(method)) {
 			processScheduledAsync(scheduled, method, bean);
 			return;
@@ -540,8 +541,8 @@ public class ScheduledAnnotationBeanPostProcessor
 
 	/**
 	 * Process the given {@code @Scheduled} method declaration on the given bean,
-	 * as a synchronous method. The method MUST take no arguments. Its return value
-	 * is ignored (if any) and the scheduled invocations of the method take place
+	 * as a synchronous method. The method must accept no arguments. Its return value
+	 * is ignored (if any), and the scheduled invocations of the method take place
 	 * using the underlying {@link TaskScheduler} infrastructure.
 	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on
@@ -562,14 +563,14 @@ public class ScheduledAnnotationBeanPostProcessor
 	/**
 	 * Process the given {@code @Scheduled} bean method declaration which returns
 	 * a {@code Publisher}, or the given Kotlin suspending function converted to a
-	 * Publisher. A {@code Runnable} which subscribes to that publisher is then repeatedly
-	 * scheduled according to the annotation configuration.
+	 * {@code Publisher}. A {@code Runnable} which subscribes to that publisher is
+	 * then repeatedly scheduled according to the annotation configuration.
 	 * <p>Note that for fixed delay configuration, the subscription is turned into a blocking
 	 * call instead. Types for which a {@code ReactiveAdapter} is registered but which cannot
-	 * be deferred (i.e. not  a {@code Publisher}) are not supported.
+	 * be deferred (i.e. not a {@code Publisher}) are not supported.
 	 * @param scheduled the {@code @Scheduled} annotation
 	 * @param method the method that the annotation has been declared on, which
-	 * MUST either return a Publisher-adaptable type or be a Kotlin suspending function
+	 * must either return a Publisher-adaptable type or be a Kotlin suspending function
 	 * @param bean the target bean instance
 	 * @see ScheduledAnnotationReactiveSupport
 	 */
@@ -623,8 +624,8 @@ public class ScheduledAnnotationBeanPostProcessor
 	/**
 	 * Return all currently scheduled tasks, from {@link Scheduled} methods
 	 * as well as from programmatic {@link SchedulingConfigurer} interaction.
-	 * <p>Note this includes upcoming scheduled subscriptions for reactive methods,
-	 * but doesn't cover any currently active subscription for such methods.
+	 * <p>Note that this includes upcoming scheduled subscriptions for reactive
+	 * methods but doesn't cover any currently active subscription for such methods.
 	 * @since 5.0.2
 	 */
 	@Override
