@@ -77,7 +77,7 @@ class ParsingTests {
 			// German characters
 			parseCheck("begrüssung");
 			parseCheck("#begrüssung");
-			parseCheck("begrüssung[1]", "begrüssung.[1]"); // extra "." is needed due to erroneous logic in CompoundExpression.toStringAST()
+			parseCheck("begrüssung[1]");
 			parseCheck("service.begrüssung");
 			parseCheck("service.getBegrüssung()");
 			parseCheck("Spaß");
