@@ -92,7 +92,7 @@ class KotlinScheduledAnnotationReactiveSupportTests {
 
 		//static helper method
 		Assertions.assertThatIllegalArgumentException().isThrownBy { getPublisherFor(m!!, target!!) }
-				.withMessage("Cannot convert the @Scheduled reactive method return type to Publisher")
+				.withMessage("Cannot convert @Scheduled reactive method return type to Publisher")
 				.withNoCause()
 	}
 

@@ -656,7 +656,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		}
 		if (liveSubscriptions != null) {
 			for (Runnable subscription : liveSubscriptions) {
-				subscription.run(); // equivalent to cancelling the subscription
+				subscription.run();  // equivalent to cancelling the subscription
 			}
 		}
 	}
@@ -664,7 +664,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Override
 	public boolean requiresDestruction(Object bean) {
 		synchronized (this.scheduledTasks) {
-			return this.scheduledTasks.containsKey(bean) || this.reactiveSubscriptions.containsKey(bean);
+			return (this.scheduledTasks.containsKey(bean) || this.reactiveSubscriptions.containsKey(bean));
 		}
 	}
 
@@ -681,7 +681,7 @@ public class ScheduledAnnotationBeanPostProcessor
 			Collection<List<Runnable>> allLiveSubscriptions = this.reactiveSubscriptions.values();
 			for (List<Runnable> liveSubscriptions : allLiveSubscriptions) {
 				for (Runnable liveSubscription : liveSubscriptions) {
-					liveSubscription.run(); //equivalent to cancelling the subscription
+					liveSubscription.run();  // equivalent to cancelling the subscription
 				}
 			}
 		}

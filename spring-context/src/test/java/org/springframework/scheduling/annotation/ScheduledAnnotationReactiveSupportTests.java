@@ -41,6 +41,10 @@ import static org.springframework.scheduling.annotation.ScheduledAnnotationReact
 import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.getPublisherFor;
 import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.isReactive;
 
+/**
+ * @author Simon Baslé
+ * @since 6.1
+ */
 class ScheduledAnnotationReactiveSupportTests {
 
 	@Test
@@ -76,7 +80,7 @@ class ScheduledAnnotationReactiveSupportTests {
 	void isReactiveRejectsWithParams() {
 		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoWithParam", String.class);
 
-		//isReactive rejects with context
+		// isReactive rejects with context
 		assertThatIllegalArgumentException().isThrownBy(() -> isReactive(m))
 				.withMessage("Reactive methods may only be annotated with @Scheduled if declared without arguments")
 				.withNoCause();
@@ -87,7 +91,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		ReactiveMethods target = new ReactiveMethods();
 		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoThrows");
 
-		//static helper method
+		// static helper method
 		assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
 				.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
 				.withCause(new IllegalStateException("expected"));
@@ -98,7 +102,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		ReactiveMethods target = new ReactiveMethods();
 		Method m = ReflectionUtils.findMethod(ReactiveMethods.class, "monoThrowsIllegalAccess");
 
-		//static helper method
+		// static helper method
 		assertThatIllegalArgumentException().isThrownBy(() -> getPublisherFor(m, target))
 				.withMessage("Cannot obtain a Publisher-convertible value from the @Scheduled reactive method")
 				.withCause(new IllegalAccessException("expected"));
@@ -165,8 +169,9 @@ class ScheduledAnnotationReactiveSupportTests {
 				.as("checkpoint class")
 				.isEqualTo("reactor.core.publisher.FluxOnAssembly");
 
-		assertThat(p).hasToString("checkpoint(\"@Scheduled 'mono()' in bean 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'\")");
+		assertThat(p).hasToString("checkpoint(\"@Scheduled 'mono()' in 'org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupportTests$ReactiveMethods'\")");
 	}
+
 
 	static class ReactiveMethods {
 
@@ -211,7 +216,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		}
 
 		public Mono<Void> monoThrowsIllegalAccess() throws IllegalAccessException {
-			//simulate a reflection issue
+			// simulate a reflection issue
 			throw new IllegalAccessException("expected");
 		}
 
@@ -226,14 +231,12 @@ class ScheduledAnnotationReactiveSupportTests {
 		AtomicInteger subscription = new AtomicInteger();
 
 		public Mono<Void> trackingMono() {
-			return Mono.<Void>empty()
-					.doOnSubscribe(s -> subscription.incrementAndGet());
+			return Mono.<Void>empty().doOnSubscribe(s -> subscription.incrementAndGet());
 		}
 
 		public Mono<Void> monoError() {
 			return Mono.error(new IllegalStateException("expected"));
 		}
-
 	}
 
 }
