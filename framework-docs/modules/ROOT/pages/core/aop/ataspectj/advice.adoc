@@ -728,11 +728,6 @@ of determining parameter names, an exception will be thrown.
 `StandardReflectionParameterNameDiscoverer` :: Uses the standard `java.lang.reflect.Parameter`
   API to determine parameter names. Requires that code be compiled with the `-parameters`
   flag for `javac`. Recommended approach on Java 8+.
-`LocalVariableTableParameterNameDiscoverer` :: Analyzes the local variable table available
-  in the byte code of the advice class to determine parameter names from debug information.
-  Requires that code be compiled with debug symbols (`-g:vars` at a minimum). Deprecated
-  as of Spring Framework 6.0 for removal in Spring Framework 6.1 in favor of compiling
-  code with `-parameters`. Not supported in a GraalVM native image.
 `AspectJAdviceParameterNameDiscoverer` :: Deduces parameter names from the pointcut
   expression, `returning`, and `throwing` clauses. See the
   {api-spring-framework}/aop/aspectj/AspectJAdviceParameterNameDiscoverer.html[javadoc]
