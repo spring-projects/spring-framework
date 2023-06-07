@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,10 +205,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			doInitialize();
 		}
 		catch (JMSException ex) {
-			synchronized (this.sharedConnectionMonitor) {
-				ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), this.autoStartup);
-				this.sharedConnection = null;
-			}
+			releaseSharedConnection();
 			throw convertJmsAccessException(ex);
 		}
 	}
@@ -248,10 +245,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 		finally {
 			if (sharedConnectionEnabled()) {
-				synchronized (this.sharedConnectionMonitor) {
-					ConnectionFactoryUtils.releaseConnection(this.sharedConnection, getConnectionFactory(), false);
-					this.sharedConnection = null;
-				}
+				releaseSharedConnection();
 			}
 		}
 	}
@@ -391,9 +385,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 */
 	protected final void refreshSharedConnection() throws JMSException {
 		synchronized (this.sharedConnectionMonitor) {
-			ConnectionFactoryUtils.releaseConnection(
-					this.sharedConnection, getConnectionFactory(), this.sharedConnectionStarted);
-			this.sharedConnection = null;
+			releaseSharedConnection();
 			this.sharedConnection = createSharedConnection();
 			if (this.sharedConnectionStarted) {
 				this.sharedConnection.start();
@@ -471,6 +463,19 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 					logger.debug("Ignoring Connection stop exception - assuming already stopped: " + ex);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Release the shared Connection, if any.
+	 * @since 6.1
+	 * @see ConnectionFactoryUtils#releaseConnection
+	 */
+	protected final void releaseSharedConnection() {
+		synchronized (this.sharedConnectionMonitor) {
+			ConnectionFactoryUtils.releaseConnection(
+					this.sharedConnection, getConnectionFactory(), this.sharedConnectionStarted);
+			this.sharedConnection = null;
 		}
 	}
 

@@ -1245,9 +1245,15 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		private void decreaseActiveInvokerCount() {
 			activeInvokerCount--;
-			if (stopCallback != null && activeInvokerCount == 0) {
-				stopCallback.run();
-				stopCallback = null;
+			if (activeInvokerCount == 0) {
+				if (!isRunning()) {
+					// Proactively release shared Connection when stopped.
+					releaseSharedConnection();
+				}
+				if (stopCallback != null) {
+					stopCallback.run();
+					stopCallback = null;
+				}
 			}
 		}
 
