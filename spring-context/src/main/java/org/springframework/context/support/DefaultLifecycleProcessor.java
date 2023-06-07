@@ -68,7 +68,7 @@ import org.springframework.util.ClassUtils;
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
 
 	/**
-	 * Property name for checkpoint restore: "spring.checkpoint.restore".
+	 * Property name for checkpoint restore: {@value}.
 	 * @since 6.1
 	 * @see #CHECKPOINT_RESTORE_ON_REFRESH
 	 * @see org.crac.Core#checkpointRestore()
@@ -76,7 +76,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	public static final String CHECKPOINT_RESTORE_PROPERTY_NAME = "spring.checkpoint.restore";
 
 	/**
-	 * Recognized value for checkpoint restore property: "onRefresh".
+	 * Recognized value for checkpoint restore property: {@value}.
 	 * @since 6.1
 	 * @see #CHECKPOINT_RESTORE_PROPERTY_NAME
 	 * @see org.crac.Core#checkpointRestore()
