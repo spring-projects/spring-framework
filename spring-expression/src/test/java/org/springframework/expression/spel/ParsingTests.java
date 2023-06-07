@@ -44,6 +44,12 @@ class ParsingTests {
 	class Miscellaneous {
 
 		@Test
+		void compoundExpressions() {
+			parseCheck("property1.property2.methodOne()");
+			parseCheck("property1[0].property2['key'].methodOne()");
+		}
+
+		@Test
 		void supportedCharactersInIdentifiers() {
 			parseCheck("#var='value'");
 			parseCheck("#Varz='value'");
