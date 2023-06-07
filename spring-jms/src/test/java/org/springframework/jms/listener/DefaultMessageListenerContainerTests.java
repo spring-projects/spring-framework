@@ -29,6 +29,7 @@ import org.mockito.stubbing.Answer;
 
 import org.springframework.util.backoff.BackOff;
 import org.springframework.util.backoff.BackOffExecution;
+import org.springframework.util.backoff.FixedBackOff;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class DefaultMessageListenerContainerTests {
 
@@ -58,6 +60,8 @@ public class DefaultMessageListenerContainerTests {
 		assertThat(container.isRunning()).isFalse();
 		verify(backOff).start();
 		verify(execution).nextBackOff();
+
+		container.destroy();
 	}
 
 	@Test
@@ -75,6 +79,8 @@ public class DefaultMessageListenerContainerTests {
 		assertThat(container.isRunning()).isFalse();
 		verify(backOff).start();
 		verify(execution, times(2)).nextBackOff();
+
+		container.destroy();
 	}
 
 	@Test
@@ -92,25 +98,63 @@ public class DefaultMessageListenerContainerTests {
 		assertThat(container.isRunning()).isTrue();
 		verify(backOff).start();
 		verify(execution, times(1)).nextBackOff();  // only on attempt as the second one lead to a recovery
+
+		container.destroy();
 	}
 
 	@Test
-	public void runnableIsInvokedEvenIfContainerIsNotRunning() throws InterruptedException {
+	public void stopAndRestart() {
+		DefaultMessageListenerContainer container = createRunningContainer();
+		container.stop();
+
+		container.start();
+		container.destroy();
+	}
+
+	@Test
+	public void stopWithCallbackAndRestart() throws InterruptedException {
+		DefaultMessageListenerContainer container = createRunningContainer();
+
+		TestRunnable stopCallback = new TestRunnable();
+		container.stop(stopCallback);
+		stopCallback.waitForCompletion();
+
+		container.start();
+		container.destroy();
+	}
+
+	@Test
+	public void stopCallbackIsInvokedEvenIfContainerIsNotRunning() throws InterruptedException {
 		DefaultMessageListenerContainer container = createRunningContainer();
 		container.stop();
 
 		// container is stopped but should nevertheless invoke the runnable argument
-		TestRunnable runnable2 = new TestRunnable();
-		container.stop(runnable2);
-		runnable2.waitForCompletion();
+		TestRunnable stopCallback = new TestRunnable();
+		container.stop(stopCallback);
+		stopCallback.waitForCompletion();
+
+		container.destroy();
 	}
 
 
 	private DefaultMessageListenerContainer createRunningContainer() {
 		DefaultMessageListenerContainer container = createContainer(createSuccessfulConnectionFactory());
+		container.setCacheLevel(DefaultMessageListenerContainer.CACHE_CONNECTION);
+		container.setBackOff(new FixedBackOff(100, 1));
 		container.afterPropertiesSet();
 		container.start();
 		return container;
+	}
+
+	private ConnectionFactory createSuccessfulConnectionFactory() {
+		try {
+			ConnectionFactory connectionFactory = mock();
+			given(connectionFactory.createConnection()).willReturn(mock());
+			return connectionFactory;
+		}
+		catch (JMSException ex) {
+			throw new IllegalStateException(ex);  // never happen
+		}
 	}
 
 	private DefaultMessageListenerContainer createContainer(ConnectionFactory connectionFactory) {
@@ -159,17 +203,6 @@ public class DefaultMessageListenerContainerTests {
 		}
 	}
 
-	private ConnectionFactory createSuccessfulConnectionFactory() {
-		try {
-			ConnectionFactory connectionFactory = mock();
-			given(connectionFactory.createConnection()).willReturn(mock());
-			return connectionFactory;
-		}
-		catch (JMSException ex) {
-			throw new IllegalStateException(ex);  // never happen
-		}
-	}
-
 
 	private static class TestRunnable implements Runnable {
 
@@ -181,7 +214,7 @@ public class DefaultMessageListenerContainerTests {
 		}
 
 		public void waitForCompletion() throws InterruptedException {
-			this.countDownLatch.await(2, TimeUnit.SECONDS);
+			this.countDownLatch.await(1, TimeUnit.SECONDS);
 			assertThat(this.countDownLatch.getCount()).as("callback was not invoked").isEqualTo(0);
 		}
 	}
