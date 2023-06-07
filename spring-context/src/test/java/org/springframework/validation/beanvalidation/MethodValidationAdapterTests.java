@@ -39,11 +39,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class MethodValidationAdapterTests {
 
-	private static final MethodValidationAdapter validationAdapter = new MethodValidationAdapter();
-
 	private static final Person faustino1234 = new Person("Faustino1234");
 
 	private static final Person cayetana6789 = new Person("Cayetana6789");
+
+
+	private final MethodValidationAdapter validationAdapter = new MethodValidationAdapter();
 
 
 	@Test
@@ -80,6 +81,28 @@ public class MethodValidationAdapterTests {
 			codes [myService#addStudent.degrees,degrees]; arguments []; default message [degrees],2]; \
 			default message [must be less than or equal to 2]"""
 			));
+		});
+	}
+
+	@Test
+	void validateArgumentWithCustomObjectName() {
+		MyService target = new MyService();
+		Method method = getMethod(target, "addStudent");
+
+		this.validationAdapter.setBindingResultNameResolver((parameter, value) -> "studentToAdd");
+
+		validateArguments(target, method, new Object[] {faustino1234, new Person("Joe"), 1}, ex -> {
+
+			assertThat(ex.getConstraintViolations()).hasSize(1);
+			assertThat(ex.getAllValidationResults()).hasSize(1);
+
+			assertBeanResult(ex.getBeanResults().get(0), 0, "studentToAdd", faustino1234, List.of(
+					"""
+			Field error in object 'studentToAdd' on field 'name': rejected value [Faustino1234]; \
+			codes [Size.studentToAdd.name,Size.name,Size.java.lang.String,Size]; \
+			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+			codes [studentToAdd.name,name]; arguments []; default message [name],10,1]; \
+			default message [size must be between 1 and 10]"""));
 		});
 	}
 
@@ -158,14 +181,14 @@ public class MethodValidationAdapterTests {
 			Object target, Method method, Object[] arguments, Consumer<MethodValidationResult> assertions) {
 
 		assertions.accept(
-				validationAdapter.validateMethodArguments(target, method, arguments, new Class<?>[0]));
+				this.validationAdapter.validateMethodArguments(target, method, arguments, new Class<?>[0]));
 	}
 
 	private void validateReturnValue(
 			Object target, Method method, @Nullable Object returnValue, Consumer<MethodValidationResult> assertions) {
 
 		assertions.accept(
-				validationAdapter.validateMethodReturnValue(target, method, returnValue, new Class<?>[0]));
+				this.validationAdapter.validateMethodReturnValue(target, method, returnValue, new Class<?>[0]));
 	}
 
 	private static void assertBeanResult(

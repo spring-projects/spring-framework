@@ -85,6 +85,9 @@ public class MethodValidationAdapter {
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
+	@Nullable
+	private BindingResultNameResolver objectNameResolver;
+
 
 	/**
 	 * Create an instance using a default JSR-303 validator underneath.
@@ -155,6 +158,19 @@ public class MethodValidationAdapter {
 	 */
 	public ParameterNameDiscoverer getParameterNameDiscoverer() {
 		return this.parameterNameDiscoverer;
+	}
+
+	/**
+	 * Configure a resolver for {@link BindingResult} method parameters to match
+	 * the behavior of the higher level programming model, e.g. how the name of
+	 * {@code @ModelAttribute} or {@code @RequestBody} is determined in Spring MVC.
+	 * <p>If this is not configured, then {@link #createBindingResult} will apply
+	 * default behavior to resolve the name to use.
+	 * behavior applies.
+	 * @param nameResolver the resolver to use
+	 */
+	public void setBindingResultNameResolver(BindingResultNameResolver nameResolver) {
+		this.objectNameResolver = nameResolver;
 	}
 
 
@@ -307,6 +323,10 @@ public class MethodValidationAdapter {
 
 	/**
 	 * Select an object name and create a {@link BindingResult} for the argument.
+	 * You can configure a {@link #setBindingResultNameResolver(BindingResultNameResolver)
+	 * bindingResultNameResolver} to determine in a way that matches the specific
+	 * programming model, e.g. {@code @ModelAttribute} or {@code @RequestBody} arguments
+	 * in Spring MVC.
 	 * <p>By default, the name is based on the parameter name, or for a return type on
 	 * {@link Conventions#getVariableNameForReturnType(Method, Class, Object)}.
 	 * <p>If a name cannot be determined for any reason, e.g. a return value with
@@ -316,27 +336,51 @@ public class MethodValidationAdapter {
 	 * @return the determined name
 	 */
 	private BindingResult createBindingResult(MethodParameter parameter, @Nullable Object argument) {
-		// TODO: allow external customization via Function (e.g. from @ModelAttribute + Conventions based on type)
-		String objectName = parameter.getParameterName();
-		int index = parameter.getParameterIndex();
-		if (index == -1) {
-			try {
-				Method method = parameter.getMethod();
-				if (method != null) {
-					Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, parameter.getContainingClass());
-					objectName = Conventions.getVariableNameForReturnType(method, resolvedType, argument);
-				}
+		String objectName = null;
+		if (this.objectNameResolver != null) {
+			objectName = this.objectNameResolver.resolveName(parameter, argument);
+		}
+		else {
+			if (parameter.getParameterIndex() != -1) {
+				objectName = parameter.getParameterName();
 			}
-			catch (IllegalArgumentException ex) {
-				// insufficient type information
+			else {
+				try {
+					Method method = parameter.getMethod();
+					if (method != null) {
+						Class<?> containingClass = parameter.getContainingClass();
+						Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);
+						objectName = Conventions.getVariableNameForReturnType(method, resolvedType, argument);
+					}
+				}
+				catch (IllegalArgumentException ex) {
+					// insufficient type information
+				}
 			}
 		}
 		if (objectName == null) {
+			int index = parameter.getParameterIndex();
 			objectName = (parameter.getExecutable().getName() + (index != -1 ? ".arg" + index : ""));
 		}
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(argument, objectName);
 		result.setMessageCodesResolver(this.messageCodesResolver);
 		return result;
+	}
+
+
+	/**
+	 * Contract to determine the object name of an {@code @Valid} method parameter.
+	 */
+	public interface BindingResultNameResolver {
+
+		/**
+		 * Determine the name for the given method parameter.
+		 * @param parameter the method parameter
+		 * @param value the argument or return value
+		 * @return the name to use
+		 */
+		String resolveName(MethodParameter parameter, @Nullable Object value);
+
 	}
 
 
