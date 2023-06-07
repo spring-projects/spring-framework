@@ -32,13 +32,14 @@ import org.springframework.util.ClassUtils;
 import org.springframework.validation.FieldError;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link MethodValidationAdapter}.
  * @author Rossen Stoyanchev
  */
 public class MethodValidationAdapterTests {
+
+	private static final MethodValidationAdapter validationAdapter = new MethodValidationAdapter();
 
 	private static final Person faustino1234 = new Person("Faustino1234");
 
@@ -154,23 +155,17 @@ public class MethodValidationAdapterTests {
 	}
 
 	private void validateArguments(
-			Object target, Method method, Object[] arguments, Consumer<MethodValidationException> assertions) {
+			Object target, Method method, Object[] arguments, Consumer<MethodValidationResult> assertions) {
 
-		MethodValidationAdapter adapter = new MethodValidationAdapter();
-
-		assertThatExceptionOfType(MethodValidationException.class)
-				.isThrownBy(() -> adapter.validateMethodArguments(target, method, arguments, new Class<?>[0]))
-				.satisfies(assertions);
+		assertions.accept(
+				validationAdapter.validateMethodArguments(target, method, arguments, new Class<?>[0]));
 	}
 
 	private void validateReturnValue(
-			Object target, Method method, @Nullable Object returnValue, Consumer<MethodValidationException> assertions) {
+			Object target, Method method, @Nullable Object returnValue, Consumer<MethodValidationResult> assertions) {
 
-		MethodValidationAdapter adapter = new MethodValidationAdapter();
-
-		assertThatExceptionOfType(MethodValidationException.class)
-				.isThrownBy(() -> adapter.validateMethodReturnValue(target, method, returnValue, new Class<?>[0]))
-				.satisfies(assertions);
+		assertions.accept(
+				validationAdapter.validateMethodReturnValue(target, method, returnValue, new Class<?>[0]));
 	}
 
 	private static void assertBeanResult(
@@ -225,12 +220,6 @@ public class MethodValidationAdapterTests {
 
 	@SuppressWarnings("unused")
 	private record Person(@Size(min = 1, max = 10) String name) {
-
-			@Override
-			public String name() {
-				return this.name;
-			}
-
 	}
 
 }

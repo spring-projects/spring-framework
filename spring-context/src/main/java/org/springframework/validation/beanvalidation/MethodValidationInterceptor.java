@@ -103,11 +103,15 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 		Object target = getTarget(invocation);
 		Method method = invocation.getMethod();
 		Class<?>[] groups = determineValidationGroups(invocation);
-		this.delegate.validateMethodArguments(target, method, invocation.getArguments(), groups);
+
+		this.delegate.validateMethodArguments(target, method, invocation.getArguments(), groups)
+				.throwIfViolationsPresent();
 
 		Object returnValue = invocation.proceed();
 
-		this.delegate.validateMethodReturnValue(target, method, returnValue, groups);
+		this.delegate.validateMethodReturnValue(target, method, returnValue, groups)
+				.throwIfViolationsPresent();
+
 		return returnValue;
 	}
 

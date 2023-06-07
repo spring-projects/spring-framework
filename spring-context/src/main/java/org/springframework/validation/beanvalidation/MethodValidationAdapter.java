@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -72,6 +73,8 @@ import org.springframework.validation.annotation.Validated;
 public class MethodValidationAdapter {
 
 	private static final Comparator<ParameterValidationResult> RESULT_COMPARATOR = new ResultComparator();
+
+	private static final MethodValidationResult EMPTY_RESULT = new EmptyMethodValidationResult();
 
 
 	private final Supplier<Validator> validator;
@@ -186,15 +189,19 @@ public class MethodValidationAdapter {
 	}
 
 	/**
-	 * Validate the given method arguments and raise {@link ConstraintViolation}
-	 * in case of any errors.
+	 * Validate the given method arguments and return the result of validation.
 	 * @param target the target Object
 	 * @param method the target method
 	 * @param arguments candidate arguments for a method invocation
 	 * @param groups groups for validation determined via
 	 * {@link #determineValidationGroups(Object, Method)}
+	 * @return a result with {@link ConstraintViolation violations} and
+	 * {@link ParameterValidationResult validationResults}, both possibly empty
+	 * in case there are no violations
 	 */
-	public void validateMethodArguments(Object target, Method method, Object[] arguments, Class<?>[] groups) {
+	public MethodValidationResult validateMethodArguments(
+			Object target, Method method, Object[] arguments, Class<?>[] groups) {
+
 		ExecutableValidator execVal = this.validator.get().forExecutables();
 		Set<ConstraintViolation<Object>> result;
 		try {
@@ -207,28 +214,26 @@ public class MethodValidationAdapter {
 			Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(mostSpecificMethod);
 			result = execVal.validateParameters(target, bridgedMethod, arguments, groups);
 		}
-		if (!result.isEmpty()) {
-			throw createException(target, method, result, i -> arguments[i]);
-		}
+		return (result.isEmpty() ? EMPTY_RESULT : createException(target, method, result, i -> arguments[i]));
 	}
 
 	/**
-	 * Validate the given return value and raise {@link ConstraintViolation}
-	 * in case of any errors.
+	 * Validate the given return value and return the result of validation.
 	 * @param target the target Object
 	 * @param method the target method
 	 * @param returnValue value returned from invoking the target method
 	 * @param groups groups for validation determined via
 	 * {@link #determineValidationGroups(Object, Method)}
+	 * @return a result with {@link ConstraintViolation violations} and
+	 * {@link ParameterValidationResult validationResults}, both possibly empty
+	 * in case there are no violations
 	 */
-	public void validateMethodReturnValue(
+	public MethodValidationResult validateMethodReturnValue(
 			Object target, Method method, @Nullable Object returnValue, Class<?>[] groups) {
 
 		ExecutableValidator execVal = this.validator.get().forExecutables();
 		Set<ConstraintViolation<Object>> result = execVal.validateReturnValue(target, method, returnValue, groups);
-		if (!result.isEmpty()) {
-			throw createException(target, method, result, i -> returnValue);
-		}
+		return (result.isEmpty() ? EMPTY_RESULT : createException(target, method, result, i -> returnValue));
 	}
 
 	private MethodValidationException createException(
@@ -275,7 +280,7 @@ public class MethodValidationAdapter {
 		cascadedViolations.forEach((node, builder) -> validatonResultList.add(builder.build()));
 		validatonResultList.sort(RESULT_COMPARATOR);
 
-		return new MethodValidationException(target, method, validatonResultList, violations);
+		return new MethodValidationException(target, method, violations, validatonResultList);
 	}
 
 	/**
@@ -468,6 +473,38 @@ public class MethodValidationAdapter {
 			}
 			return 0;
 		}
+	}
+
+
+	/**
+	 * {@link MethodValidationResult} to use when there are no violations.
+	 */
+	private static final class EmptyMethodValidationResult implements MethodValidationResult {
+
+		@Override
+		public Set<ConstraintViolation<?>> getConstraintViolations() {
+			return Collections.emptySet();
+		}
+
+		@Override
+		public List<ParameterValidationResult> getAllValidationResults() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public List<ParameterValidationResult> getValueResults() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public List<ParameterErrors> getBeanResults() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public void throwIfViolationsPresent() {
+		}
+
 	}
 
 }

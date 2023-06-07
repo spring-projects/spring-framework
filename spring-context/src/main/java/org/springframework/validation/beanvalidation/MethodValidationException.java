@@ -23,17 +23,15 @@ import java.util.Set;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 
+import org.springframework.util.Assert;
+
 /**
- * Extension of {@link ConstraintViolationException} that exposes an additional
- * list of {@link ParameterValidationResult} with violations adapted to
+ * Extension of {@link ConstraintViolationException} that implements
+ * {@link MethodValidationResult} exposing an additional list of
+ * {@link ParameterValidationResult} that represents violations adapted to
  * {@link org.springframework.context.MessageSourceResolvable} and grouped by
  * method parameter.
  *
- * <p>For {@link jakarta.validation.Valid @Valid}-annotated, Object method
- * parameters or return types with cascaded violations, the {@link ParameterErrors}
- * subclass of {@link ParameterValidationResult} implements
- * {@link org.springframework.validation.Errors} and exposes
- * {@link org.springframework.validation.FieldError field errors}.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
@@ -42,7 +40,7 @@ import jakarta.validation.ConstraintViolationException;
  * @see MethodValidationAdapter
  */
 @SuppressWarnings("serial")
-public class MethodValidationException extends ConstraintViolationException {
+public class MethodValidationException extends ConstraintViolationException implements MethodValidationResult {
 
 	private final Object target;
 
@@ -52,11 +50,11 @@ public class MethodValidationException extends ConstraintViolationException {
 
 
 	public MethodValidationException(
-			Object target, Method method,
-			List<ParameterValidationResult> validationResults,
-			Set<? extends ConstraintViolation<?>> violations) {
+			Object target, Method method, Set<? extends ConstraintViolation<?>> violations,
+			List<ParameterValidationResult> validationResults) {
 
 		super(violations);
+		Assert.notEmpty(violations, "'violations' must not be empty");
 		this.target = target;
 		this.method = method;
 		this.allValidationResults = validationResults;
@@ -77,42 +75,36 @@ public class MethodValidationException extends ConstraintViolationException {
 		return this.method;
 	}
 
-	/**
-	 * Return all validation results. This includes method parameters with
-	 * constraints declared on them, as well as
-	 * {@link jakarta.validation.Valid @Valid} method parameters with
-	 * cascaded constraints.
-	 * @see #getValueResults()
-	 * @see #getBeanResults()
-	 */
+	// re-declare parent class method for NonNull treatment of interface
+
+	@Override
+	public Set<ConstraintViolation<?>> getConstraintViolations() {
+		return super.getConstraintViolations();
+	}
+
+	@Override
 	public List<ParameterValidationResult> getAllValidationResults() {
 		return this.allValidationResults;
 	}
 
-	/**
-	 * Return only validation results for method parameters with constraints
-	 * declared directly on them. This excludes
-	 * {@link jakarta.validation.Valid @Valid} method parameters with cascaded
-	 * constraints.
-	 * @see #getAllValidationResults()
-	 */
+	@Override
 	public List<ParameterValidationResult> getValueResults() {
 		return this.allValidationResults.stream()
 				.filter(result -> !(result instanceof ParameterErrors))
 				.toList();
 	}
 
-	/**
-	 * Return only validation results for {@link jakarta.validation.Valid @Valid}
-	 * method parameters with cascaded constraints. This excludes method
-	 * parameters with constraints declared directly on them.
-	 * @see #getAllValidationResults()
-	 */
+	@Override
 	public List<ParameterErrors> getBeanResults() {
 		return this.allValidationResults.stream()
 				.filter(result -> result instanceof ParameterErrors)
 				.map(result -> (ParameterErrors) result)
 				.toList();
+	}
+
+	@Override
+	public void throwIfViolationsPresent() {
+		throw this;
 	}
 
 }
