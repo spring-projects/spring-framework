@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,10 @@ import org.springframework.lang.Nullable;
  * Base class for setting up a {@link java.util.concurrent.ExecutorService}
  * (typically a {@link java.util.concurrent.ThreadPoolExecutor} or
  * {@link java.util.concurrent.ScheduledThreadPoolExecutor}).
- * Defines common configuration settings and common lifecycle handling.
+ *
+ * <p>Defines common configuration settings and common lifecycle handling,
+ * inheriting thread customization options (name, priority, etc) from
+ * {@link org.springframework.util.CustomizableThreadCreator}.
  *
  * @author Juergen Hoeller
  * @since 3.0
@@ -199,8 +202,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 
 	/**
-	 * Calls {@code shutdown} when the BeanFactory destroys
-	 * the task executor instance.
+	 * Calls {@code shutdown} when the BeanFactory destroys the executor instance.
 	 * @see #shutdown()
 	 */
 	@Override
