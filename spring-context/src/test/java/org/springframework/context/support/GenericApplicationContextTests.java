@@ -76,10 +76,12 @@ class GenericApplicationContextTests {
 
 	private final GenericApplicationContext context = new GenericApplicationContext();
 
+
 	@AfterEach
 	void closeContext() {
 		context.close();
 	}
+
 
 	@Test
 	void getBeanForClass() {
@@ -91,7 +93,7 @@ class GenericApplicationContextTests {
 		assertThat(context.getBean(CharSequence.class)).isSameAs(context.getBean("testBean"));
 
 		assertThatExceptionOfType(NoUniqueBeanDefinitionException.class)
-			.isThrownBy(() -> context.getBean(Object.class));
+				.isThrownBy(() -> context.getBean(Object.class));
 	}
 
 	@Test
@@ -509,6 +511,7 @@ class GenericApplicationContextTests {
 		context.close();
 	}
 
+
 	private MergedBeanDefinitionPostProcessor registerMockMergedBeanDefinitionPostProcessor(GenericApplicationContext context) {
 		MergedBeanDefinitionPostProcessor bpp = mock();
 		context.registerBeanDefinition("bpp", BeanDefinitionBuilder.rootBeanDefinition(
@@ -563,8 +566,8 @@ class GenericApplicationContextTests {
 		public void setCounter(Integer counter) {
 			this.counter = counter;
 		}
-
 	}
+
 
 	static class TestAotFactoryBean<T> extends AbstractFactoryBean<T> {
 
@@ -583,6 +586,7 @@ class GenericApplicationContextTests {
 			return (T) new Object();
 		}
 	}
+
 
 	static class PingPongProtocolResolver implements ProtocolResolver {
 
