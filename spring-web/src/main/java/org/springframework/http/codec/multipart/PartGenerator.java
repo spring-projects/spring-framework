@@ -38,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 import reactor.core.scheduler.Scheduler;
@@ -68,8 +67,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 
 	private final MonoSink<Part> sink;
 
-	private final boolean streaming;
-
 	private final int maxInMemorySize;
 
 	private final long maxDiskUsagePerPart;
@@ -80,12 +77,11 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 
 
 	private PartGenerator(MonoSink<Part> sink, int maxInMemorySize, long maxDiskUsagePerPart,
-			boolean streaming, Mono<Path> fileStorageDirectory, Scheduler blockingOperationScheduler) {
+			Mono<Path> fileStorageDirectory, Scheduler blockingOperationScheduler) {
 
 		this.sink = sink;
 		this.maxInMemorySize = maxInMemorySize;
 		this.maxDiskUsagePerPart = maxDiskUsagePerPart;
-		this.streaming = streaming;
 		this.fileStorageDirectory = fileStorageDirectory;
 		this.blockingOperationScheduler = blockingOperationScheduler;
 	}
@@ -94,11 +90,10 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 	 * Creates parts from a given stream of tokens.
 	 */
 	public static Mono<Part> createPart(Flux<MultipartParser.Token> tokens, int maxInMemorySize,
-			long maxDiskUsagePerPart, boolean streaming, Mono<Path> fileStorageDirectory,
-			Scheduler blockingOperationScheduler) {
+			long maxDiskUsagePerPart, Mono<Path> fileStorageDirectory, Scheduler blockingOperationScheduler) {
 
 		return Mono.create(sink -> {
-			PartGenerator generator = new PartGenerator(sink, maxInMemorySize, maxDiskUsagePerPart, streaming,
+			PartGenerator generator = new PartGenerator(sink, maxInMemorySize, maxDiskUsagePerPart,
 					fileStorageDirectory, blockingOperationScheduler);
 
 			sink.onCancel(generator);
@@ -134,19 +129,9 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 			changeState(currentState, new FormFieldState(headers));
 			requestToken();
 		}
-		else if (!this.streaming) {
+		else {
 			changeState(currentState, new InMemoryState(headers));
 			requestToken();
-		}
-		else {
-			Flux<DataBuffer> streamingContent = Flux.create(contentSink -> {
-				State newState = new StreamingState(contentSink);
-				if (changeState(currentState, newState)) {
-					contentSink.onRequest(l -> requestToken());
-					requestToken();
-				}
-			});
-			emitPart(DefaultParts.part(headers, streamingContent));
 		}
 	}
 
@@ -225,8 +210,6 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 	 * <ol>
 	 * <li>If the part is a {@linkplain MultipartUtils#isFormField(HttpHeaders) form field},
 	 * the creator will be in the {@link FormFieldState}.</li>
-	 * <li>If {@linkplain #streaming} is enabled, the creator will be in the
-	 * {@link StreamingState}.</li>
 	 * <li>Otherwise, the creator will initially be in the
 	 * {@link InMemoryState}, but will switch over to {@link CreateFileState}
 	 * when the part byte count exceeds {@link #maxInMemorySize},
@@ -352,61 +335,11 @@ final class PartGenerator extends BaseSubscriber<MultipartParser.Token> {
 
 
 	/**
-	 * The creator state when {@link #streaming} is {@code true} (and not
-	 * handling a form field). Relays all received buffers to a sink.
-	 */
-	private final class StreamingState implements State {
-
-		private final FluxSink<DataBuffer> bodySink;
-
-		public StreamingState(FluxSink<DataBuffer> bodySink) {
-			this.bodySink = bodySink;
-		}
-
-		@Override
-		public void body(DataBuffer dataBuffer) {
-			if (!this.bodySink.isCancelled()) {
-				this.bodySink.next(dataBuffer);
-				if (this.bodySink.requestedFromDownstream() > 0) {
-					requestToken();
-				}
-			}
-			else {
-				DataBufferUtils.release(dataBuffer);
-				// even though the body sink is canceled, the (outer) part sink
-				// might not be, so request another token
-				requestToken();
-			}
-		}
-
-		@Override
-		public void onComplete() {
-			if (!this.bodySink.isCancelled()) {
-				this.bodySink.complete();
-			}
-		}
-
-		@Override
-		public void error(Throwable throwable) {
-			if (!this.bodySink.isCancelled()) {
-				this.bodySink.error(throwable);
-			}
-		}
-
-		@Override
-		public String toString() {
-			return "STREAMING";
-		}
-
-	}
-
-
-	/**
-	 * The creator state when {@link #streaming} is {@code false} (and not
-	 * handling a form field). Stores all received buffers in a queue.
+	 * The creator state when not handling a form field.
+	 * Stores all received buffers in a queue.
 	 * If the byte count exceeds {@link #maxInMemorySize}, the creator state
 	 * is changed to {@link CreateFileState}, and eventually to
-	 * {@link CreateFileState}.
+	 * {@link WritingFileState}.
 	 */
 	private final class InMemoryState implements State {
 

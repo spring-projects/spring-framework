@@ -51,8 +51,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpHeaders headers;
 
-	// TODO: remove @Nullable once deprecated constructors have been removed
-	@Nullable
 	private final HttpMethod method;
 
 	@Nullable
@@ -70,22 +68,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	@Nullable
 	private String logPrefix;
 
-
-	/**
-	 * Constructor with the URI and headers for the request.
-	 * @param uri the URI for the request
-	 * @param contextPath the context path for the request
-	 * @param headers the headers for the request (as {@link MultiValueMap})
-	 * @since 5.3
-	 * @deprecated since 6.0.8, in favor of {@link #AbstractServerHttpRequest(HttpMethod, URI, String, MultiValueMap)}
-	 */
-	@Deprecated(since = "6.0.8", forRemoval = true)
-	public AbstractServerHttpRequest(URI uri, @Nullable String contextPath, MultiValueMap<String, String> headers) {
-		this.uri = uri;
-		this.path = RequestPath.parse(uri, contextPath);
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-		this.method = null;
-	}
 
 	/**
 	 * Constructor with the method, URI and headers for the request.
@@ -106,21 +88,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		this.uri = uri;
 		this.path = RequestPath.parse(uri, contextPath);
 		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-	}
-
-	/**
-	 * Constructor with the URI and headers for the request.
-	 * @param uri the URI for the request
-	 * @param contextPath the context path for the request
-	 * @param headers the headers for the request (as {@link HttpHeaders})
-	 * @deprecated since 6.0.8, in favor of {@link #AbstractServerHttpRequest(HttpMethod, URI, String, MultiValueMap)}
-	 */
-	@Deprecated(since = "6.0.8", forRemoval = true)
-	public AbstractServerHttpRequest(URI uri, @Nullable String contextPath, HttpHeaders headers) {
-		this.uri = uri;
-		this.path = RequestPath.parse(uri, contextPath);
-		this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
-		this.method = null;
 	}
 
 
@@ -147,14 +114,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		// TODO: remove null check once deprecated constructors have been removed
-		if (this.method != null) {
-			return this.method;
-		}
-		else {
-			throw new IllegalStateException("No HttpMethod provided in constructor, " +
-					"and AbstractServerHttpRequest::getMethod not overridden");
-		}
+		return this.method;
 	}
 
 	@Override
