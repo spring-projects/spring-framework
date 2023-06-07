@@ -336,9 +336,8 @@ public class TypeUtils {
 			case 3 -> Constants.ICONST_3;
 			case 4 -> Constants.ICONST_4;
 			case 5 -> Constants.ICONST_5;
-			default -> -1;
+			default -> -1; // error
 		};
-		// error
 	}
 
     public static int LCONST(long value) {

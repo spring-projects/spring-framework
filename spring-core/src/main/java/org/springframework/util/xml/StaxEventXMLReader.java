@@ -118,8 +118,10 @@ class StaxEventXMLReader extends AbstractStaxXMLReader {
 						handleEndElement(event.asEndElement());
 					}
 				}
-				case XMLStreamConstants.PROCESSING_INSTRUCTION -> handleProcessingInstruction((ProcessingInstruction) event);
-				case XMLStreamConstants.CHARACTERS, XMLStreamConstants.SPACE, XMLStreamConstants.CDATA -> handleCharacters(event.asCharacters());
+				case XMLStreamConstants.PROCESSING_INSTRUCTION ->
+						handleProcessingInstruction((ProcessingInstruction) event);
+				case XMLStreamConstants.CHARACTERS, XMLStreamConstants.SPACE, XMLStreamConstants.CDATA ->
+						handleCharacters(event.asCharacters());
 				case XMLStreamConstants.END_DOCUMENT -> {
 					handleEndDocument();
 					documentEnded = true;
