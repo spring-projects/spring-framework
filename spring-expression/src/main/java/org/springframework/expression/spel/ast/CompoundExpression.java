@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 import org.springframework.asm.MethodVisitor;
@@ -25,10 +24,14 @@ import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.CodeFlow;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelNode;
 
 /**
  * Represents a DOT separated expression sequence, such as
- * {@code 'property1.property2.methodOne()'}.
+ * {@code property1.property2.methodOne()}.
+ *
+ * <p>May also contain array/collection/map indexers, such as
+ * {@code property1[0].property2['key']}.
  *
  * @author Andy Clement
  * @author Sam Brannen
@@ -111,11 +114,19 @@ public class CompoundExpression extends SpelNodeImpl {
 
 	@Override
 	public String toStringAST() {
-		StringJoiner sj = new StringJoiner(".");
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < getChildCount(); i++) {
-			sj.add(getChild(i).toStringAST());
+			sb.append(getChild(i).toStringAST());
+			if (i < getChildCount() - 1) {
+				SpelNode nextChild = getChild(i + 1);
+				// Don't append a '.' if the next child is an Indexer.
+				// For example, we want 'myVar[0]' instead of 'myVar.[0]'.
+				if (!(nextChild instanceof Indexer)) {
+					sb.append('.');
+				}
+			}
 		}
-		return sj.toString();
+		return sb.toString();
 	}
 
 	@Override
