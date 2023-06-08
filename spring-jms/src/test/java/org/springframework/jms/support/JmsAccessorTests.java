@@ -31,17 +31,17 @@ import static org.mockito.Mockito.mock;
  * @author Chris Beams
  * @author Vedran Pavic
  */
-public class JmsAccessorTests {
+class JmsAccessorTests {
 
 	@Test
-	public void testChokesIfConnectionFactoryIsNotSupplied() throws Exception {
+	void testChokesIfConnectionFactoryIsNotSupplied() {
 		JmsAccessor accessor = new StubJmsAccessor();
 		assertThatIllegalArgumentException().isThrownBy(
 				accessor::afterPropertiesSet);
 	}
 
 	@Test
-	public void testSessionTransactedModeReallyDoesDefaultToFalse() throws Exception {
+	void testSessionTransactedModeReallyDoesDefaultToFalse() {
 		JmsAccessor accessor = new StubJmsAccessor();
 		assertThat(accessor.isSessionTransacted()).as("The [sessionTransacted] property of JmsAccessor must default to " +
 				"false. Change this test (and the attendant Javadoc) if you have " +
@@ -49,7 +49,7 @@ public class JmsAccessorTests {
 	}
 
 	@Test
-	public void testAcknowledgeModeReallyDoesDefaultToAutoAcknowledge() throws Exception {
+	void testAcknowledgeModeReallyDoesDefaultToAutoAcknowledge() {
 		JmsAccessor accessor = new StubJmsAccessor();
 		assertThat(accessor.getSessionAcknowledgeMode()).as("The [sessionAcknowledgeMode] property of JmsAccessor must default to " +
 				"[Session.AUTO_ACKNOWLEDGE]. Change this test (and the attendant " +
@@ -57,7 +57,7 @@ public class JmsAccessorTests {
 	}
 
 	@Test
-	public void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() throws Exception {
+	void testSetAcknowledgeModeNameChokesIfBadAckModeIsSupplied() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!"));
 	}
