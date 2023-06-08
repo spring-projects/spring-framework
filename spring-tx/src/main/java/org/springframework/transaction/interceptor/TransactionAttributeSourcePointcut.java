@@ -34,28 +34,31 @@ import org.springframework.util.ObjectUtils;
  * @since 2.5.5
  */
 @SuppressWarnings("serial")
-abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
+class TransactionAttributeSourcePointcut extends StaticMethodMatcherPointcut implements Serializable {
 
-	protected TransactionAttributeSourcePointcut() {
+	@Nullable
+	private TransactionAttributeSource transactionAttributeSource;
+
+
+	public TransactionAttributeSourcePointcut() {
 		setClassFilter(new TransactionAttributeSourceClassFilter());
 	}
 
 
+	public void setTransactionAttributeSource(@Nullable TransactionAttributeSource transactionAttributeSource) {
+		this.transactionAttributeSource = transactionAttributeSource;
+	}
+
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
-		TransactionAttributeSource tas = getTransactionAttributeSource();
-		return (tas == null || tas.getTransactionAttribute(method, targetClass) != null);
+		return (this.transactionAttributeSource == null ||
+				this.transactionAttributeSource.getTransactionAttribute(method, targetClass) != null);
 	}
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof TransactionAttributeSourcePointcut otherPc)) {
-			return false;
-		}
-		return ObjectUtils.nullSafeEquals(getTransactionAttributeSource(), otherPc.getTransactionAttributeSource());
+		return (this == other || (other instanceof TransactionAttributeSourcePointcut otherPc &&
+				ObjectUtils.nullSafeEquals(this.transactionAttributeSource, otherPc.transactionAttributeSource)));
 	}
 
 	@Override
@@ -65,16 +68,8 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 
 	@Override
 	public String toString() {
-		return getClass().getName() + ": " + getTransactionAttributeSource();
+		return getClass().getName() + ": " + this.transactionAttributeSource;
 	}
-
-
-	/**
-	 * Obtain the underlying TransactionAttributeSource (may be {@code null}).
-	 * To be implemented by subclasses.
-	 */
-	@Nullable
-	protected abstract TransactionAttributeSource getTransactionAttributeSource();
 
 
 	/**
@@ -90,8 +85,7 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 					PersistenceExceptionTranslator.class.isAssignableFrom(clazz)) {
 				return false;
 			}
-			TransactionAttributeSource tas = getTransactionAttributeSource();
-			return (tas == null || tas.isCandidateClass(clazz));
+			return (transactionAttributeSource == null || transactionAttributeSource.isCandidateClass(clazz));
 		}
 	}
 
