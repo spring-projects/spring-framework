@@ -324,30 +324,28 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 
 		private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
-		private volatile boolean multipartRead = false;
-
-
 		DelegatingServerWebExchange(ServerHttpRequest request, Map<String, Object> attributes,
 				ServerWebExchange delegate, List<HttpMessageReader<?>> messageReaders) {
 
 			this.request = request;
 			this.attributes = attributes;
 			this.delegate = delegate;
-			this.formDataMono = initFormData(messageReaders);
+			this.formDataMono = initFormData(request, messageReaders);
 			this.multipartDataMono = initMultipartData(request, messageReaders);
 		}
 
 		@SuppressWarnings("unchecked")
-		private Mono<MultiValueMap<String, String>> initFormData(List<HttpMessageReader<?>> readers) {
+		private static Mono<MultiValueMap<String, String>> initFormData(ServerHttpRequest request,
+				List<HttpMessageReader<?>> readers) {
+
 			try {
-				MediaType contentType = this.request.getHeaders().getContentType();
+				MediaType contentType = request.getHeaders().getContentType();
 				if (MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(contentType)) {
 					return ((HttpMessageReader<MultiValueMap<String, String>>) readers.stream()
 							.filter(reader -> reader.canRead(FORM_DATA_TYPE, MediaType.APPLICATION_FORM_URLENCODED))
 							.findFirst()
 							.orElseThrow(() -> new IllegalStateException("No form data HttpMessageReader.")))
-							.readMono(FORM_DATA_TYPE, this.request, Hints.none())
-							.doOnNext(ignored -> this.multipartRead = true)
+							.readMono(FORM_DATA_TYPE, request, Hints.none())
 							.switchIfEmpty(EMPTY_FORM_DATA)
 							.cache();
 				}
@@ -400,23 +398,7 @@ class DefaultServerRequestBuilder implements ServerRequest.Builder {
 			return this.multipartDataMono;
 		}
 
-		@Override
-		public Mono<Void> cleanupMultipart() {
-			if (this.multipartRead) {
-				return getMultipartData()
-						.onErrorResume(t -> Mono.empty()) // ignore errors reading multipart data
-						.flatMapIterable(Map::values)
-						.flatMapIterable(Function.identity())
-						.flatMap(part -> part.delete()
-										.onErrorResume(ex -> Mono.empty()))
-						.then();
-			}
-			else {
-				return Mono.empty();
-			}
-		}
-
-        // Delegating methods
+		// Delegating methods
 
 		@Override
 		public ServerHttpResponse getResponse() {
