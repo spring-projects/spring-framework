@@ -99,31 +99,31 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 
 	@Override
-	public boolean isContextLoaded(MergedContextConfiguration mergedContextConfiguration) {
-		mergedContextConfiguration = replaceIfNecessary(mergedContextConfiguration);
+	public boolean isContextLoaded(MergedContextConfiguration mergedConfig) {
+		mergedConfig = replaceIfNecessary(mergedConfig);
 		synchronized (this.contextCache) {
-			return this.contextCache.contains(mergedContextConfiguration);
+			return this.contextCache.contains(mergedConfig);
 		}
 	}
 
 	@Override
-	public ApplicationContext loadContext(MergedContextConfiguration mergedContextConfiguration) {
-		mergedContextConfiguration = replaceIfNecessary(mergedContextConfiguration);
+	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) {
+		mergedConfig = replaceIfNecessary(mergedConfig);
 		synchronized (this.contextCache) {
-			ApplicationContext context = this.contextCache.get(mergedContextConfiguration);
+			ApplicationContext context = this.contextCache.get(mergedConfig);
 			if (context == null) {
 				try {
-					if (mergedContextConfiguration instanceof AotMergedContextConfiguration aotMergedConfig) {
+					if (mergedConfig instanceof AotMergedContextConfiguration aotMergedConfig) {
 						context = loadContextInAotMode(aotMergedConfig);
 					}
 					else {
-						context = loadContextInternal(mergedContextConfiguration);
+						context = loadContextInternal(mergedConfig);
 					}
 					if (logger.isTraceEnabled()) {
 						logger.trace("Storing ApplicationContext [%s] in cache under key %s".formatted(
-								System.identityHashCode(context), mergedContextConfiguration));
+								System.identityHashCode(context), mergedConfig));
 					}
-					this.contextCache.put(mergedContextConfiguration, context);
+					this.contextCache.put(mergedConfig, context);
 				}
 				catch (Exception ex) {
 					Throwable cause = ex;
@@ -142,13 +142,13 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 						}
 					}
 					throw new IllegalStateException(
-						"Failed to load ApplicationContext for " + mergedContextConfiguration, cause);
+						"Failed to load ApplicationContext for " + mergedConfig, cause);
 				}
 			}
 			else {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
-							System.identityHashCode(context), mergedContextConfiguration));
+							System.identityHashCode(context), mergedConfig));
 				}
 			}
 
@@ -159,10 +159,10 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	}
 
 	@Override
-	public void closeContext(MergedContextConfiguration mergedContextConfiguration, @Nullable HierarchyMode hierarchyMode) {
-		mergedContextConfiguration = replaceIfNecessary(mergedContextConfiguration);
+	public void closeContext(MergedContextConfiguration mergedConfig, @Nullable HierarchyMode hierarchyMode) {
+		mergedConfig = replaceIfNecessary(mergedConfig);
 		synchronized (this.contextCache) {
-			this.contextCache.remove(mergedContextConfiguration, hierarchyMode);
+			this.contextCache.remove(mergedConfig, hierarchyMode);
 		}
 	}
 
@@ -179,19 +179,19 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 * @throws Exception if an error occurs while loading the application context
 	 */
 	@SuppressWarnings("deprecation")
-	protected ApplicationContext loadContextInternal(MergedContextConfiguration mergedContextConfiguration)
+	protected ApplicationContext loadContextInternal(MergedContextConfiguration mergedConfig)
 			throws Exception {
 
-		ContextLoader contextLoader = getContextLoader(mergedContextConfiguration);
+		ContextLoader contextLoader = getContextLoader(mergedConfig);
 		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
-			return smartContextLoader.loadContext(mergedContextConfiguration);
+			return smartContextLoader.loadContext(mergedConfig);
 		}
 		else {
-			String[] locations = mergedContextConfiguration.getLocations();
+			String[] locations = mergedConfig.getLocations();
 			Assert.notNull(locations, () -> """
 					Cannot load an ApplicationContext with a NULL 'locations' array. \
 					Consider annotating test class [%s] with @ContextConfiguration or \
-					@ContextHierarchy.""".formatted(mergedContextConfiguration.getTestClass().getName()));
+					@ContextHierarchy.""".formatted(mergedConfig.getTestClass().getName()));
 			return contextLoader.loadContext(locations);
 		}
 	}
