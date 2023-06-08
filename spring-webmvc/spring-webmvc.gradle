@@ -18,6 +18,7 @@ dependencies {
 	optional("jakarta.servlet.jsp:jakarta.servlet.jsp-api")
 	optional("jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api")
 	optional("jakarta.el:jakarta.el-api")
+	optional("jakarta.validation:jakarta.validation-api")
 	optional("jakarta.xml.bind:jakarta.xml.bind-api")
 	optional('io.micrometer:context-propagation')
 	optional("org.webjars:webjars-locator-core")

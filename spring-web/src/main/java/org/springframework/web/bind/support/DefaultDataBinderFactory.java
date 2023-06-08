@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.springframework.web.bind.support;
 
+import java.lang.annotation.Annotation;
+
+import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -32,6 +36,8 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	@Nullable
 	private final WebBindingInitializer initializer;
 
+	private boolean methodValidationApplicable;
+
 
 	/**
 	 * Create a new {@code DefaultDataBinderFactory} instance.
@@ -40,6 +46,17 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 */
 	public DefaultDataBinderFactory(@Nullable WebBindingInitializer initializer) {
 		this.initializer = initializer;
+	}
+
+
+	/**
+	 * Configure flag to signal whether validation will be applied to handler
+	 * method arguments, which is the case if Bean Validation is enabled in
+	 * Spring MVC, and method parameters have {@code @Constraint} annotations.
+	 * @since 6.1
+	 */
+	public void setMethodValidationApplicable(boolean methodValidationApplicable) {
+		this.methodValidationApplicable = methodValidationApplicable;
 	}
 
 
@@ -85,6 +102,38 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	protected void initBinder(WebDataBinder dataBinder, NativeWebRequest webRequest)
 			throws Exception {
 
+	}
+
+	/**
+	 * {@inheritDoc}.
+ 	 * <p>By default, if the parameter has {@code @Valid}, Bean Validation is
+	 * excluded, deferring to method validation.
+	 */
+	@Override
+	public WebDataBinder createBinder(
+			NativeWebRequest webRequest, @Nullable Object target, String objectName,
+			MethodParameter parameter) throws Exception {
+
+		WebDataBinder dataBinder = createBinder(webRequest, target, objectName);
+		if (this.methodValidationApplicable) {
+			MethodValidationInitializer.updateBinder(dataBinder, parameter);
+		}
+		return dataBinder;
+	}
+
+
+	/**
+	 * Excludes Bean Validation if the method parameter has {@code @Valid}.
+	 */
+	private static class MethodValidationInitializer {
+
+		public static void updateBinder(DataBinder binder, MethodParameter parameter) {
+			for (Annotation annotation : parameter.getParameterAnnotations()) {
+				if (annotation.annotationType().getName().equals("jakarta.validation.Valid")) {
+					binder.setExcludedValidators(validator -> validator instanceof jakarta.validation.Validator);
+				}
+			}
+		}
 	}
 
 }

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -163,6 +164,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
 	private final List<Validator> validators = new ArrayList<>();
+
+	@Nullable
+	private Predicate<Validator> excludedValidators;
 
 
 	/**
@@ -581,6 +585,14 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
+	 * Configure a predicate to exclude validators.
+	 * @since 6.1
+	 */
+	public void setExcludedValidators(Predicate<Validator> predicate) {
+		this.excludedValidators = predicate;
+	}
+
+	/**
 	 * Add Validators to apply after each binding step.
 	 * @see #setValidator(Validator)
 	 * @see #replaceValidators(Validator...)
@@ -614,6 +626,18 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public List<Validator> getValidators() {
 		return Collections.unmodifiableList(this.validators);
+	}
+
+	/**
+	 * Return the Validators to apply after data binding. This includes the
+	 * configured {@link #getValidators() validators} filtered by the
+	 * {@link #setExcludedValidators(Predicate) exclude predicate}.
+	 * @since 6.1
+	 */
+	public List<Validator> getValidatorsToApply() {
+		return (this.excludedValidators != null ?
+				this.validators.stream().filter(validator -> !this.excludedValidators.test(validator)).toList() :
+				Collections.unmodifiableList(this.validators));
 	}
 
 
@@ -906,7 +930,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.state(target != null, "No target to validate");
 		BindingResult bindingResult = getBindingResult();
 		// Call each validator with the same binding result
-		for (Validator validator : getValidators()) {
+		for (Validator validator : getValidatorsToApply()) {
 			validator.validate(target, bindingResult);
 		}
 	}
@@ -924,7 +948,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.state(target != null, "No target to validate");
 		BindingResult bindingResult = getBindingResult();
 		// Call each validator with the same binding result
-		for (Validator validator : getValidators()) {
+		for (Validator validator : getValidatorsToApply()) {
 			if (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator smartValidator) {
 				smartValidator.validate(target, bindingResult, validationHints);
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, name);
 				arg = readWithMessageConverters(inputMessage, parameter, parameter.getNestedGenericParameterType());
 				if (binderFactory != null) {
-					WebDataBinder binder = binderFactory.createBinder(request, arg, name);
+					WebDataBinder binder = binderFactory.createBinder(request, arg, name, parameter);
 					if (arg != null) {
 						validateIfApplicable(binder, parameter);
 						if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {

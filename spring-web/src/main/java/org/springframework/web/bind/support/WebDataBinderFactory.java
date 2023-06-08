@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.bind.support;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -24,6 +25,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * A factory for creating a {@link WebDataBinder} instance for a named target object.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.1
  */
 public interface WebDataBinderFactory {
@@ -39,5 +41,19 @@ public interface WebDataBinderFactory {
 	 */
 	WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target, String objectName)
 			throws Exception;
+
+	/**
+	 * Variant of {@link #createBinder(NativeWebRequest, Object, String)} with a
+	 * {@link MethodParameter} for which the {@code DataBinder} is created. This
+	 * may provide more insight to initialize the {@link WebDataBinder}.
+	 * @since 6.1
+	 */
+	default WebDataBinder createBinder(
+			NativeWebRequest webRequest, @Nullable Object target, String objectName,
+			MethodParameter parameter) throws Exception {
+
+		return createBinder(webRequest, target, objectName);
+	}
+
 
 }

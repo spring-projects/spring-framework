@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.beanvalidation.MethodValidator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -50,6 +51,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
+	private static final Class<?>[] EMPTY_GROUPS = new Class<?>[0];
+
 
 	private HandlerMethodArgumentResolverComposite resolvers = new HandlerMethodArgumentResolverComposite();
 
@@ -57,6 +60,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	@Nullable
 	private WebDataBinderFactory dataBinderFactory;
+
+	@Nullable
+	private MethodValidator methodValidator;
 
 
 	/**
@@ -121,6 +127,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		this.dataBinderFactory = dataBinderFactory;
 	}
 
+	/**
+	 * Set the {@link MethodValidator} to perform method validation with if the
+	 * controller method {@link #shouldValidateArguments()} or
+	 * {@link #shouldValidateReturnValue()}.
+	 * @since 6.1
+	 */
+	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
+		this.methodValidator = methodValidator;
+	}
+
 
 	/**
 	 * Invoke the method after resolving its argument values in the context of the given request.
@@ -149,7 +165,19 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
-		return doInvoke(args);
+
+		Class<?>[] groups = getValidationGroups();
+		if (shouldValidateArguments() && this.methodValidator != null) {
+			this.methodValidator.validateArguments(getBean(), getBridgedMethod(), args, groups);
+		}
+
+		Object returnValue = doInvoke(args);
+
+		if (shouldValidateReturnValue() && this.methodValidator != null) {
+			this.methodValidator.validateReturnValue(getBean(), getBridgedMethod(), returnValue, groups);
+		}
+
+		return returnValue;
 	}
 
 	/**
@@ -192,6 +220,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return args;
+	}
+
+	private Class<?>[] getValidationGroups() {
+		return ((shouldValidateArguments() || shouldValidateReturnValue()) && this.methodValidator != null ?
+				this.methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
 	/**

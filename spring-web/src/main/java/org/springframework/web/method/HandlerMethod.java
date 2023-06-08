@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -35,6 +36,10 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.MergedAnnotation;
+import org.springframework.core.annotation.MergedAnnotationPredicates;
+import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.lang.NonNull;
@@ -44,6 +49,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
@@ -84,6 +90,10 @@ public class HandlerMethod {
 
 	private final MethodParameter[] parameters;
 
+	private final boolean validateArguments;
+
+	private final boolean validateReturnValue;
+
 	@Nullable
 	private HttpStatusCode responseStatus;
 
@@ -122,6 +132,8 @@ public class HandlerMethod {
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
+		this.validateArguments = MethodValidationInitializer.checkArguments(this.beanType, this.parameters);
+		this.validateReturnValue = MethodValidationInitializer.checkReturnValue(this.beanType, this.bridgedMethod);
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
 	}
@@ -141,6 +153,8 @@ public class HandlerMethod {
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
 		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
+		this.validateArguments = MethodValidationInitializer.checkArguments(this.beanType, this.parameters);
+		this.validateReturnValue = MethodValidationInitializer.checkReturnValue(this.beanType, this.bridgedMethod);
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
 	}
@@ -177,6 +191,8 @@ public class HandlerMethod {
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		ReflectionUtils.makeAccessible(this.bridgedMethod);
 		this.parameters = initMethodParameters();
+		this.validateArguments = MethodValidationInitializer.checkArguments(this.beanType, this.parameters);
+		this.validateReturnValue = MethodValidationInitializer.checkReturnValue(this.beanType, this.bridgedMethod);
 		evaluateResponseStatus();
 		this.description = initDescription(this.beanType, this.method);
 	}
@@ -193,6 +209,8 @@ public class HandlerMethod {
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
 		this.parameters = handlerMethod.parameters;
+		this.validateArguments = handlerMethod.validateArguments;
+		this.validateReturnValue = handlerMethod.validateReturnValue;
 		this.responseStatus = handlerMethod.responseStatus;
 		this.responseStatusReason = handlerMethod.responseStatusReason;
 		this.description = handlerMethod.description;
@@ -212,6 +230,8 @@ public class HandlerMethod {
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
 		this.parameters = handlerMethod.parameters;
+		this.validateArguments = handlerMethod.validateArguments;
+		this.validateReturnValue = handlerMethod.validateReturnValue;
 		this.responseStatus = handlerMethod.responseStatus;
 		this.responseStatusReason = handlerMethod.responseStatusReason;
 		this.resolvedFromHandlerMethod = handlerMethod;
@@ -288,6 +308,33 @@ public class HandlerMethod {
 	 */
 	public MethodParameter[] getMethodParameters() {
 		return this.parameters;
+	}
+
+	/**
+	 * Whether the method arguments are a candidate for method validation, which
+	 * is the case when there are parameter {@code jakarta.validation.Constraint}
+	 * annotations.
+	 * <p>The presence of {@code jakarta.validation.Valid} by itself does not
+	 * trigger method validation since such parameters are already validated at
+	 * the level of argument resolvers.
+	 * <p><strong>Note:</strong> if the class is annotated with {@link Validated},
+	 * this method returns false, deferring to method validation via AOP proxy.
+	 * @since 6.1
+	 */
+	public boolean shouldValidateArguments() {
+		return this.validateArguments;
+	}
+
+	/**
+	 * Whether the method return value is a candidate for method validation, which
+	 * is the case when there are method {@code jakarta.validation.Constraint}
+	 * or {@code jakarta.validation.Valid} annotations.
+	 * <p><strong>Note:</strong> if the class is annotated with {@link Validated},
+	 * this method returns false, deferring to method validation via AOP proxy.
+	 * @since 6.1
+	 */
+	public boolean shouldValidateReturnValue() {
+		return this.validateReturnValue;
 	}
 
 	/**
@@ -600,6 +647,40 @@ public class HandlerMethod {
 		@Override
 		public ReturnValueMethodParameter clone() {
 			return new ReturnValueMethodParameter(this);
+		}
+	}
+
+
+	/**
+	 * Checks for the presence of {@code @Constraint} and {@code @Valid}
+	 * annotations on the method and method parameters.
+	 */
+	private static class MethodValidationInitializer {
+
+		private static final Predicate<MergedAnnotation<? extends Annotation>> INPUT_PREDICATE =
+				MergedAnnotationPredicates.typeIn("jakarta.validation.Constraint");
+
+		private static final Predicate<MergedAnnotation<? extends Annotation>> OUTPUT_PREDICATE =
+				MergedAnnotationPredicates.typeIn("jakarta.validation.Valid", "jakarta.validation.Constraint");
+
+		public static boolean checkArguments(Class<?> beanType, MethodParameter[] parameters) {
+			if (AnnotationUtils.findAnnotation(beanType, Validated.class) == null) {
+				for (MethodParameter parameter : parameters) {
+					MergedAnnotations merged = MergedAnnotations.from(parameter.getParameterAnnotations());
+					if (merged.stream().anyMatch(INPUT_PREDICATE)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		public static boolean checkReturnValue(Class<?> beanType, Method method) {
+			if (AnnotationUtils.findAnnotation(beanType, Validated.class) == null) {
+				MergedAnnotations merged = MergedAnnotations.from(method, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY);
+				return merged.stream().anyMatch(OUTPUT_PREDICATE);
+			}
+			return false;
 		}
 	}
 

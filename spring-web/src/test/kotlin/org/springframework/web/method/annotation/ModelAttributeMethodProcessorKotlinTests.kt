@@ -60,7 +60,7 @@ class ModelAttributeMethodProcessorKotlinTests {
 		val mockRequest = MockHttpServletRequest().apply { addParameter("a", "b") }
 		val requestWithParam = ServletWebRequest(mockRequest)
 		val factory = mock<WebDataBinderFactory>()
-		given(factory.createBinder(any(), any(), eq("param")))
+		given(factory.createBinder(any(), any(), eq("param"), any()))
 			.willAnswer { WebRequestDataBinder(it.getArgument(1)) }
 		assertThat(processor.resolveArgument(this.param, container, requestWithParam, factory)).isEqualTo(Param("b"))
 	}
@@ -70,7 +70,7 @@ class ModelAttributeMethodProcessorKotlinTests {
 		val mockRequest = MockHttpServletRequest().apply { addParameter("a", null) }
 		val requestWithParam = ServletWebRequest(mockRequest)
 		val factory = mock<WebDataBinderFactory>()
-		given(factory.createBinder(any(), any(), eq("param")))
+		given(factory.createBinder(any(), any(), eq("param"), any()))
 			.willAnswer { WebRequestDataBinder(it.getArgument(1)) }
 		assertThatThrownBy {
 			processor.resolveArgument(this.param, container, requestWithParam, factory)

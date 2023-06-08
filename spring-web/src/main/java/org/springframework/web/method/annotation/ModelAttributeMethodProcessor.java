@@ -164,7 +164,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		if (bindingResult == null) {
 			// Bean property binding and validation;
 			// skipped in case of binding failure on construction.
-			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
+			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name, parameter);
 			if (binder.getTarget() != null) {
 				if (!mavContainer.isBindingDisabled(name)) {
 					bindRequestParameters(binder, webRequest);
@@ -251,7 +251,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		String[] paramNames = BeanUtils.getParameterNames(ctor);
 		Class<?>[] paramTypes = ctor.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
-		WebDataBinder binder = binderFactory.createBinder(webRequest, null, attributeName);
+		WebDataBinder binder = binderFactory.createBinder(webRequest, null, attributeName, parameter);
 		String fieldDefaultPrefix = binder.getFieldDefaultPrefix();
 		String fieldMarkerPrefix = binder.getFieldMarkerPrefix();
 		boolean bindingFailure = false;

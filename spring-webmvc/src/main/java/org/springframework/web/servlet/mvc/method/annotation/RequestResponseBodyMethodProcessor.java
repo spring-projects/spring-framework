@@ -134,7 +134,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		String name = Conventions.getVariableNameForParameter(parameter);
 
 		if (binderFactory != null) {
-			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
+			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name, parameter);
 			if (arg != null) {
 				validateIfApplicable(binder, parameter);
 				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
