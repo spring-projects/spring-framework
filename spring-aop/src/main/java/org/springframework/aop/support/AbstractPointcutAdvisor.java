@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,22 +58,12 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 
-	@Override
-	public boolean isPerInstance() {
-		return true;
-	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof PointcutAdvisor otherAdvisor)) {
-			return false;
-		}
-		return (ObjectUtils.nullSafeEquals(getAdvice(), otherAdvisor.getAdvice()) &&
-				ObjectUtils.nullSafeEquals(getPointcut(), otherAdvisor.getPointcut()));
+		return (this == other || (other instanceof PointcutAdvisor otherAdvisor &&
+				ObjectUtils.nullSafeEquals(getAdvice(), otherAdvisor.getAdvice()) &&
+				ObjectUtils.nullSafeEquals(getPointcut(), otherAdvisor.getPointcut())));
 	}
 
 	@Override

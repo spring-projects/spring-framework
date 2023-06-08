@@ -47,6 +47,13 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializable {
 
+	/**
+	 * Singleton instance of this class.
+	 * @since 6.0.10
+	 */
+	public static final DefaultAdvisorChainFactory INSTANCE = new DefaultAdvisorChainFactory();
+
+
 	@Override
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(
 			Advised config, Method method, @Nullable Class<?> targetClass) {

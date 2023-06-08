@@ -28,6 +28,7 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.aop.testfixture.advice.CountingBeforeAdvice;
 import org.springframework.aop.testfixture.interceptor.NopInterceptor;
 import org.springframework.beans.testfixture.beans.ITestBean;
@@ -35,6 +36,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -304,6 +306,8 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 		CglibAopProxy cglib = new CglibAopProxy(as);
 
 		ITestBean proxy1 = (ITestBean) cglib.getProxy();
+		ITestBean proxy1a = (ITestBean) cglib.getProxy();
+		assertThat(proxy1a.getClass()).isSameAs(proxy1.getClass());
 
 		mockTargetSource.setTarget(proxy1);
 		as = new AdvisedSupport(new Class<?>[]{});
@@ -313,6 +317,39 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 		ITestBean proxy2 = (ITestBean) cglib.getProxy();
 		assertThat(proxy2).isInstanceOf(Serializable.class);
+		assertThat(proxy2.getClass()).isNotSameAs(proxy1.getClass());
+
+		ITestBean proxy2a = (ITestBean) cglib.getProxy();
+		assertThat(proxy2a).isInstanceOf(Serializable.class);
+		assertThat(proxy2a.getClass()).isSameAs(proxy2.getClass());
+
+		mockTargetSource.setTarget(proxy1);
+		as = new AdvisedSupport(new Class<?>[]{});
+		as.setTargetSource(mockTargetSource);
+		as.addAdvisor(new DefaultPointcutAdvisor(new AnnotationMatchingPointcut(Nullable.class), new NopInterceptor()));
+		cglib = new CglibAopProxy(as);
+
+		ITestBean proxy3 = (ITestBean) cglib.getProxy();
+		assertThat(proxy3).isInstanceOf(Serializable.class);
+		assertThat(proxy3.getClass()).isNotSameAs(proxy2.getClass());
+
+		ITestBean proxy3a = (ITestBean) cglib.getProxy();
+		assertThat(proxy3a).isInstanceOf(Serializable.class);
+		assertThat(proxy3a.getClass()).isSameAs(proxy3.getClass());
+
+		mockTargetSource.setTarget(proxy1);
+		as = new AdvisedSupport(new Class<?>[]{});
+		as.setTargetSource(mockTargetSource);
+		as.addAdvisor(new DefaultPointcutAdvisor(new AnnotationMatchingPointcut(NonNull.class), new NopInterceptor()));
+		cglib = new CglibAopProxy(as);
+
+		ITestBean proxy4 = (ITestBean) cglib.getProxy();
+		assertThat(proxy4).isInstanceOf(Serializable.class);
+		assertThat(proxy4.getClass()).isNotSameAs(proxy3.getClass());
+
+		ITestBean proxy4a = (ITestBean) cglib.getProxy();
+		assertThat(proxy4a).isInstanceOf(Serializable.class);
+		assertThat(proxy4a.getClass()).isSameAs(proxy4.getClass());
 	}
 
 	@Test

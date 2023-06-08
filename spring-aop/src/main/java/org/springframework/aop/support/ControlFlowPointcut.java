@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,13 +125,9 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 
 	@Override
 	public boolean equals(@Nullable Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof ControlFlowPointcut that)) {
-			return false;
-		}
-		return (this.clazz.equals(that.clazz)) && ObjectUtils.nullSafeEquals(this.methodName, that.methodName);
+		return (this == other || (other instanceof ControlFlowPointcut that &&
+				this.clazz.equals(that.clazz)) &&
+				ObjectUtils.nullSafeEquals(this.methodName, that.methodName));
 	}
 
 	@Override
