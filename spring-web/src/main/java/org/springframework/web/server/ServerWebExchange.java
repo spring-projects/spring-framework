@@ -146,14 +146,7 @@ public interface ServerWebExchange {
 	 * @since 6.0.10
 	 * @see Part#delete()
 	 */
-	default Mono<Void> cleanupMultipart() {
-		return getMultipartData()
-				.onErrorResume(t -> Mono.empty())  // ignore errors reading multipart data
-				.flatMapIterable(Map::values)
-				.flatMapIterable(Function.identity())
-				.flatMap(part -> part.delete().onErrorResume(ex -> Mono.empty()))
-				.then();
-	}
+	Mono<Void> cleanupMultipart();
 
 	/**
 	 * Return the {@link LocaleContext} using the configured
