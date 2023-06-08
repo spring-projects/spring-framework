@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for the {@link JmsAccessor} class.
  *
  * @author Rick Evans
  * @author Chris Beams
+ * @author Vedran Pavic
  */
 public class JmsAccessorTests {
 
@@ -59,6 +62,13 @@ public class JmsAccessorTests {
 				new StubJmsAccessor().setSessionAcknowledgeModeName("Tally ho chaps!"));
 	}
 
+	@Test
+	void testCustomAcknowledgeModeIsConsideredClientAcknowledge() throws Exception {
+		Session session = mock(Session.class);
+		given(session.getAcknowledgeMode()).willReturn(100);
+		JmsAccessor accessor = new StubJmsAccessor();
+		assertThat(accessor.isClientAcknowledge(session)).isTrue();
+	}
 
 	/**
 	 * Crummy, stub, do-nothing subclass of the JmsAccessor class for use in testing.
