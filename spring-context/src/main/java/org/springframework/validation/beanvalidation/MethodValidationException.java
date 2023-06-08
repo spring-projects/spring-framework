@@ -48,16 +48,19 @@ public class MethodValidationException extends ConstraintViolationException impl
 
 	private final List<ParameterValidationResult> allValidationResults;
 
+	private final boolean forReturnValue;
+
 
 	public MethodValidationException(
 			Object target, Method method, Set<? extends ConstraintViolation<?>> violations,
-			List<ParameterValidationResult> validationResults) {
+			List<ParameterValidationResult> validationResults, boolean forReturnValue) {
 
 		super(violations);
 		Assert.notEmpty(violations, "'violations' must not be empty");
 		this.target = target;
 		this.method = method;
 		this.allValidationResults = validationResults;
+		this.forReturnValue = forReturnValue;
 	}
 
 
@@ -73,6 +76,15 @@ public class MethodValidationException extends ConstraintViolationException impl
 	 */
 	public Method getMethod() {
 		return this.method;
+	}
+
+	/**
+	 * Whether the violations are for a return value.
+	 * If true the violations are from validating a return value.
+	 * If false the violations are from validating method arguments.
+	 */
+	public boolean isForReturnValue() {
+		return this.forReturnValue;
 	}
 
 	// re-declare parent class method for NonNull treatment of interface
@@ -105,6 +117,12 @@ public class MethodValidationException extends ConstraintViolationException impl
 	@Override
 	public void throwIfViolationsPresent() {
 		throw this;
+	}
+
+	@Override
+	public String toString() {
+		return "MethodValidationResult (" + getConstraintViolations().size() + " violations) " +
+				"for " + this.method.toGenericString();
 	}
 
 }

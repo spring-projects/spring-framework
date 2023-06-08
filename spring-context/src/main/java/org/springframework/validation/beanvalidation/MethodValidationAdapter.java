@@ -230,7 +230,8 @@ public class MethodValidationAdapter {
 			Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(mostSpecificMethod);
 			result = execVal.validateParameters(target, bridgedMethod, arguments, groups);
 		}
-		return (result.isEmpty() ? EMPTY_RESULT : createException(target, method, result, i -> arguments[i]));
+		return (result.isEmpty() ? EMPTY_RESULT :
+				createException(target, method, result, i -> arguments[i], false));
 	}
 
 	/**
@@ -249,12 +250,12 @@ public class MethodValidationAdapter {
 
 		ExecutableValidator execVal = this.validator.get().forExecutables();
 		Set<ConstraintViolation<Object>> result = execVal.validateReturnValue(target, method, returnValue, groups);
-		return (result.isEmpty() ? EMPTY_RESULT : createException(target, method, result, i -> returnValue));
+		return (result.isEmpty() ? EMPTY_RESULT : createException(target, method, result, i -> returnValue, true));
 	}
 
 	private MethodValidationException createException(
 			Object target, Method method, Set<ConstraintViolation<Object>> violations,
-			Function<Integer, Object> argumentFunction) {
+			Function<Integer, Object> argumentFunction, boolean forReturnValue) {
 
 		Map<MethodParameter, ValueResultBuilder> parameterViolations = new LinkedHashMap<>();
 		Map<Path.Node, BeanResultBuilder> cascadedViolations = new LinkedHashMap<>();
@@ -296,7 +297,7 @@ public class MethodValidationAdapter {
 		cascadedViolations.forEach((node, builder) -> validatonResultList.add(builder.build()));
 		validatonResultList.sort(RESULT_COMPARATOR);
 
-		return new MethodValidationException(target, method, violations, validatonResultList);
+		return new MethodValidationException(target, method, violations, validatonResultList, forReturnValue);
 	}
 
 	/**
@@ -547,6 +548,11 @@ public class MethodValidationAdapter {
 
 		@Override
 		public void throwIfViolationsPresent() {
+		}
+
+		@Override
+		public String toString() {
+			return "MethodValidationResult (0 violations)";
 		}
 
 	}
