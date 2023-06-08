@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,8 @@ public interface ContextCache {
 
 	/**
 	 * System property used to configure the maximum size of the {@link ContextCache}
-	 * as a positive integer. May alternatively be configured via the
+	 * as a positive integer: {@value}.
+	 * <p>May alternatively be configured via the
 	 * {@link org.springframework.core.SpringProperties} mechanism.
 	 * <p>Note that implementations of {@code ContextCache} are not required to
 	 * actually support a maximum cache size. Consult the documentation of the
