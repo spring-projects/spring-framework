@@ -26,14 +26,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.Advisor;
 import org.springframework.aop.AopInvocationException;
-import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
@@ -205,12 +202,21 @@ class CglibAopProxy implements AopProxy, Serializable {
 				types[x] = callbacks[x].getClass();
 			}
 			// fixedInterceptorMap only populated at this point, after getCallbacks call above
-			enhancer.setCallbackFilter(new ProxyCallbackFilter(
-					this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset));
+			ProxyCallbackFilter filter = new ProxyCallbackFilter(
+					this.advised.getConfigurationOnlyCopy(), this.fixedInterceptorMap, this.fixedInterceptorOffset);
+			enhancer.setCallbackFilter(filter);
 			enhancer.setCallbackTypes(types);
 
 			// Generate the proxy class and create a proxy instance.
-			return (classOnly ? createProxyClass(enhancer) : createProxyClassAndInstance(enhancer, callbacks));
+			// ProxyCallbackFilter has method introspection capability with Advisor access.
+			try {
+				return (classOnly ? createProxyClass(enhancer) : createProxyClassAndInstance(enhancer, callbacks));
+			}
+			finally {
+				// Reduce ProxyCallbackFilter to key-only state for its class cache role
+				// in the CGLIB$CALLBACK_FILTER field, not leaking any Advisor state...
+				filter.advised.reduceToAdvisorKey();
+			}
 		}
 		catch (CodeGenerationException | IllegalArgumentException ex) {
 			throw new AopConfigException("Could not generate CGLIB subclass of " + this.advised.getTargetClass() +
@@ -294,9 +300,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 	private Callback[] getCallbacks(Class<?> rootClass) throws Exception {
 		// Parameters used for optimization choices...
-		boolean exposeProxy = this.advised.isExposeProxy();
-		boolean isFrozen = this.advised.isFrozen();
 		boolean isStatic = this.advised.getTargetSource().isStatic();
+		boolean isFrozen = this.advised.isFrozen();
+		boolean exposeProxy = this.advised.isExposeProxy();
 
 		// Choose an "aop" interceptor (used for AOP calls).
 		Callback aopInterceptor = new DynamicAdvisedInterceptor(this.advised);
@@ -776,7 +782,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	 */
 	private static class ProxyCallbackFilter implements CallbackFilter {
 
-		private final AdvisedSupport advised;
+		final AdvisedSupport advised;
 
 		private final Map<Method, Integer> fixedInterceptorMap;
 
@@ -857,9 +863,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 			// Proxy is not yet available, but that shouldn't matter.
 			List<?> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 			boolean haveAdvice = !chain.isEmpty();
-			boolean exposeProxy = this.advised.isExposeProxy();
 			boolean isStatic = this.advised.getTargetSource().isStatic();
 			boolean isFrozen = this.advised.isFrozen();
+			boolean exposeProxy = this.advised.isExposeProxy();
 			if (haveAdvice || !isFrozen) {
 				// If exposing the proxy, then AOP_PROXY must be used.
 				if (exposeProxy) {
@@ -921,63 +927,18 @@ class CglibAopProxy implements AopProxy, Serializable {
 				return false;
 			}
 			AdvisedSupport otherAdvised = otherCallbackFilter.advised;
-			if (this.advised.isFrozen() != otherAdvised.isFrozen()) {
-				return false;
-			}
-			if (this.advised.isExposeProxy() != otherAdvised.isExposeProxy()) {
-				return false;
-			}
-			if (this.advised.getTargetSource().isStatic() != otherAdvised.getTargetSource().isStatic()) {
-				return false;
-			}
-			if (!AopProxyUtils.equalsProxiedInterfaces(this.advised, otherAdvised)) {
-				return false;
-			}
-			// Advice instance identity is unimportant to the proxy class:
-			// All that matters is type and ordering.
-			if (this.advised.getAdvisorCount() != otherAdvised.getAdvisorCount()) {
-				return false;
-			}
-			Advisor[] thisAdvisors = this.advised.getAdvisors();
-			Advisor[] thatAdvisors = otherAdvised.getAdvisors();
-			for (int i = 0; i < thisAdvisors.length; i++) {
-				Advisor thisAdvisor = thisAdvisors[i];
-				Advisor thatAdvisor = thatAdvisors[i];
-				if (!equalsAdviceClasses(thisAdvisor, thatAdvisor)) {
-					return false;
-				}
-				if (!equalsPointcuts(thisAdvisor, thatAdvisor)) {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		private static boolean equalsAdviceClasses(Advisor a, Advisor b) {
-			return (a.getAdvice().getClass() == b.getAdvice().getClass());
-		}
-
-		private static boolean equalsPointcuts(Advisor a, Advisor b) {
-			// If only one of the advisor (but not both) is PointcutAdvisor, then it is a mismatch.
-			// Takes care of the situations where an IntroductionAdvisor is used (see SPR-3959).
-			return (!(a instanceof PointcutAdvisor pointcutAdvisor1) ||
-					(b instanceof PointcutAdvisor pointcutAdvisor2 &&
-							ObjectUtils.nullSafeEquals(pointcutAdvisor1.getPointcut(), pointcutAdvisor2.getPointcut())));
+			return (this.advised.getAdvisorKey().equals(otherAdvised.getAdvisorKey()) &&
+					AopProxyUtils.equalsProxiedInterfaces(this.advised, otherAdvised) &&
+					ObjectUtils.nullSafeEquals(this.advised.getTargetClass(), otherAdvised.getTargetClass()) &&
+					this.advised.getTargetSource().isStatic() == otherAdvised.getTargetSource().isStatic() &&
+					this.advised.isFrozen() == otherAdvised.isFrozen() &&
+					this.advised.isExposeProxy() == otherAdvised.isExposeProxy() &&
+					this.advised.isOpaque() == otherAdvised.isOpaque());
 		}
 
 		@Override
 		public int hashCode() {
-			int hashCode = 0;
-			Advisor[] advisors = this.advised.getAdvisors();
-			for (Advisor advisor : advisors) {
-				Advice advice = advisor.getAdvice();
-				hashCode = 13 * hashCode + advice.getClass().hashCode();
-			}
-			hashCode = 13 * hashCode + (this.advised.isFrozen() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isExposeProxy() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isOptimize() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isOpaque() ? 1 : 0);
-			return hashCode;
+			return this.advised.getAdvisorKey().hashCode();
 		}
 	}
 
