@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,13 @@ public interface ServerWebExchange {
 	 * part is not cached, and can only be read once.
 	 */
 	Mono<MultiValueMap<String, Part>> getMultipartData();
+
+	/**
+	 * Cleans up any storage used for multipart handling.
+	 * @since 6.0.10
+	 * @see Part#delete()
+	 */
+	Mono<Void> cleanupMultipart();
 
 	/**
 	 * Return the {@link LocaleContext} using the configured
