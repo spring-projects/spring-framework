@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,8 +283,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 	private Callback[] getCallbacks(Class<?> rootClass) throws Exception {
 		// Parameters used for optimization choices...
-		boolean exposeProxy = this.advised.isExposeProxy();
 		boolean isFrozen = this.advised.isFrozen();
+		boolean exposeProxy = this.advised.isExposeProxy();
 		boolean isStatic = this.advised.getTargetSource().isStatic();
 
 		// Choose an "aop" interceptor (used for AOP calls).
@@ -899,9 +899,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 			// Proxy is not yet available, but that shouldn't matter.
 			List<?> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
 			boolean haveAdvice = !chain.isEmpty();
+			boolean isFrozen = this.advised.isFrozen();
 			boolean exposeProxy = this.advised.isExposeProxy();
 			boolean isStatic = this.advised.getTargetSource().isStatic();
-			boolean isFrozen = this.advised.isFrozen();
 			if (haveAdvice || !isFrozen) {
 				// If exposing the proxy, then AOP_PROXY must be used.
 				if (exposeProxy) {
@@ -970,6 +970,9 @@ class CglibAopProxy implements AopProxy, Serializable {
 			if (this.advised.isExposeProxy() != otherAdvised.isExposeProxy()) {
 				return false;
 			}
+			if (this.advised.isOpaque() != otherAdvised.isOpaque()) {
+				return false;
+			}
 			if (this.advised.getTargetSource().isStatic() != otherAdvised.getTargetSource().isStatic()) {
 				return false;
 			}
@@ -1016,10 +1019,6 @@ class CglibAopProxy implements AopProxy, Serializable {
 				Advice advice = advisor.getAdvice();
 				hashCode = 13 * hashCode + advice.getClass().hashCode();
 			}
-			hashCode = 13 * hashCode + (this.advised.isFrozen() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isExposeProxy() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isOptimize() ? 1 : 0);
-			hashCode = 13 * hashCode + (this.advised.isOpaque() ? 1 : 0);
 			return hashCode;
 		}
 	}
