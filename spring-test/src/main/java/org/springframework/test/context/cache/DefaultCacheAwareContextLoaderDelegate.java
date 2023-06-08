@@ -66,7 +66,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 */
 	static final ContextCache defaultContextCache = new DefaultContextCache();
 
-	private List<ApplicationContextFailureProcessor> contextFailureProcessors = TestContextSpringFactoriesUtils
+
+	private final List<ApplicationContextFailureProcessor> contextFailureProcessors = TestContextSpringFactoriesUtils
 			.loadFactoryImplementations(ApplicationContextFailureProcessor.class);
 
 	private final AotTestContextInitializers aotTestContextInitializers = new AotTestContextInitializers();
@@ -99,8 +100,9 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	@Override
 	public boolean isContextLoaded(MergedContextConfiguration mergedContextConfiguration) {
+		mergedContextConfiguration = replaceIfNecessary(mergedContextConfiguration);
 		synchronized (this.contextCache) {
-			return this.contextCache.contains(replaceIfNecessary(mergedContextConfiguration));
+			return this.contextCache.contains(mergedContextConfiguration);
 		}
 	}
 
@@ -158,8 +160,9 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	@Override
 	public void closeContext(MergedContextConfiguration mergedContextConfiguration, @Nullable HierarchyMode hierarchyMode) {
+		mergedContextConfiguration = replaceIfNecessary(mergedContextConfiguration);
 		synchronized (this.contextCache) {
-			this.contextCache.remove(replaceIfNecessary(mergedContextConfiguration), hierarchyMode);
+			this.contextCache.remove(mergedContextConfiguration, hierarchyMode);
 		}
 	}
 
