@@ -16,7 +16,9 @@
 
 package org.springframework.test.context.cache;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +62,12 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	private static final Log logger = LogFactory.getLog(DefaultCacheAwareContextLoaderDelegate.class);
 
+	/**
+	 * The default failure threshold for errors encountered while attempting to
+	 * load an {@link ApplicationContext}: {@value}.
+	 * @since 6.1
+	 */
+	private static final int DEFAULT_FAILURE_THRESHOLD = 1;
 
 	/**
 	 * Default static cache of Spring application contexts.
@@ -73,6 +81,19 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	private final AotTestContextInitializers aotTestContextInitializers = new AotTestContextInitializers();
 
 	private final ContextCache contextCache;
+
+	/**
+	 * Map of context keys to context load failure counts.
+	 * @since 6.1
+	 */
+	private final Map<MergedContextConfiguration, Integer> failureCounts = new HashMap<>(32);
+
+	/**
+	 * The configured failure threshold for errors encountered while attempting to
+	 * load an {@link ApplicationContext}.
+	 * @since 6.1
+	 */
+	private final int failureThreshold;
 
 
 	/**
@@ -95,6 +116,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	public DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache) {
 		Assert.notNull(contextCache, "ContextCache must not be null");
 		this.contextCache = contextCache;
+		this.failureThreshold = DEFAULT_FAILURE_THRESHOLD;
 	}
 
 
@@ -112,6 +134,13 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		synchronized (this.contextCache) {
 			ApplicationContext context = this.contextCache.get(mergedConfig);
 			if (context == null) {
+				Integer failureCount = this.failureCounts.getOrDefault(mergedConfig, 0);
+				if (failureCount >= this.failureThreshold) {
+					throw new IllegalStateException("""
+							ApplicationContext failure threshold (%d) exceeded: \
+							skipping repeated attempt to load context for %s"""
+								.formatted(this.failureThreshold, mergedConfig));
+				}
 				try {
 					if (mergedConfig instanceof AotMergedContextConfiguration aotMergedConfig) {
 						context = loadContextInAotMode(aotMergedConfig);
@@ -126,6 +155,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					this.contextCache.put(mergedConfig, context);
 				}
 				catch (Exception ex) {
+					this.failureCounts.put(mergedConfig, ++failureCount);
 					Throwable cause = ex;
 					if (ex instanceof ContextLoadException cle) {
 						cause = cle.getCause();
