@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Function;
 
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.MarshalException;
 import jakarta.xml.bind.Marshaller;
@@ -121,7 +122,7 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 		DataBuffer buffer = bufferFactory.allocateBuffer(1024);
 		try {
 			OutputStream outputStream = buffer.asOutputStream();
-			Class<?> clazz = ClassUtils.getUserClass(value);
+			Class<?> clazz = getMarshallerType(value);
 			Marshaller marshaller = initMarshaller(clazz);
 			marshaller.marshal(value, outputStream);
 			release = false;
@@ -137,6 +138,15 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 			if (release) {
 				DataBufferUtils.release(buffer);
 			}
+		}
+	}
+
+	private static Class<?> getMarshallerType(Object value) {
+		if (value instanceof JAXBElement<?> jaxbElement) {
+			return jaxbElement.getDeclaredType();
+		}
+		else {
+			return ClassUtils.getUserClass(value);
 		}
 	}
 

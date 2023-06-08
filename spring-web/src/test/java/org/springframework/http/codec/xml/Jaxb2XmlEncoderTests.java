@@ -20,6 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import javax.xml.namespace.QName;
+
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElements;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -73,6 +76,18 @@ public class Jaxb2XmlEncoderTests extends AbstractEncoderTests<Jaxb2XmlEncoder> 
 				.consumeNextWith(expectXml(
 						"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
 								"<pojo><bar>barbar</bar><foo>foofoo</foo></pojo>"))
+				.verifyComplete());
+	}
+
+	@Test
+	public void encodeJaxbElement() {
+		Mono<JAXBElement<Pojo>> input = Mono.just(new JAXBElement<>(new QName("baz"), Pojo.class,
+				new Pojo("foofoo", "barbar")));
+
+		testEncode(input, Pojo.class, step -> step
+				.consumeNextWith(expectXml(
+						"<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+								"<baz><bar>barbar</bar><foo>foofoo</foo></baz>"))
 				.verifyComplete());
 	}
 
