@@ -63,13 +63,6 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	private static final Log logger = LogFactory.getLog(DefaultCacheAwareContextLoaderDelegate.class);
 
 	/**
-	 * The default failure threshold for errors encountered while attempting to
-	 * load an {@link ApplicationContext}: {@value}.
-	 * @since 6.1
-	 */
-	private static final int DEFAULT_FAILURE_THRESHOLD = 1;
-
-	/**
 	 * Default static cache of Spring application contexts.
 	 */
 	static final ContextCache defaultContextCache = new DefaultContextCache();
@@ -114,9 +107,17 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	 * @see #DefaultCacheAwareContextLoaderDelegate()
 	 */
 	public DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache) {
+		this(contextCache, ContextCacheUtils.retrieveContextFailureThreshold());
+	}
+
+	/**
+	 * @since 6.1
+	 */
+	DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache, int failureThreshold) {
 		Assert.notNull(contextCache, "ContextCache must not be null");
+		Assert.isTrue(failureThreshold > 0, "'failureThreshold' must be positive");
 		this.contextCache = contextCache;
-		this.failureThreshold = DEFAULT_FAILURE_THRESHOLD;
+		this.failureThreshold = failureThreshold;
 	}
 
 
