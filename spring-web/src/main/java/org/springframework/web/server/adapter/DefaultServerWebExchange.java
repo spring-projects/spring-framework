@@ -93,6 +93,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final Mono<MultiValueMap<String, Part>> multipartDataMono;
 
+	private volatile boolean multipartRead = false;
+
 	@Nullable
 	private final ApplicationContext applicationContext;
 
@@ -131,7 +133,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		this.sessionMono = sessionManager.getSession(this).cache();
 		this.localeContextResolver = localeContextResolver;
 		this.formDataMono = initFormData(request, codecConfigurer, getLogPrefix());
-		this.multipartDataMono = initMultipartData(request, codecConfigurer, getLogPrefix());
+		this.multipartDataMono = initMultipartData(codecConfigurer, getLogPrefix());
 		this.applicationContext = applicationContext;
 	}
 
@@ -154,10 +156,9 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 				.cache();
 	}
 
-	private static Mono<MultiValueMap<String, Part>> initMultipartData(ServerHttpRequest request,
-			ServerCodecConfigurer configurer, String logPrefix) {
+	private Mono<MultiValueMap<String, Part>> initMultipartData(ServerCodecConfigurer configurer, String logPrefix) {
 
-		MediaType contentType = getContentType(request);
+		MediaType contentType = getContentType(this.request);
 		if (contentType == null || !contentType.getType().equalsIgnoreCase("multipart")) {
 			return EMPTY_MULTIPART_DATA;
 		}
@@ -168,7 +169,8 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		}
 
 		return reader
-				.readMono(MULTIPART_DATA_TYPE, request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+				.readMono(MULTIPART_DATA_TYPE, this.request, Hints.from(Hints.LOG_PREFIX_HINT, logPrefix))
+				.doOnNext(ignored -> this.multipartRead = true)
 				.switchIfEmpty(EMPTY_MULTIPART_DATA)
 				.cache();
 	}
@@ -241,6 +243,22 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Mono<MultiValueMap<String, Part>> getMultipartData() {
 		return this.multipartDataMono;
+	}
+
+	@Override
+	public Mono<Void> cleanupMultipart() {
+		if (this.multipartRead) {
+			return getMultipartData()
+					.onErrorResume(t -> Mono.empty()) // ignore errors reading multipart data
+					.flatMapIterable(Map::values)
+					.flatMapIterable(Function.identity())
+					.flatMap(part -> part.delete()
+									.onErrorResume(ex -> Mono.empty()))
+					.then();
+		}
+		else {
+			return Mono.empty();
+		}
 	}
 
 	@Override
