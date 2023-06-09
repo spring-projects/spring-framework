@@ -39,6 +39,12 @@ import java.lang.annotation.Target;
  * {@code ApplicationContext} will be marked as <em>dirty</em> before or
  * after any such annotated method as well as before or after the current test
  * class, depending on the configured {@link #methodMode} and {@link #classMode}.
+ * When {@code @DirtiesContext} is declared at both the class level and the
+ * method level, the configured test phases from both annotations will be honored.
+ * For example, if the class mode is set to {@link ClassMode#BEFORE_EACH_TEST_METHOD
+ * BEFORE_EACH_TEST_METHOD} and the method mode is set to
+ * {@link MethodMode#AFTER_METHOD AFTER_METHOD}, the context will be marked as
+ * dirty both before and after the given test method.
  *
  * <h3>Supported Test Phases</h3>
  * <ul>
