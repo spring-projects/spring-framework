@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractDirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Log logger = LogFactory.getLog(AbstractDirtiesContextTestExecutionListener.class);
+	private final Log logger = LogFactory.getLog(getClass());
 
 
 	@Override
