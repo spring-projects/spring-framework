@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.aot.hint.support;
-
-import java.net.URI;
-import java.time.LocalDate;
+package org.springframework.beans;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
@@ -31,11 +30,11 @@ import org.springframework.util.ClassUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ObjectToObjectConverterRuntimeHints}.
+ * Tests for {@link BeanUtilsRuntimeHints}.
  *
  * @author Sebastien Deleuze
  */
-class ObjectToObjectConverterRuntimeHintsTests {
+class BeanUtilsRuntimeHintsTests {
 
 	private RuntimeHints hints;
 
@@ -48,14 +47,9 @@ class ObjectToObjectConverterRuntimeHintsTests {
 	}
 
 	@Test
-	void javaSqlDateHasHints() throws NoSuchMethodException {
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(java.sql.Date.class, "toLocalDate")).accepts(this.hints);
-		assertThat(RuntimeHintsPredicates.reflection().onMethod(java.sql.Date.class.getMethod("valueOf", LocalDate.class))).accepts(this.hints);
-	}
-
-	@Test
-	void uriHasHints() throws NoSuchMethodException {
-		assertThat(RuntimeHintsPredicates.reflection().onConstructor(URI.class.getConstructor(String.class))).accepts(this.hints);
+	void mediaTypeEditorHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of("org.springframework.http.MediaTypeEditor"))
+				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
 	}
 
 }
