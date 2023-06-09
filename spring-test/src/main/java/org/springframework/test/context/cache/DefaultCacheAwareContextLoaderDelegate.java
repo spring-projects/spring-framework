@@ -16,7 +16,9 @@
 
 package org.springframework.test.context.cache;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +43,7 @@ import org.springframework.test.context.util.TestContextSpringFactoriesUtils;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@link CacheAwareContextLoaderDelegate} interface.
+ * Default implementation of the {@link CacheAwareContextLoaderDelegate} strategy.
  *
  * <p>To use a static {@link DefaultContextCache}, invoke the
  * {@link #DefaultCacheAwareContextLoaderDelegate()} constructor; otherwise,
@@ -53,13 +55,17 @@ import org.springframework.util.Assert;
  * SpringFactoriesLoader} mechanism and delegates to them in
  * {@link #loadContext(MergedContextConfiguration)} to process context load failures.
  *
+ * <p>As of Spring Framework 6.1, this class supports the <em>failure threshold</em>
+ * feature described in {@link CacheAwareContextLoaderDelegate#loadContext},
+ * delegating to {@link ContextCacheUtils#retrieveContextFailureThreshold()} to
+ * obtain the threshold value to use.
+ *
  * @author Sam Brannen
  * @since 4.1
  */
 public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContextLoaderDelegate {
 
 	private static final Log logger = LogFactory.getLog(DefaultCacheAwareContextLoaderDelegate.class);
-
 
 	/**
 	 * Default static cache of Spring application contexts.
@@ -74,13 +80,26 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 	private final ContextCache contextCache;
 
+	/**
+	 * Map of context keys to context load failure counts.
+	 * @since 6.1
+	 */
+	private final Map<MergedContextConfiguration, Integer> failureCounts = new HashMap<>(32);
 
 	/**
-	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using
-	 * a static {@link DefaultContextCache}.
-	 * <p>This default cache is static so that each context can be cached
-	 * and reused for all subsequent tests that declare the same unique
-	 * context configuration within the same JVM process.
+	 * The configured failure threshold for errors encountered while attempting to
+	 * load an {@link ApplicationContext}.
+	 * @since 6.1
+	 */
+	private final int failureThreshold;
+
+
+	/**
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using a
+	 * static {@link DefaultContextCache}.
+	 * <p>The default cache is static so that each context can be cached and
+	 * reused for all subsequent tests that declare the same unique context
+	 * configuration within the same JVM process.
 	 * @see #DefaultCacheAwareContextLoaderDelegate(ContextCache)
 	 */
 	public DefaultCacheAwareContextLoaderDelegate() {
@@ -88,13 +107,26 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	}
 
 	/**
-	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using
-	 * the supplied {@link ContextCache}.
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using the
+	 * supplied {@link ContextCache} and the default or user-configured context
+	 * failure threshold.
 	 * @see #DefaultCacheAwareContextLoaderDelegate()
+	 * @see ContextCacheUtils#retrieveContextFailureThreshold()
 	 */
 	public DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache) {
+		this(contextCache, ContextCacheUtils.retrieveContextFailureThreshold());
+	}
+
+	/**
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using the
+	 * supplied {@link ContextCache} and context failure threshold.
+	 * @since 6.1
+	 */
+	private DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache, int failureThreshold) {
 		Assert.notNull(contextCache, "ContextCache must not be null");
+		Assert.isTrue(failureThreshold > 0, "'failureThreshold' must be positive");
 		this.contextCache = contextCache;
+		this.failureThreshold = failureThreshold;
 	}
 
 
@@ -112,6 +144,13 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		synchronized (this.contextCache) {
 			ApplicationContext context = this.contextCache.get(mergedConfig);
 			if (context == null) {
+				Integer failureCount = this.failureCounts.getOrDefault(mergedConfig, 0);
+				if (failureCount >= this.failureThreshold) {
+					throw new IllegalStateException("""
+							ApplicationContext failure threshold (%d) exceeded: \
+							skipping repeated attempt to load context for %s"""
+								.formatted(this.failureThreshold, mergedConfig));
+				}
 				try {
 					if (mergedConfig instanceof AotMergedContextConfiguration aotMergedConfig) {
 						context = loadContextInAotMode(aotMergedConfig);
@@ -126,6 +165,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					this.contextCache.put(mergedConfig, context);
 				}
 				catch (Exception ex) {
+					this.failureCounts.put(mergedConfig, ++failureCount);
 					Throwable cause = ex;
 					if (ex instanceof ContextLoadException cle) {
 						cause = cle.getCause();

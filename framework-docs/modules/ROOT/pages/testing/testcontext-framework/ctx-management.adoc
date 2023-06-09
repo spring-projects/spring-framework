@@ -119,5 +119,6 @@ advanced use cases.
 * xref:testing/testcontext-framework/ctx-management/dynamic-property-sources.adoc[Context Configuration with Dynamic Property Sources]
 * xref:testing/testcontext-framework/ctx-management/web.adoc[Loading a `WebApplicationContext`]
 * xref:testing/testcontext-framework/ctx-management/caching.adoc[Context Caching]
+* xref:testing/testcontext-framework/ctx-management/failure-threshold.adoc[Context Failure Threshold]
 * xref:testing/testcontext-framework/ctx-management/hierarchies.adoc[Context Hierarchies]
 
