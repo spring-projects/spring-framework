@@ -16,6 +16,7 @@
 
 package org.springframework.aot.hint.support;
 
+import java.net.URI;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +51,11 @@ class ObjectToObjectConverterRuntimeHintsTests {
 	void javaSqlDateHasHints() throws NoSuchMethodException {
 		assertThat(RuntimeHintsPredicates.reflection().onMethod(java.sql.Date.class, "toLocalDate")).accepts(this.hints);
 		assertThat(RuntimeHintsPredicates.reflection().onMethod(java.sql.Date.class.getMethod("valueOf", LocalDate.class))).accepts(this.hints);
+	}
+
+	@Test
+	void uriHasHints() throws NoSuchMethodException {
+		assertThat(RuntimeHintsPredicates.reflection().onConstructor(URI.class.getConstructor(String.class))).accepts(this.hints);
 	}
 
 }
