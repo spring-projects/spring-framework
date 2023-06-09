@@ -43,7 +43,7 @@ import org.springframework.test.context.util.TestContextSpringFactoriesUtils;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@link CacheAwareContextLoaderDelegate} interface.
+ * Default implementation of the {@link CacheAwareContextLoaderDelegate} strategy.
  *
  * <p>To use a static {@link DefaultContextCache}, invoke the
  * {@link #DefaultCacheAwareContextLoaderDelegate()} constructor; otherwise,
@@ -54,6 +54,11 @@ import org.springframework.util.Assert;
  * implementations via the {@link org.springframework.core.io.support.SpringFactoriesLoader
  * SpringFactoriesLoader} mechanism and delegates to them in
  * {@link #loadContext(MergedContextConfiguration)} to process context load failures.
+ *
+ * <p>As of Spring Framework 6.1, this class supports the <em>failure threshold</em>
+ * feature described in {@link CacheAwareContextLoaderDelegate#loadContext},
+ * delegating to {@link ContextCacheUtils#retrieveContextFailureThreshold()} to
+ * obtain the threshold value to use.
  *
  * @author Sam Brannen
  * @since 4.1
@@ -90,11 +95,11 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 
 
 	/**
-	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using
-	 * a static {@link DefaultContextCache}.
-	 * <p>This default cache is static so that each context can be cached
-	 * and reused for all subsequent tests that declare the same unique
-	 * context configuration within the same JVM process.
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using a
+	 * static {@link DefaultContextCache}.
+	 * <p>The default cache is static so that each context can be cached and
+	 * reused for all subsequent tests that declare the same unique context
+	 * configuration within the same JVM process.
 	 * @see #DefaultCacheAwareContextLoaderDelegate(ContextCache)
 	 */
 	public DefaultCacheAwareContextLoaderDelegate() {
@@ -102,18 +107,22 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	}
 
 	/**
-	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using
-	 * the supplied {@link ContextCache}.
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using the
+	 * supplied {@link ContextCache} and the default or user-configured context
+	 * failure threshold.
 	 * @see #DefaultCacheAwareContextLoaderDelegate()
+	 * @see ContextCacheUtils#retrieveContextFailureThreshold()
 	 */
 	public DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache) {
 		this(contextCache, ContextCacheUtils.retrieveContextFailureThreshold());
 	}
 
 	/**
+	 * Construct a new {@code DefaultCacheAwareContextLoaderDelegate} using the
+	 * supplied {@link ContextCache} and context failure threshold.
 	 * @since 6.1
 	 */
-	DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache, int failureThreshold) {
+	private DefaultCacheAwareContextLoaderDelegate(ContextCache contextCache, int failureThreshold) {
 		Assert.notNull(contextCache, "ContextCache must not be null");
 		Assert.isTrue(failureThreshold > 0, "'failureThreshold' must be positive");
 		this.contextCache = contextCache;
