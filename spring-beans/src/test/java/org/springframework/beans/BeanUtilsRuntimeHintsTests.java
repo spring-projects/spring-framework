@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.http.MediaTypeEditor;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +49,7 @@ class BeanUtilsRuntimeHintsTests {
 
 	@Test
 	void mediaTypeEditorHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(TypeReference.of("org.springframework.http.MediaTypeEditor"))
+		assertThat(RuntimeHintsPredicates.reflection().onType(MediaTypeEditor.class)
 				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
 	}
 
