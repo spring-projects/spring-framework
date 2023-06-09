@@ -45,7 +45,7 @@ public class QualifierConfiguration {
 		@Bean
 		@Qualifier("2")
 		public String two() {
-			return "one";
+			return "two";
 		}
 
 	}
