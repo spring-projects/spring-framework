@@ -17,8 +17,10 @@
 package org.springframework.beans;
 
 import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.core.io.ResourceEditor;
 import org.springframework.lang.Nullable;
 
 /**
@@ -32,7 +34,9 @@ class BeanUtilsRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
-		hints.reflection().registerTypeIfPresent(classLoader, "org.springframework.http.MediaTypeEditor",
+		ReflectionHints reflectionHints = hints.reflection();
+		reflectionHints.registerType(ResourceEditor.class, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+		reflectionHints.registerTypeIfPresent(classLoader, "org.springframework.http.MediaTypeEditor",
 				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
