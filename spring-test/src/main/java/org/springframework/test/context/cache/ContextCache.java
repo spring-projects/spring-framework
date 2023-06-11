@@ -31,6 +31,11 @@ import org.springframework.test.context.MergedContextConfiguration;
  * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size} and
  * a custom eviction policy.
  *
+ * <p>As of Spring Framework 6.1, this SPI includes optional support for
+ * {@linkplain #getFailureCount(MergedContextConfiguration) tracking} and
+ * {@linkplain #incrementFailureCount(MergedContextConfiguration) incrementing}
+ * failure counts.
+ *
  * <h3>Rationale</h3>
  * <p>Context caching can have significant performance benefits if context
  * initialization is complex. Although the initialization of a Spring context
@@ -116,6 +121,37 @@ public interface ContextCache {
 	 * is not part of a hierarchy
 	 */
 	void remove(MergedContextConfiguration key, @Nullable HierarchyMode hierarchyMode);
+
+	/**
+	 * Get the failure count for the given key.
+	 * <p>A <em>failure</em> is any attempt to load the {@link ApplicationContext}
+	 * for the given key that results in an exception.
+	 * <p>The default implementation of this method always returns {@code 0}.
+	 * Concrete implementations are therefore highly encouraged to override this
+	 * method and {@link #incrementFailureCount(MergedContextConfiguration)} with
+	 * appropriate behavior. Note that the standard {@code ContextContext}
+	 * implementation in Spring overrides these methods appropriately.
+	 * @param key the context key; never {@code null}
+	 * @since 6.1
+	 * @see #incrementFailureCount(MergedContextConfiguration)
+	 */
+	default int getFailureCount(MergedContextConfiguration key) {
+		return 0;
+	}
+
+	/**
+	 * Increment the failure count for the given key.
+	 * <p>The default implementation of this method does nothing. Concrete
+	 * implementations are therefore highly encouraged to override this
+	 * method and {@link #getFailureCount(MergedContextConfiguration)} with
+	 * appropriate behavior. Note that the standard {@code ContextContext}
+	 * implementation in Spring overrides these methods appropriately.
+	 * @param key the context key; never {@code null}
+	 * @since 6.1
+	 * @see #getFailureCount(MergedContextConfiguration)
+	 */
+	default void incrementFailureCount(MergedContextConfiguration key) {
+	}
 
 	/**
 	 * Determine the number of contexts currently stored in the cache.

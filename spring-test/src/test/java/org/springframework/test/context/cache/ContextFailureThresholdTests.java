@@ -18,13 +18,9 @@ package org.springframework.test.context.cache;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.context.annotation.Bean;
@@ -49,104 +45,61 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.reset
  */
 class ContextFailureThresholdTests {
 
-	private static final AtomicInteger loadCount = new AtomicInteger(0);
+	private static final AtomicInteger passingLoadCount = new AtomicInteger(0);
+	private static final AtomicInteger failingLoadCount = new AtomicInteger(0);
 
 
 	@BeforeEach
 	@AfterEach
 	void resetFlag() {
-		loadCount.set(0);
+		resetContextCache();
+		passingLoadCount.set(0);
+		failingLoadCount.set(0);
 		SpringProperties.setProperty(CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME, null);
 	}
 
 	@Test
 	void defaultThreshold() {
-		assertThat(loadCount.get()).isZero();
-
-		EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(PassingTestCase.class))// 2 passing
-				.selectors(selectClass(FailingTestCase.class))// 3 failing
-				.execute()//
-				.testEvents()//
-				.assertStatistics(stats -> stats.started(5).succeeded(2).failed(3));
-		assertThat(loadCount.get()).isEqualTo(DEFAULT_CONTEXT_FAILURE_THRESHOLD);
+		runTests();
+		assertThat(passingLoadCount.get()).isEqualTo(1);
+		assertThat(failingLoadCount.get()).isEqualTo(DEFAULT_CONTEXT_FAILURE_THRESHOLD);
 	}
 
 	@Test
 	void customThreshold() {
-		assertThat(loadCount.get()).isZero();
+		int customThreshold = 2;
+		SpringProperties.setProperty(CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME, Integer.toString(customThreshold));
 
-		int threshold = 2;
-		SpringProperties.setProperty(CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME, Integer.toString(threshold));
-
-		EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(PassingTestCase.class))// 2 passing
-				.selectors(selectClass(FailingTestCase.class))// 3 failing
-				.execute()//
-				.testEvents()//
-				.assertStatistics(stats -> stats.started(5).succeeded(2).failed(3));
-		assertThat(loadCount.get()).isEqualTo(threshold);
+		runTests();
+		assertThat(passingLoadCount.get()).isEqualTo(1);
+		assertThat(failingLoadCount.get()).isEqualTo(customThreshold);
 	}
 
 	@Test
 	void thresholdEffectivelyDisabled() {
-		assertThat(loadCount.get()).isZero();
-
 		SpringProperties.setProperty(CONTEXT_FAILURE_THRESHOLD_PROPERTY_NAME, "999999");
 
+		runTests();
+		assertThat(passingLoadCount.get()).isEqualTo(1);
+		assertThat(failingLoadCount.get()).isEqualTo(6);
+	}
+
+	private static void runTests() {
 		EngineTestKit.engine("junit-jupiter")//
-				.selectors(selectClass(PassingTestCase.class))// 2 passing
-				.selectors(selectClass(FailingTestCase.class))// 3 failing
-				.execute()//
-				.testEvents()//
-				.assertStatistics(stats -> stats.started(5).succeeded(2).failed(3));
-		assertThat(loadCount.get()).isEqualTo(3);
+			.selectors(//
+				selectClass(PassingTestCase.class), // 3 passing
+				selectClass(FailingConfigTestCase.class), // 3 failing
+				selectClass(SharedFailingConfigTestCase.class) // 3 failing
+			)//
+			.execute()//
+			.testEvents()//
+			.assertStatistics(stats -> stats.started(9).succeeded(3).failed(6));
+		assertContextCacheStatistics(1, 2, (1 + 3 + 3));
 	}
 
 
-	@SpringJUnitConfig
 	@TestExecutionListeners(DependencyInjectionTestExecutionListener.class)
-	static class PassingTestCase {
-
-		@BeforeAll
-		static void verifyInitialCacheState() {
-			resetContextCache();
-			assertContextCacheStatistics("BeforeAll", 0, 0, 0);
-		}
-
-		@AfterAll
-		static void verifyFinalCacheState() {
-			assertContextCacheStatistics("AfterAll", 1, 1, 1);
-			resetContextCache();
-		}
-
-		@Test
-		void test1() {}
-
-		@Test
-		void test2() {}
-
-		@Configuration
-		static class PassingConfig {
-		}
-	}
-
-	@SpringJUnitConfig
-	@TestExecutionListeners(DependencyInjectionTestExecutionListener.class)
-	@TestMethodOrder(OrderAnnotation.class)
-	static class FailingTestCase {
-
-		@BeforeAll
-		static void verifyInitialCacheState() {
-			resetContextCache();
-			assertContextCacheStatistics("BeforeAll", 0, 0, 0);
-		}
-
-		@AfterAll
-		static void verifyFinalCacheState() {
-			assertContextCacheStatistics("AfterAll", 0, 0, 3);
-			resetContextCache();
-		}
+	static abstract class BaseTestCase {
 
 		@Test
 		void test1() {}
@@ -156,18 +109,38 @@ class ContextFailureThresholdTests {
 
 		@Test
 		void test3() {}
+	}
 
-		@Configuration
-		static class FailingConfig {
+	@SpringJUnitConfig(PassingConfig.class)
+	static class PassingTestCase extends BaseTestCase {
+	}
 
-			FailingConfig() {
-				loadCount.incrementAndGet();
-			}
+	@SpringJUnitConfig(FailingConfig.class)
+	static class FailingConfigTestCase extends BaseTestCase {
+	}
 
-			@Bean
-			String explosiveString() {
-				throw new RuntimeException("Boom!");
-			}
+	@SpringJUnitConfig(FailingConfig.class)
+	static class SharedFailingConfigTestCase extends BaseTestCase {
+	}
+
+	@Configuration
+	static class PassingConfig {
+
+		PassingConfig() {
+			passingLoadCount.incrementAndGet();
+		}
+	}
+
+	@Configuration
+	static class FailingConfig {
+
+		FailingConfig() {
+			failingLoadCount.incrementAndGet();
+		}
+
+		@Bean
+		String explosiveString() {
+			throw new RuntimeException("Boom!");
 		}
 	}
 

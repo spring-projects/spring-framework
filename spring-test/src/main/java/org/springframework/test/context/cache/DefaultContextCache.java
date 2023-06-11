@@ -72,6 +72,14 @@ public class DefaultContextCache implements ContextCache {
 	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap =
 			new ConcurrentHashMap<>(32);
 
+	/**
+	 * Map of context keys to context load failure counts.
+	 * @since 6.1
+	 */
+	private final Map<MergedContextConfiguration, Integer> failureCounts = new ConcurrentHashMap<>(32);
+
+	private final AtomicInteger totalFailureCount = new AtomicInteger();
+
 	private final int maxSize;
 
 	private final AtomicInteger hitCount = new AtomicInteger();
@@ -213,6 +221,23 @@ public class DefaultContextCache implements ContextCache {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public int getFailureCount(MergedContextConfiguration key) {
+		return this.failureCounts.getOrDefault(key, 0);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void incrementFailureCount(MergedContextConfiguration key) {
+		this.totalFailureCount.incrementAndGet();
+		this.failureCounts.merge(key, 1, Integer::sum);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public int size() {
 		return this.contextMap.size();
 	}
@@ -256,6 +281,8 @@ public class DefaultContextCache implements ContextCache {
 		synchronized (this.contextMap) {
 			clear();
 			clearStatistics();
+			this.totalFailureCount.set(0);
+			this.failureCounts.clear();
 		}
 	}
 
@@ -306,6 +333,7 @@ public class DefaultContextCache implements ContextCache {
 				.append("parentContextCount", getParentContextCount())
 				.append("hitCount", getHitCount())
 				.append("missCount", getMissCount())
+				.append("failureCount", this.totalFailureCount)
 				.toString();
 	}
 

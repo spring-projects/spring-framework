@@ -16,9 +16,7 @@
 
 package org.springframework.test.context.cache;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -81,12 +79,6 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	private final ContextCache contextCache;
 
 	/**
-	 * Map of context keys to context load failure counts.
-	 * @since 6.1
-	 */
-	private final Map<MergedContextConfiguration, Integer> failureCounts = new HashMap<>(32);
-
-	/**
 	 * The configured failure threshold for errors encountered while attempting to
 	 * load an {@link ApplicationContext}.
 	 * @since 6.1
@@ -144,7 +136,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		synchronized (this.contextCache) {
 			ApplicationContext context = this.contextCache.get(mergedConfig);
 			if (context == null) {
-				Integer failureCount = this.failureCounts.getOrDefault(mergedConfig, 0);
+				Integer failureCount = this.contextCache.getFailureCount(mergedConfig);
 				if (failureCount >= this.failureThreshold) {
 					throw new IllegalStateException("""
 							ApplicationContext failure threshold (%d) exceeded: \
@@ -165,7 +157,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					this.contextCache.put(mergedConfig, context);
 				}
 				catch (Exception ex) {
-					this.failureCounts.put(mergedConfig, ++failureCount);
+					this.contextCache.incrementFailureCount(mergedConfig);
 					Throwable cause = ex;
 					if (ex instanceof ContextLoadException cle) {
 						cause = cle.getCause();

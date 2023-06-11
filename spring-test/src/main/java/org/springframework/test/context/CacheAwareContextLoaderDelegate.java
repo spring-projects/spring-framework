@@ -103,7 +103,9 @@ public interface CacheAwareContextLoaderDelegate {
 	 * context consistently fails to load &mdash; for example, due to a configuration
 	 * error that prevents the context from successfully loading &mdash; this
 	 * method should preemptively throw an {@link IllegalStateException} if the
-	 * configured failure threshold has been exceeded.
+	 * configured failure threshold has been exceeded. Note that the {@code ContextCache}
+	 * provides support for tracking and incrementing the failure count for a given
+	 * context cache key.
 	 * <p>The cache statistics should be logged by invoking
 	 * {@link org.springframework.test.context.cache.ContextCache#logStatistics()}.
 	 * @param mergedConfig the merged context configuration to use to load the
