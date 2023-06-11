@@ -79,6 +79,9 @@ public class RequestParamMethodArgumentResolverTests {
 		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
 		assertThat(resolver.supportsParameter(param)).isTrue();
 
+		param = this.testMethod.annotPresent(RequestParam.class).arg(Integer.class);
+		assertThat(resolver.supportsParameter(param)).isTrue();
+
 		param = this.testMethod.annotPresent(RequestParam.class).arg(String[].class);
 		assertThat(resolver.supportsParameter(param)).isTrue();
 
@@ -505,6 +508,20 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
+	public void resolveBlankValueToDefault() throws Exception {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultConversionService());
+		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
+
+		request.addParameter("name", "     ");
+		MethodParameter param = this.testMethod.annotPresent(RequestParam.class).arg(Integer.class);
+		Object result = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		boolean condition = result instanceof Integer;
+		assertThat(condition).isTrue();
+		assertThat(result).isEqualTo(20);
+	}
+
+	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void resolveOptionalParamValue() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
@@ -662,6 +679,7 @@ public class RequestParamMethodArgumentResolverTests {
 			@RequestParam("pfilelist") List<Part> param8,
 			@RequestParam("pfilearray") Part[] param9,
 			@RequestParam Map<?, ?> param10,
+			@RequestParam(name = "name", defaultValue = "20") Integer param11,
 			String stringNotAnnot,
 			MultipartFile multipartFileNotAnnot,
 			List<MultipartFile> multipartFileList,

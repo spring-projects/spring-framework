@@ -123,6 +123,11 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
 			try {
 				arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);
+				if (arg == null && namedValueInfo.defaultValue != null) {
+					arg = binder.convertIfNecessary(
+							resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue),
+							parameter.getParameterType(), parameter);
+				}
 			}
 			catch (ConversionNotSupportedException ex) {
 				throw new MethodArgumentConversionNotSupportedException(arg, ex.getRequiredType(),
