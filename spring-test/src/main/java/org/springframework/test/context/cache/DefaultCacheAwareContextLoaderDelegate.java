@@ -109,48 +109,51 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		mergedContextConfiguration = replaceIfNecessary(mergedContextConfiguration);
 		synchronized (this.contextCache) {
 			ApplicationContext context = this.contextCache.get(mergedContextConfiguration);
-			if (context == null) {
-				try {
-					if (mergedContextConfiguration instanceof AotMergedContextConfiguration aotMergedConfig) {
-						context = loadContextInAotMode(aotMergedConfig);
+			try {
+				if (context == null) {
+					try {
+						if (mergedContextConfiguration instanceof AotMergedContextConfiguration aotMergedConfig) {
+							context = loadContextInAotMode(aotMergedConfig);
+						}
+						else {
+							context = loadContextInternal(mergedContextConfiguration);
+						}
+						if (logger.isTraceEnabled()) {
+							logger.trace("Storing ApplicationContext [%s] in cache under key %s".formatted(
+									System.identityHashCode(context), mergedContextConfiguration));
+						}
+						this.contextCache.put(mergedContextConfiguration, context);
 					}
-					else {
-						context = loadContextInternal(mergedContextConfiguration);
-					}
-					if (logger.isTraceEnabled()) {
-						logger.trace("Storing ApplicationContext [%s] in cache under key %s".formatted(
-								System.identityHashCode(context), mergedContextConfiguration));
-					}
-					this.contextCache.put(mergedContextConfiguration, context);
-				}
-				catch (Exception ex) {
-					Throwable cause = ex;
-					if (ex instanceof ContextLoadException cle) {
-						cause = cle.getCause();
-						for (ApplicationContextFailureProcessor contextFailureProcessor : this.contextFailureProcessors) {
-							try {
-								contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
-							}
-							catch (Throwable throwable) {
-								if (logger.isDebugEnabled()) {
-									logger.debug("Ignoring exception thrown from ApplicationContextFailureProcessor [%s]: %s"
-											.formatted(contextFailureProcessor, throwable));
+					catch (Exception ex) {
+						Throwable cause = ex;
+						if (ex instanceof ContextLoadException cle) {
+							cause = cle.getCause();
+							for (ApplicationContextFailureProcessor contextFailureProcessor : this.contextFailureProcessors) {
+								try {
+									contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
+								}
+								catch (Throwable throwable) {
+									if (logger.isDebugEnabled()) {
+										logger.debug("Ignoring exception thrown from ApplicationContextFailureProcessor [%s]: %s"
+												.formatted(contextFailureProcessor, throwable));
+									}
 								}
 							}
 						}
+						throw new IllegalStateException(
+								"Failed to load ApplicationContext for " + mergedContextConfiguration, cause);
 					}
-					throw new IllegalStateException(
-						"Failed to load ApplicationContext for " + mergedContextConfiguration, cause);
+				}
+				else {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
+								System.identityHashCode(context), mergedContextConfiguration));
+					}
 				}
 			}
-			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
-							System.identityHashCode(context), mergedContextConfiguration));
-				}
+			finally {
+				this.contextCache.logStatistics();
 			}
-
-			this.contextCache.logStatistics();
 
 			return context;
 		}
