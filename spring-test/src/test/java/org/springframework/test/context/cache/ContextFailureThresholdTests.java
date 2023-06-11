@@ -45,13 +45,13 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.reset
  */
 class ContextFailureThresholdTests {
 
-	private static final AtomicInteger passingLoadCount = new AtomicInteger(0);
-	private static final AtomicInteger failingLoadCount = new AtomicInteger(0);
+	private static final AtomicInteger passingLoadCount = new AtomicInteger();
+	private static final AtomicInteger failingLoadCount = new AtomicInteger();
 
 
 	@BeforeEach
 	@AfterEach
-	void resetFlag() {
+	void resetTestFixtures() {
 		resetContextCache();
 		passingLoadCount.set(0);
 		failingLoadCount.set(0);

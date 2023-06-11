@@ -158,6 +158,9 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 						this.contextCache.put(mergedConfig, context);
 					}
 					catch (Exception ex) {
+						if (logger.isTraceEnabled()) {
+							logger.trace("Incrementing ApplicationContext failure count for " + mergedConfig);
+						}
 						this.contextCache.incrementFailureCount(mergedConfig);
 						Throwable cause = ex;
 						if (ex instanceof ContextLoadException cle) {

@@ -57,6 +57,7 @@ public class DefaultContextCache implements ContextCache {
 
 	private static final Log statsLogger = LogFactory.getLog(CONTEXT_CACHE_LOGGING_CATEGORY);
 
+
 	/**
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
 	 */
