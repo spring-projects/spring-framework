@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
  *
  * <p>The maximum size may be supplied as a {@linkplain #DefaultContextCache(int)
  * constructor argument} or set via a system property or Spring property named
- * {@code spring.test.context.cache.maxSize}.
+ * {@value ContextCache#MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
