@@ -135,56 +135,59 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		mergedConfig = replaceIfNecessary(mergedConfig);
 		synchronized (this.contextCache) {
 			ApplicationContext context = this.contextCache.get(mergedConfig);
-			if (context == null) {
-				Integer failureCount = this.contextCache.getFailureCount(mergedConfig);
-				if (failureCount >= this.failureThreshold) {
-					throw new IllegalStateException("""
-							ApplicationContext failure threshold (%d) exceeded: \
-							skipping repeated attempt to load context for %s"""
-								.formatted(this.failureThreshold, mergedConfig));
-				}
-				try {
-					if (mergedConfig instanceof AotMergedContextConfiguration aotMergedConfig) {
-						context = loadContextInAotMode(aotMergedConfig);
+			try {
+				if (context == null) {
+					Integer failureCount = this.contextCache.getFailureCount(mergedConfig);
+					if (failureCount >= this.failureThreshold) {
+						throw new IllegalStateException("""
+								ApplicationContext failure threshold (%d) exceeded: \
+								skipping repeated attempt to load context for %s"""
+									.formatted(this.failureThreshold, mergedConfig));
 					}
-					else {
-						context = loadContextInternal(mergedConfig);
+					try {
+						if (mergedConfig instanceof AotMergedContextConfiguration aotMergedConfig) {
+							context = loadContextInAotMode(aotMergedConfig);
+						}
+						else {
+							context = loadContextInternal(mergedConfig);
+						}
+						if (logger.isTraceEnabled()) {
+							logger.trace("Storing ApplicationContext [%s] in cache under key %s".formatted(
+									System.identityHashCode(context), mergedConfig));
+						}
+						this.contextCache.put(mergedConfig, context);
 					}
-					if (logger.isTraceEnabled()) {
-						logger.trace("Storing ApplicationContext [%s] in cache under key %s".formatted(
-								System.identityHashCode(context), mergedConfig));
-					}
-					this.contextCache.put(mergedConfig, context);
-				}
-				catch (Exception ex) {
-					this.contextCache.incrementFailureCount(mergedConfig);
-					Throwable cause = ex;
-					if (ex instanceof ContextLoadException cle) {
-						cause = cle.getCause();
-						for (ApplicationContextFailureProcessor contextFailureProcessor : this.contextFailureProcessors) {
-							try {
-								contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
-							}
-							catch (Throwable throwable) {
-								if (logger.isDebugEnabled()) {
-									logger.debug("Ignoring exception thrown from ApplicationContextFailureProcessor [%s]: %s"
-											.formatted(contextFailureProcessor, throwable));
+					catch (Exception ex) {
+						this.contextCache.incrementFailureCount(mergedConfig);
+						Throwable cause = ex;
+						if (ex instanceof ContextLoadException cle) {
+							cause = cle.getCause();
+							for (ApplicationContextFailureProcessor contextFailureProcessor : this.contextFailureProcessors) {
+								try {
+									contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
+								}
+								catch (Throwable throwable) {
+									if (logger.isDebugEnabled()) {
+										logger.debug("Ignoring exception thrown from ApplicationContextFailureProcessor [%s]: %s"
+												.formatted(contextFailureProcessor, throwable));
+									}
 								}
 							}
 						}
+						throw new IllegalStateException(
+								"Failed to load ApplicationContext for " + mergedConfig, cause);
 					}
-					throw new IllegalStateException(
-						"Failed to load ApplicationContext for " + mergedConfig, cause);
+				}
+				else {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
+								System.identityHashCode(context), mergedConfig));
+					}
 				}
 			}
-			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Retrieved ApplicationContext [%s] from cache with key %s".formatted(
-							System.identityHashCode(context), mergedConfig));
-				}
+			finally {
+				this.contextCache.logStatistics();
 			}
-
-			this.contextCache.logStatistics();
 
 			return context;
 		}
