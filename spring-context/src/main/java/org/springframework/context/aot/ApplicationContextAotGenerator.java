@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,9 +52,9 @@ public class ApplicationContextAotGenerator {
 			GenerationContext generationContext) {
 		return withCglibClassHandler(new CglibClassHandler(generationContext), () -> {
 			applicationContext.refreshForAotProcessing(generationContext.getRuntimeHints());
-			DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
 			ApplicationContextInitializationCodeGenerator codeGenerator =
-					new ApplicationContextInitializationCodeGenerator(generationContext);
+					new ApplicationContextInitializationCodeGenerator(applicationContext, generationContext);
+			DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
 			new BeanFactoryInitializationAotContributions(beanFactory).applyTo(generationContext, codeGenerator);
 			return codeGenerator.getGeneratedClass().getName();
 		});

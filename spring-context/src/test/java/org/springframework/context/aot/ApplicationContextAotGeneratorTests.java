@@ -22,9 +22,13 @@ import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.GenerationContext;
@@ -380,6 +384,37 @@ class ApplicationContextAotGeneratorTests {
 			Constructor<?> userConstructor = ConfigurableCglibConfiguration.class.getDeclaredConstructors()[0];
 			assertThat(RuntimeHintsPredicates.reflection().onConstructor(userConstructor).introspect())
 					.accepts(generationContext.getRuntimeHints());
+		}
+
+	}
+
+	@Nested
+	static class ActiveProfile {
+
+		@ParameterizedTest
+		@MethodSource("activeProfilesParameters")
+		void processAheadOfTimeWhenHasActiveProfiles(String[] aotProfiles, String[] runtimeProfiles, String[] expectedActiveProfiles) {
+			GenericApplicationContext applicationContext = new GenericApplicationContext();
+			if (aotProfiles.length != 0) {
+				applicationContext.getEnvironment().setActiveProfiles(aotProfiles);
+			}
+			testCompiledResult(applicationContext, (initializer, compiled) -> {
+				GenericApplicationContext freshApplicationContext = new GenericApplicationContext();
+				if (runtimeProfiles.length != 0) {
+					freshApplicationContext.getEnvironment().setActiveProfiles(runtimeProfiles);
+				}
+				initializer.initialize(freshApplicationContext);
+				freshApplicationContext.refresh();
+				assertThat(freshApplicationContext.getEnvironment().getActiveProfiles()).containsExactly(expectedActiveProfiles);
+			});
+		}
+
+		static Stream<Arguments> activeProfilesParameters() {
+			return Stream.of(Arguments.of(new String[] { "aot", "prod" }, new String[] {}, new String[] { "aot", "prod" }),
+					Arguments.of(new String[] {}, new String[] { "aot", "prod" }, new String[] { "aot", "prod" }),
+					Arguments.of(new String[] { "aot" }, new String[] { "prod" }, new String[] { "prod", "aot" }),
+					Arguments.of(new String[] { "aot", "prod" }, new String[] { "aot", "prod" }, new String[] { "aot", "prod" }),
+					Arguments.of(new String[] { "default" }, new String[] {}, new String[] {}));
 		}
 
 	}
