@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.beanvalidation.MethodValidator;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.HandlerResult;
@@ -56,6 +57,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Mono<Object[]> EMPTY_ARGS = Mono.just(new Object[0]);
 
+	private static final Class<?>[] EMPTY_GROUPS = new Class<?>[0];
+
 	private static final Object NO_ARG_VALUE = new Object();
 
 
@@ -64,6 +67,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
+
+	@Nullable
+	private MethodValidator methodValidator;
 
 
 	/**
@@ -121,6 +127,16 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		this.reactiveAdapterRegistry = registry;
 	}
 
+	/**
+	 * Set the {@link MethodValidator} to perform method validation with if the
+	 * controller method {@link #shouldValidateArguments()} or
+	 * {@link #shouldValidateReturnValue()}.
+	 * @since 6.1
+	 */
+	public void setMethodValidator(@Nullable MethodValidator methodValidator) {
+		this.methodValidator = methodValidator;
+	}
+
 
 	/**
 	 * Invoke the method for the given exchange.
@@ -134,6 +150,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			ServerWebExchange exchange, BindingContext bindingContext, Object... providedArgs) {
 
 		return getMethodArgumentValues(exchange, bindingContext, providedArgs).flatMap(args -> {
+			Class<?>[] groups = getValidationGroups();
+			if (shouldValidateArguments() && this.methodValidator != null) {
+				this.methodValidator.validateArguments(getBean(), getBridgedMethod(), args, groups);
+			}
 			Object value;
 			Method method = getBridgedMethod();
 			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
@@ -223,6 +243,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				logger.debug(exchange.getLogPrefix() + formatArgumentError(parameter, exMsg));
 			}
 		}
+	}
+
+	private Class<?>[] getValidationGroups() {
+		return ((shouldValidateArguments() || shouldValidateReturnValue()) && this.methodValidator != null ?
+				this.methodValidator.determineValidationGroups(getBean(), getBridgedMethod()) : EMPTY_GROUPS);
 	}
 
 	private static boolean isAsyncVoidReturnType(MethodParameter returnType, @Nullable ReactiveAdapter adapter) {

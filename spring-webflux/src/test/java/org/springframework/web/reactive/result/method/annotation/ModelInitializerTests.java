@@ -79,7 +79,8 @@ public class ModelInitializerTests {
 		resolverConfigurer.addCustomResolver(new ModelMethodArgumentResolver(adapterRegistry));
 
 		ControllerMethodResolver methodResolver = new ControllerMethodResolver(
-				resolverConfigurer, adapterRegistry, new StaticApplicationContext(), Collections.emptyList());
+				resolverConfigurer, adapterRegistry, new StaticApplicationContext(),
+				Collections.emptyList(), null);
 
 		this.modelInitializer = new ModelInitializer(methodResolver, adapterRegistry);
 	}
@@ -210,7 +211,7 @@ public class ModelInitializerTests {
 						.toList();
 
 		WebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
-		return new InitBinderBindingContext(bindingInitializer, binderMethods);
+		return new InitBinderBindingContext(bindingInitializer, binderMethods, false);
 	}
 
 

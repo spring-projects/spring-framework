@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,17 @@
 
 package org.springframework.web.reactive;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
+import org.springframework.validation.DataBinder;
 import org.springframework.validation.support.BindingAwareConcurrentModel;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.bind.support.WebExchangeDataBinder;
@@ -50,6 +54,8 @@ public class BindingContext {
 
 	private final Model model = new BindingAwareConcurrentModel();
 
+	private boolean methodValidationApplicable;
+
 
 	/**
 	 * Create a new {@code BindingContext}.
@@ -72,6 +78,16 @@ public class BindingContext {
 	 */
 	public Model getModel() {
 		return this.model;
+	}
+
+	/**
+	 * Configure flag to signal whether validation will be applied to handler
+	 * method arguments, which is the case if Bean Validation is enabled in
+	 * Spring MVC, and method parameters have {@code @Constraint} annotations.
+	 * @since 6.1
+	 */
+	public void setMethodValidationApplicable(boolean methodValidationApplicable) {
+		this.methodValidationApplicable = methodValidationApplicable;
 	}
 
 
@@ -112,6 +128,24 @@ public class BindingContext {
 		return createDataBinder(exchange, null, name);
 	}
 
+	/**
+	 * Variant of {@link #createDataBinder(ServerWebExchange, Object, String)}
+	 * with a {@link MethodParameter} for which the {@code DataBinder} is created.
+	 * That may provide more insight to initialize the {@link WebExchangeDataBinder}.
+	 * <p>By default, if the parameter has {@code @Valid}, Bean Validation is
+	 * excluded, deferring to method validation.
+	 * @since 6.1
+	 */
+	public WebExchangeDataBinder createDataBinder(
+			ServerWebExchange exchange, @Nullable Object target, String name, MethodParameter parameter) {
+
+		WebExchangeDataBinder dataBinder = createDataBinder(exchange, target, name);
+		if (this.methodValidationApplicable) {
+			MethodValidationInitializer.updateBinder(dataBinder, parameter);
+		}
+		return dataBinder;
+	}
+
 
 	/**
 	 * Extended variant of {@link WebExchangeDataBinder}, adding path variables.
@@ -127,6 +161,23 @@ public class BindingContext {
 			return super.getValuesToBind(exchange).doOnNext(map ->
 					map.putAll(exchange.<Map<String, String>>getAttributeOrDefault(
 							HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, Collections.emptyMap())));
+		}
+	}
+
+
+	/**
+	 * Excludes Bean Validation if the method parameter has {@code @Valid}.
+	 */
+	private static class MethodValidationInitializer {
+
+		public static void updateBinder(DataBinder binder, MethodParameter parameter) {
+			if (ReactiveAdapterRegistry.getSharedInstance().getAdapter(parameter.getParameterType()) == null) {
+				for (Annotation annotation : parameter.getParameterAnnotations()) {
+					if (annotation.annotationType().getName().equals("jakarta.validation.Valid")) {
+						binder.setExcludedValidators(validator -> validator instanceof jakarta.validation.Validator);
+					}
+				}
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.validation.beanvalidation.MethodValidator;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,6 +95,9 @@ class ControllerMethodResolver {
 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
+	@Nullable
+	private final MethodValidator methodValidator;
+
 	private final Map<Class<?>, Set<Method>> initBinderMethodCache = new ConcurrentHashMap<>(64);
 
 	private final Map<Class<?>, Set<Method>> modelAttributeMethodCache = new ConcurrentHashMap<>(64);
@@ -110,8 +114,10 @@ class ControllerMethodResolver {
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache = new ConcurrentHashMap<>(64);
 
 
-	ControllerMethodResolver(ArgumentResolverConfigurer customResolvers, ReactiveAdapterRegistry adapterRegistry,
-			ConfigurableApplicationContext context, List<HttpMessageReader<?>> readers) {
+	ControllerMethodResolver(
+			ArgumentResolverConfigurer customResolvers, ReactiveAdapterRegistry adapterRegistry,
+			ConfigurableApplicationContext context, List<HttpMessageReader<?>> readers,
+			@Nullable MethodValidator methodValidator) {
 
 		Assert.notNull(customResolvers, "ArgumentResolverConfigurer is required");
 		Assert.notNull(adapterRegistry, "ReactiveAdapterRegistry is required");
@@ -123,6 +129,7 @@ class ControllerMethodResolver {
 		this.requestMappingResolvers = requestMappingResolvers(customResolvers, adapterRegistry, context, readers);
 		this.exceptionHandlerResolvers = exceptionHandlerResolvers(customResolvers, adapterRegistry, context);
 		this.reactiveAdapterRegistry = adapterRegistry;
+		this.methodValidator = methodValidator;
 
 		initControllerAdviceCaches(context);
 	}
@@ -260,6 +267,7 @@ class ControllerMethodResolver {
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setArgumentResolvers(this.requestMappingResolvers);
 		invocable.setReactiveAdapterRegistry(this.reactiveAdapterRegistry);
+		invocable.setMethodValidator(this.methodValidator);
 		return invocable;
 	}
 

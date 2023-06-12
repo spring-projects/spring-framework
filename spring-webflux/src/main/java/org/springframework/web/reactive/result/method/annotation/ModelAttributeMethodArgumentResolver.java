@@ -119,7 +119,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultSink.asMono());
 
 		return valueMono.flatMap(value -> {
-			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
+			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name, parameter);
 			return (bindingDisabled(parameter) ? Mono.empty() : bindRequestParameters(binder, exchange))
 					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {

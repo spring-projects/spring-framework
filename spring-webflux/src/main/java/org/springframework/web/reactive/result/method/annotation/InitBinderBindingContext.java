@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,12 +50,14 @@ class InitBinderBindingContext extends BindingContext {
 	private Runnable saveModelOperation;
 
 
-	InitBinderBindingContext(@Nullable WebBindingInitializer initializer,
-			List<SyncInvocableHandlerMethod> binderMethods) {
+	InitBinderBindingContext(
+			@Nullable WebBindingInitializer initializer, List<SyncInvocableHandlerMethod> binderMethods,
+			boolean methodValidationApplicable) {
 
 		super(initializer);
 		this.binderMethods = binderMethods;
 		this.binderMethodContext = new BindingContext(initializer);
+		setMethodValidationApplicable(methodValidationApplicable);
 	}
 
 

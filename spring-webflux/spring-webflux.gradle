@@ -11,6 +11,7 @@ dependencies {
 	optional(project(":spring-context"))
 	optional(project(":spring-context-support"))  // for FreeMarker support
 	optional("jakarta.servlet:jakarta.servlet-api")
+	optional("jakarta.validation:jakarta.validation-api")
 	optional("jakarta.websocket:jakarta.websocket-api")
 	optional("jakarta.websocket:jakarta.websocket-client-api")
 	optional("org.webjars:webjars-locator-core")
