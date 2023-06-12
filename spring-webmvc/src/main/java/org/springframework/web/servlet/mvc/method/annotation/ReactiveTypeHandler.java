@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.micrometer.context.ContextSnapshot;
+import io.micrometer.context.ContextSnapshotFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -515,11 +516,11 @@ class ReactiveTypeHandler {
 
 		public static Object writeReactorContext(Object returnValue) {
 			if (Mono.class.isAssignableFrom(returnValue.getClass())) {
-				ContextSnapshot snapshot = ContextSnapshot.captureAll();
+				ContextSnapshot snapshot = ContextSnapshotFactory.builder().build().captureAll();
 				return ((Mono<?>) returnValue).contextWrite(snapshot::updateContext);
 			}
 			else if (Flux.class.isAssignableFrom(returnValue.getClass())) {
-				ContextSnapshot snapshot = ContextSnapshot.captureAll();
+				ContextSnapshot snapshot = ContextSnapshotFactory.builder().build().captureAll();
 				return ((Flux<?>) returnValue).contextWrite(snapshot::updateContext);
 			}
 			else {
