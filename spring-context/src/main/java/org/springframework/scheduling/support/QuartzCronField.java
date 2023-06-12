@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
 
 /**
  * Extension of {@link CronField} for
- * <a href="https://www.quartz-scheduler.org>Quartz</a> -specific fields.
+ * <a href="https://www.quartz-scheduler.org">Quartz</a> -specific fields.
  * Created using the {@code parse*} methods, uses a {@link TemporalAdjuster}
  * internally.
  *
