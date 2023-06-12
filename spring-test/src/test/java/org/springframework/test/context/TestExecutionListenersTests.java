@@ -28,6 +28,7 @@ import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
 import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
+import org.springframework.test.context.observation.MicrometerObservationThreadLocalTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
@@ -63,6 +64,7 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				DirtiesContextTestExecutionListener.class,//
+				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class
@@ -81,6 +83,7 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				DirtiesContextTestExecutionListener.class,//
+				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class
@@ -98,6 +101,7 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				DirtiesContextTestExecutionListener.class,//
+				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
@@ -117,6 +121,7 @@ class TestExecutionListenersTests {
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
 				DirtiesContextTestExecutionListener.class,//
+				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class
