@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,7 +223,10 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * @see jakarta.jms.Session#CLIENT_ACKNOWLEDGE
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
-		return (session.getAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
+		int mode = session.getAcknowledgeMode();
+		return (mode != Session.SESSION_TRANSACTED &&
+				mode != Session.AUTO_ACKNOWLEDGE &&
+				mode != Session.DUPS_OK_ACKNOWLEDGE);
 	}
 
 }
