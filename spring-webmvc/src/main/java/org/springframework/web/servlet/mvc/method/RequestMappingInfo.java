@@ -256,6 +256,16 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
+	 * Whether the request mapping has an empty URL path mapping.
+	 * @since 6.0.10
+	 */
+	public boolean isEmptyMapping() {
+		RequestCondition<?> condition = getActivePatternsCondition();
+		return (condition instanceof PathPatternsRequestCondition pprc ?
+				pprc.isEmptyPathMapping() : ((PatternsRequestCondition) condition).isEmptyPathMapping());
+	}
+
+	/**
 	 * Return the HTTP request methods of this {@link RequestMappingInfo};
 	 * or instance with 0 request methods (never {@code null}).
 	 */

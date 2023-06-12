@@ -192,7 +192,16 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		request.setServletPath("");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
+
 		assertThat(response.getContentAsString()).isEqualTo("test");
+
+		// gh-30293
+		request = new MockHttpServletRequest("GET", "/");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertThat(response.getContentAsString()).isEqualTo("test");
+
 	}
 
 	@PathPatternsParameterizedTest
