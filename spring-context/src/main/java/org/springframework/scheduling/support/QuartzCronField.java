@@ -29,8 +29,9 @@ import org.springframework.util.Assert;
 
 /**
  * Extension of {@link CronField} for
- * <a href="https://www.quartz-scheduler.org>Quartz</a> -specific fields.
- * Created using the {@code parse*} methods, uses a {@link TemporalAdjuster}
+ * <a href="https://www.quartz-scheduler.org">Quartz</a>-specific fields.
+ *
+ * <p>Created using the {@code parse*} methods, uses a {@link TemporalAdjuster}
  * internally.
  *
  * @author Arjen Poutsma
@@ -68,8 +69,9 @@ final class QuartzCronField extends CronField {
 	}
 
 	/**
-	 * Parse the given value into a days of months {@code QuartzCronField}, the fourth entry of a cron expression.
-	 * Expects a "L" or "W" in the given value.
+	 * Parse the given value into a days of months {@code QuartzCronField},
+	 * the fourth entry of a cron expression.
+	 * <p>Expects a "L" or "W" in the given value.
 	 */
 	public static QuartzCronField parseDaysOfMonth(String value) {
 		int idx = value.lastIndexOf('L');
@@ -121,8 +123,9 @@ final class QuartzCronField extends CronField {
 	}
 
 	/**
-	 * Parse the given value into a days of week {@code QuartzCronField}, the sixth entry of a cron expression.
-	 * Expects a "L" or "#" in the given value.
+	 * Parse the given value into a days of week {@code QuartzCronField},
+	 * the sixth entry of a cron expression.
+	 * <p>Expects a "L" or "#" in the given value.
 	 */
 	public static QuartzCronField parseDaysOfWeek(String value) {
 		int idx = value.lastIndexOf('L');
@@ -227,7 +230,7 @@ final class QuartzCronField extends CronField {
 	}
 
 	/**
-	 * Return a temporal adjuster that finds the nth-to-last day of the month.
+	 * Returns a temporal adjuster that finds the nth-to-last day of the month.
 	 * @param offset the negative offset, i.e. -3 means third-to-last
 	 * @return a nth-to-last day-of-month adjuster
 	 */
@@ -241,7 +244,7 @@ final class QuartzCronField extends CronField {
 	}
 
 	/**
-	 * Return a temporal adjuster that finds the weekday nearest to the given
+	 * Returns a temporal adjuster that finds the weekday nearest to the given
 	 * day-of-month. If {@code dayOfMonth} falls on a Saturday, the date is
 	 * moved back to Friday; if it falls on a Sunday (or if {@code dayOfMonth}
 	 * is 1 and it falls on a Saturday), it is moved forward to Monday.
@@ -292,7 +295,7 @@ final class QuartzCronField extends CronField {
 	}
 
 	/**
-	 * Return a temporal adjuster that finds the last of the given doy-of-week
+	 * Returns a temporal adjuster that finds the last of the given day-of-week
 	 * in a month.
 	 */
 	private static TemporalAdjuster lastInMonth(DayOfWeek dayOfWeek) {
