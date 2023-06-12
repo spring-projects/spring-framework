@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -521,6 +521,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		copy.copyFrom(this);
 		copy.targetSource = EmptyTargetSource.forClass(getTargetClass(), getTargetSource().isStatic());
 		copy.advisorChainFactory = this.advisorChainFactory;
+		copy.methodCache = this.methodCache;
 		copy.interfaces = new ArrayList<>(this.interfaces);
 		copy.advisors = new ArrayList<>(this.advisors);
 		return copy;
