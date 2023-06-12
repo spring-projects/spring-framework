@@ -34,7 +34,7 @@ abstract class CoWebFilter : WebFilter {
 		return mono(Dispatchers.Unconfined) {
 			filter(exchange, object : CoWebFilterChain {
 				override suspend fun filter(exchange: ServerWebExchange) {
-					return chain.filter(exchange).cast(Unit.javaClass).awaitSingleOrNull() ?: Unit
+					chain.filter(exchange).awaitSingleOrNull()
 				}
 			})}.then()
 	}
