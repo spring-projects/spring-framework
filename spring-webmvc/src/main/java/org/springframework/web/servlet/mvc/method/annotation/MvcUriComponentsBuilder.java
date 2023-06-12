@@ -777,10 +777,23 @@ public class MvcUriComponentsBuilder {
 
 			else if (controllerType.isInterface()) {
 				ClassLoader classLoader = controllerType.getClassLoader();
-				if (classLoader == null || classLoader.getParent() == null) {
-					// JDK interface type from bootstrap loader or platform loader ->
-					// use higher-level loader which can see Spring infrastructure classes
+				if (classLoader == null) {
+					// JDK bootstrap loader -> use MethodInvocationInfo ClassLoader instead.
 					classLoader = MethodInvocationInfo.class.getClassLoader();
+				}
+				else if (classLoader.getParent() == null) {
+					// Potentially the JDK platform loader on JDK 9+
+					ClassLoader miiClassLoader = MethodInvocationInfo.class.getClassLoader();
+					ClassLoader miiParent = miiClassLoader.getParent();
+					while (miiParent != null) {
+						if (classLoader == miiParent) {
+							// Suggested ClassLoader is ancestor of MethodInvocationInfo ClassLoader
+							// -> use MethodInvocationInfo ClassLoader itself instead.
+							classLoader = miiClassLoader;
+							break;
+						}
+						miiParent = miiParent.getParent();
+					}
 				}
 				Class<?>[] ifcs = new Class<?>[] {controllerType, MethodInvocationInfo.class};
 				return (T) Proxy.newProxyInstance(classLoader, ifcs, interceptor);
