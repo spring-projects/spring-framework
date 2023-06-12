@@ -2,7 +2,7 @@
 = Null-safety
 
 Although Java does not let you express null-safety with its type system, the Spring Framework
-now provides the following annotations in the `org.springframework.lang` package to let you
+provides the following annotations in the `org.springframework.lang` package to let you
 declare nullability of APIs and fields:
 
 * {api-spring-framework}/lang/Nullable.html[`@Nullable`]: Annotation to indicate that a
@@ -17,11 +17,10 @@ level that declares non-null as the default semantics for fields.
 
 The Spring Framework itself leverages these annotations, but they can also be used in any
 Spring-based Java project to declare null-safe APIs and optionally null-safe fields.
-Generic type arguments, varargs and array elements nullability are not supported yet but
-should be in an upcoming release, see https://jira.spring.io/browse/SPR-15942[SPR-15942]
-for up-to-date information. Nullability declarations are expected to be fine-tuned between
-Spring Framework releases, including minor ones. Nullability of types used inside method
-bodies is outside of the scope of this feature.
+Generic type arguments, varargs and array elements nullability are not supported yet.
+Nullability declarations are expected to be fine-tuned between Spring Framework releases,
+including minor ones. Nullability of types used inside method bodies is outside the
+scope of this feature.
 
 NOTE: Other common libraries such as Reactor and Spring Data provide null-safe APIs that
 use a similar nullability arrangement, delivering a consistent overall experience for
@@ -38,7 +37,7 @@ these annotations can be used by an IDE (such as IDEA or Eclipse) to provide use
 warnings related to null-safety in order to avoid `NullPointerException` at runtime.
 
 They are also used to make Spring API null-safe in Kotlin projects, since Kotlin natively
-supports https://kotlinlang.org/docs/reference/null-safety.html[null-safety]. More details
+supports https://kotlinlang.org/docs/null-safety.html[null-safety]. More details
 are available in the xref:languages/kotlin/null-safety.adoc[Kotlin support documentation].
 
 
