@@ -136,9 +136,12 @@ public @interface Scheduled {
 	 * last invocation and the start of the next.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
+	 * <p>This attribute variant supports Spring-style "${...}" placeholders
+	 * as well as SpEL expressions.
 	 * @return the delay as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
+	 * @see #fixedDelay()
 	 */
 	String fixedDelayString() default "";
 
@@ -154,9 +157,12 @@ public @interface Scheduled {
 	 * Execute the annotated method with a fixed period between invocations.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
+	 * <p>This attribute variant supports Spring-style "${...}" placeholders
+	 * as well as SpEL expressions.
 	 * @return the period as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
+	 * @see #fixedRate()
 	 */
 	String fixedRateString() default "";
 
@@ -175,9 +181,12 @@ public @interface Scheduled {
 	 * {@link #fixedRate} or {@link #fixedDelay} task.
 	 * <p>The time unit is milliseconds by default but can be overridden via
 	 * {@link #timeUnit}.
+	 * <p>This attribute variant supports Spring-style "${...}" placeholders
+	 * as well as SpEL expressions.
 	 * @return the initial delay as a String value &mdash; for example, a placeholder
 	 * or a {@link java.time.Duration#parse java.time.Duration} compliant value
 	 * @since 3.2.2
+	 * @see #initialDelay()
 	 */
 	String initialDelayString() default "";
 
