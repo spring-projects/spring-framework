@@ -123,12 +123,33 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		if (logger.isTraceEnabled()) {
 			logger.trace("Creating JDK dynamic proxy: " + this.advised.getTargetSource());
 		}
-		if (classLoader == null || classLoader.getParent() == null) {
-			// JDK bootstrap loader or platform loader suggested ->
-			// use higher-level loader which can see Spring infrastructure classes
-			classLoader = getClass().getClassLoader();
+		return Proxy.newProxyInstance(determineClassLoader(classLoader), this.proxiedInterfaces, this);
+	}
+
+	/**
+	 * Determine whether the JDK bootstrap or platform loader has been suggested ->
+	 * use higher-level loader which can see Spring infrastructure classes instead.
+	 */
+	private ClassLoader determineClassLoader(@Nullable ClassLoader classLoader) {
+		if (classLoader == null) {
+			// JDK bootstrap loader -> use spring-aop ClassLoader instead.
+			return getClass().getClassLoader();
 		}
-		return Proxy.newProxyInstance(classLoader, this.proxiedInterfaces, this);
+		if (classLoader.getParent() == null) {
+			// Potentially the JDK platform loader on JDK 9+
+			ClassLoader aopClassLoader = getClass().getClassLoader();
+			ClassLoader aopParent = aopClassLoader.getParent();
+			while (aopParent != null) {
+				if (classLoader == aopParent) {
+					// Suggested ClassLoader is ancestor of spring-aop ClassLoader
+					// -> use spring-aop ClassLoader itself instead.
+					return aopClassLoader;
+				}
+				aopParent = aopParent.getParent();
+			}
+		}
+		// Regular case: use suggested ClassLoader as-is.
+		return classLoader;
 	}
 
 	/**
