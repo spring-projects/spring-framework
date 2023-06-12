@@ -16,6 +16,8 @@
 
 package org.springframework.messaging.simp.stomp;
 
+import org.junit.jupiter.api.Disabled;
+
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.messaging.tcp.reactor.ReactorNetty2TcpClient;
 
@@ -25,6 +27,7 @@ import org.springframework.messaging.tcp.reactor.ReactorNetty2TcpClient;
  *
  * @author Rossen Stoyanchev
  */
+@Disabled("gh-29287 :: Disabled because they fail too frequently")
 public class ReactorNetty2StompBrokerRelayIntegrationTests extends AbstractStompBrokerRelayIntegrationTests {
 
 	@Override
