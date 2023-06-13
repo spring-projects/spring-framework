@@ -25,7 +25,7 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 
 /**
- * {@code ObservationThreadLocalTestListener} is an extension of the {@link TestExecutionListener}
+ * {@code ObservationThreadLocalTestExecutionListener} is an implementation of the {@link TestExecutionListener}
  * SPI that updates the {@link ObservationThreadLocalAccessor} with the {@link ObservationRegistry}
  * taken from the {@link ApplicationContext} present in the {@link TestContext}.
  *
