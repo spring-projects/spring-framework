@@ -34,7 +34,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.mock;
 
-class ObservationThreadLocalTestListenerTests {
+class ObservationThreadLocalTestExecutionListenerTests {
 
 	ObservationRegistry originalObservationRegistry = ObservationThreadLocalAccessor.getInstance().getObservationRegistry();
 
