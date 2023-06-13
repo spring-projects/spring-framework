@@ -180,7 +180,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	}
 
 	private String[] safeMerge(@Nullable String[] existingNames, Collection<LifecycleElement> detectedElements) {
-		Stream<String> detectedNames = detectedElements.stream().map(LifecycleElement::getIdentifier);
+		Stream<String> detectedNames = detectedElements.stream().map(LifecycleElement::getMethod).map(Method::getName);
 		Stream<String> mergedNames = (existingNames != null ?
 				Stream.concat(Stream.of(existingNames), detectedNames) : detectedNames);
 		return mergedNames.distinct().toArray(String[]::new);

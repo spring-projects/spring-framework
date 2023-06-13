@@ -27,6 +27,7 @@ import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.I
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.Init;
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.InitDestroyBean;
 import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.MultiInitDestroyBean;
+import org.springframework.beans.testfixture.beans.factory.generator.lifecycle.PrivateInitDestroyBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,6 +53,15 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 	@Test
 	void processAheadOfTimeWhenHasInitDestroyAnnotationsAddsMethodNames() {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(InitDestroyBean.class);
+		processAheadOfTime(beanDefinition);
+		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
+		assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly("initMethod");
+		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("destroyMethod");
+	}
+
+	@Test
+	void processAheadOfTimeWhenHasPrivateInitDestroyAnnotationsAddsMethodNames() {
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(PrivateInitDestroyBean.class);
 		processAheadOfTime(beanDefinition);
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
 		assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly("initMethod");
