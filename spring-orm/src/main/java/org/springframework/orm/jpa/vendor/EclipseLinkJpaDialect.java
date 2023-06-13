@@ -36,13 +36,19 @@ import org.springframework.transaction.TransactionException;
  * Persistence Services (EclipseLink). Developed and tested against EclipseLink 2.7;
  * backwards-compatible with EclipseLink 2.5 and 2.6 at runtime.
  *
- * <p>By default, this class acquires an early EclipseLink transaction with an early
- * JDBC Connection for non-read-only transactions. This allows for mixing JDBC and
- * JPA/EclipseLink operations in the same transaction, with cross visibility of
+ * <p>By default, this dialect acquires an early EclipseLink transaction with an
+ * early JDBC Connection for non-read-only transactions. This allows for mixing
+ * JDBC and JPA operations in the same transaction, with cross visibility of
  * their impact. If this is not needed, set the "lazyDatabaseTransaction" flag to
  * {@code true} or consistently declare all affected transactions as read-only.
  * As of Spring 4.1.2, this will reliably avoid early JDBC Connection retrieval
  * and therefore keep EclipseLink in shared cache mode.
+ *
+ * <p><b>NOTE: This dialect supports custom isolation levels with limitations.</b>
+ * Consistent isolation level handling is only guaranteed when all Spring transaction
+ * definitions specify a concrete isolation level, without any default transactions
+ * running concurrently. Otherwise, you may see non-default isolation levels exposed
+ * to default transactions when custom isolation is used in concurrent transactions.
  *
  * @author Juergen Hoeller
  * @since 2.5.2
@@ -85,7 +91,8 @@ public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 			// (since Spring 4.1.2 / revised in 5.3.28)
 			UnitOfWork uow = entityManager.unwrap(UnitOfWork.class);
 			DatabaseLogin databaseLogin = uow.getLogin();
-			// Synchronize on shared DatabaseLogin instance (-> concurrent transactions)
+			// Synchronize on shared DatabaseLogin instance for consistent isolation level
+			// set and reset in case of concurrent transactions with different isolation.
 			synchronized (databaseLogin) {
 				int originalIsolationLevel = databaseLogin.getTransactionIsolation();
 				// Apply current isolation level value, if necessary.
