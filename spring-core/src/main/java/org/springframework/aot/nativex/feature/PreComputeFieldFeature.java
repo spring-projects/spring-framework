@@ -26,11 +26,17 @@ import org.graalvm.nativeimage.hosted.Feature;
  * GraalVM {@link Feature} that substitutes boolean field values that match a certain pattern
  * with values pre-computed AOT without causing class build-time initialization.
  *
+ * <p>It is possible to pass <pre style="code">-Dspring.aot.precompute=verbose</pre> as a
+ * <pre style="code">native-image</pre> compiler build argument to display detailed logs
+ * about pre-computed fields.</p>
+ *
  * @author Sebastien Deleuze
  * @author Phillip Webb
  * @since 6.0
  */
 class PreComputeFieldFeature implements Feature {
+
+	private static final boolean verbose = "verbose".equals(System.getProperty("spring.aot.precompute"));
 
 	private static Pattern[] patterns = {
 			Pattern.compile(Pattern.quote("org.springframework.core.NativeDetector#inNativeImage")),
@@ -64,10 +70,14 @@ class PreComputeFieldFeature implements Feature {
 						try {
 							Object fieldValue = provideFieldValue(field);
 							access.registerFieldValueTransformer(field, (receiver, originalValue) -> fieldValue);
-							System.out.println("Field " + fieldIdentifier + " set to " + fieldValue + " at build time");
+							if (verbose) {
+								System.out.println("Field " + fieldIdentifier + " set to " + fieldValue + " at build time");
+							}
 						}
 						catch (Throwable ex) {
-							System.out.println("Field " + fieldIdentifier + " will be evaluated at runtime due to this error during build time evaluation: " + ex.getMessage());
+							if (verbose) {
+								System.out.println("Field " + fieldIdentifier + " will be evaluated at runtime due to this error during build time evaluation: " + ex.getMessage());
+							}
 						}
 					}
 				}
