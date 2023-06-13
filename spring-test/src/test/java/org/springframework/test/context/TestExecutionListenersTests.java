@@ -64,10 +64,10 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				DirtiesContextTestExecutionListener.class,//
+				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
-				EventPublishingTestExecutionListener.class,//
-				MicrometerObservationThreadLocalTestExecutionListener.class
+				EventPublishingTestExecutionListener.class
 			);
 		assertRegisteredListeners(DefaultListenersTestCase.class, expected);
 	}
@@ -83,10 +83,10 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				DirtiesContextTestExecutionListener.class,//
+				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
-				EventPublishingTestExecutionListener.class,//
-				MicrometerObservationThreadLocalTestExecutionListener.class
+				EventPublishingTestExecutionListener.class
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerPrependedTestCase.class, expected);
 	}
@@ -101,11 +101,11 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				DirtiesContextTestExecutionListener.class,//
+				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
-				BazTestExecutionListener.class,//
-				MicrometerObservationThreadLocalTestExecutionListener.class
+				BazTestExecutionListener.class
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerAppendedTestCase.class, expected);
 	}
@@ -121,10 +121,10 @@ class TestExecutionListenersTests {
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
 				DirtiesContextTestExecutionListener.class,//
+				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
-				EventPublishingTestExecutionListener.class,//
-				MicrometerObservationThreadLocalTestExecutionListener.class
+				EventPublishingTestExecutionListener.class
 			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerInsertedTestCase.class, expected);
 	}

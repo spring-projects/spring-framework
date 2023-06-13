@@ -55,9 +55,9 @@ class MicrometerObservationThreadLocalTestExecutionListenerTests {
 
 	@Test
 	void observationRegistryShouldNotBeOverridden() throws Exception {
-		listener.beforeTestClass(testContext);
+		listener.beforeTestMethod(testContext);
 		thenObservationRegistryOnOTLAIsSameAsOriginal();
-		listener.afterTestClass(testContext);
+		listener.afterTestMethod(testContext);
 		thenObservationRegistryOnOTLAIsSameAsOriginal();
 	}
 
@@ -66,14 +66,14 @@ class MicrometerObservationThreadLocalTestExecutionListenerTests {
 		ObservationRegistry newObservationRegistry = ObservationRegistry.create();
 		applicationContext.getDefaultListableBeanFactory().registerSingleton("observationRegistry", newObservationRegistry);
 
-		listener.beforeTestClass(testContext);
+		listener.beforeTestMethod(testContext);
 		ObservationRegistry otlaObservationRegistry = ObservationThreadLocalAccessor.getInstance().getObservationRegistry();
 		then(otlaObservationRegistry)
 				.as("During the test we want the original ObservationRegistry to be replaced with the one present in this application context")
 				.isNotSameAs(originalObservationRegistry)
 				.isSameAs(newObservationRegistry);
 
-		listener.afterTestClass(testContext);
+		listener.afterTestMethod(testContext);
 		thenObservationRegistryOnOTLAIsSameAsOriginal();
 	}
 

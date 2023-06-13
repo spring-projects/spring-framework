@@ -33,7 +33,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * <p>This implementation is not thread-safe.
  *
  * @author Marcin Grzejszczak
- * @since 6.0
+ * @since 6.1
  */
 public class MicrometerObservationThreadLocalTestExecutionListener extends AbstractTestExecutionListener {
 
@@ -56,7 +56,7 @@ public class MicrometerObservationThreadLocalTestExecutionListener extends Abstr
 	 * @param testContext the test context for the test; never {@code null}
 	 */
 	@Override
-	public void beforeTestClass(TestContext testContext) {
+	public void beforeTestMethod(TestContext testContext) {
 		testContext.setAttribute(PREVIOUS_OBSERVATION_REGISTRY,
 				ObservationThreadLocalAccessor.getInstance().getObservationRegistry());
 		testContext.getApplicationContext()
@@ -72,12 +72,21 @@ public class MicrometerObservationThreadLocalTestExecutionListener extends Abstr
 	 * @param testContext the test context for the test; never {@code null}
 	 */
 	@Override
-	public void afterTestClass(TestContext testContext) {
+	public void afterTestMethod(TestContext testContext) {
 		ObservationRegistry previousObservationRegistry =
 				(ObservationRegistry) testContext.getAttribute(PREVIOUS_OBSERVATION_REGISTRY);
 		if (previousObservationRegistry != null) {
 			ObservationThreadLocalAccessor.getInstance()
 					.setObservationRegistry(previousObservationRegistry);
 		}
+	}
+
+
+	/**
+	 * Returns {@code 3500}.
+	 */
+	@Override
+	public final int getOrder() {
+		return 3500;
 	}
 }
