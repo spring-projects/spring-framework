@@ -68,24 +68,24 @@ import org.springframework.util.ClassUtils;
 public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactoryAware {
 
 	/**
-	 * Property name for checkpoint restore: {@value}.
+	 * Property name for a common context checkpoint: {@value}.
 	 * @since 6.1
-	 * @see #CHECKPOINT_RESTORE_ON_REFRESH
+	 * @see #CHECKPOINT_ON_REFRESH
 	 * @see org.crac.Core#checkpointRestore()
 	 */
-	public static final String CHECKPOINT_RESTORE_PROPERTY_NAME = "spring.checkpoint.restore";
+	public static final String CHECKPOINT_PROPERTY_NAME = "spring.context.checkpoint";
 
 	/**
-	 * Recognized value for checkpoint restore property: {@value}.
+	 * Recognized value for the context checkpoint property: {@value}.
 	 * @since 6.1
-	 * @see #CHECKPOINT_RESTORE_PROPERTY_NAME
+	 * @see #CHECKPOINT_PROPERTY_NAME
 	 * @see org.crac.Core#checkpointRestore()
 	 */
-	public static final String CHECKPOINT_RESTORE_ON_REFRESH = "onRefresh";
+	public static final String CHECKPOINT_ON_REFRESH = "onRefresh";
 
 
-	private final static boolean checkpointRestoreOnRefresh = CHECKPOINT_RESTORE_ON_REFRESH.equalsIgnoreCase(
-			SpringProperties.getProperty(CHECKPOINT_RESTORE_PROPERTY_NAME));
+	private final static boolean checkpointRestoreOnRefresh = CHECKPOINT_ON_REFRESH.equalsIgnoreCase(
+			SpringProperties.getProperty(CHECKPOINT_PROPERTY_NAME));
 
 	private final Log logger = LogFactory.getLog(getClass());
 
