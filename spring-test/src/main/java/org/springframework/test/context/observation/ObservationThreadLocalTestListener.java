@@ -39,7 +39,7 @@ public class ObservationThreadLocalTestListener implements TestExecutionListener
 	/**
 	 * Attribute name for a {@link TestContext} attribute which contains the previously
 	 * set {@link ObservationRegistry} on the {@link ObservationThreadLocalAccessor}.
-	 * After all tests from the given test class get ran, the previously stored {@link ObservationRegistry}
+	 * <p>After all tests from the current test class have completed, the previously stored {@link ObservationRegistry}
 	 * will be restored. If tests are ran concurrently this might cause issues
 	 * unless the {@link ObservationRegistry} is always the same (which should be the case most frequently).
 	 */
