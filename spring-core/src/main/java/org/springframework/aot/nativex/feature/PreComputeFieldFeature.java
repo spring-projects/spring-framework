@@ -38,7 +38,7 @@ class PreComputeFieldFeature implements Feature {
 
 	private static final boolean verbose = "verbose".equals(System.getProperty("spring.aot.precompute"));
 
-	private static Pattern[] patterns = {
+	private static final Pattern[] patterns = {
 			Pattern.compile(Pattern.quote("org.springframework.core.NativeDetector#inNativeImage")),
 			Pattern.compile(Pattern.quote("org.springframework.cglib.core.AbstractClassGenerator#inNativeImage")),
 			Pattern.compile(Pattern.quote("org.springframework.aot.AotDetector#inNativeImage")),
