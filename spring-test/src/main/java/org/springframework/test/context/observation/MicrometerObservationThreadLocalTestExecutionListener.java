@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.Conventions;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * {@code ObservationThreadLocalTestExecutionListener} is an implementation of the {@link TestExecutionListener}
@@ -34,7 +35,7 @@ import org.springframework.test.context.TestExecutionListener;
  * @author Marcin Grzejszczak
  * @since 6.0
  */
-public class MicrometerObservationThreadLocalTestExecutionListener implements TestExecutionListener {
+public class MicrometerObservationThreadLocalTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
 	 * Attribute name for a {@link TestContext} attribute which contains the previously
