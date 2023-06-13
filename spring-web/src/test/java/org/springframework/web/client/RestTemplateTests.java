@@ -278,6 +278,29 @@ class RestTemplateTests {
 	}
 
 	@Test
+	void getForEntityWithHeaders() throws Exception {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.set("Authorization", "test");
+		mockSentRequest(GET, "https://example.com", requestHeaders);
+		mockTextPlainHttpMessageConverter();
+		mockResponseStatus(HttpStatus.OK);
+		String expected = "Hello World";
+		mockTextResponseBody(expected);
+
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "test");
+		ResponseEntity<String> result = template.getForEntity("https://example.com", headers, String.class);
+		assertThat(result.getBody()).as("Invalid GET result").isEqualTo(expected);
+		assertThat(requestHeaders.getFirst("Accept")).as("Invalid Accept header").isEqualTo(MediaType.TEXT_PLAIN_VALUE);
+		assertThat(result.getHeaders().getContentType()).as("Invalid Content-Type header").isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(result.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatus.OK);
+
+		verify(response).close();
+	}
+
+
+	@Test
 	void getForObjectWithCustomUriTemplateHandler() throws Exception {
 		DefaultUriBuilderFactory uriTemplateHandler = new DefaultUriBuilderFactory();
 		template.setUriTemplateHandler(uriTemplateHandler);
