@@ -181,14 +181,14 @@ public class MethodValidationAdapterTests {
 			Object target, Method method, Object[] arguments, Consumer<MethodValidationResult> assertions) {
 
 		assertions.accept(
-				this.validationAdapter.validateMethodArguments(target, method, arguments, new Class<?>[0]));
+				this.validationAdapter.validateMethodArguments(target, method, null, arguments, new Class<?>[0]));
 	}
 
 	private void validateReturnValue(
 			Object target, Method method, @Nullable Object returnValue, Consumer<MethodValidationResult> assertions) {
 
 		assertions.accept(
-				this.validationAdapter.validateMethodReturnValue(target, method, returnValue, new Class<?>[0]));
+				this.validationAdapter.validateMethodReturnValue(target, method, null, returnValue, new Class<?>[0]));
 	}
 
 	private static void assertBeanResult(

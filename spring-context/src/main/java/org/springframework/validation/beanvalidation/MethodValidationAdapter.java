@@ -176,8 +176,8 @@ public class MethodValidationAdapter {
 
 	/**
 	 * Use this method determine the validation groups to pass into
-	 * {@link #validateMethodArguments(Object, Method, Object[], Class[])} and
-	 * {@link #validateMethodReturnValue(Object, Method, Object, Class[])}.
+	 * {@link #validateMethodArguments(Object, Method, MethodParameter[], Object[], Class[])} and
+	 * {@link #validateMethodReturnValue(Object, Method, MethodParameter, Object, Class[])}.
 	 * <p>Default are the validation groups as specified in the {@link Validated}
 	 * annotation on the method, or on the containing target class of the method,
 	 * or for an AOP proxy without a target (with all behavior in advisors), also
@@ -208,7 +208,8 @@ public class MethodValidationAdapter {
 	 * Validate the given method arguments and return the result of validation.
 	 * @param target the target Object
 	 * @param method the target method
-	 * @param arguments candidate arguments for a method invocation
+	 * @param parameters the parameters, if already created and available
+	 * @param arguments the candidate argument values to validate
 	 * @param groups groups for validation determined via
 	 * {@link #determineValidationGroups(Object, Method)}
 	 * @return a result with {@link ConstraintViolation violations} and
@@ -216,7 +217,8 @@ public class MethodValidationAdapter {
 	 * in case there are no violations
 	 */
 	public MethodValidationResult validateMethodArguments(
-			Object target, Method method, Object[] arguments, Class<?>[] groups) {
+			Object target, Method method, @Nullable MethodParameter[] parameters, Object[] arguments,
+			Class<?>[] groups) {
 
 		ExecutableValidator execVal = this.validator.get().forExecutables();
 		Set<ConstraintViolation<Object>> result;
@@ -231,14 +233,18 @@ public class MethodValidationAdapter {
 			result = execVal.validateParameters(target, bridgedMethod, arguments, groups);
 		}
 		return (result.isEmpty() ? EMPTY_RESULT :
-				createException(target, method, result, i -> arguments[i], false));
+				createException(target, method, result,
+						i -> parameters != null ? parameters[i] : new MethodParameter(method, i),
+						i -> arguments[i],
+						false));
 	}
 
 	/**
 	 * Validate the given return value and return the result of validation.
 	 * @param target the target Object
 	 * @param method the target method
-	 * @param returnValue value returned from invoking the target method
+	 * @param returnType the return parameter, if already created and available
+	 * @param returnValue the return value to validate
 	 * @param groups groups for validation determined via
 	 * {@link #determineValidationGroups(Object, Method)}
 	 * @return a result with {@link ConstraintViolation violations} and
@@ -246,16 +252,22 @@ public class MethodValidationAdapter {
 	 * in case there are no violations
 	 */
 	public MethodValidationResult validateMethodReturnValue(
-			Object target, Method method, @Nullable Object returnValue, Class<?>[] groups) {
+			Object target, Method method, @Nullable MethodParameter returnType, @Nullable Object returnValue,
+			Class<?>[] groups) {
 
 		ExecutableValidator execVal = this.validator.get().forExecutables();
 		Set<ConstraintViolation<Object>> result = execVal.validateReturnValue(target, method, returnValue, groups);
-		return (result.isEmpty() ? EMPTY_RESULT : createException(target, method, result, i -> returnValue, true));
+		return (result.isEmpty() ? EMPTY_RESULT :
+				createException(target, method, result,
+						i -> returnType != null ? returnType : new MethodParameter(method, -1),
+						i -> returnValue,
+						true));
 	}
 
 	private MethodValidationException createException(
 			Object target, Method method, Set<ConstraintViolation<Object>> violations,
-			Function<Integer, Object> argumentFunction, boolean forReturnValue) {
+			Function<Integer, MethodParameter> parameterFunction, Function<Integer, Object> argumentFunction,
+			boolean forReturnValue) {
 
 		Map<MethodParameter, ValueResultBuilder> parameterViolations = new LinkedHashMap<>();
 		Map<Path.Node, BeanResultBuilder> cascadedViolations = new LinkedHashMap<>();
@@ -267,10 +279,11 @@ public class MethodValidationAdapter {
 
 				MethodParameter parameter;
 				if (node.getKind().equals(ElementKind.PARAMETER)) {
-					parameter = new MethodParameter(method, node.as(Path.ParameterNode.class).getParameterIndex());
+					int index = node.as(Path.ParameterNode.class).getParameterIndex();
+					parameter = parameterFunction.apply(index);
 				}
 				else if (node.getKind().equals(ElementKind.RETURN_VALUE)) {
-					parameter = new MethodParameter(method, -1);
+					parameter = parameterFunction.apply(-1);
 				}
 				else {
 					continue;

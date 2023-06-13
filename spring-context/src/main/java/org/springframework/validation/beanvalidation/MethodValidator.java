@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 
 /**
@@ -35,8 +36,8 @@ public interface MethodValidator {
 
 	/**
 	 * Use this method determine the validation groups to pass into
-	 * {@link #validateArguments(Object, Method, Object[], Class[])} and
-	 * {@link #validateReturnValue(Object, Method, Object, Class[])}.
+	 * {@link #validateArguments(Object, Method, MethodParameter[], Object[], Class[])} and
+	 * {@link #validateReturnValue(Object, Method, MethodParameter, Object, Class[])}.
 	 * @param target the target Object
 	 * @param method the target method
 	 * @return the applicable validation groups as a {@code Class} array
@@ -48,24 +49,30 @@ public interface MethodValidator {
 	 * Validate the given method arguments and return the result of validation.
 	 * @param target the target Object
 	 * @param method the target method
-	 * @param arguments candidate arguments for a method invocation
+	 * @param parameters the parameters, if already created and available
+	 * @param arguments the candidate argument values to validate
 	 * @param groups groups for validation determined via
 	 * {@link #determineValidationGroups(Object, Method)}
 	 * @throws MethodValidationException should be raised in case of validation
 	 * errors unless the implementation handles those errors otherwise (e.g.
 	 * by injecting {@code BindingResult} into the method).
 	 */
-	void validateArguments(Object target, Method method, Object[] arguments, Class<?>[] groups);
+	void validateArguments(
+			Object target, Method method, @Nullable MethodParameter[] parameters, Object[] arguments,
+			Class<?>[] groups);
 
 	/**
 	 * Validate the given return value and return the result of validation.
 	 * @param target the target Object
 	 * @param method the target method
-	 * @param returnValue value returned from invoking the target method
+	 * @param returnType the return parameter, if already created and available
+	 * @param returnValue the return value to validate
 	 * @param groups groups for validation determined via
 	 * {@link #determineValidationGroups(Object, Method)}
 	 * @throws MethodValidationException in case of validation errors
 	 */
-	void validateReturnValue(Object target, Method method, @Nullable Object returnValue, Class<?>[] groups);
+	void validateReturnValue(
+			Object target, Method method, @Nullable MethodParameter returnType, @Nullable Object returnValue,
+			Class<?>[] groups);
 
 }

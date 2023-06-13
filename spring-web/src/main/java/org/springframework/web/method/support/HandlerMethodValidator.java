@@ -46,28 +46,16 @@ import org.springframework.web.method.annotation.ModelFactory;
  * @author Rossen Stoyanchev
  * @since 6.1
  */
-public class HandlerMethodValidator extends DefaultMethodValidator {
+public final class HandlerMethodValidator extends DefaultMethodValidator {
 
 
-	public HandlerMethodValidator(MethodValidationAdapter adapter) {
+	private HandlerMethodValidator(MethodValidationAdapter adapter) {
 		super(adapter);
-		adapter.setBindingResultNameResolver(this::determineObjectName);
-	}
-
-	private String determineObjectName(MethodParameter param, @Nullable Object argument) {
-		if (param.hasParameterAnnotation(RequestBody.class) || param.hasParameterAnnotation(RequestPart.class)) {
-			return Conventions.getVariableNameForParameter(param);
-		}
-		else {
-			return ((param.getParameterIndex() != -1) ?
-					ModelFactory.getNameForParameter(param) :
-					ModelFactory.getNameForReturnValue(argument, param));
-		}
 	}
 
 
 	@Override
-	protected void handleArgumentsResult(
+	protected void handleArgumentsValidationResult(
 			Object bean, Method method, Object[] arguments, Class<?>[] groups, MethodValidationResult result) {
 
 		if (result.getConstraintViolations().isEmpty()) {
@@ -93,12 +81,21 @@ public class HandlerMethodValidator extends DefaultMethodValidator {
 		result.throwIfViolationsPresent();
 	}
 
+	private String determineObjectName(MethodParameter param, @Nullable Object argument) {
+		if (param.hasParameterAnnotation(RequestBody.class) || param.hasParameterAnnotation(RequestPart.class)) {
+			return Conventions.getVariableNameForParameter(param);
+		}
+		else {
+			return ((param.getParameterIndex() != -1) ?
+					ModelFactory.getNameForParameter(param) :
+					ModelFactory.getNameForReturnValue(argument, param));
+		}
+	}
+
 
 	/**
-	 * Create a {@link MethodValidator} if Bean Validation is enabled in Spring MVC or WebFlux.
-	 * @param bindingInitializer for the configured Validator and MessageCodesResolver
-	 * @param parameterNameDiscoverer the {@code ParameterNameDiscoverer} to use
-	 * for {@link MethodValidationAdapter#setParameterNameDiscoverer}
+	 * Static factory method to create a {@link HandlerMethodValidator} if Bean
+	 * Validation is enabled in Spring MVC or WebFlux.
 	 */
 	@Nullable
 	public static MethodValidator from(
@@ -107,15 +104,17 @@ public class HandlerMethodValidator extends DefaultMethodValidator {
 
 		if (bindingInitializer instanceof ConfigurableWebBindingInitializer configurableInitializer) {
 			if (configurableInitializer.getValidator() instanceof Validator validator) {
-				MethodValidationAdapter validationAdapter = new MethodValidationAdapter(validator);
+				MethodValidationAdapter adapter = new MethodValidationAdapter(validator);
 				if (parameterNameDiscoverer != null) {
-					validationAdapter.setParameterNameDiscoverer(parameterNameDiscoverer);
+					adapter.setParameterNameDiscoverer(parameterNameDiscoverer);
 				}
 				MessageCodesResolver codesResolver = configurableInitializer.getMessageCodesResolver();
 				if (codesResolver != null) {
-					validationAdapter.setMessageCodesResolver(codesResolver);
+					adapter.setMessageCodesResolver(codesResolver);
 				}
-				return new HandlerMethodValidator(validationAdapter);
+				HandlerMethodValidator methodValidator = new HandlerMethodValidator(adapter);
+				adapter.setBindingResultNameResolver(methodValidator::determineObjectName);
+				return methodValidator;
 			}
 		}
 		return null;
