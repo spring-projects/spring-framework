@@ -1,5 +1,5 @@
 /**
- * Micrometer Observation support classes for the <em>Spring TestContext Framework</em>.
+ * Observation support classes for the <em>Spring TestContext Framework</em>.
  */
 @NonNullApi
 @NonNullFields
