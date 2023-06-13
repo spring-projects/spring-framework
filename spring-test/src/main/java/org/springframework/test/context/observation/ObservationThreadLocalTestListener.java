@@ -29,7 +29,7 @@ import org.springframework.test.context.TestExecutionListener;
  * SPI that updates the {@link ObservationThreadLocalAccessor} with the {@link ObservationRegistry}
  * taken from the {@link ApplicationContext} present in the {@link TestContext}.
  *
- * This implementation is not thread-safe.
+ * <p>This implementation is not thread-safe.
  *
  * @author Marcin Grzejszczak
  * @since 6.0
