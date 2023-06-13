@@ -513,6 +513,7 @@ class ReactiveTypeHandler {
 
 	private static class ContextSnapshotHelper {
 
+		@SuppressWarnings("deprecation")
 		public static Object writeReactorContext(Object returnValue) {
 			if (Mono.class.isAssignableFrom(returnValue.getClass())) {
 				ContextSnapshot snapshot = ContextSnapshot.captureAll();
