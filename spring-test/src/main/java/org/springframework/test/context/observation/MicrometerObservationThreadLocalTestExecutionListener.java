@@ -34,7 +34,7 @@ import org.springframework.test.context.TestExecutionListener;
  * @author Marcin Grzejszczak
  * @since 6.0
  */
-public class ObservationThreadLocalTestListener implements TestExecutionListener {
+public class MicrometerObservationThreadLocalTestExecutionListener implements TestExecutionListener {
 
 	/**
 	 * Attribute name for a {@link TestContext} attribute which contains the previously
@@ -43,21 +43,40 @@ public class ObservationThreadLocalTestListener implements TestExecutionListener
 	 * will be restored. If tests are ran concurrently this might cause issues
 	 * unless the {@link ObservationRegistry} is always the same (which should be the case most frequently).
 	 */
-	public static final String PREVIOUS_OBSERVATION_REGISTRY = Conventions.getQualifiedAttributeName(
-			ObservationThreadLocalTestListener.class, "previousObservationRegistry");
+	private static final String PREVIOUS_OBSERVATION_REGISTRY = Conventions.getQualifiedAttributeName(
+			MicrometerObservationThreadLocalTestExecutionListener.class, "previousObservationRegistry");
 
+	/**
+	 * Retrieves the current {@link ObservationRegistry} stored
+	 * on {@link ObservationThreadLocalAccessor} instance and stores it
+	 * in the {@link TestContext} attributes and overrides it with
+	 * one stored in {@link ApplicationContext} associated with
+	 * the {@link TestContext}.
+	 * @param testContext the test context for the test; never {@code null}
+	 */
 	@Override
-	public void beforeTestClass(TestContext testContext) throws Exception {
-		testContext.setAttribute(PREVIOUS_OBSERVATION_REGISTRY, ObservationThreadLocalAccessor.getInstance().getObservationRegistry());
-		testContext.getApplicationContext().getBeanProvider(ObservationRegistry.class)
-				.ifAvailable(observationRegistry -> ObservationThreadLocalAccessor.getInstance().setObservationRegistry(observationRegistry));
+	public void beforeTestClass(TestContext testContext) {
+		testContext.setAttribute(PREVIOUS_OBSERVATION_REGISTRY,
+				ObservationThreadLocalAccessor.getInstance().getObservationRegistry());
+		testContext.getApplicationContext()
+				.getBeanProvider(ObservationRegistry.class)
+				.ifAvailable(observationRegistry ->
+						ObservationThreadLocalAccessor.getInstance()
+								.setObservationRegistry(observationRegistry));
 	}
 
+	/**
+	 * Retrieves the previously stored {@link ObservationRegistry} and sets it back
+	 * on the {@link ObservationThreadLocalAccessor} instance.
+	 * @param testContext the test context for the test; never {@code null}
+	 */
 	@Override
-	public void afterTestClass(TestContext testContext) throws Exception {
-		ObservationRegistry previousObservationRegistry = (ObservationRegistry) testContext.getAttribute(PREVIOUS_OBSERVATION_REGISTRY);
+	public void afterTestClass(TestContext testContext) {
+		ObservationRegistry previousObservationRegistry =
+				(ObservationRegistry) testContext.getAttribute(PREVIOUS_OBSERVATION_REGISTRY);
 		if (previousObservationRegistry != null) {
-			ObservationThreadLocalAccessor.getInstance().setObservationRegistry(previousObservationRegistry);
+			ObservationThreadLocalAccessor.getInstance()
+					.setObservationRegistry(previousObservationRegistry);
 		}
 	}
 }

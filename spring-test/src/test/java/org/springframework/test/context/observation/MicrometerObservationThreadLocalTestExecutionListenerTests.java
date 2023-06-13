@@ -34,7 +34,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willAnswer;
 import static org.mockito.Mockito.mock;
 
-class ObservationThreadLocalTestExecutionListenerTests {
+class MicrometerObservationThreadLocalTestExecutionListenerTests {
 
 	ObservationRegistry originalObservationRegistry = ObservationThreadLocalAccessor.getInstance().getObservationRegistry();
 
@@ -44,7 +44,7 @@ class ObservationThreadLocalTestExecutionListenerTests {
 
 	Map<String, Object> attributes = new HashMap<>();
 
-	ObservationThreadLocalTestListener listener = new ObservationThreadLocalTestListener();
+	MicrometerObservationThreadLocalTestExecutionListener listener = new MicrometerObservationThreadLocalTestExecutionListener();
 
 	@BeforeEach
 	void setup() {
