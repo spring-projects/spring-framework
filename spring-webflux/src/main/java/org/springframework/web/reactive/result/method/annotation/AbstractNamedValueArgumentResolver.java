@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,6 +196,7 @@ public abstract class AbstractNamedValueArgumentResolver extends HandlerMethodAr
 			throw new ServerErrorException("Conversion not supported.", parameter, ex);
 		}
 		catch (TypeMismatchException ex) {
+			ex.initPropertyName(namedValueInfo.name);
 			throw new ServerWebInputException("Type mismatch.", parameter, ex);
 		}
 		return value;
