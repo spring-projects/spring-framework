@@ -89,6 +89,8 @@ dependencies {
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
 	testRuntimeOnly("jakarta.json:jakarta.json-api")
 	testRuntimeOnly("org.eclipse:yasson")
+	testRuntimeOnly("org.glassfish:jakarta.el")
+	testRuntimeOnly("org.hibernate:hibernate-validator")
 	testFixturesApi("jakarta.servlet:jakarta.servlet-api")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-params")

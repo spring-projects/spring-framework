@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,11 +56,13 @@ public class WebExchangeBindException extends ServerWebInputException implements
 
 	private static Object[] initMessageDetailArguments(BindingResult bindingResult) {
 		return new Object[] {
-				MethodArgumentNotValidException.errorsToStringList(bindingResult.getGlobalErrors()),
-				MethodArgumentNotValidException.errorsToStringList(bindingResult.getFieldErrors())
-		};
+				join(MethodArgumentNotValidException.errorsToStringList(bindingResult.getGlobalErrors())),
+				join(MethodArgumentNotValidException.errorsToStringList(bindingResult.getFieldErrors()))};
 	}
 
+	private static String join(List<String> errors) {
+		return String.join(", and ", errors);
+	}
 
 	/**
 	 * Return the BindingResult that this BindException wraps.
@@ -303,8 +305,8 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	@Override
 	public Object[] getDetailMessageArguments(MessageSource source, Locale locale) {
 		return new Object[] {
-				MethodArgumentNotValidException.errorsToStringList(getGlobalErrors(), source, locale),
-				MethodArgumentNotValidException.errorsToStringList(getFieldErrors(), source, locale)
+				join(MethodArgumentNotValidException.errorsToStringList(getGlobalErrors(), source, locale)),
+				join(MethodArgumentNotValidException.errorsToStringList(getFieldErrors(), source, locale))
 		};
 	}
 

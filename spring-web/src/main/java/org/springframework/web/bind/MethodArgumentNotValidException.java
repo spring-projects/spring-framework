@@ -16,12 +16,10 @@
 
 package org.springframework.web.bind;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.springframework.context.MessageSource;
 import org.springframework.core.MethodParameter;
@@ -29,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -100,21 +99,26 @@ public class MethodArgumentNotValidException extends BindException implements Er
 
 	@Override
 	public Object[] getDetailMessageArguments() {
-		return new Object[] {errorsToStringList(getGlobalErrors()), errorsToStringList(getFieldErrors())};
+		return new Object[] {
+				join(formatErrors(getGlobalErrors(), null, null)),
+				join(formatErrors(getFieldErrors(), null, null))};
 	}
 
 	@Override
 	public Object[] getDetailMessageArguments(MessageSource messageSource, Locale locale) {
 		return new Object[] {
-				errorsToStringList(getGlobalErrors(), messageSource, locale),
-				errorsToStringList(getFieldErrors(), messageSource, locale)
-		};
+				join(formatErrors(getGlobalErrors(), messageSource, locale)),
+				join(formatErrors(getFieldErrors(), messageSource, locale))};
+	}
+
+	private static String join(List<String> errors) {
+		return String.join(", and ", errors);
 	}
 
 	/**
 	 * Resolve global and field errors to messages with the given
 	 * {@link MessageSource} and {@link Locale}.
-	 * @return a Map with errors as key and resolved messages as value
+	 * @return a Map with errors as keys and resolved messages as values
 	 * @since 6.0.3
 	 */
 	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
@@ -141,8 +145,7 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	 * @since 6.0
 	 */
 	public static List<String> errorsToStringList(List<? extends ObjectError> errors) {
-		return errorsToStringList(errors, error ->
-				error.getDefaultMessage() != null ? error.getDefaultMessage() : error.getCode());
+		return formatErrors(errors, null, null);
 	}
 
 	/**
@@ -154,23 +157,28 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	public static List<String> errorsToStringList(
 			List<? extends ObjectError> errors, @Nullable MessageSource source, Locale locale) {
 
-		return (source != null ?
-				errorsToStringList(errors, error -> source.getMessage(error, locale)) :
-				errorsToStringList(errors));
+		return formatErrors(errors, source, locale);
 	}
 
-	private static List<String> errorsToStringList(
-			List<? extends ObjectError> errors, Function<ObjectError, String> formatter) {
+	public static List<String> formatErrors(
+			List<? extends ObjectError> errors, @Nullable MessageSource messageSource, @Nullable Locale locale) {
 
-		List<String> result = new ArrayList<>(errors.size());
-		for (ObjectError error : errors) {
-			String value = formatter.apply(error);
-			if (StringUtils.hasText(value)) {
-				result.add(error instanceof FieldError fieldError ?
-						fieldError.getField() + ": '" + value + "'" : "'" + value + "'");
-			}
+		return errors.stream()
+				.map(error -> formatError(error, messageSource, locale))
+				.filter(StringUtils::hasText)
+				.toList();
+	}
+
+	private static String formatError(
+			ObjectError error, @Nullable MessageSource messageSource, @Nullable Locale locale) {
+
+		if (messageSource != null) {
+			Assert.notNull(locale, "Expected MessageSource and locale");
+			return messageSource.getMessage(error, locale);
 		}
-		return result;
+		String field = (error instanceof FieldError fieldError ? fieldError.getField() + ": " : "");
+		String message = (error.getDefaultMessage() != null ? error.getDefaultMessage() : error.getCode());
+		return (field + message);
 	}
 
 }

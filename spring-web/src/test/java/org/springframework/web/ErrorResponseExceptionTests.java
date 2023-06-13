@@ -444,7 +444,7 @@ public class ErrorResponseExceptionTests {
 			BindingResult bindingResult = new BindException(new TestBean(), "myBean");
 			bindingResult.reject("bean.invalid.A", "Invalid bean message");
 			bindingResult.reject("bean.invalid.B");
-			bindingResult.rejectValue("name", "name.required", "Name is required");
+			bindingResult.rejectValue("name", "name.required", "must be provided");
 			bindingResult.rejectValue("age", "age.min");
 			return bindingResult;
 		}
@@ -456,16 +456,16 @@ public class ErrorResponseExceptionTests {
 			String message = messageSource.getMessage(
 					ex.getDetailMessageCode(), ex.getDetailMessageArguments(), Locale.UK);
 
-			assertThat(message).isEqualTo("" +
-					"Failures ['Invalid bean message', 'bean.invalid.B']. " +
-					"nested failures: [name: 'Name is required', age: 'age.min']");
+			assertThat(message).isEqualTo(
+					"Failed because Invalid bean message, and bean.invalid.B. " +
+							"Also because name: must be provided, and age: age.min");
 
 			message = messageSource.getMessage(
 					ex.getDetailMessageCode(), ex.getDetailMessageArguments(messageSource, Locale.UK), Locale.UK);
 
-			assertThat(message).isEqualTo("" +
-					"Failures ['Bean A message', 'Bean B message']. " +
-					"nested failures: [name: 'Required name message', age: 'Minimum age message']");
+			assertThat(message).isEqualTo(
+					"Failed because Bean A message, and Bean B message. " +
+							"Also because name is required, and age is below minimum");
 		}
 
 		private void assertErrorMessages(BiFunction<MessageSource, Locale, Map<ObjectError, String>> expectedMessages) {
@@ -473,16 +473,16 @@ public class ErrorResponseExceptionTests {
 			Map<ObjectError, String> map = expectedMessages.apply(messageSource, Locale.UK);
 
 			assertThat(map).hasSize(4).containsValues(
-					"'Bean A message'", "'Bean B message'", "name: 'Required name message'", "age: 'Minimum age message'");
+					"Bean A message", "Bean B message", "name is required", "age is below minimum");
 		}
 
 		private StaticMessageSource initMessageSource() {
 			StaticMessageSource messageSource = new StaticMessageSource();
-			messageSource.addMessage(this.code, Locale.UK, "Failures {0}. nested failures: {1}");
+			messageSource.addMessage(this.code, Locale.UK, "Failed because {0}. Also because {1}");
 			messageSource.addMessage("bean.invalid.A", Locale.UK, "Bean A message");
 			messageSource.addMessage("bean.invalid.B", Locale.UK, "Bean B message");
-			messageSource.addMessage("name.required", Locale.UK, "Required name message");
-			messageSource.addMessage("age.min", Locale.UK, "Minimum age message");
+			messageSource.addMessage("name.required", Locale.UK, "name is required");
+			messageSource.addMessage("age.min", Locale.UK, "age is below minimum");
 			return messageSource;
 		}
 	}
