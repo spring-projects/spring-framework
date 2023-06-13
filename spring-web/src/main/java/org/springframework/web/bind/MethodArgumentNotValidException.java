@@ -121,23 +121,12 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	 * @return a Map with errors as keys and resolved messages as values
 	 * @since 6.0.3
 	 */
-	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
-		Map<ObjectError, String> map = new LinkedHashMap<>();
-		addMessages(map, getGlobalErrors(), messageSource, locale);
-		addMessages(map, getFieldErrors(), messageSource, locale);
+	public Map<ObjectError, String> resolveErrorMessages(MessageSource source, Locale locale) {
+		Map<ObjectError, String> map = new LinkedHashMap<>(getErrorCount());
+		getGlobalErrors().forEach(error -> map.put(error, formatError(error, source, locale)));
+		getFieldErrors().forEach(error -> map.put(error, formatError(error, source, locale)));
 		return map;
 	}
-
-	private static void addMessages(
-			Map<ObjectError, String> map, List<? extends ObjectError> errors,
-			MessageSource messageSource, Locale locale) {
-
-		List<String> messages = errorsToStringList(errors, messageSource, locale);
-		for (int i = 0; i < errors.size(); i++) {
-			map.put(errors.get(i), messages.get(i));
-		}
-	}
-
 
 	/**
 	 * Convert each given {@link ObjectError} to a String in single quotes, taking
