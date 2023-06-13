@@ -121,14 +121,14 @@ import org.springframework.web.util.pattern.PathPatternParser;
  *
  * <p>This class registers the following {@link HandlerMapping HandlerMappings}:</p>
  * <ul>
+ * <li>{@link RouterFunctionMapping}
+ * ordered at -1 to map {@linkplain org.springframework.web.servlet.function.RouterFunction router functions}.
  * <li>{@link RequestMappingHandlerMapping}
  * ordered at 0 for mapping requests to annotated controller methods.
  * <li>{@link HandlerMapping}
  * ordered at 1 to map URL paths directly to view names.
  * <li>{@link BeanNameUrlHandlerMapping}
  * ordered at 2 to map URL paths to controller bean names.
- * <li>{@link RouterFunctionMapping}
- * ordered at 3 to map {@linkplain org.springframework.web.servlet.function.RouterFunction router functions}.
  * <li>{@link HandlerMapping}
  * ordered at {@code Integer.MAX_VALUE-1} to serve static resource requests.
  * <li>{@link HandlerMapping}
@@ -535,7 +535,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Return a {@link RouterFunctionMapping} ordered at 3 to map
+	 * Return a {@link RouterFunctionMapping} ordered at -1 to map
 	 * {@linkplain org.springframework.web.servlet.function.RouterFunction router functions}.
 	 * Consider overriding one of these other more fine-grained methods:
 	 * <ul>
@@ -552,7 +552,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			@Qualifier("mvcResourceUrlProvider") ResourceUrlProvider resourceUrlProvider) {
 
 		RouterFunctionMapping mapping = new RouterFunctionMapping();
-		mapping.setOrder(3);
+		mapping.setOrder(-1);  // go before RequestMappingHandlerMapping
 		mapping.setInterceptors(getInterceptors(conversionService, resourceUrlProvider));
 		mapping.setCorsConfigurations(getCorsConfigurations());
 		mapping.setMessageConverters(getMessageConverters());
