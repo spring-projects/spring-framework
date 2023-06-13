@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package org.springframework.http;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,20 +23,19 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
-import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link BeanUtilsRuntimeHints}.
+ * Web-related tests for {@link BeanUtilsRuntimeHints}.
  *
  * @author Sebastien Deleuze
  * @since 6.0.10
- * @see org.springframework.http.WebBeanUtilsRuntimeHintsTests
+ * @see org.springframework.beans.BeanUtilsRuntimeHintsTests
  */
-class BeanUtilsRuntimeHintsTests {
+class WebBeanUtilsRuntimeHintsTests {
 
 	private final RuntimeHints hints = new RuntimeHints();
 
@@ -48,8 +47,8 @@ class BeanUtilsRuntimeHintsTests {
 	}
 
 	@Test
-	void resourceEditorHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(ResourceEditor.class)
+	void mediaTypeEditorHasHints() {
+		assertThat(RuntimeHintsPredicates.reflection().onType(MediaTypeEditor.class)
 				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
 	}
 

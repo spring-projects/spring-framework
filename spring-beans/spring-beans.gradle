@@ -13,7 +13,6 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-core")))
 	testImplementation(project(":spring-core-test"))
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
-	testImplementation(project(":spring-web"))
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.assertj:assertj-core")
 }
