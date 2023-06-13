@@ -406,6 +406,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	@Override
+	public <T> ResponseEntity<T> getForEntity(String url, HttpHeaders headers, Class<T> responseType, Object... uriVariables)
+			throws RestClientException {
+		RequestCallback requestCallback = acceptHeaderRequestCallback(responseType, headers);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
+		return nonNull(execute(url, HttpMethod.GET, requestCallback, responseExtractor, uriVariables));
+	}
+
+	@Override
 	public <T> ResponseEntity<T> getForEntity(String url, Class<T> responseType, Map<String, ?> uriVariables)
 			throws RestClientException {
 
@@ -417,6 +425,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	@Override
 	public <T> ResponseEntity<T> getForEntity(URI url, Class<T> responseType) throws RestClientException {
 		RequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
+		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
+		return nonNull(execute(url, HttpMethod.GET, requestCallback, responseExtractor));
+	}
+
+	@Override
+	@Nullable
+	public <T> ResponseEntity<T> getForEntity(URI url, HttpHeaders headers, Class<T> responseType) throws RestClientException {
+		RequestCallback requestCallback = acceptHeaderRequestCallback(responseType, headers);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);
 		return nonNull(execute(url, HttpMethod.GET, requestCallback, responseExtractor));
 	}
@@ -926,6 +942,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
+	 * Return a {@code RequestCallback} that sets the request
+	 * header based on the headers passed by the caller
+	 */
+	public <T> RequestCallback acceptHeaderRequestCallback(Class<T> responseType, HttpHeaders headers) {
+		return new AcceptHeaderRequestCallback(responseType, headers);
+	}
+
+	/**
 	 * Return a {@code RequestCallback} implementation that writes the given
 	 * object to the request stream.
 	 */
@@ -972,9 +996,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		@Nullable
 		private final Type responseType;
+		@Nullable
+		private final HttpHeaders headers;
 
 		public AcceptHeaderRequestCallback(@Nullable Type responseType) {
 			this.responseType = responseType;
+			this.headers = null;
+		}
+
+		public AcceptHeaderRequestCallback(@Nullable Type responseType, HttpHeaders headers) {
+			this.responseType = responseType;
+			this.headers = headers;
 		}
 
 		@Override
@@ -990,6 +1022,13 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					logger.debug("Accept=" + allSupportedMediaTypes);
 				}
 				request.getHeaders().setAccept(allSupportedMediaTypes);
+			}
+			if (this.headers != null && !headers.isEmpty()) {
+				HttpHeaders httpHeaders = request.getHeaders();
+				this.headers.forEach((key, values) -> httpHeaders.put(key, new ArrayList<>(values)));
+				if (httpHeaders.getContentLength() < 0) {
+					httpHeaders.setContentLength(0L);
+				}
 			}
 		}
 

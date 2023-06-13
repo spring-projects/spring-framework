@@ -104,6 +104,20 @@ public interface RestOperations {
 			throws RestClientException;
 
 	/**
+	 * Retrieve an entity by doing a GET on the specified URL with the specified headers
+	 * The response is converted and stored in a {@link ResponseEntity}.
+	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * @param url the URL
+	 * @param headers http headers
+	 * @param responseType the type of the return value
+	 * @param uriVariables the variables to expand the template
+	 * @return the entity
+	 * @since 6.1.0
+	 */
+	<T> ResponseEntity<T> getForEntity(String url, HttpHeaders headers, Class<T> responseType, Object... uriVariables)
+			throws RestClientException;
+
+	/**
 	 * Retrieve a representation by doing a GET on the URL.
 	 * The response is converted and stored in a {@link ResponseEntity}.
 	 * @param url the URL
@@ -112,6 +126,17 @@ public interface RestOperations {
 	 * @since 3.0.2
 	 */
 	<T> ResponseEntity<T> getForEntity(URI url, Class<T> responseType) throws RestClientException;
+
+	/**
+	 * Retrieve a representation by doing a GET on the URL with specified Http Headers
+	 * The response is converted and stored in a {@link ResponseEntity}.
+	 * @param url the URL
+	 * @param headers http headers
+	 * @param responseType the type of the return value
+	 * @return the converted object
+	 * @since 6.1.0
+	 */
+	<T> ResponseEntity<T> getForEntity(URI url, HttpHeaders headers, Class<T> responseType) throws RestClientException;
 
 
 	// HEAD
