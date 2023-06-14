@@ -89,7 +89,7 @@ public class CronTrigger implements Trigger {
 	/**
 	 * Determine the next execution time according to the given trigger context.
 	 * <p>Next execution times are calculated based on the
-	 * {@linkplain TriggerContext#lastCompletionTime completion time} of the
+	 * {@linkplain TriggerContext#lastCompletion completion time} of the
 	 * previous execution; therefore, overlapping executions won't occur.
 	 */
 	@Override
@@ -114,8 +114,9 @@ public class CronTrigger implements Trigger {
 
 
 	@Override
-	public boolean equals(@Nullable Object obj) {
-		return (this == obj || (obj instanceof CronTrigger that && this.expression.equals(that.expression)));
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof CronTrigger that &&
+				this.expression.equals(that.expression)));
 	}
 
 	@Override

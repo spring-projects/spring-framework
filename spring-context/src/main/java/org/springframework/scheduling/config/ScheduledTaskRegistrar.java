@@ -485,7 +485,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 		}
 		if (this.taskScheduler != null) {
 			Duration initialDelay = task.getInitialDelayDuration();
-			if (initialDelay.toMillis() > 0) {
+			if (initialDelay.toNanos() > 0) {
 				Instant startTime = this.taskScheduler.getClock().instant().plus(initialDelay);
 				scheduledTask.future =
 						this.taskScheduler.scheduleAtFixedRate(task.getRunnable(), startTime, task.getIntervalDuration());
