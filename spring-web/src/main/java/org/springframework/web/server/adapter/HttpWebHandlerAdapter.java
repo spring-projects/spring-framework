@@ -296,9 +296,10 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 				exchange.getLogPrefix() + formatRequest(exchange.getRequest()) +
 						(traceOn ? ", headers=" + formatHeaders(exchange.getRequest().getHeaders()) : ""));
 
-		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(exchange.getRequest(),
-				exchange.getResponse(), exchange.getAttributes());
-		exchange.getAttributes().put(ServerRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
+		ServerRequestObservationContext observationContext = new ServerRequestObservationContext(
+				exchange.getRequest(), exchange.getResponse(), exchange.getAttributes());
+		exchange.getAttributes().put(
+				ServerRequestObservationContext.CURRENT_OBSERVATION_CONTEXT_ATTRIBUTE, observationContext);
 
 		return getDelegate().handle(exchange)
 				.transformDeferred(call -> transform(exchange, observationContext, call))

@@ -174,7 +174,7 @@ public class RouterFunctionMapping extends AbstractHandlerMapping implements Ini
 			org.springframework.web.filter.reactive.ServerHttpObservationFilter
 					.findObservationContext(serverRequest.exchange())
 					.ifPresent(context -> context.setPathPattern(matchingPattern.toString()));
-			ServerRequestObservationContext.findCurrent(serverRequest.exchange())
+			ServerRequestObservationContext.findCurrent(serverRequest.exchange().getAttributes())
 					.ifPresent(context -> context.setPathPattern(matchingPattern.toString()));
 		}
 		Map<String, String> uriVariables =

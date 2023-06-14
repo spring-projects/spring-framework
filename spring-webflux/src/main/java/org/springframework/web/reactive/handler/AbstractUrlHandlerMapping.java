@@ -170,7 +170,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		org.springframework.web.filter.reactive.ServerHttpObservationFilter
 				.findObservationContext(exchange)
 				.ifPresent(context -> context.setPathPattern(pattern.toString()));
-		ServerRequestObservationContext.findCurrent(exchange)
+		ServerRequestObservationContext.findCurrent(exchange.getAttributes())
 				.ifPresent(context -> context.setPathPattern(pattern.toString()));
 		exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, pathWithinMapping);
 		exchange.getAttributes().put(URI_TEMPLATE_VARIABLES_ATTRIBUTE, matchInfo.getUriVariables());

@@ -137,7 +137,7 @@ class RouterFunctionMappingTests {
 		assertThat(matchingPattern.getPatternString()).isEqualTo("/match");
 		assertThat(org.springframework.web.filter.reactive.ServerHttpObservationFilter.findObservationContext(exchange))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
-		assertThat(ServerRequestObservationContext.findCurrent(exchange))
+		assertThat(ServerRequestObservationContext.findCurrent(exchange.getAttributes()))
 				.hasValueSatisfying(context -> assertThat(context.getPathPattern()).isEqualTo(matchingPattern.getPatternString()));
 
 		ServerRequest serverRequest = exchange.getAttribute(RouterFunctions.REQUEST_ATTRIBUTE);
