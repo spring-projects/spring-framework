@@ -106,8 +106,7 @@ public class InjectionMetadata {
 	 * @since 6.0.10
 	 */
 	public Collection<InjectedElement> getInjectedElements(@Nullable PropertyValues pvs) {
-		return this.injectedElements.stream()
-				.filter(candidate -> candidate.shouldInject(pvs)).toList();
+		return this.injectedElements.stream().filter(candidate -> candidate.shouldInject(pvs)).toList();
 	}
 
 	/**
@@ -117,7 +116,7 @@ public class InjectionMetadata {
 	 * @since 5.2.4
 	 */
 	protected boolean needsRefresh(Class<?> clazz) {
-		return this.targetClass != clazz;
+		return (this.targetClass != clazz);
 	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
