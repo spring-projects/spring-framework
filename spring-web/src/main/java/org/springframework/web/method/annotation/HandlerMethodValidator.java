@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.method.support;
+package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
 
@@ -35,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebBindingInitializer;
-import org.springframework.web.method.annotation.ModelFactory;
 
 /**
  * {@link org.springframework.validation.beanvalidation.MethodValidator} for
@@ -47,7 +46,6 @@ import org.springframework.web.method.annotation.ModelFactory;
  * @since 6.1
  */
 public final class HandlerMethodValidator extends DefaultMethodValidator {
-
 
 	private HandlerMethodValidator(MethodValidationAdapter adapter) {
 		super(adapter);
@@ -86,7 +84,7 @@ public final class HandlerMethodValidator extends DefaultMethodValidator {
 			return Conventions.getVariableNameForParameter(param);
 		}
 		else {
-			return ((param.getParameterIndex() != -1) ?
+			return (param.getParameterIndex() != -1 ?
 					ModelFactory.getNameForParameter(param) :
 					ModelFactory.getNameForReturnValue(argument, param));
 		}
