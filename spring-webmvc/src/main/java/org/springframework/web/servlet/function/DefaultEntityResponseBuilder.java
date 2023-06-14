@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -508,14 +508,14 @@ final class DefaultEntityResponseBuilder<T> implements EntityResponse.Builder<T>
 
 			@Override
 			public void addIntHeader(String name, int value) {
-				if (name!=null && !HttpHeaders.CONTENT_LENGTH.equals(name)) {
+				if (!HttpHeaders.CONTENT_LENGTH.equals(name)) {
 					super.addIntHeader(name, value);
 				}
 			}
 
 			@Override
 			public void addHeader(String name, String value) {
-				if (name!= null && !HttpHeaders.CONTENT_LENGTH.equals(name)) {
+				if (!HttpHeaders.CONTENT_LENGTH.equals(name)) {
 					super.addHeader(name, value);
 				}
 			}
