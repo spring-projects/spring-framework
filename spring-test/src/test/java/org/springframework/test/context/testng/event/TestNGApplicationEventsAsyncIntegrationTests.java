@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * or assert the events from a separate thread, in conjunction with TestNG.
  *
  * @author Simon Baslé
- * @since 6.1.0
+ * @since 6.1
  */
 @RecordApplicationEvents
 class TestNGApplicationEventsAsyncIntegrationTests extends AbstractTestNGSpringContextTests {

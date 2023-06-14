@@ -48,9 +48,9 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  *
  * @author Brian Clozel
  * @since 6.0
- * @deprecated since 6.1.0 in favor of {@link WebHttpHandlerBuilder}.
+ * @deprecated since 6.1 in favor of {@link WebHttpHandlerBuilder}.
  */
-@Deprecated(since = "6.1.0", forRemoval = true)
+@Deprecated(since = "6.1", forRemoval = true)
 public class ServerHttpObservationFilter implements WebFilter {
 
 	/**
