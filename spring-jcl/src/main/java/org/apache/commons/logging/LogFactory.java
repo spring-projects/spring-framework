@@ -51,6 +51,8 @@ package org.apache.commons.logging;
  */
 public abstract class LogFactory {
 
+	private static final LogFactory factory = new LogFactoryImpl();
+
 	/**
 	 * Convenience method to return a named logger.
 	 * @param clazz containing Class from which a log name will be derived
@@ -77,7 +79,7 @@ public abstract class LogFactory {
 	 */
 	@Deprecated
 	public static LogFactory getFactory() {
-		return new LogFactory() {};
+		return factory;
 	}
 
 	/**
@@ -87,9 +89,7 @@ public abstract class LogFactory {
 	 * @deprecated in favor of {@link #getLog(Class)}
 	 */
 	@Deprecated
-	public Log getInstance(Class<?> clazz) {
-		return getLog(clazz);
-	}
+	public abstract Log getInstance(Class<?> clazz);
 
 	/**
 	 * Convenience method to return a named logger.
@@ -98,8 +98,20 @@ public abstract class LogFactory {
 	 * @deprecated in favor of {@link #getLog(String)}
 	 */
 	@Deprecated
-	public Log getInstance(String name) {
-		return getLog(name);
-	}
+	public abstract Log getInstance(String name);
+
+
+	// Just in case some code happens to call uncommon Commons Logging methods...
+
+
+	public abstract Object getAttribute(String name);
+
+	public abstract String[] getAttributeNames();
+
+	public abstract void removeAttribute(String name);
+
+	public abstract void setAttribute(String name, Object value);
+
+	public abstract void release();
 
 }
