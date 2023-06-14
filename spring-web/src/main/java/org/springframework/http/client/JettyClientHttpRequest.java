@@ -95,7 +95,11 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			Response response = responseListener.get(TimeUnit.MILLISECONDS.convert(this.timeOut), TimeUnit.MILLISECONDS);
 			return new JettyClientHttpResponse(response, responseListener.getInputStream());
 		}
-		catch (InterruptedException | TimeoutException | ExecutionException ex) {
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+			throw new IOException("Request was interrupted: " + ex.getMessage(), ex);
+		}
+		catch (TimeoutException | ExecutionException ex) {
 			throw new IOException("Could not send request: " + ex.getMessage(), ex);
 		}
 	}
