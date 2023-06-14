@@ -65,6 +65,18 @@ public interface ErrorResponse {
 	ProblemDetail getBody();
 
 	/**
+	 * Return a code to use to resolve the problem "type" for this exception
+	 * through a {@link MessageSource}. The type resolved through the
+	 * {@code MessageSource} will be passed into {@link URI#create(String)}
+	 * and therefore must be an encoded URI String.
+	 * <p>By default this is initialized via {@link #getDefaultTypeMessageCode(Class)}.
+	 * @since 6.1
+	 */
+	default String getTypeMessageCode() {
+		return getDefaultTypeMessageCode(getClass());
+	}
+
+	/**
 	 * Return a code to use to resolve the problem "detail" for this exception
 	 * through a {@link MessageSource}.
 	 * <p>By default this is initialized via
@@ -109,15 +121,19 @@ public interface ErrorResponse {
 	}
 
 	/**
-	 * Resolve the {@link #getDetailMessageCode() detailMessageCode} and the
-	 * {@link #getTitleMessageCode() titleMessageCode} through the given
-	 * {@link MessageSource}, and if found, update the "detail" and "title"
-	 * fields respectively.
+	 * Use the given {@link MessageSource} to resolve the
+	 * {@link #getTypeMessageCode() type}, {@link #getTitleMessageCode() title},
+	 * and {@link #getDetailMessageCode() detail} message codes, and then use the
+	 * resolved values to update the corresponding fields in {@link #getBody()}.
 	 * @param messageSource the {@code MessageSource} to use for the lookup
 	 * @param locale the {@code Locale} to use for the lookup
 	 */
 	default ProblemDetail updateAndGetBody(@Nullable MessageSource messageSource, Locale locale) {
 		if (messageSource != null) {
+			String type = messageSource.getMessage(getTypeMessageCode(), null, null, locale);
+			if (type != null) {
+				getBody().setType(URI.create(type));
+			}
 			Object[] arguments = getDetailMessageArguments(messageSource, locale);
 			String detail = messageSource.getMessage(getDetailMessageCode(), arguments, null, locale);
 			if (detail != null) {
@@ -131,6 +147,17 @@ public interface ErrorResponse {
 		return getBody();
 	}
 
+
+	/**
+	 * Build a message code for the "type" field, for the given exception type.
+	 * @param exceptionType the exception type associated with the problem
+	 * @return {@code "problemDetail.type."} followed by the fully qualified
+	 * {@link Class#getName() class name}
+	 * @since 6.1
+	 */
+	static String getDefaultTypeMessageCode(Class<?> exceptionType) {
+		return "problemDetail.type." + exceptionType.getName();
+	}
 
 	/**
 	 * Build a message code for the "detail" field, for the given exception type.

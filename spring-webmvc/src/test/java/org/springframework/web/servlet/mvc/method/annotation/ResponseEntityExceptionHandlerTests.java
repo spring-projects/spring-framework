@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.beans.PropertyChangeEvent;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -164,14 +165,18 @@ public class ResponseEntityExceptionHandlerTests {
 		Locale locale = Locale.UK;
 		LocaleContextHolder.setLocale(locale);
 
+		String type = "https://example.com/probs/unsupported-content";
+		String title = "Media type is not valid or not supported";
+
 		try {
 			StaticMessageSource messageSource = new StaticMessageSource();
 			messageSource.addMessage(
 					ErrorResponse.getDefaultDetailMessageCode(HttpMediaTypeNotSupportedException.class, null), locale,
 					"Content-Type {0} not supported. Supported: {1}");
 			messageSource.addMessage(
-					ErrorResponse.getDefaultTitleMessageCode(HttpMediaTypeNotSupportedException.class), locale,
-					"Media type is not valid or not supported");
+					ErrorResponse.getDefaultTitleMessageCode(HttpMediaTypeNotSupportedException.class), locale, title);
+			messageSource.addMessage(
+					ErrorResponse.getDefaultTypeMessageCode(HttpMediaTypeNotSupportedException.class), locale, type);
 
 			this.exceptionHandler.setMessageSource(messageSource);
 
@@ -181,8 +186,8 @@ public class ResponseEntityExceptionHandlerTests {
 			ProblemDetail body = (ProblemDetail) entity.getBody();
 			assertThat(body.getDetail()).isEqualTo(
 					"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
-			assertThat(body.getTitle()).isEqualTo(
-					"Media type is not valid or not supported");
+			assertThat(body.getTitle()).isEqualTo(title);
+			assertThat(body.getType()).isEqualTo(URI.create(type));
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();

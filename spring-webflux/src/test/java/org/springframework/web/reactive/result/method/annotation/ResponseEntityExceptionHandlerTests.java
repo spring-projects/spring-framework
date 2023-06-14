@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -130,29 +131,33 @@ public class ResponseEntityExceptionHandlerTests {
 		Locale locale = Locale.UK;
 		LocaleContextHolder.setLocale(locale);
 
+		String type = "https://example.com/probs/unsupported-content";
+		String title = "Media type is not valid or not supported";
+
 		StaticMessageSource messageSource = new StaticMessageSource();
 		messageSource.addMessage(
 				ErrorResponse.getDefaultDetailMessageCode(UnsupportedMediaTypeStatusException.class, null), locale,
 				"Content-Type {0} not supported. Supported: {1}");
 		messageSource.addMessage(
-				ErrorResponse.getDefaultTitleMessageCode(UnsupportedMediaTypeStatusException.class), locale,
-				"Media type is not valid or not supported");
+				ErrorResponse.getDefaultTitleMessageCode(UnsupportedMediaTypeStatusException.class), locale, title);
+		messageSource.addMessage(
+				ErrorResponse.getDefaultTypeMessageCode(UnsupportedMediaTypeStatusException.class), locale, type);
 
 		this.exceptionHandler.setMessageSource(messageSource);
 
 		Exception ex = new UnsupportedMediaTypeStatusException(MediaType.APPLICATION_JSON,
 				List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
-				.acceptLanguageAsLocales(locale).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.get("/").acceptLanguageAsLocales(locale).build());
 
 		ResponseEntity<?> responseEntity = this.exceptionHandler.handleException(ex, exchange).block();
 
 		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
 		assertThat(body.getDetail()).isEqualTo(
 				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
-		assertThat(body.getTitle()).isEqualTo(
-				"Media type is not valid or not supported");
+		assertThat(body.getTitle()).isEqualTo(title);
+		assertThat(body.getType()).isEqualTo(URI.create(type));
 	}
 
 	@Test
