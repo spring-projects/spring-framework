@@ -17,17 +17,11 @@
 package org.springframework.util;
 
 import java.lang.reflect.Array;
-import java.net.URI;
-import java.net.URL;
-import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.UUID;
 
 import org.springframework.lang.Nullable;
 
@@ -918,6 +912,7 @@ public abstract class ObjectUtils {
 	 * @since 5.3.27
 	 * @see #nullSafeToString(Object)
 	 * @see StringUtils#truncate(CharSequence)
+	 * @see ClassUtils#isSimpleValueType(Class)
 	 */
 	public static String nullSafeConciseToString(@Nullable Object obj) {
 		if (obj == null) {
@@ -930,31 +925,13 @@ public abstract class ObjectUtils {
 			return StringUtils.truncate(charSequence);
 		}
 		Class<?> type = obj.getClass();
-		if (isSimpleValueType(type)) {
+		if (ClassUtils.isSimpleValueType(type)) {
 			String str = obj.toString();
 			if (str != null) {
 				return StringUtils.truncate(str);
 			}
 		}
 		return type.getTypeName() + "@" + getIdentityHexString(obj);
-	}
-
-	/**
-	 * Derived from {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
-	 */
-	private static boolean isSimpleValueType(Class<?> type) {
-		return (Void.class != type && void.class != type &&
-				(ClassUtils.isPrimitiveOrWrapper(type) ||
-				Enum.class.isAssignableFrom(type) ||
-				CharSequence.class.isAssignableFrom(type) ||
-				Number.class.isAssignableFrom(type) ||
-				Date.class.isAssignableFrom(type) ||
-				Temporal.class.isAssignableFrom(type) ||
-				UUID.class.isAssignableFrom(type) ||
-				URI.class == type ||
-				URL.class == type ||
-				Locale.class == type ||
-				Class.class == type));
 	}
 
 }

@@ -23,15 +23,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URI;
-import java.net.URL;
-import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -663,26 +658,20 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Check if the given type represents a "simple" value type: a primitive or
-	 * primitive wrapper, an enum, a String or other CharSequence, a Number, a
-	 * Date, a Temporal, a URI, a URL, a Locale, or a Class.
+	 * Check if the given type represents a "simple" value type for
+	 * bean property and data binding purposes:
+	 * a primitive or primitive wrapper, an {@code Enum}, a {@code String}
+	 * or other {@code CharSequence}, a {@code Number}, a {@code Date},
+	 * a {@code Temporal}, a {@code UUID}, a {@code URI}, a {@code URL},
+	 * a {@code Locale}, or a {@code Class}.
 	 * <p>{@code Void} and {@code void} are not considered simple value types.
 	 * @param type the type to check
 	 * @return whether the given type represents a "simple" value type
 	 * @see #isSimpleProperty(Class)
+	 * @see ClassUtils#isSimpleValueType(Class)
 	 */
 	public static boolean isSimpleValueType(Class<?> type) {
-		return (Void.class != type && void.class != type &&
-				(ClassUtils.isPrimitiveOrWrapper(type) ||
-				Enum.class.isAssignableFrom(type) ||
-				CharSequence.class.isAssignableFrom(type) ||
-				Number.class.isAssignableFrom(type) ||
-				Date.class.isAssignableFrom(type) ||
-				Temporal.class.isAssignableFrom(type) ||
-				URI.class == type ||
-				URL.class == type ||
-				Locale.class == type ||
-				Class.class == type));
+		return ClassUtils.isSimpleValueType(type);
 	}
 
 

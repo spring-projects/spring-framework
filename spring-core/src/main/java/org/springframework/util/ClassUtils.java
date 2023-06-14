@@ -24,9 +24,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.net.URI;
+import java.net.URL;
+import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,10 +38,12 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import org.springframework.lang.Nullable;
 
@@ -526,6 +532,34 @@ public abstract class ClassUtils {
 	public static Class<?> resolvePrimitiveIfNecessary(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isPrimitive() && clazz != void.class ? primitiveTypeToWrapperMap.get(clazz) : clazz);
+	}
+
+	/**
+	 * Delegate for {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
+	 * Also used by {@link ObjectUtils#nullSafeConciseToString}.
+	 * <p>Check if the given type represents a common "simple" value type:
+	 * a primitive or primitive wrapper, an {@code Enum}, a {@code String}
+	 * or other {@code CharSequence}, a {@code Number}, a {@code Date},
+	 * a {@code Temporal}, a {@code UUID}, a {@code URI}, a {@code URL},
+	 * a {@code Locale}, or a {@code Class}.
+	 * <p>{@code Void} and {@code void} are not considered simple value types.
+	 * @param type the type to check
+	 * @return whether the given type represents a "simple" value type
+	 * @since 6.1
+	 */
+	public static boolean isSimpleValueType(Class<?> type) {
+		return (Void.class != type && void.class != type &&
+				(isPrimitiveOrWrapper(type) ||
+				Enum.class.isAssignableFrom(type) ||
+				CharSequence.class.isAssignableFrom(type) ||
+				Number.class.isAssignableFrom(type) ||
+				Date.class.isAssignableFrom(type) ||
+				Temporal.class.isAssignableFrom(type) ||
+				UUID.class.isAssignableFrom(type) ||
+				URI.class == type ||
+				URL.class == type ||
+				Locale.class == type ||
+				Class.class == type));
 	}
 
 	/**
