@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
 import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
-import org.springframework.test.context.observation.MicrometerObservationThreadLocalTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.context.web.ServletTestExecutionListener;
+import org.springframework.util.ClassUtils;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -57,14 +57,17 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
  */
 class TestExecutionListenersTests {
 
+	private static final Class<?> micrometerListenerClass =
+			ClassUtils.resolveClassName("org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener", null);
+
 	@Test
 	void defaultListeners() {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
+				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
-				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class
@@ -82,8 +85,8 @@ class TestExecutionListenersTests {
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
+				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
-				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class
@@ -100,8 +103,8 @@ class TestExecutionListenersTests {
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
+				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
-				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class,//
@@ -120,8 +123,8 @@ class TestExecutionListenersTests {
 				ApplicationEventsTestExecutionListener.class,//
 				DependencyInjectionTestExecutionListener.class,//
 				BarTestExecutionListener.class,//
+				micrometerListenerClass,//
 				DirtiesContextTestExecutionListener.class,//
-				MicrometerObservationThreadLocalTestExecutionListener.class,//
 				TransactionalTestExecutionListener.class,//
 				SqlScriptsTestExecutionListener.class,//
 				EventPublishingTestExecutionListener.class
@@ -366,9 +369,9 @@ class TestExecutionListenersTests {
 
 		@Override
 		public int getOrder() {
-			// 2500 is between DependencyInjectionTestExecutionListener (2000) and
-			// DirtiesContextTestExecutionListener (3000)
-			return 2500;
+			// 2250 is between DependencyInjectionTestExecutionListener (2000) and
+			// MicrometerObservationRegistryTestExecutionListener (2500)
+			return 2250;
 		}
 	}
 

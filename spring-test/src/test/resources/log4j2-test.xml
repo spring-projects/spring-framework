@@ -18,6 +18,7 @@
 		<Logger name="org.springframework.test.context.cache" level="warn" />
 		<Logger name="org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate" level="info" />
 		<Logger name="org.springframework.test.context.junit4.rules" level="warn" />
+		<Logger name="org.springframework.test.context.observation" level="warn" />
 		<Logger name="org.springframework.test.context.transaction.TransactionalTestExecutionListener" level="warn" />
 		<Logger name="org.springframework.test.context.web" level="warn" />
 		<!-- The following must be kept at DEBUG in order to test SPR-14363. -->

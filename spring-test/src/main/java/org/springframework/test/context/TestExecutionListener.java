@@ -68,6 +68,8 @@ package org.springframework.test.context;
  * ApplicationEventsTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
  * DependencyInjectionTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.observation.MicrometerObservationRegistryTestExecutionListener
+ * MicrometerObservationRegistryTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener
  * DirtiesContextTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
