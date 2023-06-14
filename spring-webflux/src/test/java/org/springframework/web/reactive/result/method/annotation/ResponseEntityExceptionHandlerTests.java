@@ -127,37 +127,35 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void errorResponseProblemDetailViaMessageSource() {
-
 		Locale locale = Locale.UK;
-		LocaleContextHolder.setLocale(locale);
 
 		String type = "https://example.com/probs/unsupported-content";
 		String title = "Media type is not valid or not supported";
+		Class<UnsupportedMediaTypeStatusException> exceptionType = UnsupportedMediaTypeStatusException.class;
 
-		StaticMessageSource messageSource = new StaticMessageSource();
-		messageSource.addMessage(
-				ErrorResponse.getDefaultDetailMessageCode(UnsupportedMediaTypeStatusException.class, null), locale,
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage(ErrorResponse.getDefaultTypeMessageCode(exceptionType), locale, type);
+		source.addMessage(ErrorResponse.getDefaultTitleMessageCode(exceptionType), locale, title);
+		source.addMessage(ErrorResponse.getDefaultDetailMessageCode(exceptionType, null), locale,
 				"Content-Type {0} not supported. Supported: {1}");
-		messageSource.addMessage(
-				ErrorResponse.getDefaultTitleMessageCode(UnsupportedMediaTypeStatusException.class), locale, title);
-		messageSource.addMessage(
-				ErrorResponse.getDefaultTypeMessageCode(UnsupportedMediaTypeStatusException.class), locale, type);
 
-		this.exceptionHandler.setMessageSource(messageSource);
+		this.exceptionHandler.setMessageSource(source);
 
-		Exception ex = new UnsupportedMediaTypeStatusException(MediaType.APPLICATION_JSON,
-				List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
+		Exception ex = new UnsupportedMediaTypeStatusException(
+				MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(
 				MockServerHttpRequest.get("/").acceptLanguageAsLocales(locale).build());
 
 		ResponseEntity<?> responseEntity = this.exceptionHandler.handleException(ex, exchange).block();
+		assertThat(responseEntity).isNotNull();
 
-		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
-		assertThat(body.getDetail()).isEqualTo(
+		ProblemDetail problem = (ProblemDetail) responseEntity.getBody();
+		assertThat(problem).isNotNull();
+		assertThat(problem.getType()).isEqualTo(URI.create(type));
+		assertThat(problem.getTitle()).isEqualTo(title);
+		assertThat(problem.getDetail()).isEqualTo(
 				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
-		assertThat(body.getTitle()).isEqualTo(title);
-		assertThat(body.getType()).isEqualTo(URI.create(type));
 	}
 
 	@Test

@@ -64,6 +64,9 @@ public interface ErrorResponse {
 	 */
 	ProblemDetail getBody();
 
+
+	// MessageSource codes and arguments
+
 	/**
 	 * Return a code to use to resolve the problem "type" for this exception
 	 * through a {@link MessageSource}. The type resolved through the
@@ -74,6 +77,15 @@ public interface ErrorResponse {
 	 */
 	default String getTypeMessageCode() {
 		return getDefaultTypeMessageCode(getClass());
+	}
+
+	/**
+	 * Return a code to use to resolve the problem "title" for this exception
+	 * through a {@link MessageSource}.
+	 * <p>By default this is initialized via {@link #getDefaultTitleMessageCode(Class)}.
+	 */
+	default String getTitleMessageCode() {
+		return getDefaultTitleMessageCode(getClass());
 	}
 
 	/**
@@ -109,15 +121,6 @@ public interface ErrorResponse {
 	@Nullable
 	default Object[] getDetailMessageArguments(MessageSource messageSource, Locale locale) {
 		return getDetailMessageArguments();
-	}
-
-	/**
-	 * Return a code to use to resolve the problem "title" for this exception
-	 * through a {@link MessageSource}.
-	 * <p>By default this is initialized via {@link #getDefaultTitleMessageCode(Class)}.
-	 */
-	default String getTitleMessageCode() {
-		return getDefaultTitleMessageCode(getClass());
 	}
 
 	/**
@@ -160,6 +163,16 @@ public interface ErrorResponse {
 	}
 
 	/**
+	 * Build a message code for the "title" field, for the given exception type.
+	 * @param exceptionType the exception type associated with the problem
+	 * @return {@code "problemDetail.title."} followed by the fully qualified
+	 * {@link Class#getName() class name}
+	 */
+	static String getDefaultTitleMessageCode(Class<?> exceptionType) {
+		return "problemDetail.title." + exceptionType.getName();
+	}
+
+	/**
 	 * Build a message code for the "detail" field, for the given exception type.
 	 * @param exceptionType the exception type associated with the problem
 	 * @param suffix an optional suffix, e.g. for exceptions that may have multiple
@@ -171,15 +184,6 @@ public interface ErrorResponse {
 		return "problemDetail." + exceptionType.getName() + (suffix != null ? "." + suffix : "");
 	}
 
-	/**
-	 * Build a message code for the "title" field, for the given exception type.
-	 * @param exceptionType the exception type associated with the problem
-	 * @return {@code "problemDetail.title."} followed by the fully qualified
-	 * {@link Class#getName() class name}
-	 */
-	static String getDefaultTitleMessageCode(Class<?> exceptionType) {
-		return "problemDetail.title." + exceptionType.getName();
-	}
 
 	/**
 	 * Static factory method to build an instance via
@@ -230,33 +234,6 @@ public interface ErrorResponse {
 		Builder headers(Consumer<HttpHeaders> headersConsumer);
 
 		/**
-		 * Set the underlying {@link ProblemDetail#setDetail(String) detail}.
-		 * @return the same builder instance
-		 */
-		Builder detail(String detail);
-
-		/**
-		 * Customize the {@link MessageSource} code for looking up the value for
-		 * the underlying {@link #detail(String) detail}.
-		 * <p>By default, this is set to
-		 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)} with the
-		 * associated Exception type.
-		 * @param messageCode the message code to use
-		 * @return the same builder instance
-		 * @see ErrorResponse#getDetailMessageCode()
-		 */
-		Builder detailMessageCode(String messageCode);
-
-		/**
-		 * Set the arguments to provide to the {@link MessageSource} lookup for
-		 * {@link #detailMessageCode(String)}.
-		 * @param messageArguments the arguments to provide
-		 * @return the same builder instance
-		 * @see ErrorResponse#getDetailMessageArguments()
-		 */
-		Builder detailMessageArguments(Object... messageArguments);
-
-		/**
 		 * Set the underlying {@link ProblemDetail#setType(URI) type} field.
 		 * @return the same builder instance
 		 */
@@ -285,6 +262,33 @@ public interface ErrorResponse {
 		 * @return the same builder instance
 		 */
 		Builder instance(@Nullable URI instance);
+
+		/**
+		 * Set the underlying {@link ProblemDetail#setDetail(String) detail}.
+		 * @return the same builder instance
+		 */
+		Builder detail(String detail);
+
+		/**
+		 * Customize the {@link MessageSource} code for looking up the value for
+		 * the underlying {@link #detail(String) detail}.
+		 * <p>By default, this is set to
+		 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)} with the
+		 * associated Exception type.
+		 * @param messageCode the message code to use
+		 * @return the same builder instance
+		 * @see ErrorResponse#getDetailMessageCode()
+		 */
+		Builder detailMessageCode(String messageCode);
+
+		/**
+		 * Set the arguments to provide to the {@link MessageSource} lookup for
+		 * {@link #detailMessageCode(String)}.
+		 * @param messageArguments the arguments to provide
+		 * @return the same builder instance
+		 * @see ErrorResponse#getDetailMessageArguments()
+		 */
+		Builder detailMessageArguments(Object... messageArguments);
 
 		/**
 		 * Set a "dynamic" {@link ProblemDetail#setProperty(String, Object)
