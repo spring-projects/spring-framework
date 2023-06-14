@@ -665,6 +665,8 @@ public abstract class BeanUtils {
 	 * a {@code Temporal}, a {@code UUID}, a {@code URI}, a {@code URL},
 	 * a {@code Locale}, or a {@code Class}.
 	 * <p>{@code Void} and {@code void} are not considered simple value types.
+	 * <p>As of 6.1, this method delegates to {@link ClassUtils#isSimpleValueType}
+	 * as-is but could potentially add further rules for bean property purposes.
 	 * @param type the type to check
 	 * @return whether the given type represents a "simple" value type
 	 * @see #isSimpleProperty(Class)

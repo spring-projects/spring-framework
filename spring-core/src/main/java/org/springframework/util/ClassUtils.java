@@ -544,7 +544,8 @@ public abstract class ClassUtils {
 	 * a {@code Locale}, or a {@code Class}.
 	 * <p>{@code Void} and {@code void} are not considered simple value types.
 	 * @param type the type to check
-	 * @return whether the given type represents a "simple" value type
+	 * @return whether the given type represents a "simple" value type,
+	 * suggesting value-based data binding and {@code toString} output
 	 * @since 6.1
 	 */
 	public static boolean isSimpleValueType(Class<?> type) {
@@ -555,7 +556,7 @@ public abstract class ClassUtils {
 				Number.class.isAssignableFrom(type) ||
 				Date.class.isAssignableFrom(type) ||
 				Temporal.class.isAssignableFrom(type) ||
-				UUID.class.isAssignableFrom(type) ||
+				UUID.class == type ||
 				URI.class == type ||
 				URL.class == type ||
 				Locale.class == type ||
