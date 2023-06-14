@@ -34,7 +34,7 @@ jobs:
     - name: Run Antora
       run: ./gradlew antora
     - name: Publish Docs
-      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.7
+      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.5
       with:
         docs-username: ${{ secrets.DOCS_USERNAME }}
         docs-host: ${{ secrets.DOCS_HOST }}
