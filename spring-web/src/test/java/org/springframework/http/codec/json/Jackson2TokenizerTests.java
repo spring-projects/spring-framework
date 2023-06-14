@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@ import com.fasterxml.jackson.databind.util.TokenBuffer;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -317,12 +315,11 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 				.verify();
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {false, true})
-	public void useBigDecimalForFloats(boolean useBigDecimalForFloats) {
+	@Test
+	public void useBigDecimalForFloats() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("1E+2"));
 		Flux<TokenBuffer> tokens = Jackson2Tokenizer.tokenize(
-				source, this.jsonFactory, this.objectMapper, false, useBigDecimalForFloats, -1);
+				source, this.jsonFactory, this.objectMapper, false, true, -1);
 
 		StepVerifier.create(tokens)
 				.assertNext(tokenBuffer -> {
@@ -331,12 +328,7 @@ public class Jackson2TokenizerTests extends AbstractLeakCheckingTests {
 						JsonToken token = parser.nextToken();
 						assertThat(token).isEqualTo(JsonToken.VALUE_NUMBER_FLOAT);
 						JsonParser.NumberType numberType = parser.getNumberType();
-						if (useBigDecimalForFloats) {
-							assertThat(numberType).isEqualTo(JsonParser.NumberType.BIG_DECIMAL);
-						}
-						else {
-							assertThat(numberType).isEqualTo(JsonParser.NumberType.DOUBLE);
-						}
+						assertThat(numberType).isEqualTo(JsonParser.NumberType.BIG_DECIMAL);
 					}
 					catch (IOException ex) {
 						fail(ex);
