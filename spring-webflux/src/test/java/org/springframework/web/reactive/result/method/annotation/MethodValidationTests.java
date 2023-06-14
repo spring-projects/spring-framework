@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -27,12 +28,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.executable.ExecutableValidator;
 import jakarta.validation.metadata.BeanDescriptor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
@@ -63,12 +66,14 @@ import static org.mockito.Mockito.mock;
 
 /**
  * Method validation tests for Spring MVC controller methods.
+ *
  * <p>When adding tests, consider the following others:
  * <ul>
  * <li>{@code HandlerMethodTests} -- detection if methods need validation
  * <li>{@code MethodValidationAdapterTests} -- method validation independent of Spring MVC
  * <li>{@code MethodValidationProxyTests} -- method validation with proxy scenarios
  * </ul>
+ *
  * @author Rossen Stoyanchev
  */
 public class MethodValidationTests {
@@ -85,6 +90,8 @@ public class MethodValidationTests {
 
 	@BeforeEach
 	void setup() throws Exception {
+		LocaleContextHolder.setDefaultLocale(Locale.UK);
+
 		LocalValidatorFactoryBean validatorBean = new LocalValidatorFactoryBean();
 		validatorBean.afterPropertiesSet();
 		this.jakartaValidator = new InvocationCountingValidator(validatorBean);
@@ -103,6 +110,11 @@ public class MethodValidationTests {
 		handlerAdapter.setApplicationContext(context);
 		handlerAdapter.afterPropertiesSet();
 		return handlerAdapter;
+	}
+
+	@AfterEach
+	void reset() {
+		LocaleContextHolder.setDefaultLocale(null);
 	}
 
 

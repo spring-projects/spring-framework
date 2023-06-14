@@ -24,6 +24,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link MethodArgumentNotValidException}.
+ *
  * @author Rossen Stoyanchev
  */
 public class MethodArgumentNotValidExceptionTests {
@@ -68,17 +70,23 @@ public class MethodArgumentNotValidExceptionTests {
 	}
 
 	private static MethodArgumentNotValidException createException(Person person) throws Exception {
-		LocalValidatorFactoryBean validatorBean = new LocalValidatorFactoryBean();
-		validatorBean.afterPropertiesSet();
-		SpringValidatorAdapter validator = new SpringValidatorAdapter(validatorBean);
+		LocaleContextHolder.setLocale(Locale.UK);
+		try {
+			LocalValidatorFactoryBean validatorBean = new LocalValidatorFactoryBean();
+			validatorBean.afterPropertiesSet();
+			SpringValidatorAdapter validator = new SpringValidatorAdapter(validatorBean);
 
-		BindingResult result = new BeanPropertyBindingResult(person, "person");
-		validator.validate(person, result);
+			BindingResult result = new BeanPropertyBindingResult(person, "person");
+			validator.validate(person, result);
 
-		Method method = Handler.class.getDeclaredMethod("handle", Person.class);
-		MethodParameter parameter = new MethodParameter(method, 0);
+			Method method = Handler.class.getDeclaredMethod("handle", Person.class);
+			MethodParameter parameter = new MethodParameter(method, 0);
 
-		return new MethodArgumentNotValidException(parameter, result);
+			return new MethodArgumentNotValidException(parameter, result);
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 
