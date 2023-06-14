@@ -108,4 +108,37 @@ class PropertyPlaceholderHelperTests {
 				helper.replacePlaceholders(text, props));
 	}
 
+	@Test
+	void escapedPlaceholder() {
+		String text = "foo=\\${foo},bar=${bar}";
+		Properties props = new Properties();
+		props.setProperty("bar", "foo");
+
+		assertThat(this.helper.replacePlaceholders(text, props)).isEqualTo("foo=${foo},bar=foo");
+	}
+
+	@Test
+	void escapedPlaceholderWithRecursionInProperty() {
+		String text = "foo=${bar}";
+		Properties props = new Properties();
+		props.setProperty("bar", "${baz}");
+		props.setProperty("baz", "\\${bar}");
+
+		assertThat(this.helper.replacePlaceholders(text, props)).isEqualTo("foo=${bar}");
+	}
+
+	@Test
+	void escapedPlaceholderWithRecursionInPlaceholder() {
+		String text = "foo=\\${b${inner}}";
+		Properties props = new Properties();
+		props.setProperty("inner", "ar");
+
+		assertThat(this.helper.replacePlaceholders(text, props)).isEqualTo("foo=${bar}");
+
+		text = "foo=${b\\${in${insideInner}r}}";
+		props = new Properties();
+		props.setProperty("insideInner", "ne");
+		assertThat(this.helper.replacePlaceholders(text, props)).isEqualTo("foo=${b${inner}}");
+	}
+
 }

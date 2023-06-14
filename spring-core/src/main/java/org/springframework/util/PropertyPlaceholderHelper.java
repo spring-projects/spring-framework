@@ -63,6 +63,7 @@ public class PropertyPlaceholderHelper {
 
 	private final boolean ignoreUnresolvablePlaceholders;
 
+	private final char escapeCharacter;
 
 	/**
 	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
@@ -71,7 +72,23 @@ public class PropertyPlaceholderHelper {
 	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix) {
-		this(placeholderPrefix, placeholderSuffix, null, true);
+		this(placeholderPrefix, placeholderSuffix, null, true, '\\');
+	}
+
+	/**
+	 * Creates a new {@code PropertyPlaceholderHelper} that uses the supplied prefix and suffix.
+	 * Default escape character '\' is used.
+	 * @param placeholderPrefix the prefix that denotes the start of a placeholder
+	 * @param placeholderSuffix the suffix that denotes the end of a placeholder
+	 * @param valueSeparator the separating character between the placeholder variable
+	 * and the associated default value, if any
+	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should
+	 * be ignored ({@code true}) or cause an exception ({@code false})
+	 */
+	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
+			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
+
+		this(placeholderPrefix, placeholderSuffix, valueSeparator, ignoreUnresolvablePlaceholders, '\\');
 	}
 
 	/**
@@ -82,9 +99,11 @@ public class PropertyPlaceholderHelper {
 	 * and the associated default value, if any
 	 * @param ignoreUnresolvablePlaceholders indicates whether unresolvable placeholders should
 	 * be ignored ({@code true}) or cause an exception ({@code false})
+	 * @param escapeCharacter the escape character that denotes that the following placeholder
+	 * must not be resolved
 	 */
 	public PropertyPlaceholderHelper(String placeholderPrefix, String placeholderSuffix,
-			@Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders) {
+									 @Nullable String valueSeparator, boolean ignoreUnresolvablePlaceholders, char escapeCharacter) {
 
 		Assert.notNull(placeholderPrefix, "'placeholderPrefix' must not be null");
 		Assert.notNull(placeholderSuffix, "'placeholderSuffix' must not be null");
@@ -99,6 +118,7 @@ public class PropertyPlaceholderHelper {
 		}
 		this.valueSeparator = valueSeparator;
 		this.ignoreUnresolvablePlaceholders = ignoreUnresolvablePlaceholders;
+		this.escapeCharacter = escapeCharacter;
 	}
 
 
@@ -129,12 +149,9 @@ public class PropertyPlaceholderHelper {
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 
-		int startIndex = value.indexOf(this.placeholderPrefix);
-		if (startIndex == -1) {
-			return value;
-		}
-
 		StringBuilder result = new StringBuilder(value);
+		int startIndex = findPlaceholderPrefixIndexAndRemoveEscapeCharacters(result, 0);
+
 		while (startIndex != -1) {
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
@@ -149,6 +166,8 @@ public class PropertyPlaceholderHelper {
 				}
 				// Recursive invocation, parsing placeholders contained in the placeholder key.
 				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
+				// Update result with a placeholder without escape chars
+				result.replace(startIndex + this.placeholderPrefix.length(), endIndex, placeholder);
 				// Now obtain the value for the fully resolved key...
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
 				if (propVal == null && this.valueSeparator != null) {
@@ -213,6 +232,18 @@ public class PropertyPlaceholderHelper {
 		return -1;
 	}
 
+	private int findPlaceholderPrefixIndexAndRemoveEscapeCharacters(StringBuilder value, int startIndex) {
+		int prefixIndex = value.indexOf(this.placeholderPrefix, startIndex);
+		//check if prefix is not escaped
+		if (prefixIndex < 1) {
+			return prefixIndex;
+		}
+		if (value.charAt(prefixIndex - 1) == escapeCharacter) {
+			value.deleteCharAt(prefixIndex - 1);
+			return findPlaceholderPrefixIndexAndRemoveEscapeCharacters(value, prefixIndex);
+		}
+		return prefixIndex;
+	}
 
 	/**
 	 * Strategy interface used to resolve replacement values for placeholders contained in Strings.

@@ -191,6 +191,13 @@ class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
+	void ignoreEscapedPlaceholders() {
+		MutablePropertySources propertySources = new MutablePropertySources();
+		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
+		assertThat(resolver.resolvePlaceholders("Replace this \\${key}")).isEqualTo("Replace this ${key}");
+	}
+
+	@Test
 	void resolvePlaceholders_withUnresolvable() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
@@ -297,6 +304,20 @@ class PropertySourcesPropertyResolverTests {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				pr.getProperty("pL"))
 			.withMessageContaining("Circular");
+	}
+
+	@Test
+	void ignoreNestedEscapedPlaceholders() {
+		MutablePropertySources ps = new MutablePropertySources();
+		ps.addFirst(new MockPropertySource()
+				.withProperty("p1", "v1")
+				.withProperty("p2", "\\${p1:default}")
+				.withProperty("p3", "${p2}")
+		);
+		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
+		assertThat(pr.getProperty("p1")).isEqualTo("v1");
+		assertThat(pr.getProperty("p2")).isEqualTo("${p1:default}");
+		assertThat(pr.getProperty("p3")).isEqualTo("${p1:default}");
 	}
 
 	@Test
