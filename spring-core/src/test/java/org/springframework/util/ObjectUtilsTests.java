@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -826,6 +827,17 @@ class ObjectUtilsTests {
 			.withMessage("Constant [bogus] does not exist in enum type org.springframework.util.ObjectUtilsTests$Tropes");
 	}
 
+
+	private static void assertEqualHashCodes(int expected, Object array) {
+		int actual = ObjectUtils.nullSafeHashCode(array);
+		assertThat(actual).isEqualTo(expected);
+		assertThat(array.hashCode()).isNotEqualTo(actual);
+	}
+
+
+	enum Tropes {FOO, BAR, baz}
+
+
 	@Nested
 	class NullSafeConciseToStringTests {
 
@@ -887,7 +899,13 @@ class ObjectUtilsTests {
 		}
 
 		@Test
-		void nullSafeConciseToStringForUri() {
+		void nullSafeConciseToStringForUUID() {
+			UUID id = UUID.randomUUID();
+			assertThat(ObjectUtils.nullSafeConciseToString(id)).isEqualTo(id.toString());
+		}
+
+		@Test
+		void nullSafeConciseToStringForURI() {
 			String uri = "https://www.example.com/?foo=1&bar=2&baz=3";
 			assertThat(ObjectUtils.nullSafeConciseToString(URI.create(uri))).isEqualTo(uri);
 
@@ -899,7 +917,7 @@ class ObjectUtilsTests {
 		}
 
 		@Test
-		void nullSafeConciseToStringForUrl() throws Exception {
+		void nullSafeConciseToStringForURL() throws Exception {
 			String url = "https://www.example.com/?foo=1&bar=2&baz=3";
 			assertThat(ObjectUtils.nullSafeConciseToString(new URL(url))).isEqualTo(url);
 
@@ -959,17 +977,6 @@ class ObjectUtilsTests {
 		private String prefix(Class<?> clazz) {
 			return clazz.getTypeName() + "@";
 		}
-
 	}
-
-
-	private static void assertEqualHashCodes(int expected, Object array) {
-		int actual = ObjectUtils.nullSafeHashCode(array);
-		assertThat(actual).isEqualTo(expected);
-		assertThat(array.hashCode() != actual).isTrue();
-	}
-
-
-	enum Tropes {FOO, BAR, baz}
 
 }
