@@ -34,9 +34,15 @@ jobs:
     - name: Run Antora
       run: ./gradlew antora
     - name: Publish Docs
-      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.5
+      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.7
       with:
         docs-username: ${{ secrets.DOCS_USERNAME }}
         docs-host: ${{ secrets.DOCS_HOST }}
         docs-ssh-key: ${{ secrets.DOCS_SSH_KEY }}
         docs-ssh-host-key: ${{ secrets.DOCS_SSH_HOST_KEY }}
+    - name: Bust Clouflare Cache
+      uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.7
+      with:
+        context-root: spring-framework
+        cloudflare-zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+        cloudflare-cache-token: ${{ secrets.CLOUDFLARE_CACHE_TOKEN }}
