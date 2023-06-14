@@ -53,13 +53,11 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 	private Object[] detailMessageArguments;
 
 
-	DefaultErrorResponseBuilder(Throwable ex, HttpStatusCode statusCode, String detail) {
+	DefaultErrorResponseBuilder(Throwable ex, ProblemDetail problemDetail) {
 		Assert.notNull(ex, "Throwable is required");
-		Assert.notNull(statusCode, "HttpStatusCode is required");
-		Assert.notNull(detail, "`detail` is required");
 		this.exception = ex;
-		this.statusCode = statusCode;
-		this.problemDetail = ProblemDetail.forStatusAndDetail(statusCode, detail);
+		this.statusCode = HttpStatusCode.valueOf(problemDetail.getStatus());
+		this.problemDetail = problemDetail;
 		this.typeMessageCode = ErrorResponse.getDefaultTypeMessageCode(ex.getClass());
 		this.titleMessageCode = ErrorResponse.getDefaultTitleMessageCode(ex.getClass());
 		this.detailMessageCode = ErrorResponse.getDefaultDetailMessageCode(ex.getClass(), null);

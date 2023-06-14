@@ -205,7 +205,16 @@ public interface ErrorResponse {
 	 * by a {@link MessageSource} lookup with {@link #getDetailMessageCode()}
 	 */
 	static Builder builder(Throwable ex, HttpStatusCode statusCode, String detail) {
-		return new DefaultErrorResponseBuilder(ex, statusCode, detail);
+		return builder(ex, ProblemDetail.forStatusAndDetail(statusCode, detail));
+	}
+
+	/**
+	 * Variant of {@link #builder(Throwable, HttpStatusCode, String)} for use
+	 * with a custom {@link ProblemDetail} instance.
+	 * @since 6.1
+	 */
+	static Builder builder(Throwable ex, ProblemDetail problemDetail) {
+		return new DefaultErrorResponseBuilder(ex, problemDetail);
 	}
 
 
