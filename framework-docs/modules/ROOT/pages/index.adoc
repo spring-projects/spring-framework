@@ -16,7 +16,7 @@ STOMP Messaging.
 xref:web-reactive.adoc[Web Reactive] :: Spring WebFlux, WebClient,
 WebSocket, RSocket.
 xref:integration.adoc[Integration] :: REST Clients, JMS, JCA, JMX,
-Email, Tasks, Scheduling, Caching, Observability.
+Email, Tasks, Scheduling, Caching, Observability, JVM Checkpoint Restore.
 xref:languages.adoc[Languages] :: Kotlin, Groovy, Dynamic Languages.
 xref:testing/appendix.adoc[Appendix] :: Spring properties.
 https://github.com/spring-projects/spring-framework/wiki[Wiki] :: What's New,
