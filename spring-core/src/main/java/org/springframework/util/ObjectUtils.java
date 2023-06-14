@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import org.springframework.lang.Nullable;
 
@@ -903,14 +904,15 @@ public abstract class ObjectUtils {
 	 * <li>Potentially {@linkplain StringUtils#truncate(CharSequence) truncated string}
 	 * if {@code obj} is a {@link String} or {@link CharSequence}</li>
 	 * <li>Potentially {@linkplain StringUtils#truncate(CharSequence) truncated string}
-	 * if {@code obj} is a <em>simple type</em> whose {@code toString()} method returns
-	 * a non-null value.</li>
+	 * if {@code obj} is a <em>simple value type</em> whose {@code toString()} method
+	 * returns a non-null value.</li>
 	 * <li>Otherwise, a string representation of the object's type name concatenated
 	 * with {@code @} and a hex string form of the object's identity hash code</li>
 	 * </ul>
-	 * <p>In the context of this method, a <em>simple type</em> is any of the following:
-	 * a primitive wrapper (excluding {@link Void}), an {@link Enum}, a {@link Number},
-	 * a {@link Date}, a {@link Temporal}, a {@link URI}, a {@link URL}, or a {@link Locale}.
+	 * <p>In the context of this method, a <em>simple value type</em> is any of the following:
+	 * a primitive wrapper (excluding {@code Void}), an {@code Enum}, a {@code Number},
+	 * a {@code Date}, a {@code Temporal}, a {@code UUID}, a {@code URI}, a {@code URL},
+	 * or a {@code Locale}.
 	 * @param obj the object to build a string representation for
 	 * @return a concise string representation of the supplied object
 	 * @since 5.3.27
@@ -938,13 +940,7 @@ public abstract class ObjectUtils {
 	}
 
 	/**
-	 * Copy of {@link org.springframework.beans.BeanUtils#isSimpleValueType(Class)}.
-	 * <p>Check if the given type represents a "simple" value type: a primitive or
-	 * primitive wrapper, an enum, a String or other CharSequence, a Number, a
-	 * Date, a Temporal, a URI, a URL, a Locale, or a Class.
-	 * <p>{@code Void} and {@code void} are not considered simple value types.
-	 * @param type the type to check
-	 * @return whether the given type represents a "simple" value type
+	 * Derived from {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
 	 */
 	private static boolean isSimpleValueType(Class<?> type) {
 		return (Void.class != type && void.class != type &&
@@ -954,6 +950,7 @@ public abstract class ObjectUtils {
 				Number.class.isAssignableFrom(type) ||
 				Date.class.isAssignableFrom(type) ||
 				Temporal.class.isAssignableFrom(type) ||
+				UUID.class.isAssignableFrom(type) ||
 				URI.class == type ||
 				URL.class == type ||
 				Locale.class == type ||
