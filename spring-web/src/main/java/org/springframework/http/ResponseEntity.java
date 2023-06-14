@@ -156,7 +156,8 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an int value
 	 * @since 4.3
-	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}
+	 * @deprecated as of 6.0, in favor of {@link #getStatusCode()}; scheduled
+	 * for removal in 7.0
 	 */
 	@Deprecated(since = "6.0")
 	public int getStatusCodeValue() {
