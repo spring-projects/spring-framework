@@ -240,17 +240,26 @@ public interface ErrorResponse {
 		Builder type(URI type);
 
 		/**
+		 * Customize the {@link MessageSource} code to use to resolve the value
+		 * for {@link ProblemDetail#setType(URI)}.
+		 * <p>By default, set from {@link ErrorResponse#getDefaultTypeMessageCode(Class)}.
+		 * @param messageCode the message code to use
+		 * @return the same builder instance
+		 * @since 6.1
+		 * @see ErrorResponse#getTypeMessageCode()
+		 */
+		Builder typeMessageCode(String messageCode);
+
+		/**
 		 * Set the underlying {@link ProblemDetail#setTitle(String) title} field.
 		 * @return the same builder instance
 		 */
 		Builder title(@Nullable String title);
 
 		/**
-		 * Customize the {@link MessageSource} code for looking up the value for
-		 * the underlying {@link ProblemDetail#setTitle(String) title}.
-		 * <p>By default, set via
-		 * {@link ErrorResponse#getDefaultTitleMessageCode(Class)} with the
-		 * associated Exception type.
+		 * Customize the {@link MessageSource} code to use to resolve the value
+		 * for {@link ProblemDetail#setTitle(String)}.
+		 * <p>By default, set from {@link ErrorResponse#getDefaultTitleMessageCode(Class)}.
 		 * @param messageCode the message code to use
 		 * @return the same builder instance
 		 * @see ErrorResponse#getTitleMessageCode()
@@ -270,11 +279,9 @@ public interface ErrorResponse {
 		Builder detail(String detail);
 
 		/**
-		 * Customize the {@link MessageSource} code for looking up the value for
-		 * the underlying {@link #detail(String) detail}.
-		 * <p>By default, this is set to
-		 * {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)} with the
-		 * associated Exception type.
+		 * Customize the {@link MessageSource} code to use to resolve the value
+		 * for the {@link #detail(String)}.
+		 * <p>By default, set from {@link ErrorResponse#getDefaultDetailMessageCode(Class, String)}.
 		 * @param messageCode the message code to use
 		 * @return the same builder instance
 		 * @see ErrorResponse#getDetailMessageCode()

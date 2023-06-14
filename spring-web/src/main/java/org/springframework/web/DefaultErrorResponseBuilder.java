@@ -50,6 +50,8 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 
 	private String titleMessageCode;
 
+	private String typeMessageCode;
+
 
 	DefaultErrorResponseBuilder(Throwable ex, HttpStatusCode statusCode, String detail) {
 		Assert.notNull(ex, "Throwable is required");
@@ -60,6 +62,7 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 		this.problemDetail = ProblemDetail.forStatusAndDetail(statusCode, detail);
 		this.detailMessageCode = ErrorResponse.getDefaultDetailMessageCode(ex.getClass(), null);
 		this.titleMessageCode = ErrorResponse.getDefaultTitleMessageCode(ex.getClass());
+		this.typeMessageCode = ErrorResponse.getDefaultTypeMessageCode(ex.getClass());
 	}
 
 
@@ -103,6 +106,12 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 	}
 
 	@Override
+	public ErrorResponse.Builder typeMessageCode(String messageCode) {
+		this.typeMessageCode = messageCode;
+		return this;
+	}
+
+	@Override
 	public ErrorResponse.Builder title(@Nullable String title) {
 		this.problemDetail.setTitle(title);
 		return this;
@@ -131,7 +140,8 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 	public ErrorResponse build() {
 		return new SimpleErrorResponse(
 				this.exception, this.statusCode, this.headers, this.problemDetail,
-				this.detailMessageCode, this.detailMessageArguments, this.titleMessageCode);
+				this.detailMessageCode, this.detailMessageArguments, this.titleMessageCode,
+				this.typeMessageCode);
 	}
 
 
@@ -155,9 +165,12 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 
 		private final String titleMessageCode;
 
+		private final String typeMessageCode;
+
 		SimpleErrorResponse(
 				Throwable ex, HttpStatusCode statusCode, @Nullable HttpHeaders headers, ProblemDetail problemDetail,
-				String detailMessageCode, @Nullable Object[] detailMessageArguments, String titleMessageCode) {
+				String detailMessageCode, @Nullable Object[] detailMessageArguments, String titleMessageCode,
+				String typeMessageCode) {
 
 			this.exception = ex;
 			this.statusCode = statusCode;
@@ -166,6 +179,7 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 			this.detailMessageCode = detailMessageCode;
 			this.detailMessageArguments = detailMessageArguments;
 			this.titleMessageCode = titleMessageCode;
+			this.typeMessageCode = typeMessageCode;
 		}
 
 		@Override
@@ -196,6 +210,11 @@ final class DefaultErrorResponseBuilder implements ErrorResponse.Builder {
 		@Override
 		public String getTitleMessageCode() {
 			return this.titleMessageCode;
+		}
+
+		@Override
+		public String getTypeMessageCode() {
+			return this.typeMessageCode;
 		}
 
 		@Override
