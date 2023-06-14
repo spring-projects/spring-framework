@@ -70,7 +70,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	/**
 	 * Property name for a common context checkpoint: {@value}.
 	 * @since 6.1
-	 * @see #CHECKPOINT_ON_REFRESH
+	 * @see #CHECKPOINT_ON_REFRESH_VALUE
 	 * @see org.crac.Core#checkpointRestore()
 	 */
 	public static final String CHECKPOINT_PROPERTY_NAME = "spring.context.checkpoint";
@@ -81,11 +81,11 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * @see #CHECKPOINT_PROPERTY_NAME
 	 * @see org.crac.Core#checkpointRestore()
 	 */
-	public static final String CHECKPOINT_ON_REFRESH = "onRefresh";
+	public static final String CHECKPOINT_ON_REFRESH_VALUE = "onRefresh";
 
 
-	private final static boolean checkpointRestoreOnRefresh = CHECKPOINT_ON_REFRESH.equalsIgnoreCase(
-			SpringProperties.getProperty(CHECKPOINT_PROPERTY_NAME));
+	private final static boolean checkpointOnRefresh =
+			CHECKPOINT_ON_REFRESH_VALUE.equalsIgnoreCase(SpringProperties.getProperty(CHECKPOINT_PROPERTY_NAME));
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -169,7 +169,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 
 	@Override
 	public void onRefresh() {
-		if (checkpointRestoreOnRefresh) {
+		if (checkpointOnRefresh) {
 			new CracDelegate().checkpointRestore();
 		}
 
