@@ -57,18 +57,12 @@ public final class CronExpression {
 	private final String expression;
 
 
-	private CronExpression(
-			CronField seconds,
-			CronField minutes,
-			CronField hours,
-			CronField daysOfMonth,
-			CronField months,
-			CronField daysOfWeek,
-			String expression) {
+	private CronExpression(CronField seconds, CronField minutes, CronField hours,
+			CronField daysOfMonth, CronField months, CronField daysOfWeek, String expression) {
 
-		// reverse order, to make big changes first
-		// to make sure we end up at 0 nanos, we add an extra field
-		this.fields = new CronField[]{daysOfWeek, months, daysOfMonth, hours, minutes, seconds, CronField.zeroNanos()};
+		// Reverse order, to make big changes first.
+		// To make sure we end up at 0 nanos, we add an extra field.
+		this.fields = new CronField[] {daysOfWeek, months, daysOfMonth, hours, minutes, seconds, CronField.zeroNanos()};
 		this.expression = expression;
 	}
 
@@ -268,26 +262,18 @@ public final class CronExpression {
 
 
 	@Override
+	public boolean equals(@Nullable Object other) {
+		return (this == other || (other instanceof CronExpression that &&
+				Arrays.equals(this.fields, that.fields)));
+	}
+
+	@Override
 	public int hashCode() {
 		return Arrays.hashCode(this.fields);
 	}
 
-	@Override
-	public boolean equals(@Nullable Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o instanceof CronExpression other) {
-			return Arrays.equals(this.fields, other.fields);
-		}
-		else {
-			return false;
-		}
-	}
-
 	/**
 	 * Return the expression string used to create this {@code CronExpression}.
-	 * @return the expression string
 	 */
 	@Override
 	public String toString() {
