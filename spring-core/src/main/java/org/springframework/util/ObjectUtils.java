@@ -941,6 +941,7 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Derived from {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
+	 * As of 5.3.28, considering {@code UUID} in addition to the bean-level check.
 	 */
 	private static boolean isSimpleValueType(Class<?> type) {
 		return (Void.class != type && void.class != type &&
@@ -950,7 +951,7 @@ public abstract class ObjectUtils {
 				Number.class.isAssignableFrom(type) ||
 				Date.class.isAssignableFrom(type) ||
 				Temporal.class.isAssignableFrom(type) ||
-				UUID.class.isAssignableFrom(type) ||
+				UUID.class == type ||
 				URI.class == type ||
 				URL.class == type ||
 				Locale.class == type ||
