@@ -506,23 +506,12 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 			if (isExternallyManagedInitMethod(initMethod)) {
 				return true;
 			}
-			if (this.externallyManagedInitMethods != null) {
-				for (String candidate : this.externallyManagedInitMethods) {
-					int indexOfDot = candidate.lastIndexOf('.');
-					if (indexOfDot >= 0) {
-						String methodName = candidate.substring(indexOfDot + 1);
-						if (methodName.equals(initMethod)) {
-							return true;
-						}
-					}
-				}
-			}
-			return false;
+			return hasAnyExternallyManagedMethod(this.externallyManagedInitMethods, initMethod);
 		}
 	}
 
 	/**
-	 * Return all externally managed initialization methods (as an immutable Set).
+	 * Get all externally managed initialization methods (as an immutable Set).
 	 * <p>See {@link #registerExternallyManagedInitMethod} for details
 	 * regarding the format for the initialization methods in the returned set.
 	 * @since 5.3.11
@@ -583,19 +572,23 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 			if (isExternallyManagedDestroyMethod(destroyMethod)) {
 				return true;
 			}
-			if (this.externallyManagedDestroyMethods != null) {
-				for (String candidate : this.externallyManagedDestroyMethods) {
-					int indexOfDot = candidate.lastIndexOf('.');
-					if (indexOfDot >= 0) {
-						String methodName = candidate.substring(indexOfDot + 1);
-						if (methodName.equals(destroyMethod)) {
-							return true;
-						}
+			return hasAnyExternallyManagedMethod(this.externallyManagedDestroyMethods, destroyMethod);
+		}
+	}
+
+	private static boolean hasAnyExternallyManagedMethod(Set<String> candidates, String methodName) {
+		if (candidates != null) {
+			for (String candidate : candidates) {
+				int indexOfDot = candidate.lastIndexOf('.');
+				if (indexOfDot > 0) {
+					String candidateMethodName = candidate.substring(indexOfDot + 1);
+					if (candidateMethodName.equals(methodName)) {
+						return true;
 					}
 				}
 			}
-			return false;
 		}
+		return false;
 	}
 
 	/**
