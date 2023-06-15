@@ -5,6 +5,8 @@ image_resource:
   source:
     repository: springio/github-changelog-generator
     tag: '0.0.7'
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
 inputs:
 - name: git-repo
 - name: artifactory-repo
