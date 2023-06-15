@@ -142,6 +142,7 @@ public class MethodValidationTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void modelAttributeAsync() {
 
 		// 1 for Mono argument validation + 1 for method validation of @RequestHeader
