@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,14 +180,23 @@ public final class SpringBeanContainer implements BeanContainer {
 
 		try {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
-				Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
-				this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
-				this.beanFactory.applyBeanPropertyValues(bean, name);
-				bean = this.beanFactory.initializeBean(bean, name);
-				return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
+				if (this.beanFactory.containsBean(name)) {
+					Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
+					this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+					this.beanFactory.applyBeanPropertyValues(bean, name);
+					bean = this.beanFactory.initializeBean(bean, name);
+					return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
+				}
+				else {
+					return new SpringContainedBean<>(
+							this.beanFactory.createBean(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false),
+							this.beanFactory::destroyBean);
+				}
 			}
 			else {
-				return new SpringContainedBean<>(this.beanFactory.getBean(name, beanType));
+				return (this.beanFactory.containsBean(name) ?
+						new SpringContainedBean<>(this.beanFactory.getBean(name, beanType)) :
+						new SpringContainedBean<>(this.beanFactory.getBean(beanType)));
 			}
 		}
 		catch (BeansException ex) {
