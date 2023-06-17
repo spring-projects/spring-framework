@@ -143,7 +143,7 @@ public final class SpringBeanContainer implements BeanContainer {
 
 		try {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
-				return new SpringContainedBean<>(
+				return new SpringContainedBean<>(  // to be replaced with plain createBean(Class)
 						this.beanFactory.createBean(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false),
 						this.beanFactory::destroyBean);
 			}
@@ -180,14 +180,23 @@ public final class SpringBeanContainer implements BeanContainer {
 
 		try {
 			if (lifecycleOptions.useJpaCompliantCreation()) {
-				Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
-				this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
-				this.beanFactory.applyBeanPropertyValues(bean, name);
-				bean = this.beanFactory.initializeBean(bean, name);
-				return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
+				if (this.beanFactory.containsBean(name)) {
+					Object bean = this.beanFactory.autowire(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false);
+					this.beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+					this.beanFactory.applyBeanPropertyValues(bean, name);
+					bean = this.beanFactory.initializeBean(bean, name);
+					return new SpringContainedBean<>(bean, beanInstance -> this.beanFactory.destroyBean(name, beanInstance));
+				}
+				else {
+					return new SpringContainedBean<>(  // to be replaced with plain createBean(Class)
+							this.beanFactory.createBean(beanType, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, false),
+							this.beanFactory::destroyBean);
+				}
 			}
 			else {
-				return new SpringContainedBean<>(this.beanFactory.getBean(name, beanType));
+				return (this.beanFactory.containsBean(name) ?
+						new SpringContainedBean<>(this.beanFactory.getBean(name, beanType)) :
+						new SpringContainedBean<>(this.beanFactory.getBean(beanType)));
 			}
 		}
 		catch (BeansException ex) {
