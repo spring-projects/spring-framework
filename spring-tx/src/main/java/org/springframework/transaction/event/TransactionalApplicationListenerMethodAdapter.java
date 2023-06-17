@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 
@@ -67,6 +69,11 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 				AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
 		if (ann == null) {
 			throw new IllegalStateException("No TransactionalEventListener annotation found on method: " + method);
+		}
+		if (AnnotatedElementUtils.hasAnnotation(method, Transactional.class) &&
+				!AnnotatedElementUtils.hasAnnotation(method, Async.class)) {
+			throw new IllegalStateException("@TransactionalEventListener method must not be annotated " +
+					"with @Transactional, unless when declared as @Async: " + method);
 		}
 		this.annotation = ann;
 		this.transactionPhase = ann.phase();
