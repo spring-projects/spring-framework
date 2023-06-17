@@ -57,8 +57,8 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.test.context.NestedTestConfiguration @NestedTestConfiguration}
  * for details.
  *
- * <p>Use of this annotation requires that that the {@code spring-jdbc} and
- * {@code spring-tx} modules be present in the classpath.
+ * <p>Use of this annotation requires the {@code spring-jdbc} and {@code spring-tx}
+ * modules as well as their transitive dependencies to be present on the classpath.
  *
  * @author Sam Brannen
  * @since 4.1
