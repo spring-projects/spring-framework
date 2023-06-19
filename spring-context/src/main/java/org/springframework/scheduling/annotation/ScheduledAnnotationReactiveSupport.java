@@ -20,7 +20,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Supplier;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -34,16 +38,22 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.config.DefaultScheduledTaskObservationConvention;
+import org.springframework.scheduling.config.ScheduledTaskObservationContext;
+import org.springframework.scheduling.config.ScheduledTaskObservationConvention;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.scheduling.config.ScheduledTaskObservationDocumentation.TASKS_SCHEDULED_EXECUTION;
 
 /**
  * Helper class for @{@link ScheduledAnnotationBeanPostProcessor} to support reactive
  * cases without a dependency on optional classes.
  *
  * @author Simon Baslé
+ * @author Brian Clozel
  * @since 6.1
  */
 abstract class ScheduledAnnotationReactiveSupport {
@@ -157,11 +167,12 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * delay is applied until the next iteration).
 	 */
 	static Runnable createSubscriptionRunnable(Method method, Object targetBean, Scheduled scheduled,
-			List<Runnable> subscriptionTrackerRegistry) {
+			Supplier<ObservationRegistry> observationRegistrySupplier, List<Runnable> subscriptionTrackerRegistry) {
 
 		boolean shouldBlock = (scheduled.fixedDelay() > 0 || StringUtils.hasText(scheduled.fixedDelayString()));
 		Publisher<?> publisher = getPublisherFor(method, targetBean);
-		return new SubscribingRunnable(publisher, shouldBlock, subscriptionTrackerRegistry);
+		Supplier<ScheduledTaskObservationContext> contextSupplier = () -> new ScheduledTaskObservationContext(targetBean, method);
+		return new SubscribingRunnable(publisher, shouldBlock, subscriptionTrackerRegistry, observationRegistrySupplier, contextSupplier);
 	}
 
 
@@ -173,23 +184,33 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 		private final Publisher<?> publisher;
 
+		private static final ScheduledTaskObservationConvention DEFAULT_CONVENTION = new DefaultScheduledTaskObservationConvention();
+
 		final boolean shouldBlock;
 
 		private final List<Runnable> subscriptionTrackerRegistry;
 
-		SubscribingRunnable(Publisher<?> publisher, boolean shouldBlock, List<Runnable> subscriptionTrackerRegistry) {
+		final Supplier<ObservationRegistry> observationRegistrySupplier;
+
+		final Supplier<ScheduledTaskObservationContext> contextSupplier;
+
+		SubscribingRunnable(Publisher<?> publisher, boolean shouldBlock, List<Runnable> subscriptionTrackerRegistry,
+							Supplier<ObservationRegistry> observationRegistrySupplier, Supplier<ScheduledTaskObservationContext> contextSupplier) {
 			this.publisher = publisher;
 			this.shouldBlock = shouldBlock;
 			this.subscriptionTrackerRegistry = subscriptionTrackerRegistry;
+			this.observationRegistrySupplier = observationRegistrySupplier;
+			this.contextSupplier = contextSupplier;
 		}
 
 		@Override
 		public void run() {
+			Observation observation = TASKS_SCHEDULED_EXECUTION.observation(null, DEFAULT_CONVENTION,
+					this.contextSupplier, this.observationRegistrySupplier.get());
 			if (this.shouldBlock) {
 				CountDownLatch latch = new CountDownLatch(1);
-				TrackingSubscriber subscriber = new TrackingSubscriber(this.subscriptionTrackerRegistry, latch);
-				this.subscriptionTrackerRegistry.add(subscriber);
-				this.publisher.subscribe(subscriber);
+				TrackingSubscriber subscriber = new TrackingSubscriber(this.subscriptionTrackerRegistry, observation, latch);
+				subscribe(subscriber, observation);
 				try {
 					latch.await();
 				}
@@ -198,8 +219,19 @@ abstract class ScheduledAnnotationReactiveSupport {
 				}
 			}
 			else {
-				TrackingSubscriber subscriber = new TrackingSubscriber(this.subscriptionTrackerRegistry);
-				this.subscriptionTrackerRegistry.add(subscriber);
+				TrackingSubscriber subscriber = new TrackingSubscriber(this.subscriptionTrackerRegistry, observation);
+				subscribe(subscriber, observation);
+			}
+		}
+
+		private void subscribe(TrackingSubscriber subscriber, Observation observation) {
+			this.subscriptionTrackerRegistry.add(subscriber);
+			if (reactorPresent) {
+				Flux.from(this.publisher)
+						.contextWrite(context -> context.put(ObservationThreadLocalAccessor.KEY, observation))
+						.subscribe(subscriber);
+			}
+			else {
 				this.publisher.subscribe(subscriber);
 			}
 		}
@@ -215,6 +247,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 
 		private final List<Runnable> subscriptionTrackerRegistry;
 
+		private final Observation observation;
+
 		@Nullable
 		private final CountDownLatch blockingLatch;
 
@@ -225,12 +259,13 @@ abstract class ScheduledAnnotationReactiveSupport {
 		@Nullable
 		private Subscription subscription;
 
-		TrackingSubscriber(List<Runnable> subscriptionTrackerRegistry) {
-			this(subscriptionTrackerRegistry, null);
+		TrackingSubscriber(List<Runnable> subscriptionTrackerRegistry, Observation observation) {
+			this(subscriptionTrackerRegistry, observation, null);
 		}
 
-		TrackingSubscriber(List<Runnable> subscriptionTrackerRegistry, @Nullable CountDownLatch latch) {
+		TrackingSubscriber(List<Runnable> subscriptionTrackerRegistry, Observation observation, @Nullable CountDownLatch latch) {
 			this.subscriptionTrackerRegistry = subscriptionTrackerRegistry;
+			this.observation = observation;
 			this.blockingLatch = latch;
 		}
 
@@ -238,6 +273,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 		public void run() {
 			if (this.subscription != null) {
 				this.subscription.cancel();
+				this.observation.stop();
 			}
 			if (this.blockingLatch != null) {
 				this.blockingLatch.countDown();
@@ -247,6 +283,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 		@Override
 		public void onSubscribe(Subscription subscription) {
 			this.subscription = subscription;
+			this.observation.start();
 			subscription.request(Integer.MAX_VALUE);
 		}
 
@@ -259,6 +296,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 		public void onError(Throwable ex) {
 			this.subscriptionTrackerRegistry.remove(this);
 			logger.warn("Unexpected error occurred in scheduled reactive task", ex);
+			this.observation.error(ex);
+			this.observation.stop();
 			if (this.blockingLatch != null) {
 				this.blockingLatch.countDown();
 			}
@@ -267,6 +306,10 @@ abstract class ScheduledAnnotationReactiveSupport {
 		@Override
 		public void onComplete() {
 			this.subscriptionTrackerRegistry.remove(this);
+			if (this.observation.getContext() instanceof ScheduledTaskObservationContext context) {
+				context.setComplete(true);
+			}
+			this.observation.stop();
 			if (this.blockingLatch != null) {
 				this.blockingLatch.countDown();
 			}

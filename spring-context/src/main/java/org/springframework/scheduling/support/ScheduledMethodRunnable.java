@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,15 @@ package org.springframework.scheduling.support;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.function.Supplier;
 
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
+
+import org.springframework.scheduling.config.DefaultScheduledTaskObservationConvention;
+import org.springframework.scheduling.config.ScheduledTaskObservationContext;
+import org.springframework.scheduling.config.ScheduledTaskObservationConvention;
+import org.springframework.scheduling.config.ScheduledTaskObservationDocumentation;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -28,15 +36,33 @@ import org.springframework.util.ReflectionUtils;
  * assuming that an error strategy for Runnables is in place.
  *
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 3.0.6
  * @see org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor
  */
 public class ScheduledMethodRunnable implements Runnable {
 
+	private static final ScheduledTaskObservationConvention DEFAULT_CONVENTION = new DefaultScheduledTaskObservationConvention();
+
 	private final Object target;
 
 	private final Method method;
 
+	private final Supplier<ObservationRegistry> observationRegistrySupplier;
+
+	/**
+	 * Create a {@code ScheduledMethodRunnable} for the given target instance,
+	 * calling the specified method.
+	 * @param target the target instance to call the method on
+	 * @param method the target method to call
+	 * @param observationRegistrySupplier a supplier for the observation registry to use
+	 * @since 6.1.0
+	 */
+	public ScheduledMethodRunnable(Object target, Method method, Supplier<ObservationRegistry> observationRegistrySupplier) {
+		this.target = target;
+		this.method = method;
+		this.observationRegistrySupplier = observationRegistrySupplier;
+	}
 
 	/**
 	 * Create a {@code ScheduledMethodRunnable} for the given target instance,
@@ -45,8 +71,7 @@ public class ScheduledMethodRunnable implements Runnable {
 	 * @param method the target method to call
 	 */
 	public ScheduledMethodRunnable(Object target, Method method) {
-		this.target = target;
-		this.method = method;
+		this(target, method, () -> ObservationRegistry.NOOP);
 	}
 
 	/**
@@ -57,8 +82,7 @@ public class ScheduledMethodRunnable implements Runnable {
 	 * @throws NoSuchMethodException if the specified method does not exist
 	 */
 	public ScheduledMethodRunnable(Object target, String methodName) throws NoSuchMethodException {
-		this.target = target;
-		this.method = target.getClass().getMethod(methodName);
+		this(target, target.getClass().getMethod(methodName));
 	}
 
 
@@ -79,9 +103,18 @@ public class ScheduledMethodRunnable implements Runnable {
 
 	@Override
 	public void run() {
+		ScheduledTaskObservationContext context = new ScheduledTaskObservationContext(this.target, this.method);
+		Observation observation = ScheduledTaskObservationDocumentation.TASKS_SCHEDULED_EXECUTION.observation(
+				null, DEFAULT_CONVENTION,
+				() -> context, this.observationRegistrySupplier.get());
+		observation.observe(() -> runInternal(context));
+	}
+
+	private void runInternal(ScheduledTaskObservationContext context) {
 		try {
 			ReflectionUtils.makeAccessible(this.method);
 			this.method.invoke(this.target);
+			context.setComplete(true);
 		}
 		catch (InvocationTargetException ex) {
 			ReflectionUtils.rethrowRuntimeException(ex.getTargetException());

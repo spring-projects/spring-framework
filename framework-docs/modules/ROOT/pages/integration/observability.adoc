@@ -21,11 +21,14 @@ As outlined xref:integration/observability.adoc[at the beginning of this section
 |===
 |Observation name |Description
 
-|xref:integration/observability.adoc#http-client[`"http.client.requests"`]
+|xref:integration/observability.adoc#observability.http-client[`"http.client.requests"`]
 |Time spent for HTTP client exchanges
 
-|xref:integration/observability.adoc#http-server[`"http.server.requests"`]
+|xref:integration/observability.adoc#observability.http-server[`"http.server.requests"`]
 |Processing time for HTTP server exchanges at the Framework level
+
+|xref:integration/observability.adoc#observability.tasks-scheduled[`"tasks.scheduled.execution"`]
+|Processing time for an execution of a `@Scheduled` task
 |===
 
 NOTE: Observations are using Micrometer's official naming convention, but Metrics names will be automatically converted
@@ -78,6 +81,31 @@ Filters do not replace the default convention and are used as a post-processing 
 include-code::./ServerRequestObservationFilter[]
 
 You can configure `ObservationFilter` instances on the `ObservationRegistry`.
+
+[[observability.tasks-scheduled]]
+== @Scheduled tasks instrumentation
+
+An Observation is created for xref:integration/scheduling.adoc#scheduling-enable-annotation-support[each execution of an `@Scheduled` task].
+Applications need to configure the `ObservationRegistry` on the `ScheduledTaskRegistrar` to enable the recording of observations.
+This can be done by declaring a `SchedulingConfigurer` bean that sets the observation registry:
+
+include-code::./ObservationSchedulingConfigurer[]
+
+It is using the `org.springframework.scheduling.config.DefaultScheduledTaskObservationConvention` by default, backed by the `ScheduledTaskObservationContext`.
+You can configure a custom implementation on the `ObservationRegistry` directly.
+During the execution of the scheduled method, the current observation is restored in the `ThreadLocal` context or the Reactor context (if the scheduled method returns a `Mono` or `Flux` type).
+
+By default, the following `KeyValues` are created:
+
+.Low cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`exception` _(required)_|Name of the exception thrown during the execution, or `KeyValue#NONE_VALUE`} if no exception happened.
+|`method.name` _(required)_|Name of Java `Method` that is scheduled for execution.
+|`outcome` _(required)_|Outcome of the method execution. Can be `"SUCCESS"`, `"ERROR"` or `"UNKNOWN"` (if for example the operation was cancelled during execution.
+|`target.type` _(required)_|Simple class name of the bean instance that holds the scheduled method.
+|===
 
 
 [[observability.http-server]]
