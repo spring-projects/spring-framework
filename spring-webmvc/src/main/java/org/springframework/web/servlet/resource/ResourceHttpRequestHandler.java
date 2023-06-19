@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -537,8 +537,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	/**
 	 * Processes a resource request.
-	 * <p>Checks for the existence of the requested resource in the configured list of locations.
-	 * If the resource does not exist, a {@code 404} response will be returned to the client.
+	 * <p>Finds the requested resource under one of the configured locations.
+	 * If the resource does not exist, {@link NoResourceFoundException} is raised.
 	 * If the resource exists, the request will be checked for the presence of the
 	 * {@code Last-Modified} header, and its value will be compared against the last-modified
 	 * timestamp of the given resource, returning a {@code 304} status code if the
@@ -555,8 +555,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		Resource resource = getResource(request);
 		if (resource == null) {
 			logger.debug("Resource not found");
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
+			throw new NoResourceFoundException(HttpMethod.valueOf(request.getMethod()), getPath(request));
 		}
 
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
@@ -611,12 +610,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Nullable
 	protected Resource getResource(HttpServletRequest request) throws IOException {
-		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-		if (path == null) {
-			throw new IllegalStateException("Required request attribute '" +
-					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
-		}
-
+		String path = getPath(request);
 		path = processPath(path);
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			return null;
@@ -633,6 +627,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			resource = this.transformerChain.transform(request, resource);
 		}
 		return resource;
+	}
+
+	private static String getPath(HttpServletRequest request) {
+		String path = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+		if (path == null) {
+			throw new IllegalStateException("Required request attribute '" +
+					HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE + "' is not set");
+		}
+		return path;
 	}
 
 	/**

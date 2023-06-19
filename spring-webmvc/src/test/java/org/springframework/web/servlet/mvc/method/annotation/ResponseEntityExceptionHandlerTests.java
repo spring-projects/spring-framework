@@ -63,6 +63,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
@@ -263,6 +264,11 @@ public class ResponseEntityExceptionHandlerTests {
 				testException(new NoHandlerFoundException("GET", "/resource", requestHeaders));
 
 		assertThat(responseEntity.getHeaders()).isEmpty();
+	}
+
+	@Test
+	public void noResourceFoundException() {
+		testException(new NoResourceFoundException(HttpMethod.GET, "/resource"));
 	}
 
 	@Test
