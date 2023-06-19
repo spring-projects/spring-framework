@@ -738,7 +738,7 @@ class DefaultWebClient implements WebClient {
 
 		private final ClientRequestObservationContext observationContext;
 
-		public ObservationFilterFunction(ClientRequestObservationContext observationContext) {
+		ObservationFilterFunction(ClientRequestObservationContext observationContext) {
 			this.observationContext = observationContext;
 		}
 

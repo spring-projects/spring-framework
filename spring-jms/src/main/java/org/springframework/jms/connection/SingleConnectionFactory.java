@@ -348,7 +348,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 			}
 			// Create new (method local) connection, which is later assigned to instance connection
 			//  - prevention to hold instance connection without exception listener, in case when
-			//    some subsequent methods (after creation of connection) throws JMSException
+			//    some subsequent methods (after creation of connection) throw JMSException
 			Connection con = doCreateConnection();
 			try {
 				prepareConnection(con);
@@ -360,9 +360,7 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 					con.close();
 				}
 				catch(Throwable th) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Could not close newly obtained JMS Connection that failed to prepare", th);
-					}
+					logger.debug("Could not close newly obtained JMS Connection that failed to prepare", th);
 				}
 				throw ex;
 			}

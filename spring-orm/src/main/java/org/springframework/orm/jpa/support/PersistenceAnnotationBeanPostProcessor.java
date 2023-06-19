@@ -360,7 +360,7 @@ public class PersistenceAnnotationBeanPostProcessor implements InstantiationAwar
 		RootBeanDefinition beanDefinition = registeredBean.getMergedBeanDefinition();
 		InjectionMetadata metadata = findInjectionMetadata(beanDefinition, beanClass, beanName);
 		Collection<InjectedElement> injectedElements = metadata.getInjectedElements(
-				registeredBean.getMergedBeanDefinition().getPropertyValues());
+				beanDefinition.getPropertyValues());
 		if (!CollectionUtils.isEmpty(injectedElements)) {
 			return new AotContribution(beanClass, injectedElements);
 		}
