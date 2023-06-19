@@ -150,20 +150,26 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("myServlet", MyServlet.class);
 
 		pvs = new MutablePropertyValues();
-		pvs.add("order", "1");
+		pvs.add("order", "2");
 		pvs.add("exceptionMappings",
 				"java.lang.IllegalAccessException=failed2\n" +
 				"ServletRequestBindingException=failed3");
 		pvs.add("defaultErrorView", "failed0");
-		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
+		registerSingleton("exceptionResolver2", SimpleMappingExceptionResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.add("order", "0");
+		pvs.add("order", "1");
 		pvs.add("exceptionMappings", "java.lang.Exception=failed1");
 		pvs.add("mappedHandlers", ManagedList.of(new RuntimeBeanReference("anotherLocaleHandler")));
 		pvs.add("defaultStatusCode", "500");
 		pvs.add("defaultErrorView", "failed2");
-		registerSingleton("handlerExceptionResolver", SimpleMappingExceptionResolver.class, pvs);
+		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
+
+		pvs = new MutablePropertyValues();
+		pvs.add("order", "0");
+		pvs.add("exceptionMappings", "org.springframework.web.servlet.NoHandlerFoundException=notFound");
+		pvs.add("defaultStatusCode", "404");
+		registerSingleton("exceptionResolver0", SimpleMappingExceptionResolver.class, pvs);
 
 		registerSingleton("multipartResolver", MockMultipartResolver.class);
 		registerSingleton("testListener", TestApplicationListener.class);

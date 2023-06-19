@@ -162,6 +162,10 @@ Spring MVC exceptions:
 | (default)
 |
 
+| `NoResourceFoundException`
+| (default)
+|
+
 | `TypeMismatchException`
 | (default)
 | `+{0}+` property name, `+{1}+` property value
