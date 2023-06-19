@@ -544,7 +544,7 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			pattern += "?";
 			assertThat(pattern).hasSize(1001);
-			evaluateAndCheckError("'abc' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
+			evaluateAndCheckError("'X' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
 		}
 
 	}

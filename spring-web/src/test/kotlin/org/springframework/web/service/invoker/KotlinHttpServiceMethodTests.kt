@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.lang.Nullable
 import org.springframework.web.service.annotation.GetExchange
 
 /**
@@ -65,7 +64,7 @@ class KotlinHttpServiceMethodTests {
 		verifyClientInvocation("requestToEntityFlux", object : ParameterizedTypeReference<String>() {})
 	}
 
-	private fun verifyClientInvocation(methodName: String, @Nullable expectedBodyType: ParameterizedTypeReference<*>) {
+	private fun verifyClientInvocation(methodName: String, expectedBodyType: ParameterizedTypeReference<*>) {
 		assertThat(client.invokedMethodName).isEqualTo(methodName)
 		assertThat(client.bodyType).isEqualTo(expectedBodyType)
 	}

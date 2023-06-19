@@ -40,7 +40,7 @@ public class RequestedContentTypeResolverBuilderTests {
 				MockServerHttpRequest.get("/flower").accept(MediaType.IMAGE_GIF));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.IMAGE_GIF));
+		assertThat(mediaTypes).containsExactly(MediaType.IMAGE_GIF);
 	}
 
 	@Test
@@ -52,7 +52,7 @@ public class RequestedContentTypeResolverBuilderTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/flower?format=json"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -87,11 +87,11 @@ public class RequestedContentTypeResolverBuilderTests {
 
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/"));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
 
 		exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/").accept(MediaType.ALL));
 		mediaTypes = resolver.resolveMediaTypes(exchange);
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public class RequestedContentTypeResolverBuilderTests {
 		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
 				.accept(MediaType.valueOf("*/*;q=0.8")));
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 }

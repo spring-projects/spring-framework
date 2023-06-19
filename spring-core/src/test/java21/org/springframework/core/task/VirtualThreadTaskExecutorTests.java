@@ -36,7 +36,7 @@ class VirtualThreadTaskExecutorTests {
 		executeAndWait(executor, task, monitor);
 		assertThat(task.getThreadName()).isEmpty();
 		assertThat(task.isVirtual()).isTrue();
-		assertThat(task.runtCount()).isOne();
+		assertThat(task.runCount()).isOne();
 	}
 
 	@Test
@@ -47,7 +47,7 @@ class VirtualThreadTaskExecutorTests {
 		executeAndWait(executor, task, monitor);
 		assertThat(task.getThreadName()).isEqualTo("test-0");
 		assertThat(task.isVirtual()).isTrue();
-		assertThat(task.runtCount()).isOne();
+		assertThat(task.runCount()).isOne();
 	}
 
 	@Test
@@ -58,7 +58,7 @@ class VirtualThreadTaskExecutorTests {
 		executeAndWait(executor, task, monitor);
 		assertThat(task.getThreadName()).isEqualTo("test");
 		assertThat(task.isVirtual()).isTrue();
-		assertThat(task.runtCount()).isOne();
+		assertThat(task.runCount()).isOne();
 	}
 
 	@Test
@@ -71,7 +71,7 @@ class VirtualThreadTaskExecutorTests {
 		executeAndWait(executor, task, monitor);
 		assertThat(task.getThreadName()).startsWith(customPrefix);
 		assertThat(task.isVirtual()).isTrue();
-		assertThat(task.runtCount()).isOne();
+		assertThat(task.runCount()).isOne();
 	}
 
 	private void executeAndWait(TaskExecutor executor, Runnable task, Object monitor) {
@@ -139,7 +139,7 @@ class VirtualThreadTaskExecutorTests {
 			return this.virtual;
 		}
 
-		public int runtCount() {
+		public int runCount() {
 			return this.runCount.get();
 		}
 
