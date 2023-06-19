@@ -135,7 +135,7 @@ public abstract class YamlProcessor {
 	 * <p>If no supported types are configured, only Java standard classes
 	 * (as defined in {@link org.yaml.snakeyaml.constructor.SafeConstructor})
 	 * encountered in YAML documents will be supported.
-	 * If an unsupported type is encountered, an {@link ComposerException}
+	 * If an unsupported type is encountered, a {@link ComposerException}
 	 * will be thrown when the corresponding YAML node is processed.
 	 * @param supportedTypes the supported types, or an empty array to clear the
 	 * supported types
@@ -180,7 +180,7 @@ public abstract class YamlProcessor {
 	 * <p>If custom {@linkplain #setSupportedTypes supported types} have been configured,
 	 * the default implementation creates a {@code Yaml} instance that filters out
 	 * unsupported types encountered in YAML documents.
-	 * If an unsupported type is encountered, an {@link ComposerException} will be
+	 * If an unsupported type is encountered, a {@link ComposerException} will be
 	 * thrown when the node is processed.
 	 * @see LoaderOptions#setAllowDuplicateKeys(boolean)
 	 */
