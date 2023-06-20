@@ -318,6 +318,51 @@ Java::
 ----
 ======
 
+[[aot.bestpractices.jpa]]
+=== JPA
+
+The JPA persistence unit has to be known upfront for certain optmizations to apply. Consider the following basic example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Bean
+	LocalContainerEntityManagerFactoryBean customDBEntityManagerFactory(DataSource dataSource) {
+		LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setPackagesToScan("com.example.app");
+		return factoryBean;
+	}
+----
+======
+
+To make sure the scanning occurs ahead of time, a `PersistenceManagedTypes` bean must be declared and used by the
+factory bean definition, as shown by the following example:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Bean
+	PersistenceManagedTypes persistenceManagedTypes(ResourceLoader resourceLoader) {
+		return new PersistenceManagedTypesScanner(resourceLoader)
+				.scan("com.example.app");
+	}
+
+	@Bean
+	LocalContainerEntityManagerFactoryBean customDBEntityManagerFactory(DataSource dataSource, PersistenceManagedTypes managedTypes) {
+		LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setManagedTypes(managedTypes);
+		return factoryBean;
+	}
+----
+======
 
 [[aot.hints]]
 == Runtime Hints
