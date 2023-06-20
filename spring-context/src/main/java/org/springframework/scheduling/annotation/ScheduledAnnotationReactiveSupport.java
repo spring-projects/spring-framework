@@ -79,7 +79,7 @@ abstract class ScheduledAnnotationReactiveSupport {
 	 * @throws IllegalStateException if the method is reactive but Reactor and/or the
 	 * Kotlin coroutines bridge are not present at runtime
 	 */
-	static boolean isReactive(Method method) {
+	public static boolean isReactive(Method method) {
 		if (KotlinDetector.isKotlinPresent() && KotlinDetector.isSuspendingFunction(method)) {
 			// Note that suspending functions declared without args have a single Continuation
 			// parameter in reflective inspection
@@ -103,6 +103,25 @@ abstract class ScheduledAnnotationReactiveSupport {
 		Assert.isTrue(candidateAdapter.getDescriptor().isDeferred(),
 				"Reactive methods may only be annotated with @Scheduled if the return type supports deferred execution");
 		return true;
+	}
+
+	/**
+	 * Create a {@link Runnable} for the Scheduled infrastructure, allowing for scheduled
+	 * subscription to the publisher produced by a reactive method.
+	 * <p>Note that the reactive method is invoked once, but the resulting {@code Publisher}
+	 * is subscribed to repeatedly, once per each invocation of the {@code Runnable}.
+	 * <p>In the case of a fixed-delay configuration, the subscription inside the
+	 * {@link Runnable} is turned into a blocking call in order to maintain fixed-delay
+	 * semantics (i.e. the task blocks until completion of the Publisher, and the
+	 * delay is applied until the next iteration).
+	 */
+	public static Runnable createSubscriptionRunnable(Method method, Object targetBean, Scheduled scheduled,
+			Supplier<ObservationRegistry> observationRegistrySupplier, List<Runnable> subscriptionTrackerRegistry) {
+
+		boolean shouldBlock = (scheduled.fixedDelay() > 0 || StringUtils.hasText(scheduled.fixedDelayString()));
+		Publisher<?> publisher = getPublisherFor(method, targetBean);
+		Supplier<ScheduledTaskObservationContext> contextSupplier = () -> new ScheduledTaskObservationContext(targetBean, method);
+		return new SubscribingRunnable(publisher, shouldBlock, subscriptionTrackerRegistry, observationRegistrySupplier, contextSupplier);
 	}
 
 	/**
@@ -156,25 +175,6 @@ abstract class ScheduledAnnotationReactiveSupport {
 		}
 	}
 
-	/**
-	 * Create a {@link Runnable} for the Scheduled infrastructure, allowing for scheduled
-	 * subscription to the publisher produced by a reactive method.
-	 * <p>Note that the reactive method is invoked once, but the resulting {@code Publisher}
-	 * is subscribed to repeatedly, once per each invocation of the {@code Runnable}.
-	 * <p>In the case of a fixed-delay configuration, the subscription inside the
-	 * {@link Runnable} is turned into a blocking call in order to maintain fixed-delay
-	 * semantics (i.e. the task blocks until completion of the Publisher, and the
-	 * delay is applied until the next iteration).
-	 */
-	static Runnable createSubscriptionRunnable(Method method, Object targetBean, Scheduled scheduled,
-			Supplier<ObservationRegistry> observationRegistrySupplier, List<Runnable> subscriptionTrackerRegistry) {
-
-		boolean shouldBlock = (scheduled.fixedDelay() > 0 || StringUtils.hasText(scheduled.fixedDelayString()));
-		Publisher<?> publisher = getPublisherFor(method, targetBean);
-		Supplier<ScheduledTaskObservationContext> contextSupplier = () -> new ScheduledTaskObservationContext(targetBean, method);
-		return new SubscribingRunnable(publisher, shouldBlock, subscriptionTrackerRegistry, observationRegistrySupplier, contextSupplier);
-	}
-
 
 	/**
 	 * Utility implementation of {@code Runnable} that subscribes to a {@code Publisher}
@@ -195,7 +195,8 @@ abstract class ScheduledAnnotationReactiveSupport {
 		final Supplier<ScheduledTaskObservationContext> contextSupplier;
 
 		SubscribingRunnable(Publisher<?> publisher, boolean shouldBlock, List<Runnable> subscriptionTrackerRegistry,
-							Supplier<ObservationRegistry> observationRegistrySupplier, Supplier<ScheduledTaskObservationContext> contextSupplier) {
+				Supplier<ObservationRegistry> observationRegistrySupplier, Supplier<ScheduledTaskObservationContext> contextSupplier) {
+
 			this.publisher = publisher;
 			this.shouldBlock = shouldBlock;
 			this.subscriptionTrackerRegistry = subscriptionTrackerRegistry;

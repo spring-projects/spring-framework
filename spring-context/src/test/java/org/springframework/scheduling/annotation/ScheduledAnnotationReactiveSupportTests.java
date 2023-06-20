@@ -43,7 +43,6 @@ import static org.springframework.scheduling.annotation.ScheduledAnnotationReact
 import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.isReactive;
 
 /**
- * Tests for {@link ScheduledAnnotationReactiveSupportTests}.
  * @author Simon Baslé
  * @since 6.1
  */

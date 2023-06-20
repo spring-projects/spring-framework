@@ -32,6 +32,10 @@ import reactor.core.publisher.Mono
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.Continuation
 
+/**
+ * @author Simon Baslé
+ * @since 6.1
+ */
 class KotlinScheduledAnnotationReactiveSupportTests {
 
 	private var target: SuspendingFunctions? = SuspendingFunctions()
