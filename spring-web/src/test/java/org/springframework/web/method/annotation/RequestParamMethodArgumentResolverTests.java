@@ -462,6 +462,21 @@ public class RequestParamMethodArgumentResolverTests {
 		assertThat(arg).isNull();
 	}
 
+	@Test // gh-29550
+	public void missingRequestParamEmptyValueNotRequiredWithDefaultValue() throws Exception {
+		WebDataBinder binder = new WebRequestDataBinder(null);
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+
+		WebDataBinderFactory binderFactory = mock();
+		given(binderFactory.createBinder(webRequest, null, "name")).willReturn(binder);
+
+		request.addParameter("name", "    ");
+
+		MethodParameter param = this.testMethod.annot(requestParam().notRequired("bar")).arg(String.class);
+		Object arg = resolver.resolveArgument(param, null, webRequest, binderFactory);
+		assertThat(arg).isEqualTo("bar");
+	}
+
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
 		request.setParameter("stringNotAnnot", "plainValue");
