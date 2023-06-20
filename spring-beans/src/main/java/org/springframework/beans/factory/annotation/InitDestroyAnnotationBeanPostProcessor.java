@@ -90,7 +90,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	private final transient LifecycleMetadata emptyLifecycleMetadata =
 			new LifecycleMetadata(Object.class, Collections.emptyList(), Collections.emptyList()) {
 				@Override
-				public void checkConfigMembers(RootBeanDefinition beanDefinition) {
+				public void checkInitDestroyMethods(RootBeanDefinition beanDefinition) {
 				}
 				@Override
 				public void invokeInitMethods(Object target, String beanName) {
@@ -175,7 +175,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 	private LifecycleMetadata findInjectionMetadata(RootBeanDefinition beanDefinition, Class<?> beanType) {
 		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
-		metadata.checkConfigMembers(beanDefinition);
+		metadata.checkInitDestroyMethods(beanDefinition);
 		return metadata;
 	}
 
@@ -330,7 +330,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 			this.destroyMethods = destroyMethods;
 		}
 
-		public void checkConfigMembers(RootBeanDefinition beanDefinition) {
+		public void checkInitDestroyMethods(RootBeanDefinition beanDefinition) {
 			Set<LifecycleElement> checkedInitMethods = new LinkedHashSet<>(this.initMethods.size());
 			for (LifecycleElement element : this.initMethods) {
 				String methodIdentifier = element.getIdentifier();

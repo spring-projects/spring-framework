@@ -56,21 +56,19 @@ import org.springframework.util.StringUtils;
 
 /**
  * Internal code generator to set {@link RootBeanDefinition} properties.
- * <p>
- * Generates code in the following form:<blockquote><pre class="code">
+ *
+ * <p>Generates code in the following form:<pre class="code">
  * beanDefinition.setPrimary(true);
  * beanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
  * ...
- * </pre></blockquote>
- * <p>
- * The generated code expects the following variables to be available:
- * <p>
+ * </pre>
+ *
+ * <p>The generated code expects the following variables to be available:
  * <ul>
- * <li>{@code beanDefinition} - The {@link RootBeanDefinition} to
- * configure.</li>
+ * <li>{@code beanDefinition}: the {@link RootBeanDefinition} to configure</li>
  * </ul>
- * <p>
- * Note that this generator does <b>not</b> set the {@link InstanceSupplier}.
+ *
+ * <p>Note that this generator does <b>not</b> set the {@link InstanceSupplier}.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
