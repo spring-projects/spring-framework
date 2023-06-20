@@ -321,7 +321,7 @@ Java::
 [[aot.bestpractices.jpa]]
 === JPA
 
-The JPA persistence unit has to be known upfront for certain optmizations to apply. Consider the following basic example:
+The JPA persistence unit has to be known upfront for certain optimizations to apply. Consider the following basic example:
 
 [tabs]
 ======
