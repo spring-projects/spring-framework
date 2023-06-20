@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelId;
@@ -55,8 +56,8 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 
 	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
-		super(bufferFactory, new HttpHeaders(new NettyHeadersAdapter(response.responseHeaders())));
-		Assert.notNull(response, "HttpServerResponse must not be null");
+		super(bufferFactory, new HttpHeaders(new NettyHeadersAdapter(Objects.requireNonNull(response,
+				"HttpServerResponse must not be null").responseHeaders())));
 		this.response = response;
 	}
 
