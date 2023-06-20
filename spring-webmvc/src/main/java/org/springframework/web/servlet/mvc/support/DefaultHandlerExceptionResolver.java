@@ -60,74 +60,74 @@ import org.springframework.web.util.WebUtils;
  * <p>This exception resolver is enabled by default in the common Spring
  * {@link org.springframework.web.servlet.DispatcherServlet}.
  *
+ * <h3>Supported Exceptions</h3>
  * <table>
- * <caption>Supported Exceptions</caption>
  * <thead>
  * <tr>
- * <th class="colFirst">Exception</th>
- * <th class="colLast">HTTP Status Code</th>
+ * <th class="table-header col-first">Exception</th>
+ * <th class="table-header col-last">HTTP Status Code</th>
  * </tr>
  * </thead>
  * <tbody>
- * <tr class="altColor">
- * <td><p>HttpRequestMethodNotSupportedException</p></td>
- * <td><p>405 (SC_METHOD_NOT_ALLOWED)</p></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">HttpRequestMethodNotSupportedException</div></td>
+ * <td><div class="block">405 (SC_METHOD_NOT_ALLOWED)</div></td>
  * </tr>
- * <tr class="rowColor">
- * <td><p>HttpMediaTypeNotSupportedException</p></td>
- * <td><p>415 (SC_UNSUPPORTED_MEDIA_TYPE)</p></td>
+ * <tr class="odd-row-color">
+ * <td><div class="block">HttpMediaTypeNotSupportedException</div></td>
+ * <td><div class="block">415 (SC_UNSUPPORTED_MEDIA_TYPE)</div></td>
  * </tr>
- * <tr class="altColor">
- * <td><p>HttpMediaTypeNotAcceptableException</p></td>
- * <td><p>406 (SC_NOT_ACCEPTABLE)</p></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">HttpMediaTypeNotAcceptableException</div></td>
+ * <td><div class="block">406 (SC_NOT_ACCEPTABLE)</div></td>
  * </tr>
- * <tr class="rowColor">
- * <td><p>MissingPathVariableException</p></td>
- * <td><p>500 (SC_INTERNAL_SERVER_ERROR)</p></td>
+ * <tr class="odd-row-color">
+ * <td><div class="block">MissingPathVariableException</div></td>
+ * <td><div class="block">500 (SC_INTERNAL_SERVER_ERROR)</div></td>
  * </tr>
- * <tr class="altColor">
- * <td><p>MissingServletRequestParameterException</p></td>
- * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">MissingServletRequestParameterException</div></td>
+ * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
- * <tr class="rowColor">
- * <td><p>MissingServletRequestPartException</p></td>
- * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * <tr class="odd-row-color">
+ * <td><div class="block">MissingServletRequestPartException</div></td>
+ * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
- * <tr class="rowColor">
- * <td><p>ServletRequestBindingException</p></td>
- * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">ServletRequestBindingException</div></td>
+ * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
- * <tr class="altColor">
- * <td><p>ConversionNotSupportedException</p></td>
- * <td><p>500 (SC_INTERNAL_SERVER_ERROR)</p></td>
+ * <tr class="odd-row-color">
+ * <td><div class="block">ConversionNotSupportedException</div></td>
+ * <td><div class="block">500 (SC_INTERNAL_SERVER_ERROR)</div></td>
  * </tr>
- * <tr class="rowColor">
- * <td><p>TypeMismatchException</p></td>
- * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">TypeMismatchException</div></td>
+ * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
- * <tr class="altColor">
- * <td><p>HttpMessageNotReadableException</p></td>
- * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * <tr class="odd-row-color">
+ * <td><div class="block">HttpMessageNotReadableException</div></td>
+ * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
- * <tr class="rowColor">
- * <td><p>HttpMessageNotWritableException</p></td>
- * <td><p>500 (SC_INTERNAL_SERVER_ERROR)</p></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">HttpMessageNotWritableException</div></td>
+ * <td><div class="block">500 (SC_INTERNAL_SERVER_ERROR)</div></td>
  * </tr>
- * <tr class="altColor">
- * <td><p>MethodArgumentNotValidException</p></td>
- * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * <tr class="odd-row-color">
+ * <td><div class="block">MethodArgumentNotValidException</div></td>
+ * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
- * <tr class="altColor">
- * <td><p>BindException</p></td>
- * <td><p>400 (SC_BAD_REQUEST)</p></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">BindException</div></td>
+ * <td><div class="block">400 (SC_BAD_REQUEST)</div></td>
  * </tr>
- * <tr class="rowColor">
- * <td><p>NoHandlerFoundException</p></td>
- * <td><p>404 (SC_NOT_FOUND)</p></td>
+ * <tr class="odd-row-color">
+ * <td><div class="block">NoHandlerFoundException</div></td>
+ * <td><div class="block">404 (SC_NOT_FOUND)</div></td>
  * </tr>
- * <tr class="altColor">
- * <td><p>AsyncRequestTimeoutException</p></td>
- * <td><p>503 (SC_SERVICE_UNAVAILABLE)</p></td>
+ * <tr class="even-row-color">
+ * <td><div class="block">AsyncRequestTimeoutException</div></td>
+ * <td><div class="block">503 (SC_SERVICE_UNAVAILABLE)</div></td>
  * </tr>
  * </tbody>
  * </table>
