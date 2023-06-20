@@ -70,8 +70,8 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 		beanDefinition.setDestroyMethodNames("customDestroyMethod");
 		processAheadOfTime(beanDefinition);
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
-		assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly("customInitMethod", "initMethod");
-		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("customDestroyMethod", "destroyMethod");
+		assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly("initMethod", "customInitMethod");
+		assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly("destroyMethod", "customDestroyMethod");
 	}
 
 	@Test
@@ -129,16 +129,16 @@ class InitDestroyAnnotationBeanPostProcessorTests {
 		RootBeanDefinition mergedBeanDefinition = getMergedBeanDefinition();
 		assertSoftly(softly -> {
 			softly.assertThat(mergedBeanDefinition.getInitMethodNames()).containsExactly(
-					"afterPropertiesSet",
-					"customInit",
 					CustomAnnotatedPrivateInitDestroyBean.class.getName() + ".privateInit", // fully-qualified private method
-					CustomAnnotatedPrivateSameNameInitDestroyBean.class.getName() + ".privateInit" // fully-qualified private method
+					CustomAnnotatedPrivateSameNameInitDestroyBean.class.getName() + ".privateInit", // fully-qualified private method
+					"afterPropertiesSet",
+					"customInit"
 				);
 			softly.assertThat(mergedBeanDefinition.getDestroyMethodNames()).containsExactly(
-					"destroy",
-					"customDestroy",
 					CustomAnnotatedPrivateSameNameInitDestroyBean.class.getName() + ".privateDestroy", // fully-qualified private method
-					CustomAnnotatedPrivateInitDestroyBean.class.getName() + ".privateDestroy" // fully-qualified private method
+					CustomAnnotatedPrivateInitDestroyBean.class.getName() + ".privateDestroy", // fully-qualified private method
+					"destroy",
+					"customDestroy"
 				);
 		});
 	}

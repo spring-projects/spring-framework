@@ -182,7 +182,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	private static String[] safeMerge(@Nullable String[] existingNames, Collection<LifecycleMethod> detectedMethods) {
 		Stream<String> detectedNames = detectedMethods.stream().map(LifecycleMethod::getIdentifier);
 		Stream<String> mergedNames = (existingNames != null ?
-				Stream.concat(Stream.of(existingNames), detectedNames) : detectedNames);
+				Stream.concat(detectedNames, Stream.of(existingNames)) : detectedNames);
 		return mergedNames.distinct().toArray(String[]::new);
 	}
 
