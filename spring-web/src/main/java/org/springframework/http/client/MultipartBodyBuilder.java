@@ -36,6 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Prepare the body of a multipart request, resulting in a
@@ -84,6 +85,7 @@ import org.springframework.util.MultiValueMap;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Olga Maciaszek-Sharma
  * @since 5.0.2
  * @see <a href="https://tools.ietf.org/html/rfc7578">RFC 7578</a>
  */
@@ -108,6 +110,7 @@ public final class MultipartBodyBuilder {
 	 * <li>{@link HttpEntity} -- part content and headers although generally it's
 	 * easier to add headers through the returned builder
 	 * <li>{@link Part} -- a part from a server request
+	 * <li>{@link MultipartFile MultipartFile} -- file part
 	 * </ul>
 	 * @param name the name of the part to add
 	 * @param part the part data
@@ -119,8 +122,8 @@ public final class MultipartBodyBuilder {
 
 	/**
 	 * Variant of {@link #part(String, Object)} that also accepts a MediaType.
-	 * @param name the name of the part to add
-	 * @param part the part data
+	 * @param name        the name of the part to add
+	 * @param part        the part data
 	 * @param contentType the media type to help with encoding the part
 	 * @return builder that allows for further customization of part headers
 	 */
@@ -144,7 +147,7 @@ public final class MultipartBodyBuilder {
 			return builder;
 		}
 
-		if (part instanceof PublisherEntity<?,?> publisherEntity) {
+		if (part instanceof PublisherEntity<?, ?> publisherEntity) {
 			PublisherPartBuilder<?, ?> builder = new PublisherPartBuilder<>(name, publisherEntity);
 			if (contentType != null) {
 				builder.contentType(contentType);
@@ -160,6 +163,11 @@ public final class MultipartBodyBuilder {
 			partHeaders = new HttpHeaders();
 			partHeaders.putAll(httpEntity.getHeaders());
 		}
+
+		else if (part instanceof MultipartFile file) {
+			partBody = file.getResource();
+		}
+
 		else {
 			partBody = part;
 		}
@@ -181,8 +189,8 @@ public final class MultipartBodyBuilder {
 
 	/**
 	 * Add a part from {@link Publisher} content.
-	 * @param name the name of the part to add
-	 * @param publisher a Publisher of content for the part
+	 * @param name         the name of the part to add
+	 * @param publisher    a Publisher of content for the part
 	 * @param elementClass the type of elements contained in the publisher
 	 * @return builder that allows for further customization of part headers
 	 */
@@ -199,8 +207,8 @@ public final class MultipartBodyBuilder {
 	/**
 	 * Variant of {@link #asyncPart(String, Publisher, Class)} with a
 	 * {@link ParameterizedTypeReference} for the element type information.
-	 * @param name the name of the part to add
-	 * @param publisher the part contents
+	 * @param name          the name of the part to add
+	 * @param publisher     the part contents
 	 * @param typeReference the type of elements contained in the publisher
 	 * @return builder that allows for further customization of part headers
 	 */
@@ -256,7 +264,7 @@ public final class MultipartBodyBuilder {
 
 		/**
 		 * Add part header values.
-		 * @param headerName the part header name
+		 * @param headerName   the part header name
 		 * @param headerValues the part header value(s)
 		 * @return this builder
 		 * @see HttpHeaders#addAll(String, List)
@@ -335,7 +343,7 @@ public final class MultipartBodyBuilder {
 		}
 
 		public PublisherPartBuilder(String name, @Nullable HttpHeaders headers, P body,
-				ParameterizedTypeReference<S> typeRef) {
+									ParameterizedTypeReference<S> typeRef) {
 
 			super(name, headers, body);
 			this.resolvableType = ResolvableType.forType(typeRef);
@@ -364,7 +372,7 @@ public final class MultipartBodyBuilder {
 	 * @param <P> the publisher
 	 */
 	static final class PublisherEntity<T, P extends Publisher<T>> extends HttpEntity<P>
-			implements ResolvableTypeProvider  {
+			implements ResolvableTypeProvider {
 
 		private final ResolvableType resolvableType;
 

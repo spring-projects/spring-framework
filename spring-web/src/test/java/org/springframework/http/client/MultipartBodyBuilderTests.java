@@ -16,6 +16,8 @@
 
 package org.springframework.http.client;
 
+import java.nio.charset.Charset;
+
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -29,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.MultipartBodyBuilder.PublisherEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.testfixture.servlet.MockMultipartFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -109,6 +112,21 @@ public class MultipartBodyBuilderTests {
 
 		assertThat(entity).isNotNull();
 		assertThat(entity.getClass()).isEqualTo(PublisherEntity.class);
+	}
+
+	@Test
+	void multipartFileAcceptedAsInput() {
+		MultipartBodyBuilder builder = new MultipartBodyBuilder();
+		builder.part("file", new MockMultipartFile("test.txt",
+				"test".getBytes(Charset.defaultCharset())));
+
+		HttpEntity<?> entity = builder.build().getFirst("file");
+
+		assertThat(entity).isNotNull();
+		assertThat(entity.getBody()).isNotNull();
+		assertThat(entity.getBody()).isInstanceOf(Resource.class);
+		Object body = entity.getBody();
+		assertThat(body).isInstanceOf(Resource.class);
 	}
 
 }
