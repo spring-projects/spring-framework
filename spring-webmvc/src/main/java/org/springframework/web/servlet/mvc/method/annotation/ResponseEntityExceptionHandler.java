@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -121,6 +122,7 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 			ServletRequestBindingException.class,
 			MethodArgumentNotValidException.class,
 			NoHandlerFoundException.class,
+			NoResourceFoundException.class,
 			AsyncRequestTimeoutException.class,
 			ErrorResponseException.class,
 			ConversionNotSupportedException.class,
@@ -157,6 +159,9 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 		}
 		else if (ex instanceof NoHandlerFoundException subEx) {
 			return handleNoHandlerFoundException(subEx, subEx.getHeaders(), subEx.getStatusCode(), request);
+		}
+		else if (ex instanceof NoResourceFoundException subEx) {
+			return handleNoResourceFoundException(subEx, subEx.getHeaders(), subEx.getStatusCode(), request);
 		}
 		else if (ex instanceof AsyncRequestTimeoutException subEx) {
 			return handleAsyncRequestTimeoutException(subEx, subEx.getHeaders(), subEx.getStatusCode(), request);
@@ -344,6 +349,24 @@ public abstract class ResponseEntityExceptionHandler implements MessageSourceAwa
 	@Nullable
 	protected ResponseEntity<Object> handleNoHandlerFoundException(
 			NoHandlerFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+
+		return handleExceptionInternal(ex, null, headers, status, request);
+	}
+
+	/**
+	 * Customize the handling of {@link NoResourceFoundException}.
+	 * <p>This method delegates to {@link #handleExceptionInternal}.
+	 * @param ex the exception to handle
+	 * @param headers the headers to use for the response
+	 * @param status the status code to use for the response
+	 * @param request the current request
+	 * @return a {@code ResponseEntity} for the response to use, possibly
+	 * {@code null} when the response is already committed
+	 * @since 6.1
+	 */
+	@Nullable
+	protected ResponseEntity<Object> handleNoResourceFoundException(
+			NoResourceFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
 		return handleExceptionInternal(ex, null, headers, status, request);
 	}

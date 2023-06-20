@@ -414,6 +414,10 @@ public class ScheduledAnnotationBeanPostProcessor
 	 * accordingly. The Runnable can represent either a synchronous method invocation
 	 * (see {@link #processScheduledSync(Scheduled, Method, Object)}) or an asynchronous
 	 * one (see {@link #processScheduledAsync(Scheduled, Method, Object)}).
+	 * @param scheduled the {@code @Scheduled} annotation
+	 * @param runnable the runnable to be scheduled
+	 * @param method the method that the annotation has been declared on
+	 * @param bean the target bean instance
 	 */
 	protected void processScheduledTask(Scheduled scheduled, Runnable runnable, Method method, Object bean) {
 		try {
@@ -578,6 +582,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		Runnable task;
 		try {
 			task = ScheduledAnnotationReactiveSupport.createSubscriptionRunnable(method, bean, scheduled,
+					this.registrar::getObservationRegistry,
 					this.reactiveSubscriptions.computeIfAbsent(bean, k -> new CopyOnWriteArrayList<>()));
 		}
 		catch (IllegalArgumentException ex) {
@@ -598,7 +603,7 @@ public class ScheduledAnnotationBeanPostProcessor
 	protected Runnable createRunnable(Object target, Method method) {
 		Assert.isTrue(method.getParameterCount() == 0, "Only no-arg methods may be annotated with @Scheduled");
 		Method invocableMethod = AopUtils.selectInvocableMethod(method, target.getClass());
-		return new ScheduledMethodRunnable(target, invocableMethod);
+		return new ScheduledMethodRunnable(target, invocableMethod, this.registrar::getObservationRegistry);
 	}
 
 	private static Duration toDuration(long value, TimeUnit timeUnit) {

@@ -92,6 +92,10 @@ import static org.springframework.util.ResourceUtils.CLASSPATH_URL_PREFIX;
  * on permissible configuration constellations and on the algorithms used to
  * locate these beans.
  *
+ * <h3>Required Dependencies</h3>
+ * <p>Use of this listener requires the {@code spring-jdbc} and {@code spring-tx}
+ * modules as well as their transitive dependencies to be present on the classpath.
+ *
  * @author Sam Brannen
  * @author Dmitry Semukhin
  * @since 4.1

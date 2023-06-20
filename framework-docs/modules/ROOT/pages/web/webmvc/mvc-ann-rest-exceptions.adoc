@@ -71,20 +71,21 @@ from an existing `ProblemDetail`. This could be done centrally, e.g. from an
 [.small]#xref:web/webflux/ann-rest-exceptions.adoc#webflux-ann-rest-exceptions-i18n[See equivalent in the Reactive stack]#
 
 It is a common requirement to internationalize error response details, and good practice
-to customize the problem details for Spring MVC exceptions. This is supported as follows:
+to customize the problem details for Spring WebFlux exceptions. This section describes the
+support for that.
 
-- Each `ErrorResponse` exposes a message code and arguments to resolve the "detail" field
-through a xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource].
-The actual message code value is parameterized with placeholders, e.g.
-`+"HTTP method {0} not supported"+` to be expanded from the arguments.
-- Each `ErrorResponse` also exposes a message code to resolve the "title" field.
-- `ResponseEntityExceptionHandler` uses the message code and arguments to resolve the
-"detail" and the "title" fields.
+`ErrorResponse` exposes message codes for "type", "title", and "detail", in addition to
+message code arguments for the "detail" field. `ResponseEntityExceptionHandler` resolves
+these through a xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
+and updates the `ProblemDetail` accordingly.
 
-By default, the message code for the "detail" field is "problemDetail." + the fully
-qualified exception class name. Some exceptions may expose additional message codes in
-which case a suffix is added to the default message code. The table below lists message
-arguments and codes for Spring MVC exceptions:
+The default strategy for message codes follows the pattern:
+
+`problemDetail.[type|title|detail].[fully qualified exception class name]`
+
+Some `ErrorResponse` may expose more than one message code, typically adding a suffix
+to the default message code. The table below lists message codes, and arguments for
+Spring MVC exceptions:
 
 [[mvc-ann-rest-exceptions-codes]]
 [cols="1,1,2", options="header"]
@@ -161,6 +162,10 @@ arguments and codes for Spring MVC exceptions:
 | (default)
 |
 
+| `NoResourceFoundException`
+| (default)
+|
+
 | `TypeMismatchException`
 | (default)
 | `+{0}+` property name, `+{1}+` property value
@@ -171,8 +176,6 @@ arguments and codes for Spring MVC exceptions:
 
 |===
 
-By default, the message code for the "title" field is "problemDetail.title." + the fully
-qualified exception class name.
 
 
 

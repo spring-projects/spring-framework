@@ -62,8 +62,7 @@ initialization parameters (`init-param` elements) to the Servlet declaration in 
   The exception can then be caught with a `HandlerExceptionResolver` (for example, by using an
   `@ExceptionHandler` controller method) and handled as any others.
 
-  By default, this is set to `false`, in which case the `DispatcherServlet` sets the
-  response status to 404 (NOT_FOUND) without raising an exception.
+  As of 6.1, this property is set to `true` and deprecated.
 
   Note that, if xref:web/webmvc/mvc-config/default-servlet-handler.adoc[default servlet handling]  is
   also configured, unresolved requests are always forwarded to the default servlet

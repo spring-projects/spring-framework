@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.beans.PropertyChangeEvent;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +63,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 import org.springframework.web.testfixture.servlet.MockServletConfig;
@@ -160,29 +162,31 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	public void errorResponseProblemDetailViaMessageSource() {
-
-		Locale locale = Locale.UK;
-		LocaleContextHolder.setLocale(locale);
-
 		try {
-			StaticMessageSource messageSource = new StaticMessageSource();
-			messageSource.addMessage(
-					ErrorResponse.getDefaultDetailMessageCode(HttpMediaTypeNotSupportedException.class, null), locale,
-					"Content-Type {0} not supported. Supported: {1}");
-			messageSource.addMessage(
-					ErrorResponse.getDefaultTitleMessageCode(HttpMediaTypeNotSupportedException.class), locale,
-					"Media type is not valid or not supported");
+			Locale locale = Locale.UK;
+			LocaleContextHolder.setLocale(locale);
 
-			this.exceptionHandler.setMessageSource(messageSource);
+			String type = "https://example.com/probs/unsupported-content";
+			String title = "Media type is not valid or not supported";
+			Class<HttpMediaTypeNotSupportedException> exceptionType = HttpMediaTypeNotSupportedException.class;
+
+			StaticMessageSource source = new StaticMessageSource();
+			source.addMessage(ErrorResponse.getDefaultTypeMessageCode(exceptionType), locale, type);
+			source.addMessage(ErrorResponse.getDefaultTitleMessageCode(exceptionType), locale, title);
+			source.addMessage(ErrorResponse.getDefaultDetailMessageCode(exceptionType, null), locale,
+					"Content-Type {0} not supported. Supported: {1}");
+
+			this.exceptionHandler.setMessageSource(source);
 
 			ResponseEntity<?> entity = testException(new HttpMediaTypeNotSupportedException(
 					MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML)));
 
-			ProblemDetail body = (ProblemDetail) entity.getBody();
-			assertThat(body.getDetail()).isEqualTo(
+			ProblemDetail problem = (ProblemDetail) entity.getBody();
+			assertThat(problem).isNotNull();
+			assertThat(problem.getType()).isEqualTo(URI.create(type));
+			assertThat(problem.getTitle()).isEqualTo(title);
+			assertThat(problem.getDetail()).isEqualTo(
 					"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
-			assertThat(body.getTitle()).isEqualTo(
-					"Media type is not valid or not supported");
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -260,6 +264,11 @@ public class ResponseEntityExceptionHandlerTests {
 				testException(new NoHandlerFoundException("GET", "/resource", requestHeaders));
 
 		assertThat(responseEntity.getHeaders()).isEmpty();
+	}
+
+	@Test
+	public void noResourceFoundException() {
+		testException(new NoResourceFoundException(HttpMethod.GET, "/resource"));
 	}
 
 	@Test

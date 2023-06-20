@@ -74,7 +74,7 @@ import org.springframework.lang.Nullable;
  * servers[1]=foo.bar.com
  * </pre>
  *
- * <p>Requires SnakeYAML 2.0 or higher, as of Spring Framework 6.1.0.
+ * <p>Requires SnakeYAML 2.0 or higher, as of Spring Framework 6.1.
  *
  * @author Dave Syer
  * @author Stephane Nicoll

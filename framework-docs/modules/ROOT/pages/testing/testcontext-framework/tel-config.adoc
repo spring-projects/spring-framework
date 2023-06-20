@@ -12,6 +12,8 @@ by default, exactly in the following order:
   xref:testing/testcontext-framework/application-events.adoc[`ApplicationEvents`].
 * `DependencyInjectionTestExecutionListener`: Provides dependency injection for the test
   instance.
+* `MicrometerObservationRegistryTestExecutionListener`: Provides support for
+  Micrometer's `ObservationRegistry`.
 * `DirtiesContextTestExecutionListener`: Handles the `@DirtiesContext` annotation for
   "`after`" modes.
 * `TransactionalTestExecutionListener`: Provides transactional test execution with

@@ -50,6 +50,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -125,6 +126,10 @@ import org.springframework.web.util.WebUtils;
  * <td><p>NoHandlerFoundException</p></td>
  * <td><p>404 (SC_NOT_FOUND)</p></td>
  * </tr>
+ * <tr class="rowColor">
+ * <td><p>NoResourceFoundException</p></td>
+ * <td><p>404 (SC_NOT_FOUND)</p></td>
+ * </tr>
  * <tr class="altColor">
  * <td><p>AsyncRequestTimeoutException</p></td>
  * <td><p>503 (SC_SERVICE_UNAVAILABLE)</p></td>
@@ -197,6 +202,9 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 				}
 				else if (ex instanceof NoHandlerFoundException theEx) {
 					mav = handleNoHandlerFoundException(theEx, request, response, handler);
+				}
+				else if (ex instanceof NoResourceFoundException theEx) {
+					mav = handleNoResourceFoundException(theEx, request, response, handler);
 				}
 				else if (ex instanceof AsyncRequestTimeoutException theEx) {
 					mav = handleAsyncRequestTimeoutException(theEx, request, response, handler);
@@ -410,6 +418,26 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
 
 		pageNotFoundLogger.warn(ex.getMessage());
+		return null;
+	}
+
+	/**
+	 * Handle the case where no static resource was found.
+	 * <p>The default implementation returns {@code null} in which case the
+	 * exception is handled in {@link #handleErrorResponse}.
+	 * @param ex the {@link NoResourceFoundException} to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the resource handler
+	 * @return an empty {@code ModelAndView} indicating the exception was handled, or
+	 * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}
+	 * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}
+	 * @since 6.1
+	 */
+	@Nullable
+	protected ModelAndView handleNoResourceFoundException(NoResourceFoundException ex,
+			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {
+
 		return null;
 	}
 

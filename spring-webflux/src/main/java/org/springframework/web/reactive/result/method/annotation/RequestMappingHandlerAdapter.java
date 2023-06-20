@@ -38,7 +38,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.beanvalidation.MethodValidator;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.support.HandlerMethodValidator;
+import org.springframework.web.method.annotation.HandlerMethodValidator;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.DispatchExceptionHandler;
 import org.springframework.web.reactive.HandlerAdapter;

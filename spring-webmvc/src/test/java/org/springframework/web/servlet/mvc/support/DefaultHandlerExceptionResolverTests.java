@@ -48,6 +48,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 import org.springframework.web.testfixture.servlet.MockHttpServletResponse;
 
@@ -182,7 +183,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleMissingServletRequestPartException() throws Exception {
+	public void handleMissingServletRequestPartException() {
 		MissingServletRequestPartException ex = new MissingServletRequestPartException("name");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -194,7 +195,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleBindException() throws Exception {
+	public void handleBindException() {
 		BindException ex = new BindException(new Object(), "name");
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();
@@ -203,7 +204,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleNoHandlerFoundException() throws Exception {
+	public void handleNoHandlerFoundException() {
 		ServletServerHttpRequest req = new ServletServerHttpRequest(
 				new MockHttpServletRequest("GET","/resource"));
 		NoHandlerFoundException ex = new NoHandlerFoundException(req.getMethod().name(),
@@ -215,7 +216,16 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void handleConversionNotSupportedException() throws Exception {
+	public void handleNoResourceFoundException() {
+		NoResourceFoundException ex = new NoResourceFoundException(HttpMethod.GET, "/resource");
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertThat(mav).as("No ModelAndView returned").isNotNull();
+		assertThat(mav.isEmpty()).as("No Empty ModelAndView returned").isTrue();
+		assertThat(response.getStatus()).as("Invalid status code").isEqualTo(404);
+	}
+
+	@Test
+	public void handleConversionNotSupportedException() {
 		ConversionNotSupportedException ex =
 				new ConversionNotSupportedException(new Object(), String.class, new Exception());
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
@@ -228,7 +238,7 @@ public class DefaultHandlerExceptionResolverTests {
 	}
 
 	@Test  // SPR-14669
-	public void handleAsyncRequestTimeoutException() throws Exception {
+	public void handleAsyncRequestTimeoutException() {
 		Exception ex = new AsyncRequestTimeoutException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertThat(mav).as("No ModelAndView returned").isNotNull();

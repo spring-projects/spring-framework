@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.micrometer.observation.ObservationRegistry;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Flowable;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,7 @@ import static org.springframework.scheduling.annotation.ScheduledAnnotationReact
 import static org.springframework.scheduling.annotation.ScheduledAnnotationReactiveSupport.isReactive;
 
 /**
+ * Tests for {@link ScheduledAnnotationReactiveSupportTests}.
  * @author Simon Baslé
  * @since 6.1
  */
@@ -116,12 +118,12 @@ class ScheduledAnnotationReactiveSupportTests {
 		Scheduled fixedDelayLong = AnnotationUtils.synthesizeAnnotation(Map.of("fixedDelay", 123L), Scheduled.class, null);
 		List<Runnable> tracker = new ArrayList<>();
 
-		assertThat(createSubscriptionRunnable(m, target, fixedDelayString, tracker))
+		assertThat(createSubscriptionRunnable(m, target, fixedDelayString, () -> ObservationRegistry.NOOP, tracker))
 				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
 						assertThat(sr.shouldBlock).as("fixedDelayString.shouldBlock").isTrue()
 				);
 
-		assertThat(createSubscriptionRunnable(m, target, fixedDelayLong, tracker))
+		assertThat(createSubscriptionRunnable(m, target, fixedDelayLong, () -> ObservationRegistry.NOOP, tracker))
 				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
 						assertThat(sr.shouldBlock).as("fixedDelayLong.shouldBlock").isTrue()
 				);
@@ -135,12 +137,12 @@ class ScheduledAnnotationReactiveSupportTests {
 		Scheduled fixedRateLong = AnnotationUtils.synthesizeAnnotation(Map.of("fixedRate", 123L), Scheduled.class, null);
 		List<Runnable> tracker = new ArrayList<>();
 
-		assertThat(createSubscriptionRunnable(m, target, fixedRateString, tracker))
+		assertThat(createSubscriptionRunnable(m, target, fixedRateString, () -> ObservationRegistry.NOOP, tracker))
 				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
 						assertThat(sr.shouldBlock).as("fixedRateString.shouldBlock").isFalse()
 				);
 
-		assertThat(createSubscriptionRunnable(m, target, fixedRateLong, tracker))
+		assertThat(createSubscriptionRunnable(m, target, fixedRateLong, () -> ObservationRegistry.NOOP, tracker))
 				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
 						assertThat(sr.shouldBlock).as("fixedRateLong.shouldBlock").isFalse()
 				);
@@ -153,7 +155,7 @@ class ScheduledAnnotationReactiveSupportTests {
 		Scheduled cron = AnnotationUtils.synthesizeAnnotation(Map.of("cron", "-"), Scheduled.class, null);
 		List<Runnable> tracker = new ArrayList<>();
 
-		assertThat(createSubscriptionRunnable(m, target, cron, tracker))
+		assertThat(createSubscriptionRunnable(m, target, cron, () -> ObservationRegistry.NOOP, tracker))
 				.isInstanceOfSatisfying(ScheduledAnnotationReactiveSupport.SubscribingRunnable.class, sr ->
 						assertThat(sr.shouldBlock).as("cron.shouldBlock").isFalse()
 				);

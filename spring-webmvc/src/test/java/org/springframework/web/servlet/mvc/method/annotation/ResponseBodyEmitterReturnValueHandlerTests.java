@@ -233,7 +233,7 @@ class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
-	@SuppressWarnings({"try","unused"})
+	@SuppressWarnings({"try","unused", "deprecation"})
 	void responseBodyFluxWithThreadLocal() throws Exception {
 		this.request.addHeader("Accept", "text/event-stream");
 

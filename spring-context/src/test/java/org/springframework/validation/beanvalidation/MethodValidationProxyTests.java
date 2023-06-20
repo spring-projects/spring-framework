@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -110,18 +109,20 @@ public class MethodValidationProxyTests {
 
 	@Test
 	public void testLazyValidatorForMethodValidation() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				LazyMethodValidationConfig.class, CustomValidatorBean.class,
 				MyValidBean.class, MyValidFactoryBean.class);
 		context.getBeansOfType(MyValidInterface.class).values().forEach(bean -> bean.myValidMethod("value", 5));
+		context.close();
 	}
 
 	@Test
 	public void testLazyValidatorForMethodValidationWithProxyTargetClass() {
-		ApplicationContext context = new AnnotationConfigApplicationContext(
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				LazyMethodValidationConfigWithProxyTargetClass.class, CustomValidatorBean.class,
 				MyValidBean.class, MyValidFactoryBean.class);
 		context.getBeansOfType(MyValidInterface.class).values().forEach(bean -> bean.myValidMethod("value", 5));
+		context.close();
 	}
 
 

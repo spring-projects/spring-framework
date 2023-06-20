@@ -591,7 +591,6 @@ public class DispatcherServletTests {
 		DispatcherServlet complexDispatcherServlet = new DispatcherServlet();
 		complexDispatcherServlet.setContextClass(SimpleWebApplicationContext.class);
 		complexDispatcherServlet.setNamespace("test");
-		complexDispatcherServlet.setThrowExceptionIfNoHandlerFound(true);
 		complexDispatcherServlet.init(new MockServletConfig(getServletContext(), "complex"));
 
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "GET", "/unknown");

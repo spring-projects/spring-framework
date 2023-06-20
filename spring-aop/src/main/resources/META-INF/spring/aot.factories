@@ -1,2 +1,5 @@
 org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=\
 org.springframework.aop.scope.ScopedProxyBeanRegistrationAotProcessor
+
+org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor= \
+org.springframework.aop.aspectj.annotation.AspectJBeanFactoryInitializationAotProcessor

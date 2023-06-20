@@ -18,6 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -126,33 +127,35 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	void errorResponseProblemDetailViaMessageSource() {
-
 		Locale locale = Locale.UK;
-		LocaleContextHolder.setLocale(locale);
 
-		StaticMessageSource messageSource = new StaticMessageSource();
-		messageSource.addMessage(
-				ErrorResponse.getDefaultDetailMessageCode(UnsupportedMediaTypeStatusException.class, null), locale,
+		String type = "https://example.com/probs/unsupported-content";
+		String title = "Media type is not valid or not supported";
+		Class<UnsupportedMediaTypeStatusException> exceptionType = UnsupportedMediaTypeStatusException.class;
+
+		StaticMessageSource source = new StaticMessageSource();
+		source.addMessage(ErrorResponse.getDefaultTypeMessageCode(exceptionType), locale, type);
+		source.addMessage(ErrorResponse.getDefaultTitleMessageCode(exceptionType), locale, title);
+		source.addMessage(ErrorResponse.getDefaultDetailMessageCode(exceptionType, null), locale,
 				"Content-Type {0} not supported. Supported: {1}");
-		messageSource.addMessage(
-				ErrorResponse.getDefaultTitleMessageCode(UnsupportedMediaTypeStatusException.class), locale,
-				"Media type is not valid or not supported");
 
-		this.exceptionHandler.setMessageSource(messageSource);
+		this.exceptionHandler.setMessageSource(source);
 
-		Exception ex = new UnsupportedMediaTypeStatusException(MediaType.APPLICATION_JSON,
-				List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
+		Exception ex = new UnsupportedMediaTypeStatusException(
+				MediaType.APPLICATION_JSON, List.of(MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_XML));
 
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/")
-				.acceptLanguageAsLocales(locale).build());
+		MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.get("/").acceptLanguageAsLocales(locale).build());
 
 		ResponseEntity<?> responseEntity = this.exceptionHandler.handleException(ex, exchange).block();
+		assertThat(responseEntity).isNotNull();
 
-		ProblemDetail body = (ProblemDetail) responseEntity.getBody();
-		assertThat(body.getDetail()).isEqualTo(
+		ProblemDetail problem = (ProblemDetail) responseEntity.getBody();
+		assertThat(problem).isNotNull();
+		assertThat(problem.getType()).isEqualTo(URI.create(type));
+		assertThat(problem.getTitle()).isEqualTo(title);
+		assertThat(problem.getDetail()).isEqualTo(
 				"Content-Type application/json not supported. Supported: [application/atom+xml, application/xml]");
-		assertThat(body.getTitle()).isEqualTo(
-				"Media type is not valid or not supported");
 	}
 
 	@Test

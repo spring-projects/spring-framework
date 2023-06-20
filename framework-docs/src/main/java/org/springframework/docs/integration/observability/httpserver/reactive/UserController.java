@@ -28,7 +28,7 @@ public class UserController {
 	@ExceptionHandler(MissingUserException.class)
 	ResponseEntity<Void> handleMissingUser(ServerWebExchange exchange, MissingUserException exception) {
 		// We want to record this exception with the observation
-		ServerRequestObservationContext.findCurrent(exchange)
+		ServerRequestObservationContext.findCurrent(exchange.getAttributes())
 				.ifPresent(context -> context.setError(exception));
 		return ResponseEntity.notFound().build();
 	}

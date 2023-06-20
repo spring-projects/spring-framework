@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
 /**
  * Base class for YAML factories.
  *
- * <p>Requires SnakeYAML 2.0 or higher, as of Spring Framework 6.1.0.
+ * <p>Requires SnakeYAML 2.0 or higher, as of Spring Framework 6.1.
  *
  * @author Dave Syer
  * @author Juergen Hoeller
