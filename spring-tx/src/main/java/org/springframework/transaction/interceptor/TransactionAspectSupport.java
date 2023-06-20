@@ -108,16 +108,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
 	/**
+	 * Reactive Streams API present on the classpath?
+	 */
+	private static final boolean reactiveStreamsPresent = ClassUtils.isPresent(
+			"org.reactivestreams.Publisher", TransactionAspectSupport.class.getClassLoader());
+
+	/**
 	 * Vavr library present on the classpath?
 	 */
 	private static final boolean vavrPresent = ClassUtils.isPresent(
 			"io.vavr.control.Try", TransactionAspectSupport.class.getClassLoader());
-
-	/**
-	 * Reactive Streams API present on the classpath?
-	 */
-	private static final boolean reactiveStreamsPresent =
-			ClassUtils.isPresent("org.reactivestreams.Publisher", TransactionAspectSupport.class.getClassLoader());
 
 	/**
 	 * Holder to support the {@code currentTransactionStatus()} method,
