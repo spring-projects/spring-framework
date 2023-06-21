@@ -147,9 +147,9 @@ public abstract class HttpRange {
 		Assert.hasLength(range, "Range String must not be empty");
 		int dashIdx = range.indexOf('-');
 		if (dashIdx > 0) {
-			long firstPos = Long.parseLong(range.substring(0, dashIdx));
+			long firstPos = Long.parseLong(range, 0, dashIdx, 10);
 			if (dashIdx < range.length() - 1) {
-				Long lastPos = Long.parseLong(range.substring(dashIdx + 1));
+				Long lastPos = Long.parseLong(range, dashIdx + 1, range.length(), 10);
 				return new ByteRange(firstPos, lastPos);
 			}
 			else {
@@ -157,7 +157,7 @@ public abstract class HttpRange {
 			}
 		}
 		else if (dashIdx == 0) {
-			long suffixLength = Long.parseLong(range.substring(1));
+			long suffixLength = Long.parseLong(range, 1, range.length(), 10);
 			return new SuffixByteRange(suffixLength);
 		}
 		else {

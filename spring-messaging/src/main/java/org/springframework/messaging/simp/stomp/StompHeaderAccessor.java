@@ -239,11 +239,11 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public long[] getHeartbeat() {
 		String rawValue = getFirstNativeHeader(STOMP_HEARTBEAT_HEADER);
-		String[] rawValues = StringUtils.split(rawValue, ",");
-		if (rawValues == null) {
+		int pos = rawValue != null ? rawValue.indexOf(',') : -1;
+		if (pos == -1) {
 			return Arrays.copyOf(DEFAULT_HEARTBEAT, 2);
 		}
-		return new long[] {Long.parseLong(rawValues[0]), Long.parseLong(rawValues[1])};
+		return new long[] {Long.parseLong(rawValue, 0, pos, 10), Long.parseLong(rawValue, pos + 1, rawValue.length(), 10)};
 	}
 
 	public void setAcceptVersion(String acceptVersion) {
