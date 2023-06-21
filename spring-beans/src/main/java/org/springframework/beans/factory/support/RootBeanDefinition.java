@@ -497,7 +497,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Register an externally managed configuration initialization method &mdash;
-	 * for example, a method annotated with JSR-250's {@link javax.annotation.PostConstruct}
+	 * for example, a method annotated with JSR-250's {@code javax.annotation.PostConstruct}
 	 * or Jakarta's {@link jakarta.annotation.PostConstruct} annotation.
 	 * <p>The supplied {@code initMethod} may be a
 	 * {@linkplain Method#getName() simple method name} or a
