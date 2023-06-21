@@ -47,6 +47,8 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
+ * @author Simon Baslé
  */
 public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEventListenerTests {
 
@@ -79,6 +81,13 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		Method method = ReflectionUtils.findMethod(
 				SampleEvents.class, "handleGenericString", GenericTestEvent.class);
 		supportsEventType(false, method, ResolvableType.forClassWithGenerics(GenericTestEvent.class, Long.class));
+	}
+
+	@Test
+	public void genericListenerWithUnresolvedGenerics() {
+		Method method = ReflectionUtils.findMethod(
+				SampleEvents.class, "handleGenericString", GenericTestEvent.class);
+		supportsEventType(true, method, ResolvableType.forClass(GenericTestEvent.class));
 	}
 
 	@Test
@@ -347,7 +356,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		var adapter = new ApplicationListenerMethodAdapter(null, ApplicationListenerMethodAdapterTests.class, method);
 
 		assertThat(adapter.supportsEventType(ResolvableType.forClass(EntityWrapper.class)))
-				.as("handleGenericStringPayload(EntityWrapper<String>) with EntityWrapper<?>").isFalse();
+				.as("handleGenericStringPayload(EntityWrapper<String>) with EntityWrapper<?>").isTrue();
 		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(EntityWrapper.class, Integer.class)))
 				.as("handleGenericStringPayload(EntityWrapper<String>) with EntityWrapper<Integer>").isFalse();
 		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(EntityWrapper.class, String.class)))
@@ -378,7 +387,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		var adapter = new ApplicationListenerMethodAdapter(null, ApplicationListenerMethodAdapterTests.class, method);
 
 		assertThat(adapter.supportsEventType(ResolvableType.forClass(GenericTestEvent.class)))
-				.as("handleGenericString(GenericTestEvent<String>) with GenericTestEvent<?>").isFalse();
+				.as("handleGenericString(GenericTestEvent<String>) with GenericTestEvent<?>").isTrue();
 		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(GenericTestEvent.class, Integer.class)))
 				.as("handleGenericString(GenericTestEvent<String>) with GenericTestEvent<Integer>").isFalse();
 		assertThat(adapter.supportsEventType(ResolvableType.forClassWithGenerics(GenericTestEvent.class, String.class)))
