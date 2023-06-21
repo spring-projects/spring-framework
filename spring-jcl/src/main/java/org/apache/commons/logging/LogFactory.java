@@ -102,4 +102,31 @@ public abstract class LogFactory {
 		return getLog(name);
 	}
 
+	// Just in case some code happens to call uncommon Commons Logging methods...
+
+	@Deprecated
+	public Object getAttribute(String name) {
+		return null;
+	}
+
+	@Deprecated
+	public String[] getAttributeNames() {
+		return new String[0];
+	}
+
+	@Deprecated
+	public void removeAttribute(String name) {
+		// do nothing
+	}
+
+	@Deprecated
+	public void setAttribute(String name, Object value) {
+		// do nothing
+	}
+
+	@Deprecated
+	public void release() {
+		// do nothing
+	}
+
 }
