@@ -269,13 +269,13 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 			ReflectionUtils.doWithLocalMethods(currentClass, method -> {
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
-					currInitMethods.add(new LifecycleMethod(method));
+					currInitMethods.add(new LifecycleMethod(method, beanClass));
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found init method on class [" + beanClass.getName() + "]: " + method);
 					}
 				}
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
-					currDestroyMethods.add(new LifecycleMethod(method));
+					currDestroyMethods.add(new LifecycleMethod(method, beanClass));
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found destroy method on class [" + beanClass.getName() + "]: " + method);
 					}
@@ -404,12 +404,12 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 		private final String identifier;
 
-		public LifecycleMethod(Method method) {
+		public LifecycleMethod(Method method, Class<?> beanClass) {
 			if (method.getParameterCount() != 0) {
 				throw new IllegalStateException("Lifecycle annotation requires a no-arg method: " + method);
 			}
 			this.method = method;
-			this.identifier = (Modifier.isPrivate(method.getModifiers()) ?
+			this.identifier = (isPrivateOrNotVisible(method, beanClass) ?
 					ClassUtils.getQualifiedMethodName(method) : method.getName());
 		}
 
@@ -436,6 +436,23 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		public int hashCode() {
 			return this.identifier.hashCode();
 		}
+
+		/**
+		 * Determine if the supplied lifecycle {@link Method} is private or not
+		 * visible to the supplied bean {@link Class}.
+		 * @since 6.0.11
+		 */
+		private static boolean isPrivateOrNotVisible(Method method, Class<?> beanClass) {
+			int modifiers = method.getModifiers();
+			if (Modifier.isPrivate(modifiers)) {
+				return true;
+			}
+			// Method is declared in a class that resides in a different package
+			// than the bean class and the method is neither public nor protected?
+			return (!method.getDeclaringClass().getPackageName().equals(beanClass.getPackageName()) &&
+					!(Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers)));
+		}
+
 	}
 
 }
