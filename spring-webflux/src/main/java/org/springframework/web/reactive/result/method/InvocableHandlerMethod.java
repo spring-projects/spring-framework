@@ -22,8 +22,14 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+import kotlin.reflect.jvm.KCallablesJvm;
+import kotlin.reflect.jvm.ReflectJvmMapping;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.CoroutinesUtils;
@@ -36,6 +42,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.beanvalidation.MethodValidator;
 import org.springframework.web.method.HandlerMethod;
@@ -159,8 +166,13 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			Method method = getBridgedMethod();
 			boolean isSuspendingFunction = KotlinDetector.isSuspendingFunction(method);
 			try {
-				if (isSuspendingFunction) {
-					value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+				if (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isKotlinType(method.getDeclaringClass())) {
+					if (isSuspendingFunction) {
+						value = CoroutinesUtils.invokeSuspendingFunction(method, getBean(), args);
+					}
+					else {
+						value = KotlinDelegate.invokeFunction(method, getBean(), args);
+					}
 				}
 				else {
 					value = method.invoke(getBean(), args);
@@ -276,6 +288,35 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		@Nullable
+		@SuppressWarnings("deprecation")
+		public static Object invokeFunction(Method method, Object target, Object[] args) {
+			KFunction<?> function = Objects.requireNonNull(ReflectJvmMapping.getKotlinFunction(method));
+			if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
+				KCallablesJvm.setAccessible(function, true);
+			}
+			Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
+			int index = 0;
+			for (KParameter parameter : function.getParameters()) {
+				switch (parameter.getKind()) {
+					case INSTANCE -> argMap.put(parameter, target);
+					case VALUE -> {
+						if (!parameter.isOptional() || args[index] != null) {
+							argMap.put(parameter, args[index]);
+						}
+						index++;
+					}
+				}
+			}
+			return function.callBy(argMap);
+		}
 	}
 
 }

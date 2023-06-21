@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ class KotlinMethodParameterTests {
 
 	private val nonNullableMethod = javaClass.getMethod("nonNullable", String::class.java)
 
+	private val withDefaultValueMethod: Method = javaClass.getMethod("withDefaultValue", String::class.java)
+
 	private val innerClassConstructor = InnerClass::class.java.getConstructor(KotlinMethodParameterTests::class.java)
 
 	private val innerClassWithParametersConstructor = InnerClassWithParameter::class.java
@@ -49,6 +51,16 @@ class KotlinMethodParameterTests {
 	@Test
 	fun `Method parameter nullability`() {
 		assertThat(MethodParameter(nullableMethod, 0).isOptional).isTrue()
+		assertThat(MethodParameter(nonNullableMethod, 0).isOptional).isFalse()
+	}
+
+	@Test
+	fun `Method parameter with default value`() {
+		assertThat(MethodParameter(withDefaultValueMethod, 0).isOptional).isTrue()
+	}
+
+	@Test
+	fun `Method parameter without default value`() {
 		assertThat(MethodParameter(nonNullableMethod, 0).isOptional).isFalse()
 	}
 
@@ -122,6 +134,8 @@ class KotlinMethodParameterTests {
 
 	@Suppress("unused_parameter")
 	fun nonNullable(nonNullable: String): Int = 42
+
+	fun withDefaultValue(withDefaultValue: String = "default") = withDefaultValue
 
 	inner class InnerClass
 

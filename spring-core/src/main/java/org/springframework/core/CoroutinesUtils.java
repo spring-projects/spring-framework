@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Objects;
 
 import kotlin.Unit;
@@ -26,6 +27,7 @@ import kotlin.jvm.JvmClassMappingKt;
 import kotlin.reflect.KClass;
 import kotlin.reflect.KClassifier;
 import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
 import kotlin.reflect.full.KCallables;
 import kotlin.reflect.jvm.KCallablesJvm;
 import kotlin.reflect.jvm.ReflectJvmMapping;
@@ -42,6 +44,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Utilities for working with Kotlin Coroutines.
@@ -104,8 +107,22 @@ public abstract class CoroutinesUtils {
 		if (method.isAccessible() && !KCallablesJvm.isAccessible(function)) {
 			KCallablesJvm.setAccessible(function, true);
 		}
-		Mono<Object> mono = MonoKt.mono(context, (scope, continuation) ->
-					KCallables.callSuspend(function, getSuspendedFunctionArgs(method, target, args), continuation))
+		Mono<Object> mono = MonoKt.mono(context, (scope, continuation) -> {
+					Map<KParameter, Object> argMap = CollectionUtils.newHashMap(args.length + 1);
+					int index = 0;
+					for (KParameter parameter : function.getParameters()) {
+						switch (parameter.getKind()) {
+							case INSTANCE -> argMap.put(parameter, target);
+							case VALUE -> {
+								if (!parameter.isOptional() || args[index] != null) {
+									argMap.put(parameter, args[index]);
+								}
+								index++;
+							}
+						}
+					}
+					return KCallables.callSuspendBy(function, argMap, continuation);
+				})
 				.filter(result -> !Objects.equals(result, Unit.INSTANCE))
 				.onErrorMap(InvocationTargetException.class, InvocationTargetException::getTargetException);
 
@@ -123,14 +140,6 @@ public abstract class CoroutinesUtils {
 			}
 		}
 		return mono;
-	}
-
-	private static Object[] getSuspendedFunctionArgs(Method method, Object target, Object... args) {
-		int length = (args.length == method.getParameterCount() - 1 ? args.length + 1 : args.length);
-		Object[] functionArgs = new Object[length];
-		functionArgs[0] = target;
-		System.arraycopy(args, 0, functionArgs, 1, length - 1);
-		return functionArgs;
 	}
 
 	private static Flux<?> asFlux(Object flow) {
