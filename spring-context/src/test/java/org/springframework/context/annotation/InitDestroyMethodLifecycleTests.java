@@ -28,6 +28,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.lifecyclemethods.InitDestroyBean;
+import org.springframework.context.annotation.lifecyclemethods.PackagePrivateInitDestroyBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,11 +55,11 @@ class InitDestroyMethodLifecycleTests {
 	@Test
 	void initDestroyMethods() {
 		Class<?> beanClass = InitDestroyBean.class;
-		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "afterPropertiesSet", "destroy");
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "initMethod", "destroyMethod");
 		InitDestroyBean bean = beanFactory.getBean(InitDestroyBean.class);
-		assertThat(bean.initMethods).as("init-methods").containsExactly("afterPropertiesSet");
+		assertThat(bean.initMethods).as("init-methods").containsExactly("initMethod");
 		beanFactory.destroySingletons();
-		assertThat(bean.destroyMethods).as("destroy-methods").containsExactly("destroy");
+		assertThat(bean.destroyMethods).as("destroy-methods").containsExactly("destroyMethod");
 	}
 
 	@Test
@@ -133,6 +135,26 @@ class InitDestroyMethodLifecycleTests {
 	}
 
 	@Test
+	void jakartaAnnotationsCustomPackagePrivateInitDestroyMethodsWithTheSameMethodNames() {
+		Class<?> beanClass = SubPackagePrivateInitDestroyBean.class;
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "initMethod", "destroyMethod");
+		SubPackagePrivateInitDestroyBean bean = beanFactory.getBean(SubPackagePrivateInitDestroyBean.class);
+
+		assertThat(bean.initMethods).as("init-methods").containsExactly(
+				"PackagePrivateInitDestroyBean.postConstruct",
+				"SubPackagePrivateInitDestroyBean.postConstruct",
+				"initMethod"
+			);
+
+		beanFactory.destroySingletons();
+		assertThat(bean.destroyMethods).as("destroy-methods").containsExactly(
+				"SubPackagePrivateInitDestroyBean.preDestroy",
+				"PackagePrivateInitDestroyBean.preDestroy",
+				"destroyMethod"
+			);
+	}
+
+	@Test
 	void allLifecycleMechanismsAtOnce() {
 		Class<?> beanClass = AllInOneBean.class;
 		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "afterPropertiesSet", "destroy");
@@ -164,21 +186,6 @@ class InitDestroyMethodLifecycleTests {
 		return beanFactory;
 	}
 
-
-	static class InitDestroyBean {
-
-		final List<String> initMethods = new ArrayList<>();
-		final List<String> destroyMethods = new ArrayList<>();
-
-
-		public void afterPropertiesSet() throws Exception {
-			this.initMethods.add("afterPropertiesSet");
-		}
-
-		public void destroy() throws Exception {
-			this.destroyMethods.add("destroy");
-		}
-	}
 
 	static class InitializingDisposableWithShadowedMethodsBean extends InitDestroyBean implements
 			InitializingBean, DisposableBean {
@@ -294,6 +301,20 @@ class InitDestroyMethodLifecycleTests {
 		public void destroy() throws Exception {
 			this.destroyMethods.add("destroy");
 		}
+	}
+
+	static class SubPackagePrivateInitDestroyBean extends PackagePrivateInitDestroyBean {
+
+		@PostConstruct
+		void postConstruct() {
+			this.initMethods.add("SubPackagePrivateInitDestroyBean.postConstruct");
+		}
+
+		@PreDestroy
+		void preDestroy() {
+			this.destroyMethods.add("SubPackagePrivateInitDestroyBean.preDestroy");
+		}
+
 	}
 
 }

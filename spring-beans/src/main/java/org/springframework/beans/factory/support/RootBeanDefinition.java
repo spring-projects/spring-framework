@@ -497,14 +497,15 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Register an externally managed configuration initialization method &mdash;
-	 * for example, a method annotated with JSR-250's
-	 * {@link jakarta.annotation.PostConstruct} annotation.
-	 * <p>The supplied {@code initMethod} may be the
-	 * {@linkplain Method#getName() simple method name} for non-private methods or the
+	 * for example, a method annotated with JSR-250's {@link javax.annotation.PostConstruct}
+	 * or Jakarta's {@link jakarta.annotation.PostConstruct} annotation.
+	 * <p>The supplied {@code initMethod} may be a
+	 * {@linkplain Method#getName() simple method name} or a
 	 * {@linkplain org.springframework.util.ClassUtils#getQualifiedMethodName(Method)
-	 * qualified method name} for {@code private} methods. A qualified name is
-	 * necessary for {@code private} methods in order to disambiguate between
-	 * multiple private methods with the same name within a class hierarchy.
+	 * qualified method name} for package-private and {@code private} methods.
+	 * A qualified name is necessary for package-private and {@code private} methods
+	 * in order to disambiguate between multiple such methods with the same name
+	 * within a type hierarchy.
 	 */
 	public void registerExternallyManagedInitMethod(String initMethod) {
 		synchronized (this.postProcessingLock) {
