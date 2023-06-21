@@ -47,8 +47,9 @@ public class LogFactoryService extends LogFactory {
 	}
 
 
-	// Just in case some code happens to call uncommon Commons Logging methods...
+	// Just in case some code happens to rely on Commons Logging attributes...
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -58,19 +59,19 @@ public class LogFactoryService extends LogFactory {
 		}
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 		this.attributes.remove(name);
 	}
 
+	@Override
 	public Object getAttribute(String name) {
 		return this.attributes.get(name);
 	}
 
+	@Override
 	public String[] getAttributeNames() {
 		return this.attributes.keySet().toArray(new String[0]);
-	}
-
-	public void release() {
 	}
 
 }
