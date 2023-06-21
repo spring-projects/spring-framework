@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -568,7 +568,7 @@ public class ResolvableType implements Serializable {
 			try {
 				for (Type genericInterface : resolved.getGenericInterfaces()) {
 					if (genericInterface instanceof Class) {
-						if (forClass((Class<?>) genericInterface).hasGenerics()) {
+						if (((Class<?>) genericInterface).getTypeParameters().length > 0) {
 							return true;
 						}
 					}
@@ -577,7 +577,10 @@ public class ResolvableType implements Serializable {
 			catch (TypeNotPresentException ex) {
 				// Ignore non-present types in generic signature
 			}
-			return getSuperType().hasUnresolvableGenerics();
+			Class<?> superclass = resolved.getSuperclass();
+			if (superclass != null && superclass != Object.class) {
+				return getSuperType().hasUnresolvableGenerics();
+			}
 		}
 		return false;
 	}
