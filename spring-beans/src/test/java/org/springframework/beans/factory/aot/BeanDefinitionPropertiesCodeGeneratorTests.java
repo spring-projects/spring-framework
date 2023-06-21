@@ -104,8 +104,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	@Test
 	void setScopeWhenOther() {
 		this.beanDefinition.setScope("prototype");
-		compile((actual, compiled) -> assertThat(actual.getScope())
-				.isEqualTo("prototype"));
+		compile((actual, compiled) -> assertThat(actual.getScope()).isEqualTo("prototype"));
 	}
 
 	@Test
@@ -120,8 +119,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	@Test
 	void setDependsOnWhenNotEmpty() {
 		this.beanDefinition.setDependsOn("a", "b", "c");
-		compile((actual, compiled) -> assertThat(actual.getDependsOn())
-				.containsExactly("a", "b", "c"));
+		compile((actual, compiled) -> assertThat(actual.getDependsOn()).containsExactly("a", "b", "c"));
 	}
 
 	@Test
@@ -154,8 +152,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	@Test
 	void setAutowireCandidateWhenFalse() {
 		this.beanDefinition.setAutowireCandidate(false);
-		compile(
-				(actual, compiled) -> assertThat(actual.isAutowireCandidate()).isFalse());
+		compile((actual, compiled) -> assertThat(actual.isAutowireCandidate()).isFalse());
 	}
 
 	@Test
@@ -179,8 +176,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	@Test
 	void setSyntheticWhenTrue() {
 		this.beanDefinition.setSynthetic(true);
-		compile(
-				(actual, compiled) -> assertThat(actual.isSynthetic()).isTrue());
+		compile((actual, compiled) -> assertThat(actual.isSynthetic()).isTrue());
 	}
 
 	@Test
@@ -196,8 +192,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	void setRoleWhenInfrastructure() {
 		this.beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		compile((actual, compiled) -> {
-			assertThat(compiled.getSourceFile())
-					.contains("setRole(BeanDefinition.ROLE_INFRASTRUCTURE);");
+			assertThat(compiled.getSourceFile()).contains("setRole(BeanDefinition.ROLE_INFRASTRUCTURE);");
 			assertThat(actual.getRole()).isEqualTo(BeanDefinition.ROLE_INFRASTRUCTURE);
 		});
 	}
@@ -206,8 +201,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	void setRoleWhenSupport() {
 		this.beanDefinition.setRole(BeanDefinition.ROLE_SUPPORT);
 		compile((actual, compiled) -> {
-			assertThat(compiled.getSourceFile())
-					.contains("setRole(BeanDefinition.ROLE_SUPPORT);");
+			assertThat(compiled.getSourceFile()).contains("setRole(BeanDefinition.ROLE_SUPPORT);");
 			assertThat(actual.getRole()).isEqualTo(BeanDefinition.ROLE_SUPPORT);
 		});
 	}
@@ -215,18 +209,15 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	@Test
 	void setRoleWhenOther() {
 		this.beanDefinition.setRole(999);
-		compile(
-				(actual, compiled) -> assertThat(actual.getRole()).isEqualTo(999));
+		compile((actual, compiled) -> assertThat(actual.getRole()).isEqualTo(999));
 	}
 
 	@Test
 	void setInitMethodWhenSingleInitMethod() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
 		this.beanDefinition.setInitMethodName("i1");
-		compile((actual, compiled) -> assertThat(actual.getInitMethodNames())
-				.containsExactly("i1"));
-		String[] methodNames = { "i1" };
-		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
+		compile((actual, compiled) -> assertThat(actual.getInitMethodNames()).containsExactly("i1"));
+		assertHasMethodInvokeHints(InitDestroyBean.class, "i1");
 	}
 
 	@Test
@@ -239,21 +230,16 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	void setInitMethodWhenMultipleInitMethods() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
 		this.beanDefinition.setInitMethodNames("i1", "i2");
-		compile((actual, compiled) -> assertThat(actual.getInitMethodNames())
-				.containsExactly("i1", "i2"));
-		String[] methodNames = { "i1", "i2" };
-		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
+		compile((actual, compiled) -> assertThat(actual.getInitMethodNames()).containsExactly("i1", "i2"));
+		assertHasMethodInvokeHints(InitDestroyBean.class, "i1", "i2");
 	}
 
 	@Test
 	void setDestroyMethodWhenDestroyInitMethod() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
 		this.beanDefinition.setDestroyMethodName("d1");
-		compile(
-				(actual, compiled) -> assertThat(actual.getDestroyMethodNames())
-						.containsExactly("d1"));
-		String[] methodNames = { "d1" };
-		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
+		compile((actual, compiled) -> assertThat(actual.getDestroyMethodNames()).containsExactly("d1"));
+		assertHasMethodInvokeHints(InitDestroyBean.class, "d1");
 	}
 
 	@Test
@@ -266,11 +252,8 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	void setDestroyMethodWhenMultipleDestroyMethods() {
 		this.beanDefinition.setTargetType(InitDestroyBean.class);
 		this.beanDefinition.setDestroyMethodNames("d1", "d2");
-		compile(
-				(actual, compiled) -> assertThat(actual.getDestroyMethodNames())
-						.containsExactly("d1", "d2"));
-		String[] methodNames = { "d1", "d2" };
-		assertHasMethodInvokeHints(InitDestroyBean.class, methodNames);
+		compile((actual, compiled) -> assertThat(actual.getDestroyMethodNames()).containsExactly("d1", "d2"));
+		assertHasMethodInvokeHints(InitDestroyBean.class, "d1", "d2");
 	}
 
 	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
@@ -281,15 +264,11 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	@Test
 	void constructorArgumentValuesWhenValues() {
-		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0,
-				String.class);
-		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(1,
-				"test");
-		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(2,
-				123);
+		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, String.class);
+		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(1, "test");
+		this.beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(2, 123);
 		compile((actual, compiled) -> {
-			Map<Integer, ValueHolder> values = actual.getConstructorArgumentValues()
-					.getIndexedArgumentValues();
+			Map<Integer, ValueHolder> values = actual.getConstructorArgumentValues().getIndexedArgumentValues();
 			assertThat(values.get(0).getValue()).isEqualTo(String.class);
 			assertThat(values.get(1).getValue()).isEqualTo("test");
 			assertThat(values.get(2).getValue()).isEqualTo(123);
@@ -305,20 +284,17 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().get("test")).isEqualTo(String.class);
 			assertThat(actual.getPropertyValues().get("spring")).isEqualTo("framework");
 		});
-		String[] methodNames = { "setTest", "setSpring" };
-		assertHasMethodInvokeHints(PropertyValuesBean.class, methodNames);
+		assertHasMethodInvokeHints(PropertyValuesBean.class, "setTest", "setSpring");
 	}
 
 	@Test
 	void propertyValuesWhenContainsBeanReference() {
-		this.beanDefinition.getPropertyValues().add("myService",
-				new RuntimeBeanNameReference("test"));
+		this.beanDefinition.getPropertyValues().add("myService", new RuntimeBeanNameReference("test"));
 		compile((actual, compiled) -> {
 			assertThat(actual.getPropertyValues().contains("myService")).isTrue();
 			assertThat(actual.getPropertyValues().get("myService"))
 					.isInstanceOfSatisfying(RuntimeBeanReference.class,
-							beanReference -> assertThat(beanReference.getBeanName())
-									.isEqualTo("test"));
+						beanReference -> assertThat(beanReference.getBeanName()).isEqualTo("test"));
 		});
 	}
 
@@ -342,8 +318,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		compile((actual, compiled) -> {
 			Object value = actual.getPropertyValues().get("value");
 			assertThat(value).isInstanceOf(ManagedSet.class);
-			assertThat(((Set<?>) value).iterator().next())
-					.isInstanceOf(BeanReference.class);
+			assertThat(((Set<?>) value).iterator().next()).isInstanceOf(BeanReference.class);
 		});
 	}
 
@@ -369,8 +344,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 			assertThat(actual.getPropertyValues().get("prefix")).isEqualTo("Hello");
 			assertThat(actual.getPropertyValues().get("name")).isEqualTo("World");
 		});
-		String[] methodNames = { "setPrefix", "setName" };
-		assertHasMethodInvokeHints(PropertyValuesFactoryBean.class, methodNames);
+		assertHasMethodInvokeHints(PropertyValuesFactoryBean.class, "setPrefix", "setName" );
 	}
 
 	@Test
@@ -449,9 +423,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		compile(attribute -> true, result);
 	}
 
-	private void compile(
-			Predicate<String> attributeFilter,
-			BiConsumer<RootBeanDefinition, Compiled> result) {
+	private void compile(Predicate<String> attributeFilter, BiConsumer<RootBeanDefinition, Compiled> result) {
 		DeferredTypeBuilder typeBuilder = new DeferredTypeBuilder();
 		GeneratedClass generatedClass = this.generationContext.getGeneratedClasses().addForFeature("TestCode", typeBuilder);
 		BeanDefinitionPropertiesCodeGenerator codeGenerator = new BeanDefinitionPropertiesCodeGenerator(
@@ -471,8 +443,7 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		});
 		this.generationContext.writeGeneratedContent();
 		TestCompiler.forSystem().with(this.generationContext).compile(compiled -> {
-			RootBeanDefinition suppliedBeanDefinition = (RootBeanDefinition) compiled
-					.getInstance(Supplier.class).get();
+			RootBeanDefinition suppliedBeanDefinition = (RootBeanDefinition) compiled.getInstance(Supplier.class).get();
 			result.accept(suppliedBeanDefinition, compiled);
 		});
 	}
