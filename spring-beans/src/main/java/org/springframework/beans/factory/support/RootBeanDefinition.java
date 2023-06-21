@@ -161,7 +161,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param beanType the type of bean to instantiate
 	 * @since 6.0
 	 * @see #setTargetType(ResolvableType)
+	 * @deprecated as of 6.0.11, in favor of an extra {@link #setTargetType(ResolvableType)} call
 	 */
+	@Deprecated(since = "6.0.11")
 	public RootBeanDefinition(@Nullable ResolvableType beanType) {
 		setTargetType(beanType);
 	}
