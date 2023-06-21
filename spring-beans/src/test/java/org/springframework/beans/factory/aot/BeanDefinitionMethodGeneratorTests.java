@@ -170,8 +170,9 @@ class BeanDefinitionMethodGeneratorTests {
 
 	@Test
 	void generateBeanDefinitionMethodWhenHasGenericsGeneratesMethod() {
-		RegisteredBean registeredBean = registerBean(new RootBeanDefinition(
-				ResolvableType.forClassWithGenerics(GenericBean.class, Integer.class)));
+		RootBeanDefinition beanDefinition = new RootBeanDefinition();
+		beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(GenericBean.class, Integer.class));
+		RegisteredBean registeredBean = registerBean(beanDefinition);
 		BeanDefinitionMethodGenerator generator = new BeanDefinitionMethodGenerator(
 				this.methodGeneratorFactory, registeredBean, null,
 				Collections.emptyList());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,8 +172,9 @@ class DefaultBeanRegistrationCodeFragmentsTests {
 	}
 
 	private RegisteredBean registerTestBean(ResolvableType beanType) {
-		this.beanFactory.registerBeanDefinition("testBean",
-				new RootBeanDefinition(beanType));
+		RootBeanDefinition beanDefinition = new RootBeanDefinition();
+		beanDefinition.setTargetType(beanType);
+		this.beanFactory.registerBeanDefinition("testBean", beanDefinition);
 		return RegisteredBean.of(this.beanFactory, "testBean");
 	}
 
