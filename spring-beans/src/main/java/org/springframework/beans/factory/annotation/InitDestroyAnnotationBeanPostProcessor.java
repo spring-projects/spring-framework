@@ -152,8 +152,8 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 
 	@Override
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanClass, String beanName) {
-		findLifecycleMetadata(beanDefinition, beanClass);
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		findLifecycleMetadata(beanDefinition, beanType);
 	}
 
 	@Override
@@ -173,8 +173,8 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		return null;
 	}
 
-	private LifecycleMetadata findLifecycleMetadata(RootBeanDefinition beanDefinition, Class<?> beanClass) {
-		LifecycleMetadata metadata = findLifecycleMetadata(beanClass);
+	private LifecycleMetadata findLifecycleMetadata(RootBeanDefinition beanDefinition, Class<?> beanType) {
+		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
 		metadata.checkInitDestroyMethods(beanDefinition);
 		return metadata;
 	}
@@ -254,14 +254,14 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		return metadata;
 	}
 
-	private LifecycleMetadata buildLifecycleMetadata(final Class<?> beanClass) {
-		if (!AnnotationUtils.isCandidateClass(beanClass, List.of(this.initAnnotationType, this.destroyAnnotationType))) {
+	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
+		if (!AnnotationUtils.isCandidateClass(clazz, List.of(this.initAnnotationType, this.destroyAnnotationType))) {
 			return this.emptyLifecycleMetadata;
 		}
 
 		List<LifecycleMethod> initMethods = new ArrayList<>();
 		List<LifecycleMethod> destroyMethods = new ArrayList<>();
-		Class<?> currentClass = beanClass;
+		Class<?> targetClass = clazz;
 
 		do {
 			final List<LifecycleMethod> currInitMethods = new ArrayList<>();
@@ -269,13 +269,13 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 			ReflectionUtils.doWithLocalMethods(currentClass, method -> {
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
-					currInitMethods.add(new LifecycleMethod(method, beanClass));
+					currInitMethods.add(new LifecycleMethod(method));
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found init method on class [" + beanClass.getName() + "]: " + method);
 					}
 				}
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
-					currDestroyMethods.add(new LifecycleMethod(method, beanClass));
+					currDestroyMethods.add(new LifecycleMethod(method));
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found destroy method on class [" + beanClass.getName() + "]: " + method);
 					}
@@ -323,7 +323,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		@Nullable
 		private volatile Set<LifecycleMethod> checkedDestroyMethods;
 
-		public LifecycleMetadata(Class<?> beanClass, Collection<LifecycleMethod> initMethods,
+		public LifecycleMetadata(Class<?> targetClass, Collection<LifecycleMethod> initMethods,
 				Collection<LifecycleMethod> destroyMethods) {
 
 			this.beanClass = beanClass;
@@ -404,7 +404,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 		private final String identifier;
 
-		public LifecycleMethod(Method method, Class<?> beanClass) {
+		public LifecycleMethod(Method method) {
 			if (method.getParameterCount() != 0) {
 				throw new IllegalStateException("Lifecycle annotation requires a no-arg method: " + method);
 			}
