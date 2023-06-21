@@ -1832,9 +1832,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Invoke the specified custom init method on the given bean.
-	 * Called by invokeInitMethods.
-	 * <p>Can be overridden in subclasses for custom resolution of init
-	 * methods with arguments.
+	 * <p>Called by {@link #invokeInitMethods(String, Object, RootBeanDefinition)}.
+	 * <p>Can be overridden in subclasses for custom resolution of init methods
+	 * with arguments.
 	 * @see #invokeInitMethods
 	 */
 	protected void invokeCustomInitMethod(String beanName, Object bean, RootBeanDefinition mbd, String initMethodName)

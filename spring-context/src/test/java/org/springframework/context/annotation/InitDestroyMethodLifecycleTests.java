@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
@@ -80,7 +81,7 @@ class InitDestroyMethodLifecycleTests {
 	}
 
 	@Test
-	void jsr250Annotations() {
+	void jakartaAnnotations() {
 		Class<?> beanClass = CustomAnnotatedInitDestroyBean.class;
 		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit", "customDestroy");
 		CustomAnnotatedInitDestroyBean bean = beanFactory.getBean(CustomAnnotatedInitDestroyBean.class);
@@ -90,7 +91,7 @@ class InitDestroyMethodLifecycleTests {
 	}
 
 	@Test
-	void jsr250AnnotationsWithShadowedMethods() {
+	void jakartaAnnotationsWithShadowedMethods() {
 		Class<?> beanClass = CustomAnnotatedInitDestroyWithShadowedMethodsBean.class;
 		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit", "customDestroy");
 		CustomAnnotatedInitDestroyWithShadowedMethodsBean bean = beanFactory.getBean(CustomAnnotatedInitDestroyWithShadowedMethodsBean.class);
@@ -100,7 +101,7 @@ class InitDestroyMethodLifecycleTests {
 	}
 
 	@Test
-	void jsr250AnnotationsWithCustomPrivateInitDestroyMethods() {
+	void jakartaAnnotationsWithCustomPrivateInitDestroyMethods() {
 		Class<?> beanClass = CustomAnnotatedPrivateInitDestroyBean.class;
 		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit1", "customDestroy1");
 		CustomAnnotatedPrivateInitDestroyBean bean = beanFactory.getBean(CustomAnnotatedPrivateInitDestroyBean.class);
@@ -110,13 +111,25 @@ class InitDestroyMethodLifecycleTests {
 	}
 
 	@Test
-	void jsr250AnnotationsWithCustomSameMethodNames() {
+	void jakartaAnnotationsCustomPrivateInitDestroyMethodsWithTheSameMethodNames() {
 		Class<?> beanClass = CustomAnnotatedPrivateSameNameInitDestroyBean.class;
-		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit1", "customDestroy1");
+		DefaultListableBeanFactory beanFactory = createBeanFactoryAndRegisterBean(beanClass, "customInit", "customDestroy");
 		CustomAnnotatedPrivateSameNameInitDestroyBean bean = beanFactory.getBean(CustomAnnotatedPrivateSameNameInitDestroyBean.class);
-		assertThat(bean.initMethods).as("init-methods").containsExactly("@PostConstruct.privateCustomInit1", "@PostConstruct.sameNameCustomInit1", "afterPropertiesSet");
+
+		assertThat(bean.initMethods).as("init-methods").containsExactly(
+				"@PostConstruct.privateCustomInit1",
+				"@PostConstruct.sameNameCustomInit1",
+				"afterPropertiesSet",
+				"customInit"
+			);
+
 		beanFactory.destroySingletons();
-		assertThat(bean.destroyMethods).as("destroy-methods").containsExactly("@PreDestroy.sameNameCustomDestroy1", "@PreDestroy.privateCustomDestroy1", "destroy");
+		assertThat(bean.destroyMethods).as("destroy-methods").containsExactly(
+				"@PreDestroy.sameNameCustomDestroy1",
+				"@PreDestroy.privateCustomDestroy1",
+				"destroy",
+				"customDestroy"
+			);
 	}
 
 	@Test
@@ -134,10 +147,19 @@ class InitDestroyMethodLifecycleTests {
 			String initMethodName, String destroyMethodName) {
 
 		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+
+		// Configure and register an InitDestroyAnnotationBeanPostProcessor as
+		// done in AnnotationConfigUtils.registerAnnotationConfigProcessors()
+		// for an ApplicatonContext.
+		InitDestroyAnnotationBeanPostProcessor initDestroyBpp = new InitDestroyAnnotationBeanPostProcessor();
+		initDestroyBpp.setInitAnnotationType(javax.annotation.PostConstruct.class);
+		initDestroyBpp.setDestroyAnnotationType(javax.annotation.PreDestroy.class);
+		beanFactory.addBeanPostProcessor(initDestroyBpp);
+
 		RootBeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
 		beanDefinition.setInitMethodName(initMethodName);
 		beanDefinition.setDestroyMethodName(destroyMethodName);
-		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
 		beanFactory.registerBeanDefinition("lifecycleTestBean", beanDefinition);
 		return beanFactory;
 	}

@@ -36,6 +36,7 @@ dependencies {
 	testImplementation("org.apache.commons:commons-pool2")
 	testImplementation("org.awaitility:awaitility")
 	testImplementation("jakarta.inject:jakarta.inject-tck")
+	testImplementation("javax.annotation:javax.annotation-api")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 	testRuntimeOnly("jakarta.xml.bind:jakarta.xml.bind-api")
 	testRuntimeOnly("org.glassfish:jakarta.el")
