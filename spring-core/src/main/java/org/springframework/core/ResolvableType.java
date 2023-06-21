@@ -567,7 +567,7 @@ public class ResolvableType implements Serializable {
 			try {
 				for (Type genericInterface : resolved.getGenericInterfaces()) {
 					if (genericInterface instanceof Class<?> clazz) {
-						if (forClass(clazz).hasGenerics()) {
+						if (clazz.getTypeParameters().length > 0) {
 							return true;
 						}
 					}
@@ -576,7 +576,10 @@ public class ResolvableType implements Serializable {
 			catch (TypeNotPresentException ex) {
 				// Ignore non-present types in generic signature
 			}
-			return getSuperType().hasUnresolvableGenerics();
+			Class<?> superclass = resolved.getSuperclass();
+			if (superclass != null && superclass != Object.class) {
+				return getSuperType().hasUnresolvableGenerics();
+			}
 		}
 		return false;
 	}
