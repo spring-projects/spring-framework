@@ -16,13 +16,13 @@
 
 package org.springframework.web.util;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +35,7 @@ public class ContentCachingRequestWrapperTests {
 
 	protected static final String FORM_CONTENT_TYPE = MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
-	protected static final String CHARSET = StandardCharsets.UTF_8.name();
+	protected static final Charset CHARSET = StandardCharsets.UTF_8;
 
 	protected static final String GET = HttpMethod.GET.name();
 
@@ -49,30 +49,32 @@ public class ContentCachingRequestWrapperTests {
 	@Test
 	void cachedContent() throws Exception {
 		this.request.setMethod(GET);
-		this.request.setCharacterEncoding(CHARSET);
+		this.request.setCharacterEncoding(CHARSET.name());
 		this.request.setContent("Hello World".getBytes(CHARSET));
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request);
-		byte[] response = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
+		byte[] response = wrapper.getInputStream().readAllBytes();
 		assertThat(wrapper.getContentAsByteArray()).isEqualTo(response);
+		assertThat(wrapper.getContentAsString()).isEqualTo("Hello World");
 	}
 
 	@Test
 	void cachedContentWithLimit() throws Exception {
 		this.request.setMethod(GET);
-		this.request.setCharacterEncoding(CHARSET);
+		this.request.setCharacterEncoding(CHARSET.name());
 		this.request.setContent("Hello World".getBytes(CHARSET));
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request, CONTENT_CACHE_LIMIT);
-		byte[] response = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
+		byte[] response = wrapper.getInputStream().readAllBytes();
 		assertThat(response).isEqualTo("Hello World".getBytes(CHARSET));
 		assertThat(wrapper.getContentAsByteArray()).isEqualTo("Hel".getBytes(CHARSET));
+		assertThat(wrapper.getContentAsString()).isEqualTo("Hel");
 	}
 
 	@Test
 	void cachedContentWithOverflow() throws Exception {
 		this.request.setMethod(GET);
-		this.request.setCharacterEncoding(CHARSET);
+		this.request.setCharacterEncoding(CHARSET.name());
 		this.request.setContent("Hello World".getBytes(CHARSET));
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request, CONTENT_CACHE_LIMIT) {
@@ -82,8 +84,7 @@ public class ContentCachingRequestWrapperTests {
 			}
 		};
 
-		assertThatIllegalStateException().isThrownBy(() ->
-				FileCopyUtils.copyToByteArray(wrapper.getInputStream()))
+		assertThatIllegalStateException().isThrownBy(() -> wrapper.getInputStream().readAllBytes())
 			.withMessage("3");
 	}
 
@@ -91,7 +92,7 @@ public class ContentCachingRequestWrapperTests {
 	void requestParams() throws Exception {
 		this.request.setMethod(POST);
 		this.request.setContentType(FORM_CONTENT_TYPE);
-		this.request.setCharacterEncoding(CHARSET);
+		this.request.setCharacterEncoding(CHARSET.name());
 		this.request.setParameter("first", "value");
 		this.request.setParameter("second", "foo", "bar");
 
@@ -99,22 +100,24 @@ public class ContentCachingRequestWrapperTests {
 		// getting request parameters will consume the request body
 		assertThat(wrapper.getParameterMap().isEmpty()).isFalse();
 		assertThat(new String(wrapper.getContentAsByteArray())).isEqualTo("first=value&second=foo&second=bar");
+		assertThat(wrapper.getContentAsString()).isEqualTo("first=value&second=foo&second=bar");
 		// SPR-12810 : inputstream body should be consumed
-		assertThat(new String(FileCopyUtils.copyToByteArray(wrapper.getInputStream()))).isEmpty();
+		assertThat(new String(wrapper.getInputStream().readAllBytes())).isEmpty();
 	}
 
 	@Test  // SPR-12810
 	void inputStreamFormPostRequest() throws Exception {
 		this.request.setMethod(POST);
 		this.request.setContentType(FORM_CONTENT_TYPE);
-		this.request.setCharacterEncoding(CHARSET);
+		this.request.setCharacterEncoding(CHARSET.name());
 		this.request.setParameter("first", "value");
 		this.request.setParameter("second", "foo", "bar");
 
 		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request);
 
-		byte[] response = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
+		byte[] response = wrapper.getInputStream().readAllBytes();
 		assertThat(wrapper.getContentAsByteArray()).isEqualTo(response);
+		assertThat(wrapper.getContentAsString()).isEqualTo(new String(response, CHARSET));
 	}
 
 }
