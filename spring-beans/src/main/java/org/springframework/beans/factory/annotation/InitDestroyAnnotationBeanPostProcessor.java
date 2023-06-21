@@ -152,8 +152,8 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 
 
 	@Override
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		findLifecycleMetadata(beanDefinition, beanType);
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanClass, String beanName) {
+		findLifecycleMetadata(beanDefinition, beanClass);
 	}
 
 	@Override
@@ -173,8 +173,8 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		return null;
 	}
 
-	private LifecycleMetadata findLifecycleMetadata(RootBeanDefinition beanDefinition, Class<?> beanType) {
-		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
+	private LifecycleMetadata findLifecycleMetadata(RootBeanDefinition beanDefinition, Class<?> beanClass) {
+		LifecycleMetadata metadata = findLifecycleMetadata(beanClass);
 		metadata.checkInitDestroyMethods(beanDefinition);
 		return metadata;
 	}
@@ -234,19 +234,19 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	}
 
 
-	private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
+	private LifecycleMetadata findLifecycleMetadata(Class<?> beanClass) {
 		if (this.lifecycleMetadataCache == null) {
 			// Happens after deserialization, during destruction...
-			return buildLifecycleMetadata(clazz);
+			return buildLifecycleMetadata(beanClass);
 		}
 		// Quick check on the concurrent map first, with minimal locking.
-		LifecycleMetadata metadata = this.lifecycleMetadataCache.get(clazz);
+		LifecycleMetadata metadata = this.lifecycleMetadataCache.get(beanClass);
 		if (metadata == null) {
 			synchronized (this.lifecycleMetadataCache) {
-				metadata = this.lifecycleMetadataCache.get(clazz);
+				metadata = this.lifecycleMetadataCache.get(beanClass);
 				if (metadata == null) {
-					metadata = buildLifecycleMetadata(clazz);
-					this.lifecycleMetadataCache.put(clazz, metadata);
+					metadata = buildLifecycleMetadata(beanClass);
+					this.lifecycleMetadataCache.put(beanClass, metadata);
 				}
 				return metadata;
 			}
@@ -254,42 +254,42 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		return metadata;
 	}
 
-	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
-		if (!AnnotationUtils.isCandidateClass(clazz, List.of(this.initAnnotationType, this.destroyAnnotationType))) {
+	private LifecycleMetadata buildLifecycleMetadata(final Class<?> beanClass) {
+		if (!AnnotationUtils.isCandidateClass(beanClass, List.of(this.initAnnotationType, this.destroyAnnotationType))) {
 			return this.emptyLifecycleMetadata;
 		}
 
 		List<LifecycleMethod> initMethods = new ArrayList<>();
 		List<LifecycleMethod> destroyMethods = new ArrayList<>();
-		Class<?> targetClass = clazz;
+		Class<?> currentClass = beanClass;
 
 		do {
 			final List<LifecycleMethod> currInitMethods = new ArrayList<>();
 			final List<LifecycleMethod> currDestroyMethods = new ArrayList<>();
 
-			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+			ReflectionUtils.doWithLocalMethods(currentClass, method -> {
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
 					currInitMethods.add(new LifecycleMethod(method));
 					if (logger.isTraceEnabled()) {
-						logger.trace("Found init method on class [" + clazz.getName() + "]: " + method);
+						logger.trace("Found init method on class [" + beanClass.getName() + "]: " + method);
 					}
 				}
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
 					currDestroyMethods.add(new LifecycleMethod(method));
 					if (logger.isTraceEnabled()) {
-						logger.trace("Found destroy method on class [" + clazz.getName() + "]: " + method);
+						logger.trace("Found destroy method on class [" + beanClass.getName() + "]: " + method);
 					}
 				}
 			});
 
 			initMethods.addAll(0, currInitMethods);
 			destroyMethods.addAll(currDestroyMethods);
-			targetClass = targetClass.getSuperclass();
+			currentClass = currentClass.getSuperclass();
 		}
-		while (targetClass != null && targetClass != Object.class);
+		while (currentClass != null && currentClass != Object.class);
 
 		return (initMethods.isEmpty() && destroyMethods.isEmpty() ? this.emptyLifecycleMetadata :
-				new LifecycleMetadata(clazz, initMethods, destroyMethods));
+				new LifecycleMetadata(beanClass, initMethods, destroyMethods));
 	}
 
 
@@ -311,7 +311,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 	 */
 	private class LifecycleMetadata {
 
-		private final Class<?> targetClass;
+		private final Class<?> beanClass;
 
 		private final Collection<LifecycleMethod> initMethods;
 
@@ -323,10 +323,10 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 		@Nullable
 		private volatile Set<LifecycleMethod> checkedDestroyMethods;
 
-		public LifecycleMetadata(Class<?> targetClass, Collection<LifecycleMethod> initMethods,
+		public LifecycleMetadata(Class<?> beanClass, Collection<LifecycleMethod> initMethods,
 				Collection<LifecycleMethod> destroyMethods) {
 
-			this.targetClass = targetClass;
+			this.beanClass = beanClass;
 			this.initMethods = initMethods;
 			this.destroyMethods = destroyMethods;
 		}
@@ -339,7 +339,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 					beanDefinition.registerExternallyManagedInitMethod(methodIdentifier);
 					checkedInitMethods.add(lifecycleMethod);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Registered init method on class [" + this.targetClass.getName() + "]: " + methodIdentifier);
+						logger.trace("Registered init method on class [" + this.beanClass.getName() + "]: " + methodIdentifier);
 					}
 				}
 			}
@@ -350,7 +350,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements DestructionAwareB
 					beanDefinition.registerExternallyManagedDestroyMethod(methodIdentifier);
 					checkedDestroyMethods.add(lifecycleMethod);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Registered destroy method on class [" + this.targetClass.getName() + "]: " + methodIdentifier);
+						logger.trace("Registered destroy method on class [" + this.beanClass.getName() + "]: " + methodIdentifier);
 					}
 				}
 			}
