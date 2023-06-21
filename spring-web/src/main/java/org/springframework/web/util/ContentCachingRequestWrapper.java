@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -194,6 +195,14 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	 */
 	public byte[] getContentAsByteArray() {
 		return this.cachedContent.toByteArray();
+	}
+
+	/**
+	 * Return the cached request content as a String. The Charset used to decode
+	 * the cached content is the same as returned by getCharacterEncoding.
+	 */
+	public String getContentAsString() {
+		return this.cachedContent.toString(Charset.forName(getCharacterEncoding()));
 	}
 
 	/**
