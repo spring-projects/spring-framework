@@ -110,7 +110,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						parameter.getGenericParameterType());
 
 		String name = ModelInitializer.getNameForParameter(parameter);
-		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
+		Mono<?> attributeMono = prepareAttributeMono(name, valueType, context, exchange);
 
 		// unsafe(): we're intercepting, already serialized Publisher signals
 		Sinks.One<BindingResult> bindingResultSink = Sinks.unsafe().one();
@@ -118,15 +118,15 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		Map<String, Object> model = context.getModel().asMap();
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultSink.asMono());
 
-		return valueMono.flatMap(value -> {
-			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name, parameter);
-			return (bindingDisabled(parameter) ? Mono.empty() : bindRequestParameters(binder, exchange))
+		return attributeMono.flatMap(attribute -> {
+			WebExchangeDataBinder binder = context.createDataBinder(exchange, attribute, name, parameter);
+			return (!bindingDisabled(parameter) ? bindRequestParameters(binder, exchange) : Mono.empty())
 					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter, exchange);
 						BindingResult bindingResult = binder.getBindingResult();
 						model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResult);
-						model.put(name, value);
+						model.put(name, attribute);
 						// Ignore result: serialized and buffered (should never fail)
 						bindingResultSink.tryEmitValue(bindingResult);
 					})
@@ -134,82 +134,51 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 						BindingResult errors = binder.getBindingResult();
 						if (adapter != null) {
 							return adapter.fromPublisher(errors.hasErrors() ?
-									Mono.error(new WebExchangeBindException(parameter, errors)) : valueMono);
+									Mono.error(new WebExchangeBindException(parameter, errors)) : attributeMono);
 						}
 						else {
 							if (errors.hasErrors() && !hasErrorsArgument(parameter)) {
 								throw new WebExchangeBindException(parameter, errors);
 							}
-							return value;
+							return attribute;
 						}
 					}));
 		});
 	}
 
-	/**
-	 * Determine if binding should be disabled for the supplied {@link MethodParameter},
-	 * based on the {@link ModelAttribute#binding} annotation attribute.
-	 * @since 5.2.15
-	 */
-	private boolean bindingDisabled(MethodParameter parameter) {
-		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
-		return (modelAttribute != null && !modelAttribute.binding());
-	}
+	private Mono<?> prepareAttributeMono(
+			String name, ResolvableType type, BindingContext context, ServerWebExchange exchange) {
 
-	/**
-	 * Extension point to bind the request to the target object.
-	 * @param binder the data binder instance to use for the binding
-	 * @param exchange the current request
-	 * @since 5.2.6
-	 */
-	protected Mono<Void> bindRequestParameters(WebExchangeDataBinder binder, ServerWebExchange exchange) {
-		return binder.bind(exchange);
-	}
-
-	private Mono<?> prepareAttributeMono(String attributeName, ResolvableType attributeType,
-			BindingContext context, ServerWebExchange exchange) {
-
-		Object attribute = context.getModel().asMap().get(attributeName);
+		Object attribute = context.getModel().asMap().get(name);
 
 		if (attribute == null) {
-			attribute = findAndRemoveReactiveAttribute(context.getModel(), attributeName);
+			attribute = removeReactiveAttribute(context.getModel(), name);
 		}
 
 		if (attribute == null) {
-			return createAttribute(attributeName, attributeType.toClass(), context, exchange);
+			return createAttribute(name, type.toClass(), context, exchange);
 		}
 
 		ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, attribute);
-		if (adapter != null) {
-			Assert.isTrue(!adapter.isMultiValue(), "Data binding only supports single-value async types");
-			return Mono.from(adapter.toPublisher(attribute));
-		}
-		else {
-			return Mono.justOrEmpty(attribute);
-		}
+		Assert.isTrue(adapter == null || !adapter.isMultiValue(), "Model attribute must be single-value publisher");
+		return (adapter != null ? Mono.from(adapter.toPublisher(attribute)) : Mono.justOrEmpty(attribute));
 	}
 
 	@Nullable
-	private Object findAndRemoveReactiveAttribute(Model model, String attributeName) {
-		return model.asMap().entrySet().stream()
-				.filter(entry -> {
-					if (!entry.getKey().startsWith(attributeName)) {
-						return false;
+	private Object removeReactiveAttribute(Model model, String name) {
+		for (Map.Entry<String, Object> entry : model.asMap().entrySet()) {
+			if (entry.getKey().startsWith(name)) {
+				ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, entry.getValue());
+				if (adapter != null) {
+					if (entry.getKey().equals(name + ClassUtils.getShortName(adapter.getReactiveType()))) {
+						// Remove since we will be re-inserting the resolved attribute value
+						model.asMap().remove(entry.getKey());
+						return entry.getValue();
 					}
-					ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, entry.getValue());
-					if (adapter == null) {
-						return false;
-					}
-					String name = attributeName + ClassUtils.getShortName(adapter.getReactiveType());
-					return entry.getKey().equals(name);
-				})
-				.findFirst()
-				.map(entry -> {
-					// Remove since we will be re-inserting the resolved attribute value
-					model.asMap().remove(entry.getKey());
-					return entry.getValue();
-				})
-				.orElse(null);
+				}
+			}
+		}
+		return null;
 	}
 
 	private Mono<?> createAttribute(
@@ -272,6 +241,26 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	 */
 	public Mono<Map<String, Object>> getValuesToBind(WebExchangeDataBinder binder, ServerWebExchange exchange) {
 		return binder.getValuesToBind(exchange);
+	}
+
+	/**
+	 * Determine if binding should be disabled for the supplied {@link MethodParameter},
+	 * based on the {@link ModelAttribute#binding} annotation attribute.
+	 * @since 5.2.15
+	 */
+	private boolean bindingDisabled(MethodParameter parameter) {
+		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
+		return (modelAttribute != null && !modelAttribute.binding());
+	}
+
+	/**
+	 * Extension point to bind the request to the target object.
+	 * @param binder the data binder instance to use for the binding
+	 * @param exchange the current request
+	 * @since 5.2.6
+	 */
+	protected Mono<Void> bindRequestParameters(WebExchangeDataBinder binder, ServerWebExchange exchange) {
+		return binder.bind(exchange);
 	}
 
 	private boolean hasErrorsArgument(MethodParameter parameter) {
