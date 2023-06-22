@@ -55,10 +55,7 @@ dependencies {
 		exclude group: "pull-parser", module: "pull-parser"
 		exclude group: "xpp3", module: "xpp3"
 	}
-	testImplementation("org.eclipse.jetty:jetty-server") {
-		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
-	}
-	testImplementation("org.eclipse.jetty:jetty-servlet") {
+	testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
 	testImplementation("org.hibernate:hibernate-validator")

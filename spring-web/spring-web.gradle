@@ -48,10 +48,7 @@ dependencies {
 	optional("org.eclipse.jetty:jetty-server") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 	}
-	optional("org.eclipse.jetty:jetty-servlet") {
-		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
-	}
-	optional("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.0.beta2") {
+	optional("org.eclipse.jetty.ee10:jetty-ee10-servlet") {
 		exclude group: "jakarta.servlet", module: "jakarta.servlet-api"
 		exclude group: "org.eclipse.jetty", module: "jetty-ee"
 		exclude group: "org.eclipse.jetty", module: "jetty-security"
@@ -73,7 +70,7 @@ dependencies {
 	testFixturesImplementation("org.bouncycastle:bcpkix-jdk18on") {
 		because("needed by Netty's SelfSignedCertificate on JDK 15+")
 	}
-	testFixturesImplementation("org.eclipse.jetty.websocket:websocket-jetty-server")
+	testFixturesImplementation("org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server")
 	testImplementation(project(":spring-core-test"))
 	testImplementation(testFixtures(project(":spring-beans")))
 	testImplementation(testFixtures(project(":spring-context")))
@@ -89,7 +86,7 @@ dependencies {
 	testImplementation("org.apache.tomcat:tomcat-util")
 	testImplementation("org.apache.tomcat.embed:tomcat-embed-core")
 	testImplementation("org.eclipse.jetty:jetty-server")
-	testImplementation("org.eclipse.jetty:jetty-servlet")
+	testImplementation("org.eclipse.jetty.ee10:jetty-ee10-servlet")
 	testImplementation("org.jetbrains.kotlin:kotlin-reflect")
 	testImplementation("org.skyscreamer:jsonassert")
 	testImplementation("org.xmlunit:xmlunit-assertj")

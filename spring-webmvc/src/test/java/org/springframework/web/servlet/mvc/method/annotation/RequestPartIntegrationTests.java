@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,11 +27,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import jakarta.servlet.MultipartConfigElement;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +53,7 @@ import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
@@ -83,18 +86,22 @@ class RequestPartIntegrationTests {
 
 	private static String baseUrl;
 
+	private static Path tempDirectory;
+
 
 	@BeforeAll
 	static void startServer() throws Exception {
 		// Let server pick its own random, available port.
 		server = new Server(0);
 
+		tempDirectory = Files.createTempDirectory("RequestPartIntegrationTests");
+
 		ServletContextHandler handler = new ServletContextHandler();
 		handler.setContextPath("/");
 		ServletHolder standardResolverServlet = new ServletHolder(DispatcherServlet.class);
 		standardResolverServlet.setInitParameter("contextConfigLocation", StandardMultipartResolverTestConfig.class.getName());
 		standardResolverServlet.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
-		standardResolverServlet.getRegistration().setMultipartConfig(new MultipartConfigElement(""));
+		standardResolverServlet.getRegistration().setMultipartConfig(new MultipartConfigElement(tempDirectory.toString()));
 		handler.addServlet(standardResolverServlet, "/standard-resolver/*");
 
 		server.setHandler(handler);
@@ -107,8 +114,13 @@ class RequestPartIntegrationTests {
 
 	@AfterAll
 	static void stopServer() throws Exception {
-		if (server != null) {
-			server.stop();
+		try {
+			if (server != null) {
+				server.stop();
+			}
+		}
+		finally {
+			FileSystemUtils.deleteRecursively(tempDirectory);
 		}
 	}
 
@@ -149,7 +161,7 @@ class RequestPartIntegrationTests {
 				"Content-Length: 7\r\n" +
 				"\r\n" +
 				"content\r\n" +
-				"--" + boundaryText + "--";
+				"--" + boundaryText + "--\r\n ";
 
 		RequestEntity<byte[]> requestEntity =
 				RequestEntity.post(URI.create(baseUrl + "/standard-resolver/spr13319"))

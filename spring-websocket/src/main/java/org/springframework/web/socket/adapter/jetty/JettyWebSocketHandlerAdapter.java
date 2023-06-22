@@ -20,13 +20,14 @@ import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Frame;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketOpen;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.jetty.websocket.core.OpCode;
 
@@ -65,8 +66,8 @@ public class JettyWebSocketHandlerAdapter {
 	}
 
 
-	@OnWebSocketConnect
-	public void onWebSocketConnect(Session session) {
+	@OnWebSocketOpen
+	public void onWebSocketOpen(Session session) {
 		try {
 			this.wsSession.initializeNativeSession(session);
 			this.webSocketHandler.afterConnectionEstablished(this.wsSession);
@@ -88,8 +89,8 @@ public class JettyWebSocketHandlerAdapter {
 	}
 
 	@OnWebSocketMessage
-	public void onWebSocketBinary(byte[] payload, int offset, int length) {
-		BinaryMessage message = new BinaryMessage(payload, offset, length, true);
+	public void onWebSocketBinary(ByteBuffer payload, Callback callback) {
+		BinaryMessage message = new BinaryMessage(payload, true);
 		try {
 			this.webSocketHandler.handleMessage(this.wsSession, message);
 		}
@@ -99,7 +100,7 @@ public class JettyWebSocketHandlerAdapter {
 	}
 
 	@OnWebSocketFrame
-	public void onWebSocketFrame(Frame frame) {
+	public void onWebSocketFrame(Frame frame, Callback callback) {
 		if (OpCode.PONG == frame.getOpCode()) {
 			ByteBuffer payload = frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD;
 			PongMessage message = new PongMessage(payload);
