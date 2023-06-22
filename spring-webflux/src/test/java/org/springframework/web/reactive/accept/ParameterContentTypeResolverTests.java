@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,12 +60,12 @@ public class ParameterContentTypeResolverTests {
 		Map<String, MediaType> mapping = Collections.emptyMap();
 		RequestedContentTypeResolver resolver = new ParameterContentTypeResolver(mapping);
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(new MediaType("text", "html")));
+		assertThat(mediaTypes).containsExactly(new MediaType("text", "html"));
 
 		mapping = Collections.singletonMap("HTML", MediaType.APPLICATION_XHTML_XML);
 		resolver = new ParameterContentTypeResolver(mapping);
 		mediaTypes = resolver.resolveMediaTypes(exchange);
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(new MediaType("application", "xhtml+xml")));
+		assertThat(mediaTypes).containsExactly(new MediaType("application", "xhtml+xml"));
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class ParameterContentTypeResolverTests {
 		RequestedContentTypeResolver resolver = new ParameterContentTypeResolver(Collections.emptyMap());
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(new MediaType("application", "vnd.ms-excel")));
+		assertThat(mediaTypes).containsExactly(new MediaType("application", "vnd.ms-excel"));
 	}
 
 	@Test // SPR-13747
@@ -84,7 +84,7 @@ public class ParameterContentTypeResolverTests {
 		ParameterContentTypeResolver resolver = new ParameterContentTypeResolver(mapping);
 		List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 
-		assertThat(mediaTypes).isEqualTo(Collections.singletonList(MediaType.APPLICATION_JSON));
+		assertThat(mediaTypes).containsExactly(MediaType.APPLICATION_JSON);
 	}
 
 	private MockServerWebExchange createExchange(String format) {

@@ -49,7 +49,7 @@ public class CookieAssertionTests {
 
 	private static final String COOKIE_NAME = CookieLocaleResolver.DEFAULT_COOKIE_NAME;
 	private static final String COOKIE_WITH_ATTRIBUTES_NAME = "SecondCookie";
-	protected static final String SECOND_COOKIE_ATTRIBUTE = "COOKIE_ATTRIBUTE";
+	private static final String SECOND_COOKIE_ATTRIBUTE = "COOKIE_ATTRIBUTE";
 
 	private MockMvc mockMvc;
 

@@ -349,9 +349,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	@Nullable
 	private Method findGetterForProperty(String propertyName, Class<?> clazz, Object target) {
-		boolean targetIsaClass = (target instanceof Class);
-		Method method = findGetterForProperty(propertyName, clazz, targetIsaClass);
-		if (method == null && targetIsaClass) {
+		boolean targetIsAClass = (target instanceof Class);
+		Method method = findGetterForProperty(propertyName, clazz, targetIsAClass);
+		if (method == null && targetIsAClass) {
 			// Fallback for getter instance methods in java.lang.Class.
 			method = findGetterForProperty(propertyName, Class.class, false);
 		}

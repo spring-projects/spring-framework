@@ -445,7 +445,7 @@ public abstract class AbstractReactiveTransactionManager implements ReactiveTran
 						return doCommit(synchronizationManager, status);
 					}
 					return Mono.empty();
-				})) //
+				}))
 				.onErrorResume(ex -> {
 					Mono<Void> propagateException = Mono.error(ex);
 					// Store result in a local variable in order to appease the

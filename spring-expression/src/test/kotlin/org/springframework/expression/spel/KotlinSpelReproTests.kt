@@ -50,7 +50,7 @@ class KotlinSpelReproTests {
 		val expr = parser.parseExpression("#key.startsWith('hello')")
 		context.registerFunction("suspendingGet", Config::class.java.getMethod("suspendingGet", String::class.java, Continuation::class.java))
 		context.setVariable("key", "hello world")
-		assertThat(expr	.getValue(context, Boolean::class.java)).isTrue()
+		assertThat(expr.getValue(context, Boolean::class.java)).isTrue()
 		context.setVariable("key", "")
 		assertThat(expr.getValue(context, Boolean::class.java)).isFalse()
 	}
