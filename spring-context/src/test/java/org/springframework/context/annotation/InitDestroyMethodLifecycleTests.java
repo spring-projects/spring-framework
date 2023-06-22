@@ -143,6 +143,7 @@ class InitDestroyMethodLifecycleTests {
 		assertThat(bean.initMethods).as("init-methods").containsExactly(
 				"PackagePrivateInitDestroyBean.postConstruct",
 				"SubPackagePrivateInitDestroyBean.postConstruct",
+				"InitializingBean.afterPropertiesSet",
 				"initMethod"
 			);
 
@@ -150,6 +151,7 @@ class InitDestroyMethodLifecycleTests {
 		assertThat(bean.destroyMethods).as("destroy-methods").containsExactly(
 				"SubPackagePrivateInitDestroyBean.preDestroy",
 				"PackagePrivateInitDestroyBean.preDestroy",
+				"DisposableBean.destroy",
 				"destroyMethod"
 			);
 	}
@@ -191,12 +193,12 @@ class InitDestroyMethodLifecycleTests {
 			InitializingBean, DisposableBean {
 
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		public void afterPropertiesSet() {
 			this.initMethods.add("InitializingBean.afterPropertiesSet");
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		public void destroy() {
 			this.destroyMethods.add("DisposableBean.destroy");
 		}
 	}
@@ -206,11 +208,11 @@ class InitDestroyMethodLifecycleTests {
 		final List<String> initMethods = new ArrayList<>();
 		final List<String> destroyMethods = new ArrayList<>();
 
-		public void customInit() throws Exception {
+		public void customInit() {
 			this.initMethods.add("customInit");
 		}
 
-		public void customDestroy() throws Exception {
+		public void customDestroy() {
 			this.destroyMethods.add("customDestroy");
 		}
 	}
@@ -218,12 +220,12 @@ class InitDestroyMethodLifecycleTests {
 	static class CustomAnnotatedPrivateInitDestroyBean extends CustomInitializingDisposableBean {
 
 		@PostConstruct
-		private void customInit1() throws Exception {
+		private void customInit1() {
 			this.initMethods.add("@PostConstruct.privateCustomInit1");
 		}
 
 		@PreDestroy
-		private void customDestroy1() throws Exception {
+		private void customDestroy1() {
 			this.destroyMethods.add("@PreDestroy.privateCustomDestroy1");
 		}
 	}
@@ -232,13 +234,13 @@ class InitDestroyMethodLifecycleTests {
 
 		@PostConstruct
 		@SuppressWarnings("unused")
-		private void customInit1() throws Exception {
+		private void customInit1() {
 			this.initMethods.add("@PostConstruct.sameNameCustomInit1");
 		}
 
 		@PreDestroy
 		@SuppressWarnings("unused")
-		private void customDestroy1() throws Exception {
+		private void customDestroy1() {
 			this.destroyMethods.add("@PreDestroy.sameNameCustomDestroy1");
 		}
 	}
@@ -247,12 +249,12 @@ class InitDestroyMethodLifecycleTests {
 			implements InitializingBean, DisposableBean {
 
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		public void afterPropertiesSet() {
 			this.initMethods.add("afterPropertiesSet");
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		public void destroy() {
 			this.destroyMethods.add("destroy");
 		}
 	}
@@ -260,12 +262,12 @@ class InitDestroyMethodLifecycleTests {
 	static class CustomAnnotatedInitDestroyBean extends CustomInitializingDisposableBean {
 
 		@PostConstruct
-		public void postConstruct() throws Exception {
+		public void postConstruct() {
 			this.initMethods.add("postConstruct");
 		}
 
 		@PreDestroy
-		public void preDestroy() throws Exception {
+		public void preDestroy() {
 			this.destroyMethods.add("preDestroy");
 		}
 	}
@@ -274,13 +276,13 @@ class InitDestroyMethodLifecycleTests {
 
 		@PostConstruct
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		public void afterPropertiesSet() {
 			this.initMethods.add("@PostConstruct.afterPropertiesSet");
 		}
 
 		@PreDestroy
 		@Override
-		public void destroy() throws Exception {
+		public void destroy() {
 			this.destroyMethods.add("@PreDestroy.destroy");
 		}
 	}
@@ -292,18 +294,29 @@ class InitDestroyMethodLifecycleTests {
 
 		@PostConstruct
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		public void afterPropertiesSet() {
 			this.initMethods.add("afterPropertiesSet");
 		}
 
 		@PreDestroy
 		@Override
-		public void destroy() throws Exception {
+		public void destroy() {
 			this.destroyMethods.add("destroy");
 		}
 	}
 
-	static class SubPackagePrivateInitDestroyBean extends PackagePrivateInitDestroyBean {
+	static class SubPackagePrivateInitDestroyBean extends PackagePrivateInitDestroyBean
+		implements InitializingBean, DisposableBean {
+
+		@Override
+		public void afterPropertiesSet() {
+			this.initMethods.add("InitializingBean.afterPropertiesSet");
+		}
+
+		@Override
+		public void destroy() {
+			this.destroyMethods.add("DisposableBean.destroy");
+		}
 
 		@PostConstruct
 		void postConstruct() {

@@ -28,6 +28,8 @@ import java.util.function.Supplier;
 
 import javax.lang.model.element.Modifier;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aot.generate.GeneratedClass;
@@ -61,6 +63,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Olga Maciaszek-Sharma
+ * @author Sam Brannen
+ * @since 6.0
  */
 class BeanDefinitionPropertiesCodeGeneratorTests {
 
@@ -210,56 +214,6 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	void setRoleWhenOther() {
 		this.beanDefinition.setRole(999);
 		compile((actual, compiled) -> assertThat(actual.getRole()).isEqualTo(999));
-	}
-
-	@Test
-	void setInitMethodWhenSingleInitMethod() {
-		this.beanDefinition.setTargetType(InitDestroyBean.class);
-		this.beanDefinition.setInitMethodName("i1");
-		compile((actual, compiled) -> assertThat(actual.getInitMethodNames()).containsExactly("i1"));
-		assertHasMethodInvokeHints(InitDestroyBean.class, "i1");
-	}
-
-	@Test
-	void setInitMethodWhenNoInitMethod() {
-		this.beanDefinition.setTargetType(InitDestroyBean.class);
-		compile((actual, compiled) -> assertThat(actual.getInitMethodNames()).isNull());
-	}
-
-	@Test
-	void setInitMethodWhenMultipleInitMethods() {
-		this.beanDefinition.setTargetType(InitDestroyBean.class);
-		this.beanDefinition.setInitMethodNames("i1", "i2");
-		compile((actual, compiled) -> assertThat(actual.getInitMethodNames()).containsExactly("i1", "i2"));
-		assertHasMethodInvokeHints(InitDestroyBean.class, "i1", "i2");
-	}
-
-	@Test
-	void setDestroyMethodWhenDestroyInitMethod() {
-		this.beanDefinition.setTargetType(InitDestroyBean.class);
-		this.beanDefinition.setDestroyMethodName("d1");
-		compile((actual, compiled) -> assertThat(actual.getDestroyMethodNames()).containsExactly("d1"));
-		assertHasMethodInvokeHints(InitDestroyBean.class, "d1");
-	}
-
-	@Test
-	void setDestroyMethodWhenNoDestroyMethod() {
-		this.beanDefinition.setTargetType(InitDestroyBean.class);
-		compile((actual, compiled) -> assertThat(actual.getDestroyMethodNames()).isNull());
-	}
-
-	@Test
-	void setDestroyMethodWhenMultipleDestroyMethods() {
-		this.beanDefinition.setTargetType(InitDestroyBean.class);
-		this.beanDefinition.setDestroyMethodNames("d1", "d2");
-		compile((actual, compiled) -> assertThat(actual.getDestroyMethodNames()).containsExactly("d1", "d2"));
-		assertHasMethodInvokeHints(InitDestroyBean.class, "d1", "d2");
-	}
-
-	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
-		assertThat(methodNames).allMatch(methodName -> RuntimeHintsPredicates.reflection()
-				.onMethod(beanType, methodName).invoke()
-				.test(this.generationContext.getRuntimeHints()));
 	}
 
 	@Test
@@ -419,6 +373,60 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		});
 	}
 
+	@Nested
+	class InitDestroyMethodTests {
+
+		@BeforeEach
+		void setTargetType() {
+			beanDefinition.setTargetType(InitDestroyBean.class);
+		}
+
+		@Test
+		void noInitMethod() {
+			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).isNull());
+		}
+
+		@Test
+		void singleInitMethod() {
+			beanDefinition.setInitMethodName("init");
+			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly("init"));
+			assertHasMethodInvokeHints(InitDestroyBean.class, "init");
+		}
+
+		@Test
+		void multipleInitMethods() {
+			beanDefinition.setInitMethodNames("init", "init2");
+			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly("init", "init2"));
+			assertHasMethodInvokeHints(InitDestroyBean.class, "init", "init2");
+		}
+
+		@Test
+		void noDestroyMethod() {
+			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).isNull());
+		}
+
+		@Test
+		void singleDestroyMethod() {
+			beanDefinition.setDestroyMethodName("destroy");
+			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy"));
+			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy");
+		}
+
+		@Test
+		void multipleDestroyMethods() {
+			beanDefinition.setDestroyMethodNames("destroy", "destroy2");
+			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy", "destroy2"));
+			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy", "destroy2");
+		}
+
+	}
+
+	private void assertHasMethodInvokeHints(Class<?> beanType, String... methodNames) {
+		assertThat(methodNames).allMatch(methodName -> RuntimeHintsPredicates.reflection()
+			.onMethod(beanType, methodName).invoke()
+			.test(this.generationContext.getRuntimeHints()));
+	}
+
 	private void compile(BiConsumer<RootBeanDefinition, Compiled> result) {
 		compile(attribute -> true, result);
 	}
@@ -450,16 +458,16 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 
 	static class InitDestroyBean {
 
-		void i1() {
+		void init() {
 		}
 
-		void i2() {
+		void init2() {
 		}
 
-		void d1() {
+		void destroy() {
 		}
 
-		void d2() {
+		void destroy2() {
 		}
 
 	}
