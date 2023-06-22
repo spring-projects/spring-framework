@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,9 +203,11 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 		if (this.bindingErrorProcessor != null) {
 			binder.setBindingErrorProcessor(this.bindingErrorProcessor);
 		}
-		if (this.validator != null && binder.getTarget() != null &&
-				this.validator.supports(binder.getTarget().getClass())) {
-			binder.setValidator(this.validator);
+		if (this.validator != null) {
+			Class<?> type = getTargetType(binder);
+			if (type != null && this.validator.supports(type)) {
+				binder.setValidator(this.validator);
+			}
 		}
 		if (this.conversionService != null) {
 			binder.setConversionService(this.conversionService);
@@ -215,6 +217,18 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 				propertyEditorRegistrar.registerCustomEditors(binder);
 			}
 		}
+	}
+
+	@Nullable
+	private static Class<?> getTargetType(WebDataBinder binder) {
+		Class<?> type = null;
+		if (binder.getTarget() != null) {
+			type = binder.getTarget().getClass();
+		}
+		else if (binder.getTargetType() != null) {
+			type = binder.getTargetType().resolve();
+		}
+		return type;
 	}
 
 }

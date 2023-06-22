@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.bind.support;
 
+import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -25,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
+import org.springframework.web.bind.ServletRequestDataBinder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -95,6 +97,25 @@ public class WebRequestDataBinder extends WebDataBinder {
 	 */
 	public WebRequestDataBinder(@Nullable Object target, String objectName) {
 		super(target, objectName);
+	}
+
+
+	/**
+	 * Use a default or single data constructor to create the target by
+	 * binding request parameters, multipart files, or parts to constructor args.
+	 * <p>After the call, use {@link #getBindingResult()} to check for bind errors.
+	 * If there are none, the target is set, and {@link #bind(WebRequest)}
+	 * can be called for further initialization via setters.
+	 * @param request the request to bind
+	 * @since 6.1
+	 */
+	public void construct(WebRequest request) {
+		if (request instanceof NativeWebRequest nativeRequest) {
+			ServletRequest servletRequest = nativeRequest.getNativeRequest(ServletRequest.class);
+			if (servletRequest != null) {
+				construct(ServletRequestDataBinder.valueResolver(servletRequest, this));
+			}
+		}
 	}
 
 

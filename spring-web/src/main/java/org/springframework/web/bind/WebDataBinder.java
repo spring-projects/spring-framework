@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -192,6 +193,33 @@ public class WebDataBinder extends DataBinder {
 		return this.bindEmptyMultipartFiles;
 	}
 
+
+	/**
+	 * Check if a value can be resolved if {@link #getFieldDefaultPrefix()}
+	 * or {@link #getFieldMarkerPrefix()} is prepended.
+	 * @param name the name of the value to resolve
+	 * @param type the type of value expected
+	 * @param resolver delegate resolver to use for the checks
+	 * @return the resolved value, or {@code null}
+	 * @since 6.1
+	 */
+	@Nullable
+	protected Object resolvePrefixValue(String name, Class<?> type, BiFunction<String, Class<?>, Object> resolver) {
+		Object value = resolver.apply(name, type);
+		if (value == null) {
+			String prefix = getFieldDefaultPrefix();
+			if (prefix != null) {
+				value = resolver.apply(prefix + name, type);
+			}
+			if (value == null) {
+				prefix = getFieldMarkerPrefix();
+				if (prefix != null && resolver.apply(prefix + name, type) != null) {
+					value = getEmptyValue(type);
+				}
+			}
+		}
+		return value;
+	}
 
 	/**
 	 * This implementation performs a field default and marker check

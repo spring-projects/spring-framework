@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.validation.BindingResult;
@@ -51,7 +52,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -161,11 +162,13 @@ public class ModelAttributeMethodProcessorTests {
 	@Test
 	public void resolveArgumentViaDefaultConstructor() throws Exception {
 		WebDataBinder dataBinder = new WebRequestDataBinder(null);
+		dataBinder.setTargetType(ResolvableType.forMethodParameter(this.paramNamedValidModelAttr));
+
 		WebDataBinderFactory factory = mock();
-		given(factory.createBinder(any(), notNull(), eq("attrName"), any())).willReturn(dataBinder);
+		given(factory.createBinder(any(), isNull(), eq("attrName"), any())).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
-		verify(factory).createBinder(any(), notNull(), eq("attrName"), any());
+		verify(factory).createBinder(any(), isNull(), eq("attrName"), any());
 	}
 
 	@Test
@@ -281,6 +284,7 @@ public class ModelAttributeMethodProcessorTests {
 		given(factory.createBinder(any(), any(), eq("testBeanWithConstructorArgs"), any()))
 				.willAnswer(invocation -> {
 					WebRequestDataBinder binder = new WebRequestDataBinder(invocation.getArgument(1));
+					binder.setTargetType(ResolvableType.forMethodParameter(this.beanWithConstructorArgs));
 					// Add conversion service which will convert "1,2" to a list
 					binder.setConversionService(new DefaultFormattingConversionService());
 					return binder;

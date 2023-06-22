@@ -19,6 +19,7 @@ package org.springframework.web.bind.support;
 import java.lang.annotation.Annotation;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.WebDataBinder;
@@ -69,11 +70,41 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	public final WebDataBinder createBinder(
 			NativeWebRequest webRequest, @Nullable Object target, String objectName) throws Exception {
 
+		return createBinderInternal(webRequest, target, objectName, null);
+	}
+
+	/**
+	 * {@inheritDoc}.
+	 * <p>By default, if the parameter has {@code @Valid}, Bean Validation is
+	 * excluded, deferring to method validation.
+	 */
+	@Override
+	public final WebDataBinder createBinder(
+			NativeWebRequest webRequest, @Nullable Object target, String objectName,
+			MethodParameter parameter) throws Exception {
+
+		return createBinderInternal(webRequest, target, objectName, parameter);
+	}
+
+	private WebDataBinder createBinderInternal(
+			NativeWebRequest webRequest, @Nullable Object target, String objectName,
+			@Nullable MethodParameter parameter) throws Exception {
+
 		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);
+
+		if (target == null && parameter != null) {
+			dataBinder.setTargetType(ResolvableType.forMethodParameter(parameter));
+		}
+
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder);
 		}
 		initBinder(dataBinder, webRequest);
+
+		if (this.methodValidationApplicable && parameter != null) {
+			MethodValidationInitializer.initBinder(dataBinder, parameter);
+		}
+
 		return dataBinder;
 	}
 
@@ -104,30 +135,13 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
 	}
 
-	/**
-	 * {@inheritDoc}.
- 	 * <p>By default, if the parameter has {@code @Valid}, Bean Validation is
-	 * excluded, deferring to method validation.
-	 */
-	@Override
-	public WebDataBinder createBinder(
-			NativeWebRequest webRequest, @Nullable Object target, String objectName,
-			MethodParameter parameter) throws Exception {
-
-		WebDataBinder dataBinder = createBinder(webRequest, target, objectName);
-		if (this.methodValidationApplicable) {
-			MethodValidationInitializer.updateBinder(dataBinder, parameter);
-		}
-		return dataBinder;
-	}
-
 
 	/**
 	 * Excludes Bean Validation if the method parameter has {@code @Valid}.
 	 */
 	private static class MethodValidationInitializer {
 
-		public static void updateBinder(DataBinder binder, MethodParameter parameter) {
+		public static void initBinder(DataBinder binder, MethodParameter parameter) {
 			for (Annotation annotation : parameter.getParameterAnnotations()) {
 				if (annotation.annotationType().getName().equals("jakarta.validation.Valid")) {
 					binder.setExcludedValidators(validator -> validator instanceof jakarta.validation.Validator);

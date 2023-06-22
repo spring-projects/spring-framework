@@ -17,30 +17,40 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditor;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanInstantiationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessException;
 import org.springframework.beans.PropertyAccessorUtils;
 import org.springframework.beans.PropertyBatchUpdateException;
+import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.Formatter;
@@ -50,10 +60,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.annotation.ValidationAnnotationUtils;
 
 /**
- * Binder that allows for setting property values on a target object, including
- * support for validation and binding result analysis.
+ * Binder that allows applying property values to a target object via constructor
+ * and setter injection, and also supports validation and binding result analysis.
  *
  * <p>The binding process can be customized by specifying allowed field patterns,
  * required fields, custom editors, etc.
@@ -105,6 +116,7 @@ import org.springframework.util.StringUtils;
  * @see #registerCustomEditor
  * @see #setMessageCodesResolver
  * @see #setBindingErrorProcessor
+ * @see #construct
  * @see #bind
  * @see #getBindingResult
  * @see DefaultMessageCodesResolver
@@ -126,7 +138,10 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected static final Log logger = LogFactory.getLog(DataBinder.class);
 
 	@Nullable
-	private final Object target;
+	private Object target;
+
+	@Nullable
+	ResolvableType targetType;
 
 	private final String objectName;
 
@@ -136,7 +151,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	private boolean directFieldAccess = false;
 
 	@Nullable
-	private SimpleTypeConverter typeConverter;
+	private ExtendedTypeConverter typeConverter;
 
 	private boolean ignoreUnknownFields = true;
 
@@ -193,6 +208,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Return the wrapped target object.
+	 * <p>If the target object is {@code null} and {@link #getTargetType()} is set,
+	 * then {@link #construct(ValueResolver)} may be called to create the target.
 	 */
 	@Nullable
 	public Object getTarget() {
@@ -207,12 +224,35 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
+	 * Set the type for the target object. When the target is {@code null},
+	 * setting the targetType allows using {@link #construct(ValueResolver)} to
+	 * create the target.
+	 * @param targetType the type of the target object
+	 * @since 6.1
+	 */
+	public void setTargetType(ResolvableType targetType) {
+		Assert.state(this.target == null, "targetType is used to for target creation, but target is already set");
+		this.targetType = targetType;
+	}
+
+	/**
+	 * Return the {@link #setTargetType configured} type for the target object.
+	 * @since 6.1
+	 */
+	@Nullable
+	public ResolvableType getTargetType() {
+		return this.targetType;
+	}
+
+	/**
 	 * Set whether this binder should attempt to "auto-grow" a nested path that contains a null value.
 	 * <p>If "true", a null path location will be populated with a default object value and traversed
 	 * instead of resulting in an exception. This flag also enables auto-growth of collection elements
 	 * when accessing an out-of-bounds index.
 	 * <p>Default is "true" on a standard DataBinder. Note that since Spring 4.1 this feature is supported
 	 * for bean property access (DataBinder's default mode) and field access.
+	 * <p>Used for setter/field injection via {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor initialization via {@link #construct(ValueResolver)}.
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowNestedPaths
 	 */
@@ -233,6 +273,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Specify the limit for array and collection auto-growing.
 	 * <p>Default is 256, preventing OutOfMemoryErrors in case of large indexes.
 	 * Raise this limit if your auto-growing needs are unusually high.
+	 * <p>Used for setter/field injection via {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor initialization via {@link #construct(ValueResolver)}.
 	 * @see #initBeanPropertyAccess()
 	 * @see org.springframework.beans.BeanWrapper#setAutoGrowCollectionLimit
 	 */
@@ -335,7 +377,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected SimpleTypeConverter getSimpleTypeConverter() {
 		if (this.typeConverter == null) {
-			this.typeConverter = new SimpleTypeConverter();
+			this.typeConverter = new ExtendedTypeConverter();
 			if (this.conversionService != null) {
 				this.typeConverter.setConversionService(this.conversionService);
 			}
@@ -389,6 +431,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Note that this setting only applies to <i>binding</i> operations
 	 * on this DataBinder, not to <i>retrieving</i> values via its
 	 * {@link #getBindingResult() BindingResult}.
+	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * which uses only the values it needs.
 	 * @see #bind
 	 */
 	public void setIgnoreUnknownFields(boolean ignoreUnknownFields) {
@@ -411,6 +456,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>Note that this setting only applies to <i>binding</i> operations
 	 * on this DataBinder, not to <i>retrieving</i> values via its
 	 * {@link #getBindingResult() BindingResult}.
+	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * which uses only the values it needs.
 	 * @see #bind
 	 */
 	public void setIgnoreInvalidFields(boolean ignoreInvalidFields) {
@@ -439,6 +487,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>disallowed</i> field patterns.
+	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * which uses only the values it needs.
 	 * @param allowedFields array of allowed field patterns
 	 * @see #setDisallowedFields
 	 * @see #isAllowed(String)
@@ -475,6 +526,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * <p>More sophisticated matching can be implemented by overriding the
 	 * {@link #isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> field patterns.
+	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * which uses only the values it needs.
 	 * @param disallowedFields array of disallowed field patterns
 	 * @see #setAllowedFields
 	 * @see #isAllowed(String)
@@ -508,6 +562,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * incoming property values, a corresponding "missing field" error
 	 * will be created, with error code "required" (by the default
 	 * binding error processor).
+	 * <p>Used for setter/field inject via {@link #bind(PropertyValues)}, and not
+	 * applicable to constructor initialization via {@link #construct(ValueResolver)},
+	 * which uses only the values it needs.
 	 * @param requiredFields array of field names
 	 * @see #setBindingErrorProcessor
 	 * @see DefaultBindingErrorProcessor#MISSING_FIELD_ERROR_CODE
@@ -771,6 +828,133 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 
 	/**
+	 * Create the target with constructor injection of values. It is expected that
+	 * {@link #setTargetType(ResolvableType)} was previously called and that
+	 * {@link #getTarget()} is {@code null}.
+	 * <p>Uses a public, no-arg constructor if available in the target object type,
+	 * also supporting a "primary constructor" approach for data classes as follows:
+	 * It understands the JavaBeans {@code ConstructorProperties} annotation as
+	 * well as runtime-retained parameter names in the bytecode, associating
+	 * input values with constructor arguments by name. If no such constructor is
+	 * found, the default constructor will be used (even if not public), assuming
+	 * subsequent bean property bindings through setter methods.
+	 * <p>After the call, use {@link #getBindingResult()} to check for failures
+	 * to bind to, and/or validate constructor arguments. If there are no errors,
+	 * the target is set, and {@link #doBind(MutablePropertyValues)} can be used
+	 * for further initialization via setters.
+	 * @param valueResolver to resolve constructor argument values with
+	 * @throws BeanInstantiationException in case of constructor failure
+	 * @since 6.1
+	 */
+	public final void construct(ValueResolver valueResolver) {
+		Assert.state(this.target == null, "Target instance already available");
+		Assert.state(this.targetType != null, "Target type not set");
+
+		Class<?> clazz = this.targetType.resolve();
+		clazz = (Optional.class.equals(clazz) ? this.targetType.resolveGeneric(0) : clazz);
+		Assert.state(clazz != null, "Unknown data binding target type");
+
+		Constructor<?> ctor = BeanUtils.getResolvableConstructor(clazz);
+		if (ctor.getParameterCount() == 0) {
+			// A single default constructor -> clearly a standard JavaBeans arrangement.
+			this.target = BeanUtils.instantiateClass(ctor);
+		}
+		else {
+			// A single data class constructor -> resolve constructor arguments from request parameters.
+			String[] paramNames = BeanUtils.getParameterNames(ctor);
+			Class<?>[] paramTypes = ctor.getParameterTypes();
+			Object[] args = new Object[paramTypes.length];
+			Set<String> failedParamNames = new HashSet<>(4);
+			boolean bindFailure = false;
+			for (int i = 0; i < paramNames.length; i++) {
+				String paramName = paramNames[i];
+				Class<?> paramType = paramTypes[i];
+				Object value = valueResolver.resolveValue(paramName, paramType);
+				try {
+					MethodParameter methodParam = MethodParameter.forFieldAwareConstructor(ctor, i, paramName);
+					if (value == null && methodParam.isOptional()) {
+						args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
+					}
+					else {
+						args[i] = convertIfNecessary(value, paramType, methodParam);
+					}
+				}
+				catch (TypeMismatchException ex) {
+					ex.initPropertyName(paramName);
+					args[i] = null;
+					failedParamNames.add(paramName);
+					getBindingResult().recordFieldValue(paramName, paramType, value);
+					getBindingErrorProcessor().processPropertyAccessException(ex, getBindingResult());
+					bindFailure = true;
+				}
+			}
+
+			if (bindFailure) {
+				for (int i = 0; i < paramNames.length; i++) {
+					String paramName = paramNames[i];
+					if (!failedParamNames.contains(paramName)) {
+						Object value = args[i];
+						getBindingResult().recordFieldValue(paramName, paramTypes[i], value);
+						validateArgument(ctor.getDeclaringClass(), paramName, value);
+					}
+				}
+				if (!(this.targetType.getSource() instanceof MethodParameter param && param.isOptional())) {
+					try {
+						this.target = BeanUtils.instantiateClass(ctor, args);
+					}
+					catch (BeanInstantiationException ex) {
+						// swallow and proceed without target instance
+					}
+				}
+				return;
+			}
+
+			try {
+				this.target = BeanUtils.instantiateClass(ctor, args);
+			}
+			catch (BeanInstantiationException ex) {
+				if (KotlinDetector.isKotlinType(clazz) && ex.getCause() instanceof NullPointerException cause) {
+					ObjectError error = new ObjectError(ctor.getName(), cause.getMessage());
+					getBindingResult().addError(error);
+					return;
+				}
+				throw ex;
+			}
+		}
+
+		// Now that target is set, add PropertyEditor's to PropertyAccessor
+		if (this.typeConverter != null) {
+			this.typeConverter.registerCustomEditors(getPropertyAccessor());
+		}
+	}
+
+	private void validateArgument(Class<?> constructorClass, String name, @Nullable Object value) {
+		Object[] validationHints = null;
+		if (this.targetType.getSource() instanceof MethodParameter parameter) {
+			for (Annotation ann : parameter.getParameterAnnotations()) {
+				validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
+				if (validationHints != null) {
+					break;
+				}
+			}
+		}
+		if (validationHints == null) {
+			return;
+		}
+		for (Validator validator : getValidatorsToApply()) {
+			if (validator instanceof SmartValidator smartValidator) {
+				try {
+					smartValidator.validateValue(
+							constructorClass, name, value, getBindingResult(), validationHints);
+				}
+				catch (IllegalArgumentException ex) {
+					// No corresponding field on the target class...
+				}
+			}
+		}
+	}
+
+	/**
 	 * Bind the given property values to this binder's target.
 	 * <p>This call can create field errors, representing basic binding
 	 * errors like a required field (code "required"), or type mismatch
@@ -971,5 +1155,37 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		}
 		return getBindingResult().getModel();
 	}
+
+
+	/**
+	 * Contract to resolve a value in {@link #construct(ValueResolver)}.
+	 */
+	@FunctionalInterface
+	public interface ValueResolver {
+
+		/**
+		 * Look up the value for a constructor argument.
+		 * @param name the argument name
+		 * @param type the argument type
+		 * @return the resolved value, possibly {@code null}
+		 */
+		@Nullable
+		Object resolveValue(String name, Class<?> type);
+
+	}
+
+
+	/**
+	 * {@link SimpleTypeConverter} that is also {@link PropertyEditorRegistrar}.
+	 */
+	private static class ExtendedTypeConverter
+			extends SimpleTypeConverter implements PropertyEditorRegistrar {
+
+		@Override
+		public void registerCustomEditors(PropertyEditorRegistry registry) {
+			copyCustomEditorsTo(registry, null);
+		}
+	}
+
 
 }

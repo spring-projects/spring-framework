@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,21 @@
 
 package org.springframework.web.bind;
 
+import java.lang.reflect.Array;
+import java.util.List;
+
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.Part;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartRequest;
 import org.springframework.web.multipart.support.StandardServletPartUtils;
 import org.springframework.web.util.WebUtils;
@@ -46,10 +52,9 @@ import org.springframework.web.util.WebUtils;
  * which include specifying allowed/required fields, and registering custom
  * property editors.
  *
- * <p>Can also be used for manual data binding in custom web controllers:
- * for example, in a plain Controller implementation or in a MultiActionController
- * handler method. Simply instantiate a ServletRequestDataBinder for each binding
- * process, and invoke {@code bind} with the current ServletRequest as argument:
+ * <p>Can also be used for manual data binding. Simply instantiate a
+ * ServletRequestDataBinder for each binding process, and invoke {@code bind}
+ * with the current ServletRequest as argument:
  *
  * <pre class="code">
  * MyBean myBean = new MyBean();
@@ -95,6 +100,27 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 
 	/**
+	 * Use a default or single data constructor to create the target by
+	 * binding request parameters, multipart files, or parts to constructor args.
+	 * <p>After the call, use {@link #getBindingResult()} to check for bind errors.
+	 * If there are none, the target is set, and {@link #bind(ServletRequest)}
+	 * can be called for further initialization via setters.
+	 * @param request the request to bind
+	 * @since 6.1
+	 */
+	public void construct(ServletRequest request) {
+		construct(createValueResolver(request));
+	}
+
+	/**
+	 * Allow subclasses to create the {@link ValueResolver} instance to use.
+	 * @since 6.1
+	 */
+	protected ServletRequestValueResolver createValueResolver(ServletRequest request) {
+		return new ServletRequestValueResolver(request, this);
+	}
+
+	/**
 	 * Bind the parameters of the given request to this binder's target,
 	 * also binding multipart files in case of a multipart request.
 	 * <p>This call can create field errors, representing basic binding
@@ -119,7 +145,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 		if (multipartRequest != null) {
 			bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 		}
-		else if (StringUtils.startsWithIgnoreCase(request.getContentType(), MediaType.MULTIPART_FORM_DATA_VALUE)) {
+		else if (isFormDataPost(request)) {
 			HttpServletRequest httpServletRequest = WebUtils.getNativeRequest(request, HttpServletRequest.class);
 			if (httpServletRequest != null && HttpMethod.POST.matches(httpServletRequest.getMethod())) {
 				StandardServletPartUtils.bindParts(httpServletRequest, mpvs, isBindEmptyMultipartFiles());
@@ -127,6 +153,10 @@ public class ServletRequestDataBinder extends WebDataBinder {
 		}
 		addBindValues(mpvs, request);
 		doBind(mpvs);
+	}
+
+	private static boolean isFormDataPost(ServletRequest request) {
+		return StringUtils.startsWithIgnoreCase(request.getContentType(), MediaType.MULTIPART_FORM_DATA_VALUE);
 	}
 
 	/**
@@ -150,6 +180,75 @@ public class ServletRequestDataBinder extends WebDataBinder {
 			throw new ServletRequestBindingException(
 					"Errors binding onto object '" + getBindingResult().getObjectName() + "'",
 					new BindException(getBindingResult()));
+		}
+	}
+
+	/**
+	 * Return a {@code ServletRequest} {@link ValueResolver}. Mainly for use from
+	 * {@link org.springframework.web.bind.support.WebRequestDataBinder}.
+	 * @since 6.1
+	 */
+	public static ValueResolver valueResolver(ServletRequest request, WebDataBinder binder) {
+		return new ServletRequestValueResolver(request, binder);
+	}
+
+
+	/**
+	 * Resolver that looks up values to bind in a {@link ServletRequest}.
+	 */
+	protected static class ServletRequestValueResolver implements ValueResolver {
+
+		private final ServletRequest request;
+
+		private final WebDataBinder dataBinder;
+
+		protected ServletRequestValueResolver(ServletRequest request, WebDataBinder dataBinder) {
+			this.request = request;
+			this.dataBinder = dataBinder;
+		}
+
+		protected ServletRequest getRequest() {
+			return this.request;
+		}
+
+		@Nullable
+		@Override
+		public final Object resolveValue(String name, Class<?> paramType) {
+			Object value = getRequestParameter(name, paramType);
+			if (value == null) {
+				value = this.dataBinder.resolvePrefixValue(name, paramType, this::getRequestParameter);
+			}
+			if (value == null) {
+				value = getMultipartValue(name);
+			}
+			return value;
+		}
+
+		@Nullable
+		protected Object getRequestParameter(String name, Class<?> type) {
+			Object value = this.request.getParameterValues(name);
+			return (ObjectUtils.isArray(value) && Array.getLength(value) == 1 ? Array.get(value, 0) : value);
+		}
+
+		@Nullable
+		private Object getMultipartValue(String name) {
+			MultipartRequest multipartRequest = WebUtils.getNativeRequest(this.request, MultipartRequest.class);
+			if (multipartRequest != null) {
+				List<MultipartFile> files = multipartRequest.getFiles(name);
+				if (!files.isEmpty()) {
+					return (files.size() == 1 ? files.get(0) : files);
+				}
+			}
+			else if (isFormDataPost(this.request)) {
+				HttpServletRequest httpRequest = WebUtils.getNativeRequest(this.request, HttpServletRequest.class);
+				if (httpRequest != null && HttpMethod.POST.matches(httpRequest.getMethod())) {
+					List<Part> parts = StandardServletPartUtils.getParts(httpRequest, name);
+					if (!parts.isEmpty()) {
+						return (parts.size() == 1 ? parts.get(0) : parts);
+					}
+				}
+			}
+			return null;
 		}
 	}
 
