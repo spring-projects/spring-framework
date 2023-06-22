@@ -22,11 +22,11 @@ import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.platform.launcher.TestExecutionListener;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Conventions;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
