@@ -25,6 +25,7 @@ import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -133,6 +134,13 @@ public class TransactionalApplicationListenerMethodAdapterTests {
 	}
 
 	@Test
+	public void withTransactionalRequiresNewAnnotation() {
+		Method m = ReflectionUtils.findMethod(SampleEvents.class, "withTransactionalRequiresNewAnnotation", String.class);
+		supportsEventType(true, m, createGenericEventType(String.class));
+		supportsEventType(false, m, createGenericEventType(Double.class));
+	}
+
+	@Test
 	public void withAsyncTransactionalAnnotation() {
 		Method m = ReflectionUtils.findMethod(SampleEvents.class, "withAsyncTransactionalAnnotation", String.class);
 		supportsEventType(true, m, createGenericEventType(String.class));
@@ -214,6 +222,11 @@ public class TransactionalApplicationListenerMethodAdapterTests {
 		@TransactionalEventListener
 		@Transactional
 		public void withTransactionalAnnotation(String data) {
+		}
+
+		@TransactionalEventListener
+		@Transactional(propagation = Propagation.REQUIRES_NEW)
+		public void withTransactionalRequiresNewAnnotation(String data) {
 		}
 
 		@TransactionalEventListener
