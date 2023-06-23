@@ -46,7 +46,7 @@ import org.springframework.util.ErrorHandler;
  *
  * <p><b>NOTE:</b> The default behavior of this message listener container is to
  * <b>never</b> propagate an exception thrown by a message listener up to the JMS
- * provider. Instead, it will log any such exception at the error level.
+ * provider. Instead, it will log any such exception at {@code WARN} level.
  * This means that from the perspective of the attendant JMS provider no such
  * listener will ever fail. However, if error handling is necessary, then
  * an implementation of the {@link ErrorHandler} strategy may be provided to
@@ -877,7 +877,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 
 	/**
 	 * Handle the given exception that arose during listener execution.
-	 * <p>The default implementation logs the exception at warn level,
+	 * <p>The default implementation logs the exception at {@code WARN} level,
 	 * not propagating it to the JMS provider &mdash; assuming that all handling of
 	 * acknowledgement and/or transactions is done by this listener container.
 	 * This can be overridden in subclasses.
@@ -916,7 +916,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
-	 * Invoke the registered ErrorHandler, if any. Log at warn level otherwise.
+	 * Invoke the registered {@link #getErrorHandler() ErrorHandler} if any.
+	 * Log at {@code WARN} level otherwise.
 	 * @param ex the uncaught error that arose during JMS processing
 	 * @see #setErrorHandler
 	 */
