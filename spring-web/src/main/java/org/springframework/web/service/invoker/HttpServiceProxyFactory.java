@@ -252,6 +252,7 @@ public final class HttpServiceProxyFactory {
 			// Specific type
 			resolvers.add(new UrlArgumentResolver());
 			resolvers.add(new HttpMethodArgumentResolver());
+			resolvers.add(new MultipartFileArgumentResolver());
 
 			return resolvers;
 		}
