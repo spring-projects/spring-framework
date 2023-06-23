@@ -160,48 +160,48 @@ class CoroutinesAnnotationTransactionInterceptorTests {
 	open class TestWithCoroutines {
 
 		open suspend fun suspendingNoValueSuccess() {
-			delay(10)
+			delay(1)
 		}
 
 		open suspend fun suspendingNoValueFailure() {
-			delay(10)
+			delay(1)
 			throw IllegalStateException()
 		}
 
 		open suspend fun suspendingValueSuccess(): String {
-			delay(10)
+			delay(1)
 			return "foo"
 		}
 
 		open suspend fun suspendingValueFailure(): String {
-			delay(10)
+			delay(1)
 			throw IllegalStateException()
 		}
 
 		open fun flowSuccess(): Flow<String> {
 			return flow {
 				emit("foo")
-				delay(10)
+				delay(1)
 				emit("foo")
 			}
 		}
 
 		open suspend fun suspendingFlowSuccess(): Flow<String> {
-			delay(10)
+			delay(1)
 			return flow {
 				emit("foo")
-				delay(10)
+				delay(1)
 				emit("foo")
 			}
 		}
 
 		open suspend fun suspendingValueSuccessWithContext(): String {
-			delay(10)
+			delay(1)
 			return coroutineContext[ExampleContext.Key].toString()
 		}
 
 		open suspend fun suspendingValueFailureWithContext(): String {
-			delay(10)
+			delay(1)
 			throw IllegalStateException(coroutineContext[ExampleContext.Key].toString())
 		}
 	}

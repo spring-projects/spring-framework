@@ -197,12 +197,12 @@ class KotlinInvocableHandlerMethodTests {
 	class CoroutinesController {
 
 		suspend fun singleArg(q: String?): String {
-			delay(10)
+			delay(1)
 			return "success:$q"
 		}
 
 		suspend fun noArgs(): String {
-			delay(10)
+			delay(1)
 			return "success"
 		}
 
@@ -212,12 +212,12 @@ class KotlinInvocableHandlerMethodTests {
 
 		@ResponseStatus(HttpStatus.CREATED)
 		suspend fun created(): String {
-			delay(10)
+			delay(1)
 			return "created"
 		}
 
 		suspend fun response(response: ServerHttpResponse) {
-			delay(10)
+			delay(1)
 			response.headers.add("foo", "bar")
 		}
 	}
@@ -225,7 +225,7 @@ class KotlinInvocableHandlerMethodTests {
 	private class PrivateCoroutinesController {
 
 		suspend fun singleArg(q: String?): String {
-			delay(10)
+			delay(1)
 			return "success:$q"
 		}
 	}
