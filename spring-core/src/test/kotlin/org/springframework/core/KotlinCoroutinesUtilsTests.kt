@@ -34,7 +34,7 @@ class KotlinCoroutinesUtilsTests {
 	fun deferredToMono() {
 		runBlocking {
 			val deferred: Deferred<String> = async(Dispatchers.IO) {
-				delay(10)
+				delay(1)
 				"foo"
 			}
 			val mono = CoroutinesUtils.deferredToMono(deferred)
@@ -122,12 +122,12 @@ class KotlinCoroutinesUtilsTests {
 	}
 
 	suspend fun suspendingFunction(value: String): String {
-		delay(10)
+		delay(1)
 		return value
 	}
 
 	suspend fun suspendingFunctionWithFlow(): Flow<String> {
-		delay(10)
+		delay(1)
 		return flowOf("foo", "bar")
 	}
 
@@ -136,7 +136,7 @@ class KotlinCoroutinesUtilsTests {
 	}
 
 	suspend fun suspendingFunctionWithContext(value: String): String {
-		delay(10)
+		delay(1)
 		Assertions.assertThat(coroutineContext[CoroutineName]?.name).isEqualTo("name")
 		return value
 	}

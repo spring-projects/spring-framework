@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,13 +154,13 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 
 		@MessageMapping("receive-async")
 		suspend fun receiveAsync(payload: String) {
-			delay(10)
+			delay(1)
 			fireForgetPayloads.tryEmitNext(payload)
 		}
 
 		@MessageMapping("echo-async")
 		suspend fun echoAsync(payload: String): String {
-			delay(10)
+			delay(1)
 			return "$payload async"
 		}
 
@@ -169,7 +169,7 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 			var i = 0
 			return flow {
 				while(true) {
-					delay(10)
+					delay(1)
 					emit("$payload ${i++}")
 				}
 			}
@@ -177,11 +177,11 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 
 		@MessageMapping("echo-stream-async")
 		suspend fun echoStreamAsync(payload: String): Flow<String> {
-			delay(10)
+			delay(1)
 			var i = 0
 			return flow {
 				while(true) {
-					delay(10)
+					delay(1)
 					emit("$payload ${i++}")
 				}
 			}
@@ -189,31 +189,31 @@ class RSocketClientToServerCoroutinesIntegrationTests {
 
 		@MessageMapping("echo-channel")
 		fun echoChannel(payloads: Flow<String>) = payloads.map {
-			delay(10)
+			delay(1)
 			"$it async"
 		}
 
 		@Suppress("UNUSED_PARAMETER")
 		@MessageMapping("thrown-exception")
 		suspend fun handleAndThrow(payload: String): String {
-			delay(10)
+			delay(1)
 			throw IllegalArgumentException("Invalid input error")
 		}
 
 		@MessageMapping("unit-return-value")
 		suspend fun unitReturnValue(payload: String) =
-				if (payload != "bad") delay(10) else throw IllegalStateException("bad")
+				if (payload != "bad") delay(1) else throw IllegalStateException("bad")
 
 		@MessageExceptionHandler
 		suspend fun handleException(ex: IllegalArgumentException): String {
-			delay(10)
+			delay(1)
 			return  "${ex.message} handled"
 		}
 
 		@Suppress("UNUSED_PARAMETER")
 		@MessageExceptionHandler
 		suspend fun handleExceptionWithVoidReturnValue(ex: IllegalStateException) {
-			delay(10)
+			delay(1)
 		}
 	}
 

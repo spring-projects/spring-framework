@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,12 +134,12 @@ class KotlinInvocableHandlerMethodTests {
 	class CoroutinesController {
 
 		suspend fun singleArg(q: String?): String {
-			delay(10)
+			delay(1)
 			return "success:$q"
 		}
 
 		suspend fun noArgs(): String {
-			delay(10)
+			delay(1)
 			return "success"
 		}
 
@@ -149,12 +149,12 @@ class KotlinInvocableHandlerMethodTests {
 
 		@ResponseStatus(HttpStatus.CREATED)
 		suspend fun created(): String {
-			delay(10)
+			delay(1)
 			return "created"
 		}
 
 		suspend fun response(response: ServerHttpResponse) {
-			delay(10)
+			delay(1)
 			response.headers.add("foo", "bar")
 		}
 	}
@@ -162,7 +162,7 @@ class KotlinInvocableHandlerMethodTests {
 	private class PrivateCoroutinesController {
 
 		suspend fun singleArg(q: String?): String {
-			delay(10)
+			delay(1)
 			return "success:$q"
 		}
 	}
