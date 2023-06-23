@@ -50,6 +50,17 @@ public class RequestPartArgumentResolver extends AbstractNamedValueArgumentResol
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 
+	/**
+	 * Default constructor that uses {@link ReactiveAdapterRegistry#getSharedInstance()}.
+	 * @since 6.1
+	 */
+	public RequestPartArgumentResolver() {
+		this(ReactiveAdapterRegistry.getSharedInstance());
+	}
+
+	/**
+	 * Constructor with a {@link ReactiveAdapterRegistry}.
+	 */
 	public RequestPartArgumentResolver(ReactiveAdapterRegistry reactiveAdapterRegistry) {
 		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
 	}

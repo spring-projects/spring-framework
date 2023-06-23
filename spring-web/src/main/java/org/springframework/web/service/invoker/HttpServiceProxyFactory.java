@@ -57,29 +57,21 @@ import org.springframework.web.service.annotation.HttpExchange;
  */
 public final class HttpServiceProxyFactory {
 
-	private final HttpClientAdapter clientAdapter;
+	private final HttpExchangeAdapter exchangeAdapter;
 
 	private final List<HttpServiceArgumentResolver> argumentResolvers;
 
 	@Nullable
 	private final StringValueResolver embeddedValueResolver;
 
-	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
-
-	@Nullable
-	private final Duration blockTimeout;
-
 
 	private HttpServiceProxyFactory(
-			HttpClientAdapter clientAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
-			@Nullable StringValueResolver embeddedValueResolver,
-			ReactiveAdapterRegistry reactiveAdapterRegistry, @Nullable Duration blockTimeout) {
+			HttpExchangeAdapter exchangeAdapter, List<HttpServiceArgumentResolver> argumentResolvers,
+			@Nullable StringValueResolver embeddedValueResolver) {
 
-		this.clientAdapter = clientAdapter;
+		this.exchangeAdapter = exchangeAdapter;
 		this.argumentResolvers = argumentResolvers;
 		this.embeddedValueResolver = embeddedValueResolver;
-		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
-		this.blockTimeout = blockTimeout;
 	}
 
 
@@ -109,16 +101,25 @@ public final class HttpServiceProxyFactory {
 				"No argument resolvers: afterPropertiesSet was not called");
 
 		return new HttpServiceMethod(
-				method, serviceType, this.argumentResolvers, this.clientAdapter,
-				this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
+				method, serviceType, this.argumentResolvers, this.exchangeAdapter, this.embeddedValueResolver);
 	}
 
 
 	/**
 	 * Return a builder that's initialized with the given client.
 	 */
+	public static Builder builderFor(HttpExchangeAdapter exchangeAdapter) {
+		return new Builder().exchangeAdapter(exchangeAdapter);
+	}
+
+	/**
+	 * Return a builder that's initialized with the given client.
+	 * @deprecated in favor of {@link #builderFor(HttpExchangeAdapter)}
+	 */
+	@SuppressWarnings("removal")
+	@Deprecated(since = "6.1", forRemoval = true)
 	public static Builder builder(HttpClientAdapter clientAdapter) {
-		return new Builder().clientAdapter(clientAdapter);
+		return new Builder().exchangeAdapter(clientAdapter.asHttpExchangeAdapter());
 	}
 
 	/**
@@ -135,7 +136,7 @@ public final class HttpServiceProxyFactory {
 	public static final class Builder {
 
 		@Nullable
-		private HttpClientAdapter clientAdapter;
+		private HttpExchangeAdapter exchangeAdapter;
 
 		private final List<HttpServiceArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
@@ -145,21 +146,30 @@ public final class HttpServiceProxyFactory {
 		@Nullable
 		private StringValueResolver embeddedValueResolver;
 
-		private ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
-
-		@Nullable
-		private Duration blockTimeout;
-
 		private Builder() {
+		}
+
+		/**
+		 * Provide the HTTP client to perform requests through.
+		 * @param adapter a client adapted to {@link HttpExchangeAdapter}
+		 * @return this same builder instance
+		 * @since 6.1
+		 */
+		public Builder exchangeAdapter(HttpExchangeAdapter adapter) {
+			this.exchangeAdapter = adapter;
+			return this;
 		}
 
 		/**
 		 * Provide the HTTP client to perform requests through.
 		 * @param clientAdapter a client adapted to {@link HttpClientAdapter}
 		 * @return this same builder instance
+		 * @deprecated in favor of {@link #exchangeAdapter(HttpExchangeAdapter)}
 		 */
+		@SuppressWarnings("removal")
+		@Deprecated(since = "6.1", forRemoval = true)
 		public Builder clientAdapter(HttpClientAdapter clientAdapter) {
-			this.clientAdapter = clientAdapter;
+			this.exchangeAdapter = clientAdapter.asHttpExchangeAdapter();
 			return this;
 		}
 
@@ -200,9 +210,13 @@ public final class HttpServiceProxyFactory {
 		 * asynchronous types for HTTP service method return values.
 		 * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.
 		 * @return this same builder instance
+		 * @deprecated in favor of setting the same directly on the {@link HttpExchangeAdapter}
 		 */
+		@Deprecated(since = "6.1", forRemoval = true)
 		public Builder reactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
-			this.reactiveAdapterRegistry = registry;
+			if (this.exchangeAdapter instanceof AbstractReactorHttpExchangeAdapter settable) {
+				settable.setReactiveAdapterRegistry(registry);
+			}
 			return this;
 		}
 
@@ -215,9 +229,13 @@ public final class HttpServiceProxyFactory {
 		 * client, which provides more control over such settings.
 		 * @param blockTimeout the timeout value
 		 * @return this same builder instance
+		 * @deprecated in favor of setting the same directly on the {@link HttpExchangeAdapter}
 		 */
+		@Deprecated(since = "6.1", forRemoval = true)
 		public Builder blockTimeout(@Nullable Duration blockTimeout) {
-			this.blockTimeout = blockTimeout;
+			if (this.exchangeAdapter instanceof AbstractReactorHttpExchangeAdapter settable) {
+				settable.setBlockTimeout(blockTimeout);
+			}
 			return this;
 		}
 
@@ -225,11 +243,10 @@ public final class HttpServiceProxyFactory {
 		 * Build the {@link HttpServiceProxyFactory} instance.
 		 */
 		public HttpServiceProxyFactory build() {
-			Assert.notNull(this.clientAdapter, "HttpClientAdapter is required");
+			Assert.notNull(this.exchangeAdapter, "HttpClientAdapter is required");
 
 			return new HttpServiceProxyFactory(
-					this.clientAdapter, initArgumentResolvers(),
-					this.embeddedValueResolver, this.reactiveAdapterRegistry, this.blockTimeout);
+					this.exchangeAdapter, initArgumentResolvers(), this.embeddedValueResolver);
 		}
 
 		private List<HttpServiceArgumentResolver> initArgumentResolvers() {
@@ -242,10 +259,10 @@ public final class HttpServiceProxyFactory {
 
 			// Annotation-based
 			resolvers.add(new RequestHeaderArgumentResolver(service));
-			resolvers.add(new RequestBodyArgumentResolver(this.reactiveAdapterRegistry));
+			resolvers.add(new RequestBodyArgumentResolver());
 			resolvers.add(new PathVariableArgumentResolver(service));
 			resolvers.add(new RequestParamArgumentResolver(service));
-			resolvers.add(new RequestPartArgumentResolver(this.reactiveAdapterRegistry));
+			resolvers.add(new RequestPartArgumentResolver());
 			resolvers.add(new CookieValueArgumentResolver(service));
 			resolvers.add(new RequestAttributeArgumentResolver());
 

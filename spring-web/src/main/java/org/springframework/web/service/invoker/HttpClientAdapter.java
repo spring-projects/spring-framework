@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import org.springframework.http.ResponseEntity;
  *
  * @author Rossen Stoyanchev
  * @since 6.0
+ * @deprecated in favor of {@link ReactorHttpExchangeAdapter}
  */
+@Deprecated(since = "6.1", forRemoval = true)
 public interface HttpClientAdapter {
 
 	/**
@@ -85,5 +87,56 @@ public interface HttpClientAdapter {
 	 * with additional access to the response status and headers.
 	 */
 	<T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
+
+
+	/**
+	 * Adapt this {@link HttpClientAdapter} to {@link ReactorHttpExchangeAdapter}.
+	 * @return
+	 * @since 6.1
+	 */
+	default ReactorHttpExchangeAdapter asHttpExchangeAdapter() {
+
+		return new AbstractReactorHttpExchangeAdapter() {
+
+			@Override
+			public Mono<Void> exchangeForMono(HttpRequestValues requestValues) {
+				return requestToVoid(requestValues);
+			}
+
+			@Override
+			public Mono<HttpHeaders> exchangeForHeadersMono(HttpRequestValues requestValues) {
+				return requestToHeaders(requestValues);
+			}
+
+			@Override
+			public <T> Mono<T> exchangeForBodyMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+				return requestToBody(requestValues, bodyType);
+			}
+
+			@Override
+			public <T> Flux<T> exchangeForBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+				return requestToBodyFlux(requestValues, bodyType);
+			}
+
+			@Override
+			public Mono<ResponseEntity<Void>> exchangeForBodilessEntityMono(HttpRequestValues requestValues) {
+				return requestToBodilessEntity(requestValues);
+			}
+
+			@Override
+			public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(
+					HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+
+				return requestToEntity(requestValues, bodyType);
+			}
+
+			@Override
+			public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(
+					HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+
+				return requestToEntityFlux(requestValues, bodyType);
+			}
+		};
+	}
 
 }

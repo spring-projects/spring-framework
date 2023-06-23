@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,17 @@ public class RequestBodyArgumentResolver implements HttpServiceArgumentResolver 
 	private final ReactiveAdapterRegistry reactiveAdapterRegistry;
 
 
+	/**
+	 * Default constructor that uses {@link ReactiveAdapterRegistry#getSharedInstance()}.
+	 * @since 6.1
+	 */
+	public RequestBodyArgumentResolver() {
+		this(ReactiveAdapterRegistry.getSharedInstance());
+	}
+
+	/**
+	 * Constructor with a {@link ReactiveAdapterRegistry}.
+	 */
 	public RequestBodyArgumentResolver(ReactiveAdapterRegistry reactiveAdapterRegistry) {
 		Assert.notNull(reactiveAdapterRegistry, "ReactiveAdapterRegistry is required");
 		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
