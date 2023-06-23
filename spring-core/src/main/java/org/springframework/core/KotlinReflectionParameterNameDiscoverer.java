@@ -74,21 +74,17 @@ public class KotlinReflectionParameterNameDiscoverer implements ParameterNameDis
 
 	@Nullable
 	private String[] getParameterNames(List<KParameter> parameters) {
-		List<KParameter> filteredParameters = parameters
-				.stream()
+		String[] parameterNames = parameters.stream()
 				// Extension receivers of extension methods must be included as they appear as normal method parameters in Java
 				.filter(p -> KParameter.Kind.VALUE.equals(p.getKind()) || KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()))
-				.toList();
-		String[] parameterNames = new String[filteredParameters.size()];
-		for (int i = 0; i < filteredParameters.size(); i++) {
-			KParameter parameter = filteredParameters.get(i);
-			// extension receivers are not explicitly named, but require a name for Java interoperability
-			// $receiver is not a valid Kotlin identifier, but valid in Java, so it can be used here
-			String name = KParameter.Kind.EXTENSION_RECEIVER.equals(parameter.getKind())  ? "$receiver" : parameter.getName();
-			if (name == null) {
+				// extension receivers are not explicitly named, but require a name for Java interoperability
+				// $receiver is not a valid Kotlin identifier, but valid in Java, so it can be used here
+				.map(p -> KParameter.Kind.EXTENSION_RECEIVER.equals(p.getKind()) ? "$receiver" : p.getName())
+				.toArray(String[]::new);
+		for (String parameterName : parameterNames) {
+			if (parameterName == null) {
 				return null;
 			}
-			parameterNames[i] = name;
 		}
 		return parameterNames;
 	}
