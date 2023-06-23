@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelId;
@@ -37,7 +38,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
-import org.springframework.util.Assert;
 
 /**
  * Adapt {@link ServerHttpResponse} to the {@link HttpServerResponse}.
@@ -55,8 +55,8 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 
 	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
-		super(bufferFactory, new HttpHeaders(new NettyHeadersAdapter(response.responseHeaders())));
-		Assert.notNull(response, "HttpServerResponse must not be null");
+		super(bufferFactory, new HttpHeaders(new NettyHeadersAdapter(Objects.requireNonNull(response,
+				"HttpServerResponse must not be null").responseHeaders())));
 		this.response = response;
 	}
 
