@@ -20,8 +20,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.reactivestreams.Publisher;
-
 import org.springframework.context.MessageSource;
 import org.springframework.core.CoroutinesUtils;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -240,7 +238,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * instead.
 	 * @since 6.0
 	 */
-	protected Publisher<?> invokeSuspendingFunction(Method method, Object target, Object[] args) {
+	protected Object invokeSuspendingFunction(Method method, Object target, Object[] args) {
 		return CoroutinesUtils.invokeSuspendingFunction(method, target, args);
 	}
 
