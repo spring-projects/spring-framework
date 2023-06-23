@@ -22,7 +22,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,18 +42,14 @@ public class MultipartFileArgumentResolver extends AbstractNamedValueArgumentRes
 		if (!parameter.nestedIfOptional().getNestedParameterType().equals(MultipartFile.class)) {
 			return null;
 		}
-		String parameterName = parameter.getParameterName();
-		return new NamedValueInfo(parameterName != null ? parameterName : "", true,
-				null, MULTIPART_FILE_LABEL, true);
+		return new NamedValueInfo("", true, null, MULTIPART_FILE_LABEL, true);
 
 	}
 
 	@Override
 	protected void addRequestValue(String name, Object value, MethodParameter parameter,
 			HttpRequestValues.Builder requestValues) {
-		Assert.isInstanceOf(MultipartFile.class, value,
-				"The value has to be of type 'MultipartFile'");
-		Assert.isInstanceOf(MultipartFile.class, value,
+		Assert.state(value instanceof MultipartFile,
 				"The value has to be of type 'MultipartFile'");
 
 		MultipartFile file = (MultipartFile) value;
@@ -67,7 +62,7 @@ public class MultipartFileArgumentResolver extends AbstractNamedValueArgumentRes
 			headers.setContentDispositionFormData(name, file.getOriginalFilename());
 		}
 		if (file.getContentType() != null) {
-			headers.setContentType(MediaType.parseMediaType(file.getContentType()));
+			headers.add(HttpHeaders.CONTENT_TYPE, file.getContentType());
 		}
 		return new HttpEntity<>(file.getResource(), headers);
 	}
