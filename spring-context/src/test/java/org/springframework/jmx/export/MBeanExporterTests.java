@@ -102,7 +102,7 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setNotificationListenerMappings(listeners);
 		assertThatExceptionOfType(MBeanExportException.class).as("NotificationListener on a non-existent MBean").isThrownBy(() ->
 				start(exporter))
-			.satisfies(ex -> assertThat(ex.contains(InstanceNotFoundException.class)));
+			.satisfies(ex -> assertThat(ex.contains(InstanceNotFoundException.class)).isTrue());
 	}
 
 	@Test
