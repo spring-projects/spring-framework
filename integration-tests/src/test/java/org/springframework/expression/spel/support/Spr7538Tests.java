@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.TypedValue;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class Spr7538Tests {
 
@@ -49,8 +53,9 @@ class Spr7538Tests {
 		ReflectiveMethodResolver resolver = new ReflectiveMethodResolver();
 		MethodExecutor executor = resolver.resolve(context, target, "checkCompleteness", argumentTypes);
 
-		Object result = executor.execute(context, target, arguments);
-		System.out.println("Result: " + result);
+		TypedValue typedValue = executor.execute(context, target, arguments);
+		assertThat(typedValue.getValue()).asInstanceOf(InstanceOfAssertFactories.BOOLEAN).isTrue();
+		assertThat(typedValue.getTypeDescriptor().getType()).isEqualTo(Boolean.class);
 	}
 
 	static class AlwaysTrueReleaseStrategy {
