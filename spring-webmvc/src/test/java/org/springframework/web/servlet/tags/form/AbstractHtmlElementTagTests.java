@@ -130,8 +130,8 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	}
 
 	protected final void assertAttributeNotPresent(String output, String attributeName) {
-		boolean condition = !output.contains(attributeName + "=\"");
-		assertThat(condition).as("Unexpected attribute '" + attributeName + "' in output '" + output + "'.").isTrue();
+		assertThat(output).as("Unexpected attribute '" + attributeName + "' in output '" + output + "'.")
+				.doesNotContain(attributeName + "=\"");
 	}
 
 	protected final void assertBlockTagContains(String output, String desiredContents) {

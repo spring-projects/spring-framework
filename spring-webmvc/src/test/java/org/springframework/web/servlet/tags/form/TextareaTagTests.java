@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,6 @@ public class TextareaTagTests extends AbstractFormTagTests {
 
 		assertThat(this.tag.doStartTag()).isEqualTo(Tag.SKIP_BODY);
 		String output = getOutput();
-		System.out.println(output);
 		assertContainsAttribute(output, "name", "name");
 		assertBlockTagContains(output, HTML_ESCAPED_NAME);
 	}
