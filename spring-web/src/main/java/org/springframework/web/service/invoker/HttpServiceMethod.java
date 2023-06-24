@@ -18,7 +18,6 @@ package org.springframework.web.service.invoker;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -33,26 +32,21 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.util.StringValueResolver;
-import org.springframework.web.service.annotation.HttpExchange;
 
 /**
- * Implements the invocation of an {@link HttpExchange @HttpExchange}-annotated,
+ * Implements the invocation of an annotated
  * {@link HttpServiceProxyFactory#createClient(Class) HTTP service proxy} method
  * by delegating to an {@link HttpClientAdapter} to perform actual requests.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Freeman Lau
  * @since 6.0
  */
 final class HttpServiceMethod {
@@ -67,16 +61,15 @@ final class HttpServiceMethod {
 
 	private final ResponseFunction responseFunction;
 
-
 	HttpServiceMethod(
-			Method method, Class<?> containingClass, List<HttpServiceArgumentResolver> argumentResolvers,
-			HttpClientAdapter client, @Nullable StringValueResolver embeddedValueResolver,
+			Method method, List<HttpServiceArgumentResolver> argumentResolvers,
+			HttpRequestValuesInitializer requestValuesInitializer, HttpClientAdapter client,
 			ReactiveAdapterRegistry reactiveRegistry, @Nullable Duration blockTimeout) {
 
 		this.method = method;
 		this.parameters = initMethodParameters(method);
 		this.argumentResolvers = argumentResolvers;
-		this.requestValuesInitializer = HttpRequestValuesInitializer.create(method, containingClass, embeddedValueResolver);
+		this.requestValuesInitializer = requestValuesInitializer;
 		this.responseFunction = ResponseFunction.create(client, method, reactiveRegistry, blockTimeout);
 	}
 
@@ -129,142 +122,6 @@ final class HttpServiceMethod {
 							(StringUtils.hasText("No suitable resolver") ? ": " + "No suitable resolver" : ""));
 		}
 	}
-
-
-	/**
-	 * Factory for {@link HttpRequestValues} with values extracted from the type
-	 * and method-level {@link HttpExchange @HttpRequest} annotations.
-	 */
-	private record HttpRequestValuesInitializer(
-			@Nullable HttpMethod httpMethod, @Nullable String url,
-			@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes) {
-
-		private HttpRequestValuesInitializer(
-				HttpMethod httpMethod, @Nullable String url,
-				@Nullable MediaType contentType, @Nullable List<MediaType> acceptMediaTypes) {
-
-			this.url = url;
-			this.httpMethod = httpMethod;
-			this.contentType = contentType;
-			this.acceptMediaTypes = acceptMediaTypes;
-		}
-
-		public HttpRequestValues.Builder initializeRequestValuesBuilder() {
-			HttpRequestValues.Builder requestValues = HttpRequestValues.builder();
-			if (this.httpMethod != null) {
-				requestValues.setHttpMethod(this.httpMethod);
-			}
-			if (this.url != null) {
-				requestValues.setUriTemplate(this.url);
-			}
-			if (this.contentType != null) {
-				requestValues.setContentType(this.contentType);
-			}
-			if (this.acceptMediaTypes != null) {
-				requestValues.setAccept(this.acceptMediaTypes);
-			}
-			return requestValues;
-		}
-
-
-		/**
-		 * Introspect the method and create the request factory for it.
-		 */
-		public static HttpRequestValuesInitializer create(
-				Method method, Class<?> containingClass, @Nullable StringValueResolver embeddedValueResolver) {
-
-			HttpExchange annot1 = AnnotatedElementUtils.findMergedAnnotation(containingClass, HttpExchange.class);
-			HttpExchange annot2 = AnnotatedElementUtils.findMergedAnnotation(method, HttpExchange.class);
-
-			Assert.notNull(annot2, "Expected HttpRequest annotation");
-
-			HttpMethod httpMethod = initHttpMethod(annot1, annot2);
-			String url = initUrl(annot1, annot2, embeddedValueResolver);
-			MediaType contentType = initContentType(annot1, annot2);
-			List<MediaType> acceptableMediaTypes = initAccept(annot1, annot2);
-
-			return new HttpRequestValuesInitializer(httpMethod, url, contentType, acceptableMediaTypes);
-		}
-
-		@Nullable
-		private static HttpMethod initHttpMethod(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
-
-			String value1 = (typeAnnot != null ? typeAnnot.method() : null);
-			String value2 = annot.method();
-
-			if (StringUtils.hasText(value2)) {
-				return HttpMethod.valueOf(value2);
-			}
-
-			if (StringUtils.hasText(value1)) {
-				return HttpMethod.valueOf(value1);
-			}
-
-			return null;
-		}
-
-		@Nullable
-		private static String initUrl(
-				@Nullable HttpExchange typeAnnot, HttpExchange annot, @Nullable StringValueResolver embeddedValueResolver) {
-
-			String url1 = (typeAnnot != null ? typeAnnot.url() : null);
-			String url2 = annot.url();
-
-			if (embeddedValueResolver != null) {
-				url1 = (url1 != null ? embeddedValueResolver.resolveStringValue(url1) : null);
-				url2 = embeddedValueResolver.resolveStringValue(url2);
-			}
-
-			boolean hasUrl1 = StringUtils.hasText(url1);
-			boolean hasUrl2 = StringUtils.hasText(url2);
-
-			if (hasUrl1 && hasUrl2) {
-				return (url1 + (!url1.endsWith("/") && !url2.startsWith("/") ? "/" : "") + url2);
-			}
-
-			if (!hasUrl1 && !hasUrl2) {
-				return null;
-			}
-
-			return (hasUrl2 ? url2 : url1);
-		}
-
-		@Nullable
-		private static MediaType initContentType(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
-
-			String value1 = (typeAnnot != null ? typeAnnot.contentType() : null);
-			String value2 = annot.contentType();
-
-			if (StringUtils.hasText(value2)) {
-				return MediaType.parseMediaType(value2);
-			}
-
-			if (StringUtils.hasText(value1)) {
-				return MediaType.parseMediaType(value1);
-			}
-
-			return null;
-		}
-
-		@Nullable
-		private static List<MediaType> initAccept(@Nullable HttpExchange typeAnnot, HttpExchange annot) {
-
-			String[] value1 = (typeAnnot != null ? typeAnnot.accept() : null);
-			String[] value2 = annot.accept();
-
-			if (!ObjectUtils.isEmpty(value2)) {
-				return MediaType.parseMediaTypes(Arrays.asList(value2));
-			}
-
-			if (!ObjectUtils.isEmpty(value1)) {
-				return MediaType.parseMediaTypes(Arrays.asList(value1));
-			}
-
-			return null;
-		}
-
-	}
-
 
 	/**
 	 * Function to execute a request, obtain a response, and adapt to the expected
