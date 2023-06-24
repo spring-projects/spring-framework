@@ -376,6 +376,9 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 	@Nested
 	class InitDestroyMethodTests {
 
+		private final String privateInitMethod = InitDestroyBean.class.getName() + ".privateInit";
+		private final String privateDestroyMethod = InitDestroyBean.class.getName() + ".privateDestroy";
+
 		@BeforeEach
 		void setTargetType() {
 			beanDefinition.setTargetType(InitDestroyBean.class);
@@ -394,10 +397,17 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		}
 
 		@Test
+		void privateInitMethod() {
+			beanDefinition.setInitMethodName(privateInitMethod);
+			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly(privateInitMethod));
+			assertHasMethodInvokeHints(InitDestroyBean.class, "privateInit");
+		}
+
+		@Test
 		void multipleInitMethods() {
-			beanDefinition.setInitMethodNames("init", "init2");
-			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly("init", "init2"));
-			assertHasMethodInvokeHints(InitDestroyBean.class, "init", "init2");
+			beanDefinition.setInitMethodNames("init", privateInitMethod);
+			compile((beanDef, compiled) -> assertThat(beanDef.getInitMethodNames()).containsExactly("init", privateInitMethod));
+			assertHasMethodInvokeHints(InitDestroyBean.class, "init", "privateInit");
 		}
 
 		@Test
@@ -413,10 +423,17 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		}
 
 		@Test
+		void privateDestroyMethod() {
+			beanDefinition.setDestroyMethodName(privateDestroyMethod);
+			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly(privateDestroyMethod));
+			assertHasMethodInvokeHints(InitDestroyBean.class, "privateDestroy");
+		}
+
+		@Test
 		void multipleDestroyMethods() {
-			beanDefinition.setDestroyMethodNames("destroy", "destroy2");
-			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy", "destroy2"));
-			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy", "destroy2");
+			beanDefinition.setDestroyMethodNames("destroy", privateDestroyMethod);
+			compile((beanDef, compiled) -> assertThat(beanDef.getDestroyMethodNames()).containsExactly("destroy", privateDestroyMethod));
+			assertHasMethodInvokeHints(InitDestroyBean.class, "destroy", "privateDestroy");
 		}
 
 	}
@@ -461,13 +478,15 @@ class BeanDefinitionPropertiesCodeGeneratorTests {
 		void init() {
 		}
 
-		void init2() {
+		@SuppressWarnings("unused")
+		private void privateInit() {
 		}
 
 		void destroy() {
 		}
 
-		void destroy2() {
+		@SuppressWarnings("unused")
+		private void privateDestroy() {
 		}
 
 	}

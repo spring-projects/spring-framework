@@ -72,6 +72,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 class BeanDefinitionPropertiesCodeGenerator {
@@ -138,7 +139,25 @@ class BeanDefinitionPropertiesCodeGenerator {
 	}
 
 	private void addInitDestroyHint(Class<?> beanUserClass, String methodName) {
-		Method method = ReflectionUtils.findMethod(beanUserClass, methodName);
+		Class<?> methodDeclaringClass = beanUserClass;
+
+		// Parse fully-qualified method name if necessary.
+		int indexOfDot = methodName.lastIndexOf('.');
+		if (indexOfDot > 0) {
+			String className = methodName.substring(0, indexOfDot);
+			methodName = methodName.substring(indexOfDot + 1);
+			if (!beanUserClass.getName().equals(className)) {
+				try {
+					methodDeclaringClass = ClassUtils.forName(className, beanUserClass.getClassLoader());
+				}
+				catch (Throwable ex) {
+					throw new IllegalStateException("Failed to load Class [" + className +
+							"] from ClassLoader [" + beanUserClass.getClassLoader() + "]", ex);
+				}
+			}
+		}
+
+		Method method = ReflectionUtils.findMethod(methodDeclaringClass, methodName);
 		if (method != null) {
 			this.hints.reflection().registerMethod(method, ExecutableMode.INVOKE);
 		}

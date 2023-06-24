@@ -261,9 +261,9 @@ class ApplicationContextAotGeneratorTests {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("initDestroyComponent");
 			InitDestroyComponent bean = freshApplicationContext.getBean(InitDestroyComponent.class);
-			assertThat(bean.events).containsExactly("customInit", "init");
+			assertThat(bean.events).containsExactly("init", "customInit");
 			freshApplicationContext.close();
-			assertThat(bean.events).containsExactly("customInit", "init", "customDestroy", "destroy");
+			assertThat(bean.events).containsExactly("init", "customInit", "destroy", "customDestroy");
 		});
 	}
 

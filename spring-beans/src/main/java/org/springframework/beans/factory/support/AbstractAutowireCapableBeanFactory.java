@@ -1842,18 +1842,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void invokeCustomInitMethod(String beanName, Object bean, RootBeanDefinition mbd, String initMethodName)
 			throws Throwable {
 
+		Class<?> beanClass = bean.getClass();
+		MethodDescriptor descriptor = MethodDescriptor.create(beanName, beanClass, initMethodName);
+		String methodName = descriptor.methodName();
+
 		Method initMethod = (mbd.isNonPublicAccessAllowed() ?
-				BeanUtils.findMethod(bean.getClass(), initMethodName) :
-				ClassUtils.getMethodIfAvailable(bean.getClass(), initMethodName));
+				BeanUtils.findMethod(descriptor.declaringClass(), methodName) :
+				ClassUtils.getMethodIfAvailable(beanClass, methodName));
 
 		if (initMethod == null) {
 			if (mbd.isEnforceInitMethod()) {
 				throw new BeanDefinitionValidationException("Could not find an init method named '" +
-						initMethodName + "' on bean with name '" + beanName + "'");
+						methodName + "' on bean with name '" + beanName + "'");
 			}
 			else {
 				if (logger.isTraceEnabled()) {
-					logger.trace("No default init method named '" + initMethodName +
+					logger.trace("No default init method named '" + methodName +
 							"' found on bean with name '" + beanName + "'");
 				}
 				// Ignore non-existent default lifecycle methods.
@@ -1862,9 +1866,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Invoking init method '" + initMethodName + "' on bean with name '" + beanName + "'");
+			logger.trace("Invoking init method '" + methodName + "' on bean with name '" + beanName + "'");
 		}
-		Method methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(initMethod, bean.getClass());
+		Method methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(initMethod, beanClass);
 
 		try {
 			ReflectionUtils.makeAccessible(methodToInvoke);

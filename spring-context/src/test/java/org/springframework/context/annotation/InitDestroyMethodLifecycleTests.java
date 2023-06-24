@@ -18,18 +18,26 @@ package org.springframework.context.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.lifecyclemethods.InitDestroyBean;
 import org.springframework.context.annotation.lifecyclemethods.PackagePrivateInitDestroyBean;
+import org.springframework.context.aot.ApplicationContextAotGenerator;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.test.tools.CompileWithForkedClassLoader;
+import org.springframework.core.test.tools.Compiled;
+import org.springframework.core.test.tools.TestCompiler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -156,6 +164,79 @@ class InitDestroyMethodLifecycleTests {
 			);
 	}
 
+	/**
+	 * @see org.springframework.context.aot.ApplicationContextAotGeneratorTests#processAheadOfTimeWhenHasMultipleInitDestroyMethods
+	 */
+	@Test
+	@CompileWithForkedClassLoader
+	void jakartaAnnotationsWithCustomSameMethodNamesWithAotProcessingAndAotRuntime() {
+		Class<CustomAnnotatedPrivateSameNameInitDestroyBean> beanClass = CustomAnnotatedPrivateSameNameInitDestroyBean.class;
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+
+		DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
+
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
+		beanDefinition.setInitMethodName("customInit");
+		beanDefinition.setDestroyMethodName("customDestroy");
+		beanFactory.registerBeanDefinition("lifecycleTestBean", beanDefinition);
+
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext aotApplicationContext = createApplicationContext(initializer);
+			CustomAnnotatedPrivateSameNameInitDestroyBean bean = aotApplicationContext.getBean("lifecycleTestBean", beanClass);
+
+			assertThat(bean.initMethods).as("init-methods").containsExactly(
+					"afterPropertiesSet",
+					"@PostConstruct.privateCustomInit1",
+					"@PostConstruct.sameNameCustomInit1",
+					"customInit"
+				);
+
+			aotApplicationContext.close();
+			assertThat(bean.destroyMethods).as("destroy-methods").containsExactly(
+					"destroy",
+					"@PreDestroy.sameNameCustomDestroy1",
+					"@PreDestroy.privateCustomDestroy1",
+					"customDestroy"
+				);
+		});
+	}
+
+	@Test
+	@CompileWithForkedClassLoader
+	void jakartaAnnotationsWithPackagePrivateInitDestroyMethodsWithAotProcessingAndAotRuntime() {
+		Class<SubPackagePrivateInitDestroyBean> beanClass = SubPackagePrivateInitDestroyBean.class;
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+
+		DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(beanFactory);
+
+		RootBeanDefinition beanDefinition = new RootBeanDefinition(beanClass);
+		beanDefinition.setInitMethodName("initMethod");
+		beanDefinition.setDestroyMethodName("destroyMethod");
+		beanFactory.registerBeanDefinition("lifecycleTestBean", beanDefinition);
+
+		testCompiledResult(applicationContext, (initializer, compiled) -> {
+			GenericApplicationContext aotApplicationContext = createApplicationContext(initializer);
+			SubPackagePrivateInitDestroyBean bean = aotApplicationContext.getBean("lifecycleTestBean", beanClass);
+
+			assertThat(bean.initMethods).as("init-methods").containsExactly(
+					"InitializingBean.afterPropertiesSet",
+					"PackagePrivateInitDestroyBean.postConstruct",
+					"SubPackagePrivateInitDestroyBean.postConstruct",
+					"initMethod"
+				);
+
+			aotApplicationContext.close();
+			assertThat(bean.destroyMethods).as("destroy-methods").containsExactly(
+					"DisposableBean.destroy",
+					"SubPackagePrivateInitDestroyBean.preDestroy",
+					"PackagePrivateInitDestroyBean.preDestroy",
+					"destroyMethod"
+				);
+		});
+	}
+
 	@Test
 	void allLifecycleMechanismsAtOnce() {
 		Class<?> beanClass = AllInOneBean.class;
@@ -186,6 +267,31 @@ class InitDestroyMethodLifecycleTests {
 		beanDefinition.setDestroyMethodName(destroyMethodName);
 		beanFactory.registerBeanDefinition("lifecycleTestBean", beanDefinition);
 		return beanFactory;
+	}
+
+	private static GenericApplicationContext createApplicationContext(
+			ApplicationContextInitializer<GenericApplicationContext> initializer) {
+
+		GenericApplicationContext context = new GenericApplicationContext();
+		initializer.initialize(context);
+		context.refresh();
+		return context;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void testCompiledResult(GenericApplicationContext applicationContext,
+			BiConsumer<ApplicationContextInitializer<GenericApplicationContext>, Compiled> result) {
+
+		TestCompiler.forSystem().with(processAheadOfTime(applicationContext)).compile(compiled ->
+				result.accept(compiled.getInstance(ApplicationContextInitializer.class), compiled));
+	}
+
+	private static TestGenerationContext processAheadOfTime(GenericApplicationContext applicationContext) {
+		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
+		TestGenerationContext generationContext = new TestGenerationContext();
+		generator.processAheadOfTime(applicationContext, generationContext);
+		generationContext.writeGeneratedContent();
+		return generationContext;
 	}
 
 
