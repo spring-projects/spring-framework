@@ -65,10 +65,10 @@ class TestNGApplicationEventsAsyncIntegrationTests extends AbstractTestNGSpringC
 		context.publishEvent(new CustomEvent("asyncConsumption"));
 
 		Awaitility.await().atMost(Durations.ONE_SECOND)
-				.untilAsserted(() -> assertThat(assertThat(this.applicationEvents.stream(CustomEvent.class))
+				.untilAsserted(() -> assertThat(this.applicationEvents.stream(CustomEvent.class))
 						.singleElement()
 						.extracting(CustomEvent::getMessage, InstanceOfAssertFactories.STRING)
-						.isEqualTo("asyncConsumption")));
+						.isEqualTo("asyncConsumption"));
 	}
 
 
