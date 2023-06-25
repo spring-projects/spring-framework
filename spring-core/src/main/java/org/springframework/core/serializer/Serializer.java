@@ -52,7 +52,7 @@ public interface Serializer<T> {
 	 * @since 5.2.7
 	 */
 	default byte[] serializeToByteArray(T object) throws IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
+		var out = new ByteArrayOutputStream(1024);
 		serialize(object, out);
 		return out.toByteArray();
 	}
