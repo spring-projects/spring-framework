@@ -70,7 +70,8 @@ public class DeserializingConverter implements Converter<byte[], Object> {
 
 	@Override
 	public Object convert(byte[] source) {
-		try(var byteStream = new ByteArrayInputStream(source);) {
+		ByteArrayInputStream byteStream = new ByteArrayInputStream(source);
+		try {
 			return this.deserializer.deserialize(byteStream);
 		}
 		catch (Throwable ex) {

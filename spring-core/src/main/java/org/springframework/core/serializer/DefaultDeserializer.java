@@ -67,7 +67,7 @@ public class DefaultDeserializer implements Deserializer<Object> {
 	@Override
 	@SuppressWarnings("resource")
 	public Object deserialize(InputStream inputStream) throws IOException {
-		try (var objectInputStream = new ConfigurableObjectInputStream(inputStream, this.classLoader)){
+		try (ConfigurableObjectInputStream objectInputStream = new ConfigurableObjectInputStream(inputStream, this.classLoader)){
 			return objectInputStream.readObject();
 		}
 		catch (ClassNotFoundException ex) {
