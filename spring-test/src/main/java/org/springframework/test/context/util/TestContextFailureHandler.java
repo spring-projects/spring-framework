@@ -43,7 +43,7 @@ class TestContextFailureHandler implements FailureHandler {
 				logger.debug("""
 						Skipping candidate %1$s [%2$s] due to a missing dependency. \
 						Specify custom %1$s classes or make the default %1$s classes \
-						and their required dependencies available. Offending class: [%3$s]"""
+						and their required dependencies available. Offending class: %3$s"""
 							.formatted(factoryType.getSimpleName(), factoryImplementationName, ex.getMessage()));
 			}
 		}
