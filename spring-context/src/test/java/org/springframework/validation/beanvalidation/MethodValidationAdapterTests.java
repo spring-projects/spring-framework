@@ -18,12 +18,15 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.MessageSourceResolvable;
@@ -35,7 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link MethodValidationAdapter}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class MethodValidationAdapterTests {
 
@@ -46,6 +51,18 @@ public class MethodValidationAdapterTests {
 
 	private final MethodValidationAdapter validationAdapter = new MethodValidationAdapter();
 
+	private final Locale originalLocale = Locale.getDefault();
+
+
+	@BeforeEach
+	void setDefaultLocaleToEnglish() {
+		Locale.setDefault(Locale.ENGLISH);
+	}
+
+	@AfterEach
+	void resetDefaultLocale() {
+		Locale.setDefault(this.originalLocale);
+	}
 
 	@Test
 	void validateArguments() {
