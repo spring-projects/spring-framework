@@ -26,9 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Conventions;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
-import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -47,6 +45,8 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 
 	private static final Log logger = LogFactory.getLog(MicrometerObservationRegistryTestExecutionListener.class);
 
+	private static final String THREAD_LOCAL_ACCESSOR_CLASS_NAME = "io.micrometer.context.ThreadLocalAccessor";
+
 	private static final String OBSERVATION_THREAD_LOCAL_ACCESSOR_CLASS_NAME =
 			"io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor";
 
@@ -63,25 +63,41 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 			MicrometerObservationRegistryTestExecutionListener.class, "previousObservationRegistry");
 
 
-	static {
-		// Trigger eager resolution of Micrometer Observation types during static
-		// initialization of this class to ensure that this listener can be properly
-		// skipped when SpringFactoriesLoader attempts to load it, if micrometer-observation
-		// is not in the classpath or if the version of ObservationThreadLocalAccessor
+	public MicrometerObservationRegistryTestExecutionListener() {
+		// Trigger eager resolution of Micrometer Observation types to ensure that
+		// this listener can be properly skipped when SpringFactoriesLoader attempts
+		// to load it -- for example, if context-propagation and micrometer-observation
+		// are not in the classpath or if the version of ObservationThreadLocalAccessor
 		// present does not include the getObservationRegistry() method.
-		String errorMessage =
-				"MicrometerObservationRegistryTestExecutionListener requires micrometer-observation 1.10.8 or higher";
-		Class<?> clazz;
+		ClassLoader classLoader = getClass().getClassLoader();
+		String errorMessage = """
+				MicrometerObservationRegistryTestExecutionListener requires \
+				io.micrometer:micrometer-observation:1.10.8 or higher and \
+				io.micrometer:context-propagation:1.0.3 or higher.""";
+
 		try {
-			clazz = Class.forName(OBSERVATION_THREAD_LOCAL_ACCESSOR_CLASS_NAME, true,
-					TestExecutionListener.class.getClassLoader());
+			Class.forName(THREAD_LOCAL_ACCESSOR_CLASS_NAME, false, classLoader);
+			Class<?> clazz = Class.forName(OBSERVATION_THREAD_LOCAL_ACCESSOR_CLASS_NAME, false, classLoader);
+			Method method = ReflectionUtils.findMethod(clazz, "getObservationRegistry");
+			if (method == null) {
+				// We simulate "class not found" even though it's "method not found", since
+				// the ClassNotFoundException will be processed in the subsequent catch-block.
+				throw new ClassNotFoundException(OBSERVATION_THREAD_LOCAL_ACCESSOR_CLASS_NAME);
+			}
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException(errorMessage, ex);
+			// Ensure that we throw a NoClassDefFoundError so that the exception will be properly
+			// handled in TestContextFailureHandler.
+			// If the original exception was a ClassNotFoundException or NoClassDefFoundError,
+			// we throw a NoClassDefFoundError with an augmented error message and omit the cause.
+			if (ex instanceof ClassNotFoundException || ex instanceof NoClassDefFoundError) {
+				throw new NoClassDefFoundError(ex.getMessage() + ". " + errorMessage);
+			}
+			// Otherwise, we throw a NoClassDefFoundError with the cause initialized.
+			Error error = new NoClassDefFoundError(errorMessage);
+			error.initCause(ex);
+			throw error;
 		}
-
-		Method method = ReflectionUtils.findMethod(clazz, "getObservationRegistry");
-		Assert.state(method != null, errorMessage);
 	}
 
 
