@@ -136,6 +136,69 @@ However, the first of the two preceding examples does not couple the code to Spr
 [[beans-factory-lifecycle-disposablebean]]
 === Destruction Callbacks
 
+Destruction callbacks can be inferred using a `close` or `shutdown` method, or explicit using
+`DisposableBean` interface, xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[`@PreDestroy`]
+annotation or `destroy-method` attribute.
+
+[[beans-factory-lifecycle-destruction-callback-inferred]]
+==== Inferred destruction methods
+
+By default, beans defined with Java configuration that have a public `close` or `shutdown`
+method are automatically enlisted with a destruction callback. If you have a public
+`close` or `shutdown` method and you do not wish for it to be called when the container
+shuts down, you can add `@Bean(destroyMethod = "")` to your bean definition to disable the
+default `(inferred)` mode.
+
+[NOTE]
+=====
+You may want to disable the default `(inferred)` mode for a resource that you acquire with JNDI, as its
+lifecycle is managed outside the application. In particular, make sure to always do it
+for a `DataSource`, as it is known to be problematic on Jakarta EE application servers.
+
+The following example shows how to prevent an automatic destruction callback for a
+`DataSource`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes",role="primary"]
+----
+	@Bean(destroyMethod = "")
+	public DataSource dataSource() throws NamingException {
+		return (DataSource) jndiTemplate.lookup("MyDS");
+	}
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
+----
+	@Bean(destroyMethod = "")
+	fun dataSource(): DataSource {
+		return jndiTemplate.lookup("MyDS") as DataSource
+	}
+----
+======
+
+Also, with `@Bean` methods, you typically use programmatic JNDI lookups, either by
+using Spring's `JndiTemplate` or `JndiLocatorDelegate` helpers or straight JNDI
+`InitialContext` usage but not the `JndiObjectFactoryBean` variant (which would force
+you to declare the return type as the `FactoryBean` type instead of the actual target
+type, making it harder to use for cross-reference calls in other `@Bean` methods that
+intend to refer to the provided resource here).
+=====
+
+In XML Spring configuration, you can assign the `destroy-method` attribute of a `<bean>` element the special
+`(inferred)` value, which instructs Spring to automatically detect a public `close` or
+`shutdown` method on the specific bean class. (Any class that implements
+`java.lang.AutoCloseable` or `java.io.Closeable` would therefore match.) You can also set
+this special `(inferred)` value on the `default-destroy-method` attribute of a
+`<beans>` element to apply this behavior to an entire set of beans (see
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[Default Initialization and Destroy Methods]).
+
+[[beans-factory-lifecycle-destruction-callback-explicit]]
+==== Explicit destruction methods
 Implementing the `org.springframework.beans.factory.DisposableBean` interface lets a
 bean get a callback when the container that contains it is destroyed. The
 `DisposableBean` interface specifies a single method:
@@ -221,15 +284,6 @@ Kotlin::
 ======
 
 However, the first of the two preceding definitions does not couple the code to Spring.
-
-TIP: You can assign the `destroy-method` attribute of a `<bean>` element a special
-`(inferred)` value, which instructs Spring to automatically detect a public `close` or
-`shutdown` method on the specific bean class. (Any class that implements
-`java.lang.AutoCloseable` or `java.io.Closeable` would therefore match.) You can also set
-this special `(inferred)` value on the `default-destroy-method` attribute of a
-`<beans>` element to apply this behavior to an entire set of beans (see
-xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-default-init-destroy-methods[Default Initialization and Destroy Methods]). Note that this is the
-default behavior with Java configuration.
 
 [[beans-factory-lifecycle-default-init-destroy-methods]]
 === Default Initialization and Destroy Methods
@@ -339,7 +393,7 @@ interacts directly with the raw target bean.
 As of Spring 2.5, you have three options for controlling bean lifecycle behavior:
 
 * The xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[`InitializingBean`] and
-xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[`DisposableBean`] callback interfaces
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-destruction-callback-explicit[`DisposableBean`] callback interfaces
 * Custom `init()` and `destroy()` methods
 * The xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[`@PostConstruct` and `@PreDestroy` annotations]
 . You can combine these mechanisms to control a given bean.

@@ -5,7 +5,7 @@
 The annotation supports some of the attributes offered by `<bean/>`, such as:
 
 * xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-initializingbean[init-method]
-* xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-disposablebean[destroy-method]
+* xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-destruction-callback-explicit[destroy-method]
 * xref:core/beans/dependencies/factory-autowire.adoc[autowiring]
 * `name`.
 
@@ -193,6 +193,11 @@ and can use the `@PostConstruct` and `@PreDestroy` annotations from JSR-250. See
 xref:core/beans/annotation-config/postconstruct-and-predestroy-annotations.adoc[JSR-250 annotations] for further
 details.
 
+Any classes defined with the `@Bean` annotation also support inferred destruction methods and detect
+any public `close` or `shutdown` method as a destruction callback. See
+xref:core/beans/factory-nature.adoc#beans-factory-lifecycle-destruction-callback-inferred[Inferred destruction methods]
+for further details.
+
 The regular Spring xref:core/beans/factory-nature.adoc[lifecycle] callbacks are fully supported as
 well. If a bean implements `InitializingBean`, `DisposableBean`, or `Lifecycle`, their
 respective methods are called by the container.
@@ -270,52 +275,6 @@ class AppConfig {
 }
 ----
 ======
-
-[NOTE]
-=====
-By default, beans defined with Java configuration that have a public `close` or `shutdown`
-method are automatically enlisted with a destruction callback. If you have a public
-`close` or `shutdown` method and you do not wish for it to be called when the container
-shuts down, you can add `@Bean(destroyMethod = "")` to your bean definition to disable the
-default `(inferred)` mode.
-
-You may want to do that by default for a resource that you acquire with JNDI, as its
-lifecycle is managed outside the application. In particular, make sure to always do it
-for a `DataSource`, as it is known to be problematic on Jakarta EE application servers.
-
-The following example shows how to prevent an automatic destruction callback for a
-`DataSource`:
-
-[tabs]
-======
-Java::
-+
-[source,java,indent=0,subs="verbatim,quotes",role="primary"]
-----
-	@Bean(destroyMethod = "")
-	public DataSource dataSource() throws NamingException {
-		return (DataSource) jndiTemplate.lookup("MyDS");
-	}
-----
-
-Kotlin::
-+
-[source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
-----
-	@Bean(destroyMethod = "")
-	fun dataSource(): DataSource {
-		return jndiTemplate.lookup("MyDS") as DataSource
-	}
-----
-======
-
-Also, with `@Bean` methods, you typically use programmatic JNDI lookups, either by
-using Spring's `JndiTemplate` or `JndiLocatorDelegate` helpers or straight JNDI
-`InitialContext` usage but not the `JndiObjectFactoryBean` variant (which would force
-you to declare the return type as the `FactoryBean` type instead of the actual target
-type, making it harder to use for cross-reference calls in other `@Bean` methods that
-intend to refer to the provided resource here).
-=====
 
 In the case of `BeanOne` from the example above the preceding note, it would be equally valid to call the `init()`
 method directly during construction, as the following example shows:
