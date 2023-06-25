@@ -166,9 +166,9 @@ public class ClassPathXmlApplicationContextTests {
 	void contextWithInvalidLazyClass() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(INVALID_CLASS_CONTEXT, getClass());
 		assertThat(ctx.containsBean("someMessageSource")).isTrue();
-		assertThatExceptionOfType(CannotLoadBeanClassException.class).isThrownBy(() ->
-				ctx.getBean("someMessageSource"))
-			.satisfies(ex -> assertThat(ex.contains(ClassNotFoundException.class)).isTrue());
+		assertThatExceptionOfType(CannotLoadBeanClassException.class)
+				.isThrownBy(() -> ctx.getBean("someMessageSource"))
+				.withCauseExactlyInstanceOf(ClassNotFoundException.class);
 		ctx.close();
 	}
 
@@ -176,8 +176,7 @@ public class ClassPathXmlApplicationContextTests {
 	void contextWithClassNameThatContainsPlaceholder() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(CLASS_WITH_PLACEHOLDER_CONTEXT, getClass());
 		assertThat(ctx.containsBean("someMessageSource")).isTrue();
-		boolean condition = ctx.getBean("someMessageSource") instanceof StaticMessageSource;
-		assertThat(condition).isTrue();
+		assertThat(ctx.getBean("someMessageSource")).isInstanceOf(StaticMessageSource.class);
 		ctx.close();
 	}
 
