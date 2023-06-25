@@ -109,7 +109,7 @@ public class ConstructorArgumentValues {
 	public void addIndexedArgumentValue(int index, ValueHolder newValue) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
 		Assert.notNull(newValue, "ValueHolder must not be null");
-		addOrMergeIndexedArgumentValue(index, newValue);
+		addOrMergeIndexedArgumentValue(index, newValue.copy());
 	}
 
 	/**
