@@ -84,8 +84,8 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		listeners.put("*", null);
 		MBeanExporter exporter = new MBeanExporter();
 
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				exporter.setNotificationListenerMappings(listeners));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> exporter.setNotificationListenerMappings(listeners));
 	}
 
 	@Test
@@ -100,9 +100,10 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 		exporter.setBeans(getBeanMap());
 		exporter.setServer(server);
 		exporter.setNotificationListenerMappings(listeners);
-		assertThatExceptionOfType(MBeanExportException.class).as("NotificationListener on a non-existent MBean").isThrownBy(() ->
-				start(exporter))
-			.satisfies(ex -> assertThat(ex.contains(InstanceNotFoundException.class)).isTrue());
+		assertThatExceptionOfType(MBeanExportException.class)
+				.as("NotificationListener on a non-existent MBean")
+				.isThrownBy(() -> start(exporter))
+				.withCauseExactlyInstanceOf(InstanceNotFoundException.class);
 	}
 
 	@Test
@@ -165,8 +166,8 @@ public class MBeanExporterTests extends AbstractMBeanServerTests {
 			ObjectInstance instance = server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=true"));
 			assertThat(instance).isNotNull();
 
-			assertThatExceptionOfType(InstanceNotFoundException.class).isThrownBy(() ->
-					server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false")));
+			assertThatExceptionOfType(InstanceNotFoundException.class)
+					.isThrownBy(() -> server.getObjectInstance(ObjectNameManager.getInstance("spring:mbean=false")));
 		}
 	}
 
