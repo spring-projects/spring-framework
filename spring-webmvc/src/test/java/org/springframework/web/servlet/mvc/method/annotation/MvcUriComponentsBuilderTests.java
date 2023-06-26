@@ -294,6 +294,14 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
+	public void fromMethodCallOnSubclass() {
+		UriComponents uriComponents = fromMethodCall(on(ExtendedController.class).myMethod(null)).build();
+
+		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
+		assertThat(uriComponents.toUriString()).endsWith("/extended/else");
+	}
+
+	@Test
 	public void fromMethodCallPlain() {
 		UriComponents uriComponents = fromMethodCall(on(ControllerWithMethods.class).myMethod(null)).build();
 
@@ -302,11 +310,27 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromMethodCallOnSubclass() {
-		UriComponents uriComponents = fromMethodCall(on(ExtendedController.class).myMethod(null)).build();
+	public void fromMethodCallPlainWithNoArguments() {
+		UriComponents uriComponents = fromMethodCall(on(ControllerWithMethods.class).myMethod()).build();
 
 		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
-		assertThat(uriComponents.toUriString()).endsWith("/extended/else");
+		assertThat(uriComponents.toUriString()).endsWith("/something/noarg");
+	}
+
+	@Test
+	public void fromMethodCallPlainOnInterface() {
+		UriComponents uriComponents = fromMethodCall(on(ControllerInterface.class).myMethod(null)).build();
+
+		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
+		assertThat(uriComponents.toUriString()).endsWith("/something/else");
+	}
+
+	@Test
+	public void fromMethodCallPlainWithNoArgumentsOnInterface() {
+		UriComponents uriComponents = fromMethodCall(on(ControllerInterface.class).myMethod()).build();
+
+		assertThat(uriComponents.toUriString()).startsWith("http://localhost");
+		assertThat(uriComponents.toUriString()).endsWith("/something/noarg");
 	}
 
 	@Test
@@ -575,6 +599,11 @@ public class MvcUriComponentsBuilderTests {
 			return null;
 		}
 
+		@RequestMapping("/noarg")
+		HttpEntity<Void> myMethod() {
+			return null;
+		}
+
 		@RequestMapping("/{id}/foo")
 		HttpEntity<Void> methodWithPathVariable(@PathVariable String id) {
 			return null;
@@ -613,6 +642,17 @@ public class MvcUriComponentsBuilderTests {
 	@RequestMapping("/extended")
 	@SuppressWarnings("WeakerAccess")
 	static class ExtendedController extends ControllerWithMethods {
+	}
+
+
+	@RequestMapping("/something")
+	public interface ControllerInterface {
+
+		@RequestMapping("/else")
+		HttpEntity<Void> myMethod(@RequestBody Object payload);
+
+		@RequestMapping("/noarg")
+		HttpEntity<Void> myMethod();
 	}
 
 

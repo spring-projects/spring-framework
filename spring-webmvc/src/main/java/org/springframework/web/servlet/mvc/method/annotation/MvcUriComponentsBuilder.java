@@ -745,8 +745,8 @@ public class MvcUriComponentsBuilder {
 
 		@Override
 		@Nullable
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			return intercept(proxy, method, args, null);
+		public Object invoke(Object proxy, Method method, @Nullable Object[] args) {
+			return intercept(proxy, method, (args != null ? args : new Object[0]), null);
 		}
 
 		@Override
