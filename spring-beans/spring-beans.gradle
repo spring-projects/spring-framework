@@ -15,4 +15,5 @@ dependencies {
 	testImplementation("jakarta.annotation:jakarta.annotation-api")
 	testFixturesApi("org.junit.jupiter:junit-jupiter-api")
 	testFixturesImplementation("org.assertj:assertj-core")
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
 }

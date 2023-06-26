@@ -3190,6 +3190,7 @@ class DefaultListableBeanFactoryTests {
 	}
 
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static class CustomTypeConverter implements TypeConverter {
 
 		private final NumberFormat numberFormat;
@@ -3199,7 +3200,6 @@ class DefaultListableBeanFactoryTests {
 		}
 
 		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType) {
 			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
 				try {
@@ -3218,13 +3218,11 @@ class DefaultListableBeanFactoryTests {
 		}
 
 		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable MethodParameter methodParam) {
 			return convertIfNecessary(value, requiredType);
 		}
 
 		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Object convertIfNecessary(Object value, @Nullable Class requiredType, @Nullable Field field) {
 			return convertIfNecessary(value, requiredType);
 		}

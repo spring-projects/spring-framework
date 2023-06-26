@@ -1994,6 +1994,7 @@ abstract class AbstractPropertyAccessorTests {
 
 	}
 
+	@SuppressWarnings("unchecked")
 	static class Spr13837Bean implements Spr13837 {
 
 		protected Integer something;
@@ -2004,7 +2005,6 @@ abstract class AbstractPropertyAccessorTests {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public Spr13837Bean setSomething(final Integer something) {
 			this.something = something;
 			return this;
