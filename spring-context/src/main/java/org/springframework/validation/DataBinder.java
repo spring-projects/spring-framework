@@ -850,14 +850,32 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		Assert.state(this.target == null, "Target instance already available");
 		Assert.state(this.targetType != null, "Target type not set");
 
-		Class<?> clazz = this.targetType.resolve();
-		clazz = (Optional.class.equals(clazz) ? this.targetType.resolveGeneric(0) : clazz);
-		Assert.state(clazz != null, "Unknown data binding target type");
+		this.target = createObject(this.targetType, "", valueResolver);
 
+		if (!getBindingResult().hasErrors()) {
+			this.bindingResult = null;
+			if (this.typeConverter != null) {
+				this.typeConverter.registerCustomEditors(getPropertyAccessor());
+			}
+		}
+	}
+
+	@Nullable
+	private Object createObject(ResolvableType objectType, String nestedPath, ValueResolver valueResolver) {
+		Class<?> clazz = objectType.resolve();
+		boolean isOptional = (clazz == Optional.class);
+		clazz = (isOptional ? objectType.resolveGeneric(0) : clazz);
+		if (clazz == null) {
+			throw new IllegalStateException(
+					"Insufficient type information to create instance of " + objectType);
+		}
+
+		Object result = null;
 		Constructor<?> ctor = BeanUtils.getResolvableConstructor(clazz);
+
 		if (ctor.getParameterCount() == 0) {
 			// A single default constructor -> clearly a standard JavaBeans arrangement.
-			this.target = BeanUtils.instantiateClass(ctor);
+			result = BeanUtils.instantiateClass(ctor);
 		}
 		else {
 			// A single data class constructor -> resolve constructor arguments from request parameters.
@@ -865,90 +883,102 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			Class<?>[] paramTypes = ctor.getParameterTypes();
 			Object[] args = new Object[paramTypes.length];
 			Set<String> failedParamNames = new HashSet<>(4);
-			boolean bindFailure = false;
+
 			for (int i = 0; i < paramNames.length; i++) {
-				String paramName = paramNames[i];
+				String paramPath = nestedPath + paramNames[i];
 				Class<?> paramType = paramTypes[i];
-				Object value = valueResolver.resolveValue(paramName, paramType);
-				try {
-					MethodParameter methodParam = MethodParameter.forFieldAwareConstructor(ctor, i, paramName);
-					if (value == null && methodParam.isOptional()) {
-						args[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);
-					}
-					else {
-						args[i] = convertIfNecessary(value, paramType, methodParam);
-					}
+				Object value = valueResolver.resolveValue(paramPath, paramType);
+
+				MethodParameter param = MethodParameter.forFieldAwareConstructor(ctor, i, paramNames[i]);
+				if (value == null && !BeanUtils.isSimpleValueType(param.nestedIfOptional().getNestedParameterType())) {
+					ResolvableType type = ResolvableType.forMethodParameter(param);
+					args[i]  = createObject(type, paramPath + ".", valueResolver);
 				}
-				catch (TypeMismatchException ex) {
-					ex.initPropertyName(paramName);
-					args[i] = null;
-					failedParamNames.add(paramName);
-					getBindingResult().recordFieldValue(paramName, paramType, value);
-					getBindingErrorProcessor().processPropertyAccessException(ex, getBindingResult());
-					bindFailure = true;
+				else {
+					try {
+						if (value == null && (param.isOptional() || getBindingResult().hasErrors())) {
+							args[i] = (param.getParameterType() == Optional.class ? Optional.empty() : null);
+						}
+						else {
+							args[i] = convertIfNecessary(value, paramType, param);
+						}
+					}
+					catch (TypeMismatchException ex) {
+						ex.initPropertyName(paramPath);
+						args[i] = null;
+						failedParamNames.add(paramPath);
+						getBindingResult().recordFieldValue(paramPath, paramType, value);
+						getBindingErrorProcessor().processPropertyAccessException(ex, getBindingResult());
+					}
 				}
 			}
 
-			if (bindFailure) {
+			if (getBindingResult().hasErrors()) {
 				for (int i = 0; i < paramNames.length; i++) {
-					String paramName = paramNames[i];
-					if (!failedParamNames.contains(paramName)) {
+					String paramPath = nestedPath + paramNames[i];
+					if (!failedParamNames.contains(paramPath)) {
 						Object value = args[i];
-						getBindingResult().recordFieldValue(paramName, paramTypes[i], value);
-						validateArgument(ctor.getDeclaringClass(), paramName, value);
+						getBindingResult().recordFieldValue(paramPath, paramTypes[i], value);
+						validateConstructorArgument(ctor.getDeclaringClass(), nestedPath, paramNames[i], value);
 					}
 				}
-				if (!(this.targetType.getSource() instanceof MethodParameter param && param.isOptional())) {
+				if (!(objectType.getSource() instanceof MethodParameter param && param.isOptional())) {
 					try {
-						this.target = BeanUtils.instantiateClass(ctor, args);
+						result = BeanUtils.instantiateClass(ctor, args);
 					}
 					catch (BeanInstantiationException ex) {
 						// swallow and proceed without target instance
 					}
 				}
-				return;
 			}
-
-			try {
-				this.target = BeanUtils.instantiateClass(ctor, args);
-			}
-			catch (BeanInstantiationException ex) {
-				if (KotlinDetector.isKotlinType(clazz) && ex.getCause() instanceof NullPointerException cause) {
-					ObjectError error = new ObjectError(ctor.getName(), cause.getMessage());
-					getBindingResult().addError(error);
-					return;
+			else {
+				try {
+					result = BeanUtils.instantiateClass(ctor, args);
 				}
-				throw ex;
+				catch (BeanInstantiationException ex) {
+					if (KotlinDetector.isKotlinType(clazz) && ex.getCause() instanceof NullPointerException cause) {
+						ObjectError error = new ObjectError(ctor.getName(), cause.getMessage());
+						getBindingResult().addError(error);
+					}
+					else {
+						throw ex;
+					}
+				}
 			}
 		}
 
-		// Now that target is set, add PropertyEditor's to PropertyAccessor
-		if (this.typeConverter != null) {
-			this.typeConverter.registerCustomEditors(getPropertyAccessor());
-		}
+		return (isOptional && !nestedPath.isEmpty() ? Optional.ofNullable(result) : result);
 	}
 
-	private void validateArgument(Class<?> constructorClass, String name, @Nullable Object value) {
-		Object[] validationHints = null;
+	private void validateConstructorArgument(
+			Class<?> constructorClass, String nestedPath, String name, @Nullable Object value) {
+
+		Object[] hints = null;
 		if (this.targetType.getSource() instanceof MethodParameter parameter) {
 			for (Annotation ann : parameter.getParameterAnnotations()) {
-				validationHints = ValidationAnnotationUtils.determineValidationHints(ann);
-				if (validationHints != null) {
+				hints = ValidationAnnotationUtils.determineValidationHints(ann);
+				if (hints != null) {
 					break;
 				}
 			}
 		}
-		if (validationHints == null) {
+		if (hints == null) {
 			return;
 		}
 		for (Validator validator : getValidatorsToApply()) {
 			if (validator instanceof SmartValidator smartValidator) {
+				boolean isNested = !nestedPath.isEmpty();
+				if (isNested) {
+					getBindingResult().pushNestedPath(nestedPath.substring(0, nestedPath.length() - 1));
+				}
 				try {
-					smartValidator.validateValue(
-							constructorClass, name, value, getBindingResult(), validationHints);
+					smartValidator.validateValue(constructorClass, name, value, getBindingResult(), hints);
 				}
 				catch (IllegalArgumentException ex) {
 					// No corresponding field on the target class...
+				}
+				if (isNested) {
+					getBindingResult().popNestedPath();
 				}
 			}
 		}
