@@ -16,7 +16,7 @@
 
 package org.springframework.web.bind.support;
 
-import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -44,13 +44,14 @@ public interface WebDataBinderFactory {
 
 	/**
 	 * Variant of {@link #createBinder(NativeWebRequest, Object, String)} with a
-	 * {@link MethodParameter} for which the {@code DataBinder} is created. This
-	 * may provide more insight to initialize the {@link WebDataBinder}.
+	 * {@link ResolvableType} for which the {@code DataBinder} is created.
+	 * This may be used to construct the target, or otherwise provide more
+	 * insight on how to initialize the binder.
 	 * @since 6.1
 	 */
 	default WebDataBinder createBinder(
 			NativeWebRequest webRequest, @Nullable Object target, String objectName,
-			MethodParameter parameter) throws Exception {
+			ResolvableType targetType) throws Exception {
 
 		return createBinder(webRequest, target, objectName);
 	}

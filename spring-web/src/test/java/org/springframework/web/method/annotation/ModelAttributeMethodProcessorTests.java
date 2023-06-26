@@ -179,7 +179,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
 		WebDataBinderFactory factory = mock();
-		given(factory.createBinder(this.request, target, name, this.paramNamedValidModelAttr)).willReturn(dataBinder);
+		ResolvableType type = ResolvableType.forMethodParameter(this.paramNamedValidModelAttr);
+		given(factory.createBinder(this.request, target, name, type)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
 
@@ -198,7 +199,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
 		WebDataBinderFactory factory = mock();
-		given(factory.createBinder(this.request, target, name, this.paramNamedValidModelAttr)).willReturn(dataBinder);
+		ResolvableType type = ResolvableType.forMethodParameter(this.paramNamedValidModelAttr);
+		given(factory.createBinder(this.request, target, name, type)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
 
@@ -214,7 +216,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
 		WebDataBinderFactory factory = mock();
-		given(factory.createBinder(this.request, target, name, this.paramBindingDisabledAttr)).willReturn(dataBinder);
+		ResolvableType type = ResolvableType.forMethodParameter(this.paramBindingDisabledAttr);
+		given(factory.createBinder(this.request, target, name, type)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramBindingDisabledAttr, this.container, this.request, factory);
 
@@ -232,12 +235,13 @@ public class ModelAttributeMethodProcessorTests {
 		dataBinder.getBindingResult().reject("error");
 
 		WebDataBinderFactory binderFactory = mock();
-		given(binderFactory.createBinder(this.request, target, name, this.paramNonSimpleType)).willReturn(dataBinder);
+		ResolvableType type = ResolvableType.forMethodParameter(this.paramNonSimpleType);
+		given(binderFactory.createBinder(this.request, target, name, type)).willReturn(dataBinder);
 
 		assertThatExceptionOfType(MethodArgumentNotValidException.class).isThrownBy(() ->
 				this.processor.resolveArgument(this.paramNonSimpleType, this.container, this.request, binderFactory));
 
-		verify(binderFactory).createBinder(this.request, target, name, this.paramNonSimpleType);
+		verify(binderFactory).createBinder(this.request, target, name, type);
 	}
 
 	@Test  // SPR-9378
@@ -252,7 +256,8 @@ public class ModelAttributeMethodProcessorTests {
 
 		StubRequestDataBinder dataBinder = new StubRequestDataBinder(testBean, name);
 		WebDataBinderFactory binderFactory = mock();
-		given(binderFactory.createBinder(this.request, testBean, name, this.paramModelAttr)).willReturn(dataBinder);
+		ResolvableType type = ResolvableType.forMethodParameter(this.paramModelAttr);
+		given(binderFactory.createBinder(this.request, testBean, name, type)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(this.paramModelAttr, this.container, this.request, binderFactory);
 
@@ -301,10 +306,11 @@ public class ModelAttributeMethodProcessorTests {
 
 		WebDataBinder dataBinder = new WebRequestDataBinder(target);
 		WebDataBinderFactory factory = mock();
-		given(factory.createBinder(this.request, target, expectedAttrName, param)).willReturn(dataBinder);
+		ResolvableType type = ResolvableType.forMethodParameter(param);
+		given(factory.createBinder(this.request, target, expectedAttrName, type)).willReturn(dataBinder);
 
 		this.processor.resolveArgument(param, this.container, this.request, factory);
-		verify(factory).createBinder(this.request, target, expectedAttrName, param);
+		verify(factory).createBinder(this.request, target, expectedAttrName, type);
 	}
 
 

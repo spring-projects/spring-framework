@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -142,7 +143,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 		// No BindingResult yet, proceed with binding and validation
 		if (bindingResult == null) {
-			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name, parameter);
+			ResolvableType type = ResolvableType.forMethodParameter(parameter);
+			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name, type);
 			if (attribute == null) {
 				constructAttribute(binder, webRequest);
 				attribute = wrapAsOptionalIfNecessary(parameter, binder.getTarget());

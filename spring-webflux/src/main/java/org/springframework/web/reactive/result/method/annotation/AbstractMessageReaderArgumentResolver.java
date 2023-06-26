@@ -265,11 +265,12 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 		return null;
 	}
 
-	private void validate(Object target, Object[] validationHints, MethodParameter param,
+	private void validate(Object target, Object[] validationHints, MethodParameter parameter,
 			BindingContext binding, ServerWebExchange exchange) {
 
-		String name = Conventions.getVariableNameForParameter(param);
-		WebExchangeDataBinder binder = binding.createDataBinder(exchange, target, name, param);
+		String name = Conventions.getVariableNameForParameter(parameter);
+		ResolvableType type = ResolvableType.forMethodParameter(parameter);
+		WebExchangeDataBinder binder = binding.createDataBinder(exchange, target, name, type);
 		try {
 			LocaleContextHolder.setLocaleContext(exchange.getLocaleContext());
 			binder.validate(validationHints);
@@ -278,7 +279,7 @@ public abstract class AbstractMessageReaderArgumentResolver extends HandlerMetho
 			LocaleContextHolder.resetLocaleContext();
 		}
 		if (binder.getBindingResult().hasErrors()) {
-			throw new WebExchangeBindException(param, binder.getBindingResult());
+			throw new WebExchangeBindException(parameter, binder.getBindingResult());
 		}
 	}
 

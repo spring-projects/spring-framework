@@ -148,13 +148,7 @@ public class WebExchangeDataBinder extends WebDataBinder {
 	/**
 	 * Resolve values from a map.
 	 */
-	private static class MapValueResolver implements ValueResolver {
-
-		private final Map<String, Object> map;
-
-		private MapValueResolver(Map<String, Object> map) {
-			this.map = map;
-		}
+	private record MapValueResolver(Map<String, Object> map) implements ValueResolver {
 
 		@Override
 		public Object resolveValue(String name, Class<?> type) {

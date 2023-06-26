@@ -23,6 +23,7 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
@@ -139,7 +140,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, name);
 				arg = readWithMessageConverters(inputMessage, parameter, parameter.getNestedGenericParameterType());
 				if (binderFactory != null) {
-					WebDataBinder binder = binderFactory.createBinder(request, arg, name, parameter);
+					ResolvableType type = ResolvableType.forMethodParameter(parameter);
+					WebDataBinder binder = binderFactory.createBinder(request, arg, name, type);
 					if (arg != null) {
 						validateIfApplicable(binder, parameter);
 						if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {

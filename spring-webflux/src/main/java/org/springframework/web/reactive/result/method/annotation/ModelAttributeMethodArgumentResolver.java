@@ -28,6 +28,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
@@ -150,14 +151,15 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		if (value == null) {
 			value = removeReactiveAttribute(name, context.getModel());
 		}
+		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 		if (value != null) {
 			ReactiveAdapter adapter = getAdapterRegistry().getAdapter(null, value);
 			Assert.isTrue(adapter == null || !adapter.isMultiValue(), "Multi-value publisher is not supported");
 			return (adapter != null ? Mono.from(adapter.toPublisher(value)) : Mono.just(value))
-					.map(attr -> context.createDataBinder(exchange, attr, name, parameter));
+					.map(attr -> context.createDataBinder(exchange, attr, name, type));
 		}
 		else {
-			WebExchangeDataBinder binder = context.createDataBinder(exchange, null, name, parameter);
+			WebExchangeDataBinder binder = context.createDataBinder(exchange, null, name, type);
 			return constructAttribute(binder, exchange).thenReturn(binder);
 		}
 	}

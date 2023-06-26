@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -134,7 +135,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		String name = Conventions.getVariableNameForParameter(parameter);
 
 		if (binderFactory != null) {
-			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name, parameter);
+			ResolvableType type = ResolvableType.forMethodParameter(parameter);
+			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name, type);
 			if (arg != null) {
 				validateIfApplicable(binder, parameter);
 				if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {

@@ -116,17 +116,17 @@ public class BindingContext {
 	}
 
 	/**
-	 * Create a binder with a target object and a {@code MethodParameter}.
+	 * Create a binder with a target object and a {@link ResolvableType targetType}.
 	 * If the target is {@code null}, then
 	 * {@link WebExchangeDataBinder#setTargetType targetType} is set.
 	 * @since 6.1
 	 */
 	public WebExchangeDataBinder createDataBinder(
-			ServerWebExchange exchange, @Nullable Object target, String name, @Nullable MethodParameter parameter) {
+			ServerWebExchange exchange, @Nullable Object target, String name, @Nullable ResolvableType targetType) {
 
 		WebExchangeDataBinder dataBinder = new ExtendedWebExchangeDataBinder(target, name);
-		if (target == null && parameter != null) {
-			dataBinder.setTargetType(ResolvableType.forMethodParameter(parameter));
+		if (target == null && targetType != null) {
+			dataBinder.setTargetType(targetType);
 		}
 
 		if (this.initializer != null) {
@@ -134,8 +134,10 @@ public class BindingContext {
 		}
 		dataBinder = initDataBinder(dataBinder, exchange);
 
-		if (this.methodValidationApplicable && parameter != null) {
-			MethodValidationInitializer.initBinder(dataBinder, parameter);
+		if (this.methodValidationApplicable && targetType != null) {
+			if (targetType.getSource() instanceof MethodParameter parameter) {
+				MethodValidationInitializer.initBinder(dataBinder, parameter);
+			}
 		}
 
 		return dataBinder;

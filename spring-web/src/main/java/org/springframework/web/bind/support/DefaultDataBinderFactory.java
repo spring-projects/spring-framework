@@ -81,19 +81,19 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	@Override
 	public final WebDataBinder createBinder(
 			NativeWebRequest webRequest, @Nullable Object target, String objectName,
-			MethodParameter parameter) throws Exception {
+			ResolvableType type) throws Exception {
 
-		return createBinderInternal(webRequest, target, objectName, parameter);
+		return createBinderInternal(webRequest, target, objectName, type);
 	}
 
 	private WebDataBinder createBinderInternal(
 			NativeWebRequest webRequest, @Nullable Object target, String objectName,
-			@Nullable MethodParameter parameter) throws Exception {
+			@Nullable ResolvableType type) throws Exception {
 
 		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);
 
-		if (target == null && parameter != null) {
-			dataBinder.setTargetType(ResolvableType.forMethodParameter(parameter));
+		if (target == null && type != null) {
+			dataBinder.setTargetType(type);
 		}
 
 		if (this.initializer != null) {
@@ -101,8 +101,10 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 		}
 		initBinder(dataBinder, webRequest);
 
-		if (this.methodValidationApplicable && parameter != null) {
-			MethodValidationInitializer.initBinder(dataBinder, parameter);
+		if (this.methodValidationApplicable && type != null) {
+			if (type.getSource() instanceof MethodParameter parameter) {
+				MethodValidationInitializer.initBinder(dataBinder, parameter);
+			}
 		}
 
 		return dataBinder;
