@@ -10,4 +10,5 @@ dependencies {
 	testImplementation(testFixtures(project(":spring-core")))
 	testFixturesImplementation(testFixtures(project(":spring-beans")))
 	testFixturesImplementation(testFixtures(project(":spring-core")))
+	testFixturesImplementation("com.google.code.findbugs:jsr305")
 }
