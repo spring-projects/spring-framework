@@ -127,8 +127,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			if (!this.invokeAutoCloseable) {
 				this.destroyMethodNames = destroyMethodNames;
 				List<Method> destroyMethods = new ArrayList<>(destroyMethodNames.length);
-				for (int i = 0; i < destroyMethodNames.length; i++) {
-					String destroyMethodName = destroyMethodNames[i];
+				for (String destroyMethodName : destroyMethodNames) {
 					Method destroyMethod = determineDestroyMethod(destroyMethodName);
 					if (destroyMethod == null) {
 						if (beanDefinition.isEnforceDestroyMethod()) {
