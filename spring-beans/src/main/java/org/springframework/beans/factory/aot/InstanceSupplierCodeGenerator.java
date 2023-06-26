@@ -220,7 +220,9 @@ class InstanceSupplierCodeGenerator {
 			CodeBlock.Builder code = CodeBlock.builder();
 			code.add("$T.<$T>forFactoryMethod($T.class, $S)", BeanInstanceSupplier.class,
 					suppliedType, declaringClass, factoryMethod.getName());
-			code.add(".withGenerator($T::$L)", declaringClass, factoryMethod.getName());
+			if (!isFactoryMethodAmbiguous(factoryMethod.getName(), declaringClass)) {
+				code.add(".withGenerator($T::$L)", declaringClass, factoryMethod.getName());
+			}
 			return code.build();
 		}
 
@@ -228,6 +230,12 @@ class InstanceSupplierCodeGenerator {
 				buildGetInstanceMethodForFactoryMethod(method, beanName, factoryMethod,
 						declaringClass, dependsOnBean, PRIVATE_STATIC));
 		return generateReturnStatement(getInstanceMethod);
+	}
+	private boolean isFactoryMethodAmbiguous(String methodName, Class<?> declaringClass) {
+		long count = Arrays.stream(declaringClass.getMethods())
+				.filter(method -> method.getName().equals(methodName))
+				.count();
+		return count > 1;
 	}
 
 	private CodeBlock generateCodeForInaccessibleFactoryMethod(

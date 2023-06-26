@@ -585,6 +585,13 @@ class BeanDefinitionMethodGeneratorTests {
 	}
 
 	@Test
+	void generateBeanDefinitionMethodWhenFactoryMethodIsAmbiguous() {
+		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
+				.rootBeanDefinition(DocumentBuilderFactory.class).setFactoryMethod("newNSInstance").getBeanDefinition();
+		testBeanDefinitionMethodInCurrentFile(DocumentBuilderFactory.class, beanDefinition);
+	}
+
+	@Test
 	void generateBeanDefinitionMethodWhenBeanIsOfPrimitiveType() {
 		RootBeanDefinition beanDefinition = (RootBeanDefinition) BeanDefinitionBuilder
 				.rootBeanDefinition(Boolean.class).setFactoryMethod("parseBoolean").addConstructorArgValue("true").getBeanDefinition();
