@@ -18,12 +18,15 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.MessageSourceResolvable;
@@ -35,7 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link MethodValidationAdapter}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class MethodValidationAdapterTests {
 
@@ -46,6 +51,18 @@ public class MethodValidationAdapterTests {
 
 	private final MethodValidationAdapter validationAdapter = new MethodValidationAdapter();
 
+	private final Locale originalLocale = Locale.getDefault();
+
+
+	@BeforeEach
+	void setDefaultLocaleToEnglish() {
+		Locale.setDefault(Locale.ENGLISH);
+	}
+
+	@AfterEach
+	void resetDefaultLocale() {
+		Locale.setDefault(this.originalLocale);
+	}
 
 	@Test
 	void validateArguments() {
@@ -57,30 +74,26 @@ public class MethodValidationAdapterTests {
 			assertThat(ex.getConstraintViolations()).hasSize(3);
 			assertThat(ex.getAllValidationResults()).hasSize(3);
 
-			assertBeanResult(ex.getBeanResults().get(0), 0, "student", faustino1234, List.of(
-					"""
-			Field error in object 'student' on field 'name': rejected value [Faustino1234]; \
-			codes [Size.student.name,Size.name,Size.java.lang.String,Size]; \
-			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [student.name,name]; arguments []; default message [name],10,1]; \
-			default message [size must be between 1 and 10]"""));
+			assertBeanResult(ex.getBeanResults().get(0), 0, "student", faustino1234, List.of("""
+				Field error in object 'student' on field 'name': rejected value [Faustino1234]; \
+				codes [Size.student.name,Size.name,Size.java.lang.String,Size]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [student.name,name]; arguments []; default message [name],10,1]; \
+				default message [size must be between 1 and 10]"""));
 
-			assertBeanResult(ex.getBeanResults().get(1), 1, "guardian", cayetana6789, List.of(
-					"""
-			Field error in object 'guardian' on field 'name': rejected value [Cayetana6789]; \
-			codes [Size.guardian.name,Size.name,Size.java.lang.String,Size]; \
-			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [guardian.name,name]; arguments []; default message [name],10,1]; \
-			default message [size must be between 1 and 10]"""));
+			assertBeanResult(ex.getBeanResults().get(1), 1, "guardian", cayetana6789, List.of("""
+				Field error in object 'guardian' on field 'name': rejected value [Cayetana6789]; \
+				codes [Size.guardian.name,Size.name,Size.java.lang.String,Size]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [guardian.name,name]; arguments []; default message [name],10,1]; \
+				default message [size must be between 1 and 10]"""));
 
-			assertValueResult(ex.getValueResults().get(0), 2, 3, List.of(
-					"""
-			org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [Max.myService#addStudent.degrees,Max.degrees,Max.int,Max]; \
-			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [myService#addStudent.degrees,degrees]; arguments []; default message [degrees],2]; \
-			default message [must be less than or equal to 2]"""
-			));
+			assertValueResult(ex.getValueResults().get(0), 2, 3, List.of("""
+				org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [Max.myService#addStudent.degrees,Max.degrees,Max.int,Max]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [myService#addStudent.degrees,degrees]; arguments []; default message [degrees],2]; \
+				default message [must be less than or equal to 2]"""));
 		});
 	}
 
@@ -96,13 +109,12 @@ public class MethodValidationAdapterTests {
 			assertThat(ex.getConstraintViolations()).hasSize(1);
 			assertThat(ex.getAllValidationResults()).hasSize(1);
 
-			assertBeanResult(ex.getBeanResults().get(0), 0, "studentToAdd", faustino1234, List.of(
-					"""
-			Field error in object 'studentToAdd' on field 'name': rejected value [Faustino1234]; \
-			codes [Size.studentToAdd.name,Size.name,Size.java.lang.String,Size]; \
-			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [studentToAdd.name,name]; arguments []; default message [name],10,1]; \
-			default message [size must be between 1 and 10]"""));
+			assertBeanResult(ex.getBeanResults().get(0), 0, "studentToAdd", faustino1234, List.of("""
+				Field error in object 'studentToAdd' on field 'name': rejected value [Faustino1234]; \
+				codes [Size.studentToAdd.name,Size.name,Size.java.lang.String,Size]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [studentToAdd.name,name]; arguments []; default message [name],10,1]; \
+				default message [size must be between 1 and 10]"""));
 		});
 	}
 
@@ -115,14 +127,12 @@ public class MethodValidationAdapterTests {
 			assertThat(ex.getConstraintViolations()).hasSize(1);
 			assertThat(ex.getAllValidationResults()).hasSize(1);
 
-			assertValueResult(ex.getValueResults().get(0), -1, 4, List.of(
-					"""
-			org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [Min.myService#getIntValue,Min,Min.int]; \
-			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [myService#getIntValue]; arguments []; default message [],5]; \
-			default message [must be greater than or equal to 5]"""
-			));
+			assertValueResult(ex.getValueResults().get(0), -1, 4, List.of("""
+				org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [Min.myService#getIntValue,Min,Min.int]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [myService#getIntValue]; arguments []; default message [],5]; \
+				default message [must be greater than or equal to 5]"""));
 		});
 	}
 
@@ -135,13 +145,12 @@ public class MethodValidationAdapterTests {
 			assertThat(ex.getConstraintViolations()).hasSize(1);
 			assertThat(ex.getAllValidationResults()).hasSize(1);
 
-			assertBeanResult(ex.getBeanResults().get(0), -1, "person", faustino1234, List.of(
-					"""
-			Field error in object 'person' on field 'name': rejected value [Faustino1234]; \
-			codes [Size.person.name,Size.name,Size.java.lang.String,Size]; \
-			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [person.name,name]; arguments []; default message [name],10,1]; \
-			default message [size must be between 1 and 10]"""));
+			assertBeanResult(ex.getBeanResults().get(0), -1, "person", faustino1234, List.of("""
+				Field error in object 'person' on field 'name': rejected value [Faustino1234]; \
+				codes [Size.person.name,Size.name,Size.java.lang.String,Size]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [person.name,name]; arguments []; default message [name],10,1]; \
+				default message [size must be between 1 and 10]"""));
 		});
 	}
 
@@ -159,21 +168,19 @@ public class MethodValidationAdapterTests {
 			String objectName = "people";
 			List<ParameterErrors> results = ex.getBeanResults();
 
-			assertBeanResult(results.get(0), paramIndex, objectName, faustino1234, List.of(
-					"""
-			Field error in object 'people' on field 'name': rejected value [Faustino1234]; \
-			codes [Size.people.name,Size.name,Size.java.lang.String,Size]; \
-			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [people.name,name]; arguments []; default message [name],10,1]; \
-			default message [size must be between 1 and 10]"""));
+			assertBeanResult(results.get(0), paramIndex, objectName, faustino1234, List.of("""
+				Field error in object 'people' on field 'name': rejected value [Faustino1234]; \
+				codes [Size.people.name,Size.name,Size.java.lang.String,Size]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [people.name,name]; arguments []; default message [name],10,1]; \
+				default message [size must be between 1 and 10]"""));
 
-			assertBeanResult(results.get(1), paramIndex, objectName, cayetana6789, List.of(
-					"""
-			Field error in object 'people' on field 'name': rejected value [Cayetana6789]; \
-			codes [Size.people.name,Size.name,Size.java.lang.String,Size]; \
-			arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
-			codes [people.name,name]; arguments []; default message [name],10,1]; \
-			default message [size must be between 1 and 10]"""));
+			assertBeanResult(results.get(1), paramIndex, objectName, cayetana6789, List.of("""
+				Field error in object 'people' on field 'name': rejected value [Cayetana6789]; \
+				codes [Size.people.name,Size.name,Size.java.lang.String,Size]; \
+				arguments [org.springframework.context.support.DefaultMessageSourceResolvable: \
+				codes [people.name,name]; arguments []; default message [name],10,1]; \
+				default message [size must be between 1 and 10]"""));
 		});
 	}
 
