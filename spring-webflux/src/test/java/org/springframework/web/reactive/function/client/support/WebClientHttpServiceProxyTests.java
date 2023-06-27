@@ -190,7 +190,7 @@ public class WebClientHttpServiceProxyTests {
 		@PostExchange(contentType = "application/x-www-form-urlencoded")
 		void postForm(@RequestParam MultiValueMap<String, String> params);
 
-		@PostExchange(contentType = MediaType.MULTIPART_FORM_DATA_VALUE)
+		@PostExchange
 		void postMultipart(MultipartFile file, @RequestPart String anotherPart);
 
 	}

@@ -21,7 +21,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -35,7 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link MultipartFileArgumentResolver}.
- * Tests for base class functionality of this resolver can be found in {@link NamedValueArgumentResolverTests}.
+ * Tests for base class functionality of this resolver can be found in
+ * {@link NamedValueArgumentResolverTests}.
  *
  * @author Olga Maciaszek-Sharma
  */
@@ -46,47 +46,48 @@ class MultipartFileArgumentResolverTests {
 
 	private TestClient client;
 
+
 	@BeforeEach
 	void setUp() {
-		HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builder(this.clientAdapter).build();
-		this.client = proxyFactory.createClient(TestClient.class);
+		HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(this.clientAdapter).build();
+		this.client = factory.createClient(TestClient.class);
 	}
+
 
 	@Test
 	void multipartFile() {
 		String fileName = "testFileName";
 		String originalFileName = "originalTestFileName";
-		MultipartFile testFile = new MockMultipartFile(fileName, originalFileName,
-				MediaType.APPLICATION_JSON_VALUE, "test".getBytes());
+		MultipartFile testFile = new MockMultipartFile(fileName, originalFileName, "text/plain", "test".getBytes());
+
 		this.client.postMultipartFile(testFile);
+		Object value = this.clientAdapter.getRequestValues().getBodyValue();
 
-		Object body = clientAdapter.getRequestValues().getBodyValue();
+		assertThat(value).isInstanceOf(MultiValueMap.class);
+		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) value;
+		assertThat(map).hasSize(1);
 
-		assertThat(body).isInstanceOf(MultiValueMap.class);
-		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) body;
-		assertThat(map.size()).isEqualTo(1);
-		assertThat(map.getFirst("file")).isNotNull();
-		HttpEntity<?> fileEntity = map.getFirst("file");
-		assertThat(fileEntity.getBody()).isEqualTo(testFile.getResource());
-		HttpHeaders headers = fileEntity.getHeaders();
-		assertThat(headers.getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
-		ContentDisposition contentDisposition = headers.getContentDisposition();
-		assertThat(contentDisposition.getType()).isEqualTo("form-data");
-		assertThat(contentDisposition.getName()).isEqualTo("file");
-		assertThat(contentDisposition.getFilename()).isEqualTo(originalFileName);
+		HttpEntity<?> entity = map.getFirst("file");
+		assertThat(entity).isNotNull();
+		assertThat(entity.getBody()).isEqualTo(testFile.getResource());
+
+		HttpHeaders headers = entity.getHeaders();
+		assertThat(headers.getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+		assertThat(headers.getContentDisposition().getType()).isEqualTo("form-data");
+		assertThat(headers.getContentDisposition().getName()).isEqualTo("file");
+		assertThat(headers.getContentDisposition().getFilename()).isEqualTo(originalFileName);
 	}
 
 	@Test
 	void optionalMultipartFile() {
 		this.client.postOptionalMultipartFile(Optional.empty(), "anotherPart");
+		Object value = clientAdapter.getRequestValues().getBodyValue();
 
-		Object body = clientAdapter.getRequestValues().getBodyValue();
-
-		assertThat(body).isInstanceOf(MultiValueMap.class);
-		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) body;
-		assertThat(map.size()).isEqualTo(1);
-		assertThat(map.getFirst("anotherPart")).isNotNull();
+		assertThat(value).isInstanceOf(MultiValueMap.class);
+		MultiValueMap<String, HttpEntity<?>> map = (MultiValueMap<String, HttpEntity<?>>) value;
+		assertThat(map).containsOnlyKeys("anotherPart");
 	}
+
 
 	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private interface TestClient {
@@ -98,4 +99,5 @@ class MultipartFileArgumentResolverTests {
 		void postOptionalMultipartFile(Optional<MultipartFile> file, @RequestPart String anotherPart);
 
 	}
+
 }

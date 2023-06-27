@@ -19,7 +19,6 @@ package org.springframework.web.service.invoker;
 import java.util.Optional;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
@@ -27,36 +26,29 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * {@link HttpServiceArgumentResolver} for arguments of type {@link MultipartFile}.
- * The arguments should not be annotated. To allow for non-required arguments,
- * the {@link MultipartFile} parameters can also be wrapped with {@link Optional}.
+ * The argument is recognized by type, and does not need to be annotated. To make
+ * it optional, declare the parameter with an {@link Optional} wrapper.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Rossen Stoyanchev
  * @since 6.1
  */
 public class MultipartFileArgumentResolver extends AbstractNamedValueArgumentResolver {
 
-	private static final String MULTIPART_FILE_LABEL = "multipart file";
-
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		if (!parameter.nestedIfOptional().getNestedParameterType().equals(MultipartFile.class)) {
-			return null;
-		}
-		return new NamedValueInfo("", true, null, MULTIPART_FILE_LABEL, true);
-
+		Class<?> type = parameter.nestedIfOptional().getNestedParameterType();
+		return (type.equals(MultipartFile.class) ?
+				new NamedValueInfo("", true, null, "MultipartFile", true) : null);
 	}
 
 	@Override
-	protected void addRequestValue(String name, Object value, MethodParameter parameter,
-			HttpRequestValues.Builder requestValues) {
-		Assert.state(value instanceof MultipartFile,
-				"The value has to be of type 'MultipartFile'");
+	protected void addRequestValue(
+			String name, Object value, MethodParameter parameter, HttpRequestValues.Builder values) {
 
+		Assert.state(value instanceof MultipartFile, "Expected MultipartFile value");
 		MultipartFile file = (MultipartFile) value;
-		requestValues.addRequestPart(name, toHttpEntity(name, file));
-	}
 
-	private HttpEntity<Resource> toHttpEntity(String name, MultipartFile file) {
 		HttpHeaders headers = new HttpHeaders();
 		if (file.getOriginalFilename() != null) {
 			headers.setContentDispositionFormData(name, file.getOriginalFilename());
@@ -64,7 +56,8 @@ public class MultipartFileArgumentResolver extends AbstractNamedValueArgumentRes
 		if (file.getContentType() != null) {
 			headers.add(HttpHeaders.CONTENT_TYPE, file.getContentType());
 		}
-		return new HttpEntity<>(file.getResource(), headers);
+
+		values.addRequestPart(name, new HttpEntity<>(file.getResource(), headers));
 	}
 
 }

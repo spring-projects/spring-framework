@@ -448,6 +448,10 @@ method parameters:
   Object (entity to be encoded, e.g. as JSON), `HttpEntity` (part content and headers),
   a Spring `Part`, or Reactive Streams `Publisher` of any of the above.
 
+| `MultipartFile`
+| Add a request part from a `MultipartFile`, typically used in a Spring MVC controller
+  where it represents an uploaded file.
+
 | `@CookieValue`
 | Add a cookie or multiple cookies. The argument may be a `Map<String, ?>` or
   `MultiValueMap<String, ?>` with multiple cookies, a `Collection<?>` of values, or an
