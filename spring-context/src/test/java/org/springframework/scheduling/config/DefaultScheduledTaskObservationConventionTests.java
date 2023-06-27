@@ -58,13 +58,14 @@ class DefaultScheduledTaskObservationConventionTests {
 	@Test
 	void observationShouldHaveTargetType() {
 		ScheduledTaskObservationContext context = new ScheduledTaskObservationContext(new BeanWithScheduledMethods(), taskMethod);
-		assertThat(convention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("target.type", "BeanWithScheduledMethods"));
+		assertThat(convention.getLowCardinalityKeyValues(context))
+				.contains(KeyValue.of("code.namespace", getClass().getCanonicalName() + ".BeanWithScheduledMethods"));
 	}
 
 	@Test
 	void observationShouldHaveMethodName() {
 		ScheduledTaskObservationContext context = new ScheduledTaskObservationContext(new BeanWithScheduledMethods(), taskMethod);
-		assertThat(convention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("method.name", "process"));
+		assertThat(convention.getLowCardinalityKeyValues(context)).contains(KeyValue.of("code.function", "process"));
 	}
 
 	@Test

@@ -101,10 +101,10 @@ By default, the following `KeyValues` are created:
 [cols="a,a"]
 |===
 |Name | Description
+|`code.function` _(required)_|Name of Java `Method` that is scheduled for execution.
+|`code.namespace` _(required)_|Canonical name of the class of the bean instance that holds the scheduled method.
 |`exception` _(required)_|Name of the exception thrown during the execution, or `KeyValue#NONE_VALUE`} if no exception happened.
-|`method.name` _(required)_|Name of Java `Method` that is scheduled for execution.
 |`outcome` _(required)_|Outcome of the method execution. Can be `"SUCCESS"`, `"ERROR"` or `"UNKNOWN"` (if for example the operation was cancelled during execution.
-|`target.type` _(required)_|Simple class name of the bean instance that holds the scheduled method.
 |===
 
 

@@ -56,22 +56,22 @@ public enum ScheduledTaskObservationDocumentation implements ObservationDocument
 	public enum LowCardinalityKeyNames implements KeyName {
 
 		/**
-		 * {@link Class#getSimpleName() Simple name} of the target type that owns the scheduled method.
+		 * Name of the method that is executed for the scheduled task.
 		 */
-		TARGET_TYPE {
+		CODE_FUNCTION {
 			@Override
 			public String asString() {
-				return "target.type";
+				return "code.function";
 			}
 		},
 
 		/**
-		 * Name of the method that is executed for the scheduled task.
+		 * {@link Class#getCanonicalName() Canonical name} of the target type that owns the scheduled method.
 		 */
-		METHOD_NAME {
+		CODE_NAMESPACE {
 			@Override
 			public String asString() {
-				return "method.name";
+				return "code.namespace";
 			}
 		},
 

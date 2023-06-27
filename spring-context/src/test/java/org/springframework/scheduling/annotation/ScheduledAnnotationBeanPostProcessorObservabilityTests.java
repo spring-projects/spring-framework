@@ -65,8 +65,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		registerScheduledBean(FixedDelayBean.class);
 		runScheduledTaskAndAwait();
 		assertThatTaskObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
-				.hasLowCardinalityKeyValue("method.name", "fixedDelay")
-				.hasLowCardinalityKeyValue("target.type", "FixedDelayBean")
+				.hasLowCardinalityKeyValue("code.function", "fixedDelay")
+				.hasLowCardinalityKeyValue("code.namespace", getClass().getCanonicalName() + ".FixedDelayBean")
 				.hasLowCardinalityKeyValue("exception", "none");
 	}
 
@@ -75,8 +75,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		registerScheduledBean(FixedDelayErrorBean.class);
 		runScheduledTaskAndAwait();
 		assertThatTaskObservation().hasLowCardinalityKeyValue("outcome", "ERROR")
-				.hasLowCardinalityKeyValue("method.name", "error")
-				.hasLowCardinalityKeyValue("target.type", "FixedDelayErrorBean")
+				.hasLowCardinalityKeyValue("code.function", "error")
+				.hasLowCardinalityKeyValue("code.namespace", getClass().getCanonicalName() + ".FixedDelayErrorBean")
 				.hasLowCardinalityKeyValue("exception", "IllegalStateException");
 	}
 
@@ -85,8 +85,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		registerScheduledBean(FixedDelayReactiveBean.class);
 		runScheduledTaskAndAwait();
 		assertThatTaskObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
-				.hasLowCardinalityKeyValue("method.name", "fixedDelay")
-				.hasLowCardinalityKeyValue("target.type", "FixedDelayReactiveBean")
+				.hasLowCardinalityKeyValue("code.function", "fixedDelay")
+				.hasLowCardinalityKeyValue("code.namespace", getClass().getCanonicalName() + ".FixedDelayReactiveBean")
 				.hasLowCardinalityKeyValue("exception", "none");
 	}
 
@@ -95,8 +95,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		registerScheduledBean(FixedDelayReactiveErrorBean.class);
 		runScheduledTaskAndAwait();
 		assertThatTaskObservation().hasLowCardinalityKeyValue("outcome", "ERROR")
-				.hasLowCardinalityKeyValue("method.name", "error")
-				.hasLowCardinalityKeyValue("target.type", "FixedDelayReactiveErrorBean")
+				.hasLowCardinalityKeyValue("code.function", "error")
+				.hasLowCardinalityKeyValue("code.namespace", getClass().getCanonicalName() + ".FixedDelayReactiveErrorBean")
 				.hasLowCardinalityKeyValue("exception", "IllegalStateException");
 	}
 
@@ -108,8 +108,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		context.getBean(TaskTester.class).await();
 		scheduledTask.cancel();
 		assertThatTaskObservation().hasLowCardinalityKeyValue("outcome", "UNKNOWN")
-				.hasLowCardinalityKeyValue("method.name", "cancelled")
-				.hasLowCardinalityKeyValue("target.type", "CancelledTaskBean")
+				.hasLowCardinalityKeyValue("code.function", "cancelled")
+				.hasLowCardinalityKeyValue("code.namespace", getClass().getCanonicalName() + ".CancelledTaskBean")
 				.hasLowCardinalityKeyValue("exception", "none");
 	}
 
@@ -121,8 +121,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		context.getBean(TaskTester.class).await();
 		scheduledTask.cancel();
 		assertThatTaskObservation().hasLowCardinalityKeyValue("outcome", "UNKNOWN")
-				.hasLowCardinalityKeyValue("method.name", "cancelled")
-				.hasLowCardinalityKeyValue("target.type", "CancelledReactiveTaskBean")
+				.hasLowCardinalityKeyValue("code.function", "cancelled")
+				.hasLowCardinalityKeyValue("code.namespace", getClass().getCanonicalName() + ".CancelledReactiveTaskBean")
 				.hasLowCardinalityKeyValue("exception", "none");
 	}
 
@@ -131,8 +131,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		registerScheduledBean(CurrentObservationBean.class);
 		runScheduledTaskAndAwait();
 		assertThatTaskObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
-				.hasLowCardinalityKeyValue("method.name", "hasCurrentObservation")
-				.hasLowCardinalityKeyValue("target.type", "CurrentObservationBean")
+				.hasLowCardinalityKeyValue("code.function", "hasCurrentObservation")
+				.hasLowCardinalityKeyValue("code.namespace", getClass().getCanonicalName() + ".CurrentObservationBean")
 				.hasLowCardinalityKeyValue("exception", "none");
 	}
 
@@ -141,8 +141,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		registerScheduledBean(CurrentObservationReactiveBean.class);
 		runScheduledTaskAndAwait();
 		assertThatTaskObservation().hasLowCardinalityKeyValue("outcome", "SUCCESS")
-				.hasLowCardinalityKeyValue("method.name", "hasCurrentObservation")
-				.hasLowCardinalityKeyValue("target.type", "CurrentObservationReactiveBean")
+				.hasLowCardinalityKeyValue("code.function", "hasCurrentObservation")
+				.hasLowCardinalityKeyValue("code.namespace", getClass().getCanonicalName() + ".CurrentObservationReactiveBean")
 				.hasLowCardinalityKeyValue("exception", "none");
 	}
 

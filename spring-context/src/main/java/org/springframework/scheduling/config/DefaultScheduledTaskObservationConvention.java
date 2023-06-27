@@ -53,7 +53,15 @@ public class DefaultScheduledTaskObservationConvention implements ScheduledTaskO
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(ScheduledTaskObservationContext context) {
-		return KeyValues.of(exception(context), methodName(context), outcome(context), targetType(context));
+		return KeyValues.of(codeFunction(context), codeNamespace(context), exception(context), outcome(context));
+	}
+
+	protected KeyValue codeFunction(ScheduledTaskObservationContext context) {
+		return KeyValue.of(LowCardinalityKeyNames.CODE_FUNCTION, context.getMethod().getName());
+	}
+
+	protected KeyValue codeNamespace(ScheduledTaskObservationContext context) {
+		return KeyValue.of(LowCardinalityKeyNames.CODE_NAMESPACE, context.getTargetClass().getCanonicalName());
 	}
 
 	protected KeyValue exception(ScheduledTaskObservationContext context) {
@@ -61,10 +69,6 @@ public class DefaultScheduledTaskObservationConvention implements ScheduledTaskO
 			return KeyValue.of(LowCardinalityKeyNames.EXCEPTION, context.getError().getClass().getSimpleName());
 		}
 		return EXCEPTION_NONE;
-	}
-
-	protected KeyValue methodName(ScheduledTaskObservationContext context) {
-		return KeyValue.of(LowCardinalityKeyNames.METHOD_NAME, context.getMethod().getName());
 	}
 
 	protected KeyValue outcome(ScheduledTaskObservationContext context) {
@@ -75,10 +79,6 @@ public class DefaultScheduledTaskObservationConvention implements ScheduledTaskO
 			return OUTCOME_UNKNOWN;
 		}
 		return OUTCOME_SUCCESS;
-	}
-
-	protected KeyValue targetType(ScheduledTaskObservationContext context) {
-		return KeyValue.of(LowCardinalityKeyNames.TARGET_TYPE, context.getTargetClass().getSimpleName());
 	}
 
 }
