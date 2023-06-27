@@ -79,7 +79,7 @@ public class DateTimeFormatterFactoryTests {
 		factory.setStylePattern("SS");
 		String value = applyLocale(factory.createDateTimeFormatter()).format(dateTime);
 		assertThat(value).startsWith("10/21/09");
-		assertThat(value).endsWith("12:10 PM");
+		assertThat(value.replaceAll(" ", " ")).endsWith("12:10 PM");
 
 		factory.setIso(ISO.DATE);
 		assertThat(applyLocale(factory.createDateTimeFormatter()).format(dateTime)).isEqualTo("2009-10-21");
