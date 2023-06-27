@@ -17,7 +17,6 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Optional;
 
@@ -188,31 +187,14 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @param attributeName the name of the attribute (never {@code null})
 	 * @param parameter the method parameter declaration
 	 * @param binderFactory for creating WebDataBinder instance
-	 * @param webRequest the current request
-	 * @return the created model attribute (never {@code null})
-	 * @throws BindException in case of constructor argument binding failure
-	 * @throws Exception in case of constructor instantiation failure
-	 * @see #constructAttribute(Constructor, String, MethodParameter, WebDataBinderFactory, NativeWebRequest)
-	 * @see BeanUtils#findPrimaryConstructor(Class)
+	 * @param request the current request
+	 * @return the created model attribute, or {@code null}
 	 */
 	@Nullable
 	protected Object createAttribute(String attributeName, MethodParameter parameter,
-			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
+			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
 		return null;
-	}
-
-	/**
-	 * Construct a new attribute instance with the given constructor.
-	 * @since 5.1
-	 * @deprecated and not called; replaced by built-in support for
-	 * constructor initialization in {@link org.springframework.validation.DataBinder}
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	protected Object constructAttribute(Constructor<?> ctor, String attributeName, MethodParameter parameter,
-			WebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {
-
-		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -235,18 +217,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
-	 * Resolve the value for a constructor argument.
-	 * @deprecated and not called; replaced by built-in support for
-	 * constructor initialization in {@link org.springframework.validation.DataBinder}
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public Object resolveConstructorArgument(String paramName, Class<?> paramType, NativeWebRequest request)
-			throws Exception {
-
-		throw new UnsupportedOperationException();
-	}
-
-	/**
 	 * Validate the model attribute if applicable.
 	 * <p>The default implementation checks for {@code @jakarta.validation.Valid},
 	 * Spring's {@link org.springframework.validation.annotation.Validated},
@@ -264,19 +234,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Validate the specified candidate value if applicable.
-	 * @since 5.1
-	 * @deprecated and not called; replaced by built-in support for
-	 * constructor initialization in {@link org.springframework.validation.DataBinder}
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	protected void validateValueIfApplicable(WebDataBinder binder, MethodParameter parameter,
-			Class<?> targetType, String fieldName, @Nullable Object value) {
-
-		throw new UnsupportedOperationException();
 	}
 
 	/**

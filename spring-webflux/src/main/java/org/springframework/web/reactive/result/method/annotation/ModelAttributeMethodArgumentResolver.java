@@ -182,16 +182,6 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 	}
 
 	/**
-	 * Protected method to obtain the values for data binding.
-	 * @deprecated and not called; replaced by built-in support for
-	 * constructor initialization in {@link org.springframework.validation.DataBinder}
-	 */
-	@Deprecated(since = "6.1", forRemoval = true)
-	public Mono<Map<String, Object>> getValuesToBind(WebExchangeDataBinder binder, ServerWebExchange exchange) {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
 	 * Extension point to create the attribute, binding the request to constructor args.
 	 * @param binder the data binder instance to use for the binding
 	 * @param exchange the current exchange
