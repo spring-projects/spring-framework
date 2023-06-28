@@ -78,8 +78,8 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 			if (this.scheduledExecutionTime == null) {
 				return null;
 			}
-			long initialDelay = this.scheduledExecutionTime.getTime() - this.triggerContext.getClock().millis();
-			this.currentFuture = this.executor.schedule(this, initialDelay, TimeUnit.MILLISECONDS);
+			long delay = this.scheduledExecutionTime.getTime() - this.triggerContext.getClock().millis();
+			this.currentFuture = this.executor.schedule(this, delay, TimeUnit.MILLISECONDS);
 			return this;
 		}
 	}
