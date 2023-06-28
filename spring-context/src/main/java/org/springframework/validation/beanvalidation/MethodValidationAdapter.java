@@ -18,7 +18,6 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -73,8 +72,6 @@ import org.springframework.validation.annotation.Validated;
 public class MethodValidationAdapter {
 
 	private static final Comparator<ParameterValidationResult> RESULT_COMPARATOR = new ResultComparator();
-
-	private static final MethodValidationResult EMPTY_RESULT = new EmptyMethodValidationResult();
 
 
 	private final Supplier<Validator> validator;
@@ -232,7 +229,8 @@ public class MethodValidationAdapter {
 			Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(mostSpecificMethod);
 			result = execVal.validateParameters(target, bridgedMethod, arguments, groups);
 		}
-		return (result.isEmpty() ? EMPTY_RESULT :
+		return (result.isEmpty() ?
+				MethodValidationException.forEmptyResult(target, method, true) :
 				createException(target, method, result,
 						i -> parameters != null ? parameters[i] : new MethodParameter(method, i),
 						i -> arguments[i],
@@ -257,7 +255,8 @@ public class MethodValidationAdapter {
 
 		ExecutableValidator execVal = this.validator.get().forExecutables();
 		Set<ConstraintViolation<Object>> result = execVal.validateReturnValue(target, method, returnValue, groups);
-		return (result.isEmpty() ? EMPTY_RESULT :
+		return (result.isEmpty() ?
+				MethodValidationException.forEmptyResult(target, method, true) :
 				createException(target, method, result,
 						i -> returnType != null ? returnType : new MethodParameter(method, -1),
 						i -> returnValue,
@@ -310,7 +309,7 @@ public class MethodValidationAdapter {
 		cascadedViolations.forEach((node, builder) -> validatonResultList.add(builder.build()));
 		validatonResultList.sort(RESULT_COMPARATOR);
 
-		return new MethodValidationException(target, method, violations, validatonResultList, forReturnValue);
+		return new MethodValidationException(target, method, forReturnValue, violations, validatonResultList);
 	}
 
 	/**
@@ -531,43 +530,6 @@ public class MethodValidationAdapter {
 			}
 			return 0;
 		}
-	}
-
-
-	/**
-	 * {@link MethodValidationResult} to use when there are no violations.
-	 */
-	private static final class EmptyMethodValidationResult implements MethodValidationResult {
-
-		@Override
-		public Set<ConstraintViolation<?>> getConstraintViolations() {
-			return Collections.emptySet();
-		}
-
-		@Override
-		public List<ParameterValidationResult> getAllValidationResults() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public List<ParameterValidationResult> getValueResults() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public List<ParameterErrors> getBeanResults() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public void throwIfViolationsPresent() {
-		}
-
-		@Override
-		public String toString() {
-			return "MethodValidationResult (0 violations)";
-		}
-
 	}
 
 }

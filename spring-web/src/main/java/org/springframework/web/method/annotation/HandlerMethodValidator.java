@@ -16,8 +16,6 @@
 
 package org.springframework.web.method.annotation;
 
-import java.lang.reflect.Method;
-
 import jakarta.validation.Validator;
 
 import org.springframework.core.Conventions;
@@ -28,6 +26,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.beanvalidation.DefaultMethodValidator;
 import org.springframework.validation.beanvalidation.MethodValidationAdapter;
+import org.springframework.validation.beanvalidation.MethodValidationException;
 import org.springframework.validation.beanvalidation.MethodValidationResult;
 import org.springframework.validation.beanvalidation.MethodValidator;
 import org.springframework.validation.beanvalidation.ParameterErrors;
@@ -53,8 +52,8 @@ public final class HandlerMethodValidator extends DefaultMethodValidator {
 
 
 	@Override
-	protected void handleArgumentsValidationResult(
-			Object bean, Method method, Object[] arguments, Class<?>[] groups, MethodValidationResult result) {
+	protected void handleArgumentsResult(
+			Object[] arguments, Class<?>[] groups, MethodValidationResult result) {
 
 		if (result.getConstraintViolations().isEmpty()) {
 			return;
@@ -76,7 +75,9 @@ public final class HandlerMethodValidator extends DefaultMethodValidator {
 				return;
 			}
 		}
-		result.throwIfViolationsPresent();
+		if (result.hasViolations()) {
+			throw MethodValidationException.forResult(result);
+		}
 	}
 
 	private String determineObjectName(MethodParameter param, @Nullable Object argument) {

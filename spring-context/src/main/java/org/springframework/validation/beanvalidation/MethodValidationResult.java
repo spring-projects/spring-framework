@@ -16,6 +16,7 @@
 
 package org.springframework.validation.beanvalidation;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +39,30 @@ import jakarta.validation.ConstraintViolation;
  * @since 6.1
  */
 public interface MethodValidationResult {
+
+	/**
+	 * Return the target of the method invocation to which validation was applied.
+	 */
+	Object getTarget();
+
+	/**
+	 * Return the method to which validation was applied.
+	 */
+	Method getMethod();
+
+	/**
+	 * Whether the violations are for a return value.
+	 * If true the violations are from validating a return value.
+	 * If false the violations are from validating method arguments.
+	 */
+	boolean isForReturnValue();
+
+	/**
+	 * Whether the result contains any {@link ConstraintViolation}s.
+	 */
+	default boolean hasViolations() {
+		return !getConstraintViolations().isEmpty();
+	}
 
 	/**
 	 * Returns the set of constraint violations reported during a validation.
@@ -71,12 +96,5 @@ public interface MethodValidationResult {
 	 * @see #getAllValidationResults()
 	 */
 	List<ParameterErrors> getBeanResults();
-
-	/**
-	 * Check if {@link #getConstraintViolations()} is empty, and if not, raise
-	 * {@link MethodValidationException}.
-	 * @throws MethodValidationException if the result contains any violations
-	 */
-	void throwIfViolationsPresent();
 
 }

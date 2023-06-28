@@ -17,6 +17,7 @@
 package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -31,7 +32,6 @@ import org.springframework.util.Assert;
  * {@link ParameterValidationResult} that represents violations adapted to
  * {@link org.springframework.context.MessageSourceResolvable} and grouped by
  * method parameter.
- *
  *
  * @author Rossen Stoyanchev
  * @since 6.1
@@ -51,47 +51,53 @@ public class MethodValidationException extends ConstraintViolationException impl
 	private final boolean forReturnValue;
 
 
-	public MethodValidationException(
-			Object target, Method method, Set<? extends ConstraintViolation<?>> violations,
-			List<ParameterValidationResult> validationResults, boolean forReturnValue) {
+	/**
+	 * Package private constructor for {@link MethodValidationAdapter}.
+	 */
+	MethodValidationException(
+			Object target, Method method, boolean forReturnValue,
+			Set<? extends ConstraintViolation<?>> violations, List<ParameterValidationResult> results) {
 
 		super(violations);
-		Assert.notEmpty(violations, "'violations' must not be empty");
+
+		Assert.notNull(violations, "'violations' is required");
+		Assert.notNull(results, "'results' is required");
+
 		this.target = target;
 		this.method = method;
-		this.allValidationResults = validationResults;
+		this.allValidationResults = results;
 		this.forReturnValue = forReturnValue;
 	}
 
-
 	/**
-	 * Return the target of the method invocation to which validation was applied.
+	 * Private constructor copying from another {@code MethodValidationResult}.
 	 */
-	public Object getTarget() {
-		return this.target;
+	private MethodValidationException(MethodValidationResult other) {
+		this(other.getTarget(), other.getMethod(), other.isForReturnValue(),
+				other.getConstraintViolations(), other.getAllValidationResults());
 	}
 
-	/**
-	 * Return the method to which validation was applied.
-	 */
-	public Method getMethod() {
-		return this.method;
-	}
 
-	/**
-	 * Whether the violations are for a return value.
-	 * If true the violations are from validating a return value.
-	 * If false the violations are from validating method arguments.
-	 */
-	public boolean isForReturnValue() {
-		return this.forReturnValue;
-	}
-
-	// re-declare parent class method for NonNull treatment of interface
+	// re-declare getConstraintViolations as NonNull
 
 	@Override
 	public Set<ConstraintViolation<?>> getConstraintViolations() {
 		return super.getConstraintViolations();
+	}
+
+	@Override
+	public Object getTarget() {
+		return this.target;
+	}
+
+	@Override
+	public Method getMethod() {
+		return this.method;
+	}
+
+	@Override
+	public boolean isForReturnValue() {
+		return this.forReturnValue;
 	}
 
 	@Override
@@ -115,14 +121,27 @@ public class MethodValidationException extends ConstraintViolationException impl
 	}
 
 	@Override
-	public void throwIfViolationsPresent() {
-		throw this;
-	}
-
-	@Override
 	public String toString() {
 		return "MethodValidationResult (" + getConstraintViolations().size() + " violations) " +
 				"for " + this.method.toGenericString();
 	}
+
+
+	/**
+	 * Create an exception copying from the given result, or return the same
+	 * instance if it is a {@code MethodValidationException} already.
+	 */
+	public static MethodValidationException forResult(MethodValidationResult result) {
+		return (result instanceof MethodValidationException ex ? ex : new MethodValidationException(result));
+	}
+
+	/**
+	 * Create an exception for validation without errors.
+	 */
+	public static MethodValidationException forEmptyResult(Object target, Method method, boolean forReturnValue) {
+		return new MethodValidationException(
+				target, method, forReturnValue, Collections.emptySet(), Collections.emptyList());
+	}
+
 
 }

@@ -46,47 +46,53 @@ public class DefaultMethodValidator implements MethodValidator {
 
 	@Override
 	public void validateArguments(
-			Object target, Method method, @Nullable MethodParameter[] parameters, Object[] arguments,
-			Class<?>[] groups) {
+			Object target, Method method, @Nullable MethodParameter[] parameters,
+			Object[] arguments, Class<?>[] groups) {
 
-		handleArgumentsValidationResult(target, method, arguments, groups,
-				this.adapter.validateMethodArguments(target, method, parameters, arguments, groups));
-	}
+		MethodValidationResult validationResult =
+				this.adapter.validateMethodArguments(target, method, parameters, arguments, groups);
 
-	public void validateReturnValue(
-			Object target, Method method, @Nullable MethodParameter returnType, @Nullable Object returnValue,
-			Class<?>[] groups) {
-
-		handleReturnValueValidationResult(target, method, returnValue, groups,
-				this.adapter.validateMethodReturnValue(target, method, returnType, returnValue, groups));
+		handleArgumentsResult(arguments, groups, validationResult);
 	}
 
 	/**
 	 * Subclasses can override this to handle the result of argument validation.
-	 * By default, {@link MethodValidationResult#throwIfViolationsPresent()} is called.
-	 * @param bean the target Object for method invocation
-	 * @param method the target method
+	 * By default, throws {@link MethodValidationException} if there are errors.
 	 * @param arguments the candidate argument values to validate
 	 * @param groups groups for validation determined via
+	 * @param validationResult the result from validation
 	 */
-	protected void handleArgumentsValidationResult(
-			Object bean, Method method, Object[] arguments, Class<?>[] groups, MethodValidationResult result) {
+	protected void handleArgumentsResult(
+			Object[] arguments, Class<?>[] groups, MethodValidationResult validationResult) {
 
-		result.throwIfViolationsPresent();
+		if (validationResult.hasViolations()) {
+			throw MethodValidationException.forResult(validationResult);
+		}
+	}
+
+	public void validateReturnValue(
+			Object target, Method method, @Nullable MethodParameter returnType,
+			@Nullable Object returnValue, Class<?>[] groups) {
+
+		MethodValidationResult validationResult =
+				this.adapter.validateMethodReturnValue(target, method, returnType, returnValue, groups);
+
+		handleReturnValueResult(returnValue, groups, validationResult);
 	}
 
 	/**
 	 * Subclasses can override this to handle the result of return value validation.
-	 * By default, {@link MethodValidationResult#throwIfViolationsPresent()} is called.
-	 * @param bean the target Object for method invocation
-	 * @param method the target method
+	 * By default, throws {@link MethodValidationException} if there are errors.
 	 * @param returnValue the return value to validate
 	 * @param groups groups for validation determined via
+	 * @param validationResult the result from validation
 	 */
-	protected void handleReturnValueValidationResult(
-			Object bean, Method method, @Nullable Object returnValue, Class<?>[] groups, MethodValidationResult result) {
+	protected void handleReturnValueResult(
+			@Nullable Object returnValue, Class<?>[] groups, MethodValidationResult validationResult) {
 
-		result.throwIfViolationsPresent();
+		if (validationResult.hasViolations()) {
+			throw MethodValidationException.forResult(validationResult);
+		}
 	}
 
 }
