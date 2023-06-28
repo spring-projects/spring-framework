@@ -23,11 +23,11 @@ import org.springframework.http.HttpMethod;
 /**
  * @author Marten Deinum
  */
-public class JdkClientClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
-		return new JdkClientClientHttpRequestFactory();
+		return new JdkClientHttpRequestFactory();
 	}
 
 	@Override
