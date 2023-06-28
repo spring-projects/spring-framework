@@ -18,7 +18,6 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.Duration;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
@@ -41,7 +40,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	private final boolean defaultClient;
 
-	private Duration timeOut = Duration.ofSeconds(1);
+	private int readTimeout = 1000;
 
 
 	/**
@@ -66,13 +65,20 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 
 	/**
-	 * Sets the maximum time to wait until all headers have been received.
-	 * The default value is 1 second.
+	 * Set the underlying connect timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
 	 */
-	public void setTimeOut(Duration timeOut) {
-		Assert.notNull(timeOut, "TimeOut must not be null");
-		Assert.isTrue(!timeOut.isNegative(), "TimeOut must not be negative");
-		this.timeOut = timeOut;
+	public void setConnectTimeout(int connectTimeout) {
+		Assert.isTrue(connectTimeout >= 0, "Timeout must be a non-negative value");
+		this.httpClient.setConnectTimeout(connectTimeout);
+	}
+
+	/**
+	 * Set the underlying read timeout in milliseconds.
+	 */
+	public void setReadTimeout(int readTimeout) {
+		Assert.isTrue(readTimeout > 0, "Timeout must be a positive value");
+		this.readTimeout = readTimeout;
 	}
 
 	@Override
@@ -105,6 +111,6 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 		}
 
 		Request request = this.httpClient.newRequest(uri).method(httpMethod.name());
-		return new JettyClientHttpRequest(request, this.timeOut);
+		return new JettyClientHttpRequest(request, this.readTimeout);
 	}
 }

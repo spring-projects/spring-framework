@@ -19,7 +19,6 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -46,12 +45,12 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final Request request;
 
-	private final Duration timeOut;
+	private final int readTimeout;
 
 
-	public JettyClientHttpRequest(Request request, Duration timeOut) {
+	public JettyClientHttpRequest(Request request, int readTimeout) {
 		this.request = request;
-		this.timeOut = timeOut;
+		this.readTimeout = readTimeout;
 	}
 
 	@Override
@@ -92,7 +91,7 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			else {
 				this.request.send(responseListener);
 			}
-			Response response = responseListener.get(TimeUnit.MILLISECONDS.convert(this.timeOut), TimeUnit.MILLISECONDS);
+			Response response = responseListener.get(this.readTimeout, TimeUnit.MILLISECONDS);
 			return new JettyClientHttpResponse(response, responseListener.getInputStream());
 		}
 		catch (InterruptedException ex) {
