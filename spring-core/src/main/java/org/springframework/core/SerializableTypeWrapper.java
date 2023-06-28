@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -204,19 +203,18 @@ final class SerializableTypeWrapper {
 				return forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, -1));
 			}
 			else if (Type[].class == method.getReturnType() && ObjectUtils.isEmpty(args)) {
-				Type[] result = new Type[((Type[]) method.invoke(this.provider.getType())).length];
+				Object returnValue = ReflectionUtils.invokeMethod(method, this.provider.getType());
+				if (returnValue == null) {
+					return null;
+				}
+				Type[] result = new Type[((Type[]) returnValue).length];
 				for (int i = 0; i < result.length; i++) {
 					result[i] = forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, i));
 				}
 				return result;
 			}
 
-			try {
-				return method.invoke(this.provider.getType(), args);
-			}
-			catch (InvocationTargetException ex) {
-				throw ex.getTargetException();
-			}
+			return ReflectionUtils.invokeMethod(method, this.provider.getType(), args);
 		}
 	}
 
