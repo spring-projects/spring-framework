@@ -20,13 +20,8 @@ import java.util.Locale;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.lang.Nullable;
-import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
@@ -49,22 +44,9 @@ import org.springframework.web.servlet.ViewResolver;
  * @since 18.06.2003
  * @see UrlBasedViewResolver
  */
-public class BeanNameViewResolver extends WebApplicationObjectSupport implements ViewResolver, Ordered, InitializingBean, DisposableBean {
+public class BeanNameViewResolver extends WebApplicationObjectSupport implements ViewResolver, Ordered {
 
 	private int order = Ordered.LOWEST_PRECEDENCE;  // default: same as non-Ordered
-
-	@Nullable
-	private ApplicationContext cachedContext;
-	@Nullable
-	private final ApplicationContext providedContext;
-
-	public BeanNameViewResolver() {
-		this.providedContext = null;
-	}
-
-	public BeanNameViewResolver(ApplicationContext context) {
-		this.providedContext=context;
-	}
 
 	/**
 	 * Specify the order value for this ViewResolver bean.
@@ -101,40 +83,12 @@ public class BeanNameViewResolver extends WebApplicationObjectSupport implements
 	}
 
 	/**
-	 * Initialize the view bean factory.
-	 * Synchronized because of access by parallel threads.
+	 * Initialize the view bean factory, this method can be overridden to provide a custom
+	 * way of providing a {@code BeanFactory} to obtain the views from.
+	 *
 	 * @throws BeansException in case of initialization errors
 	 */
-	protected synchronized BeanFactory initFactory() throws BeansException {
-		if (this.cachedContext != null) {
-			return this.cachedContext;
-		}
-
-		ApplicationContext applicationContext = obtainApplicationContext();
-		if (this.providedContext == null) {
-			this.cachedContext = applicationContext;
-		}
-		else {
-			if (this.providedContext instanceof ConfigurableApplicationContext cac) {
-				cac.setParent(applicationContext);
-				if (this.providedContext instanceof ConfigurableWebApplicationContext wac) {
-					wac.setServletContext(getServletContext());
-				}
-			}
-			this.cachedContext = this.providedContext;
-		}
-		return this.cachedContext;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		initFactory();
-	}
-
-	@Override
-	public void destroy() throws Exception {
-		if (this.providedContext instanceof ConfigurableApplicationContext cac) {
-			cac.close();
-		}
+	protected BeanFactory initFactory() throws BeansException {
+		return obtainApplicationContext();
 	}
 }
