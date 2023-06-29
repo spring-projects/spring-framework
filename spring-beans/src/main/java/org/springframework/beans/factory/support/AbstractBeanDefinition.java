@@ -390,7 +390,8 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	@Override
 	@Nullable
 	public String getBeanClassName() {
-		return (this.beanClass instanceof Class<?> clazz ? clazz.getName() : (String) this.beanClass);
+		Object beanClassObject = this.beanClass;  // defensive access to volatile beanClass field
+		return (beanClassObject instanceof Class<?> clazz ? clazz.getName() : (String) beanClassObject);
 	}
 
 	/**
@@ -423,7 +424,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @see #resolveBeanClass(ClassLoader)
 	 */
 	public Class<?> getBeanClass() throws IllegalStateException {
-		Object beanClassObject = this.beanClass;
+		Object beanClassObject = this.beanClass;  // defensive access to volatile beanClass field
 		if (beanClassObject == null) {
 			throw new IllegalStateException("No bean class specified on bean definition");
 		}
