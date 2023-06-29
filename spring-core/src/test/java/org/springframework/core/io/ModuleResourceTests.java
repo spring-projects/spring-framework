@@ -40,6 +40,7 @@ class ModuleResourceTests {
 		assertThat(mr.isReadable()).isTrue();
 		assertThat(mr.isOpen()).isFalse();
 		assertThat(mr.isFile()).isFalse();
+		assertThat(mr.getFilename()).isEqualTo("Introspector.class");
 		assertThat(mr.getDescription()).contains(mr.getModule().getName());
 		assertThat(mr.getDescription()).contains(mr.getPath());
 
@@ -55,6 +56,7 @@ class ModuleResourceTests {
 		assertThat(mr.isReadable()).isFalse();
 		assertThat(mr.isOpen()).isFalse();
 		assertThat(mr.isFile()).isFalse();
+		assertThat(mr.getFilename()).isEqualTo("Introspecter.class");
 		assertThat(mr.getDescription()).contains(mr.getModule().getName());
 		assertThat(mr.getDescription()).contains(mr.getPath());
 

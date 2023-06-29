@@ -93,6 +93,12 @@ public class ModuleResource extends AbstractResource {
 	}
 
 	@Override
+	@Nullable
+	public String getFilename() {
+		return StringUtils.getFilename(this.path);
+	}
+
+	@Override
 	public String getDescription() {
 		return "module resource [" + this.path + "]" +
 				(this.module.isNamed() ? " from module '" + this.module.getName() + "'" : "");
