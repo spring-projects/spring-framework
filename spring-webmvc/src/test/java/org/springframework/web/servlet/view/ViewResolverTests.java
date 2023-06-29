@@ -36,6 +36,8 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.context.support.ServletContextResource;
@@ -99,17 +101,10 @@ public class ViewResolverTests {
 	}
 
 	@Test
-	public void beanNameViewResolverWithProvidedContext() {
-		StaticWebApplicationContext providedWac = new StaticWebApplicationContext();
-		MutablePropertyValues pvs1 = new MutablePropertyValues();
-		pvs1.addPropertyValue(new PropertyValue("url", "/example1.jsp"));
-		providedWac.registerSingleton("example1", InternalResourceView.class, pvs1);
-		MutablePropertyValues pvs2 = new MutablePropertyValues();
-		pvs2.addPropertyValue(new PropertyValue("url", "/example2.jsp"));
-		providedWac.registerSingleton("example2", JstlView.class, pvs2);
-		BeanNameViewResolver vr = new BeanNameViewResolver(providedWac);
+	public void JavaConfigViewResolverWithProvidedContext() {
+		JavaConfigViewResolver vr = new JavaConfigViewResolver();
+		vr.register(TestConfiguration.class);
 		vr.setApplicationContext(this.wac);
-		providedWac.refresh();
 		this.wac.refresh();
 
 		View view = vr.resolveViewName("example1", Locale.getDefault());
@@ -120,8 +115,6 @@ public class ViewResolverTests {
 		assertThat(view).isInstanceOf(JstlView.class);
 		assertThat(((JstlView) view).getUrl()).as("Correct URL").isEqualTo("/example2.jsp");
 
-		assertThat(providedWac.getParent()).isEqualTo(this.wac);
-		assertThat(providedWac.getServletContext()).isEqualTo(this.wac.getServletContext());
 	}
 
 
@@ -599,6 +592,24 @@ public class ViewResolverTests {
 			if (!(location instanceof ServletContextResource)) {
 				throw new IllegalArgumentException("Expecting ServletContextResource, not " + location.getClass().getName());
 			}
+		}
+	}
+
+	@Configuration
+	public static class TestConfiguration {
+
+		@Bean
+		public InternalResourceView example1() {
+			InternalResourceView example1 = new InternalResourceView();
+			example1.setUrl("/example1.jsp");
+			return example1;
+		}
+
+		@Bean
+		public JstlView example2() {
+			JstlView example1 = new JstlView();
+			example1.setUrl("/example2.jsp");
+			return example1;
 		}
 	}
 
