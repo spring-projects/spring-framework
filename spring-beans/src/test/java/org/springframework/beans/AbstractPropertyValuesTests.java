@@ -35,8 +35,7 @@ public abstract class AbstractPropertyValuesTests {
 		assertThat(pvs.contains("forname")).as("Contains forname").isTrue();
 		assertThat(pvs.contains("surname")).as("Contains surname").isTrue();
 		assertThat(pvs.contains("age")).as("Contains age").isTrue();
-		boolean condition1 = !pvs.contains("tory");
-		assertThat(condition1).as("Doesn't contain tory").isTrue();
+		assertThat(!pvs.contains("tory")).as("Doesn't contain tory").isTrue();
 
 		PropertyValue[] ps = pvs.getPropertyValues();
 		Map<String, String> m = new HashMap<>();
@@ -46,8 +45,7 @@ public abstract class AbstractPropertyValuesTests {
 		for (PropertyValue element : ps) {
 			Object val = m.get(element.getName());
 			assertThat(val).as("Can't have unexpected value").isNotNull();
-			boolean condition = val instanceof String;
-			assertThat(condition).as("Val i string").isTrue();
+			assertThat(val instanceof String).as("Val i string").isTrue();
 			assertThat(val.equals(element.getValue())).as("val matches expected").isTrue();
 			m.remove(element.getName());
 		}

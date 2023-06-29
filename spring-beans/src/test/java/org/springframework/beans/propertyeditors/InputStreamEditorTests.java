@@ -16,6 +16,7 @@
 
 package org.springframework.beans.propertyeditors;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
@@ -34,13 +35,13 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 public class InputStreamEditorTests {
 
 	@Test
-	public void testCtorWithNullResourceEditor() throws Exception {
+	public void testCtorWithNullResourceEditor() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new InputStreamEditor(null));
 	}
 
 	@Test
-	public void testSunnyDay() throws Exception {
+	public void testSunnyDay() throws IOException {
 		InputStream stream = null;
 		try {
 			String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
@@ -49,8 +50,7 @@ public class InputStreamEditorTests {
 			editor.setAsText(resource);
 			Object value = editor.getValue();
 			assertThat(value).isNotNull();
-			boolean condition = value instanceof InputStream;
-			assertThat(condition).isTrue();
+			assertThat(value instanceof InputStream).isTrue();
 			stream = (InputStream) value;
 			assertThat(stream.available()).isGreaterThan(0);
 		}
@@ -62,14 +62,14 @@ public class InputStreamEditorTests {
 	}
 
 	@Test
-	public void testWhenResourceDoesNotExist() throws Exception {
+	public void testWhenResourceDoesNotExist() {
 		InputStreamEditor editor = new InputStreamEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				editor.setAsText("classpath:bingo!"));
 	}
 
 	@Test
-	public void testGetAsTextReturnsNullByDefault() throws Exception {
+	public void testGetAsTextReturnsNullByDefault() {
 		assertThat(new InputStreamEditor().getAsText()).isNull();
 		String resource = "classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class";

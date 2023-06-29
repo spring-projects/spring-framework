@@ -85,8 +85,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 			bf.getBean("testBean");
 		}
 		catch (BeanCreationException ex) {
-			boolean condition = ex.getRootCause() instanceof IllegalStateException;
-			assertThat(condition).isTrue();
+			assertThat(ex.getRootCause() instanceof IllegalStateException).isTrue();
 		}
 	}
 

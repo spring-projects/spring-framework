@@ -422,10 +422,8 @@ class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		boolean condition1 = gb.getCollectionMap().get(1) instanceof HashSet;
-		assertThat(condition1).isTrue();
-		boolean condition = gb.getCollectionMap().get(2) instanceof ArrayList;
-		assertThat(condition).isTrue();
+		assertThat(gb.getCollectionMap().get(1) instanceof HashSet).isTrue();
+		assertThat(gb.getCollectionMap().get(2) instanceof ArrayList).isTrue();
 	}
 
 
@@ -577,10 +575,8 @@ class BeanFactoryGenericsTests {
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
-		boolean condition1 = gb.getCollectionMap().get(1) instanceof HashSet;
-		assertThat(condition1).isTrue();
-		boolean condition = gb.getCollectionMap().get(2) instanceof ArrayList;
-		assertThat(condition).isTrue();
+		assertThat(gb.getCollectionMap().get(1) instanceof HashSet).isTrue();
+		assertThat(gb.getCollectionMap().get(2) instanceof ArrayList).isTrue();
 	}
 
 	@Test
