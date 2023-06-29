@@ -29,9 +29,11 @@ import org.springframework.util.StringUtils;
  * performing {@link #getInputStream()} access via {@link Module#getResourceAsStream}.
  *
  * <p>Alternatively, consider accessing resources in a module path layout via
- * @link ClassPathResource} for exported resources, or specifically relative to
+ * {@link ClassPathResource} for exported resources, or specifically relative to
  * a {@code Class} via {@link ClassPathResource#ClassPathResource(String, Class)}
  * for local resolution within the containing module of that specific class.
+ * In common scenarios, module resources will simply be transparently visible as
+ * classpath resources and therefore do not need any special treatment at all.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
