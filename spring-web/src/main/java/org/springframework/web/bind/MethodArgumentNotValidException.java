@@ -64,6 +64,13 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	}
 
 
+	/**
+	 * Return the method parameter that failed validation.
+	 */
+	public final MethodParameter getParameter() {
+		return this.parameter;
+	}
+
 	@Override
 	public HttpStatusCode getStatusCode() {
 		return HttpStatus.BAD_REQUEST;
@@ -74,58 +81,22 @@ public class MethodArgumentNotValidException extends BindException implements Er
 		return this.body;
 	}
 
-	/**
-	 * Return the method parameter that failed validation.
-	 */
-	public final MethodParameter getParameter() {
-		return this.parameter;
-	}
-
-	@Override
-	public String getMessage() {
-		StringBuilder sb = new StringBuilder("Validation failed for argument [")
-				.append(this.parameter.getParameterIndex()).append("] in ")
-				.append(this.parameter.getExecutable().toGenericString());
-		BindingResult bindingResult = getBindingResult();
-		if (bindingResult.getErrorCount() > 1) {
-			sb.append(" with ").append(bindingResult.getErrorCount()).append(" errors");
-		}
-		sb.append(": ");
-		for (ObjectError error : bindingResult.getAllErrors()) {
-			sb.append('[').append(error).append("] ");
-		}
-		return sb.toString();
-	}
-
 	@Override
 	public Object[] getDetailMessageArguments() {
 		return new Object[] {
-				join(formatErrors(getGlobalErrors(), null, null)),
-				join(formatErrors(getFieldErrors(), null, null))};
+				join(errorsToStringList(getGlobalErrors())),
+				join(errorsToStringList(getFieldErrors()))};
 	}
 
 	@Override
 	public Object[] getDetailMessageArguments(MessageSource messageSource, Locale locale) {
 		return new Object[] {
-				join(formatErrors(getGlobalErrors(), messageSource, locale)),
-				join(formatErrors(getFieldErrors(), messageSource, locale))};
+				join(errorsToStringList(getGlobalErrors(), messageSource, locale)),
+				join(errorsToStringList(getFieldErrors(), messageSource, locale))};
 	}
 
 	private static String join(List<String> errors) {
 		return String.join(", and ", errors);
-	}
-
-	/**
-	 * Resolve global and field errors to messages with the given
-	 * {@link MessageSource} and {@link Locale}.
-	 * @return a Map with errors as keys and resolved messages as values
-	 * @since 6.0.3
-	 */
-	public Map<ObjectError, String> resolveErrorMessages(MessageSource source, Locale locale) {
-		Map<ObjectError, String> map = new LinkedHashMap<>(getErrorCount());
-		getGlobalErrors().forEach(error -> map.put(error, formatError(error, source, locale)));
-		getFieldErrors().forEach(error -> map.put(error, formatError(error, source, locale)));
-		return map;
 	}
 
 	/**
@@ -134,7 +105,7 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	 * @since 6.0
 	 */
 	public static List<String> errorsToStringList(List<? extends ObjectError> errors) {
-		return formatErrors(errors, null, null);
+		return errorsToStringList(errors, null, null);
 	}
 
 	/**
@@ -144,12 +115,6 @@ public class MethodArgumentNotValidException extends BindException implements Er
 	 * @since 6.0
 	 */
 	public static List<String> errorsToStringList(
-			List<? extends ObjectError> errors, @Nullable MessageSource source, Locale locale) {
-
-		return formatErrors(errors, source, locale);
-	}
-
-	public static List<String> formatErrors(
 			List<? extends ObjectError> errors, @Nullable MessageSource messageSource, @Nullable Locale locale) {
 
 		return errors.stream()
@@ -168,6 +133,35 @@ public class MethodArgumentNotValidException extends BindException implements Er
 		String field = (error instanceof FieldError fieldError ? fieldError.getField() + ": " : "");
 		String message = (error.getDefaultMessage() != null ? error.getDefaultMessage() : error.getCode());
 		return (field + message);
+	}
+
+	/**
+	 * Resolve global and field errors to messages with the given
+	 * {@link MessageSource} and {@link Locale}.
+	 * @return a Map with errors as keys and resolved messages as values
+	 * @since 6.0.3
+	 */
+	public Map<ObjectError, String> resolveErrorMessages(MessageSource source, Locale locale) {
+		Map<ObjectError, String> map = new LinkedHashMap<>(getErrorCount());
+		getGlobalErrors().forEach(error -> map.put(error, formatError(error, source, locale)));
+		getFieldErrors().forEach(error -> map.put(error, formatError(error, source, locale)));
+		return map;
+	}
+
+	@Override
+	public String getMessage() {
+		StringBuilder sb = new StringBuilder("Validation failed for argument [")
+				.append(this.parameter.getParameterIndex()).append("] in ")
+				.append(this.parameter.getExecutable().toGenericString());
+		BindingResult bindingResult = getBindingResult();
+		if (bindingResult.getErrorCount() > 1) {
+			sb.append(" with ").append(bindingResult.getErrorCount()).append(" errors");
+		}
+		sb.append(": ");
+		for (ObjectError error : bindingResult.getAllErrors()) {
+			sb.append('[').append(error).append("] ");
+		}
+		return sb.toString();
 	}
 
 }
