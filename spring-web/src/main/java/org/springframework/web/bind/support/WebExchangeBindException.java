@@ -17,7 +17,6 @@
 package org.springframework.web.bind.support;
 
 import java.beans.PropertyEditor;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,8 +31,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.util.BindErrorUtils;
 
 /**
  * {@link ServerWebInputException} subclass that indicates a data binding or
@@ -68,20 +67,15 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	@Override
 	public Object[] getDetailMessageArguments() {
 		return new Object[] {
-				join(MethodArgumentNotValidException.errorsToStringList(getGlobalErrors())),
-				join(MethodArgumentNotValidException.errorsToStringList(getFieldErrors()))};
+				BindErrorUtils.resolveAndJoin(getGlobalErrors()),
+				BindErrorUtils.resolveAndJoin(getFieldErrors())};
 	}
 
 	@Override
 	public Object[] getDetailMessageArguments(MessageSource source, Locale locale) {
 		return new Object[] {
-				join(MethodArgumentNotValidException.errorsToStringList(getGlobalErrors(), source, locale)),
-				join(MethodArgumentNotValidException.errorsToStringList(getFieldErrors(), source, locale))
-		};
-	}
-
-	private static String join(List<String> errors) {
-		return String.join(", and ", errors);
+				BindErrorUtils.resolveAndJoin(getGlobalErrors(), source, locale),
+				BindErrorUtils.resolveAndJoin(getFieldErrors(), source, locale)};
 	}
 
 	/**
@@ -89,22 +83,12 @@ public class WebExchangeBindException extends ServerWebInputException implements
 	 * {@link MessageSource} and {@link Locale}.
 	 * @return a Map with errors as key and resolves messages as value
 	 * @since 6.0.3
+	 * @deprecated in favor of using {@link BindErrorUtils} and
+	 * {@link #getAllErrors()}, to be removed in 6.2
 	 */
+	@Deprecated(since = "6.1", forRemoval = true)
 	public Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {
-		Map<ObjectError, String> map = new LinkedHashMap<>();
-		addMessages(map, getGlobalErrors(), messageSource, locale);
-		addMessages(map, getFieldErrors(), messageSource, locale);
-		return map;
-	}
-
-	private static void addMessages(
-			Map<ObjectError, String> map, List<? extends ObjectError> errors,
-			MessageSource messageSource, Locale locale) {
-
-		List<String> messages = MethodArgumentNotValidException.errorsToStringList(errors, messageSource, locale);
-		for (int i = 0; i < errors.size(); i++) {
-			map.put(errors.get(i), messages.get(i));
-		}
+		return BindErrorUtils.resolve(getAllErrors(), messageSource, locale);
 	}
 
 

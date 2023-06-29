@@ -56,6 +56,7 @@ import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.UnsatisfiedRequestParameterException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.testfixture.method.ResolvableMethod;
+import org.springframework.web.util.BindErrorUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -252,7 +253,8 @@ public class ErrorResponseExceptionTests {
 		assertStatus(ex, HttpStatus.BAD_REQUEST);
 		assertDetail(ex, "Invalid request content.");
 		messageSourceHelper.assertDetailMessage(ex);
-		messageSourceHelper.assertErrorMessages(ex::resolveErrorMessages);
+		messageSourceHelper.assertErrorMessages(
+				(source, locale) -> BindErrorUtils.resolve(ex.getAllErrors(), source, locale));
 
 		assertThat(ex.getHeaders()).isEmpty();
 	}
@@ -457,8 +459,8 @@ public class ErrorResponseExceptionTests {
 					ex.getDetailMessageCode(), ex.getDetailMessageArguments(), Locale.UK);
 
 			assertThat(message).isEqualTo(
-					"Failed because Invalid bean message, and bean.invalid.B. " +
-							"Also because name: must be provided, and age: age.min");
+					"Failed because Invalid bean message, and bean.invalid.B.myBean. " +
+							"Also because name: must be provided, and age: age.min.myBean.age");
 
 			message = messageSource.getMessage(
 					ex.getDetailMessageCode(), ex.getDetailMessageArguments(messageSource, Locale.UK), Locale.UK);

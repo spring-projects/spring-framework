@@ -17,7 +17,7 @@
 package org.springframework.web.bind;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
 
 import jakarta.validation.constraints.Min;
@@ -29,9 +29,9 @@ import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
+import org.springframework.web.util.BindErrorUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,8 +47,7 @@ public class MethodArgumentNotValidExceptionTests {
 		Person frederick1234 = new Person("Frederick1234", 24);
 		MethodArgumentNotValidException ex = createException(frederick1234);
 
-		List<FieldError> fieldErrors = ex.getFieldErrors();
-		List<String> errors = MethodArgumentNotValidException.errorsToStringList(fieldErrors);
+		Collection<String> errors = BindErrorUtils.resolve(ex.getFieldErrors()).values();
 
 		assertThat(errors).containsExactlyInAnyOrder(
 				"name: size must be between 0 and 10", "age: must be greater than or equal to 25");
@@ -63,8 +62,7 @@ public class MethodArgumentNotValidExceptionTests {
 		source.addMessage("Size.name", Locale.UK, "name exceeds {1} characters");
 		source.addMessage("Min.age", Locale.UK, "age is under {1}");
 
-		List<FieldError> fieldErrors = ex.getFieldErrors();
-		List<String> errors = MethodArgumentNotValidException.errorsToStringList(fieldErrors, source, Locale.UK);
+		Collection<String> errors = BindErrorUtils.resolve(ex.getFieldErrors(), source, Locale.UK).values();
 
 		assertThat(errors).containsExactlyInAnyOrder("name exceeds 10 characters", "age is under 25");
 	}
