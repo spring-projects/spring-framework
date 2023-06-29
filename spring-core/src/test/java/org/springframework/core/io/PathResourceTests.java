@@ -70,19 +70,19 @@ class PathResourceTests {
 	@Test
 	void nullPath() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new PathResource((Path) null))
-			.withMessageContaining("Path must not be null");
+				.withMessageContaining("Path must not be null");
 	}
 
 	@Test
 	void nullPathString() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new PathResource((String) null))
-			.withMessageContaining("Path must not be null");
+				.withMessageContaining("Path must not be null");
 	}
 
 	@Test
 	void nullUri() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new PathResource((URI) null))
-			.withMessageContaining("URI must not be null");
+				.withMessageContaining("URI must not be null");
 	}
 
 	@Test
@@ -256,6 +256,17 @@ class PathResourceTests {
 	void directoryIsNotWritable() {
 		PathResource resource = new PathResource(TEST_DIR);
 		assertThat(resource.isWritable()).isFalse();
+	}
+
+	@Test
+	void equalsAndHashCode() {
+		Resource mr1 = new PathResource(TEST_FILE);
+		Resource mr2 = new PathResource(TEST_FILE);
+		Resource mr3 = new PathResource(TEST_DIR);
+		assertThat(mr1).isEqualTo(mr2);
+		assertThat(mr1).isNotEqualTo(mr3);
+		assertThat(mr1).hasSameHashCodeAs(mr2);
+		assertThat(mr1).doesNotHaveSameHashCodeAs(mr3);
 	}
 
 	@Test

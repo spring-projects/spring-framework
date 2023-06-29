@@ -257,7 +257,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public String getDescription() {
-		return "class path resource [" + this.absolutePath + ']';
+		return "class path resource [" + this.absolutePath + "]";
 	}
 
 
@@ -272,7 +272,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		if (this == obj) {
 			return true;
 		}
-		return ((obj instanceof ClassPathResource that) &&
+		return (obj instanceof ClassPathResource that &&
 				this.absolutePath.equals(that.absolutePath) &&
 				ObjectUtils.nullSafeEquals(getClassLoader(), that.getClassLoader()));
 	}
