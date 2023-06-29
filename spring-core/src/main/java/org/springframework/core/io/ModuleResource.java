@@ -28,12 +28,13 @@ import org.springframework.util.StringUtils;
  * {@link Resource} implementation for {@link java.lang.Module} resolution,
  * performing {@link #getInputStream()} access via {@link Module#getResourceAsStream}.
  *
- * <p>Alternatively, consider accessing resources in a module path layout
- * via {@link ClassPathResource} for exported resources, or specifically
- * via {@link ClassPathResource#ClassPathResource(String, Class)}
- * for local resolution within the containing module of a specific class.
+ * <p>Alternatively, consider accessing resources in a module path layout via
+ * @link ClassPathResource} for exported resources, or specifically relative to
+ * a {@code Class} via {@link ClassPathResource#ClassPathResource(String, Class)}
+ * for local resolution within the containing module of that specific class.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 6.1
  * @see Module#getResourceAsStream
  * @see ClassPathResource

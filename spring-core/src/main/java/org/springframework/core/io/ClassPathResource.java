@@ -100,9 +100,13 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * the class path via a leading slash.
 	 * <p>If the supplied {@code Class} is {@code null}, the default class
 	 * loader will be used for loading the resource.
+	 * <p>This is also useful for resource access within the module system,
+	 * loading a resource from the containing module of a given {@code Class}.
+	 * See {@link ModuleResource} and its javadoc.
 	 * @param path relative or absolute path within the class path
 	 * @param clazz the class to load resources with
 	 * @see ClassUtils#getDefaultClassLoader()
+	 * @see ModuleResource
 	 */
 	public ClassPathResource(String path, @Nullable Class<?> clazz) {
 		Assert.notNull(path, "Path must not be null");
@@ -257,7 +261,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 */
 	@Override
 	public String getDescription() {
-		return "class path resource [" + this.absolutePath + ']';
+		return "class path resource [" + this.absolutePath + "]";
 	}
 
 
@@ -272,7 +276,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 		if (this == obj) {
 			return true;
 		}
-		return ((obj instanceof ClassPathResource that) &&
+		return (obj instanceof ClassPathResource that &&
 				this.absolutePath.equals(that.absolutePath) &&
 				ObjectUtils.nullSafeEquals(getClassLoader(), that.getClassLoader()));
 	}
