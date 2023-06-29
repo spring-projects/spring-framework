@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -98,8 +99,24 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 			Thread.currentThread().interrupt();
 			throw new IOException("Request was interrupted: " + ex.getMessage(), ex);
 		}
-		catch (TimeoutException | ExecutionException ex) {
-			throw new IOException("Could not send request: " + ex.getMessage(), ex);
+		catch (ExecutionException ex) {
+			Throwable cause = ex.getCause();
+
+			if (cause instanceof UncheckedIOException uioEx) {
+				throw uioEx.getCause();
+			}
+			if (cause instanceof RuntimeException rtEx) {
+				throw rtEx;
+			}
+			else if (cause instanceof IOException ioEx) {
+				throw ioEx;
+			}
+			else {
+				throw new IOException(cause.getMessage(), cause);
+			}
+		}
+		catch (TimeoutException ex) {
+			throw new IOException("Request timed out: " + ex.getMessage(), ex);
 		}
 	}
 }
