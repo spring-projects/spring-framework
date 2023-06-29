@@ -543,14 +543,14 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 		@Override
 		public void afterRestore(org.crac.Context<? extends org.crac.Resource> context) {
 			long restartTime = System.nanoTime();
-			logger.debug("Restarting Spring-managed lifecycle beans after JVM restore");
+			logger.info("Restarting Spring-managed lifecycle beans after JVM restore");
 			restartAfterStop();
 
 			// Barrier for prevent-shutdown thread not needed anymore
 			this.barrier = null;
 
 			Duration timeTakenToRestart = Duration.ofNanos(System.nanoTime() - restartTime);
-			logger.debug("Restart complete in " + timeTakenToRestart.toMillis() + " ms");
+			logger.info("Restart complete in " + timeTakenToRestart.toMillis() + " ms");
 		}
 
 		private void awaitPreventShutdownBarrier() {
