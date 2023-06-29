@@ -24,6 +24,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
@@ -58,12 +59,17 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final Executor executor;
 
+	@Nullable
+	private final Duration timeOut;
 
-	public JdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor) {
+
+	public JdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor,
+			@Nullable Duration readTimeout) {
 		this.httpClient = httpClient;
 		this.uri = uri;
 		this.method = method;
 		this.executor = executor;
+		this.timeOut = readTimeout;
 	}
 
 	@Override
@@ -97,6 +103,10 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	private HttpRequest buildRequest(HttpHeaders headers, @Nullable Body body) {
 		HttpRequest.Builder builder = HttpRequest.newBuilder()
 				.uri(this.uri);
+
+		if (this.timeOut != null) {
+			builder.timeout(this.timeOut);
+		}
 
 		headers.forEach((headerName, headerValues) -> {
 			if (!headerName.equalsIgnoreCase(HttpHeaders.CONTENT_LENGTH)) {

@@ -19,10 +19,12 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.concurrent.Executor;
 
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 
@@ -39,6 +41,9 @@ public class JdkClientHttpRequestFactory implements ClientHttpRequestFactory {
 	private final HttpClient httpClient;
 
 	private final Executor executor;
+
+	@Nullable
+	private Duration readTimeout;
 
 
 	/**
@@ -74,9 +79,20 @@ public class JdkClientHttpRequestFactory implements ClientHttpRequestFactory {
 	}
 
 
+	/**
+	 * Set the underlying {@code HttpClient}'s read timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @see java.net.http.HttpRequest.Builder#timeout
+	 */
+	public void setReadTimeout(int readTimeout) {
+		this.readTimeout = Duration.ofMillis(readTimeout);
+	}
+
+
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		return new JdkClientHttpRequest(this.httpClient, uri, httpMethod, this.executor);
+		return new JdkClientHttpRequest(this.httpClient, uri, httpMethod, this.executor, this.readTimeout);
 	}
 
 }
