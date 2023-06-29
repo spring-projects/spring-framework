@@ -60,7 +60,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	private final Executor executor;
 
 	@Nullable
-	private final Duration timeOut;
+	private final Duration timeout;
 
 
 	public JdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor,
@@ -69,7 +69,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		this.uri = uri;
 		this.method = method;
 		this.executor = executor;
-		this.timeOut = readTimeout;
+		this.timeout = readTimeout;
 	}
 
 	@Override
@@ -104,8 +104,8 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		HttpRequest.Builder builder = HttpRequest.newBuilder()
 				.uri(this.uri);
 
-		if (this.timeOut != null) {
-			builder.timeout(this.timeOut);
+		if (this.timeout != null) {
+			builder.timeout(this.timeout);
 		}
 
 		headers.forEach((headerName, headerValues) -> {
