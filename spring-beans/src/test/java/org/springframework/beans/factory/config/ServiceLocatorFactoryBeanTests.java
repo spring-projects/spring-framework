@@ -198,14 +198,10 @@ public class ServiceLocatorFactoryBeanTests {
 		assertThat(testBean3).isNotSameAs(testBean2);
 		assertThat(testBean4).isNotSameAs(testBean2);
 		assertThat(testBean4).isNotSameAs(testBean3);
-		boolean condition3 = testBean1 instanceof ExtendedTestService;
-		assertThat(condition3).isFalse();
-		boolean condition2 = testBean2 instanceof ExtendedTestService;
-		assertThat(condition2).isFalse();
-		boolean condition1 = testBean3 instanceof ExtendedTestService;
-		assertThat(condition1).isFalse();
-		boolean condition = testBean4 instanceof ExtendedTestService;
-		assertThat(condition).isTrue();
+		assertThat(testBean1 instanceof ExtendedTestService).isFalse();
+		assertThat(testBean2 instanceof ExtendedTestService).isFalse();
+		assertThat(testBean3 instanceof ExtendedTestService).isFalse();
+		assertThat(testBean4 instanceof ExtendedTestService).isTrue();
 	}
 
 	@Test
@@ -264,17 +260,14 @@ public class ServiceLocatorFactoryBeanTests {
 
 
 	public static class TestService {
-
 	}
 
 
 	public static class ExtendedTestService extends TestService {
-
 	}
 
 
 	public static class TestService2 {
-
 	}
 
 
@@ -345,7 +338,6 @@ public class ServiceLocatorFactoryBeanTests {
 
 	@SuppressWarnings("serial")
 	public static class ExceptionClassWithOnlyZeroArgCtor extends Exception {
-
 	}
 
 }
