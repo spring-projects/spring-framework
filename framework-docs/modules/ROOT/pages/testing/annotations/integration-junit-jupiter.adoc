@@ -223,6 +223,7 @@ following annotations.
 * xref:testing/annotations/integration-spring/annotation-contextconfiguration.adoc[`@ContextConfiguration`]
 * xref:testing/annotations/integration-spring/annotation-webappconfiguration.adoc[`@WebAppConfiguration`]
 * xref:testing/annotations/integration-spring/annotation-contexthierarchy.adoc[`@ContextHierarchy`]
+* xref:testing/annotations/integration-spring/annotation-contextcustomizerfactories.adoc[`@ContextCustomizerFactories`]
 * xref:testing/annotations/integration-spring/annotation-activeprofiles.adoc[`@ActiveProfiles`]
 * xref:testing/annotations/integration-spring/annotation-testpropertysource.adoc[`@TestPropertySource`]
 * xref:testing/annotations/integration-spring/annotation-dynamicpropertysource.adoc[`@DynamicPropertySource`]

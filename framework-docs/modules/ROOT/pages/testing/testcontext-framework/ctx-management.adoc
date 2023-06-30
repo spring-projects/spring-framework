@@ -112,6 +112,7 @@ advanced use cases.
 * xref:testing/testcontext-framework/ctx-management/groovy.adoc[Context Configuration with Groovy Scripts]
 * xref:testing/testcontext-framework/ctx-management/javaconfig.adoc[Context Configuration with Component Classes]
 * xref:testing/testcontext-framework/ctx-management/mixed-config.adoc[Mixing XML, Groovy Scripts, and Component Classes]
+* xref:testing/testcontext-framework/ctx-management/context-customizers.adoc[Context Configuration with Context Customizers]
 * xref:testing/testcontext-framework/ctx-management/initializers.adoc[Context Configuration with Context Initializers]
 * xref:testing/testcontext-framework/ctx-management/inheritance.adoc[Context Configuration Inheritance]
 * xref:testing/testcontext-framework/ctx-management/env-profiles.adoc[Context Configuration with Environment Profiles]

@@ -37,6 +37,7 @@ import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
+import org.springframework.test.context.ContextCustomizerFactories;
 import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
@@ -378,7 +379,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	private Set<ContextCustomizer> getContextCustomizers(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
-		List<ContextCustomizerFactory> factories = getContextCustomizerFactories();
+		List<ContextCustomizerFactory> factories = getContextCustomizerFactories(testClass);
 		Set<ContextCustomizer> customizers = new LinkedHashSet<>(factories.size());
 		for (ContextCustomizerFactory factory : factories) {
 			ContextCustomizer customizer = factory.createContextCustomizer(testClass, configAttributes);
@@ -397,6 +398,69 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return customizers;
 	}
 
+	private List<ContextCustomizerFactory> getContextCustomizerFactories(Class<?> testClass) {
+		AnnotationDescriptor<ContextCustomizerFactories> descriptor =
+				TestContextAnnotationUtils.findAnnotationDescriptor(testClass, ContextCustomizerFactories.class);
+		List<ContextCustomizerFactory> factories = new ArrayList<>();
+
+		if (descriptor == null) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("@ContextCustomizerFactories is not present for class [%s]"
+						.formatted(testClass.getName()));
+			}
+			factories.addAll(getContextCustomizerFactories());
+		}
+		else {
+			// Traverse the class hierarchy...
+			while (descriptor != null) {
+				Class<?> declaringClass = descriptor.getDeclaringClass();
+				ContextCustomizerFactories annotation = descriptor.getAnnotation();
+				if (logger.isTraceEnabled()) {
+					logger.trace("Retrieved %s for declaring class [%s]."
+							.formatted(annotation, declaringClass.getName()));
+				}
+
+				boolean inheritFactories = annotation.inheritFactories();
+				AnnotationDescriptor<ContextCustomizerFactories> parentDescriptor = descriptor.next();
+				factories.addAll(0, instantiateCustomizerFactories(annotation.factories()));
+
+				// If there are no factories to inherit, we might need to merge the
+				// locally declared factories with the defaults.
+				if ((!inheritFactories || parentDescriptor == null) &&
+						annotation.mergeMode() == ContextCustomizerFactories.MergeMode.MERGE_WITH_DEFAULTS) {
+					if (logger.isTraceEnabled()) {
+						logger.trace(String.format("Merging default factories with factories configured via " +
+								"@ContextCustomizerFactories for class [%s].", descriptor.getRootDeclaringClass().getName()));
+					}
+					factories.addAll(0, getContextCustomizerFactories());
+				}
+
+				descriptor = (inheritFactories ? parentDescriptor : null);
+			}
+		}
+
+		// Remove possible duplicates.
+		List<ContextCustomizerFactory> uniqueFactories = new ArrayList<>(factories.size());
+		factories.forEach(factory -> {
+			Class<? extends ContextCustomizerFactory> factoryClass = factory.getClass();
+			if (uniqueFactories.stream().map(Object::getClass).noneMatch(factoryClass::equals)) {
+				uniqueFactories.add(factory);
+			}
+		});
+		factories = uniqueFactories;
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Using ContextCustomizerFactory implementations for test class [%s]: %s"
+					.formatted(testClass.getName(), factories));
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Using ContextCustomizerFactory implementations for test class [%s]: %s"
+					.formatted(testClass.getSimpleName(), classSimpleNames(factories)));
+		}
+
+		return factories;
+	}
+
 	/**
 	 * Get the {@link ContextCustomizerFactory} instances for this bootstrapper.
 	 * <p>The default implementation delegates to
@@ -405,6 +469,33 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
 		return TestContextSpringFactoriesUtils.loadFactoryImplementations(ContextCustomizerFactory.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<ContextCustomizerFactory> instantiateCustomizerFactories(Class<? extends ContextCustomizerFactory>... classes) {
+		List<ContextCustomizerFactory> factories = new ArrayList<>(classes.length);
+		for (Class<? extends ContextCustomizerFactory> factoryClass : classes) {
+			try {
+				factories.add(BeanUtils.instantiateClass(factoryClass));
+			}
+			catch (BeanInstantiationException ex) {
+				Throwable cause = ex.getCause();
+				if (cause instanceof ClassNotFoundException || cause instanceof NoClassDefFoundError) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("""
+								Skipping candidate %1$s [%2$s] due to a missing dependency. \
+								Specify custom %1$s classes or make the default %1$s classes \
+								and their required dependencies available. Offending class: [%3$s]"""
+									.formatted(ContextCustomizerFactory.class.getSimpleName(), factoryClass.getName(),
+										cause.getMessage()));
+					}
+				}
+				else {
+					throw ex;
+				}
+			}
+		}
+		return factories;
 	}
 
 	/**
