@@ -26,7 +26,7 @@ import static org.springframework.scheduling.config.ScheduledTaskObservationDocu
 /**
  * Default implementation for {@link ScheduledTaskObservationConvention}.
  * @author Brian Clozel
- * @since 6.1.0
+ * @since 6.1
  */
 public class DefaultScheduledTaskObservationConvention implements ScheduledTaskObservationConvention {
 

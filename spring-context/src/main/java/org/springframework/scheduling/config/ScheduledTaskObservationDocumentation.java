@@ -28,7 +28,7 @@ import io.micrometer.observation.docs.ObservationDocumentation;
  * <p>This class is used by automated tools to document KeyValues attached to the {@code @Scheduled} observations.
  *
  * @author Brian Clozel
- * @since 6.1.0
+ * @since 6.1
  */
 public enum ScheduledTaskObservationDocumentation implements ObservationDocumentation {
 

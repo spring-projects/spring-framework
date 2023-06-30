@@ -23,7 +23,7 @@ import io.micrometer.observation.ObservationConvention;
  * Interface for an {@link ObservationConvention} for
  * {@link ScheduledTaskObservationDocumentation#TASKS_SCHEDULED_EXECUTION scheduled task executions}.
  * @author Brian Clozel
- * @since 6.1.0
+ * @since 6.1
  */
 public interface ScheduledTaskObservationConvention extends ObservationConvention<ScheduledTaskObservationContext> {
 

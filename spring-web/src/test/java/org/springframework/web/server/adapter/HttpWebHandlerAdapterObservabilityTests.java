@@ -105,7 +105,7 @@ class HttpWebHandlerAdapterObservabilityTests {
 
 		private Optional<ServerRequestObservationContext> observationContext;
 
-		public HttpStatusSuccessStubWebHandler(HttpStatus responseStatus) {
+		HttpStatusSuccessStubWebHandler(HttpStatus responseStatus) {
 			this.responseStatus = responseStatus;
 		}
 

@@ -371,7 +371,7 @@ public final class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Configure a {@link ObservationRegistry} for recording server exchange observations.
+	 * Configure an {@link ObservationRegistry} for recording server exchange observations.
 	 * By default, a {@link ObservationRegistry#NOOP no-op} registry will be configured.
 	 * @param observationRegistry the observation registry
 	 * @since 6.1

@@ -41,9 +41,9 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 	/**
 	 * Name of the {@link ServerWebExchange#getAttributes() attribute} that
 	 * contains the exception handled by {@link WebExceptionHandler WebExceptionHandlers}.
-	 * @since 6.0.8
+	 * @since 6.1
 	 */
-	public static String HANDLED_WEB_EXCEPTION = ExceptionHandlingWebHandler.class.getSimpleName() + ".handledException";
+	public static final String HANDLED_WEB_EXCEPTION = ExceptionHandlingWebHandler.class.getSimpleName() + ".handledException";
 
 	private final List<WebExceptionHandler> exceptionHandlers;
 
