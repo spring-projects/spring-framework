@@ -138,7 +138,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 
 	/**
 	 * Return the {@link ObservationRegistry} for this registrar.
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	@Nullable
 	public ObservationRegistry getObservationRegistry() {
@@ -147,7 +147,7 @@ public class ScheduledTaskRegistrar implements ScheduledTaskHolder, Initializing
 
 	/**
 	 * Configure an {@link ObservationRegistry} to record observations for scheduled tasks.
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public void setObservationRegistry(@Nullable ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;

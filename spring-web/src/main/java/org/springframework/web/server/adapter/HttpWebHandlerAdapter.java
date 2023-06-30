@@ -206,7 +206,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	}
 
 	/**
-	 * Configure a {@link ObservationRegistry} for recording server exchange observations.
+	 * Configure an {@link ObservationRegistry} for recording server exchange observations.
 	 * By default, a {@link ObservationRegistry#NOOP no-op} instance will be used.
 	 * @param observationRegistry the observation registry to use
 	 * @since 6.1

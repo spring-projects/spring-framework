@@ -26,7 +26,7 @@ import org.springframework.util.ClassUtils;
  * Context that holds information for observation metadata collection
  * during the {@link ScheduledTaskObservationDocumentation#TASKS_SCHEDULED_EXECUTION execution of scheduled tasks}.
  * @author Brian Clozel
- * @since 6.1.0
+ * @since 6.1
  */
 public class ScheduledTaskObservationContext extends Observation.Context {
 

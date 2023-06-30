@@ -56,7 +56,7 @@ public class ScheduledMethodRunnable implements Runnable {
 	 * @param target the target instance to call the method on
 	 * @param method the target method to call
 	 * @param observationRegistrySupplier a supplier for the observation registry to use
-	 * @since 6.1.0
+	 * @since 6.1
 	 */
 	public ScheduledMethodRunnable(Object target, Method method, Supplier<ObservationRegistry> observationRegistrySupplier) {
 		this.target = target;
