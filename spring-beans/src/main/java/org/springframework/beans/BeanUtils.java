@@ -873,13 +873,17 @@ public abstract class BeanUtils {
 			}
 
 			List<KParameter> parameters = kotlinConstructor.getParameters();
-
-			Assert.isTrue(args.length <= parameters.size(),
-					"Number of provided arguments must be less than or equal to the number of constructor parameters");
-			if (parameters.isEmpty()) {
+			final int nbExpectedParameters = parameters.size();
+			if (args.length > nbExpectedParameters) {
+				// In such case, it might mean that selected constructor requires one or more context receivers.
+				// They are not (at least for now) listed as function parameters, but are accepted nonetheless.
+				return kotlinConstructor.call(args);
+			}
+			else if (nbExpectedParameters == 0) {
 				return kotlinConstructor.call();
 			}
-			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(parameters.size());
+
+			Map<KParameter, Object> argParameters = CollectionUtils.newHashMap(nbExpectedParameters);
 			for (int i = 0 ; i < args.length ; i++) {
 				if (!(parameters.get(i).isOptional() && args[i] == null)) {
 					argParameters.put(parameters.get(i), args[i]);
