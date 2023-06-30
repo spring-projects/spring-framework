@@ -39,7 +39,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.validation.beanvalidation.MethodValidationException;
 import org.springframework.validation.beanvalidation.ParameterValidationResult;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -164,9 +163,9 @@ public class MethodValidationTests {
 		this.request.addParameter("name", "name=Faustino1234");
 		this.request.addHeader("myHeader", "123");
 
-		MethodValidationException ex = catchThrowableOfType(
+		HandlerMethodValidationException ex = catchThrowableOfType(
 				() -> this.handlerAdapter.handle(this.request, this.response, hm),
-				MethodValidationException.class);
+				HandlerMethodValidationException.class);
 
 		assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 		assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);

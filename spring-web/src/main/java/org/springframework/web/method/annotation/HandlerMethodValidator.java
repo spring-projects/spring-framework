@@ -27,7 +27,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.beanvalidation.MethodValidationAdapter;
-import org.springframework.validation.beanvalidation.MethodValidationException;
 import org.springframework.validation.beanvalidation.MethodValidationResult;
 import org.springframework.validation.beanvalidation.MethodValidator;
 import org.springframework.validation.beanvalidation.ParameterErrors;
@@ -91,7 +90,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 			}
 		}
 
-		throw new MethodValidationException(result);
+		throw new HandlerMethodValidationException(result);
 	}
 
 	@Override
@@ -109,7 +108,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 
 		MethodValidationResult result = validateReturnValue(target, method, returnType, returnValue, groups);
 		if (result.hasErrors()) {
-			throw new MethodValidationException(result);
+			throw new HandlerMethodValidationException(result);
 		}
 	}
 

@@ -37,9 +37,12 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.beanvalidation.MethodValidationException;
+import org.springframework.validation.beanvalidation.MethodValidationResult;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.MissingRequestValueException;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -53,6 +56,7 @@ import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRe
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.mock;
 
 /**
  * Unit tests for {@link ResponseEntityExceptionHandler}.
@@ -103,6 +107,21 @@ public class ResponseEntityExceptionHandlerTests {
 	@Test
 	void handleWebExchangeBindException() {
 		testException(new WebExchangeBindException(null, new BeanPropertyBindingResult(new Object(), "foo")));
+	}
+
+	@Test
+	public void handlerMethodValidationException() {
+		testException(new HandlerMethodValidationException(mock(MethodValidationResult.class)));
+	}
+
+	@Test
+	public void methodValidationException() {
+		MethodValidationException ex = new MethodValidationException(mock(MethodValidationResult.class));
+		ResponseEntity<?> entity = this.exceptionHandler.handleException(ex, this.exchange).block();
+
+		assertThat(entity).isNotNull();
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+		assertThat(entity.getBody()).isInstanceOf(ProblemDetail.class);
 	}
 
 	@Test
