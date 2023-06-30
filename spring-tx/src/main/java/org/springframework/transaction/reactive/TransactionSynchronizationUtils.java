@@ -85,7 +85,7 @@ abstract class TransactionSynchronizationUtils {
 	public static Mono<Void> triggerBeforeCompletion(Collection<TransactionSynchronization> synchronizations) {
 		return Flux.fromIterable(synchronizations)
 				.concatMap(TransactionSynchronization::beforeCompletion).onErrorContinue((t, o) ->
-						logger.debug("TransactionSynchronization.beforeCompletion threw exception", t)).then();
+						logger.error("TransactionSynchronization.beforeCompletion threw exception", t)).then();
 	}
 
 	/**
@@ -115,7 +115,7 @@ abstract class TransactionSynchronizationUtils {
 			Collection<TransactionSynchronization> synchronizations, int completionStatus) {
 
 		return Flux.fromIterable(synchronizations).concatMap(it -> it.afterCompletion(completionStatus))
-				.onErrorContinue((t, o) -> logger.debug("TransactionSynchronization.afterCompletion threw exception", t)).then();
+				.onErrorContinue((t, o) -> logger.error("TransactionSynchronization.afterCompletion threw exception", t)).then();
 	}
 
 
