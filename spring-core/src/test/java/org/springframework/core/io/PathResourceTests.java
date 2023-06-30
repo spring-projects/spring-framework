@@ -142,7 +142,7 @@ class PathResourceTests {
 	}
 
 	@Test
-	void doesNotExistIsNotReadable() {
+	void nonExistingFileIsNotReadable() {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		assertThat(resource.isReadable()).isFalse();
 	}
@@ -157,7 +157,7 @@ class PathResourceTests {
 	void getInputStream() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-		assertThat(bytes.length).isGreaterThan(0);
+		assertThat(bytes).hasSizeGreaterThan(0);
 	}
 
 	@Test
@@ -167,7 +167,7 @@ class PathResourceTests {
 	}
 
 	@Test
-	void getInputStreamDoesNotExist() throws IOException {
+	void getInputStreamForNonExistingFile() throws IOException {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(resource::getInputStream);
 	}
@@ -260,24 +260,26 @@ class PathResourceTests {
 
 	@Test
 	void equalsAndHashCode() {
-		Resource mr1 = new PathResource(TEST_FILE);
-		Resource mr2 = new PathResource(TEST_FILE);
-		Resource mr3 = new PathResource(TEST_DIR);
-		assertThat(mr1).isEqualTo(mr2);
-		assertThat(mr1).isNotEqualTo(mr3);
-		assertThat(mr1).hasSameHashCodeAs(mr2);
-		assertThat(mr1).doesNotHaveSameHashCodeAs(mr3);
+		Resource resource1 = new PathResource(TEST_FILE);
+		Resource resource2 = new PathResource(TEST_FILE);
+		Resource resource3 = new PathResource(TEST_DIR);
+		assertThat(resource1).isEqualTo(resource1);
+		assertThat(resource1).isEqualTo(resource2);
+		assertThat(resource2).isEqualTo(resource1);
+		assertThat(resource1).isNotEqualTo(resource3);
+		assertThat(resource1).hasSameHashCodeAs(resource2);
+		assertThat(resource1).doesNotHaveSameHashCodeAs(resource3);
 	}
 
 	@Test
-	void outputStream(@TempDir Path temporaryFolder) throws IOException {
+	void getOutputStreamForExistingFile(@TempDir Path temporaryFolder) throws IOException {
 		PathResource resource = new PathResource(temporaryFolder.resolve("test"));
 		FileCopyUtils.copy("test".getBytes(StandardCharsets.UTF_8), resource.getOutputStream());
 		assertThat(resource.contentLength()).isEqualTo(4L);
 	}
 
 	@Test
-	void doesNotExistOutputStream(@TempDir Path temporaryFolder) throws IOException {
+	void getOutputStreamForNonExistingFile(@TempDir Path temporaryFolder) throws IOException {
 		File file = temporaryFolder.resolve("test").toFile();
 		file.delete();
 		PathResource resource = new PathResource(file.toPath());
@@ -286,7 +288,7 @@ class PathResourceTests {
 	}
 
 	@Test
-	void directoryOutputStream() throws IOException {
+	void getOutputStreamForDirectory() {
 		PathResource resource = new PathResource(TEST_DIR);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(resource::getOutputStream);
 	}
@@ -314,7 +316,7 @@ class PathResourceTests {
 	}
 
 	@Test
-	void getReadableByteChannelDoesNotExist() throws IOException {
+	void getReadableByteChannelForNonExistingFile() throws IOException {
 		PathResource resource = new PathResource(NON_EXISTING_FILE);
 		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(resource::readableChannel);
 	}
