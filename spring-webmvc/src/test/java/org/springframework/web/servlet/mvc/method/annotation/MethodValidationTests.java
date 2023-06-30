@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.servlet.MockHttpServletRequest;
@@ -170,7 +171,6 @@ public class MethodValidationTests {
 		assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 		assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
 
-		assertThat(ex.getConstraintViolations()).hasSize(2);
 		assertThat(ex.getAllValidationResults()).hasSize(2);
 
 		assertBeanResult(ex.getBeanResults().get(0), "student", Collections.singletonList(

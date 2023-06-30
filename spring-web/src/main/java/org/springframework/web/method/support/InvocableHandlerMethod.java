@@ -174,14 +174,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 		Class<?>[] groups = getValidationGroups();
 		if (shouldValidateArguments() && this.methodValidator != null) {
-			this.methodValidator.validateArguments(
+			this.methodValidator.applyArgumentValidation(
 					getBean(), getBridgedMethod(), getMethodParameters(), args, groups);
 		}
 
 		Object returnValue = doInvoke(args);
 
 		if (shouldValidateReturnValue() && this.methodValidator != null) {
-			this.methodValidator.validateReturnValue(
+			this.methodValidator.applyReturnValueValidation(
 					getBean(), getBridgedMethod(), getReturnType(), returnValue, groups);
 		}
 

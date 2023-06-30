@@ -16,6 +16,8 @@
 
 package org.springframework.web.method.annotation;
 
+import java.lang.reflect.Method;
+
 import jakarta.validation.Validator;
 
 import org.springframework.core.Conventions;
@@ -24,7 +26,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MessageCodesResolver;
-import org.springframework.validation.beanvalidation.DefaultMethodValidator;
 import org.springframework.validation.beanvalidation.MethodValidationAdapter;
 import org.springframework.validation.beanvalidation.MethodValidationException;
 import org.springframework.validation.beanvalidation.MethodValidationResult;
@@ -37,27 +38,41 @@ import org.springframework.web.bind.support.WebBindingInitializer;
 
 /**
  * {@link org.springframework.validation.beanvalidation.MethodValidator} for
- * use with {@code @RequestMapping} methods. Helps to determine object names
- * and populates {@link BindingResult} method arguments with errors from
- * {@link MethodValidationResult#getBeanResults() beanResults}.
+ * {@code @RequestMapping} methods.
+ *
+ * <p>Handles validation results by populating {@link BindingResult} method
+ * arguments with errors from {@link MethodValidationResult#getBeanResults()
+ * beanResults}. Also, helps to determine parameter names for
+ * {@code @ModelAttribute} and {@code @RequestBody} parameters.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
  */
-public final class HandlerMethodValidator extends DefaultMethodValidator {
+public final class HandlerMethodValidator implements MethodValidator {
 
-	private HandlerMethodValidator(MethodValidationAdapter adapter) {
-		super(adapter);
+	private final MethodValidationAdapter validationAdapter;
+
+
+	private HandlerMethodValidator(MethodValidationAdapter validationAdapter) {
+		this.validationAdapter = validationAdapter;
 	}
 
 
 	@Override
-	protected void handleArgumentsResult(
-			Object[] arguments, Class<?>[] groups, MethodValidationResult result) {
+	public Class<?>[] determineValidationGroups(Object target, Method method) {
+		return this.validationAdapter.determineValidationGroups(target, method);
+	}
 
-		if (result.getConstraintViolations().isEmpty()) {
+	@Override
+	public void applyArgumentValidation(
+			Object target, Method method, @Nullable MethodParameter[] parameters,
+			Object[] arguments, Class<?>[] groups) {
+
+		MethodValidationResult result = validateArguments(target, method, parameters, arguments, groups);
+		if (!result.hasErrors()) {
 			return;
 		}
+
 		if (!result.getBeanResults().isEmpty()) {
 			int bindingResultCount = 0;
 			for (ParameterErrors errors : result.getBeanResults()) {
@@ -75,12 +90,37 @@ public final class HandlerMethodValidator extends DefaultMethodValidator {
 				return;
 			}
 		}
-		if (result.hasViolations()) {
-			throw MethodValidationException.forResult(result);
+
+		throw new MethodValidationException(result);
+	}
+
+	@Override
+	public MethodValidationResult validateArguments(
+			Object target, Method method, @Nullable MethodParameter[] parameters,
+			Object[] arguments, Class<?>[] groups) {
+
+		return this.validationAdapter.validateArguments(target, method, parameters, arguments, groups);
+	}
+
+	@Override
+	public void applyReturnValueValidation(
+			Object target, Method method, @Nullable MethodParameter returnType,
+			@Nullable Object returnValue, Class<?>[] groups) {
+
+		MethodValidationResult result = validateReturnValue(target, method, returnType, returnValue, groups);
+		if (result.hasErrors()) {
+			throw new MethodValidationException(result);
 		}
 	}
 
-	private String determineObjectName(MethodParameter param, @Nullable Object argument) {
+	@Override
+	public MethodValidationResult validateReturnValue(Object target, Method method,
+			@Nullable MethodParameter returnType, @Nullable Object returnValue, Class<?>[] groups) {
+
+		return this.validationAdapter.validateReturnValue(target, method, returnType, returnValue, groups);
+	}
+
+	private static String determineObjectName(MethodParameter param, @Nullable Object argument) {
 		if (param.hasParameterAnnotation(RequestBody.class) || param.hasParameterAnnotation(RequestPart.class)) {
 			return Conventions.getVariableNameForParameter(param);
 		}
@@ -112,7 +152,7 @@ public final class HandlerMethodValidator extends DefaultMethodValidator {
 					adapter.setMessageCodesResolver(codesResolver);
 				}
 				HandlerMethodValidator methodValidator = new HandlerMethodValidator(adapter);
-				adapter.setBindingResultNameResolver(methodValidator::determineObjectName);
+				adapter.setBindingResultNameResolver(HandlerMethodValidator::determineObjectName);
 				return methodValidator;
 			}
 		}

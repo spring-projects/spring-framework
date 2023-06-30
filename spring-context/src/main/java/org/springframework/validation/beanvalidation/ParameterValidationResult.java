@@ -19,8 +19,6 @@ package org.springframework.validation.beanvalidation;
 import java.util.Collection;
 import java.util.List;
 
-import jakarta.validation.ConstraintViolation;
-
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -28,15 +26,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Store and expose the results of method validation via
- * {@link jakarta.validation.Validator} for a specific method parameter.
+ * Store and expose the results of method validation for a method parameter.
  * <ul>
- * <li>For a constraints directly on a method parameter, each
- * {@link ConstraintViolation} is adapted to {@link MessageSourceResolvable}.
- * <li>For cascaded constraints via {@link jakarta.validation.Validator @Valid}
- * on a bean method parameter, {@link SpringValidatorAdapter} is used to initialize
- * an {@link org.springframework.validation.Errors} with field errors, and create
- * the {@link ParameterErrors} sub-class.
+ * <li>Validation errors directly on method parameter values are exposed as a
+ * list of {@link MessageSourceResolvable}s.
+ * <li>Nested validation errors on an Object method parameter are exposed as
+ * {@link org.springframework.validation.Errors} by the subclass
+ * {@link ParameterErrors}.
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -51,24 +47,18 @@ public class ParameterValidationResult {
 
 	private final List<MessageSourceResolvable> resolvableErrors;
 
-	private final List<ConstraintViolation<Object>> violations;
-
 
 	/**
 	 * Create a {@code ParameterValidationResult}.
 	 */
 	public ParameterValidationResult(
-			MethodParameter methodParameter, @Nullable Object argument,
-			Collection<? extends MessageSourceResolvable> resolvableErrors,
-			Collection<ConstraintViolation<Object>> violations) {
+			MethodParameter param, @Nullable Object arg, Collection<? extends MessageSourceResolvable> errors) {
 
-		Assert.notNull(methodParameter, "MethodParameter is required");
-		Assert.notEmpty(resolvableErrors, "`resolvableErrors` must not be empty");
-		Assert.notEmpty(violations, "'violations' must not be empty");
-		this.methodParameter = methodParameter;
-		this.argument = argument;
-		this.resolvableErrors = List.copyOf(resolvableErrors);
-		this.violations = List.copyOf(violations);
+		Assert.notNull(param, "MethodParameter is required");
+		Assert.notEmpty(errors, "`resolvableErrors` must not be empty");
+		this.methodParameter = param;
+		this.argument = arg;
+		this.resolvableErrors = List.copyOf(errors);
 	}
 
 
@@ -89,7 +79,7 @@ public class ParameterValidationResult {
 
 	/**
 	 * List of {@link MessageSourceResolvable} representations adapted from the
-	 * underlying {@link #getViolations() violations}.
+	 * validation errors of the validation library.
 	 * <ul>
 	 * <li>For a constraints directly on a method parameter, error codes are
 	 * based on the names of the constraint annotation, the object, the method,
@@ -110,14 +100,6 @@ public class ParameterValidationResult {
 		return this.resolvableErrors;
 	}
 
-	/**
-	 * The violations associated with the method parameter, in the same order
-	 * as {@link #getResolvableErrors()}.
-	 */
-	public List<ConstraintViolation<Object>> getViolations() {
-		return this.violations;
-	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {
@@ -129,8 +111,7 @@ public class ParameterValidationResult {
 		}
 		ParameterValidationResult otherResult = (ParameterValidationResult) other;
 		return (getMethodParameter().equals(otherResult.getMethodParameter()) &&
-				ObjectUtils.nullSafeEquals(getArgument(), otherResult.getArgument()) &&
-				getViolations().equals(otherResult.getViolations()));
+				ObjectUtils.nullSafeEquals(getArgument(), otherResult.getArgument()));
 	}
 
 	@Override
@@ -138,7 +119,6 @@ public class ParameterValidationResult {
 		int hashCode = super.hashCode();
 		hashCode = 29 * hashCode + getMethodParameter().hashCode();
 		hashCode = 29 * hashCode + ObjectUtils.nullSafeHashCode(getArgument());
-		hashCode = 29 * hashCode + (getViolations().hashCode());
 		return hashCode;
 	}
 

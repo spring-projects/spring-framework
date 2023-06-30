@@ -22,44 +22,78 @@ import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
 
 /**
- * Contract to apply method validation without directly using
- * {@link MethodValidationAdapter}. For use in components where Jakarta Bean
- * Validation is an optional dependency and may or may not be present on the
- * classpath. If that's not a concern, use {@code MethodValidationAdapter}
- * directly.
+ * Contract to apply method validation and handle the results.
+ * Exposes methods that return {@link MethodValidationResult}, and methods that
+ * handle the results, by default raising {@link MethodValidationException}.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
- * @see DefaultMethodValidator
  */
 public interface MethodValidator {
 
 	/**
-	 * Use this method determine the validation groups to pass into
-	 * {@link #validateArguments(Object, Method, MethodParameter[], Object[], Class[])} and
-	 * {@link #validateReturnValue(Object, Method, MethodParameter, Object, Class[])}.
+	 * Use this method to determine the validation groups.
 	 * @param target the target Object
 	 * @param method the target method
 	 * @return the applicable validation groups as a {@code Class} array
-	 * @see MethodValidationAdapter#determineValidationGroups(Object, Method)
 	 */
 	Class<?>[] determineValidationGroups(Object target, Method method);
 
 	/**
-	 * Validate the given method arguments and return the result of validation.
+	 * Validate the given method arguments and handle the result.
 	 * @param target the target Object
 	 * @param method the target method
 	 * @param parameters the parameters, if already created and available
 	 * @param arguments the candidate argument values to validate
-	 * @param groups groups for validation determined via
-	 * {@link #determineValidationGroups(Object, Method)}
-	 * @throws MethodValidationException should be raised in case of validation
-	 * errors unless the implementation handles those errors otherwise (e.g.
-	 * by injecting {@code BindingResult} into the method).
+	 * @param groups validation groups via {@link #determineValidationGroups}
+	 * @throws MethodValidationException raised by default in case of validation errors.
+	 * Implementations may provide alternative handling, possibly not raise an exception
+	 * but for example inject errors into the method, or raise a different exception,
+	 * one that also implements {@link MethodValidationResult}.
 	 */
-	void validateArguments(
-			Object target, Method method, @Nullable MethodParameter[] parameters, Object[] arguments,
-			Class<?>[] groups);
+	default void applyArgumentValidation(
+			Object target, Method method, @Nullable MethodParameter[] parameters,
+			Object[] arguments, Class<?>[] groups) {
+
+		MethodValidationResult result = validateArguments(target, method, parameters, arguments, groups);
+		if (result.hasErrors()) {
+			throw new MethodValidationException(result);
+		}
+	}
+
+	/**
+	 * Validate the given method arguments and return validation results.
+	 * @param target the target Object
+	 * @param method the target method
+	 * @param parameters the parameters, if already created and available
+	 * @param arguments the candidate argument values to validate
+	 * @param groups validation groups from {@link #determineValidationGroups}
+	 * @return the result of validation
+	 */
+	MethodValidationResult validateArguments(
+			Object target, Method method, @Nullable MethodParameter[] parameters,
+			Object[] arguments, Class<?>[] groups);
+
+	/**
+	 * Validate the given return value and handle the results.
+	 * @param target the target Object
+	 * @param method the target method
+	 * @param returnType the return parameter, if already created and available
+	 * @param returnValue the return value to validate
+	 * @param groups validation groups from {@link #determineValidationGroups}
+	 * @throws MethodValidationException raised by default in case of validation errors.
+	 * Implementations may provide alternative handling, or raise a different exception,
+	 * one that also implements {@link MethodValidationResult}.
+	 */
+	default void applyReturnValueValidation(
+			Object target, Method method, @Nullable MethodParameter returnType,
+			@Nullable Object returnValue, Class<?>[] groups) {
+
+		MethodValidationResult result = validateReturnValue(target, method, returnType, returnValue, groups);
+		if (result.hasErrors()) {
+			throw new MethodValidationException(result);
+		}
+	}
 
 	/**
 	 * Validate the given return value and return the result of validation.
@@ -67,12 +101,11 @@ public interface MethodValidator {
 	 * @param method the target method
 	 * @param returnType the return parameter, if already created and available
 	 * @param returnValue the return value to validate
-	 * @param groups groups for validation determined via
-	 * {@link #determineValidationGroups(Object, Method)}
-	 * @throws MethodValidationException in case of validation errors
+	 * @param groups validation groups from {@link #determineValidationGroups}
+	 * @return the result of validation
 	 */
-	void validateReturnValue(
-			Object target, Method method, @Nullable MethodParameter returnType, @Nullable Object returnValue,
-			Class<?>[] groups);
+	MethodValidationResult validateReturnValue(
+			Object target, Method method, @Nullable MethodParameter returnType,
+			@Nullable Object returnValue, Class<?>[] groups);
 
 }

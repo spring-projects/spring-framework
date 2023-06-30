@@ -17,131 +17,48 @@
 package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 
 import org.springframework.util.Assert;
 
 /**
- * Extension of {@link ConstraintViolationException} that implements
- * {@link MethodValidationResult} exposing an additional list of
- * {@link ParameterValidationResult} that represents violations adapted to
- * {@link org.springframework.context.MessageSourceResolvable} and grouped by
- * method parameter.
+ * Exception that is a {@link MethodValidationResult}.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
- * @see ParameterValidationResult
- * @see ParameterErrors
- * @see MethodValidationAdapter
+ * @see MethodValidator
  */
 @SuppressWarnings("serial")
-public class MethodValidationException extends ConstraintViolationException implements MethodValidationResult {
+public class MethodValidationException extends RuntimeException implements MethodValidationResult {
 
-	private final Object target;
-
-	private final Method method;
-
-	private final List<ParameterValidationResult> allValidationResults;
-
-	private final boolean forReturnValue;
+	private final MethodValidationResult validationResult;
 
 
-	/**
-	 * Package private constructor for {@link MethodValidationAdapter}.
-	 */
-	MethodValidationException(
-			Object target, Method method, boolean forReturnValue,
-			Set<? extends ConstraintViolation<?>> violations, List<ParameterValidationResult> results) {
-
-		super(violations);
-
-		Assert.notNull(violations, "'violations' is required");
-		Assert.notNull(results, "'results' is required");
-
-		this.target = target;
-		this.method = method;
-		this.allValidationResults = results;
-		this.forReturnValue = forReturnValue;
+	public MethodValidationException(MethodValidationResult validationResult) {
+		super(validationResult.toString());
+		Assert.notNull(validationResult, "MethodValidationResult is required");
+		this.validationResult = validationResult;
 	}
 
-	/**
-	 * Private constructor copying from another {@code MethodValidationResult}.
-	 */
-	private MethodValidationException(MethodValidationResult other) {
-		this(other.getTarget(), other.getMethod(), other.isForReturnValue(),
-				other.getConstraintViolations(), other.getAllValidationResults());
-	}
-
-
-	// re-declare getConstraintViolations as NonNull
-
-	@Override
-	public Set<ConstraintViolation<?>> getConstraintViolations() {
-		return super.getConstraintViolations();
-	}
 
 	@Override
 	public Object getTarget() {
-		return this.target;
+		return this.validationResult.getTarget();
 	}
 
 	@Override
 	public Method getMethod() {
-		return this.method;
+		return this.validationResult.getMethod();
 	}
 
 	@Override
 	public boolean isForReturnValue() {
-		return this.forReturnValue;
+		return this.validationResult.isForReturnValue();
 	}
 
 	@Override
 	public List<ParameterValidationResult> getAllValidationResults() {
-		return this.allValidationResults;
+		return this.validationResult.getAllValidationResults();
 	}
-
-	@Override
-	public List<ParameterValidationResult> getValueResults() {
-		return this.allValidationResults.stream()
-				.filter(result -> !(result instanceof ParameterErrors))
-				.toList();
-	}
-
-	@Override
-	public List<ParameterErrors> getBeanResults() {
-		return this.allValidationResults.stream()
-				.filter(result -> result instanceof ParameterErrors)
-				.map(result -> (ParameterErrors) result)
-				.toList();
-	}
-
-	@Override
-	public String toString() {
-		return "MethodValidationResult (" + getConstraintViolations().size() + " violations) " +
-				"for " + this.method.toGenericString();
-	}
-
-
-	/**
-	 * Create an exception copying from the given result, or return the same
-	 * instance if it is a {@code MethodValidationException} already.
-	 */
-	public static MethodValidationException forResult(MethodValidationResult result) {
-		return (result instanceof MethodValidationException ex ? ex : new MethodValidationException(result));
-	}
-
-	/**
-	 * Create an exception for validation without errors.
-	 */
-	public static MethodValidationException forEmptyResult(Object target, Method method, boolean forReturnValue) {
-		return new MethodValidationException(
-				target, method, forReturnValue, Collections.emptySet(), Collections.emptyList());
-	}
-
 
 }

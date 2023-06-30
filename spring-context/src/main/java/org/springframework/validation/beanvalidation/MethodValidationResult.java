@@ -18,22 +18,16 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
 
-import jakarta.validation.ConstraintViolation;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.validation.Errors;
 
 /**
- * Container for method validation results where underlying
- * {@link ConstraintViolation violations} have been adapted to
- * {@link ParameterValidationResult} each containing a list of
- * {@link org.springframework.context.MessageSourceResolvable} grouped by method
- * parameter.
- *
- * <p>For {@link jakarta.validation.Valid @Valid}-annotated, Object method
- * parameters or return types with cascaded violations, the {@link ParameterErrors}
- * subclass of {@link ParameterValidationResult} implements
- * {@link org.springframework.validation.Errors} and exposes
- * {@link org.springframework.validation.FieldError field errors}.
+ * Container for method validation results with validation errors from the
+ * underlying library adapted to {@link MessageSourceResolvable}s and grouped
+ * by method parameter as {@link ParameterValidationResult}. For method parameters
+ * with nested validation errors, the validation result is of type
+ * {@link ParameterErrors} and implements {@link Errors}.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
@@ -58,43 +52,53 @@ public interface MethodValidationResult {
 	boolean isForReturnValue();
 
 	/**
-	 * Whether the result contains any {@link ConstraintViolation}s.
+	 * Whether the result contains any validation errors.
 	 */
-	default boolean hasViolations() {
-		return !getConstraintViolations().isEmpty();
+	default boolean hasErrors() {
+		return !getAllValidationResults().isEmpty();
 	}
 
 	/**
-	 * Returns the set of constraint violations reported during a validation.
-	 * @return the {@code Set} of {@link ConstraintViolation}s, or an empty Set
+	 * Return a single list with all errors from all validation results.
+	 * @see #getAllValidationResults()
+	 * @see ParameterValidationResult#getResolvableErrors()
 	 */
-	Set<ConstraintViolation<?>> getConstraintViolations();
+	default List<? extends MessageSourceResolvable> getAllErrors() {
+		return getAllValidationResults().stream()
+				.flatMap(result -> result.getResolvableErrors().stream())
+				.toList();
+	}
 
 	/**
-	 * Return all validation results. This includes method parameters with
-	 * constraints declared on them, as well as
-	 * {@link jakarta.validation.Valid @Valid} method parameters with
-	 * cascaded constraints.
+	 * Return all validation results. This includes both method parameters with
+	 * errors directly on them, and Object method parameters with nested errors
+	 * on their fields and properties.
 	 * @see #getValueResults()
 	 * @see #getBeanResults()
 	 */
 	List<ParameterValidationResult> getAllValidationResults();
 
 	/**
-	 * Return only validation results for method parameters with constraints
-	 * declared directly on them. This excludes
-	 * {@link jakarta.validation.Valid @Valid} method parameters with cascaded
-	 * constraints.
-	 * @see #getAllValidationResults()
+	 * Return only validation results for method parameters with errors directly
+	 * on them. This does not include Object method parameters with nested
+	 * errors on their fields and properties.
 	 */
-	List<ParameterValidationResult> getValueResults();
+	default List<ParameterValidationResult> getValueResults() {
+		return getAllValidationResults().stream()
+				.filter(result -> !(result instanceof ParameterErrors))
+				.toList();
+	}
 
 	/**
-	 * Return only validation results for {@link jakarta.validation.Valid @Valid}
-	 * method parameters with cascaded constraints. This excludes method
-	 * parameters with constraints declared directly on them.
-	 * @see #getAllValidationResults()
+	 * Return only validation results for Object method parameters with nested
+	 * errors on their fields and properties. This excludes method parameters
+	 * with errors directly on them.
 	 */
-	List<ParameterErrors> getBeanResults();
+	default List<ParameterErrors> getBeanResults() {
+		return getAllValidationResults().stream()
+				.filter(result -> result instanceof ParameterErrors)
+				.map(result -> (ParameterErrors) result)
+				.toList();
+	}
 
 }

@@ -207,7 +207,6 @@ public class MethodValidationTests {
 					assertThat(this.jakartaValidator.getValidationCount()).isEqualTo(1);
 					assertThat(this.jakartaValidator.getMethodValidationCount()).isEqualTo(1);
 
-					assertThat(ex.getConstraintViolations()).hasSize(2);
 					assertThat(ex.getAllValidationResults()).hasSize(2);
 
 					assertBeanResult(ex.getBeanResults().get(0), "student", Collections.singletonList(

@@ -18,6 +18,7 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -49,6 +50,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -59,19 +61,18 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Assist with applying method-level validation via
- * {@link jakarta.validation.Validator}, adapt each resulting
- * {@link ConstraintViolation} to {@link ParameterValidationResult}, and
- * raise {@link MethodValidationException}.
- *
- * <p>Used by {@link MethodValidationInterceptor}.
+ * {@link MethodValidator} that uses a Bean Validation
+ * {@link jakarta.validation.Validator} for validation, and adapts
+ * {@link ConstraintViolation}s to {@link MethodValidationResult}.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
  */
-public class MethodValidationAdapter {
+public class MethodValidationAdapter implements MethodValidator {
 
 	private static final Comparator<ParameterValidationResult> RESULT_COMPARATOR = new ResultComparator();
+
+	private static final MethodValidationResult EMPTY_RESULT = new EmptyMethodValidationResult();
 
 
 	private final Supplier<Validator> validator;
@@ -158,13 +159,10 @@ public class MethodValidationAdapter {
 	}
 
 	/**
-	 * Configure a resolver for {@link BindingResult} method parameters to match
-	 * the behavior of the higher level programming model, e.g. how the name of
-	 * {@code @ModelAttribute} or {@code @RequestBody} is determined in Spring MVC.
-	 * <p>If this is not configured, then {@link #createBindingResult} will apply
-	 * default behavior to resolve the name to use.
-	 * behavior applies.
-	 * @param nameResolver the resolver to use
+	 * Configure a resolver for the name of Object parameters with nested errors
+	 * to allow matching the name used in the higher level programming model,
+	 * e.g. {@code @ModelAttribute} in Spring MVC.
+	 * <p>If not configured, {@link #createBindingResult} determines the name.
 	 */
 	public void setBindingResultNameResolver(BindingResultNameResolver nameResolver) {
 		this.objectNameResolver = nameResolver;
@@ -172,18 +170,14 @@ public class MethodValidationAdapter {
 
 
 	/**
-	 * Use this method determine the validation groups to pass into
-	 * {@link #validateMethodArguments(Object, Method, MethodParameter[], Object[], Class[])} and
-	 * {@link #validateMethodReturnValue(Object, Method, MethodParameter, Object, Class[])}.
+	 * {@inheritDoc}.
 	 * <p>Default are the validation groups as specified in the {@link Validated}
 	 * annotation on the method, or on the containing target class of the method,
 	 * or for an AOP proxy without a target (with all behavior in advisors), also
 	 * check on proxied interfaces.
-	 * @param target the target Object
-	 * @param method the target method
-	 * @return the applicable validation groups as a {@code Class} array
 	 */
-	public static Class<?>[] determineValidationGroups(Object target, Method method) {
+	@Override
+	public Class<?>[] determineValidationGroups(Object target, Method method) {
 		Validated validatedAnn = AnnotationUtils.findAnnotation(method, Validated.class);
 		if (validatedAnn == null) {
 			if (AopUtils.isAopProxy(target)) {
@@ -201,72 +195,75 @@ public class MethodValidationAdapter {
 		return (validatedAnn != null ? validatedAnn.value() : new Class<?>[0]);
 	}
 
-	/**
-	 * Validate the given method arguments and return the result of validation.
-	 * @param target the target Object
-	 * @param method the target method
-	 * @param parameters the parameters, if already created and available
-	 * @param arguments the candidate argument values to validate
-	 * @param groups groups for validation determined via
-	 * {@link #determineValidationGroups(Object, Method)}
-	 * @return a result with {@link ConstraintViolation violations} and
-	 * {@link ParameterValidationResult validationResults}, both possibly empty
-	 * in case there are no violations
-	 */
-	public MethodValidationResult validateMethodArguments(
+	@Override
+	public final MethodValidationResult validateArguments(
 			Object target, Method method, @Nullable MethodParameter[] parameters, Object[] arguments,
 			Class<?>[] groups) {
 
+		Set<ConstraintViolation<Object>> violations =
+				invokeValidatorForArguments(target, method, arguments, groups);
+
+		if (violations.isEmpty()) {
+			return EMPTY_RESULT;
+		}
+
+		return adaptViolations(target, method, violations,
+				i -> parameters != null ? parameters[i] : new MethodParameter(method, i),
+				i -> arguments[i]);
+	}
+
+	/**
+	 * Invoke the validator, and return the resulting violations.
+	 */
+	public final Set<ConstraintViolation<Object>> invokeValidatorForArguments(
+			Object target, Method method, Object[] arguments, Class<?>[] groups) {
+
 		ExecutableValidator execVal = this.validator.get().forExecutables();
-		Set<ConstraintViolation<Object>> result;
+		Set<ConstraintViolation<Object>> violations;
 		try {
-			result = execVal.validateParameters(target, method, arguments, groups);
+			violations = execVal.validateParameters(target, method, arguments, groups);
 		}
 		catch (IllegalArgumentException ex) {
 			// Probably a generic type mismatch between interface and impl as reported in SPR-12237 / HV-1011
 			// Let's try to find the bridged method on the implementation class...
 			Method mostSpecificMethod = ClassUtils.getMostSpecificMethod(method, target.getClass());
 			Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(mostSpecificMethod);
-			result = execVal.validateParameters(target, bridgedMethod, arguments, groups);
+			violations = execVal.validateParameters(target, bridgedMethod, arguments, groups);
 		}
-		return (result.isEmpty() ?
-				MethodValidationException.forEmptyResult(target, method, true) :
-				createException(target, method, result,
-						i -> parameters != null ? parameters[i] : new MethodParameter(method, i),
-						i -> arguments[i],
-						false));
+		return violations;
 	}
 
-	/**
-	 * Validate the given return value and return the result of validation.
-	 * @param target the target Object
-	 * @param method the target method
-	 * @param returnType the return parameter, if already created and available
-	 * @param returnValue the return value to validate
-	 * @param groups groups for validation determined via
-	 * {@link #determineValidationGroups(Object, Method)}
-	 * @return a result with {@link ConstraintViolation violations} and
-	 * {@link ParameterValidationResult validationResults}, both possibly empty
-	 * in case there are no violations
-	 */
-	public MethodValidationResult validateMethodReturnValue(
+	@Override
+	public final MethodValidationResult validateReturnValue(
 			Object target, Method method, @Nullable MethodParameter returnType, @Nullable Object returnValue,
 			Class<?>[] groups) {
 
-		ExecutableValidator execVal = this.validator.get().forExecutables();
-		Set<ConstraintViolation<Object>> result = execVal.validateReturnValue(target, method, returnValue, groups);
-		return (result.isEmpty() ?
-				MethodValidationException.forEmptyResult(target, method, true) :
-				createException(target, method, result,
-						i -> returnType != null ? returnType : new MethodParameter(method, -1),
-						i -> returnValue,
-						true));
+		Set<ConstraintViolation<Object>> violations =
+				invokeValidatorForReturnValue(target, method, returnValue, groups);
+
+		if (violations.isEmpty()) {
+			return EMPTY_RESULT;
+		}
+
+		return adaptViolations(target, method, violations,
+				i -> returnType != null ? returnType : new MethodParameter(method, -1),
+				i -> returnValue);
 	}
 
-	private MethodValidationException createException(
+	/**
+	 * Invoke the validator, and return the resulting violations.
+	 */
+	public final Set<ConstraintViolation<Object>> invokeValidatorForReturnValue(
+			Object target, Method method, @Nullable Object returnValue, Class<?>[] groups) {
+
+		ExecutableValidator execVal = this.validator.get().forExecutables();
+		return execVal.validateReturnValue(target, method, returnValue, groups);
+	}
+
+	private MethodValidationResult adaptViolations(
 			Object target, Method method, Set<ConstraintViolation<Object>> violations,
-			Function<Integer, MethodParameter> parameterFunction, Function<Integer, Object> argumentFunction,
-			boolean forReturnValue) {
+			Function<Integer, MethodParameter> parameterFunction,
+			Function<Integer, Object> argumentFunction) {
 
 		Map<MethodParameter, ValueResultBuilder> parameterViolations = new LinkedHashMap<>();
 		Map<Path.Node, BeanResultBuilder> cascadedViolations = new LinkedHashMap<>();
@@ -309,7 +306,7 @@ public class MethodValidationAdapter {
 		cascadedViolations.forEach((node, builder) -> validatonResultList.add(builder.build()));
 		validatonResultList.sort(RESULT_COMPARATOR);
 
-		return new MethodValidationException(target, method, forReturnValue, violations, validatonResultList);
+		return new DefaultMethodValidationResult(target, method, validatonResultList);
 	}
 
 	/**
@@ -412,8 +409,6 @@ public class MethodValidationAdapter {
 
 		private final List<MessageSourceResolvable> resolvableErrors = new ArrayList<>();
 
-		private final List<ConstraintViolation<Object>> violations = new ArrayList<>();
-
 		public ValueResultBuilder(Object target, MethodParameter parameter, @Nullable Object argument) {
 			this.target = target;
 			this.parameter = parameter;
@@ -422,12 +417,10 @@ public class MethodValidationAdapter {
 
 		public void addViolation(ConstraintViolation<Object> violation) {
 			this.resolvableErrors.add(createMessageSourceResolvable(this.target, this.parameter, violation));
-			this.violations.add(violation);
 		}
 
 		public ParameterValidationResult build() {
-			return new ParameterValidationResult(
-					this.parameter, this.argument, this.resolvableErrors, this.violations);
+			return new ParameterValidationResult(this.parameter, this.argument, this.resolvableErrors);
 		}
 
 	}
@@ -485,8 +478,8 @@ public class MethodValidationAdapter {
 		public ParameterErrors build() {
 			validatorAdapter.get().processConstraintViolations(this.violations, this.errors);
 			return new ParameterErrors(
-					this.parameter, this.argument, this.errors, this.violations,
-					this.container, this.containerIndex, this.containerKey);
+					this.parameter, this.argument, this.errors, this.container,
+					this.containerIndex, this.containerKey);
 		}
 	}
 
@@ -529,6 +522,93 @@ public class MethodValidationAdapter {
 				return ((Comparable<E>) key1).compareTo((E) key2);
 			}
 			return 0;
+		}
+	}
+
+
+	/**
+	 * Default {@link MethodValidationResult} implementation with non-zero errors.
+	 */
+	private static class DefaultMethodValidationResult implements MethodValidationResult {
+
+		private final Object target;
+
+		private final Method method;
+
+		private final List<ParameterValidationResult> allValidationResults;
+
+		private final boolean forReturnValue;
+
+
+		DefaultMethodValidationResult(Object target, Method method, List<ParameterValidationResult> results) {
+			Assert.notEmpty(results, "'results' is required and must not be empty");
+			Assert.notNull(target, "'target' is required");
+			Assert.notNull(method, "Method is required");
+			this.target = target;
+			this.method = method;
+			this.allValidationResults = results;
+			this.forReturnValue = (results.get(0).getMethodParameter().getParameterIndex() == -1);
+		}
+
+
+		@Override
+		public Object getTarget() {
+			return this.target;
+		}
+
+		@Override
+		public Method getMethod() {
+			return this.method;
+		}
+
+		@Override
+		public boolean isForReturnValue() {
+			return this.forReturnValue;
+		}
+
+		@Override
+		public List<ParameterValidationResult> getAllValidationResults() {
+			return this.allValidationResults;
+		}
+
+
+		@Override
+		public String toString() {
+			return getAllErrors().size() + " validation errors " +
+					"for " + (isForReturnValue() ? "return value" : "arguments") + " of " +
+					this.method.toGenericString();
+		}
+	}
+
+
+	/**
+	 * {@link MethodValidationResult} for when there are no errors.
+	 */
+	private static class EmptyMethodValidationResult implements MethodValidationResult {
+
+		@Override
+		public Object getTarget() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Method getMethod() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean isForReturnValue() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<ParameterValidationResult> getAllValidationResults() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public String toString() {
+			return "0 validation errors";
 		}
 	}
 

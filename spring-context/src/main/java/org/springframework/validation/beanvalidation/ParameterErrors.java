@@ -16,10 +16,7 @@
 
 package org.springframework.validation.beanvalidation;
 
-import java.util.Collection;
 import java.util.List;
-
-import jakarta.validation.ConstraintViolation;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -28,20 +25,18 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
 /**
- * Extension of {@link ParameterValidationResult} that's created for Object
- * method arguments or return values with cascaded violations on their properties.
- * Such method parameters are annotated with {@link jakarta.validation.Valid @Valid},
- * or in the case of return values, the annotation is on the method.
+ * Extension of {@link ParameterValidationResult} created for Object method
+ * parameters or return values with nested errors on their properties.
  *
- * <p>In addition to the (generic) {@link #getResolvableErrors()
- * MessageSourceResolvable errors} from the base class, this subclass implements
- * {@link Errors} to expose convenient access to the same as {@link FieldError}s.
+ * <p>The base class method {@link #getResolvableErrors()} returns
+ * {@link Errors#getAllErrors()}, but this subclass provides access to the same
+ * as {@link FieldError}s.
  *
- * <p>When {@code @Valid} is declared on a {@link List} or {@link java.util.Map}
- * parameter, a separate {@link ParameterErrors} is created for each list or map
- * value for which there are constraint violations. In such cases, the
- * {@link #getContainer()} is the list or map, while {@link #getContainerIndex()}
- * and {@link #getContainerKey()} reflect the index or key of the value.
+ * <p>When the method parameter is a {@link List} or {@link java.util.Map},
+ * a separate {@link ParameterErrors} is created for each list or map value for
+ * which there are validation errors. In such cases, the {@link #getContainer()}
+ * method returns the list or map, while {@link #getContainerIndex()}
+ * and {@link #getContainerKey()} return the value index or key.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
@@ -65,11 +60,9 @@ public class ParameterErrors extends ParameterValidationResult implements Errors
 	 */
 	public ParameterErrors(
 			MethodParameter parameter, @Nullable Object argument, Errors errors,
-			Collection<ConstraintViolation<Object>> violations,
 			@Nullable Object container, @Nullable Integer index, @Nullable Object key) {
 
-		super(parameter, argument, errors.getAllErrors(), violations);
-
+		super(parameter, argument, errors.getAllErrors());
 		this.errors = errors;
 		this.container = container;
 		this.containerIndex = index;

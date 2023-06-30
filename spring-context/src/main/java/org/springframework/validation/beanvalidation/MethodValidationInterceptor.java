@@ -17,8 +17,11 @@
 package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 import java.util.function.Supplier;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -42,6 +45,10 @@ import org.springframework.validation.annotation.Validated;
  *
  * <p>E.g.: {@code public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)}
  *
+ * <p>In case of validation errors, the interceptor can raise
+ * {@link ConstraintViolationException}, or adapt the violations to
+ * {@link MethodValidationResult} and raise {@link MethodValidationException}.
+ *
  * <p>Validation groups can be specified through Spring's {@link Validated} annotation
  * at the type level of the containing target class, applying to all public service methods
  * of that class. By default, JSR-303 will validate against its default group only.
@@ -49,20 +56,23 @@ import org.springframework.validation.annotation.Validated;
  * <p>As of Spring 5.0, this functionality requires a Bean Validation 1.1+ provider.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.1
  * @see MethodValidationPostProcessor
  * @see jakarta.validation.executable.ExecutableValidator
  */
 public class MethodValidationInterceptor implements MethodInterceptor {
 
-	private final MethodValidationAdapter delegate;
+	private final MethodValidationAdapter validationAdapter;
+
+	private final boolean adaptViolations;
 
 
 	/**
 	 * Create a new MethodValidationInterceptor using a default JSR-303 validator underneath.
 	 */
 	public MethodValidationInterceptor() {
-		this.delegate = new MethodValidationAdapter();
+		this(new MethodValidationAdapter(), false);
 	}
 
 	/**
@@ -70,7 +80,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validatorFactory the JSR-303 ValidatorFactory to use
 	 */
 	public MethodValidationInterceptor(ValidatorFactory validatorFactory) {
-		this.delegate = new MethodValidationAdapter(validatorFactory);
+		this(new MethodValidationAdapter(validatorFactory), false);
 	}
 
 	/**
@@ -78,7 +88,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @param validator the JSR-303 Validator to use
 	 */
 	public MethodValidationInterceptor(Validator validator) {
-		this.delegate = new MethodValidationAdapter(validator);
+		this(new MethodValidationAdapter(validator), false);
 	}
 
 	/**
@@ -88,7 +98,25 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 * @since 6.0
 	 */
 	public MethodValidationInterceptor(Supplier<Validator> validator) {
-		this.delegate = new MethodValidationAdapter(validator);
+		this(validator, false);
+	}
+
+	/**
+	 * Create a new MethodValidationInterceptor for the supplied
+	 * (potentially lazily initialized) Validator.
+	 * @param validator a Supplier for the Validator to use
+	 * @param adaptViolations whether to adapt {@link ConstraintViolation}s, and
+	 * if {@code true}, raise {@link MethodValidationException}, of if
+	 * {@code false} raise {@link ConstraintViolationException} instead
+	 * @since 6.1
+	 */
+	public MethodValidationInterceptor(Supplier<Validator> validator, boolean adaptViolations) {
+		this(new MethodValidationAdapter(validator), adaptViolations);
+	}
+
+	private MethodValidationInterceptor(MethodValidationAdapter validationAdapter, boolean adaptViolations) {
+		this.validationAdapter = validationAdapter;
+		this.adaptViolations = adaptViolations;
 	}
 
 
@@ -102,20 +130,31 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 
 		Object target = getTarget(invocation);
 		Method method = invocation.getMethod();
+		Object[] arguments = invocation.getArguments();
 		Class<?>[] groups = determineValidationGroups(invocation);
 
-		MethodValidationResult result;
+		Set<ConstraintViolation<Object>> violations;
 
-		result = this.delegate.validateMethodArguments(target, method, null, invocation.getArguments(), groups);
-		if (result.hasViolations()) {
-			throw MethodValidationException.forResult(result);
+		if (this.adaptViolations) {
+			this.validationAdapter.applyArgumentValidation(target, method, null, arguments, groups);
+		}
+		else {
+			violations = this.validationAdapter.invokeValidatorForArguments(target, method, arguments, groups);
+			if (!violations.isEmpty()) {
+				throw new ConstraintViolationException(violations);
+			}
 		}
 
 		Object returnValue = invocation.proceed();
 
-		result = this.delegate.validateMethodReturnValue(target, method, null, returnValue, groups);
-		if (result.hasViolations()) {
-			throw MethodValidationException.forResult(result);
+		if (this.adaptViolations) {
+			this.validationAdapter.applyReturnValueValidation(target, method, null, arguments, groups);
+		}
+		else {
+			violations = this.validationAdapter.invokeValidatorForReturnValue(target, method, returnValue, groups);
+			if (!violations.isEmpty()) {
+				throw new ConstraintViolationException(violations);
+			}
 		}
 
 		return returnValue;
@@ -162,8 +201,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	 */
 	protected Class<?>[] determineValidationGroups(MethodInvocation invocation) {
 		Object target = getTarget(invocation);
-		Method method = invocation.getMethod();
-		return MethodValidationAdapter.determineValidationGroups(target, method);
+		return this.validationAdapter.determineValidationGroups(target, invocation.getMethod());
 	}
 
 }
