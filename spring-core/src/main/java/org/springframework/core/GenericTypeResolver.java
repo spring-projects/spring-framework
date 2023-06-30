@@ -39,6 +39,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  * @author Rob Harrop
  * @author Sam Brannen
  * @author Phillip Webb
+ * @author Sebastien Deleuze
  * @since 2.5.2
  */
 public final class GenericTypeResolver {
@@ -166,29 +167,30 @@ public final class GenericTypeResolver {
 			}
 			else if (genericType instanceof ParameterizedType parameterizedType) {
 				ResolvableType resolvedType = ResolvableType.forType(genericType);
-				if (resolvedType.hasUnresolvableGenerics()) {
-					Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
-					Type[] typeArguments = parameterizedType.getActualTypeArguments();
-					ResolvableType contextType = ResolvableType.forClass(contextClass);
-					for (int i = 0; i < typeArguments.length; i++) {
-						Type typeArgument = typeArguments[i];
-						if (typeArgument instanceof TypeVariable<?> typeVariable) {
-							ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
-							if (resolvedTypeArgument != ResolvableType.NONE) {
-								generics[i] = resolvedTypeArgument.resolve();
-							}
-							else {
-								generics[i] = ResolvableType.forType(typeArgument).resolve();
-							}
+				Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
+				Type[] typeArguments = parameterizedType.getActualTypeArguments();
+				ResolvableType contextType = ResolvableType.forClass(contextClass);
+				for (int i = 0; i < typeArguments.length; i++) {
+					Type typeArgument = typeArguments[i];
+					if (typeArgument instanceof TypeVariable<?> typeVariable) {
+						ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
+						if (resolvedTypeArgument != ResolvableType.NONE) {
+							generics[i] = resolvedTypeArgument.resolve();
 						}
 						else {
 							generics[i] = ResolvableType.forType(typeArgument).resolve();
 						}
 					}
-					Class<?> rawClass = resolvedType.getRawClass();
-					if (rawClass != null) {
-						return ResolvableType.forClassWithGenerics(rawClass, generics).getType();
+					else if (typeArgument instanceof WildcardType wildcardType) {
+						generics[i] = resolveWildcard(wildcardType, contextType).resolve();
 					}
+					else {
+						generics[i] = ResolvableType.forType(typeArgument).resolve();
+					}
+				}
+				Class<?> rawClass = resolvedType.getRawClass();
+				if (rawClass != null) {
+					return ResolvableType.forClassWithGenerics(rawClass, generics).getType();
 				}
 			}
 		}
@@ -222,6 +224,26 @@ public final class GenericTypeResolver {
 			}
 		}
 		return ResolvableType.NONE;
+	}
+
+	private static ResolvableType resolveWildcard(WildcardType wildcardType, ResolvableType contextType) {
+		for (Type bound : wildcardType.getUpperBounds()) {
+			if (bound instanceof TypeVariable<?> typeVariable) {
+				ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
+				if (resolvedTypeArgument != ResolvableType.NONE) {
+					return resolvedTypeArgument;
+				}
+			}
+		}
+		for (Type bound : wildcardType.getLowerBounds()) {
+			if (bound instanceof TypeVariable<?> typeVariable) {
+				ResolvableType resolvedTypeArgument = resolveVariable(typeVariable, contextType);
+				if (resolvedTypeArgument != ResolvableType.NONE) {
+					return resolvedTypeArgument;
+				}
+			}
+		}
+		return ResolvableType.forType(wildcardType);
 	}
 
 	/**
