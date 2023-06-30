@@ -25,7 +25,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.util.List;
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 
@@ -33,6 +35,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequest} implementation based the Java {@link HttpClient}.
@@ -48,8 +51,19 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 	 * The JDK HttpRequest doesn't allow all headers to be set. The named headers are taken from the default
 	 * implementation for HttpRequest.
 	 */
-	private static final List<String> DISALLOWED_HEADERS =
-			List.of("connection", "content-length", "expect", "host", "upgrade");
+	protected static final Set<String> DISALLOWED_HEADERS = getDisallowedHeaders();
+
+	private static Set<String> getDisallowedHeaders() {
+		TreeSet<String> headers = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+		headers.addAll(Set.of("connection", "content-length", "expect", "host", "upgrade"));
+
+		String headersToAllow = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
+		if (headersToAllow != null) {
+			Set<String> toAllow = StringUtils.commaDelimitedListToSet(headersToAllow);
+			headers.removeAll(toAllow);
+		}
+		return Collections.unmodifiableSet(headers);
+	}
 
 	private final HttpClient httpClient;
 
