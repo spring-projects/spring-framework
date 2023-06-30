@@ -16,9 +16,16 @@
 
 package org.springframework.http.client;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.time.Duration;
+import java.util.concurrent.Executor;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Marten Deinum
@@ -35,6 +42,28 @@ public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactory
 	public void httpMethods() throws Exception {
 		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
+	}
+
+	@Test
+	public void customizeDisallowedHeaders() {
+		String original = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
+		System.setProperty("jdk.httpclient.allowRestrictedHeaders", "host");
+
+		assertThat(TestJdkClientHttpRequest.DISALLOWED_HEADERS).doesNotContain("host");
+
+		if (original != null) {
+			System.setProperty("jdk.httpclient.allowRestrictedHeaders", original);
+		}
+		else {
+			System.clearProperty("jdk.httpclient.allowRestrictedHeaders");
+		}
+	}
+
+	static class TestJdkClientHttpRequest extends JdkClientHttpRequest {
+
+		public TestJdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor, Duration readTimeout) {
+			super(httpClient, uri, method, executor, readTimeout);
+		}
 	}
 
 }
