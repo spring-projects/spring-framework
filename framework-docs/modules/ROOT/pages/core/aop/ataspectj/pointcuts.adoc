@@ -154,7 +154,6 @@ Java::
 ----
 	package com.xyz;
 
-	@Aspect
 	public class Pointcuts {
 
 		@Pointcut("execution(public * *(..))")
@@ -179,7 +178,6 @@ Kotlin::
 ----
 	package com.xyz
 
-	@Aspect
 	class Pointcuts {
 
 		@Pointcut("execution(public * *(..))")
@@ -211,9 +209,9 @@ pointcut matching.
 
 When working with enterprise applications, developers often have the need to refer to
 modules of the application and particular sets of operations from within several aspects.
-We recommend defining a dedicated aspect that captures commonly used _named pointcut_
-expressions for this purpose. Such an aspect typically resembles the following
-`CommonPointcuts` example (though what you name the aspect is up to you):
+We recommend defining a dedicated class that captures commonly used _named pointcut_
+expressions for this purpose. Such a class typically resembles the following
+`CommonPointcuts` example (though what you name the class is up to you):
 
 [tabs]
 ======
@@ -223,10 +221,8 @@ Java::
 ----
 	package com.xyz;
 
-	import org.aspectj.lang.annotation.Aspect;
 	import org.aspectj.lang.annotation.Pointcut;
 
-	@Aspect
 	public class CommonPointcuts {
 
 		/**
@@ -287,10 +283,8 @@ Kotlin::
 ----
 	package com.xyz
 
-	import org.aspectj.lang.annotation.Aspect
 	import org.aspectj.lang.annotation.Pointcut
 
-	@Aspect
 	class CommonPointcuts {
 
 		/**
@@ -346,9 +340,9 @@ Kotlin::
 ----
 ======
 
-You can refer to the pointcuts defined in such an aspect anywhere you need a pointcut
-expression by referencing the fully-qualified name of the `@Aspect` class combined with
-the `@Pointcut` method's name. For example, to make the service layer transactional, you
+You can refer to the pointcuts defined in such a class anywhere you need a pointcut
+expression by referencing the fully-qualified name of the class combined with the
+`@Pointcut` method's name. For example, to make the service layer transactional, you
 could write the following which references the
 `com.xyz.CommonPointcuts.businessService()` _named pointcut_:
 

@@ -637,17 +637,20 @@ abstract class AbstractAspectJAdvisorFactoryTests {
 	}
 
 
+	static class CommonPointcuts {
+
+		@Pointcut("execution(* getAge())")
+		void getAge() {
+		}
+	}
+
 	@Aspect
 	static class NamedPointcutAspectWithFQN {
 
 		@SuppressWarnings("unused")
 		private ITestBean fieldThatShouldBeIgnoredBySpringAtAspectJProcessing = new TestBean();
 
-		@Pointcut("execution(* getAge())")
-		void getAge() {
-		}
-
-		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.NamedPointcutAspectWithFQN.getAge()")
+		@Around("org.springframework.aop.aspectj.annotation.AbstractAspectJAdvisorFactoryTests.CommonPointcuts.getAge()()")
 		int changeReturnValue(ProceedingJoinPoint pjp) {
 			return -1;
 		}
