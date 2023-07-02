@@ -58,7 +58,7 @@ public class ProxyTransactionManagementConfiguration extends AbstractTransaction
 	@Bean
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public TransactionAttributeSource transactionAttributeSource() {
-		// Accept protected @Transactional methods on CGLIB proxies, as of 6.0.
+		// Accept protected & default @Transactional methods on CGLIB proxies, as of 6.0.
 		return new AnnotationTransactionAttributeSource(false);
 	}
 
