@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.FieldError;
 
 /**
- * Utility methods to resolve list of {@link MessageSourceResolvable}s, and
+ * Utility methods to resolve a list of {@link MessageSourceResolvable}s, and
  * optionally join them.
  *
  * @author Rossen Stoyanchev
@@ -42,7 +42,7 @@ public abstract class BindErrorUtils {
 
 	/**
 	 * Shortcut for {@link #resolveAndJoin(List, MessageSource, Locale)} with
-	 * an empty * {@link MessageSource} that simply formats the default message,
+	 * an empty {@link MessageSource} that simply formats the default message,
 	 * or first error code, also prepending the field name for field errors.
 	 */
 	public static String resolveAndJoin(List<? extends MessageSourceResolvable> errors) {
@@ -62,8 +62,8 @@ public abstract class BindErrorUtils {
 	/**
 	 * Resolve all errors through the given {@link MessageSource} and join them.
 	 * @param delimiter the delimiter to use between each error
-	 * @param  prefix characters to insert at the beginning
-	 * @param  suffix characters to insert at the end
+	 * @param prefix characters to insert at the beginning
+	 * @param suffix characters to insert at the end
 	 * @param errors the errors to resolve and join
 	 * @param messageSource the {@code MessageSource} to resolve with
 	 * @param locale the locale to resolve with
