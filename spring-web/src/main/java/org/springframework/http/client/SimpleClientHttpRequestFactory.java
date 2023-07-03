@@ -22,9 +22,11 @@ import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.time.Duration;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.
@@ -99,6 +101,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 	/**
+	 * Set the underlying URLConnection's connect timeout as {@code Duration}.
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @since 6.1
+	 * @see URLConnection#setConnectTimeout(int)
+	 */
+	public void setConnectTimeout(Duration connectTimeout) {
+		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
+		this.connectTimeout = (int) connectTimeout.toMillis();
+	}
+
+	/**
 	 * Set the underlying URLConnection's read timeout (in milliseconds).
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Default is the system's default timeout.
@@ -106,6 +120,18 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	 */
 	public void setReadTimeout(int readTimeout) {
 		this.readTimeout = readTimeout;
+	}
+
+	/**
+	 * Set the underlying URLConnection's read timeout (in milliseconds).
+	 * A timeout value of 0 specifies an infinite timeout.
+	 * <p>Default is the system's default timeout.
+	 * @since 6.1
+	 * @see URLConnection#setReadTimeout(int)
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		Assert.notNull(readTimeout, "ReadTimeout must not be null");
+		this.readTimeout = (int) readTimeout.toMillis();
 	}
 
 	/**

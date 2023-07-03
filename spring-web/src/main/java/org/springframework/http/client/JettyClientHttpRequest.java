@@ -46,10 +46,10 @@ class JettyClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
 	private final Request request;
 
-	private final int readTimeout;
+	private final long readTimeout;
 
 
-	public JettyClientHttpRequest(Request request, int readTimeout) {
+	public JettyClientHttpRequest(Request request, long readTimeout) {
 		this.request = request;
 		this.readTimeout = readTimeout;
 	}

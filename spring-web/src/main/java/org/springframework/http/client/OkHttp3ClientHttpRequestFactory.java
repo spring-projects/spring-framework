@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
@@ -73,6 +74,17 @@ public class OkHttp3ClientHttpRequestFactory implements ClientHttpRequestFactory
 	}
 
 	/**
+	 * Set the underlying read timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
+	 * @since 6.1
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		this.client = this.client.newBuilder()
+				.readTimeout(readTimeout)
+				.build();
+	}
+
+	/**
 	 * Set the underlying write timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
 	 */
@@ -83,12 +95,34 @@ public class OkHttp3ClientHttpRequestFactory implements ClientHttpRequestFactory
 	}
 
 	/**
+	 * Set the underlying write timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
+	 * @since 6.1
+	 */
+	public void setWriteTimeout(Duration writeTimeout) {
+		this.client = this.client.newBuilder()
+				.writeTimeout(writeTimeout)
+				.build();
+	}
+
+	/**
 	 * Set the underlying connect timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
 	 */
 	public void setConnectTimeout(int connectTimeout) {
 		this.client = this.client.newBuilder()
 				.connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
+				.build();
+	}
+
+	/**
+	 * Set the underlying connect timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
+	 * @since 6.1
+	 */
+	public void setConnectTimeout(Duration connectTimeout) {
+		this.client = this.client.newBuilder()
+				.connectTimeout(connectTimeout)
 				.build();
 	}
 

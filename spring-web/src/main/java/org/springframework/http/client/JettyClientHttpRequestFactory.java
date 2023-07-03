@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
@@ -40,7 +41,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	private final boolean defaultClient;
 
-	private int readTimeout = 1000;
+	private long readTimeout = 1000;
 
 
 	/**
@@ -66,7 +67,6 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	/**
 	 * Set the underlying connect timeout in milliseconds.
-	 * A value of 0 specifies an infinite timeout.
 	 */
 	public void setConnectTimeout(int connectTimeout) {
 		Assert.isTrue(connectTimeout >= 0, "Timeout must be a non-negative value");
@@ -74,11 +74,28 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 	}
 
 	/**
+	 * Set the underlying connect timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
+	 */
+	public void setConnectTimeout(Duration connectTimeout) {
+		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
+		this.httpClient.setConnectTimeout(connectTimeout.toMillis());
+	}
+
+	/**
 	 * Set the underlying read timeout in milliseconds.
 	 */
-	public void setReadTimeout(int readTimeout) {
+	public void setReadTimeout(long readTimeout) {
 		Assert.isTrue(readTimeout > 0, "Timeout must be a positive value");
 		this.readTimeout = readTimeout;
+	}
+
+	/**
+	 * Set the underlying read timeout as {@code Duration}.
+	 */
+	public void setReadTimeout(Duration readTimeout) {
+		Assert.notNull(readTimeout, "ReadTimeout must not be null");
+		this.readTimeout = readTimeout.toMillis();
 	}
 
 	@Override
