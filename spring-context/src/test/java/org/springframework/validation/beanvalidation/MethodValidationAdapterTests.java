@@ -33,6 +33,9 @@ import org.springframework.context.MessageSourceResolvable;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.method.MethodValidationResult;
+import org.springframework.validation.method.ParameterErrors;
+import org.springframework.validation.method.ParameterValidationResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

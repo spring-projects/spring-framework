@@ -18,7 +18,6 @@ package org.springframework.validation.beanvalidation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -50,7 +49,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -59,6 +57,10 @@ import org.springframework.validation.DefaultMessageCodesResolver;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.method.MethodValidationResult;
+import org.springframework.validation.method.MethodValidator;
+import org.springframework.validation.method.ParameterErrors;
+import org.springframework.validation.method.ParameterValidationResult;
 
 /**
  * {@link MethodValidator} that uses a Bean Validation
@@ -70,11 +72,11 @@ import org.springframework.validation.annotation.Validated;
  */
 public class MethodValidationAdapter implements MethodValidator {
 
+	private static final MethodValidationResult emptyValidationResult = MethodValidationResult.emptyResult();
+
 	private static final ObjectNameResolver defaultObjectNameResolver = new DefaultObjectNameResolver();
 
 	private static final Comparator<ParameterValidationResult> resultComparator = new ResultComparator();
-
-	private static final MethodValidationResult emptyResult = new EmptyMethodValidationResult();
 
 
 	private final Supplier<Validator> validator;
@@ -219,7 +221,7 @@ public class MethodValidationAdapter implements MethodValidator {
 				invokeValidatorForArguments(target, method, arguments, groups);
 
 		if (violations.isEmpty()) {
-			return emptyResult;
+			return emptyValidationResult;
 		}
 
 		return adaptViolations(target, method, violations,
@@ -257,7 +259,7 @@ public class MethodValidationAdapter implements MethodValidator {
 				invokeValidatorForReturnValue(target, method, returnValue, groups);
 
 		if (violations.isEmpty()) {
-			return emptyResult;
+			return emptyValidationResult;
 		}
 
 		return adaptViolations(target, method, violations,
@@ -320,7 +322,7 @@ public class MethodValidationAdapter implements MethodValidator {
 		cascadedViolations.forEach((node, builder) -> validatonResultList.add(builder.build()));
 		validatonResultList.sort(resultComparator);
 
-		return new DefaultMethodValidationResult(target, method, validatonResultList);
+		return MethodValidationResult.create(target, method, validatonResultList);
 	}
 
 	private MethodParameter initMethodParameter(Method method, int index) {
@@ -531,93 +533,6 @@ public class MethodValidationAdapter implements MethodValidator {
 				return ((Comparable<E>) key1).compareTo((E) key2);
 			}
 			return 0;
-		}
-	}
-
-
-	/**
-	 * Default {@link MethodValidationResult} implementation with non-zero errors.
-	 */
-	private static class DefaultMethodValidationResult implements MethodValidationResult {
-
-		private final Object target;
-
-		private final Method method;
-
-		private final List<ParameterValidationResult> allValidationResults;
-
-		private final boolean forReturnValue;
-
-
-		DefaultMethodValidationResult(Object target, Method method, List<ParameterValidationResult> results) {
-			Assert.notEmpty(results, "'results' is required and must not be empty");
-			Assert.notNull(target, "'target' is required");
-			Assert.notNull(method, "Method is required");
-			this.target = target;
-			this.method = method;
-			this.allValidationResults = results;
-			this.forReturnValue = (results.get(0).getMethodParameter().getParameterIndex() == -1);
-		}
-
-
-		@Override
-		public Object getTarget() {
-			return this.target;
-		}
-
-		@Override
-		public Method getMethod() {
-			return this.method;
-		}
-
-		@Override
-		public boolean isForReturnValue() {
-			return this.forReturnValue;
-		}
-
-		@Override
-		public List<ParameterValidationResult> getAllValidationResults() {
-			return this.allValidationResults;
-		}
-
-
-		@Override
-		public String toString() {
-			return getAllErrors().size() + " validation errors " +
-					"for " + (isForReturnValue() ? "return value" : "arguments") + " of " +
-					this.method.toGenericString();
-		}
-	}
-
-
-	/**
-	 * {@link MethodValidationResult} for when there are no errors.
-	 */
-	private static class EmptyMethodValidationResult implements MethodValidationResult {
-
-		@Override
-		public Object getTarget() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Method getMethod() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean isForReturnValue() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public List<ParameterValidationResult> getAllValidationResults() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public String toString() {
-			return "0 validation errors";
 		}
 	}
 

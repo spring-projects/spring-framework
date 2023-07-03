@@ -22,8 +22,8 @@ import java.util.Locale;
 
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.beanvalidation.MethodValidationResult;
-import org.springframework.validation.beanvalidation.ParameterValidationResult;
+import org.springframework.validation.method.MethodValidationResult;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.BindErrorUtils;
 

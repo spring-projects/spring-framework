@@ -36,7 +36,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.validation.beanvalidation.MethodValidator;
+import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.bind.support.WebDataBinderFactory;

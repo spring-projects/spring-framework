@@ -51,7 +51,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
-import org.springframework.validation.beanvalidation.MethodValidator;
+import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;

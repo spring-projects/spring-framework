@@ -34,7 +34,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
-import org.springframework.validation.beanvalidation.MethodValidationException;
+import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;

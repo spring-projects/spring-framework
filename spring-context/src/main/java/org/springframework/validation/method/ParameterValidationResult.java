@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.validation.method;
 
 import java.util.Collection;
 import java.util.List;

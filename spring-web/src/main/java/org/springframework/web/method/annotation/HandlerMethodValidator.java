@@ -27,16 +27,16 @@ import org.springframework.lang.Nullable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.beanvalidation.MethodValidationAdapter;
-import org.springframework.validation.beanvalidation.MethodValidationResult;
-import org.springframework.validation.beanvalidation.MethodValidator;
-import org.springframework.validation.beanvalidation.ParameterErrors;
+import org.springframework.validation.method.MethodValidationResult;
+import org.springframework.validation.method.MethodValidator;
+import org.springframework.validation.method.ParameterErrors;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebBindingInitializer;
 
 /**
- * {@link org.springframework.validation.beanvalidation.MethodValidator} that
+ * {@link MethodValidator} that
  * uses Bean Validation to validate {@code @RequestMapping} method arguments.
  *
  * <p>Handles validation results by populating {@link BindingResult} method

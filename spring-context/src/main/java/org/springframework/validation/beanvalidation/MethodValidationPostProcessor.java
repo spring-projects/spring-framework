@@ -36,6 +36,8 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.method.MethodValidationException;
+import org.springframework.validation.method.MethodValidationResult;
 
 /**
  * A convenient {@link BeanPostProcessor} implementation that delegates to a

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.validation.method;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -99,6 +99,27 @@ public interface MethodValidationResult {
 				.filter(result -> result instanceof ParameterErrors)
 				.map(result -> (ParameterErrors) result)
 				.toList();
+	}
+
+
+	/**
+	 * Factory method to create a {@link MethodValidationResult} instance.
+	 * @param target the target Object
+	 * @param method the target method
+	 * @param results method validation results, expected to be non-empty
+	 * @return the created instance
+	 */
+	static MethodValidationResult create(Object target, Method method, List<ParameterValidationResult> results) {
+		return new DefaultMethodValidationResult(target, method, results);
+	}
+
+	/**
+	 * Factory method to create a {@link MethodValidationResult} instance with
+	 * 0 errors, suitable to use as a constant. Getters for a target object or
+	 * method are not supported.
+	 */
+	static MethodValidationResult emptyResult() {
+		return new EmptyMethodValidationResult();
 	}
 
 }

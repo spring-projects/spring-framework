@@ -39,7 +39,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils.MethodFilter;
-import org.springframework.validation.beanvalidation.MethodValidator;
+import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;

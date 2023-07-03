@@ -36,7 +36,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.beanvalidation.MethodValidationResult;
+import org.springframework.validation.method.MethodValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingMatrixVariableException;
 import org.springframework.web.bind.MissingPathVariableException;

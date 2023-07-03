@@ -34,6 +34,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.validation.method.MethodValidationException;
+import org.springframework.validation.method.MethodValidationResult;
 
 /**
  * An AOP Alliance {@link MethodInterceptor} implementation that delegates to a

@@ -14,51 +14,43 @@
  * limitations under the License.
  */
 
-package org.springframework.validation.beanvalidation;
+package org.springframework.validation.method;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 
-import org.springframework.util.Assert;
-
 /**
- * Exception that is a {@link MethodValidationResult}.
+ * {@link MethodValidationResult} with an empty list of results.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
- * @see MethodValidator
  */
-@SuppressWarnings("serial")
-public class MethodValidationException extends RuntimeException implements MethodValidationResult {
-
-	private final MethodValidationResult validationResult;
-
-
-	public MethodValidationException(MethodValidationResult validationResult) {
-		super(validationResult.toString());
-		Assert.notNull(validationResult, "MethodValidationResult is required");
-		this.validationResult = validationResult;
-	}
-
+final class EmptyMethodValidationResult implements MethodValidationResult {
 
 	@Override
 	public Object getTarget() {
-		return this.validationResult.getTarget();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Method getMethod() {
-		return this.validationResult.getMethod();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean isForReturnValue() {
-		return this.validationResult.isForReturnValue();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public List<ParameterValidationResult> getAllValidationResults() {
-		return this.validationResult.getAllValidationResults();
+		return Collections.emptyList();
+	}
+
+	@Override
+	public String toString() {
+		return "0 validation errors";
 	}
 
 }
