@@ -70,9 +70,11 @@ import org.springframework.validation.annotation.Validated;
  */
 public class MethodValidationAdapter implements MethodValidator {
 
-	private static final Comparator<ParameterValidationResult> RESULT_COMPARATOR = new ResultComparator();
+	private static final ObjectNameResolver defaultObjectNameResolver = new DefaultObjectNameResolver();
 
-	private static final MethodValidationResult EMPTY_RESULT = new EmptyMethodValidationResult();
+	private static final Comparator<ParameterValidationResult> resultComparator = new ResultComparator();
+
+	private static final MethodValidationResult emptyResult = new EmptyMethodValidationResult();
 
 
 	private final Supplier<Validator> validator;
@@ -83,8 +85,7 @@ public class MethodValidationAdapter implements MethodValidator {
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-	@Nullable
-	private BindingResultNameResolver objectNameResolver;
+	private ObjectNameResolver objectNameResolver = defaultObjectNameResolver;
 
 
 	/**
@@ -142,8 +143,10 @@ public class MethodValidationAdapter implements MethodValidator {
 	}
 
 	/**
-	 * Set the ParameterNameDiscoverer to use to resolve method parameter names
-	 * that is in turn used to create error codes for {@link MessageSourceResolvable}.
+	 * Set the {@code ParameterNameDiscoverer} to discover method parameter names
+	 * with to create error codes for {@link MessageSourceResolvable}. Used only
+	 * when {@link MethodParameter}s are not passed into
+	 * {@link #validateArguments} or {@link #validateReturnValue}.
 	 * <p>Default is {@link org.springframework.core.DefaultParameterNameDiscoverer}.
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
@@ -151,7 +154,7 @@ public class MethodValidationAdapter implements MethodValidator {
 	}
 
 	/**
-	 * Return the {@link #setParameterNameDiscoverer(ParameterNameDiscoverer) configured}
+	 * Return the {@link #setParameterNameDiscoverer configured}
 	 * {@code ParameterNameDiscoverer}.
 	 */
 	public ParameterNameDiscoverer getParameterNameDiscoverer() {
@@ -159,12 +162,24 @@ public class MethodValidationAdapter implements MethodValidator {
 	}
 
 	/**
-	 * Configure a resolver for the name of Object parameters with nested errors
-	 * to allow matching the name used in the higher level programming model,
-	 * e.g. {@code @ModelAttribute} in Spring MVC.
-	 * <p>If not configured, {@link #createBindingResult} determines the name.
+	 * Configure a resolver to determine the name of an {@code @Valid} method
+	 * parameter to use for its {@link BindingResult}. This allows aligning with
+	 * a higher level programming model such as to resolve the name of an
+	 * {@code @ModelAttribute} method parameter in Spring MVC.
+	 * <p>By default, the object name is resolved through:
+	 * <ul>
+	 * <li>{@link MethodParameter#getParameterName()} for input parameters
+	 * <li>{@link Conventions#getVariableNameForReturnType(Method, Class, Object)}
+	 * for a return type
+	 * </ul>
+	 * If a name cannot be determined, e.g. a return value with insufficient
+	 * type information, then it defaults to one of:
+	 * <ul>
+	 * <li>{@code "{methodName}.arg{index}"} for input parameters
+	 * <li>{@code "{methodName}.returnValue"} for a return type
+	 * </ul>
 	 */
-	public void setBindingResultNameResolver(BindingResultNameResolver nameResolver) {
+	public void setObjectNameResolver(ObjectNameResolver nameResolver) {
 		this.objectNameResolver = nameResolver;
 	}
 
@@ -204,11 +219,11 @@ public class MethodValidationAdapter implements MethodValidator {
 				invokeValidatorForArguments(target, method, arguments, groups);
 
 		if (violations.isEmpty()) {
-			return EMPTY_RESULT;
+			return emptyResult;
 		}
 
 		return adaptViolations(target, method, violations,
-				i -> parameters != null ? parameters[i] : new MethodParameter(method, i),
+				i -> parameters != null ? parameters[i] : initMethodParameter(method, i),
 				i -> arguments[i]);
 	}
 
@@ -242,11 +257,11 @@ public class MethodValidationAdapter implements MethodValidator {
 				invokeValidatorForReturnValue(target, method, returnValue, groups);
 
 		if (violations.isEmpty()) {
-			return EMPTY_RESULT;
+			return emptyResult;
 		}
 
 		return adaptViolations(target, method, violations,
-				i -> returnType != null ? returnType : new MethodParameter(method, -1),
+				i -> returnType != null ? returnType : initMethodParameter(method, -1),
 				i -> returnValue);
 	}
 
@@ -284,7 +299,6 @@ public class MethodValidationAdapter implements MethodValidator {
 				else {
 					continue;
 				}
-				parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
 
 				Object argument = argumentFunction.apply(parameter.getParameterIndex());
 				if (!itr.hasNext()) {
@@ -304,18 +318,17 @@ public class MethodValidationAdapter implements MethodValidator {
 		List<ParameterValidationResult> validatonResultList = new ArrayList<>();
 		parameterViolations.forEach((parameter, builder) -> validatonResultList.add(builder.build()));
 		cascadedViolations.forEach((node, builder) -> validatonResultList.add(builder.build()));
-		validatonResultList.sort(RESULT_COMPARATOR);
+		validatonResultList.sort(resultComparator);
 
 		return new DefaultMethodValidationResult(target, method, validatonResultList);
 	}
 
-	/**
-	 * Create a {@link MessageSourceResolvable} for the given violation.
-	 * @param target target of the method invocation to which validation was applied
-	 * @param parameter the method parameter associated with the violation
-	 * @param violation the violation
-	 * @return the created {@code MessageSourceResolvable}
-	 */
+	private MethodParameter initMethodParameter(Method method, int index) {
+		MethodParameter	parameter = new MethodParameter(method, index);
+		parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
+		return parameter;
+	}
+
 	private MessageSourceResolvable createMessageSourceResolvable(
 			Object target, MethodParameter parameter, ConstraintViolation<Object> violation) {
 
@@ -331,47 +344,8 @@ public class MethodValidationAdapter implements MethodValidator {
 		return new DefaultMessageSourceResolvable(codes, arguments, violation.getMessage());
 	}
 
-	/**
-	 * Select an object name and create a {@link BindingResult} for the argument.
-	 * You can configure a {@link #setBindingResultNameResolver(BindingResultNameResolver)
-	 * bindingResultNameResolver} to determine in a way that matches the specific
-	 * programming model, e.g. {@code @ModelAttribute} or {@code @RequestBody} arguments
-	 * in Spring MVC.
-	 * <p>By default, the name is based on the parameter name, or for a return type on
-	 * {@link Conventions#getVariableNameForReturnType(Method, Class, Object)}.
-	 * <p>If a name cannot be determined for any reason, e.g. a return value with
-	 * insufficient type information, then {@code "{methodName}.arg{index}"} is used.
-	 * @param parameter the method parameter
-	 * @param argument the argument value
-	 * @return the determined name
-	 */
 	private BindingResult createBindingResult(MethodParameter parameter, @Nullable Object argument) {
-		String objectName = null;
-		if (this.objectNameResolver != null) {
-			objectName = this.objectNameResolver.resolveName(parameter, argument);
-		}
-		else {
-			if (parameter.getParameterIndex() != -1) {
-				objectName = parameter.getParameterName();
-			}
-			else {
-				try {
-					Method method = parameter.getMethod();
-					if (method != null) {
-						Class<?> containingClass = parameter.getContainingClass();
-						Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);
-						objectName = Conventions.getVariableNameForReturnType(method, resolvedType, argument);
-					}
-				}
-				catch (IllegalArgumentException ex) {
-					// insufficient type information
-				}
-			}
-		}
-		if (objectName == null) {
-			int index = parameter.getParameterIndex();
-			objectName = (parameter.getExecutable().getName() + (index != -1 ? ".arg" + index : ""));
-		}
+		String objectName = this.objectNameResolver.resolveName(parameter, argument);
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(argument, objectName);
 		result.setMessageCodesResolver(this.messageCodesResolver);
 		return result;
@@ -379,14 +353,15 @@ public class MethodValidationAdapter implements MethodValidator {
 
 
 	/**
-	 * Contract to determine the object name of an {@code @Valid} method parameter.
+	 * Strategy to resolve the name of an {@code @Valid} method parameter to
+	 * use for its {@link BindingResult}.
 	 */
-	public interface BindingResultNameResolver {
+	public interface ObjectNameResolver {
 
 		/**
-		 * Determine the name for the given method parameter.
+		 * Determine the name for the given method argument.
 		 * @param parameter the method parameter
-		 * @param value the argument or return value
+		 * @param value the argument value or return value
 		 * @return the name to use
 		 */
 		String resolveName(MethodParameter parameter, @Nullable Object value);
@@ -480,6 +455,40 @@ public class MethodValidationAdapter implements MethodValidator {
 			return new ParameterErrors(
 					this.parameter, this.argument, this.errors, this.container,
 					this.containerIndex, this.containerKey);
+		}
+	}
+
+
+	/**
+	 * Default algorithm to select an object name, as described in
+	 * {@link #setObjectNameResolver(ObjectNameResolver)}.
+	 */
+	private static class DefaultObjectNameResolver implements ObjectNameResolver {
+
+		@Override
+		public String resolveName(MethodParameter parameter, @Nullable Object value) {
+			String objectName = null;
+			if (parameter.getParameterIndex() != -1) {
+				objectName = parameter.getParameterName();
+			}
+			else {
+				try {
+					Method method = parameter.getMethod();
+					if (method != null) {
+						Class<?> containingClass = parameter.getContainingClass();
+						Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);
+						objectName = Conventions.getVariableNameForReturnType(method, resolvedType, value);
+					}
+				}
+				catch (IllegalArgumentException ex) {
+					// insufficient type information
+				}
+			}
+			if (objectName == null) {
+				int index = parameter.getParameterIndex();
+				objectName = (parameter.getExecutable().getName() + (index != -1 ? ".arg" + index : ".returnValue"));
+			}
+			return objectName;
 		}
 	}
 

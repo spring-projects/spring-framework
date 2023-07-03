@@ -36,8 +36,8 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebBindingInitializer;
 
 /**
- * {@link org.springframework.validation.beanvalidation.MethodValidator} for
- * {@code @RequestMapping} methods.
+ * {@link org.springframework.validation.beanvalidation.MethodValidator} that
+ * uses Bean Validation to validate {@code @RequestMapping} method arguments.
  *
  * <p>Handles validation results by populating {@link BindingResult} method
  * arguments with errors from {@link MethodValidationResult#getBeanResults()
@@ -48,6 +48,9 @@ import org.springframework.web.bind.support.WebBindingInitializer;
  * @since 6.1
  */
 public final class HandlerMethodValidator implements MethodValidator {
+
+	private static final MethodValidationAdapter.ObjectNameResolver objectNameResolver = new WebObjectNameResolver();
+
 
 	private final MethodValidationAdapter validationAdapter;
 
@@ -119,43 +122,51 @@ public final class HandlerMethodValidator implements MethodValidator {
 		return this.validationAdapter.validateReturnValue(target, method, returnType, returnValue, groups);
 	}
 
-	private static String determineObjectName(MethodParameter param, @Nullable Object argument) {
-		if (param.hasParameterAnnotation(RequestBody.class) || param.hasParameterAnnotation(RequestPart.class)) {
-			return Conventions.getVariableNameForParameter(param);
-		}
-		else {
-			return (param.getParameterIndex() != -1 ?
-					ModelFactory.getNameForParameter(param) :
-					ModelFactory.getNameForReturnValue(argument, param));
-		}
-	}
-
 
 	/**
-	 * Static factory method to create a {@link HandlerMethodValidator} if Bean
-	 * Validation is enabled in Spring MVC or WebFlux.
+	 * Static factory method to create a {@link HandlerMethodValidator} when Bean
+	 * Validation is enabled for use via {@link ConfigurableWebBindingInitializer},
+	 * for example in Spring MVC or WebFlux config.
 	 */
 	@Nullable
 	public static MethodValidator from(
-			@Nullable WebBindingInitializer bindingInitializer,
-			@Nullable ParameterNameDiscoverer parameterNameDiscoverer) {
+			@Nullable WebBindingInitializer initializer, @Nullable ParameterNameDiscoverer paramNameDiscoverer) {
 
-		if (bindingInitializer instanceof ConfigurableWebBindingInitializer configurableInitializer) {
+		if (initializer instanceof ConfigurableWebBindingInitializer configurableInitializer) {
 			if (configurableInitializer.getValidator() instanceof Validator validator) {
 				MethodValidationAdapter adapter = new MethodValidationAdapter(validator);
-				if (parameterNameDiscoverer != null) {
-					adapter.setParameterNameDiscoverer(parameterNameDiscoverer);
+				if (paramNameDiscoverer != null) {
+					adapter.setParameterNameDiscoverer(paramNameDiscoverer);
 				}
 				MessageCodesResolver codesResolver = configurableInitializer.getMessageCodesResolver();
 				if (codesResolver != null) {
 					adapter.setMessageCodesResolver(codesResolver);
 				}
 				HandlerMethodValidator methodValidator = new HandlerMethodValidator(adapter);
-				adapter.setBindingResultNameResolver(HandlerMethodValidator::determineObjectName);
+				adapter.setObjectNameResolver(objectNameResolver);
 				return methodValidator;
 			}
 		}
 		return null;
+	}
+
+
+	/**
+	 * ObjectNameResolver for web controller methods.
+	 */
+	private static class WebObjectNameResolver implements MethodValidationAdapter.ObjectNameResolver {
+
+		@Override
+		public String resolveName(MethodParameter param, @Nullable Object value) {
+			if (param.hasParameterAnnotation(RequestBody.class) || param.hasParameterAnnotation(RequestPart.class)) {
+				return Conventions.getVariableNameForParameter(param);
+			}
+			else {
+				return (param.getParameterIndex() != -1 ?
+						ModelFactory.getNameForParameter(param) :
+						ModelFactory.getNameForReturnValue(value, param));
+			}
+		}
 	}
 
 }

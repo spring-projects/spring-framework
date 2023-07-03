@@ -101,7 +101,7 @@ public class MethodValidationAdapterTests {
 		MyService target = new MyService();
 		Method method = getMethod(target, "addStudent");
 
-		this.validationAdapter.setBindingResultNameResolver((parameter, value) -> "studentToAdd");
+		this.validationAdapter.setObjectNameResolver((param, value) -> "studentToAdd");
 
 		testArgs(target, method, new Object[] {faustino1234, new Person("Joe"), 1}, ex -> {
 
