@@ -110,12 +110,12 @@ jar {
 	manifest.attributes["Dependencies"] = "jdk.unsupported"  // for WildFly (-> Objenesis 3.2)
 
 	dependsOn javapoetRepackJar
-	from(zipTree(javapoetRepackJar.archivePath)) {
+	from(zipTree(javapoetRepackJar.archiveFile)) {
 		include "org/springframework/javapoet/**"
 	}
 
 	dependsOn objenesisRepackJar
-	from(zipTree(objenesisRepackJar.archivePath)) {
+	from(zipTree(objenesisRepackJar.archiveFile)) {
 		include "org/springframework/objenesis/**"
 	}
 }
@@ -147,7 +147,7 @@ eclipse {
 				def pattern = ~/\/spring-\w+-repack-/
 				entries.forEach {
 					if (pattern.matcher(it.path).find()) {
-						def sourcesJar = it.path.replace('.jar', '-sources.jar');
+						def sourcesJar = it.path.replace('.jar', '-sources.jar')
 						it.sourcePath = fileReference(file(sourcesJar))
 					}
 				}
