@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.observation;
 
+import java.lang.reflect.Method;
+
 import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
 import org.apache.commons.logging.Log;
@@ -25,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.Conventions;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@code TestExecutionListener} which provides support for Micrometer's
@@ -80,7 +83,10 @@ class MicrometerObservationRegistryTestExecutionListener extends AbstractTestExe
 			Class.forName(classToCheck, false, classLoader);
 			classToCheck = OBSERVATION_THREAD_LOCAL_ACCESSOR_CLASS_NAME;
 			Class<?> clazz = Class.forName(classToCheck, false, classLoader);
-			clazz.getMethod("getObservationRegistry");
+			Method method = ReflectionUtils.findMethod(clazz, "getObservationRegistry");
+			if (method == null) {
+				errorMessage = classToCheck + ". Method getObservationRegistry() not found. " + DEPENDENCIES_ERROR_MESSAGE;
+			}
 		}
 		catch (Throwable ex) {
 			errorMessage = classToCheck + ". " + DEPENDENCIES_ERROR_MESSAGE;
