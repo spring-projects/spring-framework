@@ -79,6 +79,11 @@ public abstract class AbstractMockWebServerTests {
 				else if(request.getPath().equals("/status/notfound")) {
 					return new MockResponse().setResponseCode(404);
 				}
+				else if (request.getPath().equals("/status/299")) {
+					assertThat(request.getHeader("Expect"))
+							.contains("299");
+					return new MockResponse().setResponseCode(299);
+				}
 				else if(request.getPath().startsWith("/params")) {
 					assertThat(request.getPath()).contains("param1=value");
 					assertThat(request.getPath()).contains("param2=value1&param2=value2");

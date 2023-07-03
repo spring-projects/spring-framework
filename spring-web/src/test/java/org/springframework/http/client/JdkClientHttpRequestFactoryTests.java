@@ -16,14 +16,42 @@
 
 package org.springframework.http.client;
 
+import java.io.IOException;
+import java.net.URI;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.lang.Nullable;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Marten Deinum
  */
 public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+
+	@Nullable
+	private static String originalPropertyValue;
+
+	@BeforeAll
+	public static void setProperty() {
+		originalPropertyValue = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
+		System.setProperty("jdk.httpclient.allowRestrictedHeaders", "expect");
+	}
+
+	@AfterAll
+	public static void restoreProperty() {
+		if (originalPropertyValue != null) {
+			System.setProperty("jdk.httpclient.allowRestrictedHeaders", originalPropertyValue);
+		}
+		else {
+			System.clearProperty("jdk.httpclient.allowRestrictedHeaders");
+		}
+	}
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -35,6 +63,16 @@ public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactory
 	public void httpMethods() throws Exception {
 		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
+	}
+
+	@Test
+	public void customizeDisallowedHeaders() throws IOException {
+			ClientHttpRequest request = factory.createRequest(URI.create(this.baseUrl + "/status/299"), HttpMethod.PUT);
+			request.getHeaders().set("Expect", "299");
+
+			try (ClientHttpResponse response = request.execute()) {
+				assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatusCode.valueOf(299));
+			}
 	}
 
 }
