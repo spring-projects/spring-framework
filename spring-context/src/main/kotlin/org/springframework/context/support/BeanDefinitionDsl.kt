@@ -109,7 +109,7 @@ open class BeanDefinitionDsl internal constructor (private val init: BeanDefinit
 		SINGLETON,
 
 		/**
-		 * Scope constant for the standard singleton scope
+		 * Scope constant for the standard prototype scope
 		 * @see org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 		 */
 		PROTOTYPE
