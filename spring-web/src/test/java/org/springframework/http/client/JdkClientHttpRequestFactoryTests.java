@@ -16,14 +16,16 @@
 
 package org.springframework.http.client;
 
+import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.time.Duration;
-import java.util.concurrent.Executor;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.lang.Nullable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +33,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Marten Deinum
  */
 public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTests {
+
+	@Nullable
+	private static String originalPropertyValue;
+
+	@BeforeAll
+	public static void setProperty() {
+		originalPropertyValue = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
+		System.setProperty("jdk.httpclient.allowRestrictedHeaders", "expect");
+	}
+
+	@AfterAll
+	public static void restoreProperty() {
+		if (originalPropertyValue != null) {
+			System.setProperty("jdk.httpclient.allowRestrictedHeaders", originalPropertyValue);
+		}
+		else {
+			System.clearProperty("jdk.httpclient.allowRestrictedHeaders");
+		}
+	}
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
@@ -45,25 +66,13 @@ public class JdkClientHttpRequestFactoryTests extends AbstractHttpRequestFactory
 	}
 
 	@Test
-	public void customizeDisallowedHeaders() {
-		String original = System.getProperty("jdk.httpclient.allowRestrictedHeaders");
-		System.setProperty("jdk.httpclient.allowRestrictedHeaders", "host");
+	public void customizeDisallowedHeaders() throws IOException {
+			ClientHttpRequest request = factory.createRequest(URI.create(this.baseUrl + "/status/299"), HttpMethod.PUT);
+			request.getHeaders().set("Expect", "299");
 
-		assertThat(TestJdkClientHttpRequest.DISALLOWED_HEADERS).doesNotContain("host");
-
-		if (original != null) {
-			System.setProperty("jdk.httpclient.allowRestrictedHeaders", original);
-		}
-		else {
-			System.clearProperty("jdk.httpclient.allowRestrictedHeaders");
-		}
-	}
-
-	static class TestJdkClientHttpRequest extends JdkClientHttpRequest {
-
-		public TestJdkClientHttpRequest(HttpClient httpClient, URI uri, HttpMethod method, Executor executor, Duration readTimeout) {
-			super(httpClient, uri, method, executor, readTimeout);
-		}
+			try (ClientHttpResponse response = request.execute()) {
+				assertThat(response.getStatusCode()).as("Invalid status code").isEqualTo(HttpStatusCode.valueOf(299));
+			}
 	}
 
 }

@@ -47,13 +47,16 @@ import org.springframework.util.StringUtils;
  */
 class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
-	/*
-	 * The JDK HttpRequest doesn't allow all headers to be set. The named headers are taken from the default
-	 * implementation for HttpRequest.
-	 */
-	protected static final Set<String> DISALLOWED_HEADERS = getDisallowedHeaders();
+	private static final Set<String> DISALLOWED_HEADERS = disallowedHeaders();
 
-	private static Set<String> getDisallowedHeaders() {
+	/**
+	 * By default, {@link HttpRequest} does not allow {@code Connection},
+	 * {@code Content-Length}, {@code Expect}, {@code Host}, or {@code Upgrade}
+	 * headers to be set, but this can be overriden with the
+	 * {@code jdk.httpclient.allowRestrictedHeaders} system property.
+	 * @see jdk.internal.net.http.common.Utils#getDisallowedHeaders()
+	 */
+	private static Set<String> disallowedHeaders() {
 		TreeSet<String> headers = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		headers.addAll(Set.of("connection", "content-length", "expect", "host", "upgrade"));
 
@@ -64,6 +67,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		}
 		return Collections.unmodifiableSet(headers);
 	}
+
 
 	private final HttpClient httpClient;
 
@@ -123,11 +127,9 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		}
 
 		headers.forEach((headerName, headerValues) -> {
-			if (!headerName.equalsIgnoreCase(HttpHeaders.CONTENT_LENGTH)) {
-				if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase())) {
-					for (String headerValue : headerValues) {
-						builder.header(headerName, headerValue);
-					}
+			if (!DISALLOWED_HEADERS.contains(headerName.toLowerCase())) {
+				for (String headerValue : headerValues) {
+					builder.header(headerName, headerValue);
 				}
 			}
 		});
