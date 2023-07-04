@@ -17,11 +17,14 @@
 package org.springframework.util;
 
 import java.lang.reflect.Array;
+import java.nio.charset.Charset;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.TimeZone;
 
 import org.springframework.lang.Nullable;
 
@@ -894,19 +897,30 @@ public abstract class ObjectUtils {
 	 * <p>Returns:
 	 * <ul>
 	 * <li>{@code "null"} if {@code obj} is {@code null}</li>
+	 * <li>{@code"Optional.empty"} if {@code obj} is an empty {@link Optional}</li>
+	 * <li>{@code"Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
+	 * where {@code <concise-string>} is the result of invoking {@link #nullSafeConciseToString}
+	 * on the object contained in the {@code Optional}</li>
 	 * <li>{@linkplain Class#getName() Class name} if {@code obj} is a {@link Class}</li>
+	 * <li>{@linkplain Charset#name() Charset name} if {@code obj} is a {@link Charset}</li>
+	 * <li>{@linkplain TimeZone#getID() TimeZone ID} if {@code obj} is a {@link TimeZone}</li>
+	 * <li>{@linkplain ZoneId#getId() Zone ID} if {@code obj} is a {@link ZoneId}</li>
 	 * <li>Potentially {@linkplain StringUtils#truncate(CharSequence) truncated string}
 	 * if {@code obj} is a {@link String} or {@link CharSequence}</li>
 	 * <li>Potentially {@linkplain StringUtils#truncate(CharSequence) truncated string}
 	 * if {@code obj} is a <em>simple value type</em> whose {@code toString()} method
-	 * returns a non-null value.</li>
+	 * returns a non-null value</li>
 	 * <li>Otherwise, a string representation of the object's type name concatenated
-	 * with {@code @} and a hex string form of the object's identity hash code</li>
+	 * with {@code "@"} and a hex string form of the object's identity hash code</li>
 	 * </ul>
 	 * <p>In the context of this method, a <em>simple value type</em> is any of the following:
-	 * a primitive wrapper (excluding {@code Void}), an {@code Enum}, a {@code Number},
-	 * a {@code Date}, a {@code Temporal}, a {@code UUID}, a {@code URI}, a {@code URL},
-	 * or a {@code Locale}.
+	 * primitive wrapper (excluding {@link Void}), {@link Enum}, {@link Number},
+	 * {@link java.util.Date Date}, {@link java.time.temporal.Temporal Temporal},
+	 * {@link java.io.File File}, {@link java.nio.file.Path Path},
+	 * {@link java.net.URI URI}, {@link java.net.URL URL},
+	 * {@link java.net.InetAddress InetAddress}, {@link java.util.Currency Currency},
+	 * {@link java.util.Locale Locale}, {@link java.util.UUID UUID},
+	 * {@link java.util.regex.Pattern Pattern}.
 	 * @param obj the object to build a string representation for
 	 * @return a concise string representation of the supplied object
 	 * @since 5.3.27
@@ -918,8 +932,21 @@ public abstract class ObjectUtils {
 		if (obj == null) {
 			return "null";
 		}
+		if (obj instanceof Optional<?> optional) {
+			return (optional.isEmpty() ? "Optional.empty" :
+				"Optional[%s]".formatted(nullSafeConciseToString(optional.get())));
+		}
 		if (obj instanceof Class<?> clazz) {
 			return clazz.getName();
+		}
+		if (obj instanceof Charset charset) {
+			return charset.name();
+		}
+		if (obj instanceof TimeZone timeZone) {
+			return timeZone.getID();
+		}
+		if (obj instanceof ZoneId zoneId) {
+			return zoneId.getId();
 		}
 		if (obj instanceof CharSequence charSequence) {
 			return StringUtils.truncate(charSequence);
