@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ public class HandlerMethod {
 
 	/**
 	 * If the bean method is a bridge method, this method returns the bridged
-	 * (user-defined) method. Otherwise it returns the same method as {@link #getMethod()}.
+	 * (user-defined) method. Otherwise, it returns the same method as {@link #getMethod()}.
 	 */
 	protected Method getBridgedMethod() {
 		return this.bridgedMethod;
@@ -298,8 +298,8 @@ public class HandlerMethod {
 	 * Return a short representation of this handler method for log message purposes.
 	 */
 	public String getShortLogMessage() {
-		int args = this.method.getParameterCount();
-		return getBeanType().getSimpleName() + "#" + this.method.getName() + "[" + args + " args]";
+		return getBeanType().getSimpleName() + "#" + this.method.getName() +
+				"[" + this.method.getParameterCount() + " args]";
 	}
 
 
@@ -365,13 +365,11 @@ public class HandlerMethod {
 	}
 
 	protected String formatInvokeError(String text, Object[] args) {
-
 		String formattedArgs = IntStream.range(0, args.length)
 				.mapToObj(i -> (args[i] != null ?
 						"[" + i + "] [type=" + args[i].getClass().getName() + "] [value=" + args[i] + "]" :
 						"[" + i + "] [null]"))
 				.collect(Collectors.joining(",\n", " ", " "));
-
 		return text + "\n" +
 				"Endpoint [" + getBeanType().getName() + "]\n" +
 				"Method [" + getBridgedMethod().toGenericString() + "] " +

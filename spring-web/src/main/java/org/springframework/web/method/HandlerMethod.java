@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,6 +218,7 @@ public class HandlerMethod {
 		this.description = handlerMethod.description;
 	}
 
+
 	private MethodParameter[] initMethodParameters() {
 		int count = this.bridgedMethod.getParameterCount();
 		MethodParameter[] result = new MethodParameter[count];
@@ -248,7 +249,7 @@ public class HandlerMethod {
 		for (Class<?> paramType : method.getParameterTypes()) {
 			joiner.add(paramType.getSimpleName());
 		}
-		return beanType.getName() + "#" + method.getName() + joiner.toString();
+		return beanType.getName() + "#" + method.getName() + joiner;
 	}
 
 
