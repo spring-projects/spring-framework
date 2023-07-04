@@ -303,7 +303,7 @@ public class PathResource extends AbstractResource implements WritableResource {
 	}
 
 	/**
-	 * This implementation returns the hash code of the underlying Path reference.
+	 * This implementation returns the hash code of the underlying {@link Path} reference.
 	 */
 	@Override
 	public int hashCode() {
