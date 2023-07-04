@@ -16,23 +16,34 @@
 
 package org.springframework.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -827,6 +838,41 @@ class ObjectUtilsTests {
 		}
 
 		@Test
+		void nullSafeConciseToStringForEmptyOptional() {
+			Optional<String> optional = Optional.empty();
+			assertThat(ObjectUtils.nullSafeConciseToString(optional)).isEqualTo("Optional.empty");
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyOptionals() {
+			Optional<Tropes> optionalEnum = Optional.of(Tropes.BAR);
+			String expected = "Optional[BAR]";
+			assertThat(ObjectUtils.nullSafeConciseToString(optionalEnum)).isEqualTo(expected);
+
+			String repeat100 = "X".repeat(100);
+			String repeat101 = "X".repeat(101);
+
+			Optional<String> optionalString = Optional.of(repeat100);
+			expected = "Optional[%s]".formatted(repeat100);
+			assertThat(ObjectUtils.nullSafeConciseToString(optionalString)).isEqualTo(expected);
+
+			optionalString = Optional.of(repeat101);
+			expected = "Optional[%s]".formatted(repeat100 + truncated);
+			assertThat(ObjectUtils.nullSafeConciseToString(optionalString)).isEqualTo(expected);
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyOptionalCustomType() {
+			class CustomType {
+			}
+
+			CustomType customType = new CustomType();
+			Optional<CustomType> optional = Optional.of(customType);
+			String expected = "Optional[%s]".formatted(ObjectUtils.nullSafeConciseToString(customType));
+			assertThat(ObjectUtils.nullSafeConciseToString(optional)).isEqualTo(expected);
+		}
+
+		@Test
 		void nullSafeConciseToStringForClass() {
 			assertThat(ObjectUtils.nullSafeConciseToString(String.class)).isEqualTo("java.lang.String");
 		}
@@ -890,6 +936,30 @@ class ObjectUtilsTests {
 		}
 
 		@Test
+		void nullSafeConciseToStringForFile() {
+			String path = "/tmp/file.txt";
+			assertThat(ObjectUtils.nullSafeConciseToString(new File(path))).isEqualTo(path);
+
+			path =  "/tmp/" + "xyz".repeat(32);
+			assertThat(ObjectUtils.nullSafeConciseToString(new File(path)))
+					.hasSize(truncatedLength)
+					.startsWith(path.subSequence(0, 100))
+					.endsWith(truncated);
+		}
+
+		@Test
+		void nullSafeConciseToStringForPath() {
+			String path = "/tmp/file.txt";
+			assertThat(ObjectUtils.nullSafeConciseToString(Path.of(path))).isEqualTo(path);
+
+			path =  "/tmp/" + "xyz".repeat(32);
+			assertThat(ObjectUtils.nullSafeConciseToString(Path.of(path)))
+					.hasSize(truncatedLength)
+					.startsWith(path.subSequence(0, 100))
+					.endsWith(truncated);
+		}
+
+		@Test
 		void nullSafeConciseToStringForURI() {
 			String uri = "https://www.example.com/?foo=1&bar=2&baz=3";
 			assertThat(ObjectUtils.nullSafeConciseToString(URI.create(uri))).isEqualTo(uri);
@@ -914,8 +984,53 @@ class ObjectUtilsTests {
 		}
 
 		@Test
+		void nullSafeConciseToStringForInetAddress() {
+			InetAddress localhost = getLocalhost();
+			assertThat(ObjectUtils.nullSafeConciseToString(localhost)).isEqualTo(localhost.toString());
+		}
+
+		private static InetAddress getLocalhost() {
+			try {
+				return InetAddress.getLocalHost();
+			}
+			catch (UnknownHostException ex) {
+				return InetAddress.getLoopbackAddress();
+			}
+		}
+
+		@Test
+		void nullSafeConciseToStringForCharset() {
+			Charset charset = StandardCharsets.UTF_8;
+			assertThat(ObjectUtils.nullSafeConciseToString(charset)).isEqualTo(charset.name());
+		}
+
+		@Test
+		void nullSafeConciseToStringForCurrency() {
+			Currency currency = Currency.getInstance(Locale.US);
+			assertThat(ObjectUtils.nullSafeConciseToString(currency)).isEqualTo(currency.toString());
+		}
+
+		@Test
 		void nullSafeConciseToStringForLocale() {
 			assertThat(ObjectUtils.nullSafeConciseToString(Locale.GERMANY)).isEqualTo("de_DE");
+		}
+
+		@Test
+		void nullSafeConciseToStringForRegExPattern() {
+			Pattern pattern = Pattern.compile("^(foo|bar)$");
+			assertThat(ObjectUtils.nullSafeConciseToString(pattern)).isEqualTo(pattern.toString());
+		}
+
+		@Test
+		void nullSafeConciseToStringForTimeZone() {
+			TimeZone timeZone = TimeZone.getDefault();
+			assertThat(ObjectUtils.nullSafeConciseToString(timeZone)).isEqualTo(timeZone.getID());
+		}
+
+		@Test
+		void nullSafeConciseToStringForZoneId() {
+			ZoneId zoneId = ZoneId.systemDefault();
+			assertThat(ObjectUtils.nullSafeConciseToString(zoneId)).isEqualTo(zoneId.getId());
 		}
 
 		@Test
