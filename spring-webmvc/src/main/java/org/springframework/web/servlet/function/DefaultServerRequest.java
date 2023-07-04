@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import jakarta.servlet.ServletException;
@@ -47,6 +48,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -56,12 +58,17 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.ServletRequestDataBinder;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -216,6 +223,35 @@ class DefaultServerRequest implements ServerRequest {
 		}
 		MimeTypeUtils.sortBySpecificity(result);
 		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) throws BindException {
+		Assert.notNull(bindType, "BindType must not be null");
+		Assert.notNull(dataBinderCustomizer, "DataBinderCustomizer must not be null");
+
+		ServletRequestDataBinder dataBinder = new ServletRequestDataBinder(null);
+		dataBinder.setTargetType(ResolvableType.forClass(bindType));
+		dataBinderCustomizer.accept(dataBinder);
+
+		HttpServletRequest servletRequest = servletRequest();
+		dataBinder.construct(servletRequest);
+		dataBinder.bind(servletRequest);
+
+		BindingResult bindingResult = dataBinder.getBindingResult();
+		if (bindingResult.hasErrors()) {
+			throw new BindException(bindingResult);
+		}
+		else {
+			T result = (T) bindingResult.getTarget();
+			if (result != null) {
+				return result;
+			}
+			else {
+				throw new IllegalStateException("Binding result has neither target nor errors");
+			}
+		}
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -52,6 +53,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.ServerWebExchange;
@@ -1042,6 +1044,16 @@ public abstract class RequestPredicates {
 		@Override
 		public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
 			return this.request.bodyToFlux(typeReference);
+		}
+
+		@Override
+		public <T> Mono<T> bind(Class<T> bindType) {
+			return this.request.bind(bindType);
+		}
+
+		@Override
+		public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
+			return this.request.bind(bindType, dataBinderCustomizer);
 		}
 
 		@Override

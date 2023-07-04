@@ -27,12 +27,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.core.codec.Hints;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -49,7 +51,12 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException;
@@ -218,6 +225,33 @@ class DefaultServerRequest implements ServerRequest {
 		Flux<T> flux = body(BodyExtractors.toFlux(typeReference));
 		return flux.onErrorMap(UnsupportedMediaTypeException.class, ERROR_MAPPER)
 				.onErrorMap(DecodingException.class, DECODING_MAPPER);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
+		Assert.notNull(bindType, "BindType must not be null");
+		Assert.notNull(dataBinderCustomizer, "DataBinderCustomizer must not be null");
+
+		return Mono.defer(() -> {
+			WebExchangeDataBinder dataBinder = new WebExchangeDataBinder(null);
+			dataBinder.setTargetType(ResolvableType.forClass(bindType));
+			dataBinderCustomizer.accept(dataBinder);
+
+			ServerWebExchange exchange = exchange();
+			return dataBinder.construct(exchange)
+					.then(dataBinder.bind(exchange))
+					.then(Mono.defer(() -> {
+						BindingResult bindingResult = dataBinder.getBindingResult();
+						if (bindingResult.hasErrors()) {
+							return Mono.error(new BindException(bindingResult));
+						}
+						else {
+							T result = (T) bindingResult.getTarget();
+							return Mono.justOrEmpty(result);
+						}
+					}));
+		});
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -54,6 +55,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriUtils;
@@ -1016,6 +1019,16 @@ public abstract class RequestPredicates {
 		public <T> T body(ParameterizedTypeReference<T> bodyType)
 				throws ServletException, IOException {
 			return this.request.body(bodyType);
+		}
+
+		@Override
+		public <T> T bind(Class<T> bindType) throws BindException {
+			return this.request.bind(bindType);
+		}
+
+		@Override
+		public <T> T bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) throws BindException {
+			return this.request.bind(bindType, dataBinderCustomizer);
 		}
 
 		@Override

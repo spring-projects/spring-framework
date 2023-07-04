@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Consumer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -42,6 +43,7 @@ import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.server.ServerWebExchange;
@@ -169,6 +171,16 @@ public class ServerRequestWrapper implements ServerRequest {
 	@Override
 	public <T> Flux<T> bodyToFlux(ParameterizedTypeReference<T> typeReference) {
 		return this.delegate.bodyToFlux(typeReference);
+	}
+
+	@Override
+	public <T> Mono<T> bind(Class<T> bindType) {
+		return this.delegate.bind(bindType);
+	}
+
+	@Override
+	public <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {
+		return this.delegate.bind(bindType, dataBinderCustomizer);
 	}
 
 	@Override
