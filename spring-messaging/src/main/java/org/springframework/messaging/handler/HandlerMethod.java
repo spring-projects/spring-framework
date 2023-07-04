@@ -189,7 +189,7 @@ public class HandlerMethod extends AnnotatedMethod {
 	 * Return a short representation of this handler method for log message purposes.
 	 */
 	public String getShortLogMessage() {
-		return getBeanType().getName() + "#" + getMethod().getName() +
+		return getBeanType().getSimpleName() + "#" + getMethod().getName() +
 				"[" + getMethod().getParameterCount() + " args]";
 	}
 
