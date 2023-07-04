@@ -17,6 +17,7 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 import jakarta.validation.Validator;
 
@@ -54,9 +55,17 @@ public final class HandlerMethodValidator implements MethodValidator {
 
 	private final MethodValidationAdapter validationAdapter;
 
+	private final Predicate<MethodParameter> modelAttribitePredicate;
 
-	private HandlerMethodValidator(MethodValidationAdapter validationAdapter) {
+	private final Predicate<MethodParameter> requestParamPredicate;
+
+
+	private HandlerMethodValidator(MethodValidationAdapter validationAdapter,
+			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
+
 		this.validationAdapter = validationAdapter;
+		this.modelAttribitePredicate = modelAttribitePredicate;
+		this.requestParamPredicate = requestParamPredicate;
 	}
 
 
@@ -93,7 +102,8 @@ public final class HandlerMethodValidator implements MethodValidator {
 			}
 		}
 
-		throw new HandlerMethodValidationException(result);
+		throw new HandlerMethodValidationException(
+				result, this.modelAttribitePredicate, this.requestParamPredicate);
 	}
 
 	@Override
@@ -130,11 +140,13 @@ public final class HandlerMethodValidator implements MethodValidator {
 	 */
 	@Nullable
 	public static MethodValidator from(
-			@Nullable WebBindingInitializer initializer, @Nullable ParameterNameDiscoverer paramNameDiscoverer) {
+			@Nullable WebBindingInitializer initializer, @Nullable ParameterNameDiscoverer paramNameDiscoverer,
+			Predicate<MethodParameter> modelAttribitePredicate, Predicate<MethodParameter> requestParamPredicate) {
 
 		if (initializer instanceof ConfigurableWebBindingInitializer configurableInitializer) {
 			if (configurableInitializer.getValidator() instanceof Validator validator) {
 				MethodValidationAdapter adapter = new MethodValidationAdapter(validator);
+				adapter.setObjectNameResolver(objectNameResolver);
 				if (paramNameDiscoverer != null) {
 					adapter.setParameterNameDiscoverer(paramNameDiscoverer);
 				}
@@ -142,9 +154,7 @@ public final class HandlerMethodValidator implements MethodValidator {
 				if (codesResolver != null) {
 					adapter.setMessageCodesResolver(codesResolver);
 				}
-				HandlerMethodValidator methodValidator = new HandlerMethodValidator(adapter);
-				adapter.setObjectNameResolver(objectNameResolver);
-				return methodValidator;
+				return new HandlerMethodValidator(adapter, modelAttribitePredicate, requestParamPredicate);
 			}
 		}
 		return null;

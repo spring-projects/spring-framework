@@ -33,12 +33,9 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.validation.method.MethodValidator;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.annotation.HandlerMethodValidator;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.DispatchExceptionHandler;
 import org.springframework.web.reactive.HandlerAdapter;
@@ -60,9 +57,6 @@ public class RequestMappingHandlerAdapter
 
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
-	private final static boolean BEAN_VALIDATION_PRESENT =
-			ClassUtils.isPresent("jakarta.validation.Validator", HandlerMethod.class.getClassLoader());
-
 
 	private List<HttpMessageReader<?>> messageReaders = Collections.emptyList();
 
@@ -74,9 +68,6 @@ public class RequestMappingHandlerAdapter
 
 	@Nullable
 	private ReactiveAdapterRegistry reactiveAdapterRegistry;
-
-	@Nullable
-	private MethodValidator methodValidator;
 
 	@Nullable
 	private ConfigurableApplicationContext applicationContext;
@@ -179,12 +170,10 @@ public class RequestMappingHandlerAdapter
 		if (this.reactiveAdapterRegistry == null) {
 			this.reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 		}
-		if (BEAN_VALIDATION_PRESENT) {
-			this.methodValidator = HandlerMethodValidator.from(this.webBindingInitializer, null);
-		}
 
-		this.methodResolver = new ControllerMethodResolver(this.argumentResolverConfigurer,
-				this.reactiveAdapterRegistry, this.applicationContext, this.messageReaders, this.methodValidator);
+		this.methodResolver = new ControllerMethodResolver(
+				this.argumentResolverConfigurer, this.reactiveAdapterRegistry, this.applicationContext,
+				this.messageReaders, this.webBindingInitializer);
 
 		this.modelInitializer = new ModelInitializer(this.methodResolver, this.reactiveAdapterRegistry);
 	}
@@ -202,7 +191,7 @@ public class RequestMappingHandlerAdapter
 
 		InitBinderBindingContext bindingContext = new InitBinderBindingContext(
 				this.webBindingInitializer, this.methodResolver.getInitBinderMethods(handlerMethod),
-				this.methodValidator != null && handlerMethod.shouldValidateArguments());
+				this.methodResolver.hasMethodValidator() && handlerMethod.shouldValidateArguments());
 
 		InvocableHandlerMethod invocableMethod = this.methodResolver.getRequestMappingMethod(handlerMethod);
 

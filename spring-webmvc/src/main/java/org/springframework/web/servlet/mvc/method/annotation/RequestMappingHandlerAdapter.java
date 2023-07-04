@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,6 +37,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.KotlinDetector;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -77,6 +79,7 @@ import org.springframework.web.method.annotation.ExpressionValueMethodArgumentRe
 import org.springframework.web.method.annotation.HandlerMethodValidator;
 import org.springframework.web.method.annotation.InitBinderDataBinderFactory;
 import org.springframework.web.method.annotation.MapMethodProcessor;
+import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.annotation.ModelFactory;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.annotation.RequestHeaderMapMethodArgumentResolver;
@@ -91,6 +94,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import org.springframework.web.service.invoker.RequestParamArgumentResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
@@ -569,7 +573,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
 		if (BEAN_VALIDATION_PRESENT) {
-			this.methodValidator = HandlerMethodValidator.from(this.webBindingInitializer, this.parameterNameDiscoverer);
+			List<HandlerMethodArgumentResolver> resolvers = this.argumentResolvers.getResolvers();
+			this.methodValidator = HandlerMethodValidator.from(
+					this.webBindingInitializer, this.parameterNameDiscoverer,
+					methodParamPredicate(resolvers, ModelAttributeMethodProcessor.class),
+					methodParamPredicate(resolvers, RequestParamArgumentResolver.class));
 		}
 	}
 
@@ -767,6 +775,19 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		return handlers;
+	}
+
+	private static Predicate<MethodParameter> methodParamPredicate(
+			List<HandlerMethodArgumentResolver> resolvers, Class<?> resolverType) {
+
+		return parameter -> {
+			for (HandlerMethodArgumentResolver resolver : resolvers) {
+				if (resolver.supportsParameter(parameter)) {
+					return resolverType.isInstance(resolver);
+				}
+			}
+			return false;
+		};
 	}
 
 

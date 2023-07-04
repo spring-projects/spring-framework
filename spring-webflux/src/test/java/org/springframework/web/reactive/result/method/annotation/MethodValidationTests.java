@@ -37,7 +37,6 @@ import reactor.test.StepVerifier;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.MediaType;
-import org.springframework.util.Assert;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
@@ -300,7 +299,6 @@ public class MethodValidationTests {
 
 	@SuppressWarnings("unchecked")
 	private static <T> HandlerMethod handlerMethod(T controller, Consumer<T> mockCallConsumer) {
-		Assert.isTrue(!(controller instanceof Class<?>), "Expected controller instance");
 		Method method = ResolvableMethod.on((Class<T>) controller.getClass()).mockCall(mockCallConsumer).method();
 		return new HandlerMethod(controller, method);
 	}

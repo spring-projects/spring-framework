@@ -79,9 +79,10 @@ public interface MethodValidationResult {
 	List<ParameterValidationResult> getAllValidationResults();
 
 	/**
-	 * Return only validation results for method parameters with errors directly
-	 * on them. This does not include Object method parameters with nested
-	 * errors on their fields and properties.
+	 * Return the subset of {@link #getAllValidationResults() allValidationResults}
+	 * that includes method parameters with validation errors directly on method
+	 * argument values. This excludes {@link #getBeanResults() beanResults} with
+	 * nested errors on their fields and properties.
 	 */
 	default List<ParameterValidationResult> getValueResults() {
 		return getAllValidationResults().stream()
@@ -90,9 +91,10 @@ public interface MethodValidationResult {
 	}
 
 	/**
-	 * Return only validation results for Object method parameters with nested
-	 * errors on their fields and properties. This excludes method parameters
-	 * with errors directly on them.
+	 * Return the subset of {@link #getAllValidationResults() allValidationResults}
+	 * that includes Object method parameters with nested errors on their fields
+	 * and properties. This excludes {@link #getValueResults() valueResults} with
+	 * validation errors directly on method arguments.
 	 */
 	default List<ParameterErrors> getBeanResults() {
 		return getAllValidationResults().stream()
