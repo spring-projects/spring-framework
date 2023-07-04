@@ -87,7 +87,7 @@ configure([rootProject] + javaProjects) { project ->
 			"https://www.ibm.com/docs/api/v1/content/SSEQTP_8.5.5/com.ibm.websphere.javadoc.doc/web/apidocs/", // com.ibm.*
 			"https://docs.jboss.org/jbossas/javadoc/4.0.5/connector/", // org.jboss.resource.*
 			"https://docs.jboss.org/hibernate/orm/5.6/javadocs/",
-			"https://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
+			"https://eclipse.dev/aspectj/doc/released/aspectj5rt-api",
 			"https://www.quartz-scheduler.org/api/2.3.0/",
 			"https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-core/2.14.1/",
 			"https://www.javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/2.14.1/",
