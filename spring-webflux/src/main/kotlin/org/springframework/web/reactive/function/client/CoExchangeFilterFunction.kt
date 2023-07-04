@@ -22,11 +22,11 @@ import kotlinx.coroutines.reactor.mono
 import reactor.core.publisher.Mono
 
 /**
- * Kotlin-specific implementation of the [ExchangeFilterFunction] interface that allows for
- * using coroutines.
+ * Kotlin-specific implementation of the [ExchangeFilterFunction] interface
+ * that allows for using coroutines.
  *
  * @author Sebastien Deleuze
- * @since 6.1.0
+ * @since 6.1
  */
 abstract class CoExchangeFilterFunction : ExchangeFilterFunction {
 
@@ -48,8 +48,8 @@ abstract class CoExchangeFilterFunction : ExchangeFilterFunction {
 	 * proceed with the exchange, or not invoked to short-circuit the chain.
 	 *
 	 * **Note:** When a filter handles the response after the
-	 * call to [CoExchangeFunction.exchange], extra care must be taken
-	 * to always consume its content or otherwise propagate it downstream for
+	 * call to [CoExchangeFunction.exchange], extra care must be taken to
+	 * always consume its content or otherwise propagate it downstream for
 	 * further handling, for example by the [WebClient]. Please see the
 	 * reference documentation for more details on this.
 	 *
@@ -60,11 +60,12 @@ abstract class CoExchangeFilterFunction : ExchangeFilterFunction {
 	protected abstract suspend fun filter(request: ClientRequest, next: CoExchangeFunction): ClientResponse
 }
 
+
 /**
  * Kotlin-specific adaption of [ExchangeFunction] that allows for coroutines.
  *
  * @author Sebastien Deleuze
- * @since 6.1.0
+ * @since 6.1
  */
 interface CoExchangeFunction {
 
@@ -75,7 +76,7 @@ interface CoExchangeFunction {
 	 * [CoExchangeFilterFunction] that handles the response in some way,
 	 * extra care must be taken to always consume its content or otherwise
 	 * propagate it downstream for further handling, for example by the
-	 * [WebClient]. Please, see the reference documentation for more
+	 * [WebClient]. Please see the reference documentation for more
 	 * details on this.
 	 *
 	 * @param request the request to exchange
