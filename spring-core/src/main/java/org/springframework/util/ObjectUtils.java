@@ -16,18 +16,26 @@
 
 package org.springframework.util;
 
+import java.io.File;
 import java.lang.reflect.Array;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.time.ZoneId;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.TimeZone;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 
@@ -923,19 +931,27 @@ public abstract class ObjectUtils {
 	 * <p>Returns:
 	 * <ul>
 	 * <li>{@code "null"} if {@code obj} is {@code null}</li>
+	 * <li>{@code"Optional.empty"} if {@code obj} is an empty {@link Optional}</li>
+	 * <li>{@code"Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
+	 * where {@code <concise-string>} is the result of invoking {@link #nullSafeConciseToString}
+	 * on the object contained in the {@code Optional}</li>
 	 * <li>{@linkplain Class#getName() Class name} if {@code obj} is a {@link Class}</li>
+	 * <li>{@linkplain Charset#name() Charset name} if {@code obj} is a {@link Charset}</li>
+	 * <li>{@linkplain TimeZone#getID() TimeZone ID} if {@code obj} is a {@link TimeZone}</li>
+	 * <li>{@linkplain ZoneId#getId() Zone ID} if {@code obj} is a {@link ZoneId}</li>
 	 * <li>Potentially {@linkplain StringUtils#truncate(CharSequence) truncated string}
 	 * if {@code obj} is a {@link String} or {@link CharSequence}</li>
 	 * <li>Potentially {@linkplain StringUtils#truncate(CharSequence) truncated string}
 	 * if {@code obj} is a <em>simple value type</em> whose {@code toString()} method
-	 * returns a non-null value.</li>
+	 * returns a non-null value</li>
 	 * <li>Otherwise, a string representation of the object's type name concatenated
-	 * with {@code @} and a hex string form of the object's identity hash code</li>
+	 * with {@code "@"} and a hex string form of the object's identity hash code</li>
 	 * </ul>
 	 * <p>In the context of this method, a <em>simple value type</em> is any of the following:
-	 * a primitive wrapper (excluding {@code Void}), an {@code Enum}, a {@code Number},
-	 * a {@code Date}, a {@code Temporal}, a {@code UUID}, a {@code URI}, a {@code URL},
-	 * or a {@code Locale}.
+	 * primitive wrapper (excluding {@link Void}), {@link Enum}, {@link Number},
+	 * {@link Date}, {@link Temporal}, {@link File}, {@link Path}, {@link URI},
+	 * {@link URL}, {@link InetAddress}, {@link Currency}, {@link Locale},
+	 * {@link UUID}, {@link Pattern}.
 	 * @param obj the object to build a string representation for
 	 * @return a concise string representation of the supplied object
 	 * @since 5.3.27
@@ -946,8 +962,22 @@ public abstract class ObjectUtils {
 		if (obj == null) {
 			return "null";
 		}
+		if (obj instanceof Optional<?>) {
+			Optional<?> optional = (Optional<?>) obj;
+			return (!optional.isPresent() ? "Optional.empty" :
+					String.format("Optional[%s]", nullSafeConciseToString(optional.get())));
+		}
 		if (obj instanceof Class<?>) {
 			return ((Class<?>) obj).getName();
+		}
+		if (obj instanceof Charset) {
+			return ((Charset) obj).name();
+		}
+		if (obj instanceof TimeZone) {
+			return ((TimeZone) obj).getID();
+		}
+		if (obj instanceof ZoneId) {
+			return ((ZoneId) obj).getId();
 		}
 		if (obj instanceof CharSequence) {
 			return StringUtils.truncate((CharSequence) obj);
@@ -964,7 +994,10 @@ public abstract class ObjectUtils {
 
 	/**
 	 * Derived from {@link org.springframework.beans.BeanUtils#isSimpleValueType}.
-	 * As of 5.3.28, considering {@code UUID} in addition to the bean-level check.
+	 * <p>As of 5.3.28, considering {@link UUID} in addition to the bean-level check.
+	 * <p>As of 5.3.29, additionally considering {@link File}, {@link Path},
+	 * {@link InetAddress}, {@link Charset}, {@link Currency}, {@link TimeZone},
+	 * {@link ZoneId}, {@link Pattern}.
 	 */
 	private static boolean isSimpleValueType(Class<?> type) {
 		return (Void.class != type && void.class != type &&
@@ -974,10 +1007,18 @@ public abstract class ObjectUtils {
 				Number.class.isAssignableFrom(type) ||
 				Date.class.isAssignableFrom(type) ||
 				Temporal.class.isAssignableFrom(type) ||
-				UUID.class == type ||
+				ZoneId.class.isAssignableFrom(type) ||
+				TimeZone.class.isAssignableFrom(type) ||
+				File.class.isAssignableFrom(type) ||
+				Path.class.isAssignableFrom(type) ||
+				Charset.class.isAssignableFrom(type) ||
+				Currency.class.isAssignableFrom(type) ||
+				InetAddress.class.isAssignableFrom(type) ||
 				URI.class == type ||
 				URL.class == type ||
+				UUID.class == type ||
 				Locale.class == type ||
+				Pattern.class == type ||
 				Class.class == type));
 	}
 
