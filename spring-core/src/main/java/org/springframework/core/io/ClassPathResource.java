@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,15 @@ import org.springframework.util.StringUtils;
  *
  * <p>Supports resolution as {@code java.io.File} if the class path
  * resource resides in the file system, but not for resources in a JAR.
- * Always supports resolution as URL.
+ * Always supports resolution as {@code java.net.URL}.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 28.12.2003
  * @see ClassLoader#getResourceAsStream(String)
+ * @see ClassLoader#getResource(String)
  * @see Class#getResourceAsStream(String)
+ * @see Class#getResource(String)
  */
 public class ClassPathResource extends AbstractFileResolvingResource {
 
@@ -124,7 +126,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Return the ClassLoader that this resource will be obtained from.
+	 * Return the {@link ClassLoader} that this resource will be obtained from.
 	 */
 	@Nullable
 	public final ClassLoader getClassLoader() {
@@ -134,8 +136,8 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 
 	/**
 	 * This implementation checks for the resolution of a resource URL.
-	 * @see java.lang.ClassLoader#getResource(String)
-	 * @see java.lang.Class#getResource(String)
+	 * @see ClassLoader#getResource(String)
+	 * @see Class#getResource(String)
 	 */
 	@Override
 	public boolean exists() {
@@ -145,8 +147,8 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	/**
 	 * This implementation checks for the resolution of a resource URL upfront,
 	 * then proceeding with {@link AbstractFileResolvingResource}'s length check.
-	 * @see java.lang.ClassLoader#getResource(String)
-	 * @see java.lang.Class#getResource(String)
+	 * @see ClassLoader#getResource(String)
+	 * @see Class#getResource(String)
 	 */
 	@Override
 	public boolean isReadable() {
@@ -179,9 +181,11 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * This implementation opens an InputStream for the given class path resource.
-	 * @see java.lang.ClassLoader#getResourceAsStream(String)
-	 * @see java.lang.Class#getResourceAsStream(String)
+	 * This implementation opens an {@link InputStream} for the underlying class
+	 * path resource, if available.
+	 * @see ClassLoader#getResourceAsStream(String)
+	 * @see Class#getResourceAsStream(String)
+	 * @see ClassLoader#getSystemResourceAsStream(String)
 	 */
 	@Override
 	public InputStream getInputStream() throws IOException {
@@ -204,8 +208,8 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	/**
 	 * This implementation returns a URL for the underlying class path resource,
 	 * if available.
-	 * @see java.lang.ClassLoader#getResource(String)
-	 * @see java.lang.Class#getResource(String)
+	 * @see ClassLoader#getResource(String)
+	 * @see Class#getResource(String)
 	 */
 	@Override
 	public URL getURL() throws IOException {
@@ -217,9 +221,9 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * This implementation creates a ClassPathResource, applying the given path
-	 * relative to the path of the underlying resource of this descriptor.
-	 * @see org.springframework.util.StringUtils#applyRelativePath(String, String)
+	 * This implementation creates a {@code ClassPathResource}, applying the given
+	 * path relative to the path used to create this descriptor.
+	 * @see StringUtils#applyRelativePath(String, String)
 	 */
 	@Override
 	public Resource createRelative(String relativePath) {
@@ -231,7 +235,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	/**
 	 * This implementation returns the name of the file that this class path
 	 * resource refers to.
-	 * @see org.springframework.util.StringUtils#getFilename(String)
+	 * @see StringUtils#getFilename(String)
 	 */
 	@Override
 	@Nullable
@@ -277,8 +281,7 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * This implementation returns the hash code of the underlying
-	 * class path location.
+	 * This implementation returns the hash code of the underlying class path location.
 	 */
 	@Override
 	public int hashCode() {

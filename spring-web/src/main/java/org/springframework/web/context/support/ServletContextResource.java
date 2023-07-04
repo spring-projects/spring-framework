@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 
 
 	/**
-	 * Create a new ServletContextResource.
+	 * Create a new {@code ServletContextResource} for the given path.
 	 * <p>The Servlet spec requires that resource paths start with a slash,
 	 * even if many containers accept paths without leading slash too.
 	 * Consequently, the given path will be prepended with a slash if it
@@ -93,6 +93,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	public final String getPath() {
 		return this.path;
 	}
+
 
 	/**
 	 * This implementation checks {@code ServletContext.getResource}.

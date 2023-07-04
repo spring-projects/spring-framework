@@ -206,9 +206,9 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 
 	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
-		long initialDelay = startTime.getTime() - this.clock.millis();
+		long delay = startTime.getTime() - this.clock.millis();
 		try {
-			return this.scheduledExecutor.schedule(decorateTask(task, false), initialDelay, TimeUnit.MILLISECONDS);
+			return this.scheduledExecutor.schedule(decorateTask(task, false), delay, TimeUnit.MILLISECONDS);
 		}
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
