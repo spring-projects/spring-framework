@@ -111,7 +111,7 @@ dependencies {
 		api("org.awaitility:awaitility:4.2.0")
 		api("org.bouncycastle:bcpkix-jdk18on:1.72")
 		api("org.codehaus.jettison:jettison:1.5.4")
-		api("org.crac:crac:0.1.3")
+		api("org.crac:crac:1.3.0")
 		api("org.dom4j:dom4j:2.1.4")
 		api("org.eclipse.jetty:jetty-reactive-httpclient:3.0.8")
 		api("org.eclipse.persistence:org.eclipse.persistence.jpa:3.0.3")
