@@ -962,10 +962,10 @@ class ObjectUtilsTests {
 
 		@Test
 		void nullSafeConciseToStringForFile() {
-			String path = "/tmp/file.txt";
+			String path = "/tmp/file.txt".replace('/', File.separatorChar);
 			assertThat(ObjectUtils.nullSafeConciseToString(new File(path))).isEqualTo(path);
 
-			path =  "/tmp/" + repeat("xyz", 32);
+			path = ("/tmp/" + repeat("xyz", 32)).replace('/', File.separatorChar);
 			assertThat(ObjectUtils.nullSafeConciseToString(new File(path)))
 					.hasSize(truncatedLength)
 					.startsWith(path.subSequence(0, 100))
@@ -974,10 +974,10 @@ class ObjectUtilsTests {
 
 		@Test
 		void nullSafeConciseToStringForPath() {
-			String path = "/tmp/file.txt";
+			String path = "/tmp/file.txt".replace('/', File.separatorChar);
 			assertThat(ObjectUtils.nullSafeConciseToString(Paths.get(path))).isEqualTo(path);
 
-			path =  "/tmp/" + repeat("xyz", 32);
+			path = ("/tmp/" + repeat("xyz", 32)).replace('/', File.separatorChar);
 			assertThat(ObjectUtils.nullSafeConciseToString(Paths.get(path)))
 					.hasSize(truncatedLength)
 					.startsWith(path.subSequence(0, 100))
