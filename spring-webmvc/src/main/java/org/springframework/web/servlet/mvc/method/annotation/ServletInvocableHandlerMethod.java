@@ -272,7 +272,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	 * that's null falling back on the generic type within the declared async
 	 * return type, e.g. Foo instead of {@code DeferredResult<Foo>}.
 	 */
-	private class ConcurrentResultMethodParameter extends HandlerMethodParameter {
+	private class ConcurrentResultMethodParameter extends AnnotatedMethodParameter {
 
 		@Nullable
 		private final Object returnValue;
