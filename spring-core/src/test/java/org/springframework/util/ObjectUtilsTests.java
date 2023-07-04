@@ -17,6 +17,8 @@
 package org.springframework.util;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
 import java.sql.SQLException;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -232,7 +235,7 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	void addObjectToNullArray() throws Exception {
+	void addObjectToNullArray() {
 		String newElement = "foo";
 		String[] newArray = ObjectUtils.addObjectToArray(null, newElement);
 		assertThat(newArray).hasSize(1);
@@ -240,14 +243,14 @@ class ObjectUtilsTests {
 	}
 
 	@Test
-	void addNullObjectToNullArray() throws Exception {
+	void addNullObjectToNullArray() {
 		Object[] newArray = ObjectUtils.addObjectToArray(null, null);
 		assertThat(newArray).hasSize(1);
 		assertThat(newArray[0]).isNull();
 	}
 
 	@Test
-	void nullSafeEqualsWithArrays() throws Exception {
+	void nullSafeEqualsWithArrays() {
 		assertThat(ObjectUtils.nullSafeEquals(new String[] {"a", "b", "c"}, new String[] {"a", "b", "c"})).isTrue();
 		assertThat(ObjectUtils.nullSafeEquals(new int[] {1, 2, 3}, new int[] {1, 2, 3})).isTrue();
 	}
@@ -855,9 +858,17 @@ class ObjectUtilsTests {
 		}
 
 		@Test
-		void nullSafeConciseToStringForNumber() {
+		void nullSafeConciseToStringForPrimitivesAndWrappers() {
+			assertThat(ObjectUtils.nullSafeConciseToString(true)).isEqualTo("true");
+			assertThat(ObjectUtils.nullSafeConciseToString('X')).isEqualTo("X");
 			assertThat(ObjectUtils.nullSafeConciseToString(42L)).isEqualTo("42");
 			assertThat(ObjectUtils.nullSafeConciseToString(99.1234D)).isEqualTo("99.1234");
+		}
+
+		@Test
+		void nullSafeConciseToStringForBigNumbers() {
+			assertThat(ObjectUtils.nullSafeConciseToString(BigInteger.valueOf(42L))).isEqualTo("42");
+			assertThat(ObjectUtils.nullSafeConciseToString(BigDecimal.valueOf(99.1234D))).isEqualTo("99.1234");
 		}
 
 		@Test
@@ -915,6 +926,12 @@ class ObjectUtilsTests {
 			assertThat(ObjectUtils.nullSafeConciseToString(list.toArray(String[]::new))).startsWith(prefix(String[].class));
 			assertThat(ObjectUtils.nullSafeConciseToString(new ArrayList<>(list))).startsWith(prefix(ArrayList.class));
 			assertThat(ObjectUtils.nullSafeConciseToString(new HashSet<>(list))).startsWith(prefix(HashSet.class));
+		}
+
+		@Test
+		void nullSafeConciseToStringForMaps() {
+			Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
+			assertThat(ObjectUtils.nullSafeConciseToString(map)).startsWith(prefix(map.getClass()));
 		}
 
 		@Test
