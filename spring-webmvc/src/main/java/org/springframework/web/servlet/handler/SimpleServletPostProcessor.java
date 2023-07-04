@@ -170,7 +170,7 @@ public class SimpleServletPostProcessor implements
 
 		@Override
 		public Enumeration<String> getInitParameterNames() {
-			return Collections.enumeration(Collections.emptySet());
+			return Collections.emptyEnumeration();
 		}
 	}
 

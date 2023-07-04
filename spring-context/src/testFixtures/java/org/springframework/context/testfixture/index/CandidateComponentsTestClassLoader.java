@@ -43,8 +43,7 @@ public class CandidateComponentsTestClassLoader extends ClassLoader {
 	 * @see CandidateComponentsIndexLoader#COMPONENTS_RESOURCE_LOCATION
 	 */
 	public static ClassLoader disableIndex(ClassLoader classLoader) {
-		return new CandidateComponentsTestClassLoader(classLoader,
-				Collections.enumeration(Collections.emptyList()));
+		return new CandidateComponentsTestClassLoader(classLoader, Collections.emptyEnumeration());
 	}
 
 	/**
