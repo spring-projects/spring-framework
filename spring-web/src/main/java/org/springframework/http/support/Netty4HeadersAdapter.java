@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client.reactive;
+package org.springframework.http.support;
 
 import java.util.AbstractSet;
 import java.util.Collection;
@@ -26,24 +26,28 @@ import java.util.Set;
 import io.netty.handler.codec.http.HttpHeaders;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@code MultiValueMap} implementation for wrapping Netty HTTP headers.
- *
- * <p>There is a duplicate of this class in the server package!
+ * {@code MultiValueMap} implementation for wrapping Netty 4 HTTP headers.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
- * @since 5.3
+ * @since 6.1
  */
-class NettyHeadersAdapter implements MultiValueMap<String, String> {
+public final class Netty4HeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpHeaders headers;
 
 
-	NettyHeadersAdapter(HttpHeaders headers) {
+	/**
+	 * Creates a new {@code Netty4HeadersAdapter} based on the given
+	 * {@code HttpHeaders}.
+	 */
+	public Netty4HeadersAdapter(HttpHeaders headers) {
+		Assert.notNull(headers, "Headers must not be null");
 		this.headers = headers;
 	}
 

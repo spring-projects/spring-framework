@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive;
+package org.springframework.http.support;
 
 import java.util.AbstractSet;
 import java.util.Collection;
@@ -23,85 +23,97 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.netty.handler.codec.http.HttpHeaders;
+import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.http.HttpFields;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@code MultiValueMap} implementation for wrapping Netty HTTP headers.
+ * {@code MultiValueMap} implementation for wrapping Jetty HTTP headers.
  *
- * <p>There is a duplicate of this class in the client package!
- *
- * @author Brian Clozel
- * @since 5.1.1
+ * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
+ * @author Sam Brannen
+ * @since 6.1
  */
-final class NettyHeadersAdapter implements MultiValueMap<String, String> {
+public final class JettyHeadersAdapter implements MultiValueMap<String, String> {
 
-	private final HttpHeaders headers;
+	private final HttpFields headers;
+
+	private static final String IMMUTABLE_HEADER_ERROR = "Immutable headers";
 
 
-	NettyHeadersAdapter(HttpHeaders headers) {
+	/**
+	 * Creates a new {@code JettyHeadersAdapter} based on the given
+	 * {@code HttpFields} instance.
+	 * @param headers the {@code HttpFields} to base this adapter on
+	 */
+	public JettyHeadersAdapter(HttpFields headers) {
+		Assert.notNull(headers, "Headers must not be null");
 		this.headers = headers;
 	}
 
 
 	@Override
-	@Nullable
 	public String getFirst(String key) {
 		return this.headers.get(key);
 	}
 
 	@Override
 	public void add(String key, @Nullable String value) {
-		if (value != null) {
-			this.headers.add(key, value);
+		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
+			throw new IllegalStateException(IMMUTABLE_HEADER_ERROR);
 		}
+		mutableHttpFields.add(key, value);
 	}
 
 	@Override
 	public void addAll(String key, List<? extends String> values) {
-		this.headers.add(key, values);
+		values.forEach(value -> add(key, value));
 	}
 
 	@Override
 	public void addAll(MultiValueMap<String, String> values) {
-		values.forEach(this.headers::add);
+		values.forEach(this::addAll);
 	}
 
 	@Override
 	public void set(String key, @Nullable String value) {
-		if (value != null) {
-			this.headers.set(key, value);
+		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
+			throw new IllegalStateException(IMMUTABLE_HEADER_ERROR);
 		}
+		mutableHttpFields.put(key, value);
 	}
 
 	@Override
 	public void setAll(Map<String, String> values) {
-		values.forEach(this.headers::set);
+		values.forEach(this::set);
 	}
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
 		Map<String, String> singleValueMap = CollectionUtils.newLinkedHashMap(this.headers.size());
-		this.headers.entries()
-				.forEach(entry -> {
-					if (!singleValueMap.containsKey(entry.getKey())) {
-						singleValueMap.put(entry.getKey(), entry.getValue());
-					}
-				});
+		Iterator<HttpField> iterator = this.headers.iterator();
+		iterator.forEachRemaining(field -> {
+			if (!singleValueMap.containsKey(field.getName())) {
+				singleValueMap.put(field.getName(), field.getValue());
+			}
+		});
 		return singleValueMap;
 	}
 
 	@Override
 	public int size() {
-		return this.headers.names().size();
+		return this.headers.getFieldNamesCollection().size();
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return this.headers.isEmpty();
+		return (this.headers.size() == 0);
 	}
 
 	@Override
@@ -111,47 +123,55 @@ final class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public boolean containsValue(Object value) {
-		return (value instanceof String &&
-				this.headers.entries().stream()
-						.anyMatch(entry -> value.equals(entry.getValue())));
+		return (value instanceof String searchString &&
+				this.headers.stream().anyMatch(field -> field.contains(searchString)));
 	}
 
-	@Override
 	@Nullable
+	@Override
 	public List<String> get(Object key) {
 		if (containsKey(key)) {
-			return this.headers.getAll((String) key);
+			return this.headers.getValuesList((String) key);
 		}
 		return null;
 	}
 
 	@Nullable
 	@Override
-	public List<String> put(String key, @Nullable List<String> value) {
-		List<String> previousValues = this.headers.getAll(key);
-		this.headers.set(key, value);
-		return previousValues;
+	public List<String> put(String key, List<String> value) {
+		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
+			throw new IllegalStateException(IMMUTABLE_HEADER_ERROR);
+		}
+		List<String> oldValues = get(key);
+		mutableHttpFields.put(key, value);
+		return oldValues;
 	}
 
 	@Nullable
 	@Override
 	public List<String> remove(Object key) {
-		if (key instanceof String headerName) {
-			List<String> previousValues = this.headers.getAll(headerName);
-			this.headers.remove(headerName);
-			return previousValues;
+		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
+			throw new IllegalStateException(IMMUTABLE_HEADER_ERROR);
+		}
+		if (key instanceof String name) {
+			List<String> oldValues = get(key);
+			mutableHttpFields.remove(name);
+			return oldValues;
 		}
 		return null;
 	}
 
 	@Override
 	public void putAll(Map<? extends String, ? extends List<String>> map) {
-		map.forEach(this.headers::set);
+		map.forEach(this::put);
 	}
 
 	@Override
 	public void clear() {
-		this.headers.clear();
+		if (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {
+			throw new IllegalStateException(IMMUTABLE_HEADER_ERROR);
+		}
+		mutableHttpFields.clear();
 	}
 
 	@Override
@@ -161,8 +181,8 @@ final class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public Collection<List<String>> values() {
-		return this.headers.names().stream()
-				.map(this.headers::getAll).toList();
+		return this.headers.getFieldNamesCollection().stream()
+				.map(this.headers::getValuesList).toList();
 	}
 
 	@Override
@@ -172,7 +192,6 @@ final class NettyHeadersAdapter implements MultiValueMap<String, String> {
 			public Iterator<Entry<String, List<String>>> iterator() {
 				return new EntryIterator();
 			}
-
 			@Override
 			public int size() {
 				return headers.size();
@@ -183,13 +202,13 @@ final class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 	@Override
 	public String toString() {
-		return org.springframework.http.HttpHeaders.formatHeaders(this);
+		return HttpHeaders.formatHeaders(this);
 	}
 
 
 	private class EntryIterator implements Iterator<Entry<String, List<String>>> {
 
-		private final Iterator<String> names = headers.names().iterator();
+		private final Iterator<String> names = headers.getFieldNamesCollection().iterator();
 
 		@Override
 		public boolean hasNext() {
@@ -218,29 +237,34 @@ final class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 		@Override
 		public List<String> getValue() {
-			return headers.getAll(this.key);
+			return headers.getValuesList(this.key);
 		}
 
 		@Override
 		public List<String> setValue(List<String> value) {
-			List<String> previousValues = headers.getAll(this.key);
-			headers.set(this.key, value);
+			if (!(headers instanceof HttpFields.Mutable mutableHttpFields)) {
+				throw new IllegalStateException(IMMUTABLE_HEADER_ERROR);
+			}
+			List<String> previousValues = headers.getValuesList(this.key);
+			mutableHttpFields.put(this.key, value);
 			return previousValues;
 		}
 	}
+
 
 	private class HeaderNames extends AbstractSet<String> {
 
 		@Override
 		public Iterator<String> iterator() {
-			return new HeaderNamesIterator(headers.names().iterator());
+			return new HeaderNamesIterator(headers.getFieldNamesCollection().iterator());
 		}
 
 		@Override
 		public int size() {
-			return headers.names().size();
+			return headers.getFieldNamesCollection().size();
 		}
 	}
+
 
 	private final class HeaderNamesIterator implements Iterator<String> {
 
@@ -266,13 +290,16 @@ final class NettyHeadersAdapter implements MultiValueMap<String, String> {
 
 		@Override
 		public void remove() {
+			if (!(headers instanceof HttpFields.Mutable mutableHttpFields)) {
+				throw new IllegalStateException(IMMUTABLE_HEADER_ERROR);
+			}
 			if (this.currentName == null) {
 				throw new IllegalStateException("No current Header in iterator");
 			}
 			if (!headers.contains(this.currentName)) {
 				throw new IllegalStateException("Header not present: " + this.currentName);
 			}
-			headers.remove(this.currentName);
+			mutableHttpFields.remove(this.currentName);
 		}
 	}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive;
+package org.springframework.http.support;
 
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -29,23 +29,27 @@ import java.util.stream.StreamSupport;
 import io.netty5.handler.codec.http.headers.HttpHeaders;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
 /**
  * {@code MultiValueMap} implementation for wrapping Netty HTTP headers.
  *
- * <p>This class is based on {@link NettyHeadersAdapter}.
- *
  * @author Violeta Georgieva
- * @since 6.0
+ * @since 6.1
  */
-final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
+public final class Netty5HeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpHeaders headers;
 
 
-	Netty5HeadersAdapter(HttpHeaders headers) {
+	/**
+	 * Create a new {@code Netty5HeadersAdapter} based on the given
+	 * {@code HttpHeaders}.
+	 */
+	public Netty5HeadersAdapter(HttpHeaders headers) {
+		Assert.notNull(headers, "Headers must not be null");
 		this.headers = headers;
 	}
 

@@ -23,10 +23,11 @@ import org.eclipse.jetty.client.api.Response;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.support.JettyHeadersAdapter;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@link ClientHttpResponse} implementation based on based on Jetty's
+ * {@link ClientHttpResponse} implementation based on Jetty's
  * {@link org.eclipse.jetty.client.HttpClient}.
  *
  * @author Arjen Poutsma

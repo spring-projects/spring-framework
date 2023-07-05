@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client.reactive;
+package org.springframework.http.support;
 
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -32,6 +32,7 @@ import org.apache.hc.core5.http.HttpMessage;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 
@@ -40,14 +41,19 @@ import org.springframework.util.MultiValueMap;
  * HttpClient headers.
  *
  * @author Rossen Stoyanchev
- * @since 5.3
+ * @since 6.1
  */
-class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
+public final class HttpComponentsHeadersAdapter implements MultiValueMap<String, String> {
 
 	private final HttpMessage message;
 
 
-	HttpComponentsHeadersAdapter(HttpMessage message) {
+	/**
+	 * Create a new {@code HttpComponentsHeadersAdapter} based on the given
+	 * {@code HttpMessage}.
+	 */
+	public HttpComponentsHeadersAdapter(HttpMessage message) {
+		Assert.notNull(message, "Message must not be null");
 		this.message = message;
 	}
 

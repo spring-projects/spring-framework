@@ -38,6 +38,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
+import org.springframework.http.support.Netty4HeadersAdapter;
 
 /**
  * Adapt {@link ServerHttpResponse} to the {@link HttpServerResponse}.
@@ -55,7 +56,7 @@ class ReactorServerHttpResponse extends AbstractServerHttpResponse implements Ze
 
 
 	public ReactorServerHttpResponse(HttpServerResponse response, DataBufferFactory bufferFactory) {
-		super(bufferFactory, new HttpHeaders(new NettyHeadersAdapter(Objects.requireNonNull(response,
+		super(bufferFactory, new HttpHeaders(new Netty4HeadersAdapter(Objects.requireNonNull(response,
 				"HttpServerResponse must not be null").responseHeaders())));
 		this.response = response;
 	}
