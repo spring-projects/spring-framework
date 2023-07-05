@@ -160,10 +160,13 @@ Kotlin::
 ----
 ======
 
-Note that use of `@ModelAttribute` is optional -- for example, to set its attributes.
-By default, any argument that is not a simple value type (as determined by
-{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
-and is not resolved by any other argument resolver is treated as if it were annotated
-with `@ModelAttribute`.
+If method validation applies because other parameters have `@Constraint` annotations,
+then `HandlerMethodValidationException` would be raised instead. See the section on
+controller method xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
+
+TIP: Using `@ModelAttribute` is optional. By default, any argument that is not a simple
+value type as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+_AND_ that is not resolved by any other argument resolver is treated as an `@ModelAttribute`.
 
 

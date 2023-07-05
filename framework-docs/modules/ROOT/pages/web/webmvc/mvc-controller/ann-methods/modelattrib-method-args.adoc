@@ -144,7 +144,7 @@ Java::
 	}
 
 	@PostMapping("update")
-	public String update(@Valid AccountForm form, BindingResult result,
+	public String update(AccountForm form, BindingResult result,
 			@ModelAttribute(binding=false) Account account) { // <1>
 		// ...
 	}
@@ -166,7 +166,7 @@ Kotlin::
 	}
 
 	@PostMapping("update")
-	fun update(@Valid form: AccountForm, result: BindingResult,
+	fun update(form: AccountForm, result: BindingResult,
 			   @ModelAttribute(binding = false) account: Account): String { // <1>
 		// ...
 	}
@@ -210,10 +210,15 @@ Kotlin::
 <1> Validate the `Pet` instance.
 ======
 
-Note that using `@ModelAttribute` is optional (for example, to set its attributes).
-By default, any argument that is not a simple value type (as determined by
-{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty])
-and is not resolved by any other argument resolver is treated as if it were annotated
-with `@ModelAttribute`.
+If an `@ModelAttribute` is declared without `BindingResult` parameter after it, then
+`MethodArgumentNotValueException` is raised. However, if method validation applies because
+other parameters have `@Constraint` annotations, then `HandlerMethodValidationException`
+is raised instead. For more details, see the section on
+xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
+
+TIP: Using `@ModelAttribute` is optional. By default, any parameter that is not a simple
+value type as determined by
+{api-spring-framework}/beans/BeanUtils.html#isSimpleProperty-java.lang.Class-[BeanUtils#isSimpleProperty]
+_AND_ that is not resolved by any other argument resolver is treated as an `@ModelAttribute`.
 
 

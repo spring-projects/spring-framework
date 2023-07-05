@@ -48,7 +48,7 @@ Java::
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 ----
 	@PostMapping("/accounts")
-	public void handle(@Valid @RequestBody Account account, BindingResult result) {
+	public void handle(@Valid @RequestBody Account account, Errors errors) {
 		// ...
 	}
 ----
@@ -58,10 +58,13 @@ Kotlin::
 [source,kotlin,indent=0,subs="verbatim,quotes",role="secondary"]
 ----
 	@PostMapping("/accounts")
-	fun handle(@Valid @RequestBody account: Account, result: BindingResult) {
+	fun handle(@Valid @RequestBody account: Account, errors: Errors) {
 		// ...
 	}
 ----
 ======
 
+If method validation applies because other parameters have `@Constraint` annotations,
+then `HandlerMethodValidationException` is raised instead. For more details, see the
+section on xref:web/webmvc/mvc-controller/ann-validation.adoc[Validation].
 
