@@ -343,7 +343,7 @@ class DefaultConversionServiceTests {
 	@Test
 	void convertArrayToCollectionInterface() {
 		Collection<?> result = conversionService.convert(new String[] {"1", "2", "3"}, Collection.class);
-		assertThat(result).isEqualTo(Set.of("1", "2", "3"));
+		assertThat(result).isEqualTo(List.of("1", "2", "3"));
 	}
 
 	@Test

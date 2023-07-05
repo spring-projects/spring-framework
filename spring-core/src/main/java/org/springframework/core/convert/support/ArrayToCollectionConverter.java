@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -69,7 +70,7 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 
 		int length = Array.getLength(source);
 		TypeDescriptor elementDesc = targetType.getElementTypeDescriptor();
-		Collection<Object> target = CollectionFactory.createCollection(targetType.getType(),
+		Collection<Object> target = createCollection(targetType.getType(),
 				(elementDesc != null ? elementDesc.getType() : null), length);
 
 		if (elementDesc == null) {
@@ -87,6 +88,15 @@ final class ArrayToCollectionConverter implements ConditionalGenericConverter {
 			}
 		}
 		return target;
+	}
+
+	private Collection<Object> createCollection(Class<?> targetType, @Nullable Class<?> elementType, int length) {
+		if (targetType.isInterface() && targetType.isAssignableFrom(ArrayList.class)) {
+			// Source is an array -> prefer ArrayList for Collection and SequencedCollection.
+			// CollectionFactory.createCollection traditionally prefers LinkedHashSet instead.
+			return new ArrayList<>(length);
+		}
+		return CollectionFactory.createCollection(targetType, elementType, length);
 	}
 
 }
