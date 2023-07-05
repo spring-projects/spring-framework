@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -342,10 +342,20 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void convertArrayToCollectionInterface() {
+		Collection<?> result = conversionService.convert(new String[] {"1", "2", "3"}, Collection.class);
+		assertThat(result).isEqualTo(new LinkedHashSet<>(Arrays.asList("1", "2", "3")));
+	}
+
+	@Test
+	void convertArrayToSetInterface() {
+		Collection<?> result = conversionService.convert(new String[] {"1", "2", "3"}, Set.class);
+		assertThat(result).isEqualTo(new LinkedHashSet<>(Arrays.asList("1", "2", "3")));
+	}
+
+	@Test
+	void convertArrayToListInterface() {
 		List<?> result = conversionService.convert(new String[] {"1", "2", "3"}, List.class);
-		assertThat(result.get(0)).isEqualTo("1");
-		assertThat(result.get(1)).isEqualTo("2");
-		assertThat(result.get(2)).isEqualTo("3");
+		assertThat(result).isEqualTo(Arrays.asList("1", "2", "3"));
 	}
 
 	@Test
