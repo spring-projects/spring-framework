@@ -30,7 +30,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.reactive.AbstractReactiveTransactionManager;
 import org.springframework.transaction.reactive.GenericReactiveTransaction;
 import org.springframework.transaction.reactive.TransactionSynchronizationManager;
@@ -170,7 +169,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	}
 
 	@Override
-	protected Object doGetTransaction(TransactionSynchronizationManager synchronizationManager) throws TransactionException {
+	protected Object doGetTransaction(TransactionSynchronizationManager synchronizationManager) {
 		ConnectionFactoryTransactionObject txObject = new ConnectionFactoryTransactionObject();
 		ConnectionHolder conHolder = (ConnectionHolder) synchronizationManager.getResource(obtainConnectionFactory());
 		txObject.setConnectionHolder(conHolder, false);
@@ -184,7 +183,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	@Override
 	protected Mono<Void> doBegin(TransactionSynchronizationManager synchronizationManager, Object transaction,
-			TransactionDefinition definition) throws TransactionException {
+			TransactionDefinition definition) {
 
 		ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) transaction;
 
@@ -275,9 +274,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 	}
 
 	@Override
-	protected Mono<Object> doSuspend(TransactionSynchronizationManager synchronizationManager, Object transaction)
-			throws TransactionException {
-
+	protected Mono<Object> doSuspend(TransactionSynchronizationManager synchronizationManager, Object transaction) {
 		return Mono.defer(() -> {
 			ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) transaction;
 			txObject.setConnectionHolder(null);
@@ -287,7 +284,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	@Override
 	protected Mono<Void> doResume(TransactionSynchronizationManager synchronizationManager,
-			@Nullable Object transaction, Object suspendedResources) throws TransactionException {
+			@Nullable Object transaction, Object suspendedResources) {
 
 		return Mono.defer(() -> {
 			synchronizationManager.bindResource(obtainConnectionFactory(), suspendedResources);
@@ -297,7 +294,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	@Override
 	protected Mono<Void> doCommit(TransactionSynchronizationManager TransactionSynchronizationManager,
-			GenericReactiveTransaction status) throws TransactionException {
+			GenericReactiveTransaction status) {
 
 		ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -309,7 +306,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	@Override
 	protected Mono<Void> doRollback(TransactionSynchronizationManager TransactionSynchronizationManager,
-			GenericReactiveTransaction status) throws TransactionException {
+			GenericReactiveTransaction status) {
 
 		ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) status.getTransaction();
 		if (status.isDebug()) {
@@ -321,7 +318,7 @@ public class R2dbcTransactionManager extends AbstractReactiveTransactionManager 
 
 	@Override
 	protected Mono<Void> doSetRollbackOnly(TransactionSynchronizationManager synchronizationManager,
-			GenericReactiveTransaction status) throws TransactionException {
+			GenericReactiveTransaction status) {
 
 		return Mono.fromRunnable(() -> {
 			ConnectionFactoryTransactionObject txObject = (ConnectionFactoryTransactionObject) status.getTransaction();
