@@ -47,6 +47,8 @@ import org.springframework.util.StringUtils;
  */
 class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 
+	private static final OutputStreamPublisher.ByteMapper<ByteBuffer> BYTE_MAPPER = new ByteBufferMapper();
+
 	private static final Set<String> DISALLOWED_HEADERS = disallowedHeaders();
 
 	/**
@@ -142,6 +144,7 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		if (body != null) {
 			Flow.Publisher<ByteBuffer> outputStreamPublisher = OutputStreamPublisher.create(
 					outputStream -> body.writeTo(StreamUtils.nonClosing(outputStream)),
+					BYTE_MAPPER,
 					this.executor);
 
 			long contentLength = headers.getContentLength();
@@ -155,6 +158,27 @@ class JdkClientHttpRequest extends AbstractStreamingClientHttpRequest {
 		else {
 			return HttpRequest.BodyPublishers.noBody();
 		}
+	}
+
+
+	private static final class ByteBufferMapper implements OutputStreamPublisher.ByteMapper<ByteBuffer> {
+
+		@Override
+		public ByteBuffer map(int b) {
+			ByteBuffer byteBuffer = ByteBuffer.allocate(1);
+			byteBuffer.put((byte) b);
+			byteBuffer.flip();
+			return byteBuffer;
+		}
+
+		@Override
+		public ByteBuffer map(byte[] b, int off, int len) {
+			ByteBuffer byteBuffer = ByteBuffer.allocate(len);
+			byteBuffer.put(b, off, len);
+			byteBuffer.flip();
+			return byteBuffer;
+		}
+
 	}
 
 }

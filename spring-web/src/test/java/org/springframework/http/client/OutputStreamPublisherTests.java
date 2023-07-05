@@ -18,7 +18,6 @@ package org.springframework.http.client;
 
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -41,15 +40,31 @@ class OutputStreamPublisherTests {
 
 	private final Executor executor = Executors.newSingleThreadExecutor();
 
+	private final OutputStreamPublisher.ByteMapper<byte[]> byteMapper =
+			new OutputStreamPublisher.ByteMapper<>() {
+				@Override
+				public byte[] map(int b) {
+					return new byte[]{(byte) b};
+				}
+
+				@Override
+				public byte[] map(byte[] b, int off, int len) {
+					byte[] result = new byte[len];
+					System.arraycopy(b, off, result, 0, len);
+					return result;
+				}
+			};
+
+
 	@Test
 	void basic() {
-		Flow.Publisher<ByteBuffer> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
 			try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
 				writer.write("foo");
 				writer.write("bar");
 				writer.write("baz");
 			}
-		}, this.executor);
+		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
 
 		StepVerifier.create(flux)
@@ -59,7 +74,7 @@ class OutputStreamPublisherTests {
 
 	@Test
 	void flush() {
-		Flow.Publisher<ByteBuffer> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
 			try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
 				writer.write("foo");
 				writer.flush();
@@ -68,7 +83,7 @@ class OutputStreamPublisherTests {
 				writer.write("baz");
 				writer.flush();
 			}
-		}, this.executor);
+		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
 
 		StepVerifier.create(flux)
@@ -82,7 +97,7 @@ class OutputStreamPublisherTests {
 	void cancel() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 
-		Flow.Publisher<ByteBuffer> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
 			try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
 				assertThatIOException()
 						.isThrownBy(() -> {
@@ -94,7 +109,7 @@ class OutputStreamPublisherTests {
 						.withMessage("Subscription has been terminated");
 				latch.countDown();
 			}
-		}, this.executor);
+		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
 
 		StepVerifier.create(flux, 1)
@@ -109,14 +124,14 @@ class OutputStreamPublisherTests {
 	void closed() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 
-		Flow.Publisher<ByteBuffer> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
 			Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
 			writer.write("foo");
 			writer.close();
 			assertThatIOException().isThrownBy(() -> writer.write("bar"))
 					.withMessage("Stream closed");
 			latch.countDown();
-		}, this.executor);
+		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
 
 		StepVerifier.create(flux)
@@ -130,7 +145,7 @@ class OutputStreamPublisherTests {
 	void negativeRequestN() throws InterruptedException {
 		CountDownLatch latch = new CountDownLatch(1);
 
-		Flow.Publisher<ByteBuffer> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
 			try(Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
 				writer.write("foo");
 				writer.flush();
@@ -140,7 +155,7 @@ class OutputStreamPublisherTests {
 			finally {
 				latch.countDown();
 			}
-		}, this.executor);
+		}, this.byteMapper, this.executor);
 		Flow.Subscription[] subscriptions = new Flow.Subscription[1];
 		Flux<String> flux = toString(a-> flowPublisher.subscribe(new Flow.Subscriber<>() {
 			@Override
@@ -150,7 +165,7 @@ class OutputStreamPublisherTests {
 			}
 
 			@Override
-			public void onNext(ByteBuffer item) {
+			public void onNext(byte[] item) {
 				a.onNext(item);
 			}
 
@@ -174,9 +189,9 @@ class OutputStreamPublisherTests {
 		latch.await();
 	}
 
-	private static Flux<String> toString(Flow.Publisher<ByteBuffer> flowPublisher) {
+	private static Flux<String> toString(Flow.Publisher<byte[]> flowPublisher) {
 		return Flux.from(FlowAdapters.toPublisher(flowPublisher))
-				.map(bb -> StandardCharsets.UTF_8.decode(bb).toString());
+				.map(bytes -> new String(bytes, StandardCharsets.UTF_8));
 	}
 
 }
