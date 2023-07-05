@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import jakarta.servlet.ServletException;
@@ -457,8 +456,28 @@ public interface ServerResponse {
 		 * Build the response entity with a custom write function.
 		 * @param writeFunction the function used to write to the {@link HttpServletResponse}
 		 */
-		ServerResponse build(BiFunction<HttpServletRequest, HttpServletResponse,
-				ModelAndView> writeFunction);
+		ServerResponse build(WriteFunction writeFunction);
+
+
+		/**
+		 * Defines the contract for {@link #build(WriteFunction)}.
+		 * @since 6.1
+		 */
+		@FunctionalInterface
+		interface WriteFunction {
+
+			/**
+			 * Write to the given {@code servletResponse}, or return a
+			 * {@code ModelAndView} to be rendered.
+			 * @param servletRequest the HTTP request
+			 * @param servletResponse  the HTTP response to write to
+			 * @return a {@code ModelAndView} to render, or {@code null} if handled directly
+			 * @throws Exception in case of Servlet errors
+			 */
+			@Nullable
+			ModelAndView write(HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws Exception;
+
+		}
 
 	}
 

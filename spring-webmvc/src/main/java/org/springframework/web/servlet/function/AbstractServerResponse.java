@@ -136,6 +136,6 @@ abstract class AbstractServerResponse extends ErrorHandlingServerResponse {
 	@Nullable
 	protected abstract ModelAndView writeToInternal(
 			HttpServletRequest request, HttpServletResponse response, Context context)
-			throws ServletException, IOException;
+			throws Exception;
 
 }
