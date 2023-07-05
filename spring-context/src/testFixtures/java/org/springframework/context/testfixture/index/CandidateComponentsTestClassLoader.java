@@ -42,8 +42,7 @@ public class CandidateComponentsTestClassLoader extends ClassLoader {
 	 * @see org.springframework.context.index.CandidateComponentsIndexLoader#COMPONENTS_RESOURCE_LOCATION
 	 */
 	public static ClassLoader disableIndex(ClassLoader classLoader) {
-		return new CandidateComponentsTestClassLoader(classLoader,
-				Collections.enumeration(Collections.emptyList()));
+		return new CandidateComponentsTestClassLoader(classLoader, Collections.emptyEnumeration());
 	}
 
 	/**
