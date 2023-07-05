@@ -30,7 +30,6 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
@@ -1034,19 +1033,47 @@ class ObjectUtilsTests {
 		}
 
 		@Test
-		void nullSafeConciseToStringForArraysAndCollections() {
-			List<String> list = List.of("a", "b", "c");
-			assertThat(ObjectUtils.nullSafeConciseToString(new int[][] {{1, 2}, {3, 4}})).startsWith(prefix(int[][].class));
-			assertThat(ObjectUtils.nullSafeConciseToString(list.toArray())).startsWith(prefix(Object[].class));
-			assertThat(ObjectUtils.nullSafeConciseToString(list.toArray(String[]::new))).startsWith(prefix(String[].class));
-			assertThat(ObjectUtils.nullSafeConciseToString(new ArrayList<>(list))).startsWith(prefix(ArrayList.class));
-			assertThat(ObjectUtils.nullSafeConciseToString(new HashSet<>(list))).startsWith(prefix(HashSet.class));
+		void nullSafeConciseToStringForEmptyArrays() {
+			assertThat(ObjectUtils.nullSafeConciseToString(new char[] {})).isEqualTo("{}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new int[][] {})).isEqualTo("{}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new String[] {})).isEqualTo("{}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new Integer[][] {})).isEqualTo("{}");
 		}
 
 		@Test
-		void nullSafeConciseToStringForMaps() {
+		void nullSafeConciseToStringForNonEmptyArrays() {
+			assertThat(ObjectUtils.nullSafeConciseToString(new char[] {'a'})).isEqualTo("{...}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new int[][] {{1}, {2}})).isEqualTo("{...}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new String[] {"enigma"})).isEqualTo("{...}");
+			assertThat(ObjectUtils.nullSafeConciseToString(new Integer[][] {{1}, {2}})).isEqualTo("{...}");
+		}
+
+		@Test
+		void nullSafeConciseToStringForEmptyCollections() {
+			List<String> list = List.of();
+			Set<Integer> set = Set.of();
+			assertThat(ObjectUtils.nullSafeConciseToString(list)).isEqualTo("[]");
+			assertThat(ObjectUtils.nullSafeConciseToString(set)).isEqualTo("[]");
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyCollections() {
+			List<String> list = List.of("a", "b");
+			Set<Integer> set = Set.of(1);
+			assertThat(ObjectUtils.nullSafeConciseToString(list)).isEqualTo("[...]");
+			assertThat(ObjectUtils.nullSafeConciseToString(set)).isEqualTo("[...]");
+		}
+
+		@Test
+		void nullSafeConciseToStringForEmptyMaps() {
+			Map<String, String> map = new HashMap<String, String>();
+			assertThat(ObjectUtils.nullSafeConciseToString(map)).isEqualTo("{}");
+		}
+
+		@Test
+		void nullSafeConciseToStringForNonEmptyMaps() {
 			Map<String, Integer> map = Map.of("a", 1, "b", 2, "c", 3);
-			assertThat(ObjectUtils.nullSafeConciseToString(map)).startsWith(prefix(map.getClass()));
+			assertThat(ObjectUtils.nullSafeConciseToString(map)).isEqualTo("{...}");
 		}
 
 		@Test
