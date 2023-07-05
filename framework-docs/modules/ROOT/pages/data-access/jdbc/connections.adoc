@@ -10,7 +10,7 @@ This section covers:
 * xref:data-access/jdbc/connections.adoc#jdbc-SingleConnectionDataSource[Using `SingleConnectionDataSource`]
 * xref:data-access/jdbc/connections.adoc#jdbc-DriverManagerDataSource[Using `DriverManagerDataSource`]
 * xref:data-access/jdbc/connections.adoc#jdbc-TransactionAwareDataSourceProxy[Using `TransactionAwareDataSourceProxy`]
-* xref:data-access/jdbc/connections.adoc#jdbc-DataSourceTransactionManager[Using `DataSourceTransactionManager`]
+* xref:data-access/jdbc/connections.adoc#jdbc-DataSourceTransactionManager[Using `DataSourceTransactionManager` / `JdbcTransactionManager`]
 
 
 [[jdbc-datasource]]
@@ -125,8 +125,12 @@ The following example shows C3P0 configuration:
 == Using `DataSourceUtils`
 
 The `DataSourceUtils` class is a convenient and powerful helper class that provides
-`static` methods to obtain connections from JNDI and close connections if necessary. It
-supports thread-bound connections with, for example, `DataSourceTransactionManager`.
+`static` methods to obtain connections from JNDI and close connections if necessary.
+It supports a thread-bound JDBC `Connection` with `DataSourceTransactionManager` but
+also with `JtaTransactionManager` and `JpaTransactionManager`.
+
+Note that `JdbcTemplate` implies `DataSourceUtils` connection access, using it
+behind every JDBC operation, implicitly participating in an ongoing transaction.
 
 
 [[jdbc-SmartDataSource]]
@@ -165,7 +169,6 @@ In contrast to `DriverManagerDataSource`, it reuses the same connection all the 
 avoiding excessive creation of physical connections.
 
 
-
 [[jdbc-DriverManagerDataSource]]
 == Using `DriverManagerDataSource`
 
@@ -201,29 +204,44 @@ javadoc for more details.
 
 
 [[jdbc-DataSourceTransactionManager]]
-== Using `DataSourceTransactionManager`
+== Using `DataSourceTransactionManager` / `JdbcTransactionManager`
 
 The `DataSourceTransactionManager` class is a `PlatformTransactionManager`
-implementation for single JDBC data sources. It binds a JDBC connection from the
-specified data source to the currently executing thread, potentially allowing for one
-thread connection per data source.
+implementation for a single JDBC `DataSource`. It binds a JDBC `Connection`
+from the specified `DataSource` to the currently executing thread, potentially
+allowing for one thread-bound `Connection` per `DataSource`.
 
-Application code is required to retrieve the JDBC connection through
-`DataSourceUtils.getConnection(DataSource)` instead of Jakarta EE's standard
+Application code is required to retrieve the JDBC `Connection` through
+`DataSourceUtils.getConnection(DataSource)` instead of Java EE's standard
 `DataSource.getConnection`. It throws unchecked `org.springframework.dao` exceptions
-instead of checked `SQLExceptions`. All framework classes (such as `JdbcTemplate`) use this
-strategy implicitly. If not used with this transaction manager, the lookup strategy
-behaves exactly like the common one. Thus, it can be used in any case.
+instead of checked `SQLExceptions`. All framework classes (such as `JdbcTemplate`) use
+this strategy implicitly. If not used with a transaction manager, the lookup strategy
+behaves exactly like `DataSource.getConnection` and can therefore be used in any case.
 
-The `DataSourceTransactionManager` class supports custom isolation levels and timeouts
-that get applied as appropriate JDBC statement query timeouts. To support the latter,
-application code must either use `JdbcTemplate` or call the
-`DataSourceUtils.applyTransactionTimeout(..)` method for each created statement.
+The `DataSourceTransactionManager` class supports savepoints (`PROPAGATION_NESTED`),
+custom isolation levels, and timeouts that get applied as appropriate JDBC statement
+query timeouts. To support the latter, application code must either use `JdbcTemplate` or
+call the `DataSourceUtils.applyTransactionTimeout(..)` method for each created statement.
 
-You can use this implementation instead of `JtaTransactionManager` in the single-resource
-case, as it does not require the container to support JTA. Switching between
-both is just a matter of configuration, provided you stick to the required connection lookup
-pattern. JTA does not support custom isolation levels.
+You can use `DataSourceTransactionManager` instead of `JtaTransactionManager` in the
+single-resource case, as it does not require the container to support a JTA transaction
+coordinator. Switching between these transaction managers is just a matter of configuration,
+provided you stick to the required connection lookup pattern. Note that JTA does not support
+savepoints or custom isolation levels and has a different timeout mechanism but otherwise
+exposes similar behavior in terms of JDBC resources and JDBC commit/rollback management.
+
+NOTE: As of 5.3, Spring provides an extended `JdbcTransactionManager` variant which adds
+exception translation capabilities on commit/rollback (aligned with `JdbcTemplate`).
+Where `DataSourceTransactionManager` will only ever throw `TransactionSystemException`
+(analogous to JTA), `JdbcTransactionManager` translates database locking failures etc to
+corresponding `DataAccessException` subclasses. Note that application code needs to be
+prepared for such exceptions, not exclusively expecting `TransactionSystemException`.
+In scenarios where that is the case, `JdbcTransactionManager` is the recommended choice.
+
+In terms of exception behavior, `JdbcTransactionManager` is roughly equivalent to
+`JpaTransactionManager` and also to `R2dbcTransactionManager`, serving as an immediate
+companion/replacement for each other. `DataSourceTransactionManager` on the other hand
+is equivalent to `JtaTransactionManager` and can serve as a direct replacement there.
 
 
 

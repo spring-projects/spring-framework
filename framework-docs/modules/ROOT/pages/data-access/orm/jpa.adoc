@@ -495,7 +495,7 @@ features supported by Spring, usually in a vendor-specific manner:
 * Applying specific transaction semantics (such as custom isolation level or transaction
   timeout)
 * Retrieving the transactional JDBC `Connection` (for exposure to JDBC-based DAOs)
-* Advanced translation of `PersistenceExceptions` to Spring `DataAccessExceptions`
+* Advanced translation of `PersistenceException` to Spring's `DataAccessException`
 
 This is particularly valuable for special transaction semantics and for advanced
 translation of exception. The default implementation (`DefaultJpaDialect`) does

@@ -151,10 +151,10 @@ Kotlin::
 ----
 ======
 
-The last example we show here is for typical JDBC support. You could have the
-`DataSource` injected into an initialization method or a constructor, where you would create a
-`JdbcTemplate` and other data access support classes (such as `SimpleJdbcCall` and others) by using
-this `DataSource`. The following example autowires a `DataSource`:
+The last example we show here is for typical JDBC support. You could have the `DataSource`
+injected into an initialization method or a constructor, where you would create a `JdbcTemplate`
+and other data access support classes (such as `SimpleJdbcCall` and others) by using this
+`DataSource`. The following example autowires a `DataSource`:
 
 [tabs]
 ======

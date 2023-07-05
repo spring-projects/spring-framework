@@ -718,12 +718,22 @@ See also xref:data-access/jdbc/core.adoc#jdbc-JdbcTemplate-idioms[`JdbcTemplate`
 between ``SQLException``s and Spring's own `org.springframework.dao.DataAccessException`,
 which is agnostic in regard to data access strategy. Implementations can be generic (for
 example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error
-codes) for greater precision.
+codes) for greater precision. This exception translation mechanism is used behind the
+the common `JdbcTemplate` and `JdbcTransactionManager` entry points which do not
+propagate `SQLException` but rather `DataAccessException`.
+
+NOTE: As of 6.0, the default exception translator is `SQLExceptionSubclassTranslator`,
+detecting JDBC 4 `SQLException` subclasses with a few extra checks, and with a fallback
+to `SQLState` introspection through `SQLStateSQLExceptionTranslator`. This is usually
+sufficient for common database access and does not require vendor-specific detection.
+For backwards compatibility, consider using `SQLErrorCodeSQLExceptionTranslator` as
+described below, potentially with custom error code mappings.
 
 `SQLErrorCodeSQLExceptionTranslator` is the implementation of `SQLExceptionTranslator`
-that is used by default. This implementation uses specific vendor codes. It is more
-precise than the `SQLState` implementation. The error code translations are based on
-codes held in a JavaBean type class called `SQLErrorCodes`. This class is created and
+that is used by default when a file named `sql-error-codes.xml` is present in the root
+of the classpath. This implementation uses specific vendor codes. It is more precise than
+`SQLState` or `SQLException` subclass translation. The error code translations are based
+on codes held in a JavaBean type class called `SQLErrorCodes`. This class is created and
 populated by an `SQLErrorCodesFactory`, which (as the name suggests) is a factory for
 creating `SQLErrorCodes` based on the contents of a configuration file named
 `sql-error-codes.xml`. This file is populated with vendor codes and based on the
@@ -744,8 +754,8 @@ The `SQLErrorCodeSQLExceptionTranslator` applies matching rules in the following
   translator. If this translation is not available, the next fallback translator is
   the `SQLStateSQLExceptionTranslator`.
 
-NOTE: The `SQLErrorCodesFactory` is used by default to define `Error` codes and custom exception
-translations. They are looked up in a file named `sql-error-codes.xml` from the
+NOTE: The `SQLErrorCodesFactory` is used by default to define error codes and custom
+exception translations. They are looked up in a file named `sql-error-codes.xml` from the
 classpath, and the matching `SQLErrorCodes` instance is located based on the database
 name from the database metadata of the database in use.
 
@@ -784,12 +794,12 @@ Kotlin::
 ----
 ======
 
-In the preceding example, the specific error code (`-12345`) is translated, while other errors are
-left to be translated by the default translator implementation. To use this custom
-translator, you must pass it to the `JdbcTemplate` through the method
-`setExceptionTranslator`, and you must use this `JdbcTemplate` for all of the data access
-processing where this translator is needed. The following example shows how you can use this custom
-translator:
+In the preceding example, the specific error code (`-12345`) is translated while
+other errors are left to be translated by the default translator implementation.
+To use this custom translator, you must pass it to the `JdbcTemplate` through the
+method `setExceptionTranslator`, and you must use this `JdbcTemplate` for all of the
+data access processing where this translator is needed. The following example shows
+how you can use this custom translator:
 
 [tabs]
 ======
@@ -800,7 +810,6 @@ Java::
 	private JdbcTemplate jdbcTemplate;
 
 	public void setDataSource(DataSource dataSource) {
-
 		// create a JdbcTemplate and set data source
 		this.jdbcTemplate = new JdbcTemplate();
 		this.jdbcTemplate.setDataSource(dataSource);
@@ -809,7 +818,6 @@ Java::
 		CustomSQLErrorCodesTranslator tr = new CustomSQLErrorCodesTranslator();
 		tr.setDataSource(dataSource);
 		this.jdbcTemplate.setExceptionTranslator(tr);
-
 	}
 
 	public void updateShippingCharge(long orderId, long pct) {
