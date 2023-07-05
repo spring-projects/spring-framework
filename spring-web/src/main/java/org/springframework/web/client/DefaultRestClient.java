@@ -149,7 +149,7 @@ final class DefaultRestClient implements RestClient {
 
 	@Override
 	public RequestBodyUriSpec method(HttpMethod method) {
-		Assert.notNull(method, "Method must not be null");
+		Assert.notNull(method, "HttpMethod must not be null");
 		return methodInternal(method);
 	}
 
@@ -450,7 +450,6 @@ final class DefaultRestClient implements RestClient {
 		}
 
 
-
 		@FunctionalInterface
 		private interface InternalBody {
 
@@ -487,7 +486,7 @@ final class DefaultRestClient implements RestClient {
 
 		@Override
 		public ResponseSpec onStatus(ResponseErrorHandler errorHandler) {
-			Assert.notNull(errorHandler, "ErrorHandler must not be null");
+			Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 
 			return onStatusInternal(StatusHandler.fromErrorHandler(errorHandler));
 		}
@@ -613,6 +612,6 @@ final class DefaultRestClient implements RestClient {
 			}
 		}
 
-
 	}
+
 }

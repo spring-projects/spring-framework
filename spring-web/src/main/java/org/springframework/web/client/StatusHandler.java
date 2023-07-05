@@ -65,7 +65,7 @@ final class StatusHandler {
 	}
 
 	public static StatusHandler fromErrorHandler(ResponseErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "ErrorHandler must not be null");
+		Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 
 		return new StatusHandler(errorHandler::hasError, (request, response) ->
 				errorHandler.handleError(request.getURI(), request.getMethod(), response));
@@ -73,29 +73,29 @@ final class StatusHandler {
 
 	public static StatusHandler defaultHandler(List<HttpMessageConverter<?>> messageConverters) {
 		return new StatusHandler(response -> response.getStatusCode().isError(),
-		(request, response) -> {
-				HttpStatusCode statusCode = response.getStatusCode();
-				String statusText = response.getStatusText();
-				HttpHeaders headers = response.getHeaders();
-				byte[] body = RestClientUtils.getBody(response);
-				Charset charset = RestClientUtils.getCharset(response);
-				String message = getErrorMessage(statusCode.value(), statusText, body, charset);
-				RestClientResponseException ex;
+				(request, response) -> {
+					HttpStatusCode statusCode = response.getStatusCode();
+					String statusText = response.getStatusText();
+					HttpHeaders headers = response.getHeaders();
+					byte[] body = RestClientUtils.getBody(response);
+					Charset charset = RestClientUtils.getCharset(response);
+					String message = getErrorMessage(statusCode.value(), statusText, body, charset);
+					RestClientResponseException ex;
 
-				if (statusCode.is4xxClientError()) {
-					ex = HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
-				}
-				else if (statusCode.is5xxServerError()) {
-					ex = HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
-				}
-				else {
-					ex = new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
-				}
-				if (!CollectionUtils.isEmpty(messageConverters)) {
-					ex.setBodyConvertFunction(initBodyConvertFunction(response, body, messageConverters));
-				}
-				throw ex;
-		});
+					if (statusCode.is4xxClientError()) {
+						ex = HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);
+					}
+					else if (statusCode.is5xxServerError()) {
+						ex = HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);
+					}
+					else {
+						ex = new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);
+					}
+					if (!CollectionUtils.isEmpty(messageConverters)) {
+						ex.setBodyConvertFunction(initBodyConvertFunction(response, body, messageConverters));
+					}
+					throw ex;
+				});
 	}
 
 	private static Function<ResolvableType, ?> initBodyConvertFunction(ClientHttpResponse response, byte[] body, List<HttpMessageConverter<?>> messageConverters) {

@@ -68,7 +68,7 @@ class RestClientIntegrationTests {
 	@Target(ElementType.METHOD)
 	@ParameterizedTest(name = "[{index}] {0}")
 	@MethodSource("clientHttpRequestFactories")
-	@interface ParameterizedWebClientTest {
+	@interface ParameterizedRestClientTest {
 	}
 
 	static Stream<Named<ClientHttpRequestFactory>> clientHttpRequestFactories() {
@@ -104,7 +104,7 @@ class RestClientIntegrationTests {
 	}
 
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieve(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -126,7 +126,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieveJson(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -150,7 +150,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieveJsonWithParameterizedTypeReference(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -175,7 +175,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieveJsonAsResponseEntity(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -200,7 +200,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieveJsonAsBodilessEntity(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -224,7 +224,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieveJsonArray(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -251,7 +251,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieveJsonArrayAsResponseEntityList(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -280,7 +280,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieveJsonAsSerializedText(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -302,8 +302,8 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
-	@SuppressWarnings("rawtypes")
+	@ParameterizedRestClientTest
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void retrieveJsonNull(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -320,7 +320,7 @@ class RestClientIntegrationTests {
 		assertThat(result).isNull();
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieve404(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -338,7 +338,7 @@ class RestClientIntegrationTests {
 
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieve404WithBody(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -356,7 +356,7 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/greeting"));
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieve500(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -383,7 +383,7 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo(path));
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieve500AsEntity(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -404,7 +404,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieve500AsBodilessEntity(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -425,7 +425,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void retrieve555UnknownStatus(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -454,7 +454,7 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/unknownPage"));
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void postPojoAsJson(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -477,13 +477,12 @@ class RestClientIntegrationTests {
 		expectRequest(request -> {
 			assertThat(request.getPath()).isEqualTo("/pojo/capitalize");
 			assertThat(request.getBody().readUtf8()).isEqualTo("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}");
-//			assertThat(request.getHeader(HttpHeaders.CONTENT_LENGTH)).isEqualTo("31");
 			assertThat(request.getHeader(HttpHeaders.ACCEPT)).isEqualTo("application/json");
 			assertThat(request.getHeader(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/json");
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void statusHandler(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -504,7 +503,7 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/greeting"));
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void statusHandlerParameterizedTypeReference(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -526,7 +525,7 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/greeting"));
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void statusHandlerSuppressedErrorSignal(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -545,7 +544,7 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/greeting"));
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void statusHandlerSuppressedErrorSignalWithEntity(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -570,7 +569,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void exchangeForPlainText(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -590,7 +589,7 @@ class RestClientIntegrationTests {
 		});
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void exchangeFor404(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -607,7 +606,7 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getPath()).isEqualTo("/greeting"));
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void requestInitializer(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -629,7 +628,7 @@ class RestClientIntegrationTests {
 		expectRequest(request -> assertThat(request.getHeader("foo")).isEqualTo("bar"));
 	}
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void requestInterceptor(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -656,7 +655,7 @@ class RestClientIntegrationTests {
 	}
 
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void filterForErrorHandling(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 
@@ -700,7 +699,7 @@ class RestClientIntegrationTests {
 	}
 
 
-	@ParameterizedWebClientTest
+	@ParameterizedRestClientTest
 	void invalidDomain(ClientHttpRequestFactory requestFactory) {
 		startServer(requestFactory);
 

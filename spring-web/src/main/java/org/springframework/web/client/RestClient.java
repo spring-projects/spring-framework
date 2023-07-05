@@ -61,11 +61,12 @@ import org.springframework.web.util.UriBuilderFactory;
  * <li>{@link RequestHeadersSpec#retrieve() retrieve()}
  * <li>{@link RequestHeadersSpec#exchange(RequestHeadersSpec.ExchangeFunction) exchange(Function&lt;ClientHttpRequest, T&gt;)}
  * </ul>
+ *
  * <p>For examples with a request body see:
  * <ul>
  * <li>{@link RequestBodySpec#body(Object) body(Object)}
  * <li>{@link RequestBodySpec#body(Object, ParameterizedTypeReference) body(Object, ParameterizedTypeReference)}
- * <li>{@link RequestBodySpec#body(StreamingHttpOutputMessage.Body) body(Consumer&lt;OutputStream&gt;}
+ * <li>{@link RequestBodySpec#body(StreamingHttpOutputMessage.Body) body(Consumer&lt;OutputStream&gt;)}
  * </ul>
  *
  * @author Arjen Poutsma
@@ -218,7 +219,8 @@ public interface RestClient {
 		 * for a given URL is absolute in which case the base URL is ignored.
 		 * <p><strong>Note:</strong> this method is mutually exclusive with
 		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
-		 * baseUrl value provided here will be ignored.
+		 * {@code baseUrl} value provided here will be ignored.
+		 * @return this builder
 		 * @see DefaultUriBuilderFactory#DefaultUriBuilderFactory(String)
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
@@ -236,7 +238,8 @@ public interface RestClient {
 		 * </pre>
 		 * <p><strong>Note:</strong> this method is mutually exclusive with
 		 * {@link #uriBuilderFactory(UriBuilderFactory)}. If both are used, the
-		 * defaultUriVariables value provided here will be ignored.
+		 * {@code defaultUriVariables} value provided here will be ignored.
+		 * @return this builder
 		 * @see DefaultUriBuilderFactory#setDefaultUriVariables(Map)
 		 * @see #uriBuilderFactory(UriBuilderFactory)
 		 */
@@ -251,6 +254,7 @@ public interface RestClient {
 		 * <li>{@link #defaultUriVariables(Map)}.
 		 * </ul>
 		 * @param uriBuilderFactory the URI builder factory to use
+		 * @return this builder
 		 * @see #baseUrl(String)
 		 * @see #defaultUriVariables(Map)
 		 */
@@ -261,19 +265,22 @@ public interface RestClient {
 		 * if the request does not already contain such a header.
 		 * @param header the header name
 		 * @param values the header values
+		 * @return this builder
 		 */
 		Builder defaultHeader(String header, String... values);
 
 		/**
-		 * Provides access to every {@link #defaultHeader(String, String...)}
-		 * declared so far with the possibility to add, replace, or remove.
+		 * Provide a consumer to access to every {@linkplain #defaultHeader(String, String...)
+		 * default header} declared so far, with the possibility to add, replace, or remove.
 		 * @param headersConsumer the consumer
+		 * @return this builder
 		 */
 		Builder defaultHeaders(Consumer<HttpHeaders> headersConsumer);
 
 		/**
 		 * Provide a consumer to customize every request being built.
 		 * @param defaultRequest the consumer to use for modifying requests
+		 * @return this builder
 		 */
 		Builder defaultRequest(Consumer<RequestHeadersSpec<?>> defaultRequest);
 
@@ -306,6 +313,7 @@ public interface RestClient {
 		/**
 		 * Add the given request interceptor to the end of the interceptor chain.
 		 * @param interceptor the interceptor to be added to the chain
+		 * @return this builder
 		 */
 		Builder requestInterceptor(ClientHttpRequestInterceptor interceptor);
 
@@ -321,6 +329,7 @@ public interface RestClient {
 		/**
 		 * Add the given request initializer to the end of the initializer chain.
 		 * @param initializer the initializer to be added to the chain
+		 * @return this builder
 		 */
 		Builder requestInitializer(ClientHttpRequestInitializer initializer);
 
@@ -338,12 +347,14 @@ public interface RestClient {
 		 * for plugging in and/or customizing options of the underlying HTTP
 		 * client library (e.g. SSL).
 		 * @param requestFactory the request factory to use
+		 * @return this builder
 		 */
 		Builder requestFactory(ClientHttpRequestFactory requestFactory);
 
 		/**
 		 * Configure the message converters for the {@code RestClient} to use.
 		 * @param configurer the configurer to apply
+		 * @return this builder
 		 */
 		Builder messageConverters(Consumer<List<HttpMessageConverter<?>>> configurer);
 
@@ -351,6 +362,7 @@ public interface RestClient {
 		 * Apply the given {@code Consumer} to this builder instance.
 		 * <p>This can be useful for applying pre-packaged customizations.
 		 * @param builderConsumer the consumer to apply
+		 * @return this builder
 		 */
 		Builder apply(Consumer<Builder> builderConsumer);
 
@@ -379,14 +391,14 @@ public interface RestClient {
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
 		 */
 		S uri(String uri, Object... uriVariables);
 
 		/**
 		 * Specify the URI for the request using a URI template and URI variables.
-		 * If a {@link UriBuilderFactory} was configured for the client (e.g.
+		 * <p>If a {@link UriBuilderFactory} was configured for the client (e.g.
 		 * with a base URI) it will be used to expand the URI template.
 		 */
 		S uri(String uri, Map<String, ?> uriVariables);
@@ -478,11 +490,11 @@ public interface RestClient {
 		/**
 		 * Callback for access to the {@link ClientHttpRequest} that in turn
 		 * provides access to the native request of the underlying HTTP library.
-		 * This could be useful for setting advanced, per-request options that
-		 * exposed by the underlying library.
+		 * <p>This could be useful for setting advanced, per-request options that
+		 * are exposed by the underlying library.
 		 * @param requestConsumer a consumer to access the
 		 * {@code ClientHttpRequest} with
-		 * @return {@code ResponseSpec} to specify how to decode the body
+		 * @return this builder
 		 */
 		S httpRequest(Consumer<ClientHttpRequest> requestConsumer);
 
@@ -508,6 +520,7 @@ public interface RestClient {
 		 * {@link HttpClientErrorException} and 5xx response codes in a
 		 * {@link HttpServerErrorException}. To customize error handling, use
 		 * {@link ResponseSpec#onStatus(Predicate, ResponseSpec.ErrorHandler) onStatus} handlers.
+		 * @return {@code ResponseSpec} to specify how to decode the body
 		 */
 		ResponseSpec retrieve();
 
