@@ -59,7 +59,7 @@ public class AnnotatedMethod {
 
 	/**
 	 * Create an instance that wraps the given {@link Method}.
-	 * @param method the Method handle to wrap
+	 * @param method the {@code Method} handle to wrap
 	 */
 	public AnnotatedMethod(Method method) {
 		Assert.notNull(method, "Method is required");
@@ -82,14 +82,14 @@ public class AnnotatedMethod {
 
 
 	/**
-	 * Return the method for this handler method.
+	 * Return the annotated method.
 	 */
 	public final Method getMethod() {
 		return this.method;
 	}
 
 	/**
-	 * If the bean method is a bridge method, this method returns the bridged
+	 * If the annotated method is a bridge method, this method returns the bridged
 	 * (user-defined) method. Otherwise, it returns the same method as {@link #getMethod()}.
 	 */
 	protected final Method getBridgedMethod() {
@@ -105,7 +105,7 @@ public class AnnotatedMethod {
 	}
 
 	/**
-	 * Return the method parameters for this handler method.
+	 * Return the method parameters for this {@code AnnotatedMethod}.
 	 */
 	public final MethodParameter[] getMethodParameters() {
 		return this.parameters;
@@ -121,32 +121,31 @@ public class AnnotatedMethod {
 	}
 
 	/**
-	 * Return a MethodParameter for the declared return type.
+	 * Return a {@link MethodParameter} for the declared return type.
 	 */
 	public MethodParameter getReturnType() {
 		return new AnnotatedMethodParameter(-1);
 	}
 
 	/**
-	 * Return a MethodParameter for the actual return value type.
+	 * Return a {@link MethodParameter} for the actual return value type.
 	 */
 	public MethodParameter getReturnValueType(@Nullable Object returnValue) {
 		return new ReturnValueMethodParameter(returnValue);
 	}
 
 	/**
-	 * Return {@code true} if the method return type is void, {@code false} otherwise.
+	 * Return {@code true} if the method's return type is void, {@code false} otherwise.
 	 */
 	public boolean isVoid() {
 		return Void.TYPE.equals(getReturnType().getParameterType());
 	}
 
 	/**
-	 * Return a single annotation on the underlying method traversing its super methods
+	 * Return a single annotation on the underlying method, traversing its super methods
 	 * if no annotation can be found on the given method itself.
-	 * <p>Also supports <em>merged</em> composed annotations with attribute
-	 * overrides as of Spring Framework 4.2.2.
-	 * @param annotationType the type of annotation to introspect the method for
+	 * <p>Supports <em>merged</em> composed annotations with attribute overrides.
+	 * @param annotationType the annotation type to look for
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
@@ -156,9 +155,9 @@ public class AnnotatedMethod {
 	}
 
 	/**
-	 * Return whether the parameter is declared with the given annotation type.
+	 * Determine if an annotation of the given type is <em>present</em> or
+	 * <em>meta-present</em> on the method.
 	 * @param annotationType the annotation type to look for
-	 * @since 4.3
 	 * @see AnnotatedElementUtils#hasAnnotation
 	 */
 	public <A extends Annotation> boolean hasMethodAnnotation(Class<A> annotationType) {
@@ -208,7 +207,7 @@ public class AnnotatedMethod {
 
 	@Override
 	public int hashCode() {
-		return (this.method.hashCode());
+		return this.method.hashCode();
 	}
 
 	@Override
