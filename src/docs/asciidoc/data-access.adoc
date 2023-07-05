@@ -1455,7 +1455,6 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 ----
 <1> The line that makes the bean instance transactional.
 
-
 TIP: You can omit the `transaction-manager` attribute in the `<tx:annotation-driven/>`
 tag if the bean name of the `TransactionManager` that you want to wire in has the name
 `transactionManager`. If the `TransactionManager` bean that you want to dependency-inject
@@ -1835,17 +1834,17 @@ The following listing shows the bean declarations:
 ----
 	<tx:annotation-driven/>
 
-		<bean id="transactionManager1" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<bean id="transactionManager1" class="org.springframework.jdbc.support.JdbcTransactionManager">
 			...
 			<qualifier value="order"/>
 		</bean>
 
-		<bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<bean id="transactionManager2" class="org.springframework.jdbc.support.JdbcTransactionManager">
 			...
 			<qualifier value="account"/>
 		</bean>
 
-		<bean id="transactionManager3" class="org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager">
+		<bean id="transactionManager3" class="org.springframework.data.r2dbc.connection.R2dbcTransactionManager">
 			...
 			<qualifier value="reactive-account"/>
 		</bean>
@@ -3024,10 +3023,10 @@ example shows:
 	}
 ----
 
-The last example we show here is for typical JDBC support. You could have the
-`DataSource` injected into an initialization method or a constructor, where you would create a
-`JdbcTemplate` and other data access support classes (such as `SimpleJdbcCall` and others) by using
-this `DataSource`. The following example autowires a `DataSource`:
+The last example we show here is for typical JDBC support. You could have the `DataSource`
+injected into an initialization method or a constructor, where you would create a `JdbcTemplate`
+and other data access support classes (such as `SimpleJdbcCall` and others) by using this
+`DataSource`. The following example autowires a `DataSource`:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -3157,30 +3156,30 @@ advanced features require a JDBC 3.0 driver.
 
 The Spring Framework's JDBC abstraction framework consists of four different packages:
 
-* `core`: The `org.springframework.jdbc.core` package contains the `JdbcTemplate` class and its
-various callback interfaces, plus a variety of related classes. A subpackage named
-`org.springframework.jdbc.core.simple` contains the `SimpleJdbcInsert` and
+* `core`: The `org.springframework.jdbc.core` package contains the `JdbcTemplate` class
+and its various callback interfaces, plus a variety of related classes. A subpackage
+named `org.springframework.jdbc.core.simple` contains the `SimpleJdbcInsert` and
 `SimpleJdbcCall` classes. Another subpackage named
 `org.springframework.jdbc.core.namedparam` contains the `NamedParameterJdbcTemplate`
 class and the related support classes. See <<jdbc-core>>, <<jdbc-advanced-jdbc>>, and
 <<jdbc-simple-jdbc>>.
 
-* `datasource`: The `org.springframework.jdbc.datasource` package contains a utility class for easy
-`DataSource` access and various simple `DataSource` implementations that you can use for
-testing and running unmodified JDBC code outside of a Java EE container. A subpackage
-named `org.springfamework.jdbc.datasource.embedded` provides support for creating
+* `datasource`: The `org.springframework.jdbc.datasource` package contains a utility class
+for easy `DataSource` access and various simple `DataSource` implementations that you can
+use for testing and running unmodified JDBC code outside of a Java EE container. A subpackage
+named `org.springframework.jdbc.datasource.embedded` provides support for creating
 embedded databases by using Java database engines, such as HSQL, H2, and Derby. See
 <<jdbc-connections>> and <<jdbc-embedded-database-support>>.
 
-* `object`: The `org.springframework.jdbc.object` package contains classes that represent RDBMS
-queries, updates, and stored procedures as thread-safe, reusable objects. See
+* `object`: The `org.springframework.jdbc.object` package contains classes that represent
+RDBMS queries, updates, and stored procedures as thread-safe, reusable objects. See
 <<jdbc-object>>. This approach is modeled by JDO, although objects returned by queries
 are naturally disconnected from the database. This higher-level of JDBC abstraction
 depends on the lower-level abstraction in the `org.springframework.jdbc.core` package.
 
-* `support`: The `org.springframework.jdbc.support` package provides `SQLException` translation
-functionality and some utility classes. Exceptions thrown during JDBC processing are
-translated to exceptions defined in the `org.springframework.dao` package. This means
+* `support`: The `org.springframework.jdbc.support` package provides `SQLException`
+translation functionality and some utility classes. Exceptions thrown during JDBC processing
+are translated to exceptions defined in the `org.springframework.dao` package. This means
 that code using the Spring JDBC abstraction layer does not need to implement JDBC or
 RDBMS-specific error handling. All translated exceptions are unchecked, which gives you
 the option of catching the exceptions from which you can recover while letting other
@@ -3804,7 +3803,9 @@ See also <<jdbc-JdbcTemplate-idioms>> for guidelines on using the
 between ``SQLException``s and Spring's own `org.springframework.dao.DataAccessException`,
 which is agnostic in regard to data access strategy. Implementations can be generic (for
 example, using SQLState codes for JDBC) or proprietary (for example, using Oracle error
-codes) for greater precision.
+codes) for greater precision. This exception translation mechanism is used behind the
+the common `JdbcTemplate` and `JdbcTransactionManager` entry points which do not
+propagate `SQLException` but rather `DataAccessException`.
 
 `SQLErrorCodeSQLExceptionTranslator` is the implementation of `SQLExceptionTranslator`
 that is used by default. This implementation uses specific vendor codes. It is more
@@ -3830,8 +3831,8 @@ The `SQLErrorCodeSQLExceptionTranslator` applies matching rules in the following
   translator. If this translation is not available, the next fallback translator is
   the `SQLStateSQLExceptionTranslator`.
 
-NOTE: The `SQLErrorCodesFactory` is used by default to define `Error` codes and custom exception
-translations. They are looked up in a file named `sql-error-codes.xml` from the
+NOTE: The `SQLErrorCodesFactory` is used by default to define error codes and custom
+exception translations. They are looked up in a file named `sql-error-codes.xml` from the
 classpath, and the matching `SQLErrorCodes` instance is located based on the database
 name from the database metadata of the database in use.
 
@@ -3864,12 +3865,12 @@ You can extend `SQLErrorCodeSQLExceptionTranslator`, as the following example sh
 	}
 ----
 
-In the preceding example, the specific error code (`-12345`) is translated, while other errors are
-left to be translated by the default translator implementation. To use this custom
-translator, you must pass it to the `JdbcTemplate` through the method
-`setExceptionTranslator`, and you must use this `JdbcTemplate` for all of the data access
-processing where this translator is needed. The following example shows how you can use this custom
-translator:
+In the preceding example, the specific error code (`-12345`) is translated while
+other errors are left to be translated by the default translator implementation.
+To use this custom translator, you must pass it to the `JdbcTemplate` through the
+method `setExceptionTranslator`, and you must use this `JdbcTemplate` for all of the
+data access processing where this translator is needed. The following example shows
+how you can use this custom translator:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -3877,7 +3878,6 @@ translator:
 	private JdbcTemplate jdbcTemplate;
 
 	public void setDataSource(DataSource dataSource) {
-
 		// create a JdbcTemplate and set data source
 		this.jdbcTemplate = new JdbcTemplate();
 		this.jdbcTemplate.setDataSource(dataSource);
@@ -3886,7 +3886,6 @@ translator:
 		CustomSQLErrorCodesTranslator tr = new CustomSQLErrorCodesTranslator();
 		tr.setDataSource(dataSource);
 		this.jdbcTemplate.setExceptionTranslator(tr);
-
 	}
 
 	public void updateShippingCharge(long orderId, long pct) {
@@ -4260,8 +4259,12 @@ The following example shows C3P0 configuration:
 ==== Using `DataSourceUtils`
 
 The `DataSourceUtils` class is a convenient and powerful helper class that provides
-`static` methods to obtain connections from JNDI and close connections if necessary. It
-supports thread-bound connections with, for example, `DataSourceTransactionManager`.
+`static` methods to obtain connections from JNDI and close connections if necessary.
+It supports a thread-bound JDBC `Connection` with `DataSourceTransactionManager` but
+also with `JtaTransactionManager` and `JpaTransactionManager`.
+
+Note that `JdbcTemplate` implies `DataSourceUtils` connection access, using it
+behind every JDBC operation, implicitly participating in an ongoing transaction.
 
 
 [[jdbc-SmartDataSource]]
@@ -4300,7 +4303,6 @@ In contrast to `DriverManagerDataSource`, it reuses the same connection all the 
 avoiding excessive creation of physical connections.
 
 
-
 [[jdbc-DriverManagerDataSource]]
 ==== Using `DriverManagerDataSource`
 
@@ -4336,29 +4338,47 @@ javadoc for more details.
 
 
 [[jdbc-DataSourceTransactionManager]]
-==== Using `DataSourceTransactionManager`
+==== Using `DataSourceTransactionManager` / `JdbcTransactionManager`
 
 The `DataSourceTransactionManager` class is a `PlatformTransactionManager`
-implementation for single JDBC datasources. It binds a JDBC connection from the
-specified data source to the currently executing thread, potentially allowing for one
-thread connection per data source.
+implementation for a single JDBC `DataSource`. It binds a JDBC `Connection`
+from the specified `DataSource` to the currently executing thread, potentially
+allowing for one thread-bound `Connection` per `DataSource`.
 
-Application code is required to retrieve the JDBC connection through
+Application code is required to retrieve the JDBC `Connection` through
 `DataSourceUtils.getConnection(DataSource)` instead of Java EE's standard
 `DataSource.getConnection`. It throws unchecked `org.springframework.dao` exceptions
-instead of checked `SQLExceptions`. All framework classes (such as `JdbcTemplate`) use this
-strategy implicitly. If not used with this transaction manager, the lookup strategy
-behaves exactly like the common one. Thus, it can be used in any case.
+instead of checked `SQLExceptions`. All framework classes (such as `JdbcTemplate`) use
+this strategy implicitly. If not used with a transaction manager, the lookup strategy
+behaves exactly like `DataSource.getConnection` and can therefore be used in any case.
 
-The `DataSourceTransactionManager` class supports custom isolation levels and timeouts
-that get applied as appropriate JDBC statement query timeouts. To support the latter,
-application code must either use `JdbcTemplate` or call the
-`DataSourceUtils.applyTransactionTimeout(..)` method for each created statement.
+The `DataSourceTransactionManager` class supports savepoints (`PROPAGATION_NESTED`),
+custom isolation levels, and timeouts that get applied as appropriate JDBC statement
+query timeouts. To support the latter, application code must either use `JdbcTemplate` or
+call the `DataSourceUtils.applyTransactionTimeout(..)` method for each created statement.
 
-You can use this implementation instead of `JtaTransactionManager` in the single-resource
-case, as it does not require the container to support JTA. Switching between
-both is just a matter of configuration, provided you stick to the required connection lookup
-pattern. JTA does not support custom isolation levels.
+You can use `DataSourceTransactionManager` instead of `JtaTransactionManager` in the
+single-resource case, as it does not require the container to support a JTA transaction
+coordinator. Switching between these transaction managers is just a matter of configuration,
+provided you stick to the required connection lookup pattern. Note that JTA does not support
+savepoints or custom isolation levels and has a different timeout mechanism but otherwise
+exposes similar behavior in terms of JDBC resources and JDBC commit/rollback management.
+
+[NOTE]
+====
+As of 5.3, Spring provides an extended `JdbcTransactionManager` variant which adds
+exception translation capabilities on commit/rollback (aligned with `JdbcTemplate`).
+Where `DataSourceTransactionManager` will only ever throw `TransactionSystemException`
+(analogous to JTA), `JdbcTransactionManager` translates database locking failures etc to
+corresponding `DataAccessException` subclasses. Note that application code needs to be
+prepared for such exceptions, not exclusively expecting `TransactionSystemException`.
+In scenarios where that is the case, `JdbcTransactionManager` is the recommended choice.
+
+In terms of exception behavior, `JdbcTransactionManager` is roughly equivalent to
+`JpaTransactionManager` and also to `R2dbcTransactionManager`, serving as an immediate
+companion/replacement for each other. `DataSourceTransactionManager` on the other hand
+is equivalent to `JtaTransactionManager` and can serve as a direct replacement there.
+====
 
 
 
@@ -4373,13 +4393,13 @@ to the database.
 [[jdbc-batch-classic]]
 ==== Basic Batch Operations with `JdbcTemplate`
 
-You accomplish `JdbcTemplate` batch processing by implementing two methods of a special
-interface, `BatchPreparedStatementSetter`, and passing that implementation in as the second parameter
+You accomplish `JdbcTemplate` batch processing by implementing two methods of a special interface,
+`BatchPreparedStatementSetter`, and passing that implementation in as the second parameter
 in your `batchUpdate` method call. You can use the `getBatchSize` method to provide the size of
 the current batch. You can use the `setValues` method to set the values for the parameters of
-the prepared statement. This method is called the number of times that you
-specified in the `getBatchSize` call. The following example updates the `t_actor` table
-based on entries in a list, and the entire list is used as the batch:
+the prepared statement. This method is called the number of times that you specified in the
+`getBatchSize` call. The following example updates the `t_actor` table based on entries in a list,
+and the entire list is used as the batch:
 
 [source,java,indent=0,subs="verbatim,quotes",role="primary"]
 .Java
@@ -7276,19 +7296,16 @@ javadoc for more details.
 ==== Using `R2dbcTransactionManager`
 
 The `R2dbcTransactionManager` class is a `ReactiveTransactionManager` implementation for
-single R2DBC datasources. It binds an R2DBC connection from the specified connection factory
-to the subscriber `Context`, potentially allowing for one subscriber connection for each
-connection factory.
+a single R2DBC `ConnectionFactory`. It binds an R2DBC `Connection` from the specified
+`ConnectionFactory` to the subscriber `Context`, potentially allowing for one subscriber
+`Connection` for each `ConnectionFactory`.
 
-Application code is required to retrieve the R2DBC connection through
+Application code is required to retrieve the R2DBC `Connection` through
 `ConnectionFactoryUtils.getConnection(ConnectionFactory)`, instead of R2DBC's standard
-`ConnectionFactory.create()`.
+`ConnectionFactory.create()`. All framework classes (such as `DatabaseClient`) use this
+strategy implicitly. If not used with a transaction manager, the lookup strategy behaves
+exactly like `ConnectionFactory.create()` and can therefore be used in any case.
 
-All framework classes (such as `DatabaseClient`) use this strategy implicitly.
-If not used with this transaction manager, the lookup strategy behaves exactly like the common one.
-Thus, it can be used in any case.
-
-The `R2dbcTransactionManager` class supports custom isolation levels that get applied to the connection.
 
 
 
@@ -8457,7 +8474,7 @@ features supported by Spring, usually in a vendor-specific manner:
 * Applying specific transaction semantics (such as custom isolation level or transaction
   timeout)
 * Retrieving the transactional JDBC `Connection` (for exposure to JDBC-based DAOs)
-* Advanced translation of `PersistenceExceptions` to Spring `DataAccessExceptions`
+* Advanced translation of `PersistenceException` to Spring's `DataAccessException`
 
 This is particularly valuable for special transaction semantics and for advanced
 translation of exception. The default implementation (`DefaultJpaDialect`) does
