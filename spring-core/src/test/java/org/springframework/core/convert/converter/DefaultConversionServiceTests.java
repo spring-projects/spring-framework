@@ -342,6 +342,18 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void convertArrayToCollectionInterface() {
+		Collection<?> result = conversionService.convert(new String[] {"1", "2", "3"}, Collection.class);
+		assertThat(result).isEqualTo(Set.of("1", "2", "3"));
+	}
+
+	@Test
+	void convertArrayToSetInterface() {
+		Collection<?> result = conversionService.convert(new String[] {"1", "2", "3"}, Set.class);
+		assertThat(result).isEqualTo(Set.of("1", "2", "3"));
+	}
+
+	@Test
+	void convertArrayToListInterface() {
 		List<?> result = conversionService.convert(new String[] {"1", "2", "3"}, List.class);
 		assertThat(result).isEqualTo(List.of("1", "2", "3"));
 	}
