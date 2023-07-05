@@ -41,7 +41,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	private final boolean defaultClient;
 
-	private long readTimeout = 1000;
+	private long readTimeout = 10 * 1000;
 
 
 	/**
@@ -67,6 +67,8 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	/**
 	 * Set the underlying connect timeout in milliseconds.
+	 * A value of 0 specifies an infinite timeout.
+	 * <p>Default is 5 seconds.
 	 */
 	public void setConnectTimeout(int connectTimeout) {
 		Assert.isTrue(connectTimeout >= 0, "Timeout must be a non-negative value");
@@ -76,6 +78,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 	/**
 	 * Set the underlying connect timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
+	 * <p>Default is 5 seconds.
 	 */
 	public void setConnectTimeout(Duration connectTimeout) {
 		Assert.notNull(connectTimeout, "ConnectTimeout must not be null");
@@ -84,6 +87,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	/**
 	 * Set the underlying read timeout in milliseconds.
+	 * <p>Default is 10 seconds.
 	 */
 	public void setReadTimeout(long readTimeout) {
 		Assert.isTrue(readTimeout > 0, "Timeout must be a positive value");
@@ -92,6 +96,7 @@ public class JettyClientHttpRequestFactory implements ClientHttpRequestFactory, 
 
 	/**
 	 * Set the underlying read timeout as {@code Duration}.
+	 * <p>Default is 10 seconds.
 	 */
 	public void setReadTimeout(Duration readTimeout) {
 		Assert.notNull(readTimeout, "ReadTimeout must not be null");
