@@ -69,6 +69,9 @@ public abstract class ObjectUtils {
 	private static final String EMPTY_ARRAY = ARRAY_START + ARRAY_END;
 	private static final String ARRAY_ELEMENT_SEPARATOR = ", ";
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+	private static final String NON_EMPTY_ARRAY = ARRAY_START + "..." + ARRAY_END;
+	private static final String EMPTY_COLLECTION = "[]";
+	private static final String NON_EMPTY_COLLECTION = "[...]";
 
 
 	/**
@@ -966,6 +969,16 @@ public abstract class ObjectUtils {
 			Optional<?> optional = (Optional<?>) obj;
 			return (!optional.isPresent() ? "Optional.empty" :
 					String.format("Optional[%s]", nullSafeConciseToString(optional.get())));
+		}
+		if (obj.getClass().isArray()) {
+			return (Array.getLength(obj) == 0 ? EMPTY_ARRAY : NON_EMPTY_ARRAY);
+		}
+		if (obj instanceof Collection<?>) {
+			return (((Collection<?>) obj).isEmpty() ? EMPTY_COLLECTION : NON_EMPTY_COLLECTION);
+		}
+		if (obj instanceof Map<?, ?>) {
+			// EMPTY_ARRAY and NON_EMPTY_ARRAY are also used for maps.
+			return (((Map<?, ?>) obj).isEmpty() ? EMPTY_ARRAY : NON_EMPTY_ARRAY);
 		}
 		if (obj instanceof Class<?>) {
 			return ((Class<?>) obj).getName();
