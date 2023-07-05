@@ -718,19 +718,15 @@ javadoc for more details.
 === Using `R2dbcTransactionManager`
 
 The `R2dbcTransactionManager` class is a `ReactiveTransactionManager` implementation for
-single R2DBC data sources. It binds an R2DBC connection from the specified connection factory
-to the subscriber `Context`, potentially allowing for one subscriber connection for each
-connection factory.
+a single R2DBC `ConnectionFactory`. It binds an R2DBC `Connection` from the specified
+`ConnectionFactory` to the subscriber `Context`, potentially allowing for one subscriber
+`Connection` for each `ConnectionFactory`.
 
-Application code is required to retrieve the R2DBC connection through
+Application code is required to retrieve the R2DBC `Connection` through
 `ConnectionFactoryUtils.getConnection(ConnectionFactory)`, instead of R2DBC's standard
-`ConnectionFactory.create()`.
-
-All framework classes (such as `DatabaseClient`) use this strategy implicitly.
-If not used with this transaction manager, the lookup strategy behaves exactly like the common one.
-Thus, it can be used in any case.
-
-The `R2dbcTransactionManager` class supports custom isolation levels that get applied to the connection.
+`ConnectionFactory.create()`. All framework classes (such as `DatabaseClient`) use this
+strategy implicitly. If not used with a transaction manager, the lookup strategy behaves
+exactly like `ConnectionFactory.create()` and can therefore be used in any case.
 
 
 

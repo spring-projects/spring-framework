@@ -9,13 +9,13 @@ to the database.
 [[jdbc-batch-classic]]
 == Basic Batch Operations with `JdbcTemplate`
 
-You accomplish `JdbcTemplate` batch processing by implementing two methods of a special
-interface, `BatchPreparedStatementSetter`, and passing that implementation in as the second parameter
+You accomplish `JdbcTemplate` batch processing by implementing two methods of a special interface,
+`BatchPreparedStatementSetter`, and passing that implementation in as the second parameter
 in your `batchUpdate` method call. You can use the `getBatchSize` method to provide the size of
 the current batch. You can use the `setValues` method to set the values for the parameters of
-the prepared statement. This method is called the number of times that you
-specified in the `getBatchSize` call. The following example updates the `t_actor` table
-based on entries in a list, and the entire list is used as the batch:
+the prepared statement. This method is called the number of times that you specified in the
+`getBatchSize` call. The following example updates the `t_actor` table based on entries in a list,
+and the entire list is used as the batch:
 
 [tabs]
 ======

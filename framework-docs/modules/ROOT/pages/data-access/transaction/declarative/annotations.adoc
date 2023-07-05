@@ -124,7 +124,6 @@ In XML configuration, the `<tx:annotation-driven/>` tag provides similar conveni
 ----
 <1> The line that makes the bean instance transactional.
 
-
 TIP: You can omit the `transaction-manager` attribute in the `<tx:annotation-driven/>`
 tag if the bean name of the `TransactionManager` that you want to wire in has the name
 `transactionManager`. If the `TransactionManager` bean that you want to dependency-inject
@@ -522,17 +521,17 @@ The following listing shows the bean declarations:
 ----
 	<tx:annotation-driven/>
 
-		<bean id="transactionManager1" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<bean id="transactionManager1" class="org.springframework.jdbc.support.JdbcTransactionManager">
 			...
 			<qualifier value="order"/>
 		</bean>
 
-		<bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<bean id="transactionManager2" class="org.springframework.jdbc.support.JdbcTransactionManager">
 			...
 			<qualifier value="account"/>
 		</bean>
 
-		<bean id="transactionManager3" class="org.springframework.data.r2dbc.connectionfactory.R2dbcTransactionManager">
+		<bean id="transactionManager3" class="org.springframework.data.r2dbc.connection.R2dbcTransactionManager">
 			...
 			<qualifier value="reactive-account"/>
 		</bean>
