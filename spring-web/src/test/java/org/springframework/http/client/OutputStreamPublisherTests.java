@@ -17,7 +17,6 @@
 package org.springframework.http.client;
 
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -37,6 +36,13 @@ import static org.assertj.core.api.Assertions.assertThatIOException;
  * @author Oleh Dokuka
  */
 class OutputStreamPublisherTests {
+
+	private static final byte[] FOO = "foo".getBytes(StandardCharsets.UTF_8);
+
+	private static final byte[] BAR = "bar".getBytes(StandardCharsets.UTF_8);
+
+	private static final byte[] BAZ = "baz".getBytes(StandardCharsets.UTF_8);
+
 
 	private final Executor executor = Executors.newSingleThreadExecutor();
 
@@ -59,11 +65,9 @@ class OutputStreamPublisherTests {
 	@Test
 	void basic() {
 		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
-			try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-				writer.write("foo");
-				writer.write("bar");
-				writer.write("baz");
-			}
+			outputStream.write(FOO);
+			outputStream.write(BAR);
+			outputStream.write(BAZ);
 		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
 
@@ -75,15 +79,29 @@ class OutputStreamPublisherTests {
 	@Test
 	void flush() {
 		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
-			try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-				writer.write("foo");
-				writer.flush();
-				writer.write("bar");
-				writer.flush();
-				writer.write("baz");
-				writer.flush();
-			}
+			outputStream.write(FOO);
+			outputStream.flush();
+			outputStream.write(BAR);
+			outputStream.flush();
+			outputStream.write(BAZ);
+			outputStream.flush();
 		}, this.byteMapper, this.executor);
+		Flux<String> flux = toString(flowPublisher);
+
+		StepVerifier.create(flux)
+				.assertNext(s -> assertThat(s).isEqualTo("foo"))
+				.assertNext(s -> assertThat(s).isEqualTo("bar"))
+				.assertNext(s -> assertThat(s).isEqualTo("baz"))
+				.verifyComplete();
+	}
+
+	@Test
+	void chunkSize() {
+		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
+			outputStream.write(FOO);
+			outputStream.write(BAR);
+			outputStream.write(BAZ);
+		}, this.byteMapper, this.executor, 3);
 		Flux<String> flux = toString(flowPublisher);
 
 		StepVerifier.create(flux)
@@ -98,17 +116,16 @@ class OutputStreamPublisherTests {
 		CountDownLatch latch = new CountDownLatch(1);
 
 		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
-			try (Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-				assertThatIOException()
-						.isThrownBy(() -> {
-							writer.write("foo");
-							writer.flush();
-							writer.write("bar");
-							writer.flush();
-						})
-						.withMessage("Subscription has been terminated");
-				latch.countDown();
-			}
+			assertThatIOException()
+					.isThrownBy(() -> {
+						outputStream.write(FOO);
+						outputStream.flush();
+						outputStream.write(BAR);
+						outputStream.flush();
+					})
+					.withMessage("Subscription has been terminated");
+			latch.countDown();
+
 		}, this.byteMapper, this.executor);
 		Flux<String> flux = toString(flowPublisher);
 
@@ -125,7 +142,7 @@ class OutputStreamPublisherTests {
 		CountDownLatch latch = new CountDownLatch(1);
 
 		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
-			Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
+			OutputStreamWriter writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
 			writer.write("foo");
 			writer.close();
 			assertThatIOException().isThrownBy(() -> writer.write("bar"))
@@ -146,12 +163,12 @@ class OutputStreamPublisherTests {
 		CountDownLatch latch = new CountDownLatch(1);
 
 		Flow.Publisher<byte[]> flowPublisher = OutputStreamPublisher.create(outputStream -> {
-			try(Writer writer = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8)) {
-				writer.write("foo");
-				writer.flush();
-				writer.write("foo");
-				writer.flush();
-		}
+			try (outputStream) {
+				outputStream.write(FOO);
+				outputStream.flush();
+				outputStream.write(BAR);
+				outputStream.flush();
+			}
 			finally {
 				latch.countDown();
 			}
