@@ -342,30 +342,31 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void convertArrayToCollectionInterface() {
-		Collection<?> result = conversionService.convert(new String[] {"1", "2", "3"}, Collection.class);
-		assertThat(result).isEqualTo(new LinkedHashSet<>(Arrays.asList("1", "2", "3")));
+		@SuppressWarnings("unchecked")
+		Collection<String> result = conversionService.convert(new String[] {"1", "2", "3"}, Collection.class);
+		assertThat(result).isExactlyInstanceOf(LinkedHashSet.class).containsExactly("1", "2", "3");
 	}
 
 	@Test
 	void convertArrayToSetInterface() {
-		Collection<?> result = conversionService.convert(new String[] {"1", "2", "3"}, Set.class);
-		assertThat(result).isEqualTo(new LinkedHashSet<>(Arrays.asList("1", "2", "3")));
+		@SuppressWarnings("unchecked")
+		Collection<String> result = conversionService.convert(new String[] {"1", "2", "3"}, Set.class);
+		assertThat(result).isExactlyInstanceOf(LinkedHashSet.class).containsExactly("1", "2", "3");
 	}
 
 	@Test
 	void convertArrayToListInterface() {
-		List<?> result = conversionService.convert(new String[] {"1", "2", "3"}, List.class);
-		assertThat(result).isEqualTo(Arrays.asList("1", "2", "3"));
+		@SuppressWarnings("unchecked")
+		List<String> result = conversionService.convert(new String[] {"1", "2", "3"}, List.class);
+		assertThat(result).isExactlyInstanceOf(ArrayList.class).containsExactly("1", "2", "3");
 	}
 
 	@Test
 	void convertArrayToCollectionGenericTypeConversion() throws Exception {
 		@SuppressWarnings("unchecked")
-		List<Integer> result = (List<Integer>) conversionService.convert(new String[] {"1", "2", "3"}, TypeDescriptor
-				.valueOf(String[].class), new TypeDescriptor(getClass().getDeclaredField("genericList")));
-		assertThat((int) result.get(0)).isEqualTo((int) Integer.valueOf(1));
-		assertThat((int) result.get(1)).isEqualTo((int) Integer.valueOf(2));
-		assertThat((int) result.get(2)).isEqualTo((int) Integer.valueOf(3));
+		List<Integer> result = (List<Integer>) conversionService.convert(new String[] {"1", "2", "3"},
+				TypeDescriptor.valueOf(String[].class), new TypeDescriptor(getClass().getDeclaredField("genericList")));
+		assertThat(result).isExactlyInstanceOf(ArrayList.class).containsExactly(1, 2, 3);
 	}
 
 	@Test
@@ -393,10 +394,9 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void convertArrayToCollectionImpl() {
-		ArrayList<?> result = conversionService.convert(new String[] {"1", "2", "3"}, ArrayList.class);
-		assertThat(result.get(0)).isEqualTo("1");
-		assertThat(result.get(1)).isEqualTo("2");
-		assertThat(result.get(2)).isEqualTo("3");
+		@SuppressWarnings("unchecked")
+		ArrayList<String> result = conversionService.convert(new String[] {"1", "2", "3"}, ArrayList.class);
+		assertThat(result).isExactlyInstanceOf(ArrayList.class).containsExactly("1", "2", "3");
 	}
 
 	@Test
@@ -426,34 +426,25 @@ class DefaultConversionServiceTests {
 	@Test
 	void convertStringToArray() {
 		String[] result = conversionService.convert("1,2,3", String[].class);
-		assertThat(result.length).isEqualTo(3);
-		assertThat(result[0]).isEqualTo("1");
-		assertThat(result[1]).isEqualTo("2");
-		assertThat(result[2]).isEqualTo("3");
+		assertThat(result).containsExactly("1", "2", "3");
 	}
 
 	@Test
 	void convertStringToArrayWithElementConversion() {
 		Integer[] result = conversionService.convert("1,2,3", Integer[].class);
-		assertThat(result.length).isEqualTo(3);
-		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(1));
-		assertThat((int) result[1]).isEqualTo((int) Integer.valueOf(2));
-		assertThat((int) result[2]).isEqualTo((int) Integer.valueOf(3));
+		assertThat(result).containsExactly(1, 2, 3);
 	}
 
 	@Test
 	void convertStringToPrimitiveArrayWithElementConversion() {
 		int[] result = conversionService.convert("1,2,3", int[].class);
-		assertThat(result.length).isEqualTo(3);
-		assertThat(result[0]).isEqualTo(1);
-		assertThat(result[1]).isEqualTo(2);
-		assertThat(result[2]).isEqualTo(3);
+		assertThat(result).containsExactly(1, 2, 3);
 	}
 
 	@Test
 	void convertEmptyStringToArray() {
 		String[] result = conversionService.convert("", String[].class);
-		assertThat(result.length).isEqualTo(0);
+		assertThat(result).isEmpty();
 	}
 
 	@Test
@@ -467,7 +458,7 @@ class DefaultConversionServiceTests {
 	void convertArrayToObjectWithElementConversion() {
 		String[] array = new String[] {"3"};
 		Integer result = conversionService.convert(array, Integer.class);
-		assertThat((int) result).isEqualTo((int) Integer.valueOf(3));
+		assertThat(result).isEqualTo(3);
 	}
 
 	@Test
@@ -480,39 +471,27 @@ class DefaultConversionServiceTests {
 	@Test
 	void convertObjectToArray() {
 		Object[] result = conversionService.convert(3L, Object[].class);
-		assertThat(result.length).isEqualTo(1);
-		assertThat(result[0]).isEqualTo(3L);
+		assertThat(result).containsExactly(3L);
 	}
 
 	@Test
 	void convertObjectToArrayWithElementConversion() {
 		Integer[] result = conversionService.convert(3L, Integer[].class);
-		assertThat(result.length).isEqualTo(1);
-		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(3));
+		assertThat(result).containsExactly(3);
 	}
 
 	@Test
 	void convertCollectionToArray() {
-		List<String> list = new ArrayList<>();
-		list.add("1");
-		list.add("2");
-		list.add("3");
+		List<String> list = Arrays.asList("1", "2", "3");
 		String[] result = conversionService.convert(list, String[].class);
-		assertThat(result[0]).isEqualTo("1");
-		assertThat(result[1]).isEqualTo("2");
-		assertThat(result[2]).isEqualTo("3");
+		assertThat(result).containsExactly("1", "2", "3");
 	}
 
 	@Test
 	void convertCollectionToArrayWithElementConversion() {
-		List<String> list = new ArrayList<>();
-		list.add("1");
-		list.add("2");
-		list.add("3");
+		List<String> list = Arrays.asList("1", "2", "3");
 		Integer[] result = conversionService.convert(list, Integer[].class);
-		assertThat((int) result[0]).isEqualTo((int) Integer.valueOf(1));
-		assertThat((int) result[1]).isEqualTo((int) Integer.valueOf(2));
-		assertThat((int) result[2]).isEqualTo((int) Integer.valueOf(3));
+		assertThat(result).containsExactly(1, 2, 3);
 	}
 
 	@Test
@@ -532,34 +511,30 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void convertStringToCollection() {
-		List<?> result = conversionService.convert("1,2,3", List.class);
-		assertThat(result.size()).isEqualTo(3);
-		assertThat(result.get(0)).isEqualTo("1");
-		assertThat(result.get(1)).isEqualTo("2");
-		assertThat(result.get(2)).isEqualTo("3");
+		@SuppressWarnings("unchecked")
+		List<String> result = conversionService.convert("1,2,3", List.class);
+		assertThat(result).containsExactly("1", "2", "3");
 	}
 
 	@Test
 	void convertStringToCollectionWithElementConversion() throws Exception {
-		List<?> result = (List<?>) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
+		@SuppressWarnings("unchecked")
+		List<Integer> result = (List<Integer>) conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class),
 				new TypeDescriptor(getClass().getField("genericList")));
-		assertThat(result.size()).isEqualTo(3);
-		assertThat(result.get(0)).isEqualTo(1);
-		assertThat(result.get(1)).isEqualTo(2);
-		assertThat(result.get(2)).isEqualTo(3);
+		assertThat(result).containsExactly(1, 2, 3);
 	}
 
 	@Test
 	void convertEmptyStringToCollection() {
 		Collection<?> result = conversionService.convert("", Collection.class);
-		assertThat(result.size()).isEqualTo(0);
+		assertThat(result).isEmpty();
 	}
 
 	@Test
 	void convertCollectionToObject() {
 		List<Long> list = Collections.singletonList(3L);
 		Long result = conversionService.convert(list, Long.class);
-		assertThat(result).isEqualTo(Long.valueOf(3));
+		assertThat(result).isEqualTo(3);
 	}
 
 	@Test
