@@ -189,7 +189,7 @@ lets applications use the Servlet API directly if they need to. Spring WebFlux
 relies on Servlet non-blocking I/O and uses the Servlet API behind a low-level
 adapter. It is not exposed for direct use.
 
-NOTE: It is strongly advised not to map Servlet filters nor directly manipulate the Servlet API in the context of a WebFlux application.
+NOTE: It is strongly advised not to map Servlet filters or directly manipulate the Servlet API in the context of a WebFlux application.
 For the reasons listed above, mixing blocking I/O and non-blocking I/O in the same context will cause runtime issues.
 
 For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
@@ -200,9 +200,9 @@ For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API
 == Performance
 
 Performance has many characteristics and meanings. Reactive and non-blocking generally
-do not make applications run faster. They can, in some cases, (for example, if using the
-`WebClient` to run remote calls in parallel). On the whole, it requires more work to do
-things the non-blocking way and that can slightly increase the required processing time.
+do not make applications run faster. They can in some cases – for example, if using the
+`WebClient` to run remote calls in parallel. However, it requires more work to do
+things the non-blocking way, and that can slightly increase the required processing time.
 
 The key expected benefit of reactive and non-blocking is the ability to scale with a small,
 fixed number of threads and less memory. That makes applications more resilient under load,
@@ -224,10 +224,10 @@ block the current thread, (for example, for remote calls). For this reason, serv
 use a large thread pool to absorb potential blocking during request handling.
 
 In Spring WebFlux (and non-blocking servers in general), it is assumed that applications
-do not block. Therefore, non-blocking servers use  a small, fixed-size thread pool
+do not block. Therefore, non-blocking servers use a small, fixed-size thread pool
 (event loop workers) to handle requests.
 
-TIP: "`To scale`" and "`small number of threads`" may sound contradictory but to never block the
+TIP: "`To scale`" and "`small number of threads`" may sound contradictory, but to never block the
 current thread (and rely on callbacks instead) means that you do not need extra threads, as
 there are no blocking calls to absorb.
 
@@ -253,7 +253,7 @@ application code within that pipeline is never invoked concurrently.
 
 What threads should you expect to see on a server running with Spring WebFlux?
 
-* On a "`vanilla`" Spring WebFlux server (for example, no data access nor other optional
+* On a "`vanilla`" Spring WebFlux server (for example, no data access or other optional
 dependencies), you can expect one thread for the server and several others for request
 processing (typically as many as the number of CPU cores). Servlet containers, however,
 may start with more threads (for example, 10 on Tomcat), in support of both servlet (blocking) I/O
