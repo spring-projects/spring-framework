@@ -46,6 +46,10 @@ import org.springframework.web.util.WebUtils;
  * (e.g. a {@link org.springframework.web.servlet.View}) is still rendered.
  * As such, this filter only saves bandwidth, not server performance.
  *
+ * <p>State-changing HTTP methods and other HTTP conditional request headers such as
+ * {@code If-Match} and {@code If-Unmodified-Since} are outside the scope of this filter.
+ * Please consider using {@link ServletWebRequest#checkNotModified(String, long)} instead.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Brian Clozel
