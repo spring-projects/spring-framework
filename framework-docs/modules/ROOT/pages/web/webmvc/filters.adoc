@@ -69,9 +69,10 @@ written to the response and computing an MD5 hash from it. The next time a clien
 it does the same, but it also compares the computed value against the `If-None-Match`
 request header and, if the two are equal, returns a 304 (NOT_MODIFIED).
 
-This strategy saves network bandwidth but not CPU, as the full response must be computed
-for each request. Other strategies at the controller level, described earlier, can avoid
-the computation. See xref:web/webmvc/mvc-caching.adoc[HTTP Caching].
+This strategy saves network bandwidth but not CPU, as the full response must be computed for each request.
+State-changing HTTP methods and other HTTP conditional request headers such as `If-Match` and `If-Unmodified-Since` are outside the scope of this filter.
+Other strategies at the controller level can avoid the computation and have a broader support for HTTP conditional requests.
+See xref:web/webmvc/mvc-caching.adoc[HTTP Caching].
 
 This filter has a `writeWeakETag` parameter that configures the filter to write weak ETags
 similar to the following: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"` (as defined in
