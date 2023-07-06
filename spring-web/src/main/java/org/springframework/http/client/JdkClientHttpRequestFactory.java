@@ -48,12 +48,10 @@ public class JdkClientHttpRequestFactory implements ClientHttpRequestFactory {
 
 	/**
 	 * Create a new instance of the {@code JdkClientHttpRequestFactory}
-	 * with a default {@link HttpClient} that follows redirects.
+	 * with a default {@link HttpClient}.
 	 */
 	public JdkClientHttpRequestFactory() {
-		this(HttpClient.newBuilder()
-				.followRedirects(HttpClient.Redirect.NORMAL)
-				.build());
+		this(HttpClient.newHttpClient());
 	}
 
 	/**
