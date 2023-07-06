@@ -125,6 +125,10 @@ You can, at any point during request processing, set the error field on the `Obs
 
 include-code::./UserController[]
 
+NOTE: Because the instrumentation is done at the Servlet Filter level, the observation scope only covers the filters ordered after this one as well as the handling of the request.
+Typically, the Servlet container error handling is done at a lower level and won't have any active observation nor span.
+For this use case, a container-specific implementation is required, such as a `org.apache.catalina.Valve` for Tomcat; this is outside of the scope of this project.
+
 By default, the following `KeyValues` are created:
 
 .Low cardinality Keys
