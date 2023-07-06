@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatIllegalStateException
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
@@ -30,64 +31,124 @@ import org.springframework.web.service.annotation.GetExchange
  * Kotlin tests for [HttpServiceMethod].
  *
  * @author Sebastien Deleuze
+ * @author Olga Maciaszek-Sharma
  */
-class HttpServiceMethodKotlinTests {
+@Suppress("DEPRECATION")
+class KotlinHttpServiceMethodTests {
 
-	private val client = TestHttpClientAdapter()
-	private val proxyFactory = HttpServiceProxyFactory.builder(client).build()
+	private val webClientAdapter = TestHttpClientAdapter()
+    private val httpExchangeAdapter = TestHttpExchangeAdapter()
+	private val proxyFactory = HttpServiceProxyFactory.builder(webClientAdapter).build()
+    private val blockingProxyFactory = HttpServiceProxyFactory.builder()
+            .exchangeAdapter(httpExchangeAdapter).build()
 
 	@Test
 	fun coroutinesService(): Unit = runBlocking {
-		val service = proxyFactory.createClient(CoroutinesService::class.java)
+		val service = proxyFactory.createClient(FunctionsService::class.java)
 
 		val stringBody = service.stringBody()
-		assertThat(stringBody).isEqualTo("requestToBody")
-		verifyClientInvocation("requestToBody", object : ParameterizedTypeReference<String>() {})
+		assertThat(stringBody).isEqualTo("body")
+		verifyClientInvocation("body", object : ParameterizedTypeReference<String>() {})
 
 		service.listBody()
-		verifyClientInvocation("requestToBody", object : ParameterizedTypeReference<MutableList<String>>() {})
+		verifyClientInvocation("body", object : ParameterizedTypeReference<MutableList<String>>() {})
 
 		val flowBody = service.flowBody()
 		assertThat(flowBody.toList()).containsExactly("request", "To", "Body", "Flux")
-		verifyClientInvocation("requestToBodyFlux", object : ParameterizedTypeReference<String>() {})
+		verifyClientInvocation("bodyFlux", object : ParameterizedTypeReference<String>() {})
 
 		val stringEntity = service.stringEntity()
-		assertThat(stringEntity).isEqualTo(ResponseEntity.ok<String>("requestToEntity"))
-		verifyClientInvocation("requestToEntity", object : ParameterizedTypeReference<String>() {})
+		assertThat(stringEntity).isEqualTo(ResponseEntity.ok<String>("entity"))
+		verifyClientInvocation("entity", object : ParameterizedTypeReference<String>() {})
 
 		service.listEntity()
-		verifyClientInvocation("requestToEntity", object : ParameterizedTypeReference<MutableList<String>>() {})
+		verifyClientInvocation("entity", object : ParameterizedTypeReference<MutableList<String>>() {})
 
 		val flowEntity = service.flowEntity()
 		assertThat(flowEntity.statusCode).isEqualTo(HttpStatus.OK)
 		assertThat(flowEntity.body!!.toList()).containsExactly("request", "To", "Entity", "Flux")
-		verifyClientInvocation("requestToEntityFlux", object : ParameterizedTypeReference<String>() {})
+		verifyClientInvocation("entityFlux", object : ParameterizedTypeReference<String>() {})
 	}
 
-	private fun verifyClientInvocation(methodName: String, expectedBodyType: ParameterizedTypeReference<*>) {
-		assertThat(client.invokedMethodName).isEqualTo(methodName)
-		assertThat(client.bodyType).isEqualTo(expectedBodyType)
+    @Test
+    fun blockingServiceWithExchangeResponseFunction() {
+        val service = blockingProxyFactory.createClient(BlockingFunctionsService::class.java)
+
+        val stringBody = service.stringBodyBlocking()
+        assertThat(stringBody).isEqualTo("body")
+        verifyTemplateInvocation("body", object : ParameterizedTypeReference<String>() {})
+
+        val listBody = service.listBodyBlocking()
+        assertThat(listBody.size).isEqualTo(1)
+        verifyTemplateInvocation("body", object : ParameterizedTypeReference<MutableList<String>>() {})
+
+        val stringEntity = service.stringEntityBlocking()
+        assertThat(stringEntity).isEqualTo(ResponseEntity.ok<String>("entity"))
+        verifyTemplateInvocation("entity", object : ParameterizedTypeReference<String>() {})
+
+        service.listEntityBlocking()
+        verifyTemplateInvocation("entity", object : ParameterizedTypeReference<MutableList<String>>() {})
+    }
+
+    @Test
+    fun coroutineServiceWithExchangeResponseFunction() {
+        assertThatIllegalStateException().isThrownBy {
+            blockingProxyFactory.createClient(FunctionsService::class.java)
+        }
+
+        assertThatIllegalStateException().isThrownBy {
+            blockingProxyFactory.createClient(SuspendingFunctionsService::class.java)
+        }
+    }
+
+    private fun verifyTemplateInvocation(methodReference: String, expectedBodyType: ParameterizedTypeReference<*>) {
+        assertThat(httpExchangeAdapter.invokedMethodReference).isEqualTo(methodReference)
+        assertThat(httpExchangeAdapter.bodyType).isEqualTo(expectedBodyType)
+    }
+
+    private fun verifyClientInvocation(methodReference: String, expectedBodyType: ParameterizedTypeReference<*>) {
+		assertThat(webClientAdapter.invokedMethodReference).isEqualTo(methodReference)
+		assertThat(webClientAdapter.bodyType).isEqualTo(expectedBodyType)
 	}
 
-	private interface CoroutinesService {
-
-		@GetExchange
-		suspend fun stringBody(): String
-
-		@GetExchange
-		suspend fun listBody(): MutableList<String>
+	private interface FunctionsService : SuspendingFunctionsService {
 
 		@GetExchange
 		fun flowBody(): Flow<String>
 
 		@GetExchange
-		suspend fun stringEntity(): ResponseEntity<String>
-
-		@GetExchange
-		suspend fun listEntity(): ResponseEntity<MutableList<String>>
-
-		@GetExchange
 		fun flowEntity(): ResponseEntity<Flow<String>>
 	}
+
+    private interface SuspendingFunctionsService : BlockingFunctionsService {
+
+        @GetExchange
+        suspend fun stringBody(): String
+
+        @GetExchange
+        suspend fun listBody(): MutableList<String>
+
+        @GetExchange
+        suspend fun stringEntity(): ResponseEntity<String>
+
+        @GetExchange
+        suspend fun listEntity(): ResponseEntity<MutableList<String>>
+    }
+
+    private interface BlockingFunctionsService {
+
+        @GetExchange
+        fun stringBodyBlocking(): String
+
+        @GetExchange
+        fun listBodyBlocking(): MutableList<String>
+
+        @GetExchange
+        fun stringEntityBlocking(): ResponseEntity<String>
+
+        @GetExchange
+        fun listEntityBlocking(): ResponseEntity<MutableList<String>>
+
+    }
 
 }

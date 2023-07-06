@@ -382,12 +382,24 @@ One, declare an interface with `@HttpExchange` methods:
 	}
 ----
 
-Two, create a proxy that will perform the declared HTTP exchanges:
+Two, create a proxy that will perform the declared HTTP exchanges,
+either using `WebClient`:
 
 [source,java,indent=0,subs="verbatim,quotes"]
 ----
 	WebClient client = WebClient.builder().baseUrl("https://api.github.com/").build();
-	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder(WebClientAdapter.forClient(client)).build();
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder().exchangeAdapter(WebClientAdapter.forClient(webClient)).build();
+
+	RepositoryService service = factory.createClient(RepositoryService.class);
+----
+
+or using `RestTemplate`:
+
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("https://api.github.com/"));
+	HttpServiceProxyFactory factory = HttpServiceProxyFactory.builder().exchangeAdapter(RestTemplateAdapter.forTemplate(restTemplate)).build();
 
 	RepositoryService service = factory.createClient(RepositoryService.class);
 ----

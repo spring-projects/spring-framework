@@ -29,6 +29,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * A base reactive adapter that implements both {@link HttpClientAdapter}
+ * and {@link HttpExchangeAdapter}. Allows to ensure backwards compatibility
+ * with the deprecated {@link HttpClientAdapter} and handles blocking from reactive
+ * publishers to objects where necessary.
  *
  * @author Rossen Stoyanchev
  * @since 6.1
@@ -51,16 +55,16 @@ public abstract class AbstractReactorHttpExchangeAdapter
 
 
 	/**
-	 *
-	 * @param reactiveAdapterRegistry
+	 * Configure the registry for adapting various reactive types.
+	 * <p>By default this is an instance of {@link ReactiveAdapterRegistry} with
+	 * default settings.
 	 */
 	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry reactiveAdapterRegistry) {
 		this.reactiveAdapterRegistry = reactiveAdapterRegistry;
 	}
 
 	/**
-	 *
-	 * @return
+	 * Return the configured reactive type registry of adapters.
 	 */
 	@Override
 	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
@@ -68,31 +72,31 @@ public abstract class AbstractReactorHttpExchangeAdapter
 	}
 
 	/**
-	 *
-	 * @param blockTimeout
+	 * Configure how long to block for the response of an HTTP service method with a
+	 * synchronous (blocking) method signature.
+	 * <p>
+	 * By default, this is not set, in which case the behavior depends on connection and
+	 * request timeout settings of the underlying HTTP client. We recommend configuring
+	 * timeout values directly on the underlying HTTP client, which provides more
+	 * control over such settings.
 	 */
 	public void setBlockTimeout(@Nullable Duration blockTimeout) {
 		this.blockTimeout = blockTimeout;
 	}
 
-	/**
-	 *
-	 * @return
-	 */
 	@Override
 	@Nullable
 	public Duration getBlockTimeout() {
 		return this.blockTimeout;
 	}
 
-
 	@Override
-	public void exchange(HttpRequestValues requestValues) {
+	public Void exchange(HttpRequestValues requestValues) {
 		if (this.blockTimeout != null) {
-			exchangeForMono(requestValues).block(this.blockTimeout);
+			return exchangeForMono(requestValues).block(this.blockTimeout);
 		}
 		else {
-			exchangeForMono(requestValues).block();
+			return exchangeForMono(requestValues).block();
 		}
 	}
 

@@ -53,6 +53,7 @@ import org.springframework.web.service.annotation.HttpExchange;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Olga Maciaszek-Sharma
  * @since 6.0
  */
 final class HttpServiceMethod {
@@ -282,17 +283,57 @@ final class HttpServiceMethod {
 
 	}
 
-
 	private record ExchangeResponseFunction(
 			Function<HttpRequestValues, Object> responseFunction) implements ResponseFunction {
 
 		@Override
 		public Object execute(HttpRequestValues requestValues) {
-			return null;
+			return this.responseFunction.apply(requestValues);
 		}
 
 		public static ResponseFunction create(HttpExchangeAdapter client, Method method) {
-			return new ExchangeResponseFunction(httpRequestValues -> null);
+			if (KotlinDetector.isSuspendingFunction(method)) {
+				throw new IllegalStateException("Kotlin Coroutines are only supported with reactive implementations");
+			}
+			MethodParameter actualReturnParam = new MethodParameter(method, -1).nestedIfOptional();
+			boolean returnOptional = actualReturnParam.getParameterType().equals(Optional.class);
+			Class<?> actualReturnType = actualReturnParam.getNestedParameterType();
+
+			Function<HttpRequestValues, Object> responseFunction;
+			if (actualReturnType.equals(void.class) || actualReturnType.equals(Void.class)) {
+				responseFunction = client::exchange;
+			}
+			else if (actualReturnType.equals(HttpHeaders.class)) {
+				responseFunction = request -> processResponse(client.exchangeForHeaders(request),
+						returnOptional);
+			}
+			else if (actualReturnType.equals(ResponseEntity.class)) {
+				MethodParameter bodyParam = actualReturnParam.nested();
+				Class<?> bodyType = bodyParam.getNestedParameterType();
+				if (bodyType.equals(Void.class)) {
+					responseFunction = request -> processResponse(client
+									.exchangeForBodilessEntity(request), returnOptional);
+				}
+				else {
+					ParameterizedTypeReference<?> bodyTypeReference = ParameterizedTypeReference
+						.forType(bodyParam.getNestedGenericParameterType());
+					responseFunction = request -> processResponse(client.exchangeForEntity(request,
+									bodyTypeReference), returnOptional);
+				}
+			}
+			else {
+				ParameterizedTypeReference<?> bodyTypeReference = ParameterizedTypeReference
+					.forType(actualReturnParam.getNestedGenericParameterType());
+				responseFunction = request -> processResponse(client.exchangeForBody(request,
+								bodyTypeReference), returnOptional);
+			}
+
+			return new ExchangeResponseFunction(responseFunction);
+		}
+
+		private static @Nullable Object processResponse(@Nullable Object response,
+				boolean returnOptional) {
+			return returnOptional ? Optional.ofNullable(response) : response;
 		}
 	}
 

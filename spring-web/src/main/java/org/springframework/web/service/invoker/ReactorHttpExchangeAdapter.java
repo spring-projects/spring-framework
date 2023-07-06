@@ -25,6 +25,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 
 /**
  * Contract to abstract a Project Reactor, HTTP client to decouple it from the
@@ -36,17 +37,23 @@ import org.springframework.http.ResponseEntity;
 public interface ReactorHttpExchangeAdapter extends HttpExchangeAdapter {
 
 	/**
-	 *
-	 * @return
+	 * Return the configured reactive type registry of adapters.
 	 */
 	ReactiveAdapterRegistry getReactiveAdapterRegistry();
 
 	/**
+	 * Return the configured time to block for the response of an HTTP service method with
+	 * a synchronous (blocking) method signature.
 	 *
-	 * @return
+	 * <p>
+	 * By default, this is not set, in which case the behavior depends on connection and
+	 * request timeout settings of the underlying HTTP client. We recommend configuring
+	 * timeout values directly on the underlying HTTP client, which provides more *
+	 * control over such settings.
 	 */
+	@Nullable
 	Duration getBlockTimeout();
-	
+
 	/**
 	 * Perform the given request, and release the response content, if any.
 	 * @param requestValues the request to perform

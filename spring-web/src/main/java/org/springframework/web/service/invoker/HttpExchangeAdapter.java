@@ -34,7 +34,7 @@ public interface HttpExchangeAdapter {
 	 * Perform the given request, and release the response content, if any.
 	 * @param requestValues the request to perform
 	 */
-	void exchange(HttpRequestValues requestValues);
+	Void exchange(HttpRequestValues requestValues);
 
 	/**
 	 * Perform the given request, release the response content, and return the
@@ -48,8 +48,8 @@ public interface HttpExchangeAdapter {
 	 * Perform the given request and decode the response content to the given type.
 	 * @param requestValues the request to perform
 	 * @param bodyType the target type to decode to
-	 * @return the decoded response.
 	 * @param <T> the type the response is decoded to
+	 * @return the decoded response.
 	 */
 	@Nullable
 	<T> T exchangeForBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
@@ -66,4 +66,9 @@ public interface HttpExchangeAdapter {
 	 */
 	<T> ResponseEntity<T> exchangeForEntity(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType);
 
+	/**
+	 * A flag that indicates whether request attributes are supported by a specific client
+	 * adapter.
+	 */
+	boolean supportsRequestAttributes();
 }

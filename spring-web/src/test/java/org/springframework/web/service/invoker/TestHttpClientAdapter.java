@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.service.invoker;
+
+import java.util.Collections;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,10 +35,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Olga Maciaszek-Sharma
  */
 @SuppressWarnings("unchecked")
-class TestHttpClientAdapter implements HttpClientAdapter {
+class TestHttpClientAdapter implements HttpClientAdapter, TestAdapter {
 
 	@Nullable
-	private String invokedMethodName;
+	private String invokedForReturnMethodReference;
 
 	@Nullable
 	private HttpRequestValues requestValues;
@@ -44,17 +46,19 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 	@Nullable
 	private ParameterizedTypeReference<?> bodyType;
 
-
-	public String getInvokedMethodName() {
-		assertThat(this.invokedMethodName).isNotNull();
-		return this.invokedMethodName;
+	@Override
+	public String getInvokedMethodReference() {
+		assertThat(this.invokedForReturnMethodReference).isNotNull();
+		return this.invokedForReturnMethodReference;
 	}
 
+	@Override
 	public HttpRequestValues getRequestValues() {
 		assertThat(this.requestValues).isNotNull();
 		return this.requestValues;
 	}
 
+	@Override
 	@Nullable
 	public ParameterizedTypeReference<?> getBodyType() {
 		return this.bodyType;
@@ -65,31 +69,33 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 
 	@Override
 	public Mono<Void> requestToVoid(HttpRequestValues requestValues) {
-		saveInput("requestToVoid", requestValues, null);
+		saveInput("void", requestValues, null);
 		return Mono.empty();
 	}
 
 	@Override
 	public Mono<HttpHeaders> requestToHeaders(HttpRequestValues requestValues) {
-		saveInput("requestToHeaders", requestValues, null);
+		saveInput("headers", requestValues, null);
 		return Mono.just(new HttpHeaders());
 	}
 
 	@Override
 	public <T> Mono<T> requestToBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		saveInput("requestToBody", requestValues, bodyType);
-		return (Mono<T>) Mono.just(getInvokedMethodName());
+		saveInput("body", requestValues, bodyType);
+		return  bodyType.getType().getTypeName().contains("List") ?
+				(Mono<T>) Mono.just(Collections.singletonList(getInvokedMethodReference()))
+				: (Mono<T>) Mono.just(getInvokedMethodReference());
 	}
 
 	@Override
 	public <T> Flux<T> requestToBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
-		saveInput("requestToBodyFlux", requestValues, bodyType);
+		saveInput("bodyFlux", requestValues, bodyType);
 		return (Flux<T>) Flux.just("request", "To", "Body", "Flux");
 	}
 
 	@Override
 	public Mono<ResponseEntity<Void>> requestToBodilessEntity(HttpRequestValues requestValues) {
-		saveInput("requestToBodilessEntity", requestValues, null);
+		saveInput("bodilessEntity", requestValues, null);
 		return Mono.just(ResponseEntity.ok().build());
 	}
 
@@ -97,22 +103,22 @@ class TestHttpClientAdapter implements HttpClientAdapter {
 	public <T> Mono<ResponseEntity<T>> requestToEntity(
 			HttpRequestValues requestValues, ParameterizedTypeReference<T> type) {
 
-		saveInput("requestToEntity", requestValues, type);
-		return Mono.just((ResponseEntity<T>) ResponseEntity.ok("requestToEntity"));
+		saveInput("entity", requestValues, type);
+		return Mono.just((ResponseEntity<T>) ResponseEntity.ok("entity"));
 	}
 
 	@Override
 	public <T> Mono<ResponseEntity<Flux<T>>> requestToEntityFlux(
 			HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 
-		saveInput("requestToEntityFlux", requestValues, bodyType);
+		saveInput("entityFlux", requestValues, bodyType);
 		return Mono.just(ResponseEntity.ok((Flux<T>) Flux.just("request", "To", "Entity", "Flux")));
 	}
 
 	private <T> void saveInput(
-			String methodName, HttpRequestValues requestValues, @Nullable ParameterizedTypeReference<T> bodyType) {
+			String reference, HttpRequestValues requestValues, @Nullable ParameterizedTypeReference<T> bodyType) {
 
-		this.invokedMethodName = methodName;
+		this.invokedForReturnMethodReference = reference;
 		this.requestValues = requestValues;
 		this.bodyType = bodyType;
 	}
