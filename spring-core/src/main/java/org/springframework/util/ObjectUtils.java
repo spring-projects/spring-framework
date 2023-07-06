@@ -915,6 +915,10 @@ public abstract class ObjectUtils {
 	 * <li>{@code"Optional[<concise-string>]"} if {@code obj} is a non-empty {@code Optional},
 	 * where {@code <concise-string>} is the result of invoking {@link #nullSafeConciseToString}
 	 * on the object contained in the {@code Optional}</li>
+	 * <li>{@code "{}"} if {@code obj} is an empty array or {@link Map}</li>
+	 * <li>{@code "{...}"} if {@code obj} is a non-empty array or {@link Map}</li>
+	 * <li>{@code "[]"} if {@code obj} is an empty {@link Collection}</li>
+	 * <li>{@code "[...]"} if {@code obj} is a non-empty {@link Collection}</li>
 	 * <li>{@linkplain Class#getName() Class name} if {@code obj} is a {@link Class}</li>
 	 * <li>{@linkplain Charset#name() Charset name} if {@code obj} is a {@link Charset}</li>
 	 * <li>{@linkplain TimeZone#getID() TimeZone ID} if {@code obj} is a {@link TimeZone}</li>
