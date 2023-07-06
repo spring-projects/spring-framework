@@ -189,6 +189,9 @@ lets applications use the Servlet API directly if they need to. Spring WebFlux
 relies on Servlet non-blocking I/O and uses the Servlet API behind a low-level
 adapter. It is not exposed for direct use.
 
+NOTE: It is strongly advised not to map Servlet filters nor directly manipulate the Servlet API in the context of a WebFlux application.
+For the reasons listed above, mixing blocking I/O and non-blocking I/O in the same context will cause runtime issues.
+
 For Undertow, Spring WebFlux uses Undertow APIs directly without the Servlet API.
 
 
