@@ -548,7 +548,38 @@ public interface RestClient {
 		 * @param <T> the type the response will be transformed to
 		 * @return the value returned from the exchange function
 		 */
-		<T> T exchange(ExchangeFunction<T> exchangeFunction);
+		default <T> T exchange(ExchangeFunction<T> exchangeFunction) {
+			return exchange(exchangeFunction, true);
+		}
+
+		/**
+		 * Exchange the {@link ClientHttpResponse} for a type {@code T}. This
+		 * can be useful for advanced scenarios, for example to decode the
+		 * response differently depending on the response status:
+		 * <p><pre>
+		 * Person person = client.get()
+		 *     .uri("/people/1")
+		 *     .accept(MediaType.APPLICATION_JSON)
+		 *     .exchange((request, response) -&gt; {
+		 *         if (response.getStatusCode().equals(HttpStatus.OK)) {
+		 *             return deserialize(response.getBody());
+		 *         }
+		 *         else {
+		 *             throw new BusinessException();
+		 *         }
+		 *     });
+		 * </pre>
+		 * <p><strong>Note:</strong> If {@code close} is {@code true},
+		 * then the response is {@linkplain ClientHttpResponse#close() closed}
+		 * after the exchange function has been invoked. When set to
+		 * {@code false}, the caller is responsible for closing the response.
+		 * @param exchangeFunction the function to handle the response with
+		 * @param close {@code true} to close the response after
+		 * {@code exchangeFunction} is invoked, {@code false} to keep it open
+		 * @param <T> the type the response will be transformed to
+		 * @return the value returned from the exchange function
+		 */
+		<T> T exchange(ExchangeFunction<T> exchangeFunction, boolean close);
 
 
 		/**

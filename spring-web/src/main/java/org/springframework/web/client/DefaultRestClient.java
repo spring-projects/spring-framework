@@ -360,8 +360,8 @@ final class DefaultRestClient implements RestClient {
 		}
 
 		@Override
-		public <T> T exchange(ExchangeFunction<T> exchangeFunction) {
-			return exchangeInternal(exchangeFunction, true);
+		public <T> T exchange(ExchangeFunction<T> exchangeFunction, boolean close) {
+			return exchangeInternal(exchangeFunction, close);
 		}
 
 		private <T> T exchangeInternal(ExchangeFunction<T> exchangeFunction, boolean close) {
