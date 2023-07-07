@@ -2,7 +2,7 @@
 
 This is the home of the Spring Framework: the foundation for all [Spring projects](https://spring.io/projects). Collectively the Spring Framework and the family of Spring projects are often referred to simply as "Spring". 
 
-Spring provides everything required beyond the Java programming language for creating enterprise applications for a wide range of scenarios and architectures. Please read the [Overview](https://docs.spring.io/spring/docs/current/spring-framework-reference/overview.html#spring-introduction) section as reference for a more complete introduction.
+Spring provides everything required beyond the Java programming language for creating enterprise applications for a wide range of scenarios and architectures. Please read the [Overview](https://docs.spring.io/spring-framework/reference/overview.html) section of the reference documentation for a more complete introduction.
 
 ## Code of Conduct
 
@@ -14,7 +14,7 @@ For access to artifacts or a distribution zip, see the [Spring Framework Artifac
 
 ## Documentation
 
-The Spring Framework maintains reference documentation ([published](https://docs.spring.io/spring-framework/docs/current/spring-framework-reference/) and [source](framework-docs/src/docs/asciidoc)), GitHub [wiki pages](https://github.com/spring-projects/spring-framework/wiki), and an
+The Spring Framework maintains reference documentation ([published](https://docs.spring.io/spring-framework/reference/) and [source](framework-docs/modules/ROOT)), GitHub [wiki pages](https://github.com/spring-projects/spring-framework/wiki), and an
 [API reference](https://docs.spring.io/spring-framework/docs/current/javadoc-api/). There are also [guides and tutorials](https://spring.io/guides) across Spring projects.
 
 ## Micro-Benchmarks
