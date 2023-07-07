@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.beans.BeanInstantiationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
@@ -343,8 +344,7 @@ public final class BeanInstanceSupplier<T> extends AutowiredElementResolver impl
 			Object enclosingInstance = createInstance(declaringClass.getEnclosingClass());
 			args = ObjectUtils.addObjectToArray(args, enclosingInstance, 0);
 		}
-		ReflectionUtils.makeAccessible(constructor);
-		return constructor.newInstance(args);
+		return BeanUtils.instantiateClass(constructor, args);
 	}
 
 	private Object instantiate(ConfigurableBeanFactory beanFactory, Method method, Object[] args) throws Exception {

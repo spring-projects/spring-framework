@@ -24,6 +24,11 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KClass;
+import kotlin.reflect.KFunction;
+import kotlin.reflect.KParameter;
+
 import org.springframework.aot.generate.AccessControl;
 import org.springframework.aot.generate.AccessControl.Visibility;
 import org.springframework.aot.generate.GeneratedMethod;
@@ -31,8 +36,11 @@ import org.springframework.aot.generate.GeneratedMethods;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.generate.MethodReference.ArgumentCodeGenerator;
 import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.beans.factory.support.InstanceSupplier;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.ResolvableType;
 import org.springframework.javapoet.ClassName;
 import org.springframework.javapoet.CodeBlock;
@@ -56,6 +64,7 @@ import org.springframework.util.function.ThrowingSupplier;
  * @author Phillip Webb
  * @author Stephane Nicoll
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 6.0
  */
 class InstanceSupplierCodeGenerator {
@@ -108,11 +117,16 @@ class InstanceSupplierCodeGenerator {
 		boolean dependsOnBean = ClassUtils.isInnerClass(declaringClass);
 
 		Visibility accessVisibility = getAccessVisibility(registeredBean, constructor);
-		if (accessVisibility != Visibility.PRIVATE) {
+		if (KotlinDetector.isKotlinReflectPresent() && KotlinDelegate.hasConstructorWithOptionalParameter(beanClass)) {
+			return generateCodeForInaccessibleConstructor(beanName, beanClass, constructor,
+					dependsOnBean, hints -> hints.registerType(beanClass, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS));
+		}
+		else if (accessVisibility != Visibility.PRIVATE) {
 			return generateCodeForAccessibleConstructor(beanName, beanClass, constructor,
 					dependsOnBean, declaringClass);
 		}
-		return generateCodeForInaccessibleConstructor(beanName, beanClass, constructor, dependsOnBean);
+		return generateCodeForInaccessibleConstructor(beanName, beanClass, constructor, dependsOnBean,
+				hints -> hints.registerConstructor(constructor, ExecutableMode.INVOKE));
 	}
 
 	private CodeBlock generateCodeForAccessibleConstructor(String beanName, Class<?> beanClass,
@@ -137,11 +151,10 @@ class InstanceSupplierCodeGenerator {
 		return generateReturnStatement(generatedMethod);
 	}
 
-	private CodeBlock generateCodeForInaccessibleConstructor(String beanName,
-			Class<?> beanClass, Constructor<?> constructor, boolean dependsOnBean) {
+	private CodeBlock generateCodeForInaccessibleConstructor(String beanName, Class<?> beanClass,
+			Constructor<?> constructor, boolean dependsOnBean, Consumer<ReflectionHints> hints) {
 
-		this.generationContext.getRuntimeHints().reflection()
-				.registerConstructor(constructor, ExecutableMode.INVOKE);
+		hints.accept(this.generationContext.getRuntimeHints().reflection());
 
 		GeneratedMethod generatedMethod = generateGetInstanceSupplierMethod(method -> {
 			method.addJavadoc("Get the bean instance supplier for '$L'.", beanName);
@@ -335,6 +348,27 @@ class InstanceSupplierCodeGenerator {
 		return Arrays.stream(executable.getGenericExceptionTypes())
 				.map(ResolvableType::forType).map(ResolvableType::toClass)
 				.anyMatch(Exception.class::isAssignableFrom);
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 */
+	private static class KotlinDelegate {
+
+		public static boolean hasConstructorWithOptionalParameter(Class<?> beanClass) {
+			if (KotlinDetector.isKotlinType(beanClass)) {
+				KClass<?> kClass = JvmClassMappingKt.getKotlinClass(beanClass);
+				for (KFunction<?> constructor : kClass.getConstructors()) {
+					for (KParameter parameter : constructor.getParameters()) {
+						if (parameter.isOptional()) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
 	}
 
 }
