@@ -3,9 +3,17 @@
 
 The Spring Framework provides the following choices for making calls to REST endpoints:
 
+* xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] - synchronous client with a fluent API.
 * xref:integration/rest-clients.adoc#rest-webclient[`WebClient`] - non-blocking, reactive client with fluent API.
 * xref:integration/rest-clients.adoc#rest-resttemplate[`RestTemplate`] - synchronous client with template method API.
 * xref:integration/rest-clients.adoc#rest-http-interface[HTTP Interface] - annotated interface with generated, dynamic proxy implementation.
+
+
+[[rest-restclient]]
+== `RestClient`
+
+Reference documentation is forthcoming.
+For now, please refer to the https://docs.spring.io/spring-framework/docs/6.1.0-M1/javadoc-api/org/springframework/web/client/RestClient.html[API documentation].
 
 
 [[rest-webclient]]
@@ -36,9 +44,8 @@ The `RestTemplate` provides a higher level API over HTTP client libraries. It ma
 easy to invoke REST endpoints in a single line. It exposes the following groups of
 overloaded methods:
 
-NOTE: `RestTemplate` is in maintenance mode, with only requests for minor
-changes and bugs to be accepted. Please, consider using the
-xref:web/webflux-webclient.adoc[WebClient] instead.
+NOTE: The xref:integration/rest-clients.adoc#rest-restclient[`RestClient`] offers a more modern API for synchronous HTTP access.
+For asynchronous and streaming scenarios, consider the reactive xref:web/webflux-webclient.adoc[WebClient].
 
 [[rest-overview-of-resttemplate-methods-tbl]]
 .RestTemplate methods

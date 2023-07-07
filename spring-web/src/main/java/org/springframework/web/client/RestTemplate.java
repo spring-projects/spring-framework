@@ -89,10 +89,10 @@ import org.springframework.web.util.UriTemplateHandler;
  * instances may use the same underlying {@link ClientHttpRequestFactory}
  * if they need to share HTTP client resources.
  *
- * <p><strong>NOTE:</strong> As of 5.0 this class is in maintenance mode, with
- * only minor requests for changes and bugs to be accepted going forward. Please,
- * consider using the {@code org.springframework.web.reactive.client.WebClient}
- * which has a more modern API and supports sync, async, and streaming scenarios.
+ * <p><strong>NOTE:</strong> As of 6.1, {@link RestClient} offers a more modern
+ * API for synchronous HTTP access. For asynchronous and streaming scenarios,
+ * consider the reactive
+ * {@link org.springframework.web.reactive.function.client.WebClient}.
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
