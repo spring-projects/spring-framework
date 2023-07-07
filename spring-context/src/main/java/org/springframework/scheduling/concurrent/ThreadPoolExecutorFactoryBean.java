@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,7 +192,16 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
 		return new ThreadPoolExecutor(corePoolSize, maxPoolSize,
-				keepAliveSeconds, TimeUnit.SECONDS, queue, threadFactory, rejectedExecutionHandler);
+				keepAliveSeconds, TimeUnit.SECONDS, queue, threadFactory, rejectedExecutionHandler) {
+			@Override
+			protected void beforeExecute(Thread thread, Runnable task) {
+				ThreadPoolExecutorFactoryBean.this.beforeExecute(thread, task);
+			}
+			@Override
+			protected void afterExecute(Runnable task, Throwable ex) {
+				ThreadPoolExecutorFactoryBean.this.afterExecute(task, ex);
+			}
+		};
 	}
 
 	/**

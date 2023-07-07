@@ -26,6 +26,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
@@ -96,9 +97,8 @@ public class EnableAsyncTests {
 	public void properExceptionForExistingProxyDependencyMismatch() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncBeanWithInterface.class, AsyncBeanUser.class);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				ctx::refresh)
-			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(ctx::refresh)
+				.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 		ctx.close();
 	}
 
@@ -106,9 +106,8 @@ public class EnableAsyncTests {
 	public void properExceptionForResolvedProxyDependencyMismatch() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncBeanUser.class, AsyncBeanWithInterface.class);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				ctx::refresh)
-			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(ctx::refresh)
+				.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 		ctx.close();
 	}
 
@@ -142,13 +141,18 @@ public class EnableAsyncTests {
 					context.getBean(AsyncBeanWithExecutorQualifiedByExpressionOrPlaceholder.class);
 
 			Future<Thread> workerThread1 = asyncBean.myWork1();
-			assertThat(workerThread1.get().getName()).startsWith("myExecutor1-");
+			assertThat(workerThread1.get(100, TimeUnit.MILLISECONDS).getName()).startsWith("myExecutor1-");
 
+			context.stop();
 			Future<Thread> workerThread2 = asyncBean.myWork2();
-			assertThat(workerThread2.get().getName()).startsWith("myExecutor2-");
+			assertThatExceptionOfType(TimeoutException.class).isThrownBy(
+					() -> workerThread2.get(100, TimeUnit.MILLISECONDS));
+
+			context.start();
+			assertThat(workerThread2.get(100, TimeUnit.MILLISECONDS).getName()).startsWith("myExecutor2-");
 
 			Future<Thread> workerThread3 = asyncBean.fallBackToDefaultExecutor();
-			assertThat(workerThread3.get().getName()).startsWith("SimpleAsyncTaskExecutor");
+			assertThat(workerThread3.get(100, TimeUnit.MILLISECONDS).getName()).startsWith("SimpleAsyncTaskExecutor");
 		}
 		finally {
 			System.clearProperty("myExecutor");
@@ -208,8 +212,7 @@ public class EnableAsyncTests {
 		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AspectJAsyncAnnotationConfig.class);
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(
-				ctx::refresh);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(ctx::refresh);
 	}
 
 	@Test
@@ -520,6 +523,7 @@ public class EnableAsyncTests {
 			return new ThreadPoolTaskExecutor();
 		}
 	}
+
 
 	@Configuration
 	@EnableAsync

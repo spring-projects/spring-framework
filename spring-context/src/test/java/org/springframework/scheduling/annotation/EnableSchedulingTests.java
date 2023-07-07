@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,10 +86,20 @@ public class EnableSchedulingTests {
 		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(1);
 
 		Thread.sleep(100);
-		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
+		ctx.stop();
+		int count1 = ctx.getBean(AtomicInteger.class).get();
+		assertThat(count1).isGreaterThanOrEqualTo(10);
+		Thread.sleep(100);
+		int count2 = ctx.getBean(AtomicInteger.class).get();
+		assertThat(count2).isEqualTo(count1);
+		ctx.start();
+		Thread.sleep(100);
+		int count3 = ctx.getBean(AtomicInteger.class).get();
+		assertThat(count3).isGreaterThanOrEqualTo(20);
+
 		assertThat(ctx.getBean(ExplicitSchedulerConfig.class).threadName).startsWith("explicitScheduler-");
 		assertThat(Arrays.asList(ctx.getDefaultListableBeanFactory().getDependentBeans("myTaskScheduler")).contains(
-		TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)).isTrue();
+				TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)).isTrue();
 	}
 
 	@Test

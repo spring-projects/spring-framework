@@ -187,7 +187,16 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	protected ScheduledExecutorService createExecutor(
 			int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
-		return new ScheduledThreadPoolExecutor(poolSize, threadFactory, rejectedExecutionHandler);
+		return new ScheduledThreadPoolExecutor(poolSize, threadFactory, rejectedExecutionHandler) {
+			@Override
+			protected void beforeExecute(Thread thread, Runnable task) {
+				ScheduledExecutorFactoryBean.this.beforeExecute(thread, task);
+			}
+			@Override
+			protected void afterExecute(Runnable task, Throwable ex) {
+				ScheduledExecutorFactoryBean.this.afterExecute(task, ex);
+			}
+		};
 	}
 
 	/**
