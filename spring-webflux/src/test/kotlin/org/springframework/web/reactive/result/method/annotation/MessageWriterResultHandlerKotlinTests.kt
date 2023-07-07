@@ -44,7 +44,7 @@ import java.util.*
  *
  * @author Sebastien Deleuze
  */
-class KotlinMessageWriterResultHandlerTests {
+class MessageWriterResultHandlerKotlinTests {
 
 	private val resultHandler = initResultHandler()
 

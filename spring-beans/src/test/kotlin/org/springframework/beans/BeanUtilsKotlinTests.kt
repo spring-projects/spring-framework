@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test
  * @author Sebastien Deleuze
  */
 @Suppress("unused", "UNUSED_PARAMETER")
-class KotlinBeanUtilsTests {
+class BeanUtilsKotlinTests {
 
 	@Test
 	fun `Instantiate immutable class`() {

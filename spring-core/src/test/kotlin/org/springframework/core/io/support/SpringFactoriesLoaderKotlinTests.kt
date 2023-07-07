@@ -26,8 +26,8 @@ import org.springframework.core.io.support.SpringFactoriesLoader.ArgumentResolve
  *
  * @author Phillip Webb
  */
-@Suppress("unused", "UNUSED_PARAMETER", "PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-class KotlinSpringFactoriesLoaderTests {
+@Suppress("unused", "PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+class SpringFactoriesLoaderKotlinTests {
 
 	@Test
 	fun `Instantiate immutable data class`() {

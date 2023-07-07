@@ -37,7 +37,12 @@ import java.lang.reflect.Method
 import java.time.Duration
 import kotlin.reflect.jvm.javaMethod
 
-class KotlinInvocableHandlerMethodTests {
+/**
+ * Kotlin unit tests for [InvocableHandlerMethod].
+ *
+ * @author Sebastien Deleuze
+ */
+class InvocableHandlerMethodKotlinTests {
 
 	private val exchange = MockServerWebExchange.from(get("http://localhost:8080/path"))
 

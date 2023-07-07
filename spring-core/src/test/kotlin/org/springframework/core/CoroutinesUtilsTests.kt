@@ -28,7 +28,12 @@ import reactor.test.StepVerifier
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.coroutineContext
 
-class KotlinCoroutinesUtilsTests {
+/**
+ * Kotlin tests for [CoroutinesUtils].
+ *
+ * @author Sebastien Deleuze
+ */
+class CoroutinesUtilsTests {
 
 	@Test
 	fun deferredToMono() {
@@ -56,7 +61,7 @@ class KotlinCoroutinesUtilsTests {
 
 	@Test
 	fun invokeSuspendingFunctionWithNullContinuationParameter() {
-		val method = KotlinCoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunction", String::class.java, Continuation::class.java)
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunction", String::class.java, Continuation::class.java)
 		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo", null)
 		Assertions.assertThat(publisher).isInstanceOf(Mono::class.java)
 		StepVerifier.create(publisher)
@@ -67,7 +72,7 @@ class KotlinCoroutinesUtilsTests {
 
 	@Test
 	fun invokeSuspendingFunctionWithoutContinuationParameter() {
-		val method = KotlinCoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunction", String::class.java, Continuation::class.java)
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunction", String::class.java, Continuation::class.java)
 		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this, "foo")
 		Assertions.assertThat(publisher).isInstanceOf(Mono::class.java)
 		StepVerifier.create(publisher)
@@ -78,13 +83,13 @@ class KotlinCoroutinesUtilsTests {
 
 	@Test
 	fun invokeNonSuspendingFunction() {
-		val method = KotlinCoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
 		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(method, this, "foo") }
 	}
 
 	@Test
 	fun invokeSuspendingFunctionWithFlow() {
-		val method = KotlinCoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithFlow", Continuation::class.java)
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithFlow", Continuation::class.java)
 		val publisher = CoroutinesUtils.invokeSuspendingFunction(method, this)
 		Assertions.assertThat(publisher).isInstanceOf(Flux::class.java)
 		StepVerifier.create(publisher)
@@ -96,7 +101,7 @@ class KotlinCoroutinesUtilsTests {
 
 	@Test
 	fun invokeSuspendingFunctionWithNullContinuationParameterAndContext() {
-		val method = KotlinCoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithContext", String::class.java, Continuation::class.java)
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithContext", String::class.java, Continuation::class.java)
 		val context = CoroutineName("name")
 		val mono = CoroutinesUtils.invokeSuspendingFunction(context, method, this, "foo", null) as Mono
 		runBlocking {
@@ -106,7 +111,7 @@ class KotlinCoroutinesUtilsTests {
 
 	@Test
 	fun invokeSuspendingFunctionWithoutContinuationParameterAndContext() {
-		val method = KotlinCoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithContext", String::class.java, Continuation::class.java)
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("suspendingFunctionWithContext", String::class.java, Continuation::class.java)
 		val context = CoroutineName("name")
 		val mono = CoroutinesUtils.invokeSuspendingFunction(context, method, this, "foo") as Mono
 		runBlocking {
@@ -116,7 +121,7 @@ class KotlinCoroutinesUtilsTests {
 
 	@Test
 	fun invokeNonSuspendingFunctionWithContext() {
-		val method = KotlinCoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
+		val method = CoroutinesUtilsTests::class.java.getDeclaredMethod("nonSuspendingFunction", String::class.java)
 		val context = CoroutineName("name")
 		Assertions.assertThatIllegalArgumentException().isThrownBy { CoroutinesUtils.invokeSuspendingFunction(context, method, this, "foo") }
 	}

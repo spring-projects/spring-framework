@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
  *
  * @author Sebastien Deleuze
  */
-class KotlinResponseEntityTests {
+class ResponseEntityKotlinTests {
 
 	@Test
 	fun ofNullable() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,13 @@ import reactor.test.StepVerifier
 import java.time.Duration
 import kotlin.reflect.KClass
 
+/**
+ * Kotlin tests for [ReactiveAdapterRegistry].
+ *
+ * @author Sebastien Deleuze
+ */
 @OptIn(DelicateCoroutinesApi::class)
-class KotlinReactiveAdapterRegistryTests {
+class ReactiveAdapterRegistryKotlinTests {
 
 	private val registry = ReactiveAdapterRegistry.getSharedInstance()
 

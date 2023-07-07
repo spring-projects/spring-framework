@@ -34,7 +34,7 @@ import org.springframework.validation.beanvalidation.BeanValidationBeanRegistrat
  *
  * @author Sebastien Deleuze
  */
-class KotlinBeanValidationBeanRegistrationAotProcessorTests {
+class BeanValidationBeanRegistrationAotProcessorKotlinTests {
 
     private val processor = BeanValidationBeanRegistrationAotProcessor()
 

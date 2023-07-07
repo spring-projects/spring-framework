@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,16 @@ import kotlin.reflect.jvm.javaMethod
  * @author Juergen Hoeller
  * @author Konrad Kaminski
  */
-class KotlinMethodParameterTests {
+class MethodParameterKotlinTests {
 
 	private val nullableMethod: Method = javaClass.getMethod("nullable", String::class.java)
 
 	private val nonNullableMethod = javaClass.getMethod("nonNullable", String::class.java)
 
-	private val innerClassConstructor = InnerClass::class.java.getConstructor(KotlinMethodParameterTests::class.java)
+	private val innerClassConstructor = InnerClass::class.java.getConstructor(MethodParameterKotlinTests::class.java)
 
 	private val innerClassWithParametersConstructor = InnerClassWithParameter::class.java
-			.getConstructor(KotlinMethodParameterTests::class.java, String::class.java, String::class.java)
+			.getConstructor(MethodParameterKotlinTests::class.java, String::class.java, String::class.java)
 
 	private val regularClassConstructor = RegularClass::class.java.getConstructor(String::class.java, String::class.java)
 
