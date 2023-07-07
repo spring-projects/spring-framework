@@ -16,38 +16,15 @@
 
 package org.springframework.build.hint;
 
-import java.util.Collections;
-
-import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.SetProperty;
 
 /**
  * Entry point to the DSL extension for the {@link RuntimeHintsAgentPlugin} Gradle plugin.
  * @author Brian Clozel
  */
-public class RuntimeHintsAgentExtension {
+public interface RuntimeHintsAgentExtension {
 
-	private final SetProperty<String> includedPackages;
+	SetProperty<String> getIncludedPackages();
 
-	private final SetProperty<String> excludedPackages;
-
-	public RuntimeHintsAgentExtension(ObjectFactory objectFactory) {
-		this.includedPackages = objectFactory.setProperty(String.class).convention(Collections.singleton("org.springframework"));
-		this.excludedPackages = objectFactory.setProperty(String.class).convention(Collections.emptySet());
-	}
-
-	public SetProperty<String> getIncludedPackages() {
-		return this.includedPackages;
-	}
-
-	public SetProperty<String> getExcludedPackages() {
-		return this.excludedPackages;
-	}
-
-	String asJavaAgentArgument() {
-		StringBuilder builder = new StringBuilder();
-		this.includedPackages.get().forEach(packageName -> builder.append('+').append(packageName).append(','));
-		this.excludedPackages.get().forEach(packageName -> builder.append('-').append(packageName).append(','));
-		return builder.toString();
-	}
+	SetProperty<String> getExcludedPackages();
 }

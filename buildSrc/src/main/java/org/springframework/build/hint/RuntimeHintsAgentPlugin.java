@@ -18,14 +18,10 @@ package org.springframework.build.hint;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Classpath;
-import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.testing.Test;
-import org.gradle.process.CommandLineArgumentProvider;
 
 import java.util.Collections;
 
@@ -45,8 +41,7 @@ public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 
 		project.getPlugins().withType(JavaPlugin.class, javaPlugin -> {
-			RuntimeHintsAgentExtension agentExtension = project.getExtensions().create(EXTENSION_NAME,
-					RuntimeHintsAgentExtension.class, project.getObjects());
+			RuntimeHintsAgentExtension agentExtension = createRuntimeHintsAgentExtension(project);
 			Test agentTest = project.getTasks().create(RUNTIMEHINTS_TEST_TASK, Test.class, test -> {
 				test.useJUnitPlatform(options -> {
 					options.includeTags("RuntimeHintsTests");
@@ -54,33 +49,26 @@ public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 				test.include("**/*Tests.class", "**/*Test.class");
 				test.systemProperty("java.awt.headless", "true");
 				test.systemProperty("org.graalvm.nativeimage.imagecode", "runtime");
-			});
-			project.afterEvaluate(p -> {
-				agentTest.getJvmArgumentProviders().add(createRuntimeHintsAgentArgumentProvider(project, agentExtension));
+				test.getJvmArgumentProviders().add(createRuntimeHintsAgentArgumentProvider(project, agentExtension));
 			});
 			project.getTasks().getByName("check", task -> task.dependsOn(agentTest));
 		});
 	}
 
-	private static RuntimeHintsAgentArgumentProvider createRuntimeHintsAgentArgumentProvider(Project project, RuntimeHintsAgentExtension agentExtension) {
-		Jar jar = project.getRootProject().project("spring-core-test").getTasks().withType(Jar.class).named("jar").get();
-		RuntimeHintsAgentArgumentProvider agentArgumentProvider = project.getObjects().newInstance(RuntimeHintsAgentArgumentProvider.class);
-		agentArgumentProvider.getAgentJar().from(jar.getArchiveFile());
-		agentArgumentProvider.getJavaAgentArgument().set(agentExtension.asJavaAgentArgument());
-		return agentArgumentProvider;
+	private static RuntimeHintsAgentExtension createRuntimeHintsAgentExtension(Project project) {
+		RuntimeHintsAgentExtension agentExtension = project.getExtensions().create(EXTENSION_NAME, RuntimeHintsAgentExtension.class);
+		agentExtension.getIncludedPackages().convention(Collections.singleton("org.springframework"));
+		agentExtension.getExcludedPackages().convention(Collections.emptySet());
+		return agentExtension;
 	}
 
-	interface RuntimeHintsAgentArgumentProvider extends CommandLineArgumentProvider {
-
-		@Classpath
-		ConfigurableFileCollection getAgentJar();
-
-		@Input
-		Property<String> getJavaAgentArgument();
-
-		@Override
-		default Iterable<String> asArguments() {
-			return Collections.singleton("-javaagent:" + getAgentJar().getSingleFile() + "=" + getJavaAgentArgument().get());
-		}
+	private static RuntimeHintsAgentArgumentProvider createRuntimeHintsAgentArgumentProvider(
+			Project project, RuntimeHintsAgentExtension agentExtension) {
+		TaskProvider<Jar> jar = project.getRootProject().project("spring-core-test").getTasks().named("jar", Jar.class);
+		RuntimeHintsAgentArgumentProvider agentArgumentProvider = project.getObjects().newInstance(RuntimeHintsAgentArgumentProvider.class);
+		agentArgumentProvider.getAgentJar().from(jar);
+		agentArgumentProvider.getIncludedPackages().set(agentExtension.getIncludedPackages());
+		agentArgumentProvider.getExcludedPackages().set(agentExtension.getExcludedPackages());
+		return agentArgumentProvider;
 	}
 }
