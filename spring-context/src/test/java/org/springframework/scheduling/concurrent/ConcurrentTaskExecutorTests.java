@@ -92,19 +92,24 @@ class ConcurrentTaskExecutorTests extends AbstractSchedulingTaskExecutorTests {
 
 
 	private static class DecoratedRunnable implements Runnable {
+
 		@Override
 		public void run() {
 		}
 	}
 
+
 	private static class RunnableDecorator implements TaskDecorator {
+
 		@Override
 		public Runnable decorate(Runnable runnable) {
 			return new DecoratedRunnable();
 		}
 	}
 
+
 	private static class DecoratedExecutor implements Executor {
+
 		@Override
 		public void execute(Runnable command) {
 			Assert.state(command instanceof DecoratedRunnable, "TaskDecorator not applied");
