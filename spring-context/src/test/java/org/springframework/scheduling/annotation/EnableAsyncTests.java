@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,9 +95,8 @@ public class EnableAsyncTests {
 	public void properExceptionForExistingProxyDependencyMismatch() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncBeanWithInterface.class, AsyncBeanUser.class);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				ctx::refresh)
-			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(ctx::refresh)
+				.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 		ctx.close();
 	}
 
@@ -105,9 +104,8 @@ public class EnableAsyncTests {
 	public void properExceptionForResolvedProxyDependencyMismatch() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AsyncConfig.class, AsyncBeanUser.class, AsyncBeanWithInterface.class);
-		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(
-				ctx::refresh)
-			.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
+		assertThatExceptionOfType(UnsatisfiedDependencyException.class).isThrownBy(ctx::refresh)
+				.withCauseInstanceOf(BeanNotOfRequiredTypeException.class);
 		ctx.close();
 	}
 
@@ -182,8 +180,7 @@ public class EnableAsyncTests {
 		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(AspectJAsyncAnnotationConfig.class);
-		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(
-				ctx::refresh);
+		assertThatExceptionOfType(BeanDefinitionStoreException.class).isThrownBy(ctx::refresh);
 	}
 
 	@Test

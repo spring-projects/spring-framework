@@ -108,9 +108,9 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	/**
 	 * Set whether to wait for scheduled tasks to complete on shutdown,
 	 * not interrupting running tasks and executing all tasks in the queue.
-	 * <p>Default is "false", shutting down immediately through interrupting
-	 * ongoing tasks and clearing the queue. Switch this flag to "true" if you
-	 * prefer fully completed tasks at the expense of a longer shutdown phase.
+	 * <p>Default is {@code false}, shutting down immediately through interrupting
+	 * ongoing tasks and clearing the queue. Switch this flag to {@code true} if
+	 * you prefer fully completed tasks at the expense of a longer shutdown phase.
 	 * <p>Note that Spring's container shutdown continues while ongoing tasks
 	 * are being completed. If you want this executor to block and wait for the
 	 * termination of tasks before the rest of the container continues to shut
@@ -211,9 +211,13 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 	}
 
 	/**
-	 * Perform a shutdown on the underlying ExecutorService.
+	 * Perform a full shutdown on the underlying ExecutorService,
+	 * according to the corresponding configuration settings.
+	 * @see #setWaitForTasksToCompleteOnShutdown
+	 * @see #setAwaitTerminationMillis
 	 * @see java.util.concurrent.ExecutorService#shutdown()
 	 * @see java.util.concurrent.ExecutorService#shutdownNow()
+	 * @see java.util.concurrent.ExecutorService#awaitTermination
 	 */
 	public void shutdown() {
 		if (logger.isDebugEnabled()) {

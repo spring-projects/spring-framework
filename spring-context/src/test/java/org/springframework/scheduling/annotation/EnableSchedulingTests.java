@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class EnableSchedulingTests {
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withFixedRateTask() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfig.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size()).isEqualTo(2);
+		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(2);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
@@ -71,7 +71,7 @@ public class EnableSchedulingTests {
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withSubclass() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfigSubclass.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size()).isEqualTo(2);
+		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(2);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
@@ -81,13 +81,13 @@ public class EnableSchedulingTests {
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withExplicitScheduler() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(ExplicitSchedulerConfig.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size()).isEqualTo(1);
+		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(1);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
 		assertThat(ctx.getBean(ExplicitSchedulerConfig.class).threadName).startsWith("explicitScheduler-");
 		assertThat(Arrays.asList(ctx.getDefaultListableBeanFactory().getDependentBeans("myTaskScheduler")).contains(
-		TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)).isTrue();
+				TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)).isTrue();
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class EnableSchedulingTests {
 	@EnabledForTestGroups(LONG_RUNNING)
 	public void withExplicitScheduledTaskRegistrar() throws InterruptedException {
 		ctx = new AnnotationConfigApplicationContext(ExplicitScheduledTaskRegistrarConfig.class);
-		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks().size()).isEqualTo(1);
+		assertThat(ctx.getBean(ScheduledTaskHolder.class).getScheduledTasks()).hasSize(1);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get()).isGreaterThanOrEqualTo(10);
