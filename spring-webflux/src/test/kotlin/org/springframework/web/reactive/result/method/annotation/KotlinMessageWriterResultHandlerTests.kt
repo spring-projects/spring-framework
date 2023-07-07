@@ -40,7 +40,7 @@ import java.time.Duration
 import java.util.*
 
 /**
- * Kotlin unit tests for {@link AbstractMessageWriterResultHandler}.
+ * Kotlin unit tests for [AbstractMessageWriterResultHandler].
  *
  * @author Sebastien Deleuze
  */

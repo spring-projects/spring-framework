@@ -30,7 +30,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition
 import org.springframework.validation.beanvalidation.BeanValidationBeanRegistrationAotProcessorTests.*
 
 /**
- * Kotlin tests for {@link BeanValidationBeanRegistrationAotProcessor}.
+ * Kotlin tests for [BeanValidationBeanRegistrationAotProcessor].
  *
  * @author Sebastien Deleuze
  */
