@@ -18,9 +18,16 @@ package org.springframework.build.hint;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Classpath;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.bundling.Jar;
 import org.gradle.api.tasks.testing.Test;
+import org.gradle.process.CommandLineArgumentProvider;
+
+import java.util.Collections;
 
 /**
  * {@link Plugin} that configures the {@code RuntimeHints} Java agent to test tasks.
@@ -49,10 +56,31 @@ public class RuntimeHintsAgentPlugin implements Plugin<Project> {
 				test.systemProperty("org.graalvm.nativeimage.imagecode", "runtime");
 			});
 			project.afterEvaluate(p -> {
-				Jar jar = project.getRootProject().project("spring-core-test").getTasks().withType(Jar.class).named("jar").get();
-				agentTest.jvmArgs("-javaagent:" + jar.getArchiveFile().get().getAsFile() + "=" + agentExtension.asJavaAgentArgument());
+				agentTest.getJvmArgumentProviders().add(createRuntimeHintsAgentArgumentProvider(project, agentExtension));
 			});
 			project.getTasks().getByName("check", task -> task.dependsOn(agentTest));
 		});
+	}
+
+	private static RuntimeHintsAgentArgumentProvider createRuntimeHintsAgentArgumentProvider(Project project, RuntimeHintsAgentExtension agentExtension) {
+		Jar jar = project.getRootProject().project("spring-core-test").getTasks().withType(Jar.class).named("jar").get();
+		RuntimeHintsAgentArgumentProvider agentArgumentProvider = project.getObjects().newInstance(RuntimeHintsAgentArgumentProvider.class);
+		agentArgumentProvider.getAgentJar().from(jar.getArchiveFile());
+		agentArgumentProvider.getJavaAgentArgument().set(agentExtension.asJavaAgentArgument());
+		return agentArgumentProvider;
+	}
+
+	interface RuntimeHintsAgentArgumentProvider extends CommandLineArgumentProvider {
+
+		@Classpath
+		ConfigurableFileCollection getAgentJar();
+
+		@Input
+		Property<String> getJavaAgentArgument();
+
+		@Override
+		default Iterable<String> asArguments() {
+			return Collections.singleton("-javaagent:" + getAgentJar().getSingleFile() + "=" + getJavaAgentArgument().get());
+		}
 	}
 }
