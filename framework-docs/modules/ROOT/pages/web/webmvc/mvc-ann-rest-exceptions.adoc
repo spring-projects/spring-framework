@@ -180,6 +180,13 @@ Message codes and arguments for each error are also resolved via `MessageSource`
 
 |===
 
+NOTE: Unlike other exceptions, the message arguments for
+`MethodArgumentValidException` and `HandlerMethodValidationException` are baed on a list of
+`MessageSourceResolvable` errors that can also be customized through a
+xref:core/beans/context-introduction.adoc#context-functionality-messagesource[MessageSource]
+resource bundle. See
+xref:core/validation/beanvalidation.adoc#validation-beanvalidation-spring-method-i18n[Customizing Validation Errors]
+for more details.
 
 
 
