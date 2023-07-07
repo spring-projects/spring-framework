@@ -76,7 +76,7 @@ import org.springframework.util.MultiValueMap;
  *
  * Mono&lt;Void&gt; result = webClient.post()
  *     .uri("...")
- *     .body(multipartBody)
+ *     .bodyValue(multipartBody)
  *     .retrieve()
  *     .bodyToMono(Void.class)
  * </pre>
