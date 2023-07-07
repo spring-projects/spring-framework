@@ -290,7 +290,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			executor.execute(errorHandlingTask(task, false));
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -301,7 +301,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return executor.submit(errorHandlingTask(task, false));
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -317,7 +317,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return executor.submit(taskToUse);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -330,7 +330,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return listenableFuture;
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -343,7 +343,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return listenableFuture;
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -379,7 +379,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return new ReschedulingRunnable(task, trigger, this.clock, executor, errorHandler).schedule();
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -391,7 +391,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			return executor.schedule(errorHandlingTask(task, false), NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -404,7 +404,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 					NANO.convert(initialDelay), NANO.convert(period), NANO);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -416,7 +416,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 					0, NANO.convert(period), NANO);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -429,7 +429,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 					NANO.convert(initialDelay), NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 
@@ -441,7 +441,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 					0, NANO.convert(delay), NANO);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(executor, task, ex);
 		}
 	}
 

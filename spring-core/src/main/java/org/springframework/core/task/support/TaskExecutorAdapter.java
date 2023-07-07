@@ -93,8 +93,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			doExecute(this.concurrentExecutor, this.taskDecorator, task);
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 
@@ -112,8 +111,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			}
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 
@@ -131,8 +129,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			}
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 
@@ -144,8 +141,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			return future;
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 
@@ -157,8 +153,7 @@ public class TaskExecutorAdapter implements AsyncListenableTaskExecutor {
 			return future;
 		}
 		catch (RejectedExecutionException ex) {
-			throw new TaskRejectedException(
-					"Executor [" + this.concurrentExecutor + "] did not accept task: " + task, ex);
+			throw new TaskRejectedException(this.concurrentExecutor, task, ex);
 		}
 	}
 
