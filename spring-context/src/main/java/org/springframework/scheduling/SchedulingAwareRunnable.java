@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.scheduling;
+
+import org.springframework.lang.Nullable;
 
 /**
  * Extension of the {@link Runnable} interface, adding special callbacks
@@ -38,7 +40,27 @@ public interface SchedulingAwareRunnable extends Runnable {
 	 * pool (if any) but rather be considered as long-running background thread.
 	 * <p>This should be considered a hint. Of course TaskExecutor implementations
 	 * are free to ignore this flag and the SchedulingAwareRunnable interface overall.
+	 * <p>The default implementation returns {@code false}, as of 6.1.
 	 */
-	boolean isLongLived();
+	default boolean isLongLived() {
+		return false;
+	}
+
+	/**
+	 * Return a qualifier associated with this Runnable.
+	 * <p>The default implementation returns {@code null}.
+	 * <p>May be used for custom purposes depending on the scheduler implementation.
+	 * {@link org.springframework.scheduling.config.TaskSchedulerRouter} introspects
+	 * this qualifier in order to determine the target scheduler to be used
+	 * for a given Runnable, matching the qualifier value (or the bean name)
+	 * of a specific {@link org.springframework.scheduling.TaskScheduler} or
+	 * {@link java.util.concurrent.ScheduledExecutorService} bean definition.
+	 * @since 6.1
+	 * @see org.springframework.scheduling.annotation.Scheduled#scheduler()
+	 */
+	@Nullable
+	default String getQualifier() {
+		return null;
+	}
 
 }

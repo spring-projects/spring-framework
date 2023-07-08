@@ -203,4 +203,16 @@ public @interface Scheduled {
 	 */
 	TimeUnit timeUnit() default TimeUnit.MILLISECONDS;
 
+	/**
+	 * A qualifier for determining a scheduler to run this scheduled method on.
+	 * <p>Defaults to an empty String, suggesting the default scheduler.
+	 * <p>May be used to determine the target scheduler to be used,
+	 * matching the qualifier value (or the bean name) of a specific
+	 * {@link org.springframework.scheduling.TaskScheduler} or
+	 * {@link java.util.concurrent.ScheduledExecutorService} bean definition.
+	 * @since 6.1
+	 * @see org.springframework.scheduling.SchedulingAwareRunnable#getQualifier()
+	 */
+	String scheduler() default "";
+
 }

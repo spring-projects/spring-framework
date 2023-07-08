@@ -24,6 +24,8 @@ import java.util.function.Supplier;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 
+import org.springframework.lang.Nullable;
+import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -36,7 +38,7 @@ import org.springframework.util.ReflectionUtils;
  * @since 3.0.6
  * @see org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor
  */
-public class ScheduledMethodRunnable implements Runnable {
+public class ScheduledMethodRunnable implements SchedulingAwareRunnable {
 
 	private static final ScheduledTaskObservationConvention DEFAULT_CONVENTION =
 			new DefaultScheduledTaskObservationConvention();
@@ -44,6 +46,9 @@ public class ScheduledMethodRunnable implements Runnable {
 	private final Object target;
 
 	private final Method method;
+
+	@Nullable
+	private final String qualifier;
 
 	private final Supplier<ObservationRegistry> observationRegistrySupplier;
 
@@ -53,12 +58,17 @@ public class ScheduledMethodRunnable implements Runnable {
 	 * calling the specified method.
 	 * @param target the target instance to call the method on
 	 * @param method the target method to call
+	 * @param qualifier a qualifier associated with this Runnable,
+	 * e.g. for determining a scheduler to run this scheduled method on
 	 * @param observationRegistrySupplier a supplier for the observation registry to use
 	 * @since 6.1
 	 */
-	public ScheduledMethodRunnable(Object target, Method method, Supplier<ObservationRegistry> observationRegistrySupplier) {
+	public ScheduledMethodRunnable(Object target, Method method, @Nullable String qualifier,
+			Supplier<ObservationRegistry> observationRegistrySupplier) {
+
 		this.target = target;
 		this.method = method;
+		this.qualifier = qualifier;
 		this.observationRegistrySupplier = observationRegistrySupplier;
 	}
 
@@ -69,7 +79,7 @@ public class ScheduledMethodRunnable implements Runnable {
 	 * @param method the target method to call
 	 */
 	public ScheduledMethodRunnable(Object target, Method method) {
-		this(target, method, () -> ObservationRegistry.NOOP);
+		this(target, method, null, () -> ObservationRegistry.NOOP);
 	}
 
 	/**
@@ -96,6 +106,12 @@ public class ScheduledMethodRunnable implements Runnable {
 	 */
 	public Method getMethod() {
 		return this.method;
+	}
+
+	@Override
+	@Nullable
+	public String getQualifier() {
+		return this.qualifier;
 	}
 
 
