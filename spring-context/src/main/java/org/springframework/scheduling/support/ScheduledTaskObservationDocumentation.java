@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.scheduling.config;
+package org.springframework.scheduling.support;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.docs.KeyName;
@@ -24,8 +24,10 @@ import io.micrometer.observation.docs.ObservationDocumentation;
 
 /**
  * Documented {@link io.micrometer.common.KeyValue KeyValues} for the observations on
- * executions of {@link org.springframework.scheduling.annotation.Scheduled scheduled tasks}.
- * <p>This class is used by automated tools to document KeyValues attached to the {@code @Scheduled} observations.
+ * executions of {@link org.springframework.scheduling.annotation.Scheduled scheduled tasks}
+ *
+ * <p>This class is used by automated tools to document KeyValues attached to the
+ * {@code @Scheduled} observations.
  *
  * @author Brian Clozel
  * @since 6.1
@@ -40,18 +42,16 @@ public enum ScheduledTaskObservationDocumentation implements ObservationDocument
 		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
 			return DefaultScheduledTaskObservationConvention.class;
 		}
-
 		@Override
 		public KeyName[] getLowCardinalityKeyNames() {
 			return LowCardinalityKeyNames.values();
 		}
-
 		@Override
 		public KeyName[] getHighCardinalityKeyNames() {
 			return new KeyName[] {};
 		}
-
 	};
+
 
 	public enum LowCardinalityKeyNames implements KeyName {
 

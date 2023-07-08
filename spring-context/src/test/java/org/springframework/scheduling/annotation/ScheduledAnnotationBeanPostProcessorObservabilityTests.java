@@ -36,8 +36,8 @@ import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
-import org.springframework.scheduling.config.ScheduledTaskObservationContext;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.ScheduledTaskObservationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,10 +55,12 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 
 	private final TestObservationRegistry observationRegistry = TestObservationRegistry.create();
 
+
 	@AfterEach
 	void closeContext() {
 		context.close();
 	}
+
 
 	@Test
 	void shouldRecordSuccessObservationsForTasks() throws Exception {
@@ -185,6 +187,7 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 				.hasObservationWithNameEqualTo("tasks.scheduled.execution").that();
 	}
 
+
 	static abstract class TaskTester {
 
 		ObservationRegistry observationRegistry;
@@ -200,13 +203,13 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		}
 	}
 
+
 	static class FixedDelayBean extends TaskTester {
 
 		@Scheduled(fixedDelay = 10_000, initialDelay = 5_000)
 		public void fixedDelay() {
 			this.latch.countDown();
 		}
-
 	}
 
 
@@ -217,8 +220,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 			this.latch.countDown();
 			throw new IllegalStateException("test error");
 		}
-
 	}
+
 
 	static class FixedDelayReactiveBean extends TaskTester {
 
@@ -226,8 +229,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 		public Mono<Object> fixedDelay() {
 			return Mono.empty().doOnTerminate(() -> this.latch.countDown());
 		}
-
 	}
+
 
 	static class FixedDelayReactiveErrorBean extends TaskTester {
 
@@ -236,8 +239,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 			return Mono.error(new IllegalStateException("test error"))
 					.doOnTerminate(() -> this.latch.countDown());
 		}
-
 	}
+
 
 	static class CancelledTaskBean extends TaskTester {
 
@@ -251,8 +254,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 				// ignore cancelled task
 			}
 		}
-
 	}
+
 
 	static class CancelledReactiveTaskBean extends TaskTester {
 
@@ -261,8 +264,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 			return Flux.interval(Duration.ZERO, Duration.ofSeconds(1))
 					.doOnNext(el -> this.latch.countDown());
 		}
-
 	}
+
 
 	static class CurrentObservationBean extends TaskTester {
 
@@ -272,8 +275,8 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 			assertThat(this.observationRegistry.getCurrentObservation().getContext()).isInstanceOf(ScheduledTaskObservationContext.class);
 			this.latch.countDown();
 		}
-
 	}
+
 
 	static class CurrentObservationReactiveBean extends TaskTester {
 
@@ -290,7 +293,6 @@ class ScheduledAnnotationBeanPostProcessorObservabilityTests {
 					})
 					.doOnTerminate(() -> this.latch.countDown());
 		}
-
 	}
 
 }

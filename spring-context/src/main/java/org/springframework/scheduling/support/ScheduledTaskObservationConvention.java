@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.scheduling.config;
+package org.springframework.scheduling.support;
 
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
@@ -22,6 +22,7 @@ import io.micrometer.observation.ObservationConvention;
 /**
  * Interface for an {@link ObservationConvention} for
  * {@link ScheduledTaskObservationDocumentation#TASKS_SCHEDULED_EXECUTION scheduled task executions}.
+ *
  * @author Brian Clozel
  * @since 6.1
  */

@@ -38,15 +38,15 @@ import org.springframework.core.KotlinDetector;
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.lang.Nullable;
-import org.springframework.scheduling.config.DefaultScheduledTaskObservationConvention;
-import org.springframework.scheduling.config.ScheduledTaskObservationContext;
-import org.springframework.scheduling.config.ScheduledTaskObservationConvention;
+import org.springframework.scheduling.support.DefaultScheduledTaskObservationConvention;
+import org.springframework.scheduling.support.ScheduledTaskObservationContext;
+import org.springframework.scheduling.support.ScheduledTaskObservationConvention;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.scheduling.config.ScheduledTaskObservationDocumentation.TASKS_SCHEDULED_EXECUTION;
+import static org.springframework.scheduling.support.ScheduledTaskObservationDocumentation.TASKS_SCHEDULED_EXECUTION;
 
 /**
  * Helper class for @{@link ScheduledAnnotationBeanPostProcessor} to support reactive

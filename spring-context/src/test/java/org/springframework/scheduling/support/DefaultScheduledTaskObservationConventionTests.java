@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.scheduling.config;
+package org.springframework.scheduling.support;
 
 
 import java.lang.reflect.Method;
@@ -36,6 +36,7 @@ class DefaultScheduledTaskObservationConventionTests {
 	private final Method taskMethod = ClassUtils.getMethod(BeanWithScheduledMethods.class, "process");
 
 	private final ScheduledTaskObservationConvention convention = new DefaultScheduledTaskObservationConvention();
+
 
 	@Test
 	void observationShouldHaveDefaultName() {
@@ -92,17 +93,16 @@ class DefaultScheduledTaskObservationConventionTests {
 	}
 
 
-	static class BeanWithScheduledMethods implements TaskProcessor {
-
-		public void process() {
-
-		}
-	}
-
 	interface TaskProcessor {
 
 		void process();
+	}
 
+
+	static class BeanWithScheduledMethods implements TaskProcessor {
+
+		public void process() {
+		}
 	}
 
 }

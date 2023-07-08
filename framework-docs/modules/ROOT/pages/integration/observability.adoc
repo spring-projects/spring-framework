@@ -91,7 +91,7 @@ This can be done by declaring a `SchedulingConfigurer` bean that sets the observ
 
 include-code::./ObservationSchedulingConfigurer[]
 
-It is using the `org.springframework.scheduling.config.DefaultScheduledTaskObservationConvention` by default, backed by the `ScheduledTaskObservationContext`.
+It is using the `org.springframework.scheduling.support.DefaultScheduledTaskObservationConvention` by default, backed by the `ScheduledTaskObservationContext`.
 You can configure a custom implementation on the `ObservationRegistry` directly.
 During the execution of the scheduled method, the current observation is restored in the `ThreadLocal` context or the Reactor context (if the scheduled method returns a `Mono` or `Flux` type).
 

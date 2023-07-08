@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.scheduling.config;
+package org.springframework.scheduling.support;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
 
 import org.springframework.util.StringUtils;
 
-import static org.springframework.scheduling.config.ScheduledTaskObservationDocumentation.LowCardinalityKeyNames;
+import static org.springframework.scheduling.support.ScheduledTaskObservationDocumentation.LowCardinalityKeyNames;
 
 /**
  * Default implementation for {@link ScheduledTaskObservationConvention}.

@@ -24,10 +24,6 @@ import java.util.function.Supplier;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
 
-import org.springframework.scheduling.config.DefaultScheduledTaskObservationConvention;
-import org.springframework.scheduling.config.ScheduledTaskObservationContext;
-import org.springframework.scheduling.config.ScheduledTaskObservationConvention;
-import org.springframework.scheduling.config.ScheduledTaskObservationDocumentation;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -42,13 +38,15 @@ import org.springframework.util.ReflectionUtils;
  */
 public class ScheduledMethodRunnable implements Runnable {
 
-	private static final ScheduledTaskObservationConvention DEFAULT_CONVENTION = new DefaultScheduledTaskObservationConvention();
+	private static final ScheduledTaskObservationConvention DEFAULT_CONVENTION =
+			new DefaultScheduledTaskObservationConvention();
 
 	private final Object target;
 
 	private final Method method;
 
 	private final Supplier<ObservationRegistry> observationRegistrySupplier;
+
 
 	/**
 	 * Create a {@code ScheduledMethodRunnable} for the given target instance,

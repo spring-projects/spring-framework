@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.scheduling.config;
+package org.springframework.scheduling.support;
 
 import java.lang.reflect.Method;
 
@@ -23,8 +23,9 @@ import io.micrometer.observation.Observation;
 import org.springframework.util.ClassUtils;
 
 /**
- * Context that holds information for observation metadata collection
- * during the {@link ScheduledTaskObservationDocumentation#TASKS_SCHEDULED_EXECUTION execution of scheduled tasks}.
+ * Context that holds information for observation metadata collection during the
+ * {@link ScheduledTaskObservationDocumentation#TASKS_SCHEDULED_EXECUTION execution of scheduled tasks}.
+ *
  * @author Brian Clozel
  * @since 6.1
  */
@@ -36,6 +37,7 @@ public class ScheduledTaskObservationContext extends Observation.Context {
 
 	private boolean complete;
 
+
 	/**
 	 * Create a new observation context for a task, given the target object
 	 * and the method to be called.
@@ -46,6 +48,7 @@ public class ScheduledTaskObservationContext extends Observation.Context {
 		this.targetClass = ClassUtils.getUserClass(target);
 		this.method = method;
 	}
+
 
 	/**
 	 * Return the type of the target object.
@@ -77,4 +80,5 @@ public class ScheduledTaskObservationContext extends Observation.Context {
 	public void setComplete(boolean complete) {
 		this.complete = complete;
 	}
+
 }
