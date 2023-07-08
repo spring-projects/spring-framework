@@ -144,6 +144,9 @@ public class ScheduledAnnotationBeanPostProcessor
 	@Nullable
 	private ApplicationContext applicationContext;
 
+	@Nullable
+	private TaskSchedulerRouter localScheduler;
+
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new IdentityHashMap<>(16);
@@ -251,10 +254,10 @@ public class ScheduledAnnotationBeanPostProcessor
 			this.registrar.setScheduler(this.scheduler);
 		}
 		else {
-			TaskSchedulerRouter router = new TaskSchedulerRouter();
-			router.setBeanName(this.beanName);
-			router.setBeanFactory(this.beanFactory);
-			this.registrar.setTaskScheduler(router);
+			this.localScheduler = new TaskSchedulerRouter();
+			this.localScheduler.setBeanName(this.beanName);
+			this.localScheduler.setBeanFactory(this.beanFactory);
+			this.registrar.setTaskScheduler(this.localScheduler);
 		}
 
 		if (this.beanFactory instanceof ListableBeanFactory lbf) {
@@ -637,6 +640,9 @@ public class ScheduledAnnotationBeanPostProcessor
 			}
 		}
 		this.registrar.destroy();
+		if (this.localScheduler != null) {
+			this.localScheduler.destroy();
+		}
 	}
 
 }
