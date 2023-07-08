@@ -32,7 +32,7 @@ import org.springframework.validation.annotation.Validated
  * @author Sebastien Deleuze
  */
 @Suppress("UsePropertyAccessSyntax")
-class KotlinMethodValidationTests {
+class MethodValidationKotlinTests {
 
 	@Test
 	fun parameterValidation() {

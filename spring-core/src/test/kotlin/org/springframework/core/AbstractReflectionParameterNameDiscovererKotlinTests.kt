@@ -27,7 +27,7 @@ import org.springframework.util.ReflectionUtils
  * @author Sebastien Deleuze
  */
 @Suppress("UNUSED_PARAMETER")
-abstract class AbstractKotlinReflectionParameterNameDiscovererTests(protected val parameterNameDiscoverer: ParameterNameDiscoverer) {
+abstract class AbstractReflectionParameterNameDiscovererKotlinTests(protected val parameterNameDiscoverer: ParameterNameDiscoverer) {
 
 	@Test
 	fun getParameterNamesOnInterface() {

@@ -31,7 +31,7 @@ import org.springframework.web.service.annotation.GetExchange
  *
  * @author Sebastien Deleuze
  */
-class KotlinHttpServiceMethodTests {
+class HttpServiceMethodKotlinTests {
 
 	private val client = TestHttpClientAdapter()
 	private val proxyFactory = HttpServiceProxyFactory.builder(client).build()

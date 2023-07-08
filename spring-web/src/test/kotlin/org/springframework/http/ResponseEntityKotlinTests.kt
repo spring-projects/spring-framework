@@ -14,28 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.core
+package org.springframework.http
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 /**
- * Tests for Kotlin support in [DefaultParameterNameDiscoverer].
+ * Kotlin tests for [ResponseEntity].
  *
  * @author Sebastien Deleuze
  */
-class KotlinDefaultParameterNameDiscovererTests :
-	AbstractKotlinReflectionParameterNameDiscovererTests(DefaultParameterNameDiscoverer()){
+class ResponseEntityKotlinTests {
 
-	enum class MyEnum {
-		ONE, TWO
+	@Test
+	fun ofNullable() {
+		val entity = 42
+		val responseEntity = ResponseEntity.ofNullable(entity)
+		assertThat(responseEntity).isNotNull()
+		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
+		assertThat(responseEntity.body as Int).isEqualTo(entity)
 	}
 
-	@Test  // SPR-16931
-	fun getParameterNamesOnEnum() {
-		val constructor = MyEnum::class.java.declaredConstructors[0]
-		val actualParams = parameterNameDiscoverer.getParameterNames(constructor)
-		assertThat(actualParams).containsExactly("\$enum\$name", "\$enum\$ordinal")
+	@Test
+	fun ofNullNullable() {
+		val responseEntity = ResponseEntity.ofNullable<Int>(null)
+		assertThat(responseEntity).isNotNull()
+		assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+		assertThat(responseEntity.body).isNull()
 	}
 
 }

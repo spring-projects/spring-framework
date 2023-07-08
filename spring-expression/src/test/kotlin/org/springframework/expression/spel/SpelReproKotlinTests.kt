@@ -22,7 +22,7 @@ import org.springframework.expression.ExpressionParser
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import kotlin.coroutines.Continuation
 
-class KotlinSpelReproTests {
+class SpelReproKotlinTests {
 
 	private val parser: ExpressionParser = SpelExpressionParser()
 
@@ -31,7 +31,7 @@ class KotlinSpelReproTests {
 
 	@Test
 	fun `gh-23812 SpEL cannot invoke Kotlin synthetic classes`() {
-		val expr = parser.parseExpression("new org.springframework.expression.spel.KotlinSpelReproTests\$Config().kotlinSupplier().invoke()")
+		val expr = parser.parseExpression("new org.springframework.expression.spel.SpelReproKotlinTests\$Config().kotlinSupplier().invoke()")
 		assertThat(expr.getValue(context)).isEqualTo("test")
 	}
 

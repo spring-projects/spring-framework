@@ -40,9 +40,8 @@ import java.util.function.Consumer
  *
  * @author DongHyeon Kim
  * @author Sebastien Deleuze
- *
  */
-class KotlinWebClientHttpServiceProxyTests {
+class WebClientHttpServiceProxyKotlinTests {
 
 	private lateinit var server: MockWebServer
 
